@@ -12737,7 +12737,7 @@
            [[irdwfq]]=1)
           </li>
           <li>
-           =2 =&gt; SCF cycle, simple mixing of the potential
+           =2 =&gt; SCF cycle, simple mixing of the potential with the preconditioned potential residual (in the usual case, the latter is defined by [[diemix]], [[diemac]] and [[dielng]])
           </li>
           <li>
            =3 =&gt; SCF cycle, Anderson mixing of the potential
@@ -31607,6 +31607,24 @@
     topics: Optic_basic
     varset: optic
     vartype: string
+- !variable
+    abivarname: wfmix
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: WaveFunctions MIXing factor
+    requires: '[[usefock]] > 0 and [[nnsclohf]] >0 and [[fockoptmix]]/100
+        > 0'
+    text: |-
+        When the wavefunctions are determined using a SCF double loop (hybrid functionals), [[wfmix]] provides the mixing factor to obtain the new input wavefunctions by the combination of the earlier input wavefunctions and corresponding (DFT-preconditioned) output wavefunctions at the level of the outer loop, according to the algorithm specified by [[fockoptmix]]/100.
+
+        If [[wfmix]] is 1.0, the output wavefunctions only will determine the new input wavefunctions. This might possibly lead to unstabilities. If [[wfmix]] is smaller than 1.0, the whole iteration procedure is damped, which might allow better stability, but might be slower. If it is larger than 1.0, perhaps less iterations will be needed (if there is no instability).
+    topics: Hybrids_useful
+    varset: gstate
+    vartype: real
 - !variable
     abivarname: wfoptalg
     characteristics:

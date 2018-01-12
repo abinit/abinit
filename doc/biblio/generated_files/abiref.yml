@@ -7,9 +7,9 @@
   year : 1975
   volume : 
   pages : 
-  publisher : Dover, New-York
   doi : 
   numpages : 
+  publisher : Dover, New-York
 -
   ENTRYTYPE : article
   ID : Adler1962
@@ -19,8 +19,8 @@
   year : 1962
   volume : 126
   pages : 413-420
-  publisher : American Physical Society (APS)
   doi : 10.1103/physrev.126.413
+  publisher : American Physical Society (APS)
   source : Crossref
   issn : 0031-899X
   month : pr, number = {2
@@ -33,9 +33,9 @@
   year : 1998
   volume : 80
   pages : 4510--4513
-  publisher : American Physical Society
   doi : 10.1103/PhysRevLett.80.4510
   numpages : 3
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Allen1976
@@ -54,9 +54,9 @@
   year : 1978
   volume : 17
   pages : 3725--3734
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.17.3725
   issue : 10
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Allen1981
@@ -82,10 +82,10 @@
   title : Boltzmann Theory and Resistivity of Metals
   year : 1996
   pages : 219-250
-  editor : Chelikowsky, J. R. and Louie, S. G.
-  address : Boston
-  publisher : Kl{\"u}wer
   booktitle : Quantum Theory of Real Materials
+  editor : Chelikowsky, J. R. and Louie, S. G.
+  publisher : Kl{\"u}wer
+  address : Boston
 -
   ENTRYTYPE : article
   ID : Allen2013
@@ -104,11 +104,11 @@
   year : 2006
   volume : 96
   pages : 066402
-  publisher : American Physical Society
   doi : 10.1103/PhysRevLett.96.066402
-  file : :/media/disk_iomega/BIBLIO/Cerium/DMFT/PhysRevLett.96.066402.pdf:PDF
   issue : 6
   numpages : 4
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Cerium/DMFT/PhysRevLett.96.066402.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Amadon2008
@@ -118,13 +118,13 @@
   year : 2008
   volume : 77
   pages : 205112
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.77.205112
-  number : 20
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/DMFT/PhysRevB.77.205112.pdf:PDF
-  timestamp : 2012.08.08
   refid : 10.1103/PhysRevB.77.205112
+  doi : 10.1103/PhysRevB.77.205112
+  owner : amadonb
+  timestamp : 2012.08.08
+  number : 20
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/DMFT/PhysRevB.77.205112.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Amadon2008a
@@ -134,11 +134,11 @@
   year : 2008
   volume : 77
   pages : 155104
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.77.155104
-  file : :/media/disk_iomega/BIBLIO/Cerium/PhysRevB.77.155104-1.pdf:PDF
   issue : 15
   numpages : 10
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Cerium/PhysRevB.77.155104-1.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Amadon2012
@@ -149,11 +149,11 @@
   volume : 24
   pages : 075604
   url : http://iopscience.iop.org/article/10.1088/0953-8984/24/7/075604
-  number : 7
   owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/DMFT/0953-8984_24_7_075604.pdf:PDF
   timestamp : 2012.08.08
+  number : 7
   issn : 0953-8984
+  file : :/media/disk_iomega/BIBLIO/DMFT/0953-8984_24_7_075604.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Amadon2014
@@ -163,10 +163,10 @@
   year : 2014
   volume : 89
   pages : 125110
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.89.125110
   issue : 12
   numpages : 10
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Amadon2015
@@ -176,10 +176,10 @@
   year : 2015
   volume : 91
   pages : 161103
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.91.161103
   issue : 16
   numpages : 5
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Ambrosetti2012
@@ -198,12 +198,12 @@
   year : 1991
   volume : 43
   pages : 7570--7574
-  publisher : American Physical Society
+  refid : 10.1103/PhysRevB.43.7570
   doi : 10.1103/PhysRevB.43.7570
-  number : 10
   owner : amadonb
   timestamp : 2013.07.03
-  refid : 10.1103/PhysRevB.43.7570
+  number : 10
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Antonius2014
@@ -241,13 +241,13 @@
   year : 2004
   volume : 70
   pages : 195104--
-  publisher : American Physical Society
+  keywords : cRPA
   doi : 10.1103/PhysRevB.70.195104
-  number : 19
+  refid : 10.1103/PhysRevB.70.195104
   owner : amadonb
   timestamp : 2013.03.15
-  refid : 10.1103/PhysRevB.70.195104
-  keywords : cRPA
+  number : 19
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Aryasetiawan2006
@@ -284,9 +284,9 @@
   year : 1982
   volume : 26
   pages : 4199--4228
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.26.4199
   numpages : 29
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Bader1994
@@ -296,9 +296,9 @@
   year : 1994
   volume : ISBN 978-0-19-855865-1
   pages : 
+  url : 
   doi : 
   number : 
-  url : 
 -
   ENTRYTYPE : article
   ID : Barbiellini1996
@@ -308,9 +308,9 @@
   year : 1996
   volume : 53
   pages : 16201
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.53.16201
   issue : 24
+  doi : 10.1103/PhysRevB.53.16201
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Baroni1986
@@ -320,9 +320,9 @@
   year : 1986
   volume : 33
   pages : 7017-7021
+  url : https://journals.aps.org/prb/abstract/10.1103/PhysRevB.33.7017
   publisher : American Physical Society (APS)
   source : Crossref
-  url : https://journals.aps.org/prb/abstract/10.1103/PhysRevB.33.7017
   issn : 0163-1829
   month : ay, number = {10
 -
@@ -343,9 +343,9 @@
   year : 1990
   volume : 92
   pages : 5397-5403
+  url : http://scitation.aip.org/content/aip/journal/jcp/92/9/10.1063/1.458517
   doi : 10.1063/1.458517
   number : 9
-  url : http://scitation.aip.org/content/aip/journal/jcp/92/9/10.1063/1.458517
 -
   ENTRYTYPE : article
   ID : Benedict1998
@@ -355,10 +355,10 @@
   year : 1998
   volume : 80
   pages : 4514--4517
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevLett.80.4514
   issue : 20
+  doi : 10.1103/PhysRevLett.80.4514
   numpages : 0
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Bengone2000
@@ -377,11 +377,11 @@
   year : 2016
   volume : 94
   pages : 023303
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevE.94.023303
-  url : https://link.aps.org/doi/10.1103/PhysRevE.94.023303
   issue : 2
+  doi : 10.1103/PhysRevE.94.023303
   numpages : 25
+  url : https://link.aps.org/doi/10.1103/PhysRevE.94.023303
+  publisher : American Physical Society
   month : Aug
 -
   ENTRYTYPE : article
@@ -392,10 +392,10 @@
   year : 2014
   volume : 89
   pages : 195132
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.89.195132
   issue : 19
   numpages : 7
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Blancoa1997
@@ -424,11 +424,11 @@
   year : 1994
   volume : 49
   pages : 16223--16233
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.49.16223
-  url : https://link.aps.org/doi/10.1103/PhysRevB.49.16223
   issue : 23
+  doi : 10.1103/PhysRevB.49.16223
   numpages : 0
+  url : https://link.aps.org/doi/10.1103/PhysRevB.49.16223
+  publisher : American Physical Society
   month : Jun
 -
   ENTRYTYPE : article
@@ -448,9 +448,9 @@
   year : 1986
   volume : 34
   pages : 3820
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.34.3820
   issue : 6
+  doi : 10.1103/PhysRevB.34.3820
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Bottin2008
@@ -460,8 +460,8 @@
   year : 2008
   volume : 42
   pages : 329--336
-  publisher : Elsevier
   number : 2
+  publisher : Elsevier
 -
   ENTRYTYPE : article
   ID : Bousquet2011
@@ -490,10 +490,10 @@
   year : 2008
   volume : 78
   pages : 085125
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.78.085125
   issue : 8
+  doi : 10.1103/PhysRevB.78.085125
   numpages : 9
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Bruneval2012
@@ -503,10 +503,10 @@
   year : 2012
   volume : 108
   pages : 256403
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevLett.108.256403
   issue : 25
+  doi : 10.1103/PhysRevLett.108.256403
   numpages : 5
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Bruneval2014
@@ -516,10 +516,10 @@
   year : 2014
   volume : 89
   pages : 045116
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.89.045116
   issue : 4
+  doi : 10.1103/PhysRevB.89.045116
   numpages : 13
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Calloni2005
@@ -529,8 +529,8 @@
   year : 2005
   volume : 72
   pages : 054112
-  publisher : APS
   number : 5
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Campillo1998
@@ -540,8 +540,8 @@
   year : 1998
   volume : 58
   pages : 10307 - 10314
-  doi : 10.1103/PhysRevB.58.10307
   issue : 16
+  doi : 10.1103/PhysRevB.58.10307
 -
   ENTRYTYPE : article
   ID : Cappellini1993
@@ -551,10 +551,10 @@
   year : 1993
   volume : 47
   pages : 9892--9895
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.47.9892
   issue : 15
+  doi : 10.1103/PhysRevB.47.9892
   numpages : 0
+  publisher : American Physical Society
   month : Apr
 -
   ENTRYTYPE : article
@@ -565,9 +565,9 @@
   year : 2007
   volume : 91
   pages : 092902
-  publisher : 
   doi : 10.1063/1.2776370
   number : 
+  publisher : 
 -
   ENTRYTYPE : article
   ID : Caracas2007a
@@ -577,9 +577,9 @@
   year : 2007
   volume : 76
   pages : 184101
-  publisher : 
   doi : 
   number : 
+  publisher : 
 -
   ENTRYTYPE : article
   ID : Caracas2008
@@ -589,9 +589,9 @@
   year : 2008
   volume : 101
   pages : 085502
-  publisher : 
   doi : 10.1103/PhysRevLett.101.085502
   number : 
+  publisher : 
 -
   ENTRYTYPE : article
   ID : Casida1998
@@ -620,14 +620,14 @@
   year : 2005
   volume : 71
   pages : 035105
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.71.035105
-  number : 3
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.71.035105.pdf:PDF
-  timestamp : 2012.06.21
-  refid : 10.1103/PhysRevB.71.035105
   keywords : DFTU interaction, cRPA
+  doi : 10.1103/PhysRevB.71.035105
+  refid : 10.1103/PhysRevB.71.035105
+  owner : amadonb
+  timestamp : 2012.06.21
+  number : 3
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.71.035105.pdf:PDF
 -
   ENTRYTYPE : book
   ID : Coleman2015
@@ -650,10 +650,10 @@
   author : Daubechies, I.
   title : 10 Lectures on Wavelets
   year : 1992
-  language : en
-  publisher : Society for Industrial and Applied Mathematics ({SIAM}, 3600 {M}arket {S}treet, {F}loor 6, {P}hiladelphia, {PA} 19104)
-  isbn : 9780898712742
   keywords : Mathematics / General, Mathematics / Infinity, Mathematics / Mathematical Analysis, Science / Waves \& Wave Mechanics, Technology \& Engineering  / General
+  isbn : 9780898712742
+  publisher : Society for Industrial and Applied Mathematics ({SIAM}, 3600 {M}arket {S}treet, {F}loor 6, {P}hiladelphia, {PA} 19104)
+  language : en
 -
   ENTRYTYPE : article
   ID : Dion2004
@@ -702,8 +702,8 @@
   year : 2007
   volume : 75
   pages : 054201
-  publisher : APS
   number : 5
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Fresard1997
@@ -732,10 +732,10 @@
   year : 1999
   volume : 119
   pages : 67 - 98
-  doi : 10.1016/S0010-4655(98)00201-X
-  number : 1
   note : 
+  doi : 10.1016/S0010-4655(98)00201-X
   url : http://www.sciencedirect.com/science/article/pii/S001046559800201X
+  number : 1
   issn : 0010-4655
 -
   ENTRYTYPE : article
@@ -746,12 +746,12 @@
   year : 2014
   volume : 81
   pages : 446 - 452
-  doi : 10.1016/j.commatsci.2013.08.053
-  number : 
-  note : 
-  url : http://www.sciencedirect.com/science/article/pii/S0927025613005077
-  issn : 0927-0256
   keywords : Density functional theory 
+  note : 
+  doi : 10.1016/j.commatsci.2013.08.053
+  url : http://www.sciencedirect.com/science/article/pii/S0927025613005077
+  number : 
+  issn : 0927-0256
 -
   ENTRYTYPE : article
   ID : Geneste2012
@@ -803,9 +803,9 @@
   year : 1996
   volume : 68
   pages : 13--125
-  publisher : American Physical Society
   doi : 10.1103/RevModPhys.68.13
   issue : 1
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Georges2004
@@ -815,13 +815,13 @@
   year : 2004
   volume : 715
   pages : 3--74
-  publisher : AIP
-  doi : 10.1063/1.1800733
-  number : 1
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/DMFT/APC000003.pdf:PDF
-  timestamp : 2012.10.18
   keywords : strongly correlated electron systems, metal-insulator transition,	density functional theory, electronic structure, band theory, Green's function methods, spin systems, transport processes, critical phenomena, transition metal compounds, rare earth compounds, actinide compounds, oxygen compounds
+  doi : 10.1063/1.1800733
+  owner : amadonb
+  timestamp : 2012.10.18
+  number : 1
+  publisher : AIP
+  file : :/media/disk_iomega/BIBLIO/DMFT/APC000003.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Giannozzi2009
@@ -853,12 +853,12 @@
   year : 2013
   volume : 88
   pages : 094305
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.88.094305
-  file : Gillet2013.pdf:Gillet2013.pdf:PDF;Gillet2013.pdf:Gillet2013.pdf:PDF
-  url : http://link.aps.org/doi/10.1103/PhysRevB.88.094305
   issue : 9
   numpages : 9
+  url : http://link.aps.org/doi/10.1103/PhysRevB.88.094305
+  publisher : American Physical Society
+  file : Gillet2013.pdf:Gillet2013.pdf:PDF;Gillet2013.pdf:Gillet2013.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Gillet2015
@@ -889,10 +889,10 @@
   year : 1989
   volume : 62
   pages : 1169
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevLett.62.1169
   issue : 
+  doi : 10.1103/PhysRevLett.62.1169
   numpages : 0
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Goedecker1996
@@ -912,10 +912,10 @@
   year : 1991
   volume : 44
   pages : 8503--8513
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.44.8503
   issue : 16
+  doi : 10.1103/PhysRevB.44.8503
   numpages : 0
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Gonze1995
@@ -990,10 +990,10 @@
   year : 2016
   volume : 205
   pages : 106
-  doi : 10.1016/j.cpc.2016.04.003
-  url : http://www.sciencedirect.com/science/article/pii/S0010465516300923
-  issn : 0010-4655
   keywords : Many-Body Perturbation Theory
+  url : http://www.sciencedirect.com/science/article/pii/S0010465516300923
+  doi : 10.1016/j.cpc.2016.04.003
+  issn : 0010-4655
 -
   ENTRYTYPE : article
   ID : Grimme2006
@@ -1038,9 +1038,9 @@
   year : 2009
   volume : 9
   pages : 2820-2824
+  url : http://pubs.acs.org/doi/abs/10.1021/nl803717g
   publisher : American Chemical Society (ACS)
   source : Crossref
-  url : http://pubs.acs.org/doi/abs/10.1021/nl803717g
   issn : 1530-6984, 1530-6992
   month : ug, number = {8
 -
@@ -1052,14 +1052,14 @@
   year : 2011
   volume : 83
   pages : 349--404
-  publisher : American Physical Society
-  doi : 10.1103/RevModPhys.83.349
-  number : 2
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/RevModPhys.83.349-1.pdf:PDF
-  timestamp : 2012.06.22
-  refid : 10.1103/RevModPhys.83.349
   keywords : interaction CTQMC
+  doi : 10.1103/RevModPhys.83.349
+  refid : 10.1103/RevModPhys.83.349
+  owner : amadonb
+  timestamp : 2012.06.22
+  number : 2
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Interaction/RevModPhys.83.349-1.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Hamann1979
@@ -1069,9 +1069,9 @@
   year : 1979
   volume : 43
   pages : 1494--1497
-  publisher : American Physical Society
   doi : 10.1103/PhysRevLett.43.1494
   numpages : 3
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Hamann1989
@@ -1081,10 +1081,10 @@
   year : 1989
   volume : 40
   pages : 2980--2987
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.40.2980
   issue : 5
+  doi : 10.1103/PhysRevB.40.2980
   numpages : 0
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Hamann2005
@@ -1103,10 +1103,10 @@
   year : 2013
   volume : 88
   pages : 085117
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.88.085117
   issue : 8
+  doi : 10.1103/PhysRevB.88.085117
   numpages : 10
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Harju2013
@@ -1126,10 +1126,10 @@
   year : 2010
   volume : 81
   pages : 115126
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.81.115126
   issue : 11
+  doi : 10.1103/PhysRevB.81.115126
   numpages : 18
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Hartwigsen1998
@@ -1149,10 +1149,10 @@
   year : 1980
   volume : 20
   pages : 11 - 16
-  doi : 10.1016/0010-4655(80)90101-0
-  number : 1
   note : 
+  doi : 10.1016/0010-4655(80)90101-0
   url : http://www.sciencedirect.com/science/article/pii/0010465580901010
+  number : 1
   issn : 0010-4655
 -
   ENTRYTYPE : article
@@ -1180,9 +1180,9 @@
   title : Electrical Resistivity, Thermoelectrical Power and Optical Properties
   year : 1985
   volume : 15b
+  date-modified : 2014-03-04 10:21:33 +0000
   address : Berlin Heidelberg
   publisher : Springer
-  date-modified : 2014-03-04 10:21:33 +0000
   date-added : 2014-02-21 11:07:18 +0000
 -
   ENTRYTYPE : article
@@ -1193,8 +1193,8 @@
   year : 2000
   volume : 113
   pages : 9978--9985
-  publisher : AIP Publishing
   number : 22
+  publisher : AIP Publishing
 -
   ENTRYTYPE : article
   ID : Hermet2009
@@ -1204,9 +1204,9 @@
   year : 2009
   volume : 21
   pages : 215901
-  publisher : 
   doi : 10.1088/0953-8984/21/21/215901
   number : 
+  publisher : 
 -
   ENTRYTYPE : article
   ID : Hohenberg1964
@@ -1216,9 +1216,9 @@
   year : 1964
   volume : 136
   pages : B864--B871
-  publisher : American Physical Society
   doi : 10.1103/PhysRev.136.B864
   number : 3B
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Holzwarth2001
@@ -1237,11 +1237,11 @@
   year : 1996
   volume : 53
   pages : 10751--10763
-  publisher : American Physical Society
+  timestamp : 2015.11.12
   doi : 10.1103/PhysRevB.53.10751
   owner : yannick
-  timestamp : 2015.11.12
   issue : 16
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Hybertsen1985
@@ -1251,10 +1251,10 @@
   year : 1985
   volume : 55
   pages : 1418-1421
-  publisher : American Physical Society (APS)
   doi : 10.1103/physrevlett.55.1418
-  source : Crossref
+  publisher : American Physical Society (APS)
   url : 10.1103/physrevlett.55.1418
+  source : Crossref
   issn : 0031-9007
   month : ep, number = {13
 -
@@ -1315,8 +1315,8 @@
   year : 2005
   volume : 72
   pages : 045204
-  publisher : APS
   number : 4
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Kingsmith1993
@@ -1336,9 +1336,9 @@
   year : 1965
   volume : 140
   pages : A1133--A1138
-  publisher : American Physical Society
   doi : 10.1103/PhysRev.140.A1133
   number : 4A
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Kolos1960
@@ -1357,13 +1357,13 @@
   year : 2006
   volume : 78
   pages : 865--951
-  publisher : American Physical Society
-  doi : 10.1103/RevModPhys.78.865
-  number : 3
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Review/RMP2006.pdf:PDF
-  timestamp : 2012.07.13
   refid : 10.1103/RevModPhys.78.865
+  doi : 10.1103/RevModPhys.78.865
+  owner : amadonb
+  timestamp : 2012.07.13
+  number : 3
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Review/RMP2006.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Kresse1999
@@ -1391,8 +1391,8 @@
   journal : Phys. Rev. B
   year : 2003
   volume : 67
-  publisher : American Physical Society (APS)
   doi : 10.1103/physrevb.67.155208
+  publisher : American Physical Society (APS)
   source : Crossref
   issn : 0163-1829, 1095-3795
   month : pr, number = {15
@@ -1451,14 +1451,14 @@
   year : 1995
   volume : 52
   pages : R5467--R5470
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.52.R5467
-  number : 8
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.52.R5467.pdf:PDF
-  timestamp : 2012.06.14
-  refid : 10.1103/PhysRevB.52.R5467
   keywords : interaction, LDA+U GGA+U DFT+U
+  doi : 10.1103/PhysRevB.52.R5467
+  refid : 10.1103/PhysRevB.52.R5467
+  owner : amadonb
+  timestamp : 2012.06.14
+  number : 8
+  publisher : American Physical Society
+  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.52.R5467.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Lindhard1954
@@ -1488,8 +1488,8 @@
   year : 2015
   volume : 91
   pages : 054420
-  numpages : 11
   issue : 5
+  numpages : 11
 -
   ENTRYTYPE : article
   ID : Maintz2012
@@ -1519,8 +1519,8 @@
   year : 2012
   volume : 183
   pages : 2272--2281
-  doi : 10.1016/j.cpc.2012.05.007
   issn : 00104655
+  doi : 10.1016/j.cpc.2012.05.007
 -
   ENTRYTYPE : article
   ID : Marx1996
@@ -1536,11 +1536,11 @@
   author : Mattuck, R.D.
   title : A Guide to Feynman Diagrams in the Many-body Problem
   year : 1976
+  isbn : 9780486670478
   url : http://books.google.co.uk/books?id=pe-v8zfxE68C
   lccn : 92004895
   publisher : Dover Publications, Incorporated
   series : Dover Books on Physics Series
-  isbn : 9780486670478
 -
   ENTRYTYPE : article
   ID : Mecholsky2014
@@ -1579,8 +1579,8 @@
   year : 1994
   volume : 72
   pages : 1124
-  publisher : APS
   number : 7
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Miyake2000
@@ -1590,8 +1590,8 @@
   year : 2000
   volume : 61
   pages : 7172-7175
-  publisher : American Physical Society (APS)
   doi : 10.1103/physrevb.61.7172
+  publisher : American Physical Society (APS)
   source : Crossref
   issn : 0163-1829, 1095-3795
   month : ar, number = {11
@@ -1611,8 +1611,8 @@
   author : Mosca Conte,A.
   title : Quantum mechanical modeling of nano magnetism
   year : 2007
-  url : http://hdl.handle.net/20.500.11767/3935
   address : Trieste Italy
+  url : http://hdl.handle.net/20.500.11767/3935
   school : SISSA
 -
   ENTRYTYPE : article
@@ -1623,9 +1623,9 @@
   year : 1985
   volume : 32
   pages : 1377
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.32.1377
   issue : 2
+  doi : 10.1103/PhysRevB.32.1377
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Nunes2001
@@ -1645,12 +1645,12 @@
   year : 2013
   volume : 68
   pages : 314 - 319
-  doi : 10.1016/j.commatsci.2012.10.028
-  number : 0
-  note : 
-  url : http://www.sciencedirect.com/science/article/pii/S0927025612006295
-  issn : 0927-0256
   keywords : High-throughput 
+  note : 
+  doi : 10.1016/j.commatsci.2012.10.028
+  url : http://www.sciencedirect.com/science/article/pii/S0927025612006295
+  number : 0
+  issn : 0927-0256
 -
   ENTRYTYPE : article
   ID : Onida2002
@@ -1660,9 +1660,9 @@
   year : 2002
   volume : 74
   pages : 601--659
-  publisher : American Physical Society
   doi : 10.1103/RevModPhys.74.601
   numpages : 58
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Payne1992
@@ -1672,10 +1672,10 @@
   year : 1992
   volume : 64
   pages : 1045--1097
-  publisher : American Physical Society
-  doi : 10.1103/RevModPhys.64.1045
   issue : 4
+  doi : 10.1103/RevModPhys.64.1045
   numpages : 0
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Perdew1981
@@ -1703,11 +1703,11 @@
   year : 1998
   volume : 57
   pages : 14690--14697
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.57.14690
-  url : https://link.aps.org/doi/10.1103/PhysRevB.57.14690
   issue : 23
+  doi : 10.1103/PhysRevB.57.14690
   numpages : 0
+  url : https://link.aps.org/doi/10.1103/PhysRevB.57.14690
+  publisher : American Physical Society
   month : Jun
 -
   ENTRYTYPE : article
@@ -1718,11 +1718,11 @@
   year : 2001
   volume : 63
   pages : 245101
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.63.245101
-  url : https://link.aps.org/doi/10.1103/PhysRevB.63.245101
   issue : 24
+  doi : 10.1103/PhysRevB.63.245101
   numpages : 13
+  url : https://link.aps.org/doi/10.1103/PhysRevB.63.245101
+  publisher : American Physical Society
   month : May
 -
   ENTRYTYPE : article
@@ -1796,9 +1796,9 @@
   year : 2003
   volume : 125
   pages : 541
-  publisher : 
-  doi : 10.1021/ja027124r
   issue : 
+  doi : 10.1021/ja027124r
+  publisher : 
 -
   ENTRYTYPE : article
   ID : Puska1994
@@ -1808,9 +1808,9 @@
   year : 1994
   volume : 66
   pages : 841
-  publisher : American Physical Society
-  doi : 10.1103/RevModPhys.66.841
   issue : 3
+  doi : 10.1103/RevModPhys.66.841
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Puska1995
@@ -1820,9 +1820,9 @@
   year : 1995
   volume : 52
   pages : 10947
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.52.10947
   issue : 15
+  doi : 10.1103/PhysRevB.52.10947
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Rangel2016
@@ -1842,10 +1842,10 @@
   year : 1990
   volume : 41
   pages : 1227--1230
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.41.1227
   issue : 2
+  doi : 10.1103/PhysRevB.41.1227
   numpages : 0
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Rauch2011
@@ -1855,8 +1855,8 @@
   year : 2011
   volume : 84
   pages : 125201
-  publisher : APS
   number : 12
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Resta1994
@@ -1875,10 +1875,10 @@
   year : 2009
   volume : 94
   pages : 
-  eid : 212103
+  url : http://scitation.aip.org/content/aip/journal/apl/94/21/10.1063/1.3147189
   doi : 10.1063/1.3147189
   number : 21
-  url : http://scitation.aip.org/content/aip/journal/apl/94/21/10.1063/1.3147189
+  eid : 212103
 -
   ENTRYTYPE : article
   ID : Rieger1999
@@ -1899,10 +1899,10 @@
   year : 2000
   volume : 62
   pages : 4927--4944
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.62.4927
-  file : Rohlfing2000.pdf:Rohlfing2000.pdf:PDF;Rohlfing2000.pdf:Rohlfing2000.pdf:PDF
   issue : 8
+  publisher : American Physical Society
+  file : Rohlfing2000.pdf:Rohlfing2000.pdf:PDF;Rohlfing2000.pdf:Rohlfing2000.pdf:PDF
 -
   ENTRYTYPE : article
   ID : Romanperez2009
@@ -1919,8 +1919,8 @@
   author : C. Rostgaard
   title : Exact exchange in density functional calculations
   year : 2006
-  url : https://wiki.fysik.dtu.dk/gpaw/_downloads/rostgaard_master.pdf
   address : Lyngby
+  url : https://wiki.fysik.dtu.dk/gpaw/_downloads/rostgaard_master.pdf
   school : Technical University of Denmark
 -
   ENTRYTYPE : article
@@ -1940,8 +1940,8 @@
   year : 1970
   volume : 16
   pages : 205--223
-  publisher : Springer
   number : 3
+  publisher : Springer
 -
   ENTRYTYPE : article
   ID : Sakuma2013
@@ -2011,8 +2011,8 @@
   journal : Phys. Rev. B
   year : 2006
   volume : 74
-  publisher : American Physical Society (APS)
   doi : 10.1103/physrevb.74.035101
+  publisher : American Physical Society (APS)
   source : Crossref
   issn : 1098-0121, 1550-235X
   month : ul, number = {3
@@ -2056,8 +2056,8 @@
   volume : 48
   pages : 11705--11722
   doi : 10.1103/PhysRevB.48.11705
-  url : http://link.aps.org/doi/10.1103/PhysRevB.48.11705
   issue : 16
+  url : http://link.aps.org/doi/10.1103/PhysRevB.48.11705
 -
   ENTRYTYPE : article
   ID : Snyder2008
@@ -2086,8 +2086,8 @@
   year : 1991
   volume : 43
   pages : 13892
-  publisher : APS
   number : 17
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Torrent2008
@@ -2097,12 +2097,12 @@
   year : 2008
   volume : 42
   pages : 337 - 351
-  doi : 10.1016/j.commatsci.2007.07.020
-  number : 2
-  note : 
-  url : http://www.sciencedirect.com/science/article/pii/S0927025607002108
-  issn : 0927-0256
   keywords : Iron under pressure
+  note : 
+  doi : 10.1016/j.commatsci.2007.07.020
+  url : http://www.sciencedirect.com/science/article/pii/S0927025607002108
+  number : 2
+  issn : 0927-0256
 -
   ENTRYTYPE : article
   ID : Tran2009
@@ -2112,19 +2112,19 @@
   year : 2009
   volume : 102
   pages : 226401
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevLett.102.226401
-  url : http://link.aps.org/doi/10.1103/PhysRevLett.102.226401
   issue : 22
+  doi : 10.1103/PhysRevLett.102.226401
   numpages : 4
+  url : http://link.aps.org/doi/10.1103/PhysRevLett.102.226401
+  publisher : American Physical Society
 -
   ENTRYTYPE : misc
   ID : Tremblay2017
   author : Andr\'e-Marie Tremblay
   title : Probl\`eme \`a N-corps
   year : 2017
-  howpublished : available <a href="https://www.physique.usherbrooke.ca/pages/en/node/3436">here</a>
   url : https://www.physique.usherbrooke.ca/pages/en/node/3436
+  howpublished : available <a href="https://www.physique.usherbrooke.ca/pages/en/node/3436">here</a>
   note : Notes de cours
 -
   ENTRYTYPE : article
@@ -2153,10 +2153,10 @@
   year : 2013
   volume : 85
   pages : 1583
-  publisher : American Physical Society
-  doi : 10.1103/RevModPhys.85.1583
   issue : 4
+  doi : 10.1103/RevModPhys.85.1583
   numpages : 0
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Uehara2000
@@ -2270,8 +2270,8 @@
   year : 2007
   volume : 126
   pages : 164103
-  publisher : AIP Publishing
   number : 16
+  publisher : AIP Publishing
 -
   ENTRYTYPE : article
   ID : Werner2006
@@ -2281,12 +2281,12 @@
   year : 2006
   volume : 97
   pages : 076405
-  publisher : American Physical Society
+  refid : 10.1103/PhysRevLett.97.076405
   doi : 10.1103/PhysRevLett.97.076405
-  number : 7
   owner : amadonb
   timestamp : 2013.05.22
-  refid : 10.1103/PhysRevLett.97.076405
+  number : 7
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Wiktor2013
@@ -2296,9 +2296,9 @@
   year : 2013
   volume : 87
   pages : 235207
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.87.235207
   numpages : 12
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Wiktor2014
@@ -2308,8 +2308,8 @@
   year : 2014
   volume : 89
   pages : 155203
-  publisher : APS
   number : 15
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Wiktor2014a
@@ -2319,8 +2319,8 @@
   year : 2014
   volume : 90
   pages : 184101
-  publisher : APS
   number : 18
+  publisher : APS
 -
   ENTRYTYPE : article
   ID : Wiktor2014b
@@ -2341,11 +2341,11 @@
   year : 2015
   volume : 92
   pages : 125113
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.92.125113
-  url : http://link.aps.org/doi/10.1103/PhysRevB.92.125113
   issue : 12
+  doi : 10.1103/PhysRevB.92.125113
   numpages : 15
+  url : http://link.aps.org/doi/10.1103/PhysRevB.92.125113
+  publisher : American Physical Society
   month : Sep
 -
   ENTRYTYPE : article
@@ -2356,8 +2356,8 @@
   year : 1963
   volume : 129
   pages : 62-69
-  publisher : American Physical Society (APS)
   doi : 10.1103/physrev.129.62
+  publisher : American Physical Society (APS)
   source : Crossref
   issn : 0031-899X
   month : an, number = {1
@@ -2370,8 +2370,8 @@
   year : 2014
   volume : 112
   pages : 196603
-  publisher : American Physical Society
   doi : 10.1103/PhysRevLett.112.196603
+  publisher : American Physical Society
   issue : 19
   numpages : 5
 -
@@ -2383,11 +2383,11 @@
   year : 2006
   volume : 74
   pages : 066704
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevE.74.066704
-  url : http://link.aps.org/doi/10.1103/PhysRevE.74.066704
   issue : 6
+  doi : 10.1103/PhysRevE.74.066704
   numpages : 8
+  url : http://link.aps.org/doi/10.1103/PhysRevE.74.066704
+  publisher : American Physical Society
 -
   ENTRYTYPE : article
   ID : Zhou2006a
@@ -2397,8 +2397,8 @@
   year : 2006
   volume : 219
   pages : 172--184
-  publisher : Elsevier
   number : 1
+  publisher : Elsevier
 -
   ENTRYTYPE : book
   ID : Ziman1960
@@ -2416,8 +2416,8 @@
   volume : 33
   pages : 447--456
   doi : 10.1007/s00723-008-0080-1
-  number : 4
   url : 10.1007/s00723-008-0080-1
+  number : 4
   issn : 1613-7507
 -
   ENTRYTYPE : article
@@ -2438,11 +2438,11 @@
   year : 2009
   volume : 79
   pages : 033112
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.79.033112
-  url : https://link.aps.org/doi/10.1103/PhysRevB.79.033112
   issue : 3
+  doi : 10.1103/PhysRevB.79.033112
   numpages : 4
+  url : https://link.aps.org/doi/10.1103/PhysRevB.79.033112
+  publisher : American Physical Society
   month : Jan
 -
   ENTRYTYPE : article
