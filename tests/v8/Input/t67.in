@@ -49,7 +49,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t67.in,t68.in
+#%% test_chain = t67.in,t68.in,t69.in
 #%% [files]
 #%% files_to_test =
 #%%   t67.out, tolnlines = 4, tolabs = 0.002, tolrel = 0.002, fld_options=-easy

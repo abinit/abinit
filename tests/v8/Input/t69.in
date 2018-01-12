@@ -1,6 +1,6 @@
 # Test for non-collinear dfpt response of simple metal to B field at q/=0
 # bcc bulk Fe, low ecut, coarse kpt grid,
-# perturbing magnetic field is parallel to gs spin orientation
+# perturbing magnetic field is perpendicular to gs spin orientation
 
   nsym    1
 
@@ -43,12 +43,12 @@
   prtdensph 1
   nstep     50
 
-   toldfe  1.0d-3
+   toldfe  1.0d-2
    ixcrot  3    # direct evaluation of the xc potential
   tim1rev  0    # perturbation breaks time reversal symmetry
    irdwfk  1
    rfmagn  1
-    rfdir  0 0 1
+    rfdir  0 1 0
      nqpt  1
       qpt  0.5 0.0 0.0
 
@@ -59,10 +59,8 @@
 #%% test_chain = t67.in,t68.in,t69.in
 #%% [files]
 #%% files_to_test =
-#%%   t68.out, tolnlines = 10, tolabs = 0.011,tolrel = 0.004, fld_options=-easy
+#%%   t69.out, tolnlines = 10, tolabs = 0.011,tolrel = 0.004, fld_options=-easy
 #%% psp_files = 26fe.pspnc
-#%% [shell]
-#%% post_commands = ww_mv t68i_WFK t69i_WFK
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
