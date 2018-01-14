@@ -1,8 +1,10 @@
 #### MnO AFM non-collinear spins along [111]; ddk with ixcrot=3
 
-nsym 1
+nsym  1
 
-ecut   5
+ecut  5
+
+ixc   7
 
 ##### K-POINTS
 kptopt  3
