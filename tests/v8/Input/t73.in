@@ -1,4 +1,4 @@
-#### MnO AFM non-collinear spins along [111]; ddk with ixcrot=3
+#### MnO AFM non-collinear spins along [111]; ddk with ixcrot=2
 
 nsym 1
 
@@ -45,7 +45,7 @@ spinat
 6*0
 
 # dataset 2: ddk
-ixcrot  3
+ixcrot  2
 irdwfk  -1
 iscf    -3
 tolwfr  1.0E-16
@@ -66,7 +66,7 @@ prteig  0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t70.in, t71.in, t72.in, t73.in
+#%% test_chain = t71.in, t72.in, t73.in, t74.in
 #%% [files]
 #%% files_to_test = 
 #%%    t73.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
@@ -77,5 +77,5 @@ prteig  0
 #%% [extra_info]
 #%% authors = E. Bousquet
 #%% keywords = DFPT, ddk, non-collinear, SOC
-#%% description = DFPT in non-collinear magnetism: ddk with ixcrot=3
+#%% description = DFPT in non-collinear magnetism: ddk with ixcrot=2
 #%%<END TEST_INFO>

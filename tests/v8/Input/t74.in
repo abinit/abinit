@@ -1,4 +1,4 @@
-#### MnO AFM non-collinear spins along [111]
+#### MnO AFM non-collinear spins along [111]; ddk with ixcrot=3
 
 nsym 1
 
@@ -44,11 +44,19 @@ spinat
 -5 -5 -5
 6*0
 
-# dataset 1: GS
-iscf     7
-tolwfr   1.0E-16
-nstep    30
-nline    8
+# dataset 2: ddk
+ixcrot  3
+irdwfk  -1
+iscf    -3
+tolwfr  1.0E-16
+rfelfd  2
+rfdir   1 1 1
+nqpt    1
+qpt     0.0 0.0 0.0
+nband   42
+nline   12
+nstep   20
+
 
 # printing options
 prtden  0
@@ -58,17 +66,16 @@ prteig  0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t70.in, t71.in, t72.in, t73.in
+#%% test_chain = t71.in, t72.in, t73.in, t74.in
 #%% [files]
 #%% files_to_test = 
-#%%    t70.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
+#%%    t74.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
 #%% psp_files = Mn-sp-r_LDA_1012_dojov0.4.psp8,O-r_LDA_1012_dojov0.4.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
-#%% post_commands = ww_cp t70o_WFK t71i_WFK; ww_cp t70o_WFK t72i_WFK; ww_cp t70o_WFK t73i_WFK
 #%% [extra_info]
 #%% authors = E. Bousquet
-#%% keywords = DFPT, non-collinear, SOC
-#%% description = DFPT in non-collinear magnetism, ground state WF
+#%% keywords = DFPT, ddk, non-collinear, SOC
+#%% description = DFPT in non-collinear magnetism: ddk with ixcrot=3
 #%%<END TEST_INFO>

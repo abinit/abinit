@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 10 Jan 2018.
-- ( at 14h30 )
+- ( at 14h28 )
   
 - input  file    -> abi.in
 - output file    -> abi.out
@@ -61,7 +61,7 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
            irdwfk          -1
              iscf          -3
               ixc       -1012
-           ixcrot           2
+           ixcrot           1
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
                       -2.50000000E-01  2.50000000E-01  2.50000000E-01
                        2.50000000E-01 -2.50000000E-01  2.50000000E-01
@@ -409,7 +409,7 @@ P          mk1mem           8
            irdwfk          -1
              iscf          -3
               ixc       -1012
-           ixcrot           2
+           ixcrot           1
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
                       -2.50000000E-01  2.50000000E-01  2.50000000E-01
                        2.50000000E-01 -2.50000000E-01  2.50000000E-01
@@ -556,10 +556,10 @@ P          mk1mem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         27.9  wall=         27.9
+- Proc.   0 individual time (sec): cpu=         27.8  wall=         27.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  34 WARNINGs and  34 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.9  wall=         27.9
++Overall time at end (sec) : cpu=         27.8  wall=         27.8
