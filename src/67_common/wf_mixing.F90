@@ -443,7 +443,7 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
    ABI_ALLOCATE(coeffs,(nset2))
    coeffs(:)=cone
 !  The res_mn is destroyed by the following inverse call
-   call zgesv(nset2,1,res_mn,nset2,ipiv,coeffs,nset2,ierr)
+   call zgesv(nset2,1,res_mn,wfmixalg-1,ipiv,coeffs,nset2,ierr)
    ABI_DEALLOCATE(ipiv)
 !  The coefficients must sum to one
    sum_coeffs=sum(coeffs)
