@@ -548,6 +548,7 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
    if(istep>2)then
      ABI_DEALLOCATE(coeffs)
    endif
+   ABI_DEALLOCATE(al)
 
  endif ! wfmixalg>2 and istep>1
 
@@ -570,9 +571,10 @@ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
  ABI_DEALLOCATE(dimcprj)
  ABI_DEALLOCATE(mmn)
  ABI_DEALLOCATE(smn)
- if(allocated(res_mn))then
+ if(wfmixalg>2)then
+   ABI_DEALLOCATE(dotprod_res_k)
+   ABI_DEALLOCATE(dotprod_res)
    ABI_DEALLOCATE(res_mn)
  endif
-
 end subroutine wf_mixing
 !!***
