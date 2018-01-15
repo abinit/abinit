@@ -144,7 +144,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
- list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron'
+ list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
  list_vars=trim(list_vars)//' irdvdw'
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
@@ -218,7 +218,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget supercell'
  list_vars=trim(list_vars)//' symafm symchi symdynmat symmorphi symrel symsigma'
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe timopt tl_nprccg tl_radius'
+ list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel tsmear typat'
 !U

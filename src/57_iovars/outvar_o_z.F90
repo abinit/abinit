@@ -994,6 +994,10 @@
  dprarr(1,:)=dtsets(:)%tfw_toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tfw_toldfe','ENE',0)
 
+ intarr(1,:)=dtsets(:)%tim1rev
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'tim1rev','INT',0)
+
+
 !timopt
  timopt_default=1
 !MPI parallel case

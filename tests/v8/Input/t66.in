@@ -1,5 +1,5 @@
 # Test for collinear dfpt response with B field (rfmagn input variable)
-# bcc Fe, low ecut, coars kpt grid
+# bcc Fe, low ecut, coarse kpt grid
 
   ndtset  2
 
@@ -11,9 +11,9 @@
   typat   1
   spinat  0.0 0.0 4.0
 
-  nsppol  2  # 1 => single wf 2=> separate wvf for spin up and spin dwn chanels
-  nspinor 1  # 1=> scalar wavefunctions 2 => spinor wavefunctions
-  nspden  2  # conponents of density matrix
+  nsppol  2  # separate wvf for spin up and spin dwn chanels
+  nspinor 1  # scalar wavefunctions
+  nspden  2  # upup and dndn conponents of density matrix only
 
   so_psp  0
 
@@ -57,10 +57,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t20.in
+#%% test_chain = t66.in
 #%% [files]
 #%% files_to_test = 
-#%%   t20.out, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
+#%%   t66.out, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
