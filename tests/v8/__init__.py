@@ -51,6 +51,9 @@ inp_files = [
 "t72.in",
 "t73.in",
 "t74.in",
+"t75.in",
+"t76.in",
+"t77.in",
 #GW-soc
 "t80.in",
 "t81.in",
