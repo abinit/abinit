@@ -67,7 +67,7 @@
  subroutine mlwfovlp_setup(atom_symbols,band_in,dtset,filew90_win,gamma_only,&
 & g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
 & nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
-& proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,&
+& proj_l,proj_m,proj_radial,proj_site,proj_s_loc,proj_s_qaxis_loc,proj_x,proj_z,proj_zona,&
 & real_lattice,recip_lattice,rprimd,seed_name,spin,spinors,xcart,xred)
 
  use defs_basis
@@ -106,6 +106,9 @@
  logical,intent(out) :: band_in(mband,nsppol)
  character(len=3),intent(out) :: atom_symbols(natom)
  character(len=fnlen),intent(in) :: seed_name(nsppol),filew90_win(nsppol)
+
+ integer, optional, intent(out) :: proj_s_loc(mband)
+ real(dp), optional, intent(out) :: proj_s_qaxis_loc(3,mband)
 
 !Local variables---------------------------
 !scalars
@@ -206,15 +209,35 @@
    num_bands(:)=0
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
-     call wannier_setup(seed_name(isppol),ngkpt,nkpt&                    !input
-&    ,real_lattice,recip_lattice,dtset%kpt&                      !input
-&    ,mband,natom,atom_symbols,xcart*Bohr_Ang&                   !input
-&    ,gamma_only,spinors&                                        !input
-&    ,nntot,ovikp,g1,num_bands(isppol),nwan(isppol)&                     !output
-&    ,proj_site(:,:,isppol),proj_l(:,isppol)&                    !output
-&    ,proj_m(:,isppol),proj_radial(:,isppol)&                    !output
-&    ,proj_z(:,:,isppol),proj_x(:,:,isppol)&                     !output
-&    ,proj_zona(:,isppol),exclude_bands(:,isppol) )               !output
+#ifndef HAVE_WANNIER90_V1
+!WANNIER90_V2 has the 2 optional arguments
+     if (present(proj_s_loc)) then
+       call wannier_setup(seed_name(isppol),ngkpt,nkpt&            !input
+&      ,real_lattice,recip_lattice,dtset%kpt&                      !input
+&      ,mband,natom,atom_symbols,xcart*Bohr_Ang&                   !input
+&      ,gamma_only,spinors&                                        !input
+&      ,nntot,ovikp,g1,num_bands(isppol),nwan(isppol)&             !output
+&      ,proj_site(:,:,isppol),proj_l(:,isppol)&                    !output
+&      ,proj_m(:,isppol),proj_radial(:,isppol)&                    !output
+&      ,proj_z(:,:,isppol),proj_x(:,:,isppol)&                     !output
+&      ,proj_zona(:,isppol),exclude_bands(:,isppol)&               !output
+&      ,proj_s_loc,proj_s_qaxis_loc)                               !output
+     else
+#else
+!WANNIER90_V1 or no proj_s_loc provided
+       call wannier_setup(seed_name(isppol),ngkpt,nkpt&            !input
+&      ,real_lattice,recip_lattice,dtset%kpt&                      !input
+&      ,mband,natom,atom_symbols,xcart*Bohr_Ang&                   !input
+&      ,gamma_only,spinors&                                        !input
+&      ,nntot,ovikp,g1,num_bands(isppol),nwan(isppol)&             !output
+&      ,proj_site(:,:,isppol),proj_l(:,isppol)&                    !output
+&      ,proj_m(:,isppol),proj_radial(:,isppol)&                    !output
+&      ,proj_z(:,:,isppol),proj_x(:,:,isppol)&                     !output
+&      ,proj_zona(:,isppol),exclude_bands(:,isppol))               !output
+#endif
+#ifndef HAVE_WANNIER90_V1
+     end if
+#endif
    end do !isppol
 
 
