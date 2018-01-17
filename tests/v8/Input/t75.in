@@ -49,8 +49,8 @@ spinat
 # DFPT E-field
 ixcrot   1
 rfelfd   3
-irdddk   -1
-irdwfk   -2
+irdddk   1
+irdwfk   1
 iscf     7
 tolvrs   1.0E-08
 rfdir    1 0 0 

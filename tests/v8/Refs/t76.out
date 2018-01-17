@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 15 Jan 2018.
-- ( at 16h52 )
+.Starting date : Wed 17 Jan 2018.
+- ( at 14h21 )
   
 - input  file    -> abi.in
 - output file    -> abi.out
@@ -58,8 +58,8 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
 -          fftalg         112
-           irdddk          -1
-           irdwfk          -2
+           irdddk           1
+           irdwfk           1
               ixc           7
            ixcrot           2
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -333,8 +333,8 @@ P          mk1mem           8
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         112
-           irdddk          -1
-           irdwfk          -2
+           irdddk           1
+           irdwfk           1
               ixc           7
            ixcrot           2
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -480,10 +480,10 @@ P          mk1mem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         18.7  wall=         18.7
+- Proc.   0 individual time (sec): cpu=         18.2  wall=         18.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  20 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.7  wall=         18.7
+.Delivered  20 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=         18.2  wall=         18.2

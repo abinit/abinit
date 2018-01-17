@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 16 Jan 2018.
-- ( at 10h27 )
+.Starting date : Wed 17 Jan 2018.
+- ( at 13h47 )
   
 - input  file    -> abi.in
 - output file    -> abi.out
@@ -215,47 +215,47 @@ P          mk1mem           8
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   246.44103039815     -1.406E+03 1.082E-01 1.451E+05
- ETOT  2   24.567165219752     -2.219E+02 1.028E-01 2.110E+03
- ETOT  3   21.188677427584     -3.378E+00 1.914E-02 5.172E+01
- ETOT  4   20.971355318576     -2.173E-01 7.960E-03 7.722E+00
- ETOT  5   20.894449389705     -7.691E-02 4.043E-03 1.134E+00
- ETOT  6   20.864428299070     -3.002E-02 2.052E-03 1.721E-01
- ETOT  7   20.850353837129     -1.407E-02 1.200E-03 3.326E-01
- ETOT  8   20.842653737241     -7.700E-03 6.191E-04 1.907E-02
- ETOT  9   20.838955777057     -3.698E-03 3.634E-04 1.073E-01
- ETOT 10   20.836759010737     -2.197E-03 1.949E-04 1.479E-02
- ETOT 11   20.835606790957     -1.152E-03 1.144E-04 1.091E-02
- ETOT 12   20.834959039354     -6.478E-04 6.240E-05 5.978E-03
+-ETOT  1   246.44103438557     -1.406E+03 1.082E-01 1.451E+05
+ ETOT  2   24.567179425575     -2.219E+02 1.028E-01 2.110E+03
+ ETOT  3   21.188695805303     -3.378E+00 1.914E-02 5.172E+01
+ ETOT  4   20.971379915828     -2.173E-01 7.960E-03 7.722E+00
+ ETOT  5   20.894480060385     -7.690E-02 4.043E-03 1.134E+00
+ ETOT  6   20.864468863115     -3.001E-02 2.051E-03 1.719E-01
+ ETOT  7   20.850405082961     -1.406E-02 1.200E-03 3.320E-01
+ ETOT  8   20.842720940538     -7.684E-03 6.190E-04 1.861E-02
+ ETOT  9   20.839047742161     -3.673E-03 3.632E-04 1.043E-01
+ ETOT 10   20.836877123227     -2.171E-03 1.949E-04 1.418E-02
+ ETOT 11   20.835776352872     -1.101E-03 1.126E-04 2.538E-03
+ ETOT 12   20.835180115461     -5.962E-04 6.259E-05 4.174E-04
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
-  potential residual=  5.978E-03 exceeds tolvrs=  1.000E-08
+  potential residual=  4.174E-04 exceeds tolvrs=  1.000E-08
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.6526E-07; max=  6.2398E-05
+ Mean square residual over all n,k,spin=   8.4418E-07; max=  6.2585E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.53167893E+03 eigvalue=   2.78407284E+02  local=  -6.60356455E+02
+     kin0=   1.53165647E+03 eigvalue=   2.78419026E+02  local=  -6.60339508E+02
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -3.12668179E+03  Hartree=   6.03596802E+02     xc=  -8.77295044E+01
+ loc psp =  -3.12669999E+03  Hartree=   6.03608565E+02     xc=  -8.77312184E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=  -3.43897098E+01   enl1=  -1.35777559E+02
+    edocc=   0.00000000E+00     enl0=  -3.43878068E+01   enl1=  -1.35777323E+02
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -1.63125200E+03
+   erelax=  -1.63125178E+03
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   1.46400964E+03 fr.nonlo=   6.86414813E+01  Ewald=   1.03842431E+02
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -4.78205562E+02  frxc 2 =   4.93798975E+02
  Resulting in :
- 2DEtotal=    0.2083495904E+02 Ha. Also 2DEtotal=    0.566948068127E+03 eV
-    (2DErelax=   -1.6312520023E+03 Ha. 2DEnonrelax=    1.6520869613E+03 Ha)
-    (  non-var. 2DEtotal :    2.0857288396E+01 Ha)
+ 2DEtotal=    0.2083518012E+02 Ha. Also 2DEtotal=    0.566954083914E+03 eV
+    (2DErelax=   -1.6312517812E+03 Ha. 2DEnonrelax=    1.6520869613E+03 Ha)
+    (  non-var. 2DEtotal :    2.0848305569E+01 Ha)
 
 ================================================================================
 
@@ -269,40 +269,40 @@ P          mk1mem           8
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        20.8573916043         0.0000000000
-   1    1   2    1        13.2261841445         0.0000000000
-   1    1   3    1        19.7940773880         0.0000000000
-   1    1   1    2        -4.1040019537         0.0000000000
-   1    1   2    2        -2.5487932008         0.0000000000
-   1    1   3    2        -2.9679118708         0.0000000000
-   1    1   1    3        -7.8900858682        -0.0000000000
-   1    1   2    3        -5.2089646800        -0.0000000000
-   1    1   3    3        -7.9891404160         0.0000000000
-   1    1   1    4        -7.8888687914        -0.0000000000
-   1    1   2    4        -5.2079185660         0.0000000000
-   1    1   3    4        -7.9830616043         0.0000000000
+   1    1   1    1        20.8483055550         0.0000000000
+   1    1   2    1        13.2382222840         0.0000000000
+   1    1   3    1        19.8347191899         0.0000000000
+   1    1   1    2        -4.0971639799         0.0000000000
+   1    1   2    2        -2.5564152596         0.0000000000
+   1    1   3    2        -3.0073431614         0.0000000000
+   1    1   1    3        -7.8902403924        -0.0000000000
+   1    1   2    3        -5.2094277480        -0.0000000000
+   1    1   3    3        -7.9894484834         0.0000000000
+   1    1   1    4        -7.8893504804        -0.0000000000
+   1    1   2    4        -5.2086585415         0.0000000000
+   1    1   3    4        -7.9842224408         0.0000000000
   
-   2    1   1    1        13.2261841445         0.0000000000
+   2    1   1    1        13.2382222840         0.0000000000
   
-   3    1   1    1        19.7940773880         0.0000000000
+   3    1   1    1        19.8347191899         0.0000000000
   
-   1    2   1    1        -4.1040019537         0.0000000000
+   1    2   1    1        -4.0971639799         0.0000000000
   
-   2    2   1    1        -2.5487932008         0.0000000000
+   2    2   1    1        -2.5564152596         0.0000000000
   
-   3    2   1    1        -2.9679118708         0.0000000000
+   3    2   1    1        -3.0073431614         0.0000000000
   
-   1    3   1    1        -7.8900858682         0.0000000000
+   1    3   1    1        -7.8902403924         0.0000000000
   
-   2    3   1    1        -5.2089646800         0.0000000000
+   2    3   1    1        -5.2094277480         0.0000000000
   
-   3    3   1    1        -7.9891404160        -0.0000000000
+   3    3   1    1        -7.9894484834        -0.0000000000
   
-   1    4   1    1        -7.8888687914         0.0000000000
+   1    4   1    1        -7.8893504804         0.0000000000
   
-   2    4   1    1        -5.2079185660        -0.0000000000
+   2    4   1    1        -5.2086585415        -0.0000000000
   
-   3    4   1    1        -7.9830616043        -0.0000000000
+   3    4   1    1        -7.9842224408        -0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -333,7 +333,7 @@ P          mk1mem           8
            diemac      2.00000000E+01
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
-           etotal      2.0834959039E+01
+           etotal      2.0835180115E+01
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -485,10 +485,10 @@ P          mk1mem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=          8.8  wall=          8.8
+- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.8  wall=          8.8
+.Delivered  16 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.7  wall=          8.7
