@@ -96,7 +96,8 @@
 ! TRUE if antiferro symmetries are used with non-collinear magnetism
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
- integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
+ integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialok
+! integer :: trialafm
  integer :: itrialxfm, ntrialxfm
  integer :: has_spin, has_canting
  real(dp) :: norm2_0, norm2_1
@@ -106,11 +107,11 @@
  character(len=500) :: message
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
- integer, allocatable :: trialsymmag(:,:,:)
  integer, allocatable :: symafm_ref(:)
  real(dp) :: diff(3),efieldrot(3),sxred0(3),symnucdipmom2(3)
  real(dp) :: symspinat2(3),symxred2(3),trialnons(3)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
+ real(dp), allocatable :: trialsymmag(:,:,:)
 
 !**************************************************************************
 
@@ -346,35 +347,54 @@
 ! we use first 2 vectors to limit these, as for iatom0+1 and the translations
      ntrialxfm = 0
      symafm_ref = 0
-     trialsymmag = 0
+     trialsymmag = zero
+
+     if (noncoll==0) then
 ! FM with atom1 could come from:
 !   real FM (Idendity operation)
 !   mirror plane parallel to this spin
 !   rotation axis parallel to this spin...
-     if (sum((spinatred(:,iatom1)-spinatred(:,iatom0))**2) < tolsym) then
-       ntrialxfm = ntrialxfm+1
-       trialsymmag(:,:,ntrialxfm) = identity_3d
-       symafm_ref(ntrialxfm) = 1
-     end if
+       if (sum((spinatred(:,iatom1)-spinatred(:,iatom0))**2) < tolsym) then
+         ntrialxfm = ntrialxfm+1
+         trialsymmag(:,:,ntrialxfm) = real(identity_3d, kind=dp)
+         symafm_ref(ntrialxfm) = 1
+       end if
 
 ! AFM with atom1 could come from:
 !   real collinear AFM (inversion operation)
 !   mirror plane perpendicular to spin
 !   rotation axis C2 perpendicular to spin
-     if (has_spin==1 .and. sum((spinatred(:,iatom1)+spinatred(:,iatom0))**2) < tolsym) then
-       ntrialxfm = ntrialxfm+1
-       trialsymmag(:,:,ntrialxfm) = inversion_3d
-       symafm_ref(ntrialxfm) = -1
-     end if
+       if (has_spin==1 .and. sum((spinatred(:,iatom1)+spinatred(:,iatom0))**2) < tolsym) then
+         ntrialxfm = ntrialxfm+1
+         trialsymmag(:,:,ntrialxfm) = real(inversion_3d, kind=dp)
+         symafm_ref(ntrialxfm) = -1
+       end if
 
-! other: symmag = ptsym
+     else if (noncoll==1) then
+! in the non collinear case with SOC you have to rotate space and spin together,
+!  but could add an additional symmetry operation on top, AFM or mirror plane or rotation,
+!  if the spins are not aliged or anti aligned.
+! 
+!  symmag = ptsym with eventual afm
+       ntrialxfm = ntrialxfm+1
+       trialsymmag(:,:,ntrialxfm) = real(ptsymrel(:,:,isym), kind=dp)
+       symafm_ref(ntrialxfm) = 1
+       ntrialxfm = ntrialxfm+1
+       trialsymmag(:,:,ntrialxfm) = -real(ptsymrel(:,:,isym), kind=dp)
+       symafm_ref(ntrialxfm) = -1
+
 ! TODO: add mirror plane and possible rotation axis perpendicular to spinat of
 ! iatom0 and iatom1
-     if (has_canting==1 .and. any(ptsymrel(:,:,isym)/=identity_3d) &
-&      .and. noncoll==1 .and. any(ptsymrel(:,:,isym)/=inversion_3d) ) then
-       ntrialxfm = ntrialxfm+1
-       trialsymmag(:,:,ntrialxfm) = ptsymrel(:,:,isym)
-       symafm_ref(ntrialxfm) = 2
+       if (has_canting==1) then
+!  mirror plane
+         ntrialxfm = ntrialxfm+1
+         trialsymmag(:,:,ntrialxfm) = zero
+         symafm_ref(ntrialxfm) = 2
+!  rotation
+         ntrialxfm = ntrialxfm+1
+         trialsymmag(:,:,ntrialxfm) = zero
+         symafm_ref(ntrialxfm) = 2
+       end if
      end if
 
 
@@ -409,7 +429,7 @@
 
        if (prtvol > 1) then
          write (std_out,'(a,2I6,3I6)') 'ntrialxfm, itrialxfm, symafm_ref ', ntrialxfm, itrialxfm, symafm_ref(itrialxfm)
-         write (std_out,'(9I6)') trialsymmag(:,:,itrialxfm)
+         write (std_out,'(9E12.4)') trialsymmag(:,:,itrialxfm)
        end if
 
 !      Loop over all classes, then all atoms in the class,
@@ -431,7 +451,7 @@
 !&                                    ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
 !&                                    ptsymrel(:,3,isym)*spinatred(3,iatom2))
 !           end if
-           symspinat2(:)=matmul(real(trialsymmag(:,:,itrialxfm), kind=dp),spinatred(:,iatom2))
+           symspinat2(:)=matmul(trialsymmag(:,:,itrialxfm),spinatred(:,iatom2))
 
            if(present(nucdipmom)) then
 !          Generate the tentative symmetric nuclear dipole moment of iatom2
@@ -483,7 +503,7 @@
 
 ! if trial is already broken, forget it and exit
          if (prtvol >= 10) then
-           write (std_out, '(a,i6,i6)') '   iclass trialok ', iclass, trialok
+           write (std_out, '(a,i6,i6,a)') '   iclass trialok ', iclass, trialok, ch10
          end if
          if(trialok==0)exit
        end do ! End loop over all classes
