@@ -104,7 +104,7 @@ end type delocint
 !! abimover
 !!
 !! FUNCTION
-!! This datatype has the purpouse of store all the data taked
+!! This datatype has the purpose of store all the data taked
 !! usually from dtset needed for the different predictors
 !! to update positions, acell, etc.
 !!
