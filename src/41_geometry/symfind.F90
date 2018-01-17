@@ -96,14 +96,14 @@
 ! TRUE if antiferro symmetries are used with non-collinear magnetism
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
- integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialok
+ integer :: isym,jj,kk,natom0,nclass,ntrial,trialok
 ! integer :: trialafm
  integer :: itrialxfm, ntrialxfm
  integer :: has_spin, has_canting
+ integer :: has_afm
  real(dp) :: norm2_0, norm2_1
  real(dp) :: spinatcl2,spinatcl20,det
- logical,parameter :: afm_noncoll=.true.
- logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin, test_afmspin_noncoll
+ logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin, test_afmspin
  character(len=500) :: message
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
@@ -156,10 +156,11 @@
  if (sum(spinat(:,:)**2) < tolsym) has_spin = 0
 
  has_canting = 0
+ has_afm = 0
 
  if (natom>1) then
 
-! check if we have truly non collinear spins, not just FM or AFM
+! check if we have truly non collinear spins, or AFM
    do iatom0 = 1, natom
      norm2_0 = sum(spinat(:,iatom0)**2)
      do iatom1 = iatom0+1, natom
@@ -185,7 +186,7 @@
 &         abs(spinat(1,iatom)-spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)-spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)-spinatcl(3,iclass))<tolsym
-! spins are vector identical except z component which can have a sign flip
+! spins are vector identical along z, and this component can have a sign flip
 ! TODO: in noncoll=0 case could be generalized to include arbitrary user choice of
 ! orientation, as long as the spins are flipped properly...
          test_sameabscollin= &
@@ -194,24 +195,27 @@
 &         abs(spinat(2,iatom))<tolsym .and. abs(spinatcl(2,iclass))<tolsym .and.&
 &         abs(abs(spinat(3,iatom))-abs(spinatcl(3,iclass)))<tolsym
 ! spins are vector identical with an AFM sign flip to +
-         test_afmspin_noncoll= &
-&         noncoll==1 .and. afm_noncoll .and. &
+         test_afmspin= &
+!&         noncoll==1 .and. afm_noncoll .and. &
 &         abs(spinat(1,iatom)+spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)+spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)+spinatcl(3,iclass))<tolsym
 ! spin vectors have the same norm... 
          test_sameabsnoncoll= &
-&         noncoll==1 .and. afm_noncoll .and. has_canting==1 .and. &
+&         noncoll==1 .and. has_canting==1 .and. &
 &         (abs(spinat(1,iatom)**2   +spinat(2,iatom)**2   +spinat(3,iatom)**2 - &
 &              spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2) < tolsym)
 
-         if( test_samespin .or. test_sameabscollin .or. test_afmspin_noncoll .or. test_sameabsnoncoll) then
+         if( test_samespin .or. test_sameabscollin .or. test_afmspin .or. test_sameabsnoncoll) then
            if (prtvol >= 10) then
              write(std_out,*)' symfind : find it belongs to class iclass=',iclass
              write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
              write(std_out,*)' symfind : spinatcl(:,iclass)=',spinatcl(:,iclass)
-             write(std_out,*)' symfind : test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll=',&
-&              test_samespin,test_sameabscollin,test_afmspin_noncoll,test_sameabsnoncoll
+             write(std_out,*)' symfind : test_samespin,test_sameabscollin,test_afmspin,test_sameabsnoncoll=',&
+&              test_samespin,test_sameabscollin,test_afmspin,test_sameabsnoncoll
+           end if
+           if (test_afmspin) then
+             has_afm = 1
            end if
            natomcl(iclass)=natomcl(iclass)+1
            class(natomcl(iclass),iclass)=iatom
@@ -232,6 +236,7 @@
  end if
 
  if (prtvol > 1) then
+   write(std_out,'(a,I6)')' symfind : has_afm = ',has_afm
    write(std_out,'(a,I6)')' symfind : has_canting = ',has_canting
    write(std_out,*)' symfind : found ',nclass,' nclass of atoms'
    do iclass=1,nclass
@@ -261,8 +266,6 @@
      end if
    end do
  end if
-
- printed=0
 
  if (prtvol > 1) then
    write(std_out,*)' symfind : has selected iclass0=',iclass0
@@ -364,7 +367,7 @@
 !   real collinear AFM (inversion operation)
 !   mirror plane perpendicular to spin
 !   rotation axis C2 perpendicular to spin
-       if (has_spin==1 .and. sum((spinatred(:,iatom1)+spinatred(:,iatom0))**2) < tolsym) then
+       if (has_spin==1 .and. has_afm==1) then
          ntrialxfm = ntrialxfm+1
          trialsymmag(:,:,ntrialxfm) = real(inversion_3d, kind=dp)
          symafm_ref(ntrialxfm) = -1
@@ -379,9 +382,11 @@
        ntrialxfm = ntrialxfm+1
        trialsymmag(:,:,ntrialxfm) = real(ptsymrel(:,:,isym), kind=dp)
        symafm_ref(ntrialxfm) = 1
-       ntrialxfm = ntrialxfm+1
-       trialsymmag(:,:,ntrialxfm) = -real(ptsymrel(:,:,isym), kind=dp)
-       symafm_ref(ntrialxfm) = -1
+       if (has_afm==1) then
+         ntrialxfm = ntrialxfm+1
+         trialsymmag(:,:,ntrialxfm) = -real(ptsymrel(:,:,isym), kind=dp)
+         symafm_ref(ntrialxfm) = -1
+       end if
 
 ! TODO: add mirror plane and possible rotation axis perpendicular to spinat of
 ! iatom0 and iatom1
