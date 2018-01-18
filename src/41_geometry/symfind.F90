@@ -154,7 +154,6 @@
 
  has_spin = 1
  if (sum(spinat(:,:)**2) < tolsym) has_spin = 0
-
  has_canting = 0
  has_afm = 0
 
@@ -197,7 +196,7 @@
 ! spins are vector identical with an AFM sign flip
          test_afmspin= &
 !&         noncoll==1 .and. afm_noncoll .and. &
-&         noncoll==1 .and. has_spin==1 .and. &
+&         has_spin==1 .and. &
 &         abs(spinat(1,iatom)+spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)+spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)+spinatcl(3,iclass))<tolsym
