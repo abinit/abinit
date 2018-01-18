@@ -88,7 +88,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  integer,intent(out) :: pwind_alloc
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(inout) :: dtset
- type(orbmag_type),intent(inout) :: dtorbmag
+ type(orbmag_type),intent(out) :: dtorbmag
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  !arrays
@@ -216,13 +216,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  lmn2_size_max = psps%lmnmax*(psps%lmnmax+1)/2
  dtorbmag%lmn2max = lmn2_size_max
-
-! expibi and qijb_kk are NOT parallelized over atoms
-! this may change in the future (JZwanziger 18 March 2014)
- ABI_ALLOCATE(dtorbmag%qijb_kk,(2,lmn2_size_max,dtorbmag%natom,3))
- ABI_ALLOCATE(dtorbmag%expibi,(2,dtorbmag%natom,3))
- dtorbmag%has_expibi = 1
- dtorbmag%has_qijb = 1
 
  ABI_ALLOCATE(dtorbmag%cprjindex,(dtset%nkpt,dtset%nsppol))
  dtorbmag%cprjindex(:,:) = 0
@@ -421,25 +414,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  call timab(1005,2,tsec)
  call timab(1006,1,tsec)
-
-!------------------------------------------------------------------------------
-!------------ Compute PAW on-site terms if necessary --------------------------
-!------------------------------------------------------------------------------
-
-!  if (dtorbmag%usepaw == 1 .and. dtorbmag%has_expibi == 1) then
-!    call expibi(dtorbmag%expibi,dtorbmag%dkvecs,dtset%natom,xred)
-!    dtorbmag%has_expibi = 2
-!  end if
-
-!  if (dtorbmag%usepaw == 1 .and. dtorbmag%has_qijb == 1) then
-
-!    call qijb_kk(dtorbmag%qijb_kk,dtorbmag%dkvecs,dtorbmag%expibi,&
-! &   gprimd,dtorbmag%lmn2max,dtset%natom,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat)
-
-!  end if
- 
- call timab(1007,2,tsec)
- call timab(1008,1,tsec)
 
 !------------------------------------------------------------------------------
 !------------ Build the array pwind that is needed to compute the -------------

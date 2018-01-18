@@ -147,6 +147,7 @@
 !!       In case dtset%berryopt = 4/6/7/14/16/17, the overlap matrices computed
 !!       in this routine are stored in dtefield%smat in order
 !!       to be used in the electric field calculation.
+!! dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
@@ -202,7 +203,7 @@
 #include "abi_common.h"
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
@@ -223,6 +224,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_errors
  use m_profiling_abi
  use m_efield
+ use m_orbmag
  use m_ab7_mixing
  use m_hdr
 
@@ -280,6 +282,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
+ type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
@@ -503,6 +506,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
+ end if
+
+!----------------------------------------------------------------------
+! Orbital magnetization calculations
+!----------------------------------------------------------------------
+ if(dtset%orbmag==1) then
+    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
+     &            mcg,mcprj,mpi_enreg,npwarr,psps%ntypat,pawtab,usecprj,psps%usepaw)
  end if
 
  call timab(252,2,tsec)

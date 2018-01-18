@@ -24,6 +24,7 @@ sources = [
  "calc_fc.F90",
  "cgq_builder.F90",
  "cgwf.F90",
+ "chern_number.F90",
  "clnup1.F90",
  "clnup2.F90",
  "conducti_nc.F90",

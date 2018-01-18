@@ -64,8 +64,6 @@ module m_orbmag
   integer :: fmkmem              ! number of k-points in the FBZ per cpu
   integer :: fmkmem_max          ! max of fmkmem
   integer :: fnkpt               ! number of k-points in the FBZ
-  integer :: has_expibi          ! 2 if expibi computed, 1 if only allocated, zero else
-  integer :: has_qijb            ! 2 if paw_qijb computed, 1 if only allocated, zero else
   integer :: lmax
   integer :: lmnmax
   integer :: lmn2max
@@ -81,7 +79,9 @@ module m_orbmag
 ! Real(dp) scalars
   real(dp) :: sdeg               ! spin degeneracy: sdeg = 2 if nsppol = 1
 
-! Real(dp) arrays
+  ! Real(dp) arrays
+  real(dp) :: chern(3)           ! result of chern number calculation
+  
   real(dp) :: dkvecs(3,3)        ! dkvec(:,idir) = vector between a k-poinit
                                  ! and its nearest neighbour along idir
 ! Integer pointers
@@ -117,40 +117,10 @@ module m_orbmag
 
   integer, allocatable :: nband_occ(:)       ! nband_occ(nsppol) = actual number of occupied bands
                                              !  can be different for spin up and down!!!
-  integer, allocatable :: nneigh(:)          ! nneigh(nkpt)
-                                         ! for each k-point, nneigh stores
-                                         ! the number of its nearest neighbours
-                                         ! that are not related by symmetry
-  integer, allocatable :: sflag(:,:,:,:)  ! sflag(mband_occ,nkpt*nsppol,2,3)
-                                      ! sflag = 0 : compute the whole row of
-                                      !             smat
-                                      ! sflag = 1 : the row is up to date
-
 ! Real(dp) allocatables
-
-  real(dp), allocatable :: expibi(:,:,:)
-! expibi(2,my_natom,3)
-! used for PAW field calculations (distributed over atomic sites)
-! stores the on-site phase factors arising from
-! $\langle\phi_{i,k}|\phi_{j,k+\sigma_k k_k}\rangle$
-! where $\sigma = \pm 1$. These overlaps arise in various Berry
-! phase calculations of electric and magnetic polarization. The on-site
-! phase factor is $\exp[-i\sigma_k k_k)\cdot I]$ where
-! $I$ is the nuclear position. Only the following
-! are computed and saved, in the given order:
-! 1)    -k_1
-! 2)    -k_2
-! 3)    -k_3
 
   real(dp), allocatable :: fkptns(:,:)       ! fkptns(3,1:dtorbmag%fnkpt)
                                          ! k-points in FBZ
-
-  real(dp), allocatable :: qijb_kk(:,:,:,:)
-! qijb_kk(2,lmn2max,natom,3)
-! on-site part of <u_nk|u_mk+b> matrix elements, relevant for PAW only
-! vector b described by idir (1,2,3), forward direction; value for
-! reverse direction (ifor = 2 in berryphase_new and cgwf) obtained by
-! complex conjugation
 
   real(dp), allocatable :: zarot(:,:,:,:)
    !  zarot(l_size_max,l_size_max,l_max,nsym)
@@ -230,20 +200,10 @@ subroutine destroy_orbmag(dtorbmag)
   if(allocated(dtorbmag%nband_occ))  then
     ABI_DEALLOCATE(dtorbmag%nband_occ)
   end if
-  if(allocated(dtorbmag%nneigh))  then
-    ABI_DEALLOCATE(dtorbmag%nneigh)
-  end if
-
 ! Real(dp) pointers
 
-  if(allocated(dtorbmag%expibi))  then
-    ABI_DEALLOCATE(dtorbmag%expibi)
-  end if
   if(allocated(dtorbmag%fkptns))  then
     ABI_DEALLOCATE(dtorbmag%fkptns)
-  end if
-  if(allocated(dtorbmag%qijb_kk))  then
-    ABI_DEALLOCATE(dtorbmag%qijb_kk)
   end if
   if(allocated(dtorbmag%zarot))  then
     ABI_DEALLOCATE(dtorbmag%zarot)
