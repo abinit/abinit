@@ -180,7 +180,7 @@
 !      Compare the typat and spinat of atom iatom with existing ones.
 !      Admit either identical spinat, or z-aligned spinat with same
 !      absolute magnitude
-       if( typat(iatom)==typecl(iclass)) then
+       if(typat(iatom)==typecl(iclass)) then
 ! spins are vector identical
          test_samespin=  &
 &         abs(spinat(1,iatom)-spinatcl(1,iclass))<tolsym .and. &
@@ -194,9 +194,10 @@
 &         abs(spinat(1,iatom))<tolsym .and. abs(spinatcl(1,iclass))<tolsym .and.&
 &         abs(spinat(2,iatom))<tolsym .and. abs(spinatcl(2,iclass))<tolsym .and.&
 &         abs(abs(spinat(3,iatom))-abs(spinatcl(3,iclass)))<tolsym
-! spins are vector identical with an AFM sign flip to +
+! spins are vector identical with an AFM sign flip
          test_afmspin= &
 !&         noncoll==1 .and. afm_noncoll .and. &
+&         noncoll==1 .and. has_spin==1 .and. &
 &         abs(spinat(1,iatom)+spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)+spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)+spinatcl(3,iclass))<tolsym
@@ -221,8 +222,8 @@
            class(natomcl(iclass),iclass)=iatom
            foundcl=1
            exit
-         end if
-       end if
+         end if ! some spin flag is on
+       end if ! typat(iatom)==typecl(iclass)
      end do !loop over iclass
 !    If no class with these characteristics exist, create one
      if(foundcl==0)then
