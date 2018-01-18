@@ -426,17 +426,17 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 !------------ Compute PAW on-site terms if necessary --------------------------
 !------------------------------------------------------------------------------
 
- if (dtorbmag%usepaw == 1 .and. dtorbmag%has_expibi == 1) then
-   call expibi(dtorbmag%expibi,dtorbmag%dkvecs,dtset%natom,xred)
-   dtorbmag%has_expibi = 2
- end if
+!  if (dtorbmag%usepaw == 1 .and. dtorbmag%has_expibi == 1) then
+!    call expibi(dtorbmag%expibi,dtorbmag%dkvecs,dtset%natom,xred)
+!    dtorbmag%has_expibi = 2
+!  end if
 
- if (dtorbmag%usepaw == 1 .and. dtorbmag%has_qijb == 1) then
+!  if (dtorbmag%usepaw == 1 .and. dtorbmag%has_qijb == 1) then
 
-   call qijb_kk(dtorbmag%qijb_kk,dtorbmag%dkvecs,dtorbmag%expibi,&
-&   gprimd,dtorbmag%lmn2max,dtset%natom,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat)
+!    call qijb_kk(dtorbmag%qijb_kk,dtorbmag%dkvecs,dtorbmag%expibi,&
+! &   gprimd,dtorbmag%lmn2max,dtset%natom,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat)
 
- end if
+!  end if
  
  call timab(1007,2,tsec)
  call timab(1008,1,tsec)
