@@ -337,6 +337,7 @@ type dataset_type
  integer :: ixc
  integer :: ixc_sigma
  integer :: ixcpositron
+ integer :: ixcrot
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
  integer :: kptopt
@@ -552,6 +553,7 @@ type dataset_type
  integer :: symsigma
  integer :: td_mexcit
  integer :: tfkinfunc
+ integer :: tim1rev
  integer :: timopt
  integer :: tl_nprccg
  integer :: ucrpa
@@ -780,6 +782,7 @@ type dataset_type
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
+ real(dp) :: wfmix
  real(dp) :: wtq
  real(dp) :: wvl_hgrid
  real(dp) :: wvl_crmult

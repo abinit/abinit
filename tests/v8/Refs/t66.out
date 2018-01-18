@@ -1,5 +1,5 @@
 
-.Version 8.7.1 of ABINIT 
+.Version 8.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 31 Oct 2017.
-- ( at 15h47 )
+.Starting date : Mon 25 Dec 2017.
+- ( at 22h35 )
   
-- input  file    -> t20.in
-- output file    -> t20.out
-- root for input  files -> t20i
-- root for output files -> t20o
+- input  file    -> t66.in
+- output file    -> t66.out
+- root for input  files -> t66i
+- root for output files -> t66o
 
 
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
@@ -239,8 +239,8 @@ P          mk1mem           8
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is 26fe.pspnc
-- pspatm: opening atomic psp file    26fe.pspnc
+- pspini: atom type   1  psp file is /home/sp/dev/abinit-dev/abinit/tests/Psps_for_tests/26fe.pspnc
+- pspatm: opening atomic psp file    /home/sp/dev/abinit-dev/abinit/tests/Psps_for_tests/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -334,7 +334,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     341.375     341.152
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t20o_DS1_EIG
+ prteigrs : about to open file t66o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.26091   Average Vxc (hartree)=  -0.51312
  Magnetization (Bohr magneton)=  3.32518413E+00
  Total spin up =  5.66259207E+00   Total spin down =  2.33740793E+00
@@ -412,7 +412,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     341.375     341.152
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12179
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t20o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t66o_DS1_WFK
 P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
 P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
 P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
@@ -444,7 +444,7 @@ P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t20o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t66o_DS1_WFK
 P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
 P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
 P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
@@ -524,7 +524,7 @@ P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
  7,8,9: eventually, occupation + non-local contributions
     edocc=   2.82485854E+01     enl0=  -2.89340622E-02   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   0.00000000E+00
+   erelax=   1.50886023E+01
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -784,10 +784,10 @@ P          mk1mem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         10.6  wall=         10.6
+- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.6  wall=         10.6
++Overall time at end (sec) : cpu=         10.0  wall=         10.0

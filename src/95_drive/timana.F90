@@ -713,6 +713,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(793)='mkrho%energy                    '
  names(794)='mkrho%respfn                    '
  names(795)='mkrho%afterscfloop              '
+ names(796)='mkrho%scfcv                     '
  names(798)='mkrho/=                         '; basic(798)=1
  names(799)='mkrho/=+fourwf                  '
 
@@ -1178,8 +1179,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
    case(43) 
-!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop
-     tslots(:6)=(/790,791,792,793,794,795/)
+!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop + mkrho%scfcv
+     tslots(:7)=(/790,791,792,793,794,795,796/)
    case(44) 
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)

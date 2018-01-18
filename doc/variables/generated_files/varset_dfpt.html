@@ -83,6 +83,7 @@ variables to be used in the main input file of the abinit code.
  <br><a id='H'></a>H.
  <br><a id='I'></a>I.
  <a href="#ieig2rf">ieig2rf</a>&nbsp;&nbsp;
+ <a href="#ixcrot">ixcrot</a>&nbsp;&nbsp;
  <br><a id='J'></a>J.
  <br><a id='K'></a>K.
  <br><a id='L'></a>L.
@@ -113,12 +114,13 @@ variables to be used in the main input file of the abinit code.
  <br><a id='T'></a>T.
  <a href="#td_maxene">td_maxene</a>&nbsp;&nbsp;
  <a href="#td_mexcit">td_mexcit</a>&nbsp;&nbsp;
+ <a href="#tim1rev">tim1rev</a>&nbsp;&nbsp;
 <br><br><hr>
 <br><font id="title"><a name="bdeigrf">bdeigrf</a></font>
 <br><font id="mnemonics">Mnemonics: BanD for second-order EIGenvalues from Response-Function</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
-<br><font id="smalltext">Moderately used: [10/920] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {paral:[<a href="../../tests/paral/Input/t59.in">59</a>,<a href="../../tests/paral/Input/t60.in">60</a>],v6:[<a href="../../tests/v6/Input/t37.in">37</a>,<a href="../../tests/v6/Input/t50.in">50</a>,<a href="../../tests/v6/Input/t54.in">54</a>,<a href="../../tests/v6/Input/t58.in">58</a>,<a href="../../tests/v6/Input/t61.in">61</a>,<a href="../../tests/v6/Input/t68.in">68</a>],v7:[<a href="../../tests/v7/Input/t55.in">55</a>,<a href="../../tests/v7/Input/t83.in">83</a>]}.</font>
+<br><font id="smalltext">Moderately used: [10/924] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {paral:[<a href="../../tests/paral/Input/t59.in">59</a>,<a href="../../tests/paral/Input/t60.in">60</a>],v6:[<a href="../../tests/v6/Input/t37.in">37</a>,<a href="../../tests/v6/Input/t50.in">50</a>,<a href="../../tests/v6/Input/t54.in">54</a>,<a href="../../tests/v6/Input/t58.in">58</a>,<a href="../../tests/v6/Input/t61.in">61</a>,<a href="../../tests/v6/Input/t68.in">68</a>],v7:[<a href="../../tests/v7/Input/t55.in">55</a>,<a href="../../tests/v7/Input/t83.in">83</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is -1</font>
 <br><br><font id="requires">
@@ -145,7 +147,7 @@ that is, if the user is performing second-order eigenvalue calculations using re
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>
 <br><br><font id="requires">
@@ -170,7 +172,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: DIRections</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
@@ -196,7 +198,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> f
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -220,7 +222,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 1: PHONons</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -242,7 +244,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>
 <br><br><font id="requires">
@@ -267,7 +269,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: DIRections</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
@@ -293,7 +295,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> f
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -317,7 +319,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 2: PHONons</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -339,7 +341,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>
 <br><br><font id="requires">
@@ -364,7 +366,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: DIRections</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
@@ -390,7 +392,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a> f
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [11/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [11/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_11.in">nlo_11</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -414,7 +416,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a>
 <br><font id="mnemonics">Mnemonics: 3rd Derivative of Energy, mixed PERTurbation 3: PHONons</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t83.in">83</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -437,7 +439,7 @@ See <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t46.in">46</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t46.in">46</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -468,7 +470,7 @@ but NOT for d/dk (<a href="../../variables/generated_files/varset_dfpt.html#rfel
 <br><font id="mnemonics">Mnemonics: EFfective MASs</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [3/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -505,7 +507,7 @@ supported. Also, for both NC and PAW, <a href="../../variables/generated_files/v
 <br><font id="mnemonics">Mnemonics: EFfective MASs, BANDS to be treated.</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [3/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: integer(2,<a href="../../variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
 <br><font id="default">Default is The full range of band available in the calculation for each k-point.</font>
 <br><br><font id="requires">
@@ -528,7 +530,7 @@ even if they were not part of the user specified range.
 <br><font id="mnemonics">Mnemonics: EFfective MASs, CALCulate along DIRectionS</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [2/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -564,7 +566,7 @@ cartesian, reduced or angular (theta,phi) coordinates, respectively. In the case
 <br><font id="mnemonics">Mnemonics: EFfective MASs, activate DEGenerate formalism</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
@@ -587,7 +589,7 @@ using the transport equivalent effective mass idea
 <br><font id="mnemonics">Mnemonics: EFfective MASs, DEGeneracy TOLerance</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1e-05</font>
 <br><br><font id="requires">
@@ -610,7 +612,7 @@ Energy difference below which 2 bands are considered degenerate
 <br><font id="mnemonics">Mnemonics: EFfective MASs, DIMension of the effective mass tensor</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 3</font>
 <br><br><font id="requires">
@@ -646,7 +648,7 @@ the line immediately after the effective mass.
 <br><font id="mnemonics">Mnemonics: EFfective MASs, DIRectionS to be calculated</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [2/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: real(3 or 2,<a href="../../variables/generated_files/varset_dfpt.html#efmas_n_dirs">efmas_n_dirs</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -669,7 +671,7 @@ The directions are specified by 3 real values if <a href="../../variables/genera
 <br><font id="mnemonics">Mnemonics: EFfective MASs, Number of DIRectionS</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [2/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -690,7 +692,7 @@ Number of directions in <a href="../../variables/generated_files/varset_dfpt.htm
 <br><font id="mnemonics">Mnemonics: EFfective MASs, Number of points for integration w/r to THETA</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>.</font>
-<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
+<br><font id="smalltext">Rarely used: [3/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t80.in">80</a>,<a href="../../tests/v7/Input/t81.in">81</a>,<a href="../../tests/v7/Input/t82.in">82</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1000</font>
 <br><br><font id="requires">
@@ -716,7 +718,7 @@ The default value gives a tensor accurate to the 4th decimal in Ge.
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
-<br><font id="smalltext">Moderately used: [13/920] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
+<br><font id="smalltext">Moderately used: [13/924] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="requires">
@@ -752,7 +754,7 @@ specified in Ha (the default), Ry, eV or Kelvin, since
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
-<br><font id="smalltext">Rarely used: [3/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t89.in">89</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>,<a href="../../tests/v8/Input/t65.in">65</a>]}.</font>
+<br><font id="smalltext">Rarely used: [3/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t89.in">89</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>,<a href="../../tests/v8/Input/t65.in">65</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -776,7 +778,7 @@ When <a href="../../variables/generated_files/varset_gstate.html#optdriver">optd
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t60.in">60</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t60.in">60</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.01</font>
 <br><br><font id="requires">
@@ -809,7 +811,7 @@ present in the expression of the lifetimes. One should use a width comparable wi
 <br><font id="mnemonics">Mnemonics: FReeZe FERMI energy</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t75.in">75</a>],v6:[<a href="../../tests/v6/Input/t89.in">89</a>]}.</font>
+<br><font id="smalltext">Rarely used: [2/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t75.in">75</a>],v6:[<a href="../../tests/v6/Input/t89.in">89</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -831,7 +833,7 @@ if set to 1, allows to suppress this contribution, but this is incorrect.
 <br><font id="mnemonics">Mnemonics: Integer for second-order EIGenvalues from Response-Function</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
-<br><font id="smalltext">Moderately used: [20/920] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
+<br><font id="smalltext">Moderately used: [20/924] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -865,11 +867,40 @@ if set to 1, allows to suppress this contribution, but this is incorrect.
 <B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="ixcrot">ixcrot</a></font>
+<br><font id="mnemonics">Mnemonics: Index of the XC ROTation method used to calculate first-order exchange-correltation potential in non-collinear DFPT calculations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_xc.html">xc</a>, <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t68.in">68</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 3</font>
+<br><font id="text">
+<p>
+<p> Method of calculation of the 1st order XC potential in non-collinear DFPT calculations. The possible values are 1,2 and 3 correspond to the following methods </p>
+<ul>
+ <li>
+ If ixcrot=1, the spinor rotation matrix U at each fft point is not calculated explicitly. Instead the needed expressions involving U are derived based on the general properties of the U matrix.
+ </li>
+ <li>
+ If ixcrot=2, U is computed explicitly
+ </li>
+ <li>
+ If ixcrot=3, the brute force evaluation of the 1st order XC potential as a functional derivative is used. Rotation matrices are not computed.
+ </li>
+</ul>
+<p> In theory, all methods give identical results. However, due to different implementation approaches, the round-off errors can lead to slight differences intermediate and final results obtained using methods 1,2 and 3. The choice of the method can also affect the convergence. Note that for non-zero perturbation wavector, only ixcrot=3 implementation is currently available.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="ph_ngqpt">ph_ngqpt</a></font>
 <br><font id="mnemonics">Mnemonics: PHonons: Number of Grid points for Q-PoinT mesh.</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_q-points.html">q-points</a>.</font>
-<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t88.in">88</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>]}.</font>
+<br><font id="smalltext">Rarely used: [2/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t88.in">88</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>]}.</font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [20, 20, 20]</font>
 <br><font id="text">
@@ -886,7 +917,7 @@ Related input variables: <a href="../../variables/generated_files/varset_eph.htm
 <br><font id="mnemonics">Mnemonics: Phonons: Q-PATH</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_q-points.html">q-points</a>.</font>
-<br><font id="smalltext">Rarely used: [2/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t88.in">88</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>]}.</font>
+<br><font id="smalltext">Rarely used: [2/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t88.in">88</a>],v8:[<a href="../../tests/v8/Input/t44.in">44</a>]}.</font>
 <br><font id="vartype">Variable type: real(3,ph_nqpath)</font>
 <br><font id="default">Default is None</font>
 <br><br><font id="requires">
@@ -906,7 +937,7 @@ See also <a href="../../variables/generated_files/varset_eph.html#ph_nqpath">ph_
 <br><font id="mnemonics">Mnemonics: PREPAre Non-Linear response calculation</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_nonlinear.html">nonlinear</a>.</font>
-<br><font id="smalltext">Moderately used: [10/920] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_10.in">nlo_10</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
+<br><font id="smalltext">Moderately used: [10/924] in abinit tests, [2/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tnlo_10.in">nlo_10</a>,<a href="../../tests/tutorespfn/Input/tnlo_2.in">nlo_2</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -942,7 +973,7 @@ along the three directions explicitly, and (ii) to keep the full number of k-poi
 <br><font id="mnemonics">Mnemonics: PREPAre GKK calculation</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
-<br><font id="smalltext">Rarely used: [5/920] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_1.in">eph_1</a>],v5:[<a href="../../tests/v5/Input/t85.in">85</a>],v6:[<a href="../../tests/v6/Input/t72.in">72</a>,<a href="../../tests/v6/Input/t90.in">90</a>],v7:[<a href="../../tests/v7/Input/t90.in">90</a>]}.</font>
+<br><font id="smalltext">Rarely used: [5/924] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_1.in">eph_1</a>],v5:[<a href="../../tests/v5/Input/t85.in">85</a>],v6:[<a href="../../tests/v6/Input/t72.in">72</a>,<a href="../../tests/v6/Input/t90.in">90</a>],v7:[<a href="../../tests/v7/Input/t90.in">90</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -964,7 +995,7 @@ Use in conjunction with <a href="../../variables/generated_files/varset_files.ht
 <br><font id="mnemonics">Mnemonics: PRinT Band-By-Band decomposition</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_printing.html">printing</a>, <a href="../../topics/generated_files/topic_Output.html">Output</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t77.in">77</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t77.in">77</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -984,7 +1015,7 @@ See Ph. Ghosez and X. Gonze, J. Phys.: Condens. Matter 12, 9179 (2000).
 <br><font id="mnemonics">Mnemonics: Response Function : 2nd Derivative of wavefunctions with respect to K</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Rarely used: [0/920] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="smalltext">Rarely used: [0/924] in abinit tests, [0/136] in tuto abinit tests.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1022,7 +1053,7 @@ The directions for the derivatives are determined by <a href="../../variables/ge
 <br><font id="mnemonics">Mnemonics: Response Function : Acoustic Sum Rule</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
-<br><font id="smalltext">Rarely used: [4/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t24.in">24</a>],v6:[<a href="../../tests/v6/Input/t37.in">37</a>],v7:[<a href="../../tests/v7/Input/t50.in">50</a>,<a href="../../tests/v7/Input/t51.in">51</a>]}.</font>
+<br><font id="smalltext">Rarely used: [4/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t24.in">24</a>],v6:[<a href="../../tests/v6/Input/t37.in">37</a>],v7:[<a href="../../tests/v7/Input/t50.in">50</a>,<a href="../../tests/v7/Input/t51.in">51</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1059,7 +1090,7 @@ with the two independent input variables <a href="../../variables/generated_file
 <br><font id="mnemonics">Mnemonics: Response Function : ATomic POLarisation</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>, <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
-<br><font id="smalltext">Moderately used: [138/920] in abinit tests, [14/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="smalltext">Moderately used: [138/924] in abinit tests, [14/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>
 <br><font id="text">
@@ -1104,7 +1135,7 @@ denoting perturbations of electric field or stress type (see
 <br><font id="mnemonics">Mnemonics: Response Function with respect to Derivative with respect to K</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t30.in">30</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t30.in">30</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1136,7 +1167,7 @@ derivatives are determined by <a href="../../variables/generated_files/varset_df
 <br><font id="mnemonics">Mnemonics: Response Function : DIRections</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>, <a href="../../topics/generated_files/topic_Phonons.html">Phonons</a>.</font>
-<br><font id="smalltext">Moderately used: [194/920] in abinit tests, [27/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="smalltext">Moderately used: [195/924] in abinit tests, [27/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><font id="text">
@@ -1173,7 +1204,7 @@ should not be considered.
 <br><font id="mnemonics">Mnemonics: Response Function with respect to the ELectric FielD</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_EffMass.html">EffMass</a>, <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Moderately used: [70/920] in abinit tests, [11/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="smalltext">Moderately used: [70/924] in abinit tests, [11/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1226,7 +1257,7 @@ it is usually not applied for the d/dk response).
 <br><font id="mnemonics">Mnemonics: Response Function with respect to MAGNetic B-field perturbation</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t20.in">20</a>]}.</font>
+<br><font id="smalltext">Rarely used: [2/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t66.in">66</a>,<a href="../../tests/v8/Input/t68.in">68</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1247,7 +1278,7 @@ it is usually not applied for the d/dk response).
 <br><font id="mnemonics">Mnemonics: Response Function METHod</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Rarely used: [0/920] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="smalltext">Rarely used: [0/924] in abinit tests, [0/136] in tuto abinit tests.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -1267,7 +1298,7 @@ is allowed.
 <br><font id="mnemonics">Mnemonics: Response Function with respect to PHONons</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Moderately used: [139/920] in abinit tests, [14/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="smalltext">Moderately used: [139/924] in abinit tests, [14/136] in tuto abinit tests. Too many tests to report (>10).</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1286,7 +1317,7 @@ to run phonon response function calculations.
 <br><font id="mnemonics">Mnemonics: Response Function with respect to STRainS</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_Elastic.html">Elastic</a>.</font>
-<br><font id="smalltext">Moderately used: [24/920] in abinit tests, [5/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/telast_2.in">elast_2</a>,<a href="../../tests/tutorespfn/Input/telast_5.in">elast_5</a>,<a href="../../tests/tutorespfn/Input/telast_6.in">elast_6</a>,<a href="../../tests/tutorespfn/Input/tffield_2.in">ffield_2</a>,<a href="../../tests/tutorespfn/Input/tnlo_3.in">nlo_3</a>]}.</font>
+<br><font id="smalltext">Moderately used: [24/924] in abinit tests, [5/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/telast_2.in">elast_2</a>,<a href="../../tests/tutorespfn/Input/telast_5.in">elast_5</a>,<a href="../../tests/tutorespfn/Input/telast_6.in">elast_6</a>,<a href="../../tests/tutorespfn/Input/tffield_2.in">ffield_2</a>,<a href="../../tests/tutorespfn/Input/tnlo_3.in">nlo_3</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1325,7 +1356,7 @@ calculations (e.g. needed to get elastic constants). Define, with
 <br><font id="mnemonics">Mnemonics: Response Function, USER-defined</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
-<br><font id="smalltext">Rarely used: [0/920] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="smalltext">Rarely used: [0/924] in abinit tests, [0/136] in tuto abinit tests.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1372,7 +1403,7 @@ as well as to the ipert local variable.
 <br><font id="mnemonics">Mnemonics: SMeared DELTA function</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
-<br><font id="smalltext">Moderately used: [19/920] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
+<br><font id="smalltext">Moderately used: [19/924] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/tdepes_1.in">depes_1</a>,<a href="../../tests/tutorespfn/Input/tdepes_3.in">depes_3</a>,<a href="../../tests/tutorespfn/Input/tdepes_4.in">depes_4</a>]}.</font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1408,7 +1439,7 @@ as well as to the ipert local variable.
 <br><font id="mnemonics">Mnemonics: Time-Dependent dft : MAXimal kohn-sham ENErgy difference</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t69.in">69</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t69.in">69</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
@@ -1440,7 +1471,7 @@ way to decrease N.
 <br><font id="mnemonics">Mnemonics: Time-Dependent dft : Maximal number of EXCITations</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TDDFT.html">TDDFT</a>.</font>
-<br><font id="smalltext">Rarely used: [1/920] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t69.in">69</a>]}.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t69.in">69</a>]}.</font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1463,6 +1494,23 @@ However, when <b>td_mexcit</b> is zero, all pairs are allowed.
  for an alternative
 way to decrease N.
 </p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tim1rev">tim1rev</a></font>
+<br><font id="mnemonics">Mnemonics: TIMe 1st order REVersal </font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>.</font>
+<br><font id="smalltext">Rarely used: [1/924] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t68.in">68</a>]}.</font>
+<br><font id="vartype">Variable type: integer (Comment: possible values are 0 and 1)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+If tim1rev is equal to 1, the Sternheimer equation is solved simultaneously at +q and -q perturbation wavevectors. The first order potential at -q is taken to be equal to the Hermitian conjugate of the first order potential at +q. Relevant in the case of magnetic field perturbation.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
