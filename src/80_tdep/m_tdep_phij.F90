@@ -693,7 +693,7 @@ subroutine tdep_write_yaml(Eigen2nd,Lattice,Qpt)
     write(52,'(a,f15.6)') '  distance:',distance
     do ii=1,Qpt%qpt_tot
       if (sum(abs(Qpt%qpt_red(:,iqpt)-Qpt%special_red(ii,:))).lt.tol8) then
-        write(52,'(3a)') "  label: '",Qpt%special_qpt(ii),"'"
+        write(52,'(3a)') "  label: '",trim(Qpt%special_qpt(ii)),"'"
         exit
       end if
     end do !ii

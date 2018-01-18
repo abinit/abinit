@@ -69,6 +69,7 @@ program tdep
 #ifdef HAVE_NETCDF
   use netcdf
 #endif
+  use m_io_tools
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -144,7 +145,10 @@ program tdep
  ABI_MALLOC(ucart,(3,natom,InVar%nstep))    ; ucart(:,:,:)=0.d0
  ABI_MALLOC(Forces_MD,(3*natom*InVar%nstep)); Forces_MD(:)=0.d0
 
+ write(InVar%stdout,*) "Matching structure"
+ call flush_unit(InVar%stdout)
  call tdep_MatchIdeal2Average(distance,Forces_MD,InVar,Lattice,Rlatt_cart,Rlatt4Abi,Sym,ucart)
+ call flush_unit(InVar%stdout)
 
 !==========================================================================================
 !============== Initialize Crystal and DDB ABINIT Datatypes ===============================
@@ -165,6 +169,7 @@ program tdep
  write(InVar%stdout,*) '################ Now, find the number of coefficients for ###################'
  write(InVar%stdout,*) '########################## a reference interaction ##########################'
  write(InVar%stdout,*) '#############################################################################'
+ call flush_unit(InVar%stdout)
  
 !==========================================================================================
 !============== Initialize the Shell2at datatype ==========================================
