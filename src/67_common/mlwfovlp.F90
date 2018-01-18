@@ -156,13 +156,11 @@
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
  integer,allocatable :: proj_s_loc(:)
  real(dp) :: real_lattice(3,3)
- real(dp) :: recip_lattice(3,3),spreadw(3)
- real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),csix(:,:,:,:),cwavef(:,:)
+ real(dp) :: recip_lattice(3,3)
+ real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),cwavef(:,:)
  real(dp),allocatable :: denpot(:,:,:)
  real(dp),allocatable :: eigenvalues_w(:,:,:),fofgout(:,:),fofr(:,:,:,:)
- real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
  real(dp),allocatable :: proj_site(:,:,:),proj_x(:,:,:),proj_z(:,:,:),proj_zona(:,:)
- real(dp),allocatable :: tdocc_wan(:,:)
  real(dp),allocatable :: wann_centres(:,:,:),wann_spreads(:,:),xcart(:,:)
  real(dp),allocatable :: proj_s_qaxis_loc(:,:)
  complex(dpc),allocatable :: A_paw(:,:,:,:)
@@ -172,6 +170,12 @@
  logical,allocatable :: band_in(:,:),lwindow(:,:,:)
  character(len=3),allocatable :: atom_symbols(:)
  logical,allocatable::just_augmentation(:,:)
+#if defined HAVE_WANNIER90
+ real(dp) :: spreadw(3)
+ real(dp),allocatable :: csix(:,:,:,:)
+ real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
+ real(dp),allocatable :: tdocc_wan(:,:)
+#endif
 
 !************************************************************************
 
