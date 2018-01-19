@@ -294,7 +294,13 @@
 
 !    LOOP OVER BANDS
      do iband=1,nband_k
+       !if ( (eig0_k(iband)-fermie)>1.5/Ha_eV ) then
+       !  cycle
+       !end if
        do jband=1,nband_k
+         !if ( (eig0_k(jband)-fermie)>1.5/Ha_eV ) then
+         !  cycle
+         !end if
          do l1=1,3
            do l2=1,3
              dhdk2_r(iband,jband,l1,l2)=dhdk2_r(iband,jband,l1,l2)+(&
@@ -311,6 +317,22 @@
 
          diff_occ = occ_k(iband)-occ_k(jband)
          if (dabs(diff_occ)>=tol8) then
+
+!           if ( jband > iband ) then
+!             if ( abs(eig0_k(jband)-eig0_k(iband)-0.94/Ha_eV)<=0.25/Ha_eV ) then
+!               write(15,*) ikpt, iband, jband, diff_occ
+!             else if ( abs(eig0_k(jband)-eig0_k(iband)-2.46/Ha_ev)<=0.25/Ha_eV ) then
+!               write(25,*) ikpt, iband, jband, diff_occ
+!             else if ( abs(eig0_k(jband)-eig0_k(iband)-2.89/Ha_ev)<=0.25/Ha_eV ) then
+!               write(35,*) ikpt, iband, jband, diff_occ
+!             else if ( abs(eig0_k(jband)-eig0_k(iband)-3.32/Ha_ev)<=0.25/Ha_eV ) then
+!               write(45,*) ikpt, iband, jband, diff_occ
+!             else if ( abs(eig0_k(jband)-eig0_k(iband)-4.08/Ha_ev)<=0.25/Ha_eV ) then
+!               write(55,*) ikpt, iband, jband, diff_occ
+!             else
+!               cycle
+!             end if
+!           end if
 
 !          Conductivity for each omega
 !          omin = zero
