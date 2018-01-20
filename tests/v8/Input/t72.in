@@ -74,7 +74,7 @@ prteig  0
 #%%    t72.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
 #%% psp_files = Mn-sp-r_LDA_1012_dojov0.4.psp8,O-r_LDA_1012_dojov0.4.psp8
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 8
 #%% [shell]
 #%% post_commands = ww_cp t72o_1WF13 t75i_1WF13
 #%% [extra_info]
