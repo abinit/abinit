@@ -165,7 +165,7 @@ end subroutine args_gs_init
 !!  args_gs(:)=<type(args_gs_type)>=args_gs datastructure
 !!
 !! PARENTS
-!!      gstateimg
+!!      gstateimg,mover_effpot
 !!
 !! CHILDREN
 !!

@@ -417,6 +417,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ixc=1
    dtsets(idtset)%ixc_sigma=1
    dtsets(idtset)%ixcpositron=1
+   dtsets(idtset)%ixcrot=3
 !  J
    dtsets(idtset)%f4of2_sla(:)=-one
    dtsets(idtset)%f6of2_sla(:)=-one
@@ -433,6 +434,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kssform=1
 !  L
    dtsets(idtset)%localrdwf=1
+
 #if defined HAVE_LOTF
    dtsets(idtset)%lotf_classic=5
    dtsets(idtset)%lotf_nitex=10
@@ -441,7 +443,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 #endif
 !  M
    dtsets(idtset)%magconon = 0
-   dtsets(idtset)%magcon_lambda = 10.0_dp
+   dtsets(idtset)%magcon_lambda = 0.01_dp
    dtsets(idtset)%max_ncpus = 0
    dtsets(idtset)%mbpt_sciss=zero
    dtsets(idtset)%mband = -1
@@ -707,6 +709,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
    dtsets(idtset)%tfw_toldfe=0.000001_dp
+   dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
    dtsets(idtset)%tl_radius = zero
    dtsets(idtset)%tphysel=zero
@@ -768,6 +771,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%vprtrb(1:2)=zero
 !  W
    dtsets(idtset)%wtatcon(:,:,:)=zero
+   dtsets(idtset)%wfmix=one
    dtsets(idtset)%wfk_task=0
    dtsets(idtset)%wtk=one
    dtsets(idtset)%wvl_crmult  = 6._dp

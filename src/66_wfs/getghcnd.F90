@@ -34,6 +34,7 @@
 !!      getghc
 !!
 !! CHILDREN
+!!      zhpmv
 !!
 !! NOTES
 !!  This routine applies the Hamiltonian due to an array of magnetic dipoles located

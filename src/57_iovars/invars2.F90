@@ -1316,6 +1316,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
  ixc_current=dtset%ixc
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixcrot',tread,'INT')
+ if(tread==1) dtset%ixcrot=intarr(1)
+
 !Read the ixc for an advanced functional
 !If present, and relevant (only specific values for gcalctyp), the other internal variable will be adjusted to this other functional)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_sigma',tread,'INT')
@@ -2213,6 +2216,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strprecon',tread,'DPR')
  if(tread==1) dtset%strprecon=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tim1rev',tread,'INT')
+ if (tread==1) dtset%tim1rev=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xc_denpos',tread,'DPR')
  if(tread==1) dtset%xc_denpos=dprarr(1)
 
@@ -2221,6 +2227,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,3*dtset%natsph_extra,string(1:lenstr),'xredsph_extra',tread,'DPR')
  if(tread==1) dtset%xredsph_extra=reshape(dprarr(1:3*dtset%natsph_extra), (/3,dtset%natsph_extra/))
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfmix',tread,'DPR')
+ if(tread==1) dtset%wfmix=dprarr(1)
+
 
 !WVL - Wavelets related values
 

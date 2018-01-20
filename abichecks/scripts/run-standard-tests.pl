@@ -365,7 +365,9 @@ $CODE_FFTPROF = "$timeout_cmd$CODE_FFTPROF";
 $CODE_PAR = '/usr/local/mpi-pgi4/bin/mpirun -np 2 -machinefile sleepy.pcpm.ucl.ac.be:2 ../../../src/98_main/abinit' ;      # run parallel version on sleepy
 $CODE_PAR = "$timeout_cmd$CODE_PAR";
 
-$INPUTDIR = &transpath("$CYGWIN$top_testdir/$TestDir/Input");		# input directory
+$SORTED_CMD = &perlpath("$PERL $top_testdir/scripts/Sort.sh");	# sorting lines for warningschk.py : t03 & t04
+
+$INPUTDIR = &transpath("$CYGWIN$top_testdir/$TestDir/Input");	# input directory
 $REF = &transpath("$top_testdir/$TestDir/Refs");		# reference directory
 $PSPS = &transpath("$CYGWIN$top_testdir/Psps_for_tests");	# pseudopotential directory
 $CHKINABI = &perlpath("$PERL $top_testdir/scripts/chkinabi.pl");  # relative paths
@@ -399,6 +401,7 @@ $FLDIFF = &perlpath("$PERL $top_testdir/scripts/fldiff.pl");	# to scripts direct
 # $REF or $PSPS.
 #   See the routine setfnopt for valid options
 #
+
 $CurTest = '';
 while (<CONF>) {
 	$linect ++;
@@ -2076,6 +2079,10 @@ sub dochkwarnings {
         else {
 		print "$CODE_WARNCHK $p1 > $logfn $REDIRECT_ERR" ;
                 system ("$CODE_WARNCHK $p1 > $logfn $REDIRECT_ERR");
+                if ( $p1 eq '3' or $p1 eq '4') {
+                    print "$SORTED_CMD $logfn" ;
+                    system ("$SORTED_CMD $logfn")
+                    }
                 }
         system ("grep -v SUCCESS $logfn > $outfn");
 # Compare with reference files

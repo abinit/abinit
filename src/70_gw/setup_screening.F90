@@ -22,7 +22,7 @@
 !!
 !! OUTPUT
 !! ngfft_gw(18)=Contain all needed information about the 3D FFT for the oscillator strengths.
-!!  See ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  See ~abinit/doc/variables/vargs.htm#ngfft
 !! Ltg_q(:)<littlegroup_t>,=
 !! Ep<em1params_t>=Parameters for the screening calculation.
 !!  Most part of it is Initialized and checked.

@@ -624,6 +624,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ixc                = dtin%ixc
  dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
+ dtout%ixcrot             = dtin%ixcrot
  dtout%jdtset             = dtin%jdtset
  dtout%jellslab           = dtin%jellslab
  dtout%kptopt             = dtin%kptopt
@@ -847,6 +848,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%symsigma           = dtin%symsigma
  dtout%td_mexcit          = dtin%td_mexcit
  dtout%tfkinfunc          = dtin%tfkinfunc
+ dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
@@ -1024,6 +1026,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%vdw_tol            = dtin%vdw_tol
  dtout%vdw_tol_3bt        = dtin%vdw_tol_3bt
  dtout%vis                = dtin%vis
+ dtout%wfmix              = dtin%wfmix
  dtout%wfk_task           = dtin%wfk_task
  dtout%wtq                = dtin%wtq
  dtout%wvl_hgrid          = dtin%wvl_hgrid
@@ -1078,6 +1081,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%lexexch, dtout%lexexch)
 
+ call alloc_copy( dtin%ldaminushalf, dtout%ldaminushalf)
+ 
  call alloc_copy( dtin%lpawu, dtout%lpawu)
 
  call alloc_copy( dtin%nband, dtout%nband)
@@ -1268,6 +1273,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%lexexch))     then
    ABI_DEALLOCATE(dtset%lexexch)
+ end if
+ if (allocated(dtset%ldaminushalf))     then
+   ABI_DEALLOCATE(dtset%ldaminushalf)
  end if
  if (allocated(dtset%lpawu))       then
    ABI_DEALLOCATE(dtset%lpawu)

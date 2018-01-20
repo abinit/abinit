@@ -23,7 +23,7 @@
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  ishift : if ==0, do not shift the xc grid (usual case); if ==1, shift the xc grid
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngrad : =1, only compute the density ; =2 also compute the
 !!      gradient of the density. Note : ngrad**2 is also used to dimension rhonow
 !!  nspden=number of spin-density components
