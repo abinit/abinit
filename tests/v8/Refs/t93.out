@@ -17,10 +17,10 @@
 .Starting date : Sat 28 Oct 2017.
 - ( at 17h09 )
   
-- input  file    -> t83.in
-- output file    -> t83.out
-- root for input  files -> t83i
-- root for output files -> t83o
+- input  file    -> t93.in
+- output file    -> t93.out
+- root for input  files -> t93i
+- root for output files -> t93o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -356,7 +356,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
  frms,max,avg= 2.9341065E-28 3.3880144E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t83o_DS1_EIG
+ prteigrs : about to open file t93o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.17519   Average Vxc (hartree)=  -0.33623
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 32, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)

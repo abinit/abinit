@@ -17,10 +17,10 @@
 .Starting date : Sat 28 Oct 2017.
 - ( at 17h09 )
   
-- input  file    -> t82.in
-- output file    -> t82.out
-- root for input  files -> t82i
-- root for output files -> t82o
+- input  file    -> t92.in
+- output file    -> t92.out
+- root for input  files -> t92i
+- root for output files -> t92o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -476,7 +476,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
  frms,max,avg= 1.0380086E-26 1.6262469E-26   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t82o_DS1_EIG
+ prteigrs : about to open file t92o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.17540   Average Vxc (hartree)=  -0.33628
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 16, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -533,7 +533,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t82o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t92o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
 
 ================================================================================
@@ -584,7 +584,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
  frms,max,avg= 3.8585701E-26 5.4208231E-26   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t82o_DS2_EIG
+ prteigrs : about to open file t92o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.17540   Average Vxc (hartree)=  -0.33628
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 32, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)

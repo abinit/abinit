@@ -1,4 +1,4 @@
-#### MnO AFM non-collinear spins along [111], atomic perturbation ixcrot=3
+#### MnO AFM non-collinear spins along [111], electric field perturbation, ixcrot=1
 
 nsym  1
 
@@ -46,20 +46,19 @@ spinat
 -5 -5 -5
 6*0
 
-# DFPT atomic perturbation
-ixcrot   3
-rfphon   1
-rfatpol  1 1
-irdwfk   1 
+# DFPT E-field
+ixcrot   1
+rfelfd   3
+irdddk   1
+irdwfk   1
 iscf     7
 tolvrs   1.0E-08
-rfdir    1 0 0
+rfdir    1 0 0 
 nqpt     1
 qpt      0.0 0.0 0.0
 nband    42
-nstep    12
+nstep    14
 prtwf    0
-prtpot   0
 
 # printing options
 prtden  0
@@ -69,15 +68,15 @@ prteig  0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t71.in, t72.in, t73.in, t74.in, t75.in, t76.in, t77.in, t78.in, t79.in, t80.in 
+#%% test_chain = t71.in, t72.in, t73.in, t74.in, t75.in, t76.in, t77.in, t78.in, t79.in, t80.in
 #%% [files]
 #%% files_to_test = 
-#%%    t80.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
+#%%    t75.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
 #%% psp_files = Mn-sp-r_LDA_1012_dojov0.4.psp8,O-r_LDA_1012_dojov0.4.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = E. Bousquet
 #%% keywords = DFPT, non-collinear, SOC
-#%% description = DFPT in non-collinear magnetism, atomic perturbation with ixcrot=3
+#%% description = DFPT in non-collinear magnetism, electric field perturbation with ixcrot=1
 #%%<END TEST_INFO>
