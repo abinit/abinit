@@ -25,7 +25,6 @@
 !! NOTES
 !!
 !! PARENTS
-!!      initberry
 !!
 !! CHILDREN
 !!
@@ -67,14 +66,14 @@
 
  calc_expibi(:,:) = zero
 
-!calc_expibi(2,my_natom)
-!used for PAW field calculations (distributed over atomic sites)
-!stores the on-site phase factors arising from
-!$\langle\phi_{i,k}|\phi_{j,k+\sigma_k k_k}\rangle$
-!where $\sigma = \pm 1$. These overlaps arise in various Berry
-!phase calculations of electric and magnetic polarization. The on-site
-!phase factor is $\exp[-i\sigma_k k_k)\cdot I]$ where
-!$I$ is the nuclear position. 
+ !calc_expibi(2,natom)
+ !used for PAW field calculations (distributed over atomic sites)
+ !stores the on-site phase factors arising from
+ !$\langle\phi_{i,k}|\phi_{j,k+\sigma_k k_k}\rangle$
+ !where $\sigma = \pm 1$. These overlaps arise in various Berry
+ !phase calculations of electric and magnetic polarization. The on-site
+ !phase factor is $\exp[-i\sigma_k k_k)\cdot I]$ where
+ !$I$ is the nuclear position. 
 
  do iatom = 1, natom
 
@@ -86,7 +85,7 @@
     calc_expibi(1,iatom) = cos(two_pi*bdotr)
     calc_expibi(2,iatom) = sin(two_pi*bdotr)
 
- end do ! end loop on my_natom
+ end do ! end loop on natom
 
 end subroutine expibi
 !!***

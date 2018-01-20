@@ -80,7 +80,7 @@ module m_orbmag
   real(dp) :: sdeg               ! spin degeneracy: sdeg = 2 if nsppol = 1
 
   ! Real(dp) arrays
-  real(dp) :: chern(3)           ! result of chern number calculation
+  real(dp) :: chern(2,3)           ! result of chern number calculation
   
   real(dp) :: dkvecs(3,3)        ! dkvec(:,idir) = vector between a k-poinit
                                  ! and its nearest neighbour along idir
