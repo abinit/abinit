@@ -66,7 +66,7 @@ prteig  0
 #%%    t71.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
 #%% psp_files = Mn-sp-r_LDA_1012_dojov0.4.psp8,O-r_LDA_1012_dojov0.4.psp8
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 8
 #%% [shell]
 #%% post_commands = ww_cp t71o_WFK t72i_WFK; ww_cp t71o_WFK t73i_WFK; ww_cp t71o_WFK t74i_WFK; ww_cp t71o_WFK t75i_WFK; ww_cp t71o_WFK t76i_WFK; ww_cp t71o_WFK t77i_WFK;  ww_cp t71o_WFK t78i_WFK;  ww_cp t71o_WFK t79i_WFK; ww_cp t71o_WFK t80i_WFK
 #%% [extra_info]
