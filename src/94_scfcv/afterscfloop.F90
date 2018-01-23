@@ -513,7 +513,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
  if(dtset%orbmag==1) then
     call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
-     &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,usecprj,psps%usepaw,xred)
+         &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+         &            usecprj,psps%usepaw,xred)
  end if
 
  call timab(252,2,tsec)

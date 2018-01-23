@@ -28,6 +28,9 @@
 !! pawang <type(pawang_type)>=paw angular mesh and related data
 !! pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !! pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!! pwind(pwind_alloc,2,3) = array used to compute
+!!           the overlap matrix smat between k-points (see initberry.f)
+!! pwind_alloc = first dimension of pwind
 !! usecprj=1 if cprj datastructure has been allocated
 !! usepaw=1 if PAW calculation
 !! xred(3,natom) = location of atoms in unit cell
@@ -54,7 +57,8 @@
 #include "abi_common.h"
 
 subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
-     &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,usecprj,usepaw,xred)
+     &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+     &            usecprj,usepaw,xred)
 
  use defs_basis
  use defs_abitypes
@@ -73,6 +77,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chern_number'
+ use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 
@@ -80,14 +85,14 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
 
 !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcg,mcprj,usecprj,usepaw
+ integer,intent(in) :: mcg,mcprj,pwind_alloc,usecprj,usepaw
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(in) :: mpi_enreg
  type(orbmag_type), intent(inout) :: dtorbmag
  type(pawang_type),intent(in) :: pawang
 
  !arrays
- integer,intent(in) :: atindx1(dtset%natom),npwarr(dtset%nkpt)
+ integer,intent(in) :: atindx1(dtset%natom),npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
@@ -95,19 +100,27 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,bsigma,epsabg,gdir,gsigma,ikpt,ikptb,ikptg,isppol,my_nspinor
- integer :: nn,nnp,nnpp,nband_k,ncpgr
- real(dp) :: bdelta,gdelta,tmpi,tmpr
+ integer :: adir,bdir,bpw,bsigma,epsabg,gdir,gpw,gsigma,icg,icgb,icgg
+ integer :: ikg,ikpt,ikptb,ikptg,ipw,isppol,my_nspinor
+ integer :: nn,nnp,nnpp,nband_k,ncpgr,npw_ka,npw_kb,npw_kg
+ real(dp) :: bdelta,doti,dotr,gdelta,tmpi,tmpr
  complex(dpc) :: c_nn_nnp,c_nnp_nnpp,c_nnpp_nn,cpaw
 
  !arrays
- integer,allocatable :: dimlmn(:),nattyp_dum(:)
+ integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kbg(:),pwind_kg(:)
  real(dp) :: dkb(3),dkg(3),dkbg(3),mdkg(3)
  real(dp),allocatable :: kkb_paw(:,:,:),kbkg_paw(:,:,:),kgk_paw(:,:,:)
+ real(dp),allocatable :: vecta(:,:),vectb(:,:),vectg(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
 
  ! ***********************************************************************
  ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+
+ ! TODO: generalize to nsppol > 1
+ isppol = 1
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ 
+ nband_k = dtorbmag%mband_occ
 
  if (usepaw == 1) then ! cprj allocation
     ncpgr = cprj(1,1)%ncpgr
@@ -124,12 +137,14 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
  ABI_ALLOCATE(kkb_paw,(2,dtset%mband,dtset%mband))
  ABI_ALLOCATE(kbkg_paw,(2,dtset%mband,dtset%mband))
  ABI_ALLOCATE(kgk_paw,(2,dtset%mband,dtset%mband))
+ ABI_ALLOCATE(vecta,(2,0:dtset%mpw*dtorbmag%nspinor))
+ ABI_ALLOCATE(vectb,(2,0:dtset%mpw*dtorbmag%nspinor))
+ ABI_ALLOCATE(vectg,(2,0:dtset%mpw*dtorbmag%nspinor))
+ ABI_ALLOCATE(pwind_kb,(dtset%mpw))
+ ABI_ALLOCATE(pwind_kbg,(dtset%mpw))
+ ABI_ALLOCATE(pwind_kg,(dtset%mpw))
+ vecta(:,0) = zero; vectb(:,0) = zero; vectg(:,0) = zero
 
- ! TODO: generalize to nsppol > 1
- isppol = 1
- my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- 
- nband_k = dtorbmag%mband_occ
 
  do adir = 1, 3
 
@@ -145,14 +160,20 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
           gdir = modulo(adir,3)+1
        end if
 
-       ! loop over kpts, assuming for now kptopt 3 and no parallelism
+       ! loop over kpts, assuming for now kptopt 3, nsppol = 1, nspinor = 1, no parallelism, no symmorphic symmetry elements
        do ikpt = 1, dtorbmag%fnkpt
+          icg = dtorbmag%cgindex(ikpt,isppol)
+          ikg = dtorbmag%fkgindex(ikpt)
+          npw_ka = npwarr(ikpt)
           call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,dtorbmag%cprjindex(ikpt,isppol),&
                & ikpt,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
                & my_nspinor,dtset%nsppol,0)
        
           do bsigma = -1, 1, 2
              ikptb = dtorbmag%ikpt_dk(ikpt,(bsigma+3)/2,bdir)
+             icgb = dtorbmag%cgindex(ikptb,isppol)
+             npw_kb = npwarr(ikptb)
+             pwind_kb(1:npw_ka) = pwind(ikg+1:ikg+npw_ka,(bsigma+3)/2,bdir)
              dkb = bsigma*dtorbmag%dkvecs(1:3,bdir)
              bdelta = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
              call pawcprj_get(atindx1,cprj_kb,cprj,dtset%natom,1,dtorbmag%cprjindex(ikptb,isppol),&
@@ -164,6 +185,9 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
 
              do gsigma = -1, 1, 2
                 ikptg = dtorbmag%ikpt_dk(ikpt,(gsigma+3)/2,gdir)
+                icgg = dtorbmag%cgindex(ikptg,isppol)
+                npw_kg = npwarr(ikptg)
+                pwind_kg(1:npw_ka) = pwind(ikg+1:ikg+npw_ka,(gsigma+3)/2,gdir)
                 dkg = gsigma*dtorbmag%dkvecs(1:3,gdir)
                 gdelta = sqrt(DOT_PRODUCT(dkg,MATMUL(gmet,dkg)))
                 call pawcprj_get(atindx1,cprj_kg,cprj,dtset%natom,1,dtorbmag%cprjindex(ikptg,isppol),&
@@ -179,12 +203,31 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
                      & dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
                 do nn = 1, dtorbmag%mband_occ
+                   vecta(1:2,1:npw_ka) = cg(1:2,icg+(nn-1)*npw_ka+1:icg+nn*npw_ka)
                    do nnp = 1, dtorbmag%mband_occ
-                      c_nn_nnp = cmplx(kkb_paw(1,nn,nnp),kkb_paw(2,nn,nnp))
+                      vectb(1:2,1:npw_kb) = cg(1:2,icgb+(nnp-1)*npw_kb+1:icg+nnp*npw_kb)
+
+                      call overlap_g(doti,dotr,dtset%mpw,npw_ka,npw_kb,1,pwind_kb,vecta,vectb)
+!                      dotr=zero;doti=zero
+                      c_nn_nnp = cmplx(dotr+kkb_paw(1,nn,nnp),doti+kkb_paw(2,nn,nnp))
                    
                       do nnpp = 1, dtorbmag%mband_occ
-                         c_nnp_nnpp = cmplx(kbkg_paw(1,nnp,nnpp),kbkg_paw(2,nnp,nnpp))
-                         c_nnpp_nn = cmplx(kgk_paw(1,nnpp,nn),kgk_paw(2,nnpp,nn))
+                         vectg(1:2,1:npw_kg) = cg(1:2,icgg+(nnpp-1)*npw_kg+1:icg+nnpp*npw_kg)
+
+!                         call overlap_g(doti,dotr,dtset%mpw,npw_kb,npw_kg,1,pwind_kb,vectb,vectg)
+                         dotr=zero;doti=zero
+                         do ipw = 1, npw_ka
+                            bpw = pwind_kb(ipw)
+                            gpw = pwind_kg(ipw)
+                            dotr = dotr + vectb(1,bpw)*vectg(1,gpw)-vectb(2,bpw)*vectg(2,gpw)
+                            doti = doti + vectb(1,bpw)*vectg(2,gpw)+vectb(2,bpw)*vectg(1,gpw)
+                         end do
+                         c_nnp_nnpp = cmplx(kbkg_paw(1,nnp,nnpp)+dotr,kbkg_paw(2,nnp,nnpp)+doti)
+
+                         call overlap_g(doti,dotr,dtset%mpw,npw_ka,npw_kg,1,pwind_kg,vecta,vectg)
+!                         dotr=zero;doti=zero
+                         c_nnpp_nn = cmplx(kgk_paw(1,nnpp,nn)+dotr,kgk_paw(2,nnpp,nn)-doti)
+
                          cpaw = epsabg * bsigma * gsigma * c_nn_nnp * c_nnp_nnpp * c_nnpp_nn/(2.0*bdelta*2.0*gdelta)
                          dtorbmag%chern(1,adir) = dtorbmag%chern(1,adir) + real(cpaw)
                          dtorbmag%chern(2,adir) = dtorbmag%chern(2,adir) + aimag(cpaw)
@@ -292,6 +335,12 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
  ABI_DEALLOCATE(kkb_paw)
  ABI_DEALLOCATE(kbkg_paw)
  ABI_DEALLOCATE(kgk_paw)
+ ABI_DEALLOCATE(vecta)
+ ABI_DEALLOCATE(vectb)
+ ABI_DEALLOCATE(vectg)
+ ABI_DEALLOCATE(pwind_kb)
+ ABI_DEALLOCATE(pwind_kbg)
+ ABI_DEALLOCATE(pwind_kg)
 
 end subroutine chern_number
 !!***
