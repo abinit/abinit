@@ -67,8 +67,8 @@
 !!      pspheads_comm,pspini,pw_orthon,rayleigh_ritz,recursion,recursion_nl
 !!      respfn,rhotov,rhotoxc,rwwf,scfcv,screening,setsym,setvtr,sigma
 !!      sqnormm_v,status,stress,strhar,suscep_stat,susk,suskmm,symrhg,symsgcube
-!!      tddft,timana,vn_nl_rec,vtorho,vtorhorec,vtorhotf,vtowfk,wfconv
-!!      wfk_analyze,wfsinp,wvl_nhatgrid,xcden,xcpot
+!!      tddft,timana,vn_nl_rec,vtorho,vtorhorec,vtorhotf,vtowfk,wf_mixing
+!!      wfconv,wfk_analyze,wfsinp,wvl_nhatgrid,xcden,xcpot
 !!
 !! CHILDREN
 !!      papif_flops,papif_perror,timein

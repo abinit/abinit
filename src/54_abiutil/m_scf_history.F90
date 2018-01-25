@@ -207,7 +207,7 @@ CONTAINS !===========================================================
 !!    The wfs arrays that are possibly allocated are : cg and cprj
 !!
 !! PARENTS
-!!      gstate
+!!      gstate,scfcv
 !!
 !! CHILDREN
 !!
@@ -335,7 +335,7 @@ end subroutine scf_history_init
 !!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
 !!
 !! PARENTS
-!!      gstateimg
+!!      gstateimg,scfcv
 !!
 !! CHILDREN
 !!

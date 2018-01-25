@@ -68,7 +68,7 @@
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!
 !! PARENTS
-!!      afterscfloop,energy,gstate,respfn,vtorho
+!!      afterscfloop,energy,gstate,respfn,scfcv,vtorho
 !!
 !! CHILDREN
 !!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn

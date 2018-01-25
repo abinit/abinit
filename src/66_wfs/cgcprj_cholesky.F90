@@ -42,8 +42,10 @@
 !!  cprj_k(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors for the specific k point and spinpol
 !!
 !! PARENTS
+!!      wf_mixing
 !!
 !! CHILDREN
+!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
 !!
 !! SOURCE
 

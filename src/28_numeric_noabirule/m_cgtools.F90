@@ -1291,9 +1291,10 @@ end subroutine sqnorm_g
 !!
 !! PARENTS
 !!      cgwf,chebfi,corrmetalwf1,d2frnl,dfpt_cgwf,dfpt_nsteltwf,dfpt_nstpaw
-!!      dfpt_nstwf,dfpt_vtowfk,dfpt_wfkfermi,dfptnl_resp,eig2stern,extrapwf
-!!      fock2ACE,fock_ACE_getghc,fock_getghc,m_efmas,m_gkk,m_phgamma,m_phpi
-!!      m_rf2,m_sigmaph,mkresi,nonlop_gpu,nonlop_test,rf2_init
+!!      dfpt_nstwf,dfpt_vtowfk,dfpt_wfkfermi,dfptnl_resp,dotprod_set_cgcprj
+!!      dotprodm_sumdiag_cgcprj,eig2stern,extrapwf,fock2ACE,fock_ACE_getghc
+!!      fock_getghc,m_efmas,m_gkk,m_phgamma,m_phpi,m_rf2,m_sigmaph,mkresi
+!!      nonlop_gpu,nonlop_test,rf2_init
 !!
 !! CHILDREN
 !!

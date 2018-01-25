@@ -59,8 +59,10 @@
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      wf_mixing
 !!
 !! CHILDREN
+!!      dotprod_g,pawcprj_alloc,pawcprj_free,pawcprj_get
 !!
 !! SOURCE
 

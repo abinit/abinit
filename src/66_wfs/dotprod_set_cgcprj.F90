@@ -61,8 +61,10 @@
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      cgcprj_cholesky,wf_mixing
 !!
 !! CHILDREN
+!!      dotprod_g,pawcprj_alloc,pawcprj_free,pawcprj_get,zhpev
 !!
 !! SOURCE
 

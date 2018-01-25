@@ -47,7 +47,7 @@
 !!          Sum_{n,k} {occ(n,k)*conjugate[cprj_nk(ii)].cprj_nk(jj)} (non symetrized)
 !!
 !! PARENTS
-!!      afterscfloop,vtorho
+!!      afterscfloop,scfcv,vtorho
 !!
 !! CHILDREN
 !!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawcprj_get

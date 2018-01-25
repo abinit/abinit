@@ -55,7 +55,7 @@
 !!
 !! PARENTS
 !!      dfpt_looppert,energy,fourier_interpol,getgh1c,gstate,ks_ddiago,m_io_kss
-!!      pawmkrho,respfn,vtorho,vtorhorec
+!!      pawmkrho,respfn,scfcv,vtorho,vtorhorec
 !!
 !! CHILDREN
 !!      fourdp,indirect_parallel_fourier,zerosym

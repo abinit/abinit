@@ -55,8 +55,10 @@
 !!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors 
 !!
 !! PARENTS
+!!      cgcprj_cholesky,wf_mixing
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_lincom,zgemm
 !!
 !! SOURCE
 
