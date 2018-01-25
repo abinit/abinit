@@ -10,7 +10,7 @@
 !!  (3) pseudo-core contribution to stress tensor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2016 ABINIT group (MT,TRangel)
+!!  Copyright (C) 2016-2017 ABINIT group (MT,TRangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

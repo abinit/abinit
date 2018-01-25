@@ -8,7 +8,7 @@
 !!  Namely, the electrical dipole, quadrupole, etc... of the electron density
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MJV,MT)
+!! Copyright (C) 2010-2017 ABINIT group (MJV,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
