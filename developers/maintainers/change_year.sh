@@ -13,7 +13,7 @@
 # developers/maintainers/change_year.sh */*/*.dep */*/*.dir */*.env */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
 # developers/maintainers/change_year.sh */*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*/html */*/*/*.log */*/*.m */*/*/*.m */*/make* 
 # developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/Makefile */*/*/*.out */*/*.pl */*/*/*.pl */README */*/README 
-# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*.txt */*/*_ */*/*/*.yml
+# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*_ */*/*/*.yml
 
 # Please do not change the permission of py files. Not all py modules must be executable! So, the following command should be used simply to see whether the copyright date has to be changed ... and if not,
 # please, restart from the previous version, and if yes, do it by hand !
@@ -35,7 +35,7 @@
 # and treat by hand the remaining files ...
 #
 #XG 100118 Still other problems with copyrights might be detected by using the following command (replace 2018 by the present year !):
-# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2017 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui'
+# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2018 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui' | grep -v 'default' | grep -v js_files
 
 for file in "$@"
 do
