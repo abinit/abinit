@@ -7,7 +7,7 @@
 !! Fourier transform the real space UPF projector functions to reciprocal space
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MJV)
+!! Copyright (C) 1998-2018 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

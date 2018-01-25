@@ -9,7 +9,7 @@
 !!  [see for example Na Sai et al., PRB 66, 104108 (2002)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (MVeithen)
+!! Copyright (C) 2003-2018 ABINIT  group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

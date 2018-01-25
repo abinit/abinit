@@ -7,7 +7,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

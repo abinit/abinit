@@ -9,7 +9,7 @@
 !! Different algorithms are implemented, depending on the value of wfmixalg.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG,MT,FJ)
+!! Copyright (C) 2017-2018 ABINIT group (XG,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

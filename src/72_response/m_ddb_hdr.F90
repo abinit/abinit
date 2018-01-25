@@ -8,7 +8,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
+!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2514,7 +2514,7 @@ end subroutine ddb_chkname
 !! as well as psp information.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MT,GA)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MT,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

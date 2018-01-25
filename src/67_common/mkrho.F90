@@ -14,7 +14,7 @@
 !!   from input wavefunctions, band occupations, and k point wts.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
