@@ -10,8 +10,10 @@
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.am */*/*.bat */*/*/*.bat */*/*.c */*/*/*.c */*/*.cf */*/*.cnf */*/*.com */*/*.conf */*/*.cu */*/*.csh 
-# developers/maintainers/change_year.sh */*/*.dep */*/*.dir */*.env */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in */*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*.log */*/*.m */*/*/*.m */*/make* 
-# developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/Makefile */*/*/*.out */*/*.pl */*/*/*.pl */README */*/README */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*.txt */*/*_ 
+# developers/maintainers/change_year.sh */*/*.dep */*/*.dir */*.env */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
+# developers/maintainers/change_year.sh */*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*/html */*/*/*.log */*/*.m */*/*/*.m */*/make* 
+# developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/Makefile */*/*/*.out */*/*.pl */*/*/*.pl */README */*/README 
+# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*.txt */*/*_ */*/*/*.yml
 
 # Please do not change the permission of py files. Not all py modules must be executable! So, the following command should be used simply to see whether the copyright date has to be changed ... and if not,
 # please, restart from the previous version, and if yes, do it by hand !
