@@ -392,7 +392,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
 !  LOBPCG and ChebFi need paral_kgb=1 in parallel
-   if (nproc>1.and.(mod(dtsets(idtset)%wfoptalg,10)==1.or.mod(dtsets(idtset)%wfoptalg,10)==4)) then
+   if ((dtsets(idtset)%npband*dtsets(idtset)%npfft>1).and. &
+&      (mod(dtsets(idtset)%wfoptalg,10)==1.or.mod(dtsets(idtset)%wfoptalg,10)==4)) then
      dtsets(idtset)%paral_kgb=1
    end if
 
