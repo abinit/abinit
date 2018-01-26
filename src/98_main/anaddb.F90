@@ -250,7 +250,10 @@ program anaddb
  ! In the new version asrq0%d2asr is always computed if the Gamma block is present
  ! and this causes changes in [v5][t28]
  if (.not. (inp%ifcflag==0 .or. inp%instrflag/=0 .or. inp%elaflag/=0)) then
-   asrq0%d2asr = zero; asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
+   asrq0%d2asr = zero
+   if (asrq0%asr==3.or.asrq0%asr==4) then
+     asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
+   end if
  end if
 
  ! Open the netcdf file that will contain the anaddb results
