@@ -530,7 +530,7 @@ implicit none
 !    wover2t= hbar*w / 2kT dimensionless
      wover2t = zero;     if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
      ! should not be much of a problem for the log, but still put a check.
-     ln2shx=zero;        if (wover2t > tol16 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t)) 
+     ln2shx=zero;        if (wover2t > tol16 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t))
      cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t)
      invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
@@ -729,7 +729,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  integer :: nprocs, my_rank
  integer :: ncid
  real(dp) :: nsmallq
- real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
+ real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ !,pnorm
  real(dp) :: upr_bound,xx,gaussmaxarg
  real(dp) :: max_smallq = 0.0625_dp
  real(dp) :: normq
@@ -794,7 +794,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
  ABI_MALLOC(PHdos%atom_mass, (natom))
  PHdos%atom_mass(:) = Crystal%amu(Crystal%typat(:))*amu_emass
- 
+
 
 ! these arrays are independent of nqibz
  ABI_MALLOC(PHdos%omega, (nomega))
@@ -975,11 +975,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
                do iat=1,natom
                  msqd_atom_tmp = zero
                  do idir=1,3
+                   ! old version without symmetrization
                    !pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
-
-                   pjdos_tmp(:,idir,iat) = eigvec(:,idir,iat,imode)*wtqibz(iq_ibz)*gaussval ! * pnorm
-
                    !PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
+
+                   pjdos_tmp(:,idir,iat) = eigvec(:,idir,iat,imode)* sqrt(wtqibz(iq_ibz)*gaussval) ! * pnorm
 
                    ! accumulate outer product of displacement vectors
                    do jdir=1,3
@@ -1096,12 +1096,23 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
        do iq_ibz=1,PHdos%nqibz
          PHdos%phdos(io)=PHdos%phdos(io)+dtweightde(iq_ibz,io)
          PHdos%phdos_int(io)=PHdos%phdos_int(io)+tweight(iq_ibz,io)
+         pjdos_tmp = full_eigvec(:,:,:,imode,iq_ibz)
+
          do iat=1,natom
+           do isym=1, crystal%nsym
+             jat = Crystal%indsym(4,isym,iat)
+             PHdos%pjdos(io,:,jat)=PHdos%pjdos(io,:,jat)+ ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
+&                                                         (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * dtweightde(iq_ibz,io)
+
+             PHdos%pjdos_int(io,:,jat)=PHdos%pjdos_int(io,:,jat)+ ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
+&                                                          (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * tweight(iq_ibz,io)
+           end do
+
            msqd_atom_tmp = zero
            do idir=1,3
-             pnorm=full_eigvec(1,idir,iat,imode,iq_ibz)**2 + full_eigvec(2,idir,iat,imode,iq_ibz)**2
-             PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat) + pnorm*dtweightde(iq_ibz,io)
-             PHdos%pjdos_int(io,idir,iat)=PHdos%pjdos_int(io,idir,iat) + pnorm*tweight(iq_ibz,io)
+             !pnorm=full_eigvec(1,idir,iat,imode,iq_ibz)**2 + full_eigvec(2,idir,iat,imode,iq_ibz)**2
+             !PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat) + pnorm*dtweightde(iq_ibz,io)
+             !PHdos%pjdos_int(io,idir,iat)=PHdos%pjdos_int(io,idir,iat) + pnorm*tweight(iq_ibz,io)
 
              ! accumulate outer product of displacement vectors
              do jdir=1,3
@@ -1131,16 +1142,18 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    do iat = 1, natom
      full_eigvec(:,:,iat,:,:) = full_eigvec(:,:,iat,:,:)/sqrt(PHdos%atom_mass(iat))
    end do
+   if (my_rank == master) then
 #ifdef HAVE_NETCDF
-   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
-   NCF_CHECK(crystal_ncwrite(Crystal, ncid))
-   call phonons_ncwrite(ncid,natom,PHdos%nqibz, qibz, wtqibz, full_phfrq, full_eigvec)
-   NCF_CHECK(nf90_close(ncid))
+     ! TODO: should pass prefix as arg.
+     NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
+     NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+     call phonons_ncwrite(ncid,natom,PHdos%nqibz, qibz, wtqibz, full_phfrq, full_eigvec)
+     NCF_CHECK(nf90_close(ncid))
+   end if
 #endif
 
 ! immediately free this - it contains displ and not eigvec at this stage
    ABI_FREE(full_eigvec)
-
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
    ABI_FREE(tweight)
@@ -1151,7 +1164,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    write (msg, '(a)') 'The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations'
    MSG_WARNING (msg)
 #endif
-
  end if ! prtdos 2 = tetrahedra
 
 ! normalize by nsym : symmetrization is used in all prtdos cases
@@ -1266,7 +1278,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  real(dp) :: temperature_K, temperature, modesign, sigma, freeze_displ
 
 !arrays
- integer, allocatable :: modeindex(:) 
+ integer, allocatable :: modeindex(:)
  real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
  real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
  real(dp), allocatable :: phfrq_allq(:), phdispl_allq(:,:,:,:,:)
@@ -1291,10 +1303,10 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  !(use no syms for the moment!)
  qptopt1 = 3
 
- ! for the moment do not allow shifted q grids. 
+ ! for the moment do not allow shifted q grids.
  ! We are interpolating anyway, so it will always work
  ABI_MALLOC(qshft,(3,1))
- qshft(:,1)=zero 
+ qshft(:,1)=zero
 
  ! This call will set nqibz, IBZ and BZ arrays
  call kpts_ibz_from_kptrlatt(crystal, rlatt, qptopt1, 1, qshft, &
@@ -1349,13 +1361,13 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
    ! skip modes with too low or negative frequency -> Bose factor explodes (eg acoustic at Gamma)
    if (phfrq_allq(imode) < tol10) cycle
 
-   iq = ceiling(dble(modeindex(imode))/dble(3*Crystal%natom)) 
-   jmode = modeindex(imode) - (iq-1)*3*Crystal%natom 
+   iq = ceiling(dble(modeindex(imode))/dble(3*Crystal%natom))
+   jmode = modeindex(imode) - (iq-1)*3*Crystal%natom
    phdispl1 = phdispl_allq(:,:,:,jmode,iq)
 
    ! loop over temperatures
    do itemper = 1, ntemper
-     temperature_K = tempermin + dble(itemper-1)*temperinc  ! this is in Kelvin 
+     temperature_K = tempermin + dble(itemper-1)*temperinc  ! this is in Kelvin
      temperature = temperature_K / Ha_K !=315774.65_dp
 
      ! trick supercell object into using present q point
@@ -1364,14 +1376,14 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
      ! find thermal displacement amplitude eq 4 of Zacharias
      !   combined with l_nu,q expression in paragraph before
      sigma = sqrt( (bose_einstein(phfrq_allq(imode), temperature) + half)/phfrq_allq(imode) )
-     
+
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
      freeze_displ = modesign * sigma
      call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
    end do !itemper
 
    ! this is the prescription: flip sign for each successive mode in full
-   ! spectrum, to cancel electron phonon coupling to 1st order 
+   ! spectrum, to cancel electron phonon coupling to 1st order
    ! (hopeflly 3rd order as well)
    modesign=-modesign
 
@@ -1495,7 +1507,7 @@ subroutine thermal_supercell_print(fname, ntemper, tempermin, temperinc, thm_sce
    write (temper_str,'(I8)') int(temper)
    write (filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
    write (title1, '(3a)') "#  thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
-   title2 = "#  generated with alternating thermal displacements of all phonons" 
+   title2 = "#  generated with alternating thermal displacements of all phonons"
    call prt_supercell (filename, thm_scells(itemp), title1, title2)
  end do
 
@@ -1673,7 +1685,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  real(dp) :: cfact
  character(500) :: msg
  character(len=8) :: unitname
-   
+
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer :: nomega, imode, iomega
@@ -1916,7 +1928,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      write(unt,*)
    end do
    close(unt)
-  
+
 
    ABI_FREE(weights)
  end if
@@ -2030,7 +2042,7 @@ end subroutine phdos_calc_vsound
 !!
 !! INPUTS
 !! unit=Fortran unit number
-!! speedofsound(3) 
+!! speedofsound(3)
 !!
 !! OUTPUT
 !!
