@@ -355,8 +355,7 @@ end subroutine dtset_chkneu
 !!  dtout <type(dataset_type)>
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian
-!!      m_io_kss,m_kxc,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_io_kss
 !!
 !! CHILDREN
 !!
@@ -411,6 +410,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%accuracy           = dtin%accuracy
  dtout%adpimd             = dtin%adpimd
  dtout%autoparal          = dtin%autoparal
+ dtout%auxc_ixc           = dtin%auxc_ixc
+ dtout%auxc_scal          = dtin%auxc_scal
  dtout%awtr               = dtin%awtr
  dtout%bandpp             = dtin%bandpp
  dtout%bdeigrf            = dtin%bdeigrf
@@ -423,11 +424,11 @@ subroutine dtset_copy(dtout, dtin)
  dtout%cd_customnimfrqs   = dtin%cd_customnimfrqs
  dtout%cd_frqim_method    = dtin%cd_frqim_method
  dtout%cd_full_grid       = dtin%cd_full_grid
+ dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%cineb_start        = dtin%cineb_start
- dtout%cgtyphf            = dtin%cgtyphf
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -511,6 +512,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fockdownsampling  = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
@@ -555,7 +557,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
- dtout%gwfockmix          = dtin%gwfockmix
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -582,6 +583,10 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwls_correlation     = dtin%gwls_correlation
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
+ dtout%hyb_mixing      = dtin%hyb_mixing
+ dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
+ dtout%hyb_range_dft   = dtin%hyb_range_dft
+ dtout%hyb_range_fock  = dtin%hyb_range_fock
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -617,6 +622,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
  dtout%ixc                = dtin%ixc
+ dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
  dtout%jdtset             = dtin%jdtset
  dtout%jellslab           = dtin%jellslab
@@ -1073,6 +1079,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%lexexch, dtout%lexexch)
 
+ call alloc_copy( dtin%ldaminushalf, dtout%ldaminushalf)
+ 
  call alloc_copy( dtin%lpawu, dtout%lpawu)
 
  call alloc_copy( dtin%nband, dtout%nband)
@@ -1133,6 +1141,8 @@ subroutine dtset_copy(dtout, dtin)
  call alloc_copy( dtin%kptgw, dtout%kptgw)
 
  call alloc_copy( dtin%kptns, dtout%kptns)
+
+ call alloc_copy( dtin%kptns_hf, dtout%kptns_hf)
 
  call alloc_copy( dtin%mixalch_orig, dtout%mixalch_orig)
 
@@ -1203,8 +1213,8 @@ end subroutine dtset_copy
 !!  dtset <type(dataset_type)>=free all allocated allocatable.
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian
-!!      m_ab7_invars_f90,m_io_kss,m_kxc,mover_effpot,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_ab7_invars_f90,m_io_kss
+!!      mover_effpot
 !!
 !! CHILDREN
 !!
@@ -1261,6 +1271,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%lexexch))     then
    ABI_DEALLOCATE(dtset%lexexch)
+ end if
+ if (allocated(dtset%ldaminushalf))     then
+   ABI_DEALLOCATE(dtset%ldaminushalf)
  end if
  if (allocated(dtset%lpawu))       then
    ABI_DEALLOCATE(dtset%lpawu)
@@ -1362,6 +1375,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%kptns))       then
    ABI_DEALLOCATE(dtset%kptns)
+ end if
+ if (allocated(dtset%kptns_hf))       then
+   ABI_DEALLOCATE(dtset%kptns_hf)
  end if
  if (allocated(dtset%mixalch_orig))     then
    ABI_DEALLOCATE(dtset%mixalch_orig)

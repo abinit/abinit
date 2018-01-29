@@ -27,7 +27,7 @@
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!   see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!   see ~abinit/doc/variables/vargs.htm#ngfft
 !!  frin(nfft)=real space input function
 !!
 !! OUTPUT
@@ -37,7 +37,7 @@
 !!      dfpt_eltfrxc
 !!
 !! CHILDREN
-!!      fourdp,timab
+!!      fourdp
 !!
 !! SOURCE
 
@@ -58,7 +58,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'redgr'
- use interfaces_18_timing
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -107,9 +106,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Obtain rho(G) in wkcmpx from input rho(r)
  work(:)=frin(:)
 
- call timab(82,1,tsec)
  call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
- call timab(82,2,tsec)
 
 !Gradient calculation for three reduced components in turn.
 !Code duplicated to remove logic from loops.
@@ -155,9 +152,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
      end do
    end if !idir
 
-   call timab(82,1,tsec)
    call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-   call timab(82,2,tsec)
 
 !$OMP PARALLEL DO 
    do ifft=1,nfft

@@ -24,10 +24,10 @@
 !! PARENTS
 !!      berryphase,chkdilatmx,conducti_nc,ddb_hybrid,dfpt_mkvxc,dfpt_mkvxcstr
 !!      dfpt_symph,electrooptic,ep_el_weights,ep_fs_weights,ep_ph_weights
-!!      fock_getghc,get_kpt_fullbz,getghcnd,getkgrid,getspinrot,gstate
-!!      harmonic_thermo,invars2,inwffil,m_cut3d,m_ddb,m_ddk,m_double_grid
-!!      m_dynmat,m_effective_potential,m_esymm,m_ewald,m_fock,m_fstab,m_ifc
-!!      m_pimd,m_psps,m_strain,m_supercell,make_efg_el,make_efg_ion,metric
+!!      fock_getghc,get_kpt_fullbz,getkgrid,getspinrot,gstate,harmonic_thermo
+!!      invars2,inwffil,m_cut3d,m_ddb,m_ddk,m_double_grid,m_dynmat
+!!      m_effective_potential,m_esymm,m_ewald,m_fock,m_fstab,m_ifc,m_pimd
+!!      m_psps,m_strain,m_supercell,m_tdep_latt,make_efg_el,make_efg_ion,metric
 !!      mover,optic,outwant,pimd_langevin_npt,prtxf,relaxpol,respfn,smpbz
 !!      stresssym,symbrav,symlatt,symmetrize_rprimd,symrelrot,symrhg,tddft
 !!      testkgrid,thmeig,uderiv,xcart2xred,xfpack_x2vin

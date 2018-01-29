@@ -99,7 +99,7 @@ to obtain the Fermi velocities for the transport calculations in
 </p>
 <p>
 Once these are done, abinit calculates the wave functions on the full grid of
-k-points (using <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>=3)
+k-points (using <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>=3)
 in DS 6: these will be used to calculate the electron-phonon matrix elements.
 In a full calculation the density of k-points should be increased significantly
 here and for the following datasets.  For DS 1-5 only the normal convergence of
@@ -111,16 +111,16 @@ version 7.6.
 </p>
 <p>
 The important variable for electron-phonon coupling calculations is 
-      <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a>
+      <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a>
 	This prints out files suffixed GKK,
 which contain the electron-phonon matrix elements. The matrix elements only
 depend on the self-consistent perturbed density (files suffixed 1DENx), which
-we get from DS 2-4 (linked by variable <a href="../../input_variables/generated_files/varset_files.html#get1den">get1den</a>).
+we get from DS 2-4 (linked by variable <a href="../../variables/generated_files/varset_files.html#get1den">get1den</a>).
 	These can therefore be calculated on
 arbitrarily dense k-point meshes. Even better, only a single step is needed,
 since no self-consistency is required. To enforce the calculation of all the
 matrix elements on all k-points, symmetries are disabled when 
-       <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a>
+       <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a>
 	is set to 1, so be sure not to use it during
 the normal self-consistent phonon runs DS 2-4. Again this is very different
 from versions before 7.6.
@@ -137,9 +137,9 @@ convergence on your own.
 </p>
 <p>
 Edit the file teph_1.in. We now examine several variables.
-The kinetic energy cutoff <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+The kinetic energy cutoff <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>
 	is a bit low, and the number of k-points
-(determined by <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>) is much too low. Electron-phonon calculations
+(determined by <a href="../../variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>) is much too low. Electron-phonon calculations
 require a very precise determination of the Fermi surface of the metal. This
 implies a very dense k-point mesh, and the convergence of the grid must be
 checked. In our case, for Al, we will use a (non-shifted) 4x4x4 k-point grid,
@@ -150,7 +150,7 @@ contain the &Gamma; point.
 </p>
 
 <p>
-The value of <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
+The value of <a href="../../variables/generated_files/varset_basic.html#acell">acell</a>
 	is fixed to a rounded value from experiment.
 It, too, should be converged to get physical results (see <a
 	href="lesson_base3.html"
@@ -158,14 +158,14 @@ It, too, should be converged to get physical results (see <a
 </p>
 
 <p> 
-Note that the value of 1.0E-14 for <a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>
+Note that the value of 1.0E-14 for <a href="../../variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>
 	is tight, and should be even lower (down to
 1.0E-20 or even 1.0E-22). This is because the wavefunctions will be used later
 explicitly in the matrix elements for ANADDB, as opposed to only energy values
 or densities, which are averages of the wavefunctions and eigenenergies over
 k-points and bands. Electron-phonon quantities are delicate sums of a few of
 these small matrix elements (those near the Fermi surface), so each matrix
-element must be accurate. You can however set <a href="../../input_variables/generated_files/varset_files.html#prtwf">prtwf</a>
+element must be accurate. You can however set <a href="../../variables/generated_files/varset_files.html#prtwf">prtwf</a>
 	to 0 in the phonon calculations,
 and avoid saving huge perturbed wavefunction files to disk (you only need to keep
 the ground state wave functions, with prtwf1 1).
@@ -305,16 +305,16 @@ qpath
  1/2 1/2 1/2
 
 # Coulomb pseudopotential parameter
-mustar 0.136</pre> <a href="../../input_variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a> is a flag to turn on the calculation of the
+mustar 0.136</pre> <a href="../../variables/generated_files/varset_anaddb.html#elphflag@anaddb">elphflag</a> is a flag to turn on the calculation of the
 electron-phonon quantities. The first quantities which will be calculated are
 the phonon linewidths along a path in reciprocal space (exactly like the band
 structure in <a
 	href="lesson_base3.html#35"
 	target="kwimg">Lesson 3.5</a>). The path is specified by the variable
-<a href="../../input_variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath</a> giving the apexes of the path in reciprocal
+<a href="../../variables/generated_files/varset_anaddb.html#qpath@anaddb">qpath</a> giving the apexes of the path in reciprocal
 space, which are usually special points of high symmetry. The number of points
-is given by <a href="../../input_variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath</a>. Note that qpath can be used in normal phonon
-band structure calculations as well, provided that <a href="../../input_variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a> is omitted from the
+is given by <a href="../../variables/generated_files/varset_anaddb.html#nqpath@anaddb">nqpath</a>. Note that qpath can be used in normal phonon
+band structure calculations as well, provided that <a href="../../variables/generated_files/varset_anaddb.html#qph1l@anaddb">qph1l</a> is omitted from the
 input file (the latter overrides qpath). The phonon linewidths are printed to a file
 suffixed _LWD.</p>
 
@@ -334,7 +334,7 @@ global coupling strength, or mass renormalization factor, &lambda;. From
 (1968)</i>) as modified by Allen and Dynes (<i>Phys. Rev. B <b>12</b> 905
 (1975)</i>), ANADDB calculates the critical temperature for superconductivity.
 The formula contains an adjustable parameter &mu;* which approximates the effect
-of Coulomb interactions, and is given by the input variable <a href="../../input_variables/generated_files/varset_anaddb.html#mustar@anaddb">mustar</a>. For Al with the k-point grid given and a
+of Coulomb interactions, and is given by the input variable <a href="../../variables/generated_files/varset_anaddb.html#mustar@anaddb">mustar</a>. For Al with the k-point grid given and a
 value of &mu;=0.136 the ANADDB output file shows the following values
 <pre>
  mka2f: lambda &lt;omega^2&gt; =     8.891284E-07
@@ -362,16 +362,16 @@ method for integration on the Fermi surface, which employs a smearing of the
 DOS and attributes Gaussian weights to each k-point as a function of its
 distance from the Fermi surface. Another efficient method of integration in
 k-space is the tetrahedron method, which is also implemented in ANADDB, and can
-be used by setting <a href="../../input_variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a> = 0. In this case the k-point grid must be
-specified explicitly in the input, repeating the variable <a href="../../input_variables/generated_files/varset_anaddb.html#kptrlatt@anaddb">kptrlatt</a> from the ABINIT output, so that ANADDB can
+be used by setting <a href="../../variables/generated_files/varset_anaddb.html#telphint@anaddb">telphint</a> = 0. In this case the k-point grid must be
+specified explicitly in the input, repeating the variable <a href="../../variables/generated_files/varset_anaddb.html#kptrlatt@anaddb">kptrlatt</a> from the ABINIT output, so that ANADDB can
 re-construct the different tetrahedra which fill the reciprocal unit cell. In
 the Gaussian case, the width of the smearing can be controlled using the input
-variable <a href="../../input_variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a>. </p>
+variable <a href="../../variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a>. </p>
 
 <p> To test our calculations, they should be re-done with a denser k-point grid
 and a denser q-point grid, until the results (&alpha;&#178;F or &lambda;) are
-converged. The value of <a href="../../input_variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a> should also be checked, to make sure that
-it does not affect results. Normally, the limit for a very small <a href="../../input_variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a> and a very dense k-point grid is
+converged. The value of <a href="../../variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a> should also be checked, to make sure that
+it does not affect results. Normally, the limit for a very small <a href="../../variables/generated_files/varset_anaddb.html#elphsmear@anaddb">elphsmear</a> and a very dense k-point grid is
 the same as the value obtained with the tetrahedron method (which usually converges
 with a sparser k-point grid). </p>
 
@@ -406,7 +406,7 @@ metal after all, so the effect on the phonons should be negligible), but we
 need an additional dataset to calculate the 3 DDK files along the 3 primitive
 directions of the unit cell. To be more precise, just as for the el-ph matrix
 elements, we do not need the perturbed wavefunctions, only the perturbed
-eigenvalues. Calculating the DDK derivatives with <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a>
+eigenvalues. Calculating the DDK derivatives with <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a>
 set to 1 will output files named _GKKxx (xx=3*natom+1 to 3*natom+3) containing
 the matrix elements of the ddk perturbation (these are basically the first part
 of the normal DDK files for E field perturbation, without the wave function

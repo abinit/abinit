@@ -52,7 +52,7 @@
 !!   Other choices may better, but this is left for the future.
 !! ngfft(7)=choice for FFT algorithm, see the input variable fftalg
 !! ngfft(8)=size of the cache, in bytes (not used here presently).!!
-!!   other ngfft slots are used for parallelism see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
 !! [unit] = Output Unit number (DEFAULT std_out)
 !!
 !! PARENTS

@@ -190,7 +190,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    call anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
  end if
 
- anharmonics_terms%ncoeff = zero
+ anharmonics_terms%ncoeff = 0
 
 !Allocation of the coefficient
   if(present(coeffs))then
@@ -335,7 +335,7 @@ subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%coefficients)
   end if
 
-  anharmonics_terms%ncoeff = zero
+  anharmonics_terms%ncoeff = 0
 
 end subroutine anharmonics_terms_freeCoeffs
 !!***
@@ -582,7 +582,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 
 ! 1-Do some check
   do ii=1,6
-    if(natom /= size(phonon_strain(ii)%atmfrc,3).or.&
+    if(natom /= size(phonon_strain(ii)%atmfrc,2).or.&
 &      phonon_strain(ii)%nrpt < 0)then
       write(msg, '(a)' )&
 &        ' natom or/and nrpt have not the same size than phonon_strain array. '
@@ -603,10 +603,10 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
  ABI_DATATYPE_ALLOCATE(anharmonics_terms%phonon_strain,(6))
  do ii = 1,6
    nrpt = phonon_strain(ii)%nrpt
-   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
+   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
    ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%cell,(3,nrpt))
    anharmonics_terms%phonon_strain(ii)%nrpt   = phonon_strain(ii)%nrpt
-   anharmonics_terms%phonon_strain(ii)%atmfrc(:,:,:,:,:,:) = phonon_strain(ii)%atmfrc(:,:,:,:,:,:)
+   anharmonics_terms%phonon_strain(ii)%atmfrc(:,:,:,:,:) = phonon_strain(ii)%atmfrc(:,:,:,:,:)
    anharmonics_terms%phonon_strain(ii)%cell(:,:)   = phonon_strain(ii)%cell(:,:)
 
 !3-Set the flag
@@ -617,7 +617,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
    else
      ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc)
      ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%cell)
-     anharmonics_terms%phonon_strain(ii)%nrpt = zero
+     anharmonics_terms%phonon_strain(ii)%nrpt = 0
    end if
  end do
 
@@ -765,7 +765,7 @@ subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,nc
  has_elastic3rd    = .FALSE.
  has_elastic4th    = .FALSE.
  has_elastic_displ = .FALSE.
- d1=zero;d2=zero
+ d1=0;d2=0
  
 !Set the flags
  if(present(elastic3rd)) has_elastic3rd = .TRUE.
@@ -914,21 +914,21 @@ subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy
     do alpha=1,6
       do irpt = 1,phonon_strain(alpha)%nrpt
 !       get the cell of atom2  (0 0 0, 0 0 1...)
-        cell_atom2(1) =  (i1-1) + phonon_strain(alpha)%cell(1,irpt)
-        cell_atom2(2) =  (i2-1) + phonon_strain(alpha)%cell(2,irpt)
-        cell_atom2(3) =  (i3-1) + phonon_strain(alpha)%cell(3,irpt)
+        cell_atom2(1) =  i1 + phonon_strain(alpha)%cell(1,irpt)
+        cell_atom2(2) =  i2 + phonon_strain(alpha)%cell(2,irpt)
+        cell_atom2(3) =  i3 + phonon_strain(alpha)%cell(3,irpt)
         call getPBCIndexes_supercell(cell_atom2(1:3),sc_size(1:3))
 !       index of the second atom in the displacement array
-        jj = cell_atom2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&            cell_atom2(2)*sc_size(3)*natom_uc+&
-&            cell_atom2(3)*natom_uc
+        jj = (cell_atom2(1)-1)*sc_size(2)*sc_size(3)*natom_uc+&
+&            (cell_atom2(2)-1)*sc_size(3)*natom_uc+&
+&            (cell_atom2(3)-1)*natom_uc
         do ib = 1, natom_uc
           ll = jj + ib
           do nu=1,3
             do ia = 1, natom_uc
               kk = ii + ia
               do mu=1,3
-                ifc = phonon_strain(alpha)%atmfrc(1,mu,ia,nu,ib,irpt)
+                ifc = phonon_strain(alpha)%atmfrc(mu,ia,nu,ib,irpt)
 !               accumule energy
                 energy =  energy + sixth*strain(alpha)*disp(mu,kk)*disp(nu,ll)*ifc
 !               accumule forces

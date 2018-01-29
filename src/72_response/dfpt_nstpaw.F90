@@ -279,7 +279,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
- integer :: option,optxc,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
+ integer :: option,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -636,9 +636,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          else
 !          Non-collinear magnetism (should the second nkxc be nkxc_cur ?)
            if (nspden==4) then
-             option=0;optxc=1
-             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nkxc,nspden,n3xccc,1,option,optxc,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,&
+             option=0
+             call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum1,0,dum2,0,dum3,0,nkxc,&
+&             nkxc,nspden,n3xccc,1,option,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&

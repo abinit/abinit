@@ -45,7 +45,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  ntypat=number of types of atoms in unit cell.
 !!  nvresid(nfft,nspden)=potential or density residual
@@ -121,7 +121,8 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,fourdp,metric,pawdenpot,pawmknhat,rhotoxc,timab,xmpi_sum
+!!      dotprod_vn,fourdp,hartre,metric,pawdenpot,pawmknhat,rhotoxc,timab
+!!      xcdata_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -331,16 +332,14 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !------Compute Hartree and xc potentials----------------------------------
  nfftot=PRODUCT(ngfft(1:3))
 
- qpt(:)=zero
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qpt,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
 
- call xcdata_init(dtset%intxc,dtset%ixc,&
-&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=dtset) 
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
 !------Compute parts of total energy depending on potentials--------
@@ -598,13 +597,12 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !------Compute Hartree and xc potentials----------------------------------
 
- qpt(:)=zero
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qpt,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then

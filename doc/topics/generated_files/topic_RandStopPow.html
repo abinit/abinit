@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#7">help_features#7</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_RandStopPow.html#1">Introduction.</a><li>2. <a href="topic_RandStopPow.html#2">Related input variables.</a><li>3. <a href="topic_RandStopPow.html#3">Selected input files.</a><li>4. <a href="topic_RandStopPow.html#4">References.</a></ul>
@@ -62,8 +62,8 @@ and <b>G</b> are reciprocal lattice vectors.
 <p>The GW module of ABINIT gives access to the full inverse dielectric function for a grid of frequencies &omega;.
 Then, the implementation of the above equation is a post-processing employing a spline interpolation of the inverse dielectric function in order to evaluate
 it at &omega;=<b>v.</b>(<b>q</b>+<b>G</b>).
-The energy cutoff on <b>G</b> is governed by the <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>, as in the GW module.
-The integer <a href="../../input_variables/generated_files/varset_gw.html#npvel">npvel</a> and the cartesian vector <a href="../../input_variables/generated_files/varset_gw.html#pvelmax">pvelmax</a> control the discretization of the particle velocity.
+The energy cutoff on <b>G</b> is governed by the <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>, as in the GW module.
+The integer <a href="../../variables/generated_files/varset_gw.html#npvel">npvel</a> and the cartesian vector <a href="../../variables/generated_files/varset_gw.html#pvelmax">pvelmax</a> control the discretization of the particle velocity.
 <p>Note that the absolute convergence of the random electronic stopping power is a delicate matter that generally requires thousands of empty states together with large values of the energy cutoff.
 <br><br><a href=#top>Go to the top</a>
 
@@ -76,9 +76,9 @@ The integer <a href="../../input_variables/generated_files/varset_gw.html#npvel"
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#npvel">npvel</a>   [Number of Particle VELocities]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#pvelmax">pvelmax</a>   [Particle VELocity MAXimum]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>   [Energy CUT-off for EPSilon (the dielectric matrix)]<br>
+... <a href="../../variables/generated_files/varset_gw.html#npvel">npvel</a>   [Number of Particle VELocities]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#pvelmax">pvelmax</a>   [Particle VELocity MAXimum]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

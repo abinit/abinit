@@ -391,6 +391,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !    This grid is normalized, so the radial coordinates run between
 !    from 0 and 1 (from 0 to xcccrc, where xcccrc is the radius
 !    where the pseudo-core becomes zero).
+
    rmatch = ps_CoreCharge_MatchingRadius(psxml)
    nders  = ps_CoreCharge_NumberOfKeptDerivatives(psxml)
    write (message,'(1X,A,A,5X,A,1X,F8.3,A,5X,A,I8,A)') &

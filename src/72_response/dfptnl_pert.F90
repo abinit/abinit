@@ -1192,10 +1192,10 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
     ch10,' sum_lambda1psi0S1psi1 = ',sum_lambda1psi0S1psi1, ',',sum_lambda1psi0S1psi1_i,&
     ch10,'       sum_psi0H2psi1a = ',sum_psi0H2psi1a,       ',',sum_psi0H2psi1a_i,&
     ch10,'       sum_psi0H2psi1b = ',sum_psi0H2psi1b,       ',',sum_psi0H2psi1b_i,&
-    ch10,'                exc3/6 = ',sixth*exc3(1),         ',',sixth*exc3(2),&
-    ch10,'            exc3_paw/6 = ',sixth*exc3_paw(1),     ',',sixth*exc3_paw(2),&
     ch10,'          eHxc21_paw/2 = ',half*eHxc21_paw(1),    ',',half*eHxc21_paw(2),&
     ch10,'         eHxc21_nhat/2 = ',half*eHxc21_nhat(1),   ',',half*eHxc21_nhat(2),&
+    ch10,'                exc3/6 = ',sixth*exc3(1),         ',',sixth*exc3(2),&
+    ch10,'            exc3_paw/6 = ',sixth*exc3_paw(1),     ',',sixth*exc3_paw(2),&
     ch10,' >>>>>>>>>>>>>>> e3tot = ',e3tot,                 ',',sumi,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')

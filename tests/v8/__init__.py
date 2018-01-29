@@ -27,6 +27,7 @@ inp_files = [
 "t20.in",
 "t30.in",
 "t31.in",
+"t32.in",
 "t41.in",
 "t42.in",
 "t43.in",
@@ -42,4 +43,9 @@ inp_files = [
 "t63.in",
 "t64.in",
 "t65.in",
+#GW-soc
+"t80.in",
+"t81.in",
+"t82.in",
+"t83.in",
 ]

@@ -606,7 +606,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation does not diverged...
-           if(itime > 10 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
+           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
 !            We set to false the flag corresponding to the bound 
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
@@ -827,8 +827,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
      ! check dilatmx here and correct if necessary
      if (scfcv_args%dtset%usewvl == 0) then
-       call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
-&       dilatmx_errmsg)
+       call chkdilatmx(scfcv_args%dtset%chkdilatmx,scfcv_args%dtset%dilatmx,&
+&       rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
        if (LEN_TRIM(dilatmx_errmsg) /= 0) then
          MSG_WARNING(dilatmx_errmsg)

@@ -143,10 +143,11 @@
 !!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
 !!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
 !!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
-!!      prc_mem_free,prtene,psolver_rhohxc,rhotoxc,rhotov,scprqt,setnoccmmp
+!!      prc_mem_free,prtene,psolver_rhohxc,rhotov,rhotoxc,scprqt,setnoccmmp
 !!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
 !!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
-!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
+!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init,xmpi_isum,xmpi_sum
+!!      xmpi_wait
 !!
 !! SOURCE
 
@@ -307,11 +308,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
  integer :: quit_sum,req_cplex_dij,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
  integer :: stress_needed,sz1,sz2,unit_out
- integer :: usecprj,usexcnhat
+ integer :: usecprj,usexcnhat,use_hybcomp
  integer :: my_quit,quitsum_request,timelimit_exit
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
- real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,gsqcut,hybrid_mixing,hybrid_mixing_sr
+ real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,gsqcut,hyb_mixing,hyb_mixing_sr
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
  real(dp) :: val_min,vxcavg,vxcavg_dum
  real(dp) :: zion,wtime_step,now,prev
@@ -360,7 +361,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp),allocatable :: phnonsdiel(:,:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
- real(dp),allocatable :: vxc(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
+ real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
@@ -588,6 +589,9 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_ALLOCATE(vpsp,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
+ use_hybcomp=0 
+ if(mod(dtset%fockoptmix,100)==11)use_hybcomp=1
+ ABI_ALLOCATE(vxc_hybcomp,(nfftf,dtset%nspden*use_hybcomp))
  ngrvdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) ngrvdw=dtset%natom
  ABI_ALLOCATE(grvdw,(3,ngrvdw))
  grchempottn(:,:)=zero
@@ -944,6 +948,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !Pass through the first routines even when nstep==0
 
  quitsum_request = xmpi_request_null; timelimit_exit = 0
+ istep_updatedfock=0
 
 ! start SCF loop
  do istep=1,max(1,nstep)
@@ -1061,7 +1066,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    end if ! moved_atm_inside==1 .or. istep==1
 
    !Initialize/Update data in the case of an Exact-exchange (Hartree-Fock) or hybrid XC calculation
-   hybrid_mixing=zero;hybrid_mixing_sr=zero
+   hyb_mixing=zero;hyb_mixing_sr=zero
    if (usefock==1) then
      if (istep==1) then
        ! Initialize data_type fock for the calculation
@@ -1100,7 +1105,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
 &         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
-&         dtset%optstress,fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&         fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop. 
@@ -1123,7 +1128,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      end if
 
      !Used locally
-     hybrid_mixing=fock%fock_common%hybrid_mixing ; hybrid_mixing_sr=fock%fock_common%hybrid_mixing_sr
+     hyb_mixing=fock%fock_common%hyb_mixing ; hyb_mixing_sr=fock%fock_common%hyb_mixing_sr
 
    end if ! usefock
 
@@ -1140,11 +1145,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ipositron=electronpositron_calctype(electronpositron)
    end if
 
-   if ((moved_atm_inside==1 .or. istep==1).or. (dtset%positron<0.and.istep_mix==1)) then
+   if ((moved_atm_inside==1 .or. istep==1).or.&
+&   (dtset%positron<0.and.istep_mix==1).or.&
+&   (mod(dtset%fockoptmix,100)==11 .and. istep_updatedfock==1)) then
 !    PAW only: we sometimes have to compute compensation density
 !    and eventually add it to density from WFs
      nhatgrdim=0
      dummy_nhatgr = .False.
+!    This is executed only in the positron case.
      if (psps%usepaw==1.and.(dtset%positron>=0.or.ipositron/=1) &
 &     .and.((usexcnhat==0) &
 &     .or.(dtset%xclevel==2.and.(dtfil%ireadwf/=0.or.dtfil%ireadden/=0.or.initialized/=0)) &
@@ -1195,7 +1203,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     n1xccc,n3xccc,optene,pawrad,pawtab,ph1df,psps,rhog,rhor,rmet,rprimd,&
 &     strsxc,ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 &     xccc3d,xred,electronpositron=electronpositron,&
-&     taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
+&     taug=taug,taur=taur,vxc_hybcomp=vxc_hybcomp,vxctau=vxctau,add_tfw=tfw_activated)
 
      ! set the zero of the potentials here
      if(dtset%usepotzero==2) then
@@ -1252,7 +1260,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,&
 &     pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&     hyb_mixing=hybrid_mixing,hyb_mixing_sr=hybrid_mixing_sr,&
+&     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
 &     electronpositron=electronpositron,vpotzero=vpotzero)
 
 !    Correct the average potential with the calculated constant vpotzero
@@ -1300,7 +1308,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     natvshift=dtset%natvshift,atvshift=dtset%atvshift,fatvshift=fatvshift,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     mpi_comm_grid=spaceComm_grid,&
-&     hyb_mixing=hybrid_mixing,hyb_mixing_sr=hybrid_mixing_sr,&
+&     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
 &     electronpositron_calctype=ipositron,&
 &     electronpositron_pawrhoij=pawrhoij_ep,&
 &     electronpositron_lmselect=lmselect_ep,&
@@ -1554,13 +1562,12 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (nkxc>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79) &
 &     .and.((istep==1.or.istep==dielstrt).or.(dtset%iprcel>=100))) then
        optxc=10
-       call xcdata_init(dtset%intxc,dtset%ixc,&
-&        dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+       call xcdata_init(xcdata,dtset=dtset)
 !      to be adjusted for the call to rhotoxc
        nk3xc=1
        if(dtset%icoulomb==0 .and. dtset%usewvl==0) then
          call rhotoxc(edum,kxc,mpi_enreg,nfftf,&
-&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,dtset%nspden,n3xccc,&
+&         ngfftf,nhat,psps%usepaw,nhatgr,0,nkxc,nk3xc,n3xccc,&
 &         optxc,dtset%paral_kgb,rhor,rprimd,dummy2,0,vxc,vxcavg_dum,xccc3d,xcdata,&
 &         add_tfw=tfw_activated,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau)
        else if(.not. wvlbigdft) then
@@ -1662,7 +1669,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&     electronpositron=electronpositron,taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
+&     electronpositron=electronpositron,taug=taug,taur=taur,vxctau=vxctau,&
+&     vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated)
 
    end if
 
@@ -1690,7 +1698,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
-&       hyb_mixing=hybrid_mixing,hyb_mixing_sr=hybrid_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &       electronpositron=electronpositron)
 
      end if
@@ -1903,7 +1911,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !need to reorder them (from atom-sorted to unsorted)
  if (psps%usepaw==1.and.usecprj==1) then
    iorder_cprj=1
-!   call pawcprj_reorder(cprj,atindx1)
+   call pawcprj_reorder(cprj,atindx1)
    if (dtset%positron/=0) then
      if (electronpositron%dimcprj>0) then
        call pawcprj_reorder(electronpositron%cprj_ep,atindx1)
@@ -2051,6 +2059,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_DEALLOCATE(vtrial)
  ABI_DEALLOCATE(vpsp)
  ABI_DEALLOCATE(vxc)
+ ABI_DEALLOCATE(vxc_hybcomp)
  ABI_DEALLOCATE(vxctau)
  ABI_DEALLOCATE(xccc3d)
  ABI_DEALLOCATE(kxc)

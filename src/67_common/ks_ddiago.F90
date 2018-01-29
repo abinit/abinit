@@ -49,7 +49,7 @@
 !!  comm=MPI communicator.
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!  nfftc=Number of points in the coarse FFT mesh.
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  Diago_ctl<ddiago_ctl_type>=Datatype storing variables and options controlling the direct diagonalization.
 !!
 !! OUTPUT

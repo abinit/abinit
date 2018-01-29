@@ -32,7 +32,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_PseudosPAW.html">topic_PseudosPAW</a>, &nbsp; <a href="../../topics/generated_files/topic_crystal.html">topic_crystal</a>, &nbsp; <a href="../../users/generated_files/help_features.html#2.1">help_features#2.1</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.1">help_features#2.1</a>, &nbsp; <a href="../../topics/generated_files/topic_PseudosPAW.html">topic_PseudosPAW</a>, &nbsp; <a href="../../topics/generated_files/topic_crystal.html">topic_crystal</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_AtomTypes.html#1">Introduction.</a><li>2. <a href="topic_AtomTypes.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_AtomTypes.html#3">Related input variables.</a><li>4. <a href="topic_AtomTypes.html#4">Selected input files.</a></ul>
@@ -51,20 +51,20 @@ nuclear charge (and their mass for dynamical properties).
 However, in a pseudopotential
 or PAW approach, the knowledge of the nuclear charge does not define the potential felt by the electron,
 only the atomic data file (pseudopotential or PAW) defines it. Thus, in addition to the number of types
-of atoms <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>, and their nuclear charge <a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a>,
+of atoms <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>, and their nuclear charge <a href="../../variables/generated_files/varset_basic.html#znucl">znucl</a>,
 ABINIT requires to know the pseudopotential/PAW to use for each type of atom. 
-The latters are specified in the <a href="../../users/generated_files/help_abinit.html#intro1">"files" file</a>. Unless alchemical potentials are used (see later),
-the number of pseudopotentials to be read, <a href="../../input_variables/generated_files/varset_gstate.html#npsp">npsp</a>, is the same as <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>.
+The latters are specified in the <a href="../../guide/generated_files/help_abinit.html#intro1">"files" file</a>. Unless alchemical potentials are used (see later),
+the number of pseudopotentials to be read, <a href="../../variables/generated_files/varset_gstate.html#npsp">npsp</a>, is the same as <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>.
 Note that one cannot mix norm-conserving pseudopotentials with PAW atomic data files in a single ABINIT run,
 even for different datasets. One has to stick either to norm-conserving pseudopotentials or to PAW.
 <br>More on the pseudos/PAW in <a href="../../topics/generated_files/topic_PseudosPAW.html#">PseudosPAW</a>.
-<p>ABINIT also has a default table of the atomic masses, but this can be superceded by specifying <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>.
+<p>ABINIT also has a default table of the atomic masses, but this can be superceded by specifying <a href="../../variables/generated_files/varset_rlx.html#amu">amu</a>.
 <p><b>Alchemical potentials</b></p> 
 For norm-conserving pseudopotentials, ABINIT can mix the pseudopotentials, as described in 
 <a href="https://wiki.abinit.org/doku.php?id=developers:pseudos">the ABINIT wiki</a>,
-to create so-called "alchemical potentials", see <a href="../../input_variables/generated_files/varset_gstate.html#mixalch">mixalch</a>.
-<br>In this case, the number of pseudopotentials to be given, <a href="../../input_variables/generated_files/varset_gstate.html#npsp">npsp</a>, will usually be larger than the 
-number of types of atoms, <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>. Using alchemical potentials makes sense to treat alloys in which
+to create so-called "alchemical potentials", see <a href="../../variables/generated_files/varset_gstate.html#mixalch">mixalch</a>.
+<br>In this case, the number of pseudopotentials to be given, <a href="../../variables/generated_files/varset_gstate.html#npsp">npsp</a>, will usually be larger than the 
+number of types of atoms, <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>. Using alchemical potentials makes sense to treat alloys in which
 similar ions are present, and whose specific chemical properties are not crucial for the property of interest.
 Usually it is done only for isovalent species, and ions of quite similar radii. It is a reasonable interpolation 
 technique for the electronic properties.
@@ -89,17 +89,17 @@ Polarization, and responses to finite electric fields for AlAs. In the present t
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a>   [charge -Z- of the NUCLeus]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>   [TYPe of AToms]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#mixalch">mixalch</a>   [MIXing coefficients for ALCHemical potentials]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#npsp">npsp</a>   [Number of PSeudoPotentials]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#ntypalch">ntypalch</a>   [Number of TYPe of atoms that are "ALCHemical"]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#npspalch">%npspalch</a>   [Number of PSeudoPotentials that are "ALCHemical"]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#ntyppure">%ntyppure</a>   [Number of TYPe of atoms that are "PURe"]<br>
-... <a href="../../input_variables/generated_files/varset_internal.html#ziontypat">%ziontypat</a>   [Z (charge) of the IONs for the different TYPes of AToms]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#algalch">algalch</a>   [ALGorithm for generating ALCHemical pseudopotentials]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
+... <a href="../../variables/generated_files/varset_basic.html#znucl">znucl</a>   [charge -Z- of the NUCLeus]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
+... <a href="../../variables/generated_files/varset_basic.html#typat">typat</a>   [TYPe of AToms]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#mixalch">mixalch</a>   [MIXing coefficients for ALCHemical potentials]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#npsp">npsp</a>   [Number of PSeudoPotentials]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#ntypalch">ntypalch</a>   [Number of TYPe of atoms that are "ALCHemical"]<br>
+<p>Relevant internal variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#npspalch">%npspalch</a>   [Number of PSeudoPotentials that are "ALCHemical"]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#ntyppure">%ntyppure</a>   [Number of TYPe of atoms that are "PURe"]<br>
+... <a href="../../variables/generated_files/varset_internal.html#ziontypat">%ziontypat</a>   [Z (charge) of the IONs for the different TYPes of AToms]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_gstate.html#algalch">algalch</a>   [ALGorithm for generating ALCHemical pseudopotentials]<br>
 
 <br><br><a href=#top>Go to the top</a>
 
@@ -112,13 +112,13 @@ Polarization, and responses to finite electric fields for AlAs. In the present t
 
 <i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
 <br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
-<p> tests/v5/Input: <a href="../../tests/v5/Input/t44.in">t44.in</a> 
 <p> tests/v3/Input: <a href="../../tests/v3/Input/t92.in">t92.in</a> 
 <a href="../../tests/v3/Input/t93.in">t93.in</a> 
 <a href="../../tests/v3/Input/t94.in">t94.in</a> 
 <a href="../../tests/v3/Input/t95.in">t95.in</a> 
 <a href="../../tests/v3/Input/t96.in">t96.in</a> 
 <a href="../../tests/v3/Input/t97.in">t97.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t44.in">t44.in</a> 
 <p> tests/v6/Input: <a href="../../tests/v6/Input/t28.in">t28.in</a> 
 <br>
 

@@ -10,7 +10,60 @@ MathJax.Hub.Config({
   jax: ["input/TeX","output/HTML-CSS"],
   tex2jax: {inlineMath: [['$','$']]},
   displayAlign: "center",
-  TeX: { equationNumbers: { autoNumber: "AMS" } }
+  TeX: { 
+      equationNumbers: { autoNumber: "AMS" },
+      Macros: {
+          "*": "{\\dagger}",
+          // matchcal version
+          mcR: "{\\mathcal{R}}",
+          mcS: "{\\mathcal{S}}",
+          mcC: "{\\mathcal{C}}",
+          mcO: "{\\mathcal{O}}",
+          // acronyms
+          KS: "{\\text{KS}}",
+          QP: "{\\text{QP}}",
+          BZ: "{\\text{BZ}}",
+          sign: "{\\text{sign}}",
+          xc: "{\\text{xc}}",
+          tchi: "{\\tilde\\chi}",
+          // symbols commonly used
+          rr: "{\\bf r}",
+          RR: "{\\bf R}",
+          tt: "{\\bf t}",
+          GG: "{\\bf G}",
+          kk: "{\\bf k}",
+          qq: "{\\bf q}",
+          kq: "{\\kk + \\qq}",
+          qG: "{\\bf q + G}}",
+          kmq: "{\\kk - \\qq}",
+          kpq: "{\\kk + \\qq}",
+          kpG: "{\\kk + \\GG}",
+          qpG: "{\\qq + \\GG}",
+          // Many-body theory
+          Go: "{G_0}",
+          Wo: "{W_0}",
+          Ueff: "{U_{\\text{eff}}}",
+          // greek symbols + tilde version
+          ee: "{\\epsilon}",
+          tee: "{\\tilde{\\epsilon}}",
+          ww: "{\\omega}",
+          tww: "{\\tilde\\omega}",
+          dd: "{\\,\\text{d}}",
+          minf: "{{-\\infty}}",
+          pinf: "{{+\\infty}}",
+          h0: "{{\\hat h}_0}",
+          vxc: "{v_\\xc}",
+          // symrel
+          Ri: "{\\mcR^{-1}}",
+          Rit: "{\\mcR^{-1\\tau}}",
+          // symrec
+          Si: "{\\mcS^{-1}}}",
+          Sit: "{\\Si^\\tau}}",
+          // partial and functional derivative.
+          PDER: ["{\\dfrac{\\partial #1}{\\partial #2}}", 2],
+          FDER: ["{\\dfrac{\\delta #1}{\\delta #2}}", 2]
+      }
+  }
 });
 </script>
 <script type="text/javascript" async
@@ -33,7 +86,7 @@ on planewaves and norm-conserving pseudopotentials is also discussed.
 <p>
 The conventions used in the equations are explained in the Many-body theory notes (<a href="../../theory/generated_files/theorydoc_mbt.html#">theorydoc_mbt</a>).
 A much more consistent discussion of the theoretical aspects of the Bethe-Salpeter 
-equation can be found in [1].
+equation can be found in <a href="../../biblio/generated_files/bib_biblio.html#Onida2002">[Onida2002]</a> and references therein.
 <hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (MG,MS)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
@@ -50,7 +103,6 @@ equation can be found in [1].
   <li>3. <a href="#BS_solvers">Solving the Bethe-Salpeter problem</a></li>
   <li>4. <a href="#kernel_mel">Kernel matrix elements in reciprocal space</a></li>
   <li>5. <a href="#dipole_mel">Matrix elements of the dipole operator</a></li>
-  <li>6. <a href="#references">References</a></li>
 
  </ul> 
  <hr><br><a name="optical_properties"> </a>
@@ -62,44 +114,41 @@ the <i>ab initio</i> description of optical properties.
 <p>
 In frequency and reciprocal space, the microscopic dielectric function is related to the irreducible polarizability 
 by the following relation
-
-</p>
-<p align="center">
-        <img src="../documents/theory_mbt/epsilon_vs_tchi.png">
-
-
 </p>
 
+\begin{equation}
+\ee_{\GG_1\GG_2}(\qq;\ww) = \delta_{\GG_1,\GG_2} - v(\qq, \GG_1) \tchi_{\GG_1\GG_2}(\qq;\ww)
+\end{equation}
 
 from which the inverse dielectric function is obtained via matrix inversion.
+
 <p>
 The <i><b>macroscopic</b></i> dielectric function, <i>&#1108;<sub>M</sub></i><sup>LF</sup>(&#969;),
-can be directly related to  the inverse of a single element, the first 
+can be directly related to the inverse of a single element, the first 
 (<b>G</b><i><sub>1</sub></i>=0,<b>G</b><i><sub>2</sub></i>=0), of the inverse 
 of the <i><b>microscopic</b></i> dielectric matrix by means of:
-
-</p>
-<p align="center">
-        <img src="../documents/theory_mbt/emacro_lfe.png">
 </p>
 
+\begin{equation}
+\label{eq:abs_LFE}
+\ee_M^{\text{LF}}(\ww) = \lim_{\qq \rightarrow 0} \dfrac{1}{\ee^{-1}_{0 0}(\qq,\ww)}
+\end{equation}
 
 The microscopic dielectric matrix is the one usually calculated within the RPA in 
 a GW calculation. The optical absorption spectrum is simply given by the imaginary 
-part of  <i>&#1108;<sub>M</sub></i><sup>LF</sup>(&#969;). Sometimes, especially
-when comparing with experimental spectra,
+part of <i>&#1108;<sub>M</sub></i><sup>LF</sup>(&#969;). 
+Sometimes, especially when comparing with experimental spectra,
 the real part is simply called <i>&#1108;<sub>1</sub></i> and the imaginary part 
-
 <i>&#1108;<sub>2</sub></i>.
 
 <p>
 Note that above equation differs from 
-
-</p>
-<p align="center">
-        <img src="../documents/theory_mbt/emacro_nlfe.png">
 </p>
 
+\begin{equation}
+\label{eq:abs_NLFE}
+\ee_M^{\text{NLF}}(\ww) = \lim_{\qq \rightarrow 0} {\ee_{0 0}(\qq,\ww)}
+\end{equation}
 
 due to the so called local-field effects introduced by the presence of the crystalline 
 environment. The former quantity <i>with</i> local fields (LF) is more accurate 
@@ -140,55 +189,43 @@ due to the electron-hole interaction
  <p>A schematic picture of the different levels of the description of optical 
 spectra available in ABINIT is given below.
 </p>
+
 <p style="text-align: center;">
-        <img style="width: 742px; height: 433px;" src="../documents/theory_bse/schematic_dft_gw_bse.png">
+        <img style="width: 742px; height: 433px;" src="../documents/theory_bse/schematic_dft_gw_bse.svg">
 </p>
 
-
-<p>The Bethe-Salpeter theory is formulated in terms of two-particle
-propagators. These are four-point functions describing the motion
+<p>
+The Bethe-Salpeter theory is formulated in terms of two-particle propagators. 
+These are four-point functions describing the motion
 through the system of two particles at once. We will label them <i>L<sub>0</sub></i> 
-
-and 
-<i>L</i>, where the subscript zero indicates that the particles are non-interacting.
+and  <i>L</i>, where the subscript zero indicates that the particles are non-interacting.
 
 By restricting the starting and ending point of the particles, the two-point contraction of <i>L<sub>0</sub></i> 
 gives the reducible independent-particle polarizability according to
-
-</p>
-<p align="center">
-        <img src="../documents/theory_bse/chi0_L0.png">
-
 </p>
 
+$$ \chi^0(12) = L^0(11, 22) $$
 
 while the two-point contraction of <i>L</i> gives the reducible many-body polarizability.
 
-<p align="center">
-        <img src="../documents/theory_bse/chi_L.png">
-</p>
-
+$$ \hat\chi(12) = L(11, 22) $$
 
 that should not be confused with the <i>irreducible</i> polarizability of the 
 many-body system (denoted with a tilde in the formulas in the 
-
 <a href="theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>). 
+
 The utility of working in terms of the reducible quantities is that the macroscopic 
 dielectric function <i><b>with</b></i> local field effects is obtained directly from the 
 reducible polarizability using
-
 <!--
 chi by taking the two-point contraction and the limit of vanishing momentum transfer.
 -->
 
-<p align="center">
-
-        <img src="../documents/theory_bse/em_hatchi.png">
-</p>
-
+\begin{equation}
+\ee_M^{\text{LF}}(\ww) = 1 - \lim_{\qq  \rightarrow 0} v(\qq)\,\tchi_{00}(\qq;\ww)
+\end{equation}
 
 <p>
-
 Computing the reducible <i>L</i> directly, if possible, thus allows one to avoid the 
 costly matrix inversion of the dielectric function that should otherwise be performed 
 for each frequency.
@@ -210,37 +247,40 @@ the resulting polarizability, and the limit of vanishing momentum transfer to ob
 TODO
 -->
 
-
 </p>
 <p>
 One can show that <i>L</i> satisfies the Dyson-like equation:
-
-</p>
-<p align="center">
-        <img style="width: 473px; height: 33px;" src="../documents/theory_bse/dyson_eq_4L.png">
 </p>
 
-
+\begin{equation}
+L = L^0 + L^0 K L 
+\Longrightarrow
+L = \bigl [ 1 - L^0  K]^{-1} L^0 
+\end{equation}
 
 that involves the Bethe-Salpeter kernel <i>K</i>:
 
-<p align="center">
-    
-    <img style="width: 547px; height: 66px;" src="../documents/theory_bse/bs_kernel.png">
-    
-</p>
-
+\begin{equation}\label{eq:BSE_kernel_LF}
+K(1234) = 
+\underbrace{\delta(12)\delta(34)\bar v(13)}_{Exchange} 
+- 
+\underbrace{\delta(13)\delta(24)W(12)}_{Coulomb}
+\end{equation}
 
 where the bar symbol signifies that the Coulomb interaction has to be taken without its long-range Fourier
 component at <b>G</b>=0:
 
-<p align="center">
-        <img style="width: 310px; height: 128px;" src="../documents/theory_bse/barv.png">
-</p>
-
+\begin{equation}
+ \begin{cases}
+   {\bar v(\qq)} = v(\qq) \quad {\text{if}}\; \qq \neq 0
+   \\
+   \\
+   {\bar v(\qq=0)} = 0
+ \end{cases}
+\end{equation}
 
 <p>
-As discussed in [1], local field effects (LF) are included in the formalism through 
+As discussed in <a href="../../biblio/generated_files/bib_biblio.html#Onida2002">[Onida2002]</a>, local field effects (LF) are included in the formalism through 
 the exchange term while the Coulomb term describes the screened electron-hole 
 interaction that is responsible for the creation of the excitons. All interaction 
 is in principle already contained in <i>W</i>, and the rewriting of the kernel 
@@ -252,19 +292,26 @@ The Dyson-like equation for <i>L</i> becomes a matrix problem once a particular
 basis set is chosen to expand the four-point functions involved in the problem.
 In the standard approach, the polarisabilities and the BS kernel are expressed 
 in the so-called <i>transition</i> space (i.e. as products of single-particle orbitals) using:
-
-</p>
-<p align="center">
-
-        <img style="width: 661px; height: 88px;" src="../documents/theory_bse/eh_expansion1.png">
 </p>
 
+\begin{equation}
+F(1234) = 
+\sum_{ \substack{(n_1 n_2) \\ (n_3 n_4)} }
+\psi_{n_1}^\*(1) \psi_{n_2}(2)\,
+F_{ (n_1 n_2) (n_3 n_4) }\,
+\psi_{n_3}(3) \psi_{n_4}^\*(4) 
+\end{equation}
 
-<p align="center">
-        <img style="width: 645px; height: 55px;" src="../documents/theory_bse/eh_expansion2.png">
+and 
 
-</p>
-
+\begin{equation}
+F_{ (n_1 n_2) (n_3 n_4) } = 
+\int 
+F(1234)
+\psi_{n_1}(1) \psi_{n_2}^\*(2) 
+\psi_{n_3}^\*(3) \psi_{n_4}(4) 
+\dd (1234)
+\end{equation}
 
 where <i>n<sub>i</sub></i> is a shorthand notation to denote band, <b>k</b>-point and spin index.
 The expansion is exact provided that the set of single-particle orbitals from a complete basis set in the Hilbert space. 
@@ -272,45 +319,50 @@ The expansion is exact provided that the set of single-particle orbitals from a 
 <p>
 The main advantage of using the transition space for solving the problem is that the RPA
 polarizability is diagonal in this representation
-
-</p>
-<p align="center">
-        <img style="width: 551px; height: 67px;" src="../documents/theory_bse/L0ehbasis.png">
-
 </p>
 
-
+\begin{equation}
+\chi^0_{ (n_1 n_2) (n_3 n_4) } (\ww) = 
+\dfrac{ (f_{n_2} - f_{n_1}) } { (\ee_{n_2} - \ee_{n_1} - \ww)}
+\delta_{n_1 n_3} \delta_{n_2 n_4} 
+\end{equation}
 
 thus leading to a considerable simplification in the mathematical formalism.
 <p>
-After some algebra (see [1] for a more complete derivation) one finds that,
+After some algebra (see <a href="../../biblio/generated_files/bib_biblio.html#Onida2002">[Onida2002]</a> for a more complete derivation) one finds that,
 in a system with an energy gap, the Dyson-like equation for <i>L</i> can be expressed 
 in terms of an effective two-particle Hamiltonian, <i>H</i>, according to
-
-</p>
-<p align="center">
-    
-    <img src="../documents/theory_bse/L_for_semiconductors.png">
-
 </p>
 
-
+\begin{equation}
+L = \bigl [ H-\ww \bigr]^{-1}\,F
+\end{equation}
 
 The explicit form for <i>H</i> and <i>F</i> in the transition space is given by
 
-<p align="center">
-        <img style="width: 465px; height: 120px;" src="../documents/theory_bse/Hexc_full.png">
+\begin{equation}
+H =
+\left( 
+\begin{array}{c|cc} 
+  &   |v'c'\kk'\rangle & |c'v'\kk'\rangle     \\ \hline 
+\langle vc\kk|  & R  &  C  \\ %\hline 
+\langle cv\kk|  &  -C^* & -R^*   \\
+\end{array}
+\right) 
+\end{equation}
 
-
-</p>
-
+\begin{equation}
+F =
+\left( 
+\begin{array}{c|cc} 
+  &   |v'c'\kk'\rangle & |c'v'\kk'\rangle     \\ \hline 
+\langle vc\kk|  & 1  &  0   \\ %\hline 
+\langle cv\kk|  & 0  & -1   \\
+\end{array}
+\right) 
+\end{equation}
 
 <br>
-
-<p align="center">
-        <img style="width: 477px; height: 124px;" src="../documents/theory_bse/F_matrix.png">
-</p>
-
 
 where valence states are indicated by the indices <i>v</i>,<i>v'</i> while <i>c</i>,<i>c'</i> are used for conduction bands. 
 The <i>R</i> sub-matrix is Hermitian and is usually referred to as the resonant block 
@@ -320,15 +372,15 @@ although the operator possesses a real spectrum.
 
 <p>
 The inclusion of spin in the formalism would require an extensive discussion on its own. 
-Here, for simplicity, we limit the analysis to the case of spin unpolarized semiconductors
-(<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1).
+Here, for simplicity, we limit the analysis to the case of spin unpolarized semiconductors (<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1).
 In this particular case, the matrix elements of the resonant block are given by
-
-</p>
-<p align="center">
-        <img style="width: 836px; height: 34px;" src="../documents/theory_bse/reso_mel.png">
 </p>
 
+\begin{equation}
+R_{vc\kk,v'c'\kk'} = 
+( \ee_{c\kk} - \ee_{v\kk} )\delta_{vv'}\delta_{cc'}\delta_{\kk\kk'} + 
+2 \bar v_{(vc\kk)(v'c'\kk')} - W_{(vc\kk)(v'c'\kk')}
+\end{equation}
 
 with single particle transition energies on the diagonal.
 
@@ -339,21 +391,20 @@ The <i>C</i> matrix is symmetric and its elements are given by:
 -->
 
 <p>
-
-
 The matrix elements of v and <i>W</i> are defined as:
-
-</p>
-<p align="center">
-        <img style="width: 900px; height: 65px;" src="../documents/theory_bse/exchange_rspace.png">
 </p>
 
+\begin{equation}
+{\bar v}_{(n_1 n_2) (n_3 n_4)} =
+\delta_{\sigma_1 \sigma_2}\, \delta_{\sigma_3 \sigma_4}
+\iint \psi_{n_1}(\rr) \psi^*_{n_2}(\rr) {\bar v(\rr-\rr')} \psi_{n_3}^*(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
+\end{equation}
 
-<p align="center">
-    <img style="width: 864px; height: 55px;" src="../documents/theory_bse/coulomb_rspace.png">
-
-</p>
-
+\begin{equation}
+W_{(n_1 n_2) (n_3 n_4)} =
+\delta_{\sigma_1 \sigma_3}\, \delta_{\sigma_2 \sigma_4}
+\iint \psi_{n_1}(\rr) \psi^*_{n_3}(\rr) {W(\rr,\rr',\ww=0)} \psi^*_{n_2}(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
+\end{equation}
 
 Note, in particular, that only the static limit (&#969; = 0) of <i>W</i> is involved in the last expression.
 
@@ -374,51 +425,42 @@ This is especially true in bulk systems due to the different spatial behavior of
 In solid state calculations, it is therefore common practice to ignore the <i>C</i> block (the
 so-called Tamm-Dancoff approximation). 
 Under this assumption the excitonic Hamiltonian is given by a Hermitian operator.
-
-</p>
-<p align="center">
-
-
-    <img style="width: 981px; height: 264px;" src="../documents/theory_bse/TDA.png">
-
 </p>
 
+<p align="center"><img style="width: 981px; height: 264px;" src="../documents/theory_bse/TDA.svg"></p>
 
-The variable <a href="../../input_variables/generated_files/varset_bse.html#bs_coupling">bs_coupling</a> defines
+The variable <a href="../../variables/generated_files/varset_bse.html#bs_coupling">bs_coupling</a> defines
 whether the coupling block should be included in the calculation.
 
 <p>
 The macroscopic dielectric function is obtained by contracting the many-body <i>L</i>
-
 and then taking the optical limit of the <b>G</b>=<b>G'</b>=0 component along a particular direction
 in <b>q</b>-space.
 The final result reads:
-
-</p>
-<p align="center">
-
-
-    <img style="width: 613px; height: 54px;" src="../documents/theory_bse/exc_mdf.png">
-
 </p>
 
+\begin{equation}
+\ee_M(\ww) = 
+1 -  \lim_{\qq  \rightarrow 0}
+v(\qq)\,\langle P(\qq)|\bigl[ H - \ww \bigr]^{-1}\,F |P(\qq)\rangle
+\end{equation}
 
 where
 
-<p align="center">
-
-    <img style="width: 786px; height: 52px;" src="../documents/theory_bse/oscillator_q0.png">
-
-
-</p>
-
+\begin{equation}
+P(\qq)_{n_1 n_2} = 
+\langle n_2|e^{i\qq\cdot\rr}|n_1 \rangle 
+\underset{\qq \rightarrow 0}{ \approx}
+\delta_{n_1 n_2}  +
+i \qq \cdot \langle n_2|\rr|n_1 \rangle
++ O(q^2)
+\end{equation}
 
 is the matrix element of the dipole operator in transition space.
 <p>
 By default the code calculates the macroscopic dielectric function taking the limit along 
 six different directions in <b>q</b>-space (the three basis vectors of the reciprocal lattice and the three Cartesian
-axis). It is possible to change the default directions using the variables
-<a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a> and <a href="../../input_variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>. 
+axis). It is possible to change the default directions using the variables <a href="../../variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a> and <a href="../../variables/generated_files/varset_gw.html#gw_qlwl">gw_qlwl</a>. 
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="BS_solvers"> </a>
@@ -426,8 +468,8 @@ axis). It is possible to change the default directions using the variables
 <h3><b>3. Solving the Bethe-Salpeter problem</b></h3>
  <p>At this point it is clear that the evaluation of the macroscopic dielectric function within
 the BS formalism is a two-step process:
-
 </p>
+
 <ol>
 <li>
 Construction of the <i>H</i> matrix in the transition space.
@@ -439,35 +481,28 @@ Computation of the macroscopic dielectric function using the two equations repor
 </li>
 </ol>
 
-
 <p>
 The flowchart of a typical Bethe-Salpeter run is schematically depicted in the diagram below:
-
 </p>
-<p align="center">
 
-    <img src="../documents/theory_bse/bse_flowchart.png">
-
-</p>
+<p align="center"><img src="../documents/theory_bse/bse_flowchart.svg"></p>
 
 <p>
-
 The KSS file is represented with an ellipsis. 
-The path on the left indicated with blue arrows represents the RPA calculation 
-(<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3)
-that produces the SCR file (see also the <a href="../../tutorial/generated_files/lesson_gw1.html">first lesson</a> of the GW tutorial).
-Once the KSS and the SCR file are available, we can finally contruct the Hamiltonian and solve the
+The path on the left indicated with blue arrows represents the RPA calculation (<a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3)
+that produces the SCR file (see also the <a href="../../tutorial/generated_files/lesson_gw1.html">first lesson</a> 
+of the GW tutorial).
+Once the KSS and the SCR file are available, we can finally construct the Hamiltonian and solve the
 Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
 </p>
-<p>
 
+<p>
 For BS computations, it is common practice to simulate the self-energy corrections by employing the scissors operator 
 whose value can be obtained either from experiments or from ab-initio calculations.
 The scissors operator allows one to avoid a costly <i>GW</i> calculation that should performed for all the
 
 <b>k</b>-points and bands included in the transition space
-(the optional path on the right indicated with yellow arrows that 
-corresponds to <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4).
+(the optional path on the right indicated with yellow arrows that corresponds to <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4).
 </p>
 <p>
 The construction of the Hamiltonian matrix represents a significant portion of the overall CPU time 
@@ -475,47 +510,76 @@ due to the large number of transitions needed for an accurate description of the
 frequency-dependence of the polarizability.
 On the other hand, also the calculation of the macroscopic dielectric function poses 
 numerical difficulties since an expensive matrix inversion should be performed for each frequency.
-
 </p>
 <p>
 The code implements different methods proposed in the literature to avoid the matrix inversion for each frequency.
-The variable <a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a> is used to select 
+The variable <a href="../../variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a> is used to select 
 among the different possibilities.
 </p>
 <p>
-<a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=1
+<a href="../../variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=1
 employs standard (Sca)LAPACK routines to obtain the spectral representation of <i>H</i> 
 in terms of eigenvalues and right eigenvectors of <i>H</i>:
-
 </p>
-<p align="center"><img style="width: 337px; height: 218px;" src="../documents/theory_bse/spectral_repr.png"></p>
 
+\begin{equation}
+\begin{cases}
+H  |\lambda\rangle = \ee_\lambda |\lambda\rangle
+\\
+\\
+O_{\lambda\lambda'} = \langle\lambda|\lambda'\rangle
+\\
+\\ 
+H = \sum_{\lambda \lambda'} \ee_\lambda |\lambda\rangle O_{\lambda \lambda'} \langle\lambda'|
+\end{cases}
+\end{equation}
 
 Then, as discussed in [2], the inverse of [<i>H</i>-&#969;] is obtained according to 
 
-<p align="center"><img style="width: 412px; height: 80px;" src="../documents/theory_bse/resolvent.png"></p>
-
+\begin{equation}
+\bigl[ H -\ww \bigr]^{-1} = 
+\sum_{\lambda \lambda'} |\lambda\rangle \dfrac{O_{\lambda \lambda'}^{-1}}{(\ee_\lambda - \ww)} \langle\lambda'|
+\end{equation}
 
 We do not elaborate this point further since the direct diagonalization is advantageous only in particular circumstances, 
 as explained in the documentation.
 <p>
-<a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=2
+<a href="../../variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=2
 avoids the diagonalization using an iterative algorithm that constructs a basis
 set in which <i>H</i> is represented by a real symmetric tridiagonal matrix [3].
 Without entering into detail, one can schematically represent the Haydock technique as an algorithmic procedure 
 that transforms a dense (hermitian) matrix into a sparse (tridiagonal) one:
-
 </p>
-<p align="center"><img style="width: 739px; height: 181px;" src="../documents/theory_bse/Haydock_sketch.png"></p>
 
+\begin{equation}
+ R = R^\* =
+\begin{pmatrix}
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & *
+\end{pmatrix}
+\Longrightarrow
+\begin{pmatrix}
+a_1 & b_2 &     &   &  \\
+b_2 & a_2 & b_3 &   &  \\
+    & b_3 & *   & * &  \\
+    &     & *   & * & * \\
+    &     &     & * & * 
+\end{pmatrix}
+\end{equation}
 
 Once the coefficient of the tridiagonal form are know, the macroscopic dielectric function is
 evaluated in terms of the continued fraction: 
 
-<p align="center"><img style="width: 380px; height: 147px;" src="../documents/theory_bse/cfact.png"></p>
+\begin{equation}
+\ee(\ww) \propto
+ \cfrac{1}
+ {\ww - a_1 - \cfrac{b_2^2}{\ww - a_2 - \cfrac{b_3^2}{\cdots}}}
+\end{equation}
 
-
-where a small complex shift, defined by <a href="../../input_variables/generated_files/varset_gw.html#zcut">zcut</a>,
+where a small complex shift, defined by <a href="../../variables/generated_files/varset_gw.html#zcut">zcut</a>,
 is used to avoid the singularities along the real axis.
 The number of iteration required to converge is almost independent on the size of the problem, usually of the 
 order of 100-200 iterations.
@@ -524,21 +588,17 @@ and, most importantly, are easy to parallelize.
 Another distinct advantage is that the Haydock method is less memory demanding than the direct diagonalization 
 since only three temporary vectors are required instead of the full set of eigenvectors.
 
-<p>Note that the original formulation of the method presented in [3]
-assumes an Hermitian operator thus it can be used only for TDA
-calculations.
-We refer the reader to [4] for a generalization of the method to the
-case in which the coupling term
-cannot be neglected.
-The main drawback of the method is that it does not give direct access
-to the excitonic spectrum
-hence it cannot be used to calculate binding energies or to plot the
-excitonic wavefunctions.
-Moreover, for the time being, <a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=2
+<p>Note that the original formulation of the method presented in [[Haydock1980]
+assumes an Hermitian operator thus it can be used only for TDA calculations.
+We refer the reader to <a href="../../biblio/generated_files/bib_biblio.html#Gruning2009">[Gruning2009]</a> for a generalization of the method to the
+case in which the coupling term cannot be neglected.
+The main drawback of the method is that it does not give direct access to the excitonic spectrum
+hence it cannot be used to calculate binding energies or to plot the excitonic wavefunctions.
+Moreover, for the time being, <a href="../../variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=2
 cannot be used for calculations in which the coupling term is included.
 </p>
 <p>
-<a href="../../input_variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=3 employs the conjugate-gradient method
+<a href="../../variables/generated_files/varset_bse.html#bs_algorithm">bs_algorithm</a>=3 employs the conjugate-gradient method
 to calculate the lowest eigenstates of the Hamiltonian. 
 At present, this method is still under testing and does not support calculations with the coupling term.
 <br><br><a href=#top>Go to the top</a>
@@ -553,39 +613,39 @@ section</a> of the <i>GW</i> notes.
 
 <p>
 The matrix elements of the exchange term are evaluated in reciprocal space using:
-
 </p>
-<p align="center"><img style="width: 654px; height: 70px;" src="../documents/theory_bse/exchange_term.png"></p>
 
-
+\begin{equation}
+{\bar v}_{(vc\kk) (v'c'\kk')} = 
+\dfrac{1}{V} \sum_{\GG \neq 0} {\bar v}(\GG) \;
+\langle c\kk  |e^{i\GG\cdot\rr} |v\kk \rangle
+\langle v'\kk'|e^{-i\GG\cdot\rr}|c'\kk' \rangle
+\end{equation}
 
 while the Coulomb term is calculated according to
 
-<p align="center"><img style="width: 1025px; height: 73px;" src="../documents/theory_bse/direct_term.png"></p>
+\begin{equation}
+W_{(vc\kk) (v'c'\kk')} = 
+\dfrac{1}{V} \sum_{\GG_1\GG_2} W_{\GG_1\GG_2}(\kk'-\kk,\ww=0)
+\langle v'\kk'|e^{i(\qq +\GG_1)\cdot \rr}|v\kk \rangle 
+\langle c \kk |e^{-i(\qq+\GG_2)\cdot\rr} |c'\kk' \rangle
+\end{equation}
 
-
-The number of <b>G</b>-vectors in W and in the modified Coulomb interaction is specified through 
-<a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>
-while the wavefuctions entering the oscillator matrix elements are expanded on a <b>G</b>-sphere of energy  
-<a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>.
+The number of <b>G</b>-vectors in W and in the modified Coulomb interaction is specified through  <a href="../../variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>
+while the wavefuctions entering the oscillator matrix elements are expanded on a <b>G</b>-sphere of energy <a href="../../variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>.
 The computation of the oscillator matrix elements is discussed in 
-
 <a href="theorydoc_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
 
 <p>
-The input variable <a href="../../input_variables/generated_files/varset_bse.html#bs_exchange_term">bs_exchange_term</a>
-can be used to disable the computation of the exchange term, this
-option is mainly used for performing optical calculations without local
-field effects.
-The variable <a href="../../input_variables/generated_files/varset_bse.html#bs_coulomb_term">bs_coulomb_term</a> governs 
+The input variable <a href="../../variables/generated_files/varset_bse.html#bs_exchange_term">bs_exchange_term</a> can be used to disable the computation of the exchange term, this
+option is mainly used for performing optical calculations without local field effects.
+The variable <a href="../../variables/generated_files/varset_bse.html#bs_coulomb_term">bs_coulomb_term</a> governs 
 the computation of the Coulomb term, the most CPU-demanding part due to the presence of the double sum over <b>G</b>-vectors.
 </p>
 <p>
-
 It is also important to stress that, in the two equations above, the <b>k</b>-point index runs over the full
 Brillouin zone hence the size of the Hamiltonian is defined by the number of point in the full
 Brillouin zone and not by the number of points in the irreducible wedge.
-
 </p>
 <br><br><a href=#top>Go to the top</a>
 <hr>
@@ -603,70 +663,55 @@ clarification, especially if dielectric properties are calculated within the pse
 due to the presence of a fully nonlocal term in the Kohn-Sham Hamiltonian.
 -->
 <p>
-
 A linear expansion up to the first order in <b>q</b> of the oscillator matrix element results in:
-
 </p>
-<p align="center"><img style="width: 655px; height: 46px;" src="../documents/theory_bse/q0_expansion.png"></p>
 
+\begin{equation}
+\langle b_1,\kmq|e^{-i\qq\cdot\rr}|b_2,\kk \rangle \underset{\qq \rightarrow 0}{\approx}
+-i\,\qq\cdot \langle b_1,\kk|\rr|b_2,\kk \rangle + \mcO(q^2)
+\end{equation}
 
-where we have assumed <i>b<sub>1</sub> &#8800; b<sub>2</sub> </i>and the difference between the two wave functions at <b>k</b>-<b>q</b>  
-
+where we have assumed <i>b<sub>1</sub> &#8800; b<sub>2</sub> </i>and the difference between 
+the two wave functions at <b>k</b>-<b>q</b>  
 and <b>k</b> has been neglected because it only introduces terms that are quadratic in <b>q</b>.
 
 <p>
 Unfortunately, the above expression cannot be directly used
 because the matrix elements of the position operator are ill-defined when 
 wavefunctions obey Born-von Karman periodic boundary conditions. 
-For this reason, the first order contribution has to be evaluated using the equivalent expression [5]
+For this reason, the first order contribution has to be evaluated using the equivalent expression <a href="../../biblio/generated_files/bib_biblio.html#Baroni1986">[Baroni1986]</a>
 </p>
-<p>
 
-</p>
-<p align="center"><img style="width: 844px; height: 79px;" src="../documents/theory_bse/dipole_mel.png"></p>
+\begin{equation}
+\langle b_1,\kmq|e^{-i\qq\cdot\rr}|b_2,\kk\rangle \underset{\qq \rightarrow 0}{\approx}
+\dfrac{
+\langle b_1,\kk|-i\qq\cdot\nabla + i\qq\cdot \bigl[V_{\text{nl}},\rr\bigr]|b_2,\kk \rangle
+}
+{
+\varepsilon_{b_2\kk} - \varepsilon_{b_1\kk}
+}
+\end{equation}
 
-
-The term involving the momentum operator is efficiently evaluated in reciprocal space with linear
-scaling in <a href="../../input_variables/generated_files/varset_internal.html#npwwfn">npwwfn</a>
+The term involving the momentum operator is efficiently evaluated in reciprocal space with linear scaling in <a href="../../variables/generated_files/varset_internal.html#npwwfn">npwwfn</a>
 while the treatment of the nonlocal part of the pseudopotential is more involved and much more CPU-demanding.
 <p>
-
-
 The role played by this additional term is usually marginal in the case of GW calculations: 
 the QP corrections are obtained by performing an integration in <b>q</b>-space
 and only the <b>q</b> &#8594; 0 component of the inverse dielectric matrix is affected by the commutator of the non-local
 part of the  pseudopotential.
-
 </p>
 <p>
 For this reason it is common practice, especially during the <i>GW</i> convergence tests,
-to neglect this contribution by setting <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=0.
+to neglect this contribution by setting <a href="../../variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=0.
 Strictly speaking, however, this approximation is justified only in the case of calculations in
 bulk crystals provided that the BZ sampling is well converged.
 Particular care has to be taken when performing <i>GW</i> calculations in non-periodic systems due to the 
 reduced dimensionality of the BZ.
-
 </p>
 <p>
-
 Please note that the commutator of the nonlocal part should ALWAYS be included
 when studying optical properties, both at the RPA and at the BS level.
-We suggest the use of <a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=2 that is 
-faster and less memory demanding than the algorithm coded for
-<a href="../../input_variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=1.
-<br><br><a href=#top>Go to the top</a>
-<hr>
-<br><a name="references"> </a>
-<a name="6"> </a>
-<h3><b>6. References</b></h3>
- <p><ol>
-<li><a name="onida_rmp">G. Onida, L. Reining, and A. Rubio, Rev. Mod. Phys. <b>48</b>, 601 (2002)
-and references therein</a> </li><li><a name="albrecth">S. Albrecht, Ph.D. thesis, Ecole Polytechnique, Palaiseau (Paris), 1999</a> </li><li><a name="haydock2">R. Haydock, Comput. Phys. Comm. <b>20</b>, 11 (1980)</a> </li><li><a name="gruning">M. Gruning, A. Marini and X. Gonze, Nano Letters <b>9</b>, 2820 (2009) </a></li><li><a name="baroni1986">S. Baroni and R. Resta, Phys. Rev. B <b>33</b>, 7017 (1986) </a></li><!--
-<li><a name="benedict">L. X. Benedict and E. L. Shirley, Phys. Rev. B <b>59</b>, 5441 (1999)</a> </li>
-<li><a name="adler">S. L. Adler, Phys. Rev. <b>126</b>, 413 (1962)</a> </li>
-<li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li>
--->
-</ol>
+We suggest the use of <a href="../../variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=2 that is  faster and less memory demanding than the algorithm coded for <a href="../../variables/generated_files/varset_gw.html#inclvkb">inclvkb</a>=1.
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>

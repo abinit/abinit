@@ -864,8 +864,7 @@ end if
 
 !Set up hartree and xc potential. Compute kxc here.
  ABI_ALLOCATE(vhartr,(nfftf))
- qphon(:)=zero
- call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,qphon,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
 
  option=3
  nkxc=2*dtset%nspden-1 ! LDA
@@ -879,11 +878,12 @@ end if
  _IBM6("Before rhotoxc")
 
  call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
- call xcdata_init(dtset%intxc,dtset%ixc,&
-&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ ABI_ALLOCATE(work,(0))
+ call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,dtset%ngfft,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,&
+& work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
 & vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
+ ABI_DEALLOCATE(work)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))

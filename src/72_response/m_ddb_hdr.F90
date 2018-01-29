@@ -37,7 +37,7 @@ MODULE m_ddb_hdr
  use m_io_tools,  only : open_file
  use m_copy,      only : alloc_copy
  use m_fstrings,  only : sjoin
-
+ 
  implicit none
 
  private
@@ -150,7 +150,6 @@ MODULE m_ddb_hdr
  public :: ddb_hdr_open_write      ! Open the DDB file and write the header.
  public :: ddb_hdr_open_read       ! Open the DDB file and read the header.
  public :: ddb_hdr_compare         ! Compare two DDB headers.
-
 
 CONTAINS  !===========================================================
 !!***
@@ -303,7 +302,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
 end subroutine ddb_hdr_init
 !!***
 
-!----------------------------------------------------------------------
+
 
 !!****f* m_ddb_hdr/ddb_hdr_malloc
 !! NAME
@@ -1233,7 +1232,7 @@ end subroutine psddb8
 !! kptnrm=normalisation of k points
 !! natom=number of atoms in the unit cell
 !! nband(mkpt)=number of bands at each k point, for each polarization
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! nkpt=number of k points
 !! nspden=number of spin-density components
 !! nspinor=number of spinorial components of the wavefunctions

@@ -53,7 +53,7 @@
 !!  ngfftf(18)=contain all needed information about 3D FFT (fine grid, if PAW)
 !!  ngfft(18) =contain all needed information about 3D FFT (coarse grid, if PAW)
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, dielectric case,
-!!                 see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!                 see ~abinit/doc/variables/vargs.htm#ngfft
 !!    for susceptibility and dielectric matrices
 !!  nimage=number of images (replicas) of the cell
 !!  nkpt  =number of k points
