@@ -7,7 +7,7 @@
 !! Main calculation of the independent-particle susceptibility chi0 for qpoint!=0
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

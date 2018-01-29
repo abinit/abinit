@@ -15,7 +15,7 @@
 !! by contributions from the active space in the calling routine, if needed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!! Copyright (C) 1999-2018 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

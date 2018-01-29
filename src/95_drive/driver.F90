@@ -13,7 +13,7 @@
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

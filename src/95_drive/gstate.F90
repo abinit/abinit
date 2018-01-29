@@ -7,7 +7,7 @@
 !! Primary routine for conducting DFT calculations by CG minimization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -240,7 +240,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: nblok,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt
+ integer :: cnt,spin,band,ikpt,usecg
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -424,7 +424,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
 !  This call has to be done before any use of SCF history
-   call scf_history_init(dtset,mpi_enreg,scf_history)
+   usecg=0
+   if(dtset%extrapwf>0)usecg=1
+   call scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  end if
 
  call timab(33,2,tsec)

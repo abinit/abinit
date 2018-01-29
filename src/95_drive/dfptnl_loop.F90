@@ -7,7 +7,7 @@
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (LB)
+!! Copyright (C) 2002-2017 ABINIT group (MVeithen,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,8 +78,8 @@
 !!
 !! CHILDREN
 !!      appdig,dfpt_mkcore,dfpt_mkvxc,dfpt_vlocal,dfptnl_mv,dfptnl_resp
-!!      dotprod_vn,fourdp,getph,hartre,initylmg,inwffil,read_rhor,status,timab
-!!      wffclose,wrtout
+!!      dotprod_vn,fourdp,getph,hartre,hdr_free,initylmg,inwffil,read_rhor
+!!      status,timab,wffclose,wrtout
 !!
 !! SOURCE
 

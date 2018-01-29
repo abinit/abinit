@@ -11,7 +11,7 @@
 !! of input path for the atomic orbital file (if required).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

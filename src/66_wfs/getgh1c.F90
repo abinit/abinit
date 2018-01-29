@@ -12,7 +12,7 @@
 !! If required, <G|S^(1)|C> is returned in gs1c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, DRH, MT, SPr)
+!! Copyright (C) 1998-2018 ABINIT group (XG, DRH, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -283,6 +283,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end if
    else ! Non-Collinear magnetism for nvloc=4
      if (gs_hamkq%nspinor==2) then
+       weight=one ; tim_fourwf=4
        ABI_ALLOCATE(gh1c1,(2,npw1))
        ABI_ALLOCATE(gh1c2,(2,npw1))
        ABI_ALLOCATE(gh1c3,(2,npw1))

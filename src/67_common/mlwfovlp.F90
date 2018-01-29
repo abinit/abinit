@@ -10,7 +10,7 @@
 !! separate wannier calculation with the wannier90 code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (BAmadon,CEspejo,FJollet,TRangel)
+!! Copyright (C) 2005-2018 ABINIT group (BAmadon,CEspejo,FJollet,TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (SM,MT)
+!! Copyright (C) 2005-2018 ABINIT group (SM,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

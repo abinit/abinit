@@ -7,7 +7,7 @@
 !! Module containing the methods used to do IO on crystal objects.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG, YP, DC)
+!!  Copyright (C) 2008-2018 ABINIT group (MG, YP, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

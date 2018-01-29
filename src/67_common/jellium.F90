@@ -11,7 +11,7 @@
 !!                the jellium slab
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group (SC)
+!! Copyright (C) 2007-2018 ABINIT group (SC)
 !! This file is distributed under the terms of the 
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

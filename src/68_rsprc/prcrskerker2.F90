@@ -10,7 +10,7 @@
 !! use of a linear response approach
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (PMA)
+!! Copyright (C) 1998-2018 ABINIT group (PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
