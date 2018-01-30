@@ -1064,7 +1064,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    ABI_FREE(qbz)
  end do !imesh
  ABI_FREE(ngqpt)
- ABI_FREE(pjdos_tmp)
+
 
  if (allocated(PHdos%phdos_int)) then
    ABI_FREE(PHdos%phdos_int)
@@ -1174,7 +1174,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  PHdos%pjdos = PHdos%pjdos / Crystal%nsym
  if (prtdos == 2) PHdos%pjdos_int = PHdos%pjdos_int / Crystal%nsym
 
-
+ ABI_FREE(pjdos_tmp)
  ABI_FREE(qibz)
  ABI_FREE(wtqibz)
 
