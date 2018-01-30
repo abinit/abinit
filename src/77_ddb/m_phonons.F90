@@ -1101,11 +1101,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
          do iat=1,natom
            do isym=1, crystal%nsym
              jat = Crystal%indsym(4,isym,iat)
-             PHdos%pjdos(io,:,jat)=PHdos%pjdos(io,:,jat)+ ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
-&                                                         (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * dtweightde(iq_ibz,io)
+             PHdos%pjdos(io,:,jat)=PHdos%pjdos(io,:,jat)+ &
+                 ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
+                (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * dtweightde(iq_ibz,io)
 
-             PHdos%pjdos_int(io,:,jat)=PHdos%pjdos_int(io,:,jat)+ ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
-&                                                          (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * tweight(iq_ibz,io)
+             PHdos%pjdos_int(io,:,jat)=PHdos%pjdos_int(io,:,jat)+ &
+                 ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
+                 (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * tweight(iq_ibz,io)
            end do
 
            msqd_atom_tmp = zero
