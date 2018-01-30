@@ -17,6 +17,8 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
+!!  compute_rhor_rhog: if 1: set the computation of rhor and rhog in addition to the compensating charge.
+!!                     if 0: compute only the compensating charge
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!         1 for GS calculations
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1).

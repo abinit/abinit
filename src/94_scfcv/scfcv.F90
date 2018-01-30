@@ -1145,7 +1145,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !          3-Symetrize rhoij, compute nhat and add it to rhor
 !          Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij cannot be distributed over different atomic sites.
            cplex=1;ipert=0;idir=0;qpt(:)=zero
-           call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+           call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &            my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &            dtset%pawprtvol,pawrhoij,pawrhoij,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &            symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)

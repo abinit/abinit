@@ -592,7 +592,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
 &                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,&
 &                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_i2pert,&
-&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2)
+&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot)
 
                    if (psps%usepaw==1.and.usexcnhat==0) then
                      rho2r1(:,:) = rho2r1(:,:) - nhat1_i2pert(:,:)
