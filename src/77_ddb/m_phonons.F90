@@ -1169,6 +1169,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
  PHdos%pjdos = PHdos%pjdos / Crystal%nsym
+ if (prtdos == 2) PHdos%pjdos_int = PHdos%pjdos_int / Crystal%nsym
+
 
  ABI_FREE(qibz)
  ABI_FREE(wtqibz)
@@ -1212,6 +1214,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  ! TODO should avoid the simpson rule using derf.F90, just to be consistent
  if (prtdos==1) then
    call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%phdos,PHdos%phdos_int)
+   !do iat=1,natom
+   !  do idir=1,3
+   !    call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos(:,idir,iat),PHdos%pjdos_int(:,idir,iat))
+   !  end do
+   !end do
    do itype=1,Crystal%ntypat
      call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos_type(:,itype),PHdos%pjdos_type_int(:,itype))
    end do
