@@ -209,7 +209,7 @@ subroutine phdos_print(PHdos,fname)
 
 !Local variables-------------------------------
  integer :: io,itype,unt,unt_by_atom,unt_msqd,iatom
- real(dp) :: cfact
+ real(dp) :: tens(3,3)
  character(len=500) :: msg
  character(len=500) :: msg_method
  character(len=fnlen) :: fname_by_atom
@@ -218,16 +218,13 @@ subroutine phdos_print(PHdos,fname)
 
 ! *************************************************************************
 
-! === Convert everything into meV ===
- cfact=Ha_eV*1000 ; unitname='meV'
-! === Leave everything in Ha      ===
-! this should be the abinit default!
- cfact=one        ; unitname='Ha'
+! Use Ha units everywhere
+ unitname='Ha'
 
  select case (PHdos%prtdos)
  case (1)
    write(msg_method,'(a,es16.8,2a,i0)')&
-&   '# Gaussian method with smearing = ',PHdos%dossmear*cfact,unitname,', nqibz =',PHdos%nqibz
+&   '# Gaussian method with smearing = ',PHdos%dossmear,unitname,', nqibz =',PHdos%nqibz
  case (2)
    write(msg_method,'(a,i0)')'# Tetrahedron method, nqibz= ',PHdos%nqibz
  case default
@@ -248,9 +245,9 @@ subroutine phdos_print(PHdos,fname)
  write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type=1] ...  ',ch10,'# '
  call wrtout(unt,msg,'COLL')
  do io=1,PHdos%nomega
-   write(unt,'(3es17.8)',advance='NO')PHdos%omega(io)*cfact,PHdos%phdos(io)/cfact,PHdos%phdos_int(io)/cfact
+   write(unt,'(3es17.8)',advance='NO')PHdos%omega(io),PHdos%phdos(io),PHdos%phdos_int(io)
    do itype=1,PHdos%ntypat
-     write(unt,'(2es17.8,2x)',advance='NO')PHdos%pjdos_type(io,itype)/cfact,PHdos%pjdos_type_int(io,itype)/cfact
+     write(unt,'(2es17.8,2x)',advance='NO')PHdos%pjdos_type(io,itype),PHdos%pjdos_type_int(io,itype)
    end do
    write(unt,*)
  end do
@@ -270,9 +267,9 @@ subroutine phdos_print(PHdos,fname)
  write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    PJDOS[atom=1]  PJDOS[atom=2] ...  ',ch10,'# '
  call wrtout(unt_by_atom,msg,'COLL')
  do io=1,PHdos%nomega
-   write(unt_by_atom,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact,PHdos%phdos(io)/cfact
+   write(unt_by_atom,'(2es17.8)',advance='NO')PHdos%omega(io),PHdos%phdos(io)
    do iatom=1,PHdos%natom
-     write(unt_by_atom,'(1es17.8,2x)',advance='NO') sum(PHdos%pjdos(io,1:3,iatom))/cfact
+     write(unt_by_atom,'(1es17.8,2x)',advance='NO') sum(PHdos%pjdos(io,1:3,iatom))
    end do
    write(unt_by_atom,*)
  end do
@@ -284,7 +281,7 @@ subroutine phdos_print(PHdos,fname)
  if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
- write(msg,'(3a)')'# ',ch10,'# Phonon density of states weighted msq displacement matrix'
+ write(msg,'(3a)')'# ',ch10,'# Phonon density of states weighted msq displacement matrix (set to zero below 1e-12)'
  call wrtout(unt_msqd,msg,'COLL')
  write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in bohr^2 states/',unitname
  call wrtout(unt_msqd,msg,'COLL')
@@ -292,15 +289,19 @@ subroutine phdos_print(PHdos,fname)
  write(msg,'(5a)')'# ',ch10,'# omega     MSQDisp[atom=1, xx, yy, zz, yz, xz, xy]  MSQDisp[atom=2, xx, yy,...] ...  ',ch10,'# '
  call wrtout(unt_msqd,msg,'COLL')
  do io=1,PHdos%nomega
-   write(unt_msqd,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact
+   write(unt_msqd,'(2es17.8)',advance='NO')PHdos%omega(io)
    do iatom=1,PHdos%natom
+     tens = PHdos%msqd_dos_atom(io,:,:,iatom)
+     where (abs(tens) < tol12)
+        tens = zero
+     end where
      write(unt_msqd,'(6es17.8,2x)',advance='NO') &
-&        PHdos%msqd_dos_atom(io,1,1,iatom)/cfact, &
-&        PHdos%msqd_dos_atom(io,2,2,iatom)/cfact, &
-&        PHdos%msqd_dos_atom(io,3,3,iatom)/cfact, &
-&        PHdos%msqd_dos_atom(io,2,3,iatom)/cfact, &
-&        PHdos%msqd_dos_atom(io,1,3,iatom)/cfact, &
-&        PHdos%msqd_dos_atom(io,1,2,iatom)/cfact
+&        tens(1,1), &
+&        tens(2,2), &
+&        tens(3,3), &
+&        tens(2,3), &
+&        tens(1,3), &
+&        tens(1,2)
    end do
    write(unt_msqd,*)
  end do
