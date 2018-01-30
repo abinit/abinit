@@ -560,7 +560,7 @@ program anaddb
 
    call ddb_hdr_free(ddb_hdr)
 
- end if 
+ end if
 
 !***********************************************************************
 
@@ -569,7 +569,7 @@ program anaddb
     ! DEBUG
     !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
     ! &                     dimonly=1)
-   
+
     !mband = ddb_hdr%mband
     !msym = ddb_hdr%msym
     !natom = ddb_hdr%natom
@@ -577,7 +577,7 @@ program anaddb
     !nkpt = ddb_hdr%nkpt
     !ntypat = ddb_hdr%ntypat
     !usepaw = ddb_hdr%usepaw
-   
+
     !call ddb_hdr_free(ddb_hdr)
     ! END DEBUG
 
