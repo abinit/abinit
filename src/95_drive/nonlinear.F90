@@ -878,12 +878,10 @@ end if
  _IBM6("Before rhotoxc")
 
  call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
- ABI_ALLOCATE(work,(0))
  call xcdata_init(xcdata,dtset=dtset)
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,dtset%ngfft,&
-& work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
-& vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
- ABI_DEALLOCATE(work)
+ call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,&
+& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
