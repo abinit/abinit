@@ -99,8 +99,8 @@ m_effective_potential_file.F90 : var = comm [78_effpot]
 m_sigmaph.F90 : var = ebands [78_eph]
 m_sigmaph.F90 : var = ikcalc [78_eph]
 m_sigmaph.F90 : var = spin [78_eph]
-outscfcv.F90 : var = fermie [94_scfcv]
 afterscfloop.F90 : var = usexcnhat [94_scfcv]
+outscfcv.F90 : var = fermie [94_scfcv]
 **********************************************************************
 Warning count = 100
 **********************************************************************

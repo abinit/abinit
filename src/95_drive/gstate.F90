@@ -646,8 +646,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "to decrease the memory requirements. Consider also OpenMP threads."
      MSG_ERROR_NOSTOP(message,ii)
      write (message,'(5(a,i0), 2a)')&
-&     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband, ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+&     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
+&     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
  end if
