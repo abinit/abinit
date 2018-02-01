@@ -10,7 +10,7 @@
 !! Work for nsppol=1 or 2, but only accept nspinor=1,
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (NSAI).
+!! Copyright (C) 2001-2018 ABINIT group (NSAI).
 !!
 !! INPUTS
 !!  bdberry(4)=band limits for Berry phase contributions (or du/dk)

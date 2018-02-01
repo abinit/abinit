@@ -9,7 +9,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MT)
+!! Copyright (C) 2011-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -207,7 +207,7 @@ CONTAINS !===========================================================
 !!    The wfs arrays that are possibly allocated are : cg and cprj
 !!
 !! PARENTS
-!!      gstate
+!!      gstate,scfcv
 !!
 !! CHILDREN
 !!
@@ -335,7 +335,7 @@ end subroutine scf_history_init
 !!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
 !!
 !! PARENTS
-!!      gstateimg
+!!      gstateimg,scfcv
 !!
 !! CHILDREN
 !!

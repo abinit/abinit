@@ -9,7 +9,7 @@
 !! No change of acell, rprim and vel at present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (XG,ARom,MT)
+!! Copyright (C) 2009-2018 ABINIT group (XG,ARom,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

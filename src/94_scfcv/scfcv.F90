@@ -12,7 +12,7 @@
 !! positions or else to do non-SCF band structures.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,17 +138,18 @@
 !!      fock_ace_destroy,fock_bz_destroy,fock_common_destroy,fock_destroy
 !!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
 !!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
-!!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho
+!!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,mkrho,newrho
 !!      newvtr,nhatgrid,odamix,out_geometry_xml,out_resultsgs_xml,outscfcv
 !!      paw2wvl_ij,paw_an_free,paw_an_init,paw_an_nullify,paw_an_reset_flags
 !!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
 !!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
-!!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
-!!      prc_mem_free,prtene,psolver_rhohxc,rhotov,rhotoxc,scprqt,setnoccmmp
+!!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawmkrho,pawmkrhoij
+!!      pawtab_get_lsize,pawuj_red,prc_mem_free,prtene,psolver_rhohxc,rhotov
+!!      rhotoxc,scf_history_free,scf_history_init,scprqt,setnoccmmp
 !!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
-!!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
-!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init,xmpi_isum,xmpi_sum
-!!      xmpi_wait
+!!      symmetrize_xred,timab,transgrid,update_e_field_vars,vtorho,vtorhorec
+!!      vtorhotf,wf_mixing,wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init
+!!      xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 

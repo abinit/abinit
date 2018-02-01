@@ -22,7 +22,7 @@
 !!  If efficiency is a concern, then the F77 call should be used 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2017 ABINIT group (MG)
+!! Copyright (C) 1992-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

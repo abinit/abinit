@@ -10,7 +10,7 @@
 !! Use algorithm proposed by T. A.  Arias et al. in PRB 45, 1538 (1992)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT,FJ)
+!! Copyright (C) 1998-2018 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

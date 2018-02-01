@@ -8,7 +8,7 @@
 !! dipole moments, at a given k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group
+!! Copyright (C) 1998-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

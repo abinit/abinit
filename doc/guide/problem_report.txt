@@ -6,7 +6,7 @@ Later, it will be placed on the Web.
 Please refer to the ABINIT Netiquette list as well,
 before sending your report via e-mail.
 
-Copyright (C) 2000-2017 ABINIT group (MM,XG)
+Copyright (C) 2000-2018 ABINIT group (MM,XG)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .

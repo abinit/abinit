@@ -9,7 +9,7 @@
 !! quantities are used in PAW-based computations of polarization and magnetization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group
+!! Copyright (C) 2005-2018 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

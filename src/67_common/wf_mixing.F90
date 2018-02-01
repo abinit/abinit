@@ -9,7 +9,7 @@
 !! Different algorithms are implemented, depending on the value of wfmixalg.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG,MT,FJ)
+!! Copyright (C) 2017-2018 ABINIT group (XG,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,8 +36,12 @@
 !!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
+!!      scfcv
 !!
 !! CHILDREN
+!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
+!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
+!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
 !!
 !! SOURCE
 

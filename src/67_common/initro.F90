@@ -10,7 +10,7 @@
 !!  - PS atomic valence density from psp file (PAW or NC psps with valence change in the pp file) 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA,XG,MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -9,7 +9,7 @@
 !! Please: use the routines chkint_eq, chkint_ne, chkint_ge, chkint_le, and chkdpr
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
