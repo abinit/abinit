@@ -125,8 +125,8 @@ subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,m
                    cpk1=cmplx(cprj_k1(iatom,ibs)%cp(1,ilmn),cprj_k1(iatom,ibs)%cp(2,ilmn))
                    cpk2=cmplx(cprj_k2(iatom,jbs)%cp(1,jlmn),cprj_k2(iatom,jbs)%cp(2,jlmn))
                    cterm = conjg(cpk1)*paw_onsite*cpk2
-                   k1k2_paw(1,iband,jband) = k1k2_paw(1,iband,jband)+dreal(cterm)
-                   k1k2_paw(2,iband,jband) = k1k2_paw(2,iband,jband)+dimag(cterm)
+                   k1k2_paw(1,iband,jband) = k1k2_paw(1,iband,jband)+real(cterm)
+                   k1k2_paw(2,iband,jband) = k1k2_paw(2,iband,jband)+aimag(cterm)
                 end do ! end loop over ispinor
              end do ! end loop over jband
           end do ! end loop over iband

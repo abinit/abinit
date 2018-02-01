@@ -2016,6 +2016,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 & dtset%prtnabla > 0  .or. &
 & dtset%prtdos   ==3  .or. &
 & dtset%berryopt /=0  .or. &
+& dtset%orbmag /=0    .or. &
 & dtset%kssform  ==3  .or. &
 & dtset%pawfatbnd> 0  .or. &
 & dtset%pawprtwf > 0  )

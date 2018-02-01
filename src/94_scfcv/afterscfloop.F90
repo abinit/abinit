@@ -512,9 +512,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
  if(dtset%orbmag==1) then
-    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,&
-         &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
-         &            usecprj,psps%usepaw,xred)
+    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
+         &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+         &            symrec,usecprj,psps%usepaw,xred)
  end if
 
  call timab(252,2,tsec)
