@@ -842,7 +842,7 @@ end subroutine ifc_print
 !!  phfrq(3*natom) = Phonon frequencies in Hartree
 !!  displ_cart(2,3,natom,3*natom) = Phonon displacement in Cartesian coordinates
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
-!!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
+!!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix in Cartesian coords..
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
@@ -1656,7 +1656,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
-! unit number to print out ifc information for dynamical matrix (AI2PS) 
+! unit number to print out ifc information for dynamical matrix (AI2PS)
  integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
  real(dp) :: maxdist_tdep
@@ -1744,9 +1744,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 &   ' constants in TDEP format. This is because prt_ifc==1. '
    ! Print necessary stuff for TDEP
    write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
- 
+
    ! look at all pairs, find furthest one with weight 1
-!   do ia 
+!   do ia
 !Ifc%wghatm(ia,ib,irpt)
    maxdist_tdep = Ifc%r_inscribed_sphere !maxval(dist)*0.8_dp
    write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxdist_tdep*Bohr_Ang
@@ -1849,7 +1849,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
          ! TODO: check whether this is correct for TDEP: might need just lattice
          ! vector part and not full vector, and could be in integers instead of
          ! cartesian vector...
-         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
+         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim)
 
          !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
@@ -1860,7 +1860,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
            ! a transpose is needed or a swap between the nu and the mu
            !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
            write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
-           
+
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
          end do
