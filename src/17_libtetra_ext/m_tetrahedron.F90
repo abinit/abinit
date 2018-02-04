@@ -1587,7 +1587,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  integer :: ieps,nn1,nn2,nn3,nn4
  double precision  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
  double precision  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
- double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31
+ double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31,gval
  double precision  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
  double precision  :: deleps1, deleps2, deleps3, deleps4
  double precision  :: invepsum, cc_pre, dccde_pre
@@ -1862,7 +1862,11 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
    eps = enemin
    do ieps=1,nene
      tmp = eps - cc
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gau_prefactor*exp(-tmp*tmp*gau_width2)
+     gval = gau_prefactor*exp(-tmp*tmp*gau_width2)
+     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + gval
+     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + gval
+     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + gval
+     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gval
      eps = eps + deltaene
    end do
  end if ! end degenerate tetrahedron if
