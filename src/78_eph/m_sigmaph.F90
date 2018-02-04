@@ -97,7 +97,6 @@ module m_sigmaph
 !! TODO
 !!  1) Store (q, mu) or q-resolved contributions? More memory but could be useful for post-processing
 !!  2) Use list of i.delta values instead of single shift? Useful for convergence studies.
-!!  3) Write python code to analyze/merge results.
 !!
 !! SOURCE
 
@@ -1345,9 +1344,11 @@ end function nbe
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
-!!  cryst(crystal_t)=Crystalline structure
+!!  ecut=Cutoff energy for wavefunctions.
+!!  cryst<crystal_t>=Crystalline structure
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
+!!  dtfil<datafiles_type>=variables related to files.
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -1411,12 +1412,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  if (dtset%elph2_imagden > tol12) new%ieta = j_dpc * dtset%elph2_imagden
  new%ieta = j_dpc * 0.1_dp * eV_Ha
 
- ! Build (linear) mesh of temperatures. tsmesh(1:3) = [start, step, num]
+ ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
- ! Number of bands included in sum.
+ ! Number of bands included in self-energy summation.
  new%nbsum = dtset%mband
 
  gap_err = get_gaps(ebands, gaps)
@@ -1724,7 +1725,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
      nctkdim_t("nsppol", new%nsppol), nctkdim_t("ntemp", new%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
-     nctkdim_t("nqbz", new%nqbz)], &
+     nctkdim_t("nqibz", new%nqibz), nctkdim_t("nqbz", new%nqbz)], &
      defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -1761,7 +1762,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(ncerr)
 
    if (new%nwr > 0) then
-     ! These arrays acquire two extra dimensions on file (nkcalc, nsppol).
+     ! These arrays get two extra dimensions on file (nkcalc, nsppol).
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
        nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol") &
@@ -1999,7 +2000,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
    self%qibz_k = self%qbz; self%wtq_k = one / self%nqbz
 
  else if (abs(self%symsigma) == 1) then
-   ! Use symmetries of the little group
+   ! Use the symmetries of the little group
    lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
 
    self%nqibz_k = lgk%nkibz_q
@@ -2307,10 +2308,10 @@ subroutine sigmaph_print(self, unt)
 ! *************************************************************************
 
  ! Write dimensions
- write(unt,"(a)")sjoin("Number of bands in sum:", itoa(self%nbsum))
+ write(unt,"(a)")sjoin("Number of bands in self-energy summation:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
  write(unt,"(a)")sjoin("delta shift: ", ftoa(aimag(self%ieta) * Ha_eV), "[eV]")
- write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
+ write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
  write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
  write(unt,"(a)")sjoin("ngqpt:", ltoa(self%ngqpt))
