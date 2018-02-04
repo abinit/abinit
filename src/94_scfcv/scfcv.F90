@@ -1978,7 +1978,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  call timab(248,1,tsec)
 
  call outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,&
-& dtset,ecut,eigen,electronpositron,elfr,etotal,energies%e_fermie,&
+& dtset,ecut,eigen,electronpositron,elfr,etotal,&
 & gmet,gprimd,grhor,hdr,kg,lrhor,dtset%mband,mcg,mcprj,dtset%mgfft,&
 & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,nattyp,&
 & nfftf,ngfftf,nhat,dtset%nkpt,npwarr,dtset%nspden,&
