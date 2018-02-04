@@ -313,7 +313,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
        iatom=-1;idir=0;ctocprj_choice=3;iorder_cprj=0;unpaw=26
        call metric(gmet,gprimd,-1,rmet,rprimd,dum)
        call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
-&       iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
+&       iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,mcg,&
 &       fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
 &       dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%nkpt_bz,&
 &       dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&

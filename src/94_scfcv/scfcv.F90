@@ -1075,7 +1075,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         rprimd,dtset%typat,ucvol,xred,typord=1)
          iatom=-1;idir=0
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
-&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &         xred,ylm,ylmgr)
@@ -1942,7 +1942,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    iatom=0 ; iorder_cprj=1 ! cprj are not ordered
    call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,&
 &   iatom,idir,iorder_cprj,dtset%istwfk,kg,dtset%kptns,&
-&   dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&   mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,&
 &   dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
