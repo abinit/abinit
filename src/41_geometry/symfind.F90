@@ -119,6 +119,7 @@
    write(std_out,*)' symfind : enter'
    call flush(std_out)
    write(std_out,*)' symfind : nzchempot= ',nzchempot
+   write(std_out,'(a,I6)')'   noncoll    =', noncoll
    write(std_out,*)'   ptsymrel matrices are :'
    do isym=1,nptsym
      write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
@@ -236,6 +237,7 @@
  end if
 
  if (prtvol > 1) then
+   write(std_out,'(a,I6)')' symfind : has_spin = ',has_spin
    write(std_out,'(a,I6)')' symfind : has_afm = ',has_afm
    write(std_out,'(a,I6)')' symfind : has_canting = ',has_canting
    write(std_out,*)' symfind : found ',nclass,' nclass of atoms'
@@ -276,7 +278,7 @@
    end do
  end if
 
-!If non-collinear spinat have to be used, transfer them in reduced coordinates
+!If non-collinear spinat have to be used, transfer them to reduced coordinates
  ABI_ALLOCATE(spinatred,(3,natom))
  do iatom=1,natom
    do ii=1,3
@@ -291,6 +293,11 @@
 !Big loop over each symmetry operation of the Bravais lattice
  nsym=0
  do isym=1,nptsym
+
+   if (prtvol > 1) then
+     write(std_out,'(a,i6)')'isym= ',isym
+     write (std_out,'(a,9I6)') '  ptsym', ptsymrel(:,:,isym)
+   end if
 
 !  ji: Check whether symmetry operation leaves efield invariant
    if (berryopt==4 .or. berryopt==6 .or. berryopt==7 .or. &
@@ -333,8 +340,8 @@
 !  using the point symmetry
    iatom0=class(1,iclass0)
    sxred0(:)=ptsymrel(:,1,isym)*xred(1,iatom0)+ &
-&   ptsymrel(:,2,isym)*xred(2,iatom0)+ &
-&   ptsymrel(:,3,isym)*xred(3,iatom0)
+&            ptsymrel(:,2,isym)*xred(2,iatom0)+ &
+&            ptsymrel(:,3,isym)*xred(3,iatom0)
 
 !  From the set of possible images, deduce tentative translations,
 !  and magnetic factor then test whether it sends each atom on a symmetric one
@@ -354,7 +361,7 @@
 
      if (noncoll==0) then
 ! FM with atom1 could come from:
-!   real FM (Idendity operation)
+!   real FM (Identity operation)
 !   mirror plane parallel to this spin
 !   rotation axis parallel to this spin...
        if (sum((spinatred(:,iatom1)-spinatred(:,iatom0))**2) < tolsym) then
@@ -382,7 +389,7 @@
        ntrialxfm = ntrialxfm+1
        trialsymmag(:,:,ntrialxfm) = real(ptsymrel(:,:,isym), kind=dp)
        symafm_ref(ntrialxfm) = 1
-       if (has_afm==1) then
+       if (has_spin==1 .and. has_afm==1) then
          ntrialxfm = ntrialxfm+1
          trialsymmag(:,:,ntrialxfm) = -real(ptsymrel(:,:,isym), kind=dp)
          symafm_ref(ntrialxfm) = -1
@@ -408,7 +415,7 @@
 !       trialafm=-1
 !     end if
      if (prtvol > 1) then
-       write(std_out,'(a,i6,3E14.4,I6)')'isym,trialnons(:),ntrialxfm= ',isym,trialnons(:),ntrialxfm
+       write(std_out,'(a,3E14.4,I6)')'trialnons(:),ntrialxfm= ',trialnons(:),ntrialxfm
      end if
 
 
@@ -434,7 +441,8 @@
 
        if (prtvol > 1) then
          write (std_out,'(a,2I6,3I6)') 'ntrialxfm, itrialxfm, symafm_ref ', ntrialxfm, itrialxfm, symafm_ref(itrialxfm)
-         write (std_out,'(9E12.4)') trialsymmag(:,:,itrialxfm)
+         write (std_out,'(a,9E20.10)') '  spsym',  (trialsymmag(:,:,itrialxfm))
+         !write (std_out,'(a,9I6)') '  spsym',  nint(trialsymmag(:,:,itrialxfm))
        end if
 
 !      Loop over all classes, then all atoms in the class,
@@ -456,7 +464,10 @@
 !&                                    ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
 !&                                    ptsymrel(:,3,isym)*spinatred(3,iatom2))
 !           end if
-           symspinat2(:)=matmul(trialsymmag(:,:,itrialxfm),spinatred(:,iatom2))
+           !symspinat2(:)=matmul(trialsymmag(:,:,itrialxfm),spinatred(:,iatom2))
+           symspinat2(:)=trialsymmag(:,1,itrialxfm)*spinatred(1,iatom2)&
+&                       +trialsymmag(:,2,itrialxfm)*spinatred(2,iatom2)&
+&                       +trialsymmag(:,3,itrialxfm)*spinatred(3,iatom2)
 
            if(present(nucdipmom)) then
 !          Generate the tentative symmetric nuclear dipole moment of iatom2
