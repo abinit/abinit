@@ -239,7 +239,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
    nene=nint((enemax-enemin)/deltaene)+1
 
 !  Write the header of the DOS file, and also decides the energy range and increment
-   call dos_hdr_write(buffer,deltaene,dosdeltae,eigen,enemax,enemin,fermie,mband,nband,nene,&
+   call dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
 &   nkpt,nsppol,occopt,prtdos1,tphysel,tsmear,unitdos)
 
    ABI_ALLOCATE(dos,(bantot))

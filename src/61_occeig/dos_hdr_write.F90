@@ -19,9 +19,6 @@
 !! enemax=maximal value of the DOS energy argument
 !! enemin=minimal value of the DOS energy argument
 !! nene=number of DOS energy argument
-!! buffer=approximative buffer energy for the output of the DOS
-!!  (beyond the max and min energy values).
-!! dosdeltae=DOS delta of Energy (if zero, take default values)
 !! eigen(mband*nkpt*nsppol)=eigenvalues (input or init to large number), hartree
 !! fermie=fermi energy useful for band alignment...
 !! mband=maximum number of bands
@@ -52,7 +49,7 @@
 #include "abi_common.h"
 
 
-subroutine dos_hdr_write(buffer,deltaene,dosdeltae,&
+subroutine dos_hdr_write(deltaene,&
 &  eigen,enemax,enemin,fermie,mband,nband,nene,&
 &  nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
 
@@ -71,7 +68,7 @@ subroutine dos_hdr_write(buffer,deltaene,dosdeltae,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,nkpt,nsppol,occopt,prtdos,unitdos,nene
- real(dp),intent(in) :: buffer,dosdeltae,fermie,tphysel,tsmear
+ real(dp),intent(in) :: fermie,tphysel,tsmear
  real(dp),intent(in) :: deltaene,enemax,enemin
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
