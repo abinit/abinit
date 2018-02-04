@@ -51,7 +51,13 @@
 #include "abi_common.h"
 
 
-subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mpert,msize,natom,nblok)
+subroutine ddb_internalstr(asr,&
+!&crystal,&
+& blkval,&
+!&asrq0,&
+& d2asr,iblok,instrain,iout,mpert,&
+!&msize,&
+natom,nblok)
 
  use defs_basis
  use m_profiling_abi
@@ -73,9 +79,10 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
 
 !Arguments----------------------------------------------
 !scalars
- integer,intent(in) :: asr,iblok,iout,mpert,msize,natom,nblok
- type(crystal_t),intent(in) :: crystal
- type(asrq0_t),intent(inout) :: asrq0
+ integer,intent(in) :: asr,iblok,iout,mpert,natom,nblok
+!integer,intent(in) :: msize
+!type(crystal_t),intent(in) :: crystal
+!type(asrq0_t),intent(inout) :: asrq0
 !arrays
  real(dp),intent(in) :: d2asr(2,3,natom,3,natom)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
