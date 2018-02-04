@@ -559,7 +559,7 @@ program anaddb
 
    close(ddbun)
 
-   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,filnam(2),comm)
 
    call ddb_hdr_free(ddb_hdr)
 
@@ -821,7 +821,7 @@ program anaddb
      ! print the elastic tensor
      call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&     instrain,ab_out,mpert,msize,natom,ddb%nblok)
+&     instrain,ab_out,mpert,natom,ddb%nblok)
 
 #ifdef HAVE_NETCDF
      if (iam_master) then
