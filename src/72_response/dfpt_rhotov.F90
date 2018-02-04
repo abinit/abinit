@@ -10,7 +10,7 @@
 !!   - some contributions to the 2nd-order energy
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MT, SPr)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,7 +88,7 @@
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
-&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1)
+&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
 
  use defs_basis
  use defs_abitypes
@@ -111,7 +111,7 @@
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
- integer,intent(in) :: optene,optres,paral_kgb,usepaw,usexcnhat
+ integer,intent(in) :: optene,optres,paral_kgb,usepaw,usexcnhat,ixcrot
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: ehart01 !vz_i
  real(dp),intent(out) :: vres2
@@ -151,10 +151,7 @@
  if (nspden==4) then
    if(usepaw==1) then
      MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
-   end if
-   if(cplex==2) then
-     MSG_WARNING('DFPT with nspden=4 and qpt!=(0,0,0) is under development')
-   end if
+   endif
  end if
 
 !Get size of FFT grid
@@ -228,7 +225,7 @@
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
 
      call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1)
+&     nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1,ixcrot=ixcrot)
 
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
@@ -243,7 +240,6 @@
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      if (ipert==natom+5) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
-       !write(*,*) 'elmag1=',elmag1 Debug
      end if
    else
      if (usexcnhat/=0) then
@@ -273,7 +269,7 @@
      optnc=1
      nkxc_cur=nkxc
      call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1)
+&     nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1,ixcrot=ixcrot)
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)

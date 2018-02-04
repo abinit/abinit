@@ -6,7 +6,7 @@
 !! Loop over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB, XW, MT,SPr)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MB, XW, MT,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -351,6 +351,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  nsppol = dtset%nsppol; nspinor = dtset%nspinor
 
  kramers_deg=.true.
+ if (dtset%tim1rev==0) then
+   kramers_deg=.false.
+ end if
 
 !Obtain dimensional translations in reciprocal space gprimd,
 !metrics and unit cell volume, from rprimd. Also output rprimd, gprimd and ucvol

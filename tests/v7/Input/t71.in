@@ -1,12 +1,12 @@
 # Crystalline silicon : computation of the total energy using Fock functional,
 # without an auxiliary XC functional for the SCF cycle, 
-# and some over relaxation in a simple mixing scheme..
+# and some over relaxation in a simple mixing scheme.
 # PAW
 
  nstep 61        # Maximal number of SCF cycles
  fockoptmix 201
  nnsclohf2 4       
- ixc1 11           # Explitic use of the native PBE functional 
+ ixc1 11           # Explicit use of the native PBE functional 
  ixc2 40           # Calculation with Hartree-Fock functional
  fockdownsampling2 0 0 0 # Keep only the Gamma point to define the Fock operator
 

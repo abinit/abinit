@@ -150,13 +150,6 @@ m_tdep_utils.F90 = line: 888, var: 'jsym' [80_tdep]
 m_tdep_utils.F90 = line: 891, var: 'ipiv' [80_tdep]
 m_tdep_utils.F90 = line: 894, var: 'eigval' [80_tdep]
 m_xcdata.F90 = line: 352, var: 'gga_id' [56_xc]
-m_xc_noncoll.F90 = line: 372, var: 'dum' [41_xc_lowlevel]
-m_xc_noncoll.F90 = line: 381, var: 'fact_im' [41_xc_lowlevel]
-m_xc_noncoll.F90 = line: 381, var: 'fact_re' [41_xc_lowlevel]
-m_xc_noncoll.F90 = line: 897, var: 'delta_12' [41_xc_lowlevel]
-m_xc_noncoll.F90 = line: 898, var: 'err12' [41_xc_lowlevel]
-m_xc_noncoll.F90 = line: 898, var: 'wrong_comp' [41_xc_lowlevel]
-m_xc_noncoll.F90 = line: 900, var: 'ii' [41_xc_lowlevel]
 pred_velverlet.F90 = line: 95, var: 'vel_nexthalf' [45_geomoptim]
 printmagvtk.F90 = line: 83, var: 'jfft' [54_abiutil]
 psp9in.F90 = line: 125, var: 'iln' [64_psp]
@@ -218,5 +211,5 @@ tdep.F90 = line: 87, var: 'psij_nn' [98_main]
 tdep.F90 = line: 90, var: 'dynmat' [98_main]
 tdep.F90 = line: 93, var: 'gruneisen' [98_main]
 **********************************************************************
-Warning count = 216
+Warning count = 209
 **********************************************************************

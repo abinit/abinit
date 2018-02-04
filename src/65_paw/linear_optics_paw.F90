@@ -13,7 +13,7 @@
 !! both the real and imaginary parts.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (VR, PGhosh)
+!! Copyright (C) 2002-2018 ABINIT group (VR, PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

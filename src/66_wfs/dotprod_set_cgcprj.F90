@@ -17,7 +17,7 @@
 !! that are detrimental for performance...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG)
+!! Copyright (C) 2017-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,8 +61,10 @@
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      cgcprj_cholesky,wf_mixing
 !!
 !! CHILDREN
+!!      dotprod_g,pawcprj_alloc,pawcprj_free,pawcprj_get,zhpev
 !!
 !! SOURCE
 
@@ -118,8 +120,10 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' dotprod_set_cgcprj : enter '
- write(std_out,*)' dotprod_set_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' dotprod_set_cgcprj : enter '
+!write(std_out,*)' dotprod_set_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' dotprod_set_cgcprj : usepaw,nbd1,nbd2=',usepaw,nbd1,nbd2
+!call flush(std_out)
 !ENDDEBUG
 
  if(hermitian==1)then
@@ -286,9 +290,11 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 !write(std_out,*)' smn=',smn
 !ENDDEBUG
 
+!====== Debugging section ==========
+ if(.false.)then
 !DEBUG
 !Compute the eigenvalues of the projector S herm(S) or herm(S) S, depending on which has lowest dimension.
- write(std_out,*)' dotprod_set_cgcprj : compute the projector matrix '
+!write(std_out,*)' dotprod_set_cgcprj : compute the projector matrix '
  nbd=min(nbd1,nbd2)
  ABI_ALLOCATE(proj,(2,nbd,nbd))
  proj(:,:,:)=zero
@@ -310,7 +316,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 
 !write(std_out,*)' proj=',proj
 
- write(std_out,*)' dotprod_set_cgcprj : compute the eigenvalues of the projector '
+!write(std_out,*)' dotprod_set_cgcprj : compute the eigenvalues of the projector '
  ABI_ALLOCATE(matrx,(2,(nbd*(nbd+1))/2))
  ii=1
  do i2=1,nbd
@@ -328,7 +334,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 
  call ZHPEV ('V','U',nbd,matrx,eigval,eigvec,nbd,zhpev1,zhpev2,ier)
 
- write(std_out,*)' eigval=',eigval
+!write(std_out,*)' eigval=',eigval
 
  ABI_DEALLOCATE(matrx)
  ABI_DEALLOCATE(zhpev1)
@@ -339,6 +345,8 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
  ABI_DEALLOCATE(proj)
 !stop
 !ENDDEBUG
+ endif
+!====== End of debugging section ==========
 
  ABI_DEALLOCATE(cwavef1)
  ABI_DEALLOCATE(cwavef2)

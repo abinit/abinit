@@ -30,7 +30,7 @@
 !! * macro_uj_type : TO BE COMPLETED
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (XG)
+!! Copyright (C) 2001-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -337,6 +337,7 @@ type dataset_type
  integer :: ixc
  integer :: ixc_sigma
  integer :: ixcpositron
+ integer :: ixcrot
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
  integer :: kptopt
@@ -552,6 +553,7 @@ type dataset_type
  integer :: symsigma
  integer :: td_mexcit
  integer :: tfkinfunc
+ integer :: tim1rev
  integer :: timopt
  integer :: tl_nprccg
  integer :: ucrpa

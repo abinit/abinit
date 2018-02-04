@@ -11,7 +11,7 @@
 !! and were used to dimension the arrays needed here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1317,6 +1317,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
  ixc_current=dtset%ixc
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixcrot',tread,'INT')
+ if(tread==1) dtset%ixcrot=intarr(1)
+
 !Read the ixc for an advanced functional
 !If present, and relevant (only specific values for gcalctyp), the other internal variable will be adjusted to this other functional)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_sigma',tread,'INT')
@@ -2210,6 +2213,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strprecon',tread,'DPR')
  if(tread==1) dtset%strprecon=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tim1rev',tread,'INT')
+ if (tread==1) dtset%tim1rev=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xc_denpos',tread,'DPR')
  if(tread==1) dtset%xc_denpos=dprarr(1)

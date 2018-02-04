@@ -7,7 +7,7 @@
 !!  Creates group for Parallelization over Perturbations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2017 ABINIT group (FJ,MT)
+!!  Copyright (C) 2005-2018 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

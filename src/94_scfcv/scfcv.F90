@@ -12,7 +12,7 @@
 !! positions or else to do non-SCF band structures.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -137,17 +137,18 @@
 !!      fock_ace_destroy,fock_bz_destroy,fock_common_destroy,fock_destroy
 !!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
 !!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
-!!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho
+!!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,mkrho,newrho
 !!      newvtr,nhatgrid,odamix,out_geometry_xml,out_resultsgs_xml,outscfcv
 !!      paw2wvl_ij,paw_an_free,paw_an_init,paw_an_nullify,paw_an_reset_flags
 !!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
 !!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
-!!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
-!!      prc_mem_free,prtene,psolver_rhohxc,rhotov,rhotoxc,scprqt,setnoccmmp
+!!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawmkrho,pawmkrhoij
+!!      pawtab_get_lsize,pawuj_red,prc_mem_free,prtene,psolver_rhohxc,rhotov
+!!      rhotoxc,scf_history_free,scf_history_init,scprqt,setnoccmmp
 !!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
-!!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
-!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init,xmpi_isum,xmpi_sum
-!!      xmpi_wait
+!!      symmetrize_xred,timab,transgrid,update_e_field_vars,vtorho,vtorhorec
+!!      vtorhotf,wf_mixing,wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init
+!!      xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 
@@ -307,6 +308,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
  integer :: quit_sum,req_cplex_dij,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
+ integer :: spare_mem
  integer :: stress_needed,sz1,sz2,tim_mkrho,unit_out
  integer :: usecprj,usexcnhat,use_hybcomp
  integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg
@@ -1093,30 +1095,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         xred,ylm,ylmgr)
        end if
        if(wfmixalg/=0)then
+         spare_mem=0
+         if(spare_mem==1)history_size=wfmixalg ! Not yet coded
+         if(spare_mem==0)history_size=2*(wfmixalg-1)+1
+!        Specific case of simple mixing : always history_size=1
          if(wfmixalg==2)history_size=1
-         if(wfmixalg==3)history_size=2
-         if(wfmixalg==4)history_size=3
          scf_history_wf%history_size=history_size
          usecg=2
-!DEBUG
-!        write(std_out,*)' scfcv : will call scf_history_init'
-!        write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
-!        call flush(std_out)
-!ENDDEBUG
          call scf_history_init(dtset,mpi_enreg,usecg,scf_history_wf)
-
-!DEBUG
-   write(std_out,*)' scfcv : after scf_history_init'
-   write(std_out,*)' scfcv : dtset%mkmem=',dtset%mkmem
-   write(std_out,*)' size(scf_history_wf%cprj(:,:,:),1)=',size(scf_history_wf%cprj(:,:,:),1)
-   write(std_out,*)' size(scf_history_wf%cprj(:,:,:),2)=',size(scf_history_wf%cprj(:,:,:),2)
-   write(std_out,*)' size(scf_history_wf%cprj(:,:,:),3)=',size(scf_history_wf%cprj(:,:,:),3)
-!  stop
-!ENDDEBUG
-!DEBUG
-!        write(std_out,*)' scfcv : exit scf_history_init'
-!        call flush(std_out)
-!ENDDEBUG
        endif
      endif
 
@@ -1130,24 +1116,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
        istep_updatedfock=1
 
-!DEBUG
-!      if(istep==1)then
-!ENDDEBUG
-  
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0 .and. .not. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) )then
-!DEBUG
-         write(std_out,*)' scfcv : will call wf_mixing'
-         write(std_out,*)' dtset%wfmix,scf_history_wf%alpha=',dtset%wfmix,scf_history_wf%alpha
-!        call flush(std_out)
-!ENDDEBUG
          call wf_mixing(atindx1,cg,cprj,dtset,istep_fock_outer,mcg,mcprj,mpi_enreg,&
 &         nattyp,npwarr,pawtab,scf_history_wf)
          istep_fock_outer=istep_fock_outer+1
-!DEBUG
-         write(std_out,*)' scfcv : exit wf_mixing'
-!        call flush(std_out)
-!ENDDEBUG
 
 !DEBUG
          if(.false.)then

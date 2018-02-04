@@ -12,7 +12,7 @@
 !! coded in abinit).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT  group (MVeithen,ISouza,JIniguez)
+!! Copyright (C) 2000-2018 ABINIT  group (MVeithen,ISouza,JIniguez)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

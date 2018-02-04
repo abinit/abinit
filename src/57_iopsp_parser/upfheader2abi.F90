@@ -9,7 +9,7 @@
 !!  data for the HEADER of abinit psps only!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MJV)
+!! Copyright (C) 2009-2018 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,7 +124,7 @@ end subroutine upfheader2abi
 !!  and returns the abinit internal code pspxc
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MJV)
+!! Copyright (C) 2009-2018 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

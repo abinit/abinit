@@ -14,7 +14,7 @@
 !! rset%nl%projec(nfftrec,lmnmax,nlrec%npsp)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2017 ABINIT group (the_author)
+!!  Copyright (C) 2009-2018 ABINIT group (the_author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

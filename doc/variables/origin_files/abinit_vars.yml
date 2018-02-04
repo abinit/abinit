@@ -14314,6 +14314,34 @@
     varset: gstate
     vartype: integer
 - !variable
+    abivarname: ixcrot
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 3
+    dimensions: scalar
+    excludes: null
+    mnemonics: Index of the XC ROTation method used to calculate first-order exchange-correltation potential in non-collinear DFPT calculations
+    requires: null
+    text: |-
+        <p> Method of calculation of the 1st order XC potential in non-collinear DFPT calculations. The possible values are 1,2 and 3 correspond to the following methods </p>
+        <ul>
+         <li>
+         If ixcrot=1, the spinor rotation matrix U at each fft point is not calculated explicitly. Instead the needed expressions involving U are derived based on the general properties of the U matrix.
+         </li>
+         <li>
+         If ixcrot=2, U is computed explicitly
+         </li>
+         <li>
+         If ixcrot=3, the brute force evaluation of the 1st order XC potential as a functional derivative is used. Rotation matrices are not computed.
+         </li>
+        </ul>
+        <p> In theory, all methods give identical results. However, due to different implementation approaches, the round-off errors can lead to slight differences intermediate and final results obtained using methods 1,2 and 3. The choice of the method can also affect the convergence. Note that for non-zero perturbation wavector, only ixcrot=3 implementation is currently available.
+    topics: DFPT_internal,xc_expert,DFPT_internal
+    varset: dfpt
+    vartype: integer
+- !variable
     abivarname: jdtset
     characteristics:
     - '[[NO_MULTI]]'
@@ -28703,6 +28731,22 @@
     topics: Temperature_useful
     varset: anaddb
     vartype: real
+- !variable
+    abivarname: tim1rev
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: possible values are 0 and 1
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: 'TIMe 1st order REVersal '
+    requires: null
+    text: |-
+        If tim1rev is equal to 1, the Sternheimer equation is solved simultaneously at +q and -q perturbation wavevectors. The first order potential at -q is taken to be equal to the Hermitian conjugate of the first order potential at +q. Relevant in the case of magnetic field perturbation.
+    topics: DFPT_expert,DFPT_internal
+    varset: dfpt
+    vartype: integer
 - !variable
     abivarname: timopt
     characteristics:
