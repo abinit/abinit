@@ -1089,7 +1089,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         rprimd,dtset%typat,ucvol,xred,typord=1)
          iatom=-1;idir=0
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
-&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &         xred,ylm,ylmgr)
@@ -2039,7 +2039,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    iatom=0 ; iorder_cprj=1 ! cprj are not ordered
    call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,&
 &   iatom,idir,iorder_cprj,dtset%istwfk,kg,dtset%kptns,&
-&   dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&   mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,&
 &   dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
@@ -2060,7 +2060,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,&
 & prtxml,psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
+& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 & xccc3d,xred,ylm,ylmgr,dtset%charge*SUM(vpotzero(:)),conv_retcode)
 
 !Before leaving the present routine, save the current value of xred.
@@ -2075,7 +2075,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  call timab(248,1,tsec)
 
  call outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,&
-& dtset,ecut,eigen,electronpositron,elfr,etotal,energies%e_fermie,&
+& dtset,ecut,eigen,electronpositron,elfr,etotal,&
 & gmet,gprimd,grhor,hdr,kg,lrhor,dtset%mband,mcg,mcprj,dtset%mgfft,&
 & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,nattyp,&
 & nfftf,ngfftf,nhat,dtset%nkpt,npwarr,dtset%nspden,&

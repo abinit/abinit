@@ -2928,8 +2928,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   if (iblok /=0) then
 
 !   then print the internal stain tensor
-    call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,&
-&                        ab_out,mpert,msize,natom,nblok)
+    call ddb_internalstr(inp%asr,ddb%val,d2asr,iblok,instrain,&
+&                        ab_out,mpert,natom,nblok)
 
     do ipert1=1,6
       do ipert2=1,natom

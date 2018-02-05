@@ -967,7 +967,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene = 1 ! use double counting scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
+&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
@@ -1029,6 +1029,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene = 0 ! use direct scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
+<<<<<<< HEAD
 &     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
 !    if(.not.kramers_deg) then
@@ -1036,6 +1037,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !&       efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
 !&       enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,elmag1_mq,ipert,dtset%natom,optene)
 !     end if
+=======
+&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
+>>>>>>> hotfix-8.6
 
      call timab(152,1,tsec)
      choice=2
@@ -1293,7 +1297,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
 &     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,ncpgr,&
-&     nfftf,ngfftf,nhat,nhat1,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
+&     nfftf,ngfftf,nhat,nhat1,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &     nsym1,n3xccc,occkq,occ_rbz,paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,&
 &     pawrhoij,pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,&
 &     symrl1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,wtk_rbz,&
