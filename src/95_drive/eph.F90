@@ -111,6 +111,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk
+ use m_ddk,             only : eph_ddk
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
 
@@ -585,6 +586,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call dvdb_interpolate_and_write(dtfil,ngfftc,ngfftf,cryst,dvdb,&
 &   ifc%ngqpt,ifc%nqshft,ifc%qshft, &
 &   dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
+
+ case (6)
+   ! Calculate band velocities (dipole matrix elements)
+   call eph_ddk(wfk0_path,dtfil,dtset,ebands,psps,mpi_enreg,comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
