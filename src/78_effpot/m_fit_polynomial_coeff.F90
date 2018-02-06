@@ -1317,7 +1317,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
  type(polynomial_term_type),dimension(:),allocatable :: terms
  integer,allocatable :: odd_coeff(:),need_bound(:)
  type(polynomial_coeff_type),pointer :: coeffs_in(:)
- type(polynomial_coeff_type),allocatable :: coeffs_test(:),coeffs_new(:)
+ type(polynomial_coeff_type),allocatable :: coeffs_test(:)
  character(len=5),allocatable :: symbols(:)
  character(len=200):: name
  character(len=500) :: msg

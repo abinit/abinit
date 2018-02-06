@@ -557,6 +557,11 @@ implicit none
            call wrtout(std_out,message,'COLL')
 
 !          Copy the new model in coeffs_tmp(jj)
+!          Free the coeffs_tmp array before
+           do jj=1,ncoeff_max
+             call polynomial_coeff_free(coeffs_tmp(jj))
+           end do
+
            do jj=1,ncoeff+ii
              call polynomial_coeff_init(&
 &              coeffs_all(jj)%coefficient,&
@@ -596,11 +601,6 @@ implicit none
              write(message, '(2a)' ) ' => The model is bounded'
            end if
            call wrtout(std_out,message,'COLL')
-
-!          Free the coeffs_tmp array           
-           do jj=1,ncoeff_max
-             call polynomial_coeff_free(coeffs_tmp(jj))
-           end do
 
 !          Exit if the model is bounded         
            if(effective_potential%anharmonics_terms%bounded)  exit
