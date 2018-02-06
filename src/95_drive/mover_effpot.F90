@@ -136,7 +136,7 @@ implicit none
  type(pseudopotential_type),target :: psps
 !arrays
 !no_abirules
- integer :: sc_size(3)
+ integer :: sc_size(3),sc_size_TS(3)
  integer,pointer :: indsym(:,:,:)
  integer,allocatable :: listcoeff(:),listcoeff_bound(:,:),list_tmp(:),list_bound(:,:)
  integer,allocatable :: isPositive(:), npwtot(:)
@@ -177,10 +177,10 @@ implicit none
 
 !a new supercell is compute
 !Initialisaton of variable
- if(option == -1) then
+ if(option == -1.or.option == -2) then
 !  Bound process option
    sc_size(:) = inp%fit_boundCell
- else if(option == -2) then
+ else if(option == -3) then
 !  Heff option
    sc_size(:) = (/1,1,1/)
  else
@@ -249,7 +249,7 @@ implicit none
    dtset%usewvl = 0     !
    dtset%useylm = 0     !
    
-!    if(option == -2) then
+!    if(option == -3) then
 !      write(message,'(a)')' Read the DDB file to fill the dtset array'
 !      call wrtout(std_out,message,"COLL")
 ! !    Copy real informtions from the ddb   
@@ -300,15 +300,15 @@ implicit none
      dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
      dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures
      dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET
-   else if(option == -1) then
+   else if(option == -1.or.option == -2) then
 !    Set default for the fit
-     verbose = .FALSE.
-     writeHIST = .FALSE.
+     verbose = .false.
+     writeHIST = .false.
      dtset%restartxf = 0  ! RESTART from (X,F) history
      dtset%dtion = 100  ! Delta Time for IONs
      dtset%ionmov = 13  ! Number for the dynamic
      dtset%ntime = inp%fit_boundStep  ! Number of TIME steps 
-     dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic 
+     dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic
      dtset%mdtemp(1) = inp%fit_boundTemp   !Molecular Dynamics Temperatures 
      dtset%mdtemp(2) = inp%fit_boundTemp !Molecular Dynamics Temperatures 
      dtset%strtarget(1:6) = zero
@@ -319,27 +319,27 @@ implicit none
      
 !    Select frequency of the barostat as a function of temperature
 !    For small temperature, we need huge barostat and inversely
-     if(dtset%mdtemp(1) <= 10) then
-       freq_q = 0.002
-       freq_b = 0.0002
-     else  if(dtset%mdtemp(1) <= 50) then
-       freq_q = 0.02
-       freq_b = 0.002 
-     else  if(dtset%mdtemp(1) > 50.and.dtset%mdtemp(1) < 300) then
-       freq_q = 0.1
-       freq_b = 0.01 
-     else
-       freq_q = 0.2
-       freq_b = 0.02
-     end if
+     ! if(dtset%mdtemp(1) <= 10) then
+     !   freq_q = 0.002
+     !   freq_b = 0.0002
+     ! else  if(dtset%mdtemp(1) <= 50) then
+     !   freq_q = 0.02
+     !   freq_b = 0.002 
+     ! else  if(dtset%mdtemp(1) > 50.and.dtset%mdtemp(1) < 300) then
+     !   freq_q = 0.1
+     !   freq_b = 0.01 
+     ! else
+     !   freq_q = 0.2
+     !   freq_b = 0.02
+     ! end if
 
      !TEST_AM
      freq_q = 0.1
      freq_b = 0.01
      !TEST_AM
      
-     qmass=(abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_q**2)
-     bmass=(abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_b**2)
+     qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
+     bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1
@@ -367,7 +367,7 @@ implicit none
 
 !  set psps
    psps%useylm = dtset%useylm
-!    if(option == -2)then
+!    if(option == -3)then
 !      mtypalch = 0
 !      npsp = dtset%ntypat
 !      call psps_free(psps)
@@ -398,7 +398,7 @@ implicit none
 !    end if
 
 !  set args_gs
-!    if (option == -2) then
+!    if (option == -3 then
 !      call args_gs_init(args_gs, &
 ! &       effective_potential%crystal%amu(:),dtset%mixalch_orig(:,:,1),&
 ! &       dtset%dmatpawu(:,:,:,:,1),dtset%upawu(:,1),dtset%jpawu(:,1),&
@@ -491,7 +491,7 @@ implicit none
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
-   else if(option== -1)then
+   else if(option== -1.or.option==-2)then
      !*************************************************************
      !   Try to bound the model
      !*************************************************************
@@ -514,18 +514,114 @@ implicit none
        write(message, '(2a)' ) trim(message),' is not bound'
        call wrtout(std_out,message,'COLL')
 
-!      Get the list of possible coefficients to bound the model
-       cutoff = zero
-       do ii=1,3
-         cutoff = cutoff + effective_potential%crystal%rprimd(ii,ii)
-       end do
-       cutoff = cutoff / 3.0
 
-!       call fit_polynomial_coeff_getCoeffBound(effective_potential,coeffs_bound,&
+       if(option==-2)then
+
+!        Fill the list for the fixcoeff input of the fit_polynomial_coeff_fit routine         
+!        Store the number of coefficients before adding other coeff for the bounding
+         ncoeff = effective_potential%anharmonics_terms%ncoeff
+         ABI_ALLOCATE(listcoeff,(ncoeff))
+         do ii=1,ncoeff
+           listcoeff(ii)=ii
+         end do
+
+         write(message, '(2a)')ch10,' Generate the list of addionnal terms with the fit process...'
+         call wrtout(std_out,message,'COLL')        
+         
+!        Get the additional coeff         
+         call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
+&                inp%fit_boundPower,0,inp%fit_boundTerm,ncoeff,1,comm,cutoff_in=inp%fit_boundCutoff,&
+&                max_power_strain=2,verbose=.true.,positive=.true.,only_even_power=.true.) 
+
+!        Store the max number of coefficients after the fit process         
+         ncoeff_max = effective_potential%anharmonics_terms%ncoeff
+!        Store all the coefficients in coeffs_all
+         ABI_DATATYPE_ALLOCATE(coeffs_all,(ncoeff_max))
+         ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncoeff_max))
+         do ii=1,ncoeff_max
+           call polynomial_coeff_init(&
+&            effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
+&            effective_potential%anharmonics_terms%coefficients(ii)%nterm,&
+&            coeffs_all(ii),&
+&            effective_potential%anharmonics_terms%coefficients(ii)%terms,&
+&            effective_potential%anharmonics_terms%coefficients(ii)%name,&
+&            check=.false.) 
+         end do
+
+         
+         do ii=1,ncoeff_max-ncoeff
+
+           write(message, '(5a,I0,a)')ch10,'--',ch10,' Try to bound the model ',&
+&         'with ', ii,' additional term'
+           if(ii>1)write(message,'(2a)') trim(message),'s'
+           call wrtout(std_out,message,'COLL')
+
+!          Copy the new model in coeffs_tmp(jj)
+           do jj=1,ncoeff+ii
+             call polynomial_coeff_init(&
+&              coeffs_all(jj)%coefficient,&
+&              coeffs_all(jj)%nterm,&
+&              coeffs_tmp(jj),&
+&              coeffs_all(jj)%terms,&
+&              coeffs_all(jj)%name,&
+&              check=.false.) 
+           end do
+           
+           model_ncoeffbound = ii           
+
+!          Reset the simulation and set the coefficients of the model 
+           call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
+           call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
+&               -1,1,comm,verbose=.true.,positive=.false.) 
+           call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
+           dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
+           acell(1) = dtset%rprimd_orig(1,1,1)
+           acell(2) = dtset%rprimd_orig(2,2,1)
+           acell(3) = dtset%rprimd_orig(3,3,1)
+           call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
+&               effective_potential%supercell%xcart,xred)
+           xred_old = xred
+           vel_cell(:,:) = zero
+           vel(:,:)      = zero
+           fred(:,:)     = zero
+           fcart(:,:)    = zero
+           
+!          Run mover to check if the model is bound
+           call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
+&               rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
+&               effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
+           if(.not.effective_potential%anharmonics_terms%bounded)then
+             write(message, '(2a)' ) ' => The model is not bounded'
+           else
+             write(message, '(2a)' ) ' => The model is bounded'
+           end if
+           call wrtout(std_out,message,'COLL')
+
+!          Free the coeffs_tmp array           
+           do jj=1,ncoeff_max
+             call polynomial_coeff_free(coeffs_tmp(jj))
+           end do
+
+!          Exit if the model is bounded         
+           if(effective_potential%anharmonics_terms%bounded)  exit
+           
+         end do
+         
+       else
+!      Get the list of possible coefficients to bound the model
+         cutoff = zero
+         do ii=1,3
+           cutoff = cutoff + effective_potential%crystal%rprimd(ii,ii)
+         end do
+         cutoff = cutoff / 3.0
+
+!        call fit_polynomial_coeff_getCoeffBound(effective_potential,coeffs_bound,&
 !&                                              hist,ncoeff_bound,comm,verbose=.true.)
 
-        call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,2,sc_size,&
+!TEST_AM!
+         sc_size_TS = (/2,2,2/)
+         call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
+&       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,inp%fit_boundPower(2),2,sc_size_TS,&
 &       comm,anharmstr=inp%fit_anhaStrain==1,&
 &       spcoupling=inp%fit_SPCoupling==1,verbose=.false.,distributed=.false.,&
 &       only_even_power=.true.,only_odd_power=.false.)
@@ -557,7 +653,7 @@ implicit none
 &         check=.false.)
        end do
 
-!     Copy the fixed coefficients from the model (without bound coeff)
+!      Copy the fixed coefficients from the model (without bound coeff)
        ncoeff = effective_potential%anharmonics_terms%ncoeff
        ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncoeff+ncoeff_bound))
        do ii=1,ncoeff
@@ -569,7 +665,7 @@ implicit none
 &         check=.false.) 
        end do
        
-       ncoeff_max = ncoeff+ncoeff_bound              
+       ncoeff_max = ncoeff+ncoeff_bound
        ABI_ALLOCATE(listcoeff,(ncoeff_max))
        listcoeff = 0
        do jj=1,ncoeff
@@ -578,14 +674,15 @@ implicit none
 
        model_bound = 0
        model_ncoeffbound = 0
-       
+
        do ii=2,inp%fit_boundTerm
 !        Compute the number of possible combination
+         nmodels = 1
          ABI_ALLOCATE(list_bound,(nmodels,ii))
          ABI_ALLOCATE(list_tmp,(ii))
          list_bound = 0; list_tmp = 0; kk = 0;  jj = 1
 
-!       Generate the list of possible combinaison 1st count
+!        Generate the list of possible combinaison 1st count
          call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels,.false.)
          nmodels = kk
 
@@ -663,7 +760,7 @@ implicit none
                  end if
                end do
 
-!             Reset the simulation and set the coefficients of the model 
+!              Reset the simulation and set the coefficients of the model 
                call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,&
 &               ncoeff+ii)
                call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
@@ -681,10 +778,10 @@ implicit none
                fred(:,:)     = zero
                fcart(:,:)    = zero
                
-!             Run mover
+!              Run mover
                call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &               rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&               effective_potential=effective_potential,verbose=verbose,writeHIST=.false.)
+&               effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
                if(.not.effective_potential%anharmonics_terms%bounded)then
                  write(message, '(2a)' ) ' => The model is not bounded'
@@ -727,9 +824,16 @@ implicit none
            exit
          end if
          ABI_DEALLOCATE(coeff_values)
-         ABI_DEALLOCATE(listcoeff_bound)
+
        end do
 
+       do ii=1,ncoeff_bound
+         call polynomial_coeff_free(coeffs_bound(ii))
+       end do
+       if(allocated(coeffs_bound)) ABI_DEALLOCATE(coeffs_bound)       
+       
+     end if
+     
        if(.not.effective_potential%anharmonics_terms%bounded)then
          write(message, '(3a)' ) ch10,' => The model cannot be bounded'
          call wrtout(ab_out,message,'COLL')
@@ -742,7 +846,7 @@ implicit none
        call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+model_ncoeffbound),effective_potential,&
 &       ncoeff+model_ncoeffbound)
 
-       call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
+       call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
 &       -1,1,comm,verbose=.false.)
        
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
@@ -757,26 +861,22 @@ implicit none
          call wrtout(std_out,message,'COLL')        
        end do
 
-!     Deallocation
+!      Deallocation
        ABI_DEALLOCATE(listcoeff)
-       do ii=1,ncoeff+ncoeff_bound
+       do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_tmp(ii))
        end do
        if(allocated(coeffs_tmp)) ABI_DEALLOCATE(coeffs_tmp)
-       
-       do ii=1,ncoeff_bound
-         call polynomial_coeff_free(coeffs_bound(ii))
-       end do
-       if(allocated(coeffs_bound)) ABI_DEALLOCATE(coeffs_bound)
-       
-       do ii=1,ncoeff+ncoeff_bound
+
+       do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_all(ii))
        end do
        if(allocated(coeffs_all)) ABI_DEALLOCATE(coeffs_all)
 
      end if
      
-   else  if (option == -2) then
+   else  if (option == -3) then
+
 !*************************************************************
 !   Call the routine for calculation of the energy for specific 
 !   partern of displacement or strain for the effective 
@@ -809,21 +909,21 @@ implicit none
    ABI_DEALLOCATE(xred_old)
    ABI_DEALLOCATE(ab_xfh%xfhist)
 
-   if(option == -2)then
-     call args_gs_free(args_gs)
-     call psps_free(psps)
-     do ii = 1,npsp
-       call paw_setup_free(paw_setup(ii))
-     end do    
-     ABI_DEALLOCATE(paw_setup)
-     ABI_DEALLOCATE(ipsp2xml)
-     ABI_DEALLOCATE(pspheads)
-     call pawrad_free(pawrad)
-     call pawtab_free(pawtab)
-     ABI_DATATYPE_DEALLOCATE(pawrad)
-     ABI_DATATYPE_DEALLOCATE(pawtab)
-     ABI_DEALLOCATE(npwtot)
-   end if
+   ! if(option == -3)then
+   !   call args_gs_free(args_gs)
+   !   call psps_free(psps)
+   !   do ii = 1,npsp
+   !     call paw_setup_free(paw_setup(ii))
+   !   end do    
+   !   ABI_DEALLOCATE(paw_setup)
+   !   ABI_DEALLOCATE(ipsp2xml)
+   !   ABI_DEALLOCATE(pspheads)
+   !   call pawrad_free(pawrad)
+   !   call pawtab_free(pawtab)
+   !   ABI_DATATYPE_DEALLOCATE(pawrad)
+   !   ABI_DATATYPE_DEALLOCATE(pawtab)
+   !   ABI_DEALLOCATE(npwtot)
+   ! end if
    call dtset_free(dtset)
    call destroy_results_gs(results_gs)
    call scfcv_destroy(scfcv_args)

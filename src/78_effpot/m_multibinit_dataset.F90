@@ -126,6 +126,7 @@ module m_multibinit_dataset
   real(dp) :: conf_power_fact_strain
   real(dp) :: delta_df
   real(dp) :: energy_reference
+  real(dp) :: fit_boundCutoff
   real(dp) :: fit_boundTemp
   real(dp) :: fit_cutoff
   real(dp) :: fit_tolMSDF
@@ -249,6 +250,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%enunit=0
  multibinit_dtset%fit_anhaStrain=0
  multibinit_dtset%fit_bound=0
+ multibinit_dtset%fit_boundCutoff=0 
  multibinit_dtset%fit_boundTerm=4
  multibinit_dtset%fit_boundTemp=325
  multibinit_dtset%fit_boundStep=1000
@@ -1207,6 +1209,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%fit_boundCutoff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundCutoff',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_boundCutoff=dprarr(1)
+ if(multibinit_dtset%fit_boundCutoff<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_boundCutoff is',multibinit_dtset%fit_boundCutoff,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_boundCutoff in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ 
   multibinit_dtset%fit_boundTerm=4
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundTerm',tread,'INT')
  if(tread==1) multibinit_dtset%fit_boundTerm=intarr(1)
@@ -1806,6 +1820,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%fit_bound /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
+   write(nunit,'(1x,a16,es16.8)')'fit_boundcutoff',multibinit_dtset%fit_boundCutoff
    write(nunit,'(3x,a14,3i10)') ' fit_boundCell',multibinit_dtset%fit_boundCell
    write(nunit,'(3x,a14,i10.0)')' fit_boundTerm',multibinit_dtset%fit_boundTerm
    write(nunit,'(3x,a14,F10.1)')' fit_boundTemp',multibinit_dtset%fit_boundTemp

@@ -316,6 +316,10 @@ program multibinit
    end select
  end if
 
+!TEST_AM
+! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
+!TEST_AM
+ 
 !Fit the coeff
  if (inp%fit_coeff/=0)then
    option=inp%fit_coeff
@@ -356,7 +360,7 @@ program multibinit
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
  if(inp%fit_bound==1)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1,comm,hist=hist)
+   call mover_effpot(inp,filnam,reference_effective_potential,-2,comm,hist=hist)
  end if
 !TEST_AM
 
