@@ -3629,7 +3629,8 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
 
    write(std_out,*) "Analyti:",fred(mu,ia)
    write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta)
-   write(std_out,*) "Diff(%):",abs(100*(fred(mu,ia)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) )) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) ))
+   write(std_out,*) "Diff(%):",abs(100*(fred(mu,ia)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
+&             / (12*delta) )) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) ))
 
  end do
 end do
@@ -3686,7 +3687,8 @@ forall(ii=1:3)identity(ii,ii)=1
 
  write(std_out,*) "Analyti:",strten(jj)
  write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol
- write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol)) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol))
+ write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
+&   / (12*delta) / ucvol)) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol))
 
 end do
 
