@@ -7,7 +7,7 @@
 !! Primary routine for conducting DFT calculations by CG minimization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -240,7 +240,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: nblok,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt
+ integer :: cnt,spin,band,ikpt,usecg
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -424,7 +424,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
 !  This call has to be done before any use of SCF history
-   call scf_history_init(dtset,mpi_enreg,scf_history)
+   usecg=0
+   if(dtset%extrapwf>0)usecg=1
+   call scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  end if
 
  call timab(33,2,tsec)
@@ -978,13 +980,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (has_to_init) then
    if (dtset%iscf>0 .or. (dtset%iscf==0 .and. dtset%usewvl==1 )) then ! .and. dtset%usepaw==1)) then
-     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
 
+     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
        ! Read density
        rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
        if (dtset%usewvl==0) then
          call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
          results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
        else
          fform=52 ; accessfil=0
@@ -1003,7 +1005,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        ! Read kinetic energy density
        if(dtfil%ireadkden/=0 .and. dtset%usekden==1 )then
          call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
          call hdr_free(hdr_den)
        end if
 
@@ -1330,8 +1332,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
-    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
-    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk')
+   !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
+   !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
  end if
 
  if (dtset%prtwf==2) then

@@ -12,7 +12,7 @@
 !! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,6 +135,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  logical :: k1_eq_k2,have_to_reequilibrate,has_fock
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ghcim,ghcre,weight
+!DEBUG
+ real(dp) :: energy_,doti
+!ENDDEBUG
  character(len=500) :: msg
 !arrays
  integer, pointer :: gbound_k1(:,:),gbound_k2(:,:),kg_k1(:,:),kg_k2(:,:)
@@ -719,7 +722,7 @@ end subroutine getghc
 !! Compute metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

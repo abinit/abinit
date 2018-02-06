@@ -7,7 +7,7 @@
 !! Compute and print integral of total density inside spheres around atoms.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT,ILuk,MVer,EB,SPr)
+!! Copyright (C) 1998-2018 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of atom types
 !!  nunit=number of the unit for writing
@@ -264,10 +264,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  end if
 
  if(nspden==2) then
-   mag_coll=0
-   mag_coll_im=0
-   rho_tot=0
-   rho_tot_im=0
+   mag_coll=zero
+   mag_coll_im=zero
+   rho_tot=zero
+   rho_tot_im=zero
    do ifft=1,nfft
      jfft=(cmplex_den+1)*ifft
 !    rho_up=rho_up+rhor(ifft,2)
@@ -286,21 +286,34 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !  rho_up=rho_up*ucvol/dble(nfftot)
 !  rho_dn=rho_dn*ucvol/dble(nfftot)
 !  rho_tot=rho_tot*ucvol/dble(nfftot) 
- elseif(nspden==4) then
+ else if(nspden==4) then
    rho_tot=0
+   rho_tot_im=0
    mag_x=0
    mag_y=0
    mag_z=0
+   mag_x_im=0
+   mag_y_im=0
+   mag_z_im=0
    do ifft=1,nfft
-     rho_tot=rho_tot+rhor(ifft,1)
-     mag_x=mag_x+rhor(ifft,2)
-     mag_y=mag_y+rhor(ifft,3)
-     mag_z=mag_z+rhor(ifft,4)
+     jfft=(cmplex_den+1)*ifft
+     rho_tot=rho_tot+rhor(jfft-cmplex_den,1)
+     mag_x=mag_x+rhor(jfft-cmplex_den,2)
+     mag_y=mag_y+rhor(jfft-cmplex_den,3)
+     mag_z=mag_z+rhor(jfft-cmplex_den,4)
+     rho_tot_im=rho_tot_im+rhor(jfft,1)
+     mag_x_im=mag_x_im+rhor(jfft,2)
+     mag_y_im=mag_y_im+rhor(jfft,3)
+     mag_z_im=mag_z_im+rhor(jfft,4)
    end do
    rho_tot=rho_tot*ucvol/dble(nfftot)
    mag_x=mag_x*ucvol/dble(nfftot)
    mag_y=mag_y*ucvol/dble(nfftot)
    mag_z=mag_z*ucvol/dble(nfftot)
+   rho_tot_im=rho_tot_im*ucvol/dble(nfftot)
+   mag_x_im=mag_x_im*ucvol/dble(nfftot)
+   mag_y_im=mag_y_im*ucvol/dble(nfftot)
+   mag_z_im=mag_z_im*ucvol/dble(nfftot)
  end if
 
 !MPI parallelization
@@ -317,6 +330,9 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call xmpi_sum(mag_x,mpi_enreg%comm_fft,ierr)    ! EB
    call xmpi_sum(mag_y,mpi_enreg%comm_fft,ierr)    ! EB
    call xmpi_sum(mag_z,mpi_enreg%comm_fft,ierr)    ! EB
+   call xmpi_sum(mag_x_im,mpi_enreg%comm_fft,ierr)    ! EB
+   call xmpi_sum(mag_y_im,mpi_enreg%comm_fft,ierr)    ! EB
+   call xmpi_sum(mag_z_im,mpi_enreg%comm_fft,ierr)    ! EB
    call timab(48,2,tsec)
  end if
 
@@ -470,7 +486,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    if(cmplex_den==0) then
      write(message, '(a,e16.8)') '     n^(1)    = ', rho_tot
    else
-     write(message, '(a,e16.8,a,e16.8)') '  Re[n^(1)]= ', rho_tot,"   Im[n^(1)]= ",rho_tot_im
+     write(message, '(a,e16.8,a,e16.8)') '  Re[n^(1)] = ', rho_tot,"   Im[n^(1)] = ",rho_tot_im
    end if
    call wrtout(nunit,message,'COLL')
 
@@ -479,18 +495,26 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      if(cmplex_den==0) then
        write(message, '(a,e16.8)') '     m^(1)    = ', mag_coll
      else
-       write(message, '(a,e16.8,a,e16.8)') '  Re[m^(1)]= ', mag_coll,"   Im[m^(1)]= ",mag_coll_im
+       write(message, '(a,e16.8,a,e16.8)') '  Re[m^(1)] = ', mag_coll,"   Im[m^(1)] = ",mag_coll_im
      end if
      call wrtout(nunit,message,'COLL')
+
    elseif (nspden==4) then
-
-     write(message, '(a,i1,a,e16.8)') '     mx^(1)_',prtopt-1,' = ',mag_x
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,i1,a,e16.8)') '     my^(1)_',prtopt-1,' = ',mag_y
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,i1,a,e16.8)') '     mz^(1)_',prtopt-1,' = ',mag_z
-     call wrtout(nunit,message,'COLL')
-
+     if(cmplex_den==0) then
+       write(message, '(a,e16.8)') '     mx^(1)   = ', mag_x
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8)') '     my^(1)   = ', mag_y
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8)') '     mz^(1)   = ', mag_z
+       call wrtout(nunit,message,'COLL')
+     else
+       write(message, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
+       call wrtout(nunit,message,'COLL')
+       write(message, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
+       call wrtout(nunit,message,'COLL')
+     end if
    end if
 
    write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10

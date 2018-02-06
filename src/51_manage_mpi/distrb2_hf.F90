@@ -9,7 +9,7 @@
 !!  bands and spin indices) for an Hartree-Fock calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2017 ABINIT group (CMartins)
+!!  Copyright (C) 2000-2018 ABINIT group (CMartins)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,7 +158,7 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
      end do
    end do
  end if
- 
+
 !*** Initialization of processor distribution from a file (simple copy from distrb2, not yet implemented) ***
 
 ! !* Inquire whether there exist a file containing the processor distribution

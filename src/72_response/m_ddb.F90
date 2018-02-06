@@ -10,7 +10,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3319,7 +3319,6 @@ end subroutine ddb_write_blok
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover_effpot
 !!
 !! CHILDREN
 !!      ddb_hdr_free,ddb_hdr_open_read

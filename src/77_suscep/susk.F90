@@ -14,7 +14,7 @@
 !! to the use of the memory, so the code is simpler.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG).
+!! Copyright (C) 1998-2018 ABINIT group (XG).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@
 !!                 has to be neglected (to be used when only an estimation of
 !!                 suscep. matrix has to be evaluated, i.e. for SCF precondictioning)
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points
 !!  npwdiel=third and fifth dimension of the susmat array.
 !!  npw_k=number of plane waves at this k point

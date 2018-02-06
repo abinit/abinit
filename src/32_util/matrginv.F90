@@ -7,7 +7,7 @@
 !! Invert a general matrix of real*8 elements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (GMR)
+!! Copyright (C) 2001-2018 ABINIT group (GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

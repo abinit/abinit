@@ -7,7 +7,7 @@
 !! compute the electric field gradient due to electron density
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (JJ)
+!! Copyright (C) 2005-2018 ABINIT group (JJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

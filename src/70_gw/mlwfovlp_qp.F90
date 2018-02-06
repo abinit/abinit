@@ -9,7 +9,7 @@
 !! LDA bloch function representation for Wannier code (www.wannier.org f90 version).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (DRH)
+!!  Copyright (C) 2008-2018 ABINIT group (DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

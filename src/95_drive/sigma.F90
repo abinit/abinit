@@ -7,7 +7,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1482,6 +1482,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(htmp,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
      ABI_MALLOC(ctmp,(b1gw:b2gw,b1gw:b2gw))
      ABI_MALLOC(uks2qp,(b1gw:b2gw,b1gw:b2gw))
+
      htmp=hbare; hbare=czero
 
      do spin=1,Sigp%nsppol
@@ -1512,8 +1513,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !  QP_mflags%has_vxcval  =1
 !  if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
    if (mod10==5 .and. &
-&   (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428))&
-&   QP_mflags%has_vxcval_hybrid=1
+&   (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428 .or.&
+&   Dtset%ixc_sigma==-456 .or. Dtset%ixc_sigma==41 .or. Dtset%ixc_sigma==42)) then
+     QP_mflags%has_vxcval_hybrid=1
+   end if
 !  if (Sigp%use_sigxcore==1) QP_mflags%has_sxcore =1
 !  if (Dtset%usepawu>0)    QP_mflags%has_vu     =1
 !  if (Dtset%useexexch>0)  QP_mflags%has_lexexch=1
@@ -2158,7 +2161,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  else
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
-     ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indeces for GW corrections (for this k-point)
+     ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
      ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&

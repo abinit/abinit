@@ -8,7 +8,7 @@
 !! Module with the datatype polynomial coefficients
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -348,7 +348,7 @@ end subroutine polynomial_coeff_setCoefficient
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -402,7 +402,7 @@ end subroutine polynomial_coeff_setName
 !! name = name xof the coefficients
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -550,7 +550,7 @@ end subroutine polynomial_coeff_getName
 !!                              other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -650,7 +650,7 @@ end subroutine polynomial_coeff_broadcast
 !!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -726,7 +726,7 @@ end subroutine polynomial_coeff_MPIsend
 !!   coefficients<type(polynomial_coefficent_type)>=  polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
 !!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
@@ -813,7 +813,7 @@ end subroutine polynomial_coeff_MPIrecv
 !! This routine print the coefficents into XML format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (AM)
+!! Copyright (C) 2000-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2971,6 +2971,8 @@ end function getCoeffFromList
 !!      m_polynomial_coeff
 !!
 !! CHILDREN
+!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 

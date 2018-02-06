@@ -8,7 +8,7 @@
 !! Module with the datatype polynomial terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,7 +119,7 @@ CONTAINS  !=====================================================================
 !! polynomial_term<type(polynomial_term)> = polynomial_term datatype is now initialized
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!
@@ -307,7 +307,8 @@ end subroutine polynomial_term_init
 !! polynomial_term<type(polynomial_term)> =  datatype to free
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff,m_polynomial_term
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_polynomial_term
 !!
 !! CHILDREN
 !!

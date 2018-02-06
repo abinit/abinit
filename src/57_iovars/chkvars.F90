@@ -7,7 +7,7 @@
 !!  Examines the input string, to check whether all names are allowed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group (XG).
+!! Copyright (C) 2007-2018 ABINIT group (XG).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -144,7 +144,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
- list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron'
+ list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
  list_vars=trim(list_vars)//' irdvdw'
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
@@ -152,7 +152,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' kberry kpt kptbounds kptgw'
  list_vars=trim(list_vars)//' kptnrm kptopt kptrlatt kptrlen kssform'
 !L
- list_vars=trim(list_vars)//' lexexch localrdwf lpawu'
+ list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
@@ -214,11 +214,11 @@ subroutine chkvars (string)
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend smdelta so_psp'
- list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma spinat spinmagntarget spmeth '
+ list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget supercell'
  list_vars=trim(list_vars)//' symafm symchi symdynmat symmorphi symrel symsigma'
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe timopt tl_nprccg tl_radius'
+ list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel tsmear typat'
 !U
@@ -241,7 +241,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' vdw_df_tweaks vdw_df_zab'
  list_vars=trim(list_vars)//' vel vel_cell vis vprtrb'
 !W
- list_vars=trim(list_vars)//' wfoptalg wtatcon wtk wtq'
+ list_vars=trim(list_vars)//' wfmix wfoptalg wtatcon wtk wtq'
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
 !X

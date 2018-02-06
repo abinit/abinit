@@ -11,7 +11,7 @@
 !!     fcart(i,iat) = d(Etot)/(d(r(i,iat)))
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  ntypat=number of types of atoms
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data

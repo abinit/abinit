@@ -7,7 +7,7 @@
 !!  Compute the matrix elements <G|Vx|psi> of the Fock operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (CMartins,FJ,MT)
+!!  Copyright (C) 2013-2018 ABINIT group (CMartins,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -289,6 +289,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
 ! =================================================
+
    do jband=1,nband_k
 
 !*   occ = occupancy of jband at this k point

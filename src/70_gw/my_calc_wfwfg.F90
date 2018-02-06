@@ -7,7 +7,7 @@
 !!  Calculates the partial contribution to the COH part of the COHSEX self-energy for a given q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (FB,MG)
+!! Copyright (C) 2005-2018 ABINIT group (FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,7 +17,7 @@
 !!  related by a symmetry operation to the point q summed over (see csigme).
 !!  This index is also used to treat the integrable coulombian singularity at q=0
 !! ngfft(18)=contain all needed information about 3D FFT for GW wavefuntions,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.
@@ -161,7 +161,7 @@ end subroutine calc_coh
 !!  function entering the definition of the GW self-energy.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (FB,MG)
+!! Copyright (C) 2005-2018 ABINIT group (FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -171,7 +171,7 @@ end subroutine calc_coh
 !!  related by a symmetry operation to the point q summed over (see csigme).
 !!  This index is also used to treat the integrable coulombian singularity at q=0
 !! ngfft(18)=contain all needed information about 3D FFT for GW wavefuntions,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.

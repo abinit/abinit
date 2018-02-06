@@ -1,0 +1,1194 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Description of geometry builder and symmetry related variables.</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, geometry builder and symmetry related input variables:</h1>
+
+<h2>List and description.
+</h2>
+<hr>
+<p>This document lists and provides the description
+of the name (keywords) of the "geometry builder and symmetry related" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../../js_files/generic_advice.js"> </script>
+<hr>
+
+<h5>Copyright (C) 1998-2018 ABINIT group (DCA,XG,RC,YG,FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<script type="text/javascript" src="../../js_files/list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "geometry builder and symmetry related" variables.</b></h3>
+
+<br><a id='A'></a>A.
+ <br><a id='B'></a>B.
+ <a href="#brvltt">brvltt</a>&nbsp;&nbsp;
+ <br><a id='C'></a>C.
+ <a href="#chempot">chempot</a>&nbsp;&nbsp;
+ <br><a id='D'></a>D.
+ <br><a id='E'></a>E.
+ <br><a id='F'></a>F.
+ <br><a id='G'></a>G.
+ <a href="#genafm">genafm</a>&nbsp;&nbsp;
+ <br><a id='H'></a>H.
+ <br><a id='I'></a>I.
+ <br><a id='J'></a>J.
+ <br><a id='K'></a>K.
+ <br><a id='L'></a>L.
+ <br><a id='M'></a>M.
+ <br><a id='N'></a>N.
+ <a href="#natrd">natrd</a>&nbsp;&nbsp;
+ <a href="#nobj">nobj</a>&nbsp;&nbsp;
+ <a href="#nzchempot">nzchempot</a>&nbsp;&nbsp;
+ <br><a id='O'></a>O.
+ <a href="#objaat">objaat</a>&nbsp;&nbsp;
+ <a href="#objaax">objaax</a>&nbsp;&nbsp;
+ <a href="#objan">objan</a>&nbsp;&nbsp;
+ <a href="#objarf">objarf</a>&nbsp;&nbsp;
+ <a href="#objaro">objaro</a>&nbsp;&nbsp;
+ <a href="#objatr">objatr</a>&nbsp;&nbsp;
+ <a href="#objbat">objbat</a>&nbsp;&nbsp;
+ <a href="#objbax">objbax</a>&nbsp;&nbsp;
+ <a href="#objbn">objbn</a>&nbsp;&nbsp;
+ <a href="#objbrf">objbrf</a>&nbsp;&nbsp;
+ <a href="#objbro">objbro</a>&nbsp;&nbsp;
+ <a href="#objbtr">objbtr</a>&nbsp;&nbsp;
+ <br><a id='P'></a>P.
+ <a href="#ptgroupma">ptgroupma</a>&nbsp;&nbsp;
+ <br><a id='Q'></a>Q.
+ <br><a id='R'></a>R.
+ <br><a id='S'></a>S.
+ <a href="#spgaxor">spgaxor</a>&nbsp;&nbsp;
+ <a href="#spgorig">spgorig</a>&nbsp;&nbsp;
+ <a href="#spgroup">spgroup</a>&nbsp;&nbsp;
+ <a href="#spgroupma">spgroupma</a>&nbsp;&nbsp;
+ <br><a id='T'></a>T.
+ <a href="#tolsym">tolsym</a>&nbsp;&nbsp;
+ <br><a id='U'></a>U.
+ <br><a id='V'></a>V.
+ <a href="#vaclst">vaclst</a>&nbsp;&nbsp;
+ <a href="#vacnum">vacnum</a>&nbsp;&nbsp;
+ <br><a id='W'></a>W.
+ <br><a id='X'></a>X.
+ <a href="#xyzfile">xyzfile</a>&nbsp;&nbsp;
+<br><br><hr>
+<br><font id="title"><a name="brvltt">brvltt</a></font>
+<br><font id="mnemonics">Mnemonics: BRaVais LaTTice type</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_UnitCell.html">UnitCell</a>, <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="smalltext">Moderately used: [29/937] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {v2:[<a href="../../tests/v2/Input/t59.in">59</a>,<a href="../../tests/v2/Input/t60.in">60</a>],v3:[<a href="../../tests/v3/Input/t23.in">23</a>,<a href="../../tests/v3/Input/t24.in">24</a>,<a href="../../tests/v3/Input/t25.in">25</a>,<a href="../../tests/v3/Input/t26.in">26</a>,<a href="../../tests/v3/Input/t27.in">27</a>,<a href="../../tests/v3/Input/t28.in">28</a>,<a href="../../tests/v3/Input/t29.in">29</a>,<a href="../../tests/v3/Input/t32.in">32</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a> != 0
+</font>
+<br><font id="text">
+<p>
+<p>
+ Set the type of Bravais lattice.
+The cell defined by <a href="../../variables/generated_files/varset_basic.html#acell">acell</a>
+and <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a> or <a href="../../variables/generated_files/varset_basic.html#angdeg">angdeg</a>
+should be the CONVENTIONAL cell.
+</p>
+<p>
+ If brvltt=0, the code will assign
+brvltt from the space group information
+<a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>,
+and produce the symmetry operations for the conventional unit cell.
+If the conventional cell is not primitive, the user should
+set <a href="../../variables/generated_files/varset_gstate.html#chkprim">chkprim</a>=0.
+</p>
+<p>
+ If brvltt=-1, the code will assign brvltt from
+the space group information, then reduce the unit cell
+to a primitive unit cell. The echo of <a href="../../variables/generated_files/varset_basic.html#acell">acell</a>
+and <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a> might thus differ from those
+derived directly from the input variables.
+Also, the input variable
+<a href="../../variables/generated_files/varset_basic.html#xred">xred</a> will refer to the
+CONVENTIONAL unit cell, but its echo will refer to the
+preprocessed PRIMITIVE unit cell.
+There is of course no problem with
+<a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a> and
+<a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>, as they are independent
+of the unit cell.
+</p>
+<p>
+ The echo of <b>brvltt</b> in the output file will be one
+of the following Bravais lattices:
+ <br />
+ <ul>
+  <li>
+   1 = Primitive with no associated translations
+  </li>
+  <li>
+   2 = Inner centered with (a/2 + b/2 + c/2)
+associated translation
+  </li>
+  <li>
+   3 = Face centered with (a/2 + b/2; b/2 + c/2; c/2 + a/2)
+associated translations
+  </li>
+  <li>
+   4 = C - centered with (a/2 + b/2) associated translation
+  </li>
+  <li>
+   5 = A - centered with (b/2 + c/2) associated translation
+  </li>
+  <li>
+   6 = B - centered with (c/2 + a/2) associated translation
+  </li>
+  <li>
+   7 = Rhombohedral lattice.
+  </li>
+ </ul>
+ The user might also input directly these values, although
+they might not be consistent
+with <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>.
+</p>
+<p>
+ The space groups 146, 148, 155, 160, 161, 166, 167, when used
+with <a href="../../variables/generated_files/varset_geo.html#spgaxor">spgaxor</a>=1 (hexagonal axes) will have <b>brvltt</b>=7
+and two associated translations: (2/3, 1/3, 1/3) and
+(1/3, 2/3, 2/3).
+ <br />
+ For more details see the space group
+ <a href="../../users/spacegrouphelpfile.html">
+  help file
+ </a>
+ .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="chempot">chempot</a></font>
+<br><font id="mnemonics">Mnemonics: spatially varying CHEMical POTential</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Artificial.html">Artificial</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t30.in">30</a>,<a href="../../tests/v8/Input/t31.in">31</a>]}.</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../variables/generated_files/varset_geo.html#nzchempot">nzchempot</a>,<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_geo.html#nzchempot">nzchempot</a>/=0
+</font>
+<br><font id="text">
+<p>
+For each type of atoms, from 1 to <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>, specifies the spatially varying chemical potential, through the specification of <a href="../../variables/generated_files/varset_geo.html#nzchempot">nzchempot</a> triplets of real numbers. They give data for <a href="../../variables/generated_files/varset_geo.html#nzchempot">nzchempot</a> delimiting planes, all parallel to each other, each determined by its z reduced coordinate.
+
+The first real number is the z reduced coordinate of the delimiting plane. The second real number is the value of the chemical potential for this type of atom on this plane. The third real number is the derivative of the chemical potential fior this type of atom with respect to the z reduced coordinate, evaluated on this plane.
+
+In the space between delimiting planes, a piecewise cubic polynomial interpolation is determined : the cubic polynomial between two delimiting planes will have the imposed chemical potentials and derivatives on the two delimiting planes.
+
+The z reduced coordinates must be ordered in increasing values, and cannot span more than 1.0 . There is an automatic periodic boundary condition imposed. Specifying two identical z reduced coordinates is allowed, and means that the first one applies to the adjacent space with lower values of z, while the second applies to the adjacent space with higher values of z.
+
+When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the <b>chempot</b> array.
+
+In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="genafm">genafm</a></font>
+<br><font id="mnemonics">Mnemonics: GENerator of the translation for Anti-FerroMagnetic space group</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_spinpolarisation.html">spinpolarisation</a>, <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="smalltext">Rarely used: [1/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t22.in">22</a>]}.</font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0</font>
+<br><font id="text">
+<p>
+<p>
+ This input variable might be used to define a Shubnikov type IV magnetic space group (anti-ferromagnetic
+space group). The user is advised to consult
+"The mathematical theory of symmetry in solids,
+Representation theory for point groups and space groups, 1972,
+C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford."
+ <br />
+ A Shubnikov type IV magnetic space group might be defined by its Fedorov space group
+(set of spatial symmetries, that do not change the magnetization), and
+one translation associated with a change of magnetization.
+<b>genafm</b> is precisely this translation, in reduced coordinates (like <a href="../../variables/generated_files/varset_basic.html#xred">xred</a>)
+ <br />
+ Thus, one way to specify a Shubnikov IV magnetic space group, is to define both
+<a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a> and <b>genafm</b>. Alternatively, one might
+define <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a> and <a href="../../variables/generated_files/varset_geo.html#spgroupma">spgroupma</a>,
+or define by hand the set of symmetries, using <a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a>,
+<a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a> and <a href="../../variables/generated_files/varset_gstate.html#symafm">symafm</a>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="natrd">natrd</a></font>
+<br><font id="mnemonics">Mnemonics: Number of AToms ReaD</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>, <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="smalltext">Moderately used: [52/937] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutorial:[<a href="../../tests/tutorial/Input/tnuc_1.in">nuc_1</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is <a href="../../variables/generated_files/varset_basic.html#natom">natom</a></font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of atoms to be
+read from the input file, in the case the atom manipulator
+or the smart symmetriser is used. In this case,
+<b>natrd</b> is also used to dimension
+the array <a href="../../variables/generated_files/varset_basic.html#typat">typat</a>,
+and the arrays <a href="../../variables/generated_files/varset_basic.html#xred">xred</a>,
+<a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a> and <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>.
+ <br />
+ Must take into account the vacancies (see <a href="../../variables/generated_files/varset_geo.html#vacnum">vacnum</a> and
+<a href="../../variables/generated_files/varset_geo.html#vaclst">vaclst</a>).
+ <br />
+ Despite possible vacancies, cannot be bigger than <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nobj">nobj</a></font>
+<br><font id="mnemonics">Mnemonics: Number of OBJects</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [3/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t40.in">40</a>,<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of 'objects'
+to be used by the atom manipulator in order to find the full
+set of atoms. At present, only one or two objects
+can be defined, identified as objects 'a' and 'b'.
+ <br />
+ Related variables for object 'a' are : <a href="../../variables/generated_files/varset_geo.html#objan">objan</a>,
+<a href="../../variables/generated_files/varset_geo.html#objaat">objaat</a>,
+<a href="../../variables/generated_files/varset_geo.html#objarf">objarf</a>, <a href="../../variables/generated_files/varset_geo.html#objatr">objatr</a>,
+<a href="../../variables/generated_files/varset_geo.html#objaro">objaro</a>, <a href="../../variables/generated_files/varset_geo.html#objaax">objaax</a>. Related variables
+for object 'b' are :
+  <a href="../../variables/generated_files/varset_geo.html#objbn">objbn</a>
+ ,
+  <a href="../../variables/generated_files/varset_geo.html#objbat">objbat</a>
+ ,
+  <a href="../../variables/generated_files/varset_geo.html#objbrf">objbrf</a>
+ ,
+  <a href="../../variables/generated_files/varset_geo.html#objbtr">objbtr</a>
+ ,
+  <a href="../../variables/generated_files/varset_geo.html#objbro">objbro</a>
+ ,
+  <a href="../../variables/generated_files/varset_geo.html#objbax">objbax</a>
+ .
+ <br />
+ <p>More detailed explanation : when the atom manipulator
+is used (i.e. when <b>nobj</b>==1 or <b>nobj</b>==2), the code
+will be given a primitive set of atoms, from which it
+will have to deduce the full set of atoms.
+ <br />
+ An object will be specified by the number of
+atoms it includes (<a href="../../variables/generated_files/varset_geo.html#objan">objan</a> or
+  <a href="../../variables/generated_files/varset_geo.html#objbn">objbn</a>
+ ),
+and the list of these atoms (<a href="../../variables/generated_files/varset_geo.html#objaat">objaat</a> or
+  <a href="../../variables/generated_files/varset_geo.html#objbat">objbat</a>
+ ).
+ <br />
+ Examples of physical realisation of an object can be a molecule,
+or a group of atom to be repeated, or a part of a molecule
+to be rotated.
+The atom amnipulator can indeed repeat these objects (<a href="../../variables/generated_files/varset_geo.html#objarf">objarf</a>
+or
+  <a href="../../variables/generated_files/varset_geo.html#objbrf">objbrf</a>
+ ), rotate them (<a href="../../variables/generated_files/varset_geo.html#objaro">objaro</a> or
+  <a href="../../variables/generated_files/varset_geo.html#objbro">objbro</a>
+ ) with respect
+to an axis (<a href="../../variables/generated_files/varset_geo.html#objaax">objaax</a> or
+  <a href="../../variables/generated_files/varset_geo.html#objbax">objbax</a>
+ ), and translate them
+(<a href="../../variables/generated_files/varset_geo.html#objatr">objatr</a> or
+  <a href="../../variables/generated_files/varset_geo.html#objbtr">objbtr</a>
+ ).
+After having generated a geometry
+thanks to rotation, translation and repetition of objects,
+it is possible to remove some atoms, in order to create
+vacancies (<a href="../../variables/generated_files/varset_geo.html#vacnum">vacnum</a> and <a href="../../variables/generated_files/varset_geo.html#vaclst">vaclst</a>).
+The number of atoms in the primitive
+set, those that will be read from the input file, is
+specified by the variable <a href="../../variables/generated_files/varset_geo.html#natrd">natrd</a>. It will be always smaller
+than the final number of atoms, given by the variable <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>.
+The code checks whether the primitive number of atoms
+plus those obtained by the repetition operation is
+coherent with the variable <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, taking into
+account possible vacancies.
+ <br />
+ You should look
+at the other variables for more information.
+Go to <a href="../../variables/generated_files/varset_geo.html#objan">objan</a>, for example.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nzchempot">nzchempot</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Z reduced coordinates that define the spatial CHEMical POTential</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Artificial.html">Artificial</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v8:[<a href="../../tests/v8/Input/t30.in">30</a>,<a href="../../tests/v8/Input/t31.in">31</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable <a href="../../variables/generated_files/varset_geo.html#chempot">chempot</a>, of which <b>nzchempot</b> is the second dimension.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objaat">objaat</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect A : list of AToms</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [3/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t40.in">40</a>,<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_geo.html#objan">objan</a>)</font>
+<br><font id="default">No default</font>
+<br><br><font id="requires">
+Only relevant if '<a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a>==1'
+
+</font>
+<br><font id="text">
+<p>
+<p>
+Gives the list of atoms in object a. This list is specified by giving, for each atom, its index in the list of coordinates (<a href="../../variables/generated_files/varset_basic.html#xred">xred</a>, <a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a> or <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>), that also corresponds to a type of atom (given by the array type).
+These objects can be thought as molecules, or groups
+of atoms, or parts of molecules, to be repeated,
+rotated and translated to generate the full set
+of atoms.
+<br />
+ Look at <a href="../../variables/generated_files/varset_geo.html#objarf">objarf</a> for further explanations.
+<br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objaax">objaax</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect A : AXis</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: real(6)</font>
+<br><font id="default">No default (Comment: <b>objaax</b> must be provided if (<a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a>==1 and one component of <a href="../../variables/generated_files/varset_geo.html#objaro">objaro</a> != 0). Moreover,
+<b>objaax</b> AND <a href="../../variables/generated_files/varset_geo.html#objbax">objbax</a> must be provided if ( <a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a> == 2 and one component of <a href="../../variables/generated_files/varset_geo.html#objbro">objbro</a> != 0 ).)</font>
+<br><font id="text">
+<p>
+<p>
+ Gives, for each object, the cartesian coordinates of
+two points (first point :  <b>objaax</b>(1:3)
+second point : <b>objaax</b>(4:6).
+ By default, given in Bohr atomic units
+(1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+if preferred, since these variables have the
+'<a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a>' characteristics.
+ <br />
+ The two points define an axis of rotation
+of the corresponding object.
+ <br />
+ Note that the rotation of
+the object is done BEFORE the object is translated.
+ <br />
+ The sign of the rotation angle is positive if the
+object is to be rotated clockwise when looking to it
+along the axis, from point 1 (coordinates 1:3)
+toward point 2 (coordinates 4:6).
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objan">objan</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect A : Number of atoms</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [3/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t40.in">40</a>,<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default (Comment:  <b>objan</b> MUST be provided if <a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a>==1.
+ <b>objan</b> and <a href="../../variables/generated_files/varset_geo.html#objbn">objbn</a> MUST be provided if <a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a>==2.)</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of atoms in object a. The list of atoms is given by the
+variables <a href="../../variables/generated_files/varset_geo.html#objaat">objaat</a>.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objarf">objarf</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect A : Repetition Factors</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [3/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t40.in">40</a>,<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [1, 1, 1]</font>
+<br><font id="text">
+<p>
+<p>
+ Gives three repetition factors of the objects a.
+ <br />
+ This gives the opportunity to generate a three-dimensional
+set of repeated objects, although a simple one-dimensional
+repetition will be easily obtained through the specification of
+ <br />
+ 'nrep' 1 1
+<br>
+where 'nrep' is the 1D repetition factor.
+ <br />
+ The initial rotation and translation of the object,
+as well as the increment of rotation or translation
+from one object to the next are specified by
+the variables <a href="../../variables/generated_files/varset_geo.html#objaro">objaro</a> and <a href="../../variables/generated_files/varset_geo.html#objatr">objatr</a>, for object a,
+ <br />
+ Note that the atom manipulator will generate the full set
+of atoms from the primitive set of atoms using the
+following order : it will process each atom in the
+primitive list one by one, determine whether it belongs
+to either object a or object b, and then repeat it
+taking into account the proper rotation and translation,
+with the fastest varying repetition factor being the first,
+then the second, then the third.
+ <br />
+ In the final list of atoms, one will first
+find the atoms generated from atom 1 in the primitive list,
+then those generated from atom 2 in the primitive list, and
+so on.
+ <br />
+ If the atom manipulator is only used to rotate
+or translate an object, without repeating it,
+simply use 1 1 1, which is also the Default value.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objaro">objaro</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect A : ROtations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: real(4)</font>
+<br><font id="default">Default is 4*0.0d0 (Comment: (no rotation))</font>
+<br><font id="text">
+<p>
+<p>
+ Give, for each object, the angles of rotation in degrees
+to be applied to the corresponding object.
+ <br />
+ The rotation is applied before the translation,
+and the axis is defined by the variables <a href="../../variables/generated_files/varset_geo.html#objaax">objaax</a> and <a href="../../variables/generated_files/varset_geo.html#objbax">objbax</a>.
+See the latter variables for the definition of the sign
+of the rotation.
+ <br />
+ The first component <b>objaro</b>(1) and
+ <b>
+  objbro
+ </b>
+ (1) gives
+the angle of rotation to be applied to the first
+instance of the object. The second, third or fourth
+component (resp.) gives the increment of rotation angle
+from one instance to the next instance, defined
+by the first, second or third repetition factor (resp.) .
+This allows to generate 3D arrays of molecules with
+different rotation angles.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objatr">objatr</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect A : TRanslations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [3/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t40.in">40</a>,<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: real(12)</font>
+<br><font id="default">Default is 12*0.0d0 (Comment: (no translation))</font>
+<br><font id="text">
+<p>
+<p>
+ Give, for each object, the vectors of translations,
+in cartesian coordinates,
+to be applied to the corresponding object.
+By default, given in Bohr atomic units
+(1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+if preferred, since these variables have the
+'<a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a>' characteristics.
+ <br />
+ The translation is applied after the rotation.
+ <br />
+ The first vector <b>objatr</b>(3,1) and <a href="../../variables/generated_files/varset_geo.html#objbtr">objbtr</a>(3,1) gives
+the translation to be applied to the first
+instance of the object. The second, third or fourth
+component (resp.) gives the increment of translation
+from one instance to the next instance, defined
+by the first, second or third repetition factor (resp.) .
+This allows to generate 3D arrays of molecules.
+ <br />
+ In general, when the objects are repeated, a translation
+vector must be given, since otherwise, the repeated objects
+pack in the same region of space. As an exception, one can
+have a set of molecules regularly spaced on a circle, in
+which case, only rotations are needed.
+ <br />
+ Not present in the dtset array (no internal).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objbat">objbat</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect B : list of AToms</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_geo.html#objbn">objbn</a>)</font>
+<br><font id="default">No default</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a>==2
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the list of atoms in object b. This list is specified
+by giving, for each atom, its index in the list
+of coordinates (<a href="../../variables/generated_files/varset_basic.html#xred">xred</a>, <a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a>
+or <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>), that also
+corresponds to a type of atom (given by the array type).
+These objects can be thought as molecules, or groups
+of atoms, or parts of molecules, to be repeated,
+rotated and translated to generate the full set
+of atoms.
+ <br />
+ Look at <a href="../../variables/generated_files/varset_geo.html#objbrf">objbrf</a> for further explanations.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objbax">objbax</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect B : AXis</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [1/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: real(6)</font>
+<br><font id="default">No default (Comment: <b>objbax</b> must be provided if (<a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a>==1 and one component of <a href="../../variables/generated_files/varset_geo.html#objaro">objaro</a> != 0). Moreover,
+<a href="../../variables/generated_files/varset_geo.html#objaax">objaax</a> AND <b>objbax</b> must be provided if ( <a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a> == 2 and one component of <a href="../../variables/generated_files/varset_geo.html#objbro">objbro</a> != 0 ).)</font>
+<br><font id="text">
+<p>
+<p>
+ Gives, for each object, the cartesian coordinates of
+two points (first point :  <b>objbax</b>(1:3)
+second point : <b>objbax</b>(4:6).
+ By default, given in Bohr atomic units
+(1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+if preferred, since these variables have the
+'<a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a>' characteristics.
+ <br />
+ The two points define an axis of rotation
+of the corresponding object.
+ <br />
+ Note that the rotation of
+the object is done BEFORE the object is translated.
+ <br />
+ The sign of the rotation angle is positive if the
+object is to be rotated clockwise when looking to it
+along the axis, from point 1 (coordinates 1:3)
+toward point 2 (coordinates 4:6).
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objbn">objbn</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect B : Number of atoms</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default (Comment:  <a href="../../variables/generated_files/varset_geo.html#objan">objan</a> and <b>objbn</b> MUST be provided if <a href="../../variables/generated_files/varset_geo.html#nobj">nobj</a>==2.)</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of atoms in either
+object b. The list of atoms is given by the
+variables <a href="../../variables/generated_files/varset_geo.html#objbat">objbat</a>.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objbrf">objbrf</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect B : Repetition Factors</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [1, 1, 1]</font>
+<br><font id="text">
+<p>
+<p>
+ Gives three repetition factors of the objects a or b.
+ <br />
+ This gives the opportunity to generate a three-dimensional
+set of repeated objects, although a simple one-dimensional
+repetition will be easily obtained through the specification of
+ <br />
+ nrep 1 1  &lt;r&gt;
+where nrep is the 1D repetition factor.
+ <br />
+ The initial rotation and translation of the object,
+as well as the increment of rotation or translation
+from one object to the next are specified by
+the variables <a href="../../variables/generated_files/varset_geo.html#objbro">objbro</a> and <a href="../../variables/generated_files/varset_geo.html#objbtr">objbtr</a>, for object b.
+ <br />
+ Note that the atom manipulator will generate the full set
+of atoms from the primitive set of atoms using the
+following order : it will process each atom in the
+primitive list one by one, determine whether it belongs
+to either object a or object b, and then repeat it
+taking into account the proper rotation and translation,
+with the fastest varying repetition factor being the first,
+then the second, then the third.
+ <br />
+ In the final list of atoms, one will first
+find the atoms generated from atom 1 in the primitive list,
+then those generated from atom 2 in the primitive list, and
+so on.
+ <br />
+ If the atom manipulator is only used to rotate
+or translate an object, without repeating it,
+simply use 1 1 1, which is also the Default value.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objbro">objbro</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect B : ROtations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [1/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: real(4)</font>
+<br><font id="default">Default is 4*0.0d0 (Comment: (no rotation))</font>
+<br><font id="text">
+<p>
+<p>
+ Give, for each object, the angles of rotation in degrees
+to be applied to the corresponding object.
+ <br />
+ The rotation is applied before the translation,
+and the axis is defined by the variables <a href="../../variables/generated_files/varset_geo.html#objaax">objaax</a> and <a href="../../variables/generated_files/varset_geo.html#objbax">objbax</a>.
+See the latter variables for the definition of the sign
+of the rotation.
+ <br />
+ The first component <a href="../../variables/generated_files/varset_geo.html#objaro">objaro</a>(1) and
+ <b>
+  objbro
+ </b>
+ (1) gives
+the angle of rotation to be applied to the first
+instance of the object. The second, third or fourth
+component (resp.) gives the increment of rotation angle
+from one instance to the next instance, defined
+by the first, second or third repetition factor (resp.) .
+This allows to generate 3D arrays of molecules with
+different rotation angles.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="objbtr">objbtr</a></font>
+<br><font id="mnemonics">Mnemonics: OBJect B : TRanslations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a>, <a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t43.in">43</a>]}.</font>
+<br><font id="vartype">Variable type: real(12)</font>
+<br><font id="default">Default is 12*0.0d0 (Comment: (no translation))</font>
+<br><font id="text">
+<p>
+<p>
+ Give, for each object, the vectors of translations,
+in cartesian coordinates,
+to be applied to the corresponding object.
+By default, given in Bohr atomic units
+(1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+if preferred, since these variables have the
+'<a href="../../guide/generated_files/help_abinit.html#LENGTH">LENGTH</a>' characteristics.
+ <br />
+ The translation is applied after the rotation.
+ <br />
+ The first vector <a href="../../variables/generated_files/varset_geo.html#objatr">objatr</a>(3,1) and <b>objbtr</b>(3,1) gives
+the translation to be applied to the first
+instance of the object. The second, third or fourth
+component (resp.) gives the increment of translation
+from one instance to the next instance, defined
+by the first, second or third repetition factor (resp.) .
+This allows to generate 3D arrays of molecules.
+ <br />
+ In general, when the objects are repeated, a translation
+vector must be given, since otherwise, the repeated objects
+pack in the same region of space. As an exception, one can
+have a set of molecules regularly spaced on a circle, in
+which case, only rotations are needed.
+ <br />
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ptgroupma">ptgroupma</a></font>
+<br><font id="mnemonics">Mnemonics: PoinT GROUP number for the MAgnetic space group</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INTERNAL_ONLY">INTERNAL_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_spinpolarisation.html">spinpolarisation</a>, <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable characterizes a Shubnikov type III magnetic space group (anti-ferromagnetic
+space group). The user is advised to consult
+"The mathematical theory of symmetry in solids,
+Representation theory for point groups and space groups, 1972,
+C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford."
+ <br />
+ A Shubnikov type III magnetic space group might be defined by its Fedorov space group
+(set of all spatial symmetries, irrespective of their magnetic action), and
+the halving space group (only the symmetries that do not change the magnetization).
+ <br />
+ The specification of the halving space group might be done by specifying, for each
+point symmetry, the magnetic action. See Table 7.1 of the above-mentioned reference.
+Magnetic point groups are numbered from 1 to 58.
+</p>
+<p>
+ Related input variables :
+<a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>,
+<a href="../../variables/generated_files/varset_geo.html#spgroupma">spgroupma</a>,
+<a href="../../variables/generated_files/varset_geo.html#genafm">genafm</a>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="spgaxor">spgaxor</a></font>
+<br><font id="mnemonics">Mnemonics: SPace Group : AXes ORientation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="smalltext">Rarely used: [8/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t91.in">91</a>,<a href="../../tests/v1/Input/t92.in">92</a>,<a href="../../tests/v1/Input/t93.in">93</a>,<a href="../../tests/v1/Input/t96.in">96</a>],v3:[<a href="../../tests/v3/Input/t22.in">22</a>,<a href="../../tests/v3/Input/t28.in">28</a>,<a href="../../tests/v3/Input/t38.in">38</a>],v4:[<a href="../../tests/v4/Input/t28.in">28</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ It is taken into account only when <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>/=0; it
+allows one to define the axes orientation
+for the specific space groups for which this is needed.
+Trigonal groups (number 146,148,155,160,161,166,167):
+ <ul>
+  <li>
+   1 represents the hexagonal axes
+  </li>
+  <li>
+   2 represents the rhombohedral axes
+  </li>
+ </ul>
+ Orthorhombic space groups :
+there are six possibilities corresponding to the possible
+axes permutations
+ <ul>
+  <li>
+   1 abc -&gt; abc
+  </li>
+  <li>
+   2 abc -&gt; cab
+  </li>
+  <li>
+   3 abc -&gt; bca
+  </li>
+  <li>
+   4 abc -&gt; acb
+  </li>
+  <li>
+   5 abc -&gt; bac
+  </li>
+  <li>
+   6 abc -&gt; cba
+  </li>
+ </ul>
+ Monoclinic : there are 3 or 9 possibilities depending on
+the space group. See the space group
+ <a href="../../users/spacegrouphelpfile.html">
+  help file
+ </a>
+ for details.
+In the log/output file the notation used to describe the
+monoclinic groups is for example:
+ <br />
+ 15:c1, A2/a_c = C2/c
+ <br />
+ where,
+ <ul>
+  <li>
+   15 represents the space group number,
+  </li>
+  <li>
+   c1 the orientation as it appears on the web page,
+  </li>
+  <li>
+   A is the real Bravais type lattice,
+  </li>
+  <li>
+   2/a the existent symmetry elements,
+  </li>
+  <li>
+   _c marks the orientation of the two-fold axis or of the mirror plane,
+  </li>
+  <li>
+   C2/c represents the parent space group.
+  </li>
+ </ul>
+</p>
+<p>
+ How to determine which spgaxor you need:
+ <ol>
+  <li>
+   check the reduced positions you have, for more symmetric positions, e.g. 1/2 1/4 3/4 etc... Let us say your symmetric positions are in the first coordinate (a axis) and you are using spgroup 62.
+  </li>
+  <li>
+   look up the raw space group Wyckoff positions on
+   <a href="http://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list">
+    the Bilbao server
+   </a>
+   to see where they put the corresponding symmetric positions. For spgroup 62 Bilbao puts the 1/4 3/4 in the second coordinate, ie along the b axis.
+  </li>
+  <li>
+   in this case you need to swap the axes from the original abc order to a new order where the Bilbao axis (b) is in the first position. In this case you have 2 possibilities, spgaxor 3 or 5. If you have more than one highly symmetric coordinate you may have only a single possibility.
+  </li>
+ </ol>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="spgorig">spgorig</a></font>
+<br><font id="mnemonics">Mnemonics: SPace Group : ORIGin</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="smalltext">Rarely used: [3/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t91.in">91</a>,<a href="../../tests/v1/Input/t93.in">93</a>,<a href="../../tests/v1/Input/t95.in">95</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>!=0
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the choice of origin for the axes system.
+ <br />
+ It is defined according to the origin choice in the
+International Tables of Crystallography.
+ <br />
+ It applies only to the space groups 48, 50, 59, 70, 85, 86, 88, 125,
+126, 129, 130, 133, 134, 137, 141, 142, 201, 203, 222, 224, 227, 228.
+ <br />
+ For details see the space group
+ <a href="../../users/spacegrouphelpfile.html">
+  help file
+ </a>
+ .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="spgroup">spgroup</a></font>
+<br><font id="mnemonics">Mnemonics: SPace GROUP number</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_crystal.html">crystal</a>, <a href="../../topics/generated_files/topic_UnitCell.html">UnitCell</a>, <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="smalltext">Moderately used: [37/937] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutorial:[<a href="../../tests/tutorial/Input/tnuc_1.in">nuc_1</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of the space group.
+ <br />
+ If <b>spgroup</b> is 0, the code assumes that all the symmetries
+are input through the <a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a> matrices and the <a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a>
+vectors, or obtained from the symmetry finder (the default when
+<a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>==0).
+ <br />
+ It should be between 1 and 230.  This option can be
+used to obtain all the atoms in the unit cell, starting
+from the asymmetric unit cell.
+ <br />
+ The references for computing the symmetry corresponding to
+the space groups are :
+ <ul>
+  <li>
+   International Tables for Crystallography, 1983, Ed. Theo Hahn,
+D. Reidel Publishing Company
+  </li>
+  <li>
+   The mathematical theory of symmetry in solids,
+Representation theory for point groups and space groups, 1972,
+C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford.
+  </li>
+ </ul>
+ <br />
+ For details see the space group
+ <a href="../../users/spacegrouphelpfile.html">
+  help file
+ </a>
+ .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="spgroupma">spgroupma</a></font>
+<br><font id="mnemonics">Mnemonics: SPace GROUP number defining a MAgnetic space group</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_spinpolarisation.html">spinpolarisation</a>, <a href="../../topics/generated_files/topic_SmartSymm.html">SmartSymm</a>.</font>
+<br><font id="smalltext">Moderately used: [20/937] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {v3:[<a href="../../tests/v3/Input/t22.in">22</a>,<a href="../../tests/v3/Input/t23.in">23</a>,<a href="../../tests/v3/Input/t24.in">24</a>,<a href="../../tests/v3/Input/t32.in">32</a>,<a href="../../tests/v3/Input/t33.in">33</a>,<a href="../../tests/v3/Input/t34.in">34</a>,<a href="../../tests/v3/Input/t35.in">35</a>,<a href="../../tests/v3/Input/t36.in">36</a>,<a href="../../tests/v3/Input/t37.in">37</a>,<a href="../../tests/v3/Input/t38.in">38</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ This input variable might be used to define a Shubnikov
+magnetic space group (anti-ferromagnetic space group). The user is advised to consult
+"The mathematical theory of symmetry in solids,
+Representation theory for point groups and space groups, 1972,
+C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford."
+ <br />
+ A Shubnikov type IV magnetic space group might be defined by its Fedorov space group
+(set of spatial symmetries that do not change the magnetization), and an additional
+magnetic space group number <b>spgroupma</b>.
+ <br />
+ A Shubnikov type III magnetic space group might be defined by its Fedorov space group
+(set of all spatial symmetries, irrespective of their magnetic action), and an additional
+magnetic space group number <b>spgroupma</b>.
+ <br />
+ For the additional number <b>spgroupma</b>, we follow the definition of Table 7.4 of the
+above-mentioned Bradley and Cracknell textbook.
+ <br />
+ Thus, one way to specify a Shubnikov IV magnetic space group, is to define both
+<a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a> and <b>spgroupma</b>.
+ <br />
+ For example, the group P2_1/c_prime has <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>=14
+and <b>spgroupma</b>=78.
+ <br />
+ Alternatively,
+for Shubnikov IV magnetic groups, one might
+define <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a> and <a href="../../variables/generated_files/varset_geo.html#genafm">genafm</a>.
+For both the type III and IV, one might
+define by hand the set of symmetries, using <a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a>,
+<a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a> and <a href="../../variables/generated_files/varset_gstate.html#symafm">symafm</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tolsym">tolsym</a></font>
+<br><font id="mnemonics">Mnemonics: TOLERANCE for SYMmetries</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_crystal.html">crystal</a>.</font>
+<br><font id="smalltext">Rarely used: [2/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t78.in">78</a>],v7:[<a href="../../tests/v7/Input/t13.in">13</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1e-08</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the tolerance on the atomic positions (reduced coordinates), primitive
+vectors, or magnetization, to be considered equivalent, thanks to symmetry operations.
+This is used in the recognition of the set of symmetries of the system,
+or the application of the symmetry operations to generate from a reduced set of atoms,
+the full set of atoms. Note that a value larger than 0.01 is considered to be unacceptable.
+ <br />
+ Note : ABINIT needs the atomic positions to be symmmetric to each others within 1.e-8 .
+If <b>tolsym</b> is set to a larger value than 1.e-8, then the input atomic coordinates
+will be automatically symmetrized by the symmetry operations that will have been found.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="vaclst">vaclst</a></font>
+<br><font id="mnemonics">Mnemonics: VACancies LiST</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [1/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t40.in">40</a>]}.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_geo.html#vacnum">vacnum</a>)</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the identification number(s) of atoms
+to be subtracted from the set of atoms that are obtained
+after having rotated, translated and repeated the objects.
+ <br />
+ Useful to created vacancies.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="vacnum">vacnum</a></font>
+<br><font id="mnemonics">Mnemonics: VACancies NUMber</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_AtomManipulator.html">AtomManipulator</a>.</font>
+<br><font id="smalltext">Rarely used: [1/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t40.in">40</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of atoms to be subtracted
+from the list of atoms after the rotations, translations
+and repetitions have been done. The list of these
+atoms is contained in <a href="../../variables/generated_files/varset_geo.html#vaclst">vaclst</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="xyzfile">xyzfile</a></font>
+<br><font id="mnemonics">Mnemonics: XYZ FILE input for geometry</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#INPUT_ONLY">INPUT_ONLY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_crystal.html">crystal</a>.</font>
+<br><font id="smalltext">Rarely used: [1/937] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t10.in">10</a>]}.</font>
+<br><font id="vartype">Variable type: string</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the name of a xyz format file, to take
+<a href="../../variables/generated_files/varset_basic.html#natom">natom</a>, <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>, <a href="../../variables/generated_files/varset_basic.html#typat">typat</a>, <a href="../../variables/generated_files/varset_basic.html#znucl">znucl</a>,
+and <a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a> from. This input can not be mixed with normal atom specifications for other datasets.
+</p>
+<p>
+ Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

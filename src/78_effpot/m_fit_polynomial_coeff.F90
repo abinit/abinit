@@ -7,7 +7,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,7 +104,7 @@ CONTAINS  !=====================================================================
 !! eff_pot<type(effective_potential)> = effective potential datatype with new fitted coefficients
 !!
 !! PARENTS
-!!      mover_effpot,multibinit
+!!      m_fit_polynomial_coeff,mover_effpot,multibinit
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart
@@ -1277,7 +1277,6 @@ end subroutine fit_polynomial_coeff_getPositive
 !!
 !!
 !! PARENTS
-!!      mover_effpot
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart
@@ -2146,6 +2145,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! mses =  Mean square error of the stresses (Hatree/Bohr)**2
 !!
 !! PARENTS
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart

@@ -55,7 +55,7 @@ and the
 
 <p>This lesson should take about 1 hour and 30 minutes. </p>
 <hr>
-<h5>Copyright (C) 2000-2017 ABINIT group (PhG, MVeithen, XG)
+<h5>Copyright (C) 2000-2018 ABINIT group (PhG, MVeithen, XG)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
 
@@ -118,24 +118,24 @@ We will adopt the following set of generic parameters (the same than in the
 </pre>
 
 <p>
-In principle, the <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> to be used should be the one corresponding to the optimized structure
-at the <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, and
-<a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a> combined with
-<a href="../../input_variables/generated_files/varset_basic.html#nshiftk">nshiftk</a> and
-<a href="../../input_variables/generated_files/varset_basic.html#shiftk">shiftk</a>, chosen for the calculations.
+In principle, the <a href="../../variables/generated_files/varset_basic.html#acell">acell</a> to be used should be the one corresponding to the optimized structure
+at the <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>, and
+<a href="../../variables/generated_files/varset_basic.html#ngkpt">ngkpt</a> combined with
+<a href="../../variables/generated_files/varset_basic.html#nshiftk">nshiftk</a> and
+<a href="../../variables/generated_files/varset_basic.html#shiftk">shiftk</a>, chosen for the calculations.
 Unfortunately,  for the purpose of this tutorial, in order to limit the duration of the runs,
 we have to work at an unusually low cutoff of 2.8 Ha for which the optimized lattice constant
 is unrealistic and equal to 7.45 Bohr (instead of the converged value of 10.64).
 In what follows, the lattice constant has been arbitrarily fixed to 10.53 Bohr.
-For comparison, results with <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=5 are also reported and, in that case,
+For comparison, results with <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=5 are also reported and, in that case,
 were obtained at the optimized lattice constant of 10.64 Bohr.
 For those who would like to try later,
 convergence tests and structural optimizations can be done using the file ~abinit/tests/tutorespfn/Input/tnlo_1.in.
 Before going further, you might refresh your mind concerning the other variables :
-<a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>,
-<a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>,
-<a href="../../input_variables/generated_files/varset_rlx.html#dilatmx">dilatmx</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#nbdbuf">nbdbuf</a>.
+<a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>,
+<a href="../../variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>,
+<a href="../../variables/generated_files/varset_rlx.html#dilatmx">dilatmx</a>,
+<a href="../../variables/generated_files/varset_gstate.html#nbdbuf">nbdbuf</a>.
 <br><br><a href=#top>Go to the top</a>
 <hr>
 <br><a name="DFPT"> </a>
@@ -196,9 +196,9 @@ First, from dataset 2 it is mandatory to specify :
 </pre>
 <p>
 Also, in dataset 4, it is required to impose
-<a href="../../input_variables/generated_files/varset_files.html#prtden">prtden</a>,
+<a href="../../variables/generated_files/varset_files.html#prtden">prtden</a>,
 and
-<a href="../../input_variables/generated_files/varset_dfpt.html#prepanl">prepanl</a>
+<a href="../../variables/generated_files/varset_dfpt.html#prepanl">prepanl</a>
 <pre>
         prtden4    1
         prepanl4   1
@@ -206,7 +206,7 @@ and
 <p>
 The purpose for this is
 (i) to constrain
-<a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a> = 2 even in the computation of phonons where ABINIT usually take advantages
+<a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a> = 2 even in the computation of phonons where ABINIT usually take advantages
 of symmetry irrespective of kptopt and
 (ii) compute the electric field derivatives in the 3 directions of space, irrespective of the symmetry.
 
@@ -271,9 +271,9 @@ for the analysis of dynamical and dielectric responses except that some new flag
 
 <p>
 For the strain perturbation you need to specify
-<a href="../../input_variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a>,
-<a href="../../input_variables/generated_files/varset_anaddb.html#piezoflag@anaddb">piezoflag</a>, and
-<a href="../../input_variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a> :
+<a href="../../variables/generated_files/varset_anaddb.html#elaflag@anaddb">elaflag</a>,
+<a href="../../variables/generated_files/varset_anaddb.html#piezoflag@anaddb">piezoflag</a>, and
+<a href="../../variables/generated_files/varset_anaddb.html#instrflag@anaddb">instrflag</a> :
 <pre>
         elaflag 3
         piezoflag  3
@@ -289,28 +289,28 @@ For the non-linear responses you need
         prtmbm  1
 </pre>
 <p>
-<a href="../../input_variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag</a>=1 activates the non-linear response.
+<a href="../../variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag</a>=1 activates the non-linear response.
 
 <p>
-<a href="../../input_variables/generated_files/varset_anaddb.html#ramansr@anaddb">ramansr</a>=1 will impose the sum rule on the first-order change
+<a href="../../variables/generated_files/varset_anaddb.html#ramansr@anaddb">ramansr</a>=1 will impose the sum rule on the first-order change
 of the electronic dielectric susceptibility under atomic displacement,
 hereafter referred to as dchi/dtau .
 It is a condition of invariance of chi under translation of the whole crystal,
 similar to the acoustic sum rules for phonons at Gamma or the charge neutrality sum rule on Z*.
 
 <p>
-<a href="../../input_variables/generated_files/varset_anaddb.html#prtmbm@anaddb">prtmbm</a>=1 will allow
+<a href="../../variables/generated_files/varset_anaddb.html#prtmbm@anaddb">prtmbm</a>=1 will allow
 to get the mode by mode phonon contributions of the ions to the electro-optic coefficients.
 
 <p>
-<a href="../../input_variables/generated_files/varset_anaddb.html#alphon@anaddb">alphon</a>=1 will allow
+<a href="../../variables/generated_files/varset_anaddb.html#alphon@anaddb">alphon</a>=1 will allow
 to get the previous mode by mode contribution when aligning
 the eigenvectors with the cartesian axis of coordinates
 (in the input, the principal axis should always be aligned with z for a convenient analysis of the results).
 
 <p>
 Finally, the second list of phonon, specified with
-<a href="../../input_variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a> and <a href="../../input_variables/generated_files/varset_anaddb.html#qph2l@anaddb">qph2l</a>, must also be explicitely considered
+<a href="../../variables/generated_files/varset_anaddb.html#nph2l@anaddb">nph2l</a> and <a href="../../variables/generated_files/varset_anaddb.html#qph2l@anaddb">qph2l</a>, must also be explicitely considered
 to obtain the Raman efficiencies of longitudinal modes
 (in a way similar to the computation of frequencies of longitudinal mode frequencies at Gamma):
 
@@ -399,7 +399,7 @@ This is done with the file ~abinit/tests/tutorespfn/Input/tnlo_6.in, however wit
 The calculation is about 2 or 3 minutes on a PC 3 GHz).
 For those who want to do it you anyway, you can copy ~abinit/tests/tutorespfn/Input/tnlo_6.in in your working directory.
 If you have time, you should modify the cutoff to
-<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=5 Ha,
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=5 Ha,
  in order to obtain realistic results.
 So, you might as well start the run after this modification (the run is about two times more time-consuming than with 2.8 Ha).
 
@@ -490,7 +490,7 @@ above using the following finite-difference formula  [unit of bohr^-1] :
 </pre>
 <p>
 This value is close to that obtained at
-<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=5 from DFPT (-0.099889084).
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=5 from DFPT (-0.099889084).
 When convergence is reached (beware, the k point convergence is extremely slow, much slower than for other properties), 
 both approaches allow to get the right answer.
 You might therefore ask which approach is the most convenient and should be used in practice.

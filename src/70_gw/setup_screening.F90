@@ -8,7 +8,7 @@
 !!  as well as basic objects describing the BZ sampling .... TODO list to be completed
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 !!
 !! OUTPUT
 !! ngfft_gw(18)=Contain all needed information about the 3D FFT for the oscillator strengths.
-!!  See ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  See ~abinit/doc/variables/vargs.htm#ngfft
 !! Ltg_q(:)<littlegroup_t>,=
 !! Ep<em1params_t>=Parameters for the screening calculation.
 !!  Most part of it is Initialized and checked.

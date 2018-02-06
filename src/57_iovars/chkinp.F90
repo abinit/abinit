@@ -9,7 +9,7 @@
 !! Please: use the routines chkint_eq, chkint_ne, chkint_ge, chkint_le, and chkdpr
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -612,7 +612,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if( ANY(optdriver == [RUNL_SCREENING]) )then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
      if (dt%ecuteps <= 0) then
-       MSG_ERROR_NOSTOP("ecutesp must be > 0 if optdriver == 3", ierr)
+       MSG_ERROR_NOSTOP("ecuteps must be > 0 if optdriver == 3", ierr)
      end if
      if(dt%fftgw<20 .and. dt%fftgw/=0)then
        if(dt%ecutwfn<dt%ecuteps-tol8)then
@@ -794,7 +794,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
 
 !  fockoptmix
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',&
+&   dt%fockoptmix,12,(/0,1,11,201,211,301,401,501,601,701,801,901/),iout)
+   if(dt%paral_kgb/=0)then
+     cond_string(1)='paral_kgb' ; cond_values(1)=dt%paral_kgb
+!    Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
+   end if
 
 !  frzfermi
    call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,(/0,1/),iout)
@@ -1179,6 +1185,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  ixcpositron
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcpositron',dt%ixcpositron,8,(/0,-1,1,11,2,3,31,4/),iout)
 
+!  ixcrot
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
+
+!  tim1rev
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)
+ 
 !  kptnrm and kpt
 !  Coordinates components must be between -1 and 1.
    if(dt%kptnrm<1.0-1.0d-10)then

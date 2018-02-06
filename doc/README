@@ -2,7 +2,7 @@ README
 ======
 
 This README is in the doc directory of the abinit package.
-See the file `help_new_user.html` in the `doc/users/generated_files`
+See the file `help_new_user.html` in the `doc/guide/generated_files`
 directory for more information.
 See also <https://www.abinit.org/documentation/helpfiles>
 

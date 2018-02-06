@@ -8,7 +8,7 @@
 !! elastic tensor
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GM, AR)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GM, AR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft =(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  rhog(2,nfft)=total electron density in G space
 !!
 !! OUTPUT

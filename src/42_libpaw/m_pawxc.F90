@@ -7,7 +7,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2018 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -5564,14 +5564,14 @@ end subroutine pawxc_drivexc_wrapper
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
  if (present(rho_out_format).and.present(mag_norm_out)) then
-   call rotate_mag(rho_in,rho_out,mag,vectsize, &
+   call rotate_mag(rho_in,rho_out,mag,vectsize,1, &
 &          rho_out_format=rho_out_format,mag_norm_out=mag_norm_out)
  else if (present(rho_out_format).and..not.present(mag_norm_out)) then
-   call rotate_mag(rho_in,rho_out,mag,vectsize,rho_out_format=rho_out_format)
+   call rotate_mag(rho_in,rho_out,mag,vectsize,1,rho_out_format=rho_out_format)
  else if (.not.present(rho_out_format).and.present(mag_norm_out)) then
-   call rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out=mag_norm_out)
+   call rotate_mag(rho_in,rho_out,mag,vectsize,1,mag_norm_out=mag_norm_out)
  else
-   call rotate_mag(rho_in,rho_out,mag,vectsize)
+   call rotate_mag(rho_in,rho_out,mag,vectsize,1)
  end if
 #else
  do ipt=1,vectsize
@@ -5747,7 +5747,7 @@ end subroutine pawxc_rotate_back_mag
 
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
- call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize)
+ call rotate_back_mag_dfpt(1,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,1)
 #else
  msg='[LIBPAW] Non-collinear DFPT not available (only in ABINIT)!'
  MSG_ERROR(msg)

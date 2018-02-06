@@ -8,7 +8,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
+!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1232,7 +1232,7 @@ end subroutine psddb8
 !! kptnrm=normalisation of k points
 !! natom=number of atoms in the unit cell
 !! nband(mkpt)=number of bands at each k point, for each polarization
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! nkpt=number of k points
 !! nspden=number of spin-density components
 !! nspinor=number of spinorial components of the wavefunctions
@@ -2514,7 +2514,7 @@ end subroutine ddb_chkname
 !! as well as psp information.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MT,GA)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MT,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

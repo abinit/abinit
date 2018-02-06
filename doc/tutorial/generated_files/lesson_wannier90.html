@@ -40,7 +40,7 @@ conserving pseudopotential case.
 And it is important to note that all the cases in the tutorial are
 not converged they are just examples to show how to use the code. </p>
 <hr>
-<h5>Copyright (C) 2000-2017 ABINIT group (TRangel)
+<h5>Copyright (C) 2000-2018 ABINIT group (TRangel)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
 
@@ -141,7 +141,7 @@ Let's examine the input file tw90_1.in, while the calculation is running.
 The input file should look familiar to you. It is indeed the silicon
 case. It has two data sets: first a SCF calculation and then a NSCF calculation which will call the Wannier90 library.
 
-The only new input variable is <a href="../../input_variables/generated_files/varset_files.html#prtwant">prtwant</a> which has to be set to 2 in order to use
+The only new input variable is <a href="../../variables/generated_files/varset_files.html#prtwant">prtwant</a> which has to be set to 2 in order to use
 the Wannier90 utility.
 <p>
 Now lets look the secondary input file wannier90.win.
@@ -227,7 +227,7 @@ And modify the Isovalue, put, for instance, 0.3 and check the option "Render +/-
 <p><b> Notes:</b>
 <ul>
 <li>
-It is important to set <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a> equal to 1 for every k-point avoiding using symmetries. The reason is that the formalism used to extract the MLWF assumes that you have a uniform grid of
+It is important to set <a href="../../variables/generated_files/varset_dev.html#istwfk">istwfk</a> equal to 1 for every k-point avoiding using symmetries. The reason is that the formalism used to extract the MLWF assumes that you have a uniform grid of
 k-points. See section IV of <a href="#MV">MV</a>.
 <li>
 The number of Wannier functions to extract should be minor or equal to
@@ -235,7 +235,7 @@ the number of bands. If <i>nband > nwan</i> then the disentanglement
 routines will be called.
 <li> The number of k-points should be equal to
 ngkpt(1)*ngkpt(2)*ngkpt(3). This is achieved by using the
-input variables <a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>= 3, <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>  and <a href="../../input_variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>= 1.
+input variables <a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>= 3, <a href="../../variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>  and <a href="../../variables/generated_files/varset_basic.html#nshiftk">nshiftk</a>= 1.
 <li> The prefix of all wannier90 files in this sample case is <i>wannier90</i>.
 <br>Other possible prefixes are w90</i>
 and <b>abo</b><i>_w90</i>, where <b>abo</b> is the fourth line on your .file file.
@@ -252,7 +252,7 @@ if it is not found then it will look for <i>w90.win</i> and finally for <i>wanni
 tutorials <a href="lesson_paw1.html">PAW1</a> and <a
 href="lesson_paw1.html">PAW2</a>.
 <p> The PAW method is implemented in such a way that it is very easy
-to use. For the silicon case we just have to add the variable <a href="../../input_variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a>. 
+to use. For the silicon case we just have to add the variable <a href="../../variables/generated_files/varset_paw.html#pawecutdg">pawecutdg</a>. 
 And the PAW Atomic Data is included in the
 pseudopotential file. An example has already been prepared.
 <p>Just copy the files tw90_2.files and tw90_2.in into "Work_w90":

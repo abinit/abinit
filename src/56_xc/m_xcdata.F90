@@ -8,7 +8,7 @@
 !!  the xcdata_type used to drive the computation of the XC energy, potential, kernel, etc.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (XG)
+!!  Copyright (C) 2017-2018 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -235,7 +235,7 @@ end subroutine xcdata_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      invars2,m_xcdata
+!!      invars2,m_xcdata,setup_sigma
 !!
 !! CHILDREN
 !!      get_xclevel

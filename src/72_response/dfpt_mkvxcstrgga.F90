@@ -9,7 +9,7 @@
 !! Use the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (DRH, XG)
+!! Copyright (C) 2001-2018 ABINIT group (DRH, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkxc=second dimension of the kxc array
 !!  nspden=number of spin-density components
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
