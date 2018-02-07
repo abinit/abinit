@@ -8,7 +8,7 @@
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (MVeithen)
+!! Copyright (C) 2003-2017 ABINIT  group (JZwanziger, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,8 +72,8 @@
 #include "abi_common.h"
 
 subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
-     &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
-     &            symrec,usecprj,usepaw,xred)
+&            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+&            symrec,usecprj,usepaw,xred)
 
  use defs_basis
  use defs_abitypes
@@ -104,14 +104,14 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  implicit none
 
 !Arguments ------------------------------------
- !scalars
+!scalars
  integer,intent(in) :: mcg,mcprj,pwind_alloc,usecprj,usepaw
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(orbmag_type), intent(inout) :: dtorbmag
  type(pawang_type),intent(in) :: pawang
 
- !arrays
+!arrays
  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
@@ -119,8 +119,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
 
- !Local variables -------------------------
- !scalars
+!Local variables -------------------------
+!scalars
  integer :: adir,bdir,bfor,bsigma,ddkflag,epsabg,gdir,gfor,gsigma
  integer :: icg,icgb,icgg,icprj,icprjb,icprjg
  integer :: ikg,ikpt,ikptb,ikptg,isppol,itrs,job
@@ -137,10 +137,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
 
- ! ***********************************************************************
- ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+! ***********************************************************************
+! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
 
- ! TODO: generalize to nsppol > 1
+! TODO: generalize to nsppol > 1
  isppol = 1
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  
@@ -185,7 +185,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
  ddkflag = 1
  
- ! itrs = 0 means do not invoke time reversal symmetry in smatrix.F90
+!itrs = 0 means do not invoke time reversal symmetry in smatrix.F90
  itrs = 0
  
  job = 1
