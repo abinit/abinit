@@ -1608,6 +1608,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if
 
+ ! deallocate efield
  call destroy_efield(dtefield)
 
  ! deallocate orbmag

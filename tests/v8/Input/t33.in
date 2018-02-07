@@ -33,9 +33,9 @@ pawcpxocc3 2
 kptopt 3
 nsym 1
 symrel 1 0 0 0 1 0 0 0 1
-kptrlatt  8   0   0  
-          0   8   0  
-          0  -8   8  
+kptrlatt  4   0   0  
+          0   4   0  
+          0  -4   4  
 
 ecut 5
 pawecutdg 6

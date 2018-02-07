@@ -269,6 +269,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  mpi_enreg%mkmem(:)              = 0
 
  pwind_alloc = dtset%mpw*dtorbmag%fmkmem_max
+
  ABI_ALLOCATE(pwind,(pwind_alloc,2,3))
  ABI_ALLOCATE(pwnsfac,(2,pwind_alloc))
 

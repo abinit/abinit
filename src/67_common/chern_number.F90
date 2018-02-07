@@ -21,9 +21,6 @@
 !! dtset <type(dataset_type)>=all input variables in this dataset
 !! gmet(3,3)=metric in reciprocal space
 !! gprimd(3,3)=reciprocal space dimensional primitive translations
-!! indlmn(6,lmnmax,ntypat)
-!!   array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
-!!                                  or i=lmn (if useylm=1)
 !! kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !! mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
@@ -74,7 +71,7 @@
 
 #include "abi_common.h"
 
-subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,indlmn,kg,&
+subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
      &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
      &            symrec,usecprj,usepaw,xred)
 
@@ -115,8 +112,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,indlmn,kg,&
  type(pawang_type),intent(in) :: pawang
 
  !arrays
- integer,intent(in) :: atindx1(dtset%natom),indlmn(6,dtorbmag%lmnmax,dtset%ntypat)
- integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem)
+ integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
@@ -260,8 +256,18 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,indlmn,kg,&
                      &  mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
                      &  pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
 
-                smat_all(:,:,:,ikpt,ikptb) = smat_kk(:,:,:)
+                do nn = 1, nband_k
+                   do n1 = 1, nband_k
+                      smat_all(1,nn,n1,ikpt,ikptb) =  smat_kk(1,nn,n1)
+                      smat_all(2,nn,n1,ikpt,ikptb) =  smat_kk(2,nn,n1)
+                      smat_all(1,n1,nn,ikptb,ikpt) =  smat_kk(1,nn,n1)
+                      smat_all(2,n1,nn,ikptb,ikpt) = -smat_kk(2,nn,n1)
+                   end do
+                end do
+                
                 has_smat(ikpt,ikptb) = .TRUE.
+                has_smat(ikptb,ikpt) = .TRUE.
+
              end if
              
              do gfor = 1, 2
@@ -296,8 +302,17 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,indlmn,kg,&
                         &  mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
                         &  pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
 
-                   smat_all(:,:,:,ikpt,ikptg) = smat_kk(:,:,:)
+                   do nn = 1, nband_k
+                      do n1 = 1, nband_k
+                         smat_all(1,nn,n1,ikpt,ikptg) =  smat_kk(1,nn,n1)
+                         smat_all(2,nn,n1,ikpt,ikptg) =  smat_kk(2,nn,n1)
+                         smat_all(1,n1,nn,ikptg,ikpt) =  smat_kk(1,nn,n1)
+                         smat_all(2,n1,nn,ikptg,ikpt) = -smat_kk(2,nn,n1)
+                      end do
+                   end do
+
                    has_smat(ikpt,ikptg) = .TRUE.
+                   has_smat(ikptg,ikpt) = .TRUE.
 
                 end if
 
@@ -316,8 +331,17 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,indlmn,kg,&
                         &  mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
                         &  pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
 
-                   smat_all(:,:,:,ikptb,ikptg) = smat_kk(:,:,:)
+                   do nn = 1, nband_k
+                      do n1 = 1, nband_k
+                         smat_all(1,nn,n1,ikptb,ikptg) =  smat_kk(1,nn,n1)
+                         smat_all(2,nn,n1,ikptb,ikptg) =  smat_kk(2,nn,n1)
+                         smat_all(1,n1,nn,ikptg,ikptb) =  smat_kk(1,nn,n1)
+                         smat_all(2,n1,nn,ikptg,ikptb) = -smat_kk(2,nn,n1)
+                      end do
+                   end do
+
                    has_smat(ikptb,ikptg) = .TRUE.
+                   has_smat(ikptg,ikptb) = .TRUE.
 
                 end if
 
