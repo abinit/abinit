@@ -650,14 +650,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
    if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
-     write (message,'(10a, 5(a,i0), 2a)')&
+     write (message,'(9a)')&
 &     "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
 &     "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
-&     "to decrease the memory requirements. Consider also OpenMP threads.",ch10,&
-&     "my_nspinor: ",my_nspinor, "mpw: ",dtset%mpw, "mband: ",dtset%mband, "mkmem: ",dtset%mkmem, "nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+&     "to decrease the memory requirements. Consider also OpenMP threads."
+     MSG_ERROR_NOSTOP(message,ii)
+     write (message,'(5(a,i0), 2a)')&
+&     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
+&     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
  end if
