@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!****f* ABINIT/chern_number
+!!****f* ABINIT/chern_number
 !! NAME
 !! chern_number
 !!

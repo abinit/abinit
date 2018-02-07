@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!****f* ABINIT/mkpwind_k
+!!****f* ABINIT/mkpwind_k
 !! NAME
 !! mkpwind_k
 !!
@@ -28,11 +28,11 @@
 !! kgindex(dtset%nkpt)= index of kg per kpt
 !! mpi_enreg=information about MPI parallelization
 !! npw_k=number of planewaves at k
-!! pwind_k1(dtset%mpw)=output index of ikpt1 basis states refered to ikpt
 !! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
 !!   reciprocal space primitive translations
 !!
 !! OUTPUT
+!! pwind_k1(dtset%mpw)=output index of ikpt1 basis states refered to ikpt
 !!
 !! SIDE EFFECTS
 !!
