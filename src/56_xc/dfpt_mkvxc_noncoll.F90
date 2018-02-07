@@ -107,7 +107,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  integer,optional,intent(in) :: ixcrot
 !Local variables-------------------------------
 !scalars
- integer :: ifft
 !arrays
  real(dp) :: nhat1_zero(0,0),nhat1gr_zero(0,0,0),tsec(2)
  real(dp),allocatable :: m_norm(:),rhor1_diag(:,:),vxc1_diag(:,:)

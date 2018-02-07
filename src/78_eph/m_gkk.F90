@@ -161,7 +161,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr1=0,master=0
  integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
- integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,onpw
+ integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band
  integer :: ik,ikq,timerev_q
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq

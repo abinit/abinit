@@ -366,7 +366,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
- integer :: dbl_nnsclo_mq,ifft,pqmq !-q duplicate for dbl_nnsclo, pqmq = indicator for potential mixing
+ integer :: dbl_nnsclo_mq,ifft !-q duplicate for dbl_nnsclo
+!integer :: pqmq ! pqmq = indicator for potential mixing
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
@@ -374,10 +375,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: ucvol,vxcavg,elmag1
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq,enl0_mq
- real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,evdw_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
+ real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
- character(len=fnlen) :: fi1o_vtk
+!character(len=fnlen) :: fi1o_vtk
  integer  :: prtopt
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield

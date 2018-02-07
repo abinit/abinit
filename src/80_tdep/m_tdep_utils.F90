@@ -120,7 +120,7 @@ contains
   double precision, intent(out)  :: Rlatt4dos (3,InVar%natom_unitcell,InVar%natom)
   double precision, intent(out)  :: ucart(3,InVar%natom,InVar%nstep)
   
-  integer :: ii,jj,kk,max_ijk,iatcell,jatcell,iatom,jatom,katom,latom,eatom,fatom,istep,jstep
+  integer :: ii,jj,kk,max_ijk,iatcell,jatcell,iatom,jatom,eatom,fatom,istep,jstep
   integer :: foo,foo2,atom_ref
   double precision :: tmp(3),tmp1(3),tmp2(3),Rlatt(3),xred_tmp(3),rprimd_MD_tmp(3,3)
   double precision, allocatable :: dist_unitcell(:,:,:),xcart_average(:,:)
@@ -129,7 +129,7 @@ contains
   double precision, allocatable  :: xred_center(:,:)
   double precision, allocatable  :: Rlatt_red (:,:,:)
   double precision, allocatable  :: xred_ideal(:,:)
-  double precision, allocatable  :: distance_average(:,:,:)
+! double precision, allocatable  :: distance_average(:,:,:)
   integer, allocatable  :: FromIdeal2Average(:)
   double precision, allocatable  :: xcart(:,:,:)
   double precision, allocatable  :: xcart_ideal(:,:)
@@ -885,13 +885,13 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   double precision,intent(in) :: distance(InVar%natom,InVar%natom,4)
   double precision,intent(out) :: proj(norder,norder,nshell)
 
-  integer :: ii,jj,isym,LWORK,INFO,ieig,const_tot,jsym
+  integer :: ii,jj,isym,LWORK,INFO,const_tot
   integer :: kk,ncount,icoeff,jatcell,katcell,mu,nu,xi
   integer :: inv,watom,xatom,yatom,isyminv,nsyminv,facorder
   integer, allocatable :: IPIV(:),iconst(:)
   double precision :: prod_scal,drandom
   double precision :: eigvec(3,3)
-  double precision :: vect_trial(3),vect_trial1(3),vect_trial2(3),vect_trial3(3),eigval(3)
+  double precision :: vect_trial(3),vect_trial1(3),vect_trial2(3),vect_trial3(3)
   double precision :: WR(3),WI(3),VL(3,3),VR(3,3)
   double precision, allocatable :: WORK(:)
   double complex :: eigenvectors(3,3),eigenvalues(3)
