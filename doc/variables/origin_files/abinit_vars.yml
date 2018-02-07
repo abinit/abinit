@@ -20667,13 +20667,13 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: null
+    dimensions: scalar
     excludes: null
     mnemonics: ORBital MAGnetization
     requires: |-
         [[usepaw]]==1
         [[kptopt]]==3
-        [[nproc]]==1
+        [[NPROC]]==1
     text: |-
         Compute quantities related to orbital magnetization. Currently only the Chern number calculated.
     topics: MagField_expert
