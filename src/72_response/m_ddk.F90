@@ -351,7 +351,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  character(len=fnlen) :: fname
  real(dp) :: kibz(3), kbz(3)
  real(dp),allocatable :: cg_ki(:,:),cg_kf(:,:),eig_ki(:),work(:,:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:),dipoles(:,:,:,:,:)
+ real(dp),allocatable :: dipoles(:,:,:,:,:,:)
 
 !************************************************************************
 
@@ -401,8 +401,15 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  nkfull = ebands_full%nkpt
 
  ! allocate optical matrix elements
- ABI_MALLOC(dipoles, (mband,mband,nkfull,nsppol,3))
- write(*,*) mband, mband, nkfull, nsppol
+ ABI_MALLOC(dipoles, (2,mband,mband,nkfull,nsppol,3))
+ write(*,*) 'read'
+ write(*,*) 'nkpoints:', nkfull
+ write(*,*) 'nbands:  ', mband
+ write(*,*) 'spin:    ', nsppol
+
+ write(*,*) 'dataset'
+ write(*,*) 'mbands:', dtset%mband
+ write(*,*) 'spin:  ', dtset%nsppol
 
  !start counting the time
  call cwtime(cpu,wall,gflops,"start")
@@ -427,7 +434,8 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
      call wfk_read_band_block(in_wfk,[1,nband_k],ik_ibz,spin,xmpio_single,&
        kg_k=kg_ki,cg_k=cg_ki,eig_k=eig_ki)
 
-     write(*,*) npw_kf
+     write(*,*) 'ikpt:', ik_bz
+     write(*,*) 'npw: ', npw_kf
 
      ! The test on npwarr is needed because we may change istwfk e.g. gamma.
      if (isirred_kf) then
@@ -463,6 +471,11 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
    end do
  end do
 
+ ABI_FREE(kg_ki)
+ ABI_FREE(cg_ki)
+ ABI_FREE(eig_ki)
+
+ write(*,*) 'done!'
  call cwtime(cpu,wall,gflops,"stop")
 
  !write the matrix elements
@@ -470,7 +483,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
    ! Output DDK file in netcdf format.
    !if (me == master) then
      do ii=1,3
-         fname = strcat(itoa(ii), "_DDK.nc")
+         fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_DDK.nc")
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
          ! Have to build hdr on k-grid with info about perturbation.
          !call hdr_copy(hdr0, hdr_tmp)
@@ -479,16 +492,16 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
          !hdr_tmp%qptn = dtset%qptn(1:3)
          !NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
          !call hdr_free(hdr_tmp)
-         NCF_CHECK(crystal_ncwrite(cryst, ncid))
+         !NCF_CHECK(crystal_ncwrite(cryst, ncid))
          NCF_CHECK(ebands_ncwrite(ebands_full, ncid))
-         ncerr = nctk_def_arrays(ncid, [ &
-           nctkarr_t('h1_matrix_elements', "dp", &
-            "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
-         NCF_CHECK(ncerr)
-         NCF_CHECK(nctk_set_datamode(ncid))
-         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(:,:,:,:,ii), &
-           count=[2, dtset%mband, dtset%mband, nkfull, dtset%nsppol])
-         NCF_CHECK(ncerr)
+         !ncerr = nctk_def_arrays(ncid, [ &
+         !  nctkarr_t('h1_matrix_elements', "dp", &
+         !   "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
+         !NCF_CHECK(ncerr)
+         !NCF_CHECK(nctk_set_datamode(ncid))
+         !ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(:,:,:,:,ii), &
+         !  count=[2, dtset%mband, dtset%mband, nkfull, dtset%nsppol])
+         !NCF_CHECK(ncerr)
          NCF_CHECK(nf90_close(ncid))
     end do
    !end if
@@ -550,10 +563,10 @@ subroutine calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg,npw,kg_k,nspinor,mb
  complex(dp) :: ihrc(3,nspinor**2)
  complex(gwpc),allocatable :: ug_c(:),ug_v(:)
  real(dp) :: ediff
- real(dp),allocatable :: dipoles(:,:,:,:,:)
+ real(dp),allocatable :: dipoles(:,:,:,:,:,:)
 
- write(*,*) kbz
- write(*,*) npw,nspinor,mband
+ write(*,*) 'kcoords:', kbz
+ write(*,*) 'ikbz:   ', ik_bz
 
  ! Allocate KB form factors
  istwf_k = 0
@@ -575,7 +588,8 @@ subroutine calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg,npw,kg_k,nspinor,mb
      ! Save matrix elements of i*r in the IBZ
      ediff = 1!KS_Bst%eig(ib_c,ik_bz,spin) - KS_BSt%eig(ib_v,ik_bz,spin)
      if (ABS(ediff)<tol16) ediff=tol6  ! Treat a possible degeneracy between v and c.
-     dipoles(ib_c,ib_v,ik_bz,spin,:) = ihrc(:,1)/ediff
+     dipoles(1,ib_c,ib_v,ik_bz,spin,:) = real(ihrc(:,1))/ediff
+     dipoles(2,ib_c,ib_v,ik_bz,spin,:) = aimag(ihrc(:,1))/ediff
 
    end do
  end do
