@@ -334,28 +334,27 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: response=0
- integer :: bantot,bufsz,choice,cplex,ierr,ia,ifft,igrad,ii,ishift,ispden,nfftotf,ngrad
+ integer :: bantot,bufsz,choice,cplex,ierr,ifft,igrad,ishift,ispden,nfftotf,ngrad
  integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
  logical :: test_gylmgr,test_nfgd,test_rfgd
- logical :: wvlbigdft=.false.,compute_wvl_tail=.false.
+ logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero
- real(dp) :: eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc
- real(dp) :: ucvol,ucvol_local
+ real(dp) :: ucvol
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
- integer :: mband_cprj
- logical :: do_last_ortho
- real(dp) :: dum
+ integer :: ia,ii,mband_cprj
+ logical :: do_last_ortho,compute_wvl_tail=.false.
+ real(dp) :: dum,eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc,ucvol_local
 #endif
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:),xcart(:,:)
+ real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
- real(dp),allocatable :: hpsi_tmp(:)
+ real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
 #endif
 
 ! *************************************************************************
