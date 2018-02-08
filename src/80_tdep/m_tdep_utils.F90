@@ -888,7 +888,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   integer :: ii,jj,isym,LWORK,INFO,const_tot
   integer :: kk,ncount,icoeff,jatcell,katcell,mu,nu,xi
   integer :: inv,watom,xatom,yatom,isyminv,nsyminv,facorder
-  integer, allocatable :: IPIV(:),iconst(:)
+  integer, allocatable :: iconst(:)
   double precision :: prod_scal,drandom
   double precision :: eigvec(3,3)
   double precision :: vect_trial(3),vect_trial1(3),vect_trial2(3),vect_trial3(3)
