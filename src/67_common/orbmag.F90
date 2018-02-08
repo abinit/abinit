@@ -25,9 +25,11 @@
 !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !! mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !! mpi_enreg=information about MPI parallelization
+!! nfftf= - PAW only - number of FFT grid points for the "fine" grid (see NOTES at beginning of scfcv)
 !! npwarr(nkpt)=number of planewaves in basis at this k point
 !! pawang <type(pawang_type)>=paw angular mesh and related data
-!! pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
+!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!! pawrad(ntypat*psps%usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !! pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !! psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !! pwind(pwind_alloc,2,3) = array used to compute
@@ -36,7 +38,9 @@
 !! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
 !!   reciprocal space primitive translations
 !! usecprj=1 if cprj datastructure has been allocated
-!! usepaw=1 if PAW calculation
+!! vhartr(nfftf)=Hartree potential
+!! vpsp(nfftf)=array for holding local psp
+!! vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
 !! xred(3,natom) = location of atoms in unit cell
 !!
 !! OUTPUT
@@ -71,8 +75,8 @@
 #include "abi_common.h"
 
 subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
-     &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,&
-     &            pwind,pwind_alloc,rprimd,symrec,usecprj,usepaw,xred)
+     &            mcg,mcprj,mpi_enreg,nfftf,npwarr,pawang,pawfgr,pawrad,pawtab,psps,&
+     &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred)
 
  use defs_basis
  use defs_abitypes
@@ -88,6 +92,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
  use m_fftcore, only : kpgsph
  use m_pawang,           only : pawang_type
+ use m_pawfgr,           only : pawfgr_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
@@ -98,6 +103,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'orbmag'
  use interfaces_32_util
+ use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section
@@ -106,36 +112,39 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
 !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcg,mcprj,pwind_alloc,usecprj,usepaw
+ integer,intent(in) :: mcg,mcprj,nfftf,pwind_alloc,usecprj
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(orbmag_type), intent(inout) :: dtorbmag
  type(pawang_type),intent(in) :: pawang
+ type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
 
  !arrays
  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
- real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rprimd(3,3),xred(3,dtset%natom)
- type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
+ real(dp),intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rprimd(3,3)
+ real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
  !Local variables -------------------------
  !scalars
  integer :: adir,bdir,bfor,bsigma,ddkflag,epsabg,gdir,gfor,gsigma
  integer :: icg,icgb,icgg,icprj,icprjb,icprjg
  integer :: ikg,ikpt,ikptb,ikptg,isppol,itrs,job
- integer :: mcg1_k,my_nspinor,nband_k,ncpgr,nn,n1,n2,n3,npw_k,npw_kb,npw_kg,shiftbd
+ integer :: mcg1_k,my_nspinor,nband_k,ncpgr,nn,n1,n2,n3
+ integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,npw_k,npw_kb,npw_kg,shiftbd
  real(dp) :: deltab,deltag
  complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B,tprodA,tprodB
  character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
  !arrays
  integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
- real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2)
- real(dp),allocatable :: cg1_k(:,:),kk_paw(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
- real(dp),allocatable :: smat_kk(:,:,:)
+ real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2),rhodum(1)
+ real(dp),allocatable :: cg1_k(:,:),cgrvtrial(:,:),kk_paw(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
+ real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:)
  logical,allocatable :: has_smat(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
@@ -149,7 +158,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  
  nband_k = dtorbmag%mband_occ
 
- if (usepaw == 1) then ! cprj allocation
+ if (psps%usepaw == 1) then ! cprj allocation
     ncpgr = cprj(1,1)%ncpgr
     ABI_ALLOCATE(dimlmn,(dtset%natom))
     call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
@@ -194,6 +203,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  job = 1
  shiftbd = 1
 
+ ngfft1=dtset%ngfft(1) ; ngfft2=dtset%ngfft(2) ; ngfft3=dtset%ngfft(3)
+ ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
+
  ABI_ALLOCATE(has_smat,(dtorbmag%fnkpt,dtorbmag%fnkpt))
  ABI_ALLOCATE(smat_all,(2,nband_k,nband_k,dtorbmag%fnkpt,dtorbmag%fnkpt))
  has_smat(:,:)=.FALSE.
@@ -202,6 +214,25 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
  call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
       & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom)
+
+ !---------construct local potential------------------
+ ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
+ ! nspden=1 is essentially hard-coded in the following line
+ vtrial(1:nfftf,1)=vhartr(1:nfftf)+vxc(1:nfftf,1)+vpsp(1:nfftf)
+ 
+ ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+ call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
+
+ ABI_ALLOCATE(vlocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
+ call fftpac(isppol,mpi_enreg,dtset%nspden,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vlocal,2)
+
+ ABI_DEALLOCATE(cgrvtrial)
+ ABI_DEALLOCATE(vtrial)
+
+ call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+
+
+ !------- now local potential is attached to gs_hamk ----------------------------
  
  do adir = 1, 3
 
@@ -262,7 +293,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                 sflag_k=0
                 call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icg,icgb,itrs,job,nband_k,&
                      &  mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
-                     &  pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
+                     &  pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
 
                 do nn = 1, nband_k
                    do n1 = 1, nband_k
@@ -308,7 +339,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                    sflag_k=0
                    call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icg,icgg,itrs,job,nband_k,&
                         &  mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
-                        &  pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
+                        &  pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
 
                    do nn = 1, nband_k
                       do n1 = 1, nband_k
@@ -337,7 +368,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                    sflag_k=0
                    call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icgb,icgg,itrs,job,nband_k,&
                         &  mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
-                        &  pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
+                        &  pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
 
                    do nn = 1, nband_k
                       do n1 = 1, nband_k
@@ -400,7 +431,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  dtorbmag%chern(2,1:3) =  cnum(1,1:3)/(two_pi*dtorbmag%fnkpt)
 
 
- if (usepaw == 1) then
+ if (psps%usepaw == 1) then
     ABI_DEALLOCATE(dimlmn)
     call pawcprj_free(cprj_k)
     ABI_DATATYPE_DEALLOCATE(cprj_k)
@@ -429,6 +460,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ABI_DEALLOCATE(has_smat)
  ABI_DEALLOCATE(smat_all)
 
+ ABI_DEALLOCATE(vlocal)
  call destroy_hamiltonian(gs_hamk)
 
 end subroutine orbmag

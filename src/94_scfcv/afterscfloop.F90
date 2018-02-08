@@ -515,6 +515,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
          &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
          &            symrec,usecprj,psps%usepaw,xred)
  end if
+ if(dtset%orbmag==2) then
+    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
+     &            mcg,mcprj,mpi_enreg,nfftf,npwarr,pawang,pawfgr,pawrad,pawtab,psps,&
+     &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred)
+ end if
+ 
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)
