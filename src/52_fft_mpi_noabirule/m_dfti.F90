@@ -7,7 +7,7 @@
 !!  This module provides wrappers for the MKL DFTI routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG)
+!! Copyright (C) 2009-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -290,7 +290,7 @@ end subroutine dfti_seqfourdp
 !! kg_kout(3,npwout)=reduced planewave coordinates, output
 !! mgfft=maximum size of 1D FFTs
 !! ndat=number of FFT to do in //
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !! npwout=number of elements in fofgout array (for option 2 and 3)
 !! ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -573,7 +573,7 @@ end subroutine dfti_seqfourwf
 !!  kg_kin(3,npwin)=reduced planewave coordinates, input
 !!  kg_kout(3,npwout)=reduced planewave coordinates, output
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -703,7 +703,7 @@ end subroutine dfti_fftrisc_sp
 !!  kg_kin(3,npwin)=reduced planewave coordinates, input
 !!  kg_kout(3,npwout)=reduced planewave coordinates, output
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.

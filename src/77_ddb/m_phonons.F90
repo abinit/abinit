@@ -9,7 +9,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MG,MJV)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MG,MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -183,7 +183,7 @@ CONTAINS  !=====================================================================
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
 !!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
@@ -211,6 +211,7 @@ subroutine phdos_print(PHdos,fname)
  integer :: io,itype,unt,unt_by_atom,unt_msqd,iatom
  real(dp) :: cfact
  character(len=500) :: msg
+ character(len=500) :: msg_method
  character(len=fnlen) :: fname_by_atom
  character(len=fnlen) :: fname_msqd
  character(len=3) :: unitname
@@ -223,70 +224,74 @@ subroutine phdos_print(PHdos,fname)
 ! this should be the abinit default!
  cfact=one        ; unitname='Ha'
 
+ select case (PHdos%prtdos)
+ case (1)
+   write(msg_method,'(a,es16.8,2a,i0)')&
+&   '# Gaussian method with smearing = ',PHdos%dossmear*cfact,unitname,', nqibz =',PHdos%nqibz
+ case (2)
+   write(msg_method,'(a,i0)')'# Tetrahedron method, nqibz= ',PHdos%nqibz
+ case default
+   MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
+ end select
+
 ! === Open external file and write results ===
 ! TODO Here I have to rationalize how to write all this stuff!!
 !
  if (open_file(fname,msg,newunit=unt,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
-
- fname_by_atom = trim(fname) // "_by_atom"
- if (open_file(fname_by_atom,msg,newunit=unt_by_atom,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
- end if
- fname_msqd = trim(fname) // "_msqd"
- if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
- end if
-
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom type projected DOS'
  call wrtout(unt,msg,'COLL')
  write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in states/',unitname
  call wrtout(unt,msg,'COLL')
-
- write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom projected DOS'
- call wrtout(unt_by_atom,msg,'COLL')
- write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in states/',unitname
- call wrtout(unt_by_atom,msg,'COLL')
-
- write(msg,'(3a)')'# ',ch10,'# Phonon density of states weighted msq displacement matrix'
- call wrtout(unt_msqd,msg,'COLL')
- write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in bohr^2 states/',unitname
- call wrtout(unt_msqd,msg,'COLL')
-
- select case (PHdos%prtdos)
- case (1)
-   write(msg,'(a,es16.8,2a,i0)')&
-&   '# Gaussian method with smearing = ',PHdos%dossmear*cfact,unitname,', nqibz =',PHdos%nqibz
- case (2)
-   write(msg,'(a,i0)')'# Tetrahedron method, nqibz= ',PHdos%nqibz
- case default
-   MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
- end select
- call wrtout(unt,msg,'COLL')
- call wrtout(unt_by_atom,msg,'COLL')
- call wrtout(unt_msqd,msg,'COLL')
-
+ call wrtout(unt,msg_method,'COLL')
  write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type=1] ...  ',ch10,'# '
  call wrtout(unt,msg,'COLL')
- write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    PJDOS[atom=1]  PJDOS[atom=2] ...  ',ch10,'# '
- call wrtout(unt_by_atom,msg,'COLL')
- write(msg,'(5a)')'# ',ch10,'# omega     MSQDisp[atom=1, xx, yy, zz, yz, xz, xy]  MSQDisp[atom=2, xx, yy,...] ...  ',ch10,'# '
- call wrtout(unt_msqd,msg,'COLL')
-
  do io=1,PHdos%nomega
    write(unt,'(3es17.8)',advance='NO')PHdos%omega(io)*cfact,PHdos%phdos(io)/cfact,PHdos%phdos_int(io)/cfact
    do itype=1,PHdos%ntypat
      write(unt,'(2es17.8,2x)',advance='NO')PHdos%pjdos_type(io,itype)/cfact,PHdos%pjdos_type_int(io,itype)/cfact
    end do
    write(unt,*)
+ end do
+ close(unt)
 
+
+
+ fname_by_atom = trim(fname) // "_by_atom"
+ if (open_file(fname_by_atom,msg,newunit=unt_by_atom,form="formatted",action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+ write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom projected DOS'
+ call wrtout(unt_by_atom,msg,'COLL')
+ write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in states/',unitname
+ call wrtout(unt_by_atom,msg,'COLL')
+ call wrtout(unt_by_atom,msg_method,'COLL')
+ write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    PJDOS[atom=1]  PJDOS[atom=2] ...  ',ch10,'# '
+ call wrtout(unt_by_atom,msg,'COLL')
+ do io=1,PHdos%nomega
    write(unt_by_atom,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact,PHdos%phdos(io)/cfact
    do iatom=1,PHdos%natom
      write(unt_by_atom,'(1es17.8,2x)',advance='NO') sum(PHdos%pjdos(io,1:3,iatom))/cfact
    end do
    write(unt_by_atom,*)
+ end do
+ close(unt_by_atom)
 
+
+
+ fname_msqd = trim(fname) // "_msqd"
+ if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+ write(msg,'(3a)')'# ',ch10,'# Phonon density of states weighted msq displacement matrix'
+ call wrtout(unt_msqd,msg,'COLL')
+ write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in bohr^2 states/',unitname
+ call wrtout(unt_msqd,msg,'COLL')
+ call wrtout(unt_msqd,msg_method,'COLL')
+ write(msg,'(5a)')'# ',ch10,'# omega     MSQDisp[atom=1, xx, yy, zz, yz, xz, xy]  MSQDisp[atom=2, xx, yy,...] ...  ',ch10,'# '
+ call wrtout(unt_msqd,msg,'COLL')
+ do io=1,PHdos%nomega
    write(unt_msqd,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact
    do iatom=1,PHdos%natom
      write(unt_msqd,'(6es17.8,2x)',advance='NO') &
@@ -299,10 +304,8 @@ subroutine phdos_print(PHdos,fname)
    end do
    write(unt_msqd,*)
  end do
-
- close(unt)
- close(unt_by_atom)
  close(unt_msqd)
+
 
 end subroutine phdos_print
 !!***
@@ -682,7 +685,7 @@ end subroutine phdos_free
 !! the mesh is enlarged and the calculation is restarted.
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
 !!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
@@ -750,6 +753,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: wtqibz(:)
+ real(dp), allocatable :: pjdos_tmp(:,:,:)
 
 ! *********************************************************************
 
@@ -802,6 +806,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  ABI_MALLOC(PHdos%pjdos_type_int, (nomega,crystal%ntypat))
  ABI_MALLOC(PHdos%pjdos_rc_type, (nomega,3,crystal%ntypat))
  ABI_MALLOC(PHdos%msqd_dos_atom, (nomega,3,3,natom))
+ ABI_CALLOC(pjdos_tmp,(2,3,natom))
 
  ! === Parameters defining the gaussian approximant ===
  if (prtdos==1) then
@@ -970,8 +975,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
                do iat=1,natom
                  msqd_atom_tmp = zero
                  do idir=1,3
-                   pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
-                   PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
+                   !pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
+
+                   pjdos_tmp(:,idir,iat) = eigvec(:,idir,iat,imode)*wtqibz(iq_ibz)*gaussval ! * pnorm
+
+                   !PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
 
                    ! accumulate outer product of displacement vectors
                    do jdir=1,3
@@ -995,6 +1003,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
                    jat = Crystal%indsym(4,isym,iat)
                    PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) &
 &                    + matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+
+                   PHdos%pjdos(io,:,jat)=PHdos%pjdos(io,:,jat)+ (matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
+&                                                               (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2
                  end do
                end do ! iat
              end do ! io
@@ -1052,6 +1063,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    ABI_FREE(qbz)
  end do !imesh
  ABI_FREE(ngqpt)
+ ABI_FREE(pjdos_tmp)
 
  if (allocated(PHdos%phdos_int)) then
    ABI_FREE(PHdos%phdos_int)
@@ -1144,6 +1156,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
+ PHdos%pjdos = PHdos%pjdos / Crystal%nsym
 
  ABI_FREE(qibz)
  ABI_FREE(wtqibz)
@@ -1653,19 +1666,27 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
+ integer :: unt
  integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,natom,ncid,nprocs,my_rank
  integer :: natprj_bs,eivec,enunit,ifcflag
  real(dp) :: freeze_displ
+ real(dp) :: cfact
  character(500) :: msg
+ character(len=8) :: unitname
+   
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
+ integer :: nomega, imode, iomega
  integer,allocatable :: ndiv(:)
+ real(dp) :: omega, omega_min, gaussmaxarg, gaussfactor, gaussprefactor, xx
  real(dp) :: speedofsound(3)
  real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
  real(dp) :: displ(2*3*crystal%natom*3*crystal%natom),eigval(3,crystal%natom)
- real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:),save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
+ real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:)
+ real(dp),allocatable :: save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
  real(dp),allocatable :: weights(:)
+ real(dp),allocatable :: dos4bs(:)
  real(dp),allocatable,target :: alloc_path(:,:)
  real(dp),pointer :: fineqpath(:,:)
  type(atprj_type) :: atprj
@@ -1797,11 +1818,37 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
  end do ! iphl1
 
+! calculate dos for the specific q points along the BS calculated
+! only Gaussians are possible - no interpolation
+ omega_min = minval(save_phfrq(:,:))
+ nomega=NINT( (maxval(save_phfrq(:,:))-omega_min) / inp%dosdeltae ) + 1
+ nomega=MAX(6,nomega) ! Ensure Simpson integration will be ok
+
+ ABI_MALLOC(dos4bs,(nomega))
+ dos4bs = zero
+ gaussmaxarg = sqrt(-log(1.d-90))
+ gaussprefactor = one/(inp%dossmear*sqrt(two_pi))
+ gaussfactor    = one/(sqrt2*inp%dossmear)
+ do iphl1=1,nfineqpath
+   do imode=1,3*natom
+     do iomega=1, nomega
+       omega = omega_min + (iomega-1) * inp%dosdeltae
+       xx = (omega - save_phfrq(imode,iphl1)) * gaussfactor
+       if(abs(xx) < gaussmaxarg) then
+         dos4bs(iomega) = dos4bs(iomega) + gaussprefactor*exp(-xx*xx)
+       end if
+     end do
+   end do
+ end do
+
+
 !deallocate sortph array
  call end_sortph()
 
  if (natprj_bs > 0) call atprj_destroy(atprj)
 
+
+! WRITE OUT FILES
  if (my_rank == master) then
    ABI_MALLOC(weights, (nfineqpath))
    weights = one
@@ -1848,6 +1895,29 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      MSG_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
    end select
 
+   ! write out DOS file for q along this path
+   cfact=one
+   unitname = 'Ha'
+   if (open_file('PHBST_partial_DOS',msg,newunit=unt,form="formatted",action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   write(msg,'(3a)')'# ',ch10,'# Partial phonon density of states for q along a band structure path'
+   call wrtout(unt,msg,'COLL')
+   write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in states/',unitname
+   call wrtout(unt,msg,'COLL')
+   write(msg,'(a,E20.10,2a,i8)') '# Gaussian method with smearing = ',inp%dossmear*cfact,unitname, &
+&        ', nq =', nfineqpath
+   call wrtout(unt,msg,'COLL')
+   write(msg,'(5a)')'# ',ch10,'# omega     PHDOS ',ch10,'# '
+   call wrtout(unt,msg,'COLL')
+   do iomega=1,nomega
+     omega = omega_min + (iomega-1) * inp%dosdeltae
+     write(unt,'(2es17.8)',advance='NO')omega*cfact,dos4bs(iomega)/cfact
+     write(unt,*)
+   end do
+   close(unt)
+  
+
    ABI_FREE(weights)
  end if
 
@@ -1856,6 +1926,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  ABI_FREE(save_phdispl_cart)
  ABI_FREE(phfrq)
  ABI_FREE(eigvec)
+ ABI_FREE(dos4bs)
 
  if (allocated(alloc_path)) then
    ABI_FREE(alloc_path)

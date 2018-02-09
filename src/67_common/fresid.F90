@@ -10,7 +10,7 @@
 !!              old atomic positions, and new atomic positions
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, MM, MT)
+!! Copyright (C) 1998-2018 ABINIT group (XG, MM, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 !!  | xclevel= level of the XC functional
 !! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ntypat=number of types of atoms in cell.
 !! option=see below
 !! pawtab(ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data

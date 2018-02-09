@@ -275,7 +275,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
 ! Read IFC from ifc.in or ifc.tdep (according to ReadIFC)
 ! =======================================================
   ifcout=          min(Ifc%nrpt,200)
-  Ifc%atmfrc(:,:,:,:,:,:)=zero
+  Ifc%atmfrc(:,:,:,:,:)=zero
   if (InVar%ReadIFC==1) then
     write(InVar%stdout,'(a)') ' Read the IFC from ifc.in' 
     open(unit=40,file='ifc.in')
@@ -283,7 +283,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
     write(InVar%stdout,'(a)') ' Read the IFC from ifc.tdep' 
     open(unit=40,file='ifc.tdep')
   end if
-  Ifc%atmfrc(:,:,:,:,:,:)=zero
+  Ifc%atmfrc(:,:,:,:,:)=zero
   read(40,*) string
   read(40,*) string
   read(40,*) string
@@ -314,11 +314,11 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
         end if  
         if (dist.lt.InVar%Rcut*0.99) then
 !FB       See ifc_getiaf.F90 (for wghatm)          
-          Ifc%atmfrc(1,1,iatcell,mu,jatcell,irpt)=atmfrcsr1/Ifc%wghatm(iatcell,jatcell,irpt)
-          Ifc%atmfrc(1,2,iatcell,mu,jatcell,irpt)=atmfrcsr2/Ifc%wghatm(iatcell,jatcell,irpt)
-          Ifc%atmfrc(1,3,iatcell,mu,jatcell,irpt)=atmfrcsr3/Ifc%wghatm(iatcell,jatcell,irpt)
+          Ifc%atmfrc(1,iatcell,mu,jatcell,irpt)=atmfrcsr1/Ifc%wghatm(iatcell,jatcell,irpt)
+          Ifc%atmfrc(2,iatcell,mu,jatcell,irpt)=atmfrcsr2/Ifc%wghatm(iatcell,jatcell,irpt)
+          Ifc%atmfrc(3,iatcell,mu,jatcell,irpt)=atmfrcsr3/Ifc%wghatm(iatcell,jatcell,irpt)
         else
-          Ifc%atmfrc(1,1:3,iatcell,mu,jatcell,irpt)=zero
+          Ifc%atmfrc(1:3,iatcell,mu,jatcell,irpt)=zero
         end if
       end do
       read(40,*) string
@@ -423,7 +423,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
   double precision, intent(inout) :: Phij_NN(3*InVar%natom,3*InVar%natom)
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,InVar%natom)
 
-  integer :: eatom,fatom,iatcell,iatom,ii,irpt,jatcell,jatom,jj,isym,kk
+  integer :: eatom,fatom,iatcell,ii,irpt,jatcell,jatom,jj,isym,kk
   integer :: ishell,iatref,jatref,iatshell,trans
   double precision :: tol,dist
   double precision :: tmp(3)
@@ -432,7 +432,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
 
 ! Link the atmfrc to the Phij_NN  
 ! ==============================
-  if (dipdip==0.and.option==0) Ifc%atmfrc(:,:,:,:,:,:)=zero
+  if (dipdip==0.and.option==0) Ifc%atmfrc(:,:,:,:,:)=zero
   if (dipdip==0.and.option==1) Phij_NN(:,:)=zero
   call xred2xcart(natom_unitcell,Lattice%rprimt(:,:),xcart(:,:),Sym%xred_zero(:,:))
   tol=1.d-8
@@ -452,7 +452,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
           tmp(:)=(vect_ddb(:)*Lattice%acell_unitcell(:))**2
           dist=dsqrt(sum(tmp(:)))
           if (dist.gt.(InVar%Rcut*0.99).and.option==0) then  
-            Ifc%atmfrc(1,:,iatcell,:,jatcell,irpt)=zero
+            Ifc%atmfrc(:,iatcell,:,jatcell,irpt)=zero
             cycle
           end if
           if (abs(vect_ddb(1)-vect_tdep(1)).lt.tol.and.&
@@ -461,10 +461,10 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
             do ii=1,3
               do jj=1,3
                 if (option==0) then
-                  Ifc%atmfrc(1,ii,iatcell,jj,jatcell,irpt)=Ifc%atmfrc(1,ii,iatcell,jj,jatcell,irpt)+&
+                  Ifc%atmfrc(ii,iatcell,jj,jatcell,irpt)=Ifc%atmfrc(ii,iatcell,jj,jatcell,irpt)+&
 &                         Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)/Ifc%wghatm(iatcell,jatcell,irpt)
                 else if (option==1) then
-                  Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)=Ifc%atmfrc(1,ii,iatcell,jj,jatcell,irpt)*Ifc%wghatm(iatcell,jatcell,irpt)
+                  Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)=Ifc%atmfrc(ii,iatcell,jj,jatcell,irpt)*Ifc%wghatm(iatcell,jatcell,irpt)
                   if (abs(Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)-0.000040).lt.1.d-6) then 
                   end if
                 end if

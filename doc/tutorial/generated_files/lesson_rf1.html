@@ -42,7 +42,7 @@ please see the <a href="lesson_rf2.html"> tutorial DFPT 2</a>.
 
 <p>This lesson should take about 2 hours.
 <hr>
-<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
+<h5>Copyright (C) 2000-2018 ABINIT group (XG,RC)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
 
@@ -88,28 +88,28 @@ for the other lessons. Why not create "Work_rf1" in ~abinit/tests/tutorespfn/Inp
   Because of the use of
   two types of atoms, have a look at the following input variables :
 <ul>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>
+  <li><a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>
+  <li><a href="../../variables/generated_files/varset_basic.html#typat">typat</a>
 </ul>
 <p>
-  Note that the value of <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>
+  Note that the value of <a href="../../variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>
   is rather stringent. This is because the wavefunctions determined by the
   present run will be used later as starting point of the DFPT
-  calculation. However, the number of steps, <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>,
+  calculation. However, the number of steps, <a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a>,
   in this example file has been set to 15, and you will see that this is not enough to reach
-  the target <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>. In production runs,
-  you should choose a larger value of <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>,
-  sufficient to reach your target <a href="../../input_variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>.
+  the target <a href="../../variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>. In production runs,
+  you should choose a larger value of <a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a>,
+  sufficient to reach your target <a href="../../variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>.
   In the present tutorial, due to portability concerns related to automatic testing,
-  we could not allow a larger <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a> value.
+  we could not allow a larger <a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a> value.
   This minor problem with some tutorial examples was mentioned briefly in
   <a href="lesson_base1.html#aq1">a side note to the answer to question 1 of lesson 1</a>.
   So, do not follow blindly all examples in the tutorials : check by yourself
   the convergence of your runs !
 <p>
-You will work at fixed <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+You will work at fixed <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>
 (=3Ha) and k-point grid, defined
-by <a href="../../input_variables/generated_files/varset_gstate.html#kptrlatt">kptrlatt</a>
+by <a href="../../variables/generated_files/varset_gstate.html#kptrlatt">kptrlatt</a>
 (the 8x8x8 Monkhorst-Pack grid).
 It is implicit that in "real life", you should do a convergence test with
 respect to both convergence parameters.
@@ -174,9 +174,9 @@ You can copy the file ~abinit/tests/tutorespfn/Input/trf1_2.in in Work_rf1.
 This is your input file. You should edit it and briefly
 look at the two changes with respect to the file
  ~abinit/tests/tutorespfn/Input/trf1_1.in : the change of
-<a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>, and the
+<a href="../../variables/generated_files/varset_basic.html#xred">xred</a>, and the
 reading of the wavefunction file, using the
-<a href="../../input_variables/generated_files/varset_files.html#irdwfk">irdwfk</a> input variable.
+<a href="../../variables/generated_files/varset_files.html#irdwfk">irdwfk</a> input variable.
 Then, you can make the run. The symmetry is lowered with respect
 to the ground-state geometry, so that the number of k-points
 increases a lot, and of course, the CPU time. 
@@ -305,11 +305,11 @@ before
 
 <p>
 Accordingly, you should get familiarized with the new input variables :
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>,
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>,
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>.
+<a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>,
+<a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>,
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>.
 Then, pay attention to the special use of the
-<a href="../../input_variables/generated_files/varset_basic.html#kptopt">kptopt</a>
+<a href="../../variables/generated_files/varset_basic.html#kptopt">kptopt</a>
 input variable. It will be explained in more detail later.
 
 <p>
@@ -380,8 +380,8 @@ with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in
 are all gathered in the first part of this file.
 Moreover, the changes with respect to trf1_3.in concern
 only the input variables
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>, and
-<a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>.
+<a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>, and
+<a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>.
 Namely, all the atoms will be displaced, in all the directions.
 
 <p>
@@ -411,7 +411,7 @@ perturbation is for the As atom.
 
 <p> The phonon frequencies, obtained by diagonalizing
 the dynamical matrix (where the atomic masses have been taken
-into account, see <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>),
+into account, see <a href="../../variables/generated_files/varset_rlx.html#amu">amu</a>),
 are given as follows :
 <pre>
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -524,11 +524,11 @@ ratio
           f-sum rule ratio=    1.0028582975E+00
 </pre>
 that should be close to 1, and becomes closer to it when
-<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is increased,
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> is increased,
 and the sampling of k points is improved.
 (In the present status of ABINIT, the f-rule ratio
 is not computed correctly when
-<a href="../../input_variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>/=0)
+<a href="../../variables/generated_files/varset_rlx.html#ecutsm">ecutsm</a>/=0)
 
 <p> In the third dataset section, three irreducible perturbations
 are considered :
@@ -584,7 +584,7 @@ Namely, the Born effective charge of the Al atom is
 2.104, and the one of the As atom is
 -2.127 . The charge neutrality sum rule
 is not fulfilled exactly. When
-<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is increased,
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> is increased,
 and the sampling of k points is improved, the
 sum of the two charges goes closer to zero.
 
@@ -639,8 +639,8 @@ modes at 344.3 cm^-1, and one LO mode at 379.6 cm^-1 .
 as well as theoretical (363 cm^-1 , 400 cm^-1) values (again the
 <cite>Gianozzi et al</cite> paper mentioned above).
 Most of the discrepancy comes from the
-too low value of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>.
-Using ABINIT with <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree
+too low value of <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>.
+Using ABINIT with <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree
 gives (358.8 cm^-1 , 389.8 cm^-1). The remaining of the discrepancy
 may come partly from the pseudopotentials, that are particularly soft.
 
@@ -648,7 +648,7 @@ may come partly from the pseudopotentials, that are particularly soft.
 After imposition of the neutrality sum rule, the Al Born
 effective charge is 2.116 . The value from
 <cite>Gianozzi et al</cite> is 2.17, the experimental value
-is 2.18. Increasing <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+is 2.18. Increasing <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>
 to 6 hartree in ABINIT gives 2.168.
 
 <p>For the dielectric tensor, it is more delicate.
@@ -659,14 +659,14 @@ of polarization-dependence
 (<cite> X. Gonze, Ph. Ghosez and R. Godby, Phys. Rev. Lett. (1995)</cite>).
 Still, the agreement of our calculation
 with the theoretical result is not very good. With
-<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=3 hartree, we have
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=3 hartree, we have
 9.76. Changing it to 6 hartree gives 10.40 . A better k point
 sampling (8x8x8), with
-<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree,
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree,
 reduces the value to 9.89 . Changing pseudopotentials
 finally improves the agreement : with the much harder
 13al.pspgth and 33as.psphgh pseudopotentials with
-adequate <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=16 hartree
+adequate <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=16 hartree
 and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.37 .
 This illustrates that the dielectric tensor is a much more sensitive
 quantity than the others.
@@ -709,13 +709,13 @@ despite the low cut-off energy, and different pseudopotentials.
 
 <p>At X, they get 95cm^-1, 216cm^-1, 337cm^-1 and 393cm^-1,
 while we get 92.5cm^-1, 204.6cm^-1, 313.9cm^-1 and 375.9cm^-1.
-With <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree,
+With <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree,
 we get 89.7cm^-1, 212.3cm^-1, 328.5cm^-1 and 385.8cm^-1.
 
 <p>
 At L, they get 71cm^-1, 212cm^-1, 352cm^-1 and 372cm^-1,
 while we get 69.0cm^-1, 202.5cm^-1, 332.6cm^-1 and 352.3cm^-1.
-With <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree,
+With <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>=6 hartree,
 we get 68.1cm^-1, 208.5cm^-1, 346.7cm^-1 and 362.6cm^-1.
 
 <p> At q=(0.1 0 0), we get

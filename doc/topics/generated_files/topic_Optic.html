@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to compute linear and non-linear optical properties in the independent-particle approximation with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (SS,XG,YG)
+<h5>Copyright (C) 2016-2018 ABINIT group (SS,XG,YG)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#7">help_features#7</a>, &nbsp; <a href="../../guide/generated_files/help_optic.html#3">help_optic#3</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_Optic.html#1">Introduction.</a><li>2. <a href="topic_Optic.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Optic.html#3">Related input variables.</a><li>4. <a href="topic_Optic.html#4">Selected input files.</a></ul>
@@ -51,11 +51,11 @@ band structure includes interactions in a mean-field sense, like with DFT).
 This approximation is also referred to as a "Sum-Over-States" approach (SOS).
 This neglects all electron-hole interaction (so no excitonic effects), but might provide meaningful results
 in many case, sometimes even quantitatively. A first problem is linked with the erroneous
-band gap of the material, but this might be corrected by a scissor approximation, see e.g. <a href="../../input_variables/generated_files/varset_optic.html#scissor@optic">scissor@optic</a>. 
+band gap of the material, but this might be corrected by a scissor approximation, see e.g. <a href="../../variables/generated_files/varset_optic.html#scissor@optic">scissor@optic</a>. 
 <p>In ABINIT one can either work in the IPA (see below), or take into account the excitonic effects, see <a href="../../topics/generated_files/topic_BSE.html#">topic_BSE</a>.
 <p>
 In the ABINIT package, there are two different utilities to compute optical response 
-in the independent-particle approximation : <a href="../../users/generated_files/help_optic.html#">optic</a> and conducti. They have been developed independently
+in the independent-particle approximation : <a href="../../guide/generated_files/help_optic.html#">optic</a> and conducti. They have been developed independently
 of each other, and thus overlap significantly.
 The first one permits to cover the linear and non-linear optical properties as a function of the frequency. 
 It provides the optical dielectric tensor, the second-harmonic generation (SHG) as well as the optical rectification
@@ -89,17 +89,17 @@ susceptibility, in the simple "Sum-Over-State" approximation.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_optic.html#broadening@optic">broadening@optic</a>   [BROADENING]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#ddkfile@optic">ddkfile@optic</a>   [DDK FILE]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#domega@optic">domega@optic</a>   [Delta OMEGA]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#lin_comp@optic">lin_comp@optic</a>   [LINear COMPonents]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#maxomega@optic">maxomega@optic</a>   [MAXimum value of OMEGA]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#nonlin_comp@optic">nonlin_comp@optic</a>   [NON-LINear COMPonents]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#num_lin_comp@optic">num_lin_comp@optic</a>   [NUMber of LINear COMPonents]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#num_nonlin_comp@optic">num_nonlin_comp@optic</a>   [NUMber of NON-LINear COMPonents]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#scissor@optic">scissor@optic</a>   [SCISSOR operator]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#tolerance@optic">tolerance@optic</a>   [TOLERANCE]<br>
-... <a href="../../input_variables/generated_files/varset_optic.html#wfkfile@optic">wfkfile@optic</a>   [WaveFunction K FILE]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_optic.html#broadening@optic">broadening@optic</a>   [BROADENING]<br>
+... <a href="../../variables/generated_files/varset_optic.html#ddkfile@optic">ddkfile@optic</a>   [DDK FILE]<br>
+... <a href="../../variables/generated_files/varset_optic.html#domega@optic">domega@optic</a>   [Delta OMEGA]<br>
+... <a href="../../variables/generated_files/varset_optic.html#lin_comp@optic">lin_comp@optic</a>   [LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#maxomega@optic">maxomega@optic</a>   [MAXimum value of OMEGA]<br>
+... <a href="../../variables/generated_files/varset_optic.html#nonlin_comp@optic">nonlin_comp@optic</a>   [NON-LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#num_lin_comp@optic">num_lin_comp@optic</a>   [NUMber of LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#num_nonlin_comp@optic">num_nonlin_comp@optic</a>   [NUMber of NON-LINear COMPonents]<br>
+... <a href="../../variables/generated_files/varset_optic.html#scissor@optic">scissor@optic</a>   [SCISSOR operator]<br>
+... <a href="../../variables/generated_files/varset_optic.html#tolerance@optic">tolerance@optic</a>   [TOLERANCE]<br>
+... <a href="../../variables/generated_files/varset_optic.html#wfkfile@optic">wfkfile@optic</a>   [WaveFunction K FILE]<br>
 
 <br><br><a href=#top>Go to the top</a>
 
@@ -120,6 +120,7 @@ susceptibility, in the simple "Sum-Over-State" approximation.</li>
 <a href="../../tests/v7/Input/t42.in">t42.in</a> 
 <a href="../../tests/v7/Input/t47.in">t47.in</a> 
 <a href="../../tests/v7/Input/t48.in">t48.in</a> 
+<a href="../../tests/v7/Input/t49.in">t49.in</a> 
 <br>
 
 <br><br><a href=#top>Go to the top</a>

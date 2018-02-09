@@ -11,7 +11,7 @@
 !!  overlap matrix (not used for norm conserving psps).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,7 +170,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
  integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
- integer :: use_vnl,useoverlap,wfopta10,fock_cg_typ,old_fockflag
+ integer :: use_vnl,useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr
  real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam
@@ -240,7 +240,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  cpopt=-1
- fock_cg_typ=-1;if (associated(gs_hamk%fockcommon)) fock_cg_typ=gs_hamk%fockcommon%cg_typ
  kinpw => gs_hamk%kinpw_k
 
  ABI_ALLOCATE(pcon,(npw))
@@ -833,12 +832,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
-         if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fockcommon,0)
-
          call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnl_direc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
-
-         if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fockcommon,old_fockflag)
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Minimisation of the residual, so compute <G|(H-zshift)^2|D>
@@ -851,11 +846,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              work(:,:)=gh_direc(:,:)-zshift(iband)*direc(:,:)
            end if
 
-           if (fock_cg_typ==1) old_fockflag=fock_set_getghc_call(gs_hamk%fockcommon,0)
            call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnl_dummy,&
 &           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
-
-           if (fock_cg_typ==1) ii=fock_set_getghc_call(gs_hamk%fockcommon,old_fockflag)
 
            if (gen_eigenpb) then
              gh_direc(:,:)=gh_direc(:,:)-zshift(iband)*swork(:,:)

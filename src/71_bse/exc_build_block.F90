@@ -9,20 +9,20 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  BSp<excparam>=The parameters for the Bethe-Salpeter calculation. 
+!!  BSp<excparam>=The parameters for the Bethe-Salpeter calculation.
 !!  Cryst<crystal_t>=Info on the crystalline structure.
 !!  Kmesh<kmesh_t>=The list of k-points in the BZ, IBZ and symmetry tables.
-!!  Qmesh<kmesh_t>=The list of q-points for epsilon^{-1} and related symmetry tables. 
-!!  ktabr(nfftot_osc,BSp%nkbz)=The FFT index of $(R^{-1}(r-\tau))$ where R is symmetry needed to obtains 
+!!  Qmesh<kmesh_t>=The list of q-points for epsilon^{-1} and related symmetry tables.
+!!  ktabr(nfftot_osc,BSp%nkbz)=The FFT index of $(R^{-1}(r-\tau))$ where R is symmetry needed to obtains
 !!    the k-points from the irreducible image.  Used to symmetrize u_Sk where S = \transpose R^{-1}
-!!  Gsph_x<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).  
+!!  Gsph_x<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).
 !!  Gsph_c<gsphere_t>=Info on the G-sphere used to describe the correlation part.
 !!  Vcp<vcoul_t>=The Coulomb interaction in reciprocal space. A cutoff can be used
 !!  W<screen_t>=Data type gathering info and data for W.
@@ -31,7 +31,7 @@
 !!  Psps<Pseudopotential_type>=Variables related to pseudopotentials
 !!  Pawtab(Psps%ntypat)<pawtab_type>=PAW tabulated starting data.
 !!  Pawang<pawang_type>=PAW angular mesh and related data.
-!!  Paw_pwff(Cryst%ntypat*Wfd%usepaw)<pawpwff_t>=Form factor used to calculate the onsite matrix 
+!!  Paw_pwff(Cryst%ntypat*Wfd%usepaw)<pawpwff_t>=Form factor used to calculate the onsite matrix
 !!    elements of a plane wave.
 !!  Wfd<wfd_t>=Handler for the wavefunctions.
 !!    prtvol=Verbosity level.
@@ -58,20 +58,20 @@
 !!
 !!   where C is symmetric and R is Hermitian provided that the QP energies are real.
 !!
-!!  For nsppol=1 ==> R = diag-W+2v; C = -W+2v 
+!!  For nsppol=1 ==> R = diag-W+2v; C = -W+2v
 !!  since the Hamiltonian can be diagonalized in the spin-singlet basis set thanks to
-!!  the fact that spin triplet does not contribute to the optical limit of epsilon. 
+!!  the fact that spin triplet does not contribute to the optical limit of epsilon.
 !!
-!!  For nsppol=2 ==> R = diag-W+v; C = -W+v 
+!!  For nsppol=2 ==> R = diag-W+v; C = -W+v
 !!  Now the matrix elements depend on the spin of the transitions but only those
-!!  transitions in which the spin of the electron and of the hole are equal contribute 
+!!  transitions in which the spin of the electron and of the hole are equal contribute
 !!  to the macroscopic dielectric function. Moreover only the exchange term can connect transitions of different spin.
 !!  When nsppol==2 the transitions are ordered using | (cv up) | (cv dwn) | (vc up) | (vc down) |
 !!
 !!  The resonant block is given by:
 !!
-!!      |  (v'c' up)       | (v'c' dwn)   | 
-!!      -----------------------------------           where v_{-+} = v_{+-}^H when the momentum of the photon is neglected. 
+!!      |  (v'c' up)       | (v'c' dwn)   |
+!!      -----------------------------------           where v_{-+} = v_{+-}^H when the momentum of the photon is neglected.
 !!      | [diag-W+v]++     |      v+-     | (vc up)   Note that v_{+-} is not Hermitian due to the presence of different spins.
 !!  R = -----------------------------------           Actually it reduces to a Hermitian matrix when the system is not spin polarized.
 !!      |     v-+          | [diag-W+v]-- | (vc dwn)  but in this case one should use nsppol=1.
@@ -79,12 +79,12 @@
 !!
 !!  The coupling block is given by:
 !!
-!!      |  (c'v' up)   |    (c'v dwn)     | 
-!!      -----------------------------------           where v_{-+} = v_{+-}^t when the momentum of the photon is neglected. 
+!!      |  (c'v' up)   |    (c'v dwn)     |
+!!      -----------------------------------           where v_{-+} = v_{+-}^t when the momentum of the photon is neglected.
 !!      | [-W+v]++     |      v+-         | (vc up)   Also in this case the entire matrix v_{+-} has to be calculated
 !!  C = -----------------------------------           and stored on file.
 !!      |     v-+      |    [-W+v]--      | (vc dwn)
-!!      -----------------------------------   
+!!      -----------------------------------
 !!
 !! PARENTS
 !!      exc_build_ham
@@ -131,7 +131,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_wfd,          only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_ihave_ur, wfd_ihave_cprj, &
 &                           wfd_sym_ur
- use m_oscillators,  only : rho_tw_g, sym_rhotwgq0, get_uug
+ use m_oscillators,  only : rho_tw_g, sym_rhotwgq0
  use m_screen
 
 !This section has been created automatically by the script Abilint (TD).
@@ -173,7 +173,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: map2sphere=1,ndat1=1,master=0 
+ integer,parameter :: map2sphere=1,ndat1=1,master=0
  integer(i8b) :: bsize_my_block
  integer :: nspinor,nsppol,ISg,mpi_err,tmp_size,ngx
  integer :: ik_bz,ikp_bz,col_glob,itpk_min,itpk_max
@@ -200,9 +200,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 !arrays
  integer :: bidx(2,4),g0(3),spin_ids(2,3)
  integer(i8b) :: nels_block(3)
- integer :: my_cols(2),my_rows(2),proc_end(2),proc_start(2) 
+ integer :: my_cols(2),my_rows(2),proc_end(2),proc_start(2)
  integer :: my_extrema(2,2),sender_extrema(2,2),my_starts(2),my_ends(2)
- integer,allocatable :: igfftg0(:),ktabr_k(:),ktabr_kp(:),id_tab(:) 
+ integer,allocatable :: igfftg0(:),ktabr_k(:),ktabr_kp(:),id_tab(:)
  integer,allocatable :: ncols_of(:)
  integer(i8b),allocatable :: t_start(:),t_stop(:),hsize_of(:)
  integer,allocatable :: col_start(:),col_stop(:)
@@ -224,7 +224,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  integer :: ii
 !END DBYG
  complex(gwpc),allocatable :: vc_sqrt_qbz(:)
- complex(gwpc),allocatable :: rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:) 
+ complex(gwpc),allocatable :: rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:)
  complex(gwpc),target,allocatable :: ur_ckp(:),ur_vkp(:),ur_vk(:),ur_ck(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ptur_ckp(:),ptur_vkp(:),ptur_vk(:),ptur_ck(:)
  type(pawcprj_type),target,allocatable :: Cp_tmp1(:,:),Cp_tmp2(:,:)
@@ -243,8 +243,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
 !************************************************************************
 
-#define DEV_USE_OLDRHOTWG 1
-
  call timab(680,1,tsec)
  call timab(681,1,tsec)
 
@@ -253,7 +251,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_CHECK(Wfd%nspinor==1,"nspinor==2 not coded")
  ABI_CHECK(nfftot_osc==PRODUCT(ngfft_osc(1:3)),"mismatch in FFT size")
 
- if (Wfd%nsppol==2) then 
+ if (Wfd%nsppol==2) then
    MSG_WARNING("nsppol==2 is still under testing")
  end if
  !
@@ -270,10 +268,10 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  npweps = Bsp%npweps
  !
  ! Prepare the FFT tables to have u(r) on the ngfft_osc mesh.
- mgfft_osc = MAXVAL(ngfft_osc(1:3)) 
- fftalga_osc = ngfft_osc(7)/100 
+ mgfft_osc = MAXVAL(ngfft_osc(1:3))
+ fftalga_osc = ngfft_osc(7)/100
  if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_osc) 
+   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_osc)
  end if
 
  ABI_MALLOC(igfftg0,(npweps))
@@ -304,7 +302,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_MALLOC(ur_ck ,(nspinor*nfftot_osc))
  ABI_MALLOC(ur_vk ,(nspinor*nfftot_osc))
 
- if (Wfd%usepaw==1) then 
+ if (Wfd%usepaw==1) then
    ABI_DT_MALLOC(Cp_vk,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_vk,0,Wfd%nlmn_atm)
    ABI_DT_MALLOC(Cp_ck,(Wfd%natom,nspinor))
@@ -325,7 +323,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  end if
  !
  ! Identify the index of q==0
- iqbz0=0 
+ iqbz0=0
  do iq_bz=1,Qmesh%nbz
    if (ALL(ABS(Qmesh%bz(:,iq_bz))<tol3)) iqbz0 = iq_bz
  end do
@@ -339,25 +337,25 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  nblocks=1
  kx_fact=two
  nels_block(:)=0
- nels_block(1)=BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2 
+ nels_block(1)=BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2
  tot_nels=nels_block(1)
 
- if (nsppol==2) then 
+ if (nsppol==2) then
    nblocks=3
    kx_fact=one
-   nels_block(1) = BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2   ! Only the upper triangle for block 1 and 2 
-   nels_block(2) = BSp%nreh(2)*(BSp%nreh(2)+1_i8b)/2 
-   nels_block(3) = BSp%nreh(1)*BSp%nreh(2)*1_i8b       ! Note: Block 3 does not have symmetries. 
+   nels_block(1) = BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2   ! Only the upper triangle for block 1 and 2
+   nels_block(2) = BSp%nreh(2)*(BSp%nreh(2)+1_i8b)/2
+   nels_block(3) = BSp%nreh(1)*BSp%nreh(2)*1_i8b       ! Note: Block 3 does not have symmetries.
    tot_nels= SUM(nels_block)
  end if
  !
  ! Distribute the calculation of the matrix elements among the nodes.
  ! * tstart and t_stop give the initial and final transition index treated by each node.
- ! * my_hsize is the number of transitions treated by this processor 
+ ! * my_hsize is the number of transitions treated by this processor
  ! * my_cols(1:2) gives the initial and final column treated by this node.
  !
  use_mpiio=.FALSE.
-#ifdef HAVE_MPI_IO 
+#ifdef HAVE_MPI_IO
  use_mpiio = (nproc>1)
 #endif
  use_mpiio=.FALSE.
@@ -384,14 +382,14 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  call wrtout(ab_out,msg,"COLL",do_flush=.True.)
  !
  ! Master writes the BSE header with Fortran IO.
- if (my_rank==master) then 
+ if (my_rank==master) then
 
    if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="write") /= 0) then
       MSG_ERROR(msg)
    end if
    call exc_write_bshdr(bsh_unt,Bsp,Hdr_bse)
    ! To force the writing (needed for MPI-IO).
-   close(bsh_unt) 
+   close(bsh_unt)
 
    if (.not.use_mpiio) then ! Reopen the file and skip the header.
      if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="readwrite") /= 0) then
@@ -444,11 +442,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  call xmpi_barrier(comm)
 
  if (use_mpiio) then
-#ifdef HAVE_MPI_IO 
+#ifdef HAVE_MPI_IO
    ! Open the file with MPI-IO
    amode = MPI_MODE_RDWR
    !amode = MPI_MODE_CREATE + MPI_MODE_RDWR,
-   
+
    call MPI_FILE_OPEN(comm, fname, amode, MPI_INFO_NULL, mpi_fh, mpi_err)
    ABI_CHECK_MPI(mpi_err,"opening: "//TRIM(fname))
 
@@ -459,7 +457,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ABI_MALLOC(offset_of_block,(nblocks))
    offset_of_block(1) = ehdr_offset
    do block=2,nblocks
-     tmp_off = offset_of_block(block-1) + nels_block(block-1)*xmpi_bsize_dpc 
+     tmp_off = offset_of_block(block-1) + nels_block(block-1)*xmpi_bsize_dpc
      tmp_off = tmp_off + Bsp%nreh(block-1)*2*xmpio_bsize_frm  ! markers.
      offset_of_block(block) = tmp_off
    end do
@@ -492,7 +490,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      bidx(:,2) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b2
      bidx(:,3) = [BSp%lomo_spin(block),BSp%homo_spin(block)] ! range for b3
      bidx(:,4) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b4
-   else 
+   else
      bidx(:,1) = [BSp%lomo_spin(block),BSp%homo_spin(block)] ! range for b1
      bidx(:,2) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b2
      bidx(:,3) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b3
@@ -508,11 +506,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    !
    ! Distribution of the matrix elements among the nodes.
    ! Note that rank0 will get the first transitions.
-   nels=nels_block(block) 
+   nels=nels_block(block)
    ABI_MALLOC(t_start,(0:nproc-1))
    ABI_MALLOC(t_stop,(0:nproc-1))
-   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop,msg,ierr) 
-   if (ierr/=0) then 
+   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop,msg,ierr)
+   if (ierr/=0) then
      MSG_WARNING(msg)
    end if
 
@@ -534,10 +532,10 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    end if
 
    my_cols=0
-   do itp=1,Bsp%nreh(block) 
-     do it=1,itp 
+   do itp=1,Bsp%nreh(block)
+     do it=1,itp
        ir = it + itp*(itp-1_i8b)/2
-       if (ir==t_start(my_rank)) then 
+       if (ir==t_start(my_rank)) then
          my_rows(1) = it
          my_cols(1) = itp
        end if
@@ -559,7 +557,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    if (is_resonant) then
      write(msg,'(a,f8.1,a)')&
 &     ' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
-   else 
+   else
      write(msg,'(a,f8.1,a)')&
 &     ' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
    end if
@@ -586,7 +584,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      call timab(682,1,tsec) ! exc_build_ham(Coulomb)
 
      write(msg,'(a,2i2,a)')" Calculating direct Coulomb term for (spin1,spin2) ",spin1,spin2," using full W_{GG'} ..."
-     if (w_is_diagonal) then 
+     if (w_is_diagonal) then
         write(msg,'(a,2i2,a)')&
 &        " Calculating direct Coulomb term for (spin1, spin2) ",spin1,spin2," using diagonal approximation for W_{GG'} ..."
      end if
@@ -608,7 +606,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ttp_check=0
 #endif
 
-     do ikp_bz=1,BSp%nkbz ! Loop over kp  
+     do ikp_bz=1,BSp%nkbz ! Loop over kp
        ! NOTE: this way of looping is good for bulk but it's not optimal in the
        !       case of systems sampled only at Gamma e.g. isolated systems in which
        !       one should take advantage of Hermiticity by looping over c-v !!!!
@@ -617,7 +615,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        ! Be careful since vcks2t contains zeros corresponding to transitions that should be skipped.
        itpk_min = MINVAL(Bsp%vcks2t(:,:,ikp_bz,spin2), MASK=(Bsp%vcks2t(:,:,ikp_bz,spin2)>0) )
        itpk_max = MAXVAL(Bsp%vcks2t(:,:,ikp_bz,spin2))
-       if (my_cols(2)<itpk_min .or. my_cols(1)>itpk_max) CYCLE 
+       if (my_cols(2)<itpk_min .or. my_cols(1)>itpk_max) CYCLE
 
        write(msg,'(3(a,i0))')" status: ",ikp_bz,"/",BSp%nkbz," done by node ",my_rank
        call wrtout(std_out,msg,"PERS",do_flush=.True.)
@@ -637,25 +635,25 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,isirred=isirred)
          !ABI_CHECK(isirred,"not irred!")
          !ABI_CHECK(ph_mkt == cone, "Wrong phase!")
-                                                                                 
+
          ktabr_k(:) = ktabr(:,ik_bz)
          spinrot_k(:)=Cryst%spinrot(:,isym_k)
          !ABI_CHECK(ALL(ktabr_k == id_tab), "wrong tab")
-         !if(itim_k==2) CYCLE ! time-reversal or not       
+         !if(itim_k==2) CYCLE ! time-reversal or not
          !
          ! * Find q = K-KP-G0 in the full BZ.
          kmkp = Kmesh%bz(:,ik_bz) - Kmesh%bz(:,ikp_bz)
          call findqg0(iq_bz,g0,kmkp,Qmesh%nbz,Qmesh%bz,BSp%mG0)
 
-         ! Evaluate the tables needed for the padded FFT performed in rhotwg. Note that we have 
-         ! to pass G-G0 to sphereboundary instead of G as we need FFT results on the shifted G-sphere, 
+         ! Evaluate the tables needed for the padded FFT performed in rhotwg. Note that we have
+         ! to pass G-G0 to sphereboundary instead of G as we need FFT results on the shifted G-sphere,
          ! If Gamma is not inside G-G0 one has to disable FFT padding as sphereboundary will give wrong tables.
          ! * Get the G-G0 shift for the FFT of the oscillators.
          !
          ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
          call gsph_fft_tabs(Gsph_c,g0,mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
          if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-         if (use_padfft==0) then 
+         if (use_padfft==0) then
            ABI_FREE(gbound)
            ABI_MALLOC(gbound,(2*mgfft_osc+8,2*use_padfft))
          end if
@@ -664,18 +662,18 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
          is_qeq0 = (normv(qbz,Cryst%gmet,'G')<GW_TOLQ0)
 
-         ! Symmetrize em1(omega=0) 
-         call screen_symmetrizer(W,iq_bz,Cryst,Gsph_c,Qmesh,Vcp) 
+         ! Symmetrize em1(omega=0)
+         call screen_symmetrizer(W,iq_bz,Cryst,Gsph_c,Qmesh,Vcp)
          !
          ! * Set up table of |q_BZ+G|
          if (iq_ibz==1) then
            do ig=1,npweps
-             isg = Gsph_c%rottb(ig,itim_q,isym_q) 
+             isg = Gsph_c%rottb(ig,itim_q,isym_q)
              vc_sqrt_qbz(isg)=Vcp%vcqlwl_sqrt(ig,1)
            end do
-         else 
+         else
            do ig=1,npweps
-             isg = Gsph_c%rottb(ig,itim_q,isym_q) 
+             isg = Gsph_c%rottb(ig,itim_q,isym_q)
              vc_sqrt_qbz(isg) = Vcp%vc_sqrt(ig,iq_ibz)
            end do
          end if
@@ -693,20 +691,16 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          !
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
-#if DEV_USE_OLDRHOTWG 
            if (wfd_ihave_ur(Wfd,ic,ik_ibz,spin1,how="Stored")) then
              ptur_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%ur
-           else 
+           else
              call wfd_get_ur(Wfd,ic,ik_ibz,spin1,ur_ck)
              ptur_ck => ur_ck
            end if
-#else
-           call wfd_sym_ur(Wfd,Cryst,Kmesh,ic,ik_bz,spin1,ur_ck,trans="N",with_umklp=with_umklp)
-#endif
            !
            ! Get cprj for this (c,kbz,s1) in the BZ.
            ! * phase due to the umklapp G0 in k-q is already included.
-           if (Wfd%usepaw==1) then 
+           if (Wfd%usepaw==1) then
              if (wfd_ihave_cprj(Wfd,ic,ik_ibz,spin1,how="Stored")) then
                ptcp_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%cprj
              else
@@ -725,20 +719,16 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
              else ! Calculate matrix element from wfr.
                ! TODO: change the order of the loops.
 
-#if DEV_USE_OLDRHOTWG 
                if (wfd_ihave_ur(Wfd,icp,ikp_ibz,spin2,how="Stored")) then
                  ptur_ckp => Wfd%Wave(icp,ikp_ibz,spin2)%ur
                else
                  call wfd_get_ur(Wfd,icp,ikp_ibz,spin2,ur_ckp)
-                 ptur_ckp => ur_ckp  
+                 ptur_ckp => ur_ckp
                end if
-#else
-              call wfd_sym_ur(Wfd,Cryst,Kmesh,icp,ikp_bz,spin2,ur_ckp,trans="C",with_umklp=with_umklp)
-#endif
 
                ! Load cprj for this (c,k,s2) in the BZ.
                ! * Do not care about umklapp G0 in k-q as the phase is already included.
-               if (Wfd%usepaw==1) then 
+               if (Wfd%usepaw==1) then
                  if (wfd_ihave_cprj(Wfd,icp,ikp_ibz,spin2,how="Stored")) then
                    ptcp_ckp =>  Wfd%Wave(icp,ikp_ibz,spin2)%cprj
                  else
@@ -748,16 +738,12 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                  call paw_symcprj_op(ikp_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_ckp,Cp_ckp)
                end if
 
-#if DEV_USE_OLDRHOTWG
                call rho_tw_g(nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere,use_padfft,igfftg0,gbound,&
 &                ptur_ckp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
 &                ptur_ck ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
 &                dim_rtwg,rhxtwg_cpc)
-#else
-               call get_uug(npweps,nfftot_osc,ndat1,ngfft_osc,use_padfft,igfftg0,gbound,ur_ckp,ur_ck,rhxtwg_cpc)
-#endif
-               
-               if (Wfd%usepaw==1) then ! Add PAW onsite contribution.   
+
+               if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
                  call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
 &                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
                end if
@@ -789,7 +775,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
                cc_cpc = vc_sqrt_qbz*rhxtwg_cpc
                cc_cpc(1) = czero
-               
+
                call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,cc_cpc,cc_ctccp)
              end if
 
@@ -797,26 +783,22 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
              ! First sum on G: sum_G rho_c'c(G) W_qbz*(G,G') (W_qbz conjugated)
              rhxtwg_cpc = rhxtwg_cpc * vc_sqrt_qbz
              call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,rhxtwg_cpc,ctccp)
-             
+
              do iv=bidx(1,1),bidx(2,1)    !do iv=BSp%lomo,BSp%homo
                it = BSp%vcks2t(iv,ic,ik_bz,spin1); if (it==0) CYCLE ! ir-uv-cutoff
                ene_t = BSp%Trans(it,spin1)%en
 
                ! TODO: use this but change the order of the loops.
-#if DEV_USE_OLDRHOTWG 
                if (wfd_ihave_ur(Wfd,iv,ik_ibz,spin1,how="Stored")) then
                  ptur_vk => Wfd%Wave(iv,ik_ibz,spin1)%ur
                else
                  call wfd_get_ur(Wfd,iv,ik_ibz,spin1,ur_vk)
                  ptur_vk => ur_vk
                end if
-#else
-               call wfd_sym_ur(Wfd,Cryst,Kmesh,iv,ik_bz,spin1,ur_vk,trans="N",with_umklp=with_umklp)
-#endif
                !
                ! Load cprj for this (v,k,s1) in the BZ.
                ! * Do not care about umklapp G0 in k-q as the phase is already included.
-               if (Wfd%usepaw==1) then 
+               if (Wfd%usepaw==1) then
                  if (wfd_ihave_cprj(Wfd,iv,ik_ibz,spin1,how="Stored")) then
                    ptcp_vk =>  Wfd%Wave(iv,ik_ibz,spin1)%cprj
                  else
@@ -829,16 +811,16 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                do ivp=bidx(1,3),bidx(2,3) !do ivp=BSp%lomo,BSp%homo
 
                  if (is_resonant) then
-                   itp = BSp%vcks2t(ivp,icp,ikp_bz,spin2) 
+                   itp = BSp%vcks2t(ivp,icp,ikp_bz,spin2)
                  else ! have to exchange band indeces
-                   itp = BSp%vcks2t(icp,ivp,ikp_bz,spin2) 
+                   itp = BSp%vcks2t(icp,ivp,ikp_bz,spin2)
                  end if
-                 
+
                  if (itp==0) CYCLE ! ir-uv-cutoff
 
                  ! FIXME Temporary work around, when ikp_bz == ik it might happen that itp<it
                  ! should rewrite the loops using contracted k-dependent indeces for bands
-                 if (itp<it) CYCLE 
+                 if (itp<it) CYCLE
 
                  ir = it + itp*(itp-1)/2
                  if (ir<t_start(my_rank).or.ir>t_stop(my_rank)) CYCLE
@@ -848,26 +830,22 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                  ! ============================================
                  ! === Calculate matrix elements rhxtwg_vpv ===
                  ! ============================================
-                 if (ik_bz==ikp_bz) then 
+                 if (ik_bz==ikp_bz) then
                    ! Already in memory.
                    rhxtwg_vpv(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,ivp,iv,ik_ibz,spin1),Gsph_c)
 
-                 else 
+                 else
                    ! Calculate matrix element from wfr.
-#if DEV_USE_OLDRHOTWG 
                    if (wfd_ihave_ur(Wfd,ivp,ikp_ibz,spin2,how="Stored")) then
                      ptur_vkp => Wfd%Wave(ivp,ikp_ibz,spin2)%ur
                    else
                      call wfd_get_ur(Wfd,ivp,ikp_ibz,spin2,ur_vkp)
                      ptur_vkp => ur_vkp
-                   end if                                                                                
-#else
-                   call wfd_sym_ur(Wfd,Cryst,Kmesh,ivp,ikp_bz,spin2,ur_vkp,trans="H",with_umklp=with_umklp)
-#endif
+                   end if
                    !
                    ! Load cprj for this (vp,kp,s2) in the BZ.
                    ! * Do not care about umklapp G0 in k-q as the phase is already included.
-                   if (Wfd%usepaw==1) then 
+                   if (Wfd%usepaw==1) then
                      if (wfd_ihave_cprj(Wfd,ivp,ikp_ibz,spin2,how="Stored")) then
                        ptcp_vkp =>  Wfd%Wave(ivp,ikp_ibz,spin2)%cprj
                      else
@@ -877,14 +855,10 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                      call paw_symcprj_op(ikp_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_vkp,Cp_vkp)
                    end if
 
-#if DEV_USE_OLDRHOTWG
                    call rho_tw_g(nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere,use_padfft,igfftg0,gbound,&
 &                     ptur_vkp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
 &                     ptur_vk ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
 &                     dim_rtwg,rhxtwg_vpv)
-#else
-                   call get_uug(npweps,nfftot_osc,ndat1,ngfft_osc,use_padfft,igfftg0,gbound,ur_vkp,ur_vk,rhxtwg_vpv)
-#endif
 
                    if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
                      call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
@@ -895,7 +869,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                  ! Index in the global Hamiltonian matrix.
                  ir = it + itp*(itp-1_i8b)/2
 
-                 if (ir<t_start(my_rank).or.ir>t_stop(my_rank)) then 
+                 if (ir<t_start(my_rank).or.ir>t_stop(my_rank)) then
                    write(msg,'(a,3(1x,i0))')" Gonna SIGFAULT, ir, t_start, t_stop ",ir,t_start(my_rank),t_stop(my_rank)
                    MSG_ERROR(msg)
                  end if
@@ -934,11 +908,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                  end if
 
                  ! sum_G2 rho_c'c(G) W_qbz(G,G') rho_v'v(G')
-                 rhxtwg_vpv = vc_sqrt_qbz * rhxtwg_vpv 
+                 rhxtwg_vpv = vc_sqrt_qbz * rhxtwg_vpv
                  http = - faq * xdotc(npweps,ctccp,1,rhxtwg_vpv,1)
 
                  ! Save result taking into account the symmetry of the matrix.
-                 ! Note that the diagonal of the resonant block is not forced to be real 
+                 ! Note that the diagonal of the resonant block is not forced to be real
                  my_bsham(ir) = http
 
 #ifdef DEV_MG_DEBUG_MODE
@@ -964,7 +938,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        do it=1,BSp%nreh(block)
         ir = it + itp*(itp-1_i8b)/2
          if (itp>=it .and. ttp_check(it,itp) /= 1) then
-           if (ir>=t_start(my_rank).and.ir<=t_stop(my_rank)) then 
+           if (ir>=t_start(my_rank).and.ir<=t_stop(my_rank)) then
              write(std_out,*)"WARN: upper triangle is not 1 ",it,itp,ttp_check(it,itp)
              write(std_out,*)TRIM(repr_trans(Bsp%Trans(it ,spin1)))
              write(std_out,*)TRIM(repr_trans(Bsp%Trans(itp,spin2)))
@@ -978,7 +952,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        end do
      end do
      ierr = SUM(SUM(ttp_check,DIM=2),DIM=1)
-     if (ierr/=my_hsize) then 
+     if (ierr/=my_hsize) then
        write(msg,'(a,2i0)')"ierr/=my_hsize",ierr,my_hsize
        MSG_ERROR(msg)
      end if
@@ -1017,7 +991,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_MALLOC(rhotwg1,(npweps))
      ABI_MALLOC(rhotwg2,(npweps))
 
-     ngx = Gsph_x%ng 
+     ngx = Gsph_x%ng
      ABI_MALLOC(vc_sqrt_qbz,(ngx))
 
      ! * Get iq_ibz, and symmetries from iq_bz.
@@ -1025,12 +999,12 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
      ! * Set up table of |q(BZ)+G|
-     if (iq_ibz==1) then 
+     if (iq_ibz==1) then
        do ig=1,ngx
-         ISg = Gsph_x%rottb(ig,itim_q,isym_q) 
+         ISg = Gsph_x%rottb(ig,itim_q,isym_q)
          vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
        end do
-     else 
+     else
         MSG_ERROR("iq_ibz should be 1")
      end if
 
@@ -1041,12 +1015,12 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        ikp_bz = Bsp%Trans(itp,spin2)%k
        ivp    = Bsp%Trans(itp,spin2)%v
        icp    = Bsp%Trans(itp,spin2)%c
-                                                                                                             
+
        ikp_ibz = Kmesh%tab (ikp_bz)
        isym_kp = Kmesh%tabo(ikp_bz)
        itim_kp = (3-Kmesh%tabi(ikp_bz))/2
-                                                                                                             
-       if (is_resonant) then 
+
+       if (is_resonant) then
          rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,ivp,icp,ikp_ibz,spin2),Gsph_c)
        else ! Code for coupling block.
          rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,icp,ivp,ikp_ibz,spin2),Gsph_c)
@@ -1054,7 +1028,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        !
        ! Multiply by the Coulomb term.
         do ig=2,npweps
-          rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig) 
+          rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig)
         end do
 
        do it=1,itp ! Loop over transition t = (k,v,c,spin1)
@@ -1069,7 +1043,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ik_ibz = Kmesh%tab(ik_bz)
          isym_k = Kmesh%tabo(ik_bz)
          itim_k = (3-Kmesh%tabi(ik_bz))/2
-         !if (itim_k==2) CYCLE ! time-reversal or not       
+         !if (itim_k==2) CYCLE ! time-reversal or not
 
          rhotwg1(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,iv,ic,ik_ibz,spin1),Gsph_c)
          !
@@ -1111,7 +1085,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      if (is_resonant) msg=' Reasonant Hamiltonian matrix elements: '
      call wrtout(dump_unt,msg,"PERS")
      call wrtout(dump_unt,'    k  v  c  s      k" v" c" s"       H',"PERS")
-     do itp=1,BSp%nreh(block)      
+     do itp=1,BSp%nreh(block)
        ikp_bz = Bsp%Trans(itp,spin2)%k
        ivp    = Bsp%Trans(itp,spin2)%v
        icp    = Bsp%Trans(itp,spin2)%c
@@ -1120,7 +1094,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          iv    = Bsp%Trans(it,spin1)%v
          ic    = Bsp%Trans(it,spin1)%c
          ir = it + itp*(itp-1_i8b)/2
-         if (ir>=t_start(my_rank).and.ir<=t_stop(my_rank)) then 
+         if (ir>=t_start(my_rank).and.ir<=t_stop(my_rank)) then
            http = my_bsham(ir)
            !if (ABS(http) > tol3) then
            write(msg,'(2(i0,1x),2(i5,3i3,3x),2f7.3)')it,itp, ik_bz,iv,ic,spin1, ikp_bz,ivp,icp,spin2, http
@@ -1139,7 +1113,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      if (is_resonant) msg=' Resonant Hamiltonian matrix elements: '
      call wrtout(dump_unt,msg,"PERS")
      call wrtout(dump_unt,'    k v  c  s      k" v" c" s"       H',"PERS")
-     do itp=1,BSp%nreh(block)      
+     do itp=1,BSp%nreh(block)
        ikp_bz = Bsp%Trans(itp,spin2)%k
        ivp    = Bsp%Trans(itp,spin2)%v
        icp    = Bsp%Trans(itp,spin2)%c
@@ -1152,7 +1126,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          else
            ir = it + itp*(itp-1_i8b)/2
          end if
-         if (ir>=t_start(my_rank).and.ir<=t_stop(my_rank)) then 
+         if (ir>=t_start(my_rank).and.ir<=t_stop(my_rank)) then
            if(it > itp) then
              http = CONJG(my_bsham(ir))
              if (BSp%prep_interp) then
@@ -1160,7 +1134,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                bbtmp = CONJG(bcoeffs(ir))
                cctmp = CONJG(ccoeffs(ir))
              end if
-           else             
+           else
              http = my_bsham(ir)
              if (BSp%prep_interp) then
                aatmp = acoeffs(ir)
@@ -1192,7 +1166,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ! =================================
    call timab(685,1,tsec) ! exc_build_ham(write_ham)
    if (use_mpiio) then
-#ifdef HAVE_MPI_IO 
+#ifdef HAVE_MPI_IO
      ! Write the Hamiltonian with collective MPI-IO.
      if (BSp%prep_interp) then
        MSG_ERROR("Preparation of interpolation technique not yet coded with MPI-IO")
@@ -1202,7 +1176,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      old_type = MPI_DOUBLE_COMPLEX
      call xmpio_create_fherm_packed(my_starts,my_ends,is_fortran_file,my_offset,old_type,hmat_type,offset_err)
 
-     if (offset_err/=0) then 
+     if (offset_err/=0) then
        write(msg,"(3a)")&
 &        "Global position index cannot be stored in a standard Fortran integer. ",ch10,&
 &        "BSE matrix cannot be written with a single MPI-IO call. "
@@ -1243,7 +1217,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 #endif
    else
      ! Use FORTRAN IO with sequential access mode.
-     ! * Each node sends its data to master node. 
+     ! * Each node sends its data to master node.
      ! * Blocks are distributed according to the rank of the node.
      ! * Matrix is written by columns hence make sure that the last column is completely written.
      call cwtime(cputime,walltime,gflops,"start")
@@ -1305,9 +1279,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
        sender_extrema = my_extrema ! just to avoid NAN on sender. xechh_mpi is not well designed
        call xmpi_exch(my_extrema,4,sender,sender_extrema,master,comm,mpi_err)
-       
+
        if (my_rank==master) then
-          proc_start = sender_extrema(:,1) 
+          proc_start = sender_extrema(:,1)
           proc_end   = sender_extrema(:,2)
           !write(std_out,*)"proc_start, proc_end",proc_start,proc_end
 
@@ -1317,8 +1291,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            ABI_MALLOC(prev_col,(prev_nrows))
            read(bsh_unt) prev_col
            backspace(bsh_unt)
-          
-           if (BSp%prep_interp) then 
+
+           if (BSp%prep_interp) then
              backspace(a_unt)
              ABI_MALLOC(aprev_col,(prev_nrows))
              read(a_unt) aprev_col
@@ -1343,7 +1317,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            col_glob = proc_start(2) + jj-1
            nrows = col_glob
            if (jj==1   )  nrows=col_glob - proc_start(1) + 1
-           if (jj==ncol) then 
+           if (jj==ncol) then
              nrows=proc_end(1)
              if (ncol==1)  nrows=proc_end(1) - proc_start(1) + 1
            end if
@@ -1357,7 +1331,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                write(c_unt) CMPLX(cprev_col,kind=dpc),CMPLX(cbuffer(ist:iend),kind=dpc)
              end if
              prev_nrows = prev_nrows + iend-ist+1
-           else 
+           else
              write(bsh_unt) CMPLX(buffer(ist:iend),kind=dpc)
              if (BSp%prep_interp) then
                write(a_unt) CMPLX(abuffer(ist:iend),kind=dpc)
@@ -1372,7 +1346,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            prev_nrows = proc_end(1)
            if (proc_end(1) == proc_end(2)) prev_nrows = 0
          end if
-         if (iend/=hsize_of(sender)) then 
+         if (iend/=hsize_of(sender)) then
            write(msg,'(2(a,i0))')" Wraparound error: iend=",iend," my_hsize=",hsize_of(sender)
            MSG_ERROR(msg)
          end if
@@ -1441,7 +1415,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ABI_MALLOC(col_start,(0:nproc-1))
    ABI_MALLOC(col_stop,(0:nproc-1))
    call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
-   if (ierr/=0) then 
+   if (ierr/=0) then
      MSG_WARNING(msg)
    end if
 
@@ -1462,7 +1436,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    !
    ! TODO might add treatment of <psi|q+G|psi> for q+G -> 0
    ! TODO might used enlarged G-sphere for better convergence.
-   ! Note that my_kxssp is always written on file when nsppol=2, even when 
+   ! Note that my_kxssp is always written on file when nsppol=2, even when
    ! non-local field effects are neglected.
    ABI_MALLOC(my_kxssp,(neh1,my_cols(1):my_cols(2)))
    my_kxssp=czero
@@ -1475,7 +1449,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_MALLOC(rhotwg1,(npweps))
      ABI_MALLOC(rhotwg2,(npweps))
 
-     ngx = Gsph_x%ng 
+     ngx = Gsph_x%ng
      ABI_MALLOC(vc_sqrt_qbz,(ngx))
      !
      ! * Get iq_ibz, and symmetries from iq_bz.
@@ -1483,12 +1457,12 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
      !
      ! * Set up table of |q(BZ)+G|
-     if (iq_ibz==1) then 
+     if (iq_ibz==1) then
        do ig=1,ngx
-         ISg = Gsph_x%rottb(ig,itim_q,isym_q) 
+         ISg = Gsph_x%rottb(ig,itim_q,isym_q)
          vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
        end do
-     else 
+     else
         MSG_ERROR("iq_ibz should be 1")
      end if
 
@@ -1499,12 +1473,12 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        ikp_bz = Bsp%Trans(itp,spin2)%k
        ivp    = Bsp%Trans(itp,spin2)%v
        icp    = Bsp%Trans(itp,spin2)%c
-                                                                                                             
+
        ikp_ibz = Kmesh%tab (ikp_bz)
        isym_kp = Kmesh%tabo(ikp_bz)
        itim_kp = (3-Kmesh%tabi(ikp_bz))/2
-                                                                                                             
-       if (is_resonant) then 
+
+       if (is_resonant) then
          rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,ivp,icp,ikp_ibz,spin2),Gsph_c)
        else ! Code for coupling block.
          rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,icp,ivp,ikp_ibz,spin2),Gsph_c)
@@ -1512,7 +1486,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        !
        ! Multiply by the Coulomb term.
         do ig=2,npweps
-          rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig) 
+          rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig)
         end do
 
        do it=1,neh1 ! Loop over transition t = (k,v,c,spin1) FULL matrix.
@@ -1525,7 +1499,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ik_ibz = Kmesh%tab(ik_bz)
          isym_k = Kmesh%tabo(ik_bz)
          itim_k = (3-Kmesh%tabi(ik_bz))/2
-         !if (itim_k==2) CYCLE ! time-reversal or not       
+         !if (itim_k==2) CYCLE ! time-reversal or not
 
          rhotwg1(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,iv,ic,ik_ibz,spin1),Gsph_c)
          !
@@ -1549,7 +1523,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    call timab(685,1,tsec) ! exc_build_ham(write_ham)
 
    if (use_mpiio) then
-#ifdef HAVE_MPI_IO 
+#ifdef HAVE_MPI_IO
      my_ncols=ncols_of(my_rank); old_type=MPI_DOUBLE_COMPLEX
      call xmpio_create_fsubarray_2D((/neh1,my_ncols/),(/neh1,my_ncols/),(/1,1/),old_type,hmat_type,my_offpad,mpi_err)
      ABI_CHECK_MPI(mpi_err,"fsubarray_2D")
@@ -1557,7 +1531,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ! Each node uses a different offset to skip the header and the blocks written by the other CPUs.
      prev_nels=0
      prev_ncols=0
-     if (my_rank>0) then 
+     if (my_rank>0) then
        prev_ncols = SUM(ncols_of(0:my_rank-1))
        prev_nels = neh1*prev_ncols
      end if
@@ -1567,7 +1541,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
      call MPI_FILE_SET_VIEW(mpi_fh, my_offset, MPI_BYTE, hmat_type, 'native', MPI_INFO_NULL, mpi_err)
      ABI_CHECK_MPI(mpi_err,"SET_VIEW")
-                                                                                                               
+
      call MPI_TYPE_FREE(hmat_type,mpi_err)
      ABI_CHECK_MPI(mpi_err,"MPI_TYPE_FREE")
 
@@ -1590,7 +1564,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 #endif
    else
      ! Use FORTRAN IO with sequential access mode.
-     ! * Each node sends its data to master node. 
+     ! * Each node sends its data to master node.
      ! * Columns are distributed according to the rank of the node.
      if (my_rank==master) then
        do jj=my_cols(1),my_cols(2)
@@ -1631,8 +1605,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  !
  ! Close the file.
  if (use_mpiio) then
-#ifdef HAVE_MPI_IO 
-   call MPI_FILE_CLOSE(mpi_fh, mpi_err)               
+#ifdef HAVE_MPI_IO
+   call MPI_FILE_CLOSE(mpi_fh, mpi_err)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
    ABI_FREE(offset_of_block)
 #endif
@@ -1690,7 +1664,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ABI_DT_FREE(Cp_tmp4)
  end if
 
- call xmpi_barrier(comm) 
+ call xmpi_barrier(comm)
 
  DBG_EXIT("COLL")
 
@@ -1708,11 +1682,11 @@ contains
 !!  in random mode) for subsequent treatment in the Bethe-Salpeter code.
 !!
 !! INPUTS
-!!  BSp<excparam>=The parameters for the Bethe-Salpeter calculation. 
+!!  BSp<excparam>=The parameters for the Bethe-Salpeter calculation.
 !!  Cryst<crystal_t>=Info on the crystalline structure.
 !!  Kmesh<kmesh_t>=The list of k-points in the BZ, IBZ and symmetry tables.
-!!  Qmesh<kmesh_t>=The list of q-points for epsilon^{-1} and related symmetry tables. 
-!!  Gsph_x<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).  
+!!  Qmesh<kmesh_t>=The list of q-points for epsilon^{-1} and related symmetry tables.
+!!  Gsph_x<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).
 !!  Gsph_c<gsphere_t>=Info on the G-sphere used to describe the correlation part.
 !!  Vcp<vcoul_t>=The Coulomb interaction in reciprocal space. A cutoff can be used
 !!  rhxtwg_q0
@@ -1736,20 +1710,20 @@ contains
 !!
 !!   where C is symmetric and R is Hermitian provided that the QP energies are real.
 !!
-!!  For nsppol=1 ==> R = diag-W+2v; C = -W+2v 
+!!  For nsppol=1 ==> R = diag-W+2v; C = -W+2v
 !!  since the Hamiltonian can be diagonalized in the spin-singlet basis set thanks to
-!!  the fact that spin triplet does not contribute to the optical limit of epsilon. 
+!!  the fact that spin triplet does not contribute to the optical limit of epsilon.
 !!
-!!  For nsppol=2 ==> R = diag-W+v; C = -W+v 
+!!  For nsppol=2 ==> R = diag-W+v; C = -W+v
 !!  Now the matrix elements depend on the spin of the transitions but only those
-!!  transitions in which the spin of the electron and of the hole are equal contribute 
+!!  transitions in which the spin of the electron and of the hole are equal contribute
 !!  to the macroscopic dielectric function. Moreover only the exchange term can connect transitions of different spin.
 !!  When nsppol==2 the transitions are ordered using | (cv up) | (cv dwn) | (vc up) | (vc down) |
 !!
 !!  The resonant block is given by:
 !!
-!!      |  (v'c' up)       | (v'c' dwn)   | 
-!!      -----------------------------------           where v_{-+} = v_{+-}^H when the momentum of the photon is neglected. 
+!!      |  (v'c' up)       | (v'c' dwn)   |
+!!      -----------------------------------           where v_{-+} = v_{+-}^H when the momentum of the photon is neglected.
 !!      | [diag-W+v]++     |      v+-     | (vc up)   Note that v_{+-} is not Hermitian due to the presence of different spins.
 !!  R = -----------------------------------           Actually it reduces to a Hermitian matrix when the system is not spin polarized.
 !!      |     v-+          | [diag-W+v]-- | (vc dwn)  but in this case one should use nsppol=1.
@@ -1757,12 +1731,12 @@ contains
 !!
 !!  The coupling block is given by:
 !!
-!!      |  (c'v' up)   |    (c'v dwn)     | 
-!!      -----------------------------------           where v_{-+} = v_{+-}^t when the momentum of the photon is neglected. 
+!!      |  (c'v' up)   |    (c'v dwn)     |
+!!      -----------------------------------           where v_{-+} = v_{+-}^t when the momentum of the photon is neglected.
 !!      | [-W+v]++     |      v+-         | (vc up)   Also in this case the entire matrix v_{+-} has to be calculated
 !!  C = -----------------------------------           and stored on file.
 !!      |     v-+      |    [-W+v]--      | (vc dwn)
-!!      -----------------------------------   
+!!      -----------------------------------
 !!
 !! PARENTS
 !!
@@ -1829,11 +1803,11 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
 !arrays
  integer :: bidx(2,4),spin_ids(2,3)
  integer(i8b) :: nels_block(3)
- integer :: my_cols(2),my_rows(2) !,proc_end(2),proc_start(2) 
+ integer :: my_cols(2),my_rows(2) !,proc_end(2),proc_start(2)
  integer,allocatable :: ncols_of(:)
  integer,allocatable :: col_start(:),col_stop(:)
  real(dp) :: qbz(3),tsec(2) !kbz(3),kpbz(3),
- complex(dpc),allocatable :: my_kxssp(:,:) 
+ complex(dpc),allocatable :: my_kxssp(:,:)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg1(:),rhotwg2(:)
 
 !************************************************************************
@@ -1847,7 +1821,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  dim_rtwg=1; faq = one/(Cryst%ucvol*Kmesh%nbz)
 
  ! Identify the index of q==0
- iqbz0=0 
+ iqbz0=0
  do iq_bz=1,Qmesh%nbz
    if (ALL(ABS(Qmesh%bz(:,iq_bz))<tol3)) iqbz0 = iq_bz
  end do
@@ -1861,21 +1835,21 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  nblocks=1
  kx_fact=two
  nels_block(:)=0
- nels_block(1)=BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2 
+ nels_block(1)=BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2
  tot_nels=nels_block(1)
 
- if (nsppol==2) then 
+ if (nsppol==2) then
    nblocks=3
    kx_fact=one
-   nels_block(1) = BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2   ! Only the upper triangle for block 1 and 2 
-   nels_block(2) = BSp%nreh(2)*(BSp%nreh(2)+1_i8b)/2 
-   nels_block(3) = BSp%nreh(1)*BSp%nreh(2)*1_i8b       ! Note: Block 3 does not have symmetries. 
+   nels_block(1) = BSp%nreh(1)*(BSp%nreh(1)+1_i8b)/2   ! Only the upper triangle for block 1 and 2
+   nels_block(2) = BSp%nreh(2)*(BSp%nreh(2)+1_i8b)/2
+   nels_block(3) = BSp%nreh(1)*BSp%nreh(2)*1_i8b       ! Note: Block 3 does not have symmetries.
    tot_nels= SUM(nels_block)
  end if
  !
  ! Distribute the calculation of the matrix elements among the nodes.
  ! * tstart and t_stop give the initial and final transition index treated by each node.
- ! * my_hsize is the number of transitions treated by this processor 
+ ! * my_hsize is the number of transitions treated by this processor
  ! * my_cols(1:2) gives the initial and final column treated by this node.
  !
  do block=1,nsppol
@@ -1902,7 +1876,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
      bidx(:,2) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b2
      bidx(:,3) = [BSp%lomo_spin(block),BSp%homo_spin(block)] ! range for b3
      bidx(:,4) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b4
-   else 
+   else
      bidx(:,1) = [BSp%lomo_spin(block),BSp%homo_spin(block)] ! range for b1
      bidx(:,2) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b2
      bidx(:,3) = [BSp%lumo_spin(block),BSp%humo_spin(block)] ! range for b3
@@ -1913,10 +1887,10 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
    !spin2 = spin_ids(2,block)
 
    my_cols=0
-   do itp=1,Bsp%nreh(block) 
-     do it=1,itp 
+   do itp=1,Bsp%nreh(block)
+     do it=1,itp
        ir = it + itp*(itp-1_i8b)/2
-       if (ir==t_start(my_rank)) then 
+       if (ir==t_start(my_rank)) then
          my_rows(1) = it
          my_cols(1) = itp
        end if
@@ -1941,7 +1915,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
    ABI_MALLOC(rhotwg1,(npweps))
    ABI_MALLOC(rhotwg2,(npweps))
 
-   ngx = Gsph_x%ng 
+   ngx = Gsph_x%ng
    ABI_MALLOC(vc_sqrt_qbz,(ngx))
 
    ! * Get iq_ibz, and symmetries from iq_bz.
@@ -1949,12 +1923,12 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
    call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
    ! * Set up table of |q(BZ)+G|
-   if (iq_ibz==1) then 
+   if (iq_ibz==1) then
      do ig=1,ngx
-       ISg = Gsph_x%rottb(ig,itim_q,isym_q) 
+       ISg = Gsph_x%rottb(ig,itim_q,isym_q)
        vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
      end do
-   else 
+   else
       MSG_ERROR("iq_ibz should be 1")
    end if
 
@@ -1964,12 +1938,12 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
      ikp_bz = Bsp%Trans(itp,spin2)%k
      ivp    = Bsp%Trans(itp,spin2)%v
      icp    = Bsp%Trans(itp,spin2)%c
-                                                                                                           
+
      ikp_ibz = Kmesh%tab (ikp_bz)
      isym_kp = Kmesh%tabo(ikp_bz)
      itim_kp = (3-Kmesh%tabi(ikp_bz))/2
-                                                                                                           
-     if (is_resonant) then 
+
+     if (is_resonant) then
        rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,ivp,icp,ikp_ibz,spin2),Gsph_c)
      else ! Code for coupling block.
        rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,icp,ivp,ikp_ibz,spin2),Gsph_c)
@@ -1977,7 +1951,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
      !
      ! Multiply by the Coulomb term.
       do ig=2,npweps
-        rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig) 
+        rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig)
       end do
 
      do it=1,itp ! Loop over transition t = (k,v,c,spin1)
@@ -1991,7 +1965,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
        ik_ibz = Kmesh%tab(ik_bz)
        isym_k = Kmesh%tabo(ik_bz)
        itim_k = (3-Kmesh%tabi(ik_bz))/2
-       !if (itim_k==2) CYCLE ! time-reversal or not       
+       !if (itim_k==2) CYCLE ! time-reversal or not
 
        rhotwg1(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,iv,ic,ik_ibz,spin1),Gsph_c)
        !
@@ -2032,7 +2006,7 @@ if (nsppol==2) then
  ABI_MALLOC(col_start,(0:nproc-1))
  ABI_MALLOC(col_stop,(0:nproc-1))
  call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
- if (ierr/=0) then 
+ if (ierr/=0) then
    MSG_WARNING(msg)
  end if
 
@@ -2053,7 +2027,7 @@ if (nsppol==2) then
  !
  ! TODO might add treatment of <psi|q+G|psi> for q+G -> 0
  ! TODO might used enlarged G-sphere for better convergence.
- ! Note that my_kxssp is always written on file when nsppol=2, even when 
+ ! Note that my_kxssp is always written on file when nsppol=2, even when
  ! non-local field effects are neglected.
  ABI_MALLOC(my_kxssp,(neh1,my_cols(1):my_cols(2)))
  my_kxssp=czero
@@ -2063,7 +2037,7 @@ if (nsppol==2) then
    ABI_MALLOC(rhotwg1,(npweps))
    ABI_MALLOC(rhotwg2,(npweps))
 
-   ngx = Gsph_x%ng 
+   ngx = Gsph_x%ng
    ABI_MALLOC(vc_sqrt_qbz,(ngx))
    !
    ! * Get iq_ibz, and symmetries from iq_bz.
@@ -2071,12 +2045,12 @@ if (nsppol==2) then
    call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
    !
    ! * Set up table of |q(BZ)+G|
-   if (iq_ibz==1) then 
+   if (iq_ibz==1) then
      do ig=1,ngx
-       ISg = Gsph_x%rottb(ig,itim_q,isym_q) 
+       ISg = Gsph_x%rottb(ig,itim_q,isym_q)
        vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
      end do
-   else 
+   else
       MSG_ERROR("iq_ibz should be 1")
    end if
 
@@ -2086,12 +2060,12 @@ if (nsppol==2) then
      ikp_bz = Bsp%Trans(itp,spin2)%k
      ivp    = Bsp%Trans(itp,spin2)%v
      icp    = Bsp%Trans(itp,spin2)%c
-                                                                                                           
+
      ikp_ibz = Kmesh%tab (ikp_bz)
      isym_kp = Kmesh%tabo(ikp_bz)
      itim_kp = (3-Kmesh%tabi(ikp_bz))/2
-                                                                                                           
-     if (is_resonant) then 
+
+     if (is_resonant) then
        rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,ivp,icp,ikp_ibz,spin2),Gsph_c)
      else ! Code for coupling block.
        rhotwg2(:) = sym_rhotwgq0(itim_kp,isym_kp,dim_rtwg,npweps,rhxtwg_q0(:,icp,ivp,ikp_ibz,spin2),Gsph_c)
@@ -2099,7 +2073,7 @@ if (nsppol==2) then
      !
      ! Multiply by the Coulomb term.
       do ig=2,npweps
-        rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig) 
+        rhotwg2(ig) = rhotwg2(ig) * vc_sqrt_qbz(ig) * vc_sqrt_qbz(ig)
       end do
 
      do it=1,neh1 ! Loop over transition t = (k,v,c,spin1) FULL matrix.
@@ -2110,7 +2084,7 @@ if (nsppol==2) then
        ik_ibz = Kmesh%tab(ik_bz)
        isym_k = Kmesh%tabo(ik_bz)
        itim_k = (3-Kmesh%tabi(ik_bz))/2
-       !if (itim_k==2) CYCLE ! time-reversal or not       
+       !if (itim_k==2) CYCLE ! time-reversal or not
 
        rhotwg1(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,iv,ic,ik_ibz,spin1),Gsph_c)
        !

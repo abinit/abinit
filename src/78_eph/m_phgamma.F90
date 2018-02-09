@@ -6,7 +6,7 @@
 !!  Tools for the computation of phonon linewidths
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1349,14 +1349,14 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
        ! Diagonalize gamma matrix at qpoint (complex matrix).
        ! MJV NOTE: gam_now is recast implicitly here to matrix
        gam_now  = gams%vals_in_qibz(:,ii,:,:,iq_ibz,spin)
-    
+
        call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_now, natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
        call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-    
+
        diagerr = zero
        do nu2=1,natom3
          gamma_in_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-    
+
          do nu1=1,nu2-1
            diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
          end do
@@ -1365,21 +1365,21 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
          end do
          diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
        end do
-    
+
        if (diagerr > tol12) then
          write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
          MSG_WARNING(msg)
        end if
 
        gam_now  = gams%vals_out_qibz(:,ii,:,:,iq_ibz,spin)
-    
+
        call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_now, natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
        call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-    
+
        diagerr = zero
        do nu2=1,natom3
          gamma_out_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-    
+
          do nu1=1,nu2-1
            diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
          end do
@@ -1388,18 +1388,18 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
          end do
          diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
        end do
-    
+
        if (diagerr > tol12) then
          write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
          MSG_WARNING(msg)
        end if
      end do ! idir
    end do ! jdir
-    
+
  case default
    MSG_BUG(sjoin("Wrong value for eph_scalprod:",itoa(gams%eph_scalprod)))
  end select
-    
+
  ! Compute lambda
  do jdir = 1,gams%ndir_transp
    do idir = 1,gams%ndir_transp
@@ -1408,7 +1408,7 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
      !for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
      !for sppol 2 it should be 0.5 as we have 2 spin channels to sum
      spinfact = two/(gams%nsppol*gams%nspinor)
-    
+
      do nu1=1,gams%natom3
        gamma_in_ph(idir,jdir,nu1)  =  gamma_in_ph(idir,jdir,nu1)  * pi * spinfact
        gamma_out_ph(idir,jdir,nu1) =  gamma_out_ph(idir,jdir,nu1) * pi * spinfact
@@ -1543,7 +1543,7 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
        ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
        tmp_gam2 = reshape (gam_in_now, [2,natom3,natom3])
        call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-       
+
        do nu1=1,natom3
          gamma_in_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
          img(nu1) = tmp_gam1(2, nu1, nu1)
@@ -1555,7 +1555,7 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
 
        tmp_gam2 = reshape (gam_out_now, [2,natom3,natom3])
        call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-    
+
        do nu1=1,natom3
          gamma_out_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
          img(nu1) = tmp_gam1(2, nu1, nu1)
@@ -1570,11 +1570,11 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
        ! MJV NOTE: gam_now is recast implicitly here to matrix
        call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_in_now,natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
        call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,  natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-    
+
        diagerr = zero
        do nu2=1,natom3
          gamma_in_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-    
+
          do nu1=1,nu2-1
            diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
          end do
@@ -1583,7 +1583,7 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
          end do
          diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
        end do
-    
+
        if (diagerr > tol12) then
          write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
          MSG_WARNING(msg)
@@ -1591,11 +1591,11 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
 
        call ZGEMM('N','N',natom3,natom3,natom3,cone,gam_out_now,natom3,pheigvec,natom3,czero,tmp_gam1,natom3)
        call ZGEMM('C','N',natom3,natom3,natom3,cone,pheigvec,  natom3,tmp_gam1 ,natom3,czero,tmp_gam2,natom3)
-    
+
        diagerr = zero
        do nu2=1,natom3
          gamma_out_ph(idir,jdir,nu2) = tmp_gam2(1,nu2,nu2)
-    
+
          do nu1=1,nu2-1
            diagerr = diagerr + abs(tmp_gam2(1,nu1,nu2))+abs(tmp_gam2(2,nu1,nu2))
          end do
@@ -1604,7 +1604,7 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
          end do
          diagerr = diagerr + abs(tmp_gam2(2,nu2,nu2))
        end do
-    
+
        if (diagerr > tol12) then
          write (msg,'(a,es14.6)')'Numerical error in diagonalization of gamma with phon eigenvectors: ',diagerr
          MSG_WARNING(msg)
@@ -2612,7 +2612,7 @@ function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
 !End of the abilint section
 
  implicit none
-  
+
  real(dp), dimension(3,3) :: a2fw_tr_moment
 
 !Arguments ------------------------------------
@@ -2636,7 +2636,7 @@ function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
    do idir = 1, 3
      ! Construct the integrand function. [a2F_tr(w)/w] w^n
      ff = zero; int_ff = zero
-    
+
      if (nn-1 >= 0) then
        do iw=1,a2f_tr%nomega
          omg = a2f_tr%omega(iw)
@@ -2650,10 +2650,10 @@ function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
          ff(iw) = a2f_tr%vals_tr(iw,idir,jdir,0,spin) * omg_nm1
        end do
      end if
-    
+
      ! Integration with simpson rule on a linear mesh.
      call simpson_int(a2f_tr%nomega,a2f_tr%wstep,ff,int_ff)
-    
+
      a2fw_tr_moment(idir,jdir) = int_ff(a2f_tr%nomega)
      if (present(out_int)) out_int(:,idir,jdir) = int_ff(:)
    end do
@@ -3592,7 +3592,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
    do mu=0,natom3
      do idir=1,3
        do jdir=1,3
-  
+
          do iw=1,nomega
            ww = a2f_tr%omega(iw)
            if (abs(ww) > EPH_WTOL) then
@@ -3603,7 +3603,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
            ! TODO: Strange that the first value of int(f) is not set to zero!
            ! FIXME: The frequency integration overestimates lambda if there are negative phonon frequencies!
          end do
-    
+
          call simpson_int(nomega, wstep, a2f_tr_1mom, a2f_tr%lambdaw_tr(:,idir,jdir,mu,spin))
        end do ! jdir
      end do ! idir
@@ -3638,8 +3638,8 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
        omega_log(idir,jdir) = exp(a2f_tr_logmom_int(nomega))
      end do
    end do
-    
-   
+
+
 ! TODO: make output only for irred values xx yy zz and top half of matrix
    if (my_rank == master) then
      write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions '
@@ -3952,7 +3952,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !scalars
  integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
- integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,idir,ipert,iq_ibz
+ integer :: my_rank,nproc,iomode,mband,nsppol,nkpt,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2,band !band1,band2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
@@ -4081,13 +4081,24 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  end if
 
  ! Initialize the wave function descriptor.
- ! For the time being, no memory distribution, each node has the full set of states.
- my_minb = 1; my_maxb = mband
-
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
  ABI_MALLOC(keep_ur,(mband, nkpt ,nsppol))
- nband=mband; bks_mask=.True.; keep_ur=.False.
+ nband=mband; bks_mask=.False.; keep_ur=.False.
+
+ ! Only wavefunctions on the FS are stored in wfd.
+ ! Need all k-points on the FS because of k+q, spin is not distributed for the time being.
+ ! One could reduce the memory allocated per MPI-rank via MPI-FFT or OpenMP...
+ do spin=1,nsppol
+   fs => fstab(spin)
+   do ik_bz=1,fs%nkfs
+     ik_ibz = fs%istg0(1, ik_bz)
+     bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
+     bks_mask(bstart_k:bstart_k+nband_k-1, ik_ibz, spin) = .True.
+   end do
+ end do
+ ! no memory distribution, each node has the full set of states.
+ !bks_mask(1:mband,:,:) = .True.
 
  ecut = dtset%ecut ! dtset%dilatmx
  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
@@ -4504,10 +4515,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
                 rg = gkk_atm(:, ib1, ib2, ipc2)
                 res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                 res(2) = lf(1) * rg(2) - lf(2) * rg(1)
-                resvv_in(1,:) = res(1) * vv_kkq(:,ib1,ib2) 
-                resvv_in(2,:) = res(2) * vv_kkq(:,ib1,ib2) 
-                resvv_out(1,:) = res(1) * vv_kk(:,ib1,ib2) 
-                resvv_out(2,:) = res(2) * vv_kk(:,ib1,ib2) 
+                resvv_in(1,:) = res(1) * vv_kkq(:,ib1,ib2)
+                resvv_in(2,:) = res(2) * vv_kkq(:,ib1,ib2)
+                resvv_out(1,:) = res(1) * vv_kk(:,ib1,ib2)
+                resvv_out(2,:) = res(2) * vv_kk(:,ib1,ib2)
                 ! Loop over smearing values.
                 do isig=1,nsig
                   tgam(:,ipc1,ipc2,isig) = tgam(:,ipc1,ipc2,isig) &
@@ -4663,7 +4674,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qintp=.False.,qptopt=1)
    if (my_rank == master) call a2fw_tr_write(a2fw_tr, strcat(dtfil%filnam_ds(4), "_NOINTP"))
    call a2fw_tr_free(a2fw_tr)
-   
+
    ! Compute a2Fw_tr using Fourier interpolation.
    call a2fw_tr_init(a2fw_tr,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
      dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=1)

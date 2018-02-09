@@ -8,7 +8,7 @@
 !!  reciprocal space for a specified resolution.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2017 ABINIT group (DW)
+!!  Copyright (C) 2011-2018 ABINIT group (DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,6 +94,11 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
  end if
 
  if (usepaw==1) then
+   if(ecutdg<tol6)then
+     write(message,'(a)')&
+&      'The value of (paw)ecutdg is zero or negative, which is forbidden.'
+     MSG_ERROR(message)
+   endif
    gmaxdg=one/(sqrt2*pi)*sqrt(ecutdg)
    if (mqgriddg == 0) then
      mqgriddg2=ceiling(gmaxdg/gvecnorm*nptsgvec)

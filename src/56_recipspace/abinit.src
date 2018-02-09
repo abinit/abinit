@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -40,6 +40,8 @@ sources = [
  "m_nesting.F90",
  "m_skw.F90",
  "mkkin.F90",
+ "mknucdipmom_k.F90",
+ "mkpwind_k.F90",
  "ph1d3d.F90",
  "setmqgrid.F90",
  "setsym.F90",

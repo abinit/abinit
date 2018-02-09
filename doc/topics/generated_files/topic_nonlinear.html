@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to compute Raman intensity, and the related electro-optic coefficients with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (RC, XG)
+<h5>Copyright (C) 2016-2018 ABINIT group (RC, XG)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_DFPT.html">topic_DFPT</a>, &nbsp; <a href="../../topics/generated_files/topic_Optic.html">topic_Optic</a>, &nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#6">help_features#6</a>, &nbsp; <a href="../../topics/generated_files/topic_DFPT.html">topic_DFPT</a>, &nbsp; <a href="../../topics/generated_files/topic_Optic.html">topic_Optic</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_nonlinear.html#1">Introduction.</a><li>2. <a href="topic_nonlinear.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_nonlinear.html#3">Related input variables.</a><li>4. <a href="topic_nonlinear.html#4">Selected input files.</a><li>5. <a href="topic_nonlinear.html#5">References.</a></ul>
@@ -104,26 +104,26 @@ difference calculations), is also provided.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag@anaddb</a>   [Non-Linear FLAG]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#alphon@anaddb">alphon@anaddb</a>   [ALign PHONon mode eigendisplacements]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_atpol">d3e_pert1_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_dir">d3e_pert1_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 1: DIRections]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_elfd">d3e_pert1_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_phon">d3e_pert1_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 1: PHONons]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_atpol">d3e_pert2_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_dir">d3e_pert2_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 2: DIRections]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_elfd">d3e_pert2_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_phon">d3e_pert2_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 2: PHONons]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_atpol">d3e_pert3_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_dir">d3e_pert3_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 3: DIRections]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_elfd">d3e_pert3_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_phon">d3e_pert3_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 3: PHONons]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#prepanl">prepanl</a>   [PREPAre Non-Linear response calculation]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#ramansr@anaddb">ramansr@anaddb</a>   [RAMAN Sum-Rule]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_files.html#get1den">get1den</a>   [GET the first-order density from _1DEN file]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#ird1den">ird1den</a>   [Integer that governs the ReaDing of 1st-order DEN file]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#prtmbm@anaddb">prtmbm@anaddb</a>   [PRinT Mode-By-Mode decomposition of the electrooptic tensor]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag@anaddb</a>   [Non-Linear FLAG]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_anaddb.html#alphon@anaddb">alphon@anaddb</a>   [ALign PHONon mode eigendisplacements]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_atpol">d3e_pert1_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_dir">d3e_pert1_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 1: DIRections]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_elfd">d3e_pert1_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_phon">d3e_pert1_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 1: PHONons]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_atpol">d3e_pert2_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_dir">d3e_pert2_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 2: DIRections]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_elfd">d3e_pert2_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_phon">d3e_pert2_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 2: PHONons]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_atpol">d3e_pert3_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_dir">d3e_pert3_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 3: DIRections]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_elfd">d3e_pert3_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_phon">d3e_pert3_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 3: PHONons]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#prepanl">prepanl</a>   [PREPAre Non-Linear response calculation]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#ramansr@anaddb">ramansr@anaddb</a>   [RAMAN Sum-Rule]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_files.html#get1den">get1den</a>   [GET the first-order density from _1DEN file]<br>
+... <a href="../../variables/generated_files/varset_files.html#ird1den">ird1den</a>   [Integer that governs the ReaDing of 1st-order DEN file]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#prtmbm@anaddb">prtmbm@anaddb</a>   [PRinT Mode-By-Mode decomposition of the electrooptic tensor]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

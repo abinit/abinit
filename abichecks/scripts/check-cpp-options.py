@@ -24,6 +24,8 @@ cpp_explicit = [
   "HAVE_TEST_TIME_PARTITIONING",
   "i386",
   "DFTI_CHECK",
+  "XC_MAJOR_VERSION",
+  "XC_MINOR_VERSION",
   ]
 
 cpp_ignored = [

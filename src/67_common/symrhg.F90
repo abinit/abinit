@@ -8,7 +8,7 @@
 !! come back to the real space for a symmetrized rho(r).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,9 +18,9 @@
 !! cplex=1 if rhor is real, 2 if rhor is complex
 !! gprimd(3,3)=dimensional reciprocal space primitive translations
 !! irrzon(nfft,2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! nspden=number of spin-density components
 !! nsppol=1 for unpolarized, 2 for spin-polarized
 !! nsym=number of symmetry elements.
@@ -213,7 +213,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
      n1=ngfft(1);n2=ngfft(2);n3=ngfft(3);nproc_fft=ngfft(10);me_fft=ngfft(11);nd2=n2/nproc_fft
 
-!    Get the distrib associated with this fft_grid 
+!    Get the distrib associated with this fft_grid
      call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !    The following is only valid for total, up or dn density
@@ -350,7 +350,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
            do while (ind2/=indsy.and.iup<numpt+nup)
              iup=iup+1;ind2=irrzon(iup,1,1)
            end do
-           if (ind2/=indsy) then 
+           if (ind2/=indsy) then
              MSG_ERROR("ind2/=indsy in symrhg !")
            end if
            if (isymg(iup)==0) isymg(iup)=jsym
@@ -397,8 +397,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
            if(fftn2_distrib(j2+1)==me_fft)  then ! this ind is to be treated by me_fft
              r2=ffti2_local(j2+1) - 1
              ind=n1*(nd2*j3+r2)+j1+1  ! this is ind in the current proc
-             jsym=isymg(iup+numpt) 
-             if (jsym==0) then 
+             jsym=isymg(iup+numpt)
+             if (jsym==0) then
                MSG_ERROR("jsym=0 in symrhg !")
              end if
              magxsu1=rhosu1_arr(3*izone-2);magxsu2=rhosu2_arr(3*izone-2)

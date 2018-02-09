@@ -7,7 +7,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2018 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1340,7 +1340,7 @@ end subroutine get_eneocc_vect
 !!  ebands<ebands_t>=The object with updated values depending on the value of arr_name
 !!
 !! PARENTS
-!!      m_ebands
+!!      dfpt_looppert,m_ebands
 !!
 !! CHILDREN
 !!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout

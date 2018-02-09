@@ -8,7 +8,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2017 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
+!! Copyright (C) 1992-2018 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1291,9 +1291,10 @@ end subroutine sqnorm_g
 !!
 !! PARENTS
 !!      cgwf,chebfi,corrmetalwf1,d2frnl,dfpt_cgwf,dfpt_nsteltwf,dfpt_nstpaw
-!!      dfpt_nstwf,dfpt_vtowfk,dfpt_wfkfermi,dfptnl_resp,eig2stern,extrapwf
-!!      fock2ACE,fock_ACE_getghc,fock_getghc,m_efmas,m_gkk,m_phgamma,m_phpi
-!!      m_rf2,m_sigmaph,mkresi,nonlop_gpu,nonlop_test,rf2_init
+!!      dfpt_nstwf,dfpt_vtowfk,dfpt_wfkfermi,dfptnl_resp,dotprod_set_cgcprj
+!!      dotprodm_sumdiag_cgcprj,eig2stern,extrapwf,fock2ACE,fock_ACE_getghc
+!!      fock_getghc,m_efmas,m_gkk,m_phgamma,m_phpi,m_rf2,m_sigmaph,mkresi
+!!      nonlop_gpu,nonlop_test,rf2_init
 !!
 !! CHILDREN
 !!
@@ -1746,8 +1747,8 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhotoxc
-!!      rhohxcpositron,rhotov
+!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhohxcpositron
+!!      rhotov,rhotoxc
 !!
 !! CHILDREN
 !!
@@ -1844,10 +1845,10 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc) :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
- complex(dpc) :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
- complex(dpc) :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
- complex(dpc) :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
+ complex(dpc),parameter :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
+ complex(dpc),parameter :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
+ complex(dpc),parameter :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
+ complex(dpc),parameter :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
  complex(dpc) :: cspin(0:3), cgcmat_(2,2)
 ! ***********************************************************************
 

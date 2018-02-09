@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (AM)
+!! Copyright (C) 1999-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,16 +22,16 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abihist_bcast,abihist_free,abimem_init,abinit_doctor
-!!      compute_anharmonics,effective_potential_file_getdimsystem
-!!      effective_potential_file_gettype,effective_potential_file_read
+!!      ab7_invars_set_flags,abi_io_redirect,abihist_bcast,abihist_free
+!!      abimem_init,abinit_doctor,compute_anharmonics
+!!      effective_potential_file_getdimsystem,effective_potential_file_gettype
+!!      effective_potential_file_maphisttoref,effective_potential_file_read
 !!      effective_potential_file_readmdfile,effective_potential_free
 !!      effective_potential_setconfinement,effective_potential_writenetcdf
 !!      effective_potential_writexml,fit_polynomial_coeff_fit
-!!      fit_polynomial_coeff_maphisttoref,fit_polynomial_printsystemfiles
-!!      flush_unit,herald,init10,instrng,inupper,invars10,isfile,mover_effpot
-!!      multibinit_dtset_free,outvars_multibinit,timein,wrtout,xmpi_bcast
-!!      xmpi_init,xmpi_sum
+!!      fit_polynomial_printsystemfiles,flush_unit,herald,init10,instrng
+!!      inupper,invars10,isfile,mover_effpot,multibinit_dtset_free
+!!      outvars_multibinit,timein,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -56,6 +56,7 @@ program multibinit
  use m_multibinit_dataset
  use m_effective_potential_file
  use m_abihist
+ use m_ab7_invars
  use m_io_tools,   only : get_unit, flush_unit,open_file
  use m_fstrings,   only : int2char4,replace
  use m_time ,      only : asctime
@@ -79,7 +80,7 @@ program multibinit
 
 !Local variables-------------------------------
 ! Set array dimensions
- integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
+ integer,parameter :: master=0 ! FIXME: these should not be reserved unit numbers!
  integer :: comm,filetype,ii,ierr,lenstr
  integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
  integer :: option
@@ -89,8 +90,9 @@ program multibinit
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(17),tmpfilename,name
+ character(len=fnlen) :: filstat
  character(len=500) :: message
- type(multibinit_dataset_type) :: inp
+ type(multibinit_dtset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
  type(args_t) :: args
@@ -139,6 +141,10 @@ program multibinit
 !Initialise the code : write heading, and read names of files.
  call init10(filnam,comm)
 
+! Call the parser from the parser module.
+ filstat = trim("_STATUS")
+ call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
+ 
 !******************************************************************
 
  call timein(tcpu,twall)
@@ -180,7 +186,7 @@ program multibinit
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt,comm)
+ call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
  
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
@@ -212,7 +218,7 @@ program multibinit
 !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
-   if(filetype==3) then
+   if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
@@ -221,7 +227,7 @@ program multibinit
      call wrtout(std_out,message,'COLL')
    end if
  else
-   if(inp%ncoeff/=zero) then
+   if(inp%ncoeff/=0) then
      write(message, '(5a)' )&
 &     'ncoeff is specified in the input but,',ch10,&
 &     'there is no file for the coefficients ',ch10,&
@@ -257,7 +263,7 @@ program multibinit
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call effective_potential_file_readMDfile(filnam(5),hist)
+       call effective_potential_file_readMDfile(filnam(5),hist,option=inp%fit_ts_option)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -282,7 +288,7 @@ program multibinit
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
-   call fit_polynomial_coeff_mapHistToRef(reference_effective_potential,hist,comm)
+   call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
  end if
 
 !Generate the confinement polynome (not working yet)
@@ -314,8 +320,7 @@ program multibinit
  if (inp%fit_coeff/=0)then
    option=inp%fit_coeff
    if(hist%mxhist >0)then
-     select case(option)
-     case (-1)
+     if (option==-1)then
 !      option == -1
 !      Print the file in the specific format for the script of carlos
 !      Born_Charges  
@@ -327,16 +332,18 @@ program multibinit
        if (iam_master) then
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
        end if
-     case (1)
+     else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,&
+&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
 &       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
-&       inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff,&
+&       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+&       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
+&       fit_tolMSDFS=inp%fit_tolMSDFS,&
 &       verbose=.true.,positive=.false.,&
 &       anharmstr=inp%fit_anhaStrain==1,&
 &       spcoupling=inp%fit_SPCoupling==1)
-     end select
+     end if
    else
      write(message, '(3a)' )&
 &     'There is no step in the MD file ',ch10,&
@@ -349,12 +356,21 @@ program multibinit
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
  if(inp%fit_bound==1)then
-   call mover_effpot(inp,filnam,reference_effective_potential,1,comm,hist=hist)
+   call mover_effpot(inp,filnam,reference_effective_potential,-1,comm,hist=hist)
  end if
 !TEST_AM
 
 !****************************************************************************************
 
+!****************************************************************************************
+!TEST_AM
+!Effective Hamiltonian, compute the energy for given patern
+! call mover_effpot(inp,filnam,reference_effective_potential,-2,comm,hist=hist)
+!TEST_AM
+
+!****************************************************************************************
+
+ 
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)
  if(iam_master) then
@@ -364,7 +380,8 @@ program multibinit
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      name = replace(trim(filnam(2)),".out","")
-     call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name)
+     call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name,&
+&     prt_dipdip=inp%dipdip_prt==1)
    else if (inp%prt_model == -2)then
 !    NetCDF case, in progress
      name = trim(filnam(2))//"_sys.nc"

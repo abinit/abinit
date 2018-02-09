@@ -34,7 +34,7 @@
 !! "indsym" as seen below.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,7 @@
 !!
 !! PARENTS
 !!      get_npert_rbz,ingeo,initberry,m_ab7_symmetry,m_crystal,m_ddb
-!!      m_fit_polynomial_coeff,setsym,thmeig
+!!      m_polynomial_coeff,m_tdep_sym,setsym,thmeig
 !!
 !! CHILDREN
 !!      symchk,wrtout

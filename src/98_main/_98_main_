@@ -9,7 +9,7 @@
 !! Main routine for conducting LDA calculations by self-consistent cycles.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (TD)
+!! Copyright (C) 1998-2018 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,7 @@
 !! bsepostproc.F90
 !! conducti.F90
 !! cut3d.F90
+!! dummy_tests.F90
 !! fftprof.F90
 !! fold2Bloch.F90
 !! ioprof.F90

@@ -8,7 +8,7 @@
 !! The routine computes -if requested- the forces.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, MT)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,7 @@
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
@@ -413,14 +413,14 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
-!  has to convert it into a potential residualbefore calling forces routine
+!  has to convert it into a potential residual before calling forces routine
    if (apply_residual) then
      ABI_ALLOCATE(resid,(nfft,dtset%nspden))
      option=0; if (dtset%densfor_pred<0) option=1
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,usepaw,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,usepaw,resid,xccc3d,xred)
+&     rhor,rprimd,usepaw,resid,xccc3d,xred,vxc)
    else
      resid => nvresid
    end if

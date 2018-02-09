@@ -7,7 +7,7 @@
 !! this routine prepares the data to the call of nonlop.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FB,MT,GZ,MD,FDahm)
+!! Copyright (C) 1998-2018 ABINIT group (FB,MT,GZ,MD,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !! Given the past history of images, predict the new set of images
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (XG)
+!! Copyright (C) 2009-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,7 +158,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  case(0)
 
-   call predict_copy(itimimage,itimimage_eff,list_dynimage,ndynimage,nimage,&
+   call predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &   ntimimage_stored,results_img)
 
  case(1)

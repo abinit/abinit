@@ -33,11 +33,11 @@ on the basis of the density-functional perturbation theory (DFPT) part of ABINIT
     <li>responses to homogeneous electric fields (dielectric constant, Born effective charges, Infra-red characteristics )
     <li>responses to strain (elastic constants, piezoelectric constants ...)
   </ul>
-  Such computations are realized when one of the input variables  <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> or <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a>
+  Such computations are realized when one of the input variables  <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, <a href="../../variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> or <a href="../../variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a>
     are non-zero,
-   which activates <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=1.
+   which activates <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=1.
   You are supposed to be well-familiarized with such calculations before starting the present tutorial.
-  See the input variables described  in <a href="../../input_variables/generated_files/varset_dfpt.html#">dfpt</a>
+  See the input variables described  in <a href="../../variables/generated_files/varset_dfpt.html#">dfpt</a>
   and the tutorial <a href="lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
 <p>
   You will learn about the basic implementation of parallelism for DFPT calculations,
@@ -53,7 +53,7 @@ on the basis of the density-functional perturbation theory (DFPT) part of ABINIT
 <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
 <a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
 <hr>
-<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
+<h5>Copyright (C) 2000-2018 ABINIT group (XG,RC)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
 
@@ -312,7 +312,7 @@ For the DFPT case, only one symmetry will survive, so that, after the calculatio
 (for which no symmetry is used), the self-consistent part will be done with 8 k points in the corresponding irreducible Brillouin zone.
 With the sampling 8 8 1, there will be 32 k points in the irreducible Brillouin zone for the DFPT case.
 There are 120 bands.
-Note that the value of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> that is used in the present
+Note that the value of <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> that is used in the present
 tutorial is too low to obtain physical results (it should be around 40 Hartree).
 <p>
 As in the previous case, a preparatory ground-state calculation is needed.

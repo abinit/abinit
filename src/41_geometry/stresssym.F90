@@ -10,7 +10,7 @@
 !! symmetrized tensor replaces input tensor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,8 +29,7 @@
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      dfpt_nselt,dfpt_nstpaw,fock2ACE,forstrnps,littlegroup_pert,pawgrnl
-!!      stress
+!!      dfpt_nselt,dfpt_nstpaw,forstrnps,littlegroup_pert,pawgrnl,stress
 !!
 !! CHILDREN
 !!      matr3inv,strconv

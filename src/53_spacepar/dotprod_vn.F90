@@ -15,7 +15,7 @@
 !! up component (if nspden=2), or the magnetization vector (if nspden=4).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,11 +47,11 @@
 !!     N is stored as : n, m_x, m_y, m_z               (real)
 !!   cplex=2:
 !!     V is stored as : V^11, V^22, V^12, i.V^21 (complex)
-!!     N is stored as : n, m_x, m_y, mZ          (complex)
+!!     N is stored as : n, m_x, m_y, mz          (complex)
 !!
 !! PARENTS
 !!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
-!!      dfptnl_loop,energy,newfermie1,odamix,prcrskerker2,rhotoxc,rhotov,setvtr
+!!      dfptnl_loop,energy,newfermie1,odamix,prcrskerker2,rhotov,rhotoxc,setvtr
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -97,6 +97,7 @@ subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,&
  real(dp) :: dim11,dim12,dim21,dim22,dim_dn,dim_up,dre11,dre12,dre21,dre22
  real(dp) :: dre_dn,dre_up,factor,nproc_sphgrid,pim11,pim12,pim21,pim22,pim_dn,pim_up,pre11
  real(dp) :: pre12,pre21,pre22,pre_dn,pre_up
+ real(dp) :: bx_re,bx_im,by_re,by_im,bz_re,bz_im,v0_re,v0_im
 !arrays
  real(dp) :: buffer2(2)
 
@@ -204,14 +205,31 @@ subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,&
          pim12= pot(jfft  ,3)
          pre21= pot(jfft  ,4)
          pim21=-pot(jfft-1,4)
-         dotr=dotr + pre11 * dre11 &
-&         + pim11 * dim11 &
-&         + pre22 * dre22 &
-&         + pim22 * dim22 &
-&         + pre12 * dre12 &
-&         + pim12 * dim12 &
-&         + pre21 * dre21 &
-&         + pim21 * dim21
+
+         v0_re=half*(pre11+pre22)
+         v0_im=half*(pim11+pim22)
+         bx_re=half*(pre12+pre21)
+         bx_im=half*(pim12+pim21)
+         by_re=half*(-pim12+pim21)
+         by_im=half*(pre12-pre21)
+         bz_re=half*(pre11-pre22)
+         bz_im=half*(pim11-pim22)
+         dotr=dotr+v0_re * dens(jfft-1,1)&
+&         + v0_im * dens(jfft  ,1) &
+&         + bx_re * dens(jfft-1,2) &
+&         + bx_im * dens(jfft  ,2) &
+&         + by_re * dens(jfft-1,3) &
+&         + by_im * dens(jfft  ,3) &
+&         + bz_re * dens(jfft-1,4) &
+&         + bz_im * dens(jfft  ,4)
+!         dotr=dotr + pre11 * dre11 &
+!&         + pim11 * dim11 &
+!&         + pre22 * dre22 &
+!&         + pim22 * dim22 &
+!&         + pre12 * dre12 &
+!&         + pim12 * dim12 &
+!&         + pre21 * dre21 &
+!&         + pim21 * dim21
        end do
      else ! option=2
 !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(nfft,dens,pot) REDUCTION(+:dotr,doti)

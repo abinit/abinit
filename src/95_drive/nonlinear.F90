@@ -8,7 +8,7 @@
 !! non linear response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVeithen, MB)
+!! Copyright (C) 2002-2018 ABINIT group (MVeithen, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,10 +49,10 @@
 !!
 !! CHILDREN
 !!      d3sym,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfptnl_doutput
-!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hdr_free
+!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hartre,hdr_free
 !!      hdr_init,hdr_update,initmv,inwffil,kpgio,mkcore,nlopt,pspini,read_rhor
 !!      rhotoxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
-!!      wrtout
+!!      wrtout,xcdata_init
 !!
 !! SOURCE
 
@@ -435,10 +435,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
  call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
  ABI_ALLOCATE(work,(0))
- call xcdata_init(dtset%intxc,dtset%ixc,&
-&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfft,dtset%ngfft,&
-& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
+& work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
 & vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
  ABI_DEALLOCATE(work)
 

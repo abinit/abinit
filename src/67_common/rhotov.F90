@@ -8,7 +8,7 @@
 !! the trial (local) potential and the residual potential.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, MT, EB)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, MT, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
@@ -101,9 +101,9 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,mag_constr,mean_fftr,psolver_rhohxc,rhotoxc,rhohxcpositron
-!!      sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc
-!!      xred2xcart
+!!      dotprod_vn,hartre,mag_constr,mean_fftr,psolver_rhohxc,rhohxcpositron
+!!      rhotoxc,sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init
+!!      xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 
@@ -180,6 +180,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid,ixc_current
+!integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
+!real(dp):: rx,ry,rz                        !SPr: debug
  real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
@@ -187,6 +189,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
  real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
+!real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
 
@@ -197,8 +200,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
-!Check if we're in hybrid norm conserving pseudopotential
- is_hybrid_ncpp=(usepaw==0 .and. &
+!Check if we're in hybrid norm conserving pseudopotential with a core correction
+ is_hybrid_ncpp=(usepaw==0 .and. n3xccc/=0 .and. &
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
@@ -229,36 +232,39 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
-     if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%fockaux_ixc
-     call xcdata_init(dtset%intxc,ixc_current,&
-&     dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+     if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%auxc_ixc
+     call xcdata_init(xcdata,dtset=dtset,ixc=ixc_current)
 
 !    Use the periodic solver to compute Hxc.
      nk3xc=1
 !write(80,*) "rhotov"
 !xccc3d=zero
+!DEBUG
+     write(std_out,*)' rhotov : is_hybrid_ncpp=',is_hybrid_ncpp
+     write(std_out,*)' rhotov : n3xccc=',n3xccc
+!ENDDEBUG
+
      call timab(941,1,tsec)
      if (ipositron==0) then
-       call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
-&       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
-       if(mod(dtset%fockoptmix,100)==11)then
-!        For hybrid compensation, to be cleaned
-         energies%e_xc=energies%e_xc*dtset%fockaux_scal
-         vxc(:,:)=vxc(:,:)*dtset%fockaux_scal
-       endif
+       if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
+         call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
+&         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,&
+&         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+         if(mod(dtset%fockoptmix,100)==11)then
+           energies%e_xc=energies%e_xc*dtset%auxc_scal
+           vxc(:,:)=vxc(:,:)*dtset%auxc_scal
+         end if
+       else
+         call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&         strsxc,vxcavg,xccc3d,vxc=vxc)
+       end if
      else
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,optxc,dtset%paral_kgb,&
+&       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)
-     end if
-!write(80,*) vxc
-     if (is_hybrid_ncpp) then
-       call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       strsxc,vxcavg,xccc3d,vxc=vxc)
      end if
      call timab(941,2,tsec)
 
@@ -313,7 +319,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !    Compute second compensation energy for hybrid functionals
      call dotprod_vn(1,rhor,energies%e_hybcomp_v,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol,&
 &     mpi_comm_sphgrid=mpi_comm_sphgrid)
-   endif
+   end if
  end if
 
  calc_xcdc=.false.
@@ -357,24 +363,67 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !EB <-- vzeeman might have to be allocated correctly --> to be checked
 ! vzeeman = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
  vzeeman(:) = zero
+! ABI_ALLOCATE(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
+! vzeemanHarm(:,:) = zero                        !
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    if(dtset%nspden==2)then
 !    EB The collinear case has to be checked :
 !    EB Is it vzeeman(1) or (2) that has to be added here? to be checked in setvtr and energy as well
 !    SPr: the density components are: rhor(1) => n_upup + n_dwndwn
 !                                     rhor(2) => n_upup
-!         the convention for the potential spin components is a bit different:
-!                                     v(1)    => v_dwndwn
-!                                     v(2)    => v_upup
+!         the convention for the potential components is different:
+!                                     v(1)    => v_upup
+!                                     v(2)    => v_dndn
 !         verified by comparing collinear and non-collinear calculations
      
-     vzeeman(1) = -half*dtset%zeemanfield(3)  ! v_dwndwn
-     vzeeman(2) =  half*dtset%zeemanfield(3)  ! v_upup
+     vzeeman(1) =-half*dtset%zeemanfield(3)  ! v_upup
+     vzeeman(2) = half*dtset%zeemanfield(3)  ! v_dndn
+
+     !vzeeman(1) = zero  ! v_upup
+     !vzeeman(2) = zero  ! v_dndn
+
+     !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+     !do kk=0,nz-1
+     !  do jj=0,ny-1
+     !    do ii=0,nx-1
+     !      ipt=1+ii+nx*(jj+ny*kk)
+     !      !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
+     !      !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
+     !      !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
+     !      vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !    end do
+     !  end do
+     !end do
+
    else if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_dwndwn
-     vzeeman(2)= half*dtset%zeemanfield(3)    ! v_upup
-     vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_dwnup) = Re(v_updwn)
-     vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_dwnup) =-Im(v_updwn)
+
+     vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_upup
+     vzeeman(2)= half*dtset%zeemanfield(3)    ! v_dndn
+     vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_updn)
+     vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_updn)
+
+     !vzeeman(1)=0.0
+     !vzeeman(2)=0.0
+     !vzeeman(3)=0.0
+     !vzeeman(4)=0.0
+
+     !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+     !do kk=0,nz-1
+     !  do jj=0,ny-1
+     !    do ii=0,nx-1
+     !      ipt=1+ii+nx*(jj+ny*kk)
+     !      !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
+     !      !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
+     !      !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
+     !      vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,3)= -half*dtset%zeemanfield(1)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,4)=  half*dtset%zeemanfield(2)*cos(2*PI*(dble(ii)/dble(nx)))
+     !    end do
+     !  end do
+     !end do
+
    end if
  end if
 
@@ -406,6 +455,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
          vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
          vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
        end do
@@ -415,6 +465,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
        do ispden=3,4
          do ifft=1,nfft
            vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+           !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
            if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
            vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
          end do
@@ -490,6 +541,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
          vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         !vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,ispden)=vtrial(ifft,ispden)+vxc_hybcomp(ifft,ispden)
        end do
      end do
@@ -497,6 +549,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO
        do ifft=1,nfft
          vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+Vmagconstr(ifft,3:4)
+         !vtrial(ifft,3:4)=vtrial(ifft,3:4)+vzeemanHarm(ifft,3:4)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,3:4)=vtrial(ifft,3:4)+vxc_hybcomp(ifft,3:4)
        end do
      end if
@@ -524,6 +577,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
  ABI_DEALLOCATE(Vmagconstr)
+ !ABI_DEALLOCATE(vzeemanHarm) !SPr: debug for q/=0 magnetic field
 
  call timab(945,2,tsec)
  call timab(940,2,tsec)

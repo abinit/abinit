@@ -11,7 +11,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2018 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(45) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(47) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -229,6 +229,12 @@ MODULE m_hdr
 
    ! Data used in elphon
     abifile_t(varname="gkk_elements", fform=42, ext="GKK", class="data"), &
+
+   ! DKK matrix elements in netcdf format (optic, eph)
+    abifile_t(varname="h1_matrix_elements", fform=43, ext="DKK", class="data"), &
+
+    ! output files that are not supposed to be read by abinit.
+    abifile_t(varname="this_file_is_not_read_by_abinit", fform=666, ext="666", class="data"), &
 
    ! GW files: old 1002, 1102
    !character(len=nctk_slen),public,parameter :: e_ncname="dielectric_function"
@@ -603,6 +609,7 @@ subroutine check_fform(fform)
  character(len=500) :: msg
 
 ! *********************************************************************
+ if (fform == 666) return
  abifile = abifile_from_fform(fform)
 
  if (abifile%fform == 0) then
@@ -1022,7 +1029,7 @@ end subroutine hdr_free
 !!  The present version deals with versions of the header up to 56.
 !!
 !! PARENTS
-!!      m_io_kss,m_io_screening,m_wfk,optic
+!!      dfpt_looppert,m_io_kss,m_io_screening,m_wfk,optic
 !!
 !! CHILDREN
 !!
@@ -1451,7 +1458,7 @@ end subroutine hdr_init_lowlvl
 !!
 !! PARENTS
 !!      conducti_paw,conducti_paw_core,cut3d,emispec_paw,finddistrproc,ioprof
-!!      linear_optics_paw,m_ioarr,m_wfd,m_wfk
+!!      linear_optics_paw,m_ddk,m_ioarr,m_wfd,m_wfk
 !!
 !! CHILDREN
 !!
@@ -3012,7 +3019,7 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
+!!      initaim,inwffil,m_ddk,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
 !!
 !! CHILDREN
 !!

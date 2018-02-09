@@ -7,7 +7,7 @@
 !! Communicate pspheads to all processors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (DCA, XG, GMR, FrD, AF, MT)
+!! Copyright (C) 2009-2018 ABINIT group (DCA, XG, GMR, FrD, AF, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

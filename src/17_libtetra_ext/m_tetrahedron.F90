@@ -8,7 +8,7 @@
 !!  depends on sort_tetra and on m_kpt_rank
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2017 ABINIT group (MJV)
+!!  Copyright (C) 2010-2018 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -114,7 +114,7 @@ contains
 !!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
+!!      sort_tetra
 !!
 !! SOURCE
 
@@ -173,7 +173,7 @@ end subroutine destroy_tetra
 !!      thmeig
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
+!!      sort_tetra
 !!
 !! SOURCE
 
@@ -493,7 +493,7 @@ end subroutine init_tetra
 !!      gstate,wfk_analyze
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
+!!      sort_tetra
 !!
 !! SOURCE
 
@@ -603,7 +603,7 @@ end subroutine tetra_write
 !!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_phonons,thmeig
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
+!!      sort_tetra
 !!
 !! SOURCE
 
@@ -737,7 +737,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
    eigen_1tetra(4) = eigen_in(ind_ibz(4))
    call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
 
-   call get_onetetra_(tetrahedra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,nkpt,bcorr,tweight_tmp,dtweightde_tmp)
+   call get_onetetra_(tetrahedra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr,tweight_tmp,dtweightde_tmp)
 
 ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
 !   call daxpy (nene, 1.d0,    tweight_tmp(:,1), 1,    tweight_t(:,ind_ibz(1)), 1)
@@ -819,7 +819,7 @@ end subroutine tetra_blochl_weights
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
+!!      sort_tetra
 !!
 !! SOURCE
 
@@ -1328,7 +1328,7 @@ end subroutine get_dbl_tetra_weight
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
+!!      sort_tetra
 !!
 !! SOURCE
 
@@ -1492,7 +1492,7 @@ end function tetralib_has_mpi
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
+!!      sort_tetra
 !!
 !! SOURCE
 
@@ -1554,7 +1554,7 @@ end subroutine split_work
 !!
 !! SOURCE
 
-pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,nkpt,bcorr, &
+pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr, &
 &  tweight_tmp,dtweightde_tmp)
 
 
@@ -1568,7 +1568,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nene,nkpt,bcorr,itetra
+ integer,intent(in) :: nene,bcorr,itetra
  type(t_tetrahedron), intent(in) :: tetra
  double precision ,intent(in) :: enemax,enemin,max_occ
 !arrays
@@ -1961,7 +1961,7 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
    call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
 
    call get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,&
-&   nene,nkibz,bcorr,tweight_tmp,dtweightde_tmp)
+&   nene,bcorr,tweight_tmp,dtweightde_tmp)
 
    ! Accumulate contributions to ik_ibz
    ! (there might be multiple vertexes that map onto ik_ibz)

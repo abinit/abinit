@@ -11,7 +11,7 @@
 !! reciprocal translations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@
 !! transl(3)=primitive cell translation to make iatom same as tratom (integers)
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,symatm
+!!      m_polynomial_coeff,symatm
 !!
 !! CHILDREN
 !!
