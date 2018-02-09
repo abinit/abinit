@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to calculate the RPA correlation energy with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (FB)
+<h5>Copyright (C) 2016-2018 ABINIT group (FB)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.2">help_features#2.2</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.2">help_features#2.2</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_RPACorrEn.html#1">Introduction.</a><li>2. <a href="topic_RPACorrEn.html#2">Related input variables.</a><li>3. <a href="topic_RPACorrEn.html#3">Selected input files.</a><li>4. <a href="topic_RPACorrEn.html#4">References.</a></ul>
@@ -54,7 +54,7 @@ In this context, the RPA correlation energy corresponds to the GW total energy.
 <p>The RPA correlation energy can be expressed as an integral function of the dielectric matrix (see <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[Gonze2016]</a>).
 The integral over the frequencies is performed along the imaginary axis, where the integrand function is very smooth.
 Only a few sampling frequencies are then necessary.
-In ABINIT, the RPA correlation energy is triggered by setting the keyword <a href="../../input_variables/generated_files/varset_gw.html#gwrpacorr">gwrpacorr</a> to 1. 
+In ABINIT, the RPA correlation energy is triggered by setting the keyword <a href="../../variables/generated_files/varset_gw.html#gwrpacorr">gwrpacorr</a> to 1. 
 <p>The RPA correlation energy is a post-processed quantity
 from the GW module of ABINIT, which takes care of evaluating the dielectric matrix for several imaginary frequencies.
 
@@ -74,7 +74,7 @@ The situation can be improved with the use of an extrapolation scheme (<a href="
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#gwrpacorr">gwrpacorr</a>   [GW RPA CORRelation energy]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_gw.html#gwrpacorr">gwrpacorr</a>   [GW RPA CORRelation energy]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

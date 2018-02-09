@@ -336,6 +336,7 @@ tests/TestBot_MPI*/*
 /src/98_main/multibinit
 /src/98_main/newsp
 /src/98_main/optic
+src/98_main/tdep
 /src/98_main/ujdet
 /src/98_main/fold2Bloch
 /src/98_main/vdw_kernelgen
@@ -442,3 +443,4 @@ tests/built-in/Input/testin_wannier90o_EBANDS.agr
 vpn0941.ac
 doc/input-web/*~
 src/98_main/tdep
+src/98_main/dummy_tests

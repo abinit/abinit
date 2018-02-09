@@ -8,7 +8,7 @@
 !! and the fixed contribution to the 1st-order Fermi energy (nonlocal and kinetic)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (DRH, XG, MT)
+!! Copyright (C) 1999-2018 ABINIT group (DRH, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

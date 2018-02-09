@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -40,6 +40,7 @@ sources = [
  "nhatgrid.F90",
  "optics_paw.F90",
  "optics_paw_core.F90",
+ "overlap_k1k2_paw.F90",
  "pawaccrhoij.F90",
  "pawdenpot.F90",
  "pawdensities.F90",

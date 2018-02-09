@@ -7,7 +7,7 @@
 !! Move ion or change acell acording to forces and stresses
  !!
  !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -606,7 +606,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation does not diverged...
-           if(itime > 10 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
+           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
 !            We set to false the flag corresponding to the bound 
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then

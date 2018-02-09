@@ -7,7 +7,7 @@
 !!  Evaluates Vnl |psi> in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MG)
+!! Copyright (C) 2010-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

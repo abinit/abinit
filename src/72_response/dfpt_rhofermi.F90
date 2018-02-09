@@ -11,7 +11,7 @@
 !! at each step in the iteration process.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR, AR, MB, MT, SPr)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR, AR, MB, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -226,7 +226,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !scalars
  integer,parameter :: level=17
  integer :: bd2tot_index,bdtot_index,buffer_size,counter,cplex_rhoij
- integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq,ipw
+ integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq
  integer :: icg,icgq,ider,idir0,ierr,iexit,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
  integer :: ispden,isppol,istr,istwf_k
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk

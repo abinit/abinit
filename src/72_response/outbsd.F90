@@ -7,7 +7,7 @@
 !! output bsd file for one perturbation (used for elphon calculations in anaddb)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !! The output is this quantity for the input k point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (PB, XG, GA)
+!! Copyright (C) 1999-2018 ABINIT group (PB, XG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

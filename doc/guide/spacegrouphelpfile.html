@@ -1,0 +1,76 @@
+<HTML>
+	<HEAD><Title>Space groups</Title></HEAD>
+	<BODY bgcolor="#ffffff">
+
+<hr>
+<h1>List of 230 3D symmetry space groups</h1>
+<h3>This page presents the list of the 230 3D symmetry space groups with characteristics, and also, if applicable, derivatives of the space group.
+The table is a help for the input in the <A href="https://www.abinit.org">ABINIT</A> code.
+You may see either the <a title="Space groups" class="internal-link" href="spacegrouphelpfile.html">definition</a> of the table entries (present page)
+or the <a title="SG description" class="internal-link" href="spgrdescription.html">full table</a>.
+</h3>
+<hr>
+	<TABLE BORDER="2" cellspacing="2" cellpadding="5">
+	<tr>
+	<td width=10%> SPGROUP </td>
+	<td width=10%> SPGAXOR </td>
+	<td width=10%> SPGORIG </td>
+	<td width=10%> BRVLTT </td>
+	<td width=22%> INTERNATIONAL </td>
+	<td width=20%> SCHOENFLIES </td>
+	<td width=10%> ORDER </td>
+	</tr>
+	</table>
+
+
+<p> This list of symmetry groups is part of the on-line help of the ABINIT code.
+Besides <i>classical</i> crystallographic information, it provides the values of certain symmetry-related variables used in the input file of the ABINIT code.
+<p>
+The table entries are as follows 
+
+<p>
+<ul>
+<li>SPGROUP = "SPace GROUP number", as it is found in the International Tables of Crystallography, 1986 edition.</li>
+<li>SPGAXOR = "SPace Group AXis ORientation", the orientation of the unit cell axis. The allowed values are: </li>
+<ul>
+ <li>Trigonal groups :</li>
+<ul>
+<li>  1 represents the hexagonal axes</li>
+<li>  2 represents the rhombohedral axes</li>
+</ul>
+ <li>Orthorhombic groups:</li>
+<ul>
+<li>1 abc -> abc</li>
+<li>2 abc -> cab</li>
+<li>3 abc -> bca</li>
+<li>4 abc -> acb</li>
+<li>5 abc -> bac</li>
+<li>6 abc -> cba</li>
+</ul>
+ <li>Monoclinic : 3 or 9 possibilities depending on the space group</li>
+</ul>
+<li>SPGORIG = "SPace Group ORIGin", the position of the origin in the unit cell. The allowed values are 1 and 2. they correspond to the actual choices in the International Tables of Crystallography, 1986 edition. </li>
+<li>BRVLTT = "BRaVais LaTTice", the type of Bravais lattice. The allowed values are:</li>
+<ul>
+ <li>1 = Primitive with no associated translations</li>
+ <li>2 = Inner centered with (a/2 + b/2 + c/2) associated translation</li>
+ <li>3 = Face centered with (a/2 + b/2; b/2 + c/2; c/2 + a/2) associated translations</li>
+ <li>4 = C - centered with (a/2 + b/2) associated translation</li>
+ <li>5 = A - centered with (b/2 + c/2) associated translation</li>
+ <li>6 = B - centered with (c/2 + a/2) associated translation</li>
+ <li>7 = Rhombohedral lattice</li>
+</ul>
+<li>INTERNATIONAL = the INTERNATIONAL notation of the space group</li>
+<li>SCHOENFLIES = the equivalent SCHOENFLIES notation of the space group</li>
+<li>MULTIPLICITY (x y z) = the maximum multiplicity, after applying Bravais lattice translations, corresponding to a general position (x y z)</li>
+</ul>
+
+Access the <a title="SG description" class="internal-link" href="spgrdescription.html">full table</a>
+
+<hr>
+<div>
+This page has been created by Razvan Caracas.
+<br>Copyright (C) 2000-2018 ABINIT group (RC)
+</div>
+
+</body></html>

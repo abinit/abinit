@@ -8,7 +8,7 @@
 !! and converts them to other parameters.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG,TD)
+!! Copyright (C) 2000-2018 ABINIT group (XG,TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,7 +65,7 @@
 !!  nbd2=number of bands contained in cg2,eig_k2,occ_k2 at this k-point - spin (at output)
 !!  ngfft1(18)=all needed information about 3D FFT, for input wavefunctions
 !!  ngfft2(18)=all needed information about 3D FFT, for output wavefunctions
-!!             see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!             see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt1=number of k points for input wavefunctions
 !!  nkpt2=number of k points for output wavefunctions
 !!  npw1=number of planewaves for input wavefunctions

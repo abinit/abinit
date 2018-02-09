@@ -7,7 +7,7 @@
 !!  This module contains procedured dealing with the IO of the KSS file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MG, GMR, VO, LR, RWG, MM, XG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (MG, GMR, VO, LR, RWG, MM, XG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1063,7 +1063,7 @@ end subroutine make_gvec_kss
 !!  vtrial(nfftf,nspden)=the trial potential
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  eigen(mband,nkpt,nsppol)=array for holding eigenvalues (hartree)
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!
 !! PARENTS

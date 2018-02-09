@@ -11,7 +11,7 @@
 !!  (4) pseudo-core contrib. to frozen-wf part the dynamical matrix (part 2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -560,7 +560,7 @@ end subroutine mkcore
 !! This routine is an alternative to mkcore, to be used for PAW and/or WVL.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TRangel,MT)
+!! Copyright (C) 1998-2018 ABINIT group (TRangel,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

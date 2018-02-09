@@ -9,7 +9,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2018 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -516,10 +516,9 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ibg,icg,icp,ier,ik,ikg,ikpt,isppol,isym,itypat,jkpt,jpw,jsym,mband,mgfft,mkpt,mkptband
- integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
+ integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
  integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
- real(dp) :: hyb_mixing,hyb_mixing_sr,hyb_range
  character(len=500) :: msg
 !arrays
  integer :: indx(1),l_size_atm(dtset%natom),shiftg(3),symm(3,3),ident(3,3),symrec(3,3,dtset%nsym)
@@ -2251,7 +2250,7 @@ end subroutine fock_print
 !!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
 !!  nfft=Total number of FFT grid points.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
@@ -2451,7 +2450,7 @@ end subroutine bare_vqg
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ)
+!! Copyright (C) 1998-2018 ABINIT group (FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2466,7 +2465,7 @@ end subroutine bare_vqg
 !!  hyb_range_fock=hybrid range for separation
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_bz= number of k points in the BZ
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)

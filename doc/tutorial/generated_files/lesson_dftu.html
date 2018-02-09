@@ -42,7 +42,7 @@ if this is not the case.</p>
 <p>This lesson should take about 1 hour to
 complete.</p>
 <hr>
-<h5>Copyright (C) 2000-2017 ABINIT group (SPesant,MCote,XG,BAmadon)
+<h5>Copyright (C) 2000-2018 ABINIT group (SPesant,MCote,XG,BAmadon)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
 
@@ -122,12 +122,12 @@ From the electronic point of view, the true unit cell has two Ni and two O atoms
 the local magnetic moment around the first Ni atom will have a sign opposite
 to the one of the other Ni atom.
 <p> You should take some time to examine the values used for the input variables
-<a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>,
-<a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a> (note the last line !),
-<a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>,
-<a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>,
-<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>, and
-<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>,
+<a href="../../variables/generated_files/varset_basic.html#xred">xred</a>,
+<a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a> (note the last line !),
+<a href="../../variables/generated_files/varset_basic.html#typat">typat</a>,
+<a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>,
+<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>, and
+<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>,
 that define this antiferromagnetic ordering along the <111> direction (of a conventional cubic cell).
 </p>
 
@@ -151,7 +151,7 @@ NiO :</p>
 </pre>
 
 <p>The atoms in the output file, are listed as in the
-<a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a>
+<a href="../../variables/generated_files/varset_basic.html#typat">typat</a>
 variable (the first two are nickel atoms and the last two are oxygen atoms). The
 results indicate that spins are located in each nickel atom of the doubled
 primitive cell. Fortunately, the LDA succeeds to give an antiferromagnetic
@@ -201,29 +201,29 @@ tdftu_2.in. This calculation takes less than 30 seconds on a PC 3.0 GHz </i></p>
 <p>During the calculation, you can take a look
 at the input file. Some variable describing the LDA+U parameters have been
 added to the previous file. All other parameters were kept constant from the
-preceding calculation. First, you must set the variable <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>
+preceding calculation. First, you must set the variable <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>
 to one (for the FLL method) and two (for the AMT method) in order to enable the LDA+U
-calculation. Then, with <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>
-you give for each atomic species (<a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a>
+calculation. Then, with <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>
+you give for each atomic species (<a href="../../variables/generated_files/varset_basic.html#znucl">znucl</a>
 the values of angular momentum (l) for which the LDA+U correction will be
 applied. The choices are 2 for d-orbitals and 3 for f-orbitals. You cannot
 treat s and p orbitals with LDA+U in the present version of ABINIT. Also, if
 you do not want to apply LDA+U correction on a species, you can set the
 variable to -1. For the case of
-NiO, we put <a href="../../input_variables/generated_files/varset_paw.html#lpawu">lpawu</a>
+NiO, we put <a href="../../variables/generated_files/varset_paw.html#lpawu">lpawu</a>
 to 2 for Ni and -1 for O. </p>
 
 <p>Finally, as described in the article cited
 above for FLL and AMF, we must define the screened Coulomb interaction between
-electrons that are treated in LDA+U, with the help of the variable <a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a>
-and the screened exchange interaction, with <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>.
+electrons that are treated in LDA+U, with the help of the variable <a href="../../variables/generated_files/varset_paw.html#upawu">upawu</a>
+and the screened exchange interaction, with <a href="../../variables/generated_files/varset_paw.html#jpawu">jpawu</a>.
 Note that you can choose the energy unit by indicating at the end of the line
 the unit abbreviation (e.g. eV or Ha). For NiO, we will use variables that are
 generally accepted for this type of compound: </p>
 
-<p> <a href="../../input_variables/generated_files/varset_paw.html#upawu">upawu</a>= 8.0 eV</p>
+<p> <a href="../../variables/generated_files/varset_paw.html#upawu">upawu</a>= 8.0 eV</p>
 
-<p> <a href="../../input_variables/generated_files/varset_paw.html#jpawu">jpawu</a>= 0.8 eV (10 % of U)</p>
+<p> <a href="../../variables/generated_files/varset_paw.html#jpawu">jpawu</a>= 0.8 eV (10 % of U)</p>
 
 <p>You can take a look at the result of
 the calculation. The magnetic moment is now :</p>
@@ -252,12 +252,12 @@ there is usually only one minimum, that is the global minimum. So, if it converg
 find the same solution, namely, the global minimum. This is already not true in the case of spin-polarized calculations
 (where there might be several stable solutions of the SCF cycles, like ferromagnetic and ferromagnetic),
 but usually, there are not many local minima, and the use of the 
-<a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> input variables allows one to adequately select
+<a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a> input variables allows one to adequately select
 the global physical characteristics of the sought solution.</p>
-<p>By contrast, with the U, the <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> input variable
+<p>By contrast, with the U, the <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a> input variable
 is too primitive, and one needs to be able to initialize a spin-density matrix on each atomic site where a U is present,
 in order to guide the SCF algorithm.</p> 
-<p>The fact that <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> works
+<p>The fact that <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a> works
 for NiO comes from the relative simplicity of this system.
 <br><br><a href=#top>Go to the top</a>
 <hr>
@@ -269,11 +269,11 @@ tdftu_3.in file before continuing.</i></p>
 
 <p>In order to help the LDA+U find the ground state,
 you can define the initial density matrix for correlated orbitals with
-<a href="../../input_variables/generated_files/varset_paw.html#dmatpawu">dmatpawu</a>
-To enable this feature, <a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>
+<a href="../../variables/generated_files/varset_paw.html#dmatpawu">dmatpawu</a>
+To enable this feature, <a href="../../variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>
 must be set to a non-zero value (default is 0). When positive, the density
-matrix is kept to the <a href="../../input_variables/generated_files/varset_paw.html#dmatpawu">dmatpawu</a>
-value for the <a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a> value steps. For our calculation(tdftu_3.in) , <a href="../../input_variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>
+matrix is kept to the <a href="../../variables/generated_files/varset_paw.html#dmatpawu">dmatpawu</a>
+value for the <a href="../../variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a> value steps. For our calculation(tdftu_3.in) , <a href="../../variables/generated_files/varset_paw.html#usedmatpu">usedmatpu</a>
 is 5, thus the spin-density matrix is kept constant for 5 SCF steps.</p>
 
 <p>In the log file (not the usual output file), you might find
@@ -335,7 +335,7 @@ a fixed density matrix for d orbitals. You might now start your calculation, wit
 and tdftu_4.files, or skip the calculation, and rely
 on the reference file provided in the ~abinit/tests/tutorial/Refs directory.
 Examine the tdftu_4.in file. The only difference in the input file
-compared to tdftu_3.in is the value of <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>
+compared to tdftu_3.in is the value of <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>
 = 2. We obtain a band gap of 4.3 eV. The value of the band gap with AMF and FLL is different. However,
 we have to remember that these results are not well converged. By contrast, the magnetization,</p>
 

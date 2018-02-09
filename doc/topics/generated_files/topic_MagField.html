@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to take into account an external magnetic field with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (EB)
+<h5>Copyright (C) 2016-2018 ABINIT group (EB)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.5">help_features#2.5</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.5">help_features#2.5</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_MagField.html#1">Introduction.</a><li>2. <a href="topic_MagField.html#2">Related input variables.</a><li>3. <a href="topic_MagField.html#3">Selected input files.</a><li>4. <a href="topic_MagField.html#4">References.</a></ul>
@@ -47,7 +47,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <p>Following the procedure of Bousquet et al.,<a href="../../biblio/generated_files/bib_biblio.html#Bousquet2011">[Bousquet2011]</a> the applied <b>B</b> field is introduced by adding the "Zeeman term" term in the non-collinear Kohn-Sham potential:
 <p>This contribution is trivial to implement, and also dominant in amplitude, but has historically been neglected with respect to the orbital responses, which are rich in more complex physics. 
 <p>Unlike an applied electric field, such a Zeeman term in the potential is compatible with periodic boundary conditions. It is also compatible with collinear calculations by reducing its application on ``up'' and ``down'' spin channels with <b>B</b>=B<b>e</b><sub>z</sub>.
-<p>In ABINIT, the finite Zeeman field is controlled by the keyword <a href="../../input_variables/generated_files/varset_ffield.html#zeemanfield">zeemanfield</a> which allows to control the amplitude of the applied <b>B</b>-field (in Tesla) along the three cartesian directions.
+<p>In ABINIT, the finite Zeeman field is controlled by the keyword <a href="../../variables/generated_files/varset_ffield.html#zeemanfield">zeemanfield</a> which allows to control the amplitude of the applied <b>B</b>-field (in Tesla) along the three cartesian directions.
 <p>Such an applied Zeeman field allows one to calculate the spin contribution of the magnetic and magnetoelectric susceptibilities, and to observe phase transitions under finite magnetic field, if present.
 <br><br><a href=#top>Go to the top</a>
 
@@ -60,9 +60,10 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#zeemanfield">zeemanfield</a>   [ZEEMAN FIELD]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_ffield.html#bfield">bfield</a>   [finite B FIELD calculation]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#nucdipmom">nucdipmom</a>   [NUClear DIPole MOMents]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_ffield.html#zeemanfield">zeemanfield</a>   [ZEEMAN FIELD]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_ffield.html#bfield">bfield</a>   [finite B FIELD calculation]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#nucdipmom">nucdipmom</a>   [NUClear DIPole MOMents]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#orbmag">orbmag</a>   [ORBital MAGnetization]<br>
 
 <br><br><a href=#top>Go to the top</a>
 
@@ -75,6 +76,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
 <br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v8/Input: <a href="../../tests/v8/Input/t33.in">t33.in</a> 
 <p> tests/v6/Input: <a href="../../tests/v6/Input/t17.in">t17.in</a> 
 <p> tests/v7/Input: <a href="../../tests/v7/Input/t32.in">t32.in</a> 
 <br>

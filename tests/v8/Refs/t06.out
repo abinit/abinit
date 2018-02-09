@@ -2,7 +2,7 @@
 .Version 8.5.3 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -166,7 +166,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    :  2.9101169050763720E-29 Hartree
  Energy of the fitted coefficient          :  0.0000000000000000E+00 Hartree
 
@@ -194,7 +194,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    :  2.9887163535696527E-02 Hartree
  Energy of the elastic part                :  1.9795651172784753E-06 Hartree
  Energy of the fitted coefficient          :  9.9332071724002402E-06 Hartree
@@ -223,7 +223,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    :  8.9249788240634315E-02 Hartree
  Energy of the elastic part                :  2.7829357693964794E-05 Hartree
  Energy of the fitted coefficient          :  1.6226072267034594E-04 Hartree
@@ -252,7 +252,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    :  1.1648689791445929E-01 Hartree
  Energy of the elastic part                :  1.1809085071081901E-04 Hartree
  Energy of the fitted coefficient          :  8.5539312623809374E-04 Hartree
@@ -281,7 +281,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    :  7.6878449593547477E-02 Hartree
  Energy of the elastic part                :  3.1339460404742340E-04 Hartree
  Energy of the fitted coefficient          :  2.8812699848328356E-03 Hartree
@@ -310,7 +310,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -6.5851999217291339E-03 Hartree
  Energy of the elastic part                :  6.7112073172449294E-04 Hartree
  Energy of the fitted coefficient          :  7.6625541616739514E-03 Hartree
@@ -339,7 +339,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -7.8947800386663700E-02 Hartree
  Energy of the elastic part                :  1.2855473732135817E-03 Hartree
  Energy of the fitted coefficient          :  1.7576330824405999E-02 Hartree
@@ -368,7 +368,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.1328584848855987E-01 Hartree
  Energy of the elastic part                :  2.2496527904967050E-03 Hartree
  Energy of the fitted coefficient          :  3.6234201253470065E-02 Hartree
@@ -397,7 +397,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.4450643645468975E-01 Hartree
  Energy of the elastic part                :  3.5625231799012343E-03 Hartree
  Energy of the fitted coefficient          :  6.8550129882969754E-02 Hartree
@@ -426,7 +426,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -2.3733510144368369E-01 Hartree
  Energy of the elastic part                :  5.0928494397040848E-03 Hartree
  Energy of the fitted coefficient          :  1.2046248619602630E-01 Hartree
@@ -455,7 +455,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -4.2094339961385513E-01 Hartree
  Energy of the elastic part                :  6.6772248689896162E-03 Hartree
  Energy of the fitted coefficient          :  1.9805715261421558E-01 Hartree
@@ -484,7 +484,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -6.6010125275870724E-01 Hartree
  Energy of the elastic part                :  8.2248267164071378E-03 Hartree
  Energy of the fitted coefficient          :  3.0561554910529387E-01 Hartree
@@ -513,7 +513,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -8.9211433358828751E-01 Hartree
  Energy of the elastic part                :  9.6369332657853194E-03 Hartree
  Energy of the fitted coefficient          :  4.4265499276814679E-01 Hartree
@@ -542,7 +542,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.0874991323004075E+00 Hartree
  Energy of the elastic part                :  1.0623761184583630E-02 Hartree
  Energy of the fitted coefficient          :  6.0164631271048041E-01 Hartree
@@ -571,7 +571,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.2679838294314905E+00 Hartree
  Energy of the elastic part                :  1.0751174872123147E-02 Hartree
  Energy of the fitted coefficient          :  7.6870258491330778E-01 Hartree
@@ -600,7 +600,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.4700245471309896E+00 Hartree
  Energy of the elastic part                :  9.8082284775633868E-03 Hartree
  Energy of the fitted coefficient          :  9.2733463735548360E-01 Hartree
@@ -629,7 +629,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.7027625155107982E+00 Hartree
  Energy of the elastic part                :  8.1186398959958387E-03 Hartree
  Energy of the fitted coefficient          :  1.0629751899696891E+00 Hartree
@@ -658,7 +658,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.9424603125388709E+00 Hartree
  Energy of the elastic part                :  6.4090216575898099E-03 Hartree
  Energy of the fitted coefficient          :  1.1662466133707705E+00 Hartree
@@ -687,7 +687,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -2.1602923185571390E+00 Hartree
  Energy of the elastic part                :  5.3265914260208682E-03 Hartree
  Energy of the fitted coefficient          :  1.2344039736681449E+00 Hartree
@@ -716,7 +716,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -2.3514511880651727E+00 Hartree
  Energy of the elastic part                :  5.0941699848859635E-03 Hartree
  Energy of the fitted coefficient          :  1.2711042924555862E+00 Hartree
@@ -745,7 +745,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -2.5380791423864535E+00 Hartree
  Energy of the elastic part                :  5.6366621285233879E-03 Hartree
  Energy of the fitted coefficient          :  1.2849159433595307E+00 Hartree
@@ -774,7 +774,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -2.7469157574627663E+00 Hartree
  Energy of the elastic part                :  6.9533582165588219E-03 Hartree
  Energy of the fitted coefficient          :  1.2871839096422488E+00 Hartree
@@ -803,7 +803,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -2.9866701351244482E+00 Hartree
  Energy of the elastic part                :  9.2200595293295325E-03 Hartree
  Energy of the fitted coefficient          :  1.2896740584038862E+00 Hartree
@@ -832,7 +832,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -3.2466766771749498E+00 Hartree
  Energy of the elastic part                :  1.2459868696564269E-02 Hartree
  Energy of the fitted coefficient          :  1.3020202449542346E+00 Hartree
@@ -861,7 +861,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -3.5140158439207272E+00 Hartree
  Energy of the elastic part                :  1.6183608666039961E-02 Hartree
  Energy of the fitted coefficient          :  1.3291939959897667E+00 Hartree
@@ -890,7 +890,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -3.7881790135011659E+00 Hartree
  Energy of the elastic part                :  1.9482295576609639E-02 Hartree
  Energy of the fitted coefficient          :  1.3700216053310550E+00 Hartree
@@ -919,7 +919,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -4.0792362968827742E+00 Hartree
  Energy of the elastic part                :  2.1568624444727295E-02 Hartree
  Energy of the fitted coefficient          :  1.4180136513103747E+00 Hartree
@@ -948,7 +948,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -4.3961441246408768E+00 Hartree
  Energy of the elastic part                :  2.2317398055229015E-02 Hartree
  Energy of the fitted coefficient          :  1.4646440435893147E+00 Hartree
@@ -977,7 +977,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -4.7400492061352164E+00 Hartree
  Energy of the elastic part                :  2.2410363095158377E-02 Hartree
  Energy of the fitted coefficient          :  1.5034804692115307E+00 Hartree
@@ -1006,7 +1006,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -5.1076847887960186E+00 Hartree
  Energy of the elastic part                :  2.3057063261284028E-02 Hartree
  Energy of the fitted coefficient          :  1.5326353764995266E+00 Hartree
@@ -1035,7 +1035,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -5.4983086306567097E+00 Hartree
  Energy of the elastic part                :  2.5546432064319512E-02 Hartree
  Energy of the fitted coefficient          :  1.5538421638569222E+00 Hartree
@@ -1064,7 +1064,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -5.9162353446803904E+00 Hartree
  Energy of the elastic part                :  3.0922251477787533E-02 Hartree
  Energy of the fitted coefficient          :  1.5690606323304046E+00 Hartree
@@ -1093,7 +1093,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -6.3677783903957739E+00 Hartree
  Energy of the elastic part                :  3.9908066269225440E-02 Hartree
  Energy of the fitted coefficient          :  1.5779984190496172E+00 Hartree
@@ -1122,7 +1122,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -6.8572283301900399E+00 Hartree
  Energy of the elastic part                :  5.2985183142167623E-02 Hartree
  Energy of the fitted coefficient          :  1.5792896703321835E+00 Hartree
@@ -1151,7 +1151,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -7.3859028640883979E+00 Hartree
  Energy of the elastic part                :  7.0441322665622544E-02 Hartree
  Energy of the fitted coefficient          :  1.5738840891799573E+00 Hartree
@@ -1180,7 +1180,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -7.9539306576164606E+00 Hartree
  Energy of the elastic part                :  9.2332452845420659E-02 Hartree
  Energy of the fitted coefficient          :  1.5660100241953210E+00 Hartree
@@ -1209,7 +1209,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -8.5619568363258090E+00 Hartree
  Energy of the elastic part                :  1.1849665708016539E-01 Hartree
  Energy of the fitted coefficient          :  1.5599143687925117E+00 Hartree
@@ -1238,7 +1238,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -9.2112203521104163E+00 Hartree
  Energy of the elastic part                :  1.4877845929361905E-01 Hartree
  Energy of the fitted coefficient          :  1.5566469335655617E+00 Hartree
@@ -1267,7 +1267,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -9.9027580846081555E+00 Hartree
  Energy of the elastic part                :  1.8339691128214736E-01 Hartree
  Energy of the fitted coefficient          :  1.5551496194118746E+00 Hartree
@@ -1296,7 +1296,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.0637077111512486E+01 Hartree
  Energy of the elastic part                :  2.2318484026271088E-01 Hartree
  Energy of the fitted coefficient          :  1.5550075858993018E+00 Hartree
@@ -1325,7 +1325,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.1414676026505710E+01 Hartree
  Energy of the elastic part                :  2.6951070633555169E-01 Hartree
  Energy of the fitted coefficient          :  1.5563009252163424E+00 Hartree
@@ -1354,7 +1354,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.2236866780394420E+01 Hartree
  Energy of the elastic part                :  3.2393460490445730E-01 Hartree
  Energy of the fitted coefficient          :  1.5583815575841882E+00 Hartree
@@ -1383,7 +1383,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.3106136405112256E+01 Hartree
  Energy of the elastic part                :  3.8775881884530805E-01 Hartree
  Energy of the fitted coefficient          :  1.5608120882845620E+00 Hartree
@@ -1412,7 +1412,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.4025684920581220E+01 Hartree
  Energy of the elastic part                :  4.6168885088515116E-01 Hartree
  Energy of the fitted coefficient          :  1.5640868653725242E+00 Hartree
@@ -1441,7 +1441,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.4998479045831909E+01 Hartree
  Energy of the elastic part                :  5.4591710871134225E-01 Hartree
  Energy of the fitted coefficient          :  1.5685422755268348E+00 Hartree
@@ -1470,7 +1470,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.6026582644291139E+01 Hartree
  Energy of the elastic part                :  6.4069269871445533E-01 Hartree
  Energy of the fitted coefficient          :  1.5737985633556264E+00 Hartree
@@ -1499,7 +1499,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.7111294688505129E+01 Hartree
  Energy of the elastic part                :  7.4684695286097347E-01 Hartree
  Energy of the fitted coefficient          :  1.5786961998072164E+00 Hartree
@@ -1528,7 +1528,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.8253968335393726E+01 Hartree
  Energy of the elastic part                :  8.6568616253024100E-01 Hartree
  Energy of the fitted coefficient          :  1.5814821079716965E+00 Hartree
@@ -1557,7 +1557,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -1.9456740464768348E+01 Hartree
  Energy of the elastic part                :  9.9841747192117170E-01 Hartree
  Energy of the fitted coefficient          :  1.5812445603627248E+00 Hartree
@@ -1586,7 +1586,7 @@
 --------------------------------------------------------------------------------
  Components of total energy (in Hartree) :
 
- Energy of the reference strucure          : -4.3767304701210001E+01 Hartree
+ Energy of the reference structure         : -4.3767304701210001E+01 Hartree
  Energy of the ifc part                    : -2.0722464828003503E+01 Hartree
  Energy of the elastic part                :  1.1458796034096048E+00 Hartree
  Energy of the fitted coefficient          :  1.5783061363275166E+00 Hartree

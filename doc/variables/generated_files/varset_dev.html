@@ -1,0 +1,3344 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Description of developer variables.</title>
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, developer input variables:</h1>
+
+<h2>List and description.
+</h2>
+<hr>
+<p>This document lists and provides the description
+of the name (keywords) of the "developer" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../../js_files/generic_advice.js"> </script>
+<hr>
+
+<h5>Copyright (C) 1998-2018 ABINIT group (DCA,XG,RC,YG,FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+<script type="text/javascript" src="../../js_files/list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "developer" variables.</b></h3>
+
+<br><a id='A'></a>A.
+ <br><a id='B'></a>B.
+ <a href="#builtintest">builtintest</a>&nbsp;&nbsp;
+ <br><a id='C'></a>C.
+ <br><a id='D'></a>D.
+ <a href="#densfor_pred">densfor_pred</a>&nbsp;&nbsp;
+ <a href="#densty">densty</a>&nbsp;&nbsp;
+ <a href="#dmft_read_occnd">dmft_read_occnd</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_basis">dmftctqmc_basis</a>&nbsp;&nbsp;
+ <br><a id='E'></a>E.
+ <a href="#effmass_free">effmass_free</a>&nbsp;&nbsp;
+ <a href="#eshift">eshift</a>&nbsp;&nbsp;
+ <a href="#exchmix">exchmix</a>&nbsp;&nbsp;
+ <a href="#exchn2n3d">exchn2n3d</a>&nbsp;&nbsp;
+ <a href="#extrapwf">extrapwf</a>&nbsp;&nbsp;
+ <br><a id='F'></a>F.
+ <a href="#fermie_nest">fermie_nest</a>&nbsp;&nbsp;
+ <a href="#fftalg">fftalg</a>&nbsp;&nbsp;
+ <a href="#fftcache">fftcache</a>&nbsp;&nbsp;
+ <br><a id='G'></a>G.
+ <a href="#getgam_eig2nkq">getgam_eig2nkq</a>&nbsp;&nbsp;
+ <a href="#getwfkfine">getwfkfine</a>&nbsp;&nbsp;
+ <br><a id='H'></a>H.
+ <br><a id='I'></a>I.
+ <a href="#intxc">intxc</a>&nbsp;&nbsp;
+ <a href="#iomode">iomode</a>&nbsp;&nbsp;
+ <a href="#iprcfc">iprcfc</a>&nbsp;&nbsp;
+ <a href="#irandom">irandom</a>&nbsp;&nbsp;
+ <a href="#irdwfkfine">irdwfkfine</a>&nbsp;&nbsp;
+ <a href="#isecur">isecur</a>&nbsp;&nbsp;
+ <a href="#istatr">istatr</a>&nbsp;&nbsp;
+ <a href="#istatshft">istatshft</a>&nbsp;&nbsp;
+ <a href="#istwfk">istwfk</a>&nbsp;&nbsp;
+ <br><a id='J'></a>J.
+ <br><a id='K'></a>K.
+ <br><a id='L'></a>L.
+ <a href="#lotf_classic">lotf_classic</a>&nbsp;&nbsp;
+ <a href="#lotf_nitex">lotf_nitex</a>&nbsp;&nbsp;
+ <a href="#lotf_nneigx">lotf_nneigx</a>&nbsp;&nbsp;
+ <a href="#lotf_version">lotf_version</a>&nbsp;&nbsp;
+ <br><a id='M'></a>M.
+ <a href="#macro_uj">macro_uj</a>&nbsp;&nbsp;
+ <a href="#maxnsym">maxnsym</a>&nbsp;&nbsp;
+ <a href="#mem_test">mem_test</a>&nbsp;&nbsp;
+ <a href="#mqgrid">mqgrid</a>&nbsp;&nbsp;
+ <br><a id='N'></a>N.
+ <a href="#nbdblock">nbdblock</a>&nbsp;&nbsp;
+ <a href="#nc_xccc_gspace">nc_xccc_gspace</a>&nbsp;&nbsp;
+ <a href="#nctime">nctime</a>&nbsp;&nbsp;
+ <a href="#nloc_alg">nloc_alg</a>&nbsp;&nbsp;
+ <a href="#nloc_mem">nloc_mem</a>&nbsp;&nbsp;
+ <a href="#nnsclo">nnsclo</a>&nbsp;&nbsp;
+ <a href="#nnsclohf">nnsclohf</a>&nbsp;&nbsp;
+ <a href="#normpawu">normpawu</a>&nbsp;&nbsp;
+ <a href="#npulayit">npulayit</a>&nbsp;&nbsp;
+ <a href="#nscforder">nscforder</a>&nbsp;&nbsp;
+ <br><a id='O'></a>O.
+ <a href="#optforces">optforces</a>&nbsp;&nbsp;
+ <a href="#optnlxccc">optnlxccc</a>&nbsp;&nbsp;
+ <a href="#ortalg">ortalg</a>&nbsp;&nbsp;
+ <br><a id='P'></a>P.
+ <a href="#papiopt">papiopt</a>&nbsp;&nbsp;
+ <a href="#pawprt_b">pawprt_b</a>&nbsp;&nbsp;
+ <a href="#pawprt_k">pawprt_k</a>&nbsp;&nbsp;
+ <a href="#pawujat">pawujat</a>&nbsp;&nbsp;
+ <a href="#pawujrad">pawujrad</a>&nbsp;&nbsp;
+ <a href="#pawujv">pawujv</a>&nbsp;&nbsp;
+ <a href="#plowan_bandf">plowan_bandf</a>&nbsp;&nbsp;
+ <a href="#plowan_bandi">plowan_bandi</a>&nbsp;&nbsp;
+ <a href="#plowan_compute">plowan_compute</a>&nbsp;&nbsp;
+ <a href="#plowan_iatom">plowan_iatom</a>&nbsp;&nbsp;
+ <a href="#plowan_it">plowan_it</a>&nbsp;&nbsp;
+ <a href="#plowan_lcalc">plowan_lcalc</a>&nbsp;&nbsp;
+ <a href="#plowan_natom">plowan_natom</a>&nbsp;&nbsp;
+ <a href="#plowan_nbl">plowan_nbl</a>&nbsp;&nbsp;
+ <a href="#plowan_nt">plowan_nt</a>&nbsp;&nbsp;
+ <a href="#plowan_projcalc">plowan_projcalc</a>&nbsp;&nbsp;
+ <a href="#plowan_realspace">plowan_realspace</a>&nbsp;&nbsp;
+ <a href="#prepscphon">prepscphon</a>&nbsp;&nbsp;
+ <a href="#prtbltztrp">prtbltztrp</a>&nbsp;&nbsp;
+ <a href="#prtcif">prtcif</a>&nbsp;&nbsp;
+ <a href="#prtdipole">prtdipole</a>&nbsp;&nbsp;
+ <a href="#prtnest">prtnest</a>&nbsp;&nbsp;
+ <a href="#prtposcar">prtposcar</a>&nbsp;&nbsp;
+ <br><a id='Q'></a>Q.
+ <br><a id='R'></a>R.
+ <a href="#recefermi">recefermi</a>&nbsp;&nbsp;
+ <a href="#recgratio">recgratio</a>&nbsp;&nbsp;
+ <a href="#recnpath">recnpath</a>&nbsp;&nbsp;
+ <a href="#recnrec">recnrec</a>&nbsp;&nbsp;
+ <a href="#recptrott">recptrott</a>&nbsp;&nbsp;
+ <a href="#recrcut">recrcut</a>&nbsp;&nbsp;
+ <a href="#rectesteg">rectesteg</a>&nbsp;&nbsp;
+ <a href="#rectolden">rectolden</a>&nbsp;&nbsp;
+ <br><a id='S'></a>S.
+ <a href="#symmorphi">symmorphi</a>&nbsp;&nbsp;
+ <br><a id='T'></a>T.
+ <a href="#tfkinfunc">tfkinfunc</a>&nbsp;&nbsp;
+ <a href="#tfw_toldfe">tfw_toldfe</a>&nbsp;&nbsp;
+ <a href="#tolrde">tolrde</a>&nbsp;&nbsp;
+ <br><a id='U'></a>U.
+ <a href="#use_gemm_nonlop">use_gemm_nonlop</a>&nbsp;&nbsp;
+ <a href="#use_nonscf_gkk">use_nonscf_gkk</a>&nbsp;&nbsp;
+ <a href="#usedmft">usedmft</a>&nbsp;&nbsp;
+ <a href="#useria">useria</a>&nbsp;&nbsp;
+ <a href="#userib">userib</a>&nbsp;&nbsp;
+ <a href="#useric">useric</a>&nbsp;&nbsp;
+ <a href="#userid">userid</a>&nbsp;&nbsp;
+ <a href="#userie">userie</a>&nbsp;&nbsp;
+ <a href="#userra">userra</a>&nbsp;&nbsp;
+ <a href="#userrb">userrb</a>&nbsp;&nbsp;
+ <a href="#userrc">userrc</a>&nbsp;&nbsp;
+ <a href="#userrd">userrd</a>&nbsp;&nbsp;
+ <a href="#userre">userre</a>&nbsp;&nbsp;
+ <a href="#useylm">useylm</a>&nbsp;&nbsp;
+ <br><a id='V'></a>V.
+ <br><a id='W'></a>W.
+ <a href="#wfoptalg">wfoptalg</a>&nbsp;&nbsp;
+ <br><a id='X'></a>X.
+ <a href="#xc_denpos">xc_denpos</a>&nbsp;&nbsp;
+ <a href="#xc_tb09_c">xc_tb09_c</a>&nbsp;&nbsp;
+<br><br><hr>
+<br><font id="title"><a name="builtintest">builtintest</a></font>
+<br><font id="mnemonics">Mnemonics: BUIT-IN TEST number</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Control.html">Control</a>.</font>
+<br><font id="smalltext">Rarely used: [7/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {bigdft:[<a href="../../tests/bigdft/Input/t00.in">00</a>],etsf_io:[<a href="../../tests/etsf_io/Input/t00.in">00</a>],fast:[<a href="../../tests/fast/Input/t00.in">00</a>],libxc:[<a href="../../tests/libxc/Input/t00.in">00</a>],v1:[<a href="../../tests/v1/Input/t00.in">00</a>],v5:[<a href="../../tests/v5/Input/t00.in">00</a>],wannier90:[<a href="../../tests/wannier90/Input/t00.in">00</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+When <b>builtintest</b> is non-zero, the input file is a special one, that runs very quickly,
+and that is accompanied by a specific analysis by ABINIT, at the end of the run, against
+a hard-coded value of total energy (and possibly stresses, forces ...).
+The echo of the analysis is done in the STATUS file.
+In particular, such built-in tests can be used to check quickly
+whether ABINIT fallbacks have been connected or not (bigdft, etsf_io, libxc, wannier90).
+At present, <b>builtintest</b>=1 ... 7 are allowed. See more information in tests/built-in/README .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="densfor_pred">densfor_pred</a></font>
+<br><font id="mnemonics">Mnemonics: DENSity and FORces PREDictor</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_SCFAlgorithms.html">SCFAlgorithms</a>, <a href="../../topics/generated_files/topic_MolecularDynamics.html">MolecularDynamics</a>.</font>
+<br><font id="smalltext">Moderately used: [30/938] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {fast:[<a href="../../tests/fast/Input/t00.in">00</a>,<a href="../../tests/fast/Input/t20.in">20</a>,<a href="../../tests/fast/Input/t21.in">21</a>,<a href="../../tests/fast/Input/t28.in">28</a>,<a href="../../tests/fast/Input/t29.in">29</a>],libxc:[<a href="../../tests/libxc/Input/t53.in">53</a>],mpiio:[<a href="../../tests/mpiio/Input/t42.in">42</a>],paral:[<a href="../../tests/paral/Input/t42.in">42</a>],v1:[<a href="../../tests/v1/Input/t44.in">44</a>,<a href="../../tests/v1/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 6 if <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==1,
+2 otherwise.
+</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a> >0
+</font>
+<br><font id="text">
+<p>
+<p>
+ Used when <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>&gt;0, to define:
+ <br />
+ - the way a change of density is derived from a change of atomic position,
+ <br />
+ - the way forces are corrected when the SCF cycle is not converged.
+ <br />
+ <br />
+ Supported values :
+ <ul>
+  <li>
+   0 =&gt; density not changed (fixed charge), forces not corrected
+  </li>
+  <li>
+   1 =&gt; density not changed, forces corrected with rigid ion hypothesis (atomic charge moved with atom)
+  </li>
+  <li>
+   2 =&gt; density changed and forces corrected with rigid ion hypothesis (atomic charge moves with atom)
+  </li>
+  <li>
+   3 =&gt; density changed and forces corrected with a different implementation of the rigid ion hypothesis
+  </li>
+  <li>
+   4 =&gt; density not changed, forces corrected with the use of Harris functional formula (*)
+  </li>
+  <li>
+   5 =&gt; density changed using D. Alfe 2nd-order algorithm (**), forces not corrected
+  </li>
+  <li>
+   6 =&gt; density changed using D. Alfe 2nd-order algorithm (**) and forces corrected with the use of Harris functional formula (*)
+  </li>
+ </ul>
+Similar negative values are also allowed (see the meaning later), for development purposes only.
+ No meaning for RF calculations.
+ <br />
+ <br />
+ For the time being,
+ <br />
+ - <b>densfor_pred</b>=3 must be used with <a href="../../variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=4
+and <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>=5.
+ <br />
+ - <b>densfor_pred</b>=4, 5 or 6 must be used when band-FFT parallelism is selected.
+ <br />
+ Otherwise, use <b>densfor_pred</b>=2
+ <br />
+ <br />
+ <b>
+  (*)
+ </b>
+ <u>
+ Note concerning the correction of forces (use of <b>densfor_pred</b>=1, 2, 3, 4 or 6)
+ </u>
+ :
+ <br />
+ The force on the atom located at R is corrected by the addition of the following term:
+ <br />
+ <i>
+  F_residual=Int[dr.V_residual.dRho_atomic/dR]
+ </i>
+ ,  where Rho_atomic is an atomic (spherical) density.
+ <br />
+ - When such an atomic density (Rho_atomic) is found in the pseudopotential or PAW file, it is used. If not, a gaussian density
+(defined by <a href="../../variables/generated_files/varset_dev.html#densty">densty</a> parameter) is used.
+ <br />
+ - When SCF mixing is done on the density (<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>&gt;=10), the potential residual (V_residual)
+is obtained from the density residual with the first order formula
+ <i>
+  V_residual=dV/drho.Rho_residual
+ </i>
+ and uses the exchange-correlation kernel
+ <i>
+  dVxc/drho=Kxc
+ </i>
+ whose computation is time-consuming for GGA functionals.
+By default (positive values of <b>densfor_pred</b>), the local-density part of the GGA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
+Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of the density) is always possible by giving a negative value to <b>densfor_pred</b>. In case of hybrid functionals, a similar correction term is added, although in the density mixing scheme, the related GGA kernel is used instead of the hybrid functional kernel.
+ <br />
+ <br />
+ <b>
+  (**)
+ </b>
+ <u>
+  Note concerning the use of <b>densfor_pred</b>=5 or 6 (density prediction)
+ </u>
+ :
+ <br />
+ The algorithm is described in
+ <i>
+  Computer Physics Communications
+  <b>
+   118
+  </b>
+  (1999) 31-33
+ </i>
+ .
+It uses an atomic (spherical) density. When such an atomic density is found in the pseudopotential or PAW file, it is used. If not, a gaussian density
+(defined by <a href="../../variables/generated_files/varset_dev.html#densty">densty</a> parameter) is used.
+ <br />
+ Also note that, to be efficient, this algorithm requires a minimum convergence of the SCF cycle;
+Typically, vres2 (or nres2) has to be small enough (10
+ <sup>
+  -4
+ </sup>
+ ...10
+ <sup>
+  -5
+ </sup>
+ ).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="densty">densty</a></font>
+<br><font id="mnemonics">Mnemonics: initial DENSity for each TYpe of atom</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_xc.html">xc</a>.</font>
+<br><font id="smalltext">Moderately used: [14/938] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {mpiio:[<a href="../../tests/mpiio/Input/t01.in">01</a>],paral:[<a href="../../tests/paral/Input/t01.in">01</a>,<a href="../../tests/paral/Input/t02.in">02</a>,<a href="../../tests/paral/Input/t03.in">03</a>,<a href="../../tests/paral/Input/t51.in">51</a>,<a href="../../tests/paral/Input/t52.in">52</a>,<a href="../../tests/paral/Input/t53.in">53</a>],v1:[<a href="../../tests/v1/Input/t67.in">67</a>,<a href="../../tests/v1/Input/t68.in">68</a>],v3:[<a href="../../tests/v3/Input/t93.in">93</a>]}.</font>
+<br><font id="vartype">Variable type: real(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives a rough description
+of the initial GS density, for each type of atom.
+This value is only used to create
+the first exchange and correlation potential,
+and is not used anymore afterwards.
+For the time being, it corresponds to an average
+radius (a.u.) of the density, and is used to generate
+a gaussian density. If set to 0.0d0, an optimized value is used.
+ <br />
+ No meaning for RF calculations.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_read_occnd">dmft_read_occnd</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: READ OCCupations (Non Diagonal)</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>.</font>
+<br><font id="smalltext">Rarely used: [4/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v6:[<a href="../../tests/v6/Input/t45.in">45</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Flag to read/write Occupations as computed in DMFT. This flag is useful
+to restart a DFT+DMFT calculation with self-consistency over electronic density.
+The occupations are written each time a DMFT loop is finished. So if the calculation stops
+because the time limit is reached, this option offers the possibility to restart the self-consistent loop
+over density at the point where it stopped (assuming a restart with the wave functions, see <a href="../../variables/generated_files/varset_files.html#getwfk">getwfk</a>).
+ <ul>
+  <li>
+   0=&gt;  Occupations are written but never read.
+  </li>
+  <li>
+   1=&gt;  Occupations are read from I_DMFTOCCND, where I is the root for input files.
+  </li>
+  <li>
+   2=&gt;  Occupations are read from O_DMFTOCCND, where O is the root for output files.
+  </li>
+ </ul>
+ An alternative and more simple way to restart a DFT+DMFT calculation is to use the density file (obtained with <a href="../../variables/generated_files/varset_files.html#prtden">prtden</a>=1
+or <a href="../../variables/generated_files/varset_files.html#prtden">prtden</a>=-1) and the self-energy (see <a href="../../variables/generated_files/varset_dmft.html#dmft_rslf">dmft_rslf</a>).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmftctqmc_basis">dmftctqmc_basis</a></font>
+<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo BASIS</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>.</font>
+<br><font id="smalltext">Rarely used: [3/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t92.in">92</a>],v7:[<a href="../../tests/v7/Input/t28.in">28</a>,<a href="../../tests/v7/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>==5
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Choose the basis to perform CTQMC calculation.
+ <ul>
+  <li>
+   0=&gt;  Use the local basis in the spherical harmonics basis. Can be useful if the Hamiltonian has weak off diagonal terms
+   and for this reason, one want to keep the original basis for simplicity and for physical insight.
+  </li>
+  <li>
+   1=&gt;  Default value, diagonalize the local Hamiltonian (but only if it is not diagonal). The best choice in general.
+  </li>
+  <li>
+   2=&gt;  Diagonalise the local correlated occupation matrix. Can lead to non diagonal Hamiltonian that
+   cannot be handled by CTQMC. This option should be thus avoided.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="effmass_free">effmass_free</a></font>
+<br><font id="mnemonics">Mnemonics: EFFective MASS for the FREE electron</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Artificial.html">Artificial</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t25.in">25</a>],v6:[<a href="../../tests/v6/Input/t31.in">31</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+This parameter allows to change the free electron mass, with respect to its experimental value.
+<p>The electron mass is simply changed in the Schr&ouml;dinger equation.
+</p>
+Only for testing purposes, of course.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="eshift">eshift</a></font>
+<br><font id="mnemonics">Mnemonics: Energy SHIFT</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a>, <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SCFAlgorithms.html">SCFAlgorithms</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a>==3
+</font>
+<br><font id="text">
+<p>
+<p>
+<b>eshift</b> gives the shift of the energy used in the
+shifted Hamiltonian squared.
+The algorithm will determine eigenvalues and eigenvectors centered
+on <b>eshift</b>.
+ <br />
+ Can be specified in Ha (the default), Ry, eV or Kelvin, since
+ <b>
+  ecut
+ </b>
+ has the
+'<a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a>' characteristics.
+(1 Ha=27.2113845 eV)
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="exchmix">exchmix</a></font>
+<br><font id="mnemonics">Mnemonics: EXCHange MIXing</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_xc.html">xc</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t18.in">18</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.25</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_paw.html#useexexch">useexexch</a> == 1
+</font>
+<br><font id="text">
+<p>
+<p>
+ <b>exchmix</b> allows to tune the ratio of exact exchange when
+<a href="../../variables/generated_files/varset_paw.html#useexexch">useexexch</a> is used. The default value of 0.25 corresponds to PBE0.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="exchn2n3d">exchn2n3d</a></font>
+<br><font id="mnemonics">Mnemonics: EXCHange N2 and N3 Dimensions</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v4:[<a href="../../tests/v4/Input/t92.in">92</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ If <b>exchn2n3d</b> is 1, the internal representation of the FFT arrays
+in reciprocal space will be array(n1,n3,n2), where the second and
+third dimensions have been switched. This is to allow to be coherent with the
+<b>exchn2n3d</b>=4xx FFT treatment.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="extrapwf">extrapwf</a></font>
+<br><font id="mnemonics">Mnemonics: flag - EXTRAPolation of the Wave-Functions</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>, <a href="../../topics/generated_files/topic_MolecularDynamics.html">MolecularDynamics</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t09.in">09</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dev.html#densfor_pred">densfor_pred</a>==5 or <a href="../../variables/generated_files/varset_dev.html#densfor_pred">densfor_pred</a>==6
+</font>
+<br><font id="text">
+<p>
+<p>
+This flag activates the extrapolation of wave-functions from one Molecular Dynamics (or Structural Relaxation) step to another.
+The wave functions are extrapolated using 2nd-order algorithm of Arias, Payne and Joannopoulos
+ (PRB 45, 1538 (1992)).<br>
+ Note that, when activated, this extrapolation requires non-negligible additional memory resources
+ as the wave functions are stored for the two previous time steps. Also, it can only be activated
+ if a consistent density extrapolation is activated (see <a href="../../variables/generated_files/varset_dev.html#densfor_pred">densfor_pred</a>).<br>
+ABINIT 7.10: this option is <b>under development</b> and might give wrong results.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="fermie_nest">fermie_nest</a></font>
+<br><font id="mnemonics">Mnemonics: FERMI Energy for printing the NESTing function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t72.in">72</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ This input variable is only effective when <a href="../../variables/generated_files/varset_dev.html#prtnest">prtnest</a>=1. The energy is relative to the calculated fermi energy.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="fftalg">fftalg</a></font>
+<br><font id="mnemonics">Mnemonics: Fast Fourier Transform ALGorithm</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Moderately used: [25/938] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdfpt_03.in">dfpt_03</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 401 if <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==1,
+312 if <a href="../../variables/generated_files/varset_external.html#FFTW3">FFTW3</a> and <a href="../../variables/generated_files/varset_dev.html#usedmft">usedmft</a>==0,
+112 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ This keyword is
+ <b>
+  irrelevant
+ </b>
+ when Fast Fourier Transforms are done using
+ <b>
+  Graphics Processing Units
+ </b>
+ (GPU),
+i.e. when <a href="../../variables/generated_files/varset_paral.html#use_gpu_cuda">use_gpu_cuda</a>=1 (in that case, it is ignored).
+ <br />
+ <br />
+ Allows to choose the algorithm
+for Fast Fourier Transforms. These have to be used
+when applied to wavefunctions (routine fourwf.F90),
+as well as when
+applied to densities and potentials (routine fourdp.F90).
+Presently, it is the concatenation of three digits,
+labelled (A), (B) and (C).
+ <br />
+ <br />
+ The first digit (A) is to be chosen among 1, 2, 3, 4 or 5 :
+ <ul>
+  <li>
+   1=&gt; use FFT routines written by S. Goedecker.
+  </li>
+  <li>
+   2=&gt; not available anymore
+  </li>
+  <li>
+   3=&gt; use serial or multi-threaded FFTW3 fortran routines (
+   <a href="http://www.fftw.org">
+    http://www.fftw.org
+   </a>
+   ).
+Currently implemented with <b>fftalg</b>=312.
+  </li>
+  <li>
+   4=&gt; use FFT routines written by S. Goedecker, 2002 version, that will
+be suited for MPI and OpenMP parallelism.
+  </li>
+  <li>
+   5=&gt; use serial or multi-threaded MKL routines
+Currently implemented with <b>fftalg</b>=512.
+  </li>
+ </ul>
+ The second digit (B) is related to fourdp.f :
+ <ul>
+  <li>
+   0=&gt; only use Complex-to-complex FFT
+  </li>
+  <li>
+   1=&gt; real-to-complex is also allowed (only coded for A==1, A==3 and A==5)
+  </li>
+ </ul>
+ The third digit (C) is related to fourwf.f :
+ <ul>
+  <li>
+   0=&gt; no use of zero padding
+  </li>
+  <li>
+   1=&gt; use of zero padding (only coded for A==1, A==4)
+  </li>
+  <li>
+   2=&gt; use of zero padding, and also combines actual
+FFT operations (using 2 routines from S. Goedecker)
+with important pre- and post-processing
+operations, in order to maximize cache data reuse.
+This is very efficient for cache architectures.
+(coded for A==1 and A==4, but A==4 is not yet sufficiently tested)
+  </li>
+ </ul>
+ Internal representation as <a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(7).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="fftcache">fftcache</a></font>
+<br><font id="mnemonics">Mnemonics: Fast Fourier Transform CACHE size</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t03.in">03</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 16 (Comment: todo: Not yet machine-dependent)</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the cache size of the current
+machine, in Kbytes.
+ <br />
+ Internal representation as <a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>(8).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="getgam_eig2nkq">getgam_eig2nkq</a></font>
+<br><font id="mnemonics">Mnemonics: GET the GAMma phonon data EIG2NKQ from dataset</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a>, <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t37.in">37</a>,<a href="../../tests/v6/Input/t50.in">50</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> != 0 and <a href="../../variables/generated_files/varset_gstate.html#qpt">qpt</a> != (0.0,0.0,0.0)
+</font>
+<br><font id="text">
+<p>
+<p>
+ Relevant for second-order
+eigenvalue calculations using response-functions (<a href="../../variables/generated_files/varset_dfpt.html#ieig2rf">ieig2rf</a> != 0), and only
+for non-zero wavevectors <a href="../../variables/generated_files/varset_gstate.html#qpt">qpt</a>.
+ <br>
+ From the electron-phonon matrix elements at some wavevector only, it is not possible to determine the Debye-Waller contribution : one has to know also the q=Gamma electron-phonon matrix elements.
+ <br />
+ The variable <b>getgam_eig2nkq</b> allows to transmit the information about the second-order derivatives of the
+eigenvalues for q=Gamma from the dataset where the calculation at Gamma was done, to the datasets
+for other wavevectors.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="getwfkfine">getwfkfine</a></font>
+<br><font id="mnemonics">Mnemonics: GET the fine grid wavefunctions from _WFK file</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a>, <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a>, <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Rarely used: [5/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v67mbpt:[<a href="../../tests/v67mbpt/Input/t32.in">32</a>,<a href="../../tests/v67mbpt/Input/t33.in">33</a>,<a href="../../tests/v67mbpt/Input/t34.in">34</a>,<a href="../../tests/v67mbpt/Input/t35.in">35</a>],v7:[<a href="../../tests/v7/Input/t50.in">50</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+Eventually used when <a href="../../variables/generated_files/varset_basic.html#ndtset">ndtset</a>&gt;0
+(in the multi-dataset mode), to indicate
+starting wavefunctions, as an alternative to
+<a href="../../variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a>. One should first read the
+explanations given for these latter variables.
+<br />
+The <b>getwfkfine</b> variables is typically used to chain the calculations
+in the multi-dataset mode, since they describe from which dataset the OUTPUT
+wavefunctions are to be taken, as INPUT wavefunctions
+of the present dataset.
+<br />
+If <b>getwfkfine</b>==0, no use of previously computed output
+wavefunction file appended with _DSx_WFK is done.
+<br />
+If <b>getwfkfine</b> is positive, its value gives the index of the dataset
+for which the output wavefunction file appended with _WFK
+must be used.
+<br />
+If <b>getwfkfine</b> is -1, the output wf file with _WFK
+of the previous dataset must be taken,
+which is a frequently occurring case.
+<br />
+If <b>getwfkfine</b> is a negative number, it indicates the number
+of datasets to go backward to find the needed wavefunction file.
+In this case, if one refers to a non existent data set (prior
+to the first), the wavefunctions are not initialised from
+a disk file, so that it is as if <b>getwfkfine</b>=0 for that
+initialisation.
+Thanks to this rule, the use of <b>getwfkfine</b> -1 is rather
+straightforward : except for the first wavefunctions, that
+are not initialized by reading a disk file, the output
+wavefunction of one dataset is input of the next one.
+<br />
+NOTE : a negative value of a "get" variable indicates the number of datasets to go backwards;
+it is not the number to be subtracted from the current dataset to find the proper dataset.
+As an example :
+<pre>
+ ndtset 3   jdtset 1 2 4  getXXX -1
+</pre>
+refers to dataset 2 when dataset 4 is initialized.
+
+Response-function calculation :
+<ul>
+ <li>
+  one and only one of <b>getwfkfine</b> or <a href="../../variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a> MUST be non-zero
+ </li>
+ <li>
+  if <b>getwfkfine</b> = 1 : read ground state k -wavefunctions
+from a disk file appended with _WFK , produced in a
+previous ground state calculation (see the
+  <a href="../../users/generated_files/help_abinit.html#4">
+   section 4
+  </a>
+  of the <a href="../../guide/generated_files/help_abinit.html#">abinit help file</a>).
+ </li>
+ <li>
+  Reading the fine grid wavefunction will trigger the k-points interpolation technique of the temperature dependent
+calculations.
+ </li>
+</ul>
+Bethe-Salpeter calculation :
+<ul>
+ <li>
+  one and only one of <b>getwfkfine</b> or <a href="../../variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a> MUST be non-zero
+ </li>
+ <li>
+  if <b>getwfkfine</b> = 1 : read ground state k -wavefunctions
+from a disk file appended with _WFK , produced in a
+previous ground state calculation (see the
+  <a href="../../users/generated_files/help_abinit.html#4">
+   section 4
+  </a>
+  of the <a href="../../guide/generated_files/help_abinit.html#">abinit help file</a>).
+ </li>
+ <li>
+  This variable or <a href="../../variables/generated_files/varset_dev.html#irdwfkfine">irdwfkfine</a> is mandatory when <a href="../../variables/generated_files/varset_bse.html#bs_interp_mode">bs_interp_mode</a> == 1
+ </li>
+</ul>
+<b>
+ This variable is experimental. In development.
+</b>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="intxc">intxc</a></font>
+<br><font id="mnemonics">Mnemonics: INTerpolation for eXchange-Correlation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_xc.html">xc</a>.</font>
+<br><font id="smalltext">Moderately used: [134/938] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutorial:[<a href="../../tests/tutorial/Input/tspin_5.in">spin_5</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <ul>
+  <li>
+   0=&gt; do "usual" xc quadrature on fft grid
+  </li>
+  <li>
+   1=&gt; do higher accuracy xc quadrature using fft grid
+and additional points at the centers of each cube
+(doubles number of grid points)--the high accuracy version
+is only valid for boxcut&gt;=2.  If boxcut &lt; 2, the code stops.
+  </li>
+ </ul>
+ <br />
+ For RF calculations only <b>intxc</b>=0 is allowed yet. Moreover,
+the GS preparation runs (giving the density file and zero-order
+wavefunctions) must be done with <b>intxc</b>=0
+</p>
+<p>
+ Prior to ABINITv2.3, the choice <b>intxc</b>=1 was favoured (it was the default),
+but the continuation of the development of the code lead to prefer
+the default <b>intxc</b>=0 . Indeed, the benefit of <b>intxc</b>=1 is
+rather small, while making it available for all cases is a
+non-negligible development effort. Other targets are prioritary...
+You will notice that many automatic tests use <b>intxc</b>=1. Please,
+do not follow this historical choice for your production runs.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="iomode">iomode</a></font>
+<br><font id="mnemonics">Mnemonics: Input-Output MODE</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a>.</font>
+<br><font id="smalltext">Moderately used: [20/938] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {bigdft:[<a href="../../tests/bigdft/Input/t16.in">16</a>,<a href="../../tests/bigdft/Input/t17.in">17</a>,<a href="../../tests/bigdft/Input/t18.in">18</a>],etsf_io:[<a href="../../tests/etsf_io/Input/t00.in">00</a>,<a href="../../tests/etsf_io/Input/t01.in">01</a>,<a href="../../tests/etsf_io/Input/t02.in">02</a>,<a href="../../tests/etsf_io/Input/t04.in">04</a>,<a href="../../tests/etsf_io/Input/t09.in">09</a>],mpiio:[<a href="../../tests/mpiio/Input/t26.in">26</a>,<a href="../../tests/mpiio/Input/t27.in">27</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 if <a href="../../variables/generated_files/varset_external.html#MPI_IO">MPI_IO</a> and <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>==1,
+0 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+This option selects the format used to produce the output wavefunction files and the files containing
+densities and potentials. It mainly affects the creation of the output files since several parts
+of Abinit are able to read data from files independently of their format (either binary files or netcdf files).
+The possible values are:
+</p>
+
+<ul>
+ <li>
+  0 =&gt; Use standard Fortran IO (ok for sequential runs, not suitable for large parallel runs)
+ </li>
+ <li>
+  1 =&gt; Use MPI/IO routines (ok both for sequential and large parallel runs)
+ </li>
+ <li>
+  3 =&gt; Use NetCDF library to produce files according to the ETSF specification
+ (ok for sequential, requires netcdf4 + hdf5 + MPI-IO support for large parallel runs)
+ </li>
+</ul>
+<br />
+
+<p>
+By default, Abinit produces Fortran files and uses parallel MPI-IO under the hood when these
+operations cannot be implemented in terms of simple Fortran write/read statements.
+For example, <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>=1 uses the MPI-IO API provided by your MPI library.
+</p>
+
+<p>
+In a nutshell, use the default value and make sure that your MPI library supports MPI-IO
+before embarking yourself in large parallel runs (HAVE_MPI_IO should be set to 1 in ~abinit/config.h).
+Many MPI libraries, nowadays, support the MPI-2 standard so it's very likely that your MPI supports
+parallel IO. If you encounter problems, please ask your sysadmin to install a MPI library
+with MPI-IO capabilities.
+</p>
+<p>
+There are cases, however, in which you would like to change the default behaviour.
+For example, you may want to generate WFK or DEN files in etsf-io format because you need
+data in this format.
+In this case, you have to use iomode==3 in the input file to override the default behaviour.
+Note however that you still need parallel IO capabilities enabled in the netcdf library
+if you want to produce netcdf files in parallel with <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>=1 (i.e. netcdf4 + hdf5 + MPI-IO).
+At present, the internal fallbacks provided by Abinit do not support netcdf4 so you
+have to link against an external netcdf library that supports hdf5+MPI-IO and
+is compatible with the mpif90 used to compile Abinit.
+See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
+</p>
+
+<p>
+References:
+<ul>
+ <li>
+ "Specification of an extensible and portable file format for electronic structure and crystallographic data",
+X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon,
+M.J. Verstraete, Comput. Mat. Science 43, 1056 (2008)
+  </li>
+  <li>
+   "Sharing electronic structure and crystallographic data with ETSF_IO",
+D. Caliste, Y. Pouillon, M.J. Verstraete, V. Olevano, X. Gonze,
+Comput. Physics Communications 179, 748 (2008)
+  </li>
+  <li>
+   see also
+   <a href="http://www.etsf.eu/fileformats">
+    http://www.etsf.eu/fileformats
+   </a>
+   .
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="iprcfc">iprcfc</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for PReConditioner of Force Constants</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_GeoOpt.html">GeoOpt</a>.</font>
+<br><font id="smalltext">Rarely used: [4/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v1:[<a href="../../tests/v1/Input/t44.in">44</a>,<a href="../../tests/v1/Input/t45.in">45</a>,<a href="../../tests/v1/Input/t48.in">48</a>,<a href="../../tests/v1/Input/t49.in">49</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Used when <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>&gt;0, to define the SCF preconditioning scheme.
+Potential-based preconditioning schemes for the SCF loop
+are still under development.
+ <br />
+ The present parameter (force constant part)
+describes the way a change of force
+is derived from a change of atomic position.
+ <br />
+ Supported values :
+ <ul>
+  <li>
+   0 =&gt; hessian is the identity matrix
+  </li>
+  <li>
+   1 =&gt; hessian is 0.5 times the identity matrix
+  </li>
+  <li>
+   2 =&gt; hessian is 0.25 times the identity matrix
+  </li>
+  <li>
+   -1=&gt; hessian is twice the identity matrix
+  </li>
+  <li>
+   ... (simply corresponding power of 2 times the identity matrix)
+  </li>
+ </ul>
+ No meaning for RF calculations.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="irandom">irandom</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for the choice of the RANDOM number generator</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PIMD.html">PIMD</a>.</font>
+<br><font id="smalltext">Rarely used: [3/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t26.in">26</a>],v7:[<a href="../../tests/v7/Input/t08.in">08</a>],v8:[<a href="../../tests/v8/Input/t05.in">05</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 3</font>
+<br><font id="text">
+<p>
+<p>
+ For the time being, only used when <a href="../../variables/generated_files/varset_rlx.html#imgmov">imgmov</a>=9
+(Langevin Path-Integral Molecular Dynamics).
+ <br />
+ <b>irandom</b> defines the random number generator.
+ <br />
+ <br />
+ Supported values :
+ <ul>
+  <li>
+   1 =&gt; "uniformrandom", delivered with ABINIT package (initially comes from numerical recipes).
+  </li>
+  <li>
+   2 =&gt; intrinsic Fortran 90 random number generator.
+  </li>
+  <li>
+   3 =&gt; "ZBQ" non-deterministic random number generator by R. Chandler and P. Northrop.
+  (Available at <a href="http://www.ucl.ac.uk/~ucakarc/work/index.html#code">).
+  </li>
+ </ul>
+ <b>irandom</b>=3 is strongly advised when performing Molecular Dynamics restarts (avoids bias).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="irdwfkfine">irdwfkfine</a></font>
+<br><font id="mnemonics">Mnemonics: Integer that governs the ReaDing of the grid _WFK file on the FINE grid</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a>, <a href="../../topics/generated_files/topic_TDepES.html">TDepES</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t51.in">51</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+Indicates eventual starting
+wavefunctions. As alternative, one can use the
+input variables <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a>.
+<br />
+<br />
+Ground-state calculation :
+<ul>
+ <li>
+  only <b>irdwfkfine</b> and <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a> have a meaning
+ </li>
+ <li>
+  at most one of <b>irdwfkfine</b> or <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a> can be non-zero
+ </li>
+ <li>
+  if <b>irdwfkfine</b> = 1 : read ground state wavefunctions
+from a disk file appended with _WFK , produced in a
+previous ground state fine grid calculation (see the
+  <a href="../../users/generated_files/help_abinit.html#4">
+   section 4
+  </a>
+  of the <a href="../../guide/generated_files/help_abinit.html#">abinit help file</a>).
+ </li>
+</ul>
+Response-function calculation :
+<ul>
+ <li>
+  one and only one of <b>irdwfkfine</b> or <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a> MUST be non-zero
+ </li>
+ <li>
+  if <b>irdwfkfine</b> = 1 : read ground state k -wavefunctions
+from a disk file appended with _WFK , produced in a
+previous ground state calculation (see the
+  <a href="../../users/generated_files/help_abinit.html#4">
+   section 4
+  </a>
+  of the <a href="../../guide/generated_files/help_abinit.html#">abinit help file</a>).
+ </li>
+ <li>
+  Reading the fine grid wavefunction will trigger the k-points interpolation technique of the temperature dependent
+calculations.
+ </li>
+</ul>
+Bethe-Salpeter calculation :
+<ul>
+ <li>
+  one and only one of <b>irdwfkfine</b> or <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a> MUST be non-zero
+ </li>
+ <li>
+  if <b>irdwfkfine</b> = 1 : read ground state k -wavefunctions
+from a disk file appended with _WFK , produced in a
+previous ground state calculation (see the
+  <a href="../../users/generated_files/help_abinit.html#4">
+   section 4
+  </a>
+  of the <a href="../../guide/generated_files/help_abinit.html#">abinit help file</a>).
+ </li>
+ <li>
+  This variable or <a href="../../variables/generated_files/varset_dev.html#getwfkfine">getwfkfine</a> is mandatory when <a href="../../variables/generated_files/varset_bse.html#bs_interp_mode">bs_interp_mode</a> = 1
+ </li>
+</ul>
+<b>
+ This variable is experimental. In development.
+</b>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="isecur">isecur</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for level of SECURity choice</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SCFAlgorithms.html">SCFAlgorithms</a>.</font>
+<br><font id="smalltext">Rarely used: [9/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {fast:[<a href="../../tests/fast/Input/t17.in">17</a>,<a href="../../tests/fast/Input/t19.in">19</a>],v1:[<a href="../../tests/v1/Input/t08.in">08</a>,<a href="../../tests/v1/Input/t33.in">33</a>,<a href="../../tests/v1/Input/t85.in">85</a>,<a href="../../tests/v1/Input/t86.in">86</a>,<a href="../../tests/v1/Input/t98.in">98</a>,<a href="../../tests/v1/Input/t99.in">99</a>],v2:[<a href="../../tests/v2/Input/t51.in">51</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ In the presently used algorithms, there is a compromise
+between speed and robustness, that can be tuned by
+using <b>isecur</b>.
+ <br />
+ If <b>isecur</b> =0, an extrapolation of out-of-line
+data is allowed, and might save one non-SCF calculation every
+two line minimisation when some stability conditions
+are fulfilled (since there are 2 non-SCF calculations
+per line minimisation, 1 out of 4 is saved)
+ <br />
+ Using <b>isecur</b>=1 or higher integers will raise gradually
+the threshold to make extrapolation.
+ <br />
+ Using <b>isecur</b>=-2 will allow to save 2 non-SCF calculations
+every three line minimisation, but this can make the
+algorithm unstable. Lower values of <b>isecur</b> allows
+for more (tentative) savings. In any case, there must
+be one non-SCF computation per line minimisation.
+ <br />
+ No meaning for RF calculations yet.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="istatr">istatr</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for STATus file rate</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a>, <a href="../../guide/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [7/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {fast:[<a href="../../tests/fast/Input/t00.in">00</a>],paral:[<a href="../../tests/paral/Input/t52.in">52</a>,<a href="../../tests/paral/Input/t53.in">53</a>],v1:[<a href="../../tests/v1/Input/t03.in">03</a>,<a href="../../tests/v1/Input/t51.in">51</a>,<a href="../../tests/v1/Input/t59.in">59</a>],v3:[<a href="../../tests/v3/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 (Comment: Values lower than 10 may not work on some machines.)</font>
+<br><font id="text">
+<p>
+<p>
+Govern the rate of output of the status file.
+This status file is written when the number of the
+call to the status subroutine is equal to '
+ <b>
+  istatshft
+ </b>
+ ' modulo '<b>istatr</b>', so that
+it is written once every '<b>istatr</b>' call.
+When '<b>istatr</b>'=0, there is no writing of a status file (which is the default).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="istatshft">istatshft</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for STATus file SHiFT</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a>, <a href="../../guide/generated_files/help_abinit.html#NO_MULTI">NO_MULTI</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Govern the rate of output of the status file.
+This status file is written when the number of the
+call to the status
+subroutine is equal to '<b>istatshft</b>' modulo '
+ <b>
+  istatr
+ </b>
+ ', so that
+it is written once every '
+ <b>
+  istatr
+ </b>
+ ' call.
+There is also a writing for each of the 5 first calls,
+and the 10th call.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="istwfk">istwfk</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for choice of STorage of WaveFunction at each k point</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_k-points.html">k-points</a>, <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Moderately used: [233/938] in abinit tests, [41/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_basic.html#nkpt">nkpt</a>)</font>
+<br><font id="default">Default is *0 (Comment: For RF calculations, the Default is not used : <b>istwfk</b> is forced to be 1 deep inside the code, for all k points. For spin-orbit calculations (<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2), <b>istwfk</b> is also forced to be 1, for all k points.)</font>
+<br><font id="text">
+<p>
+<p>
+ Control the way the
+wavefunction for each k-point is stored inside ABINIT,
+in reciprocal space.
+ <br />
+ For the GS calculations, in the "cg" array containing the
+wavefunction coefficients, there is for each k-point
+and each band, a segment cg(1:2,1:npw). The 'full' number
+of plane wave is determined by <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>.
+However, if the k-point coordinates are build
+only from zeroes and halves (see list below),
+the use of time-reversal symmetry (that connects coefficients)
+has been implemented, in order to use real-to-complex
+FFTs (see <a href="../../variables/generated_files/varset_dev.html#fftalg">fftalg</a>), and to treat explicitly only half
+of the number of plane waves (this being used as 'npw').
+ <br />
+ For the RF calculations, there is not only the "cg"
+array, but also the "cgq" and "cg1" arrays. For the
+time-reversal symmetry to decrease the number of
+plane waves of these arrays, the q vector MUST be (0 0 0).
+Then, for each k point, the same rule as for the
+RF can be applied.
+ <br />
+ WARNING (991018) : for the time being, the time-reversal
+symmetry cannot be used in the RF calculations.
+ <ul>
+  <li>
+   1=&gt; do NOT take advantage of the time-reversal symmetry
+  </li>
+  <li>
+   2=&gt; use time-reversal symmetry for k=( 0   0   0 )
+  </li>
+  <li>
+   3=&gt; use time-reversal symmetry for k=(1/2  0   0 )
+  </li>
+  <li>
+   4=&gt; use time-reversal symmetry for k=( 0   0  1/2)
+  </li>
+  <li>
+   5=&gt; use time-reversal symmetry for k=(1/2  0  1/2)
+  </li>
+  <li>
+   6=&gt; use time-reversal symmetry for k=( 0  1/2  0 )
+  </li>
+  <li>
+   7=&gt; use time-reversal symmetry for k=(1/2 1/2  0 )
+  </li>
+  <li>
+   8=&gt; use time-reversal symmetry for k=( 0  1/2 1/2)
+  </li>
+  <li>
+   9=&gt; use time-reversal symmetry for k=(1/2 1/2 1/2)
+  </li>
+  <li>
+   0=&gt; (preprocessed) for each k point, choose automatically
+the appropriate time-reversal option when it is allowed,
+and chose <b>istwfk</b>=1 for all the other k points.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="lotf_classic">lotf_classic</a></font>
+<br><font id="mnemonics">Mnemonics: LOTF CLASSIC model for glue model</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_LOTF.html">LOTF</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t41.in">41</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 5</font>
+<br><font id="text">
+<p>
+<p>
+ Glue model used in LOTF.
+ <br />
+ For the moment it is imposed to be 5.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="lotf_nitex">lotf_nitex</a></font>
+<br><font id="mnemonics">Mnemonics: LOTF Number of ITerations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_LOTF.html">LOTF</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t41.in">41</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 10</font>
+<br><font id="text">
+<p>
+<p>
+ Set the number of Molecular Dynamics iterations which are computed by LOTF.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="lotf_nneigx">lotf_nneigx</a></font>
+<br><font id="mnemonics">Mnemonics: LOTF max Number of NEIGhbours</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_LOTF.html">LOTF</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t41.in">41</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 5</font>
+<br><font id="text">
+<p>
+<p>
+ Set the max number of Neighbours used in the LOTF method.
+ <br />
+ For the moment it is imposed to be 40.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="lotf_version">lotf_version</a></font>
+<br><font id="mnemonics">Mnemonics: LOTF VERSION of MD algorithm</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_LOTF.html">LOTF</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t41.in">41</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 2</font>
+<br><font id="text">
+<p>
+<p>
+ Set the MD algorithm in the LOTF method.
+ <br />
+ For the moment it is imposed to be 2.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="macro_uj">macro_uj</a></font>
+<br><font id="mnemonics">Mnemonics: MACRO variable that activates the determination of the U and J parameter (for the PAW+U calculations)</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorial:[<a href="../../tests/tutorial/Input/tudet_2.in">udet_2</a>],v5:[<a href="../../tests/v5/Input/t39.in">39</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Sets proper input values for the determination of U and J i.e.
+for <a href="../../variables/generated_files/varset_dev.html#pawujat">pawujat</a> (first atom treated with PAW+U),
+<a href="../../variables/generated_files/varset_files.html#irdwfk">irdwfk</a> (=1),
+<a href="../../variables/generated_files/varset_basic.html#tolvrs">tolvrs</a> (=10^(-8)),
+<a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a> (=255),
+<a href="../../variables/generated_files/varset_gstate.html#diemix">diemix</a> (=0.45),
+<a href="../../variables/generated_files/varset_ffield.html#atvshift">atvshift</a> (<a href="../../variables/generated_files/varset_dev.html#pawujat">pawujat</a>) <a href="../../variables/generated_files/varset_dev.html#pawujv">pawujv</a>). Do not overwrite these variables manually unless you know what you do.
+ <ul>
+  <li>
+   <b>macro_uj</b>=1 (and <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2) Standard procedure to determine U on atom pawujat through a shift of the potential on both spin channels.
+  </li>
+  <li>
+   <b>macro_uj</b>=1 (and <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1) Non standard procedure to determine U from potential shift on atom pawujat (experimental).
+  </li>
+  <li>
+   <b>macro_uj</b>=2 (and <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2) Non standard procedure to determine U from potential shift on atom pawujat through a shift on spin channel 1 on this atom and the response on this channel (experimental).
+  </li>
+  <li>
+   <b>macro_uj</b>=3 (and <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2) Standard procedure to determine J from potential shift on spin channel 1 on atom pawujat and response on spin channel 2 (experimental).
+  </li>
+ </ul>
+ Determination of U and J can be done only if the symmetry of the atomic arrangement is reduced and the atom pawujat is not connected to any other atom by symmetry relations (either input reduced symmetries manually, define concerned atom as a separate atomic species or shift concerned atom from ideal position).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="maxnsym">maxnsym</a></font>
+<br><font id="mnemonics">Mnemonics: MAXimum Number of SYMetries</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_crystal.html">crystal</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t06.in">06</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 384</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the maximum number of spatial symetries allowed in the memory.
+ <br />
+ The default value is sufficient for most applications. It might have to be increased in the case of the use of a supercell (unit cell identically repeated).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mem_test">mem_test</a></font>
+<br><font id="mnemonics">Mnemonics: MEMory TEST</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Control.html">Control</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t29.in">29</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ This variable controls the memory test done in the memana routine.
+Possible values:
+ <ul>
+  <li>
+   0 no test on the available memory is performed
+  </li>
+  <li>
+   1 the routine tries to allocate the estimated memory, for testing
+purposes, and if a failure occurs, the routine stops.
+  </li>
+  <li>
+   2 like 1, but before stopping, the routine will provide
+an estimation of the available memory.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mqgrid">mqgrid</a></font>
+<br><font id="mnemonics">Mnemonics: Maximum number of Q-space GRID points for pseudopotentials</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Planewaves.html">Planewaves</a>.</font>
+<br><font id="smalltext">Rarely used: [5/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v4:[<a href="../../tests/v4/Input/t62.in">62</a>],v7:[<a href="../../tests/v7/Input/t24.in">24</a>,<a href="../../tests/v7/Input/t25.in">25</a>,<a href="../../tests/v7/Input/t78.in">78</a>,<a href="../../tests/v7/Input/t79.in">79</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 3001</font>
+<br><font id="text">
+<p>
+<p>
+ Govern the size of the one-dimensional information
+related to pseudopotentials, in reciprocal space :
+potentials, or projector functions.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nbdblock">nbdblock</a></font>
+<br><font id="mnemonics">Mnemonics: Number of BanDs in a BLOCK</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v4:[<a href="../../tests/v4/Input/t93.in">93</a>,<a href="../../tests/v4/Input/t94.in">94</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ In case of non-standard, blocked algorithms for the
+optimization of the wavefunctions (that is, if
+<a href="../../variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a>=4):
+ <ul>
+  <li>
+   if <a href="../../variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a>=4,
+<b>nbdblock</b> defines the number of blocks (the number of bands in the block is
+then <a href="../../variables/generated_files/varset_basic.html#nband">nband</a>/<b>nbdblock</b> ).
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nc_xccc_gspace">nc_xccc_gspace</a></font>
+<br><font id="mnemonics">Mnemonics: Norm-Conserving pseudopotentials - use XC Core-Correction in G-SPACE</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Planewaves.html">Planewaves</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t10.in">10</a>,<a href="../../tests/v7/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==0,
+1 if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
+0 otherwise.
+ (Comment: 0 when <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>=0, 1 when <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>=1)</font>
+<br><font id="text">
+<p>
+Historically, Abinit treats the model core charge used for the non-linear core
+correction in real space. Alternatively, it is possible to instruct the code to compute the core charge in G-space following the same approach used in
+the PAW code. The G-space formalism is more accurate than the interpolation in real space, especially when derivatives of the model core charge are
+needed, e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum rule is reduced when <b>nc_xccc_gspace</b>==1 , especially for LDA.
+It is worth stressing, however, that <b>nc_xccc_gspace</b>==1
+should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
+G-space. Several NC pseudos available in the Abinit table are not optimized for the G-space formalism and users are strongly invited to perform
+convergence studies with respect to ecut before using this option.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nctime">nctime</a></font>
+<br><font id="mnemonics">Mnemonics: NetCdf TIME between output of molecular dynamics informations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_MolecularDynamics.html">MolecularDynamics</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {etsf_io:[<a href="../../tests/etsf_io/Input/t21.in">21</a>],paral:[<a href="../../tests/paral/Input/t41.in">41</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ When <b>nctime</b> is non-zero, the molecular dynamics information
+is output in NetCDF format, every <b>nctime</b> time step. Here is the content of an example file :
+ <pre>
+netcdf md32.outH_moldyn1 {
+dimensions:
+   time = UNLIMITED ; // (11 currently)
+   DimTensor = 6 ;
+   DimCoord = 3 ;
+   NbAtoms = 32 ;
+   DimVector = 3 ;
+   DimScalar = 1 ;
+variables:
+   double E_pot(time) ;
+      E_pot:units = "hartree" ;
+   double E_kin(time) ;
+      E_kin:units = "hartree" ;
+   double Stress(time, DimTensor) ;
+      Stress:units = "hartree/Bohr^3" ;
+   double Position(time, DimCoord, NbAtoms) ;
+      Position:units = "Bohr" ;
+   double Celerity(time, DimCoord, NbAtoms) ;
+      Celerity:units = "Bohr/(atomic time unit)" ;
+   double PrimitiveVector1(DimVector) ;
+   double PrimitiveVector2(DimVector) ;
+   double PrimitiveVector3(DimVector) ;
+   double Cell_Volume(DimScalar) ;
+      Cell_Volume:units = "Bohr^3" ;
+}
+ </pre>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nloc_alg">nloc_alg</a></font>
+<br><font id="mnemonics">Mnemonics: Non LOCal ALGorithm</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Rarely used: [5/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v2:[<a href="../../tests/v2/Input/t37.in">37</a>,<a href="../../tests/v2/Input/t38.in">38</a>],v4:[<a href="../../tests/v4/Input/t20.in">20</a>,<a href="../../tests/v4/Input/t61.in">61</a>,<a href="../../tests/v4/Input/t62.in">62</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 4</font>
+<br><font id="text">
+<p>
+<p>
+Allows to choose the algorithm for non-local operator application.
+On super-scalar architectures, the default <b>nloc_alg</b>=4 is the best.
+ <br />
+ More detailed explanations:
+ <br />
+ <div style="margin-left: 40px;">
+  - <b>nloc_alg</b>=2 : Should be efficient on vector machines. It is
+indeed the fastest algorithm for the NEC, but
+actual tests on Fujitsu machine did not gave better
+performances than the other options.
+  <br />
+  - <b>nloc_alg</b>=3 : same as <b>nloc_alg</b>==2, but the loop order is inverted.
+  <br />
+  - <b>nloc_alg</b>=4 : same as <b>nloc_alg</b>==3, but maximal use of registers
+has been coded. This should be especially efficient on
+scalar and super-scalar machines. This has been confirmed by tests.
+  <br />
+ </div>
+ Note: internally, <b>nloc_alg</b> is stored in
+ <i>
+  nloalg(1)
+ </i>
+ . See also <a href="../../variables/generated_files/varset_dev.html#nloc_mem">nloc_mem</a> for the tuning of the memory used in the non-local operator application.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nloc_mem">nloc_mem</a></font>
+<br><font id="mnemonics">Mnemonics: Non LOCal MEMOry</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t41.in">41</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 2 if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
+1 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+Controls the memory use for the application of the non-local operator.
+ <br />
+ More detailed explanations:
+ <br />
+ <div style="margin-left: 40px;">
+  - <b>nloc_mem</b>==1 : (k+G) vectors are not precomputed, in order to save memory space.
+  <br />
+  - <b>nloc_mem</b>==2 : (k+G) vectors are precomputed, once per k-point.
+  <br />
+  - <b>nloc_mem</b>==-1 or -2 : Negative values of <b>nloc_mem</b> correspond positive ones,
+where the phase precomputation has been suppressed, in order to save memory space, as an array
+  <i>
+   double precision :: ph3d(2,npw,<a href="../../variables/generated_files/varset_basic.html#natom">natom</a>)
+  </i>
+  is saved (typically half the space needed
+for the wavefunctions at 1 k point - this corresponds
+to the silicon case). However, the computation of phases
+inside nonlop is somehow time-consuming.
+  <br />
+ </div>
+ <br />
+ Note: internally, sign(<b>nloc_mem</b>) is stored in
+ <i>
+  nloalg(2)
+ </i>
+ and abs(<b>nloc_mem</b>)-1 is stored in
+ <i>
+  nloalg(3)
+ </i>
+ . See also <a href="../../variables/generated_files/varset_dev.html#nloc_alg">nloc_alg</a> for the algorithm for the non-local operator application.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nnsclo">nnsclo</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Non-Self Consistent LOops</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a>.</font>
+<br><font id="smalltext">Moderately used: [34/938] in abinit tests, [4/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_1.in">dmft_1</a>,<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>,<a href="../../tests/tutoparal/Input/tucrpa_1.in">ucrpa_1</a>],tutorial:[<a href="../../tests/tutorial/Input/tpositron_7.in">positron_7</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the maximum number of
+non-self-consistent loops of <a href="../../variables/generated_files/varset_gstate.html#nline">nline</a> line minimisations,
+in the SCF case (when <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a> &gt;0).  In the case <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a> &lt;=0 ,
+the number of non-self-consistent loops is determined
+by <a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a>.
+ <br />
+ The Default value of 0 -- for standard plane-wave calculations -- corresponds to make
+the two first fixed potential determinations
+of wavefunctions have 2 non-self consistent loops,
+and the next ones to have only 1 non-self consistent loop.
+ <br />
+ The Default value of 0 -- for wavelets calculations (<a href="../../variables/generated_files/varset_basic.html#usewvl">usewvl</a>=1) -- corresponds to make
+2 steps with 3 non-self consistent loops , 2 steps with 2 non-self consistent loops,
+then the next ones with 1 non-self consistent loop.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nnsclohf">nnsclohf</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Non-Self Consistent LOops for (Hartree)-Fock exact exchange</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Hybrids.html">Hybrids</a>.</font>
+<br><font id="smalltext">Rarely used: [6/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t65.in">65</a>,<a href="../../tests/v7/Input/t66.in">66</a>,<a href="../../tests/v7/Input/t67.in">67</a>,<a href="../../tests/v7/Input/t69.in">69</a>,<a href="../../tests/v7/Input/t71.in">71</a>,<a href="../../tests/v7/Input/t72.in">72</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 if <a href="../../variables/generated_files/varset_internal.html#usefock">usefock</a>==1,
+0 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the maximum number of loops with non-self-consistent occupied states used to calculate Fock exact exchange,
+in the SCF case.
+ <br />
+ The Default value is 0 when <a href="../../variables/generated_files/varset_internal.html#usefock">usefock</a> = 0.
+Default value is 1 when <a href="../../variables/generated_files/varset_internal.html#usefock">usefock</a> = 1 and correspond to update occupied
+wavefunctions at each self-consistent loop.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="normpawu">normpawu</a></font>
+<br><font id="mnemonics">Mnemonics: NORMalize atomic PAW+U projector</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Defines whether the atomic wave function (used as projectors in PAW+U) should be renormalized to 1
+within PAW sphere.
+ <ul>
+  <li>
+   <b>normpawu</b>=0 : leave projector
+  </li>
+  <li>
+   <b>normpawu</b>=1 : renormalize
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="npulayit">npulayit</a></font>
+<br><font id="mnemonics">Mnemonics: Number of PULAY ITerations for SC mixing</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SCFAlgorithms.html">SCFAlgorithms</a>.</font>
+<br><font id="smalltext">Rarely used: [6/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v3:[<a href="../../tests/v3/Input/t47.in">47</a>,<a href="../../tests/v3/Input/t78.in">78</a>],v4:[<a href="../../tests/v4/Input/t07.in">07</a>],v5:[<a href="../../tests/v5/Input/t15.in">15</a>,<a href="../../tests/v5/Input/t20.in">20</a>,<a href="../../tests/v5/Input/t37.in">37</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 7</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a> in [7,17]
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the  number of previous iterations involved in Pulay mixing (mixing
+during electronic SC iterations).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nscforder">nscforder</a></font>
+<br><font id="mnemonics">Mnemonics: Nth - SCaling Function ORDER</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Coulomb.html">Coulomb</a>.</font>
+<br><font id="smalltext">Moderately used: [19/938] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {bigdft:[<a href="../../tests/bigdft/Input/t00.in">00</a>,<a href="../../tests/bigdft/Input/t01.in">01</a>,<a href="../../tests/bigdft/Input/t02.in">02</a>,<a href="../../tests/bigdft/Input/t03.in">03</a>,<a href="../../tests/bigdft/Input/t04.in">04</a>,<a href="../../tests/bigdft/Input/t05.in">05</a>,<a href="../../tests/bigdft/Input/t09.in">09</a>,<a href="../../tests/bigdft/Input/t10.in">10</a>,<a href="../../tests/bigdft/Input/t12.in">12</a>,<a href="../../tests/bigdft/Input/t16.in">16</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 16</font>
+<br><font id="text">
+<p>
+<p>
+ This variable controls the order of used scaling functions when the Hartree potential is computed using the Poisson solver (see <a href="../../variables/generated_files/varset_gstate.html#icoulomb">icoulomb</a> imput variable). This variable is of seldom use since the default value is large enough. Nonetheless, possible values are 8, 14, 16, 20, 24, 30, 40, 50, 60, 100. Values greater than 20 are included in ABINIT for test purposes only.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="optforces">optforces</a></font>
+<br><font id="mnemonics">Mnemonics: OPTions for the calculation of FORCES</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ForcesStresses.html">ForcesStresses</a>.</font>
+<br><font id="smalltext">Moderately used: [41/938] in abinit tests, [17/136] in tuto abinit tests. Too many tests to report (>10).</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 if <a href="../../variables/generated_files/varset_basic.html#toldff">toldff</a> or <a href="../../variables/generated_files/varset_basic.html#tolrff">tolrff</a> != 0,
+2 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Allows to choose options for the calculation of forces.
+ <ul>
+  <li>
+   <b>optforces</b>=0 : the forces are set to zero, and many steps of the
+computation of forces are skipped
+  </li>
+  <li>
+   <b>optforces</b>=1 : calculation of forces at each SCF iteration, allowing
+to use forces as criterion to stop the SCF cycles
+  </li>
+  <li>
+   <b>optforces</b>=2 : calculation of forces at the end of the SCF iterations
+(like the stresses)
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="optnlxccc">optnlxccc</a></font>
+<br><font id="mnemonics">Mnemonics: OPTion for the calculation of Non-Linear eXchange-Correlation Core Correction</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_xc.html">xc</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t45.in">45</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Allows to choose options for the calculation of non-linear XC correction.
+At present, only relevant for the FHI type of pseudopotentials, with pspcod=6 .
+ <ul>
+  <li>
+   <b>optnlxccc</b>=1 : uses the old psp6cc.f routine, with inconsistent treatment of real-space derivatives of the core function (computed in this routine, while splined in the other parts of the code)
+  </li>
+  <li>
+   <b>optnlxccc</b>=2 : consistent calculation derivatives, in the psp6cc_dhr.f routine from DHamann.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ortalg">ortalg</a></font>
+<br><font id="mnemonics">Mnemonics: ORThogonalisation ALGorithm</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Moderately used: [11/938] in abinit tests, [0/136] in tuto abinit tests. Examples in tests: {etsf_io:[<a href="../../tests/etsf_io/Input/t00.in">00</a>,<a href="../../tests/etsf_io/Input/t09.in">09</a>],fast:[<a href="../../tests/fast/Input/t27.in">27</a>],v1:[<a href="../../tests/v1/Input/t40.in">40</a>,<a href="../../tests/v1/Input/t41.in">41</a>,<a href="../../tests/v1/Input/t42.in">42</a>,<a href="../../tests/v1/Input/t90.in">90</a>],v4:[<a href="../../tests/v4/Input/t04.in">04</a>,<a href="../../tests/v4/Input/t05.in">05</a>,<a href="../../tests/v4/Input/t93.in">93</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is -2 if <a href="../../variables/generated_files/varset_dev.html#wfoptalg">wfoptalg</a> >= 10 ,
+2 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Allows to choose the algorithm
+for orthogonalisation.
+ <br />
+ Positive or zero values make two projections per
+line minimisation, one before the preconditioning, one
+after. This is the clean application of the band-by-band
+CG gradient for finding eigenfunctions.
+ <br />
+ Negative values make only one projection per line minimisation.
+ <br />
+ The orthogonalisation step is twice faster, but the
+convergence is less good. This actually calls to
+a better understanding of this effect.
+ <br />
+ <b>ortalg</b>=0, 1 or -1 is the conventional coding.
+ <br />
+ <b>ortalg</b>=2 or -2 try to make better use of existing registers
+on the particular machine one is running.
+ <br />
+ More demanding use of registers
+is provided by <b>ortalg</b>=3 or -3, and so on.
+ <br />
+ The maximal value is presently 4 and -4.
+ <br />
+ Tests have shown that <b>ortalg</b>=2 or -2 is suitable for
+use on the available platforms.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="papiopt">papiopt</a></font>
+<br><font id="mnemonics">Mnemonics: PAPI OPTion</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Control.html">Control</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <a href="http://icl.cs.utk.edu/papi/index.html">
+  PAPI
+ </a>
+ aims to
+provide the tool designer and application engineer with a
+consistent interface and methodology for use of the
+performance counter hardware found in most major
+microprocessors. PAPI enables software engineers to see, in
+near real time, the relation between software performance and
+processor events.
+ <br />
+ This option can be used only when ABINIT has been compiled with the
+ <code>
+  --enable-papi
+ </code>
+ configure option.
+ <br />
+ If <b>papiopt</b>=1, then PAPI counters are used instead of
+the usual time() routine. All the timing output of ABINIT is
+then done with PAPI values. The measurements are more accurate and
+give also access to the flops of the calculation.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="pawprt_b">pawprt_b</a></font>
+<br><font id="mnemonics">Mnemonics: PAW PRinT band</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PAW.html">PAW</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Forces the output of the all-electron wavefunction for
+only a single band. To be used in conjuction with:
+ <b>
+  <br />
+  <a href="../../variables/generated_files/varset_paw.html#pawprtwf">pawprtwf</a>=1
+ </b>
+ and
+<a href="../../variables/generated_files/varset_dev.html#pawprt_k">pawprt_k</a>.
+The indexing of the bands start with one for the lowest occupied band
+and goes up from there.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="pawprt_k">pawprt_k</a></font>
+<br><font id="mnemonics">Mnemonics: PAW PRinT K-point</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_PAW.html">PAW</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Forces the output of the all-electron wavefunction for
+only a single k-point. To be used in conjuction with:
+ <b>
+  <br />
+  <a href="../../variables/generated_files/varset_paw.html#pawprtwf">pawprtwf</a>=1
+ </b>
+ and
+<a href="../../variables/generated_files/varset_dev.html#pawprt_b">pawprt_b</a>.
+The indexing follows the order in ouptput of the internal
+variable
+ <b>
+  kpt
+ </b>
+ in the beginning of the run.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="pawujat">pawujat</a></font>
+<br><font id="mnemonics">Mnemonics: PAW+macro_UJ, ATom number</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorial:[<a href="../../tests/tutorial/Input/tudet_2.in">udet_2</a>],v5:[<a href="../../tests/v5/Input/t39.in">39</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 (Comment:  i.e. the first atom treated with PAW+U.)</font>
+<br><font id="text">
+<p>
+<p>
+ Determines the atom for which U (or J) should be determined. See also <a href="../../variables/generated_files/varset_dev.html#macro_uj">macro_uj</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="pawujrad">pawujrad</a></font>
+<br><font id="mnemonics">Mnemonics: PAW+macro_UJ, sphere RADius</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorial:[<a href="../../tests/tutorial/Input/tudet_2.in">udet_2</a>],v5:[<a href="../../tests/v5/Input/t39.in">39</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 20 a.u.</font>
+<br><font id="text">
+<p>
+<p>
+ The sphere radius serves to extrapolate the U value calculated at r_paw to a larger sphere radius.
+See also <a href="../../variables/generated_files/varset_dev.html#macro_uj">macro_uj</a>.
+As most projector functions are localized within r_paw to &asymp;80%,
+20 a.u. contains &asymp;100% of the wavefunction and corresponds to r_paw &rarr; &infin;.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="pawujv">pawujv</a></font>
+<br><font id="mnemonics">Mnemonics: PAW+macro_UJ, potential shift (V)</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorial:[<a href="../../tests/tutorial/Input/tudet_2.in">udet_2</a>],v5:[<a href="../../tests/v5/Input/t39.in">39</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.1 eV</font>
+<br><font id="text">
+<p>
+<p>
+ Amplitude of the potential shift for the determination of U (or J). See also <a href="../../variables/generated_files/varset_dev.html#macro_uj">macro_uj</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_bandf">plowan_bandf</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions BAND Final</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Gives the upper band to include in the calculation of Wannier functions
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_bandi">plowan_bandi</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions BAND Initial</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Gives the lower band to include in the calculation of Wannier functions
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_compute">plowan_compute</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions COMPUTATION</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Activate computation of Projected Local Orbital Wannier functions (PLO Wannier) and  corresponding band structure.
+Variables <a href="../../variables/generated_files/varset_dev.html#plowan_bandi">plowan_bandi</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_bandf">plowan_bandf</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_natom">plowan_natom</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_nbl">plowan_nbl</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_iatom">plowan_iatom</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_lcalc">plowan_lcalc</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_projcalc">plowan_projcalc</a> are mandatory to precise the nature of the projections.
+ <ul>
+  <li>
+   0=&gt; Default value: do not activate calculation of PLO Wannier.
+  </li>
+  <li>
+   1=&gt; Compute PLO Wannier and band structure
+  </li>
+  <li>
+   2=&gt; Compute PLO Wannier and band structure. In this case, the coupling in k-space between blocks of Wannier functions belonging to different
+angular momenta or atoms is removed.
+  </li>
+ </ul>
+ Other related variables are
+<a href="../../variables/generated_files/varset_dev.html#plowan_realspace">plowan_realspace</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_nt">plowan_nt</a>,
+<a href="../../variables/generated_files/varset_dev.html#plowan_it">plowan_it</a>.
+
+The implementation is not symetrized over k-point and not parallelized.
+
+(The calculation of projections is
+detailed in
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+  Phys. Rev. B 77, 205112, (2008)
+ </a>
+ )
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_iatom">plowan_iatom</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions, Index of ATOM</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Gives the indices of the <a href="../../variables/generated_files/varset_dev.html#plowan_natom">plowan_natom</a> atoms on which the projections will be done.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_it">plowan_it</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions,  Index of Translation.</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer(3,<a href="../../variables/generated_files/varset_dev.html#plowan_nt">plowan_nt</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Requires <a href="../../variables/generated_files/varset_dev.html#plowan_realspace">plowan_realspace</a>  to be greater than 0 and
+<a href="../../variables/generated_files/varset_dev.html#plowan_nt">plowan_nt</a>  to be greater than 0.
+Precise a given set of selected real space translation by using the real space vectors basis.
+These atoms are used to define Wannier functions in real space. These real space
+Wannier functions are used as a basis to compute the Hamiltonian.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_lcalc">plowan_lcalc</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions,  L values to use for CALCulation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer(sum(<a href="../../variables/generated_files/varset_dev.html#plowan_nbl">plowan_nbl</a>))</font>
+<br><font id="default">Default is -1</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Gives the <a href="../../variables/generated_files/varset_dev.html#plowan_nbl">plowan_nbl</a> values of angular momenta for each atom, in the order of the atoms
+as given in <a href="../../variables/generated_files/varset_dev.html#plowan_iatom">plowan_iatom</a>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_natom">plowan_natom</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions, Number of ATOMs</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Gives the number of atoms on which the projection will be done
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_nbl">plowan_nbl</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions,  NumBer of L values</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer(<a href="../../variables/generated_files/varset_dev.html#plowan_natom">plowan_natom</a>)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Gives the total number of angular momenta (over all atoms) to compute the projections.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_nt">plowan_nt</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions,  Number of Translation on which the real space values of
+energy are computed</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Requires <a href="../../variables/generated_files/varset_dev.html#plowan_realspace">plowan_realspace</a>  to be greater than 0.
+Gives a number of selected atoms. These atoms are used to define Wannier functions in real space. These real space
+Wannier functions are used as a basis to compute the Hamiltonian.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_projcalc">plowan_projcalc</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions,  PROJectors values to use for CALCulation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer(sum(<a href="../../variables/generated_files/varset_dev.html#plowan_nbl">plowan_nbl</a>))</font>
+<br><font id="default">Default is -1</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Gives the <a href="../../variables/generated_files/varset_dev.html#plowan_nbl">plowan_nbl</a> values of projectors for each atom, in the order of the atoms
+as given in <a href="../../variables/generated_files/varset_dev.html#plowan_iatom">plowan_iatom</a>. The index i for the projectors refers to the  ith number on line
+orbitals of the PAW atomic data file.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="plowan_realspace">plowan_realspace</a></font>
+<br><font id="mnemonics">Mnemonics: Projected Local Orbital WANnier functions,  activate REAL SPACE calculation.</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Wannier.html">Wannier</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t76.in">76</a>,<a href="../../tests/v7/Input/t77.in">77</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Can take the following values:
+ <ul>
+  <li>
+   0=&gt; Default value: do not activate calculation of real space Wannier functions.
+  </li>
+  <li>
+   1=&gt; Compute PLO Wannier in real space for analysis. These data can also be used in a following dataset to perform a Wannier interpolation.
+  </li>
+  <li>
+   2=&gt; Do simple Wannier Interpolation for a given k points starting from real space Wannier function Hamiltonian
+computed in a preceding dataset.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prepscphon">prepscphon</a></font>
+<br><font id="mnemonics">Mnemonics: PREPare Self-Consistent PHONon calculation</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Print PCINFO, PHFREQ, and PHVEC files, for use with self-consistent phonon runs, after a perturbation
+calculation. Only prints out files for the present q-point, and there is presently no tool to symmetrize
+or merge these files, so use anaddb instead (with prtscphon input variable). The abinit input
+variable is destined to someday bypass the use of anaddb for scphon calculations.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtbltztrp">prtbltztrp</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT output for BoLTZTRaP code</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t11.in">11</a>],v7:[<a href="../../tests/v7/Input/t88.in">88</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
+ <a href="https://www.imc.tuwien.ac.at/forschungsbereich_theoretische_chemie/forschungsgruppen/prof_dr_gkh_madsen_theoretical_materials_chemistry/boltztrap/"> BoltzTraP code</a>
+ by Georg Madsen.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtcif">prtcif</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT Crystallographic Information File</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [3/938] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorial:[<a href="../../tests/tutorial/Input/tfold2bloch_1.in">fold2bloch_1</a>],v6:[<a href="../../tests/v6/Input/t08.in">08</a>,<a href="../../tests/v6/Input/t09.in">09</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ If set to 1, a CIF file is output with the crystallographic data for the present run (cell size shape and atomic positions).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtdipole">prtdipole</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT DIPOLE</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t06.in">06</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Print out dipole of unit cell, calculated in real space for the primitive cell only. Under development.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtnest">prtnest</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT NESTing function</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v6:[<a href="../../tests/v6/Input/t72.in">72</a>],v7:[<a href="../../tests/v7/Input/t88.in">88</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtposcar">prtposcar</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT POSCAR file</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_printing.html">printing</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t01.in">01</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Print out VASP-style POSCAR and FORCES files, for use with PHON or frophon codes for frozen phonon calculations.
+See the associated script in ~abinit/extras/post_processing/phondisp2abi.py for further details on interfacing
+with PHON, PHONOPY, etc...
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="recefermi">recefermi</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - initial guess  of the FERMI Energy</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t75.in">75</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+In the first  SCF calculation it fixes the initial guess for the Fermi energy.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="recgratio">recgratio</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - Grid RATIO</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t75.in">75</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+It represents the ratio of the two grid step: <b>recgratio</b>=fine_step/coarse_step and
+it is bigger or equal than 1.  It introduces a double-grid system which permits
+to compute the electronic density on a coarse grid, using a fine grid
+(defined by <a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>) in the
+discretisation of the green kernel (see <a href="../../variables/generated_files/varset_dev.html#recptrott">recptrott</a>).
+Successively the density and the recursion coefficients are interpolated on the fine grid by
+FFT interpolation.  Note that ngfft/recgratio=number of points of the
+coarse grid has to be compatible with the parallelization parameters.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="recnpath">recnpath</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - Number of point for PATH integral calculations</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [4/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {mpiio:[<a href="../../tests/mpiio/Input/t42.in">42</a>],paral:[<a href="../../tests/paral/Input/t42.in">42</a>],v5:[<a href="../../tests/v5/Input/t75.in">75</a>,<a href="../../tests/v5/Input/t76.in">76</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 500</font>
+<br><font id="text">
+<p>
+<p>
+ Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+Determine the number of discretisation points to compute some path
+integral in the recursion method ; those path integrals are used to
+compute the entropy and the eigenvalues energy. during the latest SFC
+cycles.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="recnrec">recnrec</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - Number of RECursions</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [4/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {mpiio:[<a href="../../tests/mpiio/Input/t42.in">42</a>],paral:[<a href="../../tests/paral/Input/t42.in">42</a>],v5:[<a href="../../tests/v5/Input/t75.in">75</a>,<a href="../../tests/v5/Input/t76.in">76</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 10</font>
+<br><font id="text">
+<p>
+<p>
+ Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+Determine the maximum order of recursion, that is the dimension of the
+krylov space we use to compute density. If the precision set by
+<a href="../../variables/generated_files/varset_dev.html#rectolden">rectolden</a> is reached before that order, the recursion method
+automatically stops.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="recptrott">recptrott</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - TROTTer parameter</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [4/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {mpiio:[<a href="../../tests/mpiio/Input/t42.in">42</a>],paral:[<a href="../../tests/paral/Input/t42.in">42</a>],v5:[<a href="../../tests/v5/Input/t75.in">75</a>,<a href="../../tests/v5/Input/t76.in">76</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+Determine the trotter parameter used to compute the exponential of the hamiltonian in the
+recursion method: exp(-beta*(-Delta + V)) ~ (exp(-beta/(4*recptrott)
+V) exp(-beta/(4*recptrott) Delta) exp(-beta/(4*recptrott)
+V))^(2*recptrott).
+If set to 0, we use recptrott = 1/2 in the above formula.
+Increasing <b>recptrott</b> improve the accuracy of the trotter formula, but
+increase the dicretisation error: it may be necessary to increase
+<a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>. The discretisation error is essentially the discretisation
+error of the green kernel exp((recptrott/beta*|r|^2)) on the ngfft
+grid.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="recrcut">recrcut</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - CUTing Radius</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t75.in">75</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+Used to improve the
+computational time in the case of the recursion method in a large
+cell: the density at a point will be computed with taking account only of
+a sphere of radius <b>recrcut</b>.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rectesteg">rectesteg</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - TEST on Electron Gas</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v5:[<a href="../../tests/v5/Input/t76.in">76</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+It is used to test an electron gas by putting the ion potential
+equal to zero.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rectolden">rectolden</a></font>
+<br><font id="mnemonics">Mnemonics: RECursion - TOLerance on the difference of electronic DENsity</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [4/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {mpiio:[<a href="../../tests/mpiio/Input/t42.in">42</a>],paral:[<a href="../../tests/paral/Input/t42.in">42</a>],v5:[<a href="../../tests/v5/Input/t75.in">75</a>,<a href="../../tests/v5/Input/t76.in">76</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0 (Comment: Default value to be changed.)</font>
+<br><font id="text">
+<p>
+<p>
+Used in Recursion method (<a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=2).
+Sets a tolerance for differences of electronic density that, reached TWICE
+successively, will cause one SCF cycle to stop. That electronic
+density difference is computed in the infinity norm (that is, it is
+computed point-by-point, and then the maximum difference is computed).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="symmorphi">symmorphi</a></font>
+<br><font id="mnemonics">Mnemonics: SYMMORPHIc symmetry operation selection</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topics: <a href="../../topics/generated_files/topic_crystal.html">crystal</a>, <a href="../../topics/generated_files/topic_GW.html">GW</a>.</font>
+<br><font id="smalltext">Moderately used: [14/938] in abinit tests, [3/136] in tuto abinit tests. Tuto test list: {tutoplugs:[<a href="../../tests/tutoplugs/Input/tw90_1.in">w90_1</a>,<a href="../../tests/tutoplugs/Input/tw90_2.in">w90_2</a>,<a href="../../tests/tutoplugs/Input/tw90_4.in">w90_4</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ With <b>symmorphi</b>=1, symmetry operations with a non-symmorphic vector are allowed.
+With <b>symmorphi</b>=0, they are not allowed.
+In the latter case, if the symmetry operations are specified in the input file, the code
+will stop and print an error message if a non-symmorphic vector is encountered.
+By contrast, if the symmetry operations are to be determined automatically
+(if <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>=0), then the set of symmetries will
+not include the non-symmorphic operations.
+</p>
+<p>
+ Note : this feature exist because in a previous status of the GW calculations, non-symmorphic
+symmetry operations could not be exploited. Thus, the k points were restricted
+to the IBZ. In order to prepare GW calculations, and to perform GW calculations,
+<b>symmorphi</b>=0 was to be used, together with <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>=0.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tfkinfunc">tfkinfunc</a></font>
+<br><font id="mnemonics">Mnemonics: Thomas-Fermi KINetic energy FUNCtional</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [6/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {mpiio:[<a href="../../tests/mpiio/Input/t42.in">42</a>],paral:[<a href="../../tests/paral/Input/t42.in">42</a>],v4:[<a href="../../tests/v4/Input/t97.in">97</a>],v5:[<a href="../../tests/v5/Input/t75.in">75</a>,<a href="../../tests/v5/Input/t76.in">76</a>],v7:[<a href="../../tests/v7/Input/t11.in">11</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<ul>
+  <li>
+   <b>tfkinfunc</b>=1 : <span style="text-decoration: underline;">Thomas-Fermi</span>
+kinetic functional (explicit functional of the density) is used instead of Kohn-Sham kinetic
+energy functional (implicit functional of the density through Kohn-Sham wavefunctions).<br/>
+See Perrot F., Phys. Rev. A20,586-594 (1979)).
+   </li>
+  <li>
+   <b>tfkinfunc</b>=11 : <span style="text-decoration: underline;">Thomas-Fermi-Weizsacker</span>
+kinetic functional with Gradient Corrections is used.<br/>
+The convergence of a calculation with this functional needs to be initialized from a calculation without Gradient Correction.
+This is automatically done with <b>tfkinfunc</b>=11. For the initialization steps, the <a href="../../variables/generated_files/varset_dev.html#tfw_toldfe">tfw_toldfe</a> criterion is used.
+When it is reached, then the Gradient Correction is added and the SCF cycle continues.<br/>
+Note: to obtain the convergence of a Molecular Dynamics simulation with TFW, it is necessary to find the best set of
+preconditionning parameters (<a href="../../variables/generated_files/varset_gstate.html#diemix">diemix</a>, <a href="../../variables/generated_files/varset_gstate.html#diemac">diemac</a>, <a href="../../variables/generated_files/varset_gstate.html#dielng">dielng</a>) and the best value of <a href="../../variables/generated_files/varset_dev.html#npulayit">npulayit</a> (if the default Pulay mixing is used).
+   </li>
+   <li>
+   <b>tfkinfunc</b>=12 : same as <b>tfkinfunc</b>=11,
+but without the initialization steps. Gradient correction is directly added.
+   </li>
+<li>
+   <b>tfkinfunc</b>=2 : the <span style="text-decoration: underline;">Recursion Method</span>
+is used in order to compute electronic density, entropy, Fermi energy and eigenvalues energy.
+This method computes the density without computing any orbital, is efficient at high temperature,
+with a efficient parallelization (almost perfect scalability). When that option is in use, the
+<a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> input variable is no longer a convergence parameter ;
+<a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a> becomes the main convergence parameter: you should adapt ecut for the ngfft
+grid you need (it is not yet automatically computed). Other convergence parameter are for the energetic values:
+<a href="../../variables/generated_files/varset_dev.html#recnrec">recnrec</a>, <a href="../../variables/generated_files/varset_dev.html#recptrott">recptrott</a>, <a href="../../variables/generated_files/varset_dev.html#recnpath">recnpath</a>.<br/>
+Since the convergence of the self-consistent cycle
+is determined directly by the convergence of the density:
+<a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>, <a href="../../variables/generated_files/varset_basic.html#toldff">toldff</a>, <a href="../../variables/generated_files/varset_basic.html#tolrff">tolrff</a>,
+<a href="../../variables/generated_files/varset_basic.html#tolvrs">tolvrs</a>, <a href="../../variables/generated_files/varset_basic.html#tolwfr">tolwfr</a> are not used, and are replaced by
+<a href="../../variables/generated_files/varset_dev.html#rectolden">rectolden</a>; the energetic values, except for the fermi energy, are only
+computed during the latest SFC cycle : the output file will show a
+jump of the total energy at the end, but it is not because of a bad
+convergence behavior. Computational speed can be improved by the use
+of  <a href="../../variables/generated_files/varset_dev.html#recrcut">recrcut</a> and  <a href="../../variables/generated_files/varset_dev.html#recgratio">recgratio</a>.
+The recursion method has not be tested in the case of non cubic cell
+or with the use of symmetries.<br/>
+In the recursion method the following variables are set to:
+<a href="../../variables/generated_files/varset_dev.html#useylm">useylm</a>=1,  <a href="../../variables/generated_files/varset_internal.html#userec">userec</a>=1.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tfw_toldfe">tfw_toldfe</a></font>
+<br><font id="mnemonics">Mnemonics: Thomas-Fermi-Weizsacker: TOLerance on the DiFference of total Energy, for initialization steps</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Recursion.html">Recursion</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v7:[<a href="../../tests/v7/Input/t11.in">11</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1.0E-6 or <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a> is present</font>
+<br><br><font id="requires">
+Only relevant if <a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=11
+</font>
+<br><font id="text">
+<p>
+This input variable has the same definition as <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a> and is only relevant when <a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>=11.<br/>
+It sets a tolerance for absolute differences of total energy that, reached TWICE successively, will cause the
+initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
+Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tolrde">tolrde</a></font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the Relative Difference of Eigenenergies</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SCFControl.html">SCFControl</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [1/136] in tuto abinit tests. Test list: {atompaw:[<a href="../../tests/atompaw/Input/t04.in">04</a>],tutoparal:[<a href="../../tests/tutoparal/Input/tdfpt_04.in">dfpt_04</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.005</font>
+<br><font id="text">
+<p>
+<p>
+ Sets a tolerance for the ratio of differences of eigenenergies
+in the line minimisation conjugate-gradient algorithm. It compares the
+decrease of the eigenenergy due to the last line minimisation, with the
+one observed for the first line minimisation.
+When the ratio is lower than <b>tolrde</b>,
+the next line minimisations are skipped.
+ <br />
+ The number of line minimisations is limited by
+<a href="../../variables/generated_files/varset_gstate.html#nline">nline</a> anyhow.
+ <br />
+ This stopping criterion is present for both GS and RF calculations.
+In RF calculations, <b>tolrde</b> is actually doubled before comparing with the above-mentioned
+ratio, for historical reasons.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="use_gemm_nonlop">use_gemm_nonlop</a></font>
+<br><font id="mnemonics">Mnemonics: USE the GEMM routine for the application of the NON-Local OPerator</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a>.</font>
+<br><font id="smalltext">Rarely used: [2/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {paral:[<a href="../../tests/paral/Input/t25.in">25</a>,<a href="../../tests/paral/Input/t30.in">30</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 (Comment: because it is not usually worth using it unless bandpp is large and it requires additional memory)</font>
+<br><font id="text">
+<p>
+<p>
+ This keyword tells abinit to use a BLAS routine to speed up the computation of the non-local operator. This requires the precomputation of a large matrix, and has a significant memory overhead. In exchange, it provides improved performance when used on several bands at once (Chebyshev or LOBPCG algorithm with <a href="../../variables/generated_files/varset_paral.html#bandpp">bandpp</a>
+<p>
+ The memory overhead is proportional to the number of atoms, the number of plane waves, and the number of projectors per atom. It can be mitigated by distributing the array with
+ <a href="../../variables/generated_files/varset_paral.html#npfft">npfft</a>
+</p>
+<p>
+ The performance depends crucially on having a good BLAS installed. Provided the BLAS supports OpenMP, this option also yields very good scaling for the nonlocal operator.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="use_nonscf_gkk">use_nonscf_gkk</a></font>
+<br><font id="mnemonics">Mnemonics: USE NON-SCF calculation of GKK matrix elements (electron phonon)</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_ElPhonInt.html">ElPhonInt</a>.</font>
+<br><font id="smalltext">Rarely used: [5/938] in abinit tests, [1/136] in tuto abinit tests. Test list: {tutorespfn:[<a href="../../tests/tutorespfn/Input/teph_1.in">eph_1</a>],v5:[<a href="../../tests/v5/Input/t85.in">85</a>],v6:[<a href="../../tests/v6/Input/t72.in">72</a>,<a href="../../tests/v6/Input/t90.in">90</a>],v7:[<a href="../../tests/v7/Input/t90.in">90</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 (Comment: Default is 0 for the moment. Do not use non-scf method.)</font>
+<br><font id="text">
+<p>
+<p>
+ When this flag is activated during a phonon calculation with abinit, all of the perturbations are cycled through, but only the symmetry-irreducible ones are calculated self-consistently. For the others the perturbed density is rotated by the appropriate symop and the gkk matrix elements are calculated non-self-consistently. As they do not depend on the perturbed wave functions, they are correct from the first iteration, and nstep is set to 1 for those perturbations. Note that the resulting 1DEN files are simply the rotate/symmetric ones and that the resulting 1WF files are garbage (completely unconverged) except the matrix elements in the header (equivalent to GKK files, but please use the latter much smaller files for el-ph calculations). The new default behavior with <b>use_nonscf_gkk</b> = 1 should be transparent for the user, with the same output files but a much quicker execution.
+</p>
+<p>
+ Caveat: Note that very tight convergence of ground state and phonon calculations is necessary to get good GKK matrix elements! <a href="../../variables/generated_files/varset_basic.html#tolwfr">tolwfr</a> = 1.e-24 or so is recommended everywhere. There may be problems using use_nonscf_gkk = 1 with non-symmorphic symmetries - please check (at least) that lifetimes for phonons go to 0 for acoustic modes at Gamma.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="usedmft">usedmft</a></font>
+<br><font id="mnemonics">Mnemonics: USE Dynamical Mean Field Theory</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_DMFT.html">DMFT</a>.</font>
+<br><font id="smalltext">Moderately used: [21/938] in abinit tests, [1/136] in tuto abinit tests. Tuto test list: {tutoparal:[<a href="../../tests/tutoparal/Input/tdmft_2.in">dmft_2</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ If set to 1, enable the use of DFT+DMFT, see in particular the important variables
+<a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmft_nwli">dmft_nwli</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmft_tollc">dmft_tollc</a>,
+<a href="../../variables/generated_files/varset_dmft.html#dmft_tolfreq">dmft_tolfreq</a>,
+and <a href="../../variables/generated_files/varset_dmft.html#dmft_iter">dmft_iter</a>.
+</p>
+<p>
+ The current implementation uses Wannier functions obtained from
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+  projected local orbitals
+ </a>
+ as correlated orbitals (see <a href="../../variables/generated_files/varset_dmft.html#dmftbandi">dmftbandi</a>  and <a href="../../variables/generated_files/varset_dmft.html#dmftbandf">dmftbandf</a> input variables to define them).
+</p>
+<p>
+ The Green functions are computed on a mesh of linear Matsubara frequencies. However, most of the code uses logarithmic Matsubara grid to lower the computational cost. Both <a href="../../variables/generated_files/varset_dmft.html#dmft_nwli">dmft_nwli</a> and <a href="../../variables/generated_files/varset_dmft.html#dmft_nwlo">dmft_nwlo</a> are thus convergence parameters.
+</p>
+<p>
+ DMFT is currently available for collinear (<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=1) polarized or unpolarized calculations (<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2 or <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1)
+and for non collinear calculations (<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2,<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=4,<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1). However it is not yet available
+for collinear antiferromagnetic calculations  (<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=2,<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1) and non collinear non magnetic calculations (<a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=1, <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1,<a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2).
+CTQMC calculations (<a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5) are not yet possible if <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2.
+</p>
+<p>
+ Only static calculations without relaxation or dynamics are possible (forces and stress are not computed in the scheme: so the computed values should NOT be trusted).
+</p>
+<p>
+ When correlated density matrices are diagonal, all values of <a href="../../variables/generated_files/varset_paw.html#upawu">upawu</a> and <a href="../../variables/generated_files/varset_paw.html#jpawu">jpawu</a>
+ are possible. If the correlated density matrices are non diagonal, only <a href="../../variables/generated_files/varset_paw.html#jpawu">jpawu</a> = 0 is implemented.
+</p>
+<p>
+ Relevant direct output quantities from
+converged DMFT calculations are total energy and occupation of correlated orbitals. For Hubbard I calculation (<a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=2), total and partial spectral
+functions can be obtained with prtdos=1 and can be found in files OUTSpFunc* (where OUT is the root for
+output files). For CTQMC calculations (<a href="../../variables/generated_files/varset_dmft.html#dmft_solv">dmft_solv</a>=5), imaginary time impurity Green function are output of the calculations and can be used to produce
+spectral function using an external Maximum Entropy Code.
+</p>
+<p>
+ A typical DFT+DMFT calculation involves two runs. First, a DFT calculation is fully converged (even unoccupied wavefunctions have to be converged).
+Then, the DFT+DMFT calculation is started using DFT wavefunctions or density files.  As DFT+DMFT calculations (with CTQMC) are computationnally
+expensive, it is convenient to use prtden=-1, to write DEN file at each DFT iteration, in order to be able to restart the calculation easily.
+</p>
+<p>
+ For details of the implementation see,
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+  B. Amadon, F. Lechermann, A. Georges, F.  Jollet, T. O.  Wehling, and A. I.  Lichtenstein, Phys. Rev. B 77(20), (2008)
+ </a>
+ , for Wannier functions and
+  B. Amadon, J. Phys.: Condens. Matter 24 075604 (2012) (doi:10.1088/0953-8984/24/7/075604),
+for self-consistency and Hubbard I implementation.
+
+If <b>usedmft</b>=1 and <a href="../../variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>/=0, then, the DFT+DMFT calculation is not done and only projections are computed at the end
+of the calculation. They can be used by an external code or used to compute the screened interaction (see variable <a href="../../variables/generated_files/varset_gw.html#ucrpa">ucrpa</a>).
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="useria">useria</a></font>
+<br><font id="mnemonics">Mnemonics: USER Integer variable A</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable integers which the user may
+input and then utilize in subroutines of his/her own
+design.  They are not used in the official versions
+of the ABINIT code, and should ease independent
+developments (hopefully integrated in the official
+version afterwards).
+ <br />
+ Internally, they are available in the dtset structured datatype,
+e.g. dtset%useria .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userib">userib</a></font>
+<br><font id="mnemonics">Mnemonics: USER Integer variable B</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable integers which the user may
+input and then utilize in subroutines of his/her own
+design.  They are not used in the official versions
+of the ABINIT code, and should ease independent
+developments (hopefully integrated in the official
+version afterwards).
+ <br />
+ Internally, they are available in the dtset structured datatype,
+e.g. dtset%useria .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="useric">useric</a></font>
+<br><font id="mnemonics">Mnemonics: USER Integer variable C</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable integers which the user may
+input and then utilize in subroutines of his/her own
+design.  They are not used in the official versions
+of the ABINIT code, and should ease independent
+developments (hopefully integrated in the official
+version afterwards).
+ <br />
+ Internally, they are available in the dtset structured datatype,
+e.g. dtset%useria .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userid">userid</a></font>
+<br><font id="mnemonics">Mnemonics: USER Integer variable D</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable integers which the user may
+input and then utilize in subroutines of his/her own
+design.  They are not used in the official versions
+of the ABINIT code, and should ease independent
+developments (hopefully integrated in the official
+version afterwards).
+ <br />
+ Internally, they are available in the dtset structured datatype,
+e.g. dtset%useria .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userie">userie</a></font>
+<br><font id="mnemonics">Mnemonics: USER Integer variable E</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable integers which the user may
+input and then utilize in subroutines of his/her own
+design.  They are not used in the official versions
+of the ABINIT code, and should ease independent
+developments (hopefully integrated in the official
+version afterwards).
+ <br />
+ Internally, they are available in the dtset structured datatype,
+e.g. dtset%useria .
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userra">userra</a></font>
+<br><font id="mnemonics">Mnemonics: USER Real variable A</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable with the same purpose as <a href="../../variables/generated_files/varset_dev.html#useria">useria</a> and cie.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userrb">userrb</a></font>
+<br><font id="mnemonics">Mnemonics: USER Real variable B</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable with the same purpose as <a href="../../variables/generated_files/varset_dev.html#useria">useria</a> and cie.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userrc">userrc</a></font>
+<br><font id="mnemonics">Mnemonics: USER Real variable C</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable with the same purpose as <a href="../../variables/generated_files/varset_dev.html#useria">useria</a> and cie.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userrd">userrd</a></font>
+<br><font id="mnemonics">Mnemonics: USER Real variable D</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable with the same purpose as <a href="../../variables/generated_files/varset_dev.html#useria">useria</a> and cie.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userre">userre</a></font>
+<br><font id="mnemonics">Mnemonics: USER Real variable E</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_Dev.html">Dev</a>.</font>
+<br><font id="smalltext">Rarely used: [0/938] in abinit tests, [0/136] in tuto abinit tests.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0</font>
+<br><font id="text">
+<p>
+<p>
+ These are user-definable with the same purpose as <a href="../../variables/generated_files/varset_dev.html#useria">useria</a> and cie.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="useylm">useylm</a></font>
+<br><font id="mnemonics">Mnemonics: USE YLM (the spherical harmonics)</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_TuningSpeed.html">TuningSpeed</a>.</font>
+<br><font id="smalltext">Rarely used: [6/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {v4:[<a href="../../tests/v4/Input/t01.in">01</a>,<a href="../../tests/v4/Input/t02.in">02</a>,<a href="../../tests/v4/Input/t03.in">03</a>],wannier90:[<a href="../../tests/wannier90/Input/t00.in">00</a>,<a href="../../tests/wannier90/Input/t01.in">01</a>,<a href="../../tests/wannier90/Input/t02.in">02</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 if <a href="../../variables/generated_files/varset_dev.html#tfkinfunc">tfkinfunc</a>==1,
+1 if <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>==1,
+0 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ When this flag is activated, the non-local operator is applied using an algorithm based on spherical harmonics. Non-local projectors are used with their usual form:
+ <br />
+ <ul>
+  P
+  <sub>
+   lmn
+  </sub>
+  (r)=Y
+  <sub>
+   lm
+  </sub>
+  (r)*p
+  <sub>
+   ln
+  </sub>
+  (r)
+ </ul>
+ <br />
+ <br />
+ When <b>useylm</b>=0, the sum over Y_lm can be reduced to a Legendre polynomial form.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="wfoptalg">wfoptalg</a></font>
+<br><font id="mnemonics">Mnemonics: WaveFunction OPTimisation ALGorithm</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_SCFAlgorithms.html">SCFAlgorithms</a>.</font>
+<br><font id="smalltext">Rarely used: [9/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {gpu:[<a href="../../tests/gpu/Input/t01.in">01</a>,<a href="../../tests/gpu/Input/t03.in">03</a>,<a href="../../tests/gpu/Input/t05.in">05</a>],paral:[<a href="../../tests/paral/Input/t30.in">30</a>,<a href="../../tests/paral/Input/t41.in">41</a>],v3:[<a href="../../tests/v3/Input/t45.in">45</a>],v4:[<a href="../../tests/v4/Input/t93.in">93</a>,<a href="../../tests/v4/Input/t94.in">94</a>],v5:[<a href="../../tests/v5/Input/t75.in">75</a>]}.</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is <a href="../../variables/generated_files/varset_external.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a> (Comment: 0 when <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>=0 (norm-conserving pseudopotentials), 10 when <a href="../../variables/generated_files/varset_internal.html#usepaw">usepaw</a>=1 (PAW) ; 114 if <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>=1.)</font>
+<br><font id="text">
+<p>
+<p>
+ Allows one to choose the algorithm for the optimisation of the wavefunctions.
+ <br />
+ The different possibilities are :
+ <ul>
+  <li>
+   <b>wfoptalg</b>=0 : standard state-by-state conjugate gradient algorithm,
+with no possibility to parallelize over the states;
+  </li>
+  <li>
+   <b>wfoptalg</b>=2 : minimisation of the residual with respect
+to different shifts, in order to cover the whole set of occupied
+bands, with possibility to parallelize over blocks of states (or bands).
+The number of states in a block
+is defined in <a href="../../variables/generated_files/varset_dev.html#nbdblock">nbdblock</a>.
+THIS IS STILL IN DEVELOPMENT.
+  </li>
+  <li>
+   <b>wfoptalg</b>=3 : minimisation of the residual with respect
+to a shift. Available only in the non-self-consistent case
+<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>=-2,
+in order to find eigenvalues and wavefunctions close to a
+prescribed value.
+  </li>
+  <li>
+   <b>wfoptalg</b>=4 : (see also <b>wfoptalg</b>=14), a parallel code based on the Locally Optimal
+Block Preconditioned Conjugate Gradient (LOBPCG) method of Knyazev.
+   <a href="http://dx.doi.org/10.1137/S1064827500366124">
+    Reference : A.V. Knyazev, "Toward the Optimal Preconditioned Eigensolver
+: Locally Optimal Block Preconditioned Conjugate Gradient Method". SIAM
+Journal on Scientific Computing 23, pp517-541 (2001)
+   </a>
+   .
+The implementation rests on the
+   <a href="http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m">
+    matlab program by Knyazev
+   </a>
+   .
+   <a href="http://dx.doi.org/10.1137/060661624">
+    Reference A. V. Knyazev, I. Lashuk, M. E. Argentati, and E. Ovchinnikov,
+Block Locally Optimal Preconditioned Eigenvalue Xolvers (BLOPEX) in
+hypre and PETSc (2007). SIAM Journal on Scientific Computing (SISC).
+25(5): 2224-2239
+   </a>
+   .
+For more information see
+   <a href="http://dx.doi.org/10.1016/j.commatsci.2007.07.019">
+    F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Large scale
+ab initio calculations based on three levels of parallelization. (2008).
+Computational Material Science, 42(2), 329-336.
+   </a>
+  </li>
+  <li>
+   <b>wfoptalg</b>=10 : (for PAW) standard state-by-state conjugate gradient algorithm,
+with no possibility to parallelize over the states, but modified
+scheme described in Kresse, Furthmuller, PRB 54, 11169 (1996)
+(modified kinetic energy, modified preconditionning, minimal
+orthogonalization, ...) ;
+  </li>
+  <li>
+   <b>wfoptalg</b>=14 :
+the recommended for parallel code, the same as <b>wfoptalg</b>=4 except that the preconditioning of
+the block vectors does not depend on the kinetic energy of each band,
+and the orthogonalization after the LOBPCG algorithm is no longer
+performed. The first modification increases the convergence and the
+second one the efficiency.
+  </li>
+<li>
+   <b>wfoptalg</b>=114 :
+A new version of <b>wfoptalg</b>=14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library.
+With more than 1 thread <a href="../../variables/generated_files/varset_paral.html#npfft">npfft</a> shoud NOT be used for the time being.
+  </li>
+  <li>
+   <b>wfoptalg</b>=1 :
+new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms. By design, it will
+   <b>
+    not
+   </b>
+   converge the last bands: it is recommended to use slightly more bands than necessary. For usage with <a href="../../variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>, it is imperative to use <a href="../../variables/generated_files/varset_gstate.html#nbdbuf">nbdbuf</a>. For more performance, try <a href="../../variables/generated_files/varset_dev.html#use_gemm_nonlop">use_gemm_nonlop</a>. For more information, see the
+   <a href="../../theory/howto_chebfi.pdf">
+    performance guide
+   </a>
+   and the
+   <a href="https://arxiv.org/abs/1406.4350">
+    paper
+   </a>
+   by A. Levitt and M. Torrent. Status: experimental but usable. Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="xc_denpos">xc_denpos</a></font>
+<br><font id="mnemonics">Mnemonics: eXchange-Correlation - DENsity POSitivity value</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Characteristic: <a href="../../guide/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_xc.html">xc</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t13.in">13</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1e-14</font>
+<br><font id="text">
+<p>
+<p>
+ For the evaluation of the exchange-correlation functionals, the density
+cannot be negative, or even too small (e.g. the LDA exchange kernel
+behaves like the density at power -(2/3), and the density is used at the denominator
+of different factors in GGAs and metaGGAs.
+<b>xc_denpos</b> is the smallest value that the density can assume at the time of the
+evaluation of a XC functional, in ABINIT. When then computed density drops below <b>xc_denpos</b>
+before attacking the evaluation of the XC functional, then it will be (only for that purpose)
+replaced by <b>xc_denpos</b>. Note that the evaluation of the gradients or other quantities
+that are density-dependent is performed before this replacement.
+</p>
+<p>
+ It has been observed that the SCF cycle of the Tran-Blaha mGGA can be quite hard to make converge, for systems
+for which there is some vacuum. In this case, setting <b>xc_denpos</b> to 1.0e-7 ... 1.0e-6 has been seen
+to allow good convergence. Of course, this will affect the numerical results somehow, and one should play
+a bit with this value to avoid incorrect calculations.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="xc_tb09_c">xc_tb09_c</a></font>
+<br><font id="mnemonics">Mnemonics: Value of the c parameter in the eXchange-Correlation TB09 functional</font>
+<br><font id="mnemonics">Executable: abinit</font>
+<br><font id="characteristic">Mentioned in topic: <a href="../../topics/generated_files/topic_xc.html">xc</a>.</font>
+<br><font id="smalltext">Rarely used: [1/938] in abinit tests, [0/136] in tuto abinit tests. Test list: {libxc:[<a href="../../tests/libxc/Input/t13.in">13</a>]}.</font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 99.99</font>
+<br><font id="text">
+<p>
+<p>
+ The modified Becke-Johnson exchange-correlation functional by Tran and Blaha (Phys. Rev. Lett. 102, 226401 (2009)) reads :
+</p>
+<p>
+ V_x(r) = c * V_x^{BR}(r) + (3*c - 2) * 1/pi * sqrt(5/12) * sqrt(2*kden(r)/den(r))
+</p>
+<p>
+ in which V_x^{BR}(r) is the Becke-Roussel potential.
+</p>
+<p>
+ In this equation the parameter c can be evaluated at each SCF step according to the following equation :
+</p>
+<p>
+ c = alpha + beta * sqrt(1/V_{cell} * \int_{V_{cell}} |grad(den(r))|/den(r) d3r)
+</p>
+<p>
+ The c parameter is evaluated thanks to the previous equation when xc_tb09_c is equal to the "magic" default value 99.99.
+The c parameter can also be fixed to some (property-optimized or material-optimized) value by using this variable.
+</p>
+</font>
+
+<br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

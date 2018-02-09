@@ -7,7 +7,7 @@
 !!  Shankland-Koelling-Wood Fourier interpolation scheme.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -560,7 +560,7 @@ end subroutine skw_eval_bks
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
 !!  nfft=Number of points in FFT mesh.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  band=Band index.
 !!  spin=Spin index.
 !!

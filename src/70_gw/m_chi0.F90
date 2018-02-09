@@ -7,7 +7,7 @@
 !!  This module provides tools for the computation of the irreducible polarizability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2018 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -140,7 +140,6 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 !Local variables-------------------------------
 !scalars
  integer :: itim,io,isym,ig1,ig2,nthreads
- integer :: jj,ii,s_jj,pad_jj,pad_ii
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
@@ -702,13 +701,13 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
 
 !Local variables-------------------------------
 !scalars
- integer :: itim,io,isym,idir,jdir,jj,ii,s_jj,pad_jj,pad_ii
+ integer :: itim,io,isym,idir,jdir
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
  integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
  complex(dpc) :: mir_kbz(3)
- complex(gwpc),allocatable :: rhotwg_sym(:),rhotwg_I(:),rhotwg_J(:)
+ complex(gwpc),allocatable :: rhotwg_sym(:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
 
 !************************************************************************
@@ -2419,7 +2418,6 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
 !scalars
  integer :: ib1,ib2
  real(dp) :: deltaeGW_b1kmq_b2k,deltaf_b1kmq_b2k,e_b1_kmq,f_b1_kmq
- character(len=500) :: msg
 !arrays
  real(dp), ABI_CONTIGUOUS pointer :: qp_energy(:,:,:),qp_occ(:,:,:)
 

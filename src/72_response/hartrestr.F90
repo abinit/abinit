@@ -13,7 +13,7 @@
 !!          - delta(diagonal strain)*(1/G**2)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR).
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@
 !!  natom=number of atoms in cell.
 !!  nfft=number of fft grid points (gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2))
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!

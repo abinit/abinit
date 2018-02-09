@@ -9,7 +9,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (AM)
+!! Copyright (C) 2000-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,8 +72,6 @@ module m_effective_potential_file
  public :: effpot_xml_getValue
  public :: effpot_xml_getAttribute
  public :: effpot_xml_getDimSystem
- private :: char_f2c
- private :: char_c2f
 
  interface
    subroutine effpot_xml_readSystem(filename,natom,&
@@ -116,15 +114,18 @@ module m_effective_potential_file
 
  interface
    subroutine effpot_xml_readCoeff(filename,ncoeff,ndisp,nterm,&
-&                                 coefficient,atindx,cell,direction,power,weight)&
+&                                 coefficient,atindx,cell,direction,power_disp,&
+&                                 power_strain,strain,weight)&
 &                          bind(C,name="effpot_xml_readCoeff")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      character(kind=C_CHAR) :: filename(*)
+     integer(C_INT) :: ncoeff,ndisp,nterm
      integer(C_INT) :: atindx(ncoeff,nterm,2,ndisp)
      integer(C_INT) :: cell(ncoeff,nterm,3,2,ndisp)
-     integer(C_INT) :: ncoeff,ndisp,nterm
      integer(C_INT) :: direction(ncoeff,nterm,ndisp)
-     integer(C_INT) :: power(ncoeff,nterm,ndisp)
+     integer(C_INT) :: strain(ncoeff,nterm,ndisp)
+     integer(C_INT) :: power_disp(ncoeff,nterm,ndisp)
+     integer(C_INT) :: power_strain(ncoeff,nterm,ndisp)
      real(C_DOUBLE) :: coefficient(ncoeff)
      real(C_DOUBLE) :: weight(ncoeff,nterm)
    end subroutine effpot_xml_readCoeff
@@ -156,7 +157,7 @@ module m_effective_potential_file
      character(kind=C_CHAR) :: filename(*)
 !     character(kind=C_CHAR) :: name(*)
      type(C_PTR) :: name
-     integer(C_INT) :: coeff,ndisp_max,nterm_max
+     integer(C_INT) :: ncoeff,ndisp_max,nterm_max
    end subroutine effpot_xml_getDimCoeff
  end interface
 
@@ -216,7 +217,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! filename = path of the file
 !! hist<type(abihist)> = optional,The history of the MD (or snapshot of DFT)
-!! inp<type(multibinit_dataset_type)> = optional,datatype with all the input variables (mantadory to 
+!! inp<type(multibinit_dtset_type)> = optional,datatype with all the input variables (mantadory to 
 !!                                      read DDB file)
 !! comm=MPI communicator
 !!
@@ -254,7 +255,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
   character(len=fnlen),intent(in) :: filename
 !array
   type(effective_potential_type), intent(inout)  :: eff_pot
-  type(multibinit_dataset_type),optional,intent(in) :: inp
+  type(multibinit_dtset_type),optional,intent(in) :: inp
   type(ddb_type) :: ddb
   type(crystal_t) :: Crystal
   type(abihist),optional :: hist
@@ -285,7 +286,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       call wrtout(std_out,message,'COLL')
       call wrtout(ab_out,message,'COLL')
 
-      call effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt,comm)!
+      call effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)!
 
 !     In anaddb, inp%atifc is set to 1 2 3 ... natom (see anaddb help).
 !     Then in the next routine inp%atifc is convert with 0 or 1 (inp%atifc is now 1 1 1 1 0).
@@ -327,7 +328,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
 
 !     Assign the energy of the reference from input
-      if(inp%energy_reference/=zero)then
+      if(abs(inp%energy_reference)>tol16)then
         write(message,'(11a)') ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     Energy of the reference structure is specify in ',ch10,&
@@ -339,7 +340,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       end if
 
 !     Assign the stress tensor of the reference from input
-      if(any(inp%strten_reference==zero))then
+      if(any(abs(inp%strten_reference)<tol16))then
         write(message,'(9a)') ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     The stress tensor of the reference structure is not specify in ',ch10,&
@@ -385,7 +386,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &      ' ---',ch10
         call wrtout(std_out,message,'COLL')
         if(inp%fit_coeff <= 0 .and. &
-&          all(eff_pot%anharmonics_terms%coefficients(:)%coefficient == zero)) then
+&          all(abs(eff_pot%anharmonics_terms%coefficients(:)%coefficient) <tol16)) then
 
           write(message,'(12a)') ch10,&
 &          ' --- !WARNING',ch10,&
@@ -418,7 +419,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &         ' with NetCDF in order to fit the polynomial coefficients'
         call wrtout(std_out,message,'COLL') 
         call wrtout(ab_out,message,'COLL')
-        call effective_potential_file_readMDfile(filename,hist)
+        call effective_potential_file_readMDfile(filename,hist,option=inp%fit_ts_option)
       else
        write(message, '(3a)' )&
 &         'There is no hist argument ',ch10,&
@@ -461,7 +462,7 @@ end subroutine effective_potential_file_read
 !!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
-!!      m_effective_potential_file,mover_effpot,multibinit
+!!      m_effective_potential_file,multibinit
 !!
 !! CHILDREN
 !!
@@ -561,6 +562,7 @@ subroutine effective_potential_file_getType(filename,filetype)
      return
    end if
  end if
+ ncerr = nf90_close(ncid)
 #endif
 
  if(filetype/=0) return
@@ -585,7 +587,6 @@ end subroutine effective_potential_file_getType
 !!
 !! INPUTS
 !! filename = names of the files
-!! comm=MPI communicator
 !!
 !! OUTPUT
 !! natom = number of atoms
@@ -600,7 +601,7 @@ end subroutine effective_potential_file_getType
 !!
 !! SOURCE
 
-subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt,comm)
+subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)
 
  use m_ddb
  use m_ddb_hdr
@@ -617,13 +618,11 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
- integer,intent(in) :: comm
  integer,intent(out) :: natom,ntypat,nqpt,nrpt
 !arrays
 
 !Local variables-------------------------------
  !scalar
- integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer :: filetype
 ! integer :: dimekb,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
  integer :: ddbun = 666
@@ -1057,6 +1056,9 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
    rewind(unit=unit_md)
    ios = 0
    nstep   = 0
+   nrprimd = 0
+   natm_old= 0
+   natm_new= 0
    nenergy = 0
    compatible = .TRUE.
 
@@ -1180,7 +1182,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 #endif
   !arrays
 #ifndef HAVE_LIBXML
-  real,allocatable :: typat(:)
+  integer,allocatable :: typat(:)
 #endif
 
  ! *************************************************************************
@@ -1268,10 +1270,10 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
        call rdfromline("mass",line,strg)
        strg1=trim(strg)
        read(unit=strg1,fmt=*) itypat
-       if (.not.any(typat==itypat)) then
+       if (.not.any(typat==int(itypat))) then
          ntypat= ntypat+1
        end if
-       typat(iatom) = itypat
+       typat(iatom) = int(itypat)
      end if
 
      if (line(1:6)==char(60)//'local') then
@@ -1344,7 +1346,7 @@ end subroutine system_getDimFromXML
 
  use m_atomdata
  use m_effective_potential, only : effective_potential_type
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1389,7 +1391,7 @@ end subroutine system_getDimFromXML
  integer,allocatable  :: symrel(:,:,:),symafm(:),ptsymrel(:,:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp) :: elastic_constants(6,6),elastic3rd(6,6,6),epsilon_inf(3,3)
- real(dp),allocatable :: all_amu(:), cell_local(:,:),cell_total(:,:)
+ real(dp),allocatable :: all_amu(:),cell_local(:,:),cell_total(:,:)
  real(dp),allocatable :: elastic_displacement(:,:,:,:),dynmat(:,:,:,:,:,:)
  real(dp),allocatable :: local_atmfrc(:,:,:,:,:),total_atmfrc(:,:,:,:,:)
  real(dp),allocatable :: spinat(:,:),strain_coupling(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
@@ -1420,7 +1422,7 @@ end subroutine system_getDimFromXML
  iam_master = (my_rank == master)
 
 !Get Dimention of system and allocation/initialisation of array
- call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt,0)
+ call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt)
  gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
  elastic_constants = zero; epsilon_inf = zero; ncoeff = 0
  ABI_ALLOCATE(all_amu,(ntypat))
@@ -1657,9 +1659,9 @@ end subroutine system_getDimFromXML
            call rdfromline("mass",line,strg)
            strg1=trim(strg)
            read(strg1,*) amu
-           if (.not.any(all_amu==amu)) then
+           if (.not.any(abs(all_amu-amu)<tol16)) then
              all_amu(iamu) = amu
-             typat(iatom) = amu
+             typat(iatom) = int(amu)
              !convert atomic mass unit to znucl
              do ii=1,103
                call atomdata_from_znucl(atom,real(ii,dp))
@@ -1672,7 +1674,7 @@ end subroutine system_getDimFromXML
              iamu = iamu +1
            end if
            do itypat=1,ntypat
-             if(amu==all_amu(itypat)) then
+             if(abs(amu-all_amu(itypat))<tol16) then
                typat(iatom) = itypat
              end if
            end do
@@ -2075,14 +2077,14 @@ end subroutine system_getDimFromXML
 ! Reorder the ATMFRC
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
-     ifcs%cell(:,:) = cell_local(:,:)
+     ifcs%cell(:,:) = int(cell_local(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
      ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
 ! Case 2: only total in the xml
    else if(irpt1==0 .and. irpt2>0)then
-     ifcs%cell(:,:) = cell_total(:,:)
+     ifcs%cell(:,:) = int(cell_total(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = zero
      ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
@@ -2092,10 +2094,10 @@ end subroutine system_getDimFromXML
      if(irpt1 <= irpt2)then
        irpt3 = 0
        do ii=1,irpt2
-         ifcs%cell(:,ii) = cell_total(:,ii)
+         ifcs%cell(:,ii) = int(cell_total(:,ii))
          ifcs%atmfrc(:,:,:,:,ii)  = total_atmfrc(:,:,:,:,ii)
          do jj=1,irpt1
-           if (all(cell_local(:,jj)== ifcs%cell(:,ii))) then
+           if (all(abs(int(cell_local(:,jj))-ifcs%cell(:,ii))<tol16)) then
              ifcs%short_atmfrc(:,:,:,:,ii) = local_atmfrc(:,:,:,:,jj)
              irpt3 = irpt3 + 1
            end if
@@ -2122,13 +2124,13 @@ end subroutine system_getDimFromXML
      MSG_ERROR(message)
    end if
 
-   if (any(znucl==zero)) then
+   if (any(abs(znucl)<tol16)) then
      write(message, '(a,a,a)' )&
 &      ' Unable to read the atomic number ',trim(filename),ch10
      MSG_ERROR(message)
    end if
 
-   if (any(all_amu==zero)) then
+   if (any(abs(all_amu)<tol16)) then
      write(message, '(a,a,a)' )&
 &     ' Unable to read the atomic mass ',trim(filename),ch10
      MSG_ERROR(message)
@@ -2278,7 +2280,7 @@ end subroutine system_xml2effpot
 !! INPUTS
 !! crytal<type(crystal_t)> = datatype with all the information for the crystal
 !! ddb<type(ddb_type)> = datatype with the ddb
-!! inp<type(multibinit_dataset_type)> = datatype with the input variables of multibinit
+!! inp<type(multibinit_dtset_type)> = datatype with the input variables of multibinit
 !! comm = MPI communicator
 !!
 !! OUTPUT
@@ -2309,7 +2311,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t,crystal_print
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2331,7 +2333,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  type(ddb_type),intent(inout) :: ddb
  type(effective_potential_type), intent(inout) :: effective_potential
  type(crystal_t),intent(in) :: crystal
- type(multibinit_dataset_type),intent(in) :: inp
+ type(multibinit_dtset_type),intent(in) :: inp
 
 !Local variables-------------------------------
 !scalar
@@ -2348,11 +2350,12 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
  integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
+ integer,allocatable :: cell_red(:,:)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
  real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
- real(dp),pointer :: atmfrc_red(:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
+ real(dp),pointer :: atmfrc_red(:,:,:,:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(asrq0_t) :: asrq0
  type(ifc_type) :: ifc
@@ -2378,7 +2381,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
   ABI_ALLOCATE(blkval,(2,3,mpert,3,mpert,nblok))
-  blkval = zero
+  blkval = 0
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
 
 !**********************************************************************
@@ -2390,7 +2393,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_ALLOCATE(symafm,(msym))
   ABI_ALLOCATE(symrel,(3,3,msym))
   ABI_ALLOCATE(tnons,(3,msym))
-  spinat = zero;  symrel = zero;  symafm = zero;  tnons = zero ; space_group = zero;
+  spinat = zero;  symrel = 0;  symafm = 0;  tnons = zero ; space_group = 0;
   call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
   call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
 &              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
@@ -2426,7 +2429,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
   if (ddb_get_etotal(ddb,effective_potential%energy) == 0) then
-    if(inp%energy_reference==zero)then
+    if(abs(inp%energy_reference) < tol16)then
       write(message,'(5a)')&
 &      ' Warning : Energy of the reference structure is not specify in',&
 &      ' the input file.',ch10,' Energy will set to zero',ch10
@@ -2436,7 +2439,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
       effective_potential%energy = inp%energy_reference
     end if
   else
-    if(inp%energy_reference/=zero)then
+    if(abs(inp%energy_reference) > tol16)then
       write(message,'(6a)')&
 &      ' Warning : Energy of the reference structure is specify in',&
 &      ' the input file.',ch10,' and in the DDB.',&
@@ -2492,7 +2495,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   if (iblok /=0) then
-   if(any(inp%strten_reference/=zero))then
+   if(any(abs(inp%strten_reference)>tol16))then
      write(message,'(10a)') ch10,&
 &          ' --- !WARNING:',ch10,&
 &          '     The stress tensor of the reference structure is specify in the',ch10,&
@@ -2516,7 +2519,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !  Get forces
    effective_potential%fcart(:,1:natom) = blkval(1,:,1:natom,1,1,iblok)
  else
-   if(all(inp%strten_reference(:)==zero))then
+   if(all(abs(inp%strten_reference(:))<tol16))then
      write(message,'(8a)') ch10,&
 &          ' --- !WARNING:',ch10,&
 &          '     The stress tensor of the reference structure is not specify',ch10,&
@@ -2530,7 +2533,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    end if
  end if
  
- if(any(effective_potential%strten(:) /= zero))then
+ if(any(abs(effective_potential%strten(:)) >tol16))then
    write(message, '(3a)' )ch10,&
 &   ' Cartesian components of forces (hartree/bohr)',ch10
    call wrtout(ab_out,message,'COLL')
@@ -2784,7 +2787,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
          end if
 
 !       Get the shift of cell
-        shift(:) = anint(red(2,:) - crystal%xred(:,ib)) - anint(red(1,:) - crystal%xred(:,ia))
+        shift(:) = int(anint(red(2,:) - crystal%xred(:,ib)) - anint(red(1,:) - crystal%xred(:,ia)))
 
         do irpt=1,ifc%nrpt
 
@@ -2845,7 +2848,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! Only conserve the necessary points in rpt
   nrpt_new2 = 0
   do irpt = 1, nrpt_new
-    if (sum(wghatm_red(:,:,irpt)) /= 0) then
+    if (abs(sum(wghatm_red(:,:,irpt))) >tol16) then
       nrpt_new2 = nrpt_new2 + 1
     end if
   end do
@@ -2862,7 +2865,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
   irpt2 = 0
   do irpt = 1,nrpt_new
-    if (sum(wghatm_red(:,:,irpt)) /= 0) then
+    if (abs(sum(wghatm_red(:,:,irpt))) > tol16) then
       irpt2 = irpt2 + 1
 !     Apply weight on each R point
       do ia=1,effective_potential%crystal%natom
@@ -2895,7 +2898,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     icount2 = icount2 + sum(effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt))
   end do
 
-  if (icount1 /= icount2) then
+  if (abs(icount1-icount2)>tol16) then
     write(message,'(2a,ES15.4,a,ES15.4,a)')'The total wghatm is no more the same',ch10,&
 &                        icount1,' before and ', icount2, ' now.'
     MSG_BUG(message)
@@ -2925,8 +2928,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   if (iblok /=0) then
 
 !   then print the internal stain tensor
-    call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,&
-&                        ab_out,mpert,msize,natom,nblok)
+    call ddb_internalstr(inp%asr,ddb%val,d2asr,iblok,instrain,&
+&                        ab_out,mpert,natom,nblok)
 
     do ipert1=1,6
       do ipert2=1,natom
@@ -3009,7 +3012,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  !Local variables-------------------------------
  !scalar
- integer :: ii,jj,my_rank,ndisp,ncoeff,nterm_max,ndisp_max,nproc,nterm
+ integer :: ii,jj,my_rank,ndisp,ncoeff,nterm_max,nstrain,ndisp_max,nproc,nterm
 ! character(len=200),allocatable :: name(:)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
@@ -3018,7 +3021,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 #ifndef HAVE_LIBXML
  integer :: funit = 1,ios = 0
- integer :: icoeff,idisp,iterm,mu
+ integer :: icoeff,idisp,istrain,iterm,mu
  logical :: found,found2,displacement
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg,strg1
@@ -3030,7 +3033,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  logical :: debug =.FALSE.
  !arrays
  real(dp),allocatable :: coefficient(:),weight(:,:)
- integer,allocatable :: atindx(:,:,:,:), cell(:,:,:,:,:),direction(:,:,:),power(:,:,:)
+ integer,allocatable :: atindx(:,:,:,:), cell(:,:,:,:,:),direction(:,:,:),power_disp(:,:,:)
+ integer,allocatable :: strain(:,:,:),power_strain(:,:,:)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs
  type(polynomial_term_type),dimension(:,:),allocatable :: terms
 
@@ -3047,10 +3051,10 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  iam_master = (my_rank == master)
 
 !Get Dimention of system and allocation/initialisation of array
- ncoeff = 0
- nterm  = 0
- ndisp  = 0
-
+ ncoeff  = 0
+ nterm   = 0
+ ndisp   = 0
+ nstrain = 0
  call effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
 
 !  Do some checks
@@ -3096,12 +3100,15 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    ABI_ALLOCATE(coefficient,(ncoeff))
    ABI_ALLOCATE(cell,(ncoeff,nterm_max,3,2,ndisp_max))
    ABI_ALLOCATE(direction,(ncoeff,nterm_max,ndisp_max))
-   ABI_ALLOCATE(power,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(strain,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(power_disp,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(power_strain,(ncoeff,nterm_max,ndisp_max))
    ABI_ALLOCATE(weight,(ncoeff,nterm_max))
 
 !  Read the values of this term with libxml
    call effpot_xml_readCoeff(char_f2c(trim(filename)),ncoeff,ndisp_max,nterm_max,&
-&                            coefficient,atindx,cell,direction,power,weight) !  
+&                            coefficient,atindx,cell,direction,power_disp,power_strain,&
+&                            strain,weight)
 !  In the XML the atom index begin to zero
 !  Need to shift for fortran array
    atindx(:,:,:,:) = atindx(:,:,:,:) + 1
@@ -3110,8 +3117,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      do iterm=1,nterm_max
 !      Initialisation of the polynomial_term structure with the values from the
        call polynomial_term_init(atindx(icoeff,iterm,:,:),cell(icoeff,iterm,:,:,:),&
-&                                direction(icoeff,iterm,:),ndisp_max,terms(icoeff,iterm),&
-&                                power(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
+&                                direction(icoeff,iterm,:),ndisp_max,ndisp_max,terms(icoeff,iterm),&
+&                                power_disp(icoeff,iterm,:),power_strain(icoeff,iterm,:),&
+&                                strain(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
      end do
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
@@ -3122,8 +3130,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !    reference cell (000) in order to compute the name correctly...
 !    If this coeff is not in the ref cell, take by default the first term
      if(coeffs(icoeff)%nterm > 0)then
-       call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
-&                                    symbols,recompute=.true.)
+       call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
        call polynomial_coeff_setName(name,coeffs(icoeff))
      end if
 
@@ -3139,7 +3146,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    ABI_ALLOCATE(coefficient,(1))
    ABI_ALLOCATE(cell,(1,1,3,2,ndisp_max))
    ABI_ALLOCATE(direction,(1,1,ndisp_max))
-   ABI_ALLOCATE(power,(1,1,ndisp_max))
+   ABI_ALLOCATE(strain,(1,1,ndisp_max))
+   ABI_ALLOCATE(power_disp,(1,1,ndisp_max))
+   ABI_ALLOCATE(power_strain,(1,1,ndisp_max))
    ABI_ALLOCATE(weight,(1,1))
 !  Loop over the file
 !  Read the values of all the terms with fortran
@@ -3178,13 +3187,12 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          End read headers of coefficient
 !          Reset counter
            found  = .false.
-           atindx = 0
-           cell   = 0
-           direction = 0
-           power  = 0           
-           iterm  = 0
-           idisp  = 0  
-           nterm  = 0
+           atindx = 0;  cell   = 0 ;  direction = 0
+           strain = 0; power_strain = 0;  power_disp  = 0
+           iterm   = 0
+           idisp   = 0
+           istrain = 0
+           nterm   = 0
            do while (.not.found)
              read(funit,'(a)',iostat=ios) readline
              call rmtabfromline(readline)
@@ -3196,7 +3204,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
              if ((line(1:5)==char(60)//'term')) then
                nterm = nterm + 1
                ndisp = 0
+               nstrain = 0
                idisp = 0
+               istrain = 0
                displacement = .true.
                call rdfromline('weight',line,strg)
                if (strg/="") then
@@ -3211,21 +3221,17 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
                    displacement = .false.
                  end if
                  if ((line(1:7)==char(60)//'strain')) then
-                   ndisp = ndisp + 1
-                   idisp = idisp + 1
+                   nstrain = nstrain + 1
+                   istrain = istrain + 1
                    call rdfromline('power',line,strg)
                    if (strg/="") then 
                      strg1=trim(strg)
-                     read(strg1,*) power(1,1,idisp)
+                     read(strg1,*) power_strain(1,1,istrain)
                    end if
                    call rdfromline('voigt',line,strg)
                    if (strg/="") then 
                      strg1=trim(strg)
-                     read(strg1,*) direction(1,1,idisp) 
-                     direction(1,1,idisp) = -1*direction(1,1,idisp) 
-!                    Set to -1 the useless quantitiers for strain                       
-                     atindx(1,1,:,idisp)  = -1
-                     cell(1,1,:,:,idisp)  = -1
+                     read(strg1,*) strain(1,1,istrain) 
                    end if
                  end if
                  if ((line(1:18)==char(60)//'displacement_diff')) then
@@ -3252,7 +3258,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
                    call rdfromline('power',line,strg)
                    if (strg/="") then
                      strg1=trim(strg)
-                     read(strg1,*) power(1,1,idisp)
+                     read(strg1,*) power_disp(1,1,idisp)
                    end if
                    do while(found2)
                      read(funit,'(a)',iostat=ios) readline
@@ -3309,8 +3315,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !              previous step
                iterm = iterm + 1
                call polynomial_term_init(atindx(1,1,:,:),cell(1,1,:,:,:),&
-&                                        direction(1,1,:),ndisp,terms(1,iterm),&
-&                                        power(1,1,:),weight(1,1),check=.true.)
+&                                        direction(1,1,:),ndisp,nstrain,terms(1,iterm),&
+&                                        power_disp(1,1,:),power_strain(1,1,:),&
+&                                        strain(1,1,:),weight(1,1),check=.true.)
              end if!end if term
            end do!end do while found (coeff)
 
@@ -3318,8 +3325,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          previous step
            icoeff = icoeff + 1
            call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:))
-           call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
-&                                        symbols,recompute=.true.)
+           call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
            call polynomial_coeff_setName(name,coeffs(icoeff))
 !          Deallocation of the terms array for this coefficient
            do jj=1,nterm_max
@@ -3337,7 +3343,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      ABI_DEALLOCATE(coefficient)
      ABI_DEALLOCATE(cell)
      ABI_DEALLOCATE(direction)
-     ABI_DEALLOCATE(power)
+     ABI_DEALLOCATE(strain)
+     ABI_DEALLOCATE(power_disp)
+     ABI_DEALLOCATE(power_strain)
      ABI_DEALLOCATE(weight)
      ABI_DEALLOCATE(symbols)
    end if !End if master
@@ -3359,7 +3367,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
        write(200+my_rank,*)"cell1",coeffs(ii)%terms(jj)%cell(:,1,:)
        write(200+my_rank,*)"cell2",coeffs(ii)%terms(jj)%cell(:,2,:)
        write(200+my_rank,*)"direction",coeffs(ii)%terms(jj)%direction
-       write(200+my_rank,*)"power",coeffs(ii)%terms(jj)%power
+       write(200+my_rank,*)"power_disp",coeffs(ii)%terms(jj)%power_disp
        write(200+my_rank,*)"weight",coeffs(ii)%terms(jj)%weight
 #else
        write(300+my_rank,*)"ii,jj,ndisp,nterm",ii,jj,coeffs(ii)%nterm,coeffs(ii)%terms(jj)%ndisp
@@ -3367,7 +3375,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
        write(300+my_rank,*)"cell1",coeffs(ii)%terms(jj)%cell(:,1,:)
        write(300+my_rank,*)"cell2",coeffs(ii)%terms(jj)%cell(:,2,:)
        write(300+my_rank,*)"direction",coeffs(ii)%terms(jj)%direction
-       write(300+my_rank,*)"power",coeffs(ii)%terms(jj)%power
+       write(300+my_rank,*)"power_disp",coeffs(ii)%terms(jj)%power_disp
        write(300+my_rank,*)"weight",coeffs(ii)%terms(jj)%weight
 #endif
      end do
@@ -3401,6 +3409,9 @@ end subroutine coeffs_xml2effpot
 !!
 !! INPUTS
 !! filename = path of the file
+!! option,optional   = 0 (default), the stress is printed in the MD File
+!!                     1, the force on the cell is printed in the MD File (-1 * stress),
+!!                        in this case, we multiply the stress by -1 in order to get the stresse
 !!
 !! OUTPUT
 !! hist<type(abihist)> = datatype with the  history of the MD
@@ -3412,7 +3423,7 @@ end subroutine coeffs_xml2effpot
 !!
 !! SOURCE
 
-subroutine effective_potential_file_readMDfile(filename,hist)
+subroutine effective_potential_file_readMDfile(filename,hist,option)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3426,12 +3437,13 @@ subroutine effective_potential_file_readMDfile(filename,hist)
 
 !Arguments ------------------------------------
 !scalars
+ integer,optional :: option 
 !arrays
  type(abihist),intent(inout) :: hist
  character(len=fnlen),intent(in) :: filename
 !Local variables-------------------------------
 !scalar
- integer :: ia,ii,mu,nu,natom,nstep,type
+ integer :: ia,ii,mu,nu,natom,nstep,type,option_in
  integer :: ios=0, unit_md=24
 !arrays
  character (len=10000) :: readline,line
@@ -3442,9 +3454,15 @@ subroutine effective_potential_file_readMDfile(filename,hist)
 
  call effective_potential_file_getType(filename,type)
 
+ option_in = 0
+ if(present(option))then
+   option_in = option
+ end if
+ 
  if(type==40)then
 !  Netcdf type
    call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
+
  else if(type==41)then
 
 !  ASCII file
@@ -3490,8 +3508,16 @@ subroutine effective_potential_file_readMDfile(filename,hist)
    end do
    close(unit_md)
    ABI_DEALLOCATE(xcart)
+     
  end if!end if type
+
+   if((type==40 .or. type==41).and.option == 1)then
+!    multiply by -1 if the current strten -1*stress, we need only stress...
+     hist%strten(:,:) = -1 * hist%strten(:,:)
+   end if
+
  
+
 end subroutine effective_potential_file_readMDfile
 !!***
 
@@ -3598,7 +3624,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !Check if the energy store in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
  do ii=1,nstep_hist
-   factE_hist = anint(hist%etot(ii) / eff_pot%energy)
+   factE_hist = int(anint(hist%etot(ii) / eff_pot%energy))
    if(factE_hist == 1) then
 !    In this case we mutiply the energy of the hist by the number of cell
      hist%etot(ii) = hist%etot(ii)  * ncell
@@ -3623,8 +3649,8 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  ABI_ALLOCATE(list,(natom_hist))
  ABI_ALLOCATE(xred_hist,(3,natom_hist))
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
- blkval = one
- list   = zero
+ blkval = 1
+ list   = 0
  call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
 &                eff_pot%supercell%xcart,xred_ref)
 

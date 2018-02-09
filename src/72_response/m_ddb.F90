@@ -10,7 +10,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2789,18 +2789,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
  asrq0%d2asr = zero
 
- ! TODO: Tests with asr = 3,4  [v5][t83] and [v5][t84]
- ! fail if I don't allocated these arrays because the code
- ! is accessing the data without checking if the correction has been computed....
- dims = 3*ddb%natom*(3*ddb%natom-1) / 2
- ABI_CALLOC(asrq0%uinvers, (dims, dims))
- ABI_CALLOC(asrq0%vtinvers,(dims, dims))
- ABI_CALLOC(asrq0%singular, (dims))
-
  if (asrq0%iblok == 0) return
  iblok = asrq0%iblok
 
- select case (asr)
+ select case (asrq0%asr)
  case (0)
    continue
 
@@ -2810,10 +2802,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  case (3,4)
    ! Rotational invariance for 1D and 0D systems
    ! Compute uinvers, vtinvers and singular matrices.
-   !dims = 3*ddb%natom*(3*ddb%natom-1) / 2
-   !ABI_CALLOC(asrq0%uinvers, (dims, dims))
-   !ABI_CALLOC(asrq0%vtinvers,(dims, dims))
-   !ABI_CALLOC(asrq0%singular, (dims))
+   dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+   ABI_CALLOC(asrq0%uinvers, (dims, dims))
+   ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+   ABI_CALLOC(asrq0%singular, (dims))
 
    call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
      ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
@@ -3319,7 +3311,6 @@ end subroutine ddb_write_blok
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover_effpot
 !!
 !! CHILDREN
 !!      ddb_hdr_free,ddb_hdr_open_read
@@ -3345,7 +3336,8 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  ! type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  character(len=*),intent(in) :: filename
  !Local variables -------------------------
- integer :: ii,mxnimage, nn,ddbun
+ integer :: mxnimage,ddbun
+!integer :: ii, nn
  type(ddb_hdr_type) :: ddb_hdr
 
 ! ************************************************************************
@@ -3398,7 +3390,15 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  end if
  ABI_ALLOCATE(dtset%rprim_orig,(3,3,mxnimage))
  dtset%rprim_orig(1:3,1:3,1) = ddb_hdr%rprim(:,:)
- 
+
+ if (allocated(dtset%rprimd_orig)) then
+   ABI_DEALLOCATE(dtset%rprimd_orig)
+ end if
+ ABI_ALLOCATE(dtset%rprimd_orig,(3,3,mxnimage))
+ dtset%rprimd_orig(:,1,1) = ddb_hdr%rprim(:,1) * dtset%acell_orig(1,1)
+ dtset%rprimd_orig(:,2,1) = ddb_hdr%rprim(:,2) * dtset%acell_orig(2,1)
+ dtset%rprimd_orig(:,3,1) = ddb_hdr%rprim(:,3) * dtset%acell_orig(3,1)
+
  if (allocated(dtset%amu_orig)) then
    ABI_DEALLOCATE(dtset%amu_orig)
  end if

@@ -10,7 +10,7 @@
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MJV)
+!! Copyright (C) 2010-2018 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -726,7 +726,7 @@ end subroutine getPBCIndexes_supercell
 !! max = maximum of the range
 !!
 !! PARENTS
-!!      m_effective_potential
+!!      m_effective_potential,m_polynomial_coeff
 !!
 !! CHILDREN
 !!

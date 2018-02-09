@@ -7,7 +7,7 @@
 !!  atompaw related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel, MT, JWZ, GJ)
+!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel, MT, JWZ, GJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -359,7 +359,7 @@ end subroutine atompaw_shapebes
 !! SOURCE
 
 
- subroutine atompaw_dij0(indlmn,kij,lmnmax,ncore,opt_init,pawtab,radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl,vminushalf)
+ subroutine atompaw_dij0(indlmn,kij,lmnmax,ncore,opt_init,pawtab,radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -380,7 +380,6 @@ end subroutine atompaw_shapebes
  integer,intent(in) :: indlmn(6,lmnmax)
  real(dp),intent(in) :: kij(pawtab%lmn2_size)
  real(dp),intent(in) :: ncore(:),vhtnzc(:)
- real(dp),optional,intent(in) :: vminushalf(:)
 
 !Local variables ---------------------------------------
  integer :: il,ilm,iln,ilmn,j0lmn,jl,jlm,jln,jlmn,klmn,lmn2_size,meshsz,meshsz1,meshsz_core,meshsz_vhtnzc
@@ -436,8 +435,8 @@ end subroutine atompaw_shapebes
 
 !Computation of <phi_i|vminushalf|phi_j>  (if any)
 !=================================================
- if(present(vminushalf)) then
-   if(size(vminushalf)>=1) then
+ if(pawtab%has_vminushalf==1) then
+   if(size(pawtab%vminushalf)>=1) then
      meshsz1=radmesh%mesh_size
      LIBPAW_ALLOCATE(ff1,(meshsz1))
      do jlmn=1,pawtab%lmn_size
@@ -447,7 +446,7 @@ end subroutine atompaw_shapebes
          klmn=j0lmn+ilmn
          ilm=indlmn(4,ilmn);iln=indlmn(5,ilmn)
          if (jlm==ilm) then
-           ff1(1:meshsz1)=pawtab%phi(1:meshsz1,iln)*pawtab%phi(1:meshsz1,jln)*vminushalf(1:meshsz1)
+           ff1(1:meshsz1)=pawtab%phi(1:meshsz1,iln)*pawtab%phi(1:meshsz1,jln)*pawtab%vminushalf(1:meshsz1)
            call simp_gen(intg,ff1,radmesh)
            pawtab%dij0(klmn)=pawtab%dij0(klmn)+intg
          end if

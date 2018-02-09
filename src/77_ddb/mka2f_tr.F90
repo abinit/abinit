@@ -12,7 +12,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (JPC, MJV, BXU)
+!! Copyright (C) 2004-2018 ABINIT group (JPC, MJV, BXU)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYINGS=
 !! or http://www.gnu.org/copyleft/gpl.txt .
