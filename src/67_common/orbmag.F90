@@ -25,6 +25,7 @@
 !! mpi_enreg=information about MPI parallelization
 !! nfftf= - PAW only - number of FFT grid points for the "fine" grid (see NOTES at beginning of scfcv)
 !! npwarr(nkpt)=number of planewaves in basis at this k point
+!! paw_ij(my_natom*usepaw) <type(paw_ij_type)>=paw arrays given on (i,j) channels
 !! pawang <type(pawang_type)>=paw angular mesh and related data
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !! pawrad(ntypat*psps%usepaw) <type(pawrad_type)>=paw radial mesh and related data
@@ -76,7 +77,7 @@
 #include "abi_common.h"
 
 subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-     &            mcg,mcprj,mpi_enreg,nfftf,npwarr,pawang,pawfgr,pawrad,pawtab,psps,&
+     &            mcg,mcprj,mpi_enreg,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
 
  use defs_basis
@@ -92,6 +93,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 &                                 load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
 
  use m_fftcore, only : kpgsph
+ use m_paw_ij,           only : paw_ij_type
  use m_pawang,           only : pawang_type
  use m_pawfgr,           only : pawfgr_type
  use m_pawrad,           only : pawrad_type
@@ -130,6 +132,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
+ type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
@@ -222,8 +225,11 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
+ ! the paw_ij loaded here are the normal ones, will eventually be replaced by the phase-twisted
+ ! versions. for now paw_ij is useful for testing.
  call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
-      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom)
+      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
+      & paw_ij=paw_ij)
 
  !---------construct local potential------------------
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
