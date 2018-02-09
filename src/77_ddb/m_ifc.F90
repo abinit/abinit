@@ -1548,6 +1548,8 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
    rmax = wkdist(natom*nrpt)
 
    ! zero the outside IFCs: act on wghatm
+
+   ! fix number of spheres
    if(nsphere/=0.and.nsphere<natom*nrpt)then
      rcut_min = min(rcut_min, wkdist(nsphere+1))
      do ii=nsphere+1,natom*nrpt
@@ -1558,6 +1560,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
      end do
    end if
 
+   ! or fix radius of maximum ifc
    if(rifcsph>tol10)then
      do ii=nsphere+1,natom*nrpt
        index=list(ii)
@@ -1570,9 +1573,10 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
      end do
    end if
 
+   ! filter smoothly to 0 at edge of WS cell
    if (rifcsph < -tol10) then
      ! Use different filter
-     r0 = abs(rifcsph) * rmax; rsigma = one
+     r0 = abs(rifcsph) * rmax; rsigma = half*(rmax-r0) !one
      rcut_min = r0 ! Set it to r0
      do ii=nsphere+1,natom*nrpt
        index=list(ii)

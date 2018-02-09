@@ -877,7 +877,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
      collect = 1 !; if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
      if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
-       call partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_enreg)
+       call partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
      end if
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
@@ -889,7 +889,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      dos%fractions(:,:,:,1)=one
    end if
 
-!  Here, computation of fatbands for the k-point given. _FATBANDS
+!  Here, print out fatbands for the k-points given in file appended _FATBANDS
    if (me == master .and. dtset%pawfatbnd>0 .and. dos%fatbands_flag==1) then
      call prtfatbands(dos,dtset,ebands,dtfil%fnameabo_app_fatbands,dtset%pawfatbnd,pawtab)
    end if

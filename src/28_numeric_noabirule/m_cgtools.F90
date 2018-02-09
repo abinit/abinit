@@ -1844,10 +1844,6 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc),parameter :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
- complex(dpc),parameter :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
- complex(dpc),parameter :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
- complex(dpc),parameter :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
  complex(dpc) :: cspin(0:3), cgcmat_(2,2)
 ! ***********************************************************************
 
@@ -1855,15 +1851,15 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
  cgcmat_ = czero
  call zgemm('n','c',2,2,npw_k,cone,cgcband,2,cgcband,2,czero,cgcmat_,2)
 
-! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_*(si,sj) cgcband(sj,pi)
- cspin(0) = cgcmat_(1,1)*pauli_0(1,1) + cgcmat_(2,1)*pauli_0(2,1) &
-& + cgcmat_(1,2)*pauli_0(1,2) + cgcmat_(2,2)*pauli_0(2,2)
- cspin(1) = cgcmat_(1,1)*pauli_x(1,1) + cgcmat_(2,1)*pauli_x(2,1) &
-& + cgcmat_(1,2)*pauli_x(1,2) + cgcmat_(2,2)*pauli_x(2,2)
- cspin(2) = cgcmat_(1,1)*pauli_y(1,1) + cgcmat_(2,1)*pauli_y(2,1) &
-& + cgcmat_(1,2)*pauli_y(1,2) + cgcmat_(2,2)*pauli_y(2,2)
- cspin(3) = cgcmat_(1,1)*pauli_z(1,1) + cgcmat_(2,1)*pauli_z(2,1) &
-& + cgcmat_(1,2)*pauli_z(1,2) + cgcmat_(2,2)*pauli_z(2,2)
+! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_mat*(si,sj) cgcband(sj,pi)
+ cspin(0) = cgcmat_(1,1)*pauli_mat(1,1,0) + cgcmat_(2,1)*pauli_mat(2,1,0) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,0) + cgcmat_(2,2)*pauli_mat(2,2,0)
+ cspin(1) = cgcmat_(1,1)*pauli_mat(1,1,1) + cgcmat_(2,1)*pauli_mat(2,1,1) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,1) + cgcmat_(2,2)*pauli_mat(2,2,1)
+ cspin(2) = cgcmat_(1,1)*pauli_mat(1,1,2) + cgcmat_(2,1)*pauli_mat(2,1,2) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,2) + cgcmat_(2,2)*pauli_mat(2,2,2)
+ cspin(3) = cgcmat_(1,1)*pauli_mat(1,1,3) + cgcmat_(2,1)*pauli_mat(2,1,3) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,3) + cgcmat_(2,2)*pauli_mat(2,2,3)
 !write(std_out,*) 'cgmat: ', cgcmat_
 !write(std_out,*) 'real(spin): ', real(cspin)
 !write(std_out,*) 'aimag(spin): ', aimag(cspin)
