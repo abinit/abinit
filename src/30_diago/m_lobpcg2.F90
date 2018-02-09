@@ -6,6 +6,7 @@
 
 module m_lobpcg2
   use m_xg
+  use m_xgScalapack
   use defs_basis, only : std_err, std_out
   use m_profiling_abi
   use m_errors
@@ -34,11 +35,12 @@ module m_lobpcg2
   integer, parameter :: EIGENEV = 8
   integer, parameter :: EIGENPEVD = 9 
   integer, parameter :: EIGENPEV = 10
-  logical, parameter :: EIGPACK(10) = &
+  integer, parameter :: EIGENSLK = 11
+  logical, parameter :: EIGPACK(11) = &
     (/ .false.,.false.,.false., &
        .true. ,.true. ,.true. ,&
        .false.,.false.,&
-       .true. ,.true.  /)
+       .true. ,.true., .false.  /)
 
   integer, parameter :: tim_init     = 1651
   integer, parameter :: tim_free     = 1652
@@ -766,6 +768,7 @@ module m_lobpcg2
     integer :: subdim
     !integer :: neigen
     double precision :: abstol
+    logical :: use_slk
     type(xg_t) :: vec
     type(xg_t) :: subA
     type(xg_t) :: subB
@@ -777,6 +780,7 @@ module m_lobpcg2
     type(xgBlock_t) :: WP 
     type(xgBlock_t) :: AWP 
     type(xgBlock_t) :: BWP 
+    type(xgScalapack_t) :: scalapack
     double precision :: tsec(2)
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
@@ -830,6 +834,7 @@ module m_lobpcg2
       AWP = lobpcg%AWP
       BWP = lobpcg%BWP
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
+
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) then
         eigenSolver = EIGENVD
@@ -842,6 +847,11 @@ module m_lobpcg2
     case default
       MSG_ERROR("RR")
     end select
+
+    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim*subdim,use_slk)
+    if ( use_slk) then
+      eigenSolver = EIGENSLK
+    end if
 
     ! Select diago algorithm
 
@@ -928,6 +938,10 @@ module m_lobpcg2
       case (EIGENPEV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpev"
         call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info) 
+      case (EIGENSLK)
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using pheev"
+        call xgScalapack_heev(scalapack,subA%self,eigenvalues)
+        info = 0 ! No error code returned for the moment
       case default
         MSG_ERROR("Error for Eigen Solver HEEV")
       end select
@@ -954,9 +968,16 @@ module m_lobpcg2
       case (EIGENPV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgv"
         call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info) 
+      case (EIGENSLK)
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using phegv"
+        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues)
+        info = 0 ! No error code returned for the moment
       case default
         MSG_ERROR("Error for Eigen Solver HEGV")
       end select
+    end if
+    if ( eigenSolver == EIGENSLK ) then
+      call xgScalapack_free(scalapack)
     end if
     tsec(2) = abi_wtime() - tsec(2)
 !    if ( var /= VAR_XW ) then
