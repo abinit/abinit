@@ -19,8 +19,6 @@
 !! cg(2,mcg)=planewave coefficients of wavefunctions
 !! cprj(natom,mcprj*usecrpj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each |p_lmn> non-local projector
 !! dtset <type(dataset_type)>=all input variables in this dataset
-!! gmet(3,3)=metric in reciprocal space
-!! gprimd(3,3)=reciprocal space dimensional primitive translations
 !! kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !! mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
@@ -35,6 +33,7 @@
 !! pwind(pwind_alloc,2,3) = array used to compute
 !!           the overlap matrix smat between k-points (see initberry.f)
 !! pwind_alloc = first dimension of pwind
+!! rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
 !!   reciprocal space primitive translations
 !! usecprj=1 if cprj datastructure has been allocated
@@ -42,6 +41,8 @@
 !! vpsp(nfftf)=array for holding local psp
 !! vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
 !! xred(3,natom) = location of atoms in unit cell
+!! ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
+!! ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
 !!
 !! OUTPUT
 !!
@@ -74,9 +75,9 @@
 
 #include "abi_common.h"
 
-subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
+subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      &            mcg,mcprj,mpi_enreg,nfftf,npwarr,pawang,pawfgr,pawrad,pawtab,psps,&
-     &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred)
+     &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
 
  use defs_basis
  use defs_abitypes
@@ -103,9 +104,11 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'orbmag'
  use interfaces_32_util
+ use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_65_paw
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -123,28 +126,32 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  !arrays
  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rprimd(3,3)
+ real(dp),intent(in) :: cg(2,mcg),rprimd(3,3)
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
+ real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,bfor,bsigma,ddkflag,epsabg,gdir,gfor,gsigma
- integer :: icg,icgb,icgg,icprj,icprjb,icprjg
- integer :: ikg,ikpt,ikptb,ikptg,isppol,itrs,job
- integer :: mcg1_k,my_nspinor,nband_k,ncpgr,nn,n1,n2,n3
+ integer :: adir,bdir,bfor,bsigma,ddkflag,dimffnl,epsabg,gdir,gfor,gsigma
+ integer :: icg,icgb,icgg,icprj,icprjb,icprjg,ider,idir
+ integer :: ikg,ikpt,ikptb,ikptg,ilm,isppol,istwf_k,itrs,job
+ integer :: mcg1_k,my_nspinor,nband_k,ncpgr,nkpg,nn,n1,n2,n3
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,npw_k,npw_kb,npw_kg,shiftbd
- real(dp) :: deltab,deltag
+ real(dp) :: deltab,deltag,ucvol
  complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B,tprodA,tprodB
  character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
  !arrays
- integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
- real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2),rhodum(1)
- real(dp),allocatable :: cg1_k(:,:),cgrvtrial(:,:),kk_paw(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
- real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:)
+ integer,allocatable :: dimlmn(:),kg_k(:,:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
+ real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2),gmet(3,3),gprimd(3,3),kpoint(3),rhodum(1),rmet(3,3)
+ real(dp),allocatable :: cg1_k(:,:),cgrvtrial(:,:),ffnl(:,:,:,:),kinpw(:),kk_paw(:,:,:),kpg_k_dummy(:,:)
+ real(dp),allocatable :: ph3d(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
+ real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:),ylm_k(:,:)
+ complex(dpc),allocatable :: nucdipmom_k(:)
  logical,allocatable :: has_smat(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
@@ -155,6 +162,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ! TODO: generalize to nsppol > 1
  isppol = 1
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  
  nband_k = dtorbmag%mband_occ
 
@@ -196,6 +205,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ABI_ALLOCATE(smat_kk,(2,nband_k,nband_k))
 
  ddkflag = 1
+ istwf_k = 1
  
  ! itrs = 0 means do not invoke time reversal symmetry in smatrix.F90
  itrs = 0
@@ -218,6 +228,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  !---------construct local potential------------------
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
  ! nspden=1 is essentially hard-coded in the following line
+ ! not sure if vpsp should be included here or not
  vtrial(1:nfftf,1)=vhartr(1:nfftf)+vxc(1:nfftf,1)+vpsp(1:nfftf)
  
  ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
@@ -230,7 +241,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ABI_DEALLOCATE(vtrial)
 
  call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
-
 
  !------- now local potential is attached to gs_hamk ----------------------------
  
@@ -260,6 +270,68 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
           ikg = dtorbmag%fkgindex(ikpt)
 
+          ! Set up remainder of Hamiltonian at k
+
+          kpoint(:)=dtorbmag%fkptns(:,ikpt)
+
+          ABI_ALLOCATE(kg_k,(3,npw_k))
+          ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+          if (psps%useylm==1) then
+             do ilm=1,psps%mpsang*psps%mpsang
+                ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
+             end do
+          end if
+
+          !      Compute (1/2) (2 Pi)**2 (k+G)**2:
+          ABI_ALLOCATE(kinpw,(npw_k))
+          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+
+          !  Compute (k+G) vectors (only if useylm=1)
+          ! original code from vtorho.F90
+          ! nkpg=3*optforces*dtset%nloalg(3)
+          ! ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+          ! if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) then
+          !    call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+          ! end if
+          ! pretty sure do not need k+g vectors, use dummy kpg_k
+          ! may eventually need them for nucdipmom_k hamiltonian if
+          ! generalize to k,k'
+          nkpg = 0
+          ABI_ALLOCATE(kpg_k_dummy,(npw_k,nkpg))
+
+          !      Compute nonlocal form factors ffnl at all (k+G):
+          ider=0;idir=0;dimffnl=1
+          ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
+          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
+               &         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k_dummy,kpoint,psps%lmnmax,&
+               &         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+               &         npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+               &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
+
+          !     compute and load nuclear dipole Hamiltonian at current k point
+          if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+             if(allocated(nucdipmom_k)) then
+                ABI_DEALLOCATE(nucdipmom_k)
+             end if
+             ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+             call mknucdipmom_k(gmet,kg_k,kpoint,dtset%natom,gs_hamk%nucdipmom,&
+                  & nucdipmom_k,npw_k,rprimd,ucvol,xred)
+             call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+          end if
+       
+
+          !      Load k-dependent part in the Hamiltonian datastructure
+          !       - Compute 3D phase factors
+          !       - Prepare various tabs in case of band-FFT parallelism
+          !       - Load k-dependent quantities in the Hamiltonian
+          ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
+
+          call load_k_hamiltonian(gs_hamk,kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
+               &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k_dummy,ffnl_k=ffnl,ph3d_k=ph3d,&
+               &         compute_ph3d=.TRUE.,compute_gbound=.TRUE.)
+
+          
           call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
                & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
@@ -417,6 +489,14 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
              
 
           end do
+
+          ABI_DEALLOCATE(kg_k)
+          ABI_DEALLOCATE(ylm_k)
+          ABI_DEALLOCATE(kinpw)
+          ABI_DEALLOCATE(kpg_k_dummy)
+          ABI_DEALLOCATE(ffnl)
+          ABI_DEALLOCATE(nucdipmom_k)
+          ABI_DEALLOCATE(ph3d)
           
        end do ! end loop over fnkpt
     end do ! end loop over epsabg
