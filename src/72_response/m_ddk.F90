@@ -234,53 +234,44 @@ subroutine ddk_init(ddk, paths, comm)
 end subroutine ddk_init
 !!***
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddk_read_fsvelocities
+!!****f* m_ddk/eph_ddk
 !! NAME
-!!  ddk_read_fsvelocities
+!!  eph_ddk
 !!
 !! FUNCTION
-!!  Read FS velocities from DDK files. Returned in ddk%velocity
+!!  Calculate the DDK matrix elements using the commutator formulation.
 !!
 !! INPUTS
-!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
-!!     and the k-points in the IBZ
-!!   comm=MPI communicator
 !!
 !! PARENTS
-!!      m_phgamma
+!!      eph
 !!
 !! CHILDREN
-!!      wrtout
+!!      calc_dipoles
 !!
 !! SOURCE
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -333,7 +324,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: inclvkb=0,formeig0=0
+ integer,parameter :: inclvkb=2,formeig0=0
  logical,parameter :: force_istwfk1=.True.
  integer :: mband,nsppol,nkpt
  logical :: isirred_kf
@@ -350,7 +341,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  character(len=500) :: msg
  character(len=fnlen) :: fname
  real(dp) :: kibz(3), kbz(3)
- real(dp),allocatable :: cg_ki(:,:),cg_kf(:,:),eig_ki(:),work(:,:,:,:)
+ real(dp),allocatable :: cg_ki(:,:),cg_kf(:,:),work(:,:,:,:)
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
 
 !************************************************************************
@@ -382,7 +373,6 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
  ABI_MALLOC(kg_ki, (3, mpw_ki))
  ABI_MALLOC(cg_ki, (2, mpw_ki*nspinor*mband))
- ABI_MALLOC(eig_ki, ((2*mband)**in_wfk%formeig*mband) )
 
  !read crystal
  call crystal_from_hdr(cryst, in_wfk%hdr, 2)
@@ -434,7 +424,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
      ! Read IBZ data.
      call wfk_read_band_block(in_wfk,[1,nband_k],ik_ibz,spin,xmpio_single,&
-       kg_k=kg_ki,cg_k=cg_ki,eig_k=eig_ki)
+       kg_k=kg_ki,cg_k=cg_ki)
 
      write(*,*) 'ikpt:', ik_bz
      write(*,*) 'npw: ', npw_kf
@@ -442,10 +432,11 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
      ! The test on npwarr is needed because we may change istwfk e.g. gamma.
      if (isirred_kf) then
 
-       call calc_dipoles(ebands,cryst,psps,kbz,spin,ik_bz,inclvkb,cg_ki,npw_ki,kg_ki,nspinor,mband,&
-                        bandmin,bandmax,dipoles)
+       call calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg_ki,npw_ki,kg_ki,nspinor,mband,&
+                         bandmin,bandmax,dipoles)
 
      else
+       MSG_ERROR("Symmetries not implemented yet!")
        ! Compute G-sphere centered on kf
        call get_kg(kbz,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
 
@@ -461,11 +452,11 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
        ! Rotate nband_k wavefunctions (output in cg_kf)
        call cg_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_k,&
-         npw_ki,kg_ki,npw_kf,kg_kf,istwf_ki,istwf_kf,cg_ki,cg_kf,work_ngfft,work)
+                      npw_ki,kg_ki,npw_kf,kg_kf,istwf_ki,istwf_kf,cg_ki,cg_kf,work_ngfft,work)
 
        ABI_FREE(work)
 
-       call calc_dipoles(ebands,cryst,psps,kbz,spin,ik_bz,inclvkb,cg_kf,npw_kf,kg_kf,nspinor,mband,&
+       call calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg_kf,npw_kf,kg_kf,nspinor,mband,&
                          bandmin,bandmax,dipoles)
        ABI_FREE(kg_kf)
      end if
@@ -475,7 +466,6 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
  ABI_FREE(kg_ki)
  ABI_FREE(cg_ki)
- ABI_FREE(eig_ki)
 
  write(*,*) 'done!'
  call cwtime(cpu,wall,gflops,"stop")
@@ -526,77 +516,88 @@ end subroutine
 
 
 
+!----------------------------------------------------------------------
 
+!!****f* m_ddk/calc_dipoles
+!! NAME
+!!  calc_dipoles
+!!
+!! FUNCTION
+!! Calculate the <r> matirx elements for ik_bz
+!! between bandmin and mandmax
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      eph_ddk
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
-
-
-
-
-
-
-
-
-
-
-
-subroutine calc_dipoles(ebands,cryst,psps,kbz,spin,ik_bz,inclvkb,cg,npw,kg_k,nspinor,mband,&
+subroutine calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg_k,npw,kg_k,nspinor,mband,&
                         bandmin,bandmax,dipoles)
 
- !
- ! Calculate the <r> matirx elements for ik_bz
- ! between bandmin and mandmax
- !
  use defs_datatypes,    only : pseudopotential_type
  use m_vkbr,            only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'eph_gkk'
+ use interfaces_14_hidewrite
+ use interfaces_32_util
+ use interfaces_56_recipspace
+ use interfaces_66_wfs
+!End of the abilint section
+ 
  implicit none
 
- type(ebands_t) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
-
- real(dp),intent(in) :: kbz(3)
- integer,intent(in) :: spin, ik_bz, inclvkb, bandmin, bandmax
- integer,intent(in) :: npw, nspinor, mband
- integer,intent(in) :: kg_k(:,:)
- integer :: ib_v, ib_c, istwf_k
  type(vkbr_t) :: vkbr
 
- real(dp),intent(in) :: cg(2,npw,nspinor,mband)
+ real(dp),intent(in) :: kbz(3)
+ integer :: ib_v, ib_c
+
+ !wavefunction coefficients
+ integer,intent(in)  :: npw, nspinor, mband
+ integer,intent(in)  :: kg_k(:,:)
+ real(dp),intent(in) :: cg_k(2,npw,nspinor,mband)
+ !wavefunctions options
+ integer,parameter  :: istwf_k=0
+ integer,intent(in) :: spin, ik_bz, inclvkb, bandmin, bandmax
+
  complex(dp) :: ihrc(3,nspinor**2)
  complex(gwpc),allocatable :: ug_c(:),ug_v(:)
- real(dp) :: ediff
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
 
  write(*,*) 'kcoords:', kbz
- write(*,*) 'ikbz:   ', ik_bz
 
  ! Allocate KB form factors
- istwf_k = 0
  if (inclvkb/=0) then ! Prepare term i <n,k|[Vnl,r]|n"k>
    call vkbr_init(vkbr,cryst,psps,inclvkb,istwf_k,npw,kbz,kg_k)
  end if
 
  do ib_v=bandmin,bandmax ! Loop over bands
-   ug_v = cmplx(cg(1,:,spin,ib_v),cg(2,:,spin,ib_v))
+   ug_v = cmplx(cg_k(1,:,spin,ib_v),cg_k(2,:,spin,ib_v))
 
    ! Note: can be improved by calculating only lower triangle
    do ib_c=bandmin,bandmax ! Loop over bands
-     ug_c = cmplx(cg(1,:,spin,ib_c),cg(2,:,spin,ib_c))
+     ug_c = cmplx(cg_k(1,:,spin,ib_c),cg_k(2,:,spin,ib_c))
 
      ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
      ihrc = nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwf_k,inclvkb,&
                         kbz,ug_c,ug_v,kg_k)
 
      ! Save matrix elements of i*r in the IBZ
-     ediff = 1
-     !ediff = ebands%eig(ib_c,ik_bz,spin) - ebands%eig(ib_v,ik_bz,spin)
-     if (ABS(ediff)<tol16) ediff=tol6  ! Treat a possible degeneracy between v and c.
-     dipoles(1,ib_c,ib_v,ik_bz,spin,:) = real(ihrc(:,1))/ediff
-     dipoles(2,ib_c,ib_v,ik_bz,spin,:) = aimag(ihrc(:,1))/ediff
+     dipoles(1,ib_c,ib_v,ik_bz,spin,:) = real(ihrc(:,1))
+     dipoles(2,ib_c,ib_v,ik_bz,spin,:) = aimag(ihrc(:,1))
 
    end do
  end do
+
+ write(*,*)
 
  ! Free KB form factors
  call vkbr_free(vkbr)
@@ -628,9 +629,27 @@ end subroutine
 
 
 
+!----------------------------------------------------------------------
 
-
-
+!!****f* m_ddk/ddk_read_fsvelocities
+!! NAME
+!!  ddk_read_fsvelocities
+!!
+!! FUNCTION
+!!  Read FS velocities from DDK files. Returned in ddk%velocity
+!!
+!! INPUTS
+!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
+!!     and the k-points in the IBZ
+!!   comm=MPI communicator
+!!
+!! PARENTS
+!!      m_phgamma
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
 
 subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 
