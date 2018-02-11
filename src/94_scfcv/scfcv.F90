@@ -70,6 +70,7 @@
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions; if mkmem>=nkpt, these are kept in a disk file.
 !!  dtefield <type(efield_type)> = variables related to Berry phase
+!!  dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  dtpawuj(ndtpawuj)= data used for the automatic determination of U
 !!     (relevant only for PAW+U) calculations (see initberry.f)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
@@ -158,7 +159,7 @@
 
 #include "abi_common.h"
 
-subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
+subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
@@ -179,6 +180,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use m_ab7_mixing
  use m_errors
  use m_efield
+ use m_orbmag
  use mod_prc_memory
  use m_nctk
  use m_hdr
@@ -254,6 +256,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
+ type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer:: electronpositron
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
@@ -1089,7 +1092,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         rprimd,dtset%typat,ucvol,xred,typord=1)
          iatom=-1;idir=0
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
-&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &         xred,ylm,ylmgr)
@@ -2014,6 +2017,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 & dtset%prtnabla > 0  .or. &
 & dtset%prtdos   ==3  .or. &
 & dtset%berryopt /=0  .or. &
+& dtset%orbmag /=0    .or. &
 & dtset%kssform  ==3  .or. &
 & dtset%pawfatbnd> 0  .or. &
 & dtset%pawprtwf > 0  )
@@ -2039,7 +2043,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    iatom=0 ; iorder_cprj=1 ! cprj are not ordered
    call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,&
 &   iatom,idir,iorder_cprj,dtset%istwfk,kg,dtset%kptns,&
-&   dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&   mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,&
 &   dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
@@ -2051,7 +2055,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
@@ -2060,7 +2064,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,&
 & prtxml,psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
+& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 & xccc3d,xred,ylm,ylmgr,dtset%charge*SUM(vpotzero(:)),conv_retcode)
 
 !Before leaving the present routine, save the current value of xred.
@@ -2075,7 +2079,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  call timab(248,1,tsec)
 
  call outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,&
-& dtset,ecut,eigen,electronpositron,elfr,etotal,energies%e_fermie,&
+& dtset,ecut,eigen,electronpositron,elfr,etotal,&
 & gmet,gprimd,grhor,hdr,kg,lrhor,dtset%mband,mcg,mcprj,dtset%mgfft,&
 & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,nattyp,&
 & nfftf,ngfftf,nhat,dtset%nkpt,npwarr,dtset%nspden,&
