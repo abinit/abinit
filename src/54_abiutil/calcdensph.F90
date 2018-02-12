@@ -91,7 +91,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  integer,parameter :: ishift=5
  integer :: i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,n1,n1a,n1b,n2,ifft
  integer :: n2a,n2b,n3,n3a,n3b,nd3,nfftot
- integer :: ii,is,npts(natom) 
+ integer :: ii
+!integer :: is,npts(natom) 
  integer :: cmplex_den,jfft
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
@@ -104,9 +105,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  logical   :: grid_found
  character(len=500) :: message
 !arrays
- real(dp) :: intgden_(nspden,natom)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: tsec(2)
+ real(dp) :: intgden_(nspden,natom),tsec(2)
 
 ! *************************************************************************
 

@@ -179,8 +179,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfftot,nfftf,mgfftf,nhat12_grdim,npwx
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm
- complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
+ real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty
+ complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
  complex(gwpc) :: gwpc_sigxme
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
@@ -195,7 +195,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
- complex(dpc) :: ovlp(2)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
  complex(gwpc),allocatable :: rhotwg_ki(:,:)
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:)

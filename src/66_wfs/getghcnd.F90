@@ -78,7 +78,7 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
 
 !Local variables-------------------------------
 !scalars
- integer :: cwavedim,igp
+ integer :: cwavedim
  character(len=500) :: message
  !arrays
  complex(dpc),allocatable :: inwave(:),hggc(:)
@@ -106,24 +106,18 @@ subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
  ABI_ALLOCATE(hggc,(cwavedim))
  ABI_ALLOCATE(inwave,(cwavedim))
 
- do igp = 1, gs_ham%npw_k
-   inwave(igp) = cmplx(cwavef(1,igp),cwavef(2,igp),kind=dpc)
- end do
-
-! apply hamiltonian hgg to input wavefunction inwave, result in hggc
+ inwave(1:gs_ham%npw_k) = cmplx(cwavef(1,1:gs_ham%npw_k),cwavef(2,1:gs_ham%npw_k),kind=dpc)
+ 
+ ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
+ ! ZHPMV is a level-2 BLAS routine, does Matrix x Vector multiplication for double complex
+ ! objects, with the matrix as Hermitian in packed storage
  call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
 
- do igp=1,gs_ham%npw_k
-   ghcnd(1,igp) = dreal(hggc(igp))
-   ghcnd(2,igp) = dimag(hggc(igp))
- end do
+ ghcnd(1,1:gs_ham%npw_k) = real(hggc)
+ ghcnd(2,1:gs_ham%npw_k) = aimag(hggc)
 
  ABI_DEALLOCATE(hggc)
  ABI_DEALLOCATE(inwave)
-
-! ghcnd=zero
-
- ! ABI_DEALLOCATE(hgg)
 
 end subroutine getghcnd
 !!***

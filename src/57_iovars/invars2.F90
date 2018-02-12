@@ -113,7 +113,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !scalars
  integer :: bantot,berryopt,dmatsize,ndim,getocc
  integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
- integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
+ integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key
  integer :: itol, itol_gen, ds_input, ifreq,ncerr !nkpt_fullbz,
@@ -2043,6 +2043,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'orbmag',tread,'INT')
+ if(tread==1) dtset%orbmag=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ortalg',tread,'INT')
  if(tread==1) then

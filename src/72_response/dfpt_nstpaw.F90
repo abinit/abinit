@@ -62,7 +62,6 @@
 !!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  nhat1(cplex*nfftf,nspden*usepaw)=1st-order compensation charge density (PAW)
-!!  nkpt=number of k points in the full BZ
 !!  nkpt_rbz=number of k points in the reduced BZ for this perturbation
 !!  nkxc=second dimension of the kxc array
 !!  npwarr(nkpt_rbz)=number of planewaves in basis at this GS k point
@@ -156,7 +155,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &                  eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
 &                  kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,&
 &                  mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nhat1,&
-&                  nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,nspinor,nsppol,nsym1,n3xccc,occkq,occ_rbz,&
+&                  nkpt_rbz,nkxc,npwarr,npwar1,nspden,nspinor,nsppol,nsym1,n3xccc,occkq,occ_rbz,&
 &                  paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,&
 &                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,&
 &                  ucvol,usecprj,usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
@@ -215,7 +214,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpw,mpw1
- integer,intent(in) :: ncpgr,nfftf,nkpt,nkpt_rbz,nkxc,nspden,nspinor,nsppol,nsym1
+ integer,intent(in) :: ncpgr,nfftf,nkpt_rbz,nkxc,nspden,nspinor,nsppol,nsym1
  integer,intent(in) :: n3xccc,usecprj,usepaw,usexcnhat,useylmgr1
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: eovl1

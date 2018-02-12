@@ -41,6 +41,7 @@ sources = [
  "m_skw.F90",
  "mkkin.F90",
  "mknucdipmom_k.F90",
+ "mkpwind_k.F90",
  "ph1d3d.F90",
  "setmqgrid.F90",
  "setsym.F90",

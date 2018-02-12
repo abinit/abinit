@@ -78,10 +78,9 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,mu
- real(dp) :: dilatmx_new
+ real(dp) :: alpha,dilatmx_new
 !arrays
  real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)
- real(dp) :: eigval_orig(3), alpha
  character(len=500) :: message
 
 ! *************************************************************************
