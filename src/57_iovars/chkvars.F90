@@ -218,6 +218,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget supercell'
  list_vars=trim(list_vars)//' symafm symchi symdynmat symmorphi symrel symsigma'
 !T
+ list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel tsmear typat'
 !U
