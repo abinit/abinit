@@ -730,8 +730,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  integer :: nprocs, my_rank
  integer :: ncid
  real(dp) :: nsmallq
- real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ !,pnorm
- real(dp) :: upr_bound,xx,gaussmaxarg
+ real(dp) :: dum,gaussfactor,gaussprefactor,low_bound,max_occ !,pnorm
+ real(dp) :: upr_bound,gaussmaxarg
  real(dp) :: max_smallq = 0.0625_dp
  real(dp) :: normq
  real(dp) :: cpu, wall, gflops
