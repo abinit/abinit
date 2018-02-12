@@ -828,7 +828,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  low_bound=dble(huge(0))*half*PHdos%omega_step
  upr_bound=-low_bound
 
-!#define DEV_OLD_MKPHDOS
+ ! TODO
+ ! 1) fix bug in tetra if degenerate and update ref files
+ ! 2) Get rid of double mesh algo and use min/max freq already computed in ifc
+ ! 3) Add MPI Parallel version (easy after change in 2)
 
  nmesh=2
  ABI_MALLOC(ngqpt,(3,nmesh))
@@ -975,54 +978,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
        if (imesh>1.and..not.out_of_bounds) then
          select case (prtdos)
          case (1)
-#ifdef DEV_OLD_MKPHDOS
-           ! Accumulate PHDOS and PJDOS with gaussian method.
-           do imode=1,3*natom
-             do io=1,PHdos%nomega
-               xx=(PHdos%omega(io)-phfrq(imode))*gaussfactor
-               gaussval = zero
-               if(abs(xx) < gaussmaxarg) gaussval=gaussprefactor*exp(-xx*xx)
-               PHdos%phdos(io)=PHdos%phdos(io) + wtqibz(iq_ibz)*gaussval
-               do iat=1,natom
-                 msqd_atom_tmp = zero
-                 do idir=1,3
-                   ! old version without symmetrization
-                   !pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
-                   !PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
-
-                   pjdos_tmp(:,idir,iat) = eigvec(:,idir,iat,imode)* sqrt(wtqibz(iq_ibz)*gaussval) ! * pnorm
-
-                   ! accumulate outer product of displacement vectors
-                   do jdir=1,3
-                     ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
-                     ! this sum only does irreducible points: the matrix is symmetrized below
-                     ! msqd_atom_tmp has units of bohr^2 / Ha as gaussval ~ 1/smear ~ 1/Ha
-                     msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
-&                          eigvec(1,idir,iat,imode)* eigvec(1,jdir,iat,imode) &
-&                       +  eigvec(2,idir,iat,imode)* eigvec(2,jdir,iat,imode) ) * wtqibz(iq_ibz) * gaussval
-                   end do ! jdir
-                 end do ! idir
-                 ! msqd_atom_tmp is in cartesian coordinates
-
-                 ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
-                 ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
-                 ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
-                 ! NB: looks consistent with the sym in harmonic thermo, just used in opposite
-                 ! direction for symops: symrel here instead of symrec and the inverse of
-                 ! indsym in harmonic_thermo
-                 do isym=1, Crystal%nsym
-                   jat = Crystal%indsym(4,isym,iat)
-                   PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) &
-&                    + matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
-
-                   PHdos%pjdos(io,:,jat)=PHdos%pjdos(io,:,jat)+ (matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
-&                                                               (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2
-                 end do
-               end do ! iat
-             end do ! io
-           end do ! imode
-#else
-
            do imode=1,3*natom
              ! Precompute \delta(w - w_{qnu}) * weight(q)
              xvals = (PHdos%omega(:) - phfrq(imode)) * gaussfactor
@@ -1071,6 +1026,12 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
                  end do
                end do
 
+               ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
+               ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
+               ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+               ! NB: looks consistent with the sym in harmonic thermo, just used in opposite
+               ! direction for symops: symrel here instead of symrec and the inverse of
+               ! indsym in harmonic_thermo
                do isym=1, Crystal%nsym
                  temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
                  jat = Crystal%indsym(4,isym,iat)
@@ -1084,7 +1045,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
              end do ! iat
            end do ! imode
-#endif
 
          case (2)
            ! Tetrahedrons
@@ -1163,66 +1123,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    PHdos%phdos=zero; PHdos%pjdos=zero; PHdos%pjdos_int=zero
    max_occ=one
 
-#ifdef DEV_OLD_MKPHDOS
-   ABI_MALLOC(tweight,(PHdos%nqibz,PHdos%nomega))
-   ABI_MALLOC(dtweightde,(PHdos%nqibz,PHdos%nomega))
-
-   do imode=1,3*natom
-     tmp_phfrq(:)=full_phfrq(imode,:)
-
-     ! Calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223.
-     call get_tetra_weight(tmp_phfrq, low_bound, upr_bound,max_occ, PHdos%nomega, PHdos%nqibz, tetraq, bcorr0,&
-&      tweight,dtweightde,xmpi_comm_self)
-
-     do io=1,PHdos%nomega
-       do iq_ibz=1,PHdos%nqibz
-         PHdos%phdos(io)=PHdos%phdos(io)+dtweightde(iq_ibz,io)
-         PHdos%phdos_int(io)=PHdos%phdos_int(io)+tweight(iq_ibz,io)
-         pjdos_tmp = full_eigvec(:,:,:,imode,iq_ibz)
-
-         do iat=1,natom
-           do isym=1, crystal%nsym
-             jat = Crystal%indsym(4,isym,iat)
-             PHdos%pjdos(io,:,jat)=PHdos%pjdos(io,:,jat)+ &
-                 ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
-                (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * dtweightde(iq_ibz,io)
-
-             PHdos%pjdos_int(io,:,jat)=PHdos%pjdos_int(io,:,jat)+ &
-                 ((matmul(symcart(:,:,isym), pjdos_tmp(1,:,iat)))**2 +&
-                 (matmul(symcart(:,:,isym), pjdos_tmp(2,:,iat)))**2) * tweight(iq_ibz,io)
-           end do
-
-           msqd_atom_tmp = zero
-           do idir=1,3
-             !pnorm=full_eigvec(1,idir,iat,imode,iq_ibz)**2 + full_eigvec(2,idir,iat,imode,iq_ibz)**2
-             !PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat) + pnorm*dtweightde(iq_ibz,io)
-             !PHdos%pjdos_int(io,idir,iat)=PHdos%pjdos_int(io,idir,iat) + pnorm*tweight(iq_ibz,io)
-
-             ! accumulate outer product of displacement vectors
-             do jdir=1,3
-               msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
-&                + (full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-&                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
-&                ) * dtweightde(iq_ibz,io)
-             end do ! jdir
-           end do ! idir
-
-! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
-!   the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
-!   normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
-           do isym=1, Crystal%nsym
-             jat = Crystal%indsym(4,isym,iat)
-!   from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
-!  TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
-             PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) + &
-&                matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
-           end do ! isym
-         end do ! iat
-       end do ! iq
-     end do  ! io
-   end do ! imode
-#else
-
    ABI_MALLOC(wdt, (phdos%nomega, 2))
    ABI_MALLOC(tweight, (PHdos%nomega, PHdos%nqibz))
    ABI_MALLOC(dtweightde, (PHdos%nomega, PHdos%nqibz))
@@ -1275,6 +1175,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
            end do ! jdie
          end do
 
+         ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
+         ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
+         ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+         ! from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
+         ! TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
          do isym=1, Crystal%nsym
            temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
            jat = Crystal%indsym(4,isym,iat)
@@ -1291,7 +1196,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    end do ! iq_ibz
 
    ABI_FREE(wdt)
-#endif
 
    ! Make eigvec into displacements
    do iat = 1, natom

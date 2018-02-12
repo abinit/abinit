@@ -1864,9 +1864,9 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
      tmp = eps - cc
      gval = gau_prefactor*exp(-tmp*tmp*gau_width2)
      dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + gval
-     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + gval
-     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + gval
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gval
+     !dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + gval
+     !dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + gval
+     !dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gval
      eps = eps + deltaene
    end do
  end if ! end degenerate tetrahedron if
