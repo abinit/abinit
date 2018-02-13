@@ -30,11 +30,13 @@ module m_xgScalapack
 #ifdef HAVE_MPI2
  use mpi
 #endif
+
+  implicit none
+
 #ifdef HAVE_MPI1
  include 'mpif.h'
 #endif
 
-  implicit none
 
   private
 
