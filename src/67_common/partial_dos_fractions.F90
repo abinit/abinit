@@ -85,6 +85,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  use m_cgtools,       only : cg_getspin
  use m_epjdos,        only : recip_ylm, epjdos_t
  use m_io_tools,      only : get_unit
+ use m_fstrings,      only : int2char4
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -108,8 +109,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 !arrays
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg)
- real(dp),intent(in) :: eigen(dtset%mband*dtset*nkpt*dtset%nsppol)
- real(dp),intent(in) :: occ(dtset%mband*dtset*nkpt*dtset%nsppol)
+ real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
 
 !Local variables-------------------------------
 !scalars
@@ -119,7 +120,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  integer :: me_g0,mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
  integer :: comm_pw,comm_kpt,rc_ylm,itypat,nband_k
  integer :: abs_shift_b
- integer :: unit_procar
+ integer :: unit_procar, ipauli
  real(dp),parameter :: bessint_delta = 0.1_dp
  real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax
  real(dp) :: cpu,wall,gflops
@@ -170,6 +171,14 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  me_kpt = mpi_enreg%me_kpt
  comm_pw = mpi_enreg%comm_bandfft ; me_g0 = mpi_enreg%me_g0
  my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+
+! forbid nspinor parallelization for the moment
+ if (mpi_enreg%nproc_spinor > 1) then
+   write(std_out,*) 'Error: partial_dos_fractions no longer supports spinor '
+   write(std_out,*) ' paralellization nproc_spinor = ', mpi_enreg%nproc_spinor, ' skipping routine'
+   return
+ end if 
+
 
  n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
  mgfft = maxval(dtset%ngfft(1:3))
@@ -226,8 +235,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    end do
 
    ! init bessel function integral for recip_ylm max ang mom + 1
-   ABI_ALLOCATE(sum_1atom_1ll,(dos%mbesslang,natsph_tot,nspinor))
-   ABI_ALLOCATE(sum_1atom_1lm,(dos%mbesslang**2,natsph_tot,nspinor))
+   ABI_ALLOCATE(sum_1atom_1ll,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
+   ABI_ALLOCATE(sum_1atom_1lm,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
 
    ! Note ecuteff instead of ecut.
    kpgmax = sqrt(dtset%ecut * dtset%dilatmx**2)
@@ -272,7 +281,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
      ioffkg = 0
      do ikpt=1,dtset%nkpt
        nband_k = dtset%nband((isppol-1)*dtset%nkpt + ikpt)
-       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt))
+       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) then
          abs_shift_b = abs_shift_b + nband_k ! jump the whole kpt in the eig and occ arrays
          cycle
        end if
@@ -336,15 +345,16 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
          !write(std_out,*)"in band:",iband
          ! TODO: eventually import eig and occ down to here - a pain, but printing outside would imply saving a huge array in memory
-         write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', eigen(abs_shift_b + iband), ' # occ. ', occ(abs_shift_b + iband), ch10
+         write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
+&          eigen(abs_shift_b + iband), ' # occ. ', occ(abs_shift_b + iband), ch10
 
-         do ispinor=1,my_nspinor
+         !do ispinor=1,my_nspinor
            ! Select wavefunction in cg array
            shift_cg = shift_sk + shift_b
 
-           call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), comm_pw, dtset%istwfk(ikpt),&
+           call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+dtset%nspinor*npw_k), comm_pw, dtset%istwfk(ikpt),&
 &           nradint, nradintmax, me_g0, dos%mbesslang , dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
-&           npw_k, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll(:,:,ispinor), sum_1atom_1lm(:,:,ispinor),&
+&           npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
            ! Accumulate
@@ -352,7 +362,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
              do ilang=1,dos%mbesslang
                dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
 &               = dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
-&               + sum_1atom_1ll(ilang,iatom,ispinor)
+&               + sum_1atom_1ll(1,ilang,iatom)
              end do
            end do
 
@@ -361,36 +371,36 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
                do ilang=1,dos%mbesslang**2
                  dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
 &                 = dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
-&                 + sum_1atom_1lm(ilang,iatom,ispinor)
+&                 + sum_1atom_1lm(1,ilang,iatom)
                end do
              end do
            end if
 
            ! Increment band, spinor shift
-           shift_b = shift_b + npw_k
-         end do ! spinor
+           !shift_b = shift_b + npw_k
+           shift_b = shift_b + dtset%nspinor*npw_k
+         !end do ! spinor
+
 ! now we have both spinor components.
          write (unit_procar,'(a)') 'ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
-         if (nspinor == 2) then
-           do ipauli= 0,3
+         do ipauli= 1,dtset%nspinor**2
 !Contract with Pauli matrices to get projections for this k and band, all atoms and ilang
-             matmul(matmul(sum_1atom_1lm,pauli_mat(:,:,ipauli)), sum_1atom_1lm)
-             do iatom = 1, natsph_tot
-               write (unit_procar,advance='no', '(I3)') iatom
-               do ilang=1,dos%mbesslang
-                 write (unit_procar,advance='no', '(F7.3)') 
-               end do
+           do iatom = 1, natsph_tot
+             write (unit_procar, '(I3)', advance='no') iatom
+             do ilang=1,min(dos%mbesslang**2,9)
+               write (unit_procar, '(F7.3)',advance='no') sum_1atom_1lm(ipauli,ilang,iatom)
              end do
+             write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,iatom))
            end do
-         else
-         end if
+         end do
 
 
        end do ! band
 
        ! Increment kpt and (spin, kpt) shifts
        ioffkg = ioffkg + npw_k
-       shift_sk = shift_sk + nband_k*my_nspinor*npw_k
+       shift_sk = shift_sk + nband_k*dtset%nspinor*npw_k
+       !shift_sk = shift_sk + nband_k*my_nspinor*npw_k
 
        ABI_FREE(kg_k)
        ABI_FREE(kpgnorm)

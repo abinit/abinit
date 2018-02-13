@@ -1865,7 +1865,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  real(dp),allocatable :: cg_k(:,:),cgcband(:,:),denpot(:,:,:),eig_k(:)
  real(dp),allocatable :: fofgout(:,:),fofr(:,:,:,:),k1(:,:)
  real(dp),allocatable :: kpgnorm(:),occ_k(:),ph1d(:,:),ph3d(:,:,:),rint(:)
- real(dp),allocatable :: sum_1atom_1ll(:,:),sum_1atom_1lm(:,:)
+ real(dp),allocatable :: sum_1atom_1ll(:,:,:),sum_1atom_1lm(:,:,:)
  real(dp),allocatable :: xfit(:),yfit(:),ylm_k(:,:)
  real(dp),allocatable :: ylmgr_dum(:,:,:)
  character(len=fnlen) :: fileqps
@@ -2113,7 +2113,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_ALLOCATE(wfg_qps,(npw_k))
        do iband=1,nband_qps
          cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
-         wfg(:,iband) = cmplx( cg_k(1,cgshift+1:cgshift+npw_k),cg_k(2,cgshift+1:cgshift+npw_k) )
+         wfg(:,iband) = dcmplx( cg_k(1,cgshift+1:cgshift+npw_k),cg_k(2,cgshift+1:cgshift+npw_k) )
        end do
 
        wfg_qps = matmul( wfg(:,:) , ccoeff(:,cband) )
@@ -2227,15 +2227,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-       ABI_ALLOCATE(sum_1atom_1ll,(mlang,natom))
-       ABI_ALLOCATE(sum_1atom_1lm,(mlang**2,natom))
+       ABI_ALLOCATE(sum_1atom_1ll,(nspinor**2,mlang,natom))
+       ABI_ALLOCATE(sum_1atom_1lm,(nspinor**2,mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
 
        rc_ylm = 1 ! Real or Complex spherical harmonics.
        mlang_type = 5
        call recip_ylm (bess_fit,cgcband,xmpi_comm_self,istwfk(ckpt),&
-&       nradint,nradintmax,1,mlang,mpw,natom,typat,mlang_type,npw_k,ph3d,prtsphere,rint,&
+&       nradint,nradintmax,1,mlang,mpw,natom,typat,mlang_type,npw_k,nspinor,ph3d,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband,gmet,istwfk(ckpt),&
