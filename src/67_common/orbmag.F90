@@ -156,12 +156,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp),allocatable :: cg1_k(:,:),cgrvtrial(:,:),ffnl(:,:,:,:),kinpw(:),kk_paw(:,:,:),kpg_k_dummy(:,:)
  real(dp),allocatable :: ph3d(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
  real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:),ylm_k(:,:)
- real(dp),allocatable :: ket(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  complex(dpc),allocatable :: nucdipmom_k(:)
  logical,allocatable :: has_smat(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
  ! ***********************************************************************
  ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
@@ -190,8 +188,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
        call pawcprj_alloc(cprj_ikn,ncpgr,dimlmn)
        call pawcprj_alloc(cprj_fkn,ncpgr,dimlmn)
     end if
-    ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
-    call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
  else
    message = ' usepaw /= 1 but Chern number calculation requires PAW '
    MSG_ERROR(message)
@@ -350,34 +346,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
           call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
                & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
-          ABI_ALLOCATE(ket,(2,npw_k))
-          ABI_ALLOCATE(ghc,(2,npw_k))
-          ABI_ALLOCATE(gsc,(2,npw_k))
-          ABI_ALLOCATE(gvnlc,(2,npw_k))
-!          call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
-          cpopt = -1
-          lambda=0.0
-          sij_opt = 0
-          tim_getghc = 0
-          type_calc = 0
-          ndat = 1
-          prtvol = 1
-          do nn = 1, nband_k
-             ket(1,1:npw_k) = cg(1,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
-             ket(2,1:npw_k) = cg(2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
-             call getghc(cpopt,ket,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
-                  &                 prtvol,sij_opt,tim_getghc,type_calc)
-             dotr=zero;doti=zero
-             do ipw = 1, npw_k
-                dotr=dotr+ket(1,ipw)*ghc(1,ipw)+ket(2,ipw)*ghc(2,ipw)
-             end do
-             write(std_out,'(a,2i4,es16.8)')'JWZ debug kpt band energy ',ikpt,nn,dotr
-          end do
-          ABI_DEALLOCATE(ket)
-          ABI_DEALLOCATE(ghc)
-          ABI_DEALLOCATE(gsc)
-          ABI_DEALLOCATE(gvnlc)
-!          call pawcprj_free(cwaveprj)
           
 
           ! do bfor = 1, 2
@@ -574,8 +542,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
        ABI_DATATYPE_DEALLOCATE(cprj_ikn)
        ABI_DATATYPE_DEALLOCATE(cprj_fkn)
     end if
-    call pawcprj_free(cwaveprj)
-    ABI_DATATYPE_DEALLOCATE(cwaveprj)
  end if
 
  ABI_DEALLOCATE(kk_paw)
