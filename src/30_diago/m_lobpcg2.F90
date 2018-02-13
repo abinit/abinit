@@ -493,7 +493,7 @@ module m_lobpcg2
           call xgBlock_zero(lobpcg%P)
           call xgBlock_zero(lobpcg%AP)
           call xgBlock_zero(lobpcg%BP)
-          !RR_eig = eigenvalues2N
+          RR_eig = eigenvalues2N
           if ( ierr /= 0 ) then
             MSG_COMMENT("This is embarrasing. Let's pray")
           end if
@@ -503,18 +503,19 @@ module m_lobpcg2
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
             RR_var = VAR_XWP
-            !RR_eig = eigenvalues3N%self
+            RR_eig = eigenvalues3N%self
           else 
             call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
             RR_var = VAR_XW
-            !RR_eig = eigenvalues2N
+            RR_eig = eigenvalues2N
             call xgBlock_zero(lobpcg%P)
             call xgBlock_zero(lobpcg%AP)
             call xgBlock_zero(lobpcg%BP)
             nrestart = nrestart + 1
           end if
+          !RR_eig = eigenvalues3N%self 
         end if
-        RR_eig = eigenvalues3N%self 
+        !RR_eig = eigenvalues3N%self 
         call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
           MSG_ERROR_NOSTOP("I'm so so sorry I could not make it, I did my best but I failed. Sorry. I'm gonna suicide",ierr)
@@ -848,7 +849,7 @@ module m_lobpcg2
       MSG_ERROR("RR")
     end select
 
-    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim*subdim,use_slk)
+    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim*subdim,lobpcg%prtvol-2,use_slk)
     if ( use_slk) then
       eigenSolver = EIGENSLK
     end if
