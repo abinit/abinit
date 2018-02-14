@@ -3166,7 +3166,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
    do iq_bz=1,nqbz
      iq_ibz = bz2ibz(iq_bz,1)
      do nu=1,natom3
-       call skw_eval_bks(new, cryst, nu, qbz(:,iq_bz), 1, phfrq(nu))
+       call skw_eval_bks(new, nu, qbz(:,iq_bz), 1, phfrq(nu))
      end do
      write(std_out,*)"BZ-IBZ:", maxval(abs(phfrq - ibz_freqs(:, iq_ibz)))
    end do
@@ -3350,7 +3350,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
    ! SKW interpolation
    call cwtime(cpu, wall, gflops, "start")
    do nu=1,natom3
-     call skw_eval_bks(skw, cryst, nu, qpt, 1, ofreqs(nu))
+     call skw_eval_bks(skw, nu, qpt, 1, ofreqs(nu))
    end do
    call cwtime(cpu, wall, gflops, "stop")
    cpu_skw = cpu_skw + cpu; wall_skw = wall_skw + wall
