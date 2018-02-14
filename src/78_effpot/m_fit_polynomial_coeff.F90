@@ -805,7 +805,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call cpu_time(time)
    call ZBQLINI(int(time*1000000/(my_rank+1)))
    if(need_verbose)then
-     write(message,'(a,I0)') " Start Monte Carlo simulations on ", nproc
+     write(message,'(a,I0,a)') " Start Monte Carlo simulations on ", nproc," CPU"
      if(nproc>1) write(message,'(2a)') trim(message)," (only print result of the master)"     
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')       

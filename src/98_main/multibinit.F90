@@ -356,13 +356,12 @@ program multibinit
    end if
  end if
 
-!TEST_AM
+
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%fit_bound==1)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-2,comm,hist=hist)
+ if(inp%fit_bound>0.and.inp%fit_bound<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%fit_bound,comm,hist=hist)
  end if
-!TEST_AM
 
 !****************************************************************************************
 
@@ -373,7 +372,6 @@ program multibinit
 !TEST_AM
 
 !****************************************************************************************
-
  
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)

@@ -1509,7 +1509,8 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 !       possible = .false.
 !     end if
      do jj=1,3
-         if(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj)  > tol10)then
+       if(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj)  > tol10.or.&
+&          abs(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj))  < tol10)then
          possible = .false.
        end if
      end do
