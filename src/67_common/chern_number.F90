@@ -212,6 +212,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
        ! loop over kpts, assuming for now kptopt 3, nsppol = 1, nspinor = 1
        ! and no parallelism, no symmorphic symmetry elements
+
        do ikpt = 1, dtorbmag%fnkpt
 
           icprj = dtorbmag%cprjindex(ikpt,isppol)
@@ -269,7 +270,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                 has_smat(ikptb,ikpt) = .TRUE.
 
              end if
-             
+
              do gfor = 1, 2
                 if (gfor .EQ. 1) then
                    gsigma = 1
@@ -365,25 +366,26 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
                             tprodB = t1B*t2B*t3B*t4B
                             IB = IB - epsabg*bsigma*gsigma*tprodB/(2.0*deltab*2.0*deltag)
-                         end do
+                         end do ! end loop over n3
 
                          tprodA = t1A*t2A*t3A
                          IA = IA + epsabg*bsigma*gsigma*tprodA/(2.0*deltab*2.0*deltag)
 
-                      end do
-                   end do
-                end do
+                      end do ! end loop over n2
+                   end do ! end loop over n1
+                end do ! end loop over nn
                 
-             end do
+             end do ! end loop over gfor
              
-
-          end do
+          end do ! end loop over bfor
           
        end do ! end loop over fnkpt
+
     end do ! end loop over epsabg
 
     cnum(1,adir) = real(IA+IB)
     cnum(2,adir) = aimag(IA+IB)
+
  end do ! end loop over adir
 
  cnum(1,1:3) = MATMUL(gprimd,cnum(1,1:3))
