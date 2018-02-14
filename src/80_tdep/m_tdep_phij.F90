@@ -181,7 +181,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
         isym =Shell2at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
         trans=Shell2at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
         if (fatom.lt.eatom) cycle
-        call tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
+        call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
 !       Symetrization of the Phij_NN matrix
         Phij_NN((eatom-1)*3+1:(eatom-1)*3+3,3*(fatom-1)+1:3*(fatom-1)+3)=Phij_33(:,:)
         do ii=1,3

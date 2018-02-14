@@ -190,7 +190,6 @@ contains
 
   implicit none
   type(ddb_type),intent(out) :: DDB
-  type(crystal_t),intent(in) :: Crystal
   type(Input_Variables_type),intent(in) :: InVar
   type(Lattice_Variables_type),intent(in) :: Lattice
 
