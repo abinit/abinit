@@ -266,6 +266,7 @@ module m_xgScalapack
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
 
+#ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_heev,1,tsec)
 
     ! Keep only working processors 
@@ -301,6 +302,9 @@ module m_xgScalapack
 
     call xgScalapack_scatter(xgScalapack,matrixA)
     call xgScalapack_scatter(xgScalapack,eigenvalues)
+#else
+   MSG_ERROR("ScaLAPACK support not available")
+#endif
 
   end subroutine xgScalapack_heev
 
@@ -330,6 +334,7 @@ module m_xgScalapack
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
 
+#ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_hegv,1,tsec)
 
     ! Keep only working processors 
@@ -369,6 +374,9 @@ module m_xgScalapack
 
     call xgScalapack_scatter(xgScalapack,matrixA)
     call xgScalapack_scatter(xgScalapack,eigenvalues)
+#else
+   MSG_ERROR("ScaLAPACK support not available")
+#endif
 
   end subroutine xgScalapack_hegv
 
