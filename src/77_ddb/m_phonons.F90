@@ -1966,8 +1966,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      end if
 
    !case (3)
-     !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat, &
-     !  weights,save_phfrq,save_phdispl_cart)
+     !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,Crystal%typat, &
+     !  save_phfrq,save_phdispl_cart)
 
    case default
      MSG_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
@@ -2584,7 +2584,7 @@ end subroutine phonons_write_phfrq
 !!
 !! SOURCE
 
-subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdispl_cart)
+subroutine phonons_writeEPS(natom,nqpts,ntypat,typat,phfreq,phdispl_cart)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2600,7 +2600,6 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
  integer,intent(in) :: natom,nqpts,ntypat
 !arrays
  integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: qpoints(3,nqpts),weights(nqpts)
  real(dp),intent(in) :: phfreq(3*natom,nqpts)
  real(dp),intent(in) :: phdispl_cart(2,3*natom,3*natom,nqpts)
 
