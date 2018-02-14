@@ -4284,7 +4284,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
  integer :: nperts_read, nperts_interpolate, nperts
  integer :: nqpt_read, nqpt_interpolate
- integer :: nfft,nfftf,mgfftf
+ integer :: nfft,nfftf
  integer :: ount, unt, fform
  real(dp) :: cpu,wall,gflops
  logical :: i_am_master

@@ -147,7 +147,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
 
   integer :: iatcell,ishell,jshell,isym,iatom,jatom,eatom,fatom,ncoeff,ncoeff_prev
   integer :: nshell,ii,jj,kk,ll,this_shell,kappa,iatshell,iatref,trans
-  double precision :: sum1,sum2,max_bound,min_bound,dist_shell,delta
+  double precision :: max_bound,min_bound,dist_shell,delta
   integer,allocatable :: tab_shell(:),counter(:,:,:)
   double precision,allocatable :: Phij_33(:,:),Phij_shell(:,:,:),correction(:,:,:),Phij_ref(:,:,:)
 
@@ -398,7 +398,8 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rl
   double complex :: ctemp,norm
   double precision, allocatable :: omega2(:)
   double precision, allocatable :: RWORK(:)
-  double complex, allocatable :: WORKC(:),mass_mat(:,:)
+  double complex, allocatable :: WORKC(:)
+! double complex, allocatable :: mass_mat(:,:)
 
 ! Calculation of the dynamical matrix (Dij)
   do iatcell=1,InVar%natom_unitcell

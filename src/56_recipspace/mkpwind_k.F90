@@ -53,7 +53,7 @@
 #include "abi_common.h"
 
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
-     & kg,kgindex,mpi_enreg,npw_k,pwind_k1,symrec)
+& kg,kgindex,mpi_enreg,npw_k,pwind_k1,symrec)
 
  use defs_basis
  use defs_abitypes
@@ -73,27 +73,27 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
  implicit none
 
 !Arguments ------------------------------------
- !scalars
+!scalars
  integer,intent(in) :: fnkpt,ikpt,ikpt1,npw_k
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
 
- !arrays
+!arrays
  integer,intent(in) :: indkk_f2ibz(fnkpt,6),kg(3,dtset%mpw*dtset%mkmem),kgindex(dtset%nkpt)
  integer,intent(in) :: symrec(3,3,dtset%nsym)
  integer,intent(out) :: pwind_k1(dtset%mpw)
  real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
  
- !Local variables -------------------------
- !scalars
+!Local variables -------------------------
+!scalars
  integer :: exchn2n3d,idum1,ikg1,ipw,istwf_k,isym,isym1,jpw,npw_k1
  real(dp) :: ecut_eff
  
- !arrays
+!arrays
  integer,allocatable :: kg1_k(:,:)
  real(dp) :: dg(3),dum33(3,3),kpt1(3),iadum(3),iadum1(3)
 
- ! ***********************************************************************
+! ***********************************************************************
 
  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
  

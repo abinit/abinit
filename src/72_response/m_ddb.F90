@@ -3336,7 +3336,8 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  ! type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  character(len=*),intent(in) :: filename
  !Local variables -------------------------
- integer :: ii,mxnimage, nn,ddbun
+ integer :: mxnimage,ddbun
+!integer :: ii, nn
  type(ddb_hdr_type) :: ddb_hdr
 
 ! ************************************************************************

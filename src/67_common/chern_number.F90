@@ -8,7 +8,7 @@
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (MVeithen)
+!! Copyright (C) 2003-2017 ABINIT  group (JZwanziger, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,8 +72,8 @@
 #include "abi_common.h"
 
 subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
-     &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
-     &            symrec,usecprj,usepaw,xred)
+&            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+&            symrec,usecprj,usepaw,xred)
 
  use defs_basis
  use defs_abitypes
@@ -104,14 +104,14 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  implicit none
 
 !Arguments ------------------------------------
- !scalars
+!scalars
  integer,intent(in) :: mcg,mcprj,pwind_alloc,usecprj,usepaw
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(orbmag_type), intent(inout) :: dtorbmag
  type(pawang_type),intent(in) :: pawang
 
- !arrays
+!arrays
  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
@@ -119,8 +119,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
 
- !Local variables -------------------------
- !scalars
+!Local variables -------------------------
+!scalars
  integer :: adir,bdir,bfor,bsigma,ddkflag,epsabg,gdir,gfor,gsigma
  integer :: icg,icgb,icgg,icprj,icprjb,icprjg
  integer :: ikg,ikpt,ikptb,ikptg,isppol,itrs,job
@@ -137,10 +137,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
 
- ! ***********************************************************************
- ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+! ***********************************************************************
+! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
 
- ! TODO: generalize to nsppol > 1
+! TODO: generalize to nsppol > 1
  isppol = 1
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  
@@ -185,7 +185,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
  ddkflag = 1
  
- ! itrs = 0 means do not invoke time reversal symmetry in smatrix.F90
+!itrs = 0 means do not invoke time reversal symmetry in smatrix.F90
  itrs = 0
  
  job = 1
@@ -212,6 +212,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
        ! loop over kpts, assuming for now kptopt 3, nsppol = 1, nspinor = 1
        ! and no parallelism, no symmorphic symmetry elements
+
        do ikpt = 1, dtorbmag%fnkpt
 
           icprj = dtorbmag%cprjindex(ikpt,isppol)
@@ -269,7 +270,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                 has_smat(ikptb,ikpt) = .TRUE.
 
              end if
-             
+
              do gfor = 1, 2
                 if (gfor .EQ. 1) then
                    gsigma = 1
@@ -365,25 +366,26 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
                             tprodB = t1B*t2B*t3B*t4B
                             IB = IB - epsabg*bsigma*gsigma*tprodB/(2.0*deltab*2.0*deltag)
-                         end do
+                         end do ! end loop over n3
 
                          tprodA = t1A*t2A*t3A
                          IA = IA + epsabg*bsigma*gsigma*tprodA/(2.0*deltab*2.0*deltag)
 
-                      end do
-                   end do
-                end do
+                      end do ! end loop over n2
+                   end do ! end loop over n1
+                end do ! end loop over nn
                 
-             end do
+             end do ! end loop over gfor
              
-
-          end do
+          end do ! end loop over bfor
           
        end do ! end loop over fnkpt
+
     end do ! end loop over epsabg
 
     cnum(1,adir) = real(IA+IB)
     cnum(2,adir) = aimag(IA+IB)
+
  end do ! end loop over adir
 
  cnum(1,1:3) = MATMUL(gprimd,cnum(1,1:3))

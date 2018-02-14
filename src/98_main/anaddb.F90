@@ -92,7 +92,7 @@ program anaddb
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
- integer :: dimekb,comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
+ integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master

@@ -133,16 +133,21 @@
  integer :: ig,ii,ikg,ierr
  integer :: ikpt,ikpt1,ikpt2,ilmn,intot,isppol,itypat
  integer :: iun(nsppol),iun_plot,iwan,jband,jband1,jband2,jj,jj1,jj2,jj3
- integer :: kk,lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
+ integer :: lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
+#if defined HAVE_WANNIER90
+ integer :: kk
+#endif
  integer :: n1tmp,n2,n2tmp,n3,n3tmp,n4,n5,n6,nband_k
  integer :: nntot,npw_k,num_nnmax,spacing
  integer :: tim_fourwf
  integer :: master,max_num_bands,nprocs,spaceComm,spin,rank
 !integer :: j,k,l
  integer  :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
- real(dp) :: corrvdw
  real(dp) :: weight
+#if defined HAVE_WANNIER90
+ real(dp) :: corrvdw
  complex(dpc) :: caux,caux2,caux3
+#endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
  character(len=20) :: wfnname
  character(len=500) :: message
@@ -155,13 +160,20 @@
  integer,allocatable:: iwav(:,:,:),kg_k(:,:),ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
  real(dp) :: real_lattice(3,3)
- real(dp) :: recip_lattice(3,3),spreadw(3)
- real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),csix(:,:,:,:),cwavef(:,:)
+ real(dp) :: recip_lattice(3,3)
+#if defined HAVE_WANNIER90
+ real(dp) :: spreadw(3)
+#endif
+ real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),cwavef(:,:)
+#if defined HAVE_WANNIER90
+ real(dp),allocatable :: csix(:,:,:,:)
+#endif
  real(dp),allocatable :: denpot(:,:,:)
  real(dp),allocatable :: eigenvalues_w(:,:,:),fofgout(:,:),fofr(:,:,:,:)
- real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
+#if defined HAVE_WANNIER90
+ real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:),tdocc_wan(:,:)
+#endif
  real(dp),allocatable :: proj_site(:,:,:),proj_x(:,:,:),proj_z(:,:,:),proj_zona(:,:)
- real(dp),allocatable :: tdocc_wan(:,:)
  real(dp),allocatable :: wann_centres(:,:,:),wann_spreads(:,:),xcart(:,:)
  complex(dpc),allocatable :: A_paw(:,:,:,:)
  complex(dpc),allocatable :: M_matrix(:,:,:,:,:),U_matrix(:,:,:,:)

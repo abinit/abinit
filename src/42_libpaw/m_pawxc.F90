@@ -875,7 +875,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !scalars
  integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad,npts
  integer :: nspden_eff,nspden_updn,nspgrad,nvxcdgr,order
- real(dp) :: dvdn,dvdz,enxcr,factor,vxcrho
+ real(dp) :: enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:)

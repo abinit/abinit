@@ -180,8 +180,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid,ixc_current
- integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
- !real(dp):: rx,ry,rz                        !SPr: debug
+!integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
+!real(dp):: rx,ry,rz                        !SPr: debug
  real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
