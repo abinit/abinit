@@ -849,10 +849,12 @@ module m_lobpcg2
       MSG_ERROR("RR")
     end select
 
+#ifdef HAVE_LINALG_SCALAPACK
     call xgScalapack_init(scalapack,lobpcg%spacecom,subdim*subdim,lobpcg%prtvol-2,use_slk)
     if ( use_slk) then
       eigenSolver = EIGENSLK
     end if
+#endif
 
     ! Select diago algorithm
 
