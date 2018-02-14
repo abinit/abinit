@@ -1061,7 +1061,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0
- integer :: unt,fform,iomode,optin,optout,my_rank,mybase,globase,cplex_file
+ integer :: unt,fform,iomode,my_rank,mybase,globase,cplex_file
+!integer :: optin,optout
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
  integer,parameter :: fform_den=52
  integer :: restart, restartpaw
@@ -1076,9 +1077,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  character(len=nctk_slen) :: varname
  !type(mpi_type) :: mpi_enreg_seq
 !arrays
- integer :: ngfft_file(18)
+!integer :: ngfft_file(18)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rhogdum(1)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+!real(dp) :: rhogdum(1)
  real(dp),allocatable :: rhor_file(:,:),rhor_tmp(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_file(:)
 

@@ -47,8 +47,8 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
 
   implicit none 
 
-  integer :: prtdos,nqpt,ii,jj,iqpt,iatom
-  integer :: msym,natom,natom_unitcell,iomega
+  integer :: prtdos,ii,iqpt,iatom
+  integer :: natom,natom_unitcell,iomega
   integer :: dos_ngqpt(3)
   character (len=25):: phdos_fname
   double precision :: dossmear,integ,domega
@@ -251,10 +251,12 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 
   implicit none 
 
-  integer :: iatom,ii,jj,kk,ll,iatcell,itypat,istep
+  integer :: iatom,ii,jj,kk,ll,iatcell,itypat
+! integer :: istep
   double precision :: BH,BR,BV,GR,GV,GH,Eaverage,Nuaverage,Laverage,Vp,Vs,Vphi
   double precision :: rho,E1,E2,E3,Nu12,Nu13,Nu23,Nu21,Nu31,Nu32,G23,G13,G12
-  double precision :: mass_amu,bohr,sigma_11,sigma_21,sigma_22,sigma_31,sigma_32,sigma_33
+  double precision :: mass_amu,bohr
+! real(dp) :: sigma_11,sigma_21,sigma_22,sigma_31,sigma_32,sigma_33
   double precision, allocatable :: Sij(:,:),Cij(:,:),aijkl(:,:,:,:),cijkl(:,:,:,:)
   type(Input_Variables_type), intent(in) :: InVar
   type(Lattice_Variables_type), intent(inout) :: Lattice

@@ -158,7 +158,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  case(0)
 
-   call predict_copy(itimimage,itimimage_eff,list_dynimage,ndynimage,nimage,&
+   call predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &   ntimimage_stored,results_img)
 
  case(1)

@@ -423,7 +423,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
   double precision, intent(inout) :: Phij_NN(3*InVar%natom,3*InVar%natom)
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,InVar%natom)
 
-  integer :: eatom,fatom,iatcell,iatom,ii,irpt,jatcell,jatom,jj,isym,kk
+  integer :: eatom,fatom,iatcell,ii,irpt,jatcell,jatom,jj,isym,kk
   integer :: ishell,iatref,jatref,iatshell,trans
   double precision :: tol,dist
   double precision :: tmp(3)

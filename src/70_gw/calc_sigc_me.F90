@@ -209,8 +209,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: iwc,ifft
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: e0i,fact_sp,theta_mu_minus_e0i,tol_empty,z2,en_high,norm,gw_gsq,w_localmax,w_max
- complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,scprod,ph_mkgwt,ph_mkt
+ real(dp) :: e0i,fact_sp,theta_mu_minus_e0i,tol_empty,z2,en_high,gw_gsq,w_localmax,w_max
+ complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg,sigma_type
  complex(gwpc),allocatable :: botsq(:,:),otq(:,:),eig(:,:)

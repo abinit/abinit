@@ -294,7 +294,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
          call mkcore_inner(corfra,core_mesh,dyfrx2,&
 &         grxc1,grxc2,grxc3,ifftsph_tmp,msz,&
 &         natom,ncmax,nfft,nfgd,nfgd_r0,nspden,n3xccc,option,pawtab(itypat),&
-&         rmet,rprimd,rr,strdia,vxc,xccc3d,rred=rred)
+&         rmet,rr,strdia,vxc,xccc3d,rred=rred)
 
        end if !parallel fftn3
      end do !i3

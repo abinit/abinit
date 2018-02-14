@@ -37,7 +37,8 @@
 #include "abi_common.h"
 
 
-subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
+subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, &
+!asrq0, &
 &                          prefix, comm)
 
 
@@ -76,7 +77,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, &
  type(crystal_t),intent(in) :: crystal
  type(ddb_type),intent(inout) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
- type(asrq0_t),intent(inout) :: asrq0
+!type(asrq0_t),intent(inout) :: asrq0
  integer,intent(in) :: comm
  character(len=*),intent(in) :: prefix
 !arrays

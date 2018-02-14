@@ -78,19 +78,16 @@ program tdep
 
   implicit none
 
-  integer :: natom,jatom,natom_unitcell,ntotcoeff,ncoeff,iatcell,nshell_max
-  integer :: order,ishell,stdout,norder,katom,iqpt
+  integer :: natom,natom_unitcell,ntotcoeff,nshell_max
+  integer :: order,stdout,norder,iqpt
   double precision :: U0,DeltaFree_AH2
-  double precision, allocatable :: ucart(:,:,:),proj(:,:,:),proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
+  double precision, allocatable :: ucart(:,:,:),proj(:,:,:),proj_tmp(:,:,:),Forces_TDEP(:)
 !FB  double precision, allocatable :: fcoeff(:,:),Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
   double precision, allocatable :: Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
-  double precision, allocatable :: Psij_coeff(:,:),Psij_NN(:,:,:)
   double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
   double precision, allocatable :: omega (:)
-  double precision, allocatable :: dynmat(:,:,:,:,:,:)
   double precision :: qpt_cart(3)
   double complex  , allocatable :: dij(:,:),eigenV(:,:)
-  double complex  , allocatable :: Gruneisen(:)
   type(phonon_dos_type) :: PHdos
   type(Input_Variables_type) :: InVar
   type(Lattice_Variables_type) :: Lattice
@@ -99,7 +96,7 @@ program tdep
   type(ifc_type) :: Ifc
   type(ddb_type) :: DDB
   type(crystal_t) :: Crystal
-  type(Shell_Variables_type) :: Shell2at,Shell3at
+  type(Shell_Variables_type) :: Shell2at
   type(Coeff_Moore_type) :: CoeffMoore
   type(Eigen_Variables_type) :: Eigen2nd
 

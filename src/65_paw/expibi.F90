@@ -13,19 +13,18 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  dkvecs(3,3) :: $\Delta k$ increments in three directions for current k-point grid
+!!  dkvecs(3) :: $\Delta k$ increment
 !!  natom :: number of atoms in unit cell
 !!  xred(natom,3) :: reduced coordinates of atoms in unit cell
 !!
 !! OUTPUT
-!!  calc_expibi(2,natom,3) :: phase factors at each atom for different vector shifts
+!!  calc_expibi(2,natom) :: phase factors at each atom for vector shift
 !!
 !! SIDE EFFECTS
 !!
 !! NOTES
 !!
 !! PARENTS
-!!      initberry
 !!
 !! CHILDREN
 !!
@@ -54,42 +53,39 @@
 !Arguments---------------------------
 !scalars
  integer,intent(in) :: natom
- real(dp),intent(out) :: calc_expibi(2,natom,3)
+ real(dp),intent(out) :: calc_expibi(2,natom)
 !arrays
- real(dp),intent(in) :: dkvecs(3,3),xred(3,natom)
+ real(dp),intent(in) :: dkvecs(3),xred(3,natom)
 
 !Local variables---------------------------
 !scalars
- integer :: iatom,kdir
+ integer :: iatom
  real(dp) :: bdotr
 
 ! *************************************************************************
 
- calc_expibi(:,:,:) = zero
+ calc_expibi(:,:) = zero
 
-!calc_expibi(2,my_natom,3)
-!used for PAW field calculations (distributed over atomic sites)
-!stores the on-site phase factors arising from
-!$\langle\phi_{i,k}|\phi_{j,k+\sigma_k k_k}\rangle$
-!where $\sigma = \pm 1$. These overlaps arise in various Berry
-!phase calculations of electric and magnetic polarization. The on-site
-!phase factor is $\exp[-i\sigma_k k_k)\cdot I]$ where
-!$I$ is the nuclear position. 
+ !calc_expibi(2,natom)
+ !used for PAW field calculations (distributed over atomic sites)
+ !stores the on-site phase factors arising from
+ !$\langle\phi_{i,k}|\phi_{j,k+\sigma_k k_k}\rangle$
+ !where $\sigma = \pm 1$. These overlaps arise in various Berry
+ !phase calculations of electric and magnetic polarization. The on-site
+ !phase factor is $\exp[-i\sigma_k k_k)\cdot I]$ where
+ !$I$ is the nuclear position. 
 
  do iatom = 1, natom
 
-   do kdir = 1, 3    
-!    note the definition used for the k-dependence of the PAW basis functions:
-!$|\phi_{i,k}\rangle = exp(-i k\cdot r)|\phi_i\rangle
-!    see Umari, Gonze, and Pasquarello, PRB 69,235102 Eq. 23. 
-     bdotr = DOT_PRODUCT(xred(1:3,iatom),-dkvecs(1:3,kdir))
-!    here is exp(i b.R) for the given site
-     calc_expibi(1,iatom,kdir) = cos(two_pi*bdotr)
-     calc_expibi(2,iatom,kdir) = sin(two_pi*bdotr)
+    !    note the definition used for the k-dependence of the PAW basis functions:
+    !$|\phi_{i,k}\rangle = exp(-i k\cdot r)|\phi_i\rangle
+    !    see Umari, Gonze, and Pasquarello, PRB 69,235102 Eq. 23. 
+    bdotr = DOT_PRODUCT(xred(1:3,iatom),-dkvecs(1:3))
+    !    here is exp(i b.R) for the given site
+    calc_expibi(1,iatom) = cos(two_pi*bdotr)
+    calc_expibi(2,iatom) = sin(two_pi*bdotr)
 
-   end do ! end loop over kdir
+ end do ! end loop on natom
 
- end do ! end loop on my_natom
-
- end subroutine expibi
+end subroutine expibi
 !!***

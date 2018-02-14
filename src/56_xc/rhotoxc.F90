@@ -277,7 +277,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  character(len=500) :: message
  real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
- integer :: gga_id(2)
  real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
