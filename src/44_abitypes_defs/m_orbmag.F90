@@ -82,9 +82,11 @@ module m_orbmag
   ! Real(dp) arrays
   real(dp) :: chern(2,3)           ! result of chern number calculation
   
-  real(dp) :: dkvecs(3,3)        ! dkvec(:,idir) = vector between a k-poinit
-                                 ! and its nearest neighbour along idir
-! Integer pointers
+  real(dp) :: dkvecs(3,3)        ! dkvec(:,idir) = vector between a k-point and its nearest neighbour along idir
+
+  real(dp) :: orbmagvec(2,3)     ! result of orbital magnetization calculation
+
+  ! Integer pointers
   integer, allocatable :: atom_indsym(:,:,:) ! atom_indsym(4,nsym,natom)
                                          ! this is data on how the symmetries map the atoms in the cell
                                          ! see symatm.F90 for full description
