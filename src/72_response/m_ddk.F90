@@ -289,6 +289,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
  use m_ebands,          only : ebands_expandk, ebands_ncwrite
  use m_time,            only : cwtime, sec2str
+ use m_vkbr,            only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ktoa
  use m_io_tools,        only : iomode_from_fname, get_unit
  use m_cgtools,         only : dotprod_g
@@ -315,9 +316,9 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(wfk_t),target :: in_wfk
+ type(vkbr_t) :: vkbr
  type(ebands_t),intent(in) :: ebands
  type(crystal_t) :: cryst
- type(ebands_t) :: ebands_full
  type(hdr_type) :: hdr0, hdr_tmp
  type(pseudopotential_type),intent(in) :: psps
  type(mpi_type),intent(inout) :: mpi_enreg
@@ -326,23 +327,22 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 !scalars
  integer,parameter :: inclvkb=2,formeig0=0
  logical,parameter :: force_istwfk1=.True.
- integer :: mband,nsppol,nkpt
- logical :: isirred_kf
- integer :: mpw_ki, nkibz, spin, nspinor, nkfull, itimrev, isym, nband_k, npw_ki, npw_kf
- integer :: in_iomode, ii, ik_bz, ik_ibz, bandmin, bandmax, istwf_ki, istwf_kf
+ integer :: mband, nsppol, ib_v, ib_c, cgshift
+ integer :: mpw_ki, nkibz, spin, nspinor, nkfull, nband_k, npw_ki
+ integer :: in_iomode, ii, ik_bz, bandmin, bandmax, istwf_ki
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
 !arrays
- integer :: work_ngfft(18), g0(3), gmax(3), gmax_ki(3),gmax_kf(3)
- integer,allocatable :: kg_kf(:,:),kg_ki(:,:),nband(:,:)
- integer,allocatable :: bz2ibz(:,:)
- real(dp) :: dksqmax,ecut_eff,cpu,wall,gflops
+ complex(dp),allocatable :: ihrc(:,:)
+ integer,allocatable :: kg_ki(:,:)
+ real(dp) :: ediff,cpu,wall,gflops
  character(len=500) :: msg
  character(len=fnlen) :: fname
- real(dp) :: kibz(3), kbz(3)
- real(dp),allocatable :: cg_ki(:,:),cg_kf(:,:),work(:,:,:,:)
+ real(dp) :: kbz(3)
+ real(dp),allocatable :: cg_ki(:,:)
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
+ complex(gwpc),allocatable :: ug_c(:),ug_v(:)
 
 !************************************************************************
 
@@ -362,46 +362,28 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  in_iomode = iomode_from_fname(wfk_path)
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
 
- mband = in_wfk%mband
  mpw_ki = maxval(in_wfk%Hdr%npwarr)
  nkibz = in_wfk%nkpt
  nsppol = in_wfk%nsppol
  nspinor = in_wfk%nspinor
- ecut_eff = in_wfk%hdr%ecut_eff ! ecut * dilatmx**2
+ mband = in_wfk%mband
  bandmin = 1
  bandmax = mband 
 
  ABI_MALLOC(kg_ki, (3, mpw_ki))
  ABI_MALLOC(cg_ki, (2, mpw_ki*nspinor*mband))
+ ABI_CALLOC(ihrc,  (3, nspinor**2))
 
  !read crystal
  call crystal_from_hdr(cryst, in_wfk%hdr, 2)
 
- ! Build new header for out_wfk. This is the most delicate part since all the arrays in hdr_full
- ! that depend on k-points must be consistent with kfull and nkfull.
- call ebands_expandk(ebands, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, ebands_full)
-
- if (dksqmax > tol12) then
-   write(msg, '(3a,es16.6,4a)' )&
-   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
-   'Action: check your WFK file and k-point input variables',ch10,&
-   '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-   MSG_ERROR(msg)
- end if
-
- nkfull = ebands_full%nkpt
+ nkfull = ebands%nkpt
 
  ! allocate optical matrix elements
- ABI_MALLOC(dipoles, (2,mband,mband,nkfull,nsppol,3))
- write(*,*) 'read'
+ ABI_MALLOC(dipoles,      (3,2,mband,mband,nkfull,nsppol))
  write(*,*) 'nkpoints:', nkfull
  write(*,*) 'nbands:  ', mband
  write(*,*) 'spin:    ', nsppol
-
- write(*,*) 'dataset'
- write(*,*) 'mbands:', dtset%mband
- write(*,*) 'spin:  ', dtset%nsppol
 
  !start counting the time
  call cwtime(cpu,wall,gflops,"start")
@@ -410,56 +392,50 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
    do ik_bz=1,nkfull ! Loop over full kpoints
 
-     ik_ibz  = bz2ibz(ik_bz,1)
-     isym    = bz2ibz(ik_bz,2)
-     itimrev = bz2ibz(ik_bz,6)
-     g0      = bz2ibz(ik_bz,3:5) ! IS(k_ibz) + g0 = k_bz
-     isirred_kf = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0))
+     nband_k = in_wfk%nband(ik_bz,spin)
+     npw_ki  = in_wfk%hdr%npwarr(ik_bz)
+     istwf_ki = in_wfk%hdr%istwfk(ik_bz)
+     kbz = ebands%kptns(:,ik_bz)
+     write(*,*) 'kpt:', ik_bz, kbz
 
-     nband_k = in_wfk%nband(ik_ibz,spin)
-     npw_ki = in_wfk%hdr%npwarr(ik_ibz)
-     npw_kf = in_wfk%hdr%npwarr(ik_ibz)
-     kibz = ebands%kptns(:,ik_ibz)
-     kbz = ebands_full%kptns(:,ik_bz)
-
-     ! Read IBZ data.
-     call wfk_read_band_block(in_wfk,[1,nband_k],ik_ibz,spin,xmpio_single,&
+     ! Read WF
+     call wfk_read_band_block(in_wfk,[1,nband_k],ik_bz,spin,xmpio_single,&
        kg_k=kg_ki,cg_k=cg_ki)
 
-     write(*,*) 'ikpt:', ik_bz
-     write(*,*) 'npw: ', npw_kf
-
-     ! The test on npwarr is needed because we may change istwfk e.g. gamma.
-     if (isirred_kf) then
-
-       call calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg_ki,npw_ki,kg_ki,nspinor,mband,&
-                         bandmin,bandmax,dipoles)
-
-     else
-       MSG_ERROR("Symmetries not implemented yet!")
-       ! Compute G-sphere centered on kf
-       call get_kg(kbz,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
-
-       ! FFT box must enclose the two spheres centered on ki and kf
-       gmax_ki = maxval(abs(kg_ki(:,1:npw_ki)), dim=2)
-       gmax_kf = maxval(abs(kg_kf), dim=2)
-       do ii=1,3
-         gmax(ii) = max(gmax_ki(ii), gmax_kf(ii))
-       end do
-       gmax = 2*gmax + 1
-       call ngfft_seq(work_ngfft, gmax)
-       ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
-
-       ! Rotate nband_k wavefunctions (output in cg_kf)
-       call cg_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_k,&
-                      npw_ki,kg_ki,npw_kf,kg_kf,istwf_ki,istwf_kf,cg_ki,cg_kf,work_ngfft,work)
-
-       ABI_FREE(work)
-
-       call calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg_kf,npw_kf,kg_kf,nspinor,mband,&
-                         bandmin,bandmax,dipoles)
-       ABI_FREE(kg_kf)
+     ! Allocate KB form factors
+     if (inclvkb/=0) then ! Prepare term i <n,k|[Vnl,r]|n"k>
+       call vkbr_init(vkbr,cryst,psps,inclvkb,istwf_ki,npw_ki,kbz,kg_ki)
      end if
+
+     do ib_v=bandmin,bandmax ! Loop over bands
+       cgshift=(ib_v-1)*npw_ki*nspinor + (spin-1)*npw_ki
+       ug_v = cmplx(cg_ki(1,cgshift+1:cgshift+npw_ki),&
+                    cg_ki(2,cgshift+1:cgshift+npw_ki))
+
+       do ib_c=ib_v,mband ! Loop over bands
+         if (ib_c < bandmin .or. ib_c > bandmax) cycle
+         cgshift=(ib_c-1)*npw_ki*nspinor + (spin-1)*npw_ki
+         ug_c = cmplx(cg_ki(1,cgshift+1:cgshift+npw_ki),&
+                      cg_ki(2,cgshift+1:cgshift+npw_ki))
+
+         ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
+         ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_ki,nspinor,istwf_ki,inclvkb,&
+                            kbz,ug_c,ug_v,kg_ki)
+
+         ! Save matrix elements of i*r in the IBZ
+         !ediff = (ebands%eig(ib_c,ik_bz,spin) - ebands%eig(ib_v,ik_bz,spin))
+         dipoles(:,1,ib_c,ib_v,ik_bz,spin) = real(sum(ihrc(:,:),2))
+         dipoles(:,2,ib_c,ib_v,ik_bz,spin) = aimag(sum(ihrc(:,:),2))
+         ! Hermitian conjugate
+         dipoles(:,1,ib_v,ib_c,ik_bz,spin) = real(sum(ihrc(:,:),2))
+         dipoles(:,2,ib_v,ib_c,ik_bz,spin) = -aimag(sum(ihrc(:,:),2))
+
+       end do
+     end do
+
+     !
+     ! Free KB form factors
+     call vkbr_free(vkbr)
 
    end do
  end do
@@ -467,7 +443,6 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  ABI_FREE(kg_ki)
  ABI_FREE(cg_ki)
 
- write(*,*) 'done!'
  call cwtime(cpu,wall,gflops,"stop")
 
  !write the matrix elements
@@ -485,13 +460,13 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
          !NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
          !call hdr_free(hdr_tmp)
          NCF_CHECK(crystal_ncwrite(cryst, ncid))
-         NCF_CHECK(ebands_ncwrite(ebands_full, ncid))
+         NCF_CHECK(ebands_ncwrite(ebands, ncid))
          ncerr = nctk_def_arrays(ncid, [ &
            nctkarr_t('h1_matrix_elements', "dp", &
             "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
          NCF_CHECK(ncerr)
          NCF_CHECK(nctk_set_datamode(ncid))
-         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(:,:,:,:,:,ii), &
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:), &
            count=[2, dtset%mband, dtset%mband, nkfull, dtset%nsppol])
          NCF_CHECK(ncerr)
          NCF_CHECK(nf90_close(ncid))
@@ -501,123 +476,6 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
 end subroutine
 !!***
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-!----------------------------------------------------------------------
-
-!!****f* m_ddk/calc_dipoles
-!! NAME
-!!  calc_dipoles
-!!
-!! FUNCTION
-!! Calculate the <r> matirx elements for ik_bz
-!! between bandmin and mandmax
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!      eph_ddk
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine calc_dipoles(cryst,psps,kbz,spin,ik_bz,inclvkb,cg_k,npw,kg_k,nspinor,mband,&
-                        bandmin,bandmax,dipoles)
-
- use defs_datatypes,    only : pseudopotential_type
- use m_vkbr,            only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_gkk'
- use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_56_recipspace
- use interfaces_66_wfs
-!End of the abilint section
- 
- implicit none
-
- type(crystal_t),intent(in) :: cryst
- type(pseudopotential_type),intent(in) :: psps
- type(vkbr_t) :: vkbr
-
- real(dp),intent(in) :: kbz(3)
- integer :: ib_v, ib_c
-
- !wavefunction coefficients
- integer,intent(in)  :: npw, nspinor, mband
- integer,intent(in)  :: kg_k(:,:)
- real(dp),intent(in) :: cg_k(2,npw,nspinor,mband)
- !wavefunctions options
- integer,parameter  :: istwf_k=0
- integer,intent(in) :: spin, ik_bz, inclvkb, bandmin, bandmax
-
- complex(dp) :: ihrc(3,nspinor**2)
- complex(gwpc),allocatable :: ug_c(:),ug_v(:)
- real(dp),allocatable :: dipoles(:,:,:,:,:,:)
-
- write(*,*) 'kcoords:', kbz
-
- ! Allocate KB form factors
- if (inclvkb/=0) then ! Prepare term i <n,k|[Vnl,r]|n"k>
-   call vkbr_init(vkbr,cryst,psps,inclvkb,istwf_k,npw,kbz,kg_k)
- end if
-
- do ib_v=bandmin,bandmax ! Loop over bands
-   ug_v = cmplx(cg_k(1,:,spin,ib_v),cg_k(2,:,spin,ib_v))
-
-   ! Note: can be improved by calculating only lower triangle
-   do ib_c=bandmin,bandmax ! Loop over bands
-     ug_c = cmplx(cg_k(1,:,spin,ib_c),cg_k(2,:,spin,ib_c))
-
-     ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
-     ihrc = nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwf_k,inclvkb,&
-                        kbz,ug_c,ug_v,kg_k)
-
-     ! Save matrix elements of i*r in the IBZ
-     dipoles(1,ib_c,ib_v,ik_bz,spin,:) = real(ihrc(:,1))
-     dipoles(2,ib_c,ib_v,ik_bz,spin,:) = aimag(ihrc(:,1))
-
-   end do
- end do
-
- write(*,*)
-
- ! Free KB form factors
- call vkbr_free(vkbr)
-
-end subroutine
-!!***
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
