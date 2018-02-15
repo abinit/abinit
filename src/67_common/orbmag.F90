@@ -143,23 +143,23 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !scalars
  integer :: adir,bdir,bfor,bsigma,cpopt,ddkflag,dimffnl,epsabg,gdir,gfor,gsigma
  integer :: icg,icgb,icgg,icprj,icprjb,icprjg,ider,idir
- integer :: ikg,ikpt,ikptb,ikptg,ilm,ipw,isppol,istwf_k,itrs,job
+ integer :: ikg,ikgb,ikpt,ikptb,ikptg,ilm,ipw,isppol,istwf_k,itrs,job
  integer :: mcg1_k,my_nspinor,nband_k,ncpgr,ndat,nkpg,nn,n1,n2,n3
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,npw_k,npw_kb,npw_kg
  integer :: prtvol,shiftbd,sij_opt,tim_getghc,type_calc
  real(dp) :: deltab,deltag,lambda,ucvol
  complex(dpc) :: IIA,IIIA,IIIA1,IIIA2,IIIA3,tprodA
  character(len=500) :: message
- type(gs_hamiltonian_type) :: gs_hamk
+ type(gs_hamiltonian_type) :: gs_hamk,gs_hamk123
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
  real(dp) :: dkb(3),dkg(3),dkbg(3),dtm_k(2),gmet(3,3),gprimd(3,3),kpoint(3),orbmagvec(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: cg1_k(:,:),cgrvtrial(:,:),cwavef(:,:),ffnl(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
- real(dp),allocatable :: hmat(:,:),kinpw(:),kk_paw(:,:,:),kpg_k_dummy(:,:)
+ real(dp),allocatable :: hmat(:,:),hmat123(:,:,:,:,:),kinpw(:),kk_paw(:,:,:),kpg_k_dummy(:,:)
  real(dp),allocatable :: ph3d(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
  real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:),ylm_k(:,:)
  complex(dpc),allocatable :: nucdipmom_k(:)
- logical,allocatable :: has_hmat(:),has_smat(:,:)
+ logical,allocatable :: has_hmat(:),has_hmat123(:,:),has_smat(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:),cwaveprj(:,:)
 
@@ -239,22 +239,25 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_ALLOCATE(has_hmat,(dtorbmag%fnkpt))
  ABI_ALLOCATE(hmat,(nband_k,dtorbmag%fnkpt))
  has_hmat(:) = .FALSE.
+ ABI_ALLOCATE(has_hmat123,(dtorbmag%fnkpt,dtorbmag%fnkpt))
+ ABI_ALLOCATE(hmat123,(2,nband_k,nband_k,dtorbmag%fnkpt,dtorbmag%fnkpt))
+ has_hmat123(:,:) = .FALSE.
 
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
- ! the paw_ij loaded here are the normal ones, will eventually be replaced by the phase-twisted
- ! versions. for now paw_ij is useful for testing.
+ !gs_hamk is the normal hamiltonian at k, needed for computing E_nk
  call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
       & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
       & paw_ij=paw_ij)
- ! call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
- !      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
- !      & paw_ij=paw_ij)
+
+ !gs_hamk123 is used to compute <u_nk1|Hk2|u_mk3>. Eventually paw_ij will be the phase-twisted versions
+ call init_hamiltonian(gs_hamk123,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
+      & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
+      & paw_ij=paw_ij)
 
  !---------construct local potential------------------
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
  ! nspden=1 is essentially hard-coded in the following line
- ! not sure if vpsp should be included here or not
  vtrial(1:nfftf,1)=vhartr(1:nfftf)+vxc(1:nfftf,1)+vpsp(1:nfftf)
  
  ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
@@ -266,9 +269,11 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_DEALLOCATE(cgrvtrial)
  ABI_DEALLOCATE(vtrial)
 
+ ! same vlocal in both Hamiltonians
  call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+ call load_spin_hamiltonian(gs_hamk123,isppol,vlocal=vlocal,with_nonlocal=.true.)
 
- !------- now local potential is attached to gs_hamk ----------------------------
+ !------- now local potential is attached to gs_hamk and gs_hamk123 -------------------------
  
  do adir = 1, 3
 
@@ -296,7 +301,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
           ikg = dtorbmag%fkgindex(ikpt)
 
-          ! Set up remainder of Hamiltonian at k if necessary
+          ! Set up remainder of normal Hamiltonian at k if necessary
 
           if (.NOT. has_hmat(ikpt) ) then
              kpoint(:)=dtorbmag%fkptns(:,ikpt)
@@ -516,6 +521,21 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                 end if
 
+                if (.NOT. has_hmat123(ikptg,ikptb)) then
+
+                   ! Compute (1/2) (2 Pi)**2 (k+Gb)**2
+                   ! note twist: not kb+Gb, but k+Gb
+                   ikgb = dtorbmag%fkgindex(ikptb)
+                   ABI_ALLOCATE(kg_k,(3,npw_kb))
+                   kg_k(:,1:npw_kb)=kg(:,1+ikgb:npw_kb+ikgb)
+                   ABI_ALLOCATE(kinpw,(npw_kb))
+                   call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_kb,0,0)
+
+                   ABI_DEALLOCATE(kg_k)
+                   ABI_DEALLOCATE(kinpw)
+                   
+                end if
+
                 do nn = 1, nband_k
                    do n1 = 1, nband_k
 
@@ -600,6 +620,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_DEALLOCATE(smat_all)
  ABI_DEALLOCATE(has_hmat)
  ABI_DEALLOCATE(hmat)
+ ABI_DEALLOCATE(has_hmat123)
+ ABI_DEALLOCATE(hmat123)
 
  ABI_DEALLOCATE(vlocal)
  call destroy_hamiltonian(gs_hamk)
