@@ -147,7 +147,7 @@ program tdep
 !============== Initialize Crystal and DDB ABINIT Datatypes ===============================
 !==========================================================================================
  call tdep_init_crystal(Crystal,InVar,Lattice,Sym)
- call tdep_init_ddb(Crystal,DDB,InVar,Lattice)
+ call tdep_init_ddb(DDB,InVar,Lattice)
 
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
@@ -239,7 +239,7 @@ program tdep
  close(53)
  close(52)
  close(51)
- call tdep_write_yaml(Eigen2nd,Lattice,Qpt)
+ call tdep_write_yaml(Eigen2nd,Qpt)
  write(InVar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
 !==========================================================================================
 !===================== Compute the elastic constants ======================================

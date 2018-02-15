@@ -177,7 +177,7 @@ contains
  end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_init_ddb(Crystal,DDB,InVar,Lattice)
+ subroutine tdep_init_ddb(DDB,InVar,Lattice)
 
   use m_copy,             only : alloc_copy
 
@@ -190,7 +190,6 @@ contains
 
   implicit none
   type(ddb_type),intent(out) :: DDB
-  type(crystal_t),intent(in) :: Crystal
   type(Input_Variables_type),intent(in) :: InVar
   type(Lattice_Variables_type),intent(in) :: Lattice
 
@@ -498,7 +497,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
           isym =Shell2at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
           trans=Shell2at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
           if (fatom.lt.eatom) cycle
-          call tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
+          call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
 !         Symetrization of the Phij_NN matrix
           Phij_NN((eatom-1)*3+1:(eatom-1)*3+3,3*(fatom-1)+1:3*(fatom-1)+3)=Phij_33(:,:)
           do ii=1,3
