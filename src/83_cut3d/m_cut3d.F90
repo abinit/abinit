@@ -2122,7 +2122,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      write(std_out,*) 'norm',SUM( abs(wfg_qps(:))**2 )
        ABI_DEALLOCATE(ccoeff)
        ABI_DEALLOCATE(wfg)
-       ABI_ALLOCATE(cgcband,(2,npw_k))
+       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       cgcband = zero
        cgcband(1,:)= real(wfg_qps(:))
        cgcband(2,:)= aimag(wfg_qps(:))
        ABI_DEALLOCATE(wfg_qps)
@@ -2130,21 +2131,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      else ! not a GW wavefunction
 
 ! get spin vector for present state
-       if (nspinor == 2) then
-         cgshift=(cband-1)*npw_k*nspinor
-         ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
-         cgcband(:,1:nspinor*npw_k)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
-         call cg_getspin(cgcband, npw_k, spinvec)
-         write(std_out,'(a,6E20.10)' ) ' spin vector for this state = ', (spinvec)
-         ABI_DEALLOCATE(cgcband)
-       end if
-
-!      The shift is to get the good band values
-       cgshift=(cband-1)*npw_k*nspinor + (cspinor-1)*npw_k
-       ABI_ALLOCATE(cgcband,(2,npw_k))
-       cgcband(:,1:npw_k)=cg_k(:,cgshift+1:cgshift+npw_k)
-
+       cgshift=(cband-1)*npw_k*nspinor
+       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       cgcband(:,1:npw_k*nspinor)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
      end if ! test QPS wavefunction from GW
+
+     if (nspinor == 2) then
+       call cg_getspin(cgcband, npw_k, spinvec)
+       write(std_out,'(a,6E20.10)' ) ' spin vector for this state = ', (spinvec)
+     end if
 
 !    Fix the phase of cgcband, for portability reasons
 !    call fxphas(cgcband,cgcband,0,npw_k,1,npw_k,0)
@@ -2153,7 +2148,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_ALLOCATE(fofgout,(2,npw_k))
      ABI_ALLOCATE(fofr,(2,n4,n5,n6))
 
-     call fourwf(cplex,denpot,cgcband,fofgout,fofr,gbound,gbound,&
+     call fourwf(cplex,denpot,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),fofgout,fofr,gbound,gbound,&
 &     istwfk(ckpt),kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,&
 &     npw_k,n4,n5,n6,0,paral_kgb,tim_fourwf0,weight,weight)
 
@@ -2238,7 +2233,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 &       nradint,nradintmax,1,mlang,mpw,natom,typat,mlang_type,npw_k,nspinor,ph3d,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
-       call dens_in_sph(cmax,cgcband,gmet,istwfk(ckpt),&
+       call dens_in_sph(cmax,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),gmet,istwfk(ckpt),&
 &       kg_k,natom,ngfft,mpi_enreg,npw_k,paral_kgb,ph1d,ratsph_arr,ucvol)
 
        write(std_out,'(a)' )' Charge in the sphere around each atom '

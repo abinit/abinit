@@ -1367,15 +1367,15 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  ABI_ALLOCATE(gnorm,(nfft))
  id3=ngfft(3)/2+2 ; id2=ngfft(2)/2+2 ; id1=ngfft(1)/2+2
  do i3=1,n3
-   g3=i3-(i3/real(id3))*ngfft(3)-one
+   g3=i3-(i3/(id3))*ngfft(3)-one
    do i2=1,n2
-     g2=i2-(i2/real(id2))*ngfft(2)-one
+     g2=i2-(i2/(id2))*ngfft(2)-one
      do i1=1,n1
-       g1=i1-(i1/real(id1))*ngfft(1)-one
+       g1=i1-(i1/(id1))*ngfft(1)-one
        ifft=i1+(i2-1)*n1+(i3-1)*n1*n2
-       garr(1,ifft)=int(g1)
-       garr(2,ifft)=int(g2)
-       garr(3,ifft)=int(g3)
+       garr(1,ifft)=nint(g1)
+       garr(2,ifft)=nint(g2)
+       garr(3,ifft)=nint(g3)
        gnorm(ifft)=sqrt(gmet(1,1)*g1*g1 + &
 &       two*gmet(2,1)*g2*g1 + &
 &       two*gmet(3,1)*g3*g1 + &
