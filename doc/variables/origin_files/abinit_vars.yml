@@ -20675,7 +20675,7 @@
         [[kptopt]]==3
         [[NPROC]]==1
     text: |-
-        Compute quantities related to orbital magnetization. Currently only the Chern number calculated.
+        Compute quantities related to orbital magnetization. A value of 1 computes the Chern number; a value of 2 computes the orbital magnetization; a value of 3 computes both. Currently this code is unfinished and should not be used in production runs.
     topics: MagField_expert
     varset: gstate
     vartype: integer
