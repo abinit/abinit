@@ -1676,7 +1676,6 @@ end subroutine fock_update_exc
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange
 !!  indsym(4,nsym,natom) :: 1:3 shift, and 4 final atom, of symmetry isym operating on iatom
 !!                            (S^{-1}(R - t) = r0 + L, see symatm.F90
-!!  istep=index of the number of steps in the routine scfcv
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
@@ -1706,7 +1705,7 @@ end subroutine fock_update_exc
 !!
 !! SOURCE
 
-subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
+subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
 
 
@@ -1722,7 +1721,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  implicit none
 
 !scalars
- integer, intent(in) :: istep,mcg,mcprj
+ integer, intent(in) :: mcg,mcprj
  real(dp), intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(fock_type),intent(inout),pointer :: fock

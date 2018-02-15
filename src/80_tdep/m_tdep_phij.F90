@@ -181,7 +181,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
         isym =Shell2at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
         trans=Shell2at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
         if (fatom.lt.eatom) cycle
-        call tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
+        call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
 !       Symetrization of the Phij_NN matrix
         Phij_NN((eatom-1)*3+1:(eatom-1)*3+3,3*(fatom-1)+1:3*(fatom-1)+3)=Phij_33(:,:)
         do ii=1,3
@@ -579,7 +579,7 @@ subroutine tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
 end subroutine tdep_write_dij
 
 !=====================================================================================================
-subroutine tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref,Phij_33,Sym,trans) 
+subroutine tdep_build_phij33(isym,Phij_ref,Phij_33,Sym,trans) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -591,10 +591,10 @@ subroutine tdep_build_phij33(eatom,fatom,isym,InVar,Phij_ref,Phij_33,Sym,trans)
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
-  type(Input_Variables_type),intent(in) :: InVar
+! type(Input_Variables_type),intent(in) :: InVar
   double precision, intent(in) :: Phij_ref(3,3)
   double precision, intent(out) :: Phij_33(3,3)
-  integer,intent(in) :: eatom,fatom,isym,trans
+  integer,intent(in) :: isym,trans
 
   double precision :: Phij_tmp(3,3),tmp1(3,3)
 
@@ -659,7 +659,7 @@ subroutine tdep_destroy_eigen2nd(Eigen2nd)
 end subroutine tdep_destroy_eigen2nd
 
 !=====================================================================================================
-subroutine tdep_write_yaml(Eigen2nd,Lattice,Qpt)
+subroutine tdep_write_yaml(Eigen2nd,Qpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -672,7 +672,7 @@ subroutine tdep_write_yaml(Eigen2nd,Lattice,Qpt)
 
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
-  type(Lattice_Variables_type),intent(in) :: Lattice
+! type(Lattice_Variables_type),intent(in) :: Lattice
 
   integer :: ii,iqpt,imode,nmode
   double precision :: distance
