@@ -276,7 +276,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    mpi_enreg_seq%my_natom = dtset%natom
 
    shift_sk = 0
-   abs_shift_b = -1 ! offset to allow for automatic update with +1 below
+   abs_shift_b =  0 ! offset to allow for automatic update with +1 below
    do isppol=1,dtset%nsppol
      ioffkg = 0
      do ikpt=1,dtset%nkpt
@@ -346,7 +346,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          !write(std_out,*)"in band:",iband
          ! TODO: eventually import eig and occ down to here - a pain, but printing outside would imply saving a huge array in memory
          write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
-&          eigen(abs_shift_b + iband), ' # occ. ', occ(abs_shift_b + iband), ch10
+&          eigen(abs_shift_b), ' # occ. ', occ(abs_shift_b), ch10
 
          !do ispinor=1,my_nspinor
            ! Select wavefunction in cg array

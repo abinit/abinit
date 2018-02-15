@@ -115,6 +115,7 @@ module m_epjdos
 
    real(dp),allocatable :: fractions(:,:,:,:)
    ! fractions(nkpt,mband,nsppol,ndosfraction))
+   ! TODO: replace nsppol with nspden = 1, 2 (nsppol==2) or 4 (nspinor==2)
 
    real(dp),allocatable :: fractions_m(:,:,:,:)
    ! fractions_m(nkpt,mband,nsppol,ndosfraction*mbesslang)
@@ -1122,12 +1123,12 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
    itypat = typat_extra(iat)
    lm_size = mlang_type(itypat) ** 2
    do ilm=1,lm_size
-     do ipauli=0,3
+     do ipauli=0,nspinor**2-1
        do ixint=1,nradint(iat)
          func(ixint) = zero
          do is=1,nspinor
            do isp=1,nspinor
-             func(ixint) =  func(ixint) + real(values(ixint, is, ilm, iat)*pauli_mat(is,isp,ipauli)*values(ixint, isp, ilm, iat))
+             func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat))*pauli_mat(is,isp,ipauli)*values(ixint, isp, ilm, iat))
            end do
          end do
          func(ixint) = rint(ixint)**2 * func(ixint)
@@ -1167,7 +1168,7 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
    sum_all = sum(sum_1atom)
 
    if (rc_ylm == 1) msg = " Angular analysis (real spherical harmonics)"
-   if (rc_ylm == 2) msg =" Angular analysis (complex spherical harmonics)"
+   if (rc_ylm == 2) msg = " Angular analysis (complex spherical harmonics)"
    call wrtout(std_out, msg)
    do iat=1,natsph
      call atomdata_from_znucl(atom, znucl_sph(iat))
