@@ -20,12 +20,12 @@ nsppol8 1  nspden8 1  nspinor8 2               ! non-magnetic LDA+U+SO
 natom 4 ntypat 2 typat 1 1 2 2
 # NB: this is the spin direction perpendicular to the AFM planes, 
 # preserves the 3 axis even when the spin is rotated along with the lattice
-spinat 1 1 -1  -1 -1 1      0 0 0   0 0 0
+spinat 0.5 0.5 -0.5  -0.5 -0.5 0.5      0 0 0   0 0 0
 znucl  28.0 8.0
-xred 0 0 0
-    0.0 0.0 0.5
-    0.5 0.5 0.25
-    0.5 0.5 0.75
+xred 0   0   0
+     0.0 0.0 0.5
+     0.5 0.5 0.25
+     0.5 0.5 0.75
 acell   3*7.92
 rprim 0.0 1/2 1/2
       1/2 0.0 1/2
