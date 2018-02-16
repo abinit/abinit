@@ -70,6 +70,7 @@
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_io_tools,   only : flush_unit
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -117,7 +118,7 @@
 
  if(prtvol > 0) then
    write(std_out,*)' symfind : enter'
-   call flush(std_out)
+   call flush_unit(std_out)
    write(std_out,*)' symfind : nzchempot= ',nzchempot
    write(std_out,'(a,I6)')'   noncoll    =', noncoll
    write(std_out,*)'   ptsymrel matrices are :'
@@ -131,7 +132,7 @@
      write(std_out,'(a,3F12.4)')'   spinat  =',spinat(:,iatom)
      write(std_out,'(a,3F12.4)')'   xred    =',xred(:,iatom)
    end do
-   call flush(std_out)
+   call flush_unit(std_out)
  end if
 
 !Find the number of classes of atoms (type and spinat must be identical,
