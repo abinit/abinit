@@ -2922,6 +2922,7 @@ function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
 
 ! *************************************************************************
  coeff = 0
+ ABI_UNUSED(weight)
  do icoeff = 1,ncoeff
    if(mu==list_coeff(1,icoeff).and.&
 &     ia==list_coeff(2,icoeff).and.&

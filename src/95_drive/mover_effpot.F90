@@ -73,11 +73,11 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
  use m_electronpositron,   only : electronpositron_type
  use m_polynomial_coeff,only : polynomial_coeff_getNorder
- use m_pawang,       only : pawang_type, pawang_free
- use m_pawrad,       only : pawrad_type, pawrad_free
- use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
- use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
-&                       paw_setup_copy, paw_setup_free, getecutfromxml
+! use m_pawang,       only : pawang_type, pawang_free
+! use m_pawrad,       only : pawrad_type, pawrad_free
+! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
+! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
+!&                       paw_setup_copy, paw_setup_free, getecutfromxml
  use m_dtset,  only : dtset_free
  use m_abihist, only : abihist
  use m_ifc
@@ -112,8 +112,8 @@ implicit none
  integer :: icoeff_bound,ii
 !integer :: iexit,initialized
  integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
- integer :: model_bound,model_ncoeffbound,my_rank,npsp
-!integer :: mtypalch,paw_size,type
+ integer :: model_bound,model_ncoeffbound,my_rank
+!integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass
  logical :: iam_master
@@ -141,8 +141,9 @@ implicit none
  integer :: sc_size(3),sc_size_TS(3)
  integer,pointer :: indsym(:,:,:)
  integer,allocatable :: listcoeff(:),listcoeff_bound(:,:),list_tmp(:),list_bound(:,:)
- integer,allocatable :: isPositive(:), npwtot(:)
+ integer,allocatable :: isPositive(:)
  integer,allocatable :: symrel(:,:,:)
+!integer,allocatable :: npwtot(:)
  real(dp) :: acell(3)
 !real(dp) :: ecut_tmp(3,2,10)
  real(dp),allocatable :: amass(:) ,coeff_values(:,:)
@@ -156,10 +157,10 @@ implicit none
  character(len=fnlen) :: filename
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
- type(pspheader_type),allocatable :: pspheads(:)
- type(pawrad_type),allocatable :: pawrad(:)
- type(pawtab_type),allocatable :: pawtab(:)
- type(args_gs_type) :: args_gs
+! type(pspheader_type),allocatable :: pspheads(:)
+! type(pawrad_type),allocatable :: pawrad(:)
+! type(pawtab_type),allocatable :: pawtab(:)
+! type(args_gs_type) :: args_gs
 !type(wvl_data) :: wvl
 !type(pawang_type) :: pawang
 !type(scf_history_type) :: scf_history
@@ -357,7 +358,7 @@ implicit none
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
        dtset%qmass(:) = inp%qmass(:)
      end if
-     if (inp%bmass == zero) then
+     if (abs(inp%bmass) < tol10) then
        dtset%bmass = bmass
        write(message,'(3a,F20.4,a)')&
 &       ' WARNING: bmass is set to zero in the input',ch10,&
@@ -552,7 +553,7 @@ implicit none
 &            check=.false.) 
          end do
 
-         
+         model_ncoeffbound = 0
          do ii=1,ncoeff_max-ncoeff
 
            write(message, '(5a,I0,a)')ch10,'--',ch10,' Try to bound the model ',&
