@@ -132,7 +132,7 @@ real(dp) :: vel(3,ab_mover%natom)
 real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
 real(dp),allocatable, save :: vin(:), vout(:)
 real(dp), allocatable, save:: vin_prev(:)
-! velocity but correspoing to vin&vout
+! velocity but correspoing to vin&vout, for ion&cell relaxation
 real(dp),allocatable,save :: vel_ioncell(:)
 
 
@@ -196,6 +196,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
    ABI_ALLOCATE(vout,(ndim))
    ABI_ALLOCATE(vin_prev,(ndim))
    ABI_ALLOCATE(vel_ioncell,(ndim))
+   vel_ioncell(:)=0.0
  end if
 
  write(std_out,*) 'FIRE 03'
@@ -273,17 +274,21 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
+! transfer xred, acell, and rprim to vin
 call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
 
+!transfer fred and strten to vout. 
+!Note: fred is not f in reduced co.
+!but dE/dx
 
  call xfpack_f2vout(residual_corrected, ab_mover%natom, ndim,&
 & ab_mover%optcell, ab_mover%strtarget, strten, ucvol,&
 & vout)
-
-vout = -1.0*vout
+! Now vout -> -dE/dx
+vout(:) = -1.0*vout(:)
 
  write(std_out,*) 'FIRE 05'
 !##########################################################
@@ -304,6 +309,7 @@ vf=sum(vel_ioncell*vout)
 if ( vf >= 0.0_dp .and. (etotal- etotal_prev <0.0_dp) ) then
 !if ( vf >= 0.0_dp ) then
     ndownhill=ndownhill+1
+    ! mix v with the v projected on force vector.
     vel_ioncell(:)=(1.0-alpha)*vel_ioncell(:) + alpha* vout *  &
 &               sqrt(sum(vel_ioncell*vel_ioncell)/sum(vout*vout))
     if ( ndownhill>min_downhill ) then
@@ -311,6 +317,7 @@ if ( vf >= 0.0_dp .and. (etotal- etotal_prev <0.0_dp) ) then
         alpha = alpha * alphadec
     end if
 else
+    ! reset downhill counter, velocity, alpha. decrease dtratio.
     ndownhill=0
     vel_ioncell(:)=0.0
     alpha=alpha0
@@ -323,9 +330,11 @@ endif
 
 ! Here mass is not used: all masses=1
 write(std_out,*) 'FIRE vin: ', vin
+! update v
 vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
 write(std_out,*) 'FIRE vel: ', vel_ioncell
 write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel_ioncell
+! update x
 vin = vin + dtratio*ab_mover%dtion* vel_ioncell
 write(std_out,*) 'FIRE vin: ', vin
    
@@ -350,7 +359,8 @@ write(std_out,*) 'FIRE vin: ', vin
    end do
  end do
 
-! reset_lattice to last step if energy is increased.
+! reset_lattice to last step by a ratio if energy is increased.
+! disabled for debugging
 if ( etotal - etotal_prev >0.0 .and. .false. ) then
     vin= vin*(1-mixold)+vin_prev*mixold
 end if

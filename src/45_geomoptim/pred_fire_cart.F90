@@ -102,18 +102,18 @@ real(dp) :: ucvol,det
 real(dp) :: etotal,etotal_prev
 real(dp) :: favg
 ! time step, damping factor initially dtion
-real(dp),save :: dtratio, alpha
+real(dp),save :: alpha
 ! dtinc: increment of dtratio
 ! dtdec: decrement of dtratio
 ! dtmax: maximum allowd value of dtratio
 ! alphadec: decrement of alpha
 ! alpha0: initial value of alpha
 ! mixold: if energy goes up, linear mix old and new coordinates. mixold
-real (dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10.0, alphadec=0.99, alpha0=0.2, mixold=0.1
+real (dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10.0, alphadec=0.99, alpha0=0.1, mixold=0.5
 ! v.dot.f
 real (dp) :: vf
 ! number of v.dot.f >0
-integer, save :: ndownhill
+integer, allocatable, save :: ndownhill(:)
 ! reset_lattice: whether to reset lattice if energy goes up.
 logical, parameter :: reset_lattice = .true.
 
@@ -132,8 +132,9 @@ real(dp) :: vel(3,ab_mover%natom)
 real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
 real(dp),allocatable, save :: vin(:), vout(:)
 real(dp), allocatable, save:: vin_prev(:)
-! velocity but correspoing to vin&vout, for ion&cell relaxation
+! velocity but correspoing to vin&vout
 real(dp),allocatable,save :: vel_ioncell(:)
+real(dp), allocatable, save :: dtratio(:)
 
 
 
@@ -154,6 +155,12 @@ real(dp),allocatable,save :: vel_ioncell(:)
    if (allocated(vel_ioncell))          then
      ABI_DEALLOCATE(vel_ioncell)
    end if
+   if (allocated(dtratio))          then
+     ABI_DEALLOCATE(dtratio)
+   end if
+   if (allocated(ndownhill))          then
+     ABI_DEALLOCATE(ndownhill)
+   end if
    return
  end if
 
@@ -172,7 +179,6 @@ real(dp),allocatable,save :: vel_ioncell(:)
 & ab_mover%optcell==8 .or.&
 & ab_mover%optcell==9) ndim=ndim+3
 
-write(std_out,*) 'FIRE: ndim=', ndim
  write(std_out,*) 'FIRE 02'
 !##########################################################
 !### 02. Allocate the vectors vin
@@ -192,12 +198,19 @@ write(std_out,*) 'FIRE: ndim=', ndim
    if (allocated(vel_ioncell))          then
      ABI_DEALLOCATE(vel_ioncell)
    end if
+   if (allocated(dtratio))          then
+     ABI_DEALLOCATE(dtratio)
+   end if
+   if (allocated(ndownhill))          then
+     ABI_DEALLOCATE(ndownhill)
+   end if
 
    ABI_ALLOCATE(vin,(ndim))
    ABI_ALLOCATE(vout,(ndim))
    ABI_ALLOCATE(vin_prev,(ndim))
    ABI_ALLOCATE(vel_ioncell,(ndim))
-   vel_ioncell(:)=0.0
+   ABI_ALLOCATE(dtratio,(ab_mover%natom))
+   ABI_ALLOCATE(ndownhill,(ab_mover%natom))
  end if
 
  write(std_out,*) 'FIRE 03'
@@ -220,6 +233,11 @@ write(std_out,*) 'FIRE: ndim=', ndim
  strten(:)  =hist%strten(:,hist%ihist)
  etotal=hist%etot(hist%ihist)
 
+ xred_prev(:,:)= hist%xred(:,:, ihist_prev)
+ rprimd_prev(:,:)= hist%rprimd(:,:, ihist_prev)
+ call xred2xcart(ab_mover%natom,rprimd_prev,xcart_prev,xred_prev)
+
+ vel(:,:)=hist%vel(:,:,hist%ihist)
  if(itime==1) then
      etotal_prev=0.0
  else
@@ -262,8 +280,8 @@ write(std_out,*) 'FIRE: ndim=', ndim
 
  residual_corrected(:,:)=residual(:,:)
  if(ab_mover%nconeq==0)then
-   do kk=1,3
-     if (kk/=3.or.ab_mover%jellslab==0) then
+   do ii=1,3
+     if (ii/=3.or.ab_mover%jellslab==0) then
        favg=sum(residual_corrected(ii,:))/dble(ab_mover%natom)
        residual_corrected(ii,:)=residual_corrected(ii,:)-favg
      end if
@@ -275,21 +293,17 @@ write(std_out,*) 'FIRE: ndim=', ndim
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
-! transfer xred, acell, and rprim to vin
 call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
 
-!transfer fred and strten to vout. 
-!Note: fred is not f in reduced co.
-!but dE/dx
 
  call xfpack_f2vout(residual_corrected, ab_mover%natom, ndim,&
 & ab_mover%optcell, ab_mover%strtarget, strten, ucvol,&
 & vout)
-! Now vout -> -dE/dx
-vout(:) = -1.0*vout(:)
+
+vout = -1.0*vout
 
  write(std_out,*) 'FIRE 05'
 !##########################################################
@@ -298,7 +312,7 @@ if ( itime==1 ) then
    ndownhill=0
    alpha=alpha0
    if (ab_mover%dtion>0)then
-     dtratio = 1.0
+     dtratio(:) = 1.0
    end if
 end if
 
@@ -306,45 +320,55 @@ end if
 !##########################################################
 !### 06. update timestep
 ! Note that vin & vout are in reduced coordinates.
-vf=sum(vel_ioncell*vout)
+!vf=dot_product(vel_ioncell, vout)
+write(std_out,*) 'fcart: ', fcart
+do ii=1, ab_mover%natom
+  vf=sum(vel(:,ii)*fcart(:,ii))
 if ( vf >= 0.0_dp .and. (etotal- etotal_prev <0.0_dp) ) then
 !if ( vf >= 0.0_dp ) then
-    ndownhill=ndownhill+1
-    ! mix v with the v projected on force vector.
-    vel_ioncell(:)=(1.0-alpha)*vel_ioncell(:) + alpha* vout *  &
-&               sqrt(sum(vel_ioncell*vel_ioncell)/sum(vout*vout))
-    if ( ndownhill>min_downhill ) then
-        dtratio = min(dtratio * dtinc, dtmax)
-        alpha = alpha * alphadec
+    ndownhill(ii)=ndownhill(ii)+1
+!    vel_ioncell(:)=(1.0-alpha)*vel_ioncell(:) + alpha* vout *  &
+!&               sqrt(dot_product(vel_ioncell, vel_ioncell)/dot_product(vout, vout))
+    vel(:,ii)=(1.0-alpha)*vel(:,ii) + alpha * fcart(:,ii) * sqrt(sum(vel(:,ii)*vel(:,ii))*sum(fcart(:,ii)*fcart(:,ii)) )
+    if ( ndownhill(ii)>min_downhill ) then
+        dtratio(ii) = min(dtratio(ii) * dtinc, dtmax)
+        !alpha = alpha * alphadec
     end if
 else
-    ! reset downhill counter, velocity, alpha. decrease dtratio.
-    ndownhill=0
-    vel_ioncell(:)=0.0
-    alpha=alpha0
-    dtratio = dtratio*dtdec
+    ndownhill(ii)=0
+!    vel_ioncell(:)=0.0
+    vel=0.0_dp
+    !alpha=alpha0
+    dtratio(ii) = dtratio(ii)*dtdec
 endif
-
+enddo
  write(std_out,*) 'FIRE 07'
 !##########################################################
 !### 07. MD step. update vel_ioncell
 
 ! Here mass is not used: all masses=1
-write(std_out,*) 'FIRE vin: ', vin
-! update v
-vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
-write(std_out,*) 'FIRE vel: ', vel_ioncell
-write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel_ioncell
-! update x
-vin = vin + dtratio*ab_mover%dtion* vel_ioncell
-write(std_out,*) 'FIRE vin: ', vin
+!write(std_out,*) 'FIRE vin: ', vin
+!vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
+
+!write(std_out,*) 'FIRE vel: ', vel_ioncell
+write(std_out,*) 'FIRE vel: ', vel
+!write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel_ioncell
+!write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel
+!vin = vin + dtratio*ab_mover%dtion* vel_ioncell
+do ii=1, ab_mover%natom
+  vel(:,ii) = vel(:,ii) + dtratio(ii)*ab_mover%dtion*fcart(:,ii)
+  xcart(:,ii) = xcart(:,ii) + vel(:,ii) * dtratio(ii) * ab_mover%dtion 
+enddo
+!write(std_out,*) 'FIRE vin: ', vin
    
-   write(std_out,*) 'FIRE vout: ', vout
+!   write(std_out,*) 'FIRE vout: ', vout
    write(std_out,*) 'FIRE vf: ', vf
    write(std_out,*) 'FIRE etotal: ', etotal
    write(std_out,*) 'FIRE etotal_prev: ', etotal_prev
-   write(std_out,*) 'FIRE deltaE: ',etotal-etotal_prev
+
+   write(std_out,*) 'FIRE deltaE: ', etotal-etotal_prev
    write(std_out,*) 'FIRE ndownhill: ', ndownhill
+
    write(std_out,*) 'FIRE dtratio: ', dtratio
    write(std_out,*) 'FIRE dtion: ', ab_mover%dtion
 
@@ -353,25 +377,19 @@ write(std_out,*) 'FIRE vin: ', vin
 !components
  do kk=1,ab_mover%natom
    do jj=1,3
-!    Warning : implemented in reduced coordinates
      if ( ab_mover%iatfix(jj,kk)==1) then
-       vin(jj+(kk-1)*3)=vin_prev(jj+(kk-1)*3)
+       xcart(jj,kk)=xcart_prev(jj,kk)
      end if
    end do
  end do
 
-! reset_lattice to last step by a ratio if energy is increased.
-! disabled for debugging
-if ( etotal - etotal_prev >0.0 .and. .false. ) then
-    vin= vin*(1-mixold)+vin_prev*mixold
+! reset_lattice to last step if energy is increased.
+if ( etotal - etotal_prev >0.0 .and. .true. ) then
+!    vin= vin*(1-mixold)+vin_prev*mixold
+     xcart = xcart*(1-mixold)+xcart_prev*mixold
 end if
 
-! only set vin to vin_prev when energy decreased, so it's 
-! possible to go back.
-! if (etotal - etotal_prev <0.0 ) then
- vin_prev(:)=vin(:)
-! endif
-
+! vin_prev(:)=vin(:)
 
 
 !##########################################################
@@ -380,10 +398,12 @@ end if
 !Increase indexes
  hist%ihist = abihist_findIndex(hist,+1)
 !Transfer vin  to xred, acell and rprim
- call xfpack_vin2x(acell, acell0, ab_mover%natom, ndim,&
-& ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
-& ab_mover%symrel, ucvol, ucvol0,&
-& vin, xred)
+! call xfpack_vin2x(acell, acell0, ab_mover%natom, ndim,&
+!& ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
+!& ab_mover%symrel, ucvol, ucvol0,&
+!& vin, xred)
+
+ call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
 
 
  if(ab_mover%optcell/=0)then
@@ -395,7 +415,8 @@ end if
 !xcart, xred, acell, rprimd
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  ihist_prev = abihist_findIndex(hist,-1)
- hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
+! hist%vel(:,:,hist%ihist)=hist%vel(:,:,ihist_prev)
+hist%vel(:,:,hist%ihist)=vel(:,:)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'
