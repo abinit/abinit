@@ -102,7 +102,7 @@ real(dp) :: ucvol,det
 real(dp) :: etotal,etotal_prev
 real(dp) :: favg
 ! time step, damping factor initially dtion
-real(dp),save :: alpha
+real(dp),save :: dtratio, alpha
 ! dtinc: increment of dtratio
 ! dtdec: decrement of dtratio
 ! dtmax: maximum allowd value of dtratio
@@ -113,7 +113,7 @@ real (dp), parameter :: dtinc=1.1, dtdec=0.5, dtmax=10.0, alphadec=0.99, alpha0=
 ! v.dot.f
 real (dp) :: vf
 ! number of v.dot.f >0
-integer, allocatable, save :: ndownhill(:)
+integer, save :: ndownhill
 ! reset_lattice: whether to reset lattice if energy goes up.
 logical, parameter :: reset_lattice = .true.
 
@@ -134,7 +134,6 @@ real(dp),allocatable, save :: vin(:), vout(:)
 real(dp), allocatable, save:: vin_prev(:)
 ! velocity but correspoing to vin&vout
 real(dp),allocatable,save :: vel_ioncell(:)
-real(dp), allocatable, save :: dtratio(:)
 
 
 
@@ -154,12 +153,6 @@ real(dp), allocatable, save :: dtratio(:)
    end if
    if (allocated(vel_ioncell))          then
      ABI_DEALLOCATE(vel_ioncell)
-   end if
-   if (allocated(dtratio))          then
-     ABI_DEALLOCATE(dtratio)
-   end if
-   if (allocated(ndownhill))          then
-     ABI_DEALLOCATE(ndownhill)
    end if
    return
  end if
@@ -198,19 +191,11 @@ real(dp), allocatable, save :: dtratio(:)
    if (allocated(vel_ioncell))          then
      ABI_DEALLOCATE(vel_ioncell)
    end if
-   if (allocated(dtratio))          then
-     ABI_DEALLOCATE(dtratio)
-   end if
-   if (allocated(ndownhill))          then
-     ABI_DEALLOCATE(ndownhill)
-   end if
 
    ABI_ALLOCATE(vin,(ndim))
    ABI_ALLOCATE(vout,(ndim))
    ABI_ALLOCATE(vin_prev,(ndim))
    ABI_ALLOCATE(vel_ioncell,(ndim))
-   ABI_ALLOCATE(dtratio,(ab_mover%natom))
-   ABI_ALLOCATE(ndownhill,(ab_mover%natom))
  end if
 
  write(std_out,*) 'FIRE 03'
@@ -312,7 +297,7 @@ if ( itime==1 ) then
    ndownhill=0
    alpha=alpha0
    if (ab_mover%dtion>0)then
-     dtratio(:) = 1.0
+     dtratio = 1.0
    end if
 end if
 
@@ -322,26 +307,25 @@ end if
 ! Note that vin & vout are in reduced coordinates.
 !vf=dot_product(vel_ioncell, vout)
 write(std_out,*) 'fcart: ', fcart
-do ii=1, ab_mover%natom
-  vf=sum(vel(:,ii)*fcart(:,ii))
+vf=sum(vel*fcart)
 if ( vf >= 0.0_dp .and. (etotal- etotal_prev <0.0_dp) ) then
 !if ( vf >= 0.0_dp ) then
-    ndownhill(ii)=ndownhill(ii)+1
+    ndownhill=ndownhill+1
 !    vel_ioncell(:)=(1.0-alpha)*vel_ioncell(:) + alpha* vout *  &
 !&               sqrt(dot_product(vel_ioncell, vel_ioncell)/dot_product(vout, vout))
-    vel(:,ii)=(1.0-alpha)*vel(:,ii) + alpha * fcart(:,ii) * sqrt(sum(vel(:,ii)*vel(:,ii))*sum(fcart(:,ii)*fcart(:,ii)) )
-    if ( ndownhill(ii)>min_downhill ) then
-        dtratio(ii) = min(dtratio(ii) * dtinc, dtmax)
-        !alpha = alpha * alphadec
+    vel=(1.0-alpha)*vel + alpha * fcart * sqrt(sum(vel*vel)*sum(fcart*fcart) )
+    if ( ndownhill>min_downhill ) then
+        dtratio = min(dtratio * dtinc, dtmax)
+        alpha = alpha * alphadec
     end if
 else
-    ndownhill(ii)=0
+    ndownhill=0
 !    vel_ioncell(:)=0.0
     vel=0.0_dp
-    !alpha=alpha0
-    dtratio(ii) = dtratio(ii)*dtdec
+    alpha=alpha0
+    dtratio = dtratio*dtdec
 endif
-enddo
+
  write(std_out,*) 'FIRE 07'
 !##########################################################
 !### 07. MD step. update vel_ioncell
@@ -349,16 +333,14 @@ enddo
 ! Here mass is not used: all masses=1
 !write(std_out,*) 'FIRE vin: ', vin
 !vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
+vel = vel + dtratio*ab_mover%dtion*fcart
 
 !write(std_out,*) 'FIRE vel: ', vel_ioncell
 write(std_out,*) 'FIRE vel: ', vel
 !write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel_ioncell
-!write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel
+write(std_out,*) 'FIRE delta x',dtratio*ab_mover%dtion* vel
 !vin = vin + dtratio*ab_mover%dtion* vel_ioncell
-do ii=1, ab_mover%natom
-  vel(:,ii) = vel(:,ii) + dtratio(ii)*ab_mover%dtion*fcart(:,ii)
-  xcart(:,ii) = xcart(:,ii) + vel(:,ii) * dtratio(ii) * ab_mover%dtion 
-enddo
+xcart = xcart + vel * dtratio * ab_mover%dtion 
 !write(std_out,*) 'FIRE vin: ', vin
    
 !   write(std_out,*) 'FIRE vout: ', vout
