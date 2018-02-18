@@ -21,7 +21,7 @@
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  cg(2,mcg)=planewave coefficients of wavefunctions
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mcg=size of wave-functions array (cg) =mpw*my_nspinor*mband*mkmem*nsppol
 !!  collect=1 if fractions should be MPI collected at the end, 0 otherwise.
 !!  mpi_enreg=information about MPI parallelization
 !!
@@ -116,9 +116,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 !scalars
  integer,parameter :: prtsphere0=0 ! do not output all the band by band details for projections.
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
- integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
- integer :: me_g0,mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
- integer :: comm_pw,comm_kpt,rc_ylm,itypat,nband_k
+ integer :: ipw,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
+ integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
+ integer :: rc_ylm,itypat,nband_k
  integer :: abs_shift_b
  integer :: unit_procar, ipauli
  real(dp),parameter :: bessint_delta = 0.1_dp
@@ -167,9 +167,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  ! Real or complex spherical harmonics?
  rc_ylm = 2; if (dos%prtdosm == 2) rc_ylm = 1
 
- comm_kpt = mpi_enreg%comm_kpt
  me_kpt = mpi_enreg%me_kpt
- comm_pw = mpi_enreg%comm_bandfft ; me_g0 = mpi_enreg%me_g0
  my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
 ! forbid nspinor parallelization for the moment
@@ -348,38 +346,37 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
 &          eigen(abs_shift_b), ' # occ. ', occ(abs_shift_b), ch10
 
-         !do ispinor=1,my_nspinor
-           ! Select wavefunction in cg array
-           shift_cg = shift_sk + shift_b
+         ! Select wavefunction in cg array
+         shift_cg = shift_sk + shift_b
 
-           call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+dtset%nspinor*npw_k), comm_pw, dtset%istwfk(ikpt),&
-&           nradint, nradintmax, me_g0, dos%mbesslang , dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
-&           npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
-&           crystal%ucvol, ylm_k, znucl_sph)
+         call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+my_nspinor*npw_k), dtset%istwfk(ikpt),&
+&          mpi_enreg, nradint, nradintmax, dos%mbesslang , dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
+&          npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
+&          crystal%ucvol, ylm_k, znucl_sph)
+         ! on exit the sum_1atom_* have both spinors counted
 
-           ! Accumulate
+         ! Accumulate
+         do iatom=1,natsph_tot
+           do ilang=1,dos%mbesslang
+             dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
+&             = dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
+&             + sum_1atom_1ll(1,ilang,iatom)
+           end do
+         end do
+
+         if (dos%prtdosm /= 0) then
            do iatom=1,natsph_tot
-             do ilang=1,dos%mbesslang
-               dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
-&               = dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
-&               + sum_1atom_1ll(1,ilang,iatom)
+             do ilang=1,dos%mbesslang**2
+               dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
+&               = dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
+&               + sum_1atom_1lm(1,ilang,iatom)
              end do
            end do
+         end if
 
-           if (dos%prtdosm /= 0) then
-             do iatom=1,natsph_tot
-               do ilang=1,dos%mbesslang**2
-                 dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
-&                 = dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
-&                 + sum_1atom_1lm(1,ilang,iatom)
-               end do
-             end do
-           end if
-
-           ! Increment band, spinor shift
-           !shift_b = shift_b + npw_k
-           shift_b = shift_b + dtset%nspinor*npw_k
-         !end do ! spinor
+         ! Increment band, spinor shift
+         !shift_b = shift_b + npw_k
+         shift_b = shift_b + my_nspinor*npw_k
 
 ! now we have both spinor components.
          write (unit_procar,'(a)') 'ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
@@ -399,8 +396,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
        ! Increment kpt and (spin, kpt) shifts
        ioffkg = ioffkg + npw_k
-       shift_sk = shift_sk + nband_k*dtset%nspinor*npw_k
-       !shift_sk = shift_sk + nband_k*my_nspinor*npw_k
+       shift_sk = shift_sk + nband_k*my_nspinor*npw_k
 
        ABI_FREE(kg_k)
        ABI_FREE(kpgnorm)
@@ -411,13 +407,14 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
    ! collect = 1 ==> gather all contributions from different processors
    if (collect == 1) then
-     call xmpi_sum(dos%fractions,comm_kpt,ierr)
-     if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,comm_kpt,ierr)
+     call xmpi_sum(dos%fractions,mpi_enreg%comm_kpt,ierr)
+     if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,mpi_enreg%comm_kpt,ierr)
 
-     if (mpi_enreg%paral_spinor == 1)then
-       call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
-       if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,mpi_enreg%comm_spinor,ierr)
-     end if
+! this is now done inside recip_ylm
+!     if (mpi_enreg%paral_spinor == 1)then
+!       call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
+!       if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,mpi_enreg%comm_spinor,ierr)
+!     end if
    end if
 
    ABI_DEALLOCATE(atindx)
@@ -498,8 +495,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
    ! Gather all contributions from different processors
    if (collect == 1) then
-     call xmpi_sum(dos%fractions,comm_kpt,ierr)
-     call xmpi_sum(dos%fractions,comm_pw,ierr)
+     call xmpi_sum(dos%fractions,mpi_enreg%comm_kpt,ierr)
+     call xmpi_sum(dos%fractions,mpi_enreg%comm_bandfft,ierr)
      !below for future use - spinors should not be parallelized for the moment
      !if (mpi_enreg%paral_spinor == 1)then
      !  call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)

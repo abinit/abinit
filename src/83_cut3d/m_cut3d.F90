@@ -2229,8 +2229,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        rc_ylm = 1 ! Real or Complex spherical harmonics.
        mlang_type = 5
-       call recip_ylm (bess_fit,cgcband,xmpi_comm_self,istwfk(ckpt),&
-&       nradint,nradintmax,1,mlang,mpw,natom,typat,mlang_type,npw_k,nspinor,ph3d,prtsphere,rint,&
+
+       call recip_ylm (bess_fit,cgcband,istwfk(ckpt),mpi_enreg,&
+&       nradint,nradintmax,mlang,mpw,natom,typat,mlang_type,npw_k,nspinor,ph3d,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),gmet,istwfk(ckpt),&

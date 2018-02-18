@@ -882,7 +882,6 @@ end subroutine dos_calcnwrite
 !!   with arguments $2 \pi |k+G| \Delta r$, for all G vectors in sphere
 !!   and all points on radial grid.
 !!  cg_1band(2,npw_k)=wavefunction in recip space (note that nspinor is missing, see Notes).
-!!  comm_pw=MPI communicator over plane waves (all npw-dependent data are distributed)
 !!  istwfk= storage mode of cg_1band
 !!  nradint(natsph)=number of points on radial real-space grid for a given atom.
 !!  nradintmax=dimension of rint array.
@@ -922,9 +921,9 @@ end subroutine dos_calcnwrite
 !!
 !! SOURCE
 
-subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,mlang,&
-&  mpw,natsph, typat_extra, mlang_type, npw_k,nspinor,ph3d,prtsphere,rint,rmax,&
-&  rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm_k,znucl_sph)
+subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax, mlang,&
+&  mpw, natsph, typat_extra, mlang_type, npw_k, nspinor, ph3d, prtsphere, rint, rmax,&
+&  rc_ylm, sum_1ll_1atom, sum_1lm_1atom, ucvol, ylm_k, znucl_sph)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -938,16 +937,17 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm_pw,istwfk,me_g0,mlang,mpw,natsph,npw_k,nradintmax
- integer,intent(in) :: nspinor !,comm_spinor
+ integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
+ integer,intent(in) :: nspinor
  integer,intent(in) :: prtsphere,rc_ylm
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: nradint(natsph),typat_extra(natsph),mlang_type(:)
- real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,nspinor*npw_k)
+ real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(:,:) !(2,my_nspinor*npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
  real(dp),intent(in) :: rmax(natsph),ylm_k(npw_k,mlang*mlang)
  real(dp),intent(in) :: znucl_sph(natsph)
+ type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(out) :: sum_1ll_1atom(nspinor**2, mlang, natsph)
  real(dp),intent(out) :: sum_1lm_1atom(nspinor**2, mlang*mlang,natsph)
 
@@ -956,8 +956,8 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
  integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm,ierr,lm_size,itypat
  integer :: ispinor
  integer :: ipauli, is, isp
+ integer :: my_nspinor
  real(dp),parameter :: invsqrt2=one/sqrt2
- complex(dpc) :: dotc(nspinor)
  real(dp) :: sum_all, dr, fact
  type(atomdata_t) :: atom
  character(len=500) :: msg
@@ -966,7 +966,9 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
  real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
  real(dp) :: func(nradintmax)
- complex(dpc) :: tmppsia(npw_k,nspinor),tmppsim(npw_k,nspinor),vect(npw_k)
+ complex(dpc) :: vect(npw_k)
+ complex(dpc),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:)
+ integer, allocatable :: ispinors(:)
  complex(dpc),allocatable :: values(:,:,:,:)
 
 ! *************************************************************************
@@ -976,6 +978,18 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
  ABI_STAT_MALLOC(values, (nradintmax, nspinor, mlang**2, natsph), ierr)
  ABI_CHECK(ierr==0, "oom in values")
  values = czero
+
+ my_nspinor = max(1,nspinor/mpi_enreg%nproc_spinor)
+ ABI_ALLOCATE(tmppsia, (npw_k,my_nspinor))
+ ABI_ALLOCATE(tmppsim, (npw_k,my_nspinor))
+ ABI_ALLOCATE(dotc, (my_nspinor))
+ ABI_ALLOCATE(ispinors, (my_nspinor))
+ if (mpi_enreg%nproc_spinor == 1) then
+   ispinors(1) = 1
+   ispinors(2) = 2
+ else
+   ispinors(1) = mpi_enreg%me_spinor+1
+ end if
 
  sum_1lm_1atom = zero
 
@@ -994,7 +1008,7 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
 
    ! u(G) e^{i(k+G).Ra}
    ! tmppsia = Temporary array for part which depends only on iat
-   do ispinor=1,nspinor
+   do ispinor=1,my_nspinor
      do ipw=1,npw_k
        tmppsia(ipw,ispinor) = dcmplx(cg_1band(1,ipw+(ispinor-1)*npw_k),cg_1band(2,ipw+(ispinor-1)*npw_k)) &
 &            * dcmplx(ph3d(1,ipw,iat), ph3d(2,ipw,iat))
@@ -1015,7 +1029,7 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
      select case (rc_ylm)
      case (1)
        ! to get PDOS for real spherical harmonics, simply multiply here by ylm_k
-       do ispinor=1,nspinor
+       do ispinor=1,my_nspinor
          do ipw=1,npw_k
            tmppsim(ipw,ispinor) = tmppsia(ipw,ispinor) * ylm_k(ipw,ilm)
          end do
@@ -1064,7 +1078,7 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
        !vect(:)%im = -vect(:)%im
 
        if (istwfk == 1) then
-         do ispinor=1,nspinor
+         do ispinor=1,my_nspinor
            do ipw=1,npw_k
              tmppsim(ipw,ispinor) = tmppsia(ipw,ispinor) * vect(ipw) 
            end do
@@ -1072,13 +1086,13 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
        else
          ! Handle time-reversal
          if (mod(ll, 2) == 0) then
-           do ispinor=1,nspinor
+           do ispinor=1,my_nspinor
              do ipw=1,npw_k
                tmppsim(ipw,ispinor) = real(tmppsia(ipw,ispinor)) * vect(ipw)
              end do
            end do
          else
-           do ispinor=1,nspinor
+           do ispinor=1,my_nspinor
              do ipw=1,npw_k
                tmppsim(ipw,ispinor) = aimag(tmppsia(ipw,ispinor)) * vect(ipw)
              end do
@@ -1096,27 +1110,35 @@ subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,
      ! where   dotc_s = \sum_G u_s (G) Y_LM^*(k+G) e^{i(k+G).Ra} j_L(|k+G| r)
      do ixint=1,nradint(iat)
        dotc = czero
-       do ipw=1,npw_k
-         dotc(:) = dotc(:) + bess_fit(ipw, ixint, il) * tmppsim(ipw, :)
+       do ispinor=1, my_nspinor
+         do ipw=1,npw_k
+           dotc(ispinor) = dotc(ispinor) + bess_fit(ipw, ixint, il) * tmppsim(ipw, ispinor)
+         end do
        end do
        if (istwfk /= 1) then
          dotc = two * dotc
-         if (istwfk == 2 .and. me_g0 == 1) then
+         if (istwfk == 2 .and. mpi_enreg%me_g0 == 1) then
            dotc(:) = dotc(:) - bess_fit(1, ixint, il) * tmppsim(1, :)
          end if
        end if
 
        ! Store results to reduce number of xmpi_sum calls if MPI
-       values(ixint, :, ilm, iat) = dotc(:)
+       do ispinor=1, my_nspinor
+         values(ixint, ispinors(ispinor), ilm, iat) = dotc(ispinor)
+       end do
      end do ! ixint
 
    end do ! ilm
  end do ! iat
 
+ ABI_DEALLOCATE(tmppsia)
+ ABI_DEALLOCATE(tmppsim)
+ ABI_DEALLOCATE(dotc)
+
  ! Collect results in comm_pw (data are distributed over plane waves)
- call xmpi_sum(values, comm_pw, ierr)
-! ! Collect results in comm_spinor (data are distributed over spinor components)
-! call xmpi_sum(values, comm_spinor, ierr)
+ call xmpi_sum(values, mpi_enreg%comm_bandfft, ierr)
+! ! Collect results in mpi_enreg%comm_spinor (data are distributed over spinor components)
+ call xmpi_sum(values, mpi_enreg%comm_spinor, ierr)
 
  ! Multiply by r**2 and take norm, integrate
  do iat=1,natsph

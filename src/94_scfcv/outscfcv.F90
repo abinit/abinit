@@ -37,7 +37,7 @@
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  lrhor(nfft,nspden)= Laplacian of electron density in electrons/bohr**5, real space
 !!  mband=maximum number of bands
-!!  mcg=size of wave-functions array (cg) =mpw**mband*mkmem*nsppol
+!!  mcg=size of wave-functions array (cg) =mpw*my_nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfftc=maximum size of 1D FFTs for the PAW coarse grid
 !!  mkmem =number of k points treated by this node.
