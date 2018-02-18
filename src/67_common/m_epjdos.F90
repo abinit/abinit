@@ -984,7 +984,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  ABI_ALLOCATE(tmppsim, (npw_k,my_nspinor))
  ABI_ALLOCATE(dotc, (my_nspinor))
  ABI_ALLOCATE(ispinors, (my_nspinor))
- if (mpi_enreg%nproc_spinor == 1) then
+ if (my_nspinor == 2) then
    ispinors(1) = 1
    ispinors(2) = 2
  else
@@ -1134,6 +1134,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  ABI_DEALLOCATE(tmppsia)
  ABI_DEALLOCATE(tmppsim)
  ABI_DEALLOCATE(dotc)
+ ABI_DEALLOCATE(ispinors)
 
  ! Collect results in comm_pw (data are distributed over plane waves)
  call xmpi_sum(values, mpi_enreg%comm_bandfft, ierr)
