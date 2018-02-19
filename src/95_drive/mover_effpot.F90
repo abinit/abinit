@@ -225,7 +225,7 @@ implicit none
 !  Set the abinit dataset for mover with fake values
 !  Scalar 
    dtset%dmft_entropy = 0
-   dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
+   dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
    dtset%dilatmx = 1.0  ! DILATation : MaXimal value
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY   

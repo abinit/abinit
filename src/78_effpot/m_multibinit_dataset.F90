@@ -91,6 +91,7 @@ module m_multibinit_dataset
   integer :: natifc
   integer :: natom
   integer :: ncoeff
+  integer :: nctime
   integer :: ntime
   integer :: nnos
   integer :: nph1l
@@ -271,6 +272,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%ifcout=-1
  multibinit_dtset%prtsrlr=0
  multibinit_dtset%ntime=200
+ multibinit_dtset%nctime=1
  multibinit_dtset%natifc=natom
  multibinit_dtset%ncoeff=0
  multibinit_dtset%nph1l=1
@@ -713,6 +715,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%nctime=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
+ if(tread==1) multibinit_dtset%nctime=intarr(1)
+ if(multibinit_dtset%nctime<0)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'nctime is',multibinit_dtset%ntime,', which is lower than 0 .',ch10,&
+&   'Action: correct nctime in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ 
  multibinit_dtset%ntime=200
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) multibinit_dtset%ntime=intarr(1)
@@ -1759,6 +1772,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(a)')' Molecular Dynamics :'
    write(nunit,'(3x,a9,3F10.1)')'     temp',multibinit_dtset%temperature
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
+   if (multibinit_dtset%nctime /=1)then
+     write(nunit,'(3x,a9,3I10.1)')'   nctime',multibinit_dtset%nctime
+   end if
    write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
    if (multibinit_dtset%restartxf/=0) then
