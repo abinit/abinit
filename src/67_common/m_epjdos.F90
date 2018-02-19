@@ -1151,7 +1151,8 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
          func(ixint) = zero
          do is=1,nspinor
            do isp=1,nspinor
-             func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat))*pauli_mat(is,isp,ipauli)*values(ixint, isp, ilm, iat))
+             func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat))*pauli_mat(is,isp,ipauli)*&
+&                                                    values(ixint, isp, ilm, iat))
            end do
          end do
          func(ixint) = rint(ixint)**2 * func(ixint)
