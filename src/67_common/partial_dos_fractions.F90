@@ -183,7 +183,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  if(mpi_enreg%me==0) then
    write (unit_procar,'(a)') 'PROCAR lm decomposed - need to concatenate files in parallel case'
    write (unit_procar,'(a,I10,a,I10,a,I10,a)') '# of k-points: ', dtset%nkpt, &
-&     '# of bands:', dtset%mband, '# of ions:', dtset%natom, ch10
+&     ' # of bands:', dtset%mband, ' # of ions:', dtset%natom, ch10
  end if
 
 !##############################################################
@@ -382,6 +382,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
              write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,iatom))
            end do
          end do
+         write (unit_procar,*)
 
 
        end do ! band
