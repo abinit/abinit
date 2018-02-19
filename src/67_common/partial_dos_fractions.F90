@@ -170,14 +170,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  me_kpt = mpi_enreg%me_kpt
  my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
-! forbid nspinor parallelization for the moment
- if (mpi_enreg%nproc_spinor > 1) then
-   write(std_out,*) 'Error: partial_dos_fractions no longer supports spinor '
-   write(std_out,*) ' paralellization nproc_spinor = ', mpi_enreg%nproc_spinor, ' skipping routine'
-   return
- end if 
-
-
  n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
  mgfft = maxval(dtset%ngfft(1:3))
 
