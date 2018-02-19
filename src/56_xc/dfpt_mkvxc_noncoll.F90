@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (FR, EB, SPr)
+!! Copyright (C) 2001-2018 ABINIT group (FR, EB, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,7 +107,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  integer,optional,intent(in) :: ixcrot
 !Local variables-------------------------------
 !scalars
- integer :: ifft
 !arrays
  real(dp) :: nhat1_zero(0,0),nhat1gr_zero(0,0,0),tsec(2)
  real(dp),allocatable :: m_norm(:),rhor1_diag(:,:),vxc1_diag(:,:)

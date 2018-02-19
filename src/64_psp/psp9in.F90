@@ -9,7 +9,7 @@
 !! local and non-local potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (JJ, MVer)
+!! Copyright (C) 1999-2018 ABINIT group (JJ, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,6 +122,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Local variables-------------------------------
 !no_abirules
 !scalars
+#if defined HAVE_PSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
  integer :: mm,nn,nso,ii,ir,il
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,zval
@@ -132,10 +133,11 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  character(len=7), parameter  :: oncvpsp_name = "ONCVPSP"
  integer :: iproj,irelt,nders
  real(dp) :: rmax,rmatch,z,chgvps
+#endif
 !arrays
+#if defined HAVE_PSML
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
-#if defined HAVE_PSML
  type(ps_t) :: psxml
 #endif
 

@@ -9,7 +9,7 @@
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ,XG,MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ,XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,8 +136,8 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  type(fock_type),pointer, intent(inout) :: fock
 !Local variables-------------------------------
 !scalars
- integer :: bandpp,bdtot_index,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
- integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
+ integer :: bandpp,bdtot_index,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
+ integer :: idir,ierr,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
  integer :: use_ACE_old

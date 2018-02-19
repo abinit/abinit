@@ -7,7 +7,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2018 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4153,7 +4153,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case (2)
          call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case default
@@ -4296,7 +4296,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case (2)
          call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case default

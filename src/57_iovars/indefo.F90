@@ -8,7 +8,7 @@
 !! (some are initialized earlier, see indefo1 routine)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MM,FF)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -542,6 +542,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
+   dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
 !    dtsets(idtset)%ortalg=999

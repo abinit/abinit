@@ -8,7 +8,7 @@
 !! as well as kinetic energy contribution to stress tensor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

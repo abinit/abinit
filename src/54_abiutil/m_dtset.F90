@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2017 ABINIT group (XG, MG)
+!! Copyright (C) 1992-2018 ABINIT group (XG, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -723,6 +723,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%optforces          = dtin%optforces
  dtout%optnlxccc          = dtin%optnlxccc
  dtout%optstress          = dtin%optstress
+ dtout%orbmag             = dtin%orbmag
  dtout%ortalg             = dtin%ortalg
  dtout%paral_atom         = dtin%paral_atom
  dtout%paral_kgb          = dtin%paral_kgb

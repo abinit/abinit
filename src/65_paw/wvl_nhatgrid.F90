@@ -10,7 +10,7 @@
 !! (and derivatives) on this grid (g_l=radial shape function).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (T Rangel)
+!! Copyright (C) 2011-2018 ABINIT group (T Rangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

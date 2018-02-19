@@ -81,7 +81,7 @@ def mpicfg_parser(fname, defaults=None):
     return d
 
 #NB: Pickle fail if JobRunnerError inherits from Exception
-# so we inherit from object. This should represents a serious problem 
+# so we inherit from object. This should represents a serious problem
 # because we never catch JobRunner Exceptions. This object is mainly
 # used to store info about the exception in JobRunner exceptions (see run method)
 
@@ -162,12 +162,12 @@ class JobRunner(object):
         return cls(d)
 
     @classmethod
-    def generic_mpi(cls, ompenv=None, use_mpiexec=False, timebomb=None):
+    def generic_mpi(cls, ompenv=None, use_mpiexec=False, mpi_args="", timebomb=None):
         """
         Build a `JobRunner` for MPI jobs (assumes some default values).
         """
         # It should work, provided that the shell environment is properly defined.
-        d = dict(ompenv=ompenv, timebomb=timebomb)
+        d = dict(ompenv=ompenv, timebomb=timebomb, mpi_args=mpi_args)
 
         if use_mpiexec:
             d["mpirun_np"] = "mpiexec -np"
@@ -185,6 +185,9 @@ class JobRunner(object):
                 self.__dict__[k] = v
             else:
                 raise ValueError("key %s is already in self.__dict__, cannot overwrite" % k)
+
+        if "mpi_args" not in dic:
+            self.mpi_args = ""
 
         if self.has_poe and (self.has_mpirun or self.has_srun):
             raise ValueError("poe and (mpirun||srun) are mutually exclusive")
@@ -311,8 +314,8 @@ class JobRunner(object):
             perf_cmd = "perf %s " % self.perf_command
 
         if self.has_mpirun or self.has_srun:
-            args = [perf_cmd, self.mpirun_np, str(mpi_nprocs), valcmd, bin_path,
-                   "<", stdin_fname, ">", stdout_fname, "2>", stderr_fname]
+            args = [perf_cmd, self.mpirun_np, str(mpi_nprocs), " %s " % self.mpi_args,
+                    valcmd, bin_path, "<", stdin_fname, ">", stdout_fname, "2>", stderr_fname]
 
         elif self.has_poe:
             # example ${poe} abinit ${poe_args} -procs 4
@@ -342,6 +345,7 @@ class JobRunner(object):
                 args = ["gdb", bin_path, "--command=%s" % dbg_filepath]
 
         cmd = " ".join(args)
+        #print(cmd)
 
         #if self.has_valgrind: print("Invoking valgrind:\n %s" % cmd)
         logger.debug("About to execute command:\n" + cmd)

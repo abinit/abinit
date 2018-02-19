@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -24,6 +24,7 @@ sources = [
  "calc_fc.F90",
  "cgq_builder.F90",
  "cgwf.F90",
+ "chern_number.F90",
  "clnup1.F90",
  "clnup2.F90",
  "conducti_nc.F90",
@@ -50,6 +51,7 @@ sources = [
  "getcgqphase.F90",
  "init_e_field_vars.F90",
  "initberry.F90",
+ "initorbmag.F90",
  "initmv.F90",
  "initro.F90",
  "ionion_realspace.F90",

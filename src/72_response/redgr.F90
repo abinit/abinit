@@ -17,7 +17,7 @@
 !! and unshifted grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !scalars
  integer :: cplex_tmp,i1,i2,i3,id,idir,ifft,ig,ii,ing,n1,n2,n3
 !arrays
- real(dp) :: tsec(2)
  real(dp),allocatable :: gg(:,:),wkcmpx(:,:),work(:),workgr(:,:)
 
 ! *************************************************************************

@@ -10,7 +10,7 @@
 !! separate wannier calculation with the wannier90 code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (BAmadon,CEspejo,FJollet,TRangel)
+!! Copyright (C) 2005-2018 ABINIT group (BAmadon,CEspejo,FJollet,TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@
 !!  mkmem =number of k points treated by this node.
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
-!   natom=number of atoms in cell.
+!!  natom=number of atoms in cell.
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this processor) (see NOTES at beginning of scfcv)
 !!  ngfft(18)=contain all needed information about 3D FFT (see NOTES at beginning of scfcv)
@@ -133,16 +133,21 @@
  integer :: ig,ii,ikg,ierr
  integer :: ikpt,ikpt1,ikpt2,ilmn,intot,isppol,itypat
  integer :: iun(nsppol),iun_plot,iwan,jband,jband1,jband2,jj,jj1,jj2,jj3
- integer :: kk,lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
+ integer :: lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
+#if defined HAVE_WANNIER90
+ integer :: kk
+#endif
  integer :: n1tmp,n2,n2tmp,n3,n3tmp,n4,n5,n6,nband_k
  integer :: nntot,npw_k,num_nnmax,spacing
  integer :: tim_fourwf
  integer :: master,max_num_bands,nprocs,spaceComm,spin,rank
 !integer :: j,k,l
  integer  :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
- real(dp) :: corrvdw
  real(dp) :: weight
+#if defined HAVE_WANNIER90
+ real(dp) :: corrvdw
  complex(dpc) :: caux,caux2,caux3
+#endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
  character(len=20) :: wfnname
  character(len=500) :: message

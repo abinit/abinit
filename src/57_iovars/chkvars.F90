@@ -7,7 +7,7 @@
 !!  Examines the input string, to check whether all names are allowed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group (XG).
+!! Copyright (C) 2007-2018 ABINIT group (XG).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -177,7 +177,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
  list_vars=trim(list_vars)//' occopt omegasimax omegasrdmax optcell optdriver optforces'
- list_vars=trim(list_vars)//' optnlxccc optstress ortalg'
+ list_vars=trim(list_vars)//' optnlxccc optstress orbmag ortalg'
 !P
  list_vars=trim(list_vars)//' paral_atom paral_kgb paral_rf pawcpxocc pawcross'
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'

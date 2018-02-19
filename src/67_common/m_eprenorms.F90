@@ -12,7 +12,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2015 ABINIT group (YG)
+!! Copyright (C) 2001-2018 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -9,7 +9,7 @@
 !!  should minimize the second order XC energy (without taking self-consistency into account).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (SPr)
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,10 +68,10 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
 
 !Local variables-------------------------------
  integer  :: ipt                                     
- real(dp) :: bxc0,phixc0,m_dot_m1,bxc1                  
+ real(dp) :: bxc0,bxc1                  
+ real(dp) :: m1_norm,m0_norm
+ real(dp) :: f_dot_m
  real(dp) :: mdir(3),fdir(3)               
- real(dp) :: m1(3),m0(3),m1_norm,m0_norm
- real(dp) :: f_dot_m,f_perp(3)
  
 ! *************************************************************************
 

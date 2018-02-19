@@ -7,7 +7,7 @@
 !! this routine is driver for using mover with effective potential
 !! 
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (AM)
+!! Copyright (C) 1998-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,16 +109,18 @@ implicit none
  type(abihist),optional,intent(inout):: hist
 !Local variables-------------------------------
 !scalar
- integer :: icoeff_bound,ii,iexit,initialized
+ integer :: icoeff_bound,ii
+!integer :: iexit,initialized
  integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
- integer :: mtypalch,model_bound,model_ncoeffbound,my_rank,paw_size,npsp,type
- integer,save :: paw_size_old=-1
+ integer :: model_bound,model_ncoeffbound,my_rank,npsp
+!integer :: mtypalch,paw_size,type
+!integer,save :: paw_size_old=-1
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass
  logical :: iam_master
  integer, parameter:: master=0
  logical :: verbose,writeHIST
- real(dp) :: cpui
- character(len=6) :: codvsn
+!real(dp) :: cpui
+!character(len=6) :: codvsn
 
 !TEST_AM
 ! integer :: ia,mu,rand_seed = 5
@@ -141,7 +143,8 @@ implicit none
  integer,allocatable :: listcoeff(:),listcoeff_bound(:,:),list_tmp(:),list_bound(:,:)
  integer,allocatable :: isPositive(:), npwtot(:)
  integer,allocatable :: symrel(:,:,:)
- real(dp) :: acell(3), ecut_tmp(3,2,10)
+ real(dp) :: acell(3)
+!real(dp) :: ecut_tmp(3,2,10)
  real(dp),allocatable :: amass(:) ,coeff_values(:,:)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
@@ -150,15 +153,16 @@ implicit none
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
- character(len=fnlen) :: filename,filename_psp(3)
+ character(len=fnlen) :: filename
+!character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
  type(pspheader_type),allocatable :: pspheads(:)
  type(pawrad_type),allocatable :: pawrad(:)
  type(pawtab_type),allocatable :: pawtab(:)
  type(args_gs_type) :: args_gs
- type(wvl_data) :: wvl
- type(pawang_type) :: pawang
- type(scf_history_type) :: scf_history
+!type(wvl_data) :: wvl
+!type(pawang_type) :: pawang
+!type(scf_history_type) :: scf_history
 
 !******************************************************************
 

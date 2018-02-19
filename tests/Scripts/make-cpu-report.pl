@@ -3,7 +3,7 @@
 # forces, stresses ... in a whole set of files
 # Output will be written in the file "report"
 #
-# Copyright (C) 1993-2017 ABINIT group (XG,LSi)
+# Copyright (C) 1993-2018 ABINIT group (XG,LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

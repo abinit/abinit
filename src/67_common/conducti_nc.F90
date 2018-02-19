@@ -9,7 +9,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (VRecoules, PGhosh)
+!! Copyright (C) 2002-2018 ABINIT group (VRecoules, PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

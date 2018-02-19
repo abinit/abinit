@@ -15,7 +15,7 @@
 !! of ehart, enxc, and eei.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -262,7 +262,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
- real(dp) :: qphon(3),qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
+ real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
