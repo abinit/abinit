@@ -1334,7 +1334,9 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
      NCF_CHECK_MSG(ncerr," open netcdf history file")
 
 !    Compute the itime for the hist file     
-     itime_file = int(anint(real(itime / nctime,dp)))
+     itime_file = itime
+     if(nctime > 0) itime_file = int(anint(real(itime / nctime,sp)))
+
    end if
  endif
 
