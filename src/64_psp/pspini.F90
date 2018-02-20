@@ -27,6 +27,7 @@
 !!   |              main routine, for each type of atom
 !!  gsqcut=cutoff for G^2 based on ecut for basis sphere (bohr^-2)
 !!  gsqcutdg=PAW only - cutoff for G^2 based on ecutdg (fine grid) for basis sphere (bohr^-2)
+!!  level= level of the calling routine
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!   used to estimate real space mesh (if necessary)
 !!
@@ -68,7 +69,7 @@
 
 #include "abi_common.h"
 
-subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
+subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,psps,rprimd,comm_mpi)
 
  use defs_basis
  use defs_datatypes
@@ -94,6 +95,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: level
  integer, optional,intent(in) :: comm_mpi
  integer,intent(out) :: gencond
  real(dp),intent(in) :: gsqcut,gsqcutdg

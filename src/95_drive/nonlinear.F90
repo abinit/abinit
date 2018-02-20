@@ -343,7 +343,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Open and read pseudopotential files
  ecore = 0_dp
  call status(0,dtfil%filstat,iexit,level,'call pspini   ')
- call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,&
+ call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,level,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 !Initialize band structure datatype

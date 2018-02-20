@@ -363,7 +363,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  nfftf_tot=PRODUCT(ngfftf(1:3))
 
  ! Open and read pseudopotential files ===
- call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
+ call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
  call timab(402,2,tsec) ! Init1
  !

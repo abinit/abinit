@@ -544,7 +544,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
 & pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ====================================================

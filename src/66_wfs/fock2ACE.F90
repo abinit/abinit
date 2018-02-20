@@ -50,6 +50,7 @@
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  symrec(3,3,nsym)=symmetries in reciprocal space (dimensionless)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
 !!  use_gpu_cuda= 0 or 1 to know if we use cuda for nonlop call
@@ -83,7 +84,7 @@
 
 subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
-&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
+&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,symrec,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
 
  use defs_basis
  use defs_datatypes
@@ -123,7 +124,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt)
- integer,intent(in) :: typat(natom)
+ integer,intent(in) :: symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: kpt(3,nkpt)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)

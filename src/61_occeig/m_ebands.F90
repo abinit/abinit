@@ -4737,6 +4737,7 @@ end subroutine ebands_prtbltztrp
 !!  eigen(mband*nkpt*nsppol) = array for holding eigenvalues (hartree)
 !!  fermie = Fermi level
 !!  fname_radix = radix of file names for output
+!!  natom = number of atoms in cell.
 !!  nband = number of bands
 !!  nkpt = number of k points.
 !!  nsppol = 1 for unpolarized, 2 for spin-polarized
@@ -4759,7 +4760,7 @@ end subroutine ebands_prtbltztrp
 !! SOURCE
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
-&       nband, nelec, nkpt, nspinor, nsppol, nsym, &
+&       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, &
 &       rprimd, symrel, tau_k)
 
 
@@ -4773,7 +4774,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: nsym, nband, nkpt, nsppol, nspinor, ntemper
+ integer, intent(in) :: natom, nsym, nband, nkpt, nsppol, nspinor, ntemper
  real(dp), intent(in) :: tempermin, temperinc
  real(dp), intent(in) :: nelec
  character(len=fnlen), intent(in) :: fname_radix
