@@ -41,7 +41,6 @@
 !!  nspden=Number of spin Density components
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
-!!  nsym=number of elements in symmetry group
 !!  ntypat=number of types of atoms
 !!  occ(mband*nkpt*nsppol)=occupation numbers for each band over all k points
 !!  optfor=1 if computation of forces is required
@@ -82,7 +81,7 @@
 #include "abi_common.h"
 
 subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
-&  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
+&  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,&
 &  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
 
  use defs_basis
@@ -116,7 +115,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
- integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor
+ integer,intent(in) :: nspden,nsppol,nspinor,ntypat,optfor
  integer,intent(in) :: usecprj,use_gpu_cuda
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps

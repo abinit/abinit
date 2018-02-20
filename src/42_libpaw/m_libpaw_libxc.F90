@@ -1651,6 +1651,10 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
    if (is_hse) then
      call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
    end if
+#else
+   ABI_UNUSED(hyb_mixing)
+   ABI_UNUSED(hyb_mixing_sr)
+   ABI_UNUSED(hyb_range)
 #endif
 
  end do

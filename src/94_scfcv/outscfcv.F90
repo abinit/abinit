@@ -356,7 +356,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,hdr,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
  else if (dtset%prtwant==3) then
@@ -371,7 +371,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !  Call Wannier90
    call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,hdr,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
 !  this is the old implementation, risky due to unpredictable size effects
