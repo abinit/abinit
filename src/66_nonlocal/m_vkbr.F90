@@ -365,6 +365,7 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 !************************************************************************
 
  ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
+ ABI_CHECK( maxval(psps%indlmn(1,:,:)) < 3, "the pseudopotential has f orbitals there is a bug in the implementation")
 
  ! Adding term i <c,k|[Vnl,r]|v,k> ===
  select case (vkbr%inclvkb)
@@ -387,6 +388,7 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
       do im=1,2*(il-1)+1
         ! Index of im and il
         ilm = im + (il-1)*(il-1)
+        if (il > 2) cycle          !To be removed!!!
         !do ilm=1,vkbr%mpsang**2
         cta1 = czero_gw; cta2(:) = czero_gw
         cta4 = czero_gw; cta3(:) = czero_gw

@@ -325,9 +325,9 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: inclvkb=2,formeig0=0
+ integer,parameter :: formeig0=0
  logical,parameter :: force_istwfk1=.True.
- integer :: mband, nsppol, ib_v, ib_c, cgshift
+ integer :: mband, nsppol, ib_v, ib_c, cgshift, inclvkb
  integer :: mpw_ki, nkibz, spin, nspinor, nkfull, nband_k, npw_ki
  integer :: in_iomode, ii, ik_bz, bandmin, bandmax, istwf_ki
 #ifdef HAVE_NETCDF
@@ -358,6 +358,8 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
   MSG_ERROR("The matrix elements are only written in NETCDF format")
 #endif
 
+ inclvkb = dtset%inclvkb
+
  ! Open input file, extract dimensions and allocate workspace arrays.
  in_iomode = iomode_from_fname(wfk_path)
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
@@ -381,6 +383,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
  ! allocate optical matrix elements
  ABI_MALLOC(dipoles,      (3,2,mband,mband,nkfull,nsppol))
+ write(*,*) 'inclvkb: ', inclvkb
  write(*,*) 'nkpoints:', nkfull
  write(*,*) 'nbands:  ', mband
  write(*,*) 'spin:    ', nsppol
