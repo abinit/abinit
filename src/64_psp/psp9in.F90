@@ -612,6 +612,10 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !--------------------------------------------------------------------
 
 #else
+ ABI_UNUSED(mpsang)
+ ABI_UNUSED(pspso)
+ ABI_UNUSED(qgrid_vl)
+ ABI_UNUSED(nctab)
 !Initialize some arguments, for portability at compile time
  indlmn=0 ; mmax=0 ; nproj=0
  ekb=zero ; epsatm=zero ; ffspl=zero ; qchrg=zero ; vlspl=zero ; xcccrc=zero ; xccc1d=zero

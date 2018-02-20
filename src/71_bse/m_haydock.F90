@@ -2148,7 +2148,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
 
    call haydock_bilanczos_optalgo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,hexc,hexc_i,&
-&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
 &    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
 
 
@@ -2262,7 +2262,7 @@ end subroutine haydock_bilanczos
 !! SOURCE
 
 subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
-&  factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
+&  factor,term_type,ep_renorms,aa,bb,cc,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
 &  green,inn,is_converged,comm)
 
 
@@ -2289,7 +2289,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  complex(dpc),intent(out) :: green(nomega)
  complex(dpc),intent(in) :: omega(nomega) 
  complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
- complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
  complex(dpc),intent(in) :: ep_renorms(hsize)
  complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
  complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
