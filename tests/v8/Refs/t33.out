@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  7 Feb 2018.
-- ( at 09h42 )
+.Starting date : Tue 20 Feb 2018.
+- ( at 14h44 )
   
 - input  file    -> t33.in
 - output file    -> t33.out
@@ -181,6 +181,7 @@ P           mkmem          64
         symmorphi           0
            toldfe      1.00000000E-08 Hartree
             typat      1  2
+        usexcnhat           0
            useylm           1
               wtk        0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
                          0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
@@ -292,26 +293,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -8.5654921794069    -8.565E+00 3.353E-02 1.966E-01
- ETOT  2  -8.5672869837831    -1.795E-03 2.775E-06 2.979E-02
+ ETOT  2  -8.5672869837832    -1.795E-03 2.775E-06 2.979E-02
  ETOT  3  -8.5669878340355     2.991E-04 3.877E-06 1.258E-03
- ETOT  4  -8.5670848304485    -9.700E-05 1.712E-08 1.322E-04
+ ETOT  4  -8.5670848304486    -9.700E-05 1.712E-08 1.322E-04
  ETOT  5  -8.5671136655307    -2.884E-05 4.150E-09 3.949E-06
  ETOT  6  -8.5671142830608    -6.175E-07 1.096E-09 2.291E-07
- ETOT  7  -8.5671143236229    -4.056E-08 2.906E-11 1.166E-08
+ ETOT  7  -8.5671143236228    -4.056E-08 2.906E-11 1.166E-08
  ETOT  8  -8.5671143255578    -1.935E-09 1.087E-12 1.143E-09
- ETOT  9  -8.5671143257670    -2.092E-10 4.144E-13 3.837E-11
+ ETOT  9  -8.5671143257670    -2.093E-10 4.144E-13 3.837E-11
  
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  2.092E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.093E-10 < toldfe=  1.000E-08
  
 ====================================================
  
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
  
- C(   1) : real, imag  -3.76921142E-10 -5.53809059E-15
- C(   2) : real, imag   1.96762758E-10 -2.12901098E-15
- C(   3) : real, imag   5.46569358E-11 -2.68096908E-15
+ C(   1) : real, imag  -4.10293060E-10 -2.80325671E-15
+ C(   2) : real, imag   2.30002890E-10 -8.31202322E-15
+ C(   3) : real, imag   9.17886186E-11 -2.03500756E-15
  
 ====================================================
  
@@ -324,8 +325,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.433914957927168
- Compensation charge over fine fft grid    =     -0.433909402574850
+ Compensation charge over spherical meshes =     -0.433914957927220
+ Compensation charge over fine fft grid    =     -0.433909402574833
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -399,25 +400,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
  
-    Kinetic energy  =  3.12005075974935E+00
-    Hartree energy  =  7.94649631192662E-01
+    Kinetic energy  =  3.12005075974934E+00
+    Hartree energy  =  7.94649631192591E-01
     XC energy       = -7.30621178575011E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Loc. psp. energy= -2.01846533460679E+00
-    Spherical terms =  4.28061343108171E+00
-    >>>>>>>>> Etotal= -8.56712158190567E+00
+    Loc. psp. energy= -2.01846533460660E+00
+    Spherical terms =  4.28061343108174E+00
+    >>>>>>>>> Etotal= -8.56712158190554E+00
  
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.13447798735297E-01
+    Band energy     = -9.13447798735493E-01
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Dble-C XC-energy= -4.31284279289845E+00
-    Spherical terms =  4.09693454943924E+00
-    >>>> Etotal (DC)= -8.56711432576700E+00
+    Dble-C XC-energy= -4.31284279289839E+00
+    Spherical terms =  4.09693454943934E+00
+    >>>> Etotal (DC)= -8.56711432576703E+00
  
-  >Total energy in eV           = -2.33123233940526E+02
-  >Total DC energy in eV        = -2.33123036490951E+02
+  >Total energy in eV           = -2.33123233940522E+02
+  >Total DC energy in eV        = -2.33123036490952E+02
 --------------------------------------------------------------------------------
  
 ================================================================================
@@ -460,19 +461,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
  ETOT  6  -8.5673121106521    -6.196E-07 1.102E-09 2.393E-07
  ETOT  7  -8.5673121541111    -4.346E-08 3.517E-11 1.176E-08
  ETOT  8  -8.5673121560395    -1.928E-09 1.274E-12 1.203E-09
- ETOT  9  -8.5673121562562    -2.167E-10 5.349E-13 4.552E-11
+ ETOT  9  -8.5673121562563    -2.168E-10 5.349E-13 4.552E-11
  
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  2.167E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.168E-10 < toldfe=  1.000E-08
  
 ====================================================
  
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
  
- C(   1) : real, imag  -1.01270224E-08  9.66238644E-16
- C(   2) : real, imag  -8.91699217E-09  1.17500110E-14
- C(   3) : real, imag  -9.35549054E-03 -6.51410392E-15
+ C(   1) : real, imag  -1.01270477E-08 -4.97885345E-16
+ C(   2) : real, imag  -8.91697438E-09  1.19895949E-14
+ C(   3) : real, imag  -9.35549054E-03 -6.00831563E-15
  
 ====================================================
  
@@ -485,8 +486,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.433965926445997
- Compensation charge over fine fft grid    =     -0.433960370571709
+ Compensation charge over spherical meshes =     -0.433965926445936
+ Compensation charge over fine fft grid    =     -0.433960370571645
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -600,25 +601,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
  
-    Kinetic energy  =  3.12046441011849E+00
-    Hartree energy  =  7.94720501256358E-01
-    XC energy       = -7.30631357837833E+00
+    Kinetic energy  =  3.12046441011842E+00
+    Hartree energy  =  7.94720501256324E-01
+    XC energy       = -7.30631357837834E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Loc. psp. energy= -2.01860191993915E+00
-    Spherical terms =  4.28052278120784E+00
-    >>>>>>>>> Etotal= -8.56696608930729E+00
+    Loc. psp. energy= -2.01860191993936E+00
+    Spherical terms =  4.28052278120799E+00
+    >>>>>>>>> Etotal= -8.56696608930745E+00
  
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.13558733814561E-01
+    Band energy     = -9.13558733814625E-01
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Dble-C XC-energy= -4.31291782169928E+00
-    Spherical terms =  4.09692268283009E+00
-    >>>> Etotal (DC)= -8.56731215625625E+00
+    Dble-C XC-energy= -4.31291782169927E+00
+    Spherical terms =  4.09692268283011E+00
+    >>>> Etotal (DC)= -8.56731215625627E+00
  
-  >Total energy in eV           = -2.33119002771744E+02
-  >Total DC energy in eV        = -2.33128419732333E+02
+  >Total energy in eV           = -2.33119002771748E+02
+  >Total DC energy in eV        = -2.33128419732334E+02
 --------------------------------------------------------------------------------
  
 ================================================================================
@@ -658,22 +659,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
  ETOT  3  -8.5671856855269     3.016E-04 3.913E-06 1.257E-03
  ETOT  4  -8.5672827411822    -9.706E-05 1.742E-08 1.318E-04
  ETOT  5  -8.5673114924259    -2.875E-05 4.225E-09 3.954E-06
- ETOT  6  -8.5673121130784    -6.207E-07 1.093E-09 2.302E-07
+ ETOT  6  -8.5673121130783    -6.207E-07 1.093E-09 2.302E-07
  ETOT  7  -8.5673121541143    -4.104E-08 2.996E-11 1.165E-08
  ETOT  8  -8.5673121560458    -1.931E-09 1.095E-12 1.151E-09
- ETOT  9  -8.5673121562564    -2.107E-10 4.245E-13 3.850E-11
+ ETOT  9  -8.5673121562564    -2.106E-10 4.245E-13 3.850E-11
  
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  2.107E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.106E-10 < toldfe=  1.000E-08
  
 ====================================================
  
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
  
- C(   1) : real, imag   4.60918016E-09 -1.59660225E-15
- C(   2) : real, imag  -1.16250735E-08  3.17511093E-15
- C(   3) : real, imag   9.35550643E-03 -1.10869957E-15
+ C(   1) : real, imag   4.60918117E-09  1.01220049E-15
+ C(   2) : real, imag  -1.16250718E-08  1.52464389E-15
+ C(   3) : real, imag   9.35550643E-03 -6.29531721E-16
  
 ====================================================
  
@@ -686,8 +687,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.433965905748404
- Compensation charge over fine fft grid    =     -0.433960398600228
+ Compensation charge over spherical meshes =     -0.433965905748250
+ Compensation charge over fine fft grid    =     -0.433960398600170
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -801,24 +802,24 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.719     159.665
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
  
-    Kinetic energy  =  3.12046450255099E+00
-    Hartree energy  =  7.94720420893074E-01
-    XC energy       = -7.30631349260070E+00
+    Kinetic energy  =  3.12046450255114E+00
+    Hartree energy  =  7.94720420892967E-01
+    XC energy       = -7.30631349260053E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Loc. psp. energy= -2.01860176590405E+00
-    Spherical terms =  4.28052287277132E+00
-    >>>>>>>>> Etotal= -8.56696574586186E+00
+    Loc. psp. energy= -2.01860176590397E+00
+    Spherical terms =  4.28052287277120E+00
+    >>>>>>>>> Etotal= -8.56696574586169E+00
  
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.13558820886565E-01
+    Band energy     = -9.13558820887013E-01
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Dble-C XC-energy= -4.31291774737944E+00
-    Spherical terms =  4.09692269558207E+00
-    >>>> Etotal (DC)= -8.56731215625643E+00
+    Dble-C XC-energy= -4.31291774737935E+00
+    Spherical terms =  4.09692269558244E+00
+    >>>> Etotal (DC)= -8.56731215625642E+00
  
-  >Total energy in eV           = -2.33118993426118E+02
+  >Total energy in eV           = -2.33118993426114E+02
   >Total DC energy in eV        = -2.33128419732338E+02
 --------------------------------------------------------------------------------
  
@@ -932,6 +933,7 @@ P           mkmem          64
         symmorphi           0
            toldfe      1.00000000E-08 Hartree
             typat      1  2
+        usexcnhat           0
            useylm           1
               wtk        0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
                          0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
@@ -1026,10 +1028,10 @@ P           mkmem          64
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         18.5  wall=         18.5
+- Proc.   0 individual time (sec): cpu=         18.2  wall=         18.2
  
 ================================================================================
  
  Calculation completed.
 .Delivered   5 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.5  wall=         18.5
++Overall time at end (sec) : cpu=         18.2  wall=         18.2
