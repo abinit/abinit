@@ -1663,7 +1663,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &                               list_symcoeff_tmp2(3,icoeff,isym),&
 &                               list_symcoeff_tmp2(4,icoeff,isym),&
 &                               list_symcoeff_tmp2(1,icoeff,isym),&
-&                               real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
+&                               ncoeff)
      list_symcoeff_tmp2(6,icoeff,isym) = icoeff2
    end do
  end do
@@ -1747,7 +1747,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &                                 list_symcoeff_tmp2(2,icoeff,isym),&
 &                                 list_symcoeff_tmp2(4,icoeff,isym),&
 &                                 list_symcoeff_tmp2(1,icoeff,isym),&
-&                                 real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
+&                                 ncoeff)
        if (icoeff2> icoeff)then
          list_symcoeff_tmp2(:,icoeff2,1) = 0
        end if
@@ -1797,7 +1797,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &                               list_symcoeff(3,icoeff,isym),&
 &                               list_symcoeff(4,icoeff,isym),&
 &                               list_symcoeff(1,icoeff,isym),&
-&                               real(list_symcoeff(5,icoeff,isym),dp),ncoeff)
+&                               ncoeff)
      list_symcoeff(6,icoeff,isym) = icoeff2
    end do
  end do
@@ -2886,7 +2886,6 @@ end subroutine computeCombinaisonFromList
 !! ib = index of the atom 1
 !! irpt = indexes of the cell of the second atom 
 !! mu = direction of the IFC 
-!! weight =  weight of the term (-1 or 1) 
 !! ncoeff = number of total coefficients in the list
 !!
 !! OUTPUT
@@ -2899,7 +2898,7 @@ end subroutine computeCombinaisonFromList
 !!
 !! SOURCE
 
-function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
+function getCoeffFromList(list_coeff,ia,ib,irpt,mu,ncoeff) result(coeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2913,7 +2912,6 @@ function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
 !Arguments ------------------------------------
 !scalar
  integer,intent(in) :: ia,ib,irpt,mu,ncoeff
- real(dp),intent(in):: weight
  integer :: coeff
 !arrays
  integer,intent(in) :: list_coeff(6,ncoeff)
@@ -2924,7 +2922,6 @@ function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
 
 ! *************************************************************************
  coeff = 0
- ABI_UNUSED(weight)
  do icoeff = 1,ncoeff
    if(mu==list_coeff(1,icoeff).and.&
 &     ia==list_coeff(2,icoeff).and.&
