@@ -1509,9 +1509,11 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 !       possible = .false.
 !     end if
      do jj=1,3
-       if(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj)  > tol10.or.&
-&          abs(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj))  < tol10)then
-         possible = .false.
+!        if(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj)  > tol10.or.&
+! &          abs(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj))  < tol10)then
+        if(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj)  > tol10)then
+
+       possible = .false.
        end if
      end do
 !      If this distance is superior to the cutoff, we don't compute that term
