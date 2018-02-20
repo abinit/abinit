@@ -93,6 +93,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 !scalars
  integer,parameter :: ishift=5
  integer :: iatom, ierr
+ integer :: cplex1=1
  integer :: n1a, n1b, n3a, n3b, n2a, n2b
  integer :: n1, n2, n3
  integer :: ifft_local
@@ -116,7 +117,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,1,intgden)
+ call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,1,cplex1,intgden=intgden)
 
  n1 = ngfft(1)
  n2 = ngfft(2)
@@ -238,6 +239,12 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                cmm_z=intgden(4,iatom)-spinat(3,iatom)
              else if (nspden == 2) then
                ! this is up spins - down spins - requested moment ~ 0
+               ! EB: note that intgden comes from calcdensph, which, in nspden=2 case, returns
+               ! intgden(1)=rho_up=n+m
+               ! intgden(2)=rho_dn=n-m
+               ! Then, is the following line be
+               ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom) 
+               ! ??
                cmm_z=intgden(1,iatom)-intgden(2,iatom) - spinat(3,iatom)
              end if
            end if

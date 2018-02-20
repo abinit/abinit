@@ -18,7 +18,7 @@
 !!
 !! INPUTS
 !!  kpt(3)=real input k vector (reduced coordinates)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gmet(3,3)=reciprocal space metric (currently in Bohr**-2)
 !!
 !! OUTPUT

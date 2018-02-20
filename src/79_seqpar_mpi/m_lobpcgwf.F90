@@ -124,7 +124,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer,parameter :: choice=1, paw_opt=0, signs=1
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
  integer :: iband, shift
- real(dp) :: dprod_i
  real(dp) :: gsc_dummy(0,0)
 
 ! *********************************************************************

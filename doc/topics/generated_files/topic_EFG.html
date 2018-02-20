@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Electric fields gradients </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.5">help_features#2.5</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.5">help_features#2.5</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_EFG.html#1">Introduction.</a><li>2. <a href="topic_EFG.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_EFG.html#3">Related input variables.</a><li>4. <a href="topic_EFG.html#4">Selected input files.</a><li>5. <a href="topic_EFG.html#5">References.</a></ul>
@@ -66,16 +77,16 @@ all bands are doubly occupied, and permits the current approach to be used
 with more complex electronic and magnetic states than just insulators.
 
 <p>Within ABINIT, the electric field gradient computation is invoked with
-the key word <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a> (for Print EFG), together with the key word <a href="../../input_variables/generated_files/varset_paw.html#quadmom">quadmom</a>.
-The <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a> key word takes the values 1--3. For value 1, the electric field
+the key word <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a> (for Print EFG), together with the key word <a href="../../variables/generated_files/varset_paw.html#quadmom">quadmom</a>.
+The <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a> key word takes the values 1--3. For value 1, the electric field
 gradient coupling in MHz is reported, where the conversion is made by atom by combining
-the gradient with the nuclear quadrupole moments supplied by <a href="../../input_variables/generated_files/varset_paw.html#quadmom">quadmom</a>. When <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a> is
+the gradient with the nuclear quadrupole moments supplied by <a href="../../variables/generated_files/varset_paw.html#quadmom">quadmom</a>. When <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a> is
 input as 2, the additional breakdown of the field gradient in terms of valence and on-site
 PAW terms is reported, along with the eigenvectors of the EFG matrix, so that 
 principal directions may be determined with respect to the crystal axes. Finally,
-<a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a>=3 allows additional computation of a point-charge model of the gradient, 
+<a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a>=3 allows additional computation of a point-charge model of the gradient, 
 for comparison purposes. The point charges by atom are supplied through the additional
-variable <a href="../../input_variables/generated_files/varset_paw.html#ptcharge">ptcharge</a>.
+variable <a href="../../variables/generated_files/varset_paw.html#ptcharge">ptcharge</a>.
 Detailed examples of the use of ABINIT to compute EFG's can be found in 
 <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2008">[Zwanziger2008]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009a">[Zwanziger2009a]</a>. 
 
@@ -94,7 +105,7 @@ are evaluated from a linear fit to the first few points of the PAW radial
 functions.
 
 <p>Within ABINIT the Fermi contact interaction is invoked with the 
-key word <a href="../../input_variables/generated_files/varset_paw.html#prtfc">prtfc</a> (for Print Fermi Contact), which only takes the value 1.
+key word <a href="../../variables/generated_files/varset_paw.html#prtfc">prtfc</a> (for Print Fermi Contact), which only takes the value 1.
 When called, the electron density at each nuclear position is reported, in atomic
 units (electrons per cubic Bohr). The isomer shift as measured in M&ouml;ssbauer
 spectroscopy is typically reported in velocity units and is obtained from the
@@ -132,10 +143,10 @@ shows how to compute the electric field gradient. Prerequisite : PAW1.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_paw.html#prtefg">prtefg</a>   [PRint Electric Field Gradient]<br>
-... <a href="../../input_variables/generated_files/varset_paw.html#prtfc">prtfc</a>   [PRinT Fermi Contact term]<br>
-... <a href="../../input_variables/generated_files/varset_paw.html#ptcharge">ptcharge</a>   [PoinT CHARGEs]<br>
-... <a href="../../input_variables/generated_files/varset_paw.html#quadmom">quadmom</a>   [QUADrupole MOMents]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_paw.html#prtefg">prtefg</a>   [PRint Electric Field Gradient]<br>
+... <a href="../../variables/generated_files/varset_paw.html#prtfc">prtfc</a>   [PRinT Fermi Contact term]<br>
+... <a href="../../variables/generated_files/varset_paw.html#ptcharge">ptcharge</a>   [PoinT CHARGEs]<br>
+... <a href="../../variables/generated_files/varset_paw.html#quadmom">quadmom</a>   [QUADrupole MOMents]<br>
 
 <br><br><a href=#top>Go to the top</a>
 
@@ -169,9 +180,9 @@ shows how to compute the electric field gradient. Prerequisite : PAW1.</li>
 
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Petrilli1998">[Petrilli1998]</a>  Helena M. Petrilli, Peter E. Bl&ouml;chl, Peter Blaha and Karlheinz Schwarz, "Electric-field-gradient calculations using the projector augmented wave method", Phys. Rev. B 57, 14690&ndash;14697 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.57.14690">10.1103/PhysRevB.57.14690</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Pickard2001">[Pickard2001]</a>  Chris J. Pickard and Francesco Mauri, "All-electron magnetic response with pseudopotentials: NMR chemical shifts", Phys. Rev. B 63, 245101 (2001). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.63.245101">10.1103/PhysRevB.63.245101</a>.<br>
-<br> <a href="../../biblio/generated_files/bib_biblio.html#Profeta2003">[Profeta2003]</a>  M. Profeta, F. Mauri and C. J. Pickard, "Accurate First Principles Prediction of 17 O NMR Parameters in SiO2:? Assignment of the Zeolite Ferrierite Spectrum", J. Am. Chem. Soc. 125, 541 (2003). <br> DOI: <a href="https://doi.org/10.1021/ja027124r">10.1021/ja027124r</a>.<br>
-<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2008">[Zwanziger2008]</a>  J. W.and Torrent, M. Zwanziger, "First-Principles Calculation of Electric Field Gradients in Metals, Semiconductors, and Insulators", Applied Magnetic Resonance 33, 447&ndash;456 (2008). <br> DOI: <a href="https://doi.org/10.1007/s00723-008-0080-1">10.1007/s00723-008-0080-1</a>.<br>
-<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009">[Zwanziger2009]</a>  J W Zwanziger, "Computation of M&ouml;ssbauer isomer shifts from first principles", Journal of Physics: Condensed Matter 21, 195501 (2009). <br> DOI: <a href="https://doi.org/10.1088/0953-8984/21/19/195501">10.1088/0953-8984/21/19/195501</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Profeta2003">[Profeta2003]</a>  M. Profeta, F. Mauri and C. J. Pickard, "Accurate First Principles Prediction of 17 O NMR Parameters in SiO2: Assignment of the Zeolite Ferrierite Spectrum", J. Am. Chem. Soc. 125, 541 (2003). <br> DOI: <a href="https://doi.org/10.1021/ja027124r">10.1021/ja027124r</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2008">[Zwanziger2008]</a>  J. W. Zwanziger and M. Torrent, "First-Principles Calculation of Electric Field Gradients in Metals, Semiconductors, and Insulators", Applied Magnetic Resonance 33, 447&ndash;456 (2008). <br> DOI: <a href="https://doi.org/10.1007/s00723-008-0080-1">10.1007/s00723-008-0080-1</a>.<br>
+<br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009">[Zwanziger2009]</a>  J. W. Zwanziger, "Computation of M&ouml;ssbauer isomer shifts from first principles", Journal of Physics: Condensed Matter 21, 195501 (2009). <br> DOI: <a href="https://doi.org/10.1088/0953-8984/21/19/195501">10.1088/0953-8984/21/19/195501</a>.<br>
 <br> <a href="../../biblio/generated_files/bib_biblio.html#Zwanziger2009a">[Zwanziger2009a]</a>  J. W. Zwanziger, "First-principles study of the nuclear quadrupole resonance parameters and orbital ordering in LaTiO<sub>3</sub>", Phys. Rev. B 79, 033112 (2009). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.79.033112">10.1103/PhysRevB.79.033112</a>.<br>
 <p>
 <br><br><a href=#top>Go to the top</a>

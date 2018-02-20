@@ -76,8 +76,8 @@ CONTAINS
 !!  Add information on the use of time-reversal in the Abinit header.
 !!
 !! PARENTS
-!!      eph,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mrgscr
-!!      setup_bse,setup_screening,setup_sigma,wfk_analyze
+!!      cut3d,eph,fold2Bloch,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mrgscr,setup_bse,setup_screening,setup_sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,crystal_init
@@ -267,6 +267,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 contains
  integer function vid(vname)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

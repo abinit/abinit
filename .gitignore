@@ -38,6 +38,8 @@ tmp_*
 ui_*.py
 abipy.egg-info
 math.so
+positions.so
+topology.so
 *-stamp
 *.abiauty
 *.abirules
@@ -72,6 +74,7 @@ tests/TestBot_MPI*/*
 /config.sh
 /config.status
 /directories.dot
+/dump_fb_version.py
 /stamp-h1
 /abinit-*.tar.gz
 /confstat.*
@@ -343,6 +346,7 @@ tests/TestBot_MPI*/*
 /tests/*/*/*~
 /tests/Tmp
 /tests/test_suite.cpkl
+/tests/test_suite.cpkl.lock
 /tests/aclocal.m4
 /tests/autom4te.cache
 /tests/config.log
@@ -437,3 +441,5 @@ tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
 vpn0941.ac
 doc/input-web/*~
+src/98_main/tdep
+src/98_main/dummy_tests

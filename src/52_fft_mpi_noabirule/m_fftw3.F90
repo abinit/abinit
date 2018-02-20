@@ -135,8 +135,10 @@ MODULE m_fftw3
  ! It should be at least integer*@SIZEOF_INT_P@
  ! MKL wrappers requires it to be integer*8, so do _not_ use C_INTPTR_T.
 
+#ifdef HAVE_FFT_FFTW3_THREADS
  integer,private,save :: THREADS_INITED = 0
  ! 1 if treads have been initialized. 0 otherwise.
+#endif
 
  logical,private,save :: USE_LIB_THREADS = .FALSE.
 !!***
@@ -385,7 +387,7 @@ end subroutine fftw3_seqfourdp
 !! kg_kout(3,npwout)=reduced planewave coordinates, output
 !! mgfft=maximum size of 1D FFTs
 !! ndat=number of FFT to do in //
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !! npwout=number of elements in fofgout array (for option 2 and 3)
 !! ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -771,7 +773,7 @@ end subroutine fftw3_seqfourwf
 !!  kg_kin(3,npwin)=reduced planewave coordinates, input
 !!  kg_kout(3,npwout)=reduced planewave coordinates, output
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -901,7 +903,7 @@ end subroutine fftw3_fftrisc_sp
 !!  kg_kin(3,npwin)=reduced planewave coordinates, input
 !!  kg_kout(3,npwout)=reduced planewave coordinates, output
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -2532,9 +2534,11 @@ subroutine fftw3_init_threads()
 !scalars
 #ifdef HAVE_FFT_FFTW3_THREADS
  integer :: iret
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_FFT_FFTW3_THREADS
  if (THREADS_INITED==0) then
    !call wrtout(std_out,"Calling dfftw_init_threads()","COLL")
    call dfftw_init_threads(iret)
@@ -2605,9 +2609,11 @@ subroutine fftw3_set_nthreads(nthreads)
  integer :: istat,nt
  integer,parameter :: enough=1
  integer,save :: nwarns=0
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_FFT_FFTW3_THREADS
  if (THREADS_INITED==0) then
    MSG_WARNING("Threads are not initialized")
  end if
@@ -4593,7 +4599,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 #ifdef HAVE_FFT_FFTW3
 !Local variables-------------------------------
  integer,parameter :: nt1=1
- integer :: i,j,i1,i2,idat,ierr,includelast
+ integer :: j,i1,i2,idat,ierr,includelast
  integer :: ioption,j2,j3,j2st,jp2st,jeff,lzt,m1zt,ma,mb,n1dfft,nnd3
  integer :: lot1,lot2,lot3
  integer :: m2eff,ncache,n1eff,n1half,nproc_fft,me_fft,nthreads
@@ -5317,7 +5323,7 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 !Local variables-------------------------------
 !scalaras 
 #ifdef HAVE_FFT_FFTW3
- integer :: i,j,i1,idat,ierr,includelast,j2,j2st,j3,jeff,jp2st,lzt,nthreads
+ integer :: j,i1,idat,ierr,includelast,j2,j2st,j3,jeff,jp2st,lzt,nthreads
  integer :: ma,mb,n1dfft,n1eff,n2eff,n1zt,ncache,nnd3,nproc_fft,me_fft,lot1,lot2,lot3
  integer(KIND_FFTW_PLAN) :: bw_plan1_lot,bw_plan1_rest
  integer(KIND_FFTW_PLAN) :: bw_plan2_lot,bw_plan2_rest
@@ -5857,7 +5863,7 @@ end subroutine fftw3_mpiforw
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ndat=Numbre of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r 
@@ -6511,7 +6517,7 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !scalars
 #ifdef HAVE_FFT_FFTW3
  integer,parameter :: unused0=0
- integer :: i,j,i1,idat,ierr,j3glob
+ integer :: j,i1,idat,ierr,j3glob
  integer :: ioption,j2,j3,j2st,jp2st,lzt,m1zt,ma,mb,n1dfft,nnd3
  integer :: m2eff,ncache,n1eff,jeff,includelast,lot1,lot2,lot3,nthreads
  integer(KIND_FFTW_PLAN) :: bw_plan1_lot,bw_plan1_rest
@@ -6848,7 +6854,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 #ifdef HAVE_FFT_FFTW3
 !Local variables-------------------------------
  integer,parameter :: nt1=1
- integer :: i,j,i1,i2,idat,ierr,includelast,nthreads
+ integer :: j,i1,i2,idat,ierr,includelast,nthreads
  integer :: ioption,j2,j3,j2st,jp2st,jeff,lzt,m1zt,ma,mb,n1dfft,nnd3
  integer :: lot1,lot2,lot3
  integer :: m2eff,ncache,n1eff,n1half,nproc_fft,me_fft

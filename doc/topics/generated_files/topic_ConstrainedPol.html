@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>ConstrainedPolarization </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#6">help_features#6</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_ConstrainedPol.html#1">Introduction.</a><li>2. <a href="topic_ConstrainedPol.html#2">Related input variables.</a><li>3. <a href="topic_ConstrainedPol.html#3">Selected input files.</a></ul>
@@ -34,7 +45,7 @@
 
 Compute polarization in cartesian coordinates, and update lattice constants and atomic positions 
 in order to perform a structural optimization at constrained polarization, following
-the formalism described in Na Sai et al, PRB 66, 104108 (2002). More details in <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
+the formalism described in Na Sai et al, PRB 66, 104108 (2002). More details in <a href="../../variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag</a>.
 The geometry optimization is done in ANADDB.
 <br><br><a href=#top>Go to the top</a>
 
@@ -47,14 +58,14 @@ The geometry optimization is done in ANADDB.
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag@anaddb</a>   [POLarization FLAG]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#iatfix@anaddb">iatfix@anaddb</a>   [Indices of the AToms that are FIXed]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#istrfix@anaddb">istrfix@anaddb</a>   [Index of STRain FIXed]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#natfix@anaddb">natfix@anaddb</a>   [Number of AToms FIXed]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#nstrfix@anaddb">nstrfix@anaddb</a>   [Number of STRain components FIXed]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#relaxat@anaddb">relaxat@anaddb</a>   [RELAXation of AToms]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#relaxstr@anaddb">relaxstr@anaddb</a>   [RELAXation of STRain]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#targetpol@anaddb">targetpol@anaddb</a>   [TARGET POLarization]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_anaddb.html#polflag@anaddb">polflag@anaddb</a>   [POLarization FLAG]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_anaddb.html#iatfix@anaddb">iatfix@anaddb</a>   [Indices of the AToms that are FIXed]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#istrfix@anaddb">istrfix@anaddb</a>   [Index of STRain FIXed]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#natfix@anaddb">natfix@anaddb</a>   [Number of AToms FIXed]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#nstrfix@anaddb">nstrfix@anaddb</a>   [Number of STRain components FIXed]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#relaxat@anaddb">relaxat@anaddb</a>   [RELAXation of AToms]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#relaxstr@anaddb">relaxstr@anaddb</a>   [RELAXation of STRain]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#targetpol@anaddb">targetpol@anaddb</a>   [TARGET POLarization]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

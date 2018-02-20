@@ -260,7 +260,7 @@ sec4:
   the real part of the self-energy, the imaginary part of the self-energy, and the spectral function.
   You can visualize it using your preferred software. For instance, issue
   <pre>
-  $ gnuplot
+  >>> gnuplot
   gnuplot&#62  p'tgw2_4o_SIG' u 1:4 w l
   </pre>
   You should be able to distinguish the main quasiparticle peak located at the GW energy (-3.7 eV) and

@@ -25,7 +25,7 @@
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms.
 !!  option= (see above)
@@ -919,7 +919,7 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
    call derf_ab(tt,arg)
    yy=-Z/xx*tt
 
-  end subroutine calcVloc_mklocl
+ end subroutine calcVloc_mklocl
 !!***
 
 !----------------------------------------------------------------------
@@ -1001,7 +1001,7 @@ function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
    vloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
 
-  end function vloc_zero_mklocl
+ end function vloc_zero_mklocl
 !!***
 
 end subroutine createIonicPotential_new
@@ -1271,7 +1271,7 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
      call derf_ab(tt,arg)
      yy=(Z/(xx**2))* ( tt - 2._dp/sqrt(pi)*arg*exp(-arg**2) )
 
-    end subroutine calcdVloc_mklocl
+   end subroutine calcdVloc_mklocl
 !!***
 
 !----------------------------------------------------------------------
@@ -1353,7 +1353,7 @@ function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
      dvloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
 
-    end function dvloc_zero_mklocl
+   end function dvloc_zero_mklocl
 !!***
 
 end subroutine local_forces_new
@@ -1408,5 +1408,5 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
        go=(i >= 1 .and. i <= n)
      end if
 
-    end subroutine ind_positions_mklocl
+   end subroutine ind_positions_mklocl
 !!***

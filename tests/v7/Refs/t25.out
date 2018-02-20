@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Mon  4 Apr 2016.
 - ( at 12h04 )
@@ -364,8 +364,9 @@ P           mkmem           8
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -406,8 +407,9 @@ P           mkmem           8
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -446,8 +448,9 @@ P           mkmem           8
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -593,7 +596,7 @@ P           mkmem           8
    4  0.008  0.008  0.003  4.814  0.007
    5  0.002  0.007  0.013  0.007  4.926
 
-   bare interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.0067    0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0136   -0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
@@ -639,7 +642,7 @@ P           mkmem           8
    4  0.006  0.006  0.003  0.115  0.006
    5  0.002  0.006  0.010  0.006  0.169
 
-   cRPA interaction value of J=1/((2l+1)(2l)) \sum_{m1/=m2} U(m1,m2,m2,m1)=    0.0056   -0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0099    0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -653,7 +656,7 @@ P           mkmem           8
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      0.1191    0.0000      0.0056   -0.0000
+        0.000      0.1191    0.0000      0.0099    0.0000
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -802,7 +805,7 @@ P           mkmem           8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
 - to dynamical screening and self-consistency in uranium dioxide and cerium
@@ -826,7 +829,7 @@ P           mkmem           8
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [5] A brief introduction to the ABINIT software package.
@@ -837,7 +840,7 @@ P           mkmem           8
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -

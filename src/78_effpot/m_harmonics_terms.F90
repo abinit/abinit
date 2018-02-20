@@ -28,7 +28,7 @@ module m_harmonics_terms
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_phonon_supercell,only: getPBCIndexes_supercell
+ use m_supercell,only: getPBCIndexes_supercell
  use m_xmpi,only : xmpi_sum
  use m_ifc
 
@@ -123,6 +123,7 @@ CONTAINS  !=====================================================================
 !!      m_effective_potential
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -201,23 +202,23 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  harmonics_terms%ifcs%nrpt = nrpt
 
 !Allocation of total ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%atmfrc(:,:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:,:) 
+ ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt))
+ harmonics_terms%ifcs%atmfrc(:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:) 
 
 !Allocation of ewald part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,:) = ifcs%ewald_atmfrc(:,:,:,:,:,:)
+ ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
+ harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:) = ifcs%ewald_atmfrc(:,:,:,:,:)
 
 !Allocation of short range part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:,:)
+ ABI_ALLOCATE(harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
+ harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:)
 
 !Allocation of cell of ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%cell,(3,nrpt))
  harmonics_terms%ifcs%cell(:,:) = ifcs%cell(:,:)
 
 !Allocation of the dynamical matrix
- harmonics_terms%nqpt = zero 
+ harmonics_terms%nqpt = 0
  if(present(nqpt).and.present(dynmat).and.present(qpoints).and.present(phfrq))then
    call harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,&
 &                                 harmonics_terms%phfrq,harmonics_terms%qpoints)
@@ -272,6 +273,7 @@ end subroutine harmonics_terms_init
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -296,7 +298,7 @@ subroutine harmonics_terms_free(harmonics_terms)
 
 ! *************************************************************************
 
-  harmonics_terms%nqpt = zero
+  harmonics_terms%nqpt = 0
   harmonics_terms%elastic_constants = zero
   harmonics_terms%epsilon_inf       = zero
 
@@ -349,6 +351,7 @@ end subroutine harmonics_terms_free
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -415,6 +418,7 @@ end subroutine harmonics_terms_setInternalStrain
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -483,6 +487,7 @@ end subroutine harmonics_terms_setEffectiveCharges
 !!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
  
@@ -576,13 +581,13 @@ end subroutine harmonics_terms_setDynmat
 !!  disp(3,natom_sc) = atomics displacement between configuration and the reference
 !!  ncell = total number of cell to treat
 !!  nrpt  = total number of rpt to treat
-!!  cells(ncell) = number of the cells into the supercell (1,2,3,4,5)
 !!  natom_sc = number of atoms in the supercell
 !!  natom_uc = number of atoms in the unit cell
 !!  nrpt  = number of rpt
+!!  atmrpt_index(nrpt,cell) = For each cell in the supercell and each rpt,
+!!                            give the index of the first atoms in the rpt cell
 !!  rpt(nrpt) = index of rpt in  atmfrc (6th dimension)
 !!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
-!!  index_rpt(3,nrpt)  = indexes of the rpt into atmfrc
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -595,15 +600,15 @@ end subroutine harmonics_terms_setDynmat
 !! CHILDREN
 !!
 !! PARENTS
-!!      m_harmonics_terms
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      wrtout
 !!
 !! SOURCE
 
-subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,natom_uc,ncell,nrpt,&
-&                                      index_cells,index_rpt,sc_size,rpt,comm)
+subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,ncell,nrpt,&
+&                                      atmrpt_index,index_cells,sc_size,rpt,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -620,8 +625,8 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
   integer,intent(in) :: natom_uc,natom_sc,ncell,nrpt
   integer,intent(in) :: comm
 ! array
-  integer,intent(in) :: sc_size(3)
-  integer,intent(in) ::  index_rpt(3,nrpt),cells(ncell),index_cells(ncell,3),rpt(nrpt)
+  integer,intent(in) :: sc_size(3),atmrpt_index(nrpt,ncell)
+  integer,intent(in) ::  index_cells(4,ncell),rpt(nrpt)
   real(dp),intent(in) :: atmfrc(3,natom_uc,3,natom_uc,nrpt)
   real(dp),intent(in) :: disp(3,natom_sc)
   real(dp),intent(out) :: fcart(3,natom_sc)
@@ -632,7 +637,6 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
   integer :: mu,nu
   real(dp):: disp1,disp2,ifc,tmp,tmp2
 ! array
-  integer :: cell_atom2(3)
   character(500) :: msg
 
 ! *************************************************************************
@@ -645,21 +649,18 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
 ! Initialisation of variables
   energy   = zero
   fcart(:,:) = zero
+
   do icell = 1,ncell
-    ii = (cells(icell)-1)*natom_uc
-    i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
+    i1 = index_cells(1,icell)
+    i2 = index_cells(2,icell)
+    i3 = index_cells(3,icell)
+!   index of the first atom in the current cell
+    ii = index_cells(4,icell)
     do irpt_tmp = 1,nrpt
       irpt = rpt(irpt_tmp)
-!     do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
-!     get the cell of atom2  (0 0 0, 0 0 1...)
-      cell_atom2(1) = (i1-1) + index_rpt(1,irpt)
-      cell_atom2(2) = (i2-1) + index_rpt(2,irpt)
-      cell_atom2(3) = (i3-1) + index_rpt(3,irpt)
-      call getPBCIndexes_supercell(cell_atom2(1:3),sc_size(1:3))
-!     index of the second atom in the displacement array
-      jj = cell_atom2(1)*sc_size(2)*sc_size(3)*natom_uc+&
-&          cell_atom2(2)*sc_size(3)*natom_uc+&
-&          cell_atom2(3)*natom_uc
+!     index of the first atom in the irpt cell
+      jj = atmrpt_index(irpt_tmp,icell)
+!     Loop over the atom in the cell      
       do ib = 1, natom_uc
         ll = jj + ib
         do nu=1,3
@@ -669,14 +670,14 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,n
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
-              if(abs(ifc) > tol8)then
+!              if(abs(ifc) > tol10)then
                 tmp = disp2 * ifc
 !               accumule energy
                 tmp2 = disp1*tmp
                 energy =  energy + tmp2
 !               accumule forces
                 fcart(mu,kk) = fcart(mu,kk) + tmp
-              end if
+!              end if
             end do
           end do
         end do
@@ -715,10 +716,10 @@ end subroutine harmonics_terms_evaluateIFC
 !!   strten(6) = contribution to the stress tensor
 !!
 !! PARENTS
-!!      m_harmonics_terms
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      wrtout
 !!
 !! SOURCE
 !!
@@ -761,7 +762,7 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
    end do
  end do
  
-!2-Part due to the internat strain
+!2-Part due to the internal strain coupling parameters
  ii = 1
  do ia = 1,natom
    do mu = 1,3
@@ -801,10 +802,10 @@ end subroutine  harmonics_terms_evaluateElastic
 !! ifc<type(ifc_type)> = interatomic forces constants
 !!
 !! PARENTS
-!!      compute_anharmonics,m_harmonics_terms
+!!      compute_anharmonics,m_effective_potential
 !!
 !! CHILDREN
-!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!      wrtout
 !!
 !! SOURCE
 
@@ -834,7 +835,7 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
  real(dp) :: sum
  character(500) :: msg
 !array
- real(dp),pointer :: atmfrc(:,:,:,:,:,:)
+ real(dp),pointer :: atmfrc(:,:,:,:,:)
 ! *************************************************************************
 
  irpt_ref = 0
@@ -853,17 +854,19 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
    MSG_ERROR(msg)
  end if
 
+ atmfrc => ifc%atmfrc
  if (present(option)) then
    if (option == 1) then
+     nullify(atmfrc)
      atmfrc => ifc%short_atmfrc
      write(msg,'(3a)') ch10," Impose acoustic sum rule on short range"
    else if (option == 2) then
+     nullify(atmfrc)
      atmfrc => ifc%ewald_atmfrc
      write(msg,'(3a)') ch10," Impose acoustic sum rule on long range"
    end if
  else
-   atmfrc => ifc%atmfrc
-     write(msg,'(3a)') ch10," Impose acoustic sum rule on total ifc"
+   write(msg,'(3a)') ch10," Impose acoustic sum rule on total ifc"
  end if
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
@@ -878,23 +881,23 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
 !      either in a symmetrical manner, or an unsymmetrical one.
          if(asr==1)then
            do irpt=1, ifc%nrpt
-             sum=sum+atmfrc(1,mu,ia,nu,ib,irpt)
+             sum=sum+atmfrc(mu,ia,nu,ib,irpt)
            end do
          else if(asr==2)then
            do irpt=1, ifc%nrpt
               sum=sum+&
-&                 (atmfrc(1,mu,ia,nu,ib,irpt)+&
-&                  atmfrc(1,nu,ia,mu,ib,irpt))/2
+&                 (atmfrc(mu,ia,nu,ib,irpt)+&
+&                  atmfrc(nu,ia,mu,ib,irpt))/2
             end do
           end if
         end do
 
 !      Correct the self-interaction in order to fulfill the ASR
-        atmfrc(1,mu,ia,nu,ia,irpt_ref)=&
-&       atmfrc(1,mu,ia,nu,ia,irpt_ref)-sum
+        atmfrc(mu,ia,nu,ia,irpt_ref)=&
+&       atmfrc(mu,ia,nu,ia,irpt_ref)-sum
         if(asr==2)then
-          atmfrc(1,nu,ia,mu,ia,irpt_ref)=&
-&         atmfrc(1,mu,ia,nu,ia,irpt_ref)
+          atmfrc(nu,ia,mu,ia,irpt_ref)=&
+&         atmfrc(mu,ia,nu,ia,irpt_ref)
         end if
       end do
     end do
@@ -902,12 +905,12 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
 
  if (present(option)) then
    if (option == 1) then
-     ifc%short_atmfrc = atmfrc
+     ifc%short_atmfrc = atmfrc(:,:,:,:,:)
    else if (option == 2) then
-     ifc%ewald_atmfrc = atmfrc
+     ifc%ewald_atmfrc = atmfrc(:,:,:,:,:)
    end if
  else
-   ifc%atmfrc = atmfrc
+   ifc%atmfrc(:,:,:,:,:) = atmfrc(:,:,:,:,:)
  end if
 
  end subroutine harmonics_terms_applySumRule

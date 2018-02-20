@@ -28,7 +28,6 @@
 !!    to generate the sphere of plane wave
 !!  exchn2n3d=if 1, n2 and n3 are exchanged
 !!  formeig=explained above
-!!  gmet(3,3)=reciprocal space metric (bohr^-2)
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  ireadwf=option parameter described above for wf initialization
 !!  istwfk(nkpt)=input option parameter that describes the storage of wfs to be initialized here.
@@ -41,7 +40,7 @@
 !!  mpi_enreg=informations about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol)=number of bands at each k point
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points
 !!  npwarr(nkpt)=array holding npw for each k point.
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -49,7 +48,6 @@
 !!  occ(mband*nkpt*nsppol)=occupations (from disk or left at their initial value)
 !!  optorth= 1 if the WFS have to be orthogonalized; 0 otherwise
 !!  prtvol=control print volume and debugging
-!!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!  symrel(3,3,nsym)=symmetry operations in real space in terms of primitive translations
 !!  tnons(3,nsym)=nonsymmorphic translations for symmetry operations
@@ -122,9 +120,9 @@
 #include "abi_common.h"
 
 subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
-&           formeig,gmet,hdr,ireadwf,istwfk,kg,kptns,localrdwf,mband,&
+&           formeig,hdr,ireadwf,istwfk,kg,kptns,localrdwf,mband,&
 &           mcg,mkmem,mpi_enreg,mpw,nband,ngfft,nkpt,npwarr,&
-&           nsppol,nsym,occ,optorth,rprimd,symafm,symrel,tnons,unkg,wff1,&
+&           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
 &           wffnow,unwff1,wffnm,wvl)
 
  use defs_basis
@@ -164,13 +162,13 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
  type(wffile_type),intent(inout) :: wff1
- type(wffile_type),intent(inout) :: wffnow !vz_i
+ type(wffile_type),intent(inout) :: wffnow
  type(wvl_data),intent(inout) :: wvl
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),ngfft(18)
  integer,intent(in) :: npwarr(nkpt),symafm(nsym),symrel(3,3,nsym)
  integer,intent(in),target :: nband(nkpt*nsppol)
- real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband*nkpt*nsppol) !vz_i
- real(dp),intent(in) :: gmet(3,3),kptns(3,nkpt),rprimd(3,3),tnons(3,nsym)
+ real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband*nkpt*nsppol)
+ real(dp),intent(in) :: kptns(3,nkpt),tnons(3,nsym)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
@@ -192,7 +190,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  integer,allocatable,target :: indkk(:,:),nband0(:)
  integer, pointer :: indkk_eff(:,:),nband_eff(:)
  logical,allocatable :: my_kpt(:)
- real(dp) :: gmet0(3,3),gprim0(3,3),rprim0(3,3),tsec(2)
+ real(dp) :: gmet(3,3),gmet0(3,3),gprim0(3,3),rprim0(3,3),tsec(2)
  real(dp),allocatable :: cg_disk(:,:),kptns0(:,:)
  real(dp),pointer :: cg_eff(:,:),eigen_eff(:)
  type(MPI_type),pointer :: mpi_enreg0
@@ -225,7 +223,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  ngfft0(:)=ngfft(:)
  headform0=0 !Default value for headform0 (will be needed later, to read wf blocks)
 
- ! Chebyshev is more sensitive to the quality of input random numbers, so use a new algorithm
+!Chebyshev is more sensitive to the quality of input random numbers, so use a new algorithm
  if(dtset%wfoptalg == 1) then
    randalg = 1
  else
@@ -236,7 +234,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !If the input data are on disk, determine the kind of restart
  wff1%fname = wffnm
 
- !  Checking the existence of data file
+!Checking the existence of data file
  if (ireadwf==1 .and. .not.file_exists(wff1%fname)) then
    ! Trick needed to run Abinit test suite in netcdf mode.
    if (file_exists(nctk_ncify(wff1%fname))) then
@@ -248,13 +246,17 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    end if
  end if
 
+!Compute reciprocal space metric gmet
+ call matr3inv(hdr%rprimd,gprim0) ! gprim0 is used as temporary storage
+ gmet=matmul(transpose(gprim0),gprim0)
+
  if (ireadwf==1)then
 
    iomode=dtset%iomode
    if (localrdwf==0) then
      ! This is in case the wff file must be read by only the master proc
-     if (iomode /= IO_MODE_ETSF) iomode=IO_MODE_FORTRAN_MASTER 
-     !iomode=IO_MODE_FORTRAN_MASTER 
+     if (iomode /= IO_MODE_ETSF) iomode=IO_MODE_FORTRAN_MASTER
+     !iomode=IO_MODE_FORTRAN_MASTER
    end if
 
    call WffOpen(iomode,spaceComm,wff1%fname,ierr,wff1,master,me,unwff1,spaceComm_io)
@@ -330,9 +332,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
 !  Compute reciprocal space metric gmet for unit cell of disk wf
    call matr3inv(rprim0,gprim0)
-   do ii=1,3
-     gmet0(:,ii)=gprim0(1,:)*gprim0(1,ii)+gprim0(2,:)*gprim0(2,ii)+gprim0(3,:)*gprim0(3,ii)
-   end do
+   gmet0=matmul(transpose(gprim0),gprim0)
 
    if ((mpi_enreg%paral_kgb==1).or.(mpi_enreg%paral_hf==1)) then
      ABI_DATATYPE_ALLOCATE(mpi_enreg0,)
@@ -650,7 +650,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     indkk_eff,indkk0,istwfk,istwfk0,kptns,kptns0,localrdwf,&
 &     mband_eff,mcg,mcg_disk,mpi_enreg,mpi_enreg0,mpw,mpw0,&
 &     nband_eff,nband0_rd,ngfft,nkassoc,nkpt,nkpt0,npwarr,npwarr0,nspinor_eff,nspinor0,&
-&     nsppol_eff,nsppol0,nsym,occ,optorth,dtset%prtvol,randalg,restart,rprimd,sppoldbl_eff,squeeze,&
+&     nsppol_eff,nsppol0,nsym,occ,optorth,dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,squeeze,&
 &     symrel,tnons,wff1)
      if (nsppol2nspinor/=0)  then
        ABI_DEALLOCATE(indkk_eff)
@@ -776,8 +776,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
            if(my_kpt(ikpt0)) then
              nband0_k=nband0(ikpt0);npw0=npwarr0(ikpt0)
              do iband=nband0_k,1,-1
-               icg0=icg0-npw0 
-               if (indx(ii)<icg0) then 
+               icg0=icg0-npw0
+               if (indx(ii)<icg0) then
                  MSG_BUG("Unable to read WF!")
                end if
                cg(:,indx(ii)+1:indx(ii)+npw0)=cg(:,icg0+1:icg0+npw0)
@@ -835,8 +835,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
          if(my_kpt(ikpt0)) then
            nband0_k=nband0(ikpt0);npw0=npwarr0(ikpt0)
            do iband=nband0_k,1,-1
-             icg0=icg0-npw0 
-             if (indx(ii)<icg0) then 
+             icg0=icg0-npw0
+             if (indx(ii)<icg0) then
                MSG_BUG("Unable to read WF!")
              end if
              cg(:,indx(ii)+1:indx(ii)+npw0)=cg(:,icg0+1:icg0+npw0)
@@ -942,14 +942,14 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
  ceksp=0; debug=0; doorth=1; fill=1
  if (dtset%usewvl == 0) then
-   
+
    call newkpt(ceksp,cg,debug,ecut0,ecut,ecut_eff,eigen,exchn2n3d,&
 &   fill,formeig,gmet0,gmet,headform0,indkk_eff,&
 &   ab_out,ireadwf,istwfk0,istwfk,kg,kptns0,kptns,&
 &   mband,mcg,mkmem0,mkmem,mpi_enreg0,mpi_enreg,&
 &   mpw0,mpw,my_nkpt,nband_eff,nband,ngfft0,ngfft,nkpt0,nkpt,npwarr0,npwarr,&
 &   nspinor_eff,dtset%nspinor,nsppol_eff,nsppol,nsym,occ,optorth,&
-&   dtset%prtvol,randalg,restart,rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow)
+&   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow)
 
    if (nsppol2nspinor/=0)  then
      ABI_DEALLOCATE(nband_eff)

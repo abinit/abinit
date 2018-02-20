@@ -49,9 +49,11 @@
 !!  be 0 0 0 each for a symmorphic space group)
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_use_ga,thmeig
+!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_tdep_sym
+!!      m_use_ga,thmeig
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -421,7 +423,7 @@
  call wrtout(std_out,message,'COLL')
  do isym=1,nsym
    write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-&                                                               symafm(isym),tnons(:,isym)
+&   symafm(isym),tnons(:,isym)
    call wrtout(std_out,message,'COLL')
  end do
 

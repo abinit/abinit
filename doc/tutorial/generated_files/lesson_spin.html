@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Lesson about the spin</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -76,13 +87,13 @@ we are going to perform magnetic calculations, there a two new types of
 variables:<br>
 </p>
 <ul>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a></li>
-  <li><a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a></li>
+  <li><a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a></li>
 </ul>
 Please, read their description in the help file.
 <br>
-You will work at fixed <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
-(=18Ha) and k-point grid, defined by <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>
+You will work at fixed <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>
+(=18Ha) and k-point grid, defined by <a href="../../variables/generated_files/varset_basic.html#ngkpt">ngkpt</a>
 (the 4x4x4 Monkhorst-Pack grid). It is implicit that in "real life",
 you should do a convergence test with
 respect to both convergence parameters. <br>
@@ -174,10 +185,10 @@ It is interesting to consider in more details the distribution of
 eigenvalues for each direction of magnetization, which is best done by
 looking at the respective densities of state.<br>
 To this end we have set
-<a href="../../input_variables/generated_files/varset_files.html#prtdos">prtdos</a>= 1
+<a href="../../variables/generated_files/varset_files.html#prtdos">prtdos</a>= 1
 in the input file, in order to obtain the density
 of states corresponding to spin-up and spin-down electrons (as soon as
-<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2). <br>
+<a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2). <br>
 The values of the DOS are in the files <span style="color: rgb(51, 102, 255);">tspin_1o_DS1_DOS</span> and
 <span style="color: rgb(51, 102, 255);">tspin_1o_DS2_DOS</span> for the magnetic and non magnetic case respectively. We
 can extract the values for use in a plotting software.<br>
@@ -195,13 +206,13 @@ which arises from the fact that there are more up than down electrons
 at the Fermi level.<br>
 <br>
 That the magnetization points upwards is fortuitous,
-and we can get it pointing downwards by changing the sign of the initial <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.
+and we can get it pointing downwards by changing the sign of the initial <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>.
 <br>
 Indeed, in the absence of spin-orbit coupling, there is no relation
 between the direction of magnetization and the cristal axes.<br>
-If we start with a <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>
+If we start with a <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>
 of 0, the magnetization
-remains 0. <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> gives
+remains 0. <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a> gives
 indeed a way to initially break the spin symmetry.<br>
 <br><br><a href=#top>Go to the top</a>
 <hr>
@@ -226,21 +237,21 @@ magnetization etc...<br>
 To describe such a structure, we merely need two atoms, [0,0,0] and
 [1/2,0,1/2] and a unit cell comprising those two atoms.<br>
 Also, each atom will be given opposite magnetization with the help of
-the variable <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.<br>
+the variable <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>.<br>
 <br>
 You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_2.in</span> in <span style="font-style: italic;">Work_spin</span>.
 This is your input file. Modify accordingly the <span style="color: rgb(51, 102, 255);">tspin_x.files</span> file.
 You can run the calculation, then you should edit the <span style="color: rgb(51, 102, 255);">tspin_2.in</span> file,
 and briefly
 look at the two changes with respect to the file
-<span style="color: rgb(51, 102, 255);">tspin_1.in</span>: the change of unit cell basis vectors <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>,
-the new <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>.
+<span style="color: rgb(51, 102, 255);">tspin_1.in</span>: the change of unit cell basis vectors <a href="../../variables/generated_files/varset_basic.html#rprim">rprim</a>,
+the new <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>.
 <br><br>
-Note also we use now <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1 and <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=2: this combination
+Note also we use now <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=1 and <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=2: this combination
 of values is only valid when performing an antiferromagnetic
 calculation (<span style="font-style: italic;">nspden=2</span> means that we have 2 independent components for the charge density while <span style="font-style: italic;">nsppol=1</span> means that we have 1 independent component for the wave-functions).<br>
 In that case, ABINIT uses the so-called Shubnikov symmetries, to perform calculations twice faster
-than with <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2 and <a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a>=2.
+than with <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a>=2 and <a href="../../variables/generated_files/varset_gstate.html#nspden">nspden</a>=2.
 The symmetry of the
 crystal is not the full fcc symmetry anymore since the symmetry must
 now preserve the magnetization of each atom.&nbsp; ABINIT is
@@ -248,7 +259,7 @@ nevertheless able to detect such symmetry belonging to the
 Shubnikov groups and correctly detects that the cell is
 primitive,
 which would not be the case if we had the same value of
-<a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> on each
+<a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a> on each
 atom.<br><br>
 If we now run again the calculation, this total computation time is
 approximately 30 seconds on a recent CPU.<br>
@@ -358,7 +369,7 @@ You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tuto
 This is your input file. You can modify the file <span style="color: rgb(51, 102, 255);">tspin_x.files</span> and
 immediately start running the calculation. Then, you should edit it.
 Note the values of
-<a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a>. In this job,
+<a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a>. In this job,
 we wish again to characterize the magnetic structure.<br>
 We are not going to use zeta as in the preceding calculation, but we
 will here use another feature of abinit: atom and angular
@@ -373,11 +384,11 @@ strongly dependent on the number of kpoints and we use here only a
 reduced set.<br>
 (This will take about 1.5 minutes on a modern computer)<br><br>
 To specify this calculation we need new variables, in addition to
-<a href="../../input_variables/generated_files/varset_files.html#prtdos">prtdos</a> set now to 3 :<br>
+<a href="../../variables/generated_files/varset_files.html#prtdos">prtdos</a> set now to 3 :<br>
 <ul>
-  <li><a href="../../input_variables/generated_files/varset_gstate.html#natsph">natsph</a></li>
-  <li><a href="../../input_variables/generated_files/varset_gstate.html#iatsph">iatsph</a></li>
-  <li><a href="../../input_variables/generated_files/varset_gstate.html#ratsph">ratsph</a></li>
+  <li><a href="../../variables/generated_files/varset_gstate.html#natsph">natsph</a></li>
+  <li><a href="../../variables/generated_files/varset_gstate.html#iatsph">iatsph</a></li>
+  <li><a href="../../variables/generated_files/varset_gstate.html#ratsph">ratsph</a></li>
 </ul>
 <br>
 This will specify the atoms around which the calculation will be
@@ -491,8 +502,8 @@ calculation. It takes about 20 secs on a recent computer.
 </big>
 
 The input file contains one new variable:<br>
-<ul><li><a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a></li>
-</ul>Have a look at it. You should also look at<span style="text-decoration: underline;"> </span><a href="../../input_variables/generated_files/varset_gstate.html#so_psp">so_psp</a>; it is not used here, meaning that the SO information is directly read from the pseudopotential file.<br>
+<ul><li><a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a></li>
+</ul>Have a look at it. You should also look at<span style="text-decoration: underline;"> </span><a href="../../variables/generated_files/varset_gstate.html#so_psp">so_psp</a>; it is not used here, meaning that the SO information is directly read from the pseudopotential file.<br>
 <br>
 In this run, we check that we recover the splitting of the atomic
 level by performing a calculation in a big box.
@@ -587,9 +598,9 @@ components).<br>
 Let's have a look at the following keyword:<br>
 </span>
 <ul>
-<li><a href="../../input_variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a></li>
+<li><a href="../../variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a></li>
 </ul>
-It automatically activates the spin-orbit coupling within PAW (forcing <a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2).<br>
+It automatically activates the spin-orbit coupling within PAW (forcing <a href="../../variables/generated_files/varset_gstate.html#nspinor">nspinor</a>=2).<br>
 <br>
 Now the practice:<br>
 We consider here <span style="font-style: italic;">Bismuth</span>.<br>
@@ -602,7 +613,7 @@ You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tuto
 then run the
 calculation. It takes about 10 secs on a recent computer. Two datasets
 are executed: the first one without spin-orbit coupling, the second
-one using<small><span style="font-weight: bold;">&nbsp;</span> </small></span><a href="../../input_variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a><span style="font-weight: normal;">=1.</span></small><br>
+one using<small><span style="font-weight: bold;">&nbsp;</span> </small></span><a href="../../variables/generated_files/varset_paw.html#pawspnorb">pawspnorb</a><span style="font-weight: normal;">=1.</span></small><br>
 </h3>
 
 The results (eigenvalues) are:<br>

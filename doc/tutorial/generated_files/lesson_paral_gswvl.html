@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Parallelism for the ground state using wavelets</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -73,14 +84,14 @@ mpirun -np Nproc abinit < infile > logfile
 total energy of a cluster made of 14 boron atoms. Open the file
 <code>tgswvl_01.in</code>. It contains first the definition of the wavelet
 basis-set. One may want to test the precision of the calculation by varying the
-<a href="../../input_variables/generated_files/varset_basic.html#wvl_hgrid">wvl_hgrid</a>
-and <a href="../../input_variables/generated_files/varset_gstate.html#wvl_crmult">wvl_crmult</a> variables.
+<a href="../../variables/generated_files/varset_basic.html#wvl_hgrid">wvl_hgrid</a>
+and <a href="../../variables/generated_files/varset_gstate.html#wvl_crmult">wvl_crmult</a> variables.
 This is not the purpose of this tutorial, so we will use the given values (0.45Bohr and 5).</p>
     <p>Run ABINIT with 3 processors. The overall time is printed at the end of the output file (and of the log):</p>
     <pre>
 Proc.   0 individual time (sec): cpu=        172.6  wall=        172.6
 </pre>
-    <p>Read the output file to find the number of orbitals in the calculation (given by the keyword <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>). With the distribution scheme of the wavelet mode, the best distribution over processors will be obtained for, 1, 3, 7 and 21 processors. Create four different directories (with the number of processors for instance) and run four times ABINIT with the same input file, varying the number of processors in {1, 3, 7, 21}. The speed-up is the ratio between the time with one processor and the time of a run with N processors.</p>
+    <p>Read the output file to find the number of orbitals in the calculation (given by the keyword <a href="../../variables/generated_files/varset_basic.html#nband">nband</a>). With the distribution scheme of the wavelet mode, the best distribution over processors will be obtained for, 1, 3, 7 and 21 processors. Create four different directories (with the number of processors for instance) and run four times ABINIT with the same input file, varying the number of processors in {1, 3, 7, 21}. The speed-up is the ratio between the time with one processor and the time of a run with N processors.</p>
     <p>Assuming that the directories are called {01, 03, 07, 21}, one can grep the over-all time of a run and plot it in gnuplot with:</p>
     <pre>
 plot "< grep 'individual time' */log | tr '/' ' '&quot; u 1:(ttt/$11) w lp t "Boron cluster", x t "Ideal speed-up"
@@ -187,7 +198,7 @@ same run time (since the load balancing will be better).</p>
 <code>tgswvl_02.in</code>. It contains the definition of an alkane chain of 65
 atoms, providing 64 orbitals. Run this input file with {1, 2, 4, 8, 16, 24, 32,
 48, 64} processors. The run with one processor should take less than one hour. If
-the time is short, one can reduce <a href="../../input_variables/generated_files/varset_basic.html#wvl_hgrid">wvl_hgrid</a>
+the time is short, one can reduce <a href="../../variables/generated_files/varset_basic.html#wvl_hgrid">wvl_hgrid</a>
 in the input file to 0.45.</p>
     
     <div style="text-align:center">

@@ -1282,7 +1282,7 @@ character(len=3) pure function yesno(bool)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'atoi'
+#define ABI_FUNC 'yesno'
 !End of the abilint section
 
 !Arguments ------------------------------------
@@ -2167,7 +2167,7 @@ integer function next_token(string, start, ostr) result(ierr)
  integer,intent(inout) :: start
 
 !Local variables-------------------------------
- integer :: ii,beg,stp
+ integer :: ii,beg
 
 ! *************************************************************************
 

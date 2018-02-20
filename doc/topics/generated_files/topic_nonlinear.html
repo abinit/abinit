@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Non Linear calculations </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_DFPT.html">topic_DFPT</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_Optic.html">topic_Optic</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#6">help_features#6</a>, &nbsp; <a href="../../topics/generated_files/topic_DFPT.html">topic_DFPT</a>, &nbsp; <a href="../../topics/generated_files/topic_Optic.html">topic_Optic</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_nonlinear.html#1">Introduction.</a><li>2. <a href="topic_nonlinear.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_nonlinear.html#3">Related input variables.</a><li>4. <a href="topic_nonlinear.html#4">Selected input files.</a><li>5. <a href="topic_nonlinear.html#5">References.</a></ul>
@@ -76,7 +87,7 @@ The extension to the PAW framework is in progress.
 <h3><b>2. Related lesson(s) of the tutorial.</b></h3>
 
 
-<a href="#">[[FAKE LINK:lesson_nlo.html|The lesson on static non-linear properties]]</a> 
+<a href="../../tutorial/generated_files/lesson_nlo.html#">The lesson on static non-linear properties</a> 
 presents the computation of responses beyond the linear
 order, within Density-Functional Perturbation Theory (beyond the
 simple Sum-Over-State approximation): Raman scattering efficiencies
@@ -93,26 +104,26 @@ difference calculations), is also provided.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag@anaddb</a>   [Non-Linear FLAG]<br>
-... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#alphon@anaddb">alphon@anaddb</a>   [ALign PHONon mode eigendisplacements]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_atpol">d3e_pert1_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_dir">d3e_pert1_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 1: DIRections]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_elfd">d3e_pert1_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert1_phon">d3e_pert1_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 1: PHONons]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_atpol">d3e_pert2_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_dir">d3e_pert2_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 2: DIRections]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_elfd">d3e_pert2_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert2_phon">d3e_pert2_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 2: PHONons]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_atpol">d3e_pert3_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_dir">d3e_pert3_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 3: DIRections]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_elfd">d3e_pert3_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#d3e_pert3_phon">d3e_pert3_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 3: PHONons]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#prepanl">prepanl</a>   [PREPAre Non-Linear response calculation]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#ramansr@anaddb">ramansr@anaddb</a>   [RAMAN Sum-Rule]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_files.html#get1den">get1den</a>   [GET the first-order density from _1DEN file]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#ird1den">ird1den</a>   [Integer that governs the ReaDing of 1st-order DEN file]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#prtmbm@anaddb">prtmbm@anaddb</a>   [PRinT Mode-By-Mode decomposition of the electrooptic tensor]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_anaddb.html#nlflag@anaddb">nlflag@anaddb</a>   [Non-Linear FLAG]<br>
+... <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_anaddb.html#alphon@anaddb">alphon@anaddb</a>   [ALign PHONon mode eigendisplacements]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_atpol">d3e_pert1_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_dir">d3e_pert1_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 1: DIRections]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_elfd">d3e_pert1_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert1_phon">d3e_pert1_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 1: PHONons]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_atpol">d3e_pert2_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_dir">d3e_pert2_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 2: DIRections]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_elfd">d3e_pert2_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert2_phon">d3e_pert2_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 2: PHONons]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_atpol">d3e_pert3_atpol</a>   [3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_dir">d3e_pert3_dir</a>   [3rd Derivative of Energy, mixed PERTurbation 3: DIRections]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_elfd">d3e_pert3_elfd</a>   [3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#d3e_pert3_phon">d3e_pert3_phon</a>   [3rd Derivative of Energy, mixed PERTurbation 3: PHONons]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#prepanl">prepanl</a>   [PREPAre Non-Linear response calculation]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#ramansr@anaddb">ramansr@anaddb</a>   [RAMAN Sum-Rule]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_files.html#get1den">get1den</a>   [GET the first-order density from _1DEN file]<br>
+... <a href="../../variables/generated_files/varset_files.html#ird1den">ird1den</a>   [Integer that governs the ReaDing of 1st-order DEN file]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#prtmbm@anaddb">prtmbm@anaddb</a>   [PRinT Mode-By-Mode decomposition of the electrooptic tensor]<br>
 
 <br><br><a href=#top>Go to the top</a>
 
@@ -125,8 +136,7 @@ difference calculations), is also provided.</li>
 
 <i><b>WARNING</b> : as of ABINITv8.6.x, the list of input files provided in the specific section of the topics Web pages is still to be reviewed/tuned. In some cases, it will be adequate, and in other cases, it might be incomplete, or perhaps even useless.</i>
 <br><br>The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
-<p> tests/v8/Input: <a href="../../tests/v8/Input/t49.in">t49.in</a> 
-<a href="../../tests/v8/Input/t50.in">t50.in</a> 
+<p> tests/paral/Input: <a href="../../tests/paral/Input/t54.in">t54.in</a> 
 <p> tests/v3/Input: <a href="../../tests/v3/Input/t83.in">t83.in</a> 
 <p> tests/v4/Input: <a href="../../tests/v4/Input/t52.in">t52.in</a> 
 <a href="../../tests/v4/Input/t54.in">t54.in</a> 
@@ -135,7 +145,8 @@ difference calculations), is also provided.</li>
 <a href="../../tests/v6/Input/t65.in">t65.in</a> 
 <a href="../../tests/v6/Input/t66.in">t66.in</a> 
 <a href="../../tests/v6/Input/t67.in">t67.in</a> 
-<p> tests/paral/Input: <a href="../../tests/paral/Input/t54.in">t54.in</a> 
+<p> tests/v8/Input: <a href="../../tests/v8/Input/t49.in">t49.in</a> 
+<a href="../../tests/v8/Input/t50.in">t50.in</a> 
 <br>
 
 <br><br><a href=#top>Go to the top</a>

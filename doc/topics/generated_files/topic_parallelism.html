@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Parallelism </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_TuningSpeed.html">topic_TuningSpeed</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#3">help_features#3</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#3">help_features#3</a>, &nbsp; <a href="../../topics/generated_files/topic_TuningSpeed.html">topic_TuningSpeed</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_parallelism.html#1">Introduction.</a><li>2. <a href="topic_parallelism.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_parallelism.html#3">Related input variables.</a><li>4. <a href="topic_parallelism.html#4">Selected input files.</a><li>5. <a href="topic_parallelism.html#5">References.</a></ul>
@@ -142,29 +153,29 @@ including many-body effects).</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_paral.html#autoparal">autoparal</a>   [AUTOmatisation of the PARALlelism]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#paral_atom">paral_atom</a>   [activate PARALelization over (paw) ATOMic sites]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>   [activate PARALelization over K-point, G-vectors and Bands]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#paral_rf">paral_rf</a>   [activate PARALlelization over Response Function perturbations]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_paral.html#bandpp">bandpp</a>   [BAND Per Processor]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#max_ncpus">max_ncpus</a>   [MAXimum Number of CPUS]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#npband">npband</a>   [Number of Processors at the BAND level]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#npfft">npfft</a>   [Number of Processors at the FFT level]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#nphf">nphf</a>   [Number of Processors for (Hartree)-Fock exact exchange]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#npimage">npimage</a>   [Number of Processors at the IMAGE level]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#npkpt">npkpt</a>   [Number of Processors at the K-Point Level]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#nppert">nppert</a>   [Number of Processors at the PERTurbation level]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#npspinor">npspinor</a>   [Number of Processors at the SPINOR level]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_paral.html#gpu_devices">gpu_devices</a>   [GPU: choice of DEVICES on one node]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#gpu_linalg_limit">gpu_linalg_limit</a>   [GPU (Cuda): LINear ALGebra LIMIT]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#iomode">iomode</a>   [Input-Output MODE]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#localrdwf">localrdwf</a>   [LOCAL ReaD WaveFunctions]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#np_slk">np_slk</a>   [Number of mpi Processors used for ScaLapacK calls]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#pw_unbal_thresh">pw_unbal_thresh</a>   [Plane Wave UNBALancing: THRESHold for balancing procedure]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#use_gemm_nonlop">use_gemm_nonlop</a>   [USE the GEMM routine for the application of the NON-Local OPerator]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#use_gpu_cuda">use_gpu_cuda</a>   [activate USE of GPU accelerators with CUDA (nvidia)]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#use_slk">use_slk</a>   [USE ScaLapacK]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_paral.html#autoparal">autoparal</a>   [AUTOmatisation of the PARALlelism]<br>
+... <a href="../../variables/generated_files/varset_paral.html#paral_atom">paral_atom</a>   [activate PARALelization over (paw) ATOMic sites]<br>
+... <a href="../../variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>   [activate PARALelization over K-point, G-vectors and Bands]<br>
+... <a href="../../variables/generated_files/varset_paral.html#paral_rf">paral_rf</a>   [activate PARALlelization over Response Function perturbations]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_paral.html#bandpp">bandpp</a>   [BAND Per Processor]<br>
+... <a href="../../variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
+... <a href="../../variables/generated_files/varset_paral.html#max_ncpus">max_ncpus</a>   [MAXimum Number of CPUS]<br>
+... <a href="../../variables/generated_files/varset_paral.html#npband">npband</a>   [Number of Processors at the BAND level]<br>
+... <a href="../../variables/generated_files/varset_paral.html#npfft">npfft</a>   [Number of Processors at the FFT level]<br>
+... <a href="../../variables/generated_files/varset_paral.html#nphf">nphf</a>   [Number of Processors for (Hartree)-Fock exact exchange]<br>
+... <a href="../../variables/generated_files/varset_paral.html#npimage">npimage</a>   [Number of Processors at the IMAGE level]<br>
+... <a href="../../variables/generated_files/varset_paral.html#npkpt">npkpt</a>   [Number of Processors at the K-Point Level]<br>
+... <a href="../../variables/generated_files/varset_paral.html#nppert">nppert</a>   [Number of Processors at the PERTurbation level]<br>
+... <a href="../../variables/generated_files/varset_paral.html#npspinor">npspinor</a>   [Number of Processors at the SPINOR level]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_paral.html#gpu_devices">gpu_devices</a>   [GPU: choice of DEVICES on one node]<br>
+... <a href="../../variables/generated_files/varset_paral.html#gpu_linalg_limit">gpu_linalg_limit</a>   [GPU (Cuda): LINear ALGebra LIMIT]<br>
+... <a href="../../variables/generated_files/varset_dev.html#iomode">iomode</a>   [Input-Output MODE]<br>
+... <a href="../../variables/generated_files/varset_paral.html#localrdwf">localrdwf</a>   [LOCAL ReaD WaveFunctions]<br>
+... <a href="../../variables/generated_files/varset_paral.html#np_slk">np_slk</a>   [Number of mpi Processors used for ScaLapacK calls]<br>
+... <a href="../../variables/generated_files/varset_paral.html#pw_unbal_thresh">pw_unbal_thresh</a>   [Plane Wave UNBALancing: THRESHold for balancing procedure]<br>
+... <a href="../../variables/generated_files/varset_dev.html#use_gemm_nonlop">use_gemm_nonlop</a>   [USE the GEMM routine for the application of the NON-Local OPerator]<br>
+... <a href="../../variables/generated_files/varset_paral.html#use_gpu_cuda">use_gpu_cuda</a>   [activate USE of GPU accelerators with CUDA (nvidia)]<br>
+... <a href="../../variables/generated_files/varset_paral.html#use_slk">use_slk</a>   [USE ScaLapacK]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

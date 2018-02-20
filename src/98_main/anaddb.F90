@@ -24,14 +24,16 @@
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,anaddb_dtset_free,anaddb_init
 !!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
-!!      ddb_from_file,ddb_internalstr,ddb_piezo,dfpt_phfrq
-!!      dfpt_prtph,dfpt_symph,elast_ncwrite,electrooptic,elphon,flush_unit
-!!      gruns_anaddb,gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init
-!!      ifc_outphbtrap,ifc_print,ifc_speedofsound,ifc_write,instrng,int2char4
-!!      inupper,invars9,isfile,mkphbs,mkphdos,nctk_defwrite_nonana_terms
-!!      outvars_anaddb,phdos_free,phdos_ncwrite,phdos_print,phdos_print_debye
-!!      phdos_print_msqd,phdos_print_thermo,ramansus,relaxpol,thmeig,timein
-!!      wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      ddb_from_file,ddb_hdr_free,ddb_hdr_open_read,ddb_internalstr
+!!      ddb_interpolate,ddb_piezo,dfpt_phfrq,dfpt_prtph,dfpt_symph
+!!      elast_ncwrite,electrooptic,elphon,flush_unit,gruns_anaddb,gtblk9,gtdyn9
+!!      harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap,ifc_print
+!!      ifc_speedofsound,ifc_write,instrng,int2char4,inupper,invars9,isfile
+!!      mkphbs,mkphdos,nctk_defwrite_nonana_terms,outvars_anaddb,phdos_free
+!!      phdos_ncwrite,phdos_print,phdos_print_debye,phdos_print_msqd
+!!      phdos_print_thermo,ramansus,relaxpol,thermal_supercell_free
+!!      thermal_supercell_make,thermal_supercell_print,thmeig,timein,wrtout
+!!      xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -68,6 +70,7 @@ program anaddb
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_supercell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -90,8 +93,8 @@ program anaddb
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
  integer :: dimekb,comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
- integer :: ierr,iphl2,lenstr,lmnmax,mband,mtyp,mpert,msize,natom,nblok,nblok2
- integer :: nkpt,nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
+ integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
+ integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer,allocatable :: d2flg(:)
@@ -112,7 +115,6 @@ program anaddb
  character(len=24) :: start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
- character(len=fnlen) :: phdos_fname
  character(len=500) :: message
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
@@ -121,6 +123,7 @@ program anaddb
  type(ddb_hdr_type) :: ddb_hdr
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
+ type(supercell_type), allocatable :: thm_scells(:)
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ec_ncid, ncerr
 #endif
@@ -173,7 +176,7 @@ program anaddb
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
 
  call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, &
-&                       dimonly=1)
+& dimonly=1)
 
  natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
@@ -479,6 +482,12 @@ program anaddb
 
 !**********************************************************************
 
+ if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
+   ABI_ALLOCATE(thm_scells, (inp%ntemper))
+   call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   call thermal_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
+ end if
+
 !Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
@@ -488,7 +497,7 @@ program anaddb
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
 
    if (iam_master) then
-     call phdos_print_msqd(Phdos, strcat(filnam(2), "_MSQD_T"), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
      call phdos_print_debye(Phdos, Crystal%ucvol)
      call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
@@ -560,7 +569,7 @@ program anaddb
     ! DEBUG
     !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
     ! &                     dimonly=1)
- 
+   
     !mband = ddb_hdr%mband
     !msym = ddb_hdr%msym
     !natom = ddb_hdr%natom
@@ -568,7 +577,7 @@ program anaddb
     !nkpt = ddb_hdr%nkpt
     !ntypat = ddb_hdr%ntypat
     !usepaw = ddb_hdr%usepaw
- 
+   
     !call ddb_hdr_free(ddb_hdr)
     ! END DEBUG
 
@@ -576,7 +585,7 @@ program anaddb
    elph_base_name=trim(filnam(2))//"_ep"
 
    call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),&
-&  ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
+&   ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
 
  end if
 
@@ -860,12 +869,14 @@ program anaddb
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
 
-  50 continue
+ 50 continue
+
  call asrq0_free(asrq0)
  call ifc_free(Ifc)
  call crystal_free(Crystal)
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
+ call thermal_supercell_free(inp%ntemper, thm_scells)
 
  ! Close files
  if (iam_master) then

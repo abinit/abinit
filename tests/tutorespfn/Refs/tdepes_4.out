@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.5.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -12,10 +12,10 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h53 )
+.Starting date : Wed  6 Sep 2017.
+- ( at 12h52 )
   
 - input  file    -> tdepes_4.in
 - output file    -> tdepes_4.out
@@ -34,7 +34,7 @@
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.770 Mbytes of memory.
+P This job should need less than                       0.763 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -103,7 +103,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -138,7 +138,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -155,7 +155,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -172,7 +172,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          43          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.755 Mbytes of memory.
+P This job should need less than                       0.750 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -207,7 +207,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          43          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.540 Mbytes of memory.
+P This job should need less than                       1.535 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.671 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -242,7 +242,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -259,7 +259,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -276,7 +276,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.770 Mbytes of memory.
+P This job should need less than                       0.763 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -311,7 +311,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -346,7 +346,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -363,7 +363,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -380,7 +380,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          44          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.757 Mbytes of memory.
+P This job should need less than                       0.751 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -415,7 +415,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          44          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.557 Mbytes of memory.
+P This job should need less than                       1.551 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.687 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -450,7 +450,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -467,7 +467,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -484,7 +484,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          43          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.755 Mbytes of memory.
+P This job should need less than                       0.750 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -519,7 +519,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          43          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.540 Mbytes of memory.
+P This job should need less than                       1.535 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.671 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -554,7 +554,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -571,7 +571,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -588,7 +588,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          44          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.757 Mbytes of memory.
+P This job should need less than                       0.751 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -623,7 +623,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          44          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.557 Mbytes of memory.
+P This job should need less than                       1.551 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.687 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -658,7 +658,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -675,7 +675,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -692,7 +692,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.770 Mbytes of memory.
+P This job should need less than                       0.763 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -727,7 +727,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -762,7 +762,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          51          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.892 Mbytes of memory.
+P This job should need less than                       0.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -779,7 +779,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -796,7 +796,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =          44          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.757 Mbytes of memory.
+P This job should need less than                       0.751 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -831,7 +831,7 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =          85
        mpw =          51          nfft =        1000          nkpt =          85
 ================================================================================
-P This job should need less than                       1.675 Mbytes of memory.
+P This job should need less than                       1.668 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -859,7 +859,7 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -2681,49 +2681,49 @@ _ WF disk file :      0.796 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
            kptopt11         1
            kptopt12        -9
            kptopt13         1
-           kptopt14         1
+           kptopt14         3
            kptopt15        -9
            kptopt16        -9
            kptopt21         1
            kptopt22        -9
            kptopt23         1
-           kptopt24         1
+           kptopt24         3
            kptopt25        -9
            kptopt26        -9
            kptopt31         1
            kptopt32        -9
            kptopt33         1
-           kptopt34         1
+           kptopt34         3
            kptopt35        -9
            kptopt36        -9
            kptopt41         1
            kptopt42        -9
            kptopt43         1
-           kptopt44         1
+           kptopt44         3
            kptopt45        -9
            kptopt46        -9
            kptopt51         1
            kptopt52        -9
            kptopt53         1
-           kptopt54         1
+           kptopt54         3
            kptopt55        -9
            kptopt56        -9
            kptopt61         1
            kptopt62        -9
            kptopt63         1
-           kptopt64         1
+           kptopt64         3
            kptopt65        -9
            kptopt66        -9
            kptopt71         1
            kptopt72        -9
            kptopt73         1
-           kptopt74         1
+           kptopt74         3
            kptopt75        -9
            kptopt76        -9
            kptopt81         1
            kptopt82        -9
            kptopt83         1
-           kptopt84         1
+           kptopt84         3
            kptopt85        -9
            kptopt86        -9
          kptrlatt        2    0    0      0    2    0      0    0    2
@@ -3994,8 +3994,8 @@ P          mk1mem86        85
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4004,7 +4004,7 @@ P          mk1mem86        85
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -5635,7 +5635,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2        -0.0000013614         0.0000000000
    3    2   2    2         0.0000024603         0.0000000000
    3    2   3    2         0.5059318595         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    1.299367E-04  1.305220E-04  1.312822E-04  6.741470E-03  6.741470E-03
@@ -7120,7 +7120,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         2.0088167828         0.0000000000
    3    2   2    2        -1.3201112924         0.0000000000
    3    2   3    2        34.0326756190         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -7.991556E-04 -7.488994E-04 -6.592027E-04  5.415164E-02  5.787224E-02
@@ -8851,7 +8851,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2        -0.0459860644         0.0000025237
    3    2   2    2         0.0459890949        -0.0000014295
    3    2   3    2         0.4837591959         0.0000013553
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.00000  0.00000
  Phonon energies in Hartree :
    2.471736E-03  2.471814E-03  4.556714E-03  5.577220E-03  5.755948E-03
@@ -10374,7 +10374,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         5.7426131784        12.3919822919
    3    2   2    2        12.8552989900         5.4379139743
    3    2   3    2        37.3322737910        -6.4843137189
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.00000  0.00000
  Phonon energies in Hartree :
   -1.402699E-02  3.695733E-03  4.061080E-02  4.792244E-02  6.021828E-02
@@ -11635,8 +11635,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.90017
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -11645,7 +11645,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -12174,7 +12174,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2        -0.1145405208        -0.0000000030
    3    2   2    2         0.1145446262         0.0000000210
    3    2   3    2         0.4056449392        -0.0000000617
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    6.449106E-04  6.449324E-04  3.892808E-03  5.042625E-03  5.042628E-03
@@ -12252,8 +12252,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -12262,7 +12262,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -13336,8 +13336,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.90017
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -13346,7 +13346,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -13730,7 +13730,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2        -3.8867394019        10.5898668632
    3    2   2    2         7.5357030434         6.8609492478
    3    2   3    2        26.3592080330        -4.9299035658
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.364237E-02  9.749113E-03  4.315987E-02  4.844071E-02  6.138192E-02
@@ -13802,8 +13802,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -13812,7 +13812,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -15448,7 +15448,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         0.0000101125        -0.0000091101
    3    2   2    2        -0.0000001195        -0.0000079384
    3    2   3    2         0.7093278880         0.0000063928
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.00000
  Phonon energies in Hartree :
    3.257760E-03  3.257970E-03  5.250532E-03  5.446779E-03  5.446977E-03
@@ -16983,7 +16983,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2        16.2902854299        18.6468630828
    3    2   2    2         0.8330366583        13.4903081559
    3    2   3    2        66.9826860966       -12.0900001845
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.00000
  Phonon energies in Hartree :
   -9.495928E-03  2.957784E-02  4.015884E-02  5.327372E-02  5.952213E-02
@@ -18248,8 +18248,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.91034
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -18258,7 +18258,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -18704,7 +18704,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2        -0.0333395281        -0.0521273708
    3    2   2    2         0.0334037888         0.0521225717
    3    2   3    2         0.5959697863         0.0000599466
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.25000  0.00000
  Phonon energies in Hartree :
    2.675593E-03  4.198520E-03  4.245970E-03  4.389470E-03  5.244270E-03
@@ -18782,8 +18782,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -18792,7 +18792,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -19881,8 +19881,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.91034
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -19891,7 +19891,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -20275,7 +20275,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         9.0228871780         6.3519658222
    3    2   2    2        -5.8741292194        11.5512478860
    3    2   3    2        66.2792486229        -4.1607729714
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.25000  0.00000
  Phonon energies in Hartree :
    1.970466E-02  3.865656E-02  4.879516E-02  5.562115E-02  6.416301E-02
@@ -20347,8 +20347,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -20357,7 +20357,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -21992,7 +21992,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2        -0.0000093209        -0.0567249703
    3    2   2    2        -0.0000146430         0.0567227417
    3    2   3    2         0.6230405138        -0.0000012846
- 
+
   Phonon wavevector (reduced coordinates) : -0.25000  0.25000  0.00000
  Phonon energies in Hartree :
    3.757614E-03  4.446841E-03  4.883600E-03  5.196589E-03  5.657092E-03
@@ -23524,7 +23524,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         4.4194309254         4.6598449527
    3    2   2    2       -13.6981381663         5.2634660077
    3    2   3    2        52.2453029286         0.2486741755
- 
+
   Phonon wavevector (reduced coordinates) : -0.25000  0.25000  0.00000
  Phonon energies in Hartree :
    1.968870E-02  3.892097E-02  4.530373E-02  5.318600E-02  6.267343E-02
@@ -24785,8 +24785,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.90599
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -24795,7 +24795,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -25239,7 +25239,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         0.0000049461         0.0000004421
    3    2   2    2         0.0000059703         0.0000004178
    3    2   3    2         0.6115140314        -0.0000002122
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
   -4.851965E-03 -4.851951E-03  3.790964E-03  3.791061E-03  5.216737E-03
@@ -25317,8 +25317,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -25327,7 +25327,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -26400,8 +26400,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.90599
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -26410,7 +26410,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -26794,7 +26794,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         0.2258451699         7.7286562275
    3    2   2    2       -22.0941563457        -3.3721064808
    3    2   3    2        81.8972147969         7.3915664599
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
   -6.980608E-02 -5.603467E-02  3.448702E-02  5.568614E-02  5.962063E-02
@@ -26866,8 +26866,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -26876,7 +26876,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -28072,8 +28072,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.91179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -28082,7 +28082,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -28532,7 +28532,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         0.0000019074        -0.1531251615
    3    2   2    2        -0.0000005029        -0.0000012999
    3    2   3    2         0.6012199820        -0.0000004701
- 
+
   Phonon wavevector (reduced coordinates) : -0.25000  0.50000  0.25000
  Phonon energies in Hartree :
    4.442055E-03  4.523907E-03  4.758548E-03  4.810506E-03  5.980801E-03
@@ -28610,8 +28610,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -28620,7 +28620,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -29703,8 +29703,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.91179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -29713,7 +29713,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm: epsatm=    0.92590353
+ pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -30097,7 +30097,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
    3    2   1    2         3.8190577051        -1.2720923093
    3    2   2    2       -14.9469849586         4.1479688273
    3    2   3    2        53.5798267829         0.8123294355
- 
+
   Phonon wavevector (reduced coordinates) : -0.25000  0.50000  0.25000
  Phonon energies in Hartree :
    4.009593E-02  4.770272E-02  5.284552E-02  5.747323E-02  6.407903E-02
@@ -32017,49 +32017,49 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
            kptopt11         1
            kptopt12        -9
            kptopt13         1
-           kptopt14         1
+           kptopt14         3
            kptopt15        -9
            kptopt16        -9
            kptopt21         1
            kptopt22        -9
            kptopt23         1
-           kptopt24         1
+           kptopt24         3
            kptopt25        -9
            kptopt26        -9
            kptopt31         1
            kptopt32        -9
            kptopt33         1
-           kptopt34         1
+           kptopt34         3
            kptopt35        -9
            kptopt36        -9
            kptopt41         1
            kptopt42        -9
            kptopt43         1
-           kptopt44         1
+           kptopt44         3
            kptopt45        -9
            kptopt46        -9
            kptopt51         1
            kptopt52        -9
            kptopt53         1
-           kptopt54         1
+           kptopt54         3
            kptopt55        -9
            kptopt56        -9
            kptopt61         1
            kptopt62        -9
            kptopt63         1
-           kptopt64         1
+           kptopt64         3
            kptopt65        -9
            kptopt66        -9
            kptopt71         1
            kptopt72        -9
            kptopt73         1
-           kptopt74         1
+           kptopt74         3
            kptopt75        -9
            kptopt76        -9
            kptopt81         1
            kptopt82        -9
            kptopt83         1
-           kptopt84         1
+           kptopt84         3
            kptopt85        -9
            kptopt86        -9
          kptrlatt        2    0    0      0    2    0      0    0    2
@@ -33264,7 +33264,7 @@ P          mk1mem86        85
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
 -
 - [1] Verification of first-principles codes: Comparison of total energies, phonon frequencies,
 - electron--phonon coupling and zero-point motion correction to the gap between ABINIT and QE/Yambo
@@ -33291,7 +33291,7 @@ P          mk1mem86        85
 - B.Xue, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [4] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
@@ -33312,7 +33312,7 @@ P          mk1mem86        85
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
 - [7] A brief introduction to the ABINIT software package.
@@ -33323,14 +33323,14 @@ P          mk1mem86        85
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         72.4  wall=         82.8
+- Proc.   0 individual time (sec): cpu=         65.9  wall=         77.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered 883 WARNINGs and 144 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         72.4  wall=         82.8
+.Delivered 987 WARNINGs and 144 COMMENTs to log file.
++Overall time at end (sec) : cpu=         65.9  wall=         77.4

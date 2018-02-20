@@ -13,9 +13,14 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
+!! COMMENTS
 !!
-!! CHILDREN
+!!  Right now the routine sums over the k-points. In future linear tetrahedron method might be useful.
+!!  Reference articles:
+!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003
+!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996
+!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004
+!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993
 !!
 !! SOURCE
 
@@ -31,9 +36,14 @@ MODULE m_optic_tools
  use m_errors
  use m_profiling_abi
  use m_linalg_interfaces
+ use m_xmpi
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
- use defs_datatypes, only : ebands_t
- use m_numeric_tools,   only : wrap2_pmhalf
+ use defs_datatypes,    only : ebands_t
+ use m_numeric_tools,   only : wrap2_pmhalf, c2r
  use m_io_tools,        only : open_file
 
  implicit none
@@ -44,9 +54,9 @@ MODULE m_optic_tools
  public :: getwtk
  public :: pmat2cart
  public :: pmat_renorm
- public :: linopt
- public :: nlinopt
- public :: linelop
+ public :: linopt           ! Compute dielectric function for semiconductors
+ public :: nlinopt          ! Second harmonic generation susceptibility for semiconductors
+ public :: linelop          ! Linear electro-optic susceptibility for semiconductors
  public :: nonlinopt
 
 CONTAINS  !===========================================================
@@ -80,7 +90,6 @@ CONTAINS  !===========================================================
 
 subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -115,6 +124,10 @@ subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
    call dgemm('N','N',3,3,3,one,tmp,   3,gprimd,3,zero,rsymcart,3)
 !  write(std_out,*) 'rsymcart = ',rsymcart
    symcart(:,:,isym) = rsymcart(:,:)
+! purify symops in cartesian dp coordinates
+   where( abs(symcart(:,:,isym))<tol14)
+     symcart(:,:,isym) = zero
+   end where
  end do
 
 end subroutine sym2cart
@@ -148,7 +161,6 @@ end subroutine sym2cart
 
 subroutine getwtk(kpt,nkpt,nsym,symrel,wtk)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -261,7 +273,6 @@ end subroutine getwtk
 
 subroutine pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -338,7 +349,6 @@ end subroutine pmat2cart
 
 subroutine pmat_renorm(efermi, evalv, mband, nkpt, nsppol, pmat, sc)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -356,17 +366,14 @@ subroutine pmat_renorm(efermi, evalv, mband, nkpt, nsppol, pmat, sc)
  integer, intent(in) :: mband
  real(dp), intent(in) :: efermi
  real(dp), intent(in) :: sc
-
 !arrays
  real(dp), intent(in) :: evalv(mband,nkpt,nsppol)
-!no_abirules
  complex(dpc), intent(inout) :: pmat(mband,mband,nkpt,3,nsppol)
 
 !Local variables -----------------------------------------
 !scalars
  integer :: iband1,iband2,ikpt,isppol
  real(dp) :: corec, e1, e2
-!arrays
 
 ! *************************************************************************
 
@@ -401,10 +408,11 @@ end subroutine pmat_renorm
 !! linopt
 !!
 !! FUNCTION
-!! This routine compute optical frequency dependent dielectric function
-!! for semiconductors
+!! Compute optical frequency dependent dielectric function for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin=number of spins(integer)
 !!  omega=crystal volume in au (real)
 !!  nkpt=total number of kpoints (integer)
@@ -422,14 +430,15 @@ end subroutine pmat_renorm
 !!  sc=scissors shift in Ha(real)
 !!  brod=broadening in Ha(real)
 !!  fnam=root for filename that will contain the output filename will be trim(fnam)//'-linopt.out'
+!!  ncid=Netcdf id to save output data.
 !!
-!! OUTPUT
+!! SIDE EFFECTS
 !!  Dielectric function for semiconductors, on a desired energy mesh and for a desired
-!!  direction of polarisation. The output is in a file named trim(fnam)//'-linopt.out' and contains
+!!  direction of polarisation is written to file.
+!!  The output is in a file named trim(fnam)//'-linopt.out' and contains
 !!  Im(\epsilon_{v1v2}(\omega), Re(\epsilon_{v1v2}(\omega) and abs(\epsilon_{v1v2}(\omega).
 !!  Comment:
-!!  Right now the routine sums over the kpoints. In future linear tetrahedron method should be
-!!  useful.
+!!  Right now the routine sums over the kpoints. In future linear tetrahedron method should be useful.
 !!
 !! PARENTS
 !!      optic
@@ -439,19 +448,9 @@ end subroutine pmat_renorm
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
+subroutine linopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
+  v1,v2,nmesh,de,sc,brod,fnam,ncid,comm)
 
-#include "abi_common.h"
-
-subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
-  v1,v2,nmesh,de,sc,brod,fnam,comm)
-
- use m_profiling_abi
- use m_xmpi
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -463,7 +462,7 @@ subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efer
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin
+integer, intent(in) :: icomp,itemp,nspin,ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -479,8 +478,10 @@ integer, intent(in) :: nmesh
 real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
+
+
 
 !Local variables -------------------------
 !no_abirules
@@ -488,9 +489,12 @@ integer :: isp
 integer :: i,j,isym,lx,ly,ik
 integer :: ist1,ist2,iw
 ! Parallelism
-integer :: my_rank, nproc 
+integer :: my_rank, nproc
 integer,parameter :: master=0
 integer :: my_k1, my_k2
+#ifdef HAVE_NETCDF
+integer :: ncerr
+#endif
 integer :: ierr
 integer :: fout1
 logical :: do_lifetime
@@ -498,11 +502,12 @@ complex(dpc) :: e1,e2,e12
 complex(dpc) :: e1_ep,e2_ep,e12_ep
 real(dp) :: deltav1v2
 real(dp) :: ha2ev
+real(dp) :: tmpabs
 real(dp) :: renorm_factor,emin,emax
 real(dp) :: ene
 complex(dpc) :: b11,b12
 complex(dpc) :: ieta,w
-character(256) :: fnam1
+character(len=fnlen) :: fnam1
 character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
@@ -511,11 +516,9 @@ complex(dpc), allocatable :: eps(:)
 
 ! *********************************************************************
 
-
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- if(my_rank == master) then
-  !fool proof:
+ if (my_rank == master) then
   !check polarisation
    if (v1.le.0.or.v2.le.0.or.v1.gt.3.or.v2.gt.3) then
      write(std_out,*) '---------------------------------------------'
@@ -579,7 +582,12 @@ complex(dpc), allocatable :: eps(:)
  ABI_CHECK(KSBSt%mband==nstval, "The number of bands in the BSt should be equal to nstval !")
 
  do_lifetime = allocated(EPBSt%lifetime)
-!
+! TODO: activate this, and remove do_lifetime - always add it in even if 0.
+! if (.not. allocated(EPBSt%lifetime)) then
+!   ABI_ALLOCATE(EPBSt%lifetime, (nstval, my_k2-my_k1+1, nspin))
+!   EPBSt%lifetime = zero
+! end if
+
 !allocate local arrays
  ABI_ALLOCATE(chi,(nmesh))
  ABI_ALLOCATE(eps,(nmesh))
@@ -598,6 +606,7 @@ complex(dpc), allocatable :: eps(:)
      end do
    end do
  end do
+
 !calculate the energy window
  emin=0._dp
  emax=0._dp
@@ -615,13 +624,16 @@ complex(dpc), allocatable :: eps(:)
 
 !start calculating linear optical response
  chi(:)=0._dp
- !do ik=1,nkpt
- do ik=my_k1,my_k2
-   write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-   do isp=1,nspin
+! TODO: this loop should be outside the ik one, for speed and cache.
+ do isp=1,nspin
+   !do ik=1,nkpt
+   do ik=my_k1,my_k2
+     write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
      do ist1=1,nstval
        e1=KSBSt%eig(ist1,ik,isp)
        e1_ep=EPBSt%eig(ist1,ik,isp)
+! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
+! instead of putting an if statement in a loop! See above
        if(do_lifetime) then
          e1_ep = e1_ep + EPBSt%lifetime(ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
@@ -662,25 +674,30 @@ complex(dpc), allocatable :: eps(:)
              chi(iw)=chi(iw)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
              (b12/(-e12_ep-w)))
            end do
-!          end loops over states
          end if
-       end do
+       end do ! states
 !      end if
      end do
-!    end loop over spins
-   end do
-!  end loop over k-points
- end do
+   end do ! spin
+ end do ! k-points
 
  call xmpi_sum(chi,comm,ierr)
 
- if(my_rank == master) then
-!  open the output files
+ ! calculate epsilon
+ eps(1) = zero
+ deltav1v2=zero; if (v1 == v2) deltav1v2=one
+ do iw=2,nmesh
+   ene=(iw-1)*de
+   ene=ene*ha2ev
+   eps(iw)=deltav1v2+4._dp*pi*chi(iw)
+ end do
+
+ if (my_rank == master) then
+   !  open the output files
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
    end if
-!  write the output
-   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
+   ! write the output
    write(fout1, '(a,2i3,a)' )' #calculated the component:',v1,v2,'  of dielectric function'
    write(std_out,*) 'calculated the component:',v1,v2,'  of dielectric function'
    write(fout1, '(a,2es16.6)' ) ' #broadening:', real(ieta),aimag(ieta)
@@ -689,13 +706,11 @@ complex(dpc), allocatable :: eps(:)
    write(std_out,*) 'and scissors shift:',sc
    write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
    write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-   eps(:)=0._dp
-   deltav1v2=zero
-   if(v1==v2)deltav1v2=one
+   write(fout1,*)
+   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     eps(iw)=deltav1v2+4._dp*pi*chi(iw)
      write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
    end do
    write(fout1,*)
@@ -714,13 +729,55 @@ complex(dpc), allocatable :: eps(:)
      ene=ene*ha2ev
      write(fout1, '(2es16.6)' ) ene,abs(eps(iw))
    end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Im(refractive index(w)) aka kappa'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) - dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Re(refractive index(w)) aka n'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Reflectivity(w) from vacuum, at normal incidence'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene, sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         absorption coeff (in m-1) = omega Im(eps) / c n(eps)'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     tmpabs=zero
+     if (abs(eps(iw)) + dble(eps(iw)) > zero) then
+       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter
+     end if
+     write(fout1, '(2es16.6)' ) ha2ev*ene, tmpabs
+   end do
 
-!  close output file
+   ! close output file
    close(fout1)
+
+#ifdef HAVE_NETCDF
+   if (ncid /= nctk_noid) then
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_epsilon"), c2r(eps), start=[1, 1, icomp, itemp])
+     NCF_CHECK(ncerr)
+   end if
+#endif
  end if
-!deallocate local arrays
+
  ABI_DEALLOCATE(chi)
- ABI_DEALLOCATE(eps)
+ ABI_FREE(eps)
 
 end subroutine linopt
 !!***
@@ -732,10 +789,11 @@ end subroutine linopt
 !! nlinopt
 !!
 !! FUNCTION
-!! This routine compute optical frequency dependent second harmonic generation
-!! suscptibility for semiconductors
+!! Compute optical frequency dependent second harmonic generation susceptibility for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin = number of spins(integer)
 !!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
@@ -746,7 +804,6 @@ end subroutine linopt
 !!  evalv(nstval,nspin,nkpt) = eigen value for each band in Ha(real)
 !!  efermi = Fermi energy in Ha(real)
 !!  pmat(nstval,nstval,nkpt,3,nspin) = momentum matrix elements in cartesian coordinates(complex)
-!!                                     : changes on exit
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh = desired number of energy mesh points(integer)
 !!  de = desired step in energy(real); nmesh*de=maximum energy for plotting
@@ -759,6 +816,7 @@ end subroutine linopt
 !!   fnam3=trim(fnam)//'-ChiIm.out'
 !!   fnam4=trim(fnam)//'-ChiRe.out'
 !!   fnam5=trim(fnam)//'-ChiAbs.out'
+!!  ncid=Netcdf id to save output data.
 !!
 !! OUTPUT
 !!  Calculates the second harmonic generation susceptibility on a desired energy mesh and
@@ -769,18 +827,6 @@ end subroutine linopt
 !!  ChiAbs.out : abs\chi_{v1v2v3}(2\omega,\omega,-\omega). The headers in these files contain
 !!  information about the calculation.
 !!
-!! SIDE EFFECTS
-!!  pmat(nstval,nstval,nkpt,3,nspin) = momentum matrix elements in cartesian coordinates(complex)
-!!
-!! COMMENTS
-!!  Right now the routine sums over the k-points. In future linear tetrahedron method might be
-!!  useful.
-!!  Reference articles:
-!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003
-!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996
-!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004
-!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993
-!!
 !! PARENTS
 !!      optic
 !!
@@ -789,11 +835,9 @@ end subroutine linopt
 !!
 !! SOURCE
 
-subroutine nlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
-  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,comm)
+subroutine nlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
+  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,ncid,comm)
 
- use defs_basis
- use m_xmpi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -805,7 +849,7 @@ subroutine nlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin
+integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -814,7 +858,7 @@ real(dp), intent(in) :: symcrys(3,3,nsymcrys)
 integer, intent(in) :: nstval
 real(dp), intent(in) :: evalv(nstval,nkpt,nspin)
 real(dp), intent(in) :: efermi
-complex(dpc), intent(inout) :: pmat(nstval,nstval,nkpt,3,nspin)
+complex(dpc), intent(in) :: pmat(nstval,nstval,nkpt,3,nspin)
 integer, intent(in) :: v1
 integer, intent(in) :: v2
 integer, intent(in) :: v3
@@ -824,21 +868,19 @@ real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 real(dp), intent(in) :: tol
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 
 !Local variables -------------------------
-!no_abirules
-! present calculation related (user specific)
 integer :: iw
-integer :: i1,i2,i3,i,j,k,lx,ly,lz
+integer :: i,j,k,lx,ly,lz
 integer :: isp,isym,ik
 integer :: ist1,ist2,istl,istn,istm
-! Parallelism
 integer,parameter :: master=0
 integer :: my_rank, nproc
 integer :: my_k1, my_k2
 integer :: ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
+real(dp) :: f1,f2,f3
 real(dp) :: ha2ev
 real(dp) :: t1,t2,t3,tst
 real(dp) :: ene,totre,totabs,totim
@@ -846,16 +888,16 @@ real(dp) :: e1,e2,el,en,em
 real(dp) :: emin,emax,my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
 real(dp) :: wmn,wnm,wln,wnl,wml,wlm
-!character(len=500) :: msg
 complex(dpc) :: idel,w,zi
 complex(dpc) :: mat2w,mat1w1,mat1w2,mat2w_tra,mat1w3_tra
 complex(dpc) :: b111,b121,b131,b112,b122,b132,b113,b123,b133
 complex(dpc) :: b241,b242,b243,b221,b222,b223,b211,b212,b213,b231
 complex(dpc) :: b311,b312,b313,b331
 complex(dpc) :: b24,b21_22,b11,b12_13,b31_32
-character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
+character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 character(500) :: msg
 ! local allocatable arrays
+integer :: start4(4),count4(4)
 real(dp) :: s(3,3),sym(3,3,3)
 complex(dpc), allocatable :: px(:,:,:,:,:)
 complex(dpc), allocatable :: py(:,:,:,:,:)
@@ -865,7 +907,7 @@ complex(dpc), allocatable :: inter2w(:)
 complex(dpc), allocatable :: inter1w(:)
 complex(dpc), allocatable :: intra2w(:)
 complex(dpc), allocatable :: intra1w(:)
-complex(dpc), allocatable :: intra1wS(:)
+complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
 
 ! *********************************************************************
 
@@ -897,9 +939,9 @@ complex(dpc), allocatable :: intra1wS(:)
  fnam5=trim(fnam)//'-ChiAbs.out'
  fnam6=trim(fnam)//'-ChiImDec.out'
  fnam7=trim(fnam)//'-ChiReDec.out'
+
  if(my_rank == master) then
-  !fool proof:
-  !If there exists inversion symmetry exit with a mesg.
+  !If there exists inversion symmetry exit with a message.
    tst=1.d-09
    do isym=1,nsymcrys
      t1=symcrys(1,1,isym)+1
@@ -967,11 +1009,9 @@ complex(dpc), allocatable :: intra1wS(:)
      write(std_out,*) '    ideally should be less than 0.004   '
      write(std_out,*) '----------------------------------------'
    end if
-  
-  !fool proof ends
  end if
-!
-!allocate local arrays
+
+ !allocate local arrays
  ABI_ALLOCATE(px,(nstval,nstval,3,3,3))
  ABI_ALLOCATE(py,(nstval,nstval,3,3,3))
  ABI_ALLOCATE(pz,(nstval,nstval,3,3,3))
@@ -981,6 +1021,7 @@ complex(dpc), allocatable :: intra1wS(:)
  ABI_ALLOCATE(intra1w,(nmesh))
  ABI_ALLOCATE(intra1wS,(nmesh))
  ABI_ALLOCATE(delta,(nstval,nstval,3))
+
 !generate the symmetrizing tensor
  sym(:,:,:)=0._dp
  do isym=1,nsymcrys
@@ -1001,7 +1042,7 @@ complex(dpc), allocatable :: intra1wS(:)
 
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
- 
+
 !initialise
  inter2w(:)=0._dp
  inter1w(:)=0._dp
@@ -1012,12 +1053,12 @@ complex(dpc), allocatable :: intra1wS(:)
 
  my_emin=HUGE(0._dp)
  my_emax=-HUGE(0._dp)
-!start loop over kpts
+! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-!  start loop over spins
+! loop over spins
    do isp=1,nspin
-!    start loop over states
+!  loop over states
      do ist1=1,nstval
        e1=evalv(ist1,ik,isp)
        if (e1.lt.efermi) then   ! ist1 is a valence state
@@ -1028,12 +1069,12 @@ complex(dpc), allocatable :: intra1wS(:)
              do lx=1,3
                do ly=1,3
                  do lz=1,3
-                   i1=sym(lx,ly,lz)+sym(lx,lz,ly)
-                   i2=sym(ly,lx,lz)+sym(ly,lz,lx)
-                   i3=sym(lz,lx,ly)+sym(lz,ly,lx)
-                   px(ist1,ist2,lx,ly,lz)=i1*pmat(ist1,ist2,ik,lx,isp)
-                   py(ist2,ist1,lx,ly,lz)=i2*pmat(ist2,ist1,ik,lx,isp)   
-                   pz(ist2,ist1,lx,ly,lz)=i3*pmat(ist2,ist1,ik,lx,isp)
+                   f1=sym(lx,ly,lz)+sym(lx,lz,ly)
+                   f2=sym(ly,lx,lz)+sym(ly,lz,lx)
+                   f3=sym(lz,lx,ly)+sym(lz,ly,lx)
+                   px(ist1,ist2,lx,ly,lz)=f1*pmat(ist1,ist2,ik,lx,isp)
+                   py(ist2,ist1,lx,ly,lz)=f2*pmat(ist2,ist1,ik,lx,isp)
+                   pz(ist2,ist1,lx,ly,lz)=f3*pmat(ist2,ist1,ik,lx,isp)
                  end do
                end do
              end do
@@ -1141,11 +1182,11 @@ complex(dpc), allocatable :: intra1wS(:)
                b111=mat2w*(1._dp/(wln+wlm))*(1._dp/wlm)
                b121=mat1w1*(1._dp/(wnm+wlm))*(1._dp/wlm)
                b131=mat1w2*(1._dp/wlm)
-!              
+!
                b221=0._dp
                b211=mat1w1/wml
                b241=-mat2w/wml
-!              
+!
                b311=mat1w2/wlm
                if (abs(wln).gt.tol) then
                  b111=b111/wln
@@ -1210,7 +1251,7 @@ complex(dpc), allocatable :: intra1wS(:)
                  wml=em-el
                  wlm=-wml
                end if
-!              
+!
                b112=0._dp
                b122=mat1w1*(1._dp/(wnm+wlm))
                b132=mat1w2*(1._dp/(wnm+wnl))
@@ -1283,7 +1324,7 @@ complex(dpc), allocatable :: intra1wS(:)
                    end do
                  end do
                end do
-!              
+!
                b113=mat2w*(1._dp/(wnl+wml))*(1._dp/wnl)
                b123=mat1w1*(1._dp/wnl)
                b133=mat1w2*(1._dp/wnl)*(1._dp/(wnl+wnm))
@@ -1316,7 +1357,7 @@ complex(dpc), allocatable :: intra1wS(:)
                b31_32=b31_32+b313
 !              end loop over istl
              end do
- 
+
              b11=b11*zi*(1._dp/wnm)*const_esu
              b12_13=b12_13*zi*(1._dp/wnm)*const_esu
              b24=(b24+b231)*zi*(1._dp/(wnm**3))*const_esu
@@ -1326,55 +1367,66 @@ complex(dpc), allocatable :: intra1wS(:)
              do iw=1,nmesh
                w=(iw-1)*de+idel
                inter2w(iw)=inter2w(iw)+(wkpt(ik)*(b11/(wmn-2._dp*w))) ! Inter(2w) from chi
-               inter1w(iw)=inter1w(iw)+(wkpt(ik)*(b12_13/(wmn-w))) ! Inter(1w) from chi 
+               inter1w(iw)=inter1w(iw)+(wkpt(ik)*(b12_13/(wmn-w))) ! Inter(1w) from chi
                intra2w(iw)=intra2w(iw)+(wkpt(ik)*(b24/(wmn-2._dp*w))) ! Intra(2w) from eta
                intra1w(iw)=intra1w(iw)+(wkpt(ik)*((b21_22)/(wmn-w))) ! Intra(1w) from eta
-               intra1wS(iw)=intra1wS(iw)+(wkpt(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma 
+               intra1wS(iw)=intra1wS(iw)+(wkpt(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
              end do
-!            end loop over istn and istm
            end if
-         end do
+         end do ! istn and istm
        end if
      end do
-!    end loop over spins
-   end do
-!  end loop over k-points
- end do
+   end do  ! spins
+ end do ! k-points
 
  call xmpi_sum(inter2w,comm,ierr)
  call xmpi_sum(inter1w,comm,ierr)
  call xmpi_sum(intra2w,comm,ierr)
  call xmpi_sum(intra1w,comm,ierr)
  call xmpi_sum(intra1wS,comm,ierr)
-
  call xmpi_min(my_emin,emin,comm,ierr)
  call xmpi_max(my_emax,emax,comm,ierr)
 
- if(my_rank == master) then
-!  
-!  write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
-!  
+ if (my_rank == master) then
+   ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
+
+   if (ncid /= nctk_noid) then
+     start4 = [1, 1, icomp, itemp]
+     count4 = [2, nmesh, 1, 1]
+     ABI_MALLOC(chi2tot, (nmesh))
+     chi2tot = inter2w + inter1w + intra2w + intra1w + intra1wS
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"), c2r(inter2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"), c2r(inter1w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"), c2r(intra2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w"), c2r(intra1w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS"), c2r(intra1wS), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot"), c2r(chi2tot), start=start4, count=count4))
+#endif
+     ABI_FREE(chi2tot)
+   end if
+
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
    if (open_file(fnam2,msg,newunit=fout2,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
    if (open_file(fnam3,msg,newunit=fout3,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
    if (open_file(fnam4,msg,newunit=fout4,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
    if (open_file(fnam6,msg,newunit=fout6,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
 !  write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
@@ -1420,7 +1472,7 @@ complex(dpc), allocatable :: intra1wS(:)
    write(fout5, '(a)')' # Energy(eV)  |TotChi(-2w,w,w)|   |Tot Chi(-2w,w,w)|'
    write(fout5, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout5, '(a)')' # '
-   
+
    write(fout6, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout6, '(a,es16.6)') ' #tolerance:',tol
    write(fout6, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -1439,40 +1491,37 @@ complex(dpc), allocatable :: intra1wS(:)
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
 
-!  
    totim=0._dp
    totre=0._dp
    totabs=0._dp
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-!    
+
      totim=aimag(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totim=0._dp
-!    
+
      totre=dble(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
      write(fout2,'(f15.6,2es15.6)') ene,totre,totre*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totre=0._dp
-!    
+
      write(fout3,'(f15.6,4es15.6)') ene,aimag(inter2w(iw))/1.d-7,      &
      aimag(inter1w(iw))/1.d-7,aimag(intra2w(iw))/1.d-7, aimag(intra1w(iw)+intra1wS(iw))/1.d-7
-!    
+
      write(fout4,'(f15.6,4es15.6)') ene,dble(inter2w(iw))/1.d-7,       &
      dble(inter1w(iw))/1.d-7,dble(intra2w(iw))/1.d-7,dble(intra1w(iw)+intra1wS(iw))/1.d-7
-!    
+
      totabs=abs(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
      write(fout5,'(f15.6,2es15.6)') ene,totabs,totabs*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totabs=0._dp
-!
+
      write(fout6,'(f15.6,4es15.6)') ene,aimag(inter2w(iw)+inter1w(iw))/1.d-7,      &
      aimag(intra2w(iw)+intra1w(iw))/1.d-7,aimag(intra1wS(iw))/1.d-7
-!    
+
      write(fout7,'(f15.6,4es15.6)') ene,dble(inter2w(iw)+inter1w(iw))/1.d-7,       &
      dble(intra2w(iw)+intra1w(iw))/1.d-7,dble(intra1wS(iw))/1.d-7
-!    
    end do
-
 
    close(fout1)
    close(fout2)
@@ -1502,7 +1551,7 @@ complex(dpc), allocatable :: intra1wS(:)
    write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Hartree'
  end if
 
-!  deallocate local arrays
+ ! deallocate local arrays
  ABI_DEALLOCATE(px)
  ABI_DEALLOCATE(py)
  ABI_DEALLOCATE(pz)
@@ -1523,10 +1572,11 @@ end subroutine nlinopt
 !! linelop
 !!
 !! FUNCTION
-!! This routine compute optical frequency dependent linear electro-optic
-!! suscptibility for semiconductors
+!! Compute optical frequency dependent linear electro-optic susceptibility for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin = number of spins(integer)
 !!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
@@ -1538,7 +1588,6 @@ end subroutine nlinopt
 !!  occv(nstval,nspin,nkpt) = occupation number
 !!  efermi = Fermi energy in Ha(real)
 !!  pmat(nstval,nstval,nkpt,3,nspin) = momentum matrix elements in cartesian coordinates(complex)
-!!                                     : changes on exit
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh = desired number of energy mesh points(integer)
 !!  de = desired step in energy(real); nmesh*de=maximum energy for plotting
@@ -1551,6 +1600,7 @@ end subroutine nlinopt
 !!   fnam3=trim(fnam)//'-ChiIm.out'
 !!   fnam4=trim(fnam)//'-ChiRe.out'
 !!   fnam5=trim(fnam)//'-ChiAbs.out'
+!!  ncid=Netcdf id to save output data.
 !!
 !! OUTPUT
 !!  Calculates the second harmonic generation susceptibility on a desired energy mesh and
@@ -1561,18 +1611,7 @@ end subroutine nlinopt
 !!  ChiEOAbs.out : abs\chi_{v1v2v3}(\omega,\omega,0). The headers in these files contain
 !!  information about the calculation.
 !!
-!! SIDE EFFECTS
-!!  pmat(nstval,nstval,nkpt,3,nspin) = momentum matrix elements in cartesian coordinates(complex)
-!!
-!! COMMENTS
-!!  Right now the routine sums over the k-points. In future linear tetrahedron method might be
-!!  useful.
-!!  Reference articles:
-!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003
-!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996
-!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004
-!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993
-!!  YG:
+!!  NOTES:
 !!    - The routine has been written using notations of Ref. 2
 !!    - This routine does not symmetrize the tensor (up to now)
 !!    - Sum over all the states and use occupation factors instead of looping only on resonant contributions
@@ -1585,11 +1624,9 @@ end subroutine nlinopt
 !!
 !! SOURCE
 
-subroutine linelop(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
-  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,comm)
+subroutine linelop(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
+  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
- use defs_basis
- use m_xmpi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1601,7 +1638,7 @@ subroutine linelop(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efer
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin
+integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -1611,7 +1648,7 @@ integer, intent(in) :: nstval
 real(dp), intent(in) :: evalv(nstval,nkpt,nspin)
 real(dp), intent(in) :: occv(nstval,nkpt,nspin)
 real(dp), intent(in) :: efermi
-complex(dpc), intent(inout) :: pmat(nstval,nstval,nkpt,3,nspin)
+complex(dpc), intent(in) :: pmat(nstval,nstval,nkpt,3,nspin)
 integer, intent(in) :: v1
 integer, intent(in) :: v2
 integer, intent(in) :: v3
@@ -1621,7 +1658,7 @@ real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 real(dp), intent(in) :: tol
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 logical, intent(in) :: do_antiresonant
 
 !Local variables -------------------------
@@ -1639,11 +1676,11 @@ real(dp) :: emin,emax,my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
 real(dp) :: wmn,wnm,wln,wnl,wml,wlm
 complex(dpc) :: idel,w,zi
-character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5
+character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5
 ! local allocatable arrays
 real(dp), allocatable :: s(:,:)
 real(dp), allocatable :: sym(:,:,:)
-
+integer :: start4(4),count4(4)
 ! DBYG
  integer :: istp
  real(dp) :: ep, wmp, wpn
@@ -1653,9 +1690,10 @@ real(dp), allocatable :: sym(:,:,:)
  complex(dpc), allocatable :: rmna(:,:,:) ! (m,n,a) = r_{mn}^{a}
  complex(dpc), allocatable :: rmnbc(:,:,:,:) ! (m,n,b,c) = r^b_{mn;c}(k)
  complex(dpc), allocatable :: roverw(:,:,:,:) ! (m,n,b,c) = [r^b_{mn}(k)/w_{mn(k)];c
- complex(dpc), allocatable :: chi(:) ! \chi_{II}^{abc}(-\omega,\omega,0) 
- complex(dpc), allocatable :: eta(:) ! \eta_{II}^{abc}(-\omega,\omega,0) 
- complex(dpc), allocatable :: sigma(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0) 
+ complex(dpc), allocatable :: chi(:) ! \chi_{II}^{abc}(-\omega,\omega,0)
+ complex(dpc), allocatable :: eta(:) ! \eta_{II}^{abc}(-\omega,\omega,0)
+ complex(dpc), allocatable :: sigma(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0)
+ complex(dpc), allocatable :: chi2tot(:)
  complex(dpc) :: num1, num2, den1, den2, term1, term2
  complex(dpc) :: chi1, chi1_1, chi1_2, chi2_1b, chi2_2b
  complex(dpc), allocatable :: chi2(:) ! Second term that depends on the frequency ! (omega)
@@ -1666,7 +1704,7 @@ real(dp), allocatable :: sym(:,:,:)
  integer :: ierr
  integer :: my_k1, my_k2
  character(500) :: msg
- integer :: fout1,fout2,fout3,fout4,fout5 
+ integer :: fout1,fout2,fout3,fout4,fout5
 
 ! *********************************************************************
 
@@ -1815,10 +1853,10 @@ real(dp), allocatable :: sym(:,:,:)
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
 
-!start loop over kpts
+! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-!  start loop over spins
+!  loop over spins
    do isp=1,nspin
 !    Calculate the scissor corrected energies and the energy window
      do ist1=1,nstval
@@ -1905,7 +1943,7 @@ real(dp), allocatable :: sym(:,:,:)
                  eta1 = eta1 + sym(lx,ly,lz)*(fnm*rmna(istn,istm,lx)*(roverw(istm,istn,lz,ly)))
                  eta2_1 = eta2_1 + sym(lx,ly,lz)*(fnm*(rmna(istn,istm,lx)*rmnbc(istm,istn,ly,lz)))
                  eta2_2 = eta2_2 + sym(lx,ly,lz)*(fnm*(rmnbc(istn,istm,lx,lz)*rmna(istm,istn,ly)))
-                 sigma1_1 = sigma1_1 + sym(lx,ly,lz)*(fnm*delta(istn,istm,lx)*rmna(istn,istm,ly)*rmna(istm,istn,lz))/(wmn**2) 
+                 sigma1_1 = sigma1_1 + sym(lx,ly,lz)*(fnm*delta(istn,istm,lx)*rmna(istn,istm,ly)*rmna(istm,istn,lz))/(wmn**2)
                  sigma1_2 = sigma1_2 + sym(lx,ly,lz)*(fnm*delta(istn,istm,lx)*rmna(istn,istm,lz)*rmna(istm,istn,ly))/(wmn**2)
                  sigma2 = sigma2 + sym(lx,ly,lz)*(fnm*rmnbc(istn,istm,lz,lx)*rmna(istm,istn,ly))/wmn
                end do
@@ -1932,13 +1970,13 @@ real(dp), allocatable :: sym(:,:,:)
              do ly = 1,3
                do lz = 1,3
                  if(abs(wlm) > tol) then
-                   chi1_1 = chi1_1 + sym(lx,ly,lz)*(fnm*rmna(istn,istm,lx)*rmna(istm,istl,lz)*rmna(istl,istn,ly))/(wlm)  
+                   chi1_1 = chi1_1 + sym(lx,ly,lz)*(fnm*rmna(istn,istm,lx)*rmna(istm,istl,lz)*rmna(istl,istn,ly))/(wlm)
                    chi2_1b = chi2_1b + sym(lx,ly,lz)*(fnm*rmna(istn,istl,lx)*rmna(istl,istm,lz)*rmna(istm,istn,ly))/(wlm)
                  end if
                  if(abs(wln) > tol) then
                    chi1_2 = chi1_2 + sym(lx,ly,lz)*(fnm*rmna(istn,istm,lx)*rmna(istm,istl,ly)*rmna(istl,istn,lz))/(wln)
-                   chi2_2b = chi2_2b + sym(lx,ly,lz)*(fmn*rmna(istl,istm,lx)*rmna(istm,istn,ly)*rmna(istn,istl,lz))/(wnl)         
-                 end if               
+                   chi2_2b = chi2_2b + sym(lx,ly,lz)*(fmn*rmna(istl,istm,lx)*rmna(istm,istn,ly)*rmna(istn,istl,lz))/(wnl)
+                 end if
                end do
              end do
            end do
@@ -1947,7 +1985,7 @@ real(dp), allocatable :: sym(:,:,:)
          sigma1 = 0.5_dp*(sigma1_1-sigma1_2)
          eta2 = 0.5_dp*(eta2_1-eta2_2)
          chi1 = chi1_1 + chi1_2
-!       
+!
 !        calculate over the desired energy mesh and sum over k-points
          do iw=1,nmesh
            w=(iw-1)*de+idel
@@ -1956,26 +1994,34 @@ real(dp), allocatable :: sym(:,:,:)
            eta(iw) = eta(iw) + 0.5_dp*zi*wkpt(ik)*((eta1/(wmn-w)) + (eta2/((wmn-w)**2)))*const_esu
            sigma(iw) = sigma(iw) + 0.5_dp*zi*wkpt(ik)*((sigma1/(wmn-w))- (sigma2/(wmn-w)))*const_esu
          end do
-!        end loop over istn and istm
-       end do
+       end do ! istn and istm
      end do
-!    end loop over spins
-   end do
-!  end loop over k-points
- end do
- 
+   end do ! spins
+ end do ! k-points
+
  call xmpi_sum(chi,comm,ierr)
  call xmpi_sum(eta,comm,ierr)
  call xmpi_sum(sigma,comm,ierr)
-
  call xmpi_min(my_emin,emin,comm,ierr)
  call xmpi_max(my_emax,emax,comm,ierr)
- 
- if(my_rank == master) then
 
-  !
-  !write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
-  !
+ if (my_rank == master) then
+
+   if (ncid /= nctk_noid) then
+     start4 = [1, 1, icomp, itemp]
+     count4 = [2, nmesh, 1, 1]
+     ABI_MALLOC(chi2tot, (nmesh))
+     chi2tot = chi + eta + sigma
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi"), c2r(chi), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_eta"), c2r(eta), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_sigma"), c2r(sigma), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo_chi2tot"), c2r(chi2tot), start=start4, count=count4))
+#endif
+     ABI_FREE(chi2tot)
+   end if
+
+  ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
    end if
@@ -1991,7 +2037,7 @@ real(dp), allocatable :: sym(:,:,:)
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
    end if
-  !!write headers
+   ! write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
    write(fout1, '(a,es16.6,a)' ) ' #broadening:',brod,'Ha'
@@ -2000,7 +2046,7 @@ real(dp), allocatable :: sym(:,:,:)
    write(fout1, '(a)' )' # Energy      Tot-Im Chi(-w,w,0)  Tot-Im Chi(-w,w,0)'
    write(fout1, '(a)' )' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout1, '(a)' )' # '
-  
+
    write(fout2, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
    write(fout2, '(a,es16.6)') ' #tolerance:',tol
    write(fout2, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2009,7 +2055,7 @@ real(dp), allocatable :: sym(:,:,:)
    write(fout2, '(a)')' # Energy      Tot-Re Chi(-w,w,0)  Tot-Re Chi(-w,w,0)'
    write(fout2, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout2, '(a)')' # '
-  
+
    write(fout3, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout3, '(a,es16.6)') ' #tolerance:',tol
    write(fout3, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2018,7 +2064,7 @@ real(dp), allocatable :: sym(:,:,:)
    write(fout3, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout3, '(a)')' # in esu'
    write(fout3, '(a)')' # '
-  
+
    write(fout4, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout4, '(a,es16.6)') ' #tolerance:',tol
    write(fout4, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2027,7 +2073,7 @@ real(dp), allocatable :: sym(:,:,:)
    write(fout4, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout4, '(a)')' # in esu'
    write(fout4, '(a)')' # '
-  
+
    write(fout5, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout5, '(a,es16.6)') ' #tolerance:',tol
    write(fout5, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2036,39 +2082,34 @@ real(dp), allocatable :: sym(:,:,:)
    write(fout5, '(a)')' # Energy(eV)  |TotChi(-w,w,0)|   |Tot Chi(-w,w,0)|'
    write(fout5, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout5, '(a)')' # '
-  !!
+
    totim=0._dp
    totre=0._dp
    totabs=0._dp
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-  !!  
      totim=aimag(chi(iw)+eta(iw)+sigma(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totim=0._dp
-  !!  
      totre=dble(chi(iw)+eta(iw)+sigma(iw))/1.d-7
      write(fout2,'(f15.6,2es15.6)') ene,totre,totre*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totre=0._dp
-  !!  
      write(fout3,'(f15.6,3es15.6)') ene,aimag(chi(iw))/1.d-7,      &
      aimag(eta(iw))/1.d-7,aimag(sigma(iw))/1.d-7
-  !!  
      write(fout4,'(f15.6,3es15.6)') ene,dble(chi(iw))/1.d-7,       &
      dble(eta(iw))/1.d-7,dble(sigma(iw))/1.d-7
-  !!  
      totabs=abs(chi(iw)+eta(iw)+sigma(iw))/1.d-7
      write(fout5,'(f15.6,2es15.6)') ene,totabs,totabs*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totabs=0._dp
    end do
-  
+
    close(fout1)
    close(fout2)
    close(fout3)
    close(fout4)
    close(fout5)
-  !print information
+   ! print information
    write(std_out,*) ' '
    write(std_out,*) 'information about calculation just performed:'
    write(std_out,*) ' '
@@ -2090,16 +2131,16 @@ real(dp), allocatable :: sym(:,:,:)
 
  end if
 
-!deallocate local arrays
+ ! deallocate local arrays
  ABI_FREE(enk)
- ABI_FREE(delta) 
+ ABI_FREE(delta)
  ABI_FREE(rmnbc)
- ABI_FREE(roverw) 
- ABI_FREE(rmna) 
- ABI_FREE(chi) 
+ ABI_FREE(roverw)
+ ABI_FREE(rmna)
+ ABI_FREE(chi)
  ABI_FREE(chi2)
  ABI_FREE(eta)
- ABI_FREE(sigma) 
+ ABI_FREE(sigma)
  ABI_FREE(s)
  ABI_FREE(sym)
 
@@ -2113,10 +2154,11 @@ end subroutine linelop
 !! nonlinopt
 !!
 !! FUNCTION
-!! This routine compute optical frequency dependent linear electro-optic
-!! suscptibility for semiconductors
+!! Compute optical frequency dependent linear electro-optic susceptibility for semiconductors
 !!
 !! INPUTS
+!!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
+!!  itemp=Temperature index (used for netcdf output)
 !!  nspin = number of spins(integer)
 !!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
@@ -2128,7 +2170,6 @@ end subroutine linelop
 !!  occv(nstval,nspin,nkpt) = occupation number
 !!  efermi = Fermi energy in Ha(real)
 !!  pmat(nstval,nstval,nkpt,3,nspin) = momentum matrix elements in cartesian coordinates(complex)
-!!                                     : changes on exit
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh = desired number of energy mesh points(integer)
 !!  de = desired step in energy(real); nmesh*de=maximum energy for plotting
@@ -2150,19 +2191,9 @@ end subroutine linelop
 !!  ChiEORe.out  : contributions to Re\chi_{v1v2v3}(\omega,\omega,-0) from various terms
 !!  ChiEOAbs.out : abs\chi_{v1v2v3}(\omega,\omega,0). The headers in these files contain
 !!  information about the calculation.
-!!
-!! SIDE EFFECTS
-!!  pmat(nstval,nstval,nkpt,3,nspin) = momentum matrix elements in cartesian coordinates(complex)
+!!  ncid=Netcdf id to save output data.
 !!
 !! COMMENTS
-!!  Right now the routine sums over the k-points. In future linear tetrahedron method might be
-!!  useful.
-!!  Reference articles:
-!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003
-!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996
-!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004
-!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993
-!!  YG:
 !!    - The routine has been written using notations of Ref. 2
 !!    - This routine does not symmetrize the tensor (up to now)
 !!    - Sum over all the states and use occupation factors instead of looping only on resonant contributions
@@ -2175,11 +2206,9 @@ end subroutine linelop
 !!
 !! SOURCE
 
-subroutine nonlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
-  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,comm)
+subroutine nonlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
+  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
- use defs_basis
- use m_xmpi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2191,7 +2220,7 @@ subroutine nonlinopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,ef
 
 !Arguments ------------------------------------
 !no_abirules
-integer, intent(in) :: nspin
+integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wkpt(nkpt)
@@ -2201,7 +2230,7 @@ integer, intent(in) :: nstval
 real(dp), intent(in) :: evalv(nstval,nkpt,nspin)
 real(dp), intent(in) :: occv(nstval,nkpt,nspin)
 real(dp), intent(in) :: efermi
-complex(dpc), intent(inout) :: pmat(nstval,nstval,nkpt,3,nspin)
+complex(dpc), intent(in) :: pmat(nstval,nstval,nkpt,3,nspin)
 integer, intent(in) :: v1
 integer, intent(in) :: v2
 integer, intent(in) :: v3
@@ -2211,7 +2240,7 @@ real(dp), intent(in) :: de
 real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 real(dp), intent(in) :: tol
-character(256), intent(in) :: fnam
+character(len=*), intent(in) :: fnam
 logical, intent(in) :: do_antiresonant
 
 !Local variables -------------------------
@@ -2227,8 +2256,9 @@ real(dp) :: emin,emax, my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
 real(dp) :: wmn,wnm,wln,wnl,wml,wlm
 complex(dpc) :: idel,w,zi
-character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
+character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 ! local allocatable arrays
+ integer :: start4(4),count4(4)
  real(dp) :: s(3,3),sym(3,3,3)
  integer :: istp
  real(dp) :: ep, wmp, wpn
@@ -2238,19 +2268,20 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  complex(dpc), allocatable :: rmna(:,:,:) ! (m,n,a) = r_{mn}^{a}
  complex(dpc), allocatable :: rmnbc(:,:,:,:) ! (m,n,b,c) = r^b_{mn;c}(k)
  complex(dpc), allocatable :: roverw(:,:,:,:) ! (m,n,b,c) = [r^b_{mn}(k)/w_{mn(k)];c
- complex(dpc), allocatable :: chiw(:), chi2w(:) ! \chi_{II}^{abc}(-\omega,\omega,0) 
- complex(dpc), allocatable :: etaw(:), eta2w(:) ! \eta_{II}^{abc}(-\omega,\omega,0) 
- complex(dpc), allocatable :: sigmaw(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0) 
+ complex(dpc), allocatable :: chiw(:), chi2w(:) ! \chi_{II}^{abc}(-\omega,\omega,0)
+ complex(dpc), allocatable :: etaw(:), eta2w(:) ! \eta_{II}^{abc}(-\omega,\omega,0)
+ complex(dpc), allocatable :: sigmaw(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0)
  complex(dpc) :: num1, num2, den1, den2, term1, term2
  complex(dpc) :: chi1, chi2_1, chi2_2
  complex(dpc), allocatable :: chi2(:) ! Second term that depends on the frequency ! (omega)
  complex(dpc), allocatable :: eta1(:) ! Second term that depends on the frequency ! (omega)
+ complex(dpc), allocatable :: chi2tot(:)
  complex(dpc) :: eta1_1, eta1_2, eta2_1, eta2_2
  complex(dpc) :: sigma2_1, sigma1
  complex(dpc), allocatable :: symrmn(:,:,:) ! (m,l,n) = 1/2*(rml^b rln^c+rml^c rln^b)
  complex(dpc) :: symrmnl(3,3), symrlmn(3,3), symrmln(3,3)
 !Parallelism
- integer :: my_rank, nproc 
+ integer :: my_rank, nproc
  integer,parameter :: master=0
  integer :: ierr
  integer :: my_k1, my_k2
@@ -2288,9 +2319,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  fnam5=trim(fnam)//'-ChiSHGAbs.out'
  fnam6=trim(fnam)//'-ChiSHGImDec.out'
  fnam7=trim(fnam)//'-ChiSHGReDec.out'
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! fool proof:
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 !If there exists inversion symmetry exit with a mesg.
  tst=1.d-09
  do isym=1,nsymcrys
@@ -2311,6 +2340,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
      end if
    end if
  end do
+
 !check polarisation
  if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
    write(std_out,*) '---------------------------------------------'
@@ -2320,6 +2350,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '---------------------------------------------'
    MSG_ERROR("Aborting now")
  end if
+
 !number of energy mesh points
  if (nmesh.le.0) then
    write(std_out,*) '---------------------------------------------'
@@ -2330,6 +2361,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '---------------------------------------------'
    MSG_ERROR("Aborting now")
  end if
+
 !step in energy
  if (de.le.0._dp) then
    write(std_out,*) '---------------------------------------------'
@@ -2340,6 +2372,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '---------------------------------------------'
    MSG_ERROR("Aborting now")
  end if
+
 !broadening
  if (brod.gt.0.009) then
    write(std_out,*) '---------------------------------------------'
@@ -2352,6 +2385,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    ideally should be less than 0.005   '
    write(std_out,*) '----------------------------------------'
  end if
+
 !tolerance
  if (tol.gt.0.006) then
    write(std_out,*) '----------------------------------------'
@@ -2359,14 +2393,8 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    ideally should be less than 0.004   '
    write(std_out,*) '----------------------------------------'
  end if
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!fool proof ends
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!allocate local arrays
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ ! allocate local arrays
  ABI_MALLOC(enk,(nstval))
  ABI_MALLOC(delta,(nstval,nstval,3))
  ABI_MALLOC(rmnbc,(nstval,nstval,3,3))
@@ -2410,12 +2438,11 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
 
-!start loop over kpts
+! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-!  start loop over spins
    do isp=1,nspin
-!    Calculate the scissor corrected energies and the energy window
+     ! Calculate the scissor corrected energies and the energy window
      do ist1=1,nstval
        en = evalv(ist1,ik,isp)
        my_emin=min(my_emin,en)
@@ -2514,7 +2541,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
              flm = -fml
              fln = -fnl
              do ly = 1,3
-               do lz = 1,3 
+               do lz = 1,3
                  symrmnl(ly,lz) = 0.5_dp*(rmna(istm,istn,ly)*rmna(istn,istl,lz)+rmna(istm,istn,lz)*rmna(istn,istl,ly))
                  symrlmn(ly,lz) = 0.5_dp*(rmna(istl,istm,ly)*rmna(istm,istn,lz)+rmna(istl,istm,lz)*rmna(istm,istn,ly))
                  symrmln(ly,lz) = 0.5_dp*(rmna(istm,istl,ly)*rmna(istl,istn,lz)+rmna(istm,istl,lz)*rmna(istl,istn,ly))
@@ -2532,10 +2559,10 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
                    eta1_1 = eta1_1 + sym(lx,ly,lz)*wln*rmna(istn,istl,lx)*symrlmn(ly,lz)
                    eta1_2 = eta1_2 - sym(lx,ly,lz)*wml*rmna(istl,istm,lx)*symrmnl(ly,lz)
                    if(abs(wnl-wmn) > tol) then
-                     chi2_1 = chi2_1 - sym(lx,ly,lz)*(fnm*rmna(istl,istm,lx)*symrmnl(ly,lz)/(wnl-wmn)) 
+                     chi2_1 = chi2_1 - sym(lx,ly,lz)*(fnm*rmna(istl,istm,lx)*symrmnl(ly,lz)/(wnl-wmn))
                    end if
                    if(abs(wmn-wlm) > tol) then
-                     chi2_2 = chi2_2 - sym(lx,ly,lz)*(fnm*rmna(istn,istl,lx)*symrlmn(ly,lz)/(wmn-wlm))  
+                     chi2_2 = chi2_2 - sym(lx,ly,lz)*(fnm*rmna(istn,istl,lx)*symrlmn(ly,lz)/(wmn-wlm))
                    end if
                  end do
                end do
@@ -2559,26 +2586,23 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
                end do
              end do
            end do
-!          
+!
 !          calculate over the desired energy mesh and sum over k-points
            do iw=1,nmesh
              w=(iw-1)*de+idel
              chi2w(iw) = chi2w(iw) + zi*wkpt(ik)*((2.0_dp*fnm*chi1/(wmn-2.0_dp*w)))*const_esu ! Inter(2w) from chi
-             chiw(iw) = chiw(iw) + zi*wkpt(ik)*((chi2_1+chi2_2)/(wmn-w))*const_esu ! Inter(w) from chi 
+             chiw(iw) = chiw(iw) + zi*wkpt(ik)*((chi2_1+chi2_2)/(wmn-w))*const_esu ! Inter(w) from chi
              eta2w(iw) = eta2w(iw) + zi*wkpt(ik)*(8.0_dp*(eta2_1/((wmn**2)*(wmn-2.0_dp*w))) &
-&                 + 2.0_dp*eta2_2/((wmn**2)*(wmn-2.0_dp*w)))*const_esu ! Intra(2w) from eta 
-             etaw(iw) = etaw(iw) + zi*wkpt(ik)*((eta1_1 + eta1_2)*fnm/((wmn**2)*(wmn-w)))*const_esu ! Intra(w) from eta 
+&                 + 2.0_dp*eta2_2/((wmn**2)*(wmn-2.0_dp*w)))*const_esu ! Intra(2w) from eta
+             etaw(iw) = etaw(iw) + zi*wkpt(ik)*((eta1_1 + eta1_2)*fnm/((wmn**2)*(wmn-w)))*const_esu ! Intra(w) from eta
              sigmaw(iw) = sigmaw(iw) + 0.5_dp*zi*wkpt(ik)*(fnm*sigma1/((wmn**2)*(wmn-w)) &
 &                 + (sigma2_1/((wmn**2)*(wmn-w))))*const_esu ! Intra(1w) from sigma
            end do
          end if
-!        end loop over istn and istm
-       end do
+       end do ! end loop over istn and istm
      end do
-!    end loop over spins
-   end do
-!  end loop over k-points
- end do
+   end do ! spins
+ end do ! k-points
 
  ! Collect info among the nodes
  call xmpi_min(my_emin,emin,comm,ierr)
@@ -2590,12 +2614,26 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  call xmpi_sum(eta2w,comm,ierr)
  call xmpi_sum(sigmaw,comm,ierr)
 
- ! Master writes the output 
- if(my_rank == master) then
+ ! Master writes the output
+ if (my_rank == master) then
 
-  !
-  !write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
-  !
+   if (ncid /= nctk_noid) then
+     start4 = [1, 1, icomp, itemp]
+     count4 = [2, nmesh, 1, 1]
+     ABI_MALLOC(chi2tot, (nmesh))
+     chi2tot = chiw + chi2w + etaw + eta2w + sigmaw
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2tot"), c2r(chi2tot), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chiw"), c2r(chiw), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_etaw"), c2r(etaw), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_chi2w"), c2r(chi2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_eta2w"), c2r(eta2w), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "leo2_sigmaw"), c2r(sigmaw), start=start4, count=count4))
+#endif
+     ABI_FREE(chi2tot)
+   end if
+
+   ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
    end if
@@ -2626,7 +2664,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout1, '(a)' )' # Energy      Tot-Im Chi(-w,w,0)  Tot-Im Chi(-w,w,0)'
    write(fout1, '(a)' )' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout1, '(a)' )' # '
-  
+
    write(fout2, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
    write(fout2, '(a,es16.6)') ' #tolerance:',tol
    write(fout2, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2635,7 +2673,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout2, '(a)')' # Energy      Tot-Re Chi(-w,w,0)  Tot-Re Chi(-w,w,0)'
    write(fout2, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout2, '(a)')' # '
-  
+
    write(fout3, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout3, '(a,es16.6)') ' #tolerance:',tol
    write(fout3, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2644,7 +2682,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout3, '(a)')' # Energy(eV) Inter(2w) inter(1w) intra(2w) intra(1w)'
    write(fout3, '(a)')' # in esu'
    write(fout3, '(a)')' # '
-   
+
    write(fout4, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout4, '(a,es16.6)') ' #tolerance:',tol
    write(fout4, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2653,7 +2691,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout4, '(a)')' # Energy(eV) Inter(2w) inter(1w) intra(2w) intra(1w)'
    write(fout4, '(a)')' # in esu'
    write(fout4, '(a)')' # '
-   
+
    write(fout5, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout5, '(a,es16.6)') ' #tolerance:',tol
    write(fout5, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2662,7 +2700,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout5, '(a)')' # Energy(eV)  |TotChi(-w,w,0)|   |Tot Chi(-w,w,0)|'
    write(fout5, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout5, '(a)')' # '
-   
+
    write(fout6, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout6, '(a,es16.6)') ' #tolerance:',tol
    write(fout6, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2671,7 +2709,7 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout6, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout6, '(a)')' # in esu'
    write(fout6, '(a)')' # '
-  
+
    write(fout7, '(a,3i3)') ' #calculated the component:',v1,v2,v3
    write(fout7, '(a,es16.6)') ' #tolerance:',tol
    write(fout7, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
@@ -2680,39 +2718,39 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout7, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
-  !!
+
    totim=0._dp
    totre=0._dp
    totabs=0._dp
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-  !!  
+
      totim=aimag(chiw(iw)+chi2w(iw)+etaw(iw)+eta2w(iw)+sigmaw(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totim=0._dp
-  !!  
+
      totre=dble(chiw(iw)+chi2w(iw)+eta2w(iw)+etaw(iw)+sigmaw(iw))/1.d-7
      write(fout2,'(f15.6,2es15.6)') ene,totre,totre*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totre=0._dp
-  !!  
+
      write(fout3,'(f15.6,4es15.6)') ene,aimag(chi2w(iw))/1.d-7,aimag(chiw(iw))/1.d-7,     &
      aimag(eta2w(iw))/1.d-7,aimag(etaw(iw))/1.d-7+aimag(sigmaw(iw))/1.d-7
-  !!  
+
      write(fout4,'(f15.6,4es15.6)') ene,dble(chi2w(iw))/1.d-7,aimag(chiw(iw))/1.d-7,       &
      dble(eta2w(iw))/1.d-7,dble(etaw(iw))/1.d-7+dble(sigmaw(iw))/1.d-7
-  !!  
+
      totabs=abs(chiw(iw)+chi2w(iw)+etaw(iw)+eta2w(iw)+sigmaw(iw))/1.d-7
      write(fout5,'(f15.6,2es15.6)') ene,totabs,totabs*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totabs=0._dp
-  !!  
+
      write(fout6,'(f15.6,4es15.6)') ene,aimag(chi2w(iw)+chiw(iw))/1.d-7,      &
      aimag(eta2w(iw)+etaw(iw))/1.d-7,aimag(sigmaw(iw))/1.d-7
-  !!  
+
      write(fout7,'(f15.6,4es15.6)') ene,dble(chi2w(iw)+chiw(iw))/1.d-7,       &
      dble(eta2w(iw)+etaw(iw))/1.d-7,dble(sigmaw(iw))/1.d-7
    end do
-  
+
    close(fout1)
    close(fout2)
    close(fout3)
@@ -2720,7 +2758,8 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    close(fout5)
    close(fout6)
    close(fout7)
-  !print information
+
+   ! print information
    write(std_out,*) ' '
    write(std_out,*) 'information about calculation just performed:'
    write(std_out,*) ' '
@@ -2742,20 +2781,20 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
  end if
 
-!  deallocate local arrays
+ ! deallocate local arrays
  ABI_FREE(enk)
- ABI_FREE(delta) 
+ ABI_FREE(delta)
  ABI_FREE(rmnbc)
- ABI_FREE(roverw) 
- ABI_FREE(rmna) 
- ABI_FREE(chiw) 
- ABI_FREE(chi2w) 
+ ABI_FREE(roverw)
+ ABI_FREE(rmna)
+ ABI_FREE(chiw)
+ ABI_FREE(chi2w)
  ABI_FREE(chi2)
- ABI_FREE(etaw) 
+ ABI_FREE(etaw)
  ABI_FREE(eta1)
  ABI_FREE(symrmn)
- ABI_FREE(eta2w) 
- ABI_FREE(sigmaw) 
+ ABI_FREE(eta2w)
+ ABI_FREE(sigmaw)
 
 end subroutine nonlinopt
 !!***

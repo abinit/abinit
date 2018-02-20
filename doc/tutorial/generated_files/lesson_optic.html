@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Lesson on optical properties</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
     <li>Frequency dependent second order nonlinear susceptibility tensor
   </ul>
   in the simple "Random-Phase Approximation" or "Sum-over-states" approach.
-  This tutorial will help you to discover the <a href="../../users/generated_files/help_optic.html#">optic help file</a>.
+  This tutorial will help you to discover the <a href="../../guide/generated_files/help_optic.html#">optic help file</a>.
 <p>This lesson should take about 1 hour. </p>
 <hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (SS,XG,YG)
@@ -74,8 +85,8 @@ but is included for later CPU time saving).
 <br>The fourth to sixth datasets correspond to the computation of the ddk matrix
 elements. Note that the number of bands is the same as for dataset 2 and 3. Note also
 that these are non-self-consistent calculations, moreover, restricted to
-<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>=1 and
-<a href="../../input_variables/generated_files/varset_gstate.html#nline">nline</a>=0 .
+<a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a>=1 and
+<a href="../../variables/generated_files/varset_gstate.html#nline">nline</a>=0 .
 Indeed, only the matrix elements between explicitly computed states are required.
 Using a larger nstep would lead to a full computation of derivative of the wavefunction
 with respect to the wavevector, while only the matrix elements are needed. Such a larger
@@ -154,7 +165,7 @@ xmgrace toptic_2_0002_0002_0002-ChiTotRe.out
 </pre>
 
 <p>
-It might be the perfect time to finish the <a href="../../users/generated_files/help_optic.html#">optic help file</a>, with
+It might be the perfect time to finish the <a href="../../guide/generated_files/help_optic.html#">optic help file</a>, with
 <a href="../../users/generated_files/help_optic.html#5" target="helpsimg">section 5</a>.
 <p>
 For comparison, we have included in the tutorial, three files that have been obtained

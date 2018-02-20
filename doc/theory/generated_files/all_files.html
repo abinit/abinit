@@ -4,7 +4,71 @@
 <!--                                                                                     -->
 <html>
 <head><title>Default keyword ... this is an error</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { 
+      equationNumbers: { autoNumber: "AMS" },
+      Macros: {
+          "*": "{\\dagger}",
+          // matchcal version
+          mcR: "{\\mathcal{R}}",
+          mcS: "{\\mathcal{S}}",
+          mcC: "{\\mathcal{C}}",
+          mcO: "{\\mathcal{O}}",
+          // acronyms
+          KS: "{\\text{KS}}",
+          QP: "{\\text{QP}}",
+          BZ: "{\\text{BZ}}",
+          sign: "{\\text{sign}}",
+          xc: "{\\text{xc}}",
+          tchi: "{\\tilde\\chi}",
+          // symbols commonly used
+          rr: "{\\bf r}",
+          RR: "{\\bf R}",
+          tt: "{\\bf t}",
+          GG: "{\\bf G}",
+          kk: "{\\bf k}",
+          qq: "{\\bf q}",
+          kq: "{\\kk + \\qq}",
+          qG: "{\\bf q + G}}",
+          kmq: "{\\kk - \\qq}",
+          kpq: "{\\kk + \\qq}",
+          kpG: "{\\kk + \\GG}",
+          qpG: "{\\qq + \\GG}",
+          // Many-body theory
+          Go: "{G_0}",
+          Wo: "{W_0}",
+          Ueff: "{U_{\\text{eff}}}",
+          // greek symbols + tilde version
+          ee: "{\\epsilon}",
+          tee: "{\\tilde{\\epsilon}}",
+          ww: "{\\omega}",
+          tww: "{\\tilde\\omega}",
+          dd: "{\\,\\text{d}}",
+          minf: "{{-\\infty}}",
+          pinf: "{{+\\infty}}",
+          h0: "{{\\hat h}_0}",
+          vxc: "{v_\\xc}",
+          // symrel
+          Ri: "{\\mcR^{-1}}",
+          Rit: "{\\mcR^{-1\\tau}}",
+          // symrec
+          Si: "{\\mcS^{-1}}}",
+          Sit: "{\\Si^\\tau}}",
+          // partial and functional derivative.
+          PDER: ["{\\dfrac{\\partial #1}{\\partial #2}}", 2],
+          FDER: ["{\\dfrac{\\delta #1}{\\delta #2}}", 2]
+      }
+  }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 

@@ -55,6 +55,8 @@ class MolecularDynamicFile:
 #                      OUT_list.append(fic_tuple)
                   if files.find('HIST.nc') == len(files)-7 and len(files)>7 :
                       OUT_list.append(fic_tuple)
+                  if files.find('HIST.nc') == len(files)-7 and len(files)>7 :
+                      OUT_list.append(fic_tuple)
               if len(OUT_list) > 0 :
                   OUT_list.sort() ; OUT_list.reverse()
                   fic_HIST=OUT_list[0][1].replace('_OUT.nc','_HIST')
@@ -68,15 +70,24 @@ class MolecularDynamicFile:
       else:
           if str(pnamefile).find('_OUT.nc') != -1:  
               self.namefile2 = str(pnamefile)
-              self.namefile1 = str(pnamefile).replace('_OUT.nc','_HIST')
+              self.namefile1 = str(pnamefile).replace('_OUT.nc','_HIST')              
               self.type_of_file = 'netcdf'
           elif str(pnamefile).find('HIST.nc') != -1 :
-              self.namefile2 = str(pnamefile)
+              self.namefile1 = str(pnamefile)
+              if(os.path.exists(self.namefile1.replace('HIST.nc','OUT.nc'))):
+                  self.namefile2 = str(pnamefile).replace('HIST.nc','OUT.nc')
+              else:
+                  self.namefile2 = str(pnamefile)
+              self.type_of_file = 'netcdf'
+
               self.namefile1 = str(pnamefile)
               self.type_of_file = 'netcdf'
           elif str(pnamefile).find('HIST') != -1 :
-              self.namefile2 = str(pnamefile).replace('_HIST','_OUT.nc')
               self.namefile1 = str(pnamefile)
+              if(os.path.exists(self.namefile1.replace('HIST','OUT.nc'))):
+                  self.namefile2 = str(pnamefile).replace('HIST','OUT.nc')
+              else:
+                  self.namefile2 = str(pnamefile)
               self.type_of_file = 'netcdf'
           else:
               self.type_of_file = 'ASCII_output'
@@ -321,11 +332,6 @@ class MolecularDynamicFile:
       except:
           self.goodFile = False
           print "Error,unable to read this netcdf file "
-          try:
-              QtGui.QMessageBox.critical(None,"Warning","Error,unable to read this netcdf file ")
-          except :
-              pass;
-
 
   def E_kinCalculation(self):
       natom = self.getNatom() 
@@ -339,7 +345,7 @@ class MolecularDynamicFile:
       typat = self.getTypat()
       amu = self.getAmu()
       for typ in typat:
-          self.mass.extend([self.amu_emass*amu[typ-1]])
+          self.mass.extend([self.amu_emass*amu[int(typ-1)]])
 
   def temperature_calculation(self):
       Nbstep = self.getNbStep()-1

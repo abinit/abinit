@@ -77,7 +77,7 @@ body : |
   <area shape="rect" coords="520  ,445 ,695 ,500 " href="lesson_paral_mbt.html" />
   </map>
   
-  <img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v5.png" usemap="#map1"/>
+  <img style="height: 540px; width: 720px;" alt="Schema 1" src="../documents/lesson_welcome/tutorial_flowchart_v6.png" usemap="#map1"/>
   </center>
   
   <p>Before following the tutorials, you should have read the <a
@@ -286,6 +286,6 @@ body : |
   
   <p>NOTE that not all features of ABINIT are covered by these
   tutorials. For a complete feature list, please see the
-  ~abinit/doc/features/ directory. For examples on how to use these
+  [[help_features]]. For examples on how to use these
   features, please see the ~abinit/tests/* directories and their
   accompanying README files.</p>

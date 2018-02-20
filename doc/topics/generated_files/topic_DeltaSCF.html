@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>DeltaSCF </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#7">help_features#7</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_DeltaSCF.html#1">Introduction.</a><li>2. <a href="topic_DeltaSCF.html#2">References.</a></ul>
@@ -36,9 +47,9 @@ Although formally not justified, difference in total energy using constrained oc
 sometimes results in surprisingly good agreement with experimental results, for neutral excitations,
 in molecules or doped solids. See e.g. <a href="../../biblio/generated_files/bib_biblio.html#Jia2017">[Jia2017]</a>.
 <p>The manual specification of the occupation numbers is needed in this case. This is accomplished
-with the input variable <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a>, coupled with <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=0 for the homogeneous occupation of a band
-throughout the Brillouin Zone, or with <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=2 for the specific occupation of a state for a selected k-wavevector.
-For very big cells, both should be equivalent, and <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=0 is easier to use.
+with the input variable <a href="../../variables/generated_files/varset_gstate.html#occ">occ</a>, coupled with <a href="../../variables/generated_files/varset_basic.html#occopt">occopt</a>=0 for the homogeneous occupation of a band
+throughout the Brillouin Zone, or with <a href="../../variables/generated_files/varset_basic.html#occopt">occopt</a>=2 for the specific occupation of a state for a selected k-wavevector.
+For very big cells, both should be equivalent, and <a href="../../variables/generated_files/varset_basic.html#occopt">occopt</a>=0 is easier to use.
 <br><br><a href=#top>Go to the top</a>
 
 

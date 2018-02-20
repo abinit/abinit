@@ -34,7 +34,7 @@
 !!  nfftf= -PAW ONLY- number of FFT grid points for the fine grid
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftf(18)= -PAW ONLY- contain all needed information about 3D FFT for the fine grid
 !!              (ngs_rbzfftf=ngfft for norm-conserving potential runs)
 !!  npwarr(nkpt)=number of planewaves at each k point, and boundary

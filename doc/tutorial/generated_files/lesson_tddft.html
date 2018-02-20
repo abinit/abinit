@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Lesson on TDDFT</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -58,7 +69,7 @@ formalism is given in
  <a href="http://dx.doi.org/10.1016/S1380-7323(96)80093-8" >http://dx.doi.org/10.1016/S1380-7323(96)80093-8</a>
 </pre>
 However this reference might be hard to get, that is why we have based the tutorial
-instead on the following (also early) papers : <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>, <a href="../../biblio/generated_files/bib_biblio.html#Casida1998a">[Casida1998a]</a>, and <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:Vasiliev1999]]</a></a>.
+instead on the following (also early) papers : <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>, <a href="../../biblio/generated_files/bib_biblio.html#Casida1998a">[Casida1998a]</a>, and <a href="../../biblio/generated_files/bib_biblio.html#Vasiliev1998">[Vasiliev1998]</a>.
 <p>
 The first of these papers, <a href="../../biblio/generated_files/bib_biblio.html#Casida1998">[Casida1998]</a>,
 will be used as main reference for our tutorial.
@@ -80,7 +91,7 @@ four-wavefunction integrals of the Coulomb and Exchange-Correlation kernel.
 The exchange-correlation kernel contribution will differ in the
 spin-singlet and in the spin-triplet states, this being the only difference between
 spin-singlet and spin-triplet states.
-See Eqs.(1.3) and (1.4) of <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:Casida1998b]]</a></a>,
+See Eqs.(1.3) and (1.4) of <a href="../../biblio/generated_files/bib_biblio.html#Casida1998a">[Casida1998a]</a>,
 and Eqs.(1-2) of <a href="../../biblio/generated_files/bib_biblio.html#Vasiliev1998">[Vasiliev1998]</a>.
 <p>
 The construction of the coupling matrix can be done on the basis of an exchange-correlation
@@ -156,14 +167,14 @@ are written, for use in the second data set. The second dataset is the one
 where the TDDFT calculation is done. Moreover, the non-self-consistent
 calculation of the occupied eigenfunctions and corresponding eigenenergies
 is also accomplished. This is obtained by setting
-<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a> to -1.
+<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a> to -1.
 Please, take now some time to read the information about this value of
-<a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>, and the
+<a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>, and the
 few input variables that acquire some meaning in this context
 (namely,
-<a href="../../input_variables/generated_files/varset_gstate.html#boxcenter">boxcenter</a>,
-<a href="../../input_variables/generated_files/varset_dfpt.html#td_mexcit">td_mexcit</a>,
-and <a href="../../input_variables/generated_files/varset_dfpt.html#td_maxene">td_maxene</a>).
+<a href="../../variables/generated_files/varset_gstate.html#boxcenter">boxcenter</a>,
+<a href="../../variables/generated_files/varset_dfpt.html#td_mexcit">td_mexcit</a>,
+and <a href="../../variables/generated_files/varset_dfpt.html#td_maxene">td_maxene</a>).
 Actually,
 this is most of the information that should be known
 to use the TDDFT in ABINIT !
@@ -175,7 +186,7 @@ The box is not very large
 for the Casida's formalism, only one k point is used.
 We have chosen the Perdew-Wang 92 LDA functional for both the self-consistent
 and non-self-consistent calculations
-(<a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=7).
+(<a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>=7).
 
 <p>
 We can now examine the output file ttddft_1.out.

@@ -39,8 +39,8 @@
 !!      mrgddb
 !!
 !! CHILDREN
-!!      ddb_free,ddb_malloc,ddb_write_blok
-!!      read_blok8,wrtout
+!!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
+!!      ddb_hdr_open_write,ddb_malloc,ddb_write_blok,read_blok8,wrtout
 !!
 !! SOURCE
 
@@ -84,14 +84,12 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
  integer :: nblok,nblokt
  integer :: temp,tmerge,usepaw
- integer :: ngfft(18),ngfft8(18)
- integer,allocatable :: lloc(:),mgblok(:)
+ integer,allocatable :: mgblok(:)
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr8
 !arrays
- real(dp) :: acell(3),acell8(3),rprim(3,3),rprim8(3,3)
  real(dp),allocatable :: blkval2(:,:,:,:),kpnt(:,:,:)
  character(len=500) :: message
 
@@ -117,7 +115,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  do iddb=1,nddb
    call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
-&                         dimonly=1)
+&   dimonly=1)
 
    mblok=mblok+ddb_hdr%nblok
    mblktyp=max(mblktyp,ddb_hdr%mblktyp)
@@ -152,8 +150,8 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  write(std_out,*)' read the input derivative database information'
  call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
-&            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+& matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+& msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
  ABI_ALLOCATE(blkval2,(2,msize,ddb_hdr%nband(1),mkpt))
  ABI_ALLOCATE(kpnt,(3,mkpt,mblok))
@@ -185,12 +183,12 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !  Open the corresponding input DDB,
 !  and read the database file informations
    write(message, '(a,a,i6)' )ch10,&
-&       ' read the input derivative database number',iddb
+&   ' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
 
    call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
-&            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+&   matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+&   msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
    if (chkopt==1)then
 !    Compare the current DDB and input DDB information.

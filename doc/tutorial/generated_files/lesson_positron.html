@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Electron-positron annihilation</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -84,10 +95,10 @@ two datasets. The first dataset is a standard ground-state calculation. The seco
   ixcpositron2  1   ! We are using the Boronski and Nieminen parametrization
 </pre></font>
 <p>
-Here we set <a href="../../input_variables/generated_files/varset_gstate.html#positron">positron</a>=1,
+Here we set <a href="../../variables/generated_files/varset_gstate.html#positron">positron</a>=1,
 which corresponds to a positronic ground-state calculation, considering that the electrons are not perturbed by the presence of the positron. The electron density is read 
 from the file resulting from dataset 1. As we consider the positron to be completely delocalized, we only consider the &Gamma; point. The keyword 
-<a href="../../input_variables/generated_files/varset_gstate.html#ixcpositron">ixcpositron</a> selects the 
+<a href="../../variables/generated_files/varset_gstate.html#ixcpositron">ixcpositron</a> selects the 
 electron-positron correlation functional and enhancement factor. In this calculation we use the functional parametrized by Boronski and Nieminen [Phys. Rev. B 34, 3820 (1986)], using  the  data  provided  by  Arponen  and  Pajanne  [J. Phys. F 9, 2359 (1979)].
 </p>
 <p>
@@ -119,11 +130,11 @@ The lifetime of 223 ps agrees well with the value of 225 ps calculated with the 
 and with the experimental value of about 219 ps [Phys. Rev. B 56, 7356 (1997)].
 </p>
 <p><small><em>
-Note: if we had not used the "zero positron density limit" approximation (using, for example, another value of <a href="../../input_variables/generated_files/varset_gstate.html#ixcpositron">ixcpositron</a>), 
+Note: if we had not used the "zero positron density limit" approximation (using, for example, another value of <a href="../../variables/generated_files/varset_gstate.html#ixcpositron">ixcpositron</a>), 
 we would theoretically have needed a box of infinite size for the positron to completely delocalise itself in the crystal. 
-This can be avoided by the use of the <a href="../../input_variables/generated_files/varset_gstate.html#posocc">posocc</a> input parameter. 
+This can be avoided by the use of the <a href="../../variables/generated_files/varset_gstate.html#posocc">posocc</a> input parameter. 
 Numerically, it is equivalent to calculate the density of 1 positron in a box of size N and that of x positron in a box of size N * x. 
-Thus, we can calculate the lifetime of a positron in a primitive cell by setting <a href="../../input_variables/generated_files/varset_gstate.html#posocc">posocc</a> to a small value (0.0001 ...). 
+Thus, we can calculate the lifetime of a positron in a primitive cell by setting <a href="../../variables/generated_files/varset_gstate.html#posocc">posocc</a> to a small value (0.0001 ...). 
 This value must obviously be tested ...
 </em></small></p>
 <br><br><a href=#top>Go to the top</a>
@@ -173,11 +184,11 @@ abinit < tpositron_x.files >& tpositron_3.log
 <p> 
 This calculation is significantly longer than the previous one, because the electron and positron steps will be 
 repeated until the convergence criterion is reached. In <font color="#298A08">tpositron_3.in</font> we only have one dataset and we set 
-<a href="../../input_variables/generated_files/varset_gstate.html#positron">positron</a>=-10 to perform an automatic calculation of electrons and positron densities.
-The convergence is controlled by <a href="../../input_variables/generated_files/varset_gstate.html#postoldfe">postoldfe</a>=1d-5. 
+<a href="../../variables/generated_files/varset_gstate.html#positron">positron</a>=-10 to perform an automatic calculation of electrons and positron densities.
+The convergence is controlled by <a href="../../variables/generated_files/varset_gstate.html#postoldfe">postoldfe</a>=1d-5. 
 This means that we will repeat the electron and positron steps until the energy difference between them is lower than 1d-5 Ha. 
-This value should always be larger than <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>.
-In this calculation we still use <a href="../../input_variables/generated_files/varset_gstate.html#ixcpositron">ixcpositron</a>=1, which means that we are using 
+This value should always be larger than <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>.
+In this calculation we still use <a href="../../variables/generated_files/varset_gstate.html#ixcpositron">ixcpositron</a>=1, which means that we are using 
 the GGGC scheme (see [Phys. Rev. Lett. 72, 3214 (1994)] and [Phys. Rev. B 92, 125113 (2015)].
 </p>
 <p>Once the calculation is finished, look at the positron lifetime in <font color="#298A08">tpositron_3.out</font>.</p>
@@ -207,10 +218,10 @@ Including the self-consistency increases the positron lifetime, because its loca
 abinit < tpositron_4.files >& tpositron_4.log
 </pre>
 <p> 
-In this calculation we switched on the atomic relaxation by setting <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=2. 
+In this calculation we switched on the atomic relaxation by setting <a href="../../variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=2. 
 We need to calculate forces to be able to move the atoms, so we set 
-<a href="../../input_variables/generated_files/varset_dev.html#optforces">optforces</a>=1. In the provided <font face="Courier" color="#298A08">tpositron_4.in</font> file,
-We only perform 4 relaxation steps (<a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>=4) to save time, 
+<a href="../../variables/generated_files/varset_dev.html#optforces">optforces</a>=1. In the provided <font face="Courier" color="#298A08">tpositron_4.in</font> file,
+We only perform 4 relaxation steps (<a href="../../variables/generated_files/varset_rlx.html#ntime">ntime</a>=4) to save time, 
 but more steps would be needed to converge the positron lifetime.
 </p>
 <p>Look at the positron lifetime in the RPA limit after each ionic step:</p>
@@ -223,7 +234,7 @@ but more steps would be needed to converge the positron lifetime.
 </p>
 <p>
 As the vacancy relaxes outwards, the positron lifetime increases. 4 steps were not enough to relax the defect completely, as the lifetime still changes. 
-Indeed, setting <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a> to 10 delivers:
+Indeed, setting <a href="../../variables/generated_files/varset_rlx.html#ntime">ntime</a> to 10 delivers:
 <font color="#8A2908"><pre>
 Positron lifetime                         (ps)   =  2.55617112E+02
 Positron lifetime                         (ps)   =  2.56981106E+02
@@ -255,11 +266,11 @@ abinit < tpositron_5.files >& tpositron_5.log
 </pre>
 <p>
 Now take a look at the input file <font color="#298A08">tpositron_5.in</font>. 
-The momentum distribution calculation is activated by <a href="../../input_variables/generated_files/varset_gstate.html#posdoppler">posdoppler</a>=1. 
+The momentum distribution calculation is activated by <a href="../../variables/generated_files/varset_gstate.html#posdoppler">posdoppler</a>=1. 
 You can also notice that instead of having two datasets as in the first part of this tutorial, we now use the automatic electron-positron 
-loop and set <a href="../../input_variables/generated_files/varset_gstate.html#posnstep">posnstep</a>=2. 
+loop and set <a href="../../variables/generated_files/varset_gstate.html#posnstep">posnstep</a>=2. 
 This is done because we need to have the full electron and positron wavefunctions in memory, which is only the case when 
-<a href="../../input_variables/generated_files/varset_gstate.html#positron">positron</a><=-10. Additionally, the momentum distribution calculations require using a full k-point grid. In the input file we set:
+<a href="../../variables/generated_files/varset_gstate.html#positron">positron</a><=-10. Additionally, the momentum distribution calculations require using a full k-point grid. In the input file we set:
 </p>
 <font color="#8A2908"><pre>
     kptopt 0

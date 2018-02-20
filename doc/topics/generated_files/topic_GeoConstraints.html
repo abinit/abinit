@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>Geometry Constraints </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_GeoOpt.html">topic_GeoOpt</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_MolecularDynamics.html">topic_MolecularDynamics</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_TransPath.html">topic_TransPath</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#4">help_features#4</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#4">help_features#4</a>, &nbsp; <a href="../../topics/generated_files/topic_GeoOpt.html">topic_GeoOpt</a>, &nbsp; <a href="../../topics/generated_files/topic_MolecularDynamics.html">topic_MolecularDynamics</a>, &nbsp; <a href="../../topics/generated_files/topic_TransPath.html">topic_TransPath</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_GeoConstraints.html#1">Introduction.</a><li>2. <a href="topic_GeoConstraints.html#2">Related input variables.</a></ul>
@@ -36,12 +47,12 @@ There are two mechanisms to put constraints on the atom positions in ABINIT. The
 <a href="../../topics/generated_files/topic_GeoOpt.html#">geometry optimization</a>,
 <a href="../../topics/generated_files/topic_MolecularDynamics.html#">molecular dynamics</a> (including PIMD) 
 or other geometry algorithms (e.g. <a href="../../topics/generated_files/topic_TransPath.html#">transition path searches</a>).
-<p>The simplest one (entry point <a href="../../input_variables/generated_files/varset_rlx.html#iatfix">iatfix</a>) simply define a set of atoms that are fixed, 
-either entirely, or only along one of the directions (for the latter, see the warning in <a href="../../input_variables/generated_files/varset_rlx.html#iatfix">iatfix</a>)
+<p>The simplest one (entry point <a href="../../variables/generated_files/varset_rlx.html#iatfix">iatfix</a>) simply define a set of atoms that are fixed, 
+either entirely, or only along one of the directions (for the latter, see the warning in <a href="../../variables/generated_files/varset_rlx.html#iatfix">iatfix</a>)
 <p>A more complex one, but also much more powerful, allows to place constraints on linear combinations of atomic positions.
 Thanks to such constraint, the mean position of two atoms (or a fragment, like a molecule) can be fixed, 
 or constrained to stay within an arbitrary plane. One can thus also sample different mean positions.
-See a complete description in <a href="../../input_variables/generated_files/varset_rlx.html#wtatcon">wtatcon</a>.
+See a complete description in <a href="../../variables/generated_files/varset_rlx.html#wtatcon">wtatcon</a>.
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -53,18 +64,18 @@ See a complete description in <a href="../../input_variables/generated_files/var
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#iatfix">iatfix</a>   [Indices of AToms that are FIXed ]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatfixx">iatfixx</a>   [Indices of AToms that are FIXed along the X direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatfixy">iatfixy</a>   [Indices of AToms that are FIXed along the Y direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#iatfixz">iatfixz</a>   [Indices of AToms that are FIXed along the Z direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfix">natfix</a>   [Number of Atoms that are FIXed]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfixx">natfixx</a>   [Number of Atoms that are FIXed along the X direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfixy">natfixy</a>   [Number of Atoms that are FIXed along the Y direction]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natfixz">natfixz</a>   [Number of Atoms that are FIXed along the Z direction]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#iatcon">iatcon</a>   [Indices of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#natcon">natcon</a>   [Number of AToms in CONstraint equations]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#nconeq">nconeq</a>   [Number of CONstraint EQuations]<br>
-... <a href="../../input_variables/generated_files/varset_rlx.html#wtatcon">wtatcon</a>   [WeighTs for AToms in CONstraint equations]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_rlx.html#iatfix">iatfix</a>   [Indices of AToms that are FIXed ]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#iatfixx">iatfixx</a>   [Indices of AToms that are FIXed along the X direction]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#iatfixy">iatfixy</a>   [Indices of AToms that are FIXed along the Y direction]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#iatfixz">iatfixz</a>   [Indices of AToms that are FIXed along the Z direction]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#natfix">natfix</a>   [Number of Atoms that are FIXed]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#natfixx">natfixx</a>   [Number of Atoms that are FIXed along the X direction]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#natfixy">natfixy</a>   [Number of Atoms that are FIXed along the Y direction]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#natfixz">natfixz</a>   [Number of Atoms that are FIXed along the Z direction]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_rlx.html#iatcon">iatcon</a>   [Indices of AToms in CONstraint equations]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#natcon">natcon</a>   [Number of AToms in CONstraint equations]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#nconeq">nconeq</a>   [Number of CONstraint EQuations]<br>
+... <a href="../../variables/generated_files/varset_rlx.html#wtatcon">wtatcon</a>   [WeighTs for AToms in CONstraint equations]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

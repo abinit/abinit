@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>TuningSpeed </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#2.4">help_features#2.4</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.4">help_features#2.4</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_TuningSpeed.html#1">Introduction.</a><li>2. <a href="topic_TuningSpeed.html#2">Related input variables.</a><li>3. <a href="topic_TuningSpeed.html#3">Selected input files.</a></ul>
@@ -48,12 +59,12 @@ and need a smaller planewave basis set. They might possibly be less accurate as 
 <p>If one is only interested in ground-state properties and forces, one might also get some speed up by
 using a real-space representation of density and potential on a real space FFT grid that does not allow their
 fine details to be taken into account (actually, filtering such quantities). This is achieved by
-lowering <a href="../../input_variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a> below its theoretically needed value of 2.0 .
-<p>The choice of the FFT algorithm implementation, see <a href="../../input_variables/generated_files/varset_dev.html#fftalg">fftalg</a> might also lead to significant speed up, 
+lowering <a href="../../variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a> below its theoretically needed value of 2.0 .
+<p>The choice of the FFT algorithm implementation, see <a href="../../variables/generated_files/varset_dev.html#fftalg">fftalg</a> might also lead to significant speed up, 
 on specific machines.
 <p>For specific k-points, time-reversal symmetry can be used to represent the wavefunctions with their 
 real part, instead of both their real and complex parts. This allows halving the memory needs, as well as
-the CPU time. See <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a>.
+the CPU time. See <a href="../../variables/generated_files/varset_dev.html#istwfk">istwfk</a>.
 <p>Other input variables related to tuning the speed or the memory usage are for expert users only.
 <br><br><a href=#top>Go to the top</a>
 
@@ -66,18 +77,18 @@ the CPU time. See <a href="../../input_variables/generated_files/varset_dev.html
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a>   [BOX CUT-off MINimum]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a>   [Integer for choice of STorage of WaveFunction at each k point]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_dev.html#fftalg">fftalg</a>   [Fast Fourier Transform ALGorithm]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_dev.html#exchn2n3d">exchn2n3d</a>   [EXCHange N2 and N3 Dimensions]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#extrapwf">extrapwf</a>   [flag - EXTRAPolation of the Wave-Functions]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#fftcache">fftcache</a>   [Fast Fourier Transform CACHE size]<br>
-... <a href="../../input_variables/generated_files/varset_paw.html#iboxcut">iboxcut</a>   [Integer governing the internal use of BOXCUT - not a very good choice of variable name]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#nbdblock">nbdblock</a>   [Number of BanDs in a BLOCK]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#nloc_alg">nloc_alg</a>   [Non LOCal ALGorithm]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#nloc_mem">nloc_mem</a>   [Non LOCal MEMOry]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#ortalg">ortalg</a>   [ORThogonalisation ALGorithm]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#useylm">useylm</a>   [USE YLM (the spherical harmonics)]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#boxcutmin">boxcutmin</a>   [BOX CUT-off MINimum]<br>
+... <a href="../../variables/generated_files/varset_dev.html#istwfk">istwfk</a>   [Integer for choice of STorage of WaveFunction at each k point]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_dev.html#fftalg">fftalg</a>   [Fast Fourier Transform ALGorithm]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_dev.html#exchn2n3d">exchn2n3d</a>   [EXCHange N2 and N3 Dimensions]<br>
+... <a href="../../variables/generated_files/varset_dev.html#extrapwf">extrapwf</a>   [flag - EXTRAPolation of the Wave-Functions]<br>
+... <a href="../../variables/generated_files/varset_dev.html#fftcache">fftcache</a>   [Fast Fourier Transform CACHE size]<br>
+... <a href="../../variables/generated_files/varset_paw.html#iboxcut">iboxcut</a>   [Integer governing the internal use of BOXCUT - not a very good choice of variable name]<br>
+... <a href="../../variables/generated_files/varset_dev.html#nbdblock">nbdblock</a>   [Number of BanDs in a BLOCK]<br>
+... <a href="../../variables/generated_files/varset_dev.html#nloc_alg">nloc_alg</a>   [Non LOCal ALGorithm]<br>
+... <a href="../../variables/generated_files/varset_dev.html#nloc_mem">nloc_mem</a>   [Non LOCal MEMOry]<br>
+... <a href="../../variables/generated_files/varset_dev.html#ortalg">ortalg</a>   [ORThogonalisation ALGorithm]<br>
+... <a href="../../variables/generated_files/varset_dev.html#useylm">useylm</a>   [USE YLM (the spherical harmonics)]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

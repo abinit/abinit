@@ -111,8 +111,9 @@ def format_backlinks(backlinks_str):
       backlinks_newlist=[]
   backlinks_formatted=""
   if len(backlinks_newlist)!=0:
-    for link in backlinks_newlist:
-      backlinks_formatted+=link
+    for ilink in range(len(backlinks_newlist)-1):
+      backlinks_formatted+=backlinks_newlist[ilink]+", "
+    backlinks_formatted+=backlinks_newlist[len(backlinks_newlist)-1]+". "
   return backlinks_formatted
 
 ################################################################################
@@ -169,7 +170,10 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if webtext=="":
       if external_namespace==1:
         webtext+=namespace+":"
-      webtext+=p23
+      if key!="":
+        webtext+=p23
+      else:
+        webtext+=section
 
     #Finalize the cases of external links
     if external_namespace==1:
@@ -180,21 +184,24 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     #Treat the internal links
     if namespace=="":
       linkseed=key
+      if key=="":
+        #This is the own file, no need to establish backlinks or further processing, the section is the reference
+        return '<a href="#%s">%s</a>' %(section,webtext)
     elif namespace in ["aim","anaddb","optic"]:
       linkseed=key+"@"+namespace
     else:
       linkseed=namespace+'_'+key
 
     #The allowed namespaces are:
-    dic_namespaces={"aim":"input_variables/generated_files",
-                    "anaddb":"input_variables/generated_files",
+    dic_namespaces={"aim":"variables/generated_files",
+                    "anaddb":"variables/generated_files",
                     "bib":"biblio/generated_files",
-                    "help":"users/generated_files",
+                    "help":"guide/generated_files",
                     "lesson":"tutorial/generated_files",
-                    "optic":"input_variables/generated_files",
+                    "optic":"variables/generated_files",
                     "theorydoc":"theory/generated_files",
                     "topic":"topics/generated_files",
-                    "varset":"input_variables/generated_files"}
+                    "varset":"variables/generated_files"}
 
     #Actually for the internal links, make the selection on the linkseed at present ... this should be changed ...
     #Might be changed, later ...
@@ -224,12 +231,12 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="../../%s/%s.html#%s">%s</a>' %(dir,linkseed,section,webtext)
 
       #Treat everything else
-      elif "input_variable in " in value:
+      elif "variable in " in value:
         # This is a link to an input variable
-        filename=value[18:]
-        return '<a href="../../input_variables/generated_files/varset_%s.html#%s">%s</a>' %(filename,linkseed,webtext)
+        filename=value[12:]
+        return '<a href="../../variables/generated_files/varset_%s.html#%s">%s</a>' %(filename,linkseed,webtext)
       elif value=="characteristic":
-        return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
+        return '<a href="../../guide/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
       elif value=="in_tests":
         return '<a href="../../%s">&#126;abinit/%s</a>' %(key,key)
       elif value=="bibID":
@@ -237,6 +244,9 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         if result != -9999 :
           backlinks[key]+=backlink+";;"
           return '<a href="../../biblio/generated_files/bib_biblio.html#%s">[%s]</a>' %(key,webtext)
+
+    if 1:
+      print(" FAKE LINK detected : '"+dokukey+"'")
 
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
@@ -328,7 +338,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
            full_filname=origin_yml.name
            if root_filname != "":
              full_filname=root_filname+"_"+origin_yml.name
-           backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
+           backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> ' %(dir_name,full_filname,label,full_filname,label)
            sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          #Treat one level of subsections
          sublabels=[]
@@ -346,7 +356,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
              full_filname=origin_yml.name
              if root_filname != "":
                full_filname=root_filname+"_"+origin_yml.name
-             backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
+             backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> ' %(dir_name,full_filname,sublabel,full_filname,sublabel)
              sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
          sec_html+="<br><br><a href=#top>Go to the top</a>\n<hr>\n"
          secs_html+=sec_html
@@ -363,7 +373,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     doc_html=""
     for j in ["header","title","subtitle","purpose","advice","intro","copyright","links","menu",
               "tofcontent_header","toc",
-              "introduction","examples","tutorials","input_variables","input_files","references",
+              "introduction","examples","tutorials","variables","input_files","references",
               "content","body","sections",
               "links","end"]:
 
@@ -424,8 +434,8 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] \n' %(full_filname,name,dic_subtitles[name])
 
   all_files_html=""
-  spec={'users':'help files','tutorial':'lessons of the tutorial',
-        'theory':'theory documents','input_variables':'varsets','biblio':'generated files in the biblio directory'}
+  spec={'guide':'help files','tutorial':'lessons of the tutorial',
+        'theory':'theory documents','variables':'varsets','biblio':'generated files in the biblio directory'}
   for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
     if j == "toc_all":
       all_files_html += toc_all
@@ -456,7 +466,7 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
     full_filname=root_filname+"_"+origin_yml.name
   else:
     full_filname=origin_yml.name
-  backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> &nbsp; ' %(dir_name,full_filname,full_filname)
+  backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> ' %(dir_name,full_filname,full_filname)
 
   doc_html=doc_html.replace("__JS_PATH__","../../js_files/")
 

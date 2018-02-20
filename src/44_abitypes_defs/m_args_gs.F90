@@ -74,6 +74,10 @@ MODULE m_args_gs
    ! upawu(ntypat)
    ! Value of J for the DFT+U or DMFT approach
 
+  real(dp), pointer :: rprimd_orig(:,:)
+   ! rprimd_orig(3,3)
+   ! Original primitive vectors (usually the input variable)
+
  end type args_gs_type
 
 !public procedures.
@@ -89,7 +93,7 @@ CONTAINS
 !!****f* m_args_gs/args_gs_init
 !! NAME
 !!  args_gs_init
-!!
+!!args_gs_init
 !! FUNCTION
 !!  Init a args_gs datastructure
 !!
@@ -112,7 +116,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu)
+subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -126,6 +130,7 @@ subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu)
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in),target :: amu(:),dmatpawu(:,:,:,:),jpawu(:),mixalch(:,:),upawu(:)
+ real(dp),intent(in),target :: rprimd_orig(:,:)
  type(args_gs_type),intent(inout) :: args_gs
 !Local variables-------------------------------
 
@@ -133,11 +138,12 @@ subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu)
 
  !@args_gs_type
 
- args_gs%amu      => amu
- args_gs%mixalch  => mixalch
- args_gs%dmatpawu => dmatpawu
- args_gs%upawu    => upawu
- args_gs%jpawu    => jpawu
+ args_gs%amu         => amu
+ args_gs%mixalch     => mixalch
+ args_gs%dmatpawu    => dmatpawu
+ args_gs%upawu       => upawu
+ args_gs%jpawu       => jpawu
+ args_gs%rprimd_orig => rprimd_orig
 
 end subroutine args_gs_init
 !!***
@@ -159,7 +165,7 @@ end subroutine args_gs_init
 !!  args_gs(:)=<type(args_gs_type)>=args_gs datastructure
 !!
 !! PARENTS
-!!      gstateimg
+!!      gstateimg,mover_effpot
 !!
 !! CHILDREN
 !!
@@ -185,11 +191,12 @@ subroutine args_gs_free(args_gs)
 
  !@args_gs_type
 
- args_gs%amu      => null()
- args_gs%mixalch  => null()
- args_gs%dmatpawu => null()
- args_gs%upawu    => null()
- args_gs%jpawu    => null()
+ args_gs%amu         => null()
+ args_gs%mixalch     => null()
+ args_gs%dmatpawu    => null()
+ args_gs%upawu       => null()
+ args_gs%jpawu       => null()
+ args_gs%rprimd_orig => null()
 
 end subroutine args_gs_free
 !!***

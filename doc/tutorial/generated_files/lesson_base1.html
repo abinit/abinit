@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>First (basic) lesson</title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -26,7 +37,7 @@
   of defaults, the actions of the parser, and the use of the multi-dataset
   feature. You will also learn about the two output files as well as the density
   file. <p></p>
-<p>This first lesson covers the sections 1, 3, 4 and 6 of the <a href="../../users/generated_files/help_abinit.html#">abinit help file</a>.</p>
+<p>This first lesson covers the sections 1, 3, 4 and 6 of the <a href="../../guide/generated_files/help_abinit.html#">abinit help file</a>.</p>
 <p>The very first step is a detailed tour of the input and output files: you
   are like a tourist, and you discover a town in a coach. You will have a bit
   more freedom after that first step ... <br>
@@ -61,7 +72,7 @@ The first step (the most important, and the most difficult !).
 Note that the present tutorial will use four different windows:
 one to visualize the text of the tutorial (the present window),
 a second to run the code, a third to visualize
-sections of the <a href="../../users/generated_files/help_abinit.html#">abinit help file</a> (that will open automatically),
+sections of the <a href="../../guide/generated_files/help_abinit.html#">abinit help file</a> (that will open automatically),
 and a fourth one for the description of input variables (that will also open automatically).
 Try to manage adequately these four windows ...
 
@@ -116,8 +127,11 @@ Change the working directory of windows 2 to "Work":
   then it is located in ~abinit/src/98_main . In what follows, we will suppose
   that you can call it by simply typing "abinit", even if the
   actual command must be something like ../../../../opt/abinit or
-  ../../../../src/98_main/abinit. (Suggestion: create an alias with `ln -s`, or copy the abinit executable, 
-  or declare the path with the shell command `export PATH=~abinit/src/98_main:$PATH`).
+  ../../../../src/98_main/abinit. 
+  <br>To ease your life, you might copy the abinit executable, or create an alias with `ln -s`, 
+  or declare the path with the shell command 
+  <li><i> export PATH=~abinit/src/98_main:$PATH </i></li>
+  where ~abinit is the absolute path to your abinit top directory.
 <p>
   So, in the Work directory, type: <br>
   <li><i> abinit < tbase1_x.files >& log </i></li> <br>
@@ -129,7 +143,7 @@ Change the working directory of windows 2 to "Work":
   <pre>
   abinit  log  tbase1_1.in  tbase1_1.out  tbase1_x.files  tbase1_xo_DDB  tbase1_xo_DEN  tbase1_xo_EIG.nc  tbase1_xo_GSR.nc  tbase1_xo_OUT.nc  tbase1_xo_WFK
   </pre>
-  (if you declared the path, you will not find 'abinit' in the list)
+  (if you declared the path, you will not find 'abinit' in the list).
   Different output files have been created, including a "log" file and the
   output file "tbase1_1.out".
   To check that everything is correct, you
@@ -206,15 +220,15 @@ in the first column of the ABINIT output file.
   <a href="../../users/generated_files/help_abinit.html#intro3" target="helpsimg">section 3.1</a> of the abinit_help file.
 
 <p><b>1.1.g</b> You might now examine in more details some input variables. An
-  alphabetically ordered <a href="../../input_variables/generated_files/varset_allvars.html#">index of all variables</a> is
+  alphabetically ordered <a href="../../variables/generated_files/varset_allvars.html#">index of all variables</a> is
   provided, and their description is found in different files (non-exhaustive list):
 <ul>
-<li> Basic variables, varset_<a href="../../input_variables/generated_files/varset_basic.html#">basic</a></li>
-<li> Files handling variables, varset_<a href="../../input_variables/generated_files/varset_files.html#">files</a></li>
-<li> Ground-state calculation variables, varset_<a href="../../input_variables/generated_files/varset_gstate.html#">gstate</a></li>
-<li> GW variables, varset_<a href="#"><a href="#">[[FAKE LINK:FAKE LINK:varset:GW]]</a></a></li>
-<li> Parallelisation variables, varset_<a href="../../input_variables/generated_files/varset_paral.html#">paral</a></li>
-<li> Density Functional Perturbation Theory (DFPT) variables, varset_<a href="#"><a href="#">[[FAKE LINK:FAKE LINK:varset:DFPT]]</a></a></li>
+<li> Basic variables, varset_<a href="../../variables/generated_files/varset_basic.html#">basic</a></li>
+<li> Files handling variables, varset_<a href="../../variables/generated_files/varset_files.html#">files</a></li>
+<li> Ground-state calculation variables, varset_<a href="../../variables/generated_files/varset_gstate.html#">gstate</a></li>
+<li> GW variables, varset_<a href="../../variables/generated_files/varset_gw.html#">gw</a></li>
+<li> Parallelisation variables, varset_<a href="../../variables/generated_files/varset_paral.html#">paral</a></li>
+<li> Density Functional Perturbation Theory (DFPT) variables, varset_<a href="../../variables/generated_files/varset_dfpt.html#">dfpt</a></li>
 </ul>
   However, the number of such variables is rather large! Note that
   a dozen of input variables were needed to run the first test case. This is possible
@@ -228,20 +242,20 @@ in the first column of the ABINIT output file.
   are particularly important input variables.
   So, take a few minutes to have a look at the input variables of tbase1_1.in:
   <ul>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#typat">typat</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a></li>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a></li>
-  <li><a href="../../input_variables/generated_files/varset_gstate.html#diemac">diemac</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#acell">acell</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#znucl">znucl</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#natom">natom</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#typat">typat</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#nkpt">nkpt</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a></li>
+  <li><a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a></li>
+  <li><a href="../../variables/generated_files/varset_gstate.html#diemac">diemac</a></li>
   </ul>
-  Have also a look at <a href="../../input_variables/generated_files/varset_basic.html#kpt">kpt</a>
-  and <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>.
+  Have also a look at <a href="../../variables/generated_files/varset_basic.html#kpt">kpt</a>
+  and <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>.
 
   <p> It is now time to have a look at the two output files of the run. </p>
 
@@ -277,20 +291,20 @@ in the first column of the ABINIT output file.
   that were NOT defined in the input file, but that appear in the echo written
   in "tbase1_1.out": <br>
   <br>
-  - <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>: its value is 2.
+  - <a href="../../variables/generated_files/varset_basic.html#nband">nband</a>: its value is 2.
   <br>
   It is the number of electronic states that will be treated by the code. It has
   been computed by counting the number of valence electrons in the unit cell (summing
   the valence electrons brought by each pseudopotential) then occupying the lowest
-  states (look at the <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a> variable),
+  states (look at the <a href="../../variables/generated_files/varset_gstate.html#occ">occ</a> variable),
   and adding some states (at least one, maybe more, depending on the size of the
   system). <br>
   <br>
-  - <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>: its value is 30
+  - <a href="../../variables/generated_files/varset_gstate.html#ngfft">ngfft</a>: its value is 30
   30 30 . <br>
   It is the number of points of the three-dimensional FFT grid. It has been derived
-  from <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> and the dimension
-  of the cell (<a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>). <br>
+  from <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> and the dimension
+  of the cell (<a href="../../variables/generated_files/varset_basic.html#acell">acell</a>). <br>
   <br>
   The maximal number of plane waves "<b>mpw</b>" is mentioned in the memory evaluation
   section: it is <b>752</b>. <br>
@@ -298,20 +312,20 @@ in the first column of the ABINIT output file.
   symmetry, valid for the k-point (0 0 0), to decrease the number of planewave
   by about a factor of two. <br>
   The full set of plane waves is <b>1503</b> (see later in the "tbase1_1.out" file). <br>
-  The code indicates the time-reversal symmetry by a value of <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a>=2
-  , instead of the usual <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a>=1
+  The code indicates the time-reversal symmetry by a value of <a href="../../variables/generated_files/varset_dev.html#istwfk">istwfk</a>=2
+  , instead of the usual <a href="../../variables/generated_files/varset_dev.html#istwfk">istwfk</a>=1
   default. <br>
   <br>
-  - <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>: its value is 16. <br>
-  It is the number of symmetries of the system. The 3x3 matrices <a href="../../input_variables/generated_files/varset_basic.html#symrel">symrel</a>
+  - <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>: its value is 16. <br>
+  It is the number of symmetries of the system. The 3x3 matrices <a href="../../variables/generated_files/varset_basic.html#symrel">symrel</a>
   define the symmetries operation. In this case, none of the symmetries is accompanied
-  by a translation, that would appear in the variable <a href="../../input_variables/generated_files/varset_basic.html#tnons">tnons</a>.
+  by a translation, that would appear in the variable <a href="../../variables/generated_files/varset_basic.html#tnons">tnons</a>.
   The code did an automatic analysis of symmetries. <br>
   They could alternatively be set by hand, or using the symmetry builder (to be
   described later). <br>
   <br>
-  - <a href="../../input_variables/generated_files/varset_basic.html#xangst">xangst</a> and <a href="../../input_variables/generated_files/varset_basic.html#xred">xred</a>
-  are alternative ways to <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a>
+  - <a href="../../variables/generated_files/varset_basic.html#xangst">xangst</a> and <a href="../../variables/generated_files/varset_basic.html#xred">xred</a>
+  are alternative ways to <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>
   to specify the positions of atoms within the primitive cell. </p>
   <p>Now, you can start reading the description of the remaining
   of the tbase1_1.out file, in the <a href="../../users/generated_files/help_abinit.html#6.3" target="helpsimg"> section 6.3
@@ -324,12 +338,12 @@ in the first column of the ABINIT output file.
 <p>
 
 <ul>
-  <li><a name="q1">Q1</a>. How many SCF cycles were needed to have the <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>
+  <li><a name="q1">Q1</a>. How many SCF cycles were needed to have the <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>
     criterion satisfied?
-  <li><a name="q2">Q2</a>. Is the energy likely more converged than <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>?
+  <li><a name="q2">Q2</a>. Is the energy likely more converged than <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>?
   <li><a name="q3">Q3</a>. What is the value of the force on each atom, in Ha/Bohr?
   <li><a name="q4">Q4</a>. What is the difference of eigenenergies between the two electronic states?
-  <li><a name="q5">Q5</a>. Can you insert '<a href="../../input_variables/generated_files/varset_files.html#prtvol">prtvol</a> 2' in the input file, 
+  <li><a name="q5">Q5</a>. Can you insert '<a href="../../variables/generated_files/varset_files.html#prtvol">prtvol</a> 2' in the input file, 
         run again abinit, and find where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?
 </ul>
 
@@ -367,7 +381,7 @@ in the first column of the ABINIT output file.
   to examine the interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of
   0.05 Bohr. That is, 21 calculations. <br>
   If you are a UNIX guru, it will be easy for you to write a script that will
-  drive these 21 calculations, changing automatically the variable <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a>
+  drive these 21 calculations, changing automatically the variable <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>
   in the input file, and then gather all the data, in a convenient form to be
   plotted. <br>
   Well, are you a UNIX guru? If not, there is an easier path, all within ABINIT! </p>
@@ -381,13 +395,13 @@ in the first column of the ABINIT output file.
   described above (interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of
   0.05 Bohr)? You might start from tbase1_1.in.
   Try to define a series, and to use
-  the <a href="../../input_variables/generated_files/varset_files.html#getwfk">getwfk</a>
+  the <a href="../../variables/generated_files/varset_files.html#getwfk">getwfk</a>
   input variable (the latter will make the computation much faster). </p>
-<p>You should likely have a look at the section that describes the <a href="../../input_variables/generated_files/varset_files.html#irdwfk">irdwfk</a>
-  and <a href="../../input_variables/generated_files/varset_files.html#getwfk">getwfk</a> input variables:
+<p>You should likely have a look at the section that describes the <a href="../../variables/generated_files/varset_files.html#irdwfk">irdwfk</a>
+  and <a href="../../variables/generated_files/varset_files.html#getwfk">getwfk</a> input variables:
   in particular, look at the meaning of <i><b>getwfk -1</b></i> </p>
 <p>Also, define explicitly the number of states (or supercell "bands") to be
-  one, using the input variable <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>.
+  one, using the input variable <a href="../../variables/generated_files/varset_basic.html#nband">nband</a>.
   The input file <a href="../../tests/tutorial/Input/tbase1_2.in">&#126;abinit/tests/tutorial/Input/tbase1_2.in</a> is an example of
   file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_2.out">&#126;abinit/tests/tutorial/Refs/tbase1_2.out</a>
   is an example of output file. If you decide to use the ~abinit/tests/tutorial/Input/tbase1_2.in file,
@@ -450,25 +464,25 @@ The forces vanish also between 1.5 Bohr and
  <p><b>1.3.a</b> The other methodology is based on an automatic computation of
   the minimum. <br>
   There are different algorithms to do that.
-  See the input variable <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>,
+  See the input variable <a href="../../variables/generated_files/varset_rlx.html#ionmov">ionmov</a>,
   with values 2 and 7. In the present case, with only one degree of freedom
   to be optimized, the best choice
-  is <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a> 2 . </p>
+  is <a href="../../variables/generated_files/varset_rlx.html#ionmov">ionmov</a> 2 . </p>
 <p>You have also to define the maximal number of timesteps for this optimization.
-  Set the input variable <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a> to 10, it will be largely enough.
-  For the stopping criterion <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>,
+  Set the input variable <a href="../../variables/generated_files/varset_rlx.html#ntime">ntime</a> to 10, it will be largely enough.
+  For the stopping criterion <a href="../../variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>,
   use the reasonable value of 5.0d-4 Ha/Bohr. This defines the force threshold
   to consider that the geometry is converged. The code will stop if the residual
   forces are below that value before
-  reaching <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>.
+  reaching <a href="../../variables/generated_files/varset_rlx.html#ntime">ntime</a>.
 </p>
 <p>It is also worth to change the stopping criterion for the SCF cycle, in order
   to be sure that the forces generated for each trial interatomic distance are
-  sufficiently converged. Indeed, the value used for <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>, namely 1.0d-6,
+  sufficiently converged. Indeed, the value used for <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>, namely 1.0d-6,
   might be sufficient for total energy calculations, but definitely not for
   the accurate computation of other properties.
-  So, change <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a> in <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a>, and set the latter
-  input variable to ten times smaller than <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>.
+  So, change <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a> in <a href="../../variables/generated_files/varset_basic.html#toldff">toldff</a>, and set the latter
+  input variable to ten times smaller than <a href="../../variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>.
   The input file <a href="../../tests/tutorial/Input/tbase1_3.in">&#126;abinit/tests/tutorial/Input/tbase1_3.in</a> is an example of
   file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_3.out">&#126;abinit/tests/tutorial/Refs/tbase1_3.out</a>
   is an example of output file. If you decide to use these files, do not forget
@@ -486,7 +500,7 @@ The forces vanish also between 1.5 Bohr and
               7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
 </pre>
 
-<p> According to these data (see <a href="../../input_variables/generated_files/varset_basic.html#xcart">xcart</a>),
+<p> According to these data (see <a href="../../variables/generated_files/varset_basic.html#xcart">xcart</a>),
   the optimal interatomic distance is about 1.522 Bohr, in good agreement
   with the estimation of tbase1_2.out .
   If you have time (this is to be done at home), you might try to change the
@@ -507,9 +521,9 @@ Here, we will print this quantity.
 
 <p><b>1.4.a</b> We start from the optimized interatomic distance 1.522 Bohr,
   and make a run at fixed geometry.
-  The input variable <a href="../../input_variables/generated_files/varset_files.html#prtden">prtden</a>
+  The input variable <a href="../../variables/generated_files/varset_files.html#prtden">prtden</a>
   must be set to 1.
-  To understand correctly the content of the <a href="../../input_variables/generated_files/varset_files.html#prtden">prtden</a>
+  To understand correctly the content of the <a href="../../variables/generated_files/varset_files.html#prtden">prtden</a>
   description, it is worth to read a much more detailed description of the "files" file,
   in <a href="../../users/generated_files/help_abinit.html#4" target="helpsimg">section 4 </a> of the abinit_help file.
   <a name="ref9"></a></p>
@@ -535,7 +549,7 @@ Here, we will print this quantity.
   <a name="ref10"></a></p>
 
 <p><b>1.4.c</b> Such a density file can be read by ABINIT, to restart a calculation
-  (see the input variable <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>,
+  (see the input variable <a href="../../variables/generated_files/varset_basic.html#iscf">iscf</a>,
   when its value is -2), but more usually, by an utility called "cut3d". This
   utility is available in the ABINIT package.
   You might try to use it now, to generate two-dimensional
@@ -565,21 +579,21 @@ in its constituent atoms, each being neutral.
   There are some subtleties in the calculation of an isolated atom.
 <ul>
   <li>in many cases, the ground state of an isolated atom is spin-polarized, see
-    the variables <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a> and <a href="../../input_variables/generated_files/varset_gstate.html#spinat">spinat</a> ;
+    the variables <a href="../../variables/generated_files/varset_basic.html#nsppol">nsppol</a> and <a href="../../variables/generated_files/varset_gstate.html#spinat">spinat</a> ;
   <li>the highest occupied level might be degenerate with the lowest unoccupied
     level of the same spin, in which case the techniques usually appropriate for metals
     are to be used (see <a href="lesson_base4.html">lesson_base4</a>)
   <li>also often, the symmetry of the ground-state charge density will NOT be
     spherical, so that the automatic determination of symmetries by the code,
     based on the atomic coordinates, should be disabled, see the input variable
-    <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>, to be set to 1 in this
+    <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>, to be set to 1 in this
     case.
 </ul>
 <br>
 For Hydrogen, we are lucky that the ground state is spherical (1s orbital), and
 that the highest occupied level and lowest unoccupied level, although degenerate,
 have a different spin. We will define by hand the occupation of each spin, see
-the input variables <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a> (to be set to 2), and <a href="../../input_variables/generated_files/varset_gstate.html#occ">occ</a> . <br>
+the input variables <a href="../../variables/generated_files/varset_basic.html#occopt">occopt</a> (to be set to 2), and <a href="../../variables/generated_files/varset_gstate.html#occ">occ</a> . <br>
 Finally, in order to make numerical errors cancel, it is important
 to compute the above-mentioned difference in the same box, for the same
 cut-off, and even for a location in the box that is similar to the
@@ -603,8 +617,8 @@ related with the spin-polarisation:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.11112
 </pre>
-<li>If you run again, while having inserted in the input file '<a href="../../input_variables/generated_files/varset_files.html#prtvol">prtvol</a> 2',
-because <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>,
+<li>If you run again, while having inserted in the input file '<a href="../../variables/generated_files/varset_files.html#prtvol">prtvol</a> 2',
+because <a href="../../variables/generated_files/varset_basic.html#occopt">occopt</a>,
 the charge density and spin polarisation at each point of the FFT grid is also analyzed:
 <pre>
  Total charge density [el/Bohr^3]
@@ -673,9 +687,9 @@ and the atomisation energy is a bit too low, 5 % off.
 <br>Well, are you sure that the input parameters that we did not discuss
 are correct? These are:
 <ul>
-  <li><a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> (the plane-wave kinetic energy cut-off)
-  <li><a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> (the supercell size)
-  <li><a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> (not even mentioned until now, this input variable specifies what kind of exchange-correlation functional is to be used ...)
+  <li><a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a> (the plane-wave kinetic energy cut-off)
+  <li><a href="../../variables/generated_files/varset_basic.html#acell">acell</a> (the supercell size)
+  <li><a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a> (not even mentioned until now, this input variable specifies what kind of exchange-correlation functional is to be used ...)
   <li>the pseudopotential
 </ul>
 <br>
@@ -694,9 +708,9 @@ B 54, 1703 (1996)</cite>).
 <p><b>Answers to the questions, section <a href=#1.1.j >1.1.j </a> </b>:
 <ul>
   <li><a href="#aq1">Q1</a>. How many SCF cycles were needed to have
-    the <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a> criterion satisfied?
+    the <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a> criterion satisfied?
   <li><a href="#aq2">Q2</a>. Is the energy likely more converged than
-    <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>?
+    <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>?
   <li><a href="#aq3">Q3</a>. What is the value of the force on each atom, in Ha/Bohr?
   <li><a href="#aq4">Q4</a>. What is the difference of eigenenergies between the two electronic states?
   <li><a href="#aq5">Q5</a>. Where is located the maximum of the electronic density, and how much is it, in electrons/Bohr^3 ?
@@ -719,12 +733,12 @@ in the quoted results !</i>
  At SCF step    6, etot is converged :
   for the second time, diff in etot=  9.038E-11 &lt; toldfe=  1.000E-06
 </pre>
-Note that the number of steps that were allowed, <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>=10,
+Note that the number of steps that were allowed, <a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a>=10,
 is larger than the number of steps effectively needed to reach the stopping criterion.
 As a rule, you should always check that the number of steps that you allowed
 was sufficient to reach the target tolerance. You might now play a bit with nstep, as e.g. set it
 to 5, to see how ABINIT reacts.
-<p>Side note: in most of the tutorial examples, <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>
+<p>Side note: in most of the tutorial examples, <a href="../../variables/generated_files/varset_basic.html#nstep">nstep</a>
 will be enough to reach the
 target tolerance, defined by one of the "tolXXX" input variables. However, this is not always the case
 (e.g. the test case 1 of the <a href="lesson_rf1.html">lesson DFPT 1</a>),
@@ -733,9 +747,9 @@ before the required tolerance.
 
 <p>&nbsp;
 <a name="aq2">&nbsp;</a>
-<p><b>Q2.</b> The information is contained in the same piece of the output file. Yes, the energy is more converged than <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
+<p><b>Q2.</b> The information is contained in the same piece of the output file. Yes, the energy is more converged than <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
   since the stopping criterion asked for the difference between successive evaluations
-  of the energy to be smaller than <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>
+  of the energy to be smaller than <a href="../../variables/generated_files/varset_basic.html#toldfe">toldfe</a>
   twice in a row, while the evolution of the energy is nice, and always decreasing
   by smaller and smaller amounts.
 

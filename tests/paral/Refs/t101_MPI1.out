@@ -12,7 +12,7 @@
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
  Please read ~abinit/doc/users/acknowledgments.html for suggested
  acknowledgments of the ABINIT effort.
- For more information, see http://www.abinit.org .
+ For more information, see https://www.abinit.org .
 
 .Starting date : Fri 30 Jun 2017.
 - ( at 16h23 )
@@ -34,18 +34,25 @@
    prt_model         2
      strcpli        -1
  Fit the coefficients :
-        fit_coeff         1
-       fit_cutoff       7.0
-       fit_option         0
-       fit_ncycle         4
-         fit_grid         1         1         1
-   fit_rangePower         3         4
-    fit_nfixcoeff         0
+        fit_coeff  1
+ fit_generateTerm  1
+       fit_cutoff  7.00000000E+00
+       fit_option  0
+       fit_ncycle  4
+         fit_grid  1  1  1
+    fit_ts_option  0
+   fit_rangePower  3  4
+   fit_anhaStrain  0
+   fit_SPCoupling  1
+    fit_nbancoeff  0
+     fit_bancoeff
+    fit_nfixcoeff  0
      fit_fixcoeff
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         0
+  dipdip_prt         1
       ifcana         0
       ifcout   2000000
       natifc         5
@@ -83,10 +90,10 @@
 
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
 
- --- !WARNING
-     Stress Tensor and forces are set to zero (not available in the DDB)
+ --- !WARNING:
+     The stress tensor of the reference structure is not specify
+     The stress tensor will be set to zero
  ---
-
 
 ================================================================================
 
@@ -185,16 +192,8 @@
 
 ================================================================================
 
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/paral/Input/t101_HIST
- with NetCDF in order to fit the polynomial coefficients
-
- The size of the supercell for the fit is  2  2  2
-
- --- !WARNING
-     The ordering of the atoms in the hist file is different,
-     of the one built by multibinit. The hist file will be map,
-     on the ordering of multibinit.
- ---
+-Reading the file the HIST file :
+-/home/alex/dev/abinit_git/tests/paral/Input/t101_HIST
 
 
 ================================================================================
@@ -203,37 +202,35 @@
 
 --------------------------------------------------------------------------------
 
- The coefficients for the fit must be generate...
-
- 4 fitted coefficients for the 1st order
- 842 coefficients generated 
+ The coefficients for the fit must  will be generate
+ 555 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
    Energy          :   3.7052089149349636E+00
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5063892046377629E-03
-   Forces          :   7.3678364726205139E-03
-   Stresses        :   1.3855273201724902E-04
+   Forces+Stresses :   7.5063894344026072E-03
+   Forces          :   7.3678367059228245E-03
+   Stresses        :   1.3855272847978226E-04
 
- N   Selecting          MSEE              MSEFS              MSEF              MSES
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 1      718       2.5609676624E+00  5.3488564713E-03  5.2003038308E-03  1.4855264050E-04
- 2      540       1.9431984603E+00  4.4884624863E-03  4.3332758540E-03  1.5518663222E-04
- 3      93        1.9687719602E+00  4.0002876127E-03  3.8455540654E-03  1.5473354726E-04
- 4      752       2.0033067189E+00  3.7875226129E-03  3.6336181883E-03  1.5390442456E-04
+ 1     464         2.5609676625E+00  5.3488566325E-03  5.2003039954E-03  1.4855263709E-04
+ 2     348         1.9431984606E+00  4.4884626204E-03  4.3332759913E-03  1.5518662913E-04
+ 3     66          1.9687719605E+00  4.0002877311E-03  3.8455541872E-03  1.5473354390E-04
+ 4     480         2.0033067192E+00  3.7875227245E-03  3.6336183034E-03  1.5390442116E-04
 
  Fitted coefficients at the end of the fit process:
- 718 =>   1.8766945024E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 540 =>   1.2507790346E-01 (Sr_x-Ru_x)^4
- 93 =>  -5.8319599017E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 752 =>   9.0370877257E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 464 =>   1.8766945024E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 348 =>   1.2507790341E-01 (Sr_x-Ru_x)^4
+ 66 =>  -5.8319599031E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 480 =>   9.0370877270E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/f.u.):
-   Energy          :   2.0033067188567482E+00
+   Energy          :   2.0033067191838985E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7875226128517088E-03
-   Forces          :   3.6336181882886637E-03
-   Stresses        :   1.5390442456304510E-04
+   Forces+Stresses :   3.7875227245094760E-03
+   Forces          :   3.6336183033506722E-03
+   Stresses        :   1.5390442115880394E-04
 
 
 ================================================================================

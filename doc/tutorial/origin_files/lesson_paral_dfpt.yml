@@ -14,7 +14,7 @@ intro : |
       are non-zero,
      which activates [[optdriver]]=1.
     You are supposed to be well-familiarized with such calculations before starting the present tutorial.
-    See the input variables described  in the file [[varrf]]
+    See the input variables described  in [[varset:dfpt]]
     and the tutorial <a href="lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
   <p>
     You will learn about the basic implementation of parallelism for DFPT calculations,
@@ -261,7 +261,7 @@ sec2:
   parallelism.
   <br>
   "inwffil" is a subroutine whose job is to read the ground-state wavefunctions
-  (you can find the source of the "inwffil" routine in <a href="http://www.abinit.org/robodoc">the latest ABINIT sources</a>).
+  (you can find the source of the "inwffil" routine in <a href="https://www.abinit.org/robodoc">the latest ABINIT sources</a>).
   As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case of the DFPT
   computations (note that the reading is actually parallelized for e.g. ground-state calculations).
   In the output file provided as a reference (with four computing cores), the "inwffil" wall clock time 

@@ -4,7 +4,18 @@
 <!--                                                                                     -->
 <html>
 <head><title>PseudosPAW </title>
-<link rel=stylesheet type="text/css" href="../formabinit.css">
+<link rel=stylesheet type="text/css" href="../../formabinit.css">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX","output/HTML-CSS"],
+  tex2jax: {inlineMath: [['$','$']]},
+  displayAlign: "center",
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 </head>
 <body bgcolor="#ffffff">
 
@@ -21,7 +32,7 @@
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_AtomTypes.html">topic_AtomTypes</a> &nbsp;&nbsp; <a href="../../topics/generated_files/topic_Verification.html">topic_Verification</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_abinit.html#5">help_abinit#5</a> &nbsp;&nbsp; <a href="../../users/generated_files/help_features.html#2.2">help_features#2.2</a> &nbsp;
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_abinit.html#5">help_abinit#5</a>, &nbsp; <a href="../../guide/generated_files/help_features.html#2.2">help_features#2.2</a>, &nbsp; <a href="../../topics/generated_files/topic_AtomTypes.html">topic_AtomTypes</a>, &nbsp; <a href="../../topics/generated_files/topic_Verification.html">topic_Verification</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_PseudosPAW.html#1">Introduction.</a><li>2. <a href="topic_PseudosPAW.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_PseudosPAW.html#3">Related input variables.</a></ul>
@@ -34,39 +45,39 @@
 
 ABINIT can read many different types of norm-conserving pseudopotentials and PAW atomic data. 
 The names of the files to be used in an ABINIT run 
-are to be provided in the <a href="../../users/generated_files/help_abinit.html#intro1">"files" file</a>, one for each <a href="../../topics/generated_files/topic_AtomTypes.html#">type of atom</a>.
+are to be provided in the <a href="../../guide/generated_files/help_abinit.html#intro1">"files" file</a>, one for each <a href="../../topics/generated_files/topic_AtomTypes.html#">type of atom</a>.
 Note that one cannot mix norm-conserving pseudopotentials with PAW atomic data files in a single ABINIT run,
 even for different datasets. One has to stick either to norm-conserving pseudopotentials or to PAW.
 
 <p><b>Norm-conserving pseudopotential tables</b>
 <p>There are several sets of norm-conserving pseudopotentials available for
 most elements of the periodic table, either in LDA or in GGA-PBE. 
-The <a href="http://www.abinit.org/downloads/pseudodojo/pseudodojo">recommended one</a> (GGA-PBE, <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=11) 
+The <a href="https://www.abinit.org/downloads/pseudodojo/pseudodojo">recommended one</a> (GGA-PBE, <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>=11) 
 comes from the ONCVPSP generator (with spin-orbit coupling).
-The Goedecker HGH table (LDA, <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=1, also including spin-orbit coupling) 
-is also available, at <a href="http://www.abinit.org/downloads/psp-links/psp-links/hgh">http://www.abinit.org/downloads/psp-links/psp-links/hgh</a>.
-It is rather accurate, but requires often large <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>.
+The Goedecker HGH table (LDA, <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>=1, also including spin-orbit coupling) 
+is also available, at <a href="https://www.abinit.org/downloads/psp-links/psp-links/hgh">https://www.abinit.org/downloads/psp-links/psp-links/hgh</a>.
+It is rather accurate, but requires often large <a href="../../variables/generated_files/varset_basic.html#ecut">ecut</a>.
 The old Troullier-Martins type tables (
-<a href="http://www.abinit.org/downloads/psp-links/psp-links/lda_tm">LDA</a> <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=1 and 
-<a href="http://www.abinit.org/downloads/psp-links/psp-links/gga_fhi">GGA</a> <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=11) are deprecated, because not accurate enough,
+<a href="https://www.abinit.org/downloads/psp-links/psp-links/lda_tm">LDA</a> <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>=1 and 
+<a href="https://www.abinit.org/downloads/psp-links/psp-links/gga_fhi">GGA</a> <a href="../../variables/generated_files/varset_basic.html#ixc">ixc</a>=11) are deprecated, because not accurate enough,
 and also not including spin-orbit coupling. The different format for norm-conserving 
 pseudopotentials are described in <a href="https://wiki.abinit.org/doku.php?id=developers:pseudos">https://wiki.abinit.org/doku.php?id=developers:pseudos</a>.
 
 <p><b>PAW atomic data tables</b>
 <p>Five large sets of PAW atomic data can be read by ABINIT.
 The recommended one (JTH) for both LDA and GGA-PBE is available on 
-<a href="http://www.abinit.org/downloads/PAW2/index.html">the ABINIT web site PAW page</a>. It uses the PAW-XML format.
+<a href="https://www.abinit.org/downloads/PAW2/index.html">the ABINIT web site PAW page</a>. It uses the PAW-XML format.
 The links to other sets are provided in the same Web page, see the end of the section "Documents and tools"
 
 <p><b>Validation</b>
 <p>Many pseudopotentials (norm-conserving as well as PAW) have been tested against all-electron calculations, 
 see the section "Documents and tools" paragraph about the "Delta" project 
-on <a href="http://www.abinit.org/downloads/PAW2/index.html">the ABINIT web site PAW page</a>.
+on <a href="https://www.abinit.org/downloads/PAW2/index.html">the ABINIT web site PAW page</a>.
 In <a href="../../tutorial/generated_files/lesson_paw3.html#">paw3</a> it is explained How to perform more detailed comparisons with an all-electron code.
 
 <p><b>Generation</b>
 <p>Six codes are available to generate new pseudopotentials when needed, see 
-<a href="http://www.abinit.org/downloads/atomic-data-files">the related ABINIT web page</a>.
+<a href="https://www.abinit.org/downloads/atomic-data-files">the related ABINIT web page</a>.
 For norm-conserving pseudopotentials, ONCVPSP is the preferred one.
 The ultra-soft pseudopotentials generated by "USPP" are approximations of the
 Projector Augmented Wave approach, and are treated within the PAW framework in ABINIT.
@@ -96,10 +107,10 @@ used in ABINIT. There is also a dedicated tutorial to ATOMPAW/ABINIT.
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_basic.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#znucl">znucl</a>   [charge -Z- of the NUCLeus]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_internal.html#ziontypat">%ziontypat</a>   [Z (charge) of the IONs for the different TYPes of AToms]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#npsp">npsp</a>   [Number of PSeudoPotentials]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_basic.html#ntypat">ntypat</a>   [Number of TYPes of AToms]<br>
+... <a href="../../variables/generated_files/varset_basic.html#znucl">znucl</a>   [charge -Z- of the NUCLeus]<br>
+<p>Relevant internal variables:<p>... <a href="../../variables/generated_files/varset_internal.html#ziontypat">%ziontypat</a>   [Z (charge) of the IONs for the different TYPes of AToms]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_gstate.html#npsp">npsp</a>   [Number of PSeudoPotentials]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

@@ -46,6 +46,7 @@
  nqpt?3    1
  nbdbuf?3  2
  tolwfr?3  1.0d-8       # tolwfr 1.0d-22 should be used for converged results
+ kptopt?3  1
  
 # Computation at q
  getwfk?4 -3
@@ -60,6 +61,7 @@
  rfatpol?4 1 2          # Treat displacements of all atoms
  rfdir?4   1 1 1        # Do all directions 
  tolwfr?4  1.0d-8       # tolwfr 1.0d-22 should be used for converged results
+ kptopt?4  3
 
 # Non self-consistent calculation following high sym k path
  nqpt?5      1

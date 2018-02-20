@@ -78,6 +78,7 @@ ignore files:
     conducti
     cut3d
     descrip*
+    dummy_tests
     *.mms
     macroave
     mrgddb

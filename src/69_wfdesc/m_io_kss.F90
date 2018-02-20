@@ -383,7 +383,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 !Local variables-------------------------------
 !scalars
  integer :: itypat,il,ig,mpsang,ntypat
- character(len=500) :: msg
 !array
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:)
  real(dp),allocatable :: dum_vkbsign(:,:)
@@ -527,9 +526,8 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
 !Local variables-------------------------------
 !scalars
  integer :: ib,ibsp,ig,ispinor,iatom,ii !,ierr
- character(len=500) :: msg
 #ifdef HAVE_NETCDF
- integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
+ integer :: kg_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #endif
 
@@ -1065,7 +1063,7 @@ end subroutine make_gvec_kss
 !!  vtrial(nfftf,nspden)=the trial potential
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  eigen(mband,nkpt,nsppol)=array for holding eigenvalues (hartree)
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!
 !! PARENTS

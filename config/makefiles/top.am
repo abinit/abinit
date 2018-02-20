@@ -147,24 +147,23 @@ infos_html:
 	cp -fr tests/v7/Input tmp-infos-$(VERSION)/tests/v7/Input
 	cp -fr tests/v8/Input tmp-infos-$(VERSION)/tests/v8/Input
 	cp -fr tests/vdwxc/Input tmp-infos-$(VERSION)/tests/vdwxc/Input
-	-rm -f tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
-	cp -fr tmp-infos-$(VERSION)/features/features_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/features/features.html
+	-rm -f tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
 	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
 	cp -fr tmp-infos-$(VERSION)/inst*_notes/inst*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/install_notes/install.html
 	tar -cvf infos_html-$(VERSION).tar                \
           tmp-infos-$(VERSION)/biblio \
-          tmp-infos-$(VERSION)/input_variables \
+          tmp-infos-$(VERSION)/variables \
           tmp-infos-$(VERSION)/tests \
           tmp-infos-$(VERSION)/theory \
           tmp-infos-$(VERSION)/topics \
           tmp-infos-$(VERSION)/tutorial \
-          tmp-infos-$(VERSION)/users \
+          tmp-infos-$(VERSION)/guide \
           tmp-infos-$(VERSION)/js_files \
+          tmp-infos-$(VERSION)/formabinit.css \
           tmp-infos-$(VERSION)/known_problems \
           tmp-infos-$(VERSION)/gallery/Plot1.jpg tmp-infos-$(VERSION)/gallery/pcpm.gif tmp-infos-$(VERSION)/gallery/mode.png  \
           tmp-infos-$(VERSION)/install_notes/install.html \
           tmp-infos-$(VERSION)/release_notes/release_notes.html \
-          tmp-infos-$(VERSION)/features/features.html \
           tmp-infos-$(VERSION)/presentation/presentation.pdf
 	gzip infos_html-$(VERSION).tar
 	-rm -fr tmp-infos-$(VERSION)
@@ -238,7 +237,7 @@ binary_package_lite:
 
 dist-lite: distdir
 	tardir=$(distdir) && \
-	  cd $(distdir)/doc; rm -rf build* features inp* t* users  && \
+	  cd $(distdir)/doc; rm -rf build* inp* t* guide  && \
 	  cd ../tests; rm -rf v* tuto* Psps* paral mpiio libxc gpu fast bigdft* && \
 	  cd ../abichecks; rm -rf abirules buildsys && \
 	  cd ../..; \

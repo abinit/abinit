@@ -9,7 +9,7 @@
 !! due to phonons and temperature effects...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG, MVer)
+!! Copyright (C) 2009-2017 ABINIT group (MG, MVer,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,14 +55,14 @@
 !! CHILDREN
 !!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
 !!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
-!!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_prtbltztrp
-!!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ,ebands_write
-!!      edos_free,edos_print,edos_write,eph_gkk,eph_phgamma,eph_phpi,hdr_free
-!!      hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs,ifc_outphbtrap,ifc_print
-!!      ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq,initmpi_seq,mkphdos
-!!      pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite,phdos_print
-!!      phdos_print_thermo,print_ngfft,pspini,sigmaph,wfk_read_eigenvalues
-!!      wrtout,xmpi_bcast,xmpi_end
+!!      dvdb_interpolate_and_write,dvdb_list_perts,dvdb_print,ebands_free
+!!      ebands_print,ebands_prtbltztrp,ebands_set_fermie,ebands_set_scheme
+!!      ebands_update_occ,ebands_write,edos_free,edos_print,edos_write,eph_gkk
+!!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs
+!!      ifc_outphbtrap,ifc_print,ifc_printbxsf,ifc_test_phinterp
+!!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
+!!      phdos_free,phdos_ncwrite,phdos_print,phdos_print_thermo,print_ngfft
+!!      pspini,sigmaph,wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_end
 !!
 !! SOURCE
 
@@ -151,7 +151,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
- logical :: use_wfq,use_dvdb
+ logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
  character(len=fnlen) :: ddk_path(3)
@@ -211,6 +211,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
+ use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
  use_dvdb = (dtset%eph_task /= 0)
 
@@ -223,7 +224,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    if (use_dvdb .and. .not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
 
    ! Accept WFK file in Fortran or netcdf format.
-   if (nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
+   if (use_wfk .and. nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
      MSG_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path, msg))
    end if
    ! WFQ file
@@ -244,8 +245,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
- call xmpi_bcast(wfk0_path,master,comm,ierr)
- call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
+ if (use_wfk) then
+   call xmpi_bcast(wfk0_path,master,comm,ierr)
+   call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
+ end if
  if (use_wfq) then
    call xmpi_bcast(wfq_path,master,comm,ierr)
    call wrtout(ab_out, sjoin("- Reading GS states from WFQ file:", wfq_path) )
@@ -267,15 +270,17 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Construct crystal and ebands from the GS WFK file.
- call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
- call hdr_vs_dtset(wfk0_hdr,dtset)
+ if (use_wfk) then
+   call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
+   call hdr_vs_dtset(wfk0_hdr,dtset)
 
- call crystal_from_hdr(cryst,wfk0_hdr,timrev2)
- call crystal_print(cryst,header="crystal structure from WFK file")
+   call crystal_from_hdr(cryst,wfk0_hdr,timrev2)
+   call crystal_print(cryst,header="crystal structure from WFK file")
 
- ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
- call hdr_free(wfk0_hdr)
- ABI_FREE(gs_eigen)
+   ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
+   call hdr_free(wfk0_hdr)
+   ABI_FREE(gs_eigen)
+ end if
 
  ! Read WFQ and construct ebands on the shifted grid.
  if (use_wfq) then
@@ -289,47 +294,50 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Here we change the GS bands (fermi level, scissors operator ...)
  ! All the modifications to ebands should be done here.
+ if (use_wfk) then
 
- if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
-   write(msg,"(2a,2(a,i0,a,f14.6,a))")&
-   " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
-   "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
-   "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
-   call wrtout(ab_out,msg)
-   call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
-   if (use_wfq) then
-     call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
-   end if
- end if
-
- if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
-   ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
-   call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
-   call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
-   call wrtout(ab_out,msg)
-   if (use_wfq) then
-     call ebands_set_fermie(ebands_kq, dtset%eph_fermie, msg)
+   if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
+     write(msg,"(2a,2(a,i0,a,f14.6,a))")&
+     " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
+     "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
+     "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
      call wrtout(ab_out,msg)
+     call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
+     if (use_wfq) then
+       call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
+     end if
    end if
 
- else if (abs(dtset%eph_extrael) > tol12) then
-   NOT_IMPLEMENTED_ERROR()
-   ! TODO: Be careful with the trick used in elphon for passing the concentration
-   !call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
-   !call wrtout(ab_out,msg)
-   !if (use_wfq) then
-   !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
-   !  call wrtout(ab_out,msg)
-   !end if
- end if
+   if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
+     ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
+     call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
+     call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
+     call wrtout(ab_out,msg)
+     if (use_wfq) then
+       call ebands_set_fermie(ebands_kq, dtset%eph_fermie, msg)
+       call wrtout(ab_out,msg)
+     end if
 
- ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
- ! since occ are set to zero, and fermie is taken from the previous density.
- call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
- call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
- if (use_wfq) then
-   call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+   else if (abs(dtset%eph_extrael) > tol12) then
+     NOT_IMPLEMENTED_ERROR()
+     ! TODO: Be careful with the trick used in elphon for passing the concentration
+     !call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
+     !call wrtout(ab_out,msg)
+     !if (use_wfq) then
+     !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
+     !  call wrtout(ab_out,msg)
+     !end if
+   end if
+
+   ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
+   ! since occ are set to zero, and fermie is taken from the previous density.
+   call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+   if (use_wfq) then
+     call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
+     call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+   end if
+
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -338,7 +346,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Compute electron DOS.
- if (dtset%kptopt>0 .and. dtset%nkpt>1) then
+ if (dtset%kptopt>0 .and. dtset%nkpt>1 .and. use_wfk) then
    ! TODO: Optimize this part. Really slow if tetra and lots of points
    ! Could just do DOS around efermi
    edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
@@ -385,9 +393,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        call wrtout(ab_out,msg)
      end if
    end if
- end if ! master
 
- if (my_rank == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   if (use_wfk) then
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   end if
+ end if
 
  !if (.False.) then
  !!if (.True.) then
@@ -402,10 +412,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Read the DDB file.
- ABI_CALLOC(dummy_atifc, (cryst%natom))
+ ABI_CALLOC(dummy_atifc, (dtset%natom))
 
- call ddb_from_file(ddb,ddb_path,brav1,cryst%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
- call crystal_free(cryst_ddb)
+ if (use_wfk) then
+   call ddb_from_file(ddb,ddb_path,brav1,dtset%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
+   call crystal_free(cryst_ddb)
+ else
+   call ddb_from_file(ddb,ddb_path,brav1,dtset%natom,natifc0,dummy_atifc,cryst,comm, prtvol=dtset%prtvol)
+ end if
  ABI_FREE(dummy_atifc)
 
  ddb_nqshift = 1
@@ -462,7 +476,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
 ! Otherwise just leave these defaults.
 !MG: Disabled for the time being because of SIGFPE in v8[41]
-     path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
+     path = dtfil%filnam_ds(4)
      !call phdos_print_msqd(phdos, path, 1000, one, one)
      path = strcat(dtfil%filnam_ds(4), "_THERMO")
      call phdos_print_thermo(PHdos, path, 1000, zero, one)
@@ -566,6 +580,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
+ case (5)
+   ! Interpolate the phonon potential
+   call dvdb_interpolate_and_write(dtfil,ngfftc,ngfftf,cryst,dvdb,&
+&   ifc%ngqpt,ifc%nqshft,ifc%qshft, &
+&   dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
+
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
  end select
@@ -578,7 +598,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ddb_free(ddb)
  call ddk_free(ddk)
  call ifc_free(ifc)
- call ebands_free(ebands)
+ if (use_wfk) call ebands_free(ebands)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
