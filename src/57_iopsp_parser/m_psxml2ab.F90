@@ -57,6 +57,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  use m_profiling_abi
  use m_errors
  use m_psml
+ use m_psml_api
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -78,7 +79,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 !Local variables-------------------------------
 !scalars
  integer :: dd,dm,dy
- integer :: il,lmm,ii
+ integer :: il,lmm,ii,nxc,nvshells
  integer :: iproj, ishell, ll, ll_previous
  integer,parameter :: n1xccc_default=2501
  character(len=500) :: message, frmt_str
@@ -93,43 +94,45 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  call ps_destroy(psxml)
  call psml_reader(psxmlfile, psxml, debug=.true.)
 
-
- atmsymb = ps_AtomicLabel(psxml)
- creator = ps_Creator(psxml)
- psphead%znuclpsp  = ps_AtomicNumber(psxml)
- psphead%zionpsp   = ps_Zpseudo(psxml)
-
- message = ps_Date(psxml)
+ call ps_Provenance_Get(psxml, 1, creator=creator, date=message)
  read (message, '(I4,A1,I2,A1,I2)') dy, g1, dm, g2, dd
  psphead%pspdat = MODULO(dy,100) * 10000 + dm * 100 + dd
+ 
+ call ps_PseudoAtomSpec_Get(psxml, atomic_symbol=atmsymb, &
+&  atomic_number=psphead%znuclpsp, z_pseudo=psphead%zionpsp, &
+&  pseudo_flavor=message)
 
  psphead%pspcod = 9
 
 ! impose libxc coding for pspxc
  psphead%pspxc = 0
- do ii=1, ps_NLibxcFunctionals(psxml)
-   psphead%pspxc = ps_LibxcId(psxml,ii) + psphead%pspxc*1000
+ call ps_ExchangeCorrelation_Get(psxml, n_libxc_functionals=nxc)
+ do ii=1, min(2,nxc)
+   call ps_LibxcFunctional_Get(psxml, ii, code=dd)
+   psphead%pspxc = dd + psphead%pspxc*1000
  end do
  psphead%pspxc = -psphead%pspxc
 
+ call ps_ValenceConfiguration_Get(psxml, nshells=nvshells)
+
  if (iwrite == 1) then
-   write (message,'(a,a)') '- psxml2ab: ps_PseudoFlavor ', ps_PseudoFlavor(psxml)
+   write (message,'(a,a)') '- psxml2ab: ps_PseudoFlavor ', trim(message)
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write (message,'(a,I5)') '- psxml2ab: ps_NLibxcFunctionals ', ps_NLibxcFunctionals(psxml)
+   write (message,'(a,I5)') '- psxml2ab: ps_NLibxcFunctionals ', nxc
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   write (message,'(a,I5)') '- psxml2ab: ps_NValenceShells ', ps_NValenceShells(psxml)
+   write (message,'(a,I5)') '- psxml2ab: ps_NValenceShells ', nvshells
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
 
- ABI_ALLOCATE(zeld, (ps_NValenceShells(psxml)))
- ABI_ALLOCATE(zelu, (ps_NValenceShells(psxml)))
+ ABI_ALLOCATE(zeld, (nvshells))
+ ABI_ALLOCATE(zelu, (nvshells))
  zeld = zero
  zelu = zero
  frmt_str="(a"
- do ishell = 1, ps_NValenceShells(psxml)
+ do ishell = 1, nvshells
    if (iwrite == 1) then
      write (message,'(a,I5)') '- psxml2ab: ps_ValenceShellN ', ps_ValenceShellN(psxml,ishell)
 !    call wrtout(ab_out,  message,'COLL')
