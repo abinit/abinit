@@ -158,7 +158,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
- type(wvl_denspot_type), intent(in) :: wvl_den
+ type(wvl_denspot_type),optional, intent(in) :: wvl_den
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout),target :: arr(cplex*nfft,dtset%nspden)
@@ -541,6 +541,9 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
 #else
      BIGDFT_NOTENABLED_ERROR()
+     if(.false. and present(wvl_den))then
+       write(std_out,*)' One should not be here'
+     endif
 #endif
    end if
 

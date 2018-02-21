@@ -878,7 +878,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !      =================================================================
 !      ==== Write wavefunctions, KB and PAW matrix elements on disk ====
 !      =================================================================
-       call write_kss_wfgk(untkss,ikpt,isppol,kpoint,dtset%nspinor,npwkss,npw_k,kg_k,&
+       call write_kss_wfgk(untkss,ikpt,isppol,kpoint,dtset%nspinor,npwkss,npw_k,&
 &           nbandksseff,natom,Psps,ene,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
        ABI_DEALLOCATE(occ_k)
