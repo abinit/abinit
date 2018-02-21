@@ -98,9 +98,13 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  call ps_destroy(psxml)
  call psml_reader(psxmlfile, psxml, debug=.true.)
 
+ psphead%pspdat = 0
  call ps_Provenance_Get(psxml, 1, creator=creator, date=message)
- read (message, '(I4,A1,I2,A1,I2)') dy, g1, dm, g2, dd
+ read (message(1:10), '(I4,A1,I2,A1,I2)', err=10) &
+&  dy, g1, dm, g2, dd
  psphead%pspdat = MODULO(dy,100) * 10000 + dm * 100 + dd
+
+10 continue
  
  call ps_PseudoAtomSpec_Get(psxml, &
 &  atomic_symbol=atmsymb, atomic_label=label, &
@@ -167,6 +171,9 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  end if
 
 !    Find the number of projectors per angular momentum shell
+ nprojs = 0
+ nprojsr = 0
+ nprojso = 0
  psphead%nproj(:)=0
  call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, number=nprojs)
  if (nprojs > 0) then
@@ -177,11 +184,12 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 !      call wrtout(ab_out,  message,'COLL')
        call wrtout(std_out,  message,'COLL')
      end if
-     call ps_NonlocalProjectors_Filter(psxml, indexes_in=idx_sr, l=il)
+     call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
      psphead%nproj(il) = psphead%nproj(il) + 1
    end do
  else
    call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=nprojsr)
+   write(*,*) "DEBUG_PSML", nprojsr
    if (nprojsr > 0) then
      call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, indexes=idx_sr)
      do iproj = 1, nprojsr
@@ -190,7 +198,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 !        call wrtout(ab_out,  message,'COLL')
          call wrtout(std_out,  message,'COLL')
        end if
-       call ps_NonlocalProjectors_Filter(psxml, indexes_in=idx_sr, l=il)
+       call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
        psphead%nproj(il) = psphead%nproj(il) + 1
      end do
    else
@@ -207,7 +215,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 !    call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
    end if
-   call ps_NonlocalProjectors_Filter(psxml, indexes_in=idx_so, l=il)
+   call ps_Projector_Get(psxml, idx_so(iproj), l=il)
    psphead%nprojso(il) = psphead%nprojso(il) + 1
  end do
  if (iwrite == 1) then
@@ -242,7 +250,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  end if
  ll_previous=-1
  do iproj = 1, max(nprojs, nprojsr)
-   call ps_NonlocalProjectors_Filter(psxml, indexes_in=idx_sr, l=ll)
+   call ps_Projector_Get(psxml, idx_sr(iproj), l=ll)
    if (iwrite == 1) then
      if(ll/=ll_previous)then
        write (message,'(a,I5)') '- psxml2ab: ps_Projector_L ', ll
@@ -265,7 +273,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  end if
  ll_previous=-1
  do iproj = 1, nprojso
-   call ps_NonlocalProjectors_Filter(psxml, indexes_in=idx_so, l=ll)
+   call ps_Projector_Get(psxml, idx_so(iproj), l=ll)
    if (iwrite == 1) then
      if(ll/=ll_previous)then
        write (message,'(a,I5)') '- psxml2ab: ps_Projector_L ', ll
@@ -273,7 +281,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
        call wrtout(std_out,  message,'COLL')
        ll_previous=ll
      endif
-     call ps_Projector_Get(psxml, idx_sr(iproj), ekb=ekb)
+     call ps_Projector_Get(psxml, idx_so(iproj), ekb=ekb)
      write (message,'(a,E20.10)') '- psxml2ab: ps_Projector_Ekb ', ekb
      call wrtout(ab_out,  message,'COLL')
      call wrtout(std_out,  message,'COLL')
@@ -291,7 +299,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 
    write(message,'(a,a)') &
 &   '- psxml2ab: Atomic Label:                      ', &
-&  label
+&  trim(label)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
@@ -313,7 +321,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
-   write(message,'(a,a)') &
+   write(message,'(a,i8)') &
 &   '- psxml2ab: Date of pseudopotential generation: ', &
 &   psphead%pspdat
    call wrtout(ab_out,  message,'COLL')
