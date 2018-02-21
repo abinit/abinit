@@ -7,6 +7,7 @@
 !!  Initial guess of the first order magnetization/density for magnetic field perturbation.
 !!  The first order magnetization is set so as to zero out the first order XC magnetic field, which
 !!  should minimize the second order XC energy (without taking self-consistency into account).
+!!  Works only for ipert==natom+5.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2017-2018 ABINIT group (SPr)
@@ -15,7 +16,6 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  ipert = perturbtation type (works only for ipert==natom+5)
 !!  idir  = direction of the applied magnetic field
 !!  cplex = complex or real first order density and magnetization
 !!  nfft  = dimension of the fft grid
@@ -46,7 +46,7 @@
 #include "abi_common.h"
 
 
-subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
+subroutine dfpt_init_mag1(idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
     
  use defs_basis
  use m_errors
@@ -61,7 +61,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
  implicit none
 
 !Arguments ------------------------------------
- integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
+ integer , intent(in)    :: idir,cplex,nfft,nspden,nkxc
  real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
  real(dp), intent(in)    :: kxc0(nfft,nkxc)
  real(dp), intent(out)   :: rhor1(cplex*nfft,nspden)                        

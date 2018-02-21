@@ -440,7 +440,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Open and read pseudopotential files
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
 
  call timab(701,2,tsec)

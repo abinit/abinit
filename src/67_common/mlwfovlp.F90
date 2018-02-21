@@ -72,7 +72,7 @@
 
  subroutine mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,hdr,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-& nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+& nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
  use defs_basis
@@ -121,7 +121,6 @@
  integer :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),gprimd(3,3),rprimd(3,3)
- real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: xred(3,natom)
  type(pawcprj_type) :: cprj(natom,mcprj)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
@@ -1185,7 +1184,6 @@
 !                end if
 !                if(ISNAN(dble(caux3))) then
 !                write(std_out,*) 'NaN: caux3(ikpt,iwan,iband,kk,jj):',ikpt,iwan,iband,kk,jj
-!                write(std_out,*) 'caux,caux2 and occ=',caux,caux2,occ(jj),ch10 
 !                end if
 !                END DEBUG 
                end do
