@@ -2001,7 +2001,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
                call pawcprj_symkn(fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1),cprj_tmp(:,1:nspinor),&
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fockbz%tab_symkpt(my_jkpt),fockbz%timerev(my_jkpt),dtset%kptns(:,ikpt),fockbz%pawang%l_max-1,lmnmax,&
-&               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot,atindx=fockcommon%atindx)
+&               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot)
 
                if(dtset%optforces==1) then
                  do iatom=1,dtset%natom

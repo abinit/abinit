@@ -4555,6 +4555,7 @@ end subroutine pawxcsphpositron
    msg='nkxc must be 1 or 3 (not OK for GGA)!'
    MSG_BUG(msg)
  end if
+ ABI_UNUSED(xclevel)
 ! if(xclevel==2) then
 !   msg='GGA is not implemented!'
 !   MSG_ERROR(msg)
