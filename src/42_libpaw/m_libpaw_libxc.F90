@@ -1653,7 +1653,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
    end if
 #else
 !  This is to avoid unused arguments
-   if(.false. .and. present(hyb_mixing) .and. present(hyb_mixing_sr) .and. present(hyb_range)then
+   if(.false. .and. present(hyb_mixing) .and. present(hyb_mixing_sr) .and. present(hyb_range))then
      msg='One should not be here'
    endif
 #endif
