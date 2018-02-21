@@ -1,5 +1,5 @@
 
-.Version 8.5.2 of ABINIT 
+.Version 8.7.3 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  8 Aug 2017.
-- ( at 11h23 )
+.Starting date : Wed 21 Feb 2018.
+- ( at 16h18 )
   
 - input  file    -> t14.in
 - output file    -> t14.out
 - root for input  files -> t14i
 - root for output files -> t14o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/pouillon/abinit/pouillon/tests/Psps_for_tests/79_Au_atom.psml
+- inpspheads : Reading pseudopotential header in XML form from /store/abinit/pouillon/tests/Psps_for_tests/79_Au_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     4
 - psxml2ab: ps_Projector_L     0
@@ -37,11 +37,11 @@
 - psxml2ab: Atomic Label:                      Au
 - psxml2ab: Atomic Number:                         79.00000
 - psxml2ab: Valence charge:                        11.00000
-- psxml2ab: Pseudopotential generator code :    psop-1.1
-- psxml2ab: Date of pseudopotential generation: 2017-07-31
+- psxml2ab: Pseudopotential generator code :    ATM4.2.6
+- psxml2ab: Date of pseudopotential generation:        0
 - psxml2ab: Pseudopotential flavor:             Troullier-Martins
-- psxml2ab: Exchange-correlation functional    1 :    XC_LDA_X
-- psxml2ab: Exchange-correlation functional    2 :    XC_LDA_C_PZ
+- psxml2ab: Exchange-correlation functional    1 :    XC_LDA_X (   1)
+- psxml2ab: Exchange-correlation functional    2 :    XC_LDA_C_PZ (   9)
 - psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   dirac
 - psxml2ab: Spin-polarized pseudopotential:     no
 - psxml2ab: No core corrections.
@@ -317,16 +317,15 @@ P           mkmem         110
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/pouillon/abinit/pouillon/tests/Psps_for_tests/79_Au_atom.psml
-- pspatm: opening atomic psp file    /home/pouillon/abinit/pouillon/tests/Psps_for_tests/79_Au_atom.psml
-- Au    psop-1.1
-- 79.00000  11.00000    170731                znucl, zion, pspdat
+- pspini: atom type   1  psp file is /store/abinit/pouillon/tests/Psps_for_tests/79_Au_atom.psml
+- pspatm: opening atomic psp file    /store/abinit/pouillon/tests/Psps_for_tests/79_Au_atom.psml
+- Au    ATM4.2.6
+- 79.00000  11.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
-  psp9in : irelt =            0
-  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
- pspatm: epsatm=   56.33759577
+  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
+  pspatm : epsatm=   56.33759577
          --- l  ekb(1:nproj) -->
              0    1.432475
              1    0.827346
@@ -405,10 +404,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     195.636     195.592
     Ewald energy    = -3.59768071338375E+01
     PspCore energy  =  5.40846333359106E+00
     Loc. psp. energy= -8.06335421940300E+00
-    NL   psp  energy= -1.21567048065252E+01
+    NL   psp  energy= -1.21567048065251E+01
     >>>>> Internal E= -3.20726063087395E+01
 
-    -kT*entropy     = -3.60151471714844E-03
+    -kT*entropy     = -3.60151471714846E-03
     >>>>>>>>> Etotal= -3.20762078234566E+01
 
  Other information on the energy :
@@ -653,47 +652,49 @@ P           mkmem         110
 
 ================================================================================
 
-- Total cpu        time (s,m,h):        299.2        4.99      0.083
-- Total wall clock time (s,m,h):        383.9        6.40      0.107
+- Total cpu        time (s,m,h):        150.1        2.50      0.042
+- Total wall clock time (s,m,h):        188.7        3.15      0.052
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =          299.2, wall_time =          383.9
+- cpu_time =          150.1, wall_time =          188.7
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                 184.302  61.6    243.469  63.4          43154      -1.00        0.76       0.76
-- vtowfk(ssdiag)                66.167  22.1     59.918  15.6             -1      -1.00        1.10       1.10
-- nonlop(apply)                 22.204   7.4     29.524   7.7          43154      -1.00        0.75       0.75
-- getghc-other                   5.853   2.0      7.655   2.0             -1      -1.00        0.76       0.76
-- fourwf%(den)                   4.189   1.4     14.344   3.7           4964      -1.00        0.29       0.29
-- projbd                         3.852   1.3      4.706   1.2          66508      -1.00        0.82       0.82
-- pspini                         1.780   0.6      6.209   1.6              1      -1.00        0.29       0.29
-- others (106)                   2.778   0.9      7.695   2.0             -1      -1.00        0.36       0.36
+- fourwf%(pot)                  97.487  65.0    118.921  63.0          43154      -1.00        0.82       0.82
+- vtowfk(ssdiag)                25.019  16.7     26.780  14.2             -1      -1.00        0.93       0.93
+- nonlop(apply)                 13.027   8.7     15.996   8.5          43154      -1.00        0.81       0.81
+- fourwf%(den)                   2.914   1.9      7.935   4.2           4964      -1.00        0.37       0.37
+- getghc-other                   2.807   1.9      3.514   1.9             -1      -1.00        0.80       0.80
+- projbd                         1.670   1.1      1.915   1.0          66508      -1.00        0.87       0.87
+- pspini                         0.978   0.7      2.636   1.4              1      -1.00        0.37       0.37
+- abinit(2)                      0.954   0.6      2.688   1.4              1      -1.00        0.36       0.36
+- others (105)                   1.275   0.8      3.550   1.9             -1      -1.00        0.36       0.36
 -<END_TIMER>
 -
-- subtotal                     291.125  97.3    373.520  97.3                                  0.78       0.78
+- subtotal                     146.131  97.4    183.935  97.5                                  0.79       0.79
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =         299.2, wall_time =         383.9
+- cpu_time =         150.1, wall_time =         188.7
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                 184.302  61.6    243.469  63.4          43154      -1.00        0.76       0.76
-- vtowfk(ssdiag)                66.167  22.1     59.918  15.6             -1      -1.00        1.10       1.10
-- nonlop(apply)                 22.204   7.4     29.524   7.7          43154      -1.00        0.75       0.75
-- getghc-other                   5.853   2.0      7.655   2.0             -1      -1.00        0.76       0.76
-- fourwf%(den)                   4.189   1.4     14.344   3.7           4964      -1.00        0.29       0.29
-- projbd                         3.852   1.3      4.706   1.2          66508      -1.00        0.82       0.82
-- pspini                         1.780   0.6      6.209   1.6              1      -1.00        0.29       0.29
-- others (106)                   2.778   0.9      7.695   2.0             -1      -1.00        0.36       0.36
+- fourwf%(pot)                  97.487  65.0    118.921  63.0          43154      -1.00        0.82       0.82
+- vtowfk(ssdiag)                25.019  16.7     26.780  14.2             -1      -1.00        0.93       0.93
+- nonlop(apply)                 13.027   8.7     15.996   8.5          43154      -1.00        0.81       0.81
+- fourwf%(den)                   2.914   1.9      7.935   4.2           4964      -1.00        0.37       0.37
+- getghc-other                   2.807   1.9      3.514   1.9             -1      -1.00        0.80       0.80
+- projbd                         1.670   1.1      1.915   1.0          66508      -1.00        0.87       0.87
+- pspini                         0.978   0.7      2.636   1.4              1      -1.00        0.37       0.37
+- abinit(2)                      0.954   0.6      2.688   1.4              1      -1.00        0.36       0.36
+- others (105)                   1.275   0.8      3.550   1.9             -1      -1.00        0.36       0.36
 -<END_TIMER>
 
-- subtotal                     291.125  97.3    373.520  97.3                                  0.78       0.78
+- subtotal                     146.131  97.4    183.935  97.5                                  0.79       0.79
 
 ================================================================================
 
@@ -764,10 +765,10 @@ P           mkmem         110
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=        299.2  wall=        383.9
+- Proc.   0 individual time (sec): cpu=        150.1  wall=        188.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        299.2  wall=        383.9
++Overall time at end (sec) : cpu=        150.1  wall=        188.7
