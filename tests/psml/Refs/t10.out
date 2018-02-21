@@ -1,5 +1,5 @@
 
-.Version 8.5.2 of ABINIT 
+.Version 8.7.3 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  8 Aug 2017.
-- ( at 11h20 )
+.Starting date : Wed 21 Feb 2018.
+- ( at 16h17 )
   
 - input  file    -> t10.in
 - output file    -> t10.out
 - root for input  files -> t10i
 - root for output files -> t10o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/pouillon/abinit/pouillon/tests/Psps_for_tests/26_Fe_atom.psml
+- inpspheads : Reading pseudopotential header in XML form from /store/abinit/pouillon/tests/Psps_for_tests/26_Fe_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     4
 - psxml2ab: ps_Projector_L     0
@@ -37,11 +37,11 @@
 - psxml2ab: Atomic Label:                      Fe
 - psxml2ab: Atomic Number:                         26.00000
 - psxml2ab: Valence charge:                         8.00000
-- psxml2ab: Pseudopotential generator code :    psop-1.1
-- psxml2ab: Date of pseudopotential generation: 2017-07-31
+- psxml2ab: Pseudopotential generator code :    ATM4.2.6
+- psxml2ab: Date of pseudopotential generation:        0
 - psxml2ab: Pseudopotential flavor:             Troullier-Martins
-- psxml2ab: Exchange-correlation functional    1 :    XC_GGA_X_PBE
-- psxml2ab: Exchange-correlation functional    2 :    XC_GGA_C_PBE
+- psxml2ab: Exchange-correlation functional    1 :    XC_GGA_X_PBE ( 101)
+- psxml2ab: Exchange-correlation functional    2 :    XC_GGA_C_PBE ( 130)
 - psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   dirac
 - psxml2ab: Spin-polarized pseudopotential:     no
 
@@ -274,16 +274,15 @@ P           mkmem          14
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10453
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/pouillon/abinit/pouillon/tests/Psps_for_tests/26_Fe_atom.psml
-- pspatm: opening atomic psp file    /home/pouillon/abinit/pouillon/tests/Psps_for_tests/26_Fe_atom.psml
-- Fe    psop-1.1
-- 26.00000   8.00000    170731                znucl, zion, pspdat
+- pspini: atom type   1  psp file is /store/abinit/pouillon/tests/Psps_for_tests/26_Fe_atom.psml
+- pspatm: opening atomic psp file    /store/abinit/pouillon/tests/Psps_for_tests/26_Fe_atom.psml
+- Fe    ATM4.2.6
+- 26.00000   8.00000         0                znucl, zion, pspdat
     9 -101130    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     5.98000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
-  psp9in : irelt =            0
-  psp9in : mmax, amesh, rad(mmax) =          600   1.0000000000000000E-002   5.9900000000000002     
- pspatm: epsatm=   34.31427913
+  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
+  pspatm : epsatm=   34.31427913
          --- l  ekb(1:nproj) -->
              0    1.693952
              1    0.682661
@@ -357,16 +356,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.12866329802861E+01
-    Hartree energy  =  4.52802637631762E-01
-    XC energy       = -1.24763383097562E+01
+    Kinetic energy  =  1.12866329802862E+01
+    Hartree energy  =  4.52802637631765E-01
+    XC energy       = -1.24763383097563E+01
     Ewald energy    = -2.14723277850123E+01
     PspCore energy  =  3.44153796902551E+00
     Loc. psp. energy= -2.33449124154934E+00
-    NL   psp  energy= -3.19904865788436E+00
+    NL   psp  energy= -3.19904865788437E+00
     >>>>> Internal E= -2.43012324072588E+01
 
-    -kT*entropy     =  3.46178536555979E-06
+    -kT*entropy     =  3.46178536556903E-06
     >>>>>>>>> Etotal= -2.43012289454735E+01
 
  Other information on the energy :
@@ -407,7 +406,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
  ETOT  2  -24.150296657643    -8.41E-01 3.89E-02 1.77E+02 0.852
  ETOT  3  -24.291577822410    -1.41E-01 2.21E-02 9.08E+00 0.467
  ETOT  4  -24.300372399703    -8.79E-03 1.87E-03 2.33E-01 0.148
- ETOT  5  -24.301004885104    -6.32E-04 1.87E-03 4.77E-02 0.056
+ ETOT  5  -24.301004885103    -6.32E-04 1.87E-03 4.77E-02 0.056
  ETOT  6  -24.301227786065    -2.23E-04 7.43E-04 3.20E-03 0.001
  ETOT  7  -24.301228444902    -6.59E-07 3.89E-05 6.33E-04 0.003
  ETOT  8  -24.301228917142    -4.72E-07 6.88E-05 1.52E-05 0.001
@@ -477,20 +476,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.12863373810929E+01
-    Hartree energy  =  4.52737961339712E-01
-    XC energy       = -1.24762757934905E+01
+    Kinetic energy  =  1.12863373810933E+01
+    Hartree energy  =  4.52737961339584E-01
+    XC energy       = -1.24762757934903E+01
     Ewald energy    = -2.14723277850123E+01
     PspCore energy  =  3.44153796902551E+00
-    Loc. psp. energy= -2.33431284302298E+00
-    NL   psp  energy= -3.19892932196478E+00
+    Loc. psp. energy= -2.33431284302270E+00
+    NL   psp  energy= -3.19892932196543E+00
     >>>>> Internal E= -2.43012324320324E+01
 
-    -kT*entropy     =  3.51489041925589E-06
+    -kT*entropy     =  3.51489041920660E-06
     >>>>>>>>> Etotal= -2.43012289171419E+01
 
  Other information on the energy :
-    Total energy(eV)= -6.61270068334081E+02 ; Band energy (Ha)=   1.5439040013E+00
+    Total energy(eV)= -6.61270068334082E+02 ; Band energy (Ha)=   1.5439040013E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -681,47 +680,47 @@ P           mkmem          14
 
 ================================================================================
 
-- Total cpu        time (s,m,h):        112.3        1.87      0.031
-- Total wall clock time (s,m,h):        123.5        2.06      0.034
+- Total cpu        time (s,m,h):         55.0        0.92      0.015
+- Total wall clock time (s,m,h):         58.1        0.97      0.016
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =          112.3, wall_time =          123.5
+- cpu_time =           55.0, wall_time =           58.1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  60.626  54.0     67.235  54.4          22610      -1.00        0.90       0.90
-- vtowfk(ssdiag)                26.697  23.8     22.866  18.5             -1      -1.00        1.17       1.17
-- nonlop(apply)                 10.860   9.7     11.761   9.5          22610      -1.00        0.92       0.92
-- getghc-other                   3.280   2.9      3.866   3.1             -1      -1.00        0.85       0.85
-- pspini                         1.593   1.4      4.857   3.9              2      -1.00        0.33       0.33
-- projbd                         1.532   1.4      1.214   1.0          35140      -1.00        1.26       1.26
-- fourwf%(den)                   0.670   0.6      1.728   1.4           1451      -1.00        0.39       0.39
-- others (106)                   1.348   1.2      3.667   3.0             -1      -1.00        0.37       0.37
+- fourwf%(pot)                  31.067  56.5     30.983  53.3          22610      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 9.386  17.1      9.612  16.5             -1      -1.00        0.98       0.98
+- nonlop(apply)                  5.720  10.4      5.755   9.9          22610      -1.00        0.99       0.99
+- getghc-other                   1.807   3.3      1.835   3.2             -1      -1.00        0.98       0.98
+- pspini                         1.077   2.0      2.450   4.2              2      -1.00        0.44       0.44
+- projbd                         0.962   1.7      0.911   1.6          35140      -1.00        1.06       1.06
+- fourwf%(den)                   0.404   0.7      0.869   1.5           1451      -1.00        0.47       0.47
+- others (106)                   0.898   1.6      2.059   3.5             -1      -1.00        0.44       0.44
 -<END_TIMER>
 -
-- subtotal                     106.607  94.9    117.194  94.9                                  0.91       0.91
+- subtotal                      51.320  93.3     54.474  93.8                                  0.94       0.94
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =         112.3, wall_time =         123.5
+- cpu_time =          55.0, wall_time =          58.1
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  60.626  54.0     67.235  54.4          22610      -1.00        0.90       0.90
-- vtowfk(ssdiag)                26.697  23.8     22.866  18.5             -1      -1.00        1.17       1.17
-- nonlop(apply)                 10.860   9.7     11.761   9.5          22610      -1.00        0.92       0.92
-- getghc-other                   3.280   2.9      3.866   3.1             -1      -1.00        0.85       0.85
-- pspini                         1.593   1.4      4.857   3.9              2      -1.00        0.33       0.33
-- projbd                         1.532   1.4      1.214   1.0          35140      -1.00        1.26       1.26
-- fourwf%(den)                   0.670   0.6      1.728   1.4           1451      -1.00        0.39       0.39
-- others (106)                   1.348   1.2      3.667   3.0             -1      -1.00        0.37       0.37
+- fourwf%(pot)                  31.067  56.5     30.983  53.3          22610      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 9.386  17.1      9.612  16.5             -1      -1.00        0.98       0.98
+- nonlop(apply)                  5.720  10.4      5.755   9.9          22610      -1.00        0.99       0.99
+- getghc-other                   1.807   3.3      1.835   3.2             -1      -1.00        0.98       0.98
+- pspini                         1.077   2.0      2.450   4.2              2      -1.00        0.44       0.44
+- projbd                         0.962   1.7      0.911   1.6          35140      -1.00        1.06       1.06
+- fourwf%(den)                   0.404   0.7      0.869   1.5           1451      -1.00        0.47       0.47
+- others (106)                   0.898   1.6      2.059   3.5             -1      -1.00        0.44       0.44
 -<END_TIMER>
 
-- subtotal                     106.607  94.9    117.194  94.9                                  0.91       0.91
+- subtotal                      51.320  93.3     54.474  93.8                                  0.94       0.94
 
 ================================================================================
 
@@ -792,10 +791,10 @@ P           mkmem          14
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=        112.3  wall=        123.5
+- Proc.   0 individual time (sec): cpu=         55.0  wall=         58.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        112.3  wall=        123.5
++Overall time at end (sec) : cpu=         55.0  wall=         58.1
