@@ -1,6 +1,6 @@
 
 .Version 8.7.3 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,14 +15,14 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 21 Feb 2018.
-- ( at 16h16 )
+- ( at 17h01 )
   
 - input  file    -> t06.in
 - output file    -> t06.out
 - root for input  files -> t06i
 - root for output files -> t06o
 
-- inpspheads : Reading pseudopotential header in XML form from /store/abinit/pouillon/tests/Psps_for_tests/26_Fe_oncv.psml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/26_Fe_oncv.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     6
 - psxml2ab: ps_Projector_L     0
@@ -84,7 +84,7 @@ _ WF disk file :      0.720 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -95,7 +95,7 @@ _ WF disk file :      0.720 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
         bs_loband1          0
         bs_loband2          0       0
              ecut      1.00000000E+01 Hartree
--          fftalg         112
+-          fftalg         312
               ixc     -101130
            jdtset        1    2
               kpt      8.33333333E-02  8.33333333E-02  8.33333333E-02
@@ -275,8 +275,8 @@ P           mkmem          14
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10453
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /store/abinit/pouillon/tests/Psps_for_tests/26_Fe_oncv.psml
-- pspatm: opening atomic psp file    /store/abinit/pouillon/tests/Psps_for_tests/26_Fe_oncv.psml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/26_Fe_oncv.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/26_Fe_oncv.psml
 - Fe    ONCVPSP-3.3.0+psml-3.3.0-72 (s
 - 26.00000  16.00000    170801                znucl, zion, pspdat
     9 -101130    2   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -305,11 +305,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
  ETOT  5  -117.47616487311    -1.090E-05 1.755E-06 5.712E-05
  ETOT  6  -117.47616479067     8.244E-08 2.431E-06 1.381E-07
  ETOT  7  -117.47616478053     1.014E-08 1.154E-06 1.627E-09
- ETOT  8  -117.47616477759     2.938E-09 2.695E-07 2.503E-11
- ETOT  9  -117.47616477702     5.720E-10 1.273E-06 3.868E-14
+ ETOT  8  -117.47616477759     2.937E-09 2.695E-07 2.503E-11
+ ETOT  9  -117.47616477702     5.741E-10 1.273E-06 3.868E-14
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  5.720E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  5.741E-10 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.20997468E-01  sigma(3 2)=  0.00000000E+00
@@ -357,20 +357,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.85232469486411E+01
-    Hartree energy  =  1.70783683212959E+01
-    XC energy       = -1.54518276303924E+01
+    Kinetic energy  =  3.85232469486599E+01
+    Hartree energy  =  1.70783683213080E+01
+    XC energy       = -1.54518276303949E+01
     Ewald energy    = -8.58893111400492E+01
     PspCore energy  =  2.86737692574925E+00
-    Loc. psp. energy= -7.63605147539706E+01
-    NL   psp  energy=  1.75650447005100E+00
-    >>>>> Internal E= -1.17476156858675E+02
+    Loc. psp. energy= -7.63605147539953E+01
+    NL   psp  energy=  1.75650447004845E+00
+    >>>>> Internal E= -1.17476156858674E+02
 
-    -kT*entropy     = -7.91834664723242E-06
-    >>>>>>>>> Etotal= -1.17476164777022E+02
+    -kT*entropy     = -7.91834664670347E-06
+    >>>>>>>>> Etotal= -1.17476164777020E+02
 
  Other information on the energy :
-    Total energy(eV)= -3.19668901414815E+03 ; Band energy (Ha)=  -1.6718189885E+01
+    Total energy(eV)= -3.19668901414812E+03 ; Band energy (Ha)=  -1.6718189885E+01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -407,19 +407,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
  ETOT  2  -117.31249140760    -1.88E+00 1.75E-02 2.58E+02 1.071
  ETOT  3  -117.47957939868    -1.67E-01 1.15E-02 1.18E+00 1.182
  ETOT  4  -117.47998977722    -4.10E-04 6.04E-05 2.94E-02 1.167
- ETOT  5  -117.48028367213    -2.94E-04 5.19E-06 4.84E-02 1.300
- ETOT  6  -117.48053247679    -2.49E-04 9.13E-06 7.61E-02 1.369
+ ETOT  5  -117.48028367214    -2.94E-04 5.19E-06 4.84E-02 1.300
+ ETOT  6  -117.48053247678    -2.49E-04 9.13E-06 7.61E-02 1.369
  ETOT  7  -117.48000488356     5.28E-04 1.06E-06 1.49E-02 1.167
- ETOT  8  -117.47998837088     1.65E-05 9.17E-07 4.24E-02 1.167
+ ETOT  8  -117.47998837089     1.65E-05 9.17E-07 4.24E-02 1.167
  ETOT  9  -117.47996571084     2.27E-05 8.13E-07 9.46E-02 1.167
  ETOT 10  -117.48000517622    -3.95E-05 2.99E-06 1.28E-02 1.167
- ETOT 11  -117.48032409089    -3.19E-04 1.47E-06 5.29E-02 1.311
+ ETOT 11  -117.48032409086    -3.19E-04 1.47E-06 5.29E-02 1.311
  ETOT 12  -117.48055965106    -2.36E-04 1.26E-06 3.45E-02 1.370
  ETOT 13  -117.48056832661    -8.68E-06 1.39E-06 1.36E-02 1.370
- ETOT 14  -117.48055139289     1.69E-05 9.57E-07 5.20E-02 1.370
- ETOT 15  -117.48056193884    -1.05E-05 6.31E-07 2.89E-02 1.370
+ ETOT 14  -117.48055139286     1.69E-05 9.57E-07 5.20E-02 1.370
+ ETOT 15  -117.48056193881    -1.05E-05 6.31E-07 2.89E-02 1.370
  ETOT 16  -117.48056508324    -3.14E-06 2.21E-07 2.10E-02 1.370
- ETOT 17  -117.48056733722    -2.25E-06 6.09E-07 1.53E-02 1.370
+ ETOT 17  -117.48056733716    -2.25E-06 6.09E-07 1.53E-02 1.370
 
  At SCF step   17, etot is converged : 
   for the second time, diff in etot=  2.254E-06 < toldfe=  1.000E-05
@@ -442,7 +442,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.0095E-09; max=  6.0871E-07
+ Mean square residual over all n,k,spin=   8.0092E-09; max=  6.0870E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -486,20 +486,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.86823988854200E+01
-    Hartree energy  =  1.71855750502459E+01
-    XC energy       = -1.54917016041338E+01
+    Kinetic energy  =  3.86823989171824E+01
+    Hartree energy  =  1.71855750792504E+01
+    XC energy       = -1.54917016076537E+01
     Ewald energy    = -8.58893111400492E+01
     PspCore energy  =  2.86737692574925E+00
-    Loc. psp. energy= -7.65625168044374E+01
-    NL   psp  energy=  1.72761092473623E+00
-    >>>>> Internal E= -1.17480567762469E+02
+    Loc. psp. energy= -7.65625168594871E+01
+    NL   psp  energy=  1.72761092260783E+00
+    >>>>> Internal E= -1.17480567762400E+02
 
-    -kT*entropy     =  4.25244268896370E-07
-    >>>>>>>>> Etotal= -1.17480567337225E+02
+    -kT*entropy     =  4.25244269089925E-07
+    >>>>>>>>> Etotal= -1.17480567337156E+02
 
  Other information on the energy :
-    Total energy(eV)= -3.19680881390380E+03 ; Band energy (Ha)=  -1.6635500650E+01
+    Total energy(eV)= -3.19680881390193E+03 ; Band energy (Ha)=  -1.6635500670E+01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -525,7 +525,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
            etotal2    -1.1748056734E+02
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         112
+-          fftalg         312
               ixc     -101130
            jdtset        1    2
               kpt      8.33333333E-02  8.33333333E-02  8.33333333E-02
@@ -653,7 +653,7 @@ P           mkmem          14
            spinat2     0.0000000000E+00  0.0000000000E+00  5.0000000000E+00
            strten1     1.2099746829E-01  1.2099746829E-01  1.2099746829E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     1.2071214185E-01  1.2071214185E-01  1.2071214185E-01
+           strten2     1.2071214171E-01  1.2071214171E-01  1.2071214171E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1 -1 -1   0  0  1   0  1  0       1  1  1   0  0 -1   0 -1  0
@@ -690,49 +690,10 @@ P           mkmem          14
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         91.0        1.52      0.025
-- Total wall clock time (s,m,h):         90.9        1.51      0.025
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           91.0, wall_time =           90.9
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  51.716  56.8     48.302  53.1          36963      -1.00        1.07       1.07
-- vtowfk(ssdiag)                15.288  16.8     14.961  16.5             -1      -1.00        1.02       1.02
-- nonlop(apply)                  8.968   9.9      8.505   9.4          36963      -1.00        1.05       1.05
-- getghc-other                   3.036   3.3      2.901   3.2             -1      -1.00        1.05       1.05
-- projbd                         1.655   1.8      1.616   1.8          57462      -1.00        1.02       1.02
-- fourwf%(den)                   1.385   1.5      3.248   3.6           4948      -1.00        0.43       0.43
-- pspini                         0.749   0.8      0.764   0.8              2      -1.00        0.98       0.98
-- fourdp                         0.458   0.5      1.096   1.2            567      -1.00        0.42       0.42
-- others (105)                   0.766   0.8      1.625   1.8             -1      -1.00        0.47       0.47
--<END_TIMER>
--
-- subtotal                      84.021  92.4     83.018  91.3                                  1.01       1.01
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          91.0, wall_time =          90.9
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  51.716  56.8     48.302  53.1          36963      -1.00        1.07       1.07
-- vtowfk(ssdiag)                15.288  16.8     14.961  16.5             -1      -1.00        1.02       1.02
-- nonlop(apply)                  8.968   9.9      8.505   9.4          36963      -1.00        1.05       1.05
-- getghc-other                   3.036   3.3      2.901   3.2             -1      -1.00        1.05       1.05
-- projbd                         1.655   1.8      1.616   1.8          57462      -1.00        1.02       1.02
-- fourwf%(den)                   1.385   1.5      3.248   3.6           4948      -1.00        0.43       0.43
-- pspini                         0.749   0.8      0.764   0.8              2      -1.00        0.98       0.98
-- fourdp                         0.458   0.5      1.096   1.2            567      -1.00        0.42       0.42
-- others (105)                   0.766   0.8      1.625   1.8             -1      -1.00        0.47       0.47
--<END_TIMER>
 
-- subtotal                      84.021  92.4     83.018  91.3                                  1.01       1.01
 
 ================================================================================
 
@@ -803,10 +764,10 @@ P           mkmem          14
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         91.0  wall=         90.9
+- Proc.   0 individual time (sec): cpu=          8.1  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         91.0  wall=         90.9
++Overall time at end (sec) : cpu=          8.1  wall=          8.2
