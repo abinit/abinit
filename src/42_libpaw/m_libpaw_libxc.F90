@@ -1652,9 +1652,10 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
      call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
    end if
 #else
-   ABI_UNUSED(hyb_mixing)
-   ABI_UNUSED(hyb_mixing_sr)
-   ABI_UNUSED(hyb_range)
+!  This is to avoid unused arguments
+   if(.false. .and. present(hyb_mixing) .and. present(hyb_mixing_sr) .and. present(hyb_range)then
+     msg='One should not be here'
+   endif
 #endif
 
  end do
