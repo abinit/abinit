@@ -327,7 +327,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  character(len=fnlen),intent(in) :: filapp
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
- type(wvl_wf_type),intent(in) :: wfs
+ type(wvl_wf_type),optional,intent(in) :: wfs
 !arrays
  integer,intent(in) :: lmn_size(psps%npsp)
 
@@ -429,7 +429,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  ABI_UNUSED(itype)
  ABI_UNUSED(kdep)
  ABI_UNUSED(lmn_size)
- ABI_UNUSED(wfs%ks)
+ if(.false. .and. present(wfs))write(std_out,*)' OK'
 #endif
 
 end subroutine abi_etsf_init
