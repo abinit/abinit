@@ -271,7 +271,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 !scalars
  integer,parameter :: LMAX=3
  real(dp),parameter :: PPAD=tol8
- real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi
+ real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi,c
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -344,14 +344,17 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
      dth = SQRT(7.d0/(16*pi))*(-15.d0*costh**2*sinth + 3.d0**sinth)
      dphi= czero
    else if (ABS(im)==1) then
-     dth= -SQRT(21.d0/(64.d0*pi))*CMPLX(cosphi,sinphi)*(5.d0*costh**3-costh-10.d0*sinth**2*costh)
-     dphi=-SQRT(21.d0/(64.d0*pi))*sinth*(5.d0*costh**2-1)*(0.d0,1.d0)*CMPLX(cosphi,sinphi)
+     c = SQRT(21.d0/(64.d0*pi))
+     dth= -c*      (15.d0*costh**3-11.d0*costh)*            CMPLX(cosphi,sinphi)
+     dphi=-c*sinth*( 5.d0*costh**2-1          )*(0.d0,1.d0)*CMPLX(cosphi,sinphi)
    else if (ABS(im)==2) then
-     dth =SQRT(105.d0/(32.d0*pi))*(2.d0*sinth*costh**2-sinth**3)*CMPLX(costwophi,sintwophi)
-     dphi=SQRT(105.d0/(32*pi))*sinth**2*costh*(0.d0,2.d0)*CMPLX(costwophi,sintwophi)
+     c = SQRT(105.d0/(32.d0*pi))
+     dth =c*(2.d0*sinth*costh**2-sinth**3)   *CMPLX(costwophi,sintwophi)
+     dphi=c*(2.d0*sinth**2*costh)*(0.d0,1.d0)*CMPLX(costwophi,sintwophi)
    else if (abs(im)==3) then
-     dth =-SQRT(35.d0/(64.d0*pi))*3.d0*sinth**2*costh*CMPLX(costhreephi,sinthreephi)
-     dphi= SQRT(35.d0/(64.d0*pi))*sinth**3*(0.d0,3.d0)*CMPLX(costhreephi,sinthreephi)
+     c = SQRT(35.d0/(64.d0*pi))
+     dth =-c*3.d0*sinth**2*costh       *CMPLX(costhreephi,sinthreephi)
+     dphi=-c*3.d0*sinth**3 *(0.d0,1.d0)*CMPLX(costhreephi,sinthreephi)
    end if
 
  case default
