@@ -1,23 +1,7 @@
 **********************************************************************
 Warning pattern : 'Unused dummy argument'
 **********************************************************************
-calc_vhxc_me.F90 = line: 87, var: 'rhog' [70_gw]
 m_dummy.F90 = line: 35, var: 'unused_arg' [32_util]
-m_dvdb.F90 = line: 2672, var: 'cryst' [72_response]
-m_dvdb.F90 = line: 2672, var: 'nspden' [72_response]
-m_dvdb.F90 = line: 4248, var: 'mpi_enreg' [72_response]
-m_haydock.F90 = line: 2264, var: 'hexc_i' [71_bse]
-m_io_kss.F90 = line: 501, var: 'npw_k' [69_wfdesc]
-m_rf2.F90 = line: 400, var: 'dtfil' [72_response]
-m_rf2.F90 = line: 401, var: 'ikpt' [72_response]
-m_rf2.F90 = line: 401, var: 'isppol' [72_response]
-m_rf2.F90 = line: 401, var: 'mband' [72_response]
-m_rf2.F90 = line: 401, var: 'mkmem' [72_response]
-m_rf2.F90 = line: 401, var: 'nsppol' [72_response]
-m_shirley.F90 = line: 1683, var: 'paw_ij' [69_wfdesc]
-m_sigmaph.F90 = line: 1809, var: 'ebands' [78_eph]
-m_sigmaph.F90 = line: 1809, var: 'ikcalc' [78_eph]
-m_sigmaph.F90 = line: 1809, var: 'spin' [78_eph]
 **********************************************************************
-Warning count = 17
+Warning count = 1
 **********************************************************************
