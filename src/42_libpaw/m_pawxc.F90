@@ -4555,7 +4555,8 @@ end subroutine pawxcsphpositron
    msg='nkxc must be 1 or 3 (not OK for GGA)!'
    MSG_BUG(msg)
  end if
- ABI_UNUSED(xclevel)
+!This is to avoid complain that xclevel is an unused argument.
+ if(.false.)write(std_out,*)xclevel
 ! if(xclevel==2) then
 !   msg='GGA is not implemented!'
 !   MSG_ERROR(msg)
