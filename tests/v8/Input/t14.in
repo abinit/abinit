@@ -21,7 +21,7 @@ fit_fixcoeff  = 1 2
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% test_chain = t13.in,t14.in
+#%% test_chain = t13.in,t14.in,t15.in
 #%% system_xml = t14_sys.xml
 #%% coeff_xml = t14_coeffs.xml
 #%% md_hist = t13_HIST

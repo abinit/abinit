@@ -2,21 +2,32 @@
 #Test for multibinit, read the ddb and generate the effective potential into XML file
 # Generate coefficients for the anharmonic part and run the fit process
 ##############################################################################
-energy_reference = -173.52217240339399
-prt_model = 2
+prt_model = 1
 
-dipdip = 0
+dipdip = 1
 dipdip_prt = 1
 
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
+fit_generateTerm = 0
 fit_coeff = 1
-fit_rangePower = 3 4
-fit_cutoff = 7
-fit_ncoeff = 10
-fit_nfixcoeff  = 2
-fit_fixcoeff  = 48 50
+fit_ncoeff = 0
+fit_nfixcoeff  = -1
+
+#---------------------------------------------------------------
+#Inputs for the bound process:
+#---------------------------------------------------------------                                                                                                                                                  
+bound_coeff = 2
+bound_maxCoeff = 5 
+bound_rangePower = 6 8
+bound_cutoff = 7.5
+bound_anhaStrain = 0 
+bound_SPCoupling = 1
+
+bound_cell = 4 4 4
+bound_temp = 100
+bound_step = 100
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -24,13 +35,13 @@ fit_fixcoeff  = 48 50
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t13.in,t14.in,t15.in
-#%% input_ddb = t13_ddb.in
+#%% system_xml = t14_sys.xml
+#%% coeff_xml = t14_coeffs.xml
 #%% md_hist = t13_HIST
 #%% [files]
 #%% files_to_test = 
-#%%   t13.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t13_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   t13_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t15.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t15_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

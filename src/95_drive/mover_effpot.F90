@@ -561,6 +561,7 @@ implicit none
 &         'with ', ii,' additional term'
            if(ii>1)write(message,'(2a)') trim(message),'s'
            call wrtout(std_out,message,'COLL')
+           call wrtout(ab_out,message,'COLL')
 
 !          Copy the new model in coeffs_tmp(jj)
 !          Free the coeffs_tmp array before

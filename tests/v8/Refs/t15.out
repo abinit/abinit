@@ -1,0 +1,463 @@
+
+.Version 8.7.4 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+
+.Copyright (C) 1998-2018 ABINIT group . 
+ MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Thu 22 Feb 2018.
+- ( at 15h39 )
+  
+-  nproc =    1
+
+================================================================================
+
+ Read the information in the reference structure in 
+-/mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t14_sys.xml
+ to initialize the multibinit input
+
+================================================================================
+
+ -outvars_multibinit: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+   prt_model         1
+     strcpli        -1
+ Fit the coefficients :
+        fit_coeff  1
+ fit_generateTerm  0
+       fit_cutoff  0.00000000E+00
+       fit_option  0
+       fit_ncoeff  0
+         fit_grid  1  1  1
+    fit_ts_option  0
+   fit_rangePower  3  4
+   fit_anhaStrain  0
+   fit_SPCoupling  1
+    fit_nfixcoeff -1
+     fit_fixcoeff
+ Bound the coefficients :
+ bound_anhaStrain  0
+ bound_SPCoupling  1
+     bound_cutoff  7.50000000E+00
+       bound_cell   4  4  4
+   bound_maxCoeff   5
+       bound_temp  1.00000000E+02
+       bound_step    100
+ bound_rangePower  6  8
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         1
+dipdip_range         1         1         1
+  dipdip_prt         1
+      ifcana         0
+      ifcout   2000000
+      natifc         5
+       atifc         1   2   3   4   5
+ Description of grid 1 :
+        brav         1
+       ngqpt         1         1         1
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         1
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    0.000E+00
+
+================================================================================
+
+-Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t14_sys.xml
+-Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t14_sys.xml with LibXML library
+
+================================================================================
+ Generation of new ifc
+
+ dipdip is set to one, the dipole-dipole interation is recompute.
+
+ New bound for ifc (long+short):
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
+ Computation of new dipole-dipole interaction.
+
+ Impose acoustic sum rule on total ifc
+
+================================================================================
+
+ This effective potential contains :
+  - Reference energy:       -173.5221724034
+  - Number of types of atoms:    3
+  - Number of atoms:     5
+  - Number of cells:    21
+  - Number of qpoints:    1
+  - Primitive vectors (unit:Bohr):
+    7.426520    0.000000    0.000000
+    0.000000    7.426520    0.000000
+    0.000000    0.000000    7.426520
+  - acell (unit:Bohr):
+    1.000000    1.000000    1.000000
+  - Dielectric tensor:
+    1.000000    0.000000    0.000000
+    0.000000    1.000000    0.000000
+    0.000000    0.000000    1.000000
+  - Elastic tensor (unit:10^2GPa):
+    3.128144    1.018257    1.018257    0.000000    0.000000    0.000000
+    1.018253    3.128149    1.018253    0.000000    0.000000   -0.000000
+    1.018255    1.018255    3.128127   -0.000000   -0.000000   -0.000000
+   -0.000000   -0.000001   -0.000001    0.654090    0.000000    0.000000
+   -0.000003   -0.000000   -0.000003    0.000000    0.654092    0.000000
+   -0.000001   -0.000001    0.000000    0.000000    0.000000    0.654094
+  - Atoms   1
+    - atomic number:   38.0000
+    - atomic mass:   87.6200
+    - cartesian position:    0.000000    0.000000    0.000000
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   2
+    - atomic number:   44.0000
+    - atomic mass:  101.0700
+    - cartesian position:    3.713260    3.713260    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   3
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    0.000000    3.713260    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   4
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.713260    0.000000    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   5
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.713260    3.713260    0.000000
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+
+ Read the coefficients of the polynomial fit from XML and perform some checks
+
+-Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t14_coeffs.xml
+-Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t14_coeffs.xml with LibXML library
+
+================================================================================
+
+-Reading the file the HIST file :
+-/mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t13_HIST
+
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
+
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.0031281255862630E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.7876180836314273E-03
+   Forces          :   3.6336164702180729E-03
+   Stresses        :   1.5400161341335444E-04
+
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Try to bound the model
+ Check if the model is bounded or not
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The size of the supercell for the fit is  2  2  2
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit must  will be generate
+ 1654 coefficients generated 
+
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 5     1261        2.1659705521E+00  3.3922859331E-03  3.2385054595E-03  1.5378047365E-04
+ 6     1252        2.2597350739E+00  3.2231271329E-03  3.0695620838E-03  1.5356504912E-04
+ 7     1045        2.2480600318E+00  3.1186032812E-03  2.9650802026E-03  1.5352307860E-04
+ 8     1275        2.3071009962E+00  3.0609360457E-03  2.9076840294E-03  1.5325201630E-04
+ 9     815         2.3216692007E+00  3.0079104442E-03  2.8542440971E-03  1.5366634714E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.0810597747E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   5.4517540542E-02 (Sr_x-Ru_x)^4
+ 3 =>  -4.7503217334E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   4.8933233300E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1261 =>   6.3664949658E+01 (Ru_x-Ru_x[1 0 0])^4(Ru_y-Ru_y[1 0 0])^2
+ 1252 =>   1.2366835951E+01 (Ru_x-Ru_x[1 0 0])^6
+ 1045 =>   4.6698360347E+03 (Ru_x-O1_x)^2(O1_x-O1_x[1 0 0])^4
+ 1275 =>   5.5106823452E+01 (Ru_x-Ru_x[1 0 0])^2(Ru_y-Ru_y[1 0 0])^4
+ 815 =>   8.8139725648E+00 (Sr_x-Sr_x[1 0 0])^2(Sr_y-Sr_y[1 0 0])^4
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.3216692006690423E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.0079104442433517E-03
+   Forces          :   2.8542440970998686E-03
+   Stresses        :   1.5366634714348293E-04
+
+
+--
+ Try to bound the model with 1 additional term
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
+
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.4734879366E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   9.9173374239E-02 (Sr_x-Ru_x)^4
+ 3 =>  -4.7163107384E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   5.5052447672E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   1.0053252722E+02 (Ru_x-Ru_x[1 0 0])^4(Ru_y-Ru_y[1 0 0])^2
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.1659705520648540E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.3922859331466625E-03
+   Forces          :   3.2385054594994290E-03
+   Stresses        :   1.5378047364723361E-04
+
+
+--
+ Try to bound the model with 2 additional terms
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The size of the supercell for the fit is  2  2  2
+
+ The coefficients present in the effective potential will be used for the fit
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
+
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.2561329088E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   8.7061338576E-02 (Sr_x-Ru_x)^4
+ 3 =>  -5.0930431738E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   5.4940566173E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   9.1162886502E+01 (Ru_x-Ru_x[1 0 0])^4(Ru_y-Ru_y[1 0 0])^2
+ 6 =>   1.1065007131E+01 (Ru_x-Ru_x[1 0 0])^6
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.2597350739484727E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.2231271329372820E-03
+   Forces          :   3.0695620838162943E-03
+   Stresses        :   1.5356504912098794E-04
+
+
+--
+ Try to bound the model with 3 additional terms
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The size of the supercell for the fit is  2  2  2
+
+ The coefficients present in the effective potential will be used for the fit
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
+
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.1930802181E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   8.7494447986E-02 (Sr_x-Ru_x)^4
+ 3 =>  -5.0352559544E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   5.6385123094E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   9.2391503294E+01 (Ru_x-Ru_x[1 0 0])^4(Ru_y-Ru_y[1 0 0])^2
+ 6 =>   1.1291992285E+01 (Ru_x-Ru_x[1 0 0])^6
+ 7 =>   4.5735090003E+03 (Ru_x-O1_x)^2(O1_x-O1_x[1 0 0])^4
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.2480600317856561E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.1186032811747265E-03
+   Forces          :   2.9650802025730171E-03
+   Stresses        :   1.5352307860170904E-04
+
+
+--
+ Try to bound the model with 4 additional terms
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The size of the supercell for the fit is  2  2  2
+
+ The coefficients present in the effective potential will be used for the fit
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
+
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.0550101685E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   7.9355205259E-02 (Sr_x-Ru_x)^4
+ 3 =>  -4.8771543972E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   5.0241405029E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   6.1525163475E+01 (Ru_x-Ru_x[1 0 0])^4(Ru_y-Ru_y[1 0 0])^2
+ 6 =>   1.1759147173E+01 (Ru_x-Ru_x[1 0 0])^6
+ 7 =>   4.6639184341E+03 (Ru_x-O1_x)^2(O1_x-O1_x[1 0 0])^4
+ 8 =>   4.8946596254E+01 (Ru_x-Ru_x[1 0 0])^2(Ru_y-Ru_y[1 0 0])^4
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.3071009961831330E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.0609360457085713E-03
+   Forces          :   2.9076840294118061E-03
+   Stresses        :   1.5325201629676522E-04
+
+
+--
+ Try to bound the model with 5 additional terms
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The size of the supercell for the fit is  2  2  2
+
+ The coefficients present in the effective potential will be used for the fit
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
+
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.0810597747E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   5.4517540542E-02 (Sr_x-Ru_x)^4
+ 3 =>  -4.7503217334E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   4.8933233300E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   6.3664949658E+01 (Ru_x-Ru_x[1 0 0])^4(Ru_y-Ru_y[1 0 0])^2
+ 6 =>   1.2366835951E+01 (Ru_x-Ru_x[1 0 0])^6
+ 7 =>   4.6698360347E+03 (Ru_x-O1_x)^2(O1_x-O1_x[1 0 0])^4
+ 8 =>   5.5106823452E+01 (Ru_x-Ru_x[1 0 0])^2(Ru_y-Ru_y[1 0 0])^4
+ 9 =>   8.8139725648E+00 (Sr_x-Sr_x[1 0 0])^2(Sr_y-Sr_y[1 0 0])^4
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.3216692006690423E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.0079104442433517E-03
+   Forces          :   2.8542440970998686E-03
+   Stresses        :   1.5366634714348293E-04
+
+
+ => The model cannot be bounded
+
+ Fitted coefficients at the end of the fit bound process:
+ 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+
+================================================================================
+
+
+================================================================================
+
+ Generation of the xml file for the model in t15_model.xml
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.3
+
+================================================================================
+
++Total cpu time      5.276  and wall time      5.275 sec
+
+ multibinit : the run completed succesfully.
