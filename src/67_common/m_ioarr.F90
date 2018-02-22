@@ -541,7 +541,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
 #else
      BIGDFT_NOTENABLED_ERROR()
-     if(.false. and present(wvl_den))then
+     if(.false. .and. present(wvl_den))then
        write(std_out,*)' One should not be here'
      endif
 #endif
