@@ -4040,7 +4040,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! now we can initialize the ddk velocities, on the FS grid only
  if (dtset%eph_transport > 0) then
    call ddk_read_fsvelocities(ddk, fstab, comm)
-   call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
+   call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
  end if
 
  ! TODO: Support nsig in phgamma_init

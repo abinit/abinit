@@ -250,6 +250,8 @@
 & mpi_enreg%me_g0,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 & npwin,npwout,nspinor,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 & ph3din,ph3dout,signs_,sij,svectout_,pi,ucvol,vectin,vectout_)
+#else
+ ABI_UNUSED(nnlout)
 #endif
 
  if (choice==1.and.signs==1) then
