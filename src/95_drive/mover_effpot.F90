@@ -536,7 +536,8 @@ implicit none
 !        Get the additional coeff         
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
 &                inp%fit_boundPower,0,inp%fit_boundTerm,ncoeff,1,comm,cutoff_in=inp%fit_boundCutoff,&
-&                max_power_strain=2,verbose=.true.,positive=.true.,only_even_power=.true.) 
+&                max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%fit_SPCoupling==1,&
+&                anharmstr=inp%fit_anhaStrain==1,only_even_power=.true.) 
 
 !        Store the max number of coefficients after the fit process         
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff

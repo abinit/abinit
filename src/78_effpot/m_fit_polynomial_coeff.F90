@@ -721,7 +721,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm) 
 
      if(need_verbose) then
-       write(message, '(a,I0)' )' Selecting the coefficient number ',list_coeffs(icycle)
+       write(message, '(a,I0,2a)' )' Selecting the coefficient number ',list_coeffs(icycle),&
+&                                   ' ===> ',trim(coeffs_tmp(icycle)%name)
        call wrtout(std_out,message,'COLL')
    
        write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
