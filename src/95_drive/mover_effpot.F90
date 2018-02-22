@@ -184,7 +184,7 @@ implicit none
 !Initialisaton of variable
  if(option == -1.or.option == -2) then
 !  Bound process option
-   sc_size(:) = inp%fit_boundCell
+   sc_size(:) = inp%bound_cell
  else if(option == -3) then
 !  Heff option
    sc_size(:) = (/1,1,1/)
@@ -312,10 +312,10 @@ implicit none
      dtset%restartxf = 0  ! RESTART from (X,F) history
      dtset%dtion = 100  ! Delta Time for IONs
      dtset%ionmov = 13  ! Number for the dynamic
-     dtset%ntime = inp%fit_boundStep  ! Number of TIME steps 
+     dtset%ntime = inp%bound_step  ! Number of TIME steps 
      dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic
-     dtset%mdtemp(1) = inp%fit_boundTemp   !Molecular Dynamics Temperatures 
-     dtset%mdtemp(2) = inp%fit_boundTemp !Molecular Dynamics Temperatures 
+     dtset%mdtemp(1) = inp%bound_temp   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = inp%bound_temp !Molecular Dynamics Temperatures 
      dtset%strtarget(1:6) = zero
    end if
    
@@ -535,9 +535,9 @@ implicit none
          
 !        Get the additional coeff         
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
-&                inp%fit_boundPower,0,inp%fit_boundTerm,ncoeff,1,comm,cutoff_in=inp%fit_boundCutoff,&
-&                max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%fit_SPCoupling==1,&
-&                anharmstr=inp%fit_anhaStrain==1,only_even_power=.true.) 
+&                inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
+&                max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
+&                anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.) 
 
 !        Store the max number of coefficients after the fit process         
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -627,9 +627,9 @@ implicit none
 !TEST_AM!
          sc_size_TS = (/2,2,2/)
          call polynomial_coeff_getNorder(coeffs_bound,effective_potential%crystal,cutoff,&
-&       ncoeff_bound,ncoeff_bound_tot,inp%fit_boundPower,inp%fit_boundPower(2),2,sc_size_TS,&
-&       comm,anharmstr=inp%fit_anhaStrain==1,&
-&       spcoupling=inp%fit_SPCoupling==1,verbose=.false.,distributed=.false.,&
+&       ncoeff_bound,ncoeff_bound_tot,inp%bound_rangePower,inp%bound_rangePower(2),2,sc_size_TS,&
+&       comm,anharmstr=inp%bound_anhaStrain==1,&
+&       spcoupling=inp%bound_SPCoupling==1,verbose=.false.,distributed=.false.,&
 &       only_even_power=.true.,only_odd_power=.false.)
 
        if(iam_master)then
@@ -681,7 +681,7 @@ implicit none
        model_bound = 0
        model_ncoeffbound = 0
 
-       do ii=2,inp%fit_boundTerm
+       do ii=2,inp%bound_maxCoeff
 !        Compute the number of possible combination
          nmodels = 1
          ABI_ALLOCATE(list_bound,(nmodels,ii))

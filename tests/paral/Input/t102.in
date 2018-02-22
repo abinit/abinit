@@ -10,7 +10,7 @@ dipdip_prt = 1
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
 fit_coeff = 1
-fit_ncycle = 2
+fit_ncoeff = 2
 fit_nfixcoeff  = 2 
 fit_fixcoeff  = 1 2 
 

@@ -38,14 +38,12 @@
  fit_generateTerm  0
        fit_cutoff  0.00000000E+00
        fit_option  0
-       fit_ncycle  2
+       fit_ncoeff  2
          fit_grid  1  1  1
     fit_ts_option  0
    fit_rangePower  3  4
    fit_anhaStrain  0
    fit_SPCoupling  1
-    fit_nbancoeff  0
-     fit_bancoeff
     fit_nfixcoeff  2
      fit_fixcoeff         1     2
  Miscellaneous information :

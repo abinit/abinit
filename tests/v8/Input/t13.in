@@ -14,7 +14,7 @@ dipdip_prt = 1
 fit_coeff = 1
 fit_rangePower = 3 4
 fit_cutoff = 7
-fit_ncycle = 10
+fit_ncoeff = 10
 fit_nfixcoeff  = 2
 fit_fixcoeff  = 48 50
 

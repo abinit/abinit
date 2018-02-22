@@ -57,9 +57,6 @@ module m_multibinit_dataset
 
  type multibinit_dtset_type
 
-! Variables should be declared on separated lines in order to reduce the occurence of bzr conflicts.
-! Since all these input variables are described in the multibinit_help.html
-! file, they are not described in length here ...
 ! Integer
   integer :: asr
   integer :: brav
@@ -71,15 +68,17 @@ module m_multibinit_dataset
   integer :: eivec
   integer :: elphflag
   integer :: enunit
-  integer :: fit_bound
-  integer :: fit_boundTerm
-  integer :: fit_boundStep
+  integer :: bound_coeff
+  integer :: bound_maxCoeff
+  integer :: bound_SPCoupling
+  integer :: bound_AnhaStrain
+  integer :: bound_step
   integer :: fit_anhaStrain
   integer :: fit_SPCoupling
   integer :: fit_generateTerm
   integer :: fit_coeff
   integer :: fit_option
-  integer :: fit_ncycle
+  integer :: fit_ncoeff
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
   integer :: fit_ts_option
@@ -112,8 +111,8 @@ module m_multibinit_dataset
   integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
-  integer :: fit_boundPower(2)
-  integer :: fit_boundCell(3)
+  integer :: bound_rangePower(2)
+  integer :: bound_cell(3)
   integer :: n_cell(3)
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: ng2qpt(3)
@@ -127,8 +126,8 @@ module m_multibinit_dataset
   real(dp) :: conf_power_fact_strain
   real(dp) :: delta_df
   real(dp) :: energy_reference
-  real(dp) :: fit_boundCutoff
-  real(dp) :: fit_boundTemp
+  real(dp) :: bound_cutoff
+  real(dp) :: bound_Temp
   real(dp) :: fit_cutoff
   real(dp) :: fit_tolMSDF
   real(dp) :: fit_tolMSDS
@@ -249,15 +248,17 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%energy_reference= zero
  multibinit_dtset%enunit=0
  multibinit_dtset%fit_anhaStrain=0
- multibinit_dtset%fit_bound=0
- multibinit_dtset%fit_boundCutoff=0 
- multibinit_dtset%fit_boundTerm=4
- multibinit_dtset%fit_boundTemp=325
- multibinit_dtset%fit_boundStep=1000
+ multibinit_dtset%bound_coeff=0
+ multibinit_dtset%bound_anhaStrain=0
+ multibinit_dtset%bound_cutoff=0 
+ multibinit_dtset%bound_maxCoeff=4
+ multibinit_dtset%bound_temp=325
+ multibinit_dtset%bound_step=1000
+ multibinit_dtset%bound_SPCoupling=1
  multibinit_dtset%fit_coeff=0
  multibinit_dtset%fit_cutoff=0 
  multibinit_dtset%fit_nbancoeff=0
- multibinit_dtset%fit_ncycle=0
+ multibinit_dtset%fit_ncoeff=0
  multibinit_dtset%fit_ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
  multibinit_dtset%fit_option=0
@@ -300,8 +301,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%dipdip_range(:)= (/0,0,0/)
  multibinit_dtset%fit_grid(:)= 1
  multibinit_dtset%fit_rangePower(:)= (/3,4/)
- multibinit_dtset%fit_boundPower(:)= (/6,6/)
- multibinit_dtset%fit_boundCell(:)= (/6,6,6/)
+ multibinit_dtset%bound_rangePower(:)= (/6,6/)
+ multibinit_dtset%bound_cell(:)= (/6,6,6/)
  multibinit_dtset%n_cell(:)= 0
  multibinit_dtset%ngqpt(:) = 0
  multibinit_dtset%ng2qpt(:)= 0
@@ -628,14 +629,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
- multibinit_dtset%fit_ncycle=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncycle',tread,'INT')
- if(tread==1) multibinit_dtset%fit_ncycle=intarr(1)
- if(multibinit_dtset%fit_ncycle<0)then
+ multibinit_dtset%fit_ncoeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_ncoeff=intarr(1)
+ if(multibinit_dtset%fit_ncoeff<0)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_ncycle is',multibinit_dtset%fit_ncycle,', but the only allowed values',ch10,&
+&   'fit_ncoeff is',multibinit_dtset%fit_ncoeff,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
-&   'Action: correct fit_ncycle in your input file.'
+&   'Action: correct fit_ncoeff in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1198,18 +1199,41 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%fit_bound=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_bound',tread,'INT')
- if(tread==1) multibinit_dtset%fit_bound=intarr(1)
- if(multibinit_dtset%fit_bound<0.and.multibinit_dtset%fit_bound>1)then
+ multibinit_dtset%bound_coeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_coeff',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_coeff=intarr(1)
+ if(multibinit_dtset%bound_coeff<0.and.multibinit_dtset%bound_coeff>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_bound is',multibinit_dtset%fit_bound,', but the only allowed values',ch10,&
+&   'bound_coeff is',multibinit_dtset%bound_coeff,', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
-&   'Action: correct fit_bound in your input file.'
+&   'Action: correct bound_coeff in your input file.'
    MSG_ERROR(message)
  end if
 
-   multibinit_dtset%fit_SPCoupling=1
+ multibinit_dtset%bound_anhaStrain=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_anhaStrain',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_anhaStrain=intarr(1)
+ if(multibinit_dtset%bound_anhaStrain<0.and.multibinit_dtset%bound_anhaStrain>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_anhaStrain is',multibinit_dtset%bound_anhaStrain,', but the only allowed values',ch10,&
+&   'are 0 or 1 for multibinit.',ch10,&
+&   'Action: correct fit_anhaStrain in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%bound_SPCoupling=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_SPCoupling',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_SPCoupling=intarr(1)
+ if(multibinit_dtset%bound_SPCoupling<0.and.multibinit_dtset%bound_SPCoupling>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+     &   'fit_SPCoupling is',multibinit_dtset%bound_SPCoupling,&
+     &   ', but the only allowed values',ch10,&
+&   'are 0 or 1 for multibinit.',ch10,&
+&   'Action: correct fit_SPCoupling in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_SPCoupling=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_SPCoupling',tread,'INT')
  if(tread==1) multibinit_dtset%fit_SPCoupling=intarr(1)
  if(multibinit_dtset%fit_SPCoupling<0.and.multibinit_dtset%fit_SPCoupling>1)then
@@ -1221,47 +1245,47 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%fit_boundCutoff=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundCutoff',tread,'DPR')
- if(tread==1) multibinit_dtset%fit_boundCutoff=dprarr(1)
- if(multibinit_dtset%fit_boundCutoff<0)then
+ multibinit_dtset%bound_cutoff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_cutoff',tread,'DPR')
+ if(tread==1) multibinit_dtset%bound_cutoff=dprarr(1)
+ if(multibinit_dtset%bound_cutoff<0)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_boundCutoff is',multibinit_dtset%fit_boundCutoff,', but the only allowed values',ch10,&
+&   'bound_cutoff is',multibinit_dtset%bound_cutoff,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
-&   'Action: correct fit_boundCutoff in your input file.'
+&   'Action: correct bound_cutoff in your input file.'
    MSG_ERROR(message)
  end if
 
  
-  multibinit_dtset%fit_boundTerm=4
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundTerm',tread,'INT')
- if(tread==1) multibinit_dtset%fit_boundTerm=intarr(1)
- if(multibinit_dtset%fit_boundTerm<0.and.multibinit_dtset%fit_boundTerm>1)then
+  multibinit_dtset%bound_maxCoeff=4
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_maxCoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_maxCoeff=intarr(1)
+ if(multibinit_dtset%bound_maxCoeff<0.and.multibinit_dtset%bound_maxCoeff>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_boundTerm is',multibinit_dtset%fit_boundTerm,', but the only allowed values',ch10,&
+&   'bound_maxCoeff is',multibinit_dtset%bound_maxCoeff,', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
-&   'Action: correct fit_boundTerm in your input file.'
+&   'Action: correct bound_maxCoeff in your input file.'
    MSG_ERROR(message)
  end if
 
-  multibinit_dtset%fit_boundTemp=325
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundTemp',tread,'DPR')
- if(tread==1) multibinit_dtset%fit_boundTemp=dprarr(1)
- if(multibinit_dtset%fit_boundTemp<=0)then
+  multibinit_dtset%bound_temp=325
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_temp',tread,'DPR')
+ if(tread==1) multibinit_dtset%bound_temp=dprarr(1)
+ if(multibinit_dtset%bound_temp<=0)then
    write(message, '(a,f10.1,a,a,a,a,a)' )&
-&   'Fit_BoundTemp is ',multibinit_dtset%fit_boundTemp,'. The only allowed values',ch10,&
+&   'Bound_Temp is ',multibinit_dtset%bound_temp,'. The only allowed values',ch10,&
 &   'are positives values.',ch10,&
-&   'Action: correct Fit_BoundTemp in your input file.'
+&   'Action: correct Bound_Temp in your input file.'
    MSG_ERROR(message)
  end if 
- multibinit_dtset%fit_boundStep=1000
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundStep',tread,'INT')
- if(tread==1) multibinit_dtset%fit_boundStep=intarr(1)
- if(multibinit_dtset%fit_boundStep<0.and.multibinit_dtset%fit_boundStep>1)then
+ multibinit_dtset%bound_step=1000
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_step',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_step=intarr(1)
+ if(multibinit_dtset%bound_step<0.and.multibinit_dtset%bound_step>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_boundStep is',multibinit_dtset%fit_boundStep,', but the only allowed values',ch10,&
+&   'bound_step is',multibinit_dtset%bound_step,', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
-&   'Action: correct fit_boundStep in your input file.'
+&   'Action: correct bound_step in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1313,28 +1337,28 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end do
 
- multibinit_dtset%fit_boundPower(:)= (/6,6/)
- call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'fit_boundPower',tread,'INT')
- if(tread==1) multibinit_dtset%fit_boundPower(1:2)=intarr(1:2)
+ multibinit_dtset%bound_rangePower(:)= (/6,6/)
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'bound_rangePower',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_rangePower(1:2)=intarr(1:2)
  do ii=1,2
-   if(multibinit_dtset%fit_boundPower(ii)<=0.or.multibinit_dtset%fit_boundPower(ii)>20)then
+   if(multibinit_dtset%bound_rangePower(ii)<=0.or.multibinit_dtset%bound_rangePower(ii)>20)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'fit_boundPower(',ii,') is ',multibinit_dtset%fit_boundPower(ii),', which is lower',&
+&     'bound_rangePower(',ii,') is ',multibinit_dtset%bound_rangePower(ii),', which is lower',&
 &     ' than 0 of superior than 20.',&
-&     ch10,'Action: correct fit_boundPower(',ii,') in your input file.'
+&     ch10,'Action: correct bound_rangePower(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
  end do
 
-  multibinit_dtset%fit_boundCell(:)= (/6,6,6/)
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_boundCell',tread,'INT')
- if(tread==1) multibinit_dtset%fit_boundCell(1:3)=intarr(1:3)
+  multibinit_dtset%bound_cell(:)= (/6,6,6/)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'bound_cell',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_cell(1:3)=intarr(1:3)
  do ii=1,3
-   if(multibinit_dtset%fit_boundCell(ii)<=0.or.multibinit_dtset%fit_boundCell(ii)>20)then
+   if(multibinit_dtset%bound_cell(ii)<=0.or.multibinit_dtset%bound_cell(ii)>20)then
      write(message, '(a,i0,a,i0,4a,i0,a)' )&
-&     'fit_boundCell(',ii,') is ',multibinit_dtset%fit_boundCell(ii),', which is lower',&
+&     'bound_cell(',ii,') is ',multibinit_dtset%bound_cell(ii),', which is lower',&
 &     ' than 0 of superior than 20.',&
-&     ch10,'Action: correct fit_boundCell(',ii,') in your input file.'
+&     ch10,'Action: correct bound_cell(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
  end do
@@ -1819,28 +1843,34 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    end if   
    write(nunit,'(1x,a16,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
    write(nunit,'(1x,a16,I3.1)')'      fit_option',multibinit_dtset%fit_option
-   write(nunit,'(1x,a16,2x,I0)')'      fit_ncycle',multibinit_dtset%fit_ncycle   
+   write(nunit,'(1x,a16,2x,I0)')'      fit_ncoeff',multibinit_dtset%fit_ncoeff   
    write(nunit,'(1x,a16,3i3)') '        fit_grid',multibinit_dtset%fit_grid
    write(nunit,'(1x,a16,I3.1)')'   fit_ts_option',multibinit_dtset%fit_ts_option
    write(nunit,'(1x,a16,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
    write(nunit,'(1x,a16,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
    write(nunit,'(1x,a16,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
-   write(nunit,'(1x,a16,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff   
-   write(nunit,'(1x,a16)',advance='no')'   fit_bancoeff'
-   write(nunit,'(4x,9i6)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
-   write(nunit,'(1x,a16,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
-   write(nunit,'(1x,a16)',advance='no')'   fit_fixcoeff'
-   write(nunit,'(4x,9i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
+   if(multibinit_dtset%fit_nbancoeff /= 0) then
+     write(nunit,'(1x,a16,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff
+     write(nunit,'(1x,a16)',advance='no')'   fit_bancoeff'
+     write(nunit,'(4x,9i6)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
+   end if
+   if(multibinit_dtset%fit_nfixcoeff /= 0) then    
+     write(nunit,'(1x,a16,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
+     write(nunit,'(1x,a16)',advance='no')'   fit_fixcoeff'
+     write(nunit,'(4x,9i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
+   end if
  end if
 
- if(multibinit_dtset%fit_bound /=0)then
+ if(multibinit_dtset%bound_coeff /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
-   write(nunit,'(1x,a16,es16.8)')'fit_boundcutoff',multibinit_dtset%fit_boundCutoff
-   write(nunit,'(3x,a14,3i10)') ' fit_boundCell',multibinit_dtset%fit_boundCell
-   write(nunit,'(3x,a14,i10.0)')' fit_boundTerm',multibinit_dtset%fit_boundTerm
-   write(nunit,'(3x,a14,F10.1)')' fit_boundTemp',multibinit_dtset%fit_boundTemp
-   write(nunit,'(3x,a14,i10)')  ' fit_boundStep',multibinit_dtset%fit_boundStep
-   write(nunit,'(3x,a14,2i10)') 'fit_boundPower',multibinit_dtset%fit_boundPower
+   write(nunit,'(1x,a16,I3)')    'bound_anhaStrain',multibinit_dtset%bound_anhaStrain   
+   write(nunit,'(1x,a16,I3)')    'bound_SPCoupling',multibinit_dtset%bound_SPCoupling
+   write(nunit,'(1x,a16,es16.8)')'    bound_cutoff',multibinit_dtset%bound_cutoff
+   write(nunit,'(1x,a16,1x,3I3)')   '      bound_cell',multibinit_dtset%bound_cell
+   write(nunit,'(1x,a16,1x,I3)')    '  bound_maxCoeff',multibinit_dtset%bound_maxCoeff
+   write(nunit,'(1x,a16,es16.8)') '      bound_temp',multibinit_dtset%bound_temp
+   write(nunit,'(1x,a16,I7)')   '      bound_step',multibinit_dtset%bound_step
+   write(nunit,'(1x,a16,2I3.1)')'bound_rangePower',multibinit_dtset%bound_rangePower
  end if
  
 !Write the general information
