@@ -275,8 +275,8 @@ end subroutine ddk_init
 
 
 
-subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
-                   psps,mpi_enreg,comm)
+subroutine eph_ddk(wfk_path,dtfil,ebands,&
+                   psps,inclvkb,mpi_enreg,comm)
 
  use defs_basis
  use defs_datatypes
@@ -314,12 +314,11 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  character(len=*),intent(in) :: wfk_path
  integer,intent(in) :: comm
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(in) :: dtset
  type(wfk_t),target :: in_wfk
  type(vkbr_t) :: vkbr
  type(ebands_t),intent(in) :: ebands
  type(crystal_t) :: cryst
- type(hdr_type) :: hdr0, hdr_tmp
+ type(hdr_type) :: hdr_tmp
  type(pseudopotential_type),intent(in) :: psps
  type(mpi_type),intent(inout) :: mpi_enreg
 
@@ -358,14 +357,11 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
   MSG_ERROR("The matrix elements are only written in NETCDF format")
 #endif
 
- inclvkb = dtset%inclvkb
-
  ! Open input file, extract dimensions and allocate workspace arrays.
  in_iomode = iomode_from_fname(wfk_path)
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
 
  mpw_ki = maxval(in_wfk%Hdr%npwarr)
- hdr0 = in_wfk%hdr
  nkibz = in_wfk%nkpt
  nsppol = in_wfk%nsppol
  nspinor = in_wfk%nspinor
@@ -384,10 +380,10 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 
  ! allocate optical matrix elements
  ABI_MALLOC(dipoles,      (3,2,mband,mband,nkfull,nsppol))
- write(*,*) 'inclvkb: ', inclvkb
- write(*,*) 'nkpoints:', nkfull
- write(*,*) 'nbands:  ', mband
- write(*,*) 'spin:    ', nsppol
+ write(std_out,*) 'inclvkb: ', inclvkb
+ write(std_out,*) 'nkpoints:', nkfull
+ write(std_out,*) 'nbands:  ', mband
+ write(std_out,*) 'spin:    ', nsppol
 
  !start counting the time
  call cwtime(cpu,wall,gflops,"start")
@@ -400,7 +396,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
      npw_ki  = in_wfk%hdr%npwarr(ik_bz)
      istwf_ki = in_wfk%hdr%istwfk(ik_bz)
      kbz = ebands%kptns(:,ik_bz)
-     write(*,*) 'kpt:', ik_bz, kbz
+     write(std_out,*) 'kpt:', ik_bz, kbz
 
      ! Read WF
      call wfk_read_band_block(in_wfk,[1,nband_k],ik_bz,spin,xmpio_single,&
@@ -412,13 +408,13 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
      end if
 
      do ib_v=bandmin,bandmax ! Loop over bands
-       cgshift=(ib_v-1)*npw_ki*nspinor + (spin-1)*npw_ki
+       cgshift=(ib_v-1)*npw_ki*nspinor
        ug_v = cmplx(cg_ki(1,cgshift+1:cgshift+npw_ki),&
                     cg_ki(2,cgshift+1:cgshift+npw_ki))
 
        do ib_c=ib_v,mband ! Loop over bands
          if (ib_c < bandmin .or. ib_c > bandmax) cycle
-         cgshift=(ib_c-1)*npw_ki*nspinor + (spin-1)*npw_ki
+         cgshift=(ib_c-1)*npw_ki*nspinor
          ug_c = cmplx(cg_ki(1,cgshift+1:cgshift+npw_ki),&
                       cg_ki(2,cgshift+1:cgshift+npw_ki))
 
@@ -427,13 +423,15 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
                             kbz,ug_c,ug_v,kg_ki)
 
          ! Save matrix elements of i*r in the IBZ
-         !ediff = (ebands%eig(ib_c,ik_bz,spin) - ebands%eig(ib_v,ik_bz,spin))
          dipoles(:,1,ib_c,ib_v,ik_bz,spin) = real(sum(ihrc(:,:),2))
-         dipoles(:,2,ib_c,ib_v,ik_bz,spin) = aimag(sum(ihrc(:,:),2))
-         ! Hermitian conjugate
-         dipoles(:,1,ib_v,ib_c,ik_bz,spin) = real(sum(ihrc(:,:),2))
-         dipoles(:,2,ib_v,ib_c,ik_bz,spin) = -aimag(sum(ihrc(:,:),2))
-
+         dipoles(:,1,ib_v,ib_c,ik_bz,spin) = real(sum(ihrc(:,:),2)) ! Hermitian conjugate
+         if (ib_v == ib_c) then 
+            dipoles(:,2,ib_c,ib_v,ik_bz,spin) = 0
+            dipoles(:,2,ib_v,ib_c,ik_bz,spin) = 0
+         else
+            dipoles(:,2,ib_c,ib_v,ik_bz,spin) =  aimag(sum(ihrc(:,:),2))
+            dipoles(:,2,ib_v,ib_c,ik_bz,spin) = -aimag(sum(ihrc(:,:),2)) ! Hermitian conjugate
+         end if
        end do
      end do
 
@@ -453,16 +451,16 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
 #ifdef HAVE_NETCDF
    ! Output DDK file in netcdf format.
    !if (me == master) then
+
+     ! Have to build hdr on k-grid with info about perturbation.
+     call hdr_copy(in_wfk%hdr, hdr_tmp)
+     hdr_tmp%qptn = [0,0,0]
+
      do ii=1,3
          fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_DDK.nc")
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
-         ! Have to build hdr on k-grid with info about perturbation.
-         call hdr_copy(hdr0, hdr_tmp)
-         hdr_tmp%kptopt = dtset%kptopt
-         hdr_tmp%pertcase = ii!pertcase
-         hdr_tmp%qptn = dtset%qptn(1:3)
          NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-         call hdr_free(hdr_tmp)
+         hdr_tmp%pertcase = cryst%natom+ii
          NCF_CHECK(crystal_ncwrite(cryst, ncid))
          NCF_CHECK(ebands_ncwrite(ebands, ncid))
          ncerr = nctk_def_arrays(ncid, [ &
@@ -470,13 +468,16 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
             "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
          NCF_CHECK(ncerr)
          NCF_CHECK(nctk_set_datamode(ncid))
-         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:), &
-           count=[2, dtset%mband, dtset%mband, nkfull, dtset%nsppol])
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:) )
          NCF_CHECK(ncerr)
          NCF_CHECK(nf90_close(ncid))
-    end do
+     end do
+     call hdr_free(hdr_tmp)
+
    !end if
 #endif
+
+ ABI_FREE(dipoles)
 
 end subroutine
 !!***
