@@ -2314,6 +2314,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
+ ABI_UNUSED(hexc_i%hsize_dense)
 
  my_nt = my_t2-my_t1+1
 

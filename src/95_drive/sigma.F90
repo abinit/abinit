@@ -1036,7 +1036,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&
 & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
-& ks_rhor,ks_rhog,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taug=ks_taug,taur=ks_taur)
+& ks_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taug=ks_taug,taur=ks_taur)
  ABI_FREE(tmp_kstab)
 
 !#ifdef DEV_HAVE_SCGW_SYM
@@ -1533,7 +1533,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call calc_vhxc_me(Wfd,QP_mflags,QP_me,Cryst,Dtset,nfftf,ngfftf,&
 &   qp_vtrial,qp_vhartr,qp_vxc,Psps,Pawtab,QP_paw_an,Pawang,Pawfgrtab,QP_paw_ij,dijexc_core,&
-&   qp_rhor,qp_rhog,usexcnhat,qp_nhat,qp_nhatgr,nhatgrdim,tmp_kstab,taug=qp_taug,taur=qp_taur)
+&   qp_rhor,usexcnhat,qp_nhat,qp_nhatgr,nhatgrdim,tmp_kstab,taug=qp_taug,taur=qp_taur)
    ABI_FREE(tmp_kstab)
 
 !  #ifdef DEV_HAVE_SCGW_SYM

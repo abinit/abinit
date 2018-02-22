@@ -1829,6 +1829,10 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
 ! *************************************************************************
 
+ ABI_UNUSED(ikcalc)
+ ABI_UNUSED(spin)
+ ABI_UNUSED(ebands%mband)
+
  ! Compute QP corrections.
  ! Symmetrize self-energy matrix elements (symsigma == 1).
  !if (self%symsigma == 1) then

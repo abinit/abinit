@@ -498,7 +498,7 @@ end subroutine write_vkb
 !!
 !! SOURCE
 
-subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,&
+subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 &          nbandksseff,natom,Psps,ene_k,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
 
@@ -513,7 +513,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,isppol,iomode,kss_npw,nspinor,kss_unt,nbandksseff
- integer,intent(in) :: natom,npw_k
+ integer,intent(in) :: natom
  type(pseudopotential_type),intent(in) :: Psps
 !arrays
  integer,intent(in) :: gbig(3,kss_npw)
