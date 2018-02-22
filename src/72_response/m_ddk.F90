@@ -365,6 +365,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
 
  mpw_ki = maxval(in_wfk%Hdr%npwarr)
+ hdr0 = in_wfk%hdr
  nkibz = in_wfk%nkpt
  nsppol = in_wfk%nsppol
  nspinor = in_wfk%nspinor
@@ -456,12 +457,12 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,ebands,&
          fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_DDK.nc")
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
          ! Have to build hdr on k-grid with info about perturbation.
-         !call hdr_copy(hdr0, hdr_tmp)
-         !hdr_tmp%kptopt = dtset%kptopt
-         !hdr_tmp%pertcase = ii!pertcase
-         !hdr_tmp%qptn = dtset%qptn(1:3)
-         !NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-         !call hdr_free(hdr_tmp)
+         call hdr_copy(hdr0, hdr_tmp)
+         hdr_tmp%kptopt = dtset%kptopt
+         hdr_tmp%pertcase = ii!pertcase
+         hdr_tmp%qptn = dtset%qptn(1:3)
+         NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+         call hdr_free(hdr_tmp)
          NCF_CHECK(crystal_ncwrite(cryst, ncid))
          NCF_CHECK(ebands_ncwrite(ebands, ncid))
          ncerr = nctk_def_arrays(ncid, [ &
