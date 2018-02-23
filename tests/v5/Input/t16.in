@@ -18,10 +18,9 @@ nsppol8 1  nspden8 1  nspinor8 2               ! non-magnetic LDA+U+SO
 
 # === Structure and cell
 natom 4 ntypat 2 typat 1 1 2 2
-spinat 0 0 1   0 0 -1    0 0 0  0 0 0
 # NB: this is the spin direction perpendicular to the AFM planes, 
 # preserves the 3 axis even when the spin is rotated along with the lattice
-#spinat 0.5 0.5 -0.5  -0.5 -0.5 0.5      0 0 0   0 0 0
+spinat 0.5 0.5 -0.5  -0.5 -0.5 0.5      0 0 0   0 0 0
 znucl  28.0 8.0
 xred 0   0   0
      0.0 0.0 0.5
@@ -36,11 +35,11 @@ nband5 60 nband6 60 nband7 60 nband8 60
 occopt 7  tsmear 0.015
 
 # === SCF cycle options
-nstep 15  tolvrs 1.d-7
+nstep 10  tolvrs 1.d-7
 ecut 8. pawecutdg 10.
 diemix 0.5
 diemixmag5 -1 diemixmag6 -1  diemixmag7 -1  diemixmag8 -1
-nstep6 10 nstep7 16 nstep8 16
+#nstep6 10 nstep7 16 nstep8 16
 
 # === K-points and syms
 # The following kptopt values are actually default values for the different nspden cases.
@@ -254,7 +253,7 @@ pawprtvol 3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t16.out, tolnlines = 120, tolabs = 1.100e-03, tolrel = 4.000e-02, fld_options = -medium
+#%%   t16.out, tolnlines = 1020, tolabs = 1.100e-03, tolrel = 4.000e-02, fld_options = -medium
 #%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 3
