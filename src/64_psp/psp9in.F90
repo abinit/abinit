@@ -629,10 +629,8 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_PSML is false
  if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_PSML is false
- if(.false.)write(std_out,*)level  ! Just to keep level when HAVE_PSML is false
  if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_PSML is false
  if(.false.)write(std_out,*)mpsang ! Just to keep mpsang when HAVE_PSML is false
- if(.false.)write(std_out,*)nctab  ! Just to keep nctab when HAVE_PSML is false
  if(.false.)write(std_out,*)pspso  ! Just to keep pspso when HAVE_PSML is false
  if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_PSML is false
  if(.false.)write(std_out,*)qgrid_vl ! Just to keep qgrid_vl when HAVE_PSML is false
