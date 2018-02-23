@@ -189,7 +189,6 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    end do
  else
    call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=nprojsr)
-   write(*,*) "DEBUG_PSML", nprojsr
    if (nprojsr > 0) then
      call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, indexes=idx_sr)
      do iproj = 1, nprojsr
