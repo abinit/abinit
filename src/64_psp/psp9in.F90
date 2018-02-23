@@ -122,6 +122,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Local variables-------------------------------
 !no_abirules
 !scalars
+#if defined HAVE_PSML
  character(len=500) :: message
  character(len=30)  :: creator
  character(len=7), parameter  :: oncvpsp_name = "ONCVPSP"
@@ -136,7 +137,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !arrays
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
-#if defined HAVE_PSML
  type(ps_t) :: psxml
 #endif
 
@@ -629,8 +629,13 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_PSML is false
  if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_PSML is false
+ if(.false.)write(std_out,*)level  ! Just to keep level when HAVE_PSML is false
  if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_PSML is false
+ if(.false.)write(std_out,*)mpsang ! Just to keep mpsang when HAVE_PSML is false
+ if(.false.)write(std_out,*)nctab  ! Just to keep nctab when HAVE_PSML is false
+ if(.false.)write(std_out,*)pspso  ! Just to keep pspso when HAVE_PSML is false
  if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_PSML is false
+ if(.false.)write(std_out,*)qgrid_vl ! Just to keep qgrid_vl when HAVE_PSML is false
  if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_PSML is false
  if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_PSML is false
  if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_PSML is false
