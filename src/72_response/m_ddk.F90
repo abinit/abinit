@@ -269,13 +269,12 @@ end subroutine ddk_init
 !!      eph
 !!
 !! CHILDREN
-!!      calc_dipoles
 !!
 !! SOURCE
 
 
 
-subroutine eph_ddk(wfk_path,dtfil,ebands,&
+subroutine eph_ddk(wfk_path,dtfil,&
                    psps,inclvkb,mpi_enreg,comm)
 
  use defs_basis
@@ -287,7 +286,7 @@ subroutine eph_ddk(wfk_path,dtfil,ebands,&
  use m_wfk
  use m_fft
 
- use m_ebands,          only : ebands_expandk, ebands_ncwrite
+ use m_ebands,          only : ebands_ncwrite
  use m_time,            only : cwtime, sec2str
  use m_vkbr,            only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ktoa
@@ -316,7 +315,7 @@ subroutine eph_ddk(wfk_path,dtfil,ebands,&
  type(datafiles_type),intent(in) :: dtfil
  type(wfk_t),target :: in_wfk
  type(vkbr_t) :: vkbr
- type(ebands_t),intent(in) :: ebands
+ type(ebands_t) :: ebands
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp
  type(pseudopotential_type),intent(in) :: psps
@@ -327,7 +326,7 @@ subroutine eph_ddk(wfk_path,dtfil,ebands,&
  integer,parameter :: formeig0=0
  logical,parameter :: force_istwfk1=.True.
  integer :: mband, nsppol, ib_v, ib_c, cgshift, inclvkb
- integer :: mpw_ki, nkibz, spin, nspinor, nkfull, nband_k, npw_ki
+ integer :: mpw_ki, spin, nspinor, nkfull, nband_k, npw_ki
  integer :: in_iomode, ii, ik_bz, bandmin, bandmax, istwf_ki
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
@@ -361,25 +360,26 @@ subroutine eph_ddk(wfk_path,dtfil,ebands,&
  in_iomode = iomode_from_fname(wfk_path)
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
 
- mpw_ki = maxval(in_wfk%Hdr%npwarr)
- nkibz = in_wfk%nkpt
- nsppol = in_wfk%nsppol
- nspinor = in_wfk%nspinor
- mband = in_wfk%mband
- bandmin = 1
- bandmax = mband 
-
- ABI_MALLOC(kg_ki, (3, mpw_ki))
- ABI_MALLOC(cg_ki, (2, mpw_ki*nspinor*mband))
- ABI_CALLOC(ihrc,  (3, nspinor**2))
-
  !read crystal
  call crystal_from_hdr(cryst, in_wfk%hdr, 2)
 
- nkfull = ebands%nkpt
+ !read ebands
+ ebands = wfk_read_ebands(wfk_path,comm)
 
- ! allocate optical matrix elements
- ABI_MALLOC(dipoles,      (3,2,mband,mband,nkfull,nsppol))
+ mpw_ki = maxval(in_wfk%Hdr%npwarr)
+ nkfull = in_wfk%nkpt
+ nsppol = in_wfk%nsppol
+ nspinor = in_wfk%nspinor
+ mband = in_wfk%mband
+ !TODO: hardcoded for now but should be an arugment
+ bandmin = 1
+ bandmax = mband 
+
+ ABI_MALLOC(kg_ki,  (3, mpw_ki))
+ ABI_MALLOC(cg_ki,  (2, mpw_ki*nspinor*mband))
+ ABI_CALLOC(ihrc,   (3, nspinor**2))
+ ABI_MALLOC(dipoles,(3,2,mband,mband,nkfull,nsppol))
+
  write(std_out,*) 'inclvkb: ', inclvkb
  write(std_out,*) 'nkpoints:', nkfull
  write(std_out,*) 'nbands:  ', mband
@@ -392,10 +392,10 @@ subroutine eph_ddk(wfk_path,dtfil,ebands,&
 
    do ik_bz=1,nkfull ! Loop over full kpoints
 
-     nband_k = in_wfk%nband(ik_bz,spin)
-     npw_ki  = in_wfk%hdr%npwarr(ik_bz)
+     nband_k  = in_wfk%nband(ik_bz,spin)
+     npw_ki   = in_wfk%hdr%npwarr(ik_bz)
      istwf_ki = in_wfk%hdr%istwfk(ik_bz)
-     kbz = ebands%kptns(:,ik_bz)
+     kbz = in_wfk%hdr%kptns(:,ik_bz)
      write(std_out,*) 'kpt:', ik_bz, kbz
 
      ! Read WF
@@ -408,6 +408,7 @@ subroutine eph_ddk(wfk_path,dtfil,ebands,&
      end if
 
      do ib_v=bandmin,bandmax ! Loop over bands
+       if (ib_v < bandmin .or. ib_v > bandmax) cycle
        cgshift=(ib_v-1)*npw_ki*nspinor
        ug_v = cmplx(cg_ki(1,cgshift+1:cgshift+npw_ki),&
                     cg_ki(2,cgshift+1:cgshift+npw_ki))
@@ -435,7 +436,6 @@ subroutine eph_ddk(wfk_path,dtfil,ebands,&
        end do
      end do
 
-     !
      ! Free KB form factors
      call vkbr_free(vkbr)
 

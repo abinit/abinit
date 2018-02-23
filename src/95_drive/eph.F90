@@ -589,7 +589,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (6)
    ! Calculate band velocities (dipole matrix elements)
-   call eph_ddk(wfk0_path,dtfil,ebands,psps,dtset%inclvkb,mpi_enreg,comm)
+   call eph_ddk(wfk0_path,dtfil,psps,dtset%inclvkb,mpi_enreg,comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
