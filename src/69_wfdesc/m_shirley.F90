@@ -1733,6 +1733,8 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
 
  DBG_ENTER("COLL")
 
+ ABI_UNUSED(Paw_ij%cplex)
+
  ABI_CHECK(Wsh%nspinor==1,"nspinor==2 not coded")
  ABI_CHECK(Wsh%nsppol==1,"Wsh%nsppol must be 1")
  ABI_CHECK(Wsh%paral_kgb/=1,"paral_kgb not coded")

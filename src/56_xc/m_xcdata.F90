@@ -349,7 +349,8 @@ subroutine get_auxc_ixc(auxc_ixc,ixc)
  integer, intent(out) :: auxc_ixc
 
 !Local variables-------------------------------
- integer :: gga_id(2),usefock,xclevel
+ integer :: usefock,xclevel
+!integer :: gga_id(2)
 
 ! *************************************************************************
 

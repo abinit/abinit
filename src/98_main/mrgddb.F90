@@ -79,8 +79,8 @@ program mrgddb
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
- integer :: chkopt,dummy,dummy1,dummy2,dummy3,dummy4,dummy5,dummy6,dummy7,ios
- integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank,fcnt
+ integer :: chkopt,ios
+ integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename

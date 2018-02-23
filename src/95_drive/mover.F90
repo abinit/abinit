@@ -708,8 +708,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
-       call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,ab_mover%ntypat,&
-&       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
+       call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
+&       ab_mover%ntypat,ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
 
@@ -860,7 +860,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
-     if(ab_mover%ionmov/=23 .or. icycle==1)then
+!    This file is not created for multibinit run 
+     if(need_scfcv_cycle .and. (ab_mover%ionmov/=23 .or. icycle==1))then
        if (scfcv_args%dtset%nctime>0) then
          jj=itime; if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1) jj=jj-hist_prev%mxhist
          if (jj>0) then

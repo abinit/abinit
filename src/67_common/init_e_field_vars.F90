@@ -128,7 +128,8 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
    initfield = .true.
  end if
 
- if (.not. initfield) then
+ if (.not. initfield .and. dtset%orbmag == 0) then
+    ! initorbmag.F90 also allocates pwind and pwnsfac
    pwind_alloc = 1
    ABI_ALLOCATE(pwind,(pwind_alloc,2,3))
    ABI_ALLOCATE(pwnsfac,(2,pwind_alloc))

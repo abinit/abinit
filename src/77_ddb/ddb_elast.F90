@@ -59,7 +59,9 @@
 
 subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&            instrain,iout,mpert,msize,natom,nblok)
+&            instrain,iout,mpert,&
+! &msize,&
+&            natom,nblok)
 
  use defs_basis
  use m_profiling_abi
@@ -83,7 +85,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !Arguments -------------------------------------------
 !scalars
- integer,intent(in) :: iblok,iblok_stress,iout,mpert,msize,natom,nblok
+ integer,intent(in) :: iblok,iblok_stress,iout,mpert,natom,nblok
+!integer,intent(in) :: msize
  type(crystal_t),intent(in) :: crystal
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays

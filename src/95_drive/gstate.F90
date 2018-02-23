@@ -132,6 +132,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_wffile
  use m_rec
  use m_efield
+ use m_orbmag
  use m_ddb
  use m_bandfft_kpt
  use m_invovl
@@ -255,6 +256,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
  type(macro_uj_type) :: dtpawuj(0)
+ type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(recursion_type) ::rec_set
@@ -438,7 +440,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Open and read pseudopotential files
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
 
  call timab(701,2,tsec)
@@ -648,14 +650,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
    if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
-     write (message,'(10a, 5(a,i0), 2a)')&
+     write (message,'(9a)')&
 &     "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
 &     "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
-&     "to decrease the memory requirements. Consider also OpenMP threads.",ch10,&
-&     "my_nspinor: ",my_nspinor, "mpw: ",dtset%mpw, "mband: ",dtset%mband, "mkmem: ",dtset%mkmem, "nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+&     "to decrease the memory requirements. Consider also OpenMP threads."
+     MSG_ERROR_NOSTOP(message,ii)
+     write (message,'(5(a,i0), 2a)')&
+&     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
+&     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
  end if
@@ -1160,6 +1165,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
+ !! orbital magnetization initialization
+ dtorbmag%orbmag = dtset%orbmag
+ if (dtorbmag%orbmag > 0) then
+    call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
+&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                   rprimd,symrec,xred)
+ end if
+ 
+
  fatvshift=one
 
  if (dtset%usewvl == 1 .and. wvl_debug) then
@@ -1200,7 +1214,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call timab(35,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &   indsym,initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1570,11 +1584,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   0, dtset%ngfft, 1, dtset%nscforder)
  end if
 
- if ((dtset%berryopt<0).or.&
+ if (associated(pwind)) then
+    ABI_DEALLOCATE(pwind)
+ end if
+ if (associated(pwnsfac)) then
+    ABI_DEALLOCATE(pwnsfac)
+ end if
+  if ((dtset%berryopt<0).or.&
 & (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17)) then
-   ABI_DEALLOCATE(pwind)
-   ABI_DEALLOCATE(pwnsfac)
    if (xmpi_paral == 1) then
      ABI_DEALLOCATE(mpi_enreg%kptdstrb)
      if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -1591,12 +1609,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (allocated(mpi_enreg%mkmem)) then
      ABI_DEALLOCATE(mpi_enreg%mkmem)
    end if
- else
-   ABI_DEALLOCATE(pwind)
-   ABI_DEALLOCATE(pwnsfac)
  end if
 
+ ! deallocate efield
  call destroy_efield(dtefield)
+
+ ! deallocate orbmag
+ call destroy_orbmag(dtorbmag)
 
 !deallocate Recursion
  if (dtset%userec == 1) then

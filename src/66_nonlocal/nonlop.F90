@@ -502,7 +502,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if(cpopt>=0) then
    if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
      msg = 'Incorrect size for cprjin!'
-
      MSG_BUG(msg)
    end if
  end if
@@ -685,7 +684,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       enlout(b4:e4),ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,idir,indlmn_,istwf_k,&
 &       kgin,kgout,kpgin,kpgout,kptin,kptout,hamk%lmnmax,matblk_,hamk%mgfft,&
 &       mpi_enreg,hamk%mpsang,hamk%mpssoang,natom_,nattyp_,hamk%ngfft,&
-&       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
+&       nkpgin,nkpgout,nloalg_,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,only_SO_,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,hamk%ucvol,&
 &       vectin(:,b0:e0),vectout(:,b1:e1))
 !    Spherical Harmonics version

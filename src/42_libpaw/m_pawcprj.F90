@@ -778,7 +778,7 @@ end subroutine pawcprj_zaxpby
 
  subroutine pawcprj_symkn(cprj_fkn,cprj_ikn,cprj_sym,dimlmn,iband,indlmn,&
 &                       isym,itim,kpt,lmax,lmnmax,mband,natom,nband,nspinor,nsym,ntypat,&
-&                       typat,zarot,atindx)
+&                       typat,zarot)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -797,7 +797,6 @@ end subroutine pawcprj_zaxpby
 !arrays
  integer,intent(in) :: cprj_sym(4,nsym,natom),dimlmn(natom)
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),typat(natom)
- integer,optional,intent(in) ::atindx(natom)
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(in) :: zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)
  type(pawcprj_type),intent(in) :: cprj_ikn(natom,mband*nspinor)
@@ -813,7 +812,6 @@ end subroutine pawcprj_zaxpby
 
 ! *************************************************************************
 
-! if (present(atindx)) order=.true.
  if (iband == -1) then
    ibst = 1
    ibnd = nband
@@ -823,7 +821,7 @@ end subroutine pawcprj_zaxpby
  end if
 
  do iatom = 1, natom
-   iatm=iatom!; if(order) iatm=atindx(iatom)
+   iatm=iatom
    itypat = typat(iatom)
    nlmn = dimlmn(iatm)
    jatom = cprj_sym(4,isym,iatom)

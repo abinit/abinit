@@ -772,7 +772,7 @@ subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
  call wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,shift_)
 #else
  BIGDFT_NOTENABLED_ERROR()
- if (.false.) write(std_out,*)  opt,rhov_abi(1,1),rhov_big(1,1,1,1)
+ if (.false. .and. present(shift)) write(std_out,*)  opt,rhov_abi(1,1),rhov_big(1,1,1,1)
 #endif
 
 end subroutine wvl_rhov_abi2big_2D_4D
@@ -837,7 +837,7 @@ subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
  call wvl_rhov_abi2big_gen(nfft_abi,nfft_big,1,opt,rhov_abi,rhov_big,shift_)
 #else
  BIGDFT_NOTENABLED_ERROR()
- if (.false.) write(std_out,*)  opt,rhov_abi(1),rhov_big(1,1,1,1)
+ if (.false. .and. present(shift)) write(std_out,*)  opt,rhov_abi(1),rhov_big(1,1,1,1)
 #endif
 
 end subroutine wvl_rhov_abi2big_1D_4D
@@ -903,7 +903,7 @@ subroutine wvl_rhov_abi2big_2D_2D(opt,rhov_abi,rhov_big,shift)
  call wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,shift_)
 #else
  BIGDFT_NOTENABLED_ERROR()
- if (.false.) write(std_out,*)  opt,rhov_abi(1,1),rhov_big(1,1)
+ if (.false. .and. present(shift)) write(std_out,*)  opt,rhov_abi(1,1),rhov_big(1,1)
 #endif
 
 end subroutine wvl_rhov_abi2big_2D_2D
@@ -968,7 +968,7 @@ subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
  call wvl_rhov_abi2big_gen(nfft_abi,nfft_big,1,opt,rhov_abi,rhov_big,shift_)
 #else
  BIGDFT_NOTENABLED_ERROR()
- if (.false.) write(std_out,*)  opt,rhov_abi(1),rhov_big(1,1)
+ if (.false. .and. present(shift)) write(std_out,*)  opt,rhov_abi(1),rhov_big(1,1)
 #endif
 
 end subroutine wvl_rhov_abi2big_1D_2D
@@ -1029,7 +1029,7 @@ subroutine wvl_rhov_abi2big_2D_1D(opt,rhov_abi,rhov_big,shift)
  call wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,shift_)
 #else
  BIGDFT_NOTENABLED_ERROR()
- if (.false.) write(std_out,*)  opt,rhov_abi(1,1),rhov_big(1)
+ if (.false. .and. present(shift)) write(std_out,*)  opt,rhov_abi(1,1),rhov_big(1)
 #endif
 
 end subroutine wvl_rhov_abi2big_2D_1D
@@ -1089,7 +1089,7 @@ subroutine wvl_rhov_abi2big_1D_1D(opt,rhov_abi,rhov_big,shift)
  call wvl_rhov_abi2big_gen(nfft_abi,nfft_big,1,opt,rhov_abi,rhov_big,shift_)
 #else
  BIGDFT_NOTENABLED_ERROR()
- if (.false.) write(std_out,*)  opt,rhov_abi(1),rhov_big(1)
+ if (.false. .and. present(shift)) write(std_out,*)  opt,rhov_abi(1),rhov_big(1)
 #endif
 
 end subroutine wvl_rhov_abi2big_1D_1D

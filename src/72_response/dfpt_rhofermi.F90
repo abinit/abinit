@@ -226,7 +226,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !scalars
  integer,parameter :: level=17
  integer :: bd2tot_index,bdtot_index,buffer_size,counter,cplex_rhoij
- integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq,ipw
+ integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq
  integer :: icg,icgq,ider,idir0,ierr,iexit,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
  integer :: ispden,isppol,istr,istwf_k
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
@@ -354,9 +354,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    ikg=0;ikg1=0
 !  Continue to initialize the Hamiltonian at k+q
    call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
-!  call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+!  call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
 
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
 
 
 !  Nullify contribution to density at EFermi from this k-point

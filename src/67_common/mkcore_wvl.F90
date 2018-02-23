@@ -487,6 +487,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 
 #else
  BIGDFT_NOTENABLED_ERROR()
+ ABI_UNUSED(xcccrc)
  if (.false.) write(std_out,*) natom,nfft,nspden,ntypat,n1xccc,n3xccc,option,mpi_comm_wvl,&
 & wvl_den%symObj,wvl_descr%h(1),atindx1(1),nattyp(1),rprimd(1,1),vxc(1,1),&
 & xred(1,1),xccc1d(1,1,1),corstr(1),grxc(1,1),xccc3d(1),pawrad(1)%mesh_size,pawtab(1)%lmn_size
@@ -811,7 +812,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
        call mkcore_inner(corfra,core_mesh,dyfrx2,&
 &       grxc1,grxc2,grxc3,ifftsph_tmp,msz,&
 &       natom,ncmax,nfft,nfgd,nfgd_r0,nspden,n3xccc,option,pawtab(itypat),&
-&       rmet,rprimd,rr,strdia,vxc,xccc3d,rred=rred)
+&       rmet,rr,strdia,vxc,xccc3d,rred=rred)
 
      end do !i3
 

@@ -42,6 +42,7 @@ module m_effective_potential
  use m_harmonics_terms
  use m_xmpi
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
+ use m_abihist,        only : abihist
  use m_special_funcs,  only : factorial
  use m_copy,           only : alloc_copy
  use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
@@ -178,7 +179,7 @@ CONTAINS  !=====================================================================
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!      m_effective_potential_file
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -2535,8 +2536,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !------------------------------------
 
   energy = eff_pot%energy * ncell
-  strten = eff_pot%strten / ucvol
-
+  
   if(need_verbose)then
     write(msg, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference structure         :',&
 &                                          energy,' Hartree'
@@ -2736,7 +2736,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! divide stess tensor by ucvol
   strten = strten / ucvol
 
-! multiply forces by -1 
+! multiply forces by -1
   fcart = -1 * fcart
 
 ! Redistribute the residuale of the forces
@@ -2857,7 +2857,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_getDisp'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -2874,31 +2873,29 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   real(dp),intent(in),optional :: xred_ref(3,natom),xcart_ref(3,natom)
 !Local variables-------------------------------
 !scalar
-  integer :: ii,ib,mu
+  integer :: ii,ia,ib,mu
   integer :: ierr,nproc,my_rank,natom_alone,my_natom
   character(len=500) :: msg
   logical :: has_strain = .FALSE.
   logical :: need_displacement,need_duDelta
 !array
+  integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
   integer,allocatable :: my_atoms(:)
-  real(dp),allocatable :: work(:),work2(:,:)
   type(strain_type) :: strain
-  integer  :: ipiv(3)
   real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
   real(dp) :: xred_ref_tmp(3,natom)
-  real(dp) :: strain_mat(3,3),strain_mat_inv(3,3)
   
 ! *************************************************************************
 
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
      write(msg, '(3a)' )&
-&         'You need at least give xcart_ref of xred_ref '
+&         'You need at least give xcart_ref or xred_ref '
      MSG_ERROR(msg)
   end if
 
   if (.not.(present(xred_hist).or.present(xcart_hist))) then
      write(msg, '(3a)' )&
-&         'You need at least give xcart_hist of xred_hist '
+&         'You need at least give xcart_hist or xred_hist '
      MSG_ERROR(msg)
   end if
 
@@ -2972,32 +2969,23 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 ! Get also the variation of the displacmeent wr to strain
   if(has_strain.and.need_duDelta) then
     du_delta(:,:,:)   = zero
-!   Compute displacmeent wr to strain 
-!   See formula A4  in PRB 95,094115
-    ABI_ALLOCATE(work,(3))
-    ABI_ALLOCATE(work2,(3,natom))
-    work2(:,:) = zero
-    work(:) = zero
-    strain_mat(:,:) = strain%strain(:,:)
-    do mu=1,3
-      strain_mat(mu,mu) =  strain_mat(mu,mu) + one
-      ipiv(mu) = mu
+!   Compute displacmeent wr to strain
+!   within the metric tensor formulation
+!   \frac{\partial u_{k}}{\partial \epsilon_{\alpha\beta}}= 
+!    \frac{1}{2} (\delta_{\alpha,k} u_{\beta}+ \delta_{\beta,k} u_{\alpha})
+    do ia=1,my_natom
+      ib = my_atoms(ia)
+      do ii=1,6
+        do mu=1,3
+          if(alpha(ii)==mu)then
+            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * displacement(beta(ii),ib)
+          end if
+          if(beta(ii)==mu)then
+            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * displacement(alpha(ii),ib)
+          end if
+        end do
+      end do
     end do
-    call matr3inv(strain_mat,strain_mat_inv)
-    strain_mat_inv=transpose(strain_mat_inv)
-    do ii=1,my_natom
-      ib = my_atoms(ii)
-      work2(:,:) = zero
-      work2(:,ib) = MATMUL(strain_mat_inv,displacement(:,ib))
-      du_delta(1,:,ib) = (/work2(1,ib),zero,zero/)
-      du_delta(2,:,ib) = (/zero,work2(2,ib),zero/)
-      du_delta(3,:,ib) = (/zero,zero,work2(3,ib)/)
-      du_delta(4,:,ib) = (/zero,work2(3,ib),work2(2,ib)/)
-      du_delta(5,:,ib) = (/work2(3,ib),zero,work2(1,ib)/)
-      du_delta(6,:,ib) = (/work2(2,ib),work2(1,ib),zero/)
-    end do
-    ABI_DEALLOCATE(work)
-    ABI_DEALLOCATE(work2)
     call xmpi_sum(du_delta , comm, ierr)
   end if
 
@@ -3527,6 +3515,186 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
  end subroutine effective_potential_computeGradient
 !!***
 
+!!****f* m_effective_potential/effective_potential_checkDEV
+!!
+!! NAME
+!! effective_potential_checkDEV
+!!
+!! FUNCTION
+!! Routine for develloper Check by finite differences the equations in
+!! effective_potential_evaluate
+!!
+!! INPUTS
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD
+!! natom = number of atom
+!! ntime = number of time in the hist
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+ subroutine effective_potential_checkDEV(eff_pot,hist,natom,ntime)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_checkDEV'
+ use interfaces_41_geometry
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom,ntime
+!arrays
+ type(effective_potential_type),intent(in) :: eff_pot
+ type(abihist),intent(in) :: hist
+!Local variables-------------------------------
+!scalar
+ integer :: ii,jj,ia,mu,npt,istep
+! integer :: ifirst
+ real(dp):: energy,delt,delta,ucvol
+ !arrays
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),mat_def(3,3),identity(3,3) 
+ real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),deltalist(5)
+ real(dp):: disp(3,natom),strain(6),du_delta(6,3,natom),diff(5)
+ integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ !Do some checks
+ if(ntime /= hist%mxhist)then
+   write(msg,'(a)')'ntime is not correct'
+   MSG_BUG(msg)
+ end if
+
+ if(natom /= size(hist%xred,2)) then
+   write(msg,'(a)')'natom is not correct'
+   MSG_BUG(msg)
+ end if
+ rprimd =  eff_pot%supercell%rprimd
+ istep = 127
+ call effective_potential_getDisp(disp,du_delta,natom,eff_pot%supercell%rprimd,&
+&                                 eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
+&                                 xcart_ref=eff_pot%supercell%xcart,&
+&                                 compute_displacement = .true.,compute_duDelta = .true.)
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ npt=5
+ delta = 0.005
+ deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
+ strain = zero 
+ rprimd =  hist%rprimd(:,:,istep)
+   do ia=1,natom
+     do mu=1,3
+       write(std_out,*) "atm: ",ia," dir: ",mu
+       do ii=1,npt
+         delt = deltalist(ii)
+!         strain = zero
+
+         call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
+&                                         eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
+&                                         xcart_ref=eff_pot%supercell%xcart,&
+&                                         compute_displacement = .true.,compute_duDelta = .true.)
+
+
+           disp(mu,ia) = disp(mu,ia) + delt * eff_pot%supercell%rprimd(mu,mu)
+
+         call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+&                                      xred=hist%xred(:,:,istep),du_delta=du_delta,&  
+&                                      displacement=disp,strain=strain,&
+&                                      compute_anharmonic=.true.,verbose=.false.)
+         diff(ii) = energy 
+
+       end do
+       
+       call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
+&                                     eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
+&                                     xcart_ref=eff_pot%supercell%xcart,&
+&                                     compute_displacement = .true.,compute_duDelta = .true.)
+
+   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,eff_pot%supercell%rprimd,&
+&                                  xred=hist%xred(:,:,istep),du_delta=du_delta,&
+&                                  displacement=disp,strain=strain,&
+&                                  compute_anharmonic=.true.,verbose=.false.)
+
+   write(std_out,*) "Analyti:",fred(mu,ia)
+   write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta)
+   write(std_out,*) "Diff(%):",abs(100*(fred(mu,ia)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
+&             / (12*delta) )) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) ))
+
+ end do
+end do
+
+
+!  Fill the identity matrix
+identity = zero
+forall(ii=1:3)identity(ii,ii)=1
+
+ npt=5
+ delta = 0.005
+ deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
+
+ do jj=1,6
+   write(std_out,*) "strain ",jj
+   do ii=1,npt
+     strain = zero   
+     delt = deltalist(ii)
+     mat_def = zero       
+     strain(jj) = strain(jj) + delt
+     
+     mat_def(alpha(jj),beta(jj)) = mat_def(alpha(jj),beta(jj)) + half * strain(jj)
+     mat_def(beta(jj),alpha(jj)) = mat_def(beta(jj),alpha(jj)) + half * strain(jj)
+
+     
+     rprimd =  matmul(eff_pot%supercell%rprimd,identity(:,:)+mat_def(:,:))
+!     rprimd = eff_pot%supercell%rprimd
+     call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
+&                                     eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
+&                                     xcart_ref=eff_pot%supercell%xcart,&
+&                                     compute_displacement = .true.,compute_duDelta = .true.)
+     
+!   disp_tmp = dips_tmp + delta *  eff_pot%supercell%rprimd(1,1) 
+   
+     call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+&                                      xred=hist%xred(:,:,istep),du_delta=du_delta,&  
+&                                      displacement=disp,strain=strain,&
+&                                      compute_anharmonic=.true.,verbose=.false.)
+     diff(ii) = energy 
+
+   end do
+
+   ! write(std_out,*) "Diff:",diff(:)
+   
+   call effective_potential_getDisp(disp,du_delta,natom,eff_pot%supercell%rprimd,&
+&                                   eff_pot%supercell%rprimd,1,xred_hist=hist%xred(:,:,istep),&
+&                                   xcart_ref=eff_pot%supercell%xcart,&
+&                                   compute_displacement = .true.,compute_duDelta = .true.)
+
+   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,eff_pot%supercell%rprimd,&
+&                                  xred=hist%xred(:,:,istep),du_delta=du_delta,&
+&                                  displacement=disp,&
+&                                  compute_anharmonic=.true.,verbose=.false.)
+
+ write(std_out,*) "Analyti:",strten(jj)
+ write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol
+ write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
+&   / (12*delta) / ucvol)) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol))
+
+end do
+
+end subroutine effective_potential_checkDEV
+!!***
+ 
 !!****f* m_effective_potential/effective_potential_writeNETCDF
 !! NAME
 !! effective_potential_writeNETCDF

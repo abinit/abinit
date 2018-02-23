@@ -116,7 +116,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !scalars
  integer,parameter :: berryopt=0,iorder_cprj=0,level=19,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1
  integer :: choice_cprj,cpopt_cprj,iband,icpgr_loc,idir1,idir2,idir_cprj,ierr
- integer :: igs,indb,ipert1,ipert2,iproc,jband,kdir1
+ integer :: indb,ipert1,ipert2,iproc,jband,kdir1
  integer :: me,my_nband,natom,ncpgr_loc,nproc_band,print_info
  integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1,shift_proc
  integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir1_loc,shift_dir2,shift_jband_lambda

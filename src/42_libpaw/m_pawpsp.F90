@@ -4340,7 +4340,10 @@ implicit none
  integer,intent(out):: lloc,lmax,pspcod,pspxc
  real(dp),intent(out):: r2well,zion,znucl
 !Local variables-------------------------------
- integer :: ii,il
+ integer :: il
+#if defined LIBPAW_HAVE_LIBXC
+ integer :: ii
+#endif
  character(len=100) :: xclibxc
  character(len=500) :: msg
 !arrays

@@ -4153,7 +4153,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case (2)
          call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case default
@@ -4296,7 +4296,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case (2)
          call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case default
@@ -4737,7 +4737,6 @@ end subroutine ebands_prtbltztrp
 !!  eigen(mband*nkpt*nsppol) = array for holding eigenvalues (hartree)
 !!  fermie = Fermi level
 !!  fname_radix = radix of file names for output
-!!  natom = number of atoms in cell.
 !!  nband = number of bands
 !!  nkpt = number of k points.
 !!  nsppol = 1 for unpolarized, 2 for spin-polarized
@@ -4760,7 +4759,7 @@ end subroutine ebands_prtbltztrp
 !! SOURCE
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
-&       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, &
+&       nband, nelec, nkpt, nspinor, nsppol, nsym, &
 &       rprimd, symrel, tau_k)
 
 
@@ -4774,7 +4773,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom, nsym, nband, nkpt, nsppol, nspinor, ntemper
+ integer, intent(in) :: nsym, nband, nkpt, nsppol, nspinor, ntemper
  real(dp), intent(in) :: tempermin, temperinc
  real(dp), intent(in) :: nelec
  character(len=fnlen), intent(in) :: fname_radix

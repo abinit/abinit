@@ -122,6 +122,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Local variables-------------------------------
 !no_abirules
 !scalars
+#if defined HAVE_PSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
  integer :: mm,nn,nso,ii,ir,il
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,zval
@@ -132,10 +133,11 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  character(len=7), parameter  :: oncvpsp_name = "ONCVPSP"
  integer :: iproj,irelt,nders
  real(dp) :: rmax,rmatch,z,chgvps
+#endif
 !arrays
+#if defined HAVE_PSML
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
-#if defined HAVE_PSML
  type(ps_t) :: psxml
 #endif
 
@@ -610,6 +612,10 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !--------------------------------------------------------------------
 
 #else
+ ABI_UNUSED(mpsang)
+ ABI_UNUSED(pspso)
+ ABI_UNUSED(qgrid_vl)
+ ABI_UNUSED(nctab%mqgrid_vl)
 !Initialize some arguments, for portability at compile time
  indlmn=0 ; mmax=0 ; nproj=0
  ekb=zero ; epsatm=zero ; ffspl=zero ; qchrg=zero ; vlspl=zero ; xcccrc=zero ; xccc1d=zero
