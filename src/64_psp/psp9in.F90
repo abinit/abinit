@@ -125,21 +125,19 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 #if defined HAVE_PSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
  integer :: mm,nn,nso,ii,ir,il
+ integer :: nshells
+ integer :: iproj,irelt,nders
+ integer :: np_dn, np_lj, np_nr, np_so, np_sr, np_up, val_l, val_n
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,zval
+ real(dp) :: rmax,rmatch,z,chgvps
+ real(dp) :: val_occ
+ logical :: has_nlcc,has_spin
  logical :: has_tvale,oncvpsp
  character(len=500) :: message
  character(len=30)  :: creator
  character(len=7), parameter  :: oncvpsp_name = "ONCVPSP"
- integer :: iln,pspindex,ipsang,irad,kk,ll
- integer :: mm,nn,nso,ii,ir,il,nshells
- integer :: iproj,irelt,nders
- real(dp) :: rmax,rmatch,z,chgvps
-#endif
- integer :: np_dn, np_lj, np_nr, np_so, np_sr, np_up, val_l, val_n
- logical :: has_nlcc,has_spin,has_tvale,oncvpsp
- real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,zval
- real(dp) :: rmax,rmatch,z,chgvps,val_occ
  type(pawrad_type) :: mesh
+#endif
 !arrays
 #if defined HAVE_PSML
  integer, allocatable :: idx_so(:),idx_sr(:)
