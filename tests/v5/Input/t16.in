@@ -35,7 +35,7 @@ nband5 60 nband6 60 nband7 60 nband8 60
 occopt 7  tsmear 0.015
 
 # === SCF cycle options
-nstep 10  tolvrs 1.d-7
+nstep 15  tolvrs 1.d-10
 ecut 8. pawecutdg 10.
 diemix 0.5
 diemixmag5 -1 diemixmag6 -1  diemixmag7 -1  diemixmag8 -1
