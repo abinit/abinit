@@ -492,7 +492,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
          fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_DDK.nc")
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating DDK.nc file")
          NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-         hdr_tmp%pertcase = cryst%natom+ii
+         hdr_tmp%pertcase = (cryst%natom*3)+ii
          NCF_CHECK(crystal_ncwrite(cryst, ncid))
          NCF_CHECK(ebands_ncwrite(ebands, ncid))
          ncerr = nctk_def_arrays(ncid, [ &
