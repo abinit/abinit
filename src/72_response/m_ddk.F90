@@ -402,7 +402,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  end do
 
  !initialize distributed wavefunctions object
- call wfd_init(in_wfd,cryst,pawtab,psps,keep_ur,paral_kgb,mpw,mband,nband,nkpt,nsppol,&
+ call wfd_init(in_wfd,cryst,pawtab,psps,keep_ur,paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,&
    bks_mask,dtset%nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,&
    ngfftc,dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
