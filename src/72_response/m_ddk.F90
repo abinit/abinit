@@ -247,7 +247,7 @@ end subroutine ddk_init
 !! INPUTS
 !!
 !! PARENTS
-!!      eph
+!!      wfk_analyse
 !!
 !! CHILDREN
 !!
@@ -255,8 +255,8 @@ end subroutine ddk_init
 
 
 
-subroutine eph_ddk(wfk_path,dtfil,&
-                   psps,inclvkb,mpi_enreg,comm)
+subroutine eph_ddk(wfk_path,dtfil,dtset,&
+                   psps,pawtab,inclvkb,ngfftc,mpi_enreg,comm)
 
  use defs_basis
  use defs_datatypes
@@ -265,7 +265,7 @@ subroutine eph_ddk(wfk_path,dtfil,&
  use m_xmpi
  use m_errors
  use m_wfk
- use m_fft
+ use m_wfd
 
  use m_ebands,          only : ebands_ncwrite
  use m_time,            only : cwtime, sec2str
@@ -273,9 +273,10 @@ subroutine eph_ddk(wfk_path,dtfil,&
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ktoa
  use m_io_tools,        only : iomode_from_fname, get_unit
  use m_cgtools,         only : dotprod_g
- use m_fftcore,         only : get_kg, kpgsph, sphere, ngfft_seq
+ use m_fftcore,         only : get_kg, kpgsph, sphere
  use m_crystal,         only : crystal_t
  use m_crystal_io,      only : crystal_ncwrite
+ use m_pawtab,          only : pawtab_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -294,33 +295,39 @@ subroutine eph_ddk(wfk_path,dtfil,&
  character(len=*),intent(in) :: wfk_path
  integer,intent(in) :: comm
  type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(in) :: dtset
  type(wfk_t),target :: in_wfk
+ type(wfd_t),target :: in_wfd
  type(vkbr_t) :: vkbr
  type(ebands_t) :: ebands
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp
  type(pseudopotential_type),intent(in) :: psps
  type(mpi_type),intent(inout) :: mpi_enreg
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: formeig0=0
+ integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb=0, master=0
  logical,parameter :: force_istwfk1=.True.
- integer :: mband, nsppol, ib_v, ib_c, cgshift, inclvkb
- integer :: mpw_ki, spin, nspinor, nkfull, nband_k, npw_ki
- integer :: in_iomode, ii, ik_bz, bandmin, bandmax, istwf_ki
+ integer :: iomode, mband, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
+ integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
+ integer :: in_iomode, ii, ik, bandmin, bandmax, istwf_k
+ integer :: my_kstart, my_kstop, my_rank, nproc, ierr
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
 !arrays
- complex(dp),allocatable :: ihrc(:,:)
- integer,allocatable :: kg_ki(:,:)
- real(dp) :: ediff,cpu,wall,gflops
+ integer,intent(in) :: ngfftc(18)
+ logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+ integer,allocatable :: nband(:,:)
+ integer,allocatable :: kg_k(:,:)
  character(len=500) :: msg
  character(len=fnlen) :: fname
+ real(dp) :: cpu,wall,gflops,ecut
  real(dp) :: kbz(3)
- real(dp),allocatable :: cg_ki(:,:)
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
+ complex(gwpc),allocatable :: ihrc(:,:)
  complex(gwpc),allocatable :: ug_c(:),ug_v(:)
 
 !************************************************************************
@@ -336,6 +343,10 @@ subroutine eph_ddk(wfk_path,dtfil,&
 #ifndef HAVE_NETCDF
   MSG_ERROR("The matrix elements are only written in NETCDF format")
 #endif
+    
+ ! paralelism
+ my_rank = xmpi_comm_rank(comm)
+ nproc = xmpi_comm_size(comm)
 
  ! Open input file, extract dimensions and allocate workspace arrays.
  in_iomode = iomode_from_fname(wfk_path)
@@ -347,72 +358,107 @@ subroutine eph_ddk(wfk_path,dtfil,&
  !read ebands
  ebands = wfk_read_ebands(wfk_path,comm)
 
- mpw_ki = maxval(in_wfk%Hdr%npwarr)
- nkfull = in_wfk%nkpt
- nsppol = in_wfk%nsppol
+ mpw     = maxval(in_wfk%Hdr%npwarr)
+ nkpt    = in_wfk%nkpt
+ nsppol  = in_wfk%nsppol
  nspinor = in_wfk%nspinor
- mband = in_wfk%mband
+ mband   = in_wfk%mband
+ ecut    = in_wfk%hdr%ecut
+
  !TODO: hardcoded for now but should be an arugment
  bandmin = 1
  bandmax = mband 
 
- ABI_MALLOC(kg_ki,  (3, mpw_ki))
- ABI_MALLOC(cg_ki,  (2, mpw_ki*nspinor*mband))
- ABI_CALLOC(ihrc,   (3, nspinor**2))
- ABI_MALLOC(dipoles,(3,2,mband,mband,nkfull,nsppol))
+ ABI_MALLOC(ug_c,    (mpw))
+ ABI_MALLOC(ug_v,    (mpw))
+ ABI_MALLOC(kg_k,    (3,mpw))
+ ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
+ ABI_MALLOC(ihrc,    (3, nspinor**2))
+ ihrc = (0.0,0.0)
+
+ ABI_MALLOC(nband,   (nkpt, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
+ ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
 
  write(std_out,*) 'inclvkb: ', inclvkb
- write(std_out,*) 'nkpoints:', nkfull
+ write(std_out,*) 'nkpoints:', nkpt
  write(std_out,*) 'nbands:  ', mband
  write(std_out,*) 'spin:    ', nsppol
+ write(std_out,*) 'ngfft:   ', in_wfk%hdr%ngfft
+ write(std_out,*) 'mpw:     ', mpw
+ write(std_out,*) 'ecut:    ', ecut
+
+ !create distribution of the wavefunctions mask
+ keep_ur = .false.
+ bks_mask = .false. 
+ nband = mband
+ 
+ ! Distribute the k-points over the processors
+ call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
+ ABI_CHECK(ierr==0, "k-point distribution failed")
+ do ik=1,nkpt
+ if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
+   bks_mask(:,ik,:) = .true.
+ end do
+
+ !initialize distributed wavefunctions object
+ call wfd_init(in_wfd,cryst,pawtab,psps,keep_ur,paral_kgb,mpw,mband,nband,nkpt,nsppol,&
+   bks_mask,dtset%nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,&
+   ngfftc,dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+
+ ABI_FREE(bks_mask)
+ ABI_FREE(keep_ur)
+ ABI_FREE(nband)
+
+ call wfd_print(in_wfd,header="Wavefunctions on the k-points grid",mode_paral='PERS')
+
+ !Read Wavefunctions
+ iomode = iomode_from_fname(wfk_path)
+ call wfd_read_wfk(in_wfd,wfk_path,iomode)
 
  !start counting the time
  call cwtime(cpu,wall,gflops,"start")
 
  do spin=1,nsppol ! Loop over spins
 
-   do ik_bz=1,nkfull ! Loop over full kpoints
+   do ik=1,nkpt ! Loop over full kpoints
+     ! Only do a subset a k-points
+     if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
 
-     nband_k  = in_wfk%nband(ik_bz,spin)
-     npw_ki   = in_wfk%hdr%npwarr(ik_bz)
-     istwf_ki = in_wfk%hdr%istwfk(ik_bz)
-     kbz = in_wfk%hdr%kptns(:,ik_bz)
-     write(std_out,*) 'kpt:', ik_bz, kbz
+     nband_k  = in_wfk%nband(ik,spin)
+     istwf_k  = in_wfk%hdr%istwfk(ik)
+     kbz      = in_wfk%hdr%kptns(:,ik)
+     npw_k    = in_wfk%hdr%npwarr(ik)
 
      ! Read WF
-     call wfk_read_band_block(in_wfk,[1,nband_k],ik_bz,spin,xmpio_single,&
-       kg_k=kg_ki,cg_k=cg_ki)
+     kg_k(:,1:npw_k) = in_wfd%kdata(ik)%kg_k
 
      ! Allocate KB form factors
      if (inclvkb/=0) then ! Prepare term i <n,k|[Vnl,r]|n"k>
-       call vkbr_init(vkbr,cryst,psps,inclvkb,istwf_ki,npw_ki,kbz,kg_ki)
+       call vkbr_init(vkbr,cryst,psps,inclvkb,istwf_k,npw_k,kbz,kg_k)
      end if
 
-     do ib_v=bandmin,bandmax ! Loop over bands
-       if (ib_v < bandmin .or. ib_v > bandmax) cycle
-       cgshift=(ib_v-1)*npw_ki*nspinor
-       ug_v = cmplx(cg_ki(1,cgshift+1:cgshift+npw_ki),&
-                    cg_ki(2,cgshift+1:cgshift+npw_ki))
+     ! Loop over bands
+     do ib_v=bandmin,bandmax
+       ug_v(1:npw_k) = in_wfd%wave(ib_v,ik,spin)%ug
 
-       do ib_c=ib_v,mband ! Loop over bands
-         if (ib_c < bandmin .or. ib_c > bandmax) cycle
-         cgshift=(ib_c-1)*npw_ki*nspinor
-         ug_c = cmplx(cg_ki(1,cgshift+1:cgshift+npw_ki),&
-                      cg_ki(2,cgshift+1:cgshift+npw_ki))
+       ! Loop over bands
+       do ib_c=ib_v,mband
+         ug_c(1:npw_k) = in_wfd%wave(ib_c,ik,spin)%ug
 
          ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
-         ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_ki,nspinor,istwf_ki,inclvkb,&
-                            kbz,ug_c,ug_v,kg_ki)
+         ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,&
+                            kbz,ug_c,ug_v,kg_k)
 
          ! Save matrix elements of i*r in the IBZ
-         dipoles(:,1,ib_c,ib_v,ik_bz,spin) = real(sum(ihrc(:,:),2))
-         dipoles(:,1,ib_v,ib_c,ik_bz,spin) = real(sum(ihrc(:,:),2)) ! Hermitian conjugate
+         dipoles(:,1,ib_c,ib_v,ik,spin) = real(sum(ihrc(:,:),2))
+         dipoles(:,1,ib_v,ib_c,ik,spin) = real(sum(ihrc(:,:),2)) ! Hermitian conjugate
          if (ib_v == ib_c) then 
-            dipoles(:,2,ib_c,ib_v,ik_bz,spin) = 0
-            dipoles(:,2,ib_v,ib_c,ik_bz,spin) = 0
+            dipoles(:,2,ib_c,ib_v,ik,spin) = 0
+            dipoles(:,2,ib_v,ib_c,ik,spin) = 0
          else
-            dipoles(:,2,ib_c,ib_v,ik_bz,spin) =  aimag(sum(ihrc(:,:),2))
-            dipoles(:,2,ib_v,ib_c,ik_bz,spin) = -aimag(sum(ihrc(:,:),2)) ! Hermitian conjugate
+            dipoles(:,2,ib_c,ib_v,ik,spin) =  aimag(sum(ihrc(:,:),2))
+            dipoles(:,2,ib_v,ib_c,ik,spin) = -aimag(sum(ihrc(:,:),2)) ! Hermitian conjugate
          end if
        end do
      end do
@@ -423,15 +469,20 @@ subroutine eph_ddk(wfk_path,dtfil,&
    end do
  end do
 
- ABI_FREE(kg_ki)
- ABI_FREE(cg_ki)
+ ABI_FREE(ug_c)
+ ABI_FREE(ug_v)
+ ABI_FREE(kg_k)
+ ABI_FREE(ihrc)
+
+ ! Gather the k-points computed by all processes
+ call xmpi_sum_master(dipoles,master,comm,ierr)
 
  call cwtime(cpu,wall,gflops,"stop")
 
  !write the matrix elements
 #ifdef HAVE_NETCDF
    ! Output DDK file in netcdf format.
-   !if (me == master) then
+   if (my_rank == master) then
 
      ! Have to build hdr on k-grid with info about perturbation.
      call hdr_copy(in_wfk%hdr, hdr_tmp)
@@ -455,7 +506,7 @@ subroutine eph_ddk(wfk_path,dtfil,&
      end do
      call hdr_free(hdr_tmp)
 
-   !end if
+   end if
 #endif
 
  ABI_FREE(dipoles)

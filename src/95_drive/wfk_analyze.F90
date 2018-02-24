@@ -417,7 +417,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  case (WFK_TASK_DDK)
     ! calculate the DDK matrix elements using a WFK file
-    call eph_ddk(wfk0_path,dtfil,psps,dtset%inclvkb,mpi_enreg,comm) 
+    call eph_ddk(wfk0_path,dtfil,dtset,psps,pawtab,dtset%inclvkb,ngfftc,mpi_enreg,comm) 
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
