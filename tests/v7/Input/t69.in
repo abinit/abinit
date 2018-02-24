@@ -8,7 +8,7 @@
  nnsclohf2 4       
  ixc2 40           # Calculation with Hartree-Fock functional
 
- wfmix 1.5         # Apparently, this calue is quite optimal in this case.
+ wfmix 1.5         # Apparently, this value is quite optimal in this case.
 
 iscf 7
 diemac 1.0

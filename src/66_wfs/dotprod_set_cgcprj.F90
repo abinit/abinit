@@ -17,7 +17,7 @@
 !! that are detrimental for performance...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG)
+!! Copyright (C) 2017-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,8 +61,10 @@
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      cgcprj_cholesky,wf_mixing
 !!
 !! CHILDREN
+!!      dotprod_g,pawcprj_alloc,pawcprj_free,pawcprj_get,zhpev
 !!
 !! SOURCE
 
@@ -107,18 +109,21 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ig
- integer :: ilmn1,ilmn2,klmn,max_nbd2
+ integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ier,ig,ii,i1,i2
+ integer :: ilmn1,ilmn2,klmn,max_nbd2,nbd
  real(dp) :: dotr,doti
 !arrays
- real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
+ real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:),proj(:,:,:)
+ real(dp),allocatable :: eigval(:),eigvec(:,:,:),matrx(:,:),zhpev1(:,:),zhpev2(:)
  type(pawcprj_type),allocatable :: cprj1_k(:,:),cprj2_k(:,:)
 
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' dotprod_set_cgcprj : enter '
- write(std_out,*)' dotprod_set_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' dotprod_set_cgcprj : enter '
+!write(std_out,*)' dotprod_set_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' dotprod_set_cgcprj : usepaw,nbd1,nbd2=',usepaw,nbd1,nbd2
+!call flush(std_out)
 !ENDDEBUG
 
  if(hermitian==1)then
@@ -284,6 +289,64 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 !DEBUG
 !write(std_out,*)' smn=',smn
 !ENDDEBUG
+
+!====== Debugging section ==========
+ if(.false.)then
+!DEBUG
+!Compute the eigenvalues of the projector S herm(S) or herm(S) S, depending on which has lowest dimension.
+!write(std_out,*)' dotprod_set_cgcprj : compute the projector matrix '
+ nbd=min(nbd1,nbd2)
+ ABI_ALLOCATE(proj,(2,nbd,nbd))
+ proj(:,:,:)=zero
+ if(nbd1<=nbd2)then
+   do ibd1=1,nbd1
+     do ibd2=1,nbd2
+       proj(1,:,ibd1)=proj(1,:,ibd1)+smn(1,:,ibd2)*smn(1,ibd1,ibd2)+smn(2,:,ibd2)*smn(2,ibd1,ibd2)
+       proj(2,:,ibd1)=proj(2,:,ibd1)-smn(1,:,ibd2)*smn(2,ibd1,ibd2)+smn(2,:,ibd2)*smn(1,ibd1,ibd2)
+     enddo
+   enddo
+ else
+   do ibd2=1,nbd2
+     do ibd1=1,nbd1
+       proj(1,:,ibd2)=proj(1,:,ibd2)+smn(1,ibd1,:)*smn(1,ibd1,ibd2)+smn(2,ibd1,:)*smn(2,ibd1,ibd2)
+       proj(2,:,ibd2)=proj(2,:,ibd2)+smn(1,ibd1,:)*smn(2,ibd1,ibd2)-smn(2,ibd1,:)*smn(1,ibd1,ibd2)
+     enddo
+   enddo
+ endif
+
+!write(std_out,*)' proj=',proj
+
+!write(std_out,*)' dotprod_set_cgcprj : compute the eigenvalues of the projector '
+ ABI_ALLOCATE(matrx,(2,(nbd*(nbd+1))/2))
+ ii=1
+ do i2=1,nbd
+   do i1=1,i2
+     matrx(1,ii)=proj(1,i1,i2)
+     matrx(2,ii)=proj(2,i1,i2)
+     ii=ii+1
+   end do
+ end do
+
+ ABI_ALLOCATE(zhpev1,(2,2*nbd-1))
+ ABI_ALLOCATE(zhpev2,(3*nbd-2))
+ ABI_ALLOCATE(eigval,(nbd))
+ ABI_ALLOCATE(eigvec,(2,nbd,nbd))
+
+ call ZHPEV ('V','U',nbd,matrx,eigval,eigvec,nbd,zhpev1,zhpev2,ier)
+
+!write(std_out,*)' eigval=',eigval
+
+ ABI_DEALLOCATE(matrx)
+ ABI_DEALLOCATE(zhpev1)
+ ABI_DEALLOCATE(zhpev2)
+ ABI_DEALLOCATE(eigval)
+ ABI_DEALLOCATE(eigvec)
+
+ ABI_DEALLOCATE(proj)
+!stop
+!ENDDEBUG
+ endif
+!====== End of debugging section ==========
 
  ABI_DEALLOCATE(cwavef1)
  ABI_DEALLOCATE(cwavef2)

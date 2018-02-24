@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -460,6 +460,10 @@ subroutine outvar_i_n (dtsets,iout,&
 !ixcpositron
  intarr(1,:)=dtsets(:)%ixcpositron
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixcpositron','INT',0)
+
+!ixcrot
+ intarr(1,:)=dtsets(:)%ixcrot
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixcrot','INT',0)
 
 !ixc_sigma
  intarr(1,:)=dtsets(:)%ixc_sigma

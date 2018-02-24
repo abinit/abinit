@@ -7,7 +7,7 @@
 !! Main calculation of the independent-particle susceptibility chi0 for qpoint!=0
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -736,8 +736,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
 
          CASE (1, 2)
-           ! Spectral method
-           call assemblychi0sf(ik_bz,nspinor,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
+           ! Spectral method (not yet adapted for nspinor=2)
+           call assemblychi0sf(ik_bz,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
 &            deltaf_b1kmq_b2k,my_wl,iomegal,wl,my_wr,iomegar,wr,Ep%nomegasf,sf_chi0)
 
          CASE DEFAULT

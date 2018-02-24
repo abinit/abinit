@@ -7,15 +7,15 @@
 !!  Initial guess of the first order magnetization/density for magnetic field perturbation.
 !!  The first order magnetization is set so as to zero out the first order XC magnetic field, which
 !!  should minimize the second order XC energy (without taking self-consistency into account).
+!!  Works only for ipert==natom+5.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (SPr)
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  ipert = perturbtation type (works only for ipert==natom+5)
 !!  idir  = direction of the applied magnetic field
 !!  cplex = complex or real first order density and magnetization
 !!  nfft  = dimension of the fft grid
@@ -46,7 +46,7 @@
 #include "abi_common.h"
 
 
-subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
+subroutine dfpt_init_mag1(idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
     
  use defs_basis
  use m_errors
@@ -61,21 +61,22 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
  implicit none
 
 !Arguments ------------------------------------
- integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
+ integer , intent(in)    :: idir,cplex,nfft,nspden,nkxc
  real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
  real(dp), intent(in)    :: kxc0(nfft,nkxc)
  real(dp), intent(out)   :: rhor1(cplex*nfft,nspden)                        
 
 !Local variables-------------------------------
  integer  :: ipt                                     
- real(dp) :: bxc0,phixc0,m_dot_m1,bxc1                  
+ real(dp) :: bxc0,bxc1                  
+ real(dp) :: m1_norm,m0_norm
+ real(dp) :: f_dot_m
  real(dp) :: mdir(3),fdir(3)               
- real(dp) :: m1(3),m0(3),m1_norm,m0_norm
- real(dp) :: f_dot_m,f_perp(3)
  
 ! *************************************************************************
 
  if (nspden==2) then
+
    if(cplex==1) then
      do ipt=1,nfft
        bxc1=half*(half*(kxc0(ipt,1)+kxc0(ipt,3))-kxc0(ipt,2)) ! d/dm Bxc
@@ -89,6 +90,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        rhor1(ipt,:)=zero
      end do
    end if
+
  else if(nspden==4) then
 
    fdir=zero
@@ -120,9 +122,11 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
        rhor1(2*ipt  ,3)=zero
        rhor1(2*ipt  ,4)=zero
 
+       rhor1(2*ipt-1,1)=zero; rhor1(2*ipt,1)=zero
+       rhor1(2*ipt-1,2)=zero; rhor1(2*ipt,2)=zero
+       rhor1(2*ipt-1,3)=zero; rhor1(2*ipt,3)=zero
+       rhor1(2*ipt-1,4)=zero; rhor1(2*ipt,4)=zero
 
-       rhor1(2*ipt-1,:)=zero
-       rhor1(2*ipt  ,:)=zero
      end if
    end do
  end if

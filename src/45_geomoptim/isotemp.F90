@@ -7,7 +7,7 @@
 !! performs one half step on isotemp parameters according to Martyna et al.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -172,7 +172,7 @@ end subroutine isotemp
 !! performs one half step on isopress parameters according to Martyna et al.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -370,7 +370,7 @@ end subroutine isopress
 !! performs one half step on isostress parameters according to Martyna et al.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

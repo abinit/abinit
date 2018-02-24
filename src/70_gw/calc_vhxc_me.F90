@@ -10,7 +10,7 @@
 !!  The later quantity is required in case of GW calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,10 +152,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc
- integer :: rank,comm,master,nprocs
+ integer :: rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
- real(dp) :: omega ! HSE Fock exchange screening parameter
  complex(dpc) :: cdot
  logical :: ltest
  character(len=500) :: msg

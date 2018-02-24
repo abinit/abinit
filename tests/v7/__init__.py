@@ -71,7 +71,8 @@ inp_files = [
 "t68.in",
 "t69.in",
 "t70.in", 
-#"t71.in", # To be activated when ready ...
+"t71.in", 
+"t72.in", 
 "t76.in",
 "t77.in",
 "t78.in",

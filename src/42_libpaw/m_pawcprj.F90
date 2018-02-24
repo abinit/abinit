@@ -11,7 +11,7 @@
 !!         |Cnk> are wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MT,JWZ)
+!! Copyright (C) 2012-2018 ABINIT group (MT,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -121,14 +121,15 @@ CONTAINS
 !!      berryphase_new,calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,classify_bands
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
-!!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
-!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,initberry,ks_ddiago
+!!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi
+!!      dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,energy,exc_build_block
+!!      exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr,forstrnps,getgh1c
+!!      getgh2c,getghc,getgsc,initberry,ks_ddiago,lincom_cgcprj
 !!      m_electronpositron,m_fock,m_invovl,m_io_kss,m_pawcprj,m_plowannier
 !!      m_shirley,m_wfd,make_grad_berry,nonlop,optics_paw,optics_paw_core
 !!      outkss,partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij
 !!      posdoppler,prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma
-!!      smatrix_pawinit,suscep_stat,update_e_field_vars,vtorho,vtowfk
+!!      smatrix_pawinit,suscep_stat,update_e_field_vars,vtorho,vtowfk,wf_mixing
 !!      wfd_pawrhoij,wfd_vnlpsi,wvl_hpsitopsi
 !!
 !! CHILDREN
@@ -206,15 +207,17 @@ end subroutine pawcprj_alloc
 !!      berryphase_new,calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,classify_bands
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
-!!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
-!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,ks_ddiago,m_efield
+!!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi
+!!      dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,energy,exc_build_block
+!!      exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr,forstrnps,getgh1c
+!!      getgh2c,getghc,getgsc,ks_ddiago,lincom_cgcprj,m_efield
 !!      m_electronpositron,m_fock,m_gkk,m_invovl,m_io_kss,m_pawcprj,m_phgamma
 !!      m_phpi,m_plowannier,m_scf_history,m_shirley,m_sigmaph,m_wfd
 !!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
 !!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
 !!      prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma,smatrix_pawinit
-!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
+!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wf_mixing,wfd_pawrhoij
+!!      wfd_vnlpsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -457,7 +460,7 @@ end subroutine pawcprj_copy
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
 !! PARENTS
-!!      chebfi,dfpt_cgwf,dfpt_wfkfermi,getdc1,m_invovl
+!!      chebfi,dfpt_cgwf,dfpt_wfkfermi,getdc1,m_invovl,wf_mixing
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -985,7 +988,7 @@ end subroutine pawcprj_conjg
 !!  cprj_in and cprj_out must be dimensionned as cprj_in(n1,n2*nn) and cprj_in(n1,n2)
 !!
 !! PARENTS
-!!      extrapwf,getdc1
+!!      extrapwf,getdc1,lincom_cgcprj,wf_mixing
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -1187,9 +1190,9 @@ end subroutine pawcprj_output
 !!
 !! PARENTS
 !!      berryphase_new,cgwf,datafordmft,dfpt_nstpaw,dfpt_vtowfk,dfpt_wfkfermi
-!!      extrapwf,fock2ACE,forstrnps,m_plowannier,make_grad_berry,optics_paw
-!!      optics_paw_core,pawmkrhoij,posdoppler,rf2_init,smatrix_pawinit
-!!      suscep_stat
+!!      dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,extrapwf,fock2ACE,forstrnps
+!!      m_plowannier,make_grad_berry,optics_paw,optics_paw_core,pawmkrhoij
+!!      posdoppler,rf2_init,smatrix_pawinit,suscep_stat,wf_mixing
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -1393,7 +1396,7 @@ end subroutine pawcprj_get
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= input cprj datastructure
 !!  dimcp=first dimension of cprj_k,cprjnk arrays (1 or natom)
 !!  iband1=index of first band
-!!  ibg=shift if cprjnk array to locate current k-point
+!!  ibg=shift in cprj array to locate current k-point
 !!  ikpt=index of current k-point
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during writing, depending on content of atind array:
@@ -1423,7 +1426,7 @@ end subroutine pawcprj_get
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=output cprj (used if mkmem/=0)
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,ctocprj,dfpt_vtowfk,extrapwf,vtowfk
+!!      berryphase_new,cgwf,ctocprj,dfpt_vtowfk,extrapwf,vtowfk,wf_mixing
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -2878,7 +2881,7 @@ end subroutine pawcprj_bcast
 !! PARENTS
 !!      afterscfloop,berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,forstr
 !!      getghc,initberry,m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv
-!!      smatrix_pawinit
+!!      smatrix_pawinit,wf_mixing
 !!
 !! CHILDREN
 !!      xmpi_sum

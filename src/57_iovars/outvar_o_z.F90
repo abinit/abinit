@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -236,6 +236,9 @@
 
  intarr(1,:)=dtsets(:)%optstress
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optstress','INT',0)
+
+ intarr(1,:)=dtsets(:)%orbmag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'orbmag','INT',0)
 
  intarr(1,:)=dtsets(:)%ortalg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ortalg','INT',0,firstchar=firstchar_gpu)
@@ -993,6 +996,10 @@
 
  dprarr(1,:)=dtsets(:)%tfw_toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tfw_toldfe','ENE',0)
+
+ intarr(1,:)=dtsets(:)%tim1rev
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'tim1rev','INT',0)
+
 
 !timopt
  timopt_default=1

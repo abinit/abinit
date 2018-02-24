@@ -8,7 +8,7 @@
 !! For one k point and spinpol, compute a set (size nband_out) of linear combinations of nband_in wavefunctions,
 !! that are known in the cg+cprj representation :
 !! cgout_n(:,:) <--- Sum_m [ cg_m(:,:) . alpha_mn ]
-!! cprjout_n(:,:) <--- Sum_n [ cprj_m(:,:) . alpha_mn ]
+!! cprjout_n(:,:) <--- Sum_m [ cprj_m(:,:) . alpha_mn ]
 !! If nband_out is smaller or equal to nband_in, the result might be in-place (output in cg instead of cgout, and in cprj instead of cprjout).
 !! Otherwise, it is contained in the optional cgout+cprjout pair.
 
@@ -22,14 +22,14 @@
 !! that are detrimental for performance...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG)
+!! Copyright (C) 2017-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  alpha_mn(2,nband_out,nband_in)=complex matrix of coefficients of the linear combinations to be computed
+!!  alpha_mn(2,nband_in,nband_out)=complex matrix of coefficients of the linear combinations to be computed
 !!  dimcprj(natom)=number of lmn components in the <p_{lmn}^i|\psi> for the i-th atom
 !!  icg=shift in cg array to locate current k-point and spinpol (for input, and possibly for in-place output)
 !!  inplace= if 0, output in cgout and cprjout ; if 1, output in cg and cprj
@@ -55,8 +55,10 @@
 !!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors 
 !!
 !! PARENTS
+!!      cgcprj_cholesky,wf_mixing
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_lincom,zgemm
 !!
 !! SOURCE
 
@@ -91,7 +93,7 @@
 !arrays
  integer, intent(in) :: dimcprj(natom)
  real(dp), intent(inout) :: cg(2,mcg)
- real(dp), intent(in) :: alpha_mn(2,nband_out,nband_in)
+ real(dp), intent(in) :: alpha_mn(2,nband_in,nband_out)
  real(dp), intent(out),optional :: cgout(:,:)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj)
  type(pawcprj_type),intent(out),optional :: cprjout(:,:)
@@ -108,6 +110,7 @@
 !DEBUG
 !write(std_out,*)' lincom_cgcprj : enter '
 !write(std_out,*)' lincom_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' lincom_cgcprj : icgout=',icgout
 !ENDDEBUG
 
  if(inplace==0)then
@@ -144,8 +147,8 @@
    do iband_out=1,nband_out
      ii=(iband_out-1)*nspinor
      do iband_in=1,nband_in
-       al(1,iband_in)=alpha_mn(1,iband_out,iband_in)
-       al(2,iband_in)=alpha_mn(2,iband_out,iband_in)
+       al(1,iband_in)=alpha_mn(1,iband_in,iband_out)
+       al(2,iband_in)=alpha_mn(2,iband_in,iband_out)
      enddo
      call pawcprj_lincom(al,cprj,cprjout_(:,ii+1:ii+nspinor),nband_in)
    enddo

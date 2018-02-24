@@ -7,7 +7,7 @@
 !! Old option=3, transfer fred and strten to vout
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG,MJV)
+!! Copyright (C) 1998-2018 ABINIT group (XG,MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

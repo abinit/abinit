@@ -6,7 +6,7 @@
 # doc/input_variables/generated_files/varset_allvars.html, displays all the names that cannot be
 # identified and returns their count.
 #
-# Copyright (C) 2005-2017 ABINIT group (LSi)
+# Copyright (C) 2005-2018 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

@@ -18,7 +18,7 @@
 !! * This routine uses Legendre polynomials Pl to express Vnl.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -143,7 +143,7 @@
 subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,kgin,kgout,kpgin,kpgout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
-&                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,npwin,npwout,nspinor,nspinortot,&
+&                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
 &                     ucvol,vectin,vectout)
 
@@ -172,7 +172,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !scalars
  integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k
  integer,intent(in) :: lmnmax,matblk,mgfft,mpsang,mpssoang,natom,nkpgin,nkpgout
- integer,intent(in) :: nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs
+ integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

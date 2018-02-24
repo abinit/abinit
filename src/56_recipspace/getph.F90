@@ -11,7 +11,7 @@
 !! values provided by the index table atindx. This will save time in nonlop.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

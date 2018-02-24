@@ -9,7 +9,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2017 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -449,7 +449,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: strsxc(6)
- real(dp) :: dum(0),qphon(3)
+ real(dp) :: dum(0)
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 

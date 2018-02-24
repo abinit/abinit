@@ -11,7 +11,7 @@
 !!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG,GA)
+!! Copyright (C) 2009-2018 ABINIT group (MG,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4284,7 +4284,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
  integer :: nperts_read, nperts_interpolate, nperts
  integer :: nqpt_read, nqpt_interpolate
- integer :: nfft,nfftf,mgfftf
+ integer :: nfft,nfftf
  integer :: ount, unt, fform
  real(dp) :: cpu,wall,gflops
  logical :: i_am_master

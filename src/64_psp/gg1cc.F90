@@ -7,7 +7,7 @@
 !! gg1cc_xx=$(\frac{\sin(2\pi xx)}{(2\pi xx)(1-4xx^2)(1-xx^2)})^2$
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, DCA, MM)
+!! Copyright (C) 1998-2018 ABINIT group (XG, DCA, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

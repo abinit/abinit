@@ -7,7 +7,7 @@
 !!  Examines the input string, to check whether all names are allowed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group (XG).
+!! Copyright (C) 2007-2018 ABINIT group (XG).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -144,7 +144,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
- list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron'
+ list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
  list_vars=trim(list_vars)//' irdvdw'
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
@@ -177,7 +177,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
  list_vars=trim(list_vars)//' occopt omegasimax omegasrdmax optcell optdriver optforces'
- list_vars=trim(list_vars)//' optnlxccc optstress ortalg'
+ list_vars=trim(list_vars)//' optnlxccc optstress orbmag ortalg'
 !P
  list_vars=trim(list_vars)//' paral_atom paral_kgb paral_rf pawcpxocc pawcross'
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
@@ -218,7 +218,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget supercell'
  list_vars=trim(list_vars)//' symafm symchi symdynmat symmorphi symrel symsigma'
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe timopt tl_nprccg tl_radius'
+ list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel tsmear typat'
 !U

@@ -7,7 +7,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2018 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -875,7 +875,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !scalars
  integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad,npts
  integer :: nspden_eff,nspden_updn,nspgrad,nvxcdgr,order
- real(dp) :: dvdn,dvdz,enxcr,factor,vxcrho
+ real(dp) :: enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:)
@@ -5747,7 +5747,7 @@ end subroutine pawxc_rotate_back_mag
 
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
- call rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,1)
+ call rotate_back_mag_dfpt(1,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,1)
 #else
  msg='[LIBPAW] Non-collinear DFPT not available (only in ABINIT)!'
  MSG_ERROR(msg)

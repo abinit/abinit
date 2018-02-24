@@ -10,7 +10,7 @@
 !!  (3) pseudo-core contribution to stress tensor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2016 ABINIT group (MT,TRangel)
+!!  Copyright (C) 2016-2018 ABINIT group (MT,TRangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -510,7 +510,7 @@ end subroutine mkcore_wvl
 !!      the dynamical matrix (part 2)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -811,7 +811,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
        call mkcore_inner(corfra,core_mesh,dyfrx2,&
 &       grxc1,grxc2,grxc3,ifftsph_tmp,msz,&
 &       natom,ncmax,nfft,nfgd,nfgd_r0,nspden,n3xccc,option,pawtab(itypat),&
-&       rmet,rprimd,rr,strdia,vxc,xccc3d,rred=rred)
+&       rmet,rr,strdia,vxc,xccc3d,rred=rred)
 
      end do !i3
 

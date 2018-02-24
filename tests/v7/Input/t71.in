@@ -1,20 +1,22 @@
 # Crystalline silicon : computation of the total energy using Fock functional,
 # without an auxiliary XC functional for the SCF cycle, 
-# and some over relaxation in a simple mixing scheme..
+# and some over relaxation in a simple mixing scheme.
 # PAW
 
- nstep 61          # Maximal number of SCF cycles
+ nstep 61        # Maximal number of SCF cycles
  fockoptmix 201
  nnsclohf2 4       
+ ixc1 11           # Explicit use of the native PBE functional 
  ixc2 40           # Calculation with Hartree-Fock functional
+ fockdownsampling2 0 0 0 # Keep only the Gamma point to define the Fock operator
 
- wfmix 1.5         # Apparently, this calue is quite optimal in this case.
+ wfmix 1.3         # Apparently, this value is quite optimal in this case.
 
 iscf 7
 diemac 1.0
 diemix 1.0
 
-ndtset 2         # Two datasets : 1) LDA 2) PBE0
+ndtset 2         # Two datasets : 1) LDA 2) HF
 
 #Definition of the unit cell
 acell 3*6.740652601

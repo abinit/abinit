@@ -9,7 +9,7 @@
 !!             John Wiley & Sons, New-York, 1957
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT, NH)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT, NH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -10,7 +10,7 @@
 !! Also, it is far of being optimal at the level of linear algebra
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG)
+!! Copyright (C) 2017-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,8 +42,10 @@
 !!  cprj_k(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors for the specific k point and spinpol
 !!
 !! PARENTS
+!!      wf_mixing
 !!
 !! CHILDREN
+!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
 !!
 !! SOURCE
 

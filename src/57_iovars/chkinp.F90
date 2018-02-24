@@ -9,7 +9,7 @@
 !! Please: use the routines chkint_eq, chkint_ne, chkint_ge, chkint_le, and chkdpr
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -794,7 +794,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
 
 !  fockoptmix
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,5,(/0,1,11,201,211/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',&
+&   dt%fockoptmix,12,(/0,1,11,201,211,301,401,501,601,701,801,901/),iout)
+   if(dt%paral_kgb/=0)then
+     cond_string(1)='paral_kgb' ; cond_values(1)=dt%paral_kgb
+!    Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
+   end if
 
 !  frzfermi
    call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,(/0,1/),iout)
@@ -1179,6 +1185,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  ixcpositron
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcpositron',dt%ixcpositron,8,(/0,-1,1,11,2,3,31,4/),iout)
 
+!  ixcrot
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
+
+!  tim1rev
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)
+ 
 !  kptnrm and kpt
 !  Coordinates components must be between -1 and 1.
    if(dt%kptnrm<1.0-1.0d-10)then
@@ -1809,14 +1821,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP(message,ierr)
      end if
 
-!!    nucdipmom requires kptopt > 2
-!     if(dt%kptopt<=2) then
-!       write(message, '(a,i4,a,a,a)' )&
-!&       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
-!&       ' => stop ',ch10,&
-!&       'Action: re-run with kptopt greater than 2 '
-!       MSG_ERROR_NOSTOP(message,ierr)
-!     end if
+!    nucdipmom requires kptopt > 2
+     if(dt%kptopt<=2) then
+        write(message, '(a,i4,a,a,a)' )&
+&       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
+&       ' => stop ',ch10,&
+&       'Action: re-run with kptopt greater than 2 '
+        MSG_ERROR_NOSTOP(message,ierr)
+     end if
 
    end if
 
@@ -1982,7 +1994,27 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(dt%optcell>0)then
      cond_string(1)='optcell' ; cond_values(1)=dt%optcell
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optstress',dt%optstress,1,(/1/),iout)
-   end if
+  end if
+
+  !  orbmag
+  ! only values of 0 (default) and 1 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,2,(/0,1/),iout)
+  ! when orbmag /= 0, symmorphi must be 0 (no tnons)
+  if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
+  end if
+  ! only kptopt 4 and 3 are allowed
+  if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
+  end if
+  ! only nproc 1 for now
+  if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nproc',nproc,1,(/1/),iout)
+  end if
+  
 
 !  paral_atom
    call chkint_eq(0,0,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,2,(/0,1/),iout)

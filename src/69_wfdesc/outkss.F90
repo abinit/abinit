@@ -21,7 +21,7 @@
 !!  - Writing out eigenvalues and eigenvectors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (MT, VO, AR, MG)
+!! Copyright (C) 2000-2018 ABINIT group (MT, VO, AR, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -9,7 +9,7 @@
 !! Different algorithms are implemented, depending on the value of wfmixalg.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG,MT,FJ)
+!! Copyright (C) 2017-2018 ABINIT group (XG,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,11 +33,15 @@
 !!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
 !!                          Value from previous SCF cycle is input and stored in some form
 !!                          Extrapolated value is output
-!!  scf_history <type(scf_history_type)>=arrays obtained from previous SCF cycles
+!!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
+!!      scfcv
 !!
 !! CHILDREN
+!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
+!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
+!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
 !!
 !! SOURCE
 
@@ -48,7 +52,7 @@
 #include "abi_common.h"
 
 subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
-& nattyp,npwarr,pawtab,scf_history)
+& nattyp,npwarr,pawtab,scf_history_wf)
 
  use defs_basis
  use defs_abitypes
@@ -66,6 +70,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wf_mixing'
+ use interfaces_18_timing
  use interfaces_32_util
  use interfaces_66_wfs
 !End of the abilint section
@@ -77,7 +82,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  integer,intent(in) :: istep,mcg,mcprj
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
- type(scf_history_type),intent(inout) :: scf_history
+ type(scf_history_type),intent(inout) :: scf_history_wf
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
  integer,intent(in) :: npwarr(dtset%nkpt)
@@ -88,44 +93,60 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer :: hermitian
- integer :: ibd,ibg,iblockbd,iblockbd1,icg,icgb
- integer :: ierr,ii,ikpt,inc,indh,inplace
- integer :: isize,isppol,istwf_k,kk,me_distrb,my_nspinor
- integer :: nband_k,nblockbd,nprocband,npw_k,npw_nk,ntypat,ortalgo,spaceComm_band,usepaw,wfmixalg
- !character(len=500) :: message
-!arrays
+ integer :: ibdmix,ibdsp,ibg,ibg_hist,icg,icg_hist
+ integer :: ierr,ikpt,indh,ind_biorthog,ind_biorthog_eff,ind_newwf,ind_residual,inplace
+ integer :: iset2,isppol,istep_cycle,istep_new,istwf_k,kk,me_distrb,my_nspinor
+ integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
+ integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
  real(dp) :: alpha,beta
- integer,allocatable :: bufsize(:),bufsize_wf(:),bufdisp(:),bufdisp_wf(:)
- integer,allocatable :: ipiv(:),dimcprj(:),npw_block(:),npw_disp(:)
- real(dp),allocatable :: al(:,:),cwavef(:,:),cwavefh(:,:)
- real(dp),allocatable :: dum(:,:)
- real(dp),allocatable :: dmn(:,:,:),dmn_debug(:,:,:),mmn(:,:,:)
- real(dp),allocatable :: smn(:,:,:),smn_(:,:,:)
- real(dp),allocatable :: work(:,:),work1(:,:)
- type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:),cprj_k3(:,:)
-!DEBUG
- real(dp),allocatable :: cg_ref(:,:)
- type(pawcprj_type),allocatable :: cprj_ref(:,:)
-!ENDDEBUG
+ complex(dpc) :: sum_coeffs
+!arrays
+ integer,allocatable :: ipiv(:),dimcprj(:)
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: al(:,:),mmn(:,:,:)
+ real(dp),allocatable :: dotprod_res(:,:,:),dotprod_res_k(:,:,:),res_mn(:,:,:),smn(:,:,:)
+ complex(dpc),allocatable :: coeffs(:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:)
 
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' wf_mixing : enter '
- write(std_out,*)' istep,scf_history%alpha=',istep,scf_history%alpha
- write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
- write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
- ABI_ALLOCATE(cg_ref,(2,mcg))
- cg_ref(:,:)=cg(:,:)
- ABI_DATATYPE_ALLOCATE(cprj_ref,(dtset%natom,mcprj))
- cprj_ref(:,:)=cprj(:,:)
+!write(std_out,*)
+!write(std_out,*)' wf_mixing : enter, istep= ',istep
+!call flush(std_out)
+!write(std_out,*)' istep,scf_history_wf%alpha=',istep,scf_history_wf%alpha
+!write(std_out,*)' cg(1,1)=',cg(1,1)
+!write(std_out,*)' scf_history_wf%cg(1,1,1:5)=',scf_history_wf%cg(1,1,1:5)
+!ABI_ALLOCATE(cg_ref,(2,mcg))
+!cg_ref(:,:)=cg(:,:)
+!ABI_DATATYPE_ALLOCATE(cprj_ref,(dtset%natom,mcprj))
+!cprj_ref(:,:)=cprj(:,:)
+!      write(std_out,*)' scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)=',&
+!&       scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)
+!       call flush(std_out)
 !ENDDEBUG
 
  if (istep==0) return
 
  ntypat=dtset%ntypat
  usepaw=dtset%usepaw
- wfmixalg=scf_history%wfmixalg
+ wfmixalg=scf_history_wf%wfmixalg
+ nbdmix=dtset%nbandhf
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ me_distrb=mpi_enreg%me_kpt
+ spaceComm_band=xmpi_comm_self
+
+ spare_mem=0
+ if(scf_history_wf%history_size==wfmixalg-1)spare_mem=1
+
+!scf_history_wf%alpha contains dtset%wfmix
+ alpha=scf_history_wf%alpha
+ beta=one-scf_history_wf%alpha
+
+ icg=0
+ icg_hist=0
+ ibg=0
+ ibg_hist=0
 
 !Useful array
  ABI_ALLOCATE(dimcprj,(dtset%natom))
@@ -133,56 +154,103 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
    call pawcprj_getdim(dimcprj,dtset%natom,nattyp,ntypat,dtset%typat,pawtab,'O')
  end if
 
-!Index for the wavefunction stored in scf_history
- indh=1
+ if(istep==1)then
+   do indh=1,scf_history_wf%history_size
+     call pawcprj_alloc(scf_history_wf%cprj(:,:,indh),0,dimcprj)
+   enddo
+ endif
 
-!DEBUG
-! if(istep==1)then
-!   scf_history%cg(:,:,1)=cg(:,:)
-! else
-!   cg(:,:)=scf_history%cg(:,:,1)
-! endif
-! return
-!ENDDEBUG
+ ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,my_nspinor*nbdmix))
+ ABI_DATATYPE_ALLOCATE(cprj_kh,(dtset%natom,my_nspinor*nbdmix))
+ if(usepaw==1) then
+   call pawcprj_alloc(cprj_k,0,dimcprj)
+   call pawcprj_alloc(cprj_kh,0,dimcprj)
+ endif
+ ABI_ALLOCATE(smn,(2,nbdmix,nbdmix))
+ ABI_ALLOCATE(mmn,(2,nbdmix,nbdmix))
+
+ if(wfmixalg>2)then
+   nset1=1 
+   nset2=min(istep-1,wfmixalg-1) 
+   ABI_ALLOCATE(dotprod_res_k,(2,1,nset2))
+   ABI_ALLOCATE(dotprod_res,(2,1,nset2))
+   ABI_ALLOCATE(res_mn,(2,wfmixalg-1,wfmixalg-1)) 
+   dotprod_res=zero
+   if(istep==1)then
+     scf_history_wf%dotprod_sumdiag_cgcprj_ij=zero
+   endif
+ endif
+
+!Explanation for the index for the wavefunction stored in scf_history_wf
+!The reference is the cg+cprj output after the wf optimization at istep 1. 
+!It comes as input to the present routine as cgcprj input at step 2, and is usually found at indh=1.
+
+!In the simple mixing case (wfmixalg==1), the reference is never stored, because it is used "on-the-fly" to biothogonalize the
+!previous input (that was stored in indh=1), then generate the next input, which is stored again in indh=1
+
+!When the storage is not spared: 
+!- the values of indh from 2 to wfmixalg store the (computed here) biorthogonalized input cgcprj, then the residual
+!- the values of indh from wfmixalg+1 to 2*wfmixalg-1 store the biorthogonalized output cgcprj (coming as argument)
 
 !First step
- if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history%alpha-one)<tol8) ) then
-   scf_history%cg(:,:,1)=cg(:,:)
-   if(usepaw==1) then
-     scf_history%cprj(:,:,1)=cprj(:,:)
-   end if
+if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
+
+   indh=2   ! This input wavefunction is NOT the reference
+   if(wfmixalg==2)indh=1 ! But this does not matter in the simple mixing case that has history_size=1
+
+!  Simply store the wavefunctions and cprj. However, nband_k might be different from nbandhf...
+!  LOOP OVER SPINS
+   do isppol=1,dtset%nsppol
+
+!    BIG FAT k POINT LOOP
+     do ikpt=1,dtset%nkpt
+
+!      Select k point to be treated by this proc
+       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
+
+       npw_k=npwarr(ikpt)
+
+       scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+       if(usepaw==1) then
+!        scf_history_wf%cprj(:,ibg_hist+1:ibg_hist+my_nspinor*nbdmix,1)=cprj(:,ibg+1:ibg+my_nspinor*nbdmix)
+         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
+&          dtset%mkmem,dtset%natom,nbdmix,nband_k,my_nspinor,dtset%nsppol,0,&
+&          mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+       end if
+
+!      Update the counters
+       ibg=ibg+my_nspinor*nband_k
+       ibg_hist=ibg_hist+my_nspinor*nbdmix
+       icg=icg+my_nspinor*nband_k*npw_k
+       icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
+
+     enddo
+   enddo
 
  else
-!From 2nd step
+!  From istep==2
 
-!  Init parallelism
-   me_distrb=mpi_enreg%me_kpt
-   if (mpi_enreg%paral_kgb==1.or.mpi_enreg%paralbd==1) then
-     spaceComm_band=mpi_enreg%comm_band
-     nprocband=mpi_enreg%nproc_band
-   else
-     spaceComm_band=xmpi_comm_self
-     nprocband=1
-   end if
+!  First part of the computation : biorthogonalization, and computation of the residual (possibly, prediction of the next input in the case of simple mixing)
+!  Index for the wavefunctions stored in scf_history_wf whose scalar products with the argument cgcprj will have to be computed.
+   indh=1   ! This input wavefunction is the reference
+   if(wfmixalg/=2 .and. istep==2)indh=2 ! except for istep=2 in the rmm-diis
 
-!  For the moment no band-fft parallelism
-   nprocband=1
-
-!  Additional statements if band-fft parallelism
-   if (nprocband>1) then
-     ABI_ALLOCATE(npw_block,(nprocband))
-     ABI_ALLOCATE(npw_disp,(nprocband))
-     ABI_ALLOCATE(bufsize,(nprocband))
-     ABI_ALLOCATE(bufdisp,(nprocband))
-     ABI_ALLOCATE(bufsize_wf,(nprocband))
-     ABI_ALLOCATE(bufdisp_wf,(nprocband))
-   end if
-
-   icg=0
-   ibg=0
+   if(wfmixalg>2)then
+!    istep inside the cycle defined by wfmixalg, and next index. Then, indices of the wavefunction sets.
+     istep_cycle=mod((istep-2),wfmixalg-1)
+     istep_new=mod((istep-1),wfmixalg-1)
+     ind_biorthog=1+wfmixalg+istep_cycle
+     ind_residual=2+istep_cycle
+     ind_newwf=2+istep_new
+     shift_set1=ind_residual-1
+     shift_set2=1
+   endif
 
 !  LOOP OVER SPINS
-   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
    do isppol=1,dtset%nsppol
 
 !    BIG FAT k POINT LOOP
@@ -193,330 +261,324 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
 
        istwf_k=dtset%istwfk(ikpt)
-
-!      Retrieve number of plane waves
        npw_k=npwarr(ikpt)
-       if (nprocband>1) then
-!        Special treatment for band-fft //
-         call xmpi_allgather(npw_k,npw_block,spaceComm_band,ierr)
-         npw_nk=sum(npw_block);npw_disp(1)=0
-         do ii=2,nprocband
-           npw_disp(ii)=npw_disp(ii-1)+npw_block(ii-1)
-         end do
-       else
-         npw_nk=npw_k
-       end if
 
-!      Allocate arrays for a wave-function (or a block of WFs)
-       ABI_ALLOCATE(cwavef,(2,npw_nk*my_nspinor))
-       ABI_ALLOCATE(cwavefh,(2,npw_nk*my_nspinor))
+!      Biorthogonalization
 
-
-       if (nprocband>1) then
-         isize=2*my_nspinor;bufsize(:)=isize*npw_block(:);bufdisp(:)=isize*npw_disp(:)
-         isize=2*my_nspinor*npw_k;bufsize_wf(:)=isize
-         do ii=1,nprocband
-           bufdisp_wf(ii)=(ii-1)*isize
-         end do
-       end if
-
-!      Space biorthogonalization
-
-!      Loop over bands or blocks of bands
-       nblockbd=nband_k/nprocband
-       icgb=icg
-
-       ABI_DATATYPE_ALLOCATE( cprj_k,(dtset%natom,my_nspinor*nblockbd))
-       ABI_DATATYPE_ALLOCATE( cprj_kh,(dtset%natom,my_nspinor*nblockbd))
        if(usepaw==1) then
-         call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimcprj)
          call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
-&         dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
+&         dtset%mkmem,dtset%natom,nbdmix,nband_k,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         call pawcprj_alloc(cprj_kh,scf_history%cprj(1,1,indh)%ncpgr,dimcprj)
-         call pawcprj_get(atindx1,cprj_kh,scf_history%cprj(:,:,indh),dtset%natom,1,ibg,ikpt,1,isppol,&
-&         dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
-&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+         call pawcprj_get(atindx1,cprj_kh,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,my_nspinor,dtset%nsppol,0,&
+&          mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
        end if  !end usepaw=1
 
-       ABI_ALLOCATE(smn,(2,nblockbd,nblockbd))
-
-!DEBUG
-       write(std_out,*)' Compute the S matrix, whose matrix elements are scalar products.'
-!ENDDEBUG
        hermitian=0
-       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,scf_history%cprj(:,:,indh),dimcprj,hermitian,&
-&        ibg,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-
-!DEBUG
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
-!ENDDEBUG
+       if(wfmixalg==2 .or. istep==2)then
+         call dotprod_set_cgcprj(atindx1,cg,scf_history_wf%cg(:,:,indh),cprj_k,cprj_kh,dimcprj,hermitian,&
+&          0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+&          mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+       else
+         call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),cg,cprj_kh,cprj_k,dimcprj,hermitian,&
+&          0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+&          mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
+       endif
 
 !      Invert S matrix, that is NOT hermitian. 
 !      Calculate M=S^-1
-       ABI_ALLOCATE(mmn,(2,nband_k,nband_k))
        mmn=zero
-       do kk=1,nband_k
+       do kk=1,nbdmix
          mmn(1,kk,kk)=one
        end do
 
-       ABI_ALLOCATE(smn_,(2,nband_k,nband_k))
-       ABI_ALLOCATE(ipiv,(nband_k))
-!      For debuggning purposes, the smn matrix is preserved (later, M * S = 1 is checked ...)
-!      The smn_ arrays stores a copy of the smn array, and will be destroyed by the following inverse call
-       smn_=smn
-       call zgesv(nband_k,nband_k,smn_,nband_k,ipiv,mmn,nband_k,ierr)
+       ABI_ALLOCATE(ipiv,(nbdmix))
+!      The smn is destroyed by the following inverse call
+       call zgesv(nbdmix,nbdmix,smn,nbdmix,ipiv,mmn,nbdmix,ierr)
        ABI_DEALLOCATE(ipiv)
-       ABI_DEALLOCATE(smn_)
 !DEBUG
        if(ierr/=0)then
-         write(std_out,*)' wf_mixing : the call to cgesv general inversion routine returned an error code ierr=',ierr
-         stop
+         MSG_ERROR(' The call to cgesv general inversion routine failed')
        endif
 !ENDDEBUG
 
-!DEBUG
-!Print the M matrix
-       write(std_out,*)' Print the M matrix.'
-       do iblockbd=1,nblockbd
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',mmn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',mmn(2,1:nblockbd,iblockbd)
-       end do
-       write(std_out,*)' Check M * S = 1.'
-       ABI_ALLOCATE(dmn,(2,nband_k,nband_k))
-       dmn=zero
-       do iblockbd=1,nblockbd
-         do iblockbd1=1,nblockbd
-           dmn(1,:,iblockbd)=dmn(1,:,iblockbd)&
-&           +mmn(1,:,iblockbd1)*smn(1,iblockbd1,iblockbd)-mmn(2,:,iblockbd1)*smn(2,iblockbd1,iblockbd)
-           dmn(2,iblockbd,:)=dmn(2,iblockbd,:)&
-&           +mmn(1,:,iblockbd1)*smn(2,iblockbd1,iblockbd)+mmn(2,:,iblockbd1)*smn(1,iblockbd1,iblockbd)
-         enddo
-       enddo
-       write(std_out,*)' Print the M*S matrix.'
-       do iblockbd=1,nblockbd
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',dmn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',dmn(2,1:nblockbd,iblockbd)
-       end do
-       ABI_ALLOCATE(dmn_debug,(2,nband_k,nband_k))
-       dmn_debug=zero
-       do kk=1,nband_k
-         dmn_debug(1,kk,kk)=one
-       end do
-       if(maxval(abs(dmn-dmn_debug))>tol8)then
-         write(std_out,*)' wf_mixing : dmn and dmn_debug do not agree '
-         stop
+!      The M matrix is used to compute the biorthogonalized set of wavefunctions, and to store it at the proper place
+       if(wfmixalg==2 .or. istep==2)then
+         inplace=1
+         call lincom_cgcprj(mmn,scf_history_wf%cg(:,:,indh),cprj_kh,dimcprj,&
+&         icg_hist,inplace,mcg,my_nspinor*nbdmix,dtset%natom,nbdmix,nbdmix,npw_k,my_nspinor,usepaw)
+       else
+         inplace=0
+         call lincom_cgcprj(mmn,cg,cprj_k,dimcprj,&
+&         icg,inplace,mcg,my_nspinor*nbdmix,dtset%natom,nbdmix,nbdmix,npw_k,my_nspinor,usepaw,&
+&         cgout=scf_history_wf%cg(:,:,ind_biorthog),cprjout=scf_history_wf%cprj(:,:,ind_biorthog),icgout=icg_hist)
        endif
-       ABI_DEALLOCATE(dmn)
-       ABI_DEALLOCATE(dmn_debug)
-!ENDDEBUG
 
+!      The biorthogonalised set of wavefunctions is now stored at the proper place
 
-!      (This is the simple mixing case) 
-!      The wavefunction from scf_history is biorthogonalized to cg, taken as reference
-!      Wavefunction alignment (istwfk=1 ?)
+!      Finalize this first part of the computation, depending on the algorithm and the step.
 
-!DEBUG  (Old coding)
-       ABI_ALLOCATE(work,(2,npw_nk*my_nspinor*nblockbd))
-       ABI_ALLOCATE(work1,(2,npw_nk*my_nspinor*nblockbd))
-       work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,indh)
-!ENDDEBUG
-      
+       if(wfmixalg==2)then
 
-!      This is the list of args of lincom_cgcprj
-!      subroutine lincom_cgcprj(alpha_mn,cg,cprj,dimcprj,&
-!&         icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw)
-
-!      This is the new coding
-       inplace=1
-       call lincom_cgcprj(mmn,scf_history%cg(:,:,indh),cprj_kh,dimcprj,&
-&         icg,inplace,mcg,my_nspinor*nband_k,dtset%natom,nband_k,nband_k,npw_k,my_nspinor,usepaw)
-
-!DEBUG
-!      This is the old coding
-       call zgemm('N','N',npw_nk*my_nspinor,nband_k,nband_k,dcmplx(1._dp), &
-&       work1,npw_nk*my_nspinor, &
-&       mmn,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
-       if(maxval(abs(scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)-work(:,:)))>tol8)then
-         MSG_ERROR(' The old and new coding do not agree ')
-       endif
-!      scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,indh)=work(:,:)
-
-!      If paw, must also align cprj from history
-       if (usepaw==1) then
-!        New version (MT):
-         ABI_DATATYPE_ALLOCATE(cprj_k3,(dtset%natom,my_nspinor))
-         call pawcprj_alloc(cprj_k3,cprj_kh(1,1)%ncpgr,dimcprj)
-         ABI_ALLOCATE(al,(2,nblockbd))
-         do iblockbd=1,nblockbd
-           ii=(iblockbd-1)*my_nspinor
-           do iblockbd1=1,nblockbd
-             al(1,iblockbd1)=mmn(1,iblockbd,iblockbd1)
-             al(2,iblockbd1)=mmn(2,iblockbd,iblockbd1)
-           end do
-           call pawcprj_lincom(al,cprj_kh,cprj_k3,nblockbd)
-!          This seems incorrect : cprj_kh is overwritten while its original values are still supposed to be used !
-           call pawcprj_copy(cprj_k3,cprj_kh(:,ii+1:ii+my_nspinor))
-         end do
-         ABI_DEALLOCATE(al)
-         call pawcprj_free(cprj_k3)
-         ABI_DATATYPE_DEALLOCATE(cprj_k3)
-       end if
-       ABI_DEALLOCATE(mmn)
-       ABI_DEALLOCATE(work)
-       ABI_DEALLOCATE(work1)
-!ENDDEBUG
-
-!DEBUG
-!      This is a check that now the scf_history%cg(:,:,indh) is biorthogonal to the cg
-!      Calculate Smn=<cg|S|cg_hist>
-       write(std_out,*)' Check that the biorthogonalized scf_history%cg is indeed biorthogonal to cg'
-       hermitian=0
-       call dotprod_set_cgcprj(atindx1,cg,scf_history%cg(:,:,indh),cprj,cprj_kh,dimcprj,hermitian,&
-&        ibg,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
-!ENDDEBUG
-
-!      Wavefunction extrapolation, simple mixing case
-       ibd=0  
-       inc=npw_nk*my_nspinor
-       do iblockbd=1,nblockbd
-!        scf_history%alpha contains dtset%wfmix in the simple mixing case.
-         cg(:,icg+1+ibd:icg+inc+ibd)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh)&
-&          +scf_history%alpha*(cg(:,icg+1+ibd:ibd+icg+inc)-scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh))
+!        Wavefunction extrapolation, simple mixing case
+!        alpha contains dtset%wfmix, beta contains one-alpha
+         cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=&
+&          alpha*cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)&
+&          +beta*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh) 
          if(usepaw==1) then
-           alpha=one-scf_history%alpha
-           beta=scf_history%alpha
-           call pawcprj_axpby(alpha,beta,cprj_kh(:,iblockbd:iblockbd),cprj_k(:,iblockbd:iblockbd))
+           do ibdmix=1,nbdmix
+             call pawcprj_axpby(beta,alpha,cprj_kh(:,ibdmix:ibdmix),cprj_k(:,ibdmix:ibdmix))
+           end do ! end loop on ibdmix
          endif
-         ibd=ibd+inc
-       end do ! end loop on iblockbd
 
-!DEBUG
-!      This is a check that the new cg is biorthogonal to the cg_ref
-!      Calculate Smn=<cg|S|cg_hist>
-       write(std_out,*)' Check that the new extrapolated cg is biorthogonal to cg_ref'
-       hermitian=0
-       call dotprod_set_cgcprj(atindx1,cg,cg_ref,cprj_k,cprj_ref,dimcprj,hermitian,&
-&        0,ibg,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,my_nspinor*nblockbd,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
-!ENDDEBUG
+!        Back to usual orthonormalization 
+         call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nband_k,dtset%mkmem,&
+&          mpi_enreg,dtset%natom,nattyp,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
 
-!DEBUG
-!      For checking purposes
-       cg_ref=cg
-!ENDDEBUG
-
-!      Back to usual orthonormalization 
-! HERE should place new routine cgcprj_cholesky
-!        subroutine cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
-!&  mpi_enreg,natom,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
-
-       call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nblockbd,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
-
-!DEBUG
-       if(usepaw==0)then
-!        Old algorithm, only valid for norm conserving case
-!        (borrowed from vtowfk and wfconv - which is problematic for PAW).
-!        Back to usual orthonormalization (borrowed from vtowfk and wfconv - which is problematic for PAW).
-         ortalgo=mpi_enreg%paral_kgb
-!        There are dummy arguments as PAW is not implemented with gsc in the present status !! 
-         ABI_ALLOCATE(dum,(2,0))
-!        Warning :  for the band-fft parallelism, perhaps npw_k has to be used instead of npw_nk
-         call pw_orthon(icg,0,istwf_k,mcg,0,npw_nk*my_nspinor,nband_k,ortalgo,dum,usepaw,cg_ref,&
-&          mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-         ABI_DEALLOCATE(dum)
-         if(maxval(abs(cg-cg_ref))>tol8)then
-           MSG_ERROR(' The old and new coding for orthogonalisation do not agree ')
-         endif
-       endif
-!ENDDEBUG
-
-!DEBUG
-!      This is a check that the new cg is orthonormalized
-!      Calculate Smn=<cg|S|cg>
-       write(std_out,*)' Check that the final extrapolated cg is orthonormalized '
-       hermitian=1
-       call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,hermitian,&
-&        0,0,icg,icg,ikpt,isppol,istwf_k,dtset%mband,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
-&        mpi_enreg,dtset%natom,nattyp,nband_k,nband_k,npw_nk,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
-       do iblockbd=1,nband_k
-         write(std_out, '(a,i4)')' iblockbd=',iblockbd
-         write(std_out, '(a,8f12.4)')' Real:',smn(1,1:nblockbd,iblockbd)
-         write(std_out, '(a,8f12.4)')' Imag:',smn(2,1:nblockbd,iblockbd)
-       enddo
-!      stop
-!ENDDEBUG
-
-!      Store the newly extrapolated wavefunctions, orthonormalized, in scf_history
-       ibd=0
-       inc=npw_nk*my_nspinor
-       do iblockbd=1,nblockbd
-         scf_history%cg(:,1+icg+ibd:icg+ibd+inc,indh)=cg(:,icg+1+ibd:ibd+icg+inc)
+!        Store the newly extrapolated wavefunctions, orthonormalized, in scf_history_wf
+         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
          if(usepaw==1) then
-           call pawcprj_put(atindx1,cprj_k,scf_history%cprj(:,:,indh),dtset%natom,1,ibg,ikpt,1,isppol,&
-&           dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,dimcprj,my_nspinor,dtset%nsppol,0,&
-&           mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+           do ibdmix=1,nbdmix
+             call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&             nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&             mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+           end do ! end loop on ibdmix
          end if
-         ibd=ibd+inc
-       end do ! end loop on iblockbd
 
-       ABI_DEALLOCATE(cwavef)
-       ABI_DEALLOCATE(cwavefh)
-       ABI_DEALLOCATE(smn)
-       if(usepaw==1) then
-         call pawcprj_free(cprj_k)
-         call pawcprj_free(cprj_kh)
-       end if
-       ABI_DATATYPE_DEALLOCATE(cprj_k)
-       ABI_DATATYPE_DEALLOCATE(cprj_kh)
+       else  !  wfmixalg/=2
+!        RMM-DIIS
+
+         if (istep==2)then
+!          Store the argument wf as the reference for all future steps, in scf_history_wf with index 1. 
+           scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+           if(usepaw==1) then
+             do ibdmix=1,nbdmix
+               call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,1),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&               nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&               mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+             end do ! end loop on ibdmix
+           end if
+         endif
+
+         ind_biorthog_eff=ind_biorthog
+         if(istep==2)ind_biorthog_eff=1 ! The argument wf has not been stored in ind_biorthog
+
+!        Compute the residual of the wavefunctions for this istep, 
+!        that replaces the previously stored set of (biorthogonalized) input wavefunctions
+         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)=&
+&          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)&
+&          -scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
+         if(usepaw==1) then
+           do ibdmix=1,nbdmix
+             call pawcprj_axpby(one,-one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff),&
+&             scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual))
+           end do ! end loop on ibdmix
+         endif
+         
+!        Compute the new scalar products to fill the res_mn matrix
+         call dotprodm_sumdiag_cgcprj(atindx1,scf_history_wf%cg,scf_history_wf%cprj,dimcprj,&
+&         ibg,icg,ikpt,isppol,istwf_k,nbdmix,mcg,mcprj,dtset%mkmem,&
+&         mpi_enreg,scf_history_wf%history_size,dtset%natom,nattyp,nbdmix,npw_k,nset1,nset2,my_nspinor,dtset%nsppol,ntypat,&
+&         shift_set1,shift_set2,pawtab,dotprod_res_k,usepaw)
+
+         dotprod_res=dotprod_res+dotprod_res_k
+
+!        scf_history_wf for index ind_biorthog will contain the extrapolated wavefunctions (and no more the output of the SCF loop).
+         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)=&
+&          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)+&
+&          (alpha-one)*scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
+         if(usepaw==1) then
+           do ibdmix=1,nbdmix
+             if(ind_biorthog/=ind_biorthog_eff)then
+               scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog)=scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff) 
+             endif
+             call pawcprj_axpby((alpha-one),one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual),&
+&             scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog))
+           end do ! end loop on ibdmix
+         endif
+
+       endif
 
        ibg=ibg+my_nspinor*nband_k
+       ibg_hist=ibg_hist+my_nspinor*nbdmix
        icg=icg+my_nspinor*nband_k*npw_k
+       icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
 
 !      End big k point loop
      end do
 !    End loop over spins
    end do
 
-   if (nprocband>1) then
-     ABI_DEALLOCATE(npw_block)
-     ABI_DEALLOCATE(npw_disp)
-     ABI_DEALLOCATE(bufsize)
-     ABI_DEALLOCATE(bufdisp)
-     ABI_DEALLOCATE(bufsize_wf)
-     ABI_DEALLOCATE(bufdisp_wf)
-   end if
-
  end if ! istep>=2
 
+ if(wfmixalg>2 .and. istep>1)then
+
 !DEBUG
- write(std_out,*)' wf_mixing : exit '
- write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
- write(std_out,*)' scf_history%cg(1:2,1:2,1)=',scf_history%cg(1:2,1:2,1)
- ABI_DEALLOCATE(cg_ref)
- ABI_DATATYPE_DEALLOCATE(cprj_ref)
+!      write(std_out,*)' '
+!      write(std_out,*)' Entering the residual minimisation part '
+!      write(std_out,*)' '
+!      call flush(std_out)
 !ENDDEBUG
 
- ABI_DEALLOCATE(dimcprj)
+   call timab(48,1,tsec)
+   call xmpi_sum(dotprod_res,mpi_enreg%comm_kpt,ierr)
+   call timab(48,2,tsec)
 
+   scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,1+shift_set1,1+shift_set2:nset2+shift_set2)=dotprod_res(:,1,1:nset2)
+   scf_history_wf%dotprod_sumdiag_cgcprj_ij(1,1+shift_set2:nset2+shift_set2,1+shift_set1)=dotprod_res(1,1,1:nset2)
+   scf_history_wf%dotprod_sumdiag_cgcprj_ij(2,1+shift_set2:nset2+shift_set2,1+shift_set1)=-dotprod_res(2,1,1:nset2)
+
+ endif ! wfmixalg>2 and istep>1
+
+ if(wfmixalg>2 .and. istep>2)then
+
+!  Extract the relevant matrix R_mn
+   res_mn(:,1:nset2,1:nset2)=&
+&   scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,1+shift_set2:nset2+shift_set2,1+shift_set2:nset2+shift_set2)
+
+!DEBUG
+!      write(std_out,*)' The matrix res_mn(:,1:nset2,1:nset2) is :'
+!      write(std_out,*)res_mn(:,1:nset2,1:nset2)
+!      call flush(std_out)
+!ENDDEBUG
+
+!  Solve R_mn \alpha_n = 1_m
+   ABI_ALLOCATE(ipiv,(nset2))
+   ABI_ALLOCATE(coeffs,(nset2))
+   coeffs(:)=cone
+!  The res_mn is destroyed by the following inverse call
+   call zgesv(nset2,1,res_mn,wfmixalg-1,ipiv,coeffs,nset2,ierr)
+   ABI_DEALLOCATE(ipiv)
+!  The coefficients must sum to one
+   sum_coeffs=sum(coeffs)
+   coeffs=coeffs/sum_coeffs
+
+!DEBUG
+!      write(std_out,*)' The coefficients that minimize the residual have been found'
+!      write(std_out,*)' coeffs =',coeffs
+!      call flush(std_out)
+!ENDDEBUG
+ endif ! wfmixalg>2 and istep>2
+
+  if(wfmixalg>2 .and. istep>1)then
+
+!  Find the new "input" wavefunction, bi-orthogonalized, and store it replacing the adequate "old" input wavefunction.
+
+   icg=0
+   icg_hist=0
+   ibg=0
+   ibg_hist=0
+   ABI_ALLOCATE(al,(2,nset2))
+   if(istep>2)then
+     do iset2=1,nset2
+       al(1,iset2)=real(coeffs(iset2)) ; al(2,iset2)=aimag(coeffs(iset2))
+     enddo
+   else
+     al(1,1)=one ; al(2,1)=zero
+   endif
+
+!DEBUG
+!      write(std_out,*)' Overload the coefficients, in order to simulate a simple mixing with wfmix '
+!      write(std_out,*)' Set al(1,ind_biorthog-3)=one, for ind_biorthog=',ind_biorthog
+!      write(std_out,*)' This will feed scf_history for set ind_biorthog-3+wfmixalg=',ind_biorthog-3+wfmixalg
+!      al(:,:)=zero
+!      al(1,ind_biorthog-3)=one
+!      call flush(std_out)
+!ENDDEBUG
+
+!  LOOP OVER SPINS
+   do isppol=1,dtset%nsppol
+
+!    BIG FAT k POINT LOOP
+     do ikpt=1,dtset%nkpt
+
+!      Select k point to be treated by this proc
+       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
+
+       istwf_k=dtset%istwfk(ikpt)
+       npw_k=npwarr(ikpt)
+
+       if(istep>2)then
+!        Make the appropriate linear combination (from the extrapolated wfs)
+         cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=zero
+         do iset2=1,nset2
+           cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(1,icg+1:icg+my_nspinor*npw_k*nband_k)&
+&            +al(1,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)&
+&            -al(2,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)
+           cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)=cg(2,icg+1:icg+my_nspinor*npw_k*nband_k)&
+&            +al(1,iset2)*scf_history_wf%cg(2,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)&        
+&            +al(2,iset2)*scf_history_wf%cg(1,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,iset2+wfmixalg)
+         enddo
+       else ! One needs a simple copy from the extrapolated wavefunctions
+         cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1+wfmixalg)
+       endif
+!      Note the storage in cprj_k. By the way, a simple copy might also be used in case istep=2.
+       if(usepaw==1) then
+         do ibdsp=1,my_nspinor*nbdmix
+           call pawcprj_lincom(al,scf_history_wf%cprj(:,ibdsp,1+wfmixalg:nset2+wfmixalg),cprj_k(:,ibdsp:ibdsp),nset2)
+         enddo
+       endif
+
+!      Store the newly extrapolated wavefunctions for this k point, still bi-orthonormalized, in scf_history_wf
+       scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_newwf)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
+       if(usepaw==1) then
+         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,ind_newwf),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+       end if
+
+!      Back to usual orthonormalization for the cg and cprj_k
+       call cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf_k,mcg,my_nspinor*nband_k,dtset%mkmem,&
+&        mpi_enreg,dtset%natom,nattyp,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,usepaw)
+
+!      Need to transfer cprj_k to cprj
+       if(usepaw==1) then
+         call pawcprj_put(atindx1,cprj_k,cprj,dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+&          nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
+&          mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
+       endif
+
+       ibg=ibg+my_nspinor*nband_k
+       ibg_hist=ibg_hist+my_nspinor*nbdmix
+       icg=icg+my_nspinor*nband_k*npw_k
+       icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
+
+!      End big k point loop
+     end do
+!    End loop over spins
+   end do
+
+   if(istep>2)then
+     ABI_DEALLOCATE(coeffs)
+   endif
+   ABI_DEALLOCATE(al)
+
+ endif ! wfmixalg>2 and istep>1
+
+!DEBUG
+! write(std_out,*)' wf_mixing : exit '
+!      write(std_out,*)' scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)=',&
+!&       scf_history_wf%dotprod_sumdiag_cgcprj_ij(:,2,2)
+! write(std_out,*)' cg(1:2,1:2)=',cg(1:2,1:2)
+! write(std_out,*)' scf_history_wf%cg(1:2,1:2,1)=',scf_history_wf%cg(1:2,1:2,1)
+! ABI_DEALLOCATE(cg_ref)
+! ABI_DATATYPE_DEALLOCATE(cprj_ref)
+!ENDDEBUG
+
+ if(usepaw==1) then
+   call pawcprj_free(cprj_k)
+   call pawcprj_free(cprj_kh)
+ end if
+ ABI_DATATYPE_DEALLOCATE(cprj_k)
+ ABI_DATATYPE_DEALLOCATE(cprj_kh)
+ ABI_DEALLOCATE(dimcprj)
+ ABI_DEALLOCATE(mmn)
+ ABI_DEALLOCATE(smn)
+ if(wfmixalg>2)then
+   ABI_DEALLOCATE(dotprod_res_k)
+   ABI_DEALLOCATE(dotprod_res)
+   ABI_DEALLOCATE(res_mn)
+ endif
 end subroutine wf_mixing
 !!***

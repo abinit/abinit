@@ -9,7 +9,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MT)
+!! Copyright (C) 2011-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -133,6 +133,7 @@ MODULE m_scf_history
    real(dp),allocatable :: cg(:,:,:)
     ! cg(2,mcg,history_size)
     ! wavefunction coefficients needed for each SCF cycle of history
+    ! Might also contain the wf residuals
 
    real(dp),allocatable :: deltarhor(:,:,:)
     ! deltarhor(nfft,nspden,history_size)
@@ -159,6 +160,11 @@ MODULE m_scf_history
    real(dp),allocatable :: xred_last(:,:)
     ! xred_last(3,natom)
     ! Last computed atomic positions (reduced coordinates)
+
+   real(dp),allocatable :: dotprod_sumdiag_cgcprj_ij(:,:,:)
+    ! dotprod_sumdiag_cgcprj_mn(2,history_size,history_size)
+    ! Container for the scalar products between aligned sets of wavefunctions or their residuals
+    ! S_ij=Sum_nk <wf_nk(set i)|wf_nk(set j)> possibly with some weighting factor that might depend on nk.
 
 ! Structured datatypes arrays
 
@@ -201,7 +207,7 @@ CONTAINS !===========================================================
 !!    The wfs arrays that are possibly allocated are : cg and cprj
 !!
 !! PARENTS
-!!      gstate
+!!      gstate,scfcv
 !!
 !! CHILDREN
 !!
@@ -268,9 +274,11 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      scf_history%mcprj=0
      if (usecg>0) then
        my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-       scf_history%mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+       scf_history%mcg=dtset%mpw*my_nspinor*dtset%nbandhf*dtset%mkmem*dtset%nsppol ! This is for scf_history_wf
+       if(usecg==1)scf_history%mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol ! This is for scf_history (when extrapwf==1)
        if (dtset%usepaw==1) then
-         mband_cprj=dtset%mband
+         mband_cprj=dtset%nbandhf
+         if(usecg==1)mband_cprj=dtset%mband
          if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
          scf_history%mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
        end if
@@ -303,6 +311,11 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
        ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
      end if
 
+     if (scf_history%usecg==2)then
+!      This relatively small matrix is always allocated when usecg==1, even if not used
+       ABI_ALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij,(2,scf_history%history_size,scf_history%history_size))
+     endif
+
    end if
  end if
 
@@ -322,7 +335,7 @@ end subroutine scf_history_init
 !!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
 !!
 !! PARENTS
-!!      gstateimg
+!!      gstateimg,scfcv
 !!
 !! CHILDREN
 !!
@@ -391,6 +404,9 @@ subroutine scf_history_free(scf_history)
  end if
  if (allocated(scf_history%cg))           then
    ABI_DEALLOCATE(scf_history%cg)
+ end if
+ if (allocated(scf_history%dotprod_sumdiag_cgcprj_ij))           then
+   ABI_DEALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij)
  end if
 
  scf_history%history_size=-1

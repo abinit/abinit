@@ -21,7 +21,7 @@
 !! spherical harmonics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2009-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
