@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.7.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 17 Sep 2017.
-- ( at 06h08 )
+.Starting date : Wed 21 Feb 2018.
+- ( at 17h01 )
   
 - input  file    -> t13.in
 - output file    -> t13.out
 - root for input  files -> t13i
 - root for output files -> t13o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_oncv.psml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/79_Au_oncv.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     7
 - psxml2ab: ps_Projector_L     0
@@ -40,11 +40,11 @@
 - psxml2ab: Atomic Label:                      Au
 - psxml2ab: Atomic Number:                         79.00000
 - psxml2ab: Valence charge:                        19.00000
-- psxml2ab: Pseudopotential generator code :    ONCVPSP-3.3.0+psml-3.3.0-72 (scalar-relativistic)
-- psxml2ab: Date of pseudopotential generation: 2017-07-20
+- psxml2ab: Pseudopotential generator code :    ONCVPSP-3.3.0+psml-3.3.0-72 (s
+- psxml2ab: Date of pseudopotential generation:   170720
 - psxml2ab: Pseudopotential flavor:             Hamann's oncvpsp
-- psxml2ab: Exchange-correlation functional    1 :    Perdew, Burke & Ernzerhof (GGA)
-- psxml2ab: Exchange-correlation functional    2 :    Perdew, Burke & Ernzerhof (GGA)
+- psxml2ab: Exchange-correlation functional    1 :    Perdew, Burke & Ernzerhof (GGA) ( 101)
+- psxml2ab: Exchange-correlation functional    2 :    Perdew, Burke & Ernzerhof (GGA) ( 130)
 - psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   scalar
 - psxml2ab: Spin-polarized pseudopotential:     no
 
@@ -319,8 +319,8 @@ P           mkmem         110
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_oncv.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/79_Au_oncv.psml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/79_Au_oncv.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/79_Au_oncv.psml
 - Au    ONCVPSP-3.3.0+psml-3.3.0-72 (s
 - 79.00000  19.00000    170720                znucl, zion, pspdat
     9 -101130    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -729,10 +729,10 @@ P           mkmem         110
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         20.0  wall=         20.2
+- Proc.   0 individual time (sec): cpu=         21.3  wall=         21.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.0  wall=         20.2
++Overall time at end (sec) : cpu=         21.3  wall=         21.4
