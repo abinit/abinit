@@ -24,14 +24,17 @@
 #endif
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #if defined HAVE_LIBXC
 
 #include "xc.h"
 #include "xc_version.h"
-/* if version before 4 get config file*/
+#include "xc_funcs.h"
+
+/* if version before 4 get config file */
 #if ( XC_MAJOR_VERSION < 4 )
-#include "xc_config.h"
+#  include "xc_config.h"
 #else
 #  define FLOAT double
 #endif
@@ -118,8 +121,23 @@ void xc_func_type_free(XC(func_type) **xc_func)
  *     These accessors where not provided before libXC v3
  * ===============================================================
  */
-#if defined XC_MICRO_VERSION
- /* libXC v3.0 and later */
+#if ( XC_MAJOR_VERSION > 3 )
+/* ==== libXC v4.0 and later ==== */
+char const *xc_get_info_name(XC(func_type) *xc_func)
+ {return xc_func_info_get_name(xc_func->info);}
+int xc_get_info_flags(XC(func_type) *xc_func)
+ {return xc_func_info_get_flags(xc_func->info);}
+int xc_get_info_kind(XC(func_type) *xc_func)
+ {return xc_func_info_get_kind(xc_func->info);}
+char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
+ {if (*number>=0&&*number<=XC_MAX_REFERENCES)
+   {if (xc_func_info_get_references(xc_func->info,*number) != NULL)
+    {return xc_func_info_get_references(xc_func->info,*number)->ref;}}
+  else {return NULL;}
+  return NULL;}
+
+#elif ( XC_MAJOR_VERSION > 2 )
+/* ==== libXC v3.0 ==== */
 char const *xc_get_info_name(XC(func_type) *xc_func)
  {return xc_func_info_get_name(xc_func->info);}
 int xc_get_info_flags(XC(func_type) *xc_func)
@@ -128,18 +146,13 @@ int xc_get_info_kind(XC(func_type) *xc_func)
  {return xc_func_info_get_kind(xc_func->info);}
 char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
  {if (*number>=0&&*number<=4)
-#if ( XC_MAJOR_VERSION < 4 ) 
    {if (xc_func_info_get_ref(xc_func->info,*number) != NULL)
     {return xc_func_info_get_ref(xc_func->info,*number);}}
-#else
-/* NB: TODO check if return types are used correctly in version 4. Compilation raises warning about return type of xc_func_info_get_references*/
-   {if (xc_func_info_get_references(xc_func->info,*number) != NULL)
-    {return xc_func_info_get_references(xc_func->info,*number);}}
-#endif
   else {return NULL;}
   return NULL;}
+
 #else
- /* libXC before v3.0 */
+/* ==== Before libXC v3.0 ==== */
 char const *xc_get_info_name(XC(func_type) *xc_func)
  {return xc_func->info->name;}
 int xc_get_info_flags(XC(func_type) *xc_func)
@@ -150,5 +163,43 @@ char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
  {if (*number==0) {return xc_func->info->refs;} else {return NULL;}
   return NULL;}
 #endif
+
+/* ===============================================================
+ * Wrapper to xc_func_set_ext_params for backward compatibility
+ *    Allows to change the parameters of a XC functional
+ * ===============================================================
+ */
+void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_params)
+#if ( XC_MAJOR_VERSION > 3 ) 
+/* ==== libXC v4.0 and later ==== */
+ {/* set_ext_params function is missing for PBE0 */  
+  if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
+   {xc_func->cam_alpha=ext_params[0];xc_func->mix_coef[0]=1.0-ext_params[0];}
+
+  else if (n_ext_params == xc_func->info->n_ext_params)
+   {XC(func_set_ext_params)(xc_func, ext_params);}
+
+#else
+/* ==== Before libXC v4.0 ==== */
+ {if (xc_func->info->number == XC_LDA_C_XALPHA && n_ext_params == 1)
+   {XC(lda_c_xalpha_set_params)(xc_func, *ext_params);}
+  else if (xc_func->info->number == XC_MGGA_X_TB09 && n_ext_params == 1)
+   {XC(mgga_x_tb09_set_params)(xc_func, *ext_params);}
+  else if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
+   {XC(hyb_gga_xc_pbeh_set_params)(xc_func, *ext_params);}
+  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE03 && n_ext_params == 3)
+   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[0], ext_params[2]);
+    xc_func->cam_omega=ext_params[1];}
+  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE06 && n_ext_params == 3)
+   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[0], ext_params[2]);
+    xc_func->cam_omega=ext_params[1];}
+#endif
+  else
+   {fprintf(stderr, "BUG: invalid entry in set_params!\n");abort();}
+ }
+
+
+
+
 
 #endif

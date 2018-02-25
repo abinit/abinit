@@ -48,9 +48,6 @@
 #endif
 
 #include "abi_common.h"
-#if defined HAVE_LIBXC
-#include "xc_version.h"
-#endif
 
 module libxc_functionals
 
@@ -58,6 +55,7 @@ module libxc_functionals
  use m_profiling_abi
  use m_errors
 
+!ISO C bindings are mandatory
 #ifdef HAVE_FC_ISO_C_BINDING
  use iso_c_binding
 #endif
@@ -216,39 +214,14 @@ module libxc_functionals
    end subroutine xc_mgga
  end interface
 !
-#if ( XC_MAJOR_VERSION < 4 )
  interface
-   subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
-     use iso_c_binding, only : C_DOUBLE,C_PTR
-     real(C_DOUBLE),value :: alpha
+   subroutine xc_func_set_params(xc_func,params,n_params) bind(C)
+     use iso_c_binding, only : C_INT,C_DOUBLE,C_PTR
+     integer(C_INT),value :: n_params
+     real(C_DOUBLE) :: params(*)
      type(C_PTR) :: xc_func
-   end subroutine xc_hyb_gga_xc_pbeh_set_params
+   end subroutine xc_func_set_params
  end interface
-!
- interface
-   subroutine xc_hyb_gga_xc_hse_set_params(xc_func, alpha, omega) bind(C)
-     use iso_c_binding, only : C_DOUBLE,C_PTR
-     real(C_DOUBLE),value :: alpha, omega
-     type(C_PTR) :: xc_func
-   end subroutine xc_hyb_gga_xc_hse_set_params
- end interface
-!
- interface
-   subroutine xc_lda_c_xalpha_set_params(xc_func,alpha) bind(C)
-     use iso_c_binding, only : C_DOUBLE,C_PTR
-     real(C_DOUBLE),value :: alpha
-     type(C_PTR) :: xc_func
-   end subroutine xc_lda_c_xalpha_set_params
- end interface
-!
- interface
-   subroutine xc_mgga_x_tb09_set_params(xc_func,c) bind(C)
-     use iso_c_binding, only : C_DOUBLE,C_PTR
-     real(C_DOUBLE),value :: c
-     type(C_PTR) :: xc_func
-   end subroutine xc_mgga_x_tb09_set_params
- end interface
-#endif
 !
  interface
    subroutine xc_get_singleprecision_constant(xc_cst_singleprecision) bind(C)
@@ -513,8 +486,8 @@ contains
  type(libxc_functional_type),pointer :: xc_func
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer :: flags
- integer(C_INT) :: func_id_c,iref_c,nspin_c,success_c
- real(C_DOUBLE) :: alpha_c,beta_c,omega_c
+ integer(C_INT) :: func_id_c,iref_c,npar_c,nspin_c,success_c
+ real(C_DOUBLE) :: alpha_c,beta_c,omega_c,param_c(1)
  character(kind=C_CHAR,len=1),pointer :: strg_c
  type(C_PTR) :: func_ptr_c
 #endif
@@ -558,7 +531,7 @@ contains
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
 
-   if (xc_func%id==0) cycle
+   if (xc_func%id<=0) cycle
 
 !  Get XC functional family
    xc_func%family=libxc_functionals_family_from_id(xc_func%id)
@@ -590,15 +563,8 @@ contains
 
 !  Special treatment for LDA_C_XALPHA functional
    if (xc_func%id==libxc_functionals_getid('XC_LDA_C_XALPHA')) then
-     alpha_c=real(zero,kind=C_DOUBLE)
-#if ( XC_MAJOR_VERSION < 4 )
-     call xc_lda_c_xalpha_set_params(xc_func%conf,alpha_c);
-#else
-     msg='seems set_params has disappeared for xalpha in libxc 4. defaults are being used'
-     MSG_WARNING(msg)
-     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
-#endif
-
+     param_c(1)=real(zero,kind=C_DOUBLE);npar_c=int(1,kind=C_INT)
+     call xc_func_set_params(xc_func%conf,param_c,npar_c)
    end if
 
 !  Get functional kind
@@ -698,7 +664,7 @@ end subroutine libxc_functionals_init
      xc_func => xc_global(ii)
    end if
 
-   if (xc_func%id == 0) cycle
+   if (xc_func%id <= 0) cycle
    xc_func%id=-1
    xc_func%family=-1
    xc_func%kind=-1
@@ -776,12 +742,12 @@ end subroutine libxc_functionals_init
  end if
 
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- if (xc_funcs(1)%id == 0) then
+ if (xc_funcs(1)%id <= 0) then
    if (xc_funcs(2)%id /= 0) then
      call c_f_pointer(xc_functional_get_name(xc_funcs(2)%id),strg_c)
      call xc_char_to_f(strg_c,libxc_functionals_fullname)
    end if
- else if (xc_funcs(2)%id == 0) then
+ else if (xc_funcs(2)%id <= 0) then
    if (xc_funcs(1)%id /= 0) then
      call c_f_pointer(xc_functional_get_name(xc_funcs(1)%id),strg_c)
      call xc_char_to_f(strg_c,libxc_functionals_fullname)
@@ -1411,7 +1377,7 @@ end function libxc_functionals_nspin
 
 !  Loop over functionals
    do ii = 1,2
-     if (xc_funcs(ii)%id==0) cycle
+     if (xc_funcs(ii)%id<=0) cycle
 
 !    Get the potential (and possibly the energy)
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
@@ -1678,10 +1644,11 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
  logical :: is_pbe0,is_hse
  integer :: func_id(2)
  character(len=500) :: msg
-#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- real(C_DOUBLE) :: alpha_c,beta_c,omega_c
-#endif
  type(libxc_functional_type),pointer :: xc_func
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ integer(C_INT) :: npar_c
+ real(C_DOUBLE) :: alpha_c,beta_c,omega_c,param_c(3)
+#endif
 
 ! *************************************************************************
 
@@ -1717,31 +1684,22 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
    if (present(hyb_mixing))then
      xc_func%hyb_mixing=hyb_mixing
      alpha_c=real(xc_func%hyb_mixing,kind=C_DOUBLE)
-     if(is_pbe0)then
-#if ( XC_MAJOR_VERSION < 4 )
-       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
-#else
-       msg='seems set_params has disappeared for pbeh in libxc 4. defaults are being used'
-       MSG_WARNING(msg)
-       !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
-#endif
+     if (is_pbe0) then
+       npar_c=int(1,kind=C_INT) ; param_c(1)=alpha_c 
+       call xc_func_set_params(xc_func%conf,param_c,npar_c)
      endif
    endif
 
 !  HSE type functionals
-   if(present(hyb_mixing_sr).or.present(hyb_range))then
-     if(present(hyb_mixing_sr))xc_func%hyb_mixing_sr=hyb_mixing_sr
-     if(present(hyb_range))xc_func%hyb_range=hyb_range
-     beta_c=real(xc_func%hyb_mixing_sr,kind=C_DOUBLE)
+   if(present(hyb_mixing_sr).or.present(hyb_range)) then
+     if (present(hyb_mixing_sr)) xc_func%hyb_mixing_sr=hyb_mixing_sr
+     if (present(hyb_range))     xc_func%hyb_range=hyb_range
+     beta_c =real(xc_func%hyb_mixing_sr,kind=C_DOUBLE)
      omega_c=real(xc_func%hyb_range,kind=C_DOUBLE)
-     if(is_hse)then
-#if ( XC_MAJOR_VERSION < 4 )
-       call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
-#else
-       msg='seems set_params has disappeared for hse in libxc 4. defaults are being used'
-       MSG_WARNING(msg)
-     !call hyb_gga_xc_hse_init(xc_func%conf)
-#endif
+     if (is_hse) then
+       npar_c=int(3,kind=C_INT)
+       param_c(1)=beta_c;param_c(2:3)=omega_c
+       call xc_func_set_params(xc_func%conf,param_c,npar_c)
      endif
    end if
 
@@ -1812,10 +1770,8 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 !scalars
  integer :: family,ii
  character(len=100) :: c_name,x_name,msg
-#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xc_name
  character(kind=C_CHAR,len=1),pointer :: strg_c
-#endif
 !arrays
  integer :: trial_id(2)
 
@@ -1837,7 +1793,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
  c_name="unknown" ; x_name="unknown"
 
 !Specific treatment of the B3LYP functional, whose GGA counterpart does not exist in LibXC
- if(trial_id(1)==402 .or. trial_id(2)==402)then
+ if (trial_id(1)==402 .or. trial_id(2)==402) then
    libxc_functionals_gga_from_hybrid=.true.
    if (present(gga_id)) then
      gga_id(1)=0
@@ -1850,7 +1806,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 
  do ii = 1, 2
 
-   if (trial_id(ii)==0) cycle
+   if (trial_id(ii)<=0) cycle
    family=libxc_functionals_family_from_id(trial_id(ii))
    if (family/=XC_FAMILY_HYB_GGA.and.family/=XC_FAMILY_HYB_MGGA) cycle
 
@@ -1956,6 +1912,10 @@ end function libxc_functionals_gga_from_hybrid
 !arrays
  type(libxc_functional_type),pointer :: xc_funcs(:)
  real(dp),allocatable :: gnon(:)
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ integer(C_INT) :: npar_c=int(1,kind=C_INT)
+ real(C_DOUBLE) :: param_c(1)
+#endif
 
 ! *************************************************************************
 
@@ -2003,13 +1963,8 @@ end function libxc_functionals_gga_from_hybrid
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
-#if ( XC_MAJOR_VERSION < 4 )
-       call xc_mgga_x_tb09_set_params(xc_funcs(ii)%conf,cc)
-#else
-       msg='seems set_params has disappeared for tb09 in libxc 4. defaults are being used'
-       MSG_WARNING(msg)
-       !call xc_hyb_gga_xc_tb09_init(xc_func%conf)
-#endif
+     param_c(1)=real(cc,kind=C_DOUBLE)
+     call xc_func_set_params(xc_funcs(ii)%conf,param_c,npar_c)
 #endif
      end if
    end do
