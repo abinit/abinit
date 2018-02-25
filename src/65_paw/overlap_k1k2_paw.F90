@@ -113,27 +113,27 @@ subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,m
  ABI_DEALLOCATE(calc_expibi)
 
  do iatom = 1, natom
-    itypat = typat(iatom)
+   itypat = typat(iatom)
 
-    do ilmn=1,lmnsize(itypat)
-       do jlmn=1,lmnsize(itypat)
-          klmn=max(ilmn,jlmn)*(max(ilmn,jlmn)-1)/2 + min(ilmn,jlmn)
-          paw_onsite = cmplx(calc_qijb(1,klmn,iatom),calc_qijb(2,klmn,iatom))
-          do iband = 1, mband
-             do jband = 1, mband
-                do ispinor = 1, nspinor
-                   ibs = nspinor*(iband-1) + ispinor
-                   jbs = nspinor*(jband-1) + ispinor
-                   cpk1=cmplx(cprj_k1(iatom,ibs)%cp(1,ilmn),cprj_k1(iatom,ibs)%cp(2,ilmn))
-                   cpk2=cmplx(cprj_k2(iatom,jbs)%cp(1,jlmn),cprj_k2(iatom,jbs)%cp(2,jlmn))
-                   cterm = conjg(cpk1)*paw_onsite*cpk2
-                   k1k2_paw(1,iband,jband) = k1k2_paw(1,iband,jband)+real(cterm)
-                   k1k2_paw(2,iband,jband) = k1k2_paw(2,iband,jband)+aimag(cterm)
-                end do ! end loop over ispinor
-             end do ! end loop over jband
-          end do ! end loop over iband
-       end do ! end loop over ilmn
-    end do ! end loop over jlmn
+   do ilmn=1,lmnsize(itypat)
+     do jlmn=1,lmnsize(itypat)
+       klmn=max(ilmn,jlmn)*(max(ilmn,jlmn)-1)/2 + min(ilmn,jlmn)
+       paw_onsite = cmplx(calc_qijb(1,klmn,iatom),calc_qijb(2,klmn,iatom))
+       do iband = 1, mband
+         do jband = 1, mband
+           do ispinor = 1, nspinor
+             ibs = nspinor*(iband-1) + ispinor
+             jbs = nspinor*(jband-1) + ispinor
+             cpk1=cmplx(cprj_k1(iatom,ibs)%cp(1,ilmn),cprj_k1(iatom,ibs)%cp(2,ilmn))
+             cpk2=cmplx(cprj_k2(iatom,jbs)%cp(1,jlmn),cprj_k2(iatom,jbs)%cp(2,jlmn))
+             cterm = conjg(cpk1)*paw_onsite*cpk2
+             k1k2_paw(1,iband,jband) = k1k2_paw(1,iband,jband)+real(cterm)
+             k1k2_paw(2,iband,jband) = k1k2_paw(2,iband,jband)+aimag(cterm)
+           end do ! end loop over ispinor
+         end do ! end loop over jband
+       end do ! end loop over iband
+     end do ! end loop over ilmn
+   end do ! end loop over jlmn
 
  end do ! end loop over atoms
 

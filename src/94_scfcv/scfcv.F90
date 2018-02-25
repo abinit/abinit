@@ -1106,8 +1106,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          scf_history_wf%history_size=history_size
          usecg=2
          call scf_history_init(dtset,mpi_enreg,usecg,scf_history_wf)
-       endif
-     endif
+       end if
+     end if
 
      !Fock energy
      energies%e_exactX=zero
@@ -1129,49 +1129,49 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          if(.false.)then
          !Update the density, from the newly mixed cg and cprj.
          !Be careful: in PAW, rho does not include the compensation density (added later) !
-         tim_mkrho=6
-         if (psps%usepaw==1) then
-           ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
-           ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
+           tim_mkrho=6
+           if (psps%usepaw==1) then
+             ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
+             ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
 !          write(std_out,*) "mkrhogstate"
            !From this call, rho does not include the compensation density 
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+             call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
 
 !          2-Compute rhoij
-           call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
-&            mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&            occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,&
-&            dtset%usewvl,dtset%wtk)
+             call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
+&             mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
+&             occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,&
+&             dtset%usewvl,dtset%wtk)
 
 !          3-Symetrize rhoij, compute nhat and add it to rhor
 !          Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij cannot be distributed over different atomic sites.
-           cplex=1;ipert=0;idir=0;qpt(:)=zero
-           call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
-&            my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
-&            dtset%pawprtvol,pawrhoij,pawrhoij,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
-&            symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
-           ABI_DEALLOCATE(rhowfg)
-           ABI_DEALLOCATE(rhowfr)
+             cplex=1;ipert=0;idir=0;qpt(:)=zero
+             call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+&             my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
+&             dtset%pawprtvol,pawrhoij,pawrhoij,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
+&             symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
+             ABI_DEALLOCATE(rhowfg)
+             ABI_DEALLOCATE(rhowfr)
 
-         else
+           else
 !DEBUG
-           write(std_out,*)' scfcv : recompute the density after the wf mixing '
+             write(std_out,*)' scfcv : recompute the density after the wf mixing '
 !ENDDEBUG
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&            mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
 !DEBUG
 !          write(std_out,*)' scfcv : for debugging purposes, set rhor to zero '
 !          rhor=zero
 !ENDDEBUG
-           if(dtset%usekden==1)then
-             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&             mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+             if(dtset%usekden==1)then
+               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&               mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+             end if
            end if
          end if
        end if
-       endif
 !ENDDEBUG
 
        ! Update data relative to the occupied states in fock
@@ -1955,7 +1955,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  if (usefock==1)then
    if(wfmixalg/=0)then
      call scf_history_free(scf_history_wf)
-   endif
+   end if
  end if
 
 

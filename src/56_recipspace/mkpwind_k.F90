@@ -120,7 +120,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
  !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
  !        where GBZ(k) takes k(k) to the BZ
  !        
-                   
+ 
  isym  = indkk_f2ibz(ikpt,2)
  isym1 = indkk_f2ibz(ikpt1,2)
 
@@ -128,9 +128,9 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
  !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
 
  dg(:) = -indkk_f2ibz(ikpt,3:5) &
-      &         -nint(-fkptns(:,ikpt) - dk(:) - tol10 + &
-      &         fkptns(:,ikpt1)) &
-      &         +indkk_f2ibz(ikpt1,3:5)
+& -nint(-fkptns(:,ikpt) - dk(:) - tol10 + &
+& fkptns(:,ikpt1)) &
+& +indkk_f2ibz(ikpt1,3:5)
 
  iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
 
@@ -147,27 +147,27 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 
     !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
     !          not for the FBZ k point
-    iadum(:) = kg(:,kgindex(ikpt) + ipw)
-    
+   iadum(:) = kg(:,kgindex(ikpt) + ipw)
+   
     !          to determine r.l.v. matchings, we transformed the bra vector
     !          Rotation
-    iadum1(:)=0
-    do idum1=1,3
-       iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
-    end do
-    iadum(:)=iadum1(:)
-    iadum(:) = iadum(:) + dg(:)
+   iadum1(:)=0
+   do idum1=1,3
+     iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
+   end do
+   iadum(:)=iadum1(:)
+   iadum(:) = iadum(:) + dg(:)
 
-    do jpw = 1, npw_k1
-       iadum1(1:3) = kg1_k(1:3,jpw)
-       if ( (iadum(1) == iadum1(1)).and. &
-            &             (iadum(2) == iadum1(2)).and. &
-            &             (iadum(3) == iadum1(3)) ) then
-          pwind_k1(ipw) = jpw
+   do jpw = 1, npw_k1
+     iadum1(1:3) = kg1_k(1:3,jpw)
+     if ( (iadum(1) == iadum1(1)).and. &
+&     (iadum(2) == iadum1(2)).and. &
+&     (iadum(3) == iadum1(3)) ) then
+       pwind_k1(ipw) = jpw
           ! write(std_out,'(a,2i4)')'JWZ debug : bg ipw == jpw ',ipw,jpw
-          exit
-       end if
-    end do
+       exit
+     end if
+   end do
  end do
 
  ABI_DEALLOCATE(kg1_k)

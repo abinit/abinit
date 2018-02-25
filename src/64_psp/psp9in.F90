@@ -195,8 +195,8 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! zval   = ps_Zpseudo(psxml)
 
  call ps_PseudoAtomSpec_Get(psxml, &
-&  atomic_number=z, z_pseudo=zval, &
-&  spin_dft=has_spin, core_corrections=has_nlcc)
+& atomic_number=z, z_pseudo=zval, &
+& spin_dft=has_spin, core_corrections=has_nlcc)
 
 !---
 

@@ -149,7 +149,7 @@
  if (nspden==4) then
    if(usepaw==1) then
      MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
-   endif
+   end if
  end if
 
 !Get size of FFT grid

@@ -183,10 +183,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    if (optnc==1) then
      if(present(ixcrot)) then
        call rotate_back_mag_dfpt(option,vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
-&                                mag_norm_in=m_norm,rot_method=ixcrot)
+&       mag_norm_in=m_norm,rot_method=ixcrot)
      else
        call rotate_back_mag_dfpt(option,vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
-&                                mag_norm_in=m_norm)
+&       mag_norm_in=m_norm)
      end if
    else
      call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)
