@@ -91,7 +91,7 @@ module m_xgScalapack
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine  xgScalapack_init(xgScalapack,comm,maxData,verbosity,usable)
+  subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,usable)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -103,7 +103,7 @@ module m_xgScalapack
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
     integer            , intent(in   ) :: comm
-    integer            , intent(in   ) :: maxData
+    integer            , intent(in   ) :: maxDim
     integer            , intent(in   ) :: verbosity
     logical            , intent(  out) :: usable
     double precision :: tsec(2)
@@ -128,7 +128,7 @@ module m_xgScalapack
     xgScalapack%rank(M__WORLD) = xmpi_comm_rank(comm)
     xgScalapack%size(M__WORLD) = nproc
 
-    maxProc = MAX(1,maxData / 1000000) ! ( 1000 x 1000 matrice per MPI )
+    maxProc = (maxDim / 1000)+1 ! ( 1000 x 1000 matrice per MPI )
     if ( M__CONFIG > 0 .and. M__CONFIG <= nproc ) then
       maxProc = M__CONFIG
     end if
@@ -398,6 +398,7 @@ module m_xgScalapack
     integer :: cols, rows
     integer :: ierr
     integer :: sendto, receivefrom
+    integer :: lap
 
     call timab(M__tim_scatter,1,tsec)
 
@@ -405,21 +406,26 @@ module m_xgScalapack
     call xgBlock_reverseMap(matrix,tab,rows,cols)
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then 
-      sendto = xgScalapack%rank(M__WORLD) + xgScalapack%size(M__SLK)
-      if ( sendto < xgScalapack%size(M__WORLD) ) then
+      lap = 1
+      sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
+      do while ( sendto < xgScalapack%size(M__WORLD) ) 
         call xmpi_send(tab,sendto,sendto,xgScalapack%comms(M__WORLD),ierr)
         if ( ierr /= 0 ) then
           MSG_ERROR("Error sending data")
         end if
-      end if
+        lap = lap+1
+        sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
+      end do
     else if ( xgScalapack%comms(M__UNUSED) /= xmpi_comm_null ) then
-      receivefrom = xgScalapack%rank(M__WORLD) - xgScalapack%size(M__SLK)
+      receivefrom = MODULO(xgScalapack%rank(M__WORLD), xgScalapack%size(M__SLK))
       if ( receivefrom >= 0 ) then
         call xmpi_recv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),ierr)
         if ( ierr /= 0 ) then
           MSG_ERROR("Error receiving data")
         end if
       end if
+    else
+      MSG_BUG("Error scattering data")
     end if
 
     call timab(M__tim_scatter,2,tsec)

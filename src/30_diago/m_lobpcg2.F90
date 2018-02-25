@@ -850,7 +850,7 @@ module m_lobpcg2
     end select
 
 #ifdef HAVE_LINALG_SCALAPACK
-    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim*subdim,lobpcg%prtvol-2,use_slk)
+    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim,lobpcg%prtvol-2,use_slk)
     if ( use_slk) then
       eigenSolver = EIGENSLK
     end if
