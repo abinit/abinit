@@ -48,8 +48,8 @@
 !!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,gstate,initberry,respfn,screening,sigma
-!!      wfk_analyze
+!!      bethe_salpeter,dfpt_looppert,gstate,initberry,initorbmag,respfn
+!!      screening,sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      mkeuler,wrtout

@@ -60,8 +60,11 @@
 !! Direct questions and comments to J Zwanziger
 !!
 !! PARENTS
+!!      afterscfloop
 !!
 !! CHILDREN
+!!      mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_free,pawcprj_get
+!!      pawcprj_getdim,smatrix,wrtout
 !!
 !! SOURCE
 

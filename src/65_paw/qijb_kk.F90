@@ -37,7 +37,7 @@
 !! <u_nk|u_mk+b>, that is, two Bloch vectors at two different k points. 
 !!
 !! PARENTS
-!!      initberry
+!!      initberry,overlap_k1k2_paw
 !!
 !! CHILDREN
 !!      initylmr,sbf8,simp_gen

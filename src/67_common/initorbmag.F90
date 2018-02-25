@@ -38,8 +38,10 @@
 !! NOTES
 !!
 !! PARENTS
+!!      gstate
 !!
 !! CHILDREN
+!!      kpgsph,listkk,setsymrhoij,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 

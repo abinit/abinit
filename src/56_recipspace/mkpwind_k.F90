@@ -41,8 +41,10 @@
 !! NOTES
 !!
 !! PARENTS
+!!      chern_number
 !!
 !! CHILDREN
+!!      kpgsph
 !!
 !! SOURCE
 

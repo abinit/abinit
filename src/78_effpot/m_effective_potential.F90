@@ -179,7 +179,7 @@ CONTAINS  !=====================================================================
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
 !! PARENTS
-!      m_effective_potential_file
+!!      m_effective_potential_file
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -3535,7 +3535,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
 !! PARENTS
 !!
 !! CHILDREN
-!!
+!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 

@@ -3371,8 +3371,8 @@ end subroutine indfftrisc
 !!  Must take into account the time-reversal symmetry when istwf_k is not 1.
 !!
 !! PARENTS
-!!      getmpw,initberry,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
-!!      m_hamiltonian,m_wfd,wfconv
+!!      getmpw,initberry,initorbmag,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
+!!      m_hamiltonian,m_wfd,mkpwind_k,wfconv
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master

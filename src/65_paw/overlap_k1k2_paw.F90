@@ -42,8 +42,10 @@
 !! atom type.
 !!
 !! PARENTS
+!!      chern_number
 !!
 !! CHILDREN
+!!      expibi,qijb_kk
 !!
 !! SOURCE
 

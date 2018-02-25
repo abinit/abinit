@@ -66,8 +66,10 @@
 !!      pspatm
 !!
 !! CHILDREN
-!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,ps_destroy
-!!      ps_get_projector_indexes,psml_reader,psp8lo,psp8nl,psp9cc,spline,wrtout
+!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,ps_corecharge_get
+!!      ps_destroy,ps_nonlocalprojectors_filter,ps_projector_get
+!!      ps_provenance_get,ps_pseudoatomspec_get,ps_valenceconfiguration_get
+!!      ps_valenceshell_get,psml_reader,psp8lo,psp8nl,psp9cc,spline,wrtout
 !!
 !! SOURCE
 
