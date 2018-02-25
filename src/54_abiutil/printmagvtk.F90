@@ -80,7 +80,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 !scalars
  integer :: denvtk,denxyz,denxyz_im,nfields
  integer :: nx,ny,nz,nfft_tot
- integer :: ii,jj,kk,ind,jfft,ispden
+ integer :: ii,jj,kk,ind,ispden
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
  real    :: rx,ry,rz
  integer :: nproc_fft,ir

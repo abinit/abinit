@@ -70,6 +70,7 @@
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions; if mkmem>=nkpt, these are kept in a disk file.
 !!  dtefield <type(efield_type)> = variables related to Berry phase
+!!  dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  dtpawuj(ndtpawuj)= data used for the automatic determination of U
 !!     (relevant only for PAW+U) calculations (see initberry.f)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
@@ -158,7 +159,7 @@
 
 #include "abi_common.h"
 
-subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
+subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
@@ -179,6 +180,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use m_ab7_mixing
  use m_errors
  use m_efield
+ use m_orbmag
  use mod_prc_memory
  use m_nctk
  use m_hdr
@@ -254,6 +256,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
+ type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer:: electronpositron
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
@@ -1103,8 +1106,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          scf_history_wf%history_size=history_size
          usecg=2
          call scf_history_init(dtset,mpi_enreg,usecg,scf_history_wf)
-       endif
-     endif
+       end if
+     end if
 
      !Fock energy
      energies%e_exactX=zero
@@ -1126,60 +1129,60 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          if(.false.)then
          !Update the density, from the newly mixed cg and cprj.
          !Be careful: in PAW, rho does not include the compensation density (added later) !
-         tim_mkrho=6
-         if (psps%usepaw==1) then
-           ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
-           ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
+           tim_mkrho=6
+           if (psps%usepaw==1) then
+             ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
+             ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
 !          write(std_out,*) "mkrhogstate"
            !From this call, rho does not include the compensation density 
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+             call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
 
 !          2-Compute rhoij
-           call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
-&            mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&            occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,&
-&            dtset%usewvl,dtset%wtk)
+             call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
+&             mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
+&             occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,&
+&             dtset%usewvl,dtset%wtk)
 
 !          3-Symetrize rhoij, compute nhat and add it to rhor
 !          Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij cannot be distributed over different atomic sites.
-           cplex=1;ipert=0;idir=0;qpt(:)=zero
-           call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
-&            my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
-&            dtset%pawprtvol,pawrhoij,pawrhoij,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
-&            symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
-           ABI_DEALLOCATE(rhowfg)
-           ABI_DEALLOCATE(rhowfr)
+             cplex=1;ipert=0;idir=0;qpt(:)=zero
+             call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+&             my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
+&             dtset%pawprtvol,pawrhoij,pawrhoij,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
+&             symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
+             ABI_DEALLOCATE(rhowfg)
+             ABI_DEALLOCATE(rhowfr)
 
-         else
+           else
 !DEBUG
-           write(std_out,*)' scfcv : recompute the density after the wf mixing '
+             write(std_out,*)' scfcv : recompute the density after the wf mixing '
 !ENDDEBUG
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&            mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
 !DEBUG
 !          write(std_out,*)' scfcv : for debugging purposes, set rhor to zero '
 !          rhor=zero
 !ENDDEBUG
-           if(dtset%usekden==1)then
-             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&             mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+             if(dtset%usekden==1)then
+               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&               mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+             end if
            end if
          end if
        end if
-       endif
 !ENDDEBUG
 
        ! Update data relative to the occupied states in fock
-       call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
+       call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
        ! Possibly (re)compute the ACE operator 
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
 &         dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
-&         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
-&         fock%fock_common%symrec,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
+&         dtset%nspinor,dtset%nsppol,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
+&         dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop. 
@@ -1952,7 +1955,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  if (usefock==1)then
    if(wfmixalg/=0)then
      call scf_history_free(scf_history_wf)
-   endif
+   end if
  end if
 
 
@@ -2014,6 +2017,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 & dtset%prtnabla > 0  .or. &
 & dtset%prtdos   ==3  .or. &
 & dtset%berryopt /=0  .or. &
+& dtset%orbmag /=0    .or. &
 & dtset%kssform  ==3  .or. &
 & dtset%pawfatbnd> 0  .or. &
 & dtset%pawprtwf > 0  )
@@ -2051,7 +2055,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&

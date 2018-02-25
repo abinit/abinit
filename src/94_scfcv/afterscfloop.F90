@@ -146,6 +146,7 @@
 !!       In case dtset%berryopt = 4/6/7/14/16/17, the overlap matrices computed
 !!       in this routine are stored in dtefield%smat in order
 !!       to be used in the electric field calculation.
+!! dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
@@ -183,14 +184,14 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
-!!      energies_copy,exchange_electronpositron,forstr,getph,hdr_update
-!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt
-!!      setnoccmmp,spin_current,timab,total_energies,write_energies,wrtout
-!!      wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid,wvl_occ_abi2big,wvl_psitohpsi
-!!      wvl_rho_abi2big,wvl_tail_corrections,wvl_vtrial_abi2big,xcden,xmpi_sum
-!!      xred2xcart
+!!      applyprojectorsonthefly,chern_number,denspot_free_history
+!!      eigensystem_info,elpolariz,energies_copy,exchange_electronpositron
+!!      forstr,getph,hdr_update,kswfn_free_scf_data,last_orthon,metric,mkrho
+!!      nhatgrid,nonlop_test,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar
+!!      prtrhomxmn,scprqt,setnoccmmp,spin_current,timab,total_energies
+!!      write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid
+!!      wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections
+!!      wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -201,7 +202,7 @@
 #include "abi_common.h"
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
@@ -222,6 +223,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_errors
  use m_profiling_abi
  use m_efield
+ use m_orbmag
  use m_ab7_mixing
  use m_hdr
 
@@ -279,6 +281,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
+ type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
@@ -331,28 +334,27 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: response=0
- integer :: bantot,bufsz,choice,cplex,ierr,ia,ifft,igrad,ii,ishift,ispden,nfftotf,ngrad
+ integer :: bantot,bufsz,choice,cplex,ierr,ifft,igrad,ishift,ispden,nfftotf,ngrad
  integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
  logical :: test_gylmgr,test_nfgd,test_rfgd
- logical :: wvlbigdft=.false.,compute_wvl_tail=.false.
+ logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero
- real(dp) :: eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc
- real(dp) :: ucvol,ucvol_local
+ real(dp) :: ucvol
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
- integer :: mband_cprj
- logical :: do_last_ortho
- real(dp) :: dum
+ integer :: ia,ii,mband_cprj
+ logical :: do_last_ortho,compute_wvl_tail=.false.
+ real(dp) :: dum,eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc,ucvol_local
 #endif
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:),xcart(:,:)
+ real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
- real(dp),allocatable :: hpsi_tmp(:)
+ real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
 #endif
 
 ! *************************************************************************
@@ -502,6 +504,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
+ end if
+
+!----------------------------------------------------------------------
+! Orbital magnetization calculations
+!----------------------------------------------------------------------
+ if(dtset%orbmag==1) then
+   call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
+&   mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+&   symrec,usecprj,psps%usepaw,xred)
  end if
 
  call timab(252,2,tsec)

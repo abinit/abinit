@@ -111,7 +111,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
- real(dp) :: dummy(0),rprimd(3,3),for12(3)
+ real(dp) :: rprimd(3,3),for12(3)
 
 ! *************************************************************************
 !return

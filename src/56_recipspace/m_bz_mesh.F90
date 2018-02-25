@@ -415,7 +415,6 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  integer :: ik_bz,ik_ibz,isym,nkbz,nkbzX,nsym,timrev,itim
  real(dp) :: shift1,shift2,shift3
  logical :: ltest,do_wrap,do_hack
- character(len=500) :: msg
 !arrays
  integer,allocatable :: ktab(:),ktabi(:),ktabo(:)
  real(dp) :: rm1t(3),kbz_wrap(3)
@@ -1486,7 +1485,6 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  integer,parameter :: chksymbreak0=0
  integer :: iscf,nkbz,nkibz,nkpt_computed,my_nshiftk
  real(dp) :: kptrlen
- character(len=500) :: msg
  logical :: my_break_symmetry
 !arrays
  integer :: my_vacuum(3)

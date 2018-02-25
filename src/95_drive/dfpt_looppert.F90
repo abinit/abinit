@@ -315,9 +315,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: rhor1_save(:,:,:)
  real(dp),allocatable :: rhor1(:,:),rho1wfg(:,:),rho1wfr(:,:),tnons1(:,:),tnons1_tmp(:,:)
  real(dp),allocatable :: rhor1_pq(:,:),rhor1_mq(:,:),rhog1_pq(:,:),rhog1_mq(:,:)          !+q/-q duplicates
- real(dp),allocatable :: cg_mq(:,:),cg1_pq(:,:),cg1_mq(:,:),resid_mq(:)                   ! 
- real(dp),allocatable :: cg1_active_pq(:,:),cg1_active_mq(:,:),occk_mq(:)                 !
- real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_pq(:,:),gh0c1_set_mq(:,:)        !
+ real(dp),allocatable :: cg_mq(:,:),cg1_mq(:,:),resid_mq(:)                   ! 
+ real(dp),allocatable :: cg1_active_mq(:,:),occk_mq(:)                 !
+ real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_mq(:,:)        !
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
  real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
@@ -1716,11 +1716,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          !Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
          
-         call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
+         call dfpt_init_mag1(idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
          
          if(.not.kramers_deg) then
            rhor1_pq=rhor1
-           call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
+           call dfpt_init_mag1(idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
          end if
        end if
 
