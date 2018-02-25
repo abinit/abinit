@@ -333,13 +333,17 @@ class Website(object):
         self.variables_code = get_variables_code()
 
         # Get bibtex references and cast to MyEntry instance.
-        self.bib_data = parse_file(os.path.join(self.root, "abiref.bib"), bib_format="bibtex")
+        # FIXME
+        bib_path = os.path.join(self.root, "my_abiref.bib")
+        #bib_path = os.path.join(self.root, "biblio/origin_files/abiref.bib")
+        self.bib_data = parse_file(bib_path, bib_format="bibtex")
         for entry in self.bib_data.entries.values():
             entry.__class__ = MyEntry
 
+        # FIXME
         # Read code statistics from file and produce json file.
-        self.abinit_stats = AbinitStats(os.path.join(self.root, "statistics.txt"))
-        self.abinit_stats.json_dump(os.path.join(self.root, "data", "statistics.json"))
+        #self.abinit_stats = AbinitStats(os.path.join(self.root, "statistics.txt"))
+        #self.abinit_stats.json_dump(os.path.join(self.root, "data", "statistics.json"))
 
         # Build AbinitTestSuite object.
         from doc import tests as tmod
@@ -1026,7 +1030,10 @@ The bibtex file is available [here](../abiref.bib).
                     # Handle citation
                     ref = self.bib_data.entries[name]
                     url = "/mkdocs-theory/bibliography#%s" % self.slugify(name)
-                    add_popover(a, content=ref.fields["title"]) #+ "\n\n" + ref.authors
+                    content = ref.fields.get("title", "Unknown")
+                    if content == "Unknown":
+                        self.warn("Entry for %s does not provide title" % name)
+                    add_popover(a, content=content) #+ "\n\n" + ref.authors
                     if a.text is None: a.text = "[%s]" % name
                     html_classes.append("citation-wikilink")
 

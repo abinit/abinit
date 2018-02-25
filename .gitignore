@@ -58,8 +58,6 @@ tests/TestBot_MPI*/*
 /.abilint
 /abilint.log
 /abilint.out
-/abipy-0.1.0.dev/doc/examples/*
-/abipy-0.1.0.dev/doc/_build/*
 /aclocal.m4
 /autom4te.cache
 /build
@@ -118,6 +116,7 @@ tests/TestBot_MPI*/*
 /config/wrappers/wrap-mpicc
 /config/wrappers/wrap-mpicxx
 /config/wrappers/wrap-mpifc
+/site/
 /doc/abinit-doc-*.tar.gz
 /doc/aclocal.m4
 /doc/autom4te.cache

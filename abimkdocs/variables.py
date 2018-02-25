@@ -489,7 +489,9 @@ def get_variables_code():
     """
     global _VARS
     if _VARS is None:
-        yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "mkdocs-variables", "abinit_vars.yml")
+        # FIXME
+        #yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "mkdocs-variables", "abinit_vars.yml")
+        yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "variables", "origin_files", "abinit_vars.yml")
         _VARS = VarDatabase.from_file(yaml_path)
     return _VARS
 
