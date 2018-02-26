@@ -14,7 +14,7 @@
 !! Returns indirect indexing list indkk.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,8 +57,8 @@
 !!  of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago,m_fock
-!!      m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
+!!      initberry,initorbmag,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago
+!!      m_fock,m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
 !!
 !! CHILDREN
 !!      sort_dp,timab

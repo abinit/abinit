@@ -8,7 +8,7 @@
 !! non linear response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVeithen, MB)
+!! Copyright (C) 2002-2018 ABINIT group (MVeithen, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -343,7 +343,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Open and read pseudopotential files
  ecore = 0_dp
  call status(0,dtfil%filstat,iexit,level,'call pspini   ')
- call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,level,&
+ call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 !Initialize band structure datatype

@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to compute the matrix elements of the electron-phonon interaction with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (MV)
+<h5>Copyright (C) 2016-2018 ABINIT group (MV)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_ElPhonTransport.html">topic_ElPhonTransport</a>, &nbsp; <a href="../../topics/generated_files/topic_PhononWidth.html">topic_PhononWidth</a>, &nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#6">help_features#6</a>, &nbsp; <a href="../../topics/generated_files/topic_ElPhonTransport.html">topic_ElPhonTransport</a>, &nbsp; <a href="../../topics/generated_files/topic_PhononWidth.html">topic_PhononWidth</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_ElPhonInt.html#1">Introduction.</a><li>2. <a href="topic_ElPhonInt.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_ElPhonInt.html#3">Related input variables.</a><li>4. <a href="topic_ElPhonInt.html#4">Selected input files.</a><li>5. <a href="topic_ElPhonInt.html#5">References.</a></ul>
@@ -44,9 +44,9 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 
 <p>The theory and details of the implementation are described in <a href="../../biblio/generated_files/bib_biblio.html#Gonze2009">[Gonze2009]</a> and <a href="../../biblio/generated_files/bib_biblio.html#Gonze2016">[Gonze2016]</a>.
-<p>Basic calculations of electron-phonon interaction in ABINIT: one performs a normal ground state, then DFPT phonon calculations (using <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, 
-with added keywords <a href="../../input_variables/generated_files/varset_dfpt.html#prepgkk">prepgkk</a> and <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a>, which saves the matrix elements to files suffixed GKK. 
-The main change in this respect is that <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a> now disables the use of symmetry in reducing q-points and perturbations. 
+<p>Basic calculations of electron-phonon interaction in ABINIT: one performs a normal ground state, then DFPT phonon calculations (using <a href="../../variables/generated_files/varset_dfpt.html#rfphon">rfphon</a>, 
+with added keywords <a href="../../variables/generated_files/varset_dfpt.html#prepgkk">prepgkk</a> and <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a>, which saves the matrix elements to files suffixed GKK. 
+The main change in this respect is that <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a> now disables the use of symmetry in reducing q-points and perturbations. 
 This avoids ambiguities in wave function phases due to band degeneracies. 
 The resulting GKK files are merged using the mrggkk utility, and processed by anaddb. 
 <p>With the implementation of phonons in PAW DFPT, the electron phonon coupling is also available in PAW, though this has not yet been tested extensively. 
@@ -54,7 +54,7 @@ The input variables for electron-phonon coupling in anaddb are described in <a h
 <p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
 <p>Subsequently, the GKK file is used to compute many quantities, as explained in <a href="../../topics/generated_files/topic_PhononWidth.html#">topic_PhononWidth</a>, <a href="../../topics/generated_files/topic_TDepES.html#">topic_TDepES</a> and <a href="../../topics/generated_files/topic_ElPhonTransport.html#">topic_ElPhonTransport</a>.
 <p>A brand new ABINIT driver, focusing on the treatment of electron-phonon interaction is under development. Most of the input variables
-for experts, with <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==7 are related to this development, that is not yet operational as of v8.5 .
+for experts, with <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>==7 are related to this development, that is not yet operational as of v8.5 .
 <br><br><a href=#top>Go to the top</a>
 
 
@@ -86,29 +86,29 @@ systems).</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#prepgkk">prepgkk</a>   [PREPAre GKK calculation]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#prtgkk">prtgkk</a>   [PRinT the GKK matrix elements file]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_files.html#get1den">get1den</a>   [GET the first-order density from _1DEN file]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#gkqwrite@anaddb">gkqwrite@anaddb</a>   [GKk for input Q grid to be WRITtEn to disk]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#irdddb">irdddb</a>   [Integer that governs the ReaDing of DDB file]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#use_nonscf_gkk">use_nonscf_gkk</a>   [USE NON-SCF calculation of GKK matrix elements (electron phonon)]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_eph.html#ddb_ngqpt">ddb_ngqpt</a>   [Derivative DataBase: Number of Grid points for Q-PoinTs]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#ddb_shiftq">ddb_shiftq</a>   [Derivative DataBase: SHIFT of the Q-points ]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#ep_prt_yambo@anaddb">ep_prt_yambo@anaddb</a>   [Electron Phonon PRinTout YAMBO data]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_extrael">eph_extrael</a>   [Electron-PHonon: EXTRA ELectrons]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_fermie">eph_fermie</a>   [Electron-PHonon: FERMI Energy]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_fsewin">eph_fsewin</a>   [Electron-Phonon: Fermi Surface Energy WINdow]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_fsmear">eph_fsmear</a>   [Electron-PHonon: Fermi surface SMEARing]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_intmeth">eph_intmeth</a>   [Electron-Phonon: INTegration METHod]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_mustar">eph_mustar</a>   [Electron-PHonon : MU STAR (electron-electron interaction strength)]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_ngqpt_fine">eph_ngqpt_fine</a>   [Electron-PHonon : Number of Grid Q-PoinTs in FINE grid.]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#eph_task">eph_task</a>   [Electron-PHonon: Task]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#eph_transport">eph_transport</a>   [Electron-PHonon: TRANSPORT flag]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#getddb">getddb</a>   [GET the DDB from ...]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#prtphdos">prtphdos</a>   [PRinT the PHonon Density Of States]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#prtphsurf">prtphsurf</a>   [PRinT PHonon iso-SURFace]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#symgkq@anaddb">symgkq@anaddb</a>   [SYMmetrize the GKk matrix elements for each Q]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#prepgkk">prepgkk</a>   [PREPAre GKK calculation]<br>
+... <a href="../../variables/generated_files/varset_files.html#prtgkk">prtgkk</a>   [PRinT the GKK matrix elements file]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_files.html#get1den">get1den</a>   [GET the first-order density from _1DEN file]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#gkqwrite@anaddb">gkqwrite@anaddb</a>   [GKk for input Q grid to be WRITtEn to disk]<br>
+... <a href="../../variables/generated_files/varset_files.html#irdddb">irdddb</a>   [Integer that governs the ReaDing of DDB file]<br>
+... <a href="../../variables/generated_files/varset_dev.html#use_nonscf_gkk">use_nonscf_gkk</a>   [USE NON-SCF calculation of GKK matrix elements (electron phonon)]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_eph.html#ddb_ngqpt">ddb_ngqpt</a>   [Derivative DataBase: Number of Grid points for Q-PoinTs]<br>
+... <a href="../../variables/generated_files/varset_eph.html#ddb_shiftq">ddb_shiftq</a>   [Derivative DataBase: SHIFT of the Q-points ]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#ep_prt_yambo@anaddb">ep_prt_yambo@anaddb</a>   [Electron Phonon PRinTout YAMBO data]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_extrael">eph_extrael</a>   [Electron-PHonon: EXTRA ELectrons]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_fermie">eph_fermie</a>   [Electron-PHonon: FERMI Energy]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_fsewin">eph_fsewin</a>   [Electron-Phonon: Fermi Surface Energy WINdow]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_fsmear">eph_fsmear</a>   [Electron-PHonon: Fermi surface SMEARing]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_intmeth">eph_intmeth</a>   [Electron-Phonon: INTegration METHod]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_mustar">eph_mustar</a>   [Electron-PHonon : MU STAR (electron-electron interaction strength)]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_ngqpt_fine">eph_ngqpt_fine</a>   [Electron-PHonon : Number of Grid Q-PoinTs in FINE grid.]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#eph_task">eph_task</a>   [Electron-PHonon: Task]<br>
+... <a href="../../variables/generated_files/varset_eph.html#eph_transport">eph_transport</a>   [Electron-PHonon: TRANSPORT flag]<br>
+... <a href="../../variables/generated_files/varset_files.html#getddb">getddb</a>   [GET the DDB from ...]<br>
+... <a href="../../variables/generated_files/varset_eph.html#prtphdos">prtphdos</a>   [PRinT the PHonon Density Of States]<br>
+... <a href="../../variables/generated_files/varset_eph.html#prtphsurf">prtphsurf</a>   [PRinT PHonon iso-SURFace]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#symgkq@anaddb">symgkq@anaddb</a>   [SYMmetrize the GKk matrix elements for each Q]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

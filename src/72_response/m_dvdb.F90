@@ -11,7 +11,7 @@
 !!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG,GA)
+!! Copyright (C) 2009-2018 ABINIT group (MG,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -823,7 +823,7 @@ end function dvdb_get_pinfo
 !!  iqpt=Index of the q-point in dvdb%qpts
 !!  cplex=1 if real, 2 if complex potentials.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  ierr=Non-zero if error.
@@ -964,7 +964,7 @@ end function dvdb_read_onev1
 !! INPUTS
 !!  iqpt=Index of the q-point in dvdb%qpts
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -1630,7 +1630,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  ABI_MALLOC(phnons1, (2,nfft**(1-1/nsym1),(nspden/nsppol)-3*(nspden/4)))
  ABI_MALLOC(indsy1,(4,nsym1,cryst%natom))
 
- 
+
  call setsym(indsy1,irrzon1,iscf1,cryst%natom,nfft,ngfft,nspden,nsppol,&
    nsym1,phnons1,symafm1,symrc1,symrel1,tnons1,cryst%typat,cryst%xred)
 
@@ -1788,7 +1788,7 @@ end subroutine rotate_fqg
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -2160,7 +2160,7 @@ end subroutine dvdb_ftinterp_setup
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -2284,14 +2284,14 @@ end subroutine dvdb_ftinterp_qpt
 !!  Compute the phonon perturbation potential in real space lattice
 !!  representation.
 !!  This routine is meant to replace dvdb_ftinterp_setup
-!!  and performs the potential interpolation one perturbation at a time. 
+!!  and performs the potential interpolation one perturbation at a time.
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nrpt=Number of R-points = number of q-points in the full BZ
 !!  nspden=Number of spin densities.
 !!  ipert=index of the perturbation to be treated [1,natom3]
@@ -2648,7 +2648,7 @@ end subroutine dvdb_get_v1scf_rpt
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nrpt=Number of R-points = number of q-points in the full BZ
 !!  nspden=Number of spin densities.
 !!  ipert=index of the perturbation to be treated [1,natom3]
@@ -2703,6 +2703,8 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:)
 
 ! *************************************************************************
+ ABI_UNUSED(cryst%natom)
+ ABI_UNUSED(nspden)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
@@ -2770,14 +2772,14 @@ end subroutine dvdb_get_v1scf_qpt
 !! FUNCTION
 !!  Interpolate the phonon perturbation potential.
 !!  This routine is meant to replace dvdb_ftinterp_setup and dvdb_ftinterp_qpt.
-!!  It performs the interpolation one perturbation at a time. 
+!!  It performs the interpolation one perturbation at a time.
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nfftf=Number of fft-points on the fine grid for interpolated potential
 !!  ngfftf(18)=information on 3D FFT for interpolated potential
 !!  comm=MPI communicator
@@ -2846,7 +2848,7 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
    call dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
    &                       db%nrpt, db%nspden, ipert, v1scf_rpt, comm)
 
-   call dvdb_get_v1scf_qpt(db, cryst, qpt, nfftf, ngfftf, db%nrpt, db%nspden, & 
+   call dvdb_get_v1scf_qpt(db, cryst, qpt, nfftf, ngfftf, db%nrpt, db%nspden, &
    &                       ipert, v1scf_rpt, v1scf(:,:,:,ipert), comm)
 
    ABI_FREE(db%rpt)
@@ -3384,14 +3386,14 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  end if
  write(ount, err=10, iomsg=msg) dvdb_last_version
  write(ount, err=10, iomsg=msg) nperts
- 
+
  ! Validate headers.
  ! TODO: Should perform consistency check on the headers, rearrange them in blocks of q-points.
  ! ignore POT1 files that do not correspond to atomic perturbations.
 
  do ii=1,nfiles
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
-   
+
    if (endswith(v1files(ii), ".nc")) then
 #ifdef HAVE_NETCDF
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
@@ -3459,7 +3461,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
 #endif
    end if
-   
+
    if (.not. endswith(v1files(ii), ".nc")) then
      close(units(ii))
    else
@@ -4063,13 +4065,13 @@ end subroutine dvdb_test_ftinterp
 !! FUNCTION
 !!  Compute the long-range part of the phonon potential
 !!  due to the Born effective charges [PRL 115, 176401 (2015)].
-!!                                               
+!!
 !!    V^L_{iatom,idir}(r) = i (4pi/vol) sum_G (q+G) . Zeff_{iatom,idir}
 !!                           e^{i (q + G) . (r - tau_{iatom})} / ((q + G) . dielt . (q + G))
 !!
 !!  where Zeff and dielt are the Born effective charge tensor and the dielectric tensor,
 !!  tau is the atom position, and vol is the volume of the unit cell.
-!!                                               
+!!
 !! INPUTS
 !!  db = the DVDB object.
 !!  qpt = the q-point in reduced coordinates.
@@ -4079,7 +4081,7 @@ end subroutine dvdb_test_ftinterp
 !!  ngfft(18) = FFT mesh.
 !!
 !! OUTPUT
-!!  v1r_lr = dipole potential 
+!!  v1r_lr = dipole potential
 !!
 !!
 !! PARENTS
@@ -4284,7 +4286,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
  integer :: nperts_read, nperts_interpolate, nperts
  integer :: nqpt_read, nqpt_interpolate
- integer :: nfft,nfftf,mgfftf
+ integer :: nfft,nfftf
  integer :: ount, unt, fform
  real(dp) :: cpu,wall,gflops
  logical :: i_am_master
@@ -4302,6 +4304,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  type(hdr_type) :: hdr_ref
 
 !************************************************************************
+ ABI_UNUSED(mpi_enreg%nproc)
 
  call cwtime(cpu,wall,gflops,"start")
 
@@ -4407,7 +4410,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
      nqpt_read = nqpt_read + 1
-     q_read(:,nqpt_read) = qpt(:) 
+     q_read(:,nqpt_read) = qpt(:)
      iq_read(nqpt_read) = db_iqpt
 
      ! Count the perturbations
@@ -4421,7 +4424,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 
      call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt), "not found in DVDB. Will interpolate."))
      nqpt_interpolate = nqpt_interpolate + 1
-     q_interp(:,nqpt_interpolate) = qpt(:) 
+     q_interp(:,nqpt_interpolate) = qpt(:)
 
 
      ! Examine the symmetries of the q wavevector
@@ -4563,7 +4566,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
    end do
  end do
 
- close(ount)
+ if (my_rank == master) close(ount)
 
  ! ========================================================================== !
  ! Free memory

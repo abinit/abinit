@@ -13,7 +13,7 @@
 !!   components; in this case, form factors are multiplied by Ylm(k+G).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT, DRH)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

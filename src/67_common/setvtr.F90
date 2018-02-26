@@ -8,7 +8,7 @@
 !! Set up the trial potential and some energy terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
@@ -666,7 +666,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call mag_constr(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
 &   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,Vmagconstr,xred)
    if(dtset%nspden==4)then
-     do ispden=2,dtset%nspden ! SPr: both components should be used?
+     do ispden=1,dtset%nspden ! (SPr: both components should be used? EB: Yes it should be the case, corrected now)
        do ifft=1,nfft
          vtrial(ifft,ispden) = vtrial(ifft,ispden) + Vmagconstr(ifft,ispden)
        end do !ifft
@@ -676,7 +676,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !      TODO : MJV: check that magnetic constraint works also for nspden 2 or add input variable condition
 !              EB: ispden=2 is rho_up only: to be tested
 !             SPr: for ispden=2, both components should be used (e.g. see definition for vzeeman)?
-!      vtrial(ifft,1) = vtrial(ifft,1) + Vmagconstr(ifft,1) !SPr: added the first component here
+       vtrial(ifft,1) = vtrial(ifft,1) + Vmagconstr(ifft,1) !SPr: added the first component here
        vtrial(ifft,2) = vtrial(ifft,2) + Vmagconstr(ifft,2)
      end do !ifft
    end if

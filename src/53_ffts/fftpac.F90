@@ -13,7 +13,7 @@
 !! MG FIXME: THIS IS **VERY BAD** AS FORTRAN DOES NOT ALLOW FOR ALIASING
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, MF, XG, GMR).
+!! Copyright (C) 1998-2018 ABINIT group (DCA, MF, XG, GMR).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 !!  nspden=number of spin-density components
 !!  n1,n2,n3=actual data dimensions, dimensions of complex array a
 !!  nd1,nd2,nd3=array dimensions of (larger) array b
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  option= see description of side effects
 !!
 !! OUTPUT

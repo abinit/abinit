@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon,AGerossier)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon,AGerossier)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

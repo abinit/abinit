@@ -6,7 +6,7 @@
 !!  Tools for the computation of phonon linewidths
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1458,7 +1458,7 @@ end subroutine phgamma_vv_eval_qibz
 !!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
 !!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
 !!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
+!!      listkk,littlegroup_q,load_spin_hamiltonian
 !!      ngfft_seq,pawcprj_free,phgamma_finalize,phgamma_free,phgamma_init
 !!      phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init
 !!      wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
@@ -4040,7 +4040,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! now we can initialize the ddk velocities, on the FS grid only
  if (dtset%eph_transport > 0) then
    call ddk_read_fsvelocities(ddk, fstab, comm)
-   call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
+   call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
  end if
 
  ! TODO: Support nsig in phgamma_init
@@ -4436,7 +4436,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
              !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
              !&my_spintab=mpi_enreg%my_isppoltab)
-         call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+         call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&   ! In

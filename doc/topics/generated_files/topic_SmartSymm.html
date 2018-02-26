@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to use the symetry information to build the system from the irreducible part of the primitive cell with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<h5>Copyright (C) 2016-2018 ABINIT group (FJ)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_UnitCell.html">topic_UnitCell</a>, &nbsp; <a href="../../topics/generated_files/topic_crystal.html">topic_crystal</a>, &nbsp; <a href="../../users/generated_files/help_features.html#2.1">help_features#2.1</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#2.1">help_features#2.1</a>, &nbsp; <a href="../../topics/generated_files/topic_UnitCell.html">topic_UnitCell</a>, &nbsp; <a href="../../topics/generated_files/topic_crystal.html">topic_crystal</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_SmartSymm.html#1">Introduction.</a><li>2. <a href="topic_SmartSymm.html#2">Related input variables.</a><li>3. <a href="topic_SmartSymm.html#3">Selected input files.</a></ul>
@@ -47,13 +47,13 @@ Sometimes, the user knows the space group of the system, the conventional cell v
 as well as the positions of atoms in the asymmetric (irreducible) part of the cell. 
 From such data, ABINIT can generate the usual primitive cell vectors, as well as the coordinates of all the atoms in this cell.
 <p>
-This is activated if <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>!=0 and <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>=-1. 
-The user needs to specify the number of atoms to be read <a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a> in the asymmetric part of the cell, 
-as well as the expected number of atoms <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a> in the primitive cell. 
-Some additional information on the axes orientation <a href="../../input_variables/generated_files/varset_geo.html#spgaxor">spgaxor</a> and the cell origin <a href="../../input_variables/generated_files/varset_geo.html#spgorig">spgorig</a> 
+This is activated if <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>!=0 and <a href="../../variables/generated_files/varset_geo.html#brvltt">brvltt</a>=-1. 
+The user needs to specify the number of atoms to be read <a href="../../variables/generated_files/varset_geo.html#natrd">natrd</a> in the asymmetric part of the cell, 
+as well as the expected number of atoms <a href="../../variables/generated_files/varset_basic.html#natom">natom</a> in the primitive cell. 
+Some additional information on the axes orientation <a href="../../variables/generated_files/varset_geo.html#spgaxor">spgaxor</a> and the cell origin <a href="../../variables/generated_files/varset_geo.html#spgorig">spgorig</a> 
 might also have to be given. See <a href="../../users/spacegrouphelpfile.html">the space group help file</a>.
 <p>
-The specification of a magnetic space group is even possible (antiferromagnetic). See <a href="../../input_variables/generated_files/varset_geo.html#spgroupma">spgroupma</a> and <a href="../../input_variables/generated_files/varset_geo.html#genafm">genafm</a>.
+The specification of a magnetic space group is even possible (antiferromagnetic). See <a href="../../variables/generated_files/varset_geo.html#spgroupma">spgroupma</a> and <a href="../../variables/generated_files/varset_geo.html#genafm">genafm</a>.
 <p>
 See also the <a href="../../topics/generated_files/topic_UnitCell.html#">topic_UnitCell</a>.
 <br><br><a href=#top>Go to the top</a>
@@ -67,16 +67,16 @@ See also the <a href="../../topics/generated_files/topic_UnitCell.html#">topic_U
 <h3><b>2. Related input variables.</b></h3>
 
 
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#brvltt">brvltt</a>   [BRaVais LaTTice type]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#natom">natom</a>   [Number of ATOMs]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#natrd">natrd</a>   [Number of AToms ReaD]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#genafm">genafm</a>   [GENerator of the translation for Anti-FerroMagnetic space group]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#spgaxor">spgaxor</a>   [SPace Group : AXes ORientation]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#spgorig">spgorig</a>   [SPace Group : ORIGin]<br>
-... <a href="../../input_variables/generated_files/varset_geo.html#spgroupma">spgroupma</a>   [SPace GROUP number defining a MAgnetic space group]<br>
-<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varset_geo.html#ptgroupma">%ptgroupma</a>   [PoinT GROUP number for the MAgnetic space group]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_geo.html#brvltt">brvltt</a>   [BRaVais LaTTice type]<br>
+... <a href="../../variables/generated_files/varset_basic.html#natom">natom</a>   [Number of ATOMs]<br>
+... <a href="../../variables/generated_files/varset_geo.html#natrd">natrd</a>   [Number of AToms ReaD]<br>
+... <a href="../../variables/generated_files/varset_geo.html#spgroup">spgroup</a>   [SPace GROUP number]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#chkprim">chkprim</a>   [CHecK whether the cell is PRIMitive]<br>
+... <a href="../../variables/generated_files/varset_geo.html#genafm">genafm</a>   [GENerator of the translation for Anti-FerroMagnetic space group]<br>
+... <a href="../../variables/generated_files/varset_geo.html#spgaxor">spgaxor</a>   [SPace Group : AXes ORientation]<br>
+... <a href="../../variables/generated_files/varset_geo.html#spgorig">spgorig</a>   [SPace Group : ORIGin]<br>
+... <a href="../../variables/generated_files/varset_geo.html#spgroupma">spgroupma</a>   [SPace GROUP number defining a MAgnetic space group]<br>
+<p>Relevant internal variables:<p>... <a href="../../variables/generated_files/varset_geo.html#ptgroupma">%ptgroupma</a>   [PoinT GROUP number for the MAgnetic space group]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

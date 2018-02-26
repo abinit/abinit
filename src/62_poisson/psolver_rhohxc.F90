@@ -13,7 +13,7 @@
 !! space. The present routine is a real space counter part to rhotoxc().
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR,TRangel).
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

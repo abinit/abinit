@@ -7,7 +7,7 @@
 !! This routine is called to compute the potential corresponding to constrained magnetic moments.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (ILuk, MVer)
+!! Copyright (C) 1998-2018 ABINIT group (ILuk, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -239,6 +239,12 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                cmm_z=intgden(4,iatom)-spinat(3,iatom)
              else if (nspden == 2) then
                ! this is up spins - down spins - requested moment ~ 0
+               ! EB: note that intgden comes from calcdensph, which, in nspden=2 case, returns
+               ! intgden(1)=rho_up=n+m
+               ! intgden(2)=rho_dn=n-m
+               ! Then, is the following line be
+               ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom) 
+               ! ??
                cmm_z=intgden(1,iatom)-intgden(2,iatom) - spinat(3,iatom)
              end if
            end if

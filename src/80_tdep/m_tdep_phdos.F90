@@ -14,7 +14,6 @@ module m_tdep_phdos
   use m_phonons
   use m_ifc,              only : ifc_type,ifc_fourq
   use m_crystal,          only : crystal_t
-  use m_ddb,              only : ddb_type
 !FB  use m_crystal_io,       only : crystal_ncwrite
   use m_tdep_qpt,         only : Qpoints_type
   use m_tdep_readwrite,   only : Input_Variables_type
@@ -36,7 +35,7 @@ module m_tdep_phdos
 contains 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
+subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -47,8 +46,8 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
 
   implicit none 
 
-  integer :: prtdos,nqpt,ii,jj,iqpt,iatom
-  integer :: msym,natom,natom_unitcell,iomega
+  integer :: prtdos,ii,iqpt,iatom
+  integer :: natom,natom_unitcell,iomega
   integer :: dos_ngqpt(3)
   character (len=25):: phdos_fname
   double precision :: dossmear,integ,domega
@@ -63,7 +62,6 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   type(Symetries_Variables_type),intent(in) :: Sym
   type(crystal_t),intent(in) :: Crystal
   type(Qpoints_type),intent(in) :: Qpt
-  type(ddb_type),intent(in) :: ddb
   type(Shell_Variables_type),intent(in) :: Shell2at
 
   write(InVar%stdout,*)' '
@@ -251,10 +249,12 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 
   implicit none 
 
-  integer :: iatom,ii,jj,kk,ll,iatcell,itypat,istep
+  integer :: iatom,ii,jj,kk,ll,iatcell,itypat
+! integer :: istep
   double precision :: BH,BR,BV,GR,GV,GH,Eaverage,Nuaverage,Laverage,Vp,Vs,Vphi
   double precision :: rho,E1,E2,E3,Nu12,Nu13,Nu23,Nu21,Nu31,Nu32,G23,G13,G12
-  double precision :: mass_amu,bohr,sigma_11,sigma_21,sigma_22,sigma_31,sigma_32,sigma_33
+  double precision :: mass_amu,bohr
+! real(dp) :: sigma_11,sigma_21,sigma_22,sigma_31,sigma_32,sigma_33
   double precision, allocatable :: Sij(:,:),Cij(:,:),aijkl(:,:,:,:),cijkl(:,:,:,:)
   type(Input_Variables_type), intent(in) :: InVar
   type(Lattice_Variables_type), intent(inout) :: Lattice

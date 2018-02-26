@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to perform a GW calculation, including self-consistency with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (MG)
+<h5>Copyright (C) 2016-2018 ABINIT group (MG)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_Susceptibility.html">topic_Susceptibility</a>, &nbsp; <a href="../../users/generated_files/help_features.html#7">help_features#7</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#7">help_features#7</a>, &nbsp; <a href="../../topics/generated_files/topic_Susceptibility.html">topic_Susceptibility</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_GW.html#1">Introduction.</a><li>2. <a href="topic_GW.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_GW.html#3">Related input variables.</a><li>4. <a href="topic_GW.html#4">Selected input files.</a><li>5. <a href="topic_GW.html#5">References.</a></ul>
@@ -55,9 +55,9 @@ by solving a nonlinear equation involving the non-Hermitian, nonlocal and freque
 it accounts for the dynamic many-body effects in the electron-electron interaction.
 <p>Details about the GW implementation in ABINIT can be found <a href="../../theory/generated_files/theorydoc_mbt.html">here</a>.
 <p>A typical GW calculation consists of two different steps (following a DFT calculation):
-first the screened interaction &epsilon;<sup>-1</sup> is calculated and stored on disk (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3), 
+first the screened interaction &epsilon;<sup>-1</sup> is calculated and stored on disk (<a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3), 
 then the KS band structure and W are used to evaluate the matrix elements of &Sigma;, 
-finally obtaining the QP corrections (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4). 
+finally obtaining the QP corrections (<a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4). 
 <p>The computation of the screened interaction is described in <a href="../../topics/generated_files/topic_Susceptibility.html#">topic_Susceptibility</a>, while the 
 computation of the self-energy is described in <a href="../../topics/generated_files/topic_SelfEnergy.html#">topic_SelfEnergy</a>. The frequency meshes, used e.g. for 
 integration along the real and imaginary axes are described in <a href="../../topics/generated_files/topic_FrequencyMeshMBPT.html#">topic_FrequencyMeshMBPT</a>.
@@ -92,27 +92,27 @@ including many-body effects).</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#bdgw">bdgw</a>   [BanDs for GW calculation]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_nstep">gw_nstep</a>   [GW Number of self-consistent STEPs]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_sctype">gw_sctype</a>   [GW, Self-Consistency TYPE]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_toldfeig">gw_toldfeig</a>   [GW TOLerance on the DiFference of the EIGenvalues]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>   [GW CALCulation TYPe]<br>
-... <a href="../../input_variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_files.html#getqps">getqps</a>   [GET QuasiParticle Structure]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#getscr">getscr</a>   [GET SCReening (the inverse dielectric matrix) from ...]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#getsuscep">getsuscep</a>   [GET SUSCEPtibility (the irreducible polarizability) from ...]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#irdqps">irdqps</a>   [Integer that governs the ReaDing of QuasiParticle Structure]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#irdscr">irdscr</a>   [Integer that governs the ReaDing of the SCReening]<br>
-... <a href="../../input_variables/generated_files/varset_files.html#irdsuscep">irdsuscep</a>   [Integer that governs the ReaDing of the SUSCEPtibility]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#mbpt_sciss">mbpt_sciss</a>   [Many Body Perturbation Theory SCISSor operator]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>   [Number of BANDs in the KSS file]<br>
-... <a href="../../input_variables/generated_files/varset_basic.html#nsym">nsym</a>   [Number of SYMmetry operations]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#rhoqpmix">rhoqpmix</a>   [RHO QuasiParticle MIXing]<br>
-... <a href="../../input_variables/generated_files/varset_dev.html#symmorphi">symmorphi</a>   [SYMMORPHIc symmetry operation selection]<br>
-... <a href="../../input_variables/generated_files/varset_paw.html#usepawu">usepawu</a>   [USE PAW+U (spherical part)]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_gw.html#fftgw">fftgw</a>   [FFT for GW calculation]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a>   [GW, Number of Q-points for the Long Wave-Length Limit]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_gstate.html#optdriver">optdriver</a>   [OPTions for the DRIVER]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#bdgw">bdgw</a>   [BanDs for GW calculation]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gw_nstep">gw_nstep</a>   [GW Number of self-consistent STEPs]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gw_sctype">gw_sctype</a>   [GW, Self-Consistency TYPE]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gw_toldfeig">gw_toldfeig</a>   [GW TOLerance on the DiFference of the EIGenvalues]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gwcalctyp">gwcalctyp</a>   [GW CALCulation TYPe]<br>
+... <a href="../../variables/generated_files/varset_paral.html#gwpara">gwpara</a>   [GW PARAllelization level]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_files.html#getqps">getqps</a>   [GET QuasiParticle Structure]<br>
+... <a href="../../variables/generated_files/varset_files.html#getscr">getscr</a>   [GET SCReening (the inverse dielectric matrix) from ...]<br>
+... <a href="../../variables/generated_files/varset_files.html#getsuscep">getsuscep</a>   [GET SUSCEPtibility (the irreducible polarizability) from ...]<br>
+... <a href="../../variables/generated_files/varset_files.html#irdqps">irdqps</a>   [Integer that governs the ReaDing of QuasiParticle Structure]<br>
+... <a href="../../variables/generated_files/varset_files.html#irdscr">irdscr</a>   [Integer that governs the ReaDing of the SCReening]<br>
+... <a href="../../variables/generated_files/varset_files.html#irdsuscep">irdsuscep</a>   [Integer that governs the ReaDing of the SUSCEPtibility]<br>
+... <a href="../../variables/generated_files/varset_gw.html#mbpt_sciss">mbpt_sciss</a>   [Many Body Perturbation Theory SCISSor operator]<br>
+... <a href="../../variables/generated_files/varset_gw.html#nbandkss">nbandkss</a>   [Number of BANDs in the KSS file]<br>
+... <a href="../../variables/generated_files/varset_basic.html#nsym">nsym</a>   [Number of SYMmetry operations]<br>
+... <a href="../../variables/generated_files/varset_gw.html#rhoqpmix">rhoqpmix</a>   [RHO QuasiParticle MIXing]<br>
+... <a href="../../variables/generated_files/varset_dev.html#symmorphi">symmorphi</a>   [SYMMORPHIc symmetry operation selection]<br>
+... <a href="../../variables/generated_files/varset_paw.html#usepawu">usepawu</a>   [USE PAW+U (spherical part)]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_gw.html#fftgw">fftgw</a>   [FFT for GW calculation]<br>
+... <a href="../../variables/generated_files/varset_gw.html#gw_nqlwl">gw_nqlwl</a>   [GW, Number of Q-points for the Long Wave-Length Limit]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

@@ -10,7 +10,7 @@
 !!  The later quantity is required in case of GW calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +19,7 @@
 !!  Mflags
 !!   that of the basis sphere--appropriate for charge density rho(G),Hartree potential, and pseudopotentials
 !!  Dtset <type(dataset_type)>=all input variables in this dataset
-!!  ngfftf(18)contain all needed information about 3D fine FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftf(18)contain all needed information about 3D fine FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nfftf=number of points in the fine FFT mesh (for this processor)
 !!  Pawtab(Dtset%ntypat*Dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  Paw_an(natom) <type(paw_an_type)>=paw arrays given on angular mesh
@@ -36,7 +36,6 @@
 !!  vxc(nfftf,nspden)= xc potential in real space on the fine FFT grid
 !!  Wfd <type (wfd_t)>=Structure gathering information on the wavefunctions.
 !!  rhor(nfftf,nspden)=density in real space (smooth part if PAW).
-!!  rhog(2,nfftf)=density in reciprocal space (smooth part if PAW).
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
 !!  kstab(2,Wfd%nkibz,Wfd%nsppol)=Table temporary used to be compatible with the old implementation.
@@ -84,7 +83,7 @@
 
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
-&  rhor,rhog,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
+&  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
 &  taug,taur) ! optional arguments
 
  use defs_basis
@@ -135,7 +134,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer,intent(in) :: ngfftf(18)
  integer,intent(in) :: kstab(2,Wfd%nkibz,Wfd%nsppol)
  real(dp),intent(in) :: vhartr(nfftf),vxc(nfftf,Wfd%nspden),vtrial(nfftf,Wfd%nspden)
- real(dp),intent(in) :: rhor(nfftf,Wfd%nspden),rhog(2,nfftf)
+ real(dp),intent(in) :: rhor(nfftf,Wfd%nspden)
  real(dp),intent(in) :: nhat(nfftf,Wfd%nspden*Wfd%usepaw)
  real(dp),intent(in) :: nhatgr(nfftf,Wfd%nspden,3*nhatgrdim)
  real(dp),intent(in),optional :: taur(nfftf,Wfd%nspden*Dtset%usekden),taug(2,nfftf*Dtset%usekden)
@@ -152,10 +151,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc
- integer :: rank,comm,master,nprocs
+ integer :: rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
- real(dp) :: omega ! HSE Fock exchange screening parameter
  complex(dpc) :: cdot
  logical :: ltest
  character(len=500) :: msg

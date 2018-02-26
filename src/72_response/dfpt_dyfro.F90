@@ -9,7 +9,7 @@
 !! Also (when installed) symmetrize the different part and their sum.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG,MT)
+!! Copyright (C) 2000-2018 ABINIT group (XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of types of atoms

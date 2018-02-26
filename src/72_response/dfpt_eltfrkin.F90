@@ -8,7 +8,7 @@
 !! elastic tensor
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 !!  nband(nkpt*nsppol)=number of bands being considered per k point
 !!  nkpt=number of k points
 !!  ngfft(18)=contain all needed information about 3D FFT, i
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwarr(nkpt)=number of planewaves at each k point, and boundary
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for polarized

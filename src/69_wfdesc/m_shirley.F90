@@ -8,7 +8,7 @@
 !!  KS eigenvalues and eigenvectors with Shirley's method.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MG)
+!! Copyright (C) 1999-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1732,6 +1732,8 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
 !************************************************************************
 
  DBG_ENTER("COLL")
+
+ ABI_UNUSED(Paw_ij%cplex)
 
  ABI_CHECK(Wsh%nspinor==1,"nspinor==2 not coded")
  ABI_CHECK(Wsh%nsppol==1,"Wsh%nsppol must be 1")

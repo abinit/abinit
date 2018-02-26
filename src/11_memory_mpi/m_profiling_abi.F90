@@ -7,7 +7,7 @@
 !!  when we compile the code with --enable-memory-profiling="yes" that, in turns, defines HAVE_MEM_PROFILE.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MG)
+!! Copyright (C) 2010-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -432,7 +432,6 @@ end subroutine abimem_get_info
 !!    == .false. compact format
 !!
 !! PARENTS
-!!      m_errors
 !!
 !! CHILDREN
 !!      date_and_time,mpi_abort
