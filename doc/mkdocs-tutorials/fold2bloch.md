@@ -42,7 +42,7 @@ the same structure with a 6 atom supercell. Such a large cell is redundant in
 this case, since there is nothing that disturbs the original symmetry.
 However, we made this choice on purpose in order to observe the zone folding.
 
-![](../documents/lesson_fold2Bloch/Fig1.png)
+![](fold2Bloch_assets/Fig1.png)
 
 Fig. 1: Primitive unit cell (a) and 1x2x3 supercell (b) that represent a cubic
 lattice of hydrogen atoms.
@@ -53,7 +53,7 @@ in Y and Z directions. Accordingly, the reciprocal space shrinks along the
 same directions. We select those directions for the band structure plot as
 they will be affected by the zone folding.
 
-![](../documents/lesson_fold2Bloch/Fig2.png)
+![](fold2Bloch_assets/Fig2.png)
 
 Fig. 2: Brillouin zone of the supercell.
 
@@ -115,7 +115,8 @@ Then, run the plot_band.m script in MatLab
 This will plot the band structure of the 6 atom Hydrogen supercell created.
 
 Lastly, compare the image obtained to the band structure image below.
-![](../documents/lesson_fold2Bloch/Fig3.png)
+
+![](fold2Bloch_assets/Fig3.png)
 
 Fig. 3: 6 atom hydrogen supercell band structure plot
 
@@ -237,7 +238,7 @@ band structure plot, though. Now we have one additional dimension -- the Bloch
 spectral weight. There are several alternative visualization strategies. Here
 we use the scatter plot with the point size proportional to the spectral
 weight. The following MatLab script will help you build a graph for any
-fold2Bloch output: [ubs_dots.m](../documents/lesson_fold2Bloch/ubs_dots.m)
+fold2Bloch output: [ubs_dots.m](fold2Bloch_assets/ubs_dots.m)
 
 Make sure the following parameters in ubs_dots.m are set as follows:
 
@@ -280,15 +281,11 @@ Parameters" are set accordinly to size of the supercell constructed.
 
 After running the script you should see the following graph:
 
-![](../documents/lesson_fold2Bloch/H6.png)
+![](fold2Bloch_assets/H6.png)
 
 As you can see the unfolded band structure perfectly reproduces the
 anticipated dispersion relation _E(k) = E 0 \- 2A cos(k b)_. We can even
 estimate the magnitude of the hopping matrix element between adjacent atoms
-VssG = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in VssG =
--2.75 eV.
+VssG = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in VssG = -2.75 eV.
 
 You reached the end of the lesson on how to unfold a simplest band structure.
-
-
-

@@ -16,7 +16,7 @@ This lesson should take about 90 minutes and requires you have several CPU
 cores (up to 64).
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](lesson_basepar.html).
+explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 
 ## 1 Wavelets variables and parallelism
   
@@ -187,9 +187,9 @@ providing 64 orbitals. Run this input file with {1, 2, 4, 8, 16, 24, 32, 48,
 64} processors. The run with one processor should take less than one hour. If
 the time is short, one can reduce [[wvl_hgrid]] in the input file to 0.45.
 
-![Speedup for the C21H44 alkane chain](../documents/lesson_paral_gswvl/speedup-C21.png) 
-![Efficiency for the C21H44 alkane chain](../documents/lesson_paral_gswvl/efficiency-C21.png)
-![Time repartition for the C21H44 alkane chain](../documents/lesson_paral_gswvl/time-C21.png)
+![Speedup for the C21H44 alkane chain](paral_gswvl_assets/speedup-C21.png) 
+![Efficiency for the C21H44 alkane chain](paral_gswvl_assets/efficiency-C21.png)
+![Time repartition for the C21H44 alkane chain](paral_gswvl_assets/time-C21.png)
 
 _Time measurements for a run over several processors of a C 21H44 alkane chain._
 

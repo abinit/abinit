@@ -75,7 +75,10 @@ With respect to the input file used for the
 benchmark, the cutoff energy is strongly reduced in this tutorial, for
 practical reasons. For real tests, you can see the results (in particular the scaling) in:
 
-  * the publication concerning the KGB parallelisation: F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008) "Large scale ab initio calculations based on three levels of parallelization " ([available on Arxiv.org](https://arxiv.org/abs/0707.3405)). 
+  * the publication concerning the KGB parallelisation: 
+  F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008) 
+  "Large scale ab initio calculations based on three levels of parallelization 
+  "([available on Arxiv.org](https://arxiv.org/abs/0707.3405)). 
   * the Abinit paper: _X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,' D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi, S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet, M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf, M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger_ , Computer Phys. Commun. 180, 2582-2615 (2009). "ABINIT : First-principles approach of materials and nanosystem properties."
   * the presentation of F. Bottin at the [ABINIT workshop 2007](https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html) (Monday 29, session 2).
 

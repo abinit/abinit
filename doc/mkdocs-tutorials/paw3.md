@@ -105,7 +105,7 @@ tutorial was written so that specific numerical results can be reproduced if nec
 #### **3.1 Carbon - a simple datatset**
 
 Make a working directory for the atompaw generation (you could call it
-C_atompaw) and copy the file: [C_simple.input](../documents/lesson_paw3/inputs/C_simple.input) to it. 
+C_atompaw) and copy the file: [C_simple.input](paw3_assets/inputs/C_simple.input) to it. 
 Then go there and run atompaw by typing (assuming that you have set things up so that you 
 can run atompaw by just typing atompaw):  
   
@@ -120,7 +120,7 @@ The code should run, and if you do an ls, the contents of the directory will be 
     
 
 There is a lot of output, so it is useful to work with a graphical overview.
-Copy the gnuplot script [plot_C_all.p](../documents/lesson_paw3/scripts/plot_C_all.p) to your folder.
+Copy the gnuplot script [plot_C_all.p](paw3_assets/scripts/plot_C_all.p) to your folder.
 Open a new terminal window by typingxterm &, and run gnuplot in the new
 terminal window. At the gnuplot command prompt type:  
     
@@ -128,7 +128,7 @@ terminal window. At the gnuplot command prompt type:
 
 You should get a plot that looks like this:
 
-![Plot of atompaw outputs](../documents/lesson_paw3/images/plot_C_all_1.png)
+![Plot of atompaw outputs](paw3_assets/images/plot_C_all_1.png)
 
 You can now keep the gnuplot terminal and plot window open as you work, and if
 you change the atompaw input file and re-run it, you can update the plot by
@@ -175,8 +175,8 @@ We will now run basic convergence tests in abinit for this dataset. The
 dataset file for abinit has already been generated (it is the C.LDA-PW-
 paw.abinit file in the current directory). Make a new subdirectory for the
 test in the current directory (you could call it abinit_test for instance), go
-there and copy the files: [ab_C_test.in](../documents/lesson_paw3/inputs/ab_C_test.in) and 
-[input_C_test.files](../documents/lesson_paw3/inputs/input_C_test.files) into
+there and copy the files: [ab_C_test.in](paw3_assets/inputs/ab_C_test.in) and 
+[input_C_test.files](paw3_assets/inputs/input_C_test.files) into
 it. This abinit input file contains several datasets which increment the ecut
 input variable, and perform ground state and band structure calculations for
 each value of ecut. This is thus the internal abinit convergence study. Any
@@ -249,7 +249,7 @@ angular momentum channel is low, and  b) that other parameters apart from ecut
 dominate convergence beyond this point.
 
 If we turn to the band structure, we can use the script 
-[comp_bands_abinit2abinit.py](../documents/lesson_paw3/scripts/comp_bands_abinit2abinit.py)
+[comp_bands_abinit2abinit.py](paw3_assets/scripts/comp_bands_abinit2abinit.py)
 to check the convergence of the band structure. Copy the script to the
 directory where the abinit input file is and issue:
     
@@ -284,7 +284,7 @@ you can plot the two band structures in gnuplot directly, by entering:
 
 This should furnish you with a graph that looks something like this:
 
-![Comparison of bands 5 vs. 45 Ha](../documents/lesson_paw3/images/plot_C_band_1.png)
+![Comparison of bands 5 vs. 45 Ha](paw3_assets/images/plot_C_band_1.png)
 
 Not surprisingly, the band structures are very different. However, a search
 through the datasets of increasing index (i.e. DS22, DS32, DS42, ...) yields
@@ -299,7 +299,7 @@ and plotting this with:
 
 Should give you a plot similar to this:
 
-![Comparison of bands 20 vs. 45 Ha](../documents/lesson_paw3/images/plot_C_band_2.png)
+![Comparison of bands 20 vs. 45 Ha](paw3_assets/images/plot_C_band_2.png)
 
 You can convince yourself by zooming in that the band structures are very
 similar. The statistics at the end of the bands_20Ha_vs_45Ha.dat  file shows
@@ -324,9 +324,8 @@ this and the band structure with an elk calculation.
 First, we will need to calculate the total energy of diamond in abinit for a
 number of lattice parameters around the minimum of the total energy. There are
 example input and ".files" files for doing this at:
-[ab_C_equi.in](../documents/lesson_paw3/inputs/ab_C_equi.in) and
-[input_C_equi.files](../documents/lesson_paw3/inputs/input_C_equi.files). The
-new input file has ten datasets which increment the lattice parameter, alatt,
+[ab_C_equi.in](paw3_assets/inputs/ab_C_equi.in) and [input_C_equi.files](paw3_assets/inputs/input_C_equi.files). 
+The new input file has ten datasets which increment the lattice parameter, alatt,
 from 6.1 to 7.0 Bohr in steps of 0.1 Bohr. A look in the input file will tell
 you that ecut is set to 25 Hartrees. Copy these to your abinit_test directory and run:
     
@@ -424,7 +423,7 @@ at equilibrium for this dataset.
 In order to estimate whether these values are good or not, we need independent
 verification, and this will be provided by the all-electron elk code. There is
 an elk input file matching our abinit diamond calculation at 
-[elk_C_diamond.in](../documents/lesson_paw3/inputs/elk_C_diamond.in). You need
+[elk_C_diamond.in](paw3_assets/inputs/elk_C_diamond.in). You need
 to copy this file to a directory set up for the elk run (why not call it
 "C_elk"), and it needs to be renamed to elk.in , which is the required input
 name for an elk calculation. We are now ready to run the elk code for the first time.
@@ -589,7 +588,7 @@ You get out of "tail" by pressing Ctrl-C. While the calculation is running,
 you might want to familiarise yourself with the different input blocks in the
 elk.in file. When the Elk run has finished, there will be a BAND.OUT file in
 your run directory. We can now do an analogous band structure comparison to
-before, by using the python script [comp_bands_abinit2elk.py](../documents/lesson_paw3/scripts/comp_bands_abinit2elk.py)
+before, by using the python script [comp_bands_abinit2elk.py](paw3_assets/scripts/comp_bands_abinit2elk.py)
 (you should copy this to your current directory). If your previous abinit
 calculation is in the subdirectory "../C_abinit/abinit_test " above you write:
     
@@ -615,7 +614,7 @@ and plot it in gnuplot with:
 
 You should get a graph like this:
 
-![Comparison of abinit and elk bands without shift](../documents/lesson_paw3/images/band_abinit_elk_I.png)
+![Comparison of abinit and elk bands without shift](paw3_assets/images/band_abinit_elk_I.png)
 
 As you can see, the band structures look alike but differ by an absolute
 shift, which is normal, because in a periodic system there is no unique vacuum
@@ -663,7 +662,7 @@ occupied states, and about 0.05 eV difference for unoccupied states. If you
 plot the ouput as before, by piping the above to a bands.dat file and
 executing the same gnuplot command, you should get the plot below.
 
-![Comparison of abinit and elk bands with shift](../documents/lesson_paw3/images/band_abinit_elk_II.png)
+![Comparison of abinit and elk bands with shift](paw3_assets/images/band_abinit_elk_II.png)
 
 On the scale of the band plot there is a small - but visible - difference
 between the two. Note that the deviations are usually larger away from the
@@ -810,11 +809,11 @@ input file if you want, or make a new directory for this study). You might
 want to try and modify the gnuplot scripts so that they work correctly for
 this dataset. (The "wfn*" files are ordered just like the core radius list at
 the end, so now their meaning and the numbering of some other files have
-changed.) There is an example of the modifications in the plot script [
-plot_C_all_II.p](../documents/lesson_paw3/scripts/plot_C_all_II.p), which you
+changed.) There is an example of the modifications in the plot script 
+[plot_C_all_II.p](paw3_assets/scripts/plot_C_all_II.p), which you
 can download and run in gnuplot. You should get a plot like this:
 
-![Plot info for second Carbon dataset](../documents/lesson_paw3/images/plot_C_all_II.png)
+![Plot info for second Carbon dataset](paw3_assets/images/plot_C_all_II.png)
 
 Note the much better fit of the logarithmic derivatives, and the change in the
 shape of the projector functions (in blue in the wfn plots), due to the more
@@ -942,7 +941,7 @@ the elk and the abinit calculation.
 
 #### **4.1 Magnesium - The all-electron calculation**
 
-There is an elk input file prepared at: [elk_Mg_band.in](../documents/lesson_paw3/inputs/elk_Mg_band.in), 
+There is an elk input file prepared at: [elk_Mg_band.in](paw3_assets/inputs/elk_Mg_band.in), 
 we suggest you copy it into a subdirectory dedicated to the Mg elk calculation (why not "Mg_elk"?), rename
 it to "elk.in" and take a look inside the input file.
 
@@ -1005,7 +1004,7 @@ The last one is the Fermi energy at convergence. We will need this later when
 we compare band structures to align the band plots at the Fermi energy.
 
 Now it's time to calculate the equilibrium lattice parameters. There is a
-prepared file at: [elk_Mg_equi.in](../documents/lesson_paw3/inputs/elk_Mg_equi.in). 
+prepared file at: [elk_Mg_equi.in](paw3_assets/inputs/elk_Mg_equi.in). 
 As before copy this to your directory rename it to "elk.in". The layout of this file looks pretty much
 like the one before, except the band structure keywords are missing, and now
 switdth is fixed to the value we extracted before:
@@ -1140,10 +1139,10 @@ and others like it to get a feel for the quality of this dataset.
 
 Generate the abinit dataset file, and make sure it's given as:
 "./Mg_atompaw/Mg_LDA.pawps", then go to the subdirectory for the abinit test,
-and copy these files to it: [ab_Mg_test.in](../documents/lesson_paw3/inputs/ab_Mg_test.in), 
-[input_Mg_test.files](../documents/lesson_paw3/inputs/input_Mg_test.files), 
-[ab_Mg_equi.in](../documents/lesson_paw3/inputs/ab_Mg_equi.in) and 
-[input_Mg_equi.files](../documents/lesson_paw3/inputs/input_Mg_equi.files). 
+and copy these files to it: [ab_Mg_test.in](paw3_assets/inputs/ab_Mg_test.in), 
+[input_Mg_test.files](paw3_assets/inputs/input_Mg_test.files), 
+[ab_Mg_equi.in](paw3_assets/inputs/ab_Mg_equi.in) and 
+[input_Mg_equi.files](paw3_assets/inputs/input_Mg_equi.files). 
 The file for testing the convergence has already been set up so that the smearing
 strategy is equivalent to the elk one, as evidenced by the lines:
     
@@ -1210,7 +1209,7 @@ output to a file "bands_abinit_elk.dat", and go into gnuplot and issue these com
     
 You should get a plot that looks something like this:
 
-![Comparison of Mg \(metallic\) abinit and elk bands alignet at Fermi level](../documents/lesson_paw3/images/band_abinit_elk_III.png)
+![Comparison of Mg \(metallic\) abinit and elk bands alignet at Fermi level](paw3_assets/images/band_abinit_elk_III.png)
 
 As we can see, the bands should fit quite well. Finally, for the structural, a
 run of the "ab_Mg_equi.in" file gives us all the information we need for the

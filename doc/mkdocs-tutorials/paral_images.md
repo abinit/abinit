@@ -16,11 +16,8 @@ efficiency of the parallelism on "images".
 This lesson should take about 1.5 hour and requires to have at least a 200 CPU
 cores parallel computer.
 
-You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial 
-[A first introduction to ABINIT in parallel](lesson_basepar.html), and 
-[ground state with plane waves](lesson_paral_gspw.html).
-
+You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial 
+[A first introduction to ABINIT in parallel](basepar), and  [ground state with plane waves](paral_gspw).
 
 ## 1 Summary of the String Method
   
@@ -36,8 +33,7 @@ string method" [2]. It has been designed for the sampling of smooth energy lands
 [1] "String method for the study of rare events", W. E, W. Ren, E. Vanden-
 Eijnden, Physical Review B 66, 052301 (2002).  
 [2] "Simplified string method for computing the minimum energy path in
-barrier-crossing events", W. E, W. Ren, E. Vanden-Eijnden, J. Chem. Phys. 126,
-164103 (2007).  
+barrier-crossing events", W. E, W. Ren, E. Vanden-Eijnden, J. Chem. Phys. 126, 164103 (2007).  
 
 Before continuing you might work in a different subdirectory as for the other
 lessons. Why not "work_paral_string" ? In what follows, the names of files are
@@ -68,8 +64,9 @@ using a LDA exchange-correlation functional.
 You can visualize the initial and final states of the reaction below (H atoms
 are in white, the O atom is in red and the N atom in grey).  
   
-![initial state](../documents/lesson_paral_images/Initial1.png)
-![final state](../documents/lesson_paral_images/Initial2.png)  
+![initial state](paral_images_assets/Initial1.png)
+
+![final state](paral_images_assets/Initial2.png)  
   
 Before using the string method, it is necessary to optimize the initial and
 final points. The input files tstring_01.in and tstring_02.in contain
@@ -125,21 +122,28 @@ related keywords.
   
 1) [[imgmov]]: selects an algorithm using replicas of the unit cell. 
     For the string method, choose 2.  
+
 2) [[nimage]]: gives the number of replicas of the unit cell including the
     initial and final ones.  
+
 3) [[dynimage]]([[nimage]]): arrays of flags specifying if the image evolves
     or not (0: does not evolve; 1: evolves).  
+
 4) [[ntimimage]]: gives the maximum number of iterations (for the relaxation
     of the string).  
+
 5) [[tolimg]]: convergence criterion (in Hartree) on the total energy
     (averaged over the [[nimage]] images).  
+
 6) [[fxcartfactor]]: "time step" (in Bohr^2/Hartree) for the evolution step of
     the string method. For the time being (ABINITv6.10), only steepest-descent
     algorithm is implemented.  
+
 7) [[npimage]]: gives the number of processors among which the work load over
     the image level is shared. Only dynamical images are considered (images for
     which [[dynimage]] is 1). This input variable can be automatically set by
     ABINIT if the number of processors is large enough.  
+
 8) [[prtvolimg]]: governs the printing volume in the output file (0: full
     output; 1: intermediate; 2: minimum output).
 
@@ -204,7 +208,7 @@ cartesian coordinates (xcart_1img, xcart_2img, ...) or in reduced coordinates
 (xred_1img, xred_2img, ...). Similarly, the forces are printed out:
 fcart_1img, fcart_2img, ..., fcart_12img.  
 
-![courbe 1](../documents/lesson_paral_images/curve1.png)  
+![courbe 1](paral_images_assets/curve1.png)  
 
 Total energy as a function of OH distance for the path computed with 12 images
 and tolimg=0.0001 (which is very close to the x coordinate of the proton:
@@ -235,7 +239,7 @@ with 12 images) and the new one obtained by using 22 images (red curve). You
 can see that the global profile is almost not modified as well as the energy
 barrier.  
 
-![curve 2](../documents/lesson_paral_images/curve2.png)  
+![curve 2](paral_images_assets/curve2.png)  
 
 Total energy as a function of OH distance for the path computed with 12 images
 and tolimg=0.0001 (black curve) and the one computed with 22 images and
@@ -246,7 +250,7 @@ images obtained at the end of this calculation, from (i) to (f) and then from
 (f) to (i). It allows to visualize the MEP.  
   
 
-[![image](../documents/lesson_paral_images/start.gif)](../documents/lesson_paral_images/stringvideo.gif)  
+[![image](paral_images_assets/start.gif)](paral_images_assets/stringvideo.gif)  
 
 Click on the above image to visualize the animation (that should open in another window).  
   
@@ -264,7 +268,7 @@ section. The graph below superimposes the path obtained with 12 images and
 [[tolimg]]=0.001 (red curve) and the one with 12 images and [[tolimg]]=0.0001
 (black curve).  
 
-![image](../documents/lesson_paral_images/curve3.png)  
+![image](paral_images_assets/curve3.png)  
 
 Total energy as a function of OH distance for the path computed with 12 images
 and tolimg=0.0001 (black curve) and the one computed with 12 images and tolimg=0.001 (red curve).  

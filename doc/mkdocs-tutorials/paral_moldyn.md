@@ -128,8 +128,7 @@ the two calculations.
 
 Now we can calculate and plot several quantities. We need for that the
 diag_moldyn.py python script. You can find it in the
-_~abinit/doc/tutorial/documents/lesson_paral_moldyn_ directory (link
-[here](../documents/lesson_paral_moldyn/diag_moldyn.py)).  
+_~abinit/doc/tutorial/documents/lesson_paral_moldyn_ directory (link [here](paral_moldyn_assets/diag_moldyn.py)).  
 Run the diag_modyn.py script (type: "python diag_moldyn.py").  
 
 You can read (on standard output) the average value and the standard deviation
@@ -160,7 +159,7 @@ cores with tmoldyn_03.in. At the end of each calculation use the
 diag_moldyn.py script and save the results in PRESS02 and PRESS03. You can now
 plot the pressures in term of the K-points grids and compare the average values:
 
-![Kpoints](../documents/lesson_paral_moldyn/Kpoints.png)  
+![Kpoints](paral_moldyn_assets/Kpoints.png)  
 
 As said previously our simulations are too short to be completely convincing
 but you can see that you need at least a 2x2x2 K-points grid for a 32 atoms
@@ -189,7 +188,7 @@ comparison). Run it and save the pressure to PRESS06. Plot now PRESS02,
 PRESS04 and PRESS06, remove the first steps and compare the pressure average
 values:
 
-![cells](../documents/lesson_paral_moldyn/cell.png)  
+![cells](paral_moldyn_assets/cell.png)  
 
 You can see that even if the pressure was converge in term of K-points, the 32
 atoms supercell was not sufficient to give a reliable pressure. A 3x3x3
@@ -223,9 +222,9 @@ Set the temperature to 6500K. Look at the positions: the ions are moving
 across the cell and do not come back to their equilibrium positions. The cell
 has melted and is now liquid. Plot the pressures for the three simulations:  
 
-![melting](../documents/lesson_paral_moldyn/melting.png)  
+![melting](paral_moldyn_assets/melting.png)  
 
-![xcart](../documents/lesson_paral_moldyn/xcart.png)  
+![xcart](paral_moldyn_assets/xcart.png)  
 
 You can clearly observe a discontinuous change in pressure due to the volume
 difference between the solid and liquid phases. This give a melting

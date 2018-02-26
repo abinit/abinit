@@ -107,7 +107,7 @@ In any case, in the following, we name atompaw the ATOMPAW executable.
   
 How to use Atompaw ?  
 
-  * Edit an input file in a text editor (content of input explained [here](../documents/lesson_paw2/atompaw-usersguide.pdf))
+  * Edit an input file in a text editor (content of input explained [here](paw2_assets/atompaw-usersguide.pdf))
   * Run: atompaw < inputfile
 
 Partial waves φi, PS partial waves~φi and projectors~pi are given in wfn.i files.  
@@ -318,7 +318,7 @@ but accuracy can be affected.
 
 \- Note that the final rPAW value ("rc = ..." in Ni file) change with the
 grid; just because rPAW is adjusted in order to belong exactly to the radial grid. 
-By looking in ATOMPAW [user's guide](../documents/lesson_paw2/atompaw-usersguide.pdf), you can choose to keep it constant.
+By looking in ATOMPAW [user's guide](paw2_assets/atompaw-usersguide.pdf), you can choose to keep it constant.
 
 \- Also note that, if the results are difficult to get converged (some error
 produced by ATOMPAW), you should try a linear grid...
@@ -347,11 +347,13 @@ function of radius using a plotting tool of your choice.
 
 Here is the first s\- partial wave /projector of the Ni example:
 
-![First s partial wave](../documents/lesson_paw2/wfn1a.jpg)
+![First s partial wave](paw2_assets/wfn1a.jpg)
 
-  * The φi should meet the~φi near or after the last maximum (or minimum). If not, it is preferable to change the value of the matching (pseudization) radius.
+  * The φi should meet the~φi near or after the last maximum (or minimum). 
+    If not, it is preferable to change the value of the matching (pseudization) radius.
 
-  * The maxima of the ~φi and ~pi functions should have the same order of magnitude (but need not agree exactly). If not, you can try to get this in three ways:
+  * The maxima of the ~φi and ~pi functions should have the same order of magnitude (but need not agree exactly). 
+    If not, you can try to get this in three ways:
 
 \- Change the matching radius for this partial-wave; but this is not always
 possible (PAW spheres should not overlap in the solid)...  
@@ -365,7 +367,7 @@ section).
 
 Example: plot the wfn6 file, concerning the second d- partial wave:
 
-![2nd d partial wave](../documents/lesson_paw2/wfn6a.jpg)
+![2nd d partial wave](paw2_assets/wfn6a.jpg)
 
 This partial wave has been generated at Eref=0 Ry and orthogonalized with the
 first d\- partial wave which has an eigenenergy equal to -0.65Ry (see Ni
@@ -375,7 +377,7 @@ example, put Eref=1. instead of Eref=0. (line 24 of Ni.atompaw.input1 file).
 
 Run ATOMPAW again and plot wfn6 file:
 
-![2nd d partial wave](../documents/lesson_paw2/wfn6b.jpg)
+![2nd d partial wave](paw2_assets/wfn6b.jpg)
 
 Now the PS partial wave and projector have the same order of magnitude!
 
@@ -407,11 +409,11 @@ The logarithmic derivatives should have the following properties:
 
 Here are the three logarithmic derivative curves for the current dataset:  
 
-![l=0 log derivatives](../documents/lesson_paw2/log0a.jpg)
+![l=0 log derivatives](paw2_assets/log0a.jpg)
 
-![l=1 logderivatives](../documents/lesson_paw2/log1a.jpg)
+![l=1 logderivatives](paw2_assets/log1a.jpg)
 
-![l=2 logderivatives](../documents/lesson_paw2/log2a.jpg)  
+![l=2 logderivatives](paw2_assets/log2a.jpg)  
   
 As you can see, except for l=2, exact and PAW logarithmic derivatives do not match !  
 According to the previous remarks, try other values for the references
@@ -420,12 +422,12 @@ First, edit again the Ni.atompaw.input1 file and put Eref=3Ry for the
 additional s\- state (line 18); run ATOMPAW again. Plot the logderiv.0 file.
 You should get:  
 
-![l=0 log derivatives](../documents/lesson_paw2/log0b.jpg)
+![l=0 log derivatives](paw2_assets/log0b.jpg)
   
 Then put Eref=4Ry for the second p\- state (line 21); run ATOMPAW again. Plot
 again the logderiv.1 file. You should get:  
 
-![l=1 log derivatives](../documents/lesson_paw2/log1b.jpg)
+![l=1 log derivatives](paw2_assets/log1b.jpg)
 
 Now, all PAW logarithmic derivatives match with the exact ones in a reasonable interval.
   
@@ -460,8 +462,7 @@ physical results. Selecting a value of rVloc between 0.6*rPAW and 0.8*rPAW is
 a good choice; but the best way to adjust rVloc value is to have a look at the
 two values of evale in Ni file which are sensitive to the choice of rVloc. To
 change the value of  rVloc, one has to detail the line containing all radii
-(rPAW, rshape, rVloc and rcore); see 
-[user's guide](../documents/lesson_paw2/atompaw-usersguide.pdf).
+(rPAW, rshape, rVloc and rcore); see [user's guide](paw2_assets/atompaw-usersguide.pdf).
 
 * Change the matching radius rc for one (or both) l partial-wave(s). In some cases, changing rc can remove ghost states. 
 
@@ -471,7 +472,7 @@ To see an example of ghost state, use the
 ~abinit/doc/tutorial/lesson_paw2/Ni.ghost.atompaw.input file and run it with ATOMPAW.  
 Look at the l=1 logarithmic derivatives (logderiv.1 file). They look like:  
 
-![Ni l=1 log derivatives](../documents/lesson_paw2/log1c.jpg)  
+![Ni l=1 log derivatives](paw2_assets/log1c.jpg)  
 
 Now, edit the Ni.ghost.atompaw.input file and replace "troulliermartins" by
 "ultrasoft". Run ATOMPAW again... and look at logderiv.1 file. The ghost state has moved!  
@@ -610,7 +611,7 @@ Note: You could have tried the "bessel" keyword instead of "ultrasoft"...
 
 Summary of convergency results:
 
-![ecut convergence](../documents/lesson_paw2/ecut.jpg)  
+![ecut convergence](paw2_assets/ecut.jpg)  
   
 Final remarks:
 
@@ -644,7 +645,7 @@ several volumes around equilibrium.
 
 Plot the etotal vs acell curve:  
 
-![etotal vs acell](../documents/lesson_paw2/acell-etotal.jpg)  
+![etotal vs acell](paw2_assets/acell-etotal.jpg)  
 
 From this graph and output file, you can extract some physical quantities:  
 
@@ -678,7 +679,7 @@ computations), not with experimental ones...
 Additional remark:
 
 It can be useful to test the sensitivity of results to some ATOMPAW input parameters 
-(see [user's guide](../documents/lesson_paw2/atompaw-usersguide.pdf) for details on keywords):
+(see [user's guide](paw2_assets/atompaw-usersguide.pdf) for details on keywords):
 
   * The analytical form and the cut-off radius rshape of the shape function used in compensation charge density definition. 
     By default a "sinc" function is used but "gaussian" shapes can have an influence on results. 
@@ -727,7 +728,7 @@ The reciprocal space is divided in 3 regions:
 \- If gmax< g < γ,~pi(g) is modified so that the contribution of~pi(r) is
 conserved with an error W (as small as possible).
 
-![RSO](../documents/lesson_paw2/RSO.png)
+![RSO](paw2_assets/RSO.png)
 
 The above transformation of~pi(g) is only possible if~pi(r) is defined outside
 the augmentation sphere up to a radius R0 (with R0>rc).
@@ -754,9 +755,9 @@ You can try several values for gmax (keeping γ/gmax and W constant) and
 compare the efficiency of the atomic data; do not forget to test physical
 properties again.
 
-![RSO comparison](../documents/lesson_paw2/RSOcompa.jpg)
+![RSO comparison](paw2_assets/RSOcompa.jpg)
 
-How to choose the RSO parameters ?
+How to choose the RSO parameters?
 
 γ/gmax=2 and 0.0001 < W < 0.001 is a good choice.  
 gmax has to be adjusted. The lower gmax the faster the convergence is ; but

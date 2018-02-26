@@ -83,13 +83,13 @@ fatbands for Vanadium and l=2 with
 
 The band structure is given in eV.
 
-![FatbandV](../documents/lesson_ucalc_crpa/fatbandsV.jpeg)
+![FatbandV](ucalc_crpa_assets/fatbandsV.jpeg)
 
 and the fatbands for one oxygen atom and l=1 with
      
     xmgrace tucrpa_O_DS2_FATBANDS_at0003_O_is1_l0001.
 
-![FatbandV](../documents/lesson_ucalc_crpa/fatbandsO.jpeg)
+![FatbandV](ucalc_crpa_assets/fatbandsO.jpeg)
 
 In these plots, you recover the band structure of SrVO3 (see for comparison
 the band structure of Fig.3 of [[Amadon2008]]), and the main character of the
@@ -500,7 +500,7 @@ sufficient to see the main tendencies. Extract the value of _U_ for the 60 frequ
 
 Remove the first line, and plot the data:
 
-![dynamical](../documents/lesson_ucalc_crpa/dynamical.jpeg)
+![dynamical](ucalc_crpa_assets/dynamical.jpeg)
 
 We recover in the picture the main results found in the Fig. 3 of [[Aryasetiawan2006]]. 
 Indeed, the frequency dependent effective interactions exhibits a plasmon excitation.
