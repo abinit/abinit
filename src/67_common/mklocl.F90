@@ -136,7 +136,9 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: xcart(:,:)
+#if defined HAVE_BIGDFT
  real(dp),pointer :: rhor_ptr(:,:)
+#endif
 
 ! *************************************************************************
 

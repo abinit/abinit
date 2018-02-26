@@ -724,6 +724,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%optforces          = dtin%optforces
  dtout%optnlxccc          = dtin%optnlxccc
  dtout%optstress          = dtin%optstress
+ dtout%orbmag             = dtin%orbmag
  dtout%ortalg             = dtin%ortalg
  dtout%paral_atom         = dtin%paral_atom
  dtout%paral_kgb          = dtin%paral_kgb

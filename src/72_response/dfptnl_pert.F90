@@ -373,7 +373,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
 !  Continue to initialize the Hamiltonian
    call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,gs_hamkq,isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
 
 !  Loop over k-points
 

@@ -339,17 +339,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
         eff_pot%energy = inp%energy_reference
       end if
 
-!     Assign the stress tensor of the reference from input
-      if(any(abs(inp%strten_reference)<tol16))then
-        write(message,'(9a)') ch10,&
-&      ' --- !WARNING',ch10,&
-&      '     The stress tensor of the reference structure is not specify in ',ch10,&
-&      '     the input file. The stress tensor is set to zero',ch10,&
-&      ' ---',ch10
-        call wrtout(std_out,message,'COLL')
-      else
-        eff_pot%strten = inp%strten_reference
-      end if
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
       call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
@@ -2928,8 +2917,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   if (iblok /=0) then
 
 !   then print the internal stain tensor
-    call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,&
-&                        ab_out,mpert,msize,natom,nblok)
+    call ddb_internalstr(inp%asr,ddb%val,d2asr,iblok,instrain,&
+&                        ab_out,mpert,natom,nblok)
 
     do ipert1=1,6
       do ipert2=1,natom

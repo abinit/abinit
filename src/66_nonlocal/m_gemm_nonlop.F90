@@ -61,7 +61,7 @@ module m_gemm_nonlop
  public :: destroy_gemm_nonlop
 !!***
 
-!!****t* m_invovl/gemm_nonlop_type
+!!****t* m_gemm_nonlop/gemm_nonlop_type
 !! NAME
 !! gemm_nonlop_type
 !!
@@ -93,7 +93,7 @@ module m_gemm_nonlop
 
 contains
 
-!!****f* m_invovl/init_gemm_nonlop
+!!****f* m_gemm_nonlop/init_gemm_nonlop
 !! NAME
 !! init_gemm_nonlop
 !!
@@ -133,7 +133,7 @@ contains
  end subroutine init_gemm_nonlop
 !!***
 
-!!****f* m_invovl/destroy_gemm_nonlop
+!!****f* m_gemm_nonlop/destroy_gemm_nonlop
 !! NAME
 !! destroy_gemm_nonlop
 !!
@@ -182,7 +182,7 @@ contains
 !!***
 
 
-!!****f* m_invovl/make_gemm_nonlop
+!!****f* m_gemm_nonlop/make_gemm_nonlop
 !! NAME
 !! make_gemm_nonlop
 !!
@@ -321,7 +321,7 @@ contains
  end subroutine make_gemm_nonlop
 !!***
 
-!!****f* m_invovl/gemm_nonlop
+!!****f* m_gemm_nonlop/gemm_nonlop
 !! NAME
 !! gemm_nonlop
 !!

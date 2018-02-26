@@ -331,6 +331,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      !NCF_CHECK(ncerr)
 #else 
      MSG_ERROR("ETSF_IO is not activated")
+     ABI_UNUSED(psps%ntypat)
 #endif
    end if
 

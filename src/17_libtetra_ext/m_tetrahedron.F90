@@ -600,7 +600,7 @@ end subroutine tetra_write
 !!  dtweightde(nkpt,nene) = derivative of tweight wrt energy
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_phonons,thmeig
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,thmeig
 !!
 !! CHILDREN
 !!      get_onetetra_,sort_tetra
@@ -662,7 +662,7 @@ end subroutine get_tetra_weight
 !! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
 !!
 !! PARENTS
-!!      m_fstab,m_tetrahedron
+!!      m_fstab,m_phonons,m_tetrahedron
 !!
 !! CHILDREN
 !!      get_onetetra_,sort_tetra
@@ -737,7 +737,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
    eigen_1tetra(4) = eigen_in(ind_ibz(4))
    call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
 
-   call get_onetetra_(tetrahedra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,nkpt,bcorr,tweight_tmp,dtweightde_tmp)
+   call get_onetetra_(tetrahedra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr,tweight_tmp,dtweightde_tmp)
 
 ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
 !   call daxpy (nene, 1.d0,    tweight_tmp(:,1), 1,    tweight_t(:,ind_ibz(1)), 1)
@@ -1554,7 +1554,7 @@ end subroutine split_work
 !!
 !! SOURCE
 
-pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,nkpt,bcorr, &
+pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr, &
 &  tweight_tmp,dtweightde_tmp)
 
 
@@ -1568,7 +1568,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nene,nkpt,bcorr,itetra
+ integer,intent(in) :: nene,bcorr,itetra
  type(t_tetrahedron), intent(in) :: tetra
  double precision ,intent(in) :: enemax,enemin,max_occ
 !arrays
@@ -1587,7 +1587,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  integer :: ieps,nn1,nn2,nn3,nn4
  double precision  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
  double precision  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
- double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31
+ double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31,gval
  double precision  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
  double precision  :: deleps1, deleps2, deleps3, deleps4
  double precision  :: invepsum, cc_pre, dccde_pre
@@ -1862,7 +1862,11 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
    eps = enemin
    do ieps=1,nene
      tmp = eps - cc
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gau_prefactor*exp(-tmp*tmp*gau_width2)
+     gval = gau_prefactor*exp(-tmp*tmp*gau_width2)
+     !dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + gval
+     !dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + gval
+     !dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + gval
+     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gval
      eps = eps + deltaene
    end do
  end if ! end degenerate tetrahedron if
@@ -1961,7 +1965,7 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
    call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
 
    call get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,&
-&   nene,nkibz,bcorr,tweight_tmp,dtweightde_tmp)
+&   nene,bcorr,tweight_tmp,dtweightde_tmp)
 
    ! Accumulate contributions to ik_ibz
    ! (there might be multiple vertexes that map onto ik_ibz)

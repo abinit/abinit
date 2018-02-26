@@ -435,6 +435,7 @@ type dataset_type
  integer :: optforces
  integer :: optnlxccc
  integer :: optstress
+ integer :: orbmag
  integer :: ortalg
  integer :: paral_atom
  integer :: paral_kgb

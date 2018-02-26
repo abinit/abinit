@@ -172,7 +172,7 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
  ABI_MALLOC(hweight,(natom))
 
  call dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
-  natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl,prtcharge1,hcharge,hden,hweight)
+  natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,prtcharge1,hcharge,hden,hweight)
 
  ABI_FREE(hweight)
  ABI_FREE(aeden)

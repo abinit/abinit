@@ -78,7 +78,7 @@ module m_dynmat
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
                                 ! build (nearly) all the other matrix elements that can be build using symmetries.
- public :: sytens               ! Determines the set of irreductible elements of the non-linear optical susceptibility 
+ public :: sytens               ! Determines the set of irreductible elements of the non-linear optical susceptibility
                                 ! and Raman tensors
  public :: symdm9               ! Generate the dynamical matrix in the full BZ from the irreducible q-points.
  public :: axial9               ! Generates the local coordinates system from the  knowledge of the first vector (longitudinal) and
@@ -3917,7 +3917,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !DEBUG
 !write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
 !ENDDEBUG
- 
+
  r_inscribed_sphere = sum((matmul(rprimd(:,:),ngqpt(1:3)))**2)
  do ii=-1,1
    do jj=-1,1
@@ -5444,8 +5444,7 @@ end subroutine gtdyn9
 !!
 !! INPUTS
 !!  amu(ntypat)=mass of the atoms (atomic mass unit) matrix (diagonal in the atoms)
-!!  d2cart(2,3,mpert,3,mpert)=
-!!   dynamical matrix, effective charges, dielectric tensor,.... all in cartesian coordinates
+!!  d2cart(2,3,mpert,3,mpert)=dynamical matrix, effective charges, dielectric tensor,.... all in cartesian coordinates
 !!  indsym(4,msym*natom)=indirect indexing array : for each
 !!   isym,iatom, fourth element is label of atom into which iatom is sent by
 !!   INVERSE of symmetry operation isym; first three elements are the primitive
@@ -5472,7 +5471,7 @@ end subroutine gtdyn9
 !!    The second index runs on the direction and the atoms displaced
 !!    The third index runs on the modes.
 !!  eigval(3*natom)=contains the eigenvalues of the dynamical matrix
-!!  eigvec(2*3*natom*3*natom)= at the end, contains the eigenvectors of the dynamical matrix.
+!!  eigvec(2*3*natom*3*natom)= at the end, contains the eigenvectors of the dynamical matrix in cartesian coordinates.
 !!  phfrq(3*natom)=phonon frequencies (square root of the dynamical matrix eigenvalues,
 !!    except if these are negative, and in this case, give minus the square root of the absolute value
 !!    of the matrix eigenvalues). Hartree units.

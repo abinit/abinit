@@ -1637,9 +1637,6 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 !arrays
 #ifdef HAVE_MPI_IO
  integer(MPI_OFFSET_KIND),allocatable :: offset_wq(:,:)
-#ifndef HAVE_GW_DPC
- complex(dpc),allocatable :: bufdc(:,:,:)
-#endif
 #endif
  complex(dpc),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
  ! pointers passed to netcdf4 routines (complex datatypes are not supported).

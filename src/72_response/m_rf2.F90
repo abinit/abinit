@@ -521,6 +521,11 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  compute_conjugate = .false.
  if(present(conj)) compute_conjugate = conj
 
+ ABI_UNUSED(ikpt)
+ ABI_UNUSED(isppol)
+ ABI_UNUSED(mkmem)
+ ABI_UNUSED(nsppol)
+
 !Check sizes
  if (size(cprj_jband)/=0) then
    if (size(cprj_jband)/=nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then

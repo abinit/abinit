@@ -1110,7 +1110,6 @@ end subroutine read_blok8
 !! indsym(4,msym,natom)=indirect indexing array for symmetries
 !! natom=number of atoms in cell
 !! nsym=number of space group symmetries
-!! occopt=occupation option
 !! rmet(3,3)=metric tensor in real space (bohr^2)
 !! rprim(3,3)= primitive translation vectors
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
@@ -1119,7 +1118,6 @@ end subroutine read_blok8
 !! tnons(3,nsym)=fractional nonsymmorphic translations
 !! typat(natom)=type integer for each atom in cell
 !! ucvol=unit cell volume in bohr**3
-!! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! xcart(3,natom)=atomic cartesian coordinates
 !! xred(3,natom)=fractional dimensionless atomic coordinates
 !! zion(ntypat)=charge on each type of atom (real number)
@@ -1134,11 +1132,11 @@ end subroutine read_blok8
 !! SOURCE
 
 subroutine rdddb9(acell,atifc,amu,ddb,&
-& ddbun,dimekb,filnam,gmet,gprim,indsym,iout,&
-& lmnmax,mband,mpert,msize,msym,&
+& ddbun,filnam,gmet,gprim,indsym,iout,&
+& mband,mpert,msize,msym,&
 & natifc,natom,nkpt,nsym,ntypat,&
-& occopt,rmet,rprim,symrec,symrel,symafm,&
-& tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+& rmet,rprim,symrec,symrel,symafm,&
+& tnons,typat,ucvol,xcart,xred,zion,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1159,8 +1157,8 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !   and
 !    the allocation allocate(kpt(3,nkpt)) is strange
 !scalars
- integer,intent(in) :: ddbun,dimekb,iout,lmnmax,mband,mpert,msize,msym,natifc
- integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,usepaw
+ integer,intent(in) :: ddbun,iout,mband,mpert,msize,msym,natifc
+ integer,intent(inout) :: natom,nkpt,nsym,ntypat
  real(dp),intent(out) :: ucvol
  character(len=*),intent(in) :: filnam
  type(ddb_type),intent(inout) :: ddb
@@ -1732,11 +1730,11 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    call ddb_malloc(ddb,msize,nblok,natom,ntypat)
 
    call rdddb9(acell,atifc,amu,ddb,&
-&   ddbun,dimekb,filename,gmet,gprim,indsym,ab_out,&
-&   lmnmax,mband,mpert,msize,msym,&
+&   ddbun,filename,gmet,gprim,indsym,ab_out,&
+&   mband,mpert,msize,msym,&
 &   natifc,ddb_natom,nkpt,nsym,ntypat,&
-&   occopt,rmet,rprim,symrec,symrel,symafm,&
-&   tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+&   rmet,rprim,symrec,symrel,symafm,&
+&   tnons,typat,ucvol,xcart,xred,zion,znucl)
 
    close(ddbun)
 
@@ -2789,18 +2787,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
  asrq0%d2asr = zero
 
- ! TODO: Tests with asr = 3,4  [v5][t83] and [v5][t84]
- ! fail if I don't allocated these arrays because the code
- ! is accessing the data without checking if the correction has been computed....
- dims = 3*ddb%natom*(3*ddb%natom-1) / 2
- ABI_CALLOC(asrq0%uinvers, (dims, dims))
- ABI_CALLOC(asrq0%vtinvers,(dims, dims))
- ABI_CALLOC(asrq0%singular, (dims))
-
  if (asrq0%iblok == 0) return
  iblok = asrq0%iblok
 
- select case (asr)
+ select case (asrq0%asr)
  case (0)
    continue
 
@@ -2810,10 +2800,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  case (3,4)
    ! Rotational invariance for 1D and 0D systems
    ! Compute uinvers, vtinvers and singular matrices.
-   !dims = 3*ddb%natom*(3*ddb%natom-1) / 2
-   !ABI_CALLOC(asrq0%uinvers, (dims, dims))
-   !ABI_CALLOC(asrq0%vtinvers,(dims, dims))
-   !ABI_CALLOC(asrq0%singular, (dims))
+   dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+   ABI_CALLOC(asrq0%uinvers, (dims, dims))
+   ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+   ABI_CALLOC(asrq0%singular, (dims))
 
    call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
      ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
@@ -3344,10 +3334,13 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  ! type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  character(len=*),intent(in) :: filename
  !Local variables -------------------------
- integer :: ii,mxnimage, nn,ddbun
+ integer :: mxnimage,ddbun
+!integer :: ii, nn
  type(ddb_hdr_type) :: ddb_hdr
 
 ! ************************************************************************
+
+ ABI_UNUSED(psps%usepaw)
 
 !Set variables
  mxnimage = 1 ! Only 1 image in the DDB

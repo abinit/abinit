@@ -76,7 +76,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !scalars
  integer :: cplex_tmp,i1,i2,i3,id,idir,ifft,ig,ii,ing,n1,n2,n3
 !arrays
- real(dp) :: tsec(2)
  real(dp),allocatable :: gg(:,:),wkcmpx(:,:),work(:),workgr(:,:)
 
 ! *************************************************************************

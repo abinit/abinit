@@ -2703,6 +2703,8 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:)
 
 ! *************************************************************************
+ ABI_UNUSED(cryst%natom)
+ ABI_UNUSED(nspden)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
@@ -4284,7 +4286,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
  integer :: nperts_read, nperts_interpolate, nperts
  integer :: nqpt_read, nqpt_interpolate
- integer :: nfft,nfftf,mgfftf
+ integer :: nfft,nfftf
  integer :: ount, unt, fform
  real(dp) :: cpu,wall,gflops
  logical :: i_am_master
@@ -4302,6 +4304,7 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
  type(hdr_type) :: hdr_ref
 
 !************************************************************************
+ ABI_UNUSED(mpi_enreg%nproc)
 
  call cwtime(cpu,wall,gflops,"start")
 

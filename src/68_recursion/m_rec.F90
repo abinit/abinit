@@ -366,7 +366,7 @@ end subroutine find_maxmin_proc
  call xmpi_sum(recpar%vcount,rset%mpi%comm_bandfft,ierr)
    
  recpar%displs = 0
- if(rset%mpi%nproc>1) recpar%displs(1:) = (/(sum(recpar%vcount(:ii)),ii=0,rset%mpi%nproc-1)/) 
+ if(rset%mpi%nproc>1) recpar%displs(1:) = (/(sum(recpar%vcount(:ii)),ii=0,rset%mpi%nproc-2)/) 
 
  !--INITALIZATION OF CUDA FOR RECURSION
 #if defined HAVE_GPU_CUDA

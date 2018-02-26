@@ -449,7 +449,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: strsxc(6)
- real(dp) :: dum(0),qphon(3)
+ real(dp) :: dum(0)
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 

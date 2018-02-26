@@ -40,6 +40,7 @@ sources = [
  "nhatgrid.F90",
  "optics_paw.F90",
  "optics_paw_core.F90",
+ "overlap_k1k2_paw.F90",
  "pawaccrhoij.F90",
  "pawdenpot.F90",
  "pawdensities.F90",

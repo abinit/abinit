@@ -29,7 +29,6 @@
 !!  elfr(nfft,nspden(+1))=electron localization function, real space.
 !!   (+1) if spin-polarized in order to get total, spin up and spin down elf
 !!  etotal=total energy
-!!  fermie= Fermi energy
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  grhor(nfft,nspden,3)= gradient of electron density in electrons/bohr**4, real space
@@ -126,7 +125,7 @@
 #include "abi_common.h"
 
 subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,dtset,&
-& ecut,eigen,electronpositron,elfr,etotal,fermie,gmet,gprimd,grhor,hdr,kg,&
+& ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,kg,&
 & lrhor,mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpsang,mpw,my_natom,natom,&
 & nattyp,nfft,ngfft,nhat,nkpt,npwarr,nspden,nsppol,nsym,ntypat,n3xccc,occ,&
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
@@ -200,7 +199,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfftc,mkmem,mpsang,mpw,n3xccc,my_natom,natom,nfft
  integer,intent(in) :: nkpt,nspden,nsppol,nsym,ntypat,prtvol,usecprj
- real(dp),intent(in) :: compch_fft,compch_sph,ecut,fermie,ucvol
+ real(dp),intent(in) :: compch_fft,compch_sph,ecut,ucvol
  real(dp),intent(inout) :: etotal
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -355,7 +354,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(951,1,tsec)
  if (dtset%prtwant==2) then
 
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,hdr,kg,&
+   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -370,7 +369,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
 
 !  Call Wannier90
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,hdr,kg,&
+   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
