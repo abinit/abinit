@@ -219,6 +219,7 @@ The Markdown syntax for links is:
 | `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
+Remember that linking to a page that is located in the same directory is trivial `[The first PAW tutorial](paw1)`
 
 This is the **recommended** approach to create links to external resources or internal links to other pages 
 of the website especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).

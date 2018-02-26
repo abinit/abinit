@@ -17,9 +17,7 @@ Please follow the two lessons on PAW in ABINIT ([PAW1](lesson_paw1.html),
 
 This lesson should take about 1 hour to complete.
 
-
 ## 0 Short summary of the DFT+U method
-
   
 The standard Local Density Approximation (LDA), where the exchange and
 correlation energy is fit to homogeneous electron gas results, is a functional
@@ -42,7 +40,7 @@ correlation part for localized electrons (already included in the LDA,
 although in an average manner), another term - called the double-counting
 correction - is subtracted from the Hamiltonian.
 
-In Abinit, two double-counting corrections are currently implemented :
+In Abinit, two double-counting corrections are currently implemented:
 
 -The Full localized limit (FLL) (see A. Lichtenstein et al PRB 52, 5467 (1995))
 
@@ -51,10 +49,7 @@ In Abinit, two double-counting corrections are currently implemented :
 For some systems, the result might depend on the choice of the double-counting
 method. However, the two methods generally give similar results.
 
-
-
 ## 1 Ground state calculation of NiO using LDA
-
   
 You might create a subdirectory of the ~abinit/tests/tutorial directory, and
 use it for the tutorial. In what follows, the names of files will be mentioned
@@ -84,8 +79,6 @@ If you take a look at the output file (tdftu_1.out), you can see the
 integrated total density in the PAW spheres (see the [PAW1](lesson_paw1.html)
 and [PAW2](lesson_paw2.html) tutorials on PAW formalism). This value roughly
 estimate the magnetic moment of NiO :
-
-    
     
      Integrated total density in atomic spheres:
      -------------------------------------------
@@ -95,7 +88,6 @@ estimate the magnetic moment of NiO :
         3        1.21105             1.82716080             1.82716080    3.65432159   -0.00000000
         4        1.21105             1.82716080             1.82716080    3.65432159    0.00000000
      Note: Diff(up-dn) can be considered as a rough approximation of a local magnetic moment.
-    
 
 The atoms in the output file, are listed as in the [[typat]] variable (the
 first two are nickel atoms and the last two are oxygen atoms). The results
@@ -119,13 +111,9 @@ reason for the discrepancy between the DFT-LDA data and the experiments is
 first the fact the DFT is a theory for the ground state and second, the lack
 of correlation of the LDA. Alone, the homogeneous electron gas cannot
 correctly represent the interactions among d electrons of the Ni atom. That is
-why we want to improve our functional, and be able to manage the strong
-correlation in NiO.
-
-
+why we want to improve our functional, and be able to manage the strong correlation in NiO.
 
 ## 2 DFT+U with the FLL double-counting
-
   
 As seen previously, the LDA does not gives good results for the magnetization
 and band gap compared to experiments.
@@ -161,17 +149,13 @@ define the screened Coulomb interaction between electrons that are treated in
 LDA+U, with the help of the variable [[upawu]] and the screened exchange
 interaction, with [[jpawu]]. Note that you can choose the energy unit by
 indicating at the end of the line the unit abbreviation (e.g. eV or Ha). For
-NiO, we will use variables that are generally accepted for this type of
-compound:
+NiO, we will use variables that are generally accepted for this type of compound:
 
 [[upawu]]= 8.0 eV
 
 [[jpawu]]= 0.8 eV (10 % of U)
 
-You can take a look at the result of the calculation. The magnetic moment is
-now :
-
-    
+You can take a look at the result of the calculation. The magnetic moment is now:
     
      Integrated total density in atomic spheres:
      -------------------------------------------
@@ -181,7 +165,6 @@ now :
         3        1.21105             1.84896670             1.84896670    3.69793339    0.00000000
         4        1.21105             1.84896670             1.84896670    3.69793339    0.00000000
      Note: Diff(up-dn) can be considered as a rough approximation of a local magnetic moment.
-    
 
 NiO is found antiferromagnetic, with a moment that is in reasonable agreement
 with experimental results. Moreover, the system is a large gap insulator with
@@ -209,13 +192,9 @@ By contrast, with the U, the [[spinat]] input variable is too primitive, and
 one needs to be able to initialize a spin-density matrix on each atomic site
 where a U is present, in order to guide the SCF algorithm.
 
-The fact that [[spinat]] works for NiO comes from the relative simplicity of
-this system.
-
-
+The fact that [[spinat]] works for NiO comes from the relative simplicity of this system.
 
 ## 3 Initialization of the density matrix
-
   
 _You should begin by running the tdftu_3.in file before continuing._
 
@@ -223,15 +202,13 @@ In order to help the LDA+U find the ground state, you can define the initial
 density matrix for correlated orbitals with [[dmatpawu]] To enable this
 feature, [[usedmatpu]] must be set to a non-zero value (default is 0). When
 positive, the density matrix is kept to the [[dmatpawu]] value for the
-[[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]] is
-5, thus the spin-density matrix is kept constant for 5 SCF steps.
+[[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]] is 5, 
+thus the spin-density matrix is kept constant for 5 SCF steps.
 
 In the log file (not the usual output file), you might find for each step, the
 calculated density matrix, followed by the imposed density matrix. After the
 first 5 SCF steps, the initial density matrix is no longer imposed. Here is a
-section of the log file, in which the imposed occupation matrices are echoed :
-
-    
+section of the log file, in which the imposed occupation matrices are echoed:
     
     -------------------------------------------------------------------------
     
@@ -267,20 +244,15 @@ section of the log file, in which the imposed occupation matrices are echoed :
          0.00000    0.00000   -0.00001    0.90036   -0.00002
          0.00000    0.00002    0.00000   -0.00002    0.91309
     
-
 Generally, the LDA+U functional meets the problem of multiple local minima,
 much more than the usual LDA or GGA functionals. One often gets trapped in a
 local minimum. Trying different starting points might be important...
 
-
-
 ## 4 AMF double-counting method
-
   
 Now we will use the other implementation for the double-counting term in LDA+U
 (in Abinit), known as AMF. As the FLL method, this method uses the number of
-electrons for each spin independently and the complete interactions
-U(m1,m2,m3,m4) and J(m1,m2,m3,m4).
+electrons for each spin independently and the complete interactions U(m1,m2,m3,m4) and J(m1,m2,m3,m4).
 
 As in the preceding run, we will start with a fixed density matrix for d
 orbitals. You might now start your calculation, with the tdftu_4.in and
@@ -290,8 +262,6 @@ file. The only difference in the input file compared to tdftu_3.in is the
 value of [[usepawu]] = 2. We obtain a band gap of 4.3 eV. The value of the
 band gap with AMF and FLL is different. However, we have to remember that
 these results are not well converged. By contrast, the magnetization,
-
-    
     
      Atom  Sphere radius  Integrated_up_density  Integrated_dn_density  Total(up+dn)   Diff(up-dn)
         1        2.30000             9.24026835             7.56013140   16.80039975    1.68013694
@@ -299,23 +269,14 @@ these results are not well converged. By contrast, the magnetization,
         3        1.21105             1.84683993             1.84683993    3.69367986   -0.00000000
         4        1.21105             1.84683993             1.84683993    3.69367986    0.00000000
      Note: Diff(up-dn) can be considered as a rough approximation of a local magnetic moment.
-    
-    
 
 is very similar to the LDA+U FLL. In fact, this system is not very complex.
 But for other systems, the difference can be more important. FLL is designed
 to work well for crystal with diagonal occupation matrix with 0 or 1 for each
-spin. The AMF should be used when orbital occupations are near the average
-occupancies.
-
-
+spin. The AMF should be used when orbital occupations are near the average occupancies.
 
 ## 5 Projected density of states in LDA+U
-
   
 Using prtdos 3, you can now compute the projected d and f density of states.
 For more information about projected density of states, for more details see
 the [PAW1](lesson_paw1.html) tutorial.
-
-
-

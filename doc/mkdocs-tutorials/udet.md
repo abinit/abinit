@@ -8,18 +8,14 @@ authors: DJA
 
 This lesson aims to show how you can determine U for further DFT+U
 calculations consistently and in a fast an easy way. You will learn to prepare
-the input files for the determination and to use the main parameters
-implemented for this aim.  
-It is supposed that you already know how to run ABINIT in the PAW mode (lesson
-[PAW1](lesson_paw1.html)). Obviously, you should also read the lesson
-[DFT+U](lesson_dftu.html), and likely the lesson [PAW2](lesson_paw2.html), to
-generate PAW atomic data.  
+the input files for the determination and to use the main parameters implemented for this aim.  
+It is supposed that you already know how to run ABINIT in the PAW mode (lesson [PAW1](lesson_paw1.html)). 
+Obviously, you should also read the lesson [DFT+U](lesson_dftu.html), and likely the lesson 
+[PAW2](lesson_paw2.html), to generate PAW atomic data.  
 
 This lesson should take about 1/2 hour.
 
-
 ## 1 Summary of linear response method to determine U
-
   
 The linear response method has been introduced by several authors [1-6]. It is
 based on the fact that U corresponds to the energy to localize an additional
@@ -34,7 +30,7 @@ augment or decrease the occupation by +/-1 electron. Note that the occupation
 need not to vary by 1 electron, but the occupation shift can be infinitesimal.
 
 It is recommanded to read the following papers to understand the basic
-concepts of the linear response calculations to calculate U :
+concepts of the linear response calculations to calculate U:
 
 [1] "A LDA+U study of selected iron compounds ", M. Cococcioni, Ph.D. thesis,
 International School for Advanced Studies (SISSA), Trieste (2002)  
@@ -45,8 +41,7 @@ Review B 71, 035105 (2005)
 Some further reading:
 
 [3] "Ground States of Constrained Systems: Application to Cerium Impurities",
-P. H. Dederichs, S. Blugel, R. Zeller, and H. Akai, Phys. Rev. Lett. 53, 2512
-(1984)  
+P. H. Dederichs, S. Blugel, R. Zeller, and H. Akai, Phys. Rev. Lett. 53, 2512 (1984)  
 [4] "Calculation of Coulomb-interaction parameters for La2CuO4 using a
 constrained-density-functional approach", M. S. Hybertsen, M. Schluter, and N.
 E. Christensen, Phys. Rev. B 39, 9028 (1989)  
@@ -61,16 +56,12 @@ following paper, soon to appear:
 [7] "Consistent determination of U in the PAW approximation", D. Adams, B.
 Amadon, S. Biermann, unpublished (2010)
 
-
-
 ## 2 Determine U in ABINIT
-
   
 _Before continuing, you might consider to work in a different subdirectory as
 for the other lessons. Why not "Work_udet" ?_ _In what follows, the name of
 files are mentioned as if you were in this subdirectory.  
-All the input files can be found in the __~abinit/tests/tutorial/Input
-directory._
+All the input files can be found in the __~abinit/tests/tutorial/Input directory._
 
  _You can compare your results with reference output files located in_
 _~abinit/tests/tutorial/Refs __directories (for the present tutorial they are
@@ -79,10 +70,7 @@ named tudet*.out)._
 The input file tudet_1.in is an example of a file to prepare a wave function
 for further processing. You might use the file tudet_1.files as a "files"
 file, and get the corresponding output file ../Refs/tudet_1.out).  
-Copy the files tudet_1.in and tudet_1.files in your work directory, and run
-ABINIT:
-
-    
+Copy the files tudet_1.in and tudet_1.files in your work directory, and run ABINIT:
     
     abinit < tudet_1.files > tudet_1.log  
 
@@ -97,10 +85,7 @@ We do not suppress the writing of the _WFK file, because this is the input for
 the calculations of U.
 
 Once this calculation has finished, run the second one:  
-Copy the files tudet_2.in and tudet_2.files in your work directory, and run
-ABINIT:
-
-    
+Copy the files tudet_2.in and tudet_2.files in your work directory, and run ABINIT:
     
     abinit < tudet_2.files > tudet_1.log  
 
@@ -108,8 +93,6 @@ As you can see from the tudet_2.files file, this run uses the tudet_1o_WFK as
 an imput. In the tudet_2.in all the symmetry relations are specified
 explicitely. In the tudet_2.log you can verify that none of the symmetries
 connects atoms 1 with atom 2:  
-
-    
     
     symatm: atom number    1 is reached starting at atom   
     
@@ -122,12 +105,9 @@ connects atoms 1 with atom 2:
        2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2   
     
        2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2   
-    
-    
 
 This is important. Otherwise the occupation numbers have no freedom to evolve
-separately on the atoms surrounding the atom on which you apply the
-perturbation.
+separately on the atoms surrounding the atom on which you apply the perturbation.
 
 You can generate these symmetries, in a separate run, where you specify the
 atom where the perturbation is done as a different species. From the output
@@ -145,8 +125,6 @@ need not be set explicitly, because they are the defaults with [[macro_uj]] 1.
 
 Once the calculation tudet_2 is converged, you can have look at the output.
 You can see, that the atomic shift ([[atvshift]]) is automatically set:
-
-    
     
              atvshift      0.00367    0.00367    0.00367    0.00367    0.00367
                            0.00367    0.00367    0.00367    0.00367    0.00367
@@ -156,16 +134,11 @@ You can see, that the atomic shift ([[atvshift]]) is automatically set:
 
 This means, that all the 10 3d spin-spin orbitals on the first Fe atom where
 shifted by 0.1 eV (=0.00367 Ha). On the second atom no shift was applied.
-Self-consistency was reached twice: Once for a positive shift, once for the
-negative shift:
-
-    
+Self-consistency was reached twice: Once for a positive shift, once for the negative shift:
     
     grep SCF  tudet_2.out   
 
 The lines starting with URES
-
-    
     
      URES      ii    nat       r_max    U(J)[eV]   U_ASA[eV]   U_inf[eV]
      URES       1      2     4.69390     4.74555     3.67983     3.20150
@@ -174,7 +147,6 @@ The lines starting with URES
      URES       4    128    18.77540     9.25647     7.17772     6.24472
      URES       5    250    23.46930     9.28509     7.19991     6.26403
     
-
 contain U for different supercells. The column "nat" indicates how many atoms
 were involved in the supercell, r_max indicates the maximal distance of the
 impurity atoms in that supercell. The column U indicates the actual U you
@@ -189,18 +161,13 @@ put "[[pawujat]] 2". To change the size of the potential shift use e.g.
 "[[pawujv]] 0.05 eV". Our tests show that 0.1 eV is the optimal value, but the
 linear response is linear in a wide range (1-0.001 eV).
 
-
-
 ## 3 The ujdet utility
-
   
 In general the calculation of U with abinit as described above is sufficient.
 For some post-treatment that goes beyond the standard applications, a separate
 executable ujdet was created. The output of abinit is formatted so that you
 can easily "cut" the part with the ujdet input variables : you can generate
 the standard input file for the ujdet utility by typing:
-
-    
     
     sed -n "/MARK/,/MARK/p" tudet_2.out  > ujdet.in   
 
@@ -211,29 +178,19 @@ for non-selfconsistent calculations that allows to extract the contribution to
 U originating from a non-interacting electron gas, and vsh2, vsh4 for positive
 and negative potential shift). The same applies for the occupations occ[1-4].
 
-We now calculate U for an even larger supercell: Uncomment the line scdim in
-ujdet.in and add
-
-    
+We now calculate U for an even larger supercell: Uncomment the line scdim in ujdet.in and add
     
      scdim 6 6 6 
 
 to specify a 6 6 6 supercell or
-
-    
     
      scdim 700 0 0 
 
-to specify the maximum total number of atoms in the supercell. Then, run
-ujdet:
-
-    
+to specify the maximum total number of atoms in the supercell. Then, run ujdet:
     
     rm ujdet.[ol]* ; ujdet > ujdet.log    
     
-    
     grep URES ujdet.out   
-    
     
      URES      ii    nat       r_max    U(J)[eV]   U_ASA[eV]   U_inf[eV]
      URES       1      2     4.69390     4.74555     3.67983     3.20150
@@ -244,28 +201,18 @@ ujdet:
      URES       6    432    28.16310     9.29738     7.20944     6.27232
     
 
-As you can see, U has now been extrapolated to a supercell containing 432
-atoms.
+As you can see, U has now been extrapolated to a supercell containing 432 atoms.
 
 The value of U depends strongly on the extension of the projectors used in the
 calculation. If you want to use U in LMTO-ASA calculations you can use the
 keyword [[pawujrad]] in the ujdet.in file to get grips of the U you want to
-use there. Just uncomment the line and add the ASA-radius of the specific atom
-e.g.
-
-    
+use there. Just uncomment the line and add the ASA-radius of the specific atom e.g.
     
       pawujrad 2.5 
 
 Running
-
-    
     
     rm ujdet.[ol]* ; ujdet > ujdet.log    
 
 gives now higher values in the column U_ASA than in the runs before (8.07 eV
-compared to 7.21 eV): For more localized projectors the U value has to be
-bigger.
-
-
-
+compared to 7.21 eV): For more localized projectors the U value has to be bigger.

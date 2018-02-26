@@ -1,13 +1,12 @@
 ---
-authors: PhG,  MVeithen,  XG
+authors: PhG, MVeithen, XG
 ---
 
 # Lesson on polarization and finite electric fields  
 
 ## Polarization, and responses to finite electric fields for AlAs.  
 
-This lesson aims at showing how to get the following physical properties, for
-an insulator :
+This lesson aims at showing how to get the following physical properties, for an insulator:
 
   * The polarization.
   * The Born effective charge (by finite differences of polarization)
@@ -16,10 +15,10 @@ an insulator :
   * The proper piezoelectric tensor (clamped and relaxed ions) 
 
 The case of the linear responses (Born effective charge, dielectric constant,
-piezoelectric tensor) is treated independently in other tutorials ([lesson
-Response-Function 1](lesson_rf1.html), [lesson on Elastic
-properties](lesson_elastic.html)), using Density-Functional Perturbation
-Theory. You will learn here how to get these quantities using the finite
+piezoelectric tensor) is treated independently in other tutorials 
+([lesson Response-Function 1](rf1), [lesson on Elastic properties](elastic)), 
+using Density-Functional Perturbation Theory. 
+You will learn here how to get these quantities using the finite
 difference techniques within ABINIT. To that end, we will describe how to
 compute the polarization, in the Berry phase formulation, and how to perform
 finite electric field calculations.
@@ -34,8 +33,7 @@ view of application to AlAs, as in this tutorial). One might benefit also from
 a reading of R. Resta, _Rev. Mod. Physics_ **66** , 899 (1994).
 
 In order to gain the theoretical background needed to perform a calculation
-with a finite electric field, you should consider reading the following
-papers:
+with a finite electric field, you should consider reading the following papers:
 
   * I. Souza, J. Iniguez and D. Vanderbilt, _Phys. Rev. Lett_ **89** , 117602 (2002)
   * R. Nunes and X. Gonze, _Phys. Rev. B_ **63** , 155107 (2001)
@@ -45,19 +43,15 @@ Finally, the extension to the PAW formalism specifically in ABINIT is
 discussed in Gonze _et al.,_ _Comp. Phys. Commun._ **180** , 2582 (2009) and
 Zwanziger _et al.,_ _Comp. Mater. Sci._ **58** , 113 (2012).
 
-
 ## 1 Ground-state properties of AlAs and general parameters
-
   
-_Before beginning, you might consider working in a different subdirectory, as
-for the other lessons. Why not create "Work-ffield" in
-~abinit/tests/tutorespfn/Input ?_
+*Before beginning, you might consider working in a different subdirectory, as
+for the other lessons. 
+Why not create "Work-ffield" in ~abinit/tests/tutorespfn/Input?*
 
 In this tutorial we will assume that the ground-state properties of AlAs have
 been previously obtained, and that the corresponding convergence studies have
-been done. We will adopt the following set of generic parameters :
-
-    
+been done. We will adopt the following set of generic parameters:
     
        acell               10.53
        ixc                 3
@@ -90,10 +84,7 @@ can be done using the file [[tests/tutorespfn/Input/tnlo_1.in]]. Before going
 further, you might refresh your memory concerning the other variables :
 [[ixc]], [[ecutsm]], [[dilatmx]].
 
-
-
 ## 2 Berry phase calculation of polarization in zero field
-
   
 In this section, you will learn how to perform a Berry phase calculation of
 the polarization. As a practical problem we will try to compute the Born
@@ -126,8 +117,7 @@ displaced from 0.01 bohr right and left (referred to as tau = +0.01 and tau =
 considered in this kind of computations. Notice also that the displacements
 are given using [[xcart]], that is, explicitly in Cartesian directions, rather
 than the primitive cell axes (using [[xred]]). This makes the correspondence
-with the polarization output in Cartesian directions much simpler to
-understand.
+with the polarization output in Cartesian directions much simpler to understand.
 
 There are two implementations of the Berry phase within ABINIT. One
 corresponds to positive values of [[berryopt]] and was implemented by Na Sai.
@@ -139,23 +129,17 @@ results are directly provided in Cartesian coordinates at the end of the run
 Second the implementation of Marek Veithen is the one to be used for the
 finite electric field calculation as described in the next Section. Finally,
 note also that Veithen's implementation works with [[kptopt]] = 1 or 2 while
-Na Sai implementation is restricted to [[kptopt]] = 2, which is less
-convenient.
+Na Sai implementation is restricted to [[kptopt]] = 2, which is less convenient.
 
 The file is the one of a usual self-consistent calculation. On top of the
-usual variables, for the Berry phase calculation we simply need to define
-[[berryopt]] and [[rfdir]]:
-
-    
+usual variables, for the Berry phase calculation we simply need 
+to define [[berryopt]] and [[rfdir]]:
     
             berryopt      -1
             rfdir          1 1 1
-    
 
 Make the run, then open the output file and look for the occurrence "Berry".
 The output reports values of the Berry phase for individual k-point strings.
-
-    
     
      Computing the polarization (Berry phase) for reciprocal vector:
       0.16667  0.00000  0.00000 (in reduced coordinates)
@@ -172,7 +156,6 @@ The output reports values of the Berry phase for individual k-point strings.
                Polarization    -1.557862799E-02 (a.u. of charge)/bohr^2
                Polarization    -8.913274846E-01 C/m^2
     
-
 The "Remapping in [-1,1]" is there to avoid the quantum of polarization. As
 discussed in H. Djani, E. Bousquet, A. Kellou, Ph. Ghosez, _Phys. Rev. B_
 **86** , 054107 (2012), the indeterminacy of the quantum phase, directly
@@ -200,8 +183,6 @@ file you will find the final results in cartesian coordinates. You can collect
 them for the different values of tau.
 
 tau = 0
-
-    
     
      Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -217,8 +198,6 @@ tau = 0
     
 
 tau = +0.01
-
-    
     
      Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -231,11 +210,8 @@ tau = +0.01
          Electronic berry phase:        0.234598001E-02   0.418196820E-02   0.418196820E-02
          Ionic:                        -0.154212551E+01  -0.154800587E+01  -0.154800587E+01  
          Total:                        -0.153977953E+01  -0.154382391E+01  -0.154382391E+01
-    
 
 tau = -0.01
-
-    
     
      Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -252,16 +228,11 @@ tau = -0.01
 
 From the previous data, we can extract the Born effective charge of Al. Values
 to be used are those in a.u., in order to find the charge in electron unit. It
-corresponds to (the volume of the primitive unit cell must be specified in
-Bohr too) :
-
-    
+corresponds to (the volume of the primitive unit cell must be specified in Bohr too):
     
             Z* = \Omega_0  (P[tau=+0.01] - P[tau=-0.01]) / (2*tau)
                =  291.89   (-0.269122773E-01 - -0.270536526E-01) / 0.02
                = 2.06
-    
-
   
 For comparison, the calculation using Density-Functional Perturbation Theory
 (DFPT) can be done by using the file
@@ -269,8 +240,7 @@ For comparison, the calculation using Density-Functional Perturbation Theory
 not only leads to the computation of the Born effective charges, but also the
 computation of the piezoelectric constants (see later).
 
-You can review how to use DFPT thanks to the [lesson Response-function
-1](lesson_rf1.html) and [lesson Response-function 2](lesson_rf2.html)
+You can review how to use DFPT thanks to the [lesson Response-function 1](rf1) and [lesson Response-function 2](rf2)
 tutorials. For now, go ahead and run the input file, and have a look at the
 output file, to identify the place where the Born effective charge is written
 (search for the phrase "Effective charges" in the output file). The value we
@@ -287,8 +257,6 @@ running tffield_2.in to match this, or else change the name of the DDB file
 after generation. In any case, the DFPT calculation gives for the
 piezoelectric constants (as well as the elastic constants), as found in
 tffield_3.out, the following:
-
-    
     
       Proper piezoelectric constants (clamped ion) (unit:c/m^2)
      ...
@@ -301,8 +269,6 @@ tffield_3.out, the following:
 
 Restarting case ffield_2 and ffield_3 with [[ecut]]=5 (three minutes on a PC 3
 GHz), one gets the following values
-
-    
     
       Proper piezoelectric constants (clamped ion) (unit:c/m^2)
      ...
@@ -311,11 +277,9 @@ GHz), one gets the following values
       Proper piezoelectric constants (relaxed ion) (unit:c/m^2)
      ...
           0.03384772      0.00000000      0.00000000
-    
 
 The latter value, where the ionic relaxation largely suppresses the electronic
-piezoelectricity, will be much more difficult to converge than the clamped ion
-result.
+piezoelectricity, will be much more difficult to converge than the clamped ion result.
 
 Using the Berry phase approach it is also possible to compute the
 piezoelectric constant from finite difference of polarization with respect to
@@ -327,17 +291,11 @@ relaxed ion case, the input file includes [[ionmov]]=2 and [[optcell]]=0, in
 order to relax the ion positions at fixed cell geometry. These calculations
 should give the following final results (obtained by taking finite difference
 expressions of the strains for different electric fields)
-
-    
     
     Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.6491
     Proper piezoelectric constants(relaxed ion)(Unit:c/m^2) =  0.0430
-    
 
-For example, the clamped ion piezoelectric constant was obtained from
-tffield_4.out :
-
-    
+For example, the clamped ion piezoelectric constant was obtained from tffield_4.out:
     
      Polarization in cartesian coordinates (C/m^2):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -345,10 +303,7 @@ tffield_4.out :
          Ionic:                        -0.154692152E+01  -0.155466099E+01  -0.155466099E+01  
          Total:                        -0.154922363E+01  -0.155044426E+01  -0.155044426E+01
     
-
 and
-
-    
     
      Polarization in cartesian coordinates (C/m^2):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -356,27 +311,19 @@ and
          Ionic:                        -0.154692152E+01  -0.153919172E+01  -0.153919172E+01  
          Total:                        -0.153624022E+01  -0.153501706E+01  -0.153501706E+01
     
-
 The difference between -0.154922363E+01 (x-strain is +0.01) and
 -0.153624022E+01 (x-strain is -0.01) gives the finite difference -0.012983,
 that, divided by 0.02 (the change of strain) gives -0.6491, announced above.  
 Using to [[ecut]]=5 gives
-
-    
     
     Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.6841215
     Proper piezoelectric constants(relaxed ion)(Unit:c/m^2) =  0.0313915
-    
 
 in excellent agreement with the above-mentioned DFPT values.
 
-
-
 ## 3 Finite electric field calculations
-
   
-In this section, you will learn how to perform a calculation with a finite
-electric field.
+In this section, you will learn how to perform a calculation with a finite electric field.
 
 You can now copy the file ~abinit/tests/tutorespfn/Input/tffield_6.in in Work-
 ffield, and modify the tffield_x.files accordingly. You can start the run
@@ -384,39 +331,28 @@ immediately, it will take one minute on a PC 3GHz. It performs a finite field
 calculation at clamped atomic positions. You can look at this input file to
 identify the features specific to the finite field calculation.
 
-As general parameters, one has to specify [[nband]], [[nbdbuf]] and
-[[kptopt]]:
-
-    
+As general parameters, one has to specify [[nband]], [[nbdbuf]] and [[kptopt]]:
     
             nband          4
             nbdbuf         0
             kptopt         1
-    
 
 As a first step (dataset 11), the code must perform a Berry phase calculation
-in zero field. For that purpose, it is necessary to set the values of
-[[berryopt]] and [[rfdir]]:
-
-    
+in zero field. For that purpose, it is necessary to set the values of [[berryopt]] and [[rfdir]]:
     
             berryopt11     -1
             rfdir11        1 1 1
     
-
 _Important warning:_ you cannot use berryopt to +1 to initiate a finite field
 calculation. You must begin with berryopt -1.
 
 After that, there are different steps corresponding to various value of the
 electric field, thanks to [[efield]]. For those steps, it is important to take
 care of the following parameters, shown here for dataset 21:
-
-    
     
             berryopt21     4
             efield21       0.0001  0.0001  0.0001
             getwfk21       11
-    
 
 The electric field is applied here along the [111] direction. It must be
 incremented step by step (it is not possible to go to high field directly). At
@@ -444,11 +380,9 @@ we will focus here on the computation of Z*.
 You can look at your output file. For each field, the file contains various
 quantities that can be collected. For the present purpose, we can look at the
 evolution of the forces with the field and extract the following results from
-the output file :
+the output file:
 
 E=0
-
-    
     
     cartesian forces (hartree/bohr) at end:
         1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -456,8 +390,6 @@ E=0
     
 
 E = +0.0001
-
-    
     
     cartesian forces (hartree/bohr) at end:
         1      0.00020614766286     0.00020614766286     0.00020614766286
@@ -465,21 +397,15 @@ E = +0.0001
     
 
 E = -0.0001
-
-    
     
     cartesian forces (hartree/bohr) at end:
         1     -0.00020651242444    -0.00020651242444    -0.00020651242444
         2      0.00020651242444     0.00020651242444     0.00020651242444
     
 
-In a finite electric field, the force on atom A in direction i can be written
-as :
-
-    
+In a finite electric field, the force on atom A in direction i can be written as:
     
     F_Ai = Z*_A,ii * E + \Omega_0 dchi/dtau E^2
-    
 
 The value for positive and negative fields above are nearly the same, showing
 that the quadratic term is almost negligible. This clearly appears in the
@@ -489,26 +415,21 @@ electric fields is plotted.
 ![](../documents/lesson_nlo/image001.gif)
 
 We can therefore extract with a good accuracy the Born effective charge as :
-
-    
     
     Z*_Al    = (F_Al[E=+0.0001] - F_Al[E=-0.0001])/(2*0.0001)
              = (0.00020614766286 + 0.00020651242444)/0.0002
              = 2.06
     
-
 This value is similar to the value reported from DFPT. If you do calculations
 for more electric fields, fitting them with the general expression of the
 force above (including the E^2 term), you can find the dchi/dtau term. At
 [[ecut]]=5 you should get dchi/dtau for Al = -0.06169. This will be useful
-later for the [lesson on static Non-linear properties](lesson_nlo.html).
+later for the [lesson on static Non-linear properties](nlo).
 
 Going back to the output file, you can also look at the evolution of the
 polarization with the field.
 
 E=0
-
-    
     
     Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -518,19 +439,14 @@ E=0
     
 
 E = +0.0001
-
-    
     
     Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
          Electronic:  0.129869845E-03   0.129869845E-03   0.129869844E-03
          Ionic:      -0.270560574E-01  -0.270560574E-01  -0.270560574E-01  
          Total:      -0.269261876E-01  -0.269261876E-01  -0.269261876E-01
-    
 
 E = -0.0001
-
-    
     
     Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
@@ -542,10 +458,7 @@ E = -0.0001
 In a finite electric field, the polarization in terms of the linear and
 quadratic susceptibilities as
 
-    
-    
     P = \chi * E + \chi(2)  E^2
-    
 
 The change of polarization for positive and negative fields above are nearly
 the same, showing again that the quadratic term is almost negligible. This
@@ -554,23 +467,16 @@ polarization for a larger range of electric fields is plotted.
 
 ![](../documents/lesson_ffield/image004.gif)
 
-We can therefore extract with a good accuracy the linear optical dielectric
-susceptibility :
-
-    
+We can therefore extract with a good accuracy the linear optical dielectric susceptibility:
     
     \chi(l)_11 = (P[E=+0.0001] - P[E=-0.0001])/(2*0.0001)
                = (-0.269261876E-01+ 0.270396999E-01)/0.0002
                = 0.56756
-    
 
-The optical dielectric constant is :
-
-    
+The optical dielectric constant is:
     
     \epsilon_11 = 1+ 4 \pi \chi(1)_11
                = 8.13
-    
 
 This value underestimates the value of 9.20 obtained by DFPT. The agreement is
 not better at [[ecut]]=5. Typically, finite field calculations converge with
@@ -579,20 +485,15 @@ the density of the k point grid more slowly than DFPT calculations.
 If you do calculations for more electric fields, fitting them with the general
 expression of the force above (including the E^2 term) you can find the non-
 linear optical susceptibilities \chi(2). At [[ecut]]=5 you should get \chi(2)
-= 29.769 pm/V. This result will be also be useful for the [lesson on static
-Non-linear properties](lesson_nlo.html).
+= 29.769 pm/V. This result will be also be useful for the [lesson on static Non-linear properties](nlo).
 
 Looking at the evolution of the stress (see graphic below), you should also be
 able to extract the piezoelectric constants. You can try to do it as an
 exercise. As the calculation here was at clamped ions, you will get the
-clamped ion proper piezoelectric constants. At [[ecut]]=5, you should obtain
--0.69088 C/m^2.
+clamped ion proper piezoelectric constants. At [[ecut]]=5, you should obtain -0.69088 C/m^2.
 
 ![](../documents/lesson_ffield/image007.gif)
 
 Redoing the same kind of finite field calculation when allowing the ions to
-relax  , one can access the relaxed ion proper piezoelectric constant. At
-[[ecut]]=5 the result is -0.03259.
-
-
-
+relax, one can access the relaxed ion proper piezoelectric constant. 
+At [[ecut]]=5 the result is -0.03259.
