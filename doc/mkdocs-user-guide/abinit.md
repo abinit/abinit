@@ -7,10 +7,8 @@ authors: DCA,  XG
 ## This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.  
 
 The new user is advised to read first the [[help:new_user|new user helpfile]],
-before reading the present file. It will be easier to discover the present
-file with the help of the [[lesson:welcome|tutorial]].
-
-It is worthwhile to print this help file, for ease of reading.
+before reading the present file. 
+It will be easier to discover the present file with the help of the [[lesson:welcome|tutorial]].
 
 When the user will be sufficiently familiarized with ABINIT, reading the
 ~abinit/doc/users/tuning.txt file might be useful (this file, as many
@@ -18,14 +16,9 @@ additional documentation files, is not available on the Web, but is available
 in the package). For calculating response properties using abinit, the
 complementary [[help_respfn]] is needed.
 
-
 ## 1 How to run the code?
 
-  
-
-
 ### 1.1 Introducing the 'files' file
-
   
 Given an input file (parameters described below) and the required
 pseudopotential files, the user must create a "files" file which lists names
@@ -34,8 +27,6 @@ output file, root names for other input, output, or temporary files, and the
 names of different pseudopotential or PAW atomic data files (one per line).
 
 The files file (called for example ab.files) could look like:
-
-    
     
        ab_in
        ab_out
@@ -44,7 +35,6 @@ The files file (called for example ab.files) could look like:
        tmp
        Si-GGA.psp8
        O-GGA.psp8
-     
 
 In this example:  
 \- The main input file is called "ab_in".  
@@ -65,17 +55,13 @@ supplemented by different character strings.
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ### 1.2 Running the code
-
   
 The main executable file is called abinit. Supposing that the "files" file is
 called ab.files, and that the executable is placed in your working directory,
 abinit is run interactively (in Unix) with the command
 
   * _abinit < ab.files >& log _
-
   
 or, in the background, with the command
 
@@ -91,11 +77,8 @@ on the platform that is considered for running the code.
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ## 2 The underlying theoretical framework and algorithms
 
-  
 See the [[bib:biblio|bibliography]] file.
 
 The methods employed in this computer code to solve the electronic structure
@@ -130,18 +113,11 @@ in spirit to the paper of of Kresse and Furthmuller, see the
 If you have never used another electronic structure code or a Quantum
 Chemistry package, you should browse through the Chaps. 1 to 13 , and
 appendices L and M of the book Electronic Structure. Basic Theory and
-Practical Methods. R. M. Martin. Cambridge University Press (2004) ISBN 0 521
-78285 6.
-
-
+Practical Methods. R. M. Martin. Cambridge University Press (2004) ISBN 0 521 78285 6.
 
 ## 3 The input file
 
-  
-
-
 ### 3.1 Format of the input file
-
   
 Note that this input file was called ab_in in the example of  section 1.1 .  
 We first explain the content of the input file without use of the "multi-
@@ -158,12 +134,13 @@ of numbers separated by spaces are taken as the values for the array.
 
   * Do NOT separate a minus sign from the number to which it applies. 
   * Do NOT use tabs. 
-  * NOTE THAT NO LINE OF THE INPUT FILE MAY EXCEED 132 CHARACTERS. That is, only the first 132 characters of each line of the input file will be read and parsed for input variables and their values. 
+  * NOTE THAT NO LINE OF THE INPUT FILE MAY EXCEED 132 CHARACTERS. 
+    That is, only the first 132 characters of each line of the input file 
+    will be read and parsed for input variables and their values. 
 
-The names of all the parameters can be found in the [[varset:allvars|input
-variable database]]. The list of input variables present in the latter file
-links them to their definitions, contained in different "variable set" files,
-some of which are listed here:
+The names of all the parameters can be found in the [[varset:allvars|input variable database]]. 
+The list of input variables present in the latter file links them to their definitions, contained 
+in different "variable set" files, some of which are listed here:
 
   * Basic variables, [[varset:basic]]
   * Files handling variables, [[varset:files]]
@@ -177,8 +154,7 @@ and more than one may be given per line. Spaces are used to separate values
 and additional spaces are ignored.  
 An as example of input, the parameter for length scales is called [[acell]]
 and is an array [[acell]](3) for the lengths of the primitive translations in
-Bohr atomic units. To input a typical Si diamond lattice one would have the
-line
+Bohr atomic units. To input a typical Si diamond lattice one would have the line
 
 ` acell 10.25311 10.25311 10.25311`
 
@@ -220,15 +196,11 @@ the data is read.
 Case is irrelevant as the entire input string is mapped to upper case before
 parsing, to remove case sensitivity.  
 More than one parameter per line may be given. If a given parameter name is
-given more than once in the input file, an error message is printed, and the
-code stops.
+given more than once in the input file, an error message is printed, and the code stops.
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ### 3.2 More about ABINIT input variables
-
   
 In each section of the ABINIT input variables files, a generic information on
 the input variable is given : a **mnemonics** , possibly some
@@ -274,20 +246,14 @@ Except in the case of 'Angstr', the abbreviation must be used (i.e. 'Rydberg'
 will not be recognized presently). Other character chains, like "au" (for
 atomic units) or "Hartree", or "Bohr" are not recognized, but make the parser
 choose (by default) atomic units, which is the correct behaviour. Example :
-
-    
     
         acell 8 8 8 angstrom
         ecut 8 Ry
         tsmear 1000 K
-     
 
 or
-
-    
     
          acell 3*10 Bohr  ecut 270 eV  tsmear 0.01
-     
 
 The use of the atomic units is mandatory for other dimensioned input
 variables, like the tolerance on forces ([[toldff]]), parameters that define
@@ -298,11 +264,7 @@ The initial atomic positions can be input in Bohr or Angstrom through
 '[[xcart]]', but also, independently, in Angstrom through '[[xangst]]', or
 even in reduced coordinates, through '[[xred]]'.
 
-**
-
 #### Flow information
-
-**
 
 Most of the variables can be used in the multi-dataset mode (see section 3.3),
 but those that must have a unique value throughout all the datasets are
@@ -324,11 +286,7 @@ velocities, the cell shape, and the occupation numbers. Their echo, after the
 run has proceeded, will of course differ from their input value. They are
 signaled by the indication ' **EVOLVING** '.
 
-**
-
 #### Other information
-
-**
 
 ' **DEVELOP** ' refers to input variables that are not used in production
 runs, but have been introduced during development time, of a feature that is
@@ -347,20 +305,15 @@ machines, this does not work always (we do not know why...). Another
 possibility is offered : one can create a file named "abinit.exit" in the
 directory where the job was started. The code should also smoothly end. In
 both cases, the stop is not immediate. It can take a significant fraction
-(about 20% at most) of one SCF step to execute properly the instruction still
-needed.
+(about 20% at most) of one SCF step to execute properly the instruction still needed.
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ### 3.3 The multi-dataset mode
-
   
 Until now, we have assumed that the user wants to make computations
 corresponding to one set of data : for example, determination of the total
-energy for some geometry, with some set of plane waves and some set of
-k-points.
+energy for some geometry, with some set of plane waves and some set of k-points.
 
 It is often needed to redo the calculations for different values of some
 parameter, letting all the other things equal. As typical examples, we have
@@ -395,23 +348,16 @@ understand when one looks at examples, see below) :
          acell   8 8 8
           ecut1  10
           ecut2  15
-    
 
 means that there are 2 datasets : a first in which
-
-    
     
          acell 8 8 8  ecut 10 
 
 has to be used, and a second in which
-
-    
     
          acell 8 8 8  ecut 15
 
 has to be used.
-
-    
     
         ------------------
     
@@ -429,34 +375,25 @@ has to be used.
     
 
 this means that there are still two datasets, but now characterized by the
-indices 4 and 5, so that the first run will use the generic "acell", and
-"ecut4" :
-
-    
+indices 4 and 5, so that the first run will use the generic "acell", and "ecut4" :
     
          acell 8 8 8 ecut 25
-    
 
 and the second run will use "acell5" and "ecut5" :
-
-    
     
          acell 10 10 10 ecut 30 
 
 Note that ecut1, ecut2 and ecut3 are not used.
 
 
-
 ### 3.4 Defining a series
-
   
-Rule (2) is split in three parts : (2a), (2b) and (2c).  
-Series relate with (2b):
+Rule (2) is split in three parts: (2a), (2b) and (2c). Series relate with (2b):
 
 (2b) If the variable name appended with the index of the dataset does not
 exist, the code looks whether a series has been defined for this keyword.
 
-There are two kinds of series :
+There are two kinds of series:
 
   * arithmetic series (constant _increment_ between terms of the series) 
   * geometric series (constant _ratio_ between terms of the series) 
@@ -464,14 +401,11 @@ There are two kinds of series :
 The first term of the series is defined by the keyword appended with a colon
 (e.g. **ecut:** ), while the increment of an arithmetic series is defined by
 the keyword appended with a plus (e.g. **ecut+** ), and the factor of a
-geometric series is defined by the keyword appended with a times (e.g.
-**ecut*** ).
+geometric series is defined by the keyword appended with a times (e.g. **ecut*** ).
 
 If the index of the dataset is 1, the first term of the series is used, while
 for index N , the appropriate input data is obtained by considering the Nth
 term of the series.
-
-    
     
      ------------------
     
@@ -484,23 +418,14 @@ term of the series.
        ecut4 25
        ecut5 30
        ecut6 35
-    
 
 is equivalent to
-
-    
     
         ndtset 6 ecut: 10 ecut+ 5
-    
 
 In both cases, there are six datasets, with increasing values of [[ecut]].
 
-####  
-
-
-
 ### 3.5 Defining a double loop dataset
-
   
 To define a double loop dataset, one has first to define the upper limit of
 two loop counters, thanks to the variable [[udtset]]. The inner loop will
@@ -522,8 +447,7 @@ define the value of an input variable:
 (2a) The question mark " **?** " can be used as a metacharacter, replacing any
 digit from 1 to 9, to define an index of a dataset.  
 For example, **ecut?** 1 means that the input value that follows it can be
-used for [[ecut]] for the datasets `01, 11, 21, 31, 41, 51, 61, 71, 81, and
-91`.
+used for [[ecut]] for the datasets `01, 11, 21, 31, 41, 51, 61, 71, 81, and 91`.
 
 (2c) If the variable name appended with the index of the dataset does not
 exist, the code looks whether a double-loop series has been defined for this
@@ -541,8 +465,6 @@ can be a colon, a plus or a times, as in the case of the series defined in
 Rule (1) has precedence over them, they have precedence over rules (3) or (4),
 rule (2a) has precedence over rules (2b) or (2c) and the two latter cannot be
 used simultaneously for the same variable.
-
-    
     
         ------------------
     
@@ -552,10 +474,7 @@ used simultaneously for the same variable.
         acell2?  15 15 15
         ecut?: 5    ecut?+ 1
      
-
 is equivalent to
-
-    
     
         ndtset 6     jdtset 11 12 13  21 22 23
         acell11  10 10 10     ecut11 5
@@ -566,13 +485,9 @@ is equivalent to
         acell23  15 15 15     ecut23 7
      
 
-_More examples can be found in the directory ~abinit/tests/v1, cases 59 and
-later._
-
-
+_More examples can be found in the directory ~abinit/tests/v1, cases 59 and later._
 
 ### 3.6 File names in the multi-dataset mode
-
   
 The root names for input and output files (potential, density, wavefunctions
 and so on) will receive an appendix : ' **_DS** ' followed by the index of the
@@ -590,8 +505,7 @@ Let us mention a few of them : [[getwfk]], [[getwfq]], [[getddk]], [[get1wf]],
 
 The different variables corresponding to each dataset are echoed using the
 same indexing convention as for the input step. For the last echo of the code
-variables, some output variables are also summarized, using the same
-conventions :
+variables, some output variables are also summarized, using the same conventions:
 
   * **etotal** (total energy) 
   * **fcart** (cartesian forces) 
@@ -599,10 +513,7 @@ conventions :
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ## 4 More detailed presentation of the 'files' file
-
   
 Note: _This "files" file is called _ab.files_ in section 1 ._
 
@@ -767,14 +678,9 @@ there are types of atoms in the system, and the order in which the names are
 given establishes the identity of the atoms in the unit cell. (psp2, psp3, ...
 )
 
-
-
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ## 5 The pseudopotential files and PAW atomic data files
-
   
 Actually, no real understanding of these files is needed to run the code. The
 recommended pseudopotentials can be downloaded from the ABINIT Web site at
@@ -795,21 +701,13 @@ pseudopotential files can be found in the abinit wiki at
 [[https://wiki.abinit.org/doku.php?id=developers:pseudos]], that you should
 read now (do not pursue with the description of each format, though).
 
-
-
 ## 6 The different output files
-
   
 Explanation of the output from the code
 
 Output from the code goes to several places listed below.
 
-
-
-
-
 ### 6.1 The log file
-
   
 The "log" file (this is the standard UNIX output file, and corresponds to
 Fortran unit number 06) : a file which echoes the values of the input
@@ -838,13 +736,9 @@ ABINIT use.
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ### 6.2 The main output file
-
   
-The **main output file** is a formatted output file to be kept as the
-permanent record of the run.
+The **main output file** is a formatted output file to be kept as the permanent record of the run.
 
 Note that it is expected **not** to exist at the beginning of the run:  
 If a file with the name specified in the "files" file already exists, the code
@@ -866,12 +760,7 @@ on checks of data consistency for each dataset.
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
-
-
 ### 6.3 More on the main output file
-
   
 Then, for each dataset, the real computation is done, and the code will report
 on some initialisations, the SCF convergence, and the final analysis of
@@ -925,8 +814,8 @@ of [[ntime]], the code output more information:
   * Also are given the rms force ( **frms** ) and the maximum absolute value of any force component ( **max** ). 
   * Next are the length scales of the unit cell in Bohr and in Angstroms. 
   * Next are the eigenvalues of each band for each k point, in eV or Hartree or both depending on the choice of [[enunit]].   
-NOTE  that the average electrostatic potential of a periodically repeated cell
-is UNDEFINED.  
+
+NOTE that the average electrostatic potential of a periodically repeated cell is UNDEFINED.  
 In the present implementation, the average Hartree potential and local
 potential are imposed to be zero, but not the average exchange-correlation
 potential. This definition gives some meaning to the absolute values of
@@ -961,10 +850,8 @@ Martin, see the [[bib:biblio|bibliography]] file.
 Having finished all the calculations for the different datasets, the code
 echoes the parameters listed in the input file, using the latest values e.g.
 for [[xred]], [[vel]], and [[xcart]], and supplement them with the values
-obtained for the total energy, the forces and stresses, as well as occupation
-numbers.  
-The latter echoes are very convenient for a quick look at the result of
-calculation !
+obtained for the total energy, the forces and stresses, as well as occupation numbers.  
+The latter echoes are very convenient for a quick look at the result of calculation!
 
 This is followed finally by the timing output: both "cpu" time and "wall
 clock" time as provided by calls within the code.  
@@ -1007,33 +894,26 @@ at fixed atomic positions, these subroutines are
   * (7) **cgwf** : optimize one wavefunction in a fixed potential 
   * (8) **getghc** : computes < G | H | C >, that is, applies the Hamiltonian operator to an input vector. 
 
-
-
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ### 6.4 The header
-
   
 The **wavefunction files** , **density files** , and **potential files** all
 begin with the same records, called the "header".  
 This header is treated using a hdr_type datastructure inside ABINIT. There are
 dedicated routines inside ABINIT for initializing a header, updating it,
 reading the header of an unformatted disk file, writing a header to an
-unformatted disk file, echoing a header to a formatted disk file, cleaning a
-header datastructure.
+unformatted disk file, echoing a header to a formatted disk file, cleaning a header datastructure.
 
 The header is made of 4+[[ntypat]] unformatted records, obtained by the
 following Fortran90 instructions (format 5.7):
-
     
-    
+```fortran
      write(unit=header) codvsn,headform,fform
      write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
     & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
     & ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,tphysel,tsmear,usewvl
-    
+
      write(unit=header) istwfk(1:nkpt),nband(1:nkpt*nsppol),&
     & npwarr(1:nkpt),so_psp(1:npsp),symafm(1:nsym),symrel(1:3,1:3,1:nsym),typat(1:natom),&
     & kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),znucltypat(1:ntypat),wtk(1:nkpt)
@@ -1049,12 +929,11 @@ following Fortran90 instructions (format 5.7):
       write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:      nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
     &                 ((pawrhoij(iatom)%rhoijp     (1:cplex*nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
      endif
-    
+```
 
-where the type of the different variables is :
-
+where the type of the different variables is:
     
-    
+```fortran
     character*6 :: codvsn
     integer :: headform,fform
     integer :: bantot,date,intxc,ixc,natom,ngfft(3),nkpt,npsp,
@@ -1068,7 +947,7 @@ where the type of the different variables is :
     double precision :: znuclpsp,zionpsp
     integer :: pspso,pspdat,pspcod,pspxc,lmax,lloc,mmax=integers
     double precision :: residm,xred(3,natom),etotal,fermie,rhoij(*,nspden)
-    
+```
 
 NOTE : _etotal is set to its true value only for density and potential files.
 For other files, it is set to 1.0d20_  
@@ -1076,8 +955,7 @@ NOTE : _ecut_eff= [[ecut]]* [[dilatmx]] 2_
 NOTE : _For all cases where occupation numbers are defined (that is, positive
 iscf, and iscf=-3), and for non-metallic occupation numbers, the Fermi energy
 is set to the highest occupied eigenenergy. This might not correspond to the
-expected Fermi energy for a later non-self-consistent calculation (e.g. the
-band structure)_
+expected Fermi energy for a later non-self-consistent calculation (e.g. the band structure)_
 
 The header might differ for different versions of ABINIT. One pre-v5.3 format
 is described below. Note however, that the current version of ABINIT should be
@@ -1085,10 +963,9 @@ able to read all the previous formats (not to write them), with the exception
 of wavefunction files for which the [[ecutsm]] value was non-zero (there has
 been a change of definition of the smearing function in v4.4).
 
-The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was :
-
-    
-    
+The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was:
+   
+```fortran
      write(unit=header) codvsn,headform,fform
      write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
     & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
@@ -1108,9 +985,7 @@ The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was :
       write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
     &                 ((pawrhoij(iatom)%rhoijp     (1:nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
      endif
-    
-
-
+```
 
 ### 6.5 The density output file
 
@@ -1118,12 +993,11 @@ The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was :
 This is an unformatted data file containing the electron density on the real
 space FFT grid. It consists of the header records followed by
 
-    
-    
+```fortran
     do ispden=1,nspden
      write(unit) (rhor(ir),ir=1,cplex*ngfft(1)*ngfft(2)*ngfft(3))
     enddo
-    
+```
 
 where **rhor** is the electron density in electrons/Bohr^3, and cplex is the
 number of complex components of the density (cplex=1 for GS calculations -the
@@ -1146,8 +1020,7 @@ next fft grid point, which is (1/[[ngfft]](1))*[[acell]](1)*[[rprim]](mu,1).
 This is 1/[[ngfft]](1) of the way along the first primitive translation.  
 The rest of the values up to ir=[[ngfft]](1) lie along this vector, at
 (ir-1)/[[ngfft]](1) of the way along the first primitive translation. The
-point at ir=[[ngfft]](1)+1 lies at 1/[[ngfft]](2) along the second primitive
-translation.  
+point at ir=[[ngfft]](1)+1 lies at 1/[[ngfft]](2) along the second primitive translation.  
 The next points up to ir=[[ngfft]](1)+[[ngfft]](1) are displaced in the
 direction of the second primitive translation by 1/[[ngfft]](2) and in the
 first translation by (ir-[[ngfft]](1)-1)/[[ngfft]](1).  
@@ -1158,21 +1031,15 @@ by 1/ngfft(3), and so forth until ir varies all the way from 1 to
 diagonally opposite from the origin, or right alongside the origin if the
 whole grid is viewed as being periodically repeated.
 
-
-
-
-
 ### 6.6 The potential files
-
   
 Also unformatted files consisting of the header records and
-
     
-    
+```fortran
     do ispden=1,nspden
      write(unit) (potential(ir),ir=1,cplex*ngfft(1)*ngfft(2)*ngfft(3))
     enddo
-     
+```
 
 where **potential** can be either the sum of the Hartree potential, exchange-
 correlation and local pseudopotential (see [[prtpot]]), the Hartree potential
@@ -1195,8 +1062,7 @@ the wavefunctions, and different supplementary data.
 The **ground-state** wf file consists of the header records, and data written
 with the following lines of FORTRAN (version 4.0 and more recent versions):
 
-    
-    
+```fortran    
           bantot=0                                    <-- counts over all bands
           index=0                                     <-- index for the wavefunction location
           do isppol=1,nsppol
@@ -1212,37 +1078,32 @@ with the following lines of FORTRAN (version 4.0 and more recent versions):
             index=index+2*npw*nspinor*nband
            enddo
           enddo
-     
+```
 
 If the job ended without problem, a few supplementary lines are added, in
 order to give the history of atomic positions and corresponding forces. The
-integer nxfh gives the number of pairs (x,f) of positions and forces in
-reduced coordinates :
-
+integer nxfh gives the number of pairs (x,f) of positions and forces in reduced coordinates:
     
-    
+```fortran
      write(unit)nxfh
      do ixfh=1,nxfh
       write(unit) xred(1:3,1:natom,ixfh),dummy(1:3,1:4),&
     &             fred(1:3,1:natom,ixfh),dummy(1:3,1:4)
      enddo
-     
+```
 
 The dummy variables might contain, in the future, the description of the unit
 cell, and the stresses. The type of the different variables is :
-
     
-    
+```fortran
     integer :: kg,nband,npw,nspinor,nxfh
     double precision :: cg,dummy,eigen,fred,occ,xred
-    
+```
 
 The **response-function** wf file consists of the header records, and data
-written with the following lines of FORTRAN (version 4.0 and more recent
-versions):
-
+written with the following lines of FORTRAN (version 4.0 and more recent versions):
     
-    
+```fortran
     bantot=0                                    <-- counts over all bands
     do isppol=1,nsppol
      do ikpt=1,nkpt
@@ -1255,22 +1116,18 @@ versions):
       bantot=bantot+nband
      enddo
     enddo
-    
+```
 
 In version previous to 4.0 , npw and nspinor were combined :
-
     
-    
+```fortran
     write(unit) npw*nspinor,nband
-    
+```
 
-while the planewave coordinate record was not present (in both GS and RF
-cases).
+while the planewave coordinate record was not present (in both GS and RF cases).
 
 Note that there is an alternative format (_KSS) for the output of the
 wavefunction coefficients, activated by a non-zero value of [[nbandkss]].
-
-
 
 ### 6.8 Other output files
 
@@ -1285,16 +1142,11 @@ information on such files :
   * [[prtgeo]] to print a file with a geometrical analysis (bond lengths and bond angles), that also contains an XMOL section
   * [[prt1dm]] to print a one-dimensional projection of potential and density, for the three axes.
 
-
-
 ###  
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ### 6.9 Control of output in the parallel case
-
   
 For massively parallel runs, one cannot afford to have some of the output
 files that are usually created. Explicitly, the log file and also the status
@@ -1316,10 +1168,7 @@ to 2. It can be changed "by hand", though : modify NPROC_NO_EXTRA_LOG in
 src/10_defs/defs_basis.F90 and recompile. See src/95_drive/iofn1.F90 for more
 explanation.
 
-
-
 ## 7 Numerical quality of the calculations
-
   
 The following section describes various parameters which affect convergence
 and the numerical quality of calculations.
@@ -1333,8 +1182,7 @@ The list of these input parameters is
   * (5) [[tolmxf]], as well as [[amu]], [[dtion]], [[vis]], [[ntime]] 
   * (6) [[acell]] and [[rprim]] 
   
-The technical design of the pseudopotential also affects the quality of the
-results.
+The technical design of the pseudopotential also affects the quality of the results.
 
 (1) The first issue regarding convergence is the number of planewaves in the
 basis for a given set of atoms. Some atoms (notably those in the first row or
@@ -1364,8 +1212,7 @@ For information on extended norm conservation, see E. L. Shirley, D. C. Allan,
 R. M. Martin, and J. D. Joannopoulos, Phys. Rev. B 40, 3652 (1989).
 
 For information on optimizing the convergence of pseudopotentials, see A. M.
-Rappe, K. M. Rabe, E. Kaxiras, and J. D. Joannopoulos, Phys. Rev. B 41, 1227
-(1990).
+Rappe, K. M. Rabe, E. Kaxiras, and J. D. Joannopoulos, Phys. Rev. B 41, 1227 (1990).
 
 (2) In addition to achieving convergence in the number of planewaves in the
 basis, one must ensure that the SCF iterations which solve the electronic
@@ -1384,8 +1231,7 @@ Note that, if the gap in the system closes (e.g. due to defect formation or if
 the system is metallic in the first place), the presently coded algorithm will
 be slower to converge than for insulating materials. Convergence trouble
 during iterations usually signals closure of the gap. The code will suggest to
-treat at least one unoccupied state (or band) in order to be able to monitor
-such a closure.
+treat at least one unoccupied state (or band) in order to be able to monitor such a closure.
 
 (3) For self consistent calculations ([[iscf]] positive) it is important to
 test the adequacy of the k point integration. If symmetry is used then one
@@ -1445,15 +1291,9 @@ system size.
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-
-
 ## 8 Final remarks
 
-  
 The ABINIT package is developed by the ABINIT group. The status of this
 package and the ABINIT group are explained in the file
 ~abinit/doc/users/context.txt and ~abinit/doc/developers/planning.txt , or
 some recent version of them.
-
-
-

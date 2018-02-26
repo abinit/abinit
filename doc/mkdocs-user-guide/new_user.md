@@ -6,17 +6,13 @@ authors: DCA, XG, RC
 
 ## This file gives a beginner's introduction to the ABINIT resources, the ABINIT package, and the main ABINIT application.  
 
-
-
-
 ## 1 Foreword
-
   
 The ABINIT project is a group effort of dozens of people worldwide, whose
 central outcome is the main ABINIT application, delivered with many other
 files in the ABINIT package. The ABINIT project includes also resources
-provided on the [ABINIT Web site](https://www.abinit.org) and the [ABINIT
-Github repository](https://github.com/abinit).
+provided on the [ABINIT Web site](https://www.abinit.org) and 
+the [ABINIT Github repository](https://github.com/abinit).
 
 Before reading the present file, and get some grasp about the main ABINIT
 application, you should get some theoretical background. In case you have
@@ -35,10 +31,7 @@ Cambridge University Press (2004) ISBN 0 521 78285 6.
 After having gone through the present New User's Guide, you should follow the
 ABINIT tutorial ([[lesson_welcome]]).
 
-
-
 ## 2 Introduction
-
   
 ABINIT is a package whose main program allows to find the total energy, charge
 density and electronic structure of systems made of electrons and nuclei
@@ -59,27 +52,21 @@ We suppose that you have downloaded the ABINIT package from the Web site,
 unpacked it and installed it. If not, you might nevertheless continue reading
 the present Web page, just to get an overview, but it might prove more
 fruitful to have first downloaded the ABINIT package and at least unpacked it,
-see the [installation notes](https://www.abinit.org/installation)
-
-.
+see the [installation notes](https://www.abinit.org/installation).
 
 We will use the name "~abinit" to refer to the directory that contains the
 ABINIT package after download. In practice, a version number is appended to
-this name, to give for example : abinit-8.4.0 . The ABINIT package versioning
+this name, to give for example: abinit-8.4.0 . The ABINIT package versioning
 scheme is explained later in this file.
 
 ~abinit contains different subdirectories. For example, the present file, as
 well as other descriptive files, should be found in ~abinit/doc/users . Other
 subdirectories will be described later.
 
-
-
-## 3 The ABINIT executable : abinit
-
+## 3 The main executable: abinit
   
 After compilation, the main code will be present in the package as
-~abinit/src/98_main/abinit (or perhaps at another place, depending on your
-installation).
+~abinit/src/98_main/abinit (or perhaps at another place, depending on your installation).
 
 To run abinit you need four things:
 
@@ -87,12 +74,12 @@ To run abinit you need four things:
   * (2) An input file. 
   * (3) A files file (list of file names in a file). 
   * (4) A pseudopotential input file for each kind of element in the unit cell. 
+
 With these items a job can be run.
 
 The full list of input variables, all of which are provided in the single
 input file, is given in the ABINIT [[varset:allvars|list of all variable]].  
-The detailed description of input variables is given in many "Variable Set"
-files, including:
+The detailed description of input variables is given in many "Variable Set" files, including:
 
   * Basic variables, [[varset:basic]]
   * Ground-state calculation variables, [[varset:gstate]]
@@ -102,34 +89,29 @@ files, including:
   * Density Functional Perturbation Theory variables, [[varset:dfpt]]
   * ... 
 
-A set of examples aimed at guiding the beginner is available in the tutorial
-([[lesson_welcome]]).
+A set of examples aimed at guiding the beginner is available in the tutorial ([[lesson_welcome]]).
 
 Other test cases (more than 800 input files) can be found in the ~abinit/test
 subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
 "libxc", "paral", the "tutoX" series ...
 
-Many different sorts of pseudopotentials can be used with ABINIT. Most of them
-can be found on the [atomic data
-files](https://www.abinit.org/downloads/atomic-data-files) page of the ABINIT
-web site. There are official recommended pseudopotentials tables (the PAW JTH
-table, and the norm-conserving table from ONCVPSP), and also some older sets
-of pseudopotentials. A subset of existing pseudopotentials are used for test
+Many different sorts of pseudopotentials can be used with ABINIT. 
+Most of them can be found on the [atomic data files](https://www.abinit.org/downloads/atomic-data-files) 
+page of the ABINIT web site. 
+There are official recommended pseudopotentials tables (the PAW JTH
+table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials. 
+A subset of existing pseudopotentials are used for test
 cases, and are located in the ~abinit/tests/Psps_for_tests directory, but they
-are not recommended for production. Information on pseudopotential files can
-be found in the [ABINIT help file](help_abinit.html#5) and the
-~abinit/doc/psp_infos directory.
+are not recommended for production. 
+Information on pseudopotential files can be found in the [ABINIT help file](help_abinit.html#5) 
+and the ~abinit/doc/psp_infos directory.
 
-
-
-## 4 Other programs in the ABINIT package
-
+## 4 Other programs in the package
   
-In addition to abinit, there are utility programs provided in the ABINIT
-package.
+In addition to abinit, there are utility programs provided in the package.
 
 Some utility programs are written in F90 (like the main abinit program), and
-their sources is also in ~abinit/src/98_main .  
+their sources is also in ~abinit/src/98_main.  
 These include : **mrgddb** , **anaddb** , **aim** , **conducti** , **optics**
 , **mrgscr** , **cut3d** , and **fold2Bloch**.
 
@@ -161,17 +143,14 @@ contained in ~abinit/scripts, where post-processing (numerous tools) and pre-
 processing scripts are distinguished. Some allows one to visualize ABINIT
 outputs, like abinit_eignc_to_bandstructure.py .
 
-
-
 ## 5 Other resources outside the ABINIT package
-
   
 In addition to the ABINIT package, other resources can be obtained from the
 [ABINIT GitHub site](https://github.com/abinit). The sources of the latest
 version of the ABINIT package are actually mirrored on this site, but for
 other resources (not in the package) this is the only download point.
 
-**abipy** is an open-source library for analyzing the results produced by
+**AbiPy** is an open-source library for analyzing the results produced by
 ABINIT (including visualisation), and for preparing input files and workflows
 to automate ab-initio calculations (so-called high-throughput calculations).
 It provides interface with pymatgen, developed by the Materials Project. Links
@@ -200,15 +179,10 @@ outputs or interact with ABINIT. We provide a (not very well maintained) list
 of links in <https://www.abinit.org/community/links>. Of course, you might get
 more by browsing the Web...
 
-
-
 ## 6 Input variables to abinit
-
   
 As an overview, the most important input variables, to be provided in the
 input file, are listed below:
-
-    
     
     Specification of the geometry of the problem, and types of atoms :
     [[natom]]           total number of atoms in unit cell
@@ -252,12 +226,8 @@ input file, are listed below:
     [[tolvrs]]          tolerance on self-consistent convergence
     [[ntime]]           number of molecular dynamics or relaxation steps
     [[tolmxf]]          force tolerance for structural relaxation in Hartree/Bohr
-    
-
-
 
 ## 7 Output files
-
   
 Output from an abinit run shows up in several files and in the standard
 output. Usually one runs the command with a pipe of standard output to a log
@@ -272,8 +242,7 @@ In addition, wavefunctions can be input (starting point) or output (result of
 the calculation), and possibly, charge density and/or electrostatic potential,
 if they have been asked for. These three sets of data are stored in
 unformatted files.  
-The Density Of States (DOS) can also be an output as a formatted (readable)
-file.  
+The Density Of States (DOS) can also be an output as a formatted (readable) file.  
 An analysis of geometry can also be provided (GEO file)  
 The name of these files is constructed from a "root" name, that must be
 different for input files and output files, and that is provided by the user,
@@ -283,13 +252,9 @@ for the density, POT for the potential, DOS for the density of states ...
 There are also different temporary files. A "root" name should be provided by
 the user, from which the code generates a full name. Amongst these files,
 there is a "status" file, summarizing the current status of advancement of the
-code, in long jobs. The [ABINIT help file](help_abinit.html) contains more
-details.
-
-
+code, in long jobs. The [ABINIT help file](help_abinit.html) contains more details.
 
 ## 8 What does the code do?
-
   
 The simplest sort of job computes an electronic structure for a fixed set of
 atomic positions within a periodic unit cell. By electronic structure, we mean
@@ -299,8 +264,7 @@ description of the unit cell and atomic positions and assembles a crystal
 potential from the input atomic pseudopotentials, then uses either an input
 wavefunction or simple gaussians to generate the initial charge density and
 screening potential, then uses a self-consistent algorithm to iteratively
-adjust the planewave coefficients until a sufficient convergence is reached in
-the energy.
+adjust the planewave coefficients until a sufficient convergence is reached in the energy.
 
 Analytic derivatives of the energy with respect to atomic positions and unit
 cell primitive translations yield atomic forces and the stress tensor. The
@@ -310,13 +274,9 @@ molecular dynamics. It can also be used to find responses to atomic
 displacements and homogeneous electric field, so that the full phonon band
 structure can be constructed...
 
-
-
 ## 9 Versioning logic
-
   
-We finish this "help for new user" with a brief explanation of the logic of
-ABINIT version releases.
+We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
 
 The full name of a version has three digits (for example, 8.4.0). The first
 digit is the slowly varying one (in average, it is changed after two or three
@@ -342,12 +302,7 @@ capabilities, but the one with the largest last digit is more debugged than
 the other : version 8.4.1 is more debugged than 8.4.0, but no new features has
 been added (so likely, no additional bug!).
 
-
-
 * * *
 
-In order to start using ABINIT, please follow the tutorial
-([[lesson_welcome]])
-
-
+In order to start using ABINIT, please follow the tutorial ([[lesson_welcome]])
 
