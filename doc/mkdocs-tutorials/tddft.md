@@ -6,28 +6,24 @@ authors: XG
 
 ## Time-Dependent Density Functional Theory, Casida's approach.  
 
-This lesson aims at showing how to get the following physical properties, for
-finite systems :
+This lesson aims at showing how to get the following physical properties, for finite systems:
 
   * Excitation energies 
   * Associated oscillator strengths 
   * Frequency-dependent polarizability and optical spectra 
+
 in the Casida approach, within Time-Dependent Density Functional Theory.
 
 This lesson should take about 30 minutes.
 
-
 ## 1 Brief theoretical introduction
-
   
 In order to do Time-Dependent Density Functional Theory calculations (TDDFT)
 of electronic excitations and oscillator strengths, in the Casida's approach,
 you should first have some theoretical background.  
 TDDFT was first developed in the eighties, but the direct calculation of
-electronic excitations was introduced much later, by Casida and co-workers. A
-comprehensive description of the underlying formalism is given in
-
-    
+electronic excitations was introduced much later, by Casida and co-workers. 
+A comprehensive description of the underlying formalism is given in
     
     "Time-Dependent Density Functional Response Theory of Molecular Systems:
      Theory, Computational Methods, and Functionals"
@@ -35,14 +31,12 @@ comprehensive description of the underlying formalism is given in
      in Recent Development and Applications of Modern Density Functional Theory,
      edited by J.M. Seminario (Elsevier, Amsterdam, 1996), p. 391.
      <http://dx.doi.org/10.1016/S1380-7323(96)80093-8>
-    
 
 However this reference might be hard to get, that is why we have based the
-tutorial instead on the following (also early) papers : [[Casida1998]],
-[[Casida1998a]], and [[Vasiliev1998]].
+tutorial instead on the following (also early) papers: 
+[[Casida1998]], [[Casida1998a]], and [[Vasiliev1998]].
 
-The first of these papers, [[Casida1998]], will be used as main reference for
-our tutorial.
+The first of these papers, [[Casida1998]], will be used as main reference for our tutorial.
 
 From these papers, you will learn that a TDDFT calculation of electronic
 excitation energies start first from a usual ground-state calculation, with a
@@ -76,8 +70,7 @@ or solids). In this case, the addition of the coupling matrix is unable to
 shift the edges of the Kohn-Sham band structure (each four-wavefunction
 integral becomes too small). There is only a redistribution of the oscillator
 strengths. In particular, the DFT band gap problem is NOT solved by TDDFT.
-Also, the Casida's approach relies on the discreteness of the Kohn-Sham
-spectrum.
+Also, the Casida's approach relies on the discreteness of the Kohn-Sham spectrum.
 
 Thus, the TDDFT approach to electronic excitation energies in ABINIT is ONLY
 valid for finite systems (atoms, molecules, clusters). Actually, only one
@@ -89,8 +82,7 @@ obtain the frequency-dependent polarizability, and corresponding optical
 spectrum. In the ABINIT implementation, the oscillators strengths are given as
 a second-rank tensor, in cartesian coordinates, as well as the average over
 all directions usually used for molecules and clusters. It is left to the user
-to generate the polarisability spectrum, according to e.g. Eq.(1.2) of
-[[Casida1998a]].
+to generate the polarisability spectrum, according to e.g. Eq.(1.2) of [[Casida1998a]].
 
 One can also combine the ground state total energy with the electronic
 excitation energies to obtain Born-Oppenheimer potential energy curves for
@@ -102,33 +94,28 @@ hundreds of papers published on the basis of methodology. Still, its accuracy
 might be below the expectations, as you will see. As often, test this method
 to see if it suits your needs, and read the recent literature ...
 
-
-
-## 2 A first computation of electronic excitation energies and oscillator
-strengths, for N2
-
+## 2 A first computation of electronic excitation energies and oscillator strengths, for N2
   
-We will now compute and analyse the excitation energies of the diatomic
-molecule N2. This is a rather simple system, with cylindrical symmetry,
+We will now compute and analyse the excitation energies of the diatomic molecule N2. 
+This is a rather simple system, with cylindrical symmetry,
 allowing interesting understanding. Although we will suppose that you are
 familiarized with quantum numbers for diatomic molecules, this should not play
 an important role in the understanding of the way to use Abinit's
 implementation of Casida's formalism.
 
-_Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_tddft" ?_
+*Before beginning, you might consider to work in a different subdirectory as
+for the other lessons. Why not "Work_tddft"?*
 
 Now, you are ready to run ABINIT and prepare the needed file.
 
 Copy the files ttddft_x.files and ttddft_1.in in "Work_tddft" :
 
-* _cp ../ttddft_x.files ._
-* _cp ../ttddft_1.in ._
+    cp ../ttddft_x.files
+    cp ../ttddft_1.in
 
-So, issue now :
+So, issue now:
 
-* _../../abinit < ttddft_x.files >& log _
-
+    ../../abinit < ttddft_x.files >& log
   
 The computation is quite fast : about 15 secs on a 2.8 GHz PC.  
 Let's examine the input file ttddft_1.in.  
@@ -151,14 +138,11 @@ consistent and non-self-consistent calculations ([[ixc]]=7).
 
 We can now examine the output file ttddft_1.out.  
 One can jump to the second dataset section, and skip a few non-interesting
-information, in order to reach the following information :
-
-    
+information, in order to reach the following information:
     
      *** TDDFT : computation of excited states ***
      Splitting of  12 bands in   5 occupied bands, and   7 unoccupied bands,
      giving    35 excitations.
-    
 
 The matrix that is diagonalized, in the Casida's formalism, is thus a 35x35
 matrix. It will give 35 excitation energies.  
@@ -173,10 +157,8 @@ eigenfunctions in this simulation have the following characteristics :
   * The third and fourth states are degenerate occupied pi states (m=+1,-1), with odd parity 
   * The sixth and seventh states are degenerate unoccupied pi states (m=+1,-1), with even parity 
   * The state 8 is a (non-degenerate) unoccupied sigma state (m=0), with even parity 
-Combining states 3,4 and 5 with 6, 7 and 8, give the first nine Kohn-Sham
-energy differences :
 
-    
+Combining states 3,4 and 5 with 6, 7 and 8, give the first nine Kohn-Sham energy differences:
     
       Transition  (Ha)  and   (eV)   Tot. Ene. (Ha)  Aver     XX       YY       ZZ
        5->  6 3.10888E-01 8.45969E+00 -1.92741E+01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
@@ -189,18 +171,14 @@ energy differences :
        4->  8 3.97351E-01 1.08125E+01 -1.91876E+01 4.0028E-02 0.00E+00 1.20E-01 0.00E+00
        3->  8 3.97351E-01 1.08125E+01 -1.91876E+01 4.0028E-02 0.00E+00 0.00E+00 1.20E-01
     
-
 Without the coupling matrix, these would be the excitation energies, for both
 the spin-singlet and spin-triplet states. The coupling matrix modifies the
 eigenenergies, by mixing different electronic excitations, and also lift some
 degeneracies, e.g. the quadruplet formed by the combination of the degenerate
-states 3-4 and 6-7 that gives the excitation energies with 3.64203E-01 Ha in
-the above table.
+states 3-4 and 6-7 that gives the excitation energies with 3.64203E-01 Ha in the above table.
 
 Indeed, concerning the spin-singlet, the following excitation energies are
 obtained (see the next section of the output file):
-
-    
     
       TDDFT singlet excitation energies (at most 20 of them are printed),
       and corresponding total energies.
@@ -216,12 +194,10 @@ obtained (see the next section of the output file):
        9    4.54145E-01   1.23579E+01   -1.913079E+01    1.00(  5->  9)  0.00(  3-> 12)
        ...
     
-
 The excitation energies are numbered according to increasing energies, in Ha
 as well as in eV. The total energy is also given (adding excitation energy to
 the the ground-state energy), and finally, the two major contributions to each
-of these excitations are mentioned (size of the contribution then
-identification).
+of these excitations are mentioned (size of the contribution then identification).
 
 It is seen that the first and second excitations are degenerate (numerical
 inaccuracies accounts for the meV difference), and mainly comes from the first
@@ -233,8 +209,6 @@ observed at 3.64203E-01 Ha, has been split into one doublet and two singlets,
 with numbers 4 (the lowest singlet), 5-6 (the doublet) while the last singlet
 is not present in the 20 lowest excitations.  
 The list of oscillator strength is then provided.
-
-    
     
       Oscillator strengths :  (elements smaller than 1.e-6 are set to zero)
       Excit#   (Ha)   Average    XX        YY        ZZ         XY        XZ        YZ
@@ -250,14 +224,11 @@ The list of oscillator strength is then provided.
       10 4.60223E-01 9.496E-02 2.849E-01 0.000E+00 0.000E+00  0.00E+00  0.00E+00  0.00E+00
        ...
     
-
 The first six transitions are forbidden, with zero oscillator strength. The
 seventh and eighth transitions are allowed, with sizeable YY, YZ and ZZ
 components.
 
-Next, one finds the excitation energies for the spin-triplet states :
-
-    
+Next, one finds the excitation energies for the spin-triplet states:
     
       TDDFT triplet excitation energies (at most 20 of them are printed),
       and corresponding total energies.
@@ -273,7 +244,6 @@ Next, one finds the excitation energies for the spin-triplet states :
        9    3.90834E-01   1.06351E+01   -1.919411E+01    0.67(  4->  8)  0.27(  2->  7)
        ...
     
-
 Spin-triplet energies are markedly lower than the corresponding spin-singlet
 energies. Also, the highest singlet derived from the Kohn-Sham quadruplet is
 now the excitation number 7. The oscillator strengths also follow. At this
@@ -283,8 +253,6 @@ improve the quality of our calculation.
 To summarize our results, we obtain the following five lowest-lying spin-
 singlet excitation energies, with corresponding quantum numbers (that we
 derive from the knowledge of the Kohn-Sham states quantum numbers):
-
-    
     
     9.47 eV   m=+1,-1  even parity (Pi_g state)
     9.86 eV   m=0      even parity (Sigma_g state)
@@ -292,11 +260,8 @@ derive from the knowledge of the Kohn-Sham states quantum numbers):
     10.46 eV  m=+2,-2  odd parity  (Delta_u state)
     10.79 eV  m=+1,-1  odd parity  (Pi_u state)
     
-
 and the following five lowest-lying spin-triplet excitations energies, with
-corresponding quantum numbers :
-
-    
+corresponding quantum numbers:
     
     7.85 eV   m=+1,-1  even parity (Pi_g state)
     8.16 eV   m=0      odd parity  (Sigma_u state)
@@ -304,34 +269,26 @@ corresponding quantum numbers :
     9.16 eV   m=0      even parity (Sigma_g state)
     9.91 eV   m=0      odd parity  (Sigma_u state)
     
-
 The quantum number related to the effect of a mirror plane, needed for Sigma
 states, could not be attributed on the sole basis of the knowledge of Kohn-
 Sham orbitals quantum numbers.
 
 The lowest-lying experimental spin-singlet excitation energies, see table III
-of [[Casida1998]], are as follows :
-
-    
+of [[Casida1998]], are as follows:
     
     9.31 eV   m=+1,-1  even parity (Pi_g state)
     9.92 eV   m=0      odd parity  (Sigma_u- state)
     10.27 eV  m=+2,-2  odd parity  (Delta_u state)
     
-
-and the lowest-lying experimental spin-triplet excitations energies are :
-
-    
+and the lowest-lying experimental spin-triplet excitations energies are:
     
     7.75 eV   m=0      odd parity  (Sigma_u+ state)
     8.04 eV   m=+1,-1  even parity (Pi_g state)
     8.88 eV   m=+2,-2  odd parity  (Delta_u state)
     9.67 eV   m=0      odd parity  (Sigma_u- state)
-    
 
 In several cases, the agreement is quite satisfactory, on the order of 0.1-0.2
-eV. However, there are also noticeable discrepancies. Indeed, we have to
-understand, in our simulation :
+eV. However, there are also noticeable discrepancies. Indeed, we have to understand, in our simulation :
 
   * The appearance of the spin-singlet Sigma_g state at 9.86 eV (Spin-singlet state 2)
   * The inversion between the spin-triplet Pi_g and Sigma_u states (Spin-triplet states 1 and 2)
@@ -339,29 +296,21 @@ understand, in our simulation :
 
 Still, the agreement between these TDDFT values and the experimental values is
 much better than anything that can be done on the sole basis of Kohn-Sham
-energy differences, that are (for spin-singlet and -triplet) :
-
-    
+energy differences, that are (for spin-singlet and -triplet):
     
     8.46 eV   m=+1,-1   even parity (Pi_g state)
     9.36 eV   m=0       odd parity  (Sigma_u state)
     9.91 eV   m=0(twice),+2,-2 odd parity  (Sigma_u and Delta_u states)
     10.81 eV  m=+1,-1   odd parity  (Pi_u state)
-    
-
-
 
 ## 3 Convergence studies
-
   
-There are several parameters subject to convergence studies in this context :
+There are several parameters subject to convergence studies in this context:
 the energy cut-off, the box size, and the number of unoccupied bands.
 
 We will start with the number of unoccupied states. The only input parameter
 to be changed in the input file is the value of nband2. The following results
 are obtained, for nband2 = 12, 30, 60, 100 and 150 (Energies given in eV):
-
-    
     
     Singlet 1 :  9.47   9.44   9.39   9.36   9.35
     Singlet 2 :  9.86   9.74   9.68   9.66   9.66
@@ -374,7 +323,6 @@ are obtained, for nband2 = 12, 30, 60, 100 and 150 (Energies given in eV):
     Triplet 4 :  9.16   9.16   9.15   9.15   9.15
     Triplet 5 :  9.91   9.91   9.91   9.91   9.91
     
-
 You might try to obtain one of these ... The computation with nband2=100 takes
 about 7 minutes on a 2.8 GHz PC, and gives a result likely converged within
 0.01 eV. Let's have a look at these data. Unfortunately, none of the above-
@@ -382,14 +330,11 @@ mentioned discrepancies with experimental data is resolved, although the
 difference between the first and second spin-triplet states decreases
 significantly. Although we see that at least 60 bands are needed to obtain
 results converged within 0.05 eV, we will continue to rely on 12 bands to try
-to understand the most important discrepancies, while keeping the CPU time to
-a low level.
+to understand the most important discrepancies, while keeping the CPU time to a low level.
 
 We next try to increase the cut-off energy. Again, this is fairly easy. One
 can e.g. set up a double dataset loop. The following results are obtained, for
-ecut = 25, 35, 45, 55, 65, and 75 Ha :
-
-    
+ecut = 25, 35, 45, 55, 65, and 75 Ha:
     
     Singlet 1 :  9.47   9.41   9.39   9.36   9.36
     Singlet 2 :  9.86   9.83   9.78   9.76   9.76
@@ -402,7 +347,6 @@ ecut = 25, 35, 45, 55, 65, and 75 Ha :
     Triplet 4 :  9.16   9.28   9.33   9.34   9.34
     Triplet 5 :  9.91   9.83   9.78   9.77   9.76
     
-
 You might try to obtain one of these ... The computation with ecut=75 takes
 about 90 secs on a 2.8 GHz PC, and gives a result likely converged within 0.01
 eV. Let us have a look at these data. Concerning the discrepancies with the
@@ -415,8 +359,6 @@ has increased, but not enough.
 We finally examine the effect of the cell size. Again, this is fairly easy.
 One can e.g. set up a double dataset loop. The following results are obtained,
 for acell = (6 5 5), (7 6 6), (8 7 7), (9 8 8), (10 9 9) and (12 11 11) :
-
-    
     
     Singlet 1 :  9.47   9.37   9.33   9.33   9.33   9.33
     Singlet 2 :  9.86   9.78   9.84   9.91   9.96  10.03
@@ -429,25 +371,20 @@ for acell = (6 5 5), (7 6 6), (8 7 7), (9 8 8), (10 9 9) and (12 11 11) :
     Triplet 4 :  9.16   9.36   9.55   9.68   9.78   9.90
     Triplet 5 :  9.91   9.88   9.85   9.85   9.85   9.85
     
-
 Obviously, the cell size plays an important role in the spurious appearance of
 the states, that was remarked when comparing against experimental data.
 Indeed, the singlet 2 and triplet 4 states energy increases strongly with the
-cell size, while all other states quickly stabilize (except the still higher
-singlet 5 state).
+cell size, while all other states quickly stabilize (except the still higher singlet 5 state).
 
 There is one lesson to be learned from that convergence study : the
 convergence of different states can be quite different. Usually, converging
 the lower excited states do not require too much effort, while it is quite
-difficult, especially concerning the supercell size, to converge higher
-states.
+difficult, especially concerning the supercell size, to converge higher states.
 
 At this stage, we will simply stop this convergence study, and give the
 results of an ABINIT calculation using ecut 45 Hartree, acell 12 11 11, and 30
 bands (not fully converged, though !), then compare the results with other
 LDA/TDLDA results (from [[Casida1998]]) and experimental results :
-
-    
     
                         present Casida experimental
     Singlet Pi_g      :  9.25    9.05     9.31
@@ -468,22 +405,15 @@ of the Triplet Pi_g state (0.4 eV). In particular, we note that LDA/TDLDA is
 not able to get the correct ordering of the lower two triplet states ... One
 of our problems was intrinsic to the LDA/TDLDA approximation ...
 
-
-
 ## 4 The choice of the exchange-correlation potential
-
   
 As emphasized in [[Casida1998]], choosing a different functional for the self-
 consistent part (XC potential) and the generation of the coupling matrix (XC
 kernel) can give a better description of the higher-lying states. Indeed, a
 potential with a -1/r tail (unlike the LDA or GGA) like the van Leeuwen-
 Baerends one, can reproduce fairly well the ionisation energy, giving a much
-better description of the Rydberg states. Still, the LDA kernel works pretty
-well.
+better description of the Rydberg states. Still, the LDA kernel works pretty well.
 
 In order to activate this procedure, set the value of ixc in dataset 1 to the
 SCF functional, and the value of ixc in dataset 2 to the XC functional to be
 used for the kernel. Use pseudopotentials that agree with the SCF functional.
-
-
-

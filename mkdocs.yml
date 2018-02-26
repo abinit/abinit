@@ -177,9 +177,9 @@ pages:
         - Bethe-Salpeter: mkdocs-tutorials/bse.md
     - Parallelism:
         - Base: mkdocs-tutorials/basepar.md
-        - DFPT: mkdocs-tutorials/paral_dfpt.md
         - GSPW: mkdocs-tutorials/paral_gspw.md
         - GSWVL: mkdocs-tutorials/paral_gswvl.md
+        - DFPT: mkdocs-tutorials/paral_dfpt.md
         - Images: mkdocs-tutorials/paral_images.md
         - Many-Body: mkdocs-tutorials/paral_mbt.md
         - Moldyn: mkdocs-tutorials/paral_moldyn.md

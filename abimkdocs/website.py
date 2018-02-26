@@ -1096,7 +1096,7 @@ The bibtex file is available [here](../abiref.bib).
 
             elif namespace == "help":
                 # Handle [[help:optic|text] NB: [[help_codename]] is echoed "codename help file"
-                url = "/mkdocs-user-guide/help_%s" % name
+                url = "/mkdocs-user-guide/%s" % name
                 if a.text is None: a.text = "%s help file" % name
                 html_classes.append("user-guide-wikilink")
 
@@ -1107,7 +1107,9 @@ The bibtex file is available [here](../abiref.bib).
                 if a.text is None: a.text = "%s_%s" % (namespace, name)
                 add_popover(a, content=self.howto_topic[name])
 
-            elif namespace == "bib":
+            elif namespace in ("bib", "cite"):
+                if namespace == "bib":
+                    self.warn("%s in %s is deprecated" % (token, page_rpath))
                 # Handle [[bib:biblio|bibliography]]
                 if name == "biblio":
                     url = "/mkdocs-theory/bibliography/"
@@ -1126,7 +1128,9 @@ The bibtex file is available [here](../abiref.bib).
                                 (exc.__class__, str(exc), token, page_rpath))
                         url, a.text = "FAKE_URL", "FAKE_URL"
 
-            elif namespace == "theorydoc":
+            elif namespace in ("theorydoc", "theory"):
+                if namespace == "theorydoc":
+                    self.warn("%s in %s is deprecated" % (token, page_rpath))
                 # TODO theorydoc --> theory
                 # Handle [[theorydoc:mbpt|text]]
                 url = "/mkdocs-theory/%s" % name

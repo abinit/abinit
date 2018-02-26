@@ -25,28 +25,23 @@ and W can be found in
 with the relevant formulas. We will refer to these papers as the
 Bruneval[2006] and the Lebegue[2003] papers.
 
-A brief description of the equations implemented in the code can be found in
-the [GW_notes](../../theory/generated_files/theorydoc_mbt.html).
+A brief description of the equations implemented in the code can be found in the [[theory:mbp|GW_notes]]
 
 Also, it is suggested to [[bib:acknow#b|acknowledge]] the efforts of
-developers of the GW part of ABINIT, by citing [[Gonze2005|2005 ABINIT
-publication]].
+developers of the GW part of ABINIT, by citing [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic lessons of ABINIT, see the
-[tutorial home page](lesson_welcome.html), as well as the [first lesson on
-GW](lesson_gw1.html).
+[tutorial home page](lesson_welcome.html), as well as the [[lesson:gw1|first lesson on GW]].
 
 This lesson should take about one hour to be completed (also including the
-reading of Bruneval[2006] and Lebegue[2003]).
-
+reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 
 ## 1 The preliminary Kohn-Sham band structure calculation
 
-  
-_Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_gw2" ?_
+*Before beginning, you might consider to work in a different subdirectory as
+for the other lessons. Why not "Work_gw2"?*
 
-During [lesson 4](lesson_base4.html), you computed different properties of
+In [[lesson:base4|lesson 4]], you computed different properties of
 Aluminum within the LDA. Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
@@ -54,14 +49,11 @@ significantly if one relies on the GW approximation.
 
 In the directory ~abinit/tests/tutorial/Input/Work_gw2, copy the files
 ~abinit/tests/tutorial/Input/tgw2_x.files and tgw2_1.in, and modify the
-tgw2_x.files file as usual (see lesson 1).  
+tgw2_x.files file as usual (see [[lesson:base1]]).  
 Then (supposing abinit is the proper alias), issue:
-
-    
     
     abinit < tgw2_x.files >& tgw2_1.log &
     
-
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
 functional is used ([[occopt]]=3), with a large smearing ([[tsmear]]=0.05 Ha).
@@ -72,32 +64,19 @@ shifts (256 k points in the full Brillouin zone). This grid contains the Gamma
 point, at which the valence band structure reaches its minimum.
 
 The output file presents the Fermi energy
-
-    
     
      Fermi (or HOMO) energy (eV) =   7.14774   Average Vxc (eV)=  -9.35982
-    
 
 as well as the lowest energy, at the Gamma point
-
-    
     
      Eigenvalues (   eV  ) for nkpt=   8  k points:
      kpt#   1, nband=  6, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
       -3.76175  19.92114  19.92114  19.92114  21.00078  21.00078
-    
 
-So, the occupied band width is 10.90 eV. More converged calculations would
-give 11.06 eV (see Bruneval[2006]).  
-This is to be compared to the experimental value of 10.6 eV (see references in
-Bruneval[2006]).
-
-* * *
-
-
+So, the occupied band width is 10.90 eV. More converged calculations would give 11.06 eV (see [[cite:Bruneval2006]]).  
+This is to be compared to the experimental value of 10.6 eV (see references in [[cite:Bruneval2006]]).
 
 ## 2 Calculation of the screening file
-
   
 In order not to lose time, let us start the calculation of the screening file
 before the examination of the corresponding input file. So, copy the file
@@ -121,10 +100,9 @@ practice, it is convenient to extend all the functions of frequency to the
 full complex plane. And then, making use of the residue theorem, the
 integration path can be deformed: one transforms an integral along the real
 axis into an integral along the imaginary axis plus residues enclosed in the
-new contour of integration. The method is extensively described in
-Lebegue[2003].
+new contour of integration. The method is extensively described in [[cite:Lebegue2003]].
 
-Examine the input file tgw2_2.in . The ten first lines contain the important
+Examine the input file tgw2_2.in. The ten first lines contain the important
 information. There, you find some input variables that you are already
 familiarized with, like [[optdriver]], [[ecuteps]], [[ecutwfn]], but also new
 input variables: [[gwcalctyp]], [[nfreqim]], [[nfreqre]], and [[freqremax]].
@@ -137,26 +115,19 @@ governed by [[nfreqim]] can be chosen quite small, since all functions are
 smooth in this direction. In contrast, the number of frequencies needed along
 the real axis set with the variable [[nfreqre]] is usually larger.
 
-* * *
-
-
-
 ## 3 Finding the Fermi energy and the bottom of the valence band
-
   
 In order not to lose time, let us start the calculation of the band width
 before the study of the input file. So, copy the file tgw2_3.in, and modify
 the tgw3_x.files file as usual (replace occurrences of twg2_x by tgw2_3).
 Also, copy the WFK file (tgw2_1o_WFK) to tgw2_3i_WFK, and the screening file
-(tgw2_2o_SCR) to tgw2_3i_SCR. Then run the calculation (it should take about 2
-minutes on a 3 GHz PC).
+(tgw2_2o_SCR) to tgw2_3i_SCR. Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
 
 The computation of the GW quasi-particle energy at the Gamma point of Aluminum
 does not differ from the one of quasi-particle in Silicon. However, the
 determination of the Fermi energy raises a completely new problem: one should
 sample the Brillouin Zone, to get new energies (quasi-particle energies) and
-then determine the Fermi energy. This is actually the first step towards a
-self-consistency!
+then determine the Fermi energy. This is actually the first step towards a self-consistency!
 
 Examine the input file tgw2_3.in. The first thirty lines contain the important
 information. There, you find some input variables with values that you are
@@ -173,40 +144,25 @@ bands in the vicinity of the Fermi level: bands much below or much above are
 likely to remain much or much above the Fermi region. In the present run, we
 are just interested in the states that may cross the Fermi level, when going
 from LDA to GW. For commodity, one could have selected an homogeneous range
-for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more
-time-consuming.
+for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more time-consuming.
 
-In the output file, one finds the quasi-particle energy at Gamma, for the
-lowest band:
-
-    
+In the output file, one finds the quasi-particle energy at Gamma, for the lowest band:
     
     k =    0.000   0.000   0.000
      Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.762    -9.451    -3.762     5.689   -15.049     5.676     0.777    -0.287    -9.390     0.060    -3.701    -3.684
     
-
-(the last column is the relevant quantity). The updated Fermi energy is also
-mentioned:
-
-    
+(the last column is the relevant quantity). The updated Fermi energy is also mentioned:
     
      New Fermi energy:     2.469501E-01 Ha ,    6.719854E+00 eV
-    
 
 The last information is not printed in case of [[gwcalctyp]] lower than 10.
 
 Combining the quasi-particle energy at Gamma and the Fermi energy, gives the
 band width, 10.404 eV. Using converged parameters, the band width will be
-10.54 eV (see Bruneval[2006]). This is in excellent agreement with the
-experimental value of 10.6 eV.
-
-* * *
-
-
+10.54 eV (see Bruneval[2006]). This is in excellent agreement with the experimental value of 10.6 eV.
 
 ## 4 Computing a GW spectral function, and the plasmon satellite of Aluminum
-
   
 The access to the non-plasmon-pole-model self-energy (real and imaginary part)
 has additional benefit, e.g. an accurate spectral function can be computed,
@@ -230,8 +186,7 @@ In order not to lose time, this calculation can be started before the
 examination of the input file. So, copy the file tgw2_4.in, and modify the
 tgw4_x.files file as usual (replace occurrences of twg2_x by tgw2_4). Also,
 copy the WFK file (tgw2_1o_WFK) to tgw2_4i_WFK, and the screening file
-(tgw2_2o_SCR) to tgw2_4i_SCR. Then run the calculation (it should take about 2
-minutes on a 3 GHz PC).
+(tgw2_2o_SCR) to tgw2_4i_SCR. Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
 
 Compared to the previous file (tgw2_3.in), the input file contains two
 additional keywords: [[nfreqsp]], and [[freqspmax]]. Also, the computation of
@@ -241,12 +196,9 @@ The spectral function is written in the file tgw2_4o_SIG. It is a simple text
 file. It contains, as a function of the frequency (eV), the real part of the
 self-energy, the imaginary part of the self-energy, and the spectral function.
 You can visualize it using your preferred software. For instance, issue
-
     
-    
-    >>> gnuplot
+    $ gnuplot
     gnuplot>  p'tgw2_4o_SIG' u 1:4 w l
-    
 
 You should be able to distinguish the main quasiparticle peak located at the
 GW energy (-3.7 eV) and some additional features in the vicinity of the GW
@@ -254,9 +206,6 @@ eigenvalue minus a plasmon energy (-3.7 eV - 15.8 eV = -19.5 eV).
 
 Another file, tgw2_4o_GW, is worth to mention: it contains information to be
 used for the subsequent calculation of excitonic effects by the EXC code
-(usually available at http://theory.polytechnique.fr/codes/exc ; if not, see
-the [ETSF software page](http://www.etsf.eu/resources/software/codes) and
-further links).
-
-
+(usually available at http://theory.polytechnique.fr/codes/exc; if not, see
+the [ETSF software page](http://www.etsf.eu/resources/software/codes) and further links).
 

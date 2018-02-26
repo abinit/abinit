@@ -6,82 +6,74 @@ authors: FB
 
 ## Explore the various features of the KGB parallelization scheme  
 
-This tutorial will indicate how to perform GS calculations on hundreds
-processors using ABINIT.
+This tutorial will indicate how to perform GS calculations on hundreds processors using ABINIT.
 
 You will learn how to use some keywords related to the "KGB" parallelization
 scheme. "K" stands for "k-point", "G" refers to the wavevector of a planewave,
-and "B" stands for a "Band". On one hand, you will see how to improve the
-speed-up of your calculations and, on the other hand, how to increase the
-convergence speed of a self consistent field calculation.  
+and "B" stands for a "Band". 
+On the one hand, you will see how to improve the speed-up of your calculations and, on the other hand, 
+how to increase the convergence speed of a self consistent field calculation.  
   
 This lesson should take about 1.5 hour and requires access to at least a 200
 CPU core parallel computer. __
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in
-parallel](lesson_basepar.html).
+explained in the tutorial [A first introduction to ABINIT in parallel](lesson_basepar.html).
 
 On the contrary, the present tutorial is not a prerequisite for other
 tutorials about parallelism in ABINIT.
 
-
 ## 1 Introduction
 
-  
-_Before continuing you might work in a different subdirectory, as for the
-other lessons. Why not "work_paral_gspw" ? All the input files can be found in
-the ~abinit/tests/tutoparal/Input directory. You might have to adapt them to
-the path of the directory in which you have decided to perform your runs. You
-can compare your results with reference output files located in
+*Before continuing you might work in a different subdirectory, as for the
+other lessons. Why not "work_paral_gspw"?* 
+
+All the input files can be found in the ~abinit/tests/tutoparal/Input directory. 
+You might have to adapt them to the path of the directory in which you have decided to perform your runs. 
+You can compare your results with reference output files located in
 ~abinit/tests/tutoparal/Refs._
 
- _In the following, when "run ABINIT over nn CPU cores" appears, you have to
+the following, when "run ABINIT over nn CPU cores" appears, you have to
 use a specific command line, according to the operating system and
-architecture of the computer you are using. This can be, for instance,_
-
+architecture of the computer you are using. This can be, for instance:
     
-    
-    _mpirun -n nn abinit < abinit.files   
-    _
+    mpirun -n nn abinit < abinit.files   
 
-_or the use of a specific submission file. Some scripts are given as examples
-in the directory ~abinit/doc/tutorial/lesson_paral_gspw/. You can adapt them
-to your own calculations.  
-_
+or the use of a specific submission file. 
+Some scripts are given as examples in the directory ~abinit/doc/tutorial/lesson_paral_gspw/. 
+You can adapt them to your own calculations.  
 
 When the size of the system increases up to 100 or 1000 atoms, it is usually
-impossible to perform ab initio calculations on a single computing core. This
+impossible to perform ab initio calculations with a single computing core. This
 is because the basis sets used to solve the problem (PWs, bands, ...) increase
-proportionally (linearly, as the square, or even exponentially...). The
-trouble has two origins: (i) the memory, with the amount of data stored in RAM
+proportionally (linearly, as the square, or even exponentially...). 
+The trouble has two origins: (i) the memory, with the amount of data stored in RAM
 and (ii) the computation time, with specific strong bottlenecks which are for
 example the eigensolver, the 3dim-FFTs...
 
-Therefore, it is generally mandatory to adopt a parallelization strategy. That
-is to say: (i) to distribute the data in a MPI-sense on a large number of
+Therefore, it is generally mandatory to adopt a parallelization strategy. 
+That is to say: (i) to distribute the data in a MPI-sense on a large number of
 processors, and (ii) to parallelize the routines responsible for the increase
 of the computation time.
 
 In this tutorial, we will go beyond the simple k-point and spin parallelism
-explained in the tutorial "[A first introduction to ABINIT in
-parallel](lesson_basepar.html)" and show:  
+explained in the tutorial 
+[A first introduction to ABINIT in parallel](lesson_basepar.html) and show:  
 
   * how to improve performance by using a large number of processors, even when the number of k-points is not large,
   * how to decrease the computation time for a given number of processors. The aim is twofold:  
 
   1. reduce the time needed to perform one electronic iteration (to improve the efficiency)  
-
   2. reduce the number of electronic iterations (to improve the convergence) 
 
   * how to use other keywords or features related to the KGB parallelization scheme.  
 
 The tests are performed on a system with 108 atoms of gold; this is a
 benchmark used for a long time during the development and the implementation
-of the KGB parallelization. With respect to the input file used for the
+of the KGB parallelization. 
+With respect to the input file used for the
 benchmark, the cutoff energy is strongly reduced in this tutorial, for
-practical reasons. For real tests, you can see the results (in particular the
-scaling) in:
+practical reasons. For real tests, you can see the results (in particular the scaling) in:
 
   * the publication concerning the KGB parallelisation: F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008) "Large scale ab initio calculations based on three levels of parallelization " ([available on Arxiv.org](https://arxiv.org/abs/0707.3405)). 
   * the Abinit paper: _X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,' D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi, S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet, M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf, M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger_ , Computer Phys. Commun. 180, 2582-2615 (2009). "ABINIT : First-principles approach of materials and nanosystem properties."
@@ -95,17 +87,15 @@ the most frequently asked question. Why this parallelization is named KGB? We
 don't know. Some people say that the reason comes from the K-point, the plane
 waves G and the Bands, but you can imagine everything you want.  
 
-
-
 ## 2 A simple way to begin...
-
   
 One of the most simple way to launch the KGB parallelization in ABINIT is to
-add just one input variable to the sequential input file. This is
-[[paral_kgb]] and controls everything concerning the KGB parallelization: the
+add just one input variable to the sequential input file. 
+This is [[paral_kgb]] and controls everything concerning the KGB parallelization: the
 use of the LOBPCG eigensolver ([[wfoptalg]]=4 or 14) of A. Knyazev, the
 parallel 3dim-FFT ([[fftalg]]=401) written by S. Goedecker, and some other
-tricks... At the time of writing (but not for much longer), you still have to
+tricks... 
+At the time of writing (but not for much longer), you still have to
 define the number or processors needed on each level of the KGB
 parallelization: [[npband]], [[npfft]] and [[npkpt]].  
 
@@ -124,8 +114,6 @@ In order to do that, copy the file tests/tutoparal/Input/tgspw_01.in and the
 related tgspw_01.files file in your working directory. Then run ABINIT on 1
 CPU core.  
 At the end of the log file tgspw_01.log, you will see:  
-
-    
     
          npimage|       npkpt|    npspinor|       npfft|      npband|     bandpp |       nproc|      weight|  
        1 - >    1|   1 ->    1|   1 ->    1|   1 ->   22|   1 ->  108|   1 ->   65|   8 ->  108|   1 ->  108|  
@@ -135,8 +123,6 @@ At the end of the log file tgspw_01.log, you will see:
                1|           1|           1|           9|          12|           1|         108|      54.37 |  
                1|           1|           1|          12|           9|           2|         108|      52.86 |  
       ......................  
-    
-    
 
 A weight is assigned to each distribution of processors. As indicated in the
 documentation, you are advised to select a processor distribution with a
@@ -152,10 +138,7 @@ changing your input file as follows:
 You can now perform your calculations using the KGB parallelization in ABINIT.
 But somehow, you did it without understanding how you got the result...  
 
-
-
 ## 3 ... which is however coherent with a more sophisticated method
-
   
 In this part we will try to recover the previous result, but with a more
 comprehensive understanding of what is happening. As shown above, the couple
@@ -174,8 +157,6 @@ A second one with another distribution:
     
 And so on... Alternatively, this can be performed using a shell script
 including:  
-
-    
     
     >> cp tgspw_02.in tmp.file  
     >> echo "npband 108 npfft 1" >> tgspw_02.in  
@@ -184,15 +165,11 @@ including:
     >> cp tmp.file tgspw_02.in  
     >> echo "npband 54 npfft 2" >> tgspw_02.in  
     >> ...   
-    
 
 By reference to the couple ([[npband]]x[[npfft]]), all these results are
 named: tgspw_02.108-01.out, tgspw_02.054-02.out, tgspw_02.036-03.out,
 tgspw_02.027-04.out, tgspw_02.018-06.out, tgspw_02.012-09.out and
-tgspw_02.009-12.out. The timing of each calculation can be retrieved using the
-shell command:  
-
-    
+tgspw_02.009-12.out. The timing of each calculation can be retrieved using the shell command:  
     
     >> grep Proc *out  
     >> tgspw_02.009-12.out:- Proc.   0 individual time (sec): cpu=         88.3  wall=         88.3  
@@ -203,7 +180,6 @@ shell command:
     >> tgspw_02.054-02.out:- Proc.   0 individual time (sec): cpu=        104.7  wall=        104.7  
     >> tgspw_02.108-01.out:- Proc.   0 individual time (sec): cpu=        141.5  wall=        141.5  
     
-
 As far as the timing is concerned, the best distributions are then the ones
 proposed above in section 2.: that is to say the couples (18x6) and (27x4). So
 the prediction was pretty good.  
@@ -219,8 +195,6 @@ slowest at the end of the convergence because it takes many more steps. In
 order to see this without performing any additional calculations, we can have
 a look at the degree of convergence at the end of the calculations we already
 have. The last iterations of the SCF loop give:  
-
-    
     
     >> grep "ETOT 10" *.out  
     >> tgspw_02.009-12.out: ETOT 10  -3754.4454784191    -1.549E-03 7.222E-05 1.394E+00  
@@ -253,10 +227,7 @@ timing... even if the (18x6) one is slightly quicker per electronic step.
 Note: you can verify that the convergence is not changed when the [[npfft]]
 value is modified. The same results will be obtained, step by step.  
 
-
-
-## 4 Meaning of [[bandpp]]: part 1 (convergence)
-
+## 4 Meaning of bandpp: part 1 (convergence)
   
 We have seen in the previous section that the best convergence is obtained
 when the size of the block is the largest. This size is related to the
@@ -271,35 +242,26 @@ The input variable enabling an increasing of the size block without increasing
 the number of band processors is named [[bandpp]]. The size block is then
 defined as: [[bandpp]]x[[npband]]. In the following, we keep the same input
 file as previously and add:  
-
-    
     
     - nstep 10  
     + nstep 20  
     + npband 27 npfft 4  
-    
-    
 
 You can copy the input file tgspw_03.in then run ABINIT over 108 cores with
 tgspw_02.027-04.out, [[bandpp]]=1 and [[bandpp]]=2. The output files will be
 named tgspw_03.bandpp1.out and tgspw_03.bandpp2.out, respectively. A
 comparison between these two files shows that the convergence is better in the
 second case. The convergence is even achieved before the input file limit of
-20  electronic iterations. Quod Erat Demonstrandum:  
+20 electronic iterations. Quod Erat Demonstrandum:  
   
 For a given number of processors, it is possible to improve the convergence by
 increasing bandpp.  
   
 We can also compare the result obtained for the (27x4) distribution and
-[[bandpp]]=2 with the (54x2) one and [[bandpp]]=1. Use the same input file and
-add:  
-
-    
+[[bandpp]]=2 with the (54x2) one and [[bandpp]]=1. Use the same input file and add:  
     
     - npband 27 npfft 4  
     + npband 54 npfft 2 bandpp 1  
-    
-    
 
 Then run ABINIT over 108 cores and copy the output file to
 tgspw_03.054-02.out. Perform a diff (with vimdiff for example) between the two
@@ -312,10 +274,7 @@ processors [[npfft]] does not affect the convergence.
 It is possible to modify the distribution of processors, without changing the
 convergence, by reducing npband and increasing bandpp proportionally.  
 
-
-
 ## 5 Meaning of [[bandpp]]: part 2 (efficiency)
-
   
 In the previous section, we showed that the convergence doesn't change if
 [[bandpp]] and [[npband]] change in inverse proportions. What about the
@@ -324,24 +283,18 @@ treated separately.
 
 You can see, in the previous calculations of section 4, that the timing
 increases when [[bandpp]] increases:
-
-    
     
     >> grep Proc tgspw_03.bandpp1.out tgspw_03.bandpp2.out  
     >> tgspw_03.bandpp1.out:- Proc.   0 individual time (sec): cpu=        121.4  wall=        121.4  
     >> tgspw_03.bandpp2.out:- Proc.   0 individual time (sec): cpu=        150.7  wall=        150.7  
-    
 
 while there are fewer electronic iterations for [[bandpp]]=2 (19) than for
 [[bandpp]]=1 (20). If you perform a diff between these two files, you will see
 that the increase in time is essentially due to the section "zheegv-dsyegv".
-
-    
     
     >> grep "zheegv-dsyegv" tgspw_03.bandpp1.out tgspw_03.bandpp2.out  
     >> tgspw_03.bandpp1.out:- zheegv-dsyegv               1321.797  10.1   1323.215  10.1         513216  
     >> tgspw_03.bandpp2.out:- zheegv-dsyegv               5166.002  31.8   5164.574  31.8         244944  
-    
 
 The "zheegv-dsyegv" is a part of the LOBPCG algorithm which is performed in
 sequential, so the same calculation is done on each processor. In the second
@@ -350,10 +303,8 @@ calculation, the size of the block being larger (27x2=54) than in the first
 up, the timing of a single electronic step increases by increasing [[bandpp]],
 but the convergence improves.  
 
-  
 Do not increase too much the bandpp value, unless you decrease proportionally
-[[npband]] or if you want to improve the convergence whatever the cost in
-total timing.  
+[[npband]] or if you want to improve the convergence whatever the cost in total timing.  
   
 The only exception is when [[istwfk]]=2, i.e. when real wavefunctions are
 employed. This occurs when the Gamma point alone is used to sample the
@@ -364,8 +315,6 @@ input file tgspw_04.in and run ABINIT in each case over 108 cores. You will
 obtain four output files named tgspw_04.bandpp1.out, tgspw_04.bandpp2.out,
 tgspw_04.bandpp4.out and tgspw_04.bandpp6.out in reference to [[bandpp]]. If
 you compare the outputs of these calculations:  
-
-    
     
     >> grep Proc *out  
     >> tgspw_04.bandpp1.out:- Proc.   0 individual time (sec): cpu=         61.4  wall=         61.4  
@@ -382,37 +331,27 @@ any gain in the FFTs, whereas some significant losses in computational time
 appear in the "zheegv-dsyegv" section.  
   
 When calculations are performed at the Gamma point, you are strongly
-encouraged to use bandpp=2... or more if you need to improve the convergence
-whatever the timing.  
-  
-
-
+encouraged to use bandpp=2... or more if you need to improve the convergence whatever the timing.  
 
 ## 6 The KGB parallelization
 
   
 Up to now, we only performed a GB parallelization. This implies
 parallelization over 2 levels of PWs or over 2 levels of bands and FFTs, for
-different sections of the code (see the
-[paper](https://arxiv.org/abs/0707.3405) or
-[presentation](https://www.abinit.org/community/events/program3rd)). If the
-system has more than 1 k-point, one can add a third level of parallelization
+different sections of the code (see the [paper](https://arxiv.org/abs/0707.3405) or
+[presentation](https://www.abinit.org/community/events/program3rd)). 
+If the system has more than 1 k-point, one can add a third level of parallelization
 and perform a real KBG parallelization. There is no additional difficulty in
 adding processors on this level. In order to explain the procedure, we restart
 with the same input file that was used in section 3 and add a denser M-P grid
 (see the input file tgspw_05.in). In this case, the system has 4 k-points in
 the IBZ so the calculation can be parallelized over (at most) 4 k-point
 processors. This is done using the [[npkpt]] input variable:  
-
-    
     
      + npkpt 4  
-    
 
 This implies we use four times more processors than before, so run ABINIT over
 432 CPU cores. The timing obtained in the output file tgspw_05.out:  
-
-    
     
     >> grep Proc tgspw_05.out  
     >> - Proc.   0 individual time (sec): cpu=         87.3  wall=         87.3
@@ -421,8 +360,7 @@ is quasi-identical to the one obtained for 1 k-point (69.9 sec, see the output
 file tgspw_02.027-04.out. This means that a calculation 4 times larger (due to
 an increase of the number of k-points) gives approximatively the same human
 time if you parallelize over all the k-points. You have just re-derived a well
-established result: the scaling (the speedup) is quasi-linear on the k-point
-level.  
+established result: the scaling (the speedup) is quasi-linear on the k-point level.  
 
 When you want to parallelize a calculation, begin by the k-point level, then
 follow with the band level (up to [[npband]]=50 typically) then finish by the
@@ -436,16 +374,12 @@ output is slightly longer (17 sec. more) than the one obtained in
 tgspw_02.027-04.out.  Compare the time spent in all the routines. A first clue
 comes from the timing done below the "vtowfk level", which contains 99.xyz% of
 sequential processor time:  
-
-    
     
     >> grep "vtowfk   " tgspw_05.out tgspw_02.027-04.out  
     >> tgspw_05.out:- vtowfk                     26409.565  70.7  26409.553  70.7           4320  
     >> tgspw_05.out:- vtowfk                     26409.565  70.7  26409.553  70.7           4320  
     >> tgspw_02.027-04.out:- vtowfk                      6372.940  84.8   6372.958  84.8           1080  
     >> tgspw_02.027-04.out:- vtowfk                      6372.940  84.8   6372.958  84.8           1080  
-      
-    
 
 We see that the KGB parallelization performs really well, since the human time
 spent within vtowfk is approximatively equal: 26409/432 ~ 6372/108. So, the
@@ -459,9 +393,8 @@ overall times (shown above): the time spent in vtowfk corresponds to 84.8% of
 the overall time when you don't parallelize over k-points, and only 70.7% when
 you parallelize. This means you lose time above vtowfk in this case.
 
-This behaviour is related to the [Amdhal's
-law](https://en.wikipedia.org/wiki/Amdahl%27s_law): "The speedup of a program
-using multiple processors in parallel computing is limited by the time needed
+This behaviour is related to the [Amdhal's law](https://en.wikipedia.org/wiki/Amdahl%27s_law): 
+"The speedup of a program using multiple processors in parallel computing is limited by the time needed
 for the sequential fraction of the program. For example, if a program needs 20
 hours using a single processor core, and a particular portion of 1 hour cannot
 be parallelized, while the remaining promising portion of 19 hours (95%) can
@@ -473,17 +406,9 @@ In our case, the part above the loop over k-point in not parallelized by the
 KGB parallelization. Even if this part is very small, less than 1%, when the
 biggest part below is strongly (perfectly) parallelized, this small part
 determines an upper bound for the speedup.  
-
-  
-
-* * *
-
   
 To do in the future:
 
   * [6.]() What else about the convergency: wfoptalg, nline 
   * [7.]() MPI-IO is direct 
   * [8.]() Future: only one keyword, then ... none.
-
-
-

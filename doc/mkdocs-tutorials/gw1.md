@@ -10,20 +10,17 @@ This lesson aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham eigenvalues in the GW approximation.
 
 A brief description of the formalism and of the equations implemented in the
-code can be found in the
-[GW_notes](../../theory/generated_files/theorydoc_mbt.html).
+code can be found in the [[theory:mbt|GW_notes]].
 
-The different formulas of the GW formalism have been written in a pdf document
-by Valerio Olevano (who also wrote the first version of this tutorial), see
-~abinit/doc/theory/gwa.pdf .
+The different formulas of the GW formalism have been written in a [[pdf:gwa.pdf|pdf document]]
+by Valerio Olevano (who also wrote the first version of this tutorial).
 
 For a much more consistent discussion of the theoretical aspects of the GW
 method we refer the reader to the review
 
-  * "Quasiparticle calculations in solids", by Aulbur WG, Jonsson L, Wilkins JW,   
-in Solid State Physics 54, 1-218 (2000),  
-also available [
-here](https://www.abinit.org/sites/default/files/quasiparticle_calculations_in_solids.pdf.bz2).
+"Quasiparticle calculations in solids", by Aulbur WG, Jonsson L, Wilkins JW,   
+in Solid State Physics 54, 1-218 (2000), also available 
+[here](https://www.abinit.org/sites/default/files/quasiparticle_calculations_in_solids.pdf.bz2).
 
 It is suggested to [[bib:acknow#b|acknowledge]] the efforts of developers of
 the GW part of ABINIT, by citing the [[Gonze2005|2005 ABINIT publication]].
@@ -31,17 +28,14 @@ the GW part of ABINIT, by citing the [[Gonze2005|2005 ABINIT publication]].
 The user should be familiarized with the four basic lessons of ABINIT, see the
 [tutorial home page](lesson_welcome.html).
 
-After this first tutorial on GW, you should read the [second lesson on
-GW](lesson_gw2.html).
+After this first tutorial on GW, you should read the [[lesson:gw2|second lesson on GW]]
 
 This lesson should take about 2 hours.
 
-
 ## 1 General example of well converged GW calculation
-
   
-_Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_gw1" ?_
+*Before beginning, you might consider to work in a different subdirectory as
+for the other lessons. Why not "Work_gw1"?*h
 
 At the end of [lesson 3](lesson_base3.html#35), we computed the Kohn-Sham band
 structure of silicon. In this approximation, the band dispersion as well as
@@ -64,11 +58,8 @@ In the directory ~abinit/tests/tutorial/Input/Work_gw1, copy the files
 tgw1_x.files file as usual (see lesson 1).
 
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_1.log &
-    
 
 It is very important to run this job in background because it takes about 1
 minute. In the meantime, you should read the following.
@@ -80,23 +71,25 @@ minute. In the meantime, you should read the following.
 In order to perform a standard one-shot GW calculation one has to:
 
   1. Run a converged Ground State calculation to obtain the self-consistent density. 
-  
 
-  2. Perform a non self-consistent run to compute the Kohn-Sham eigenvalues and the eigenfunctions including several empty states. Note that, unlike standard band structure calculations, here the KS states must be computed on a regular grid of k-points. 
-  
+  2. Perform a non self-consistent run to compute the Kohn-Sham eigenvalues and the eigenfunctions 
+     including several empty states. Note that, unlike standard band structure calculations, 
+     here the KS states must be computed on a regular grid of k-points. 
 
-  3. Use [[optdriver]]=3 to compute the independent-particle susceptibility ( χ0) on a regular grid of **q** -points, for at least two frequencies (usually, ω=0 and a large purely imaginary frequency - of the order of the plasmon frequency, a dozen of eV). The inverse dielectric matrix (ε-1) is then obtained via matrix inversion and stored in an external file (SCR). The list of **q** -points is automatically defined by the k-mesh used to generate the KS states in the previous step. 
-  
+  3. Use [[optdriver]]=3 to compute the independent-particle susceptibility ( χ0) on a regular grid of 
+     **q** -points, for at least two frequencies (usually, ω=0 and a large purely imaginary 
+     frequency - of the order of the plasmon frequency, a dozen of eV). 
+     The inverse dielectric matrix (ε-1) is then obtained via matrix inversion and stored in an external file (SCR). 
+     The list of **q** -points is automatically defined by the k-mesh used to generate the KS states in the previous step. 
 
-  4. Use [[optdriver]]=4 to compute the self-energy (Σ) matrix element for a given set of k-points in order to obtain the GW quasiparticle energies Note that the k-point must belong to the k-mesh used to generate the WFK file in step 2. 
+  4. Use [[optdriver]]=4 to compute the self-energy (Σ) matrix element for a given set of k-points in order 
+     to obtain the GW quasiparticle energies Note that the k-point must belong to the k-mesh used to generate the WFK file in step 2. 
 
-The flowchart diagram of a standard one-shot run is depicted in the figure
-below.
+The flowchart diagram of a standard one-shot run is depicted in the figure below.
 
 ![](../documents/lesson_gw1/gw_flowchart.png)
 
-The input file tgw1_1.in has precisely that structure: there are four
-datasets.
+The input file tgw1_1.in has precisely that structure: there are four datasets.
 
 The first dataset performs the SCF calculation to get the density. The second
 dataset reads the previous density file and performs a NSCF run including
@@ -104,8 +97,7 @@ several empty states. The third dataset reads the WFK file produced in the
 previous step and drives the computation of susceptibility and dielectric
 matrices, producing another specialized file, tgw1_xo_DS2_SCR (_SCR for
 "Screening", actually the inverse dielectric matrix ε-1). Then, in the fourth
-dataset, the code calculates the quasiparticle energies for the 4th and 5th
-bands at the Γ point.
+dataset, the code calculates the quasiparticle energies for the 4th and 5th bands at the Γ point.
 
 So, you can edit this tgw1_1.in file.
 
@@ -125,8 +117,6 @@ to be used in the subsequent NSCF calculation. Dataset 2 computes 40 bands and
 we set nbdbuf to 5 so that only the first 35 states must be converged within
 tolwfr. This tricks allows us to save several minimization steps because the
 last bands usually require more iterations to converge
-
-    
     
     ############
     # Dataset 1
@@ -152,32 +142,21 @@ last bands usually require more iterations to converge
 
 In dataset 3, the calculation of the screening (susceptibility, dielectric
 matrix) is performed. We need to set [[optdriver]]=3 to do that:
-
-    
     
     optdriver3  3        # Screening calculation
-    
 
-The [[getwfk]] input variable is similar to other "get" input variables of
-ABINIT:
-
-    
+The [[getwfk]] input variable is similar to other "get" input variables of ABINIT:
     
     getwfk3     -1       # Obtain WFK file from previous dataset
-    
 
-In this case, it tells the code to use the WFK file calculated in the previous
-dataset.
+In this case, it tells the code to use the WFK file calculated in the previous dataset.
 
 Then, three input variables describe the computation:
-
-    
     
     nband3      17       # Bands used in the screening calculation
     ecut        8.0      # Cut-off energy of the planewave set to represent the wavefunctions
     ecuteps3    3.6      # Cut-off energy of the planewave set to represent the dielectric matrix
     
-
 In this case, we use 17 bands to calculate the Kohn-Sham response function
 $\chi^{(0)}_{KS}$. A cut-off of 8 Hartree is used to represent the
 wavefunctions in the calculation of $\chi^{(0)}_{KS}$. The dimension of
@@ -187,11 +166,8 @@ determined by [[ecuteps]]=3.6 Hartree, giving 169 planewaves.
 Finally, we define the frequencies at which the screening must be evaluated:
 ω=0.0 eV and the imaginary frequency ω= i 16.7 eV. The latter is determined by
 the input variable [[ppmfrq]]
-
-    
     
     ppmfrq3    16.7 eV  # Imaginary frequency where to calculate the screening
-    
 
 The two frequencies are used to calculate the plasmon-pole model parameters.
 For the non-zero frequency it is recommended to use a value close to the
@@ -207,27 +183,20 @@ from EELS calculations existing in literature.
 
 In dataset 4 the calculation of the Self-Energy matrix elements is performed.
 One needs to define the driver option, as well as the _WFK and _SCR files.
-
-    
     
     optdriver4  4       # Self-Energy calculation
     getwfk4    -2       # Obtain WFK file from dataset 1
     getscr4    -1       # Obtain SCR file from previous dataset
     
-
-The [[getscr]] input variable is similar to other "get" input variables of
-ABINIT.
+The [[getscr]] input variable is similar to other "get" input variables of ABINIT.
 
 Then, comes the definition of parameters needed to compute the self-energy. As
 for the computation of the susceptibility and dielectric matrices, one must
 define the set of bands, and two sets of planewaves:
-
-    
     
     nband4       30      # Bands to be used in the Self-Energy calculation
     ecutsigx4   6.0      # Dimension of the G sum in Sigma_x
                          # (the dimension in Sigma_c is controlled by npweps)
-    
 
 In this case, [[nband]] controls the number of bands used to calculate the
 correlation part of the Self-Energy. [[ecutsigx]] gives the number of
@@ -239,15 +208,11 @@ planewave of Σx if the latter is smaller than the one for Σc.
 
 Then, come the parameters defining the k-points and the band indices for which
 the quasiparticle energies will be computed:
-
-    
     
     nkptgw4      1               # number of k-point where to calculate the GW correction
     kptgw4                       # k-points
       -0.125    0.000    0.000
     bdgw4       4  5             # calculate GW corrections for bands from 4 to 5
-    
-
   
 [[nkptgw]] defines the number of k-points for which the GW corrections will be
 computed. The k-point reduced coordinates are specified in [[kptgw]]. At
@@ -276,8 +241,7 @@ the Irreducible part of the Brillouin Zone) on which the susceptibility and
 dielectric matrices will be computed. It is a set of BZ points defined as all
 the possible differences among the k-points ( _q=k-k'_ ) of the grid chosen to
 generate the WFK file. From the last statement it is clear the interest to
-choose homogeneous k-point grids, in order not to minimize the number of
-q-points.
+choose homogeneous k-point grids, in order not to minimize the number of q-points.
 
 After this section, the code prints the parameters of the FFT grid needed to
 represent the wavefunctions and to compute their convolution (required for the
@@ -300,14 +264,10 @@ method). However, the plasmon-pole model has been found to work well for a
 very large range of systems when focusing only on the real part of the GW
 corrections.
 
-At the end of the screening calculation, the macroscopic dielectric constant
-is printed:
-
-    
+At the end of the screening calculation, the macroscopic dielectric constant is printed:
     
       dielectric constant =  13.5073
       dielectric constant without local fields =  15.0536
-    
 
 Note that the convergence in the dielectric constant DOES NOT guarantee the
 convergence in the GW corrections. In fact, the dielectric constant is
@@ -330,8 +290,6 @@ function (the screening). The self-energy operator has been constructed, and
 one can evaluate the GW energies, for each of the states.
 
 The final results are:
-
-    
     
     k =   -0.125   0.000   0.000
      Band     E0  <VxcLDA>   SigX SigC(E0)    Z dSigC/dE  Sig(E)    E-E0     E
@@ -342,34 +300,16 @@ The final results are:
      E^GW_gap         3.375
      DeltaE^GW_gap    0.634
     
-
-For the desired k-point, state 4, then state 5, one finds different
-information:
+For the desired k-point, state 4, then state 5, one finds different information:
 
   * E0 is the Kohn-Sham eigenenergy 
-  
-
   * VxcLDA gives the average Kohn-Sham exchange-correlation potential 
-  
-
   * SigX gives the exchange contribution to the self-energy 
-  
-
   * SigC(E0) gives the correlation contribution to the self-energy, evaluated at the Kohn-Sham eigenenergy
-  
-
   * Z is the renormalisation factor 
-  
-
   * dSigC/dE is the energy derivative of SigC with respect to the energy
-  
-
   * SigC(E) gives the correlation contribution to the self-energy, evaluated at the GW energy
-  
-
   * E-E0 is the difference between GW energy and Kohn-Sham eigenenergy 
-  
-
   * E is the GW energy 
 
 In this case, the gap is also analyzed: E^0_gap is the direct Kohn-Sham gap at
@@ -378,8 +318,7 @@ is the GW one, and DeltaE^GW_gap is the difference. This direct gap is always
 computed between the band whose number is equal to the number of electrons in
 the cell divided by two (integer part, in case of spin-polarized calculation),
 and the next one. (Warning: for a metal, these two bands do not systematically
-lie below and above the Fermi energy - but the concept of a direct gap is not
-relevant in that case).
+lie below and above the Fermi energy - but the concept of a direct gap is not relevant in that case).
 
 It is seen that the average Kohn-Sham exchange-correlation potential for the
 state 4 (a valence state) is very close to the exchange self-energy
@@ -391,11 +330,7 @@ is much larger than for state 4. On the whole, the difference between Kohn-
 Sham and GW energies is not very large, but nevertheless, it is quite
 important when compared with the size of the gap.
 
-
-
-## 2 Preparing convergence studies: Kohn-Sham structure (WFK file) and screening
-(SCR file)
-
+## 2 Preparing convergence studies: Kohn-Sham structure (WFK file) and screening (SCR file)
   
 In the following sections, we will perform different convergence studies. In
 order to keep the CPU time at a reasonable level, we will use fake WFK and SCR
@@ -410,15 +345,11 @@ In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 file, and take the time to examine it.
 
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_2.log &
-    
 
 After this step you will need the WFK and SCR files produced in this run for
-the next runs (up to 6.8). Move tgw1o_DS2_WFK to tgw1o_DS1_WFK and
-tgw1o_DS3_SCR to tgw1o_DS1_SCR.
+the next runs (up to 6.8). Move tgw1o_DS2_WFK to tgw1o_DS1_WFK and tgw1o_DS3_SCR to tgw1o_DS1_SCR.
 
 The next sections are intended to show you how to find the converged
 parameters for a GW calculation. In principle, the following parameters might
@@ -442,50 +373,35 @@ energy calculation ([[optdriver]]=4): [[ecutwfn]], [[ecutsigx]], [[nband]].
 This is because for these, we will not need a double dataset loop to check
 this convergence, and we will rely on the previously determined SCR file.
 
-
-
-## 3 Convergence on the number of planewaves in the wavefunctions to calculate the
-Self-Energy (optional)
-
+## 3 Convergence on the number of planewaves in the wavefunctions to calculate the Self-Energy (optional)
   
 The convergence study is done in the input file tgw1_3.in. First, we check the
 convergence on the number of planewaves used to describe the wavefunctions, in
 the calculation of the Self-Energy. This will be done by defining five
 datasets, with increasing [[ecutwfn]]:
-
-    
     
     ndtset     5
     ecutwfn:  3.0
     ecutwfn+  1.0
-    
 
 In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 ../tgw1_3.in, and modify the tgw1_x.files file as usual. Edit the tgw1_3.in
 file, and take the time to examine it.
 
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_3.log &
-    
 
 Edit the output file. The number of plane waves used for the wavefunctions in
 the computation of the self-energy is mentioned in the fragments of output:
-
-    
     
      SIGMA fundamental parameters:
      PLASMON POLE MODEL
      number of plane-waves for SigmaX                  169
      number of plane-waves for SigmaC and W            169
      number of plane-waves for wavefunctions            59
-    
 
 Gathering the GW energies for each planewave set, one gets:
-
-    
     
      number of plane-waves for wavefunctions            59
      Band     E0  VxcLDA    SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
@@ -512,14 +428,10 @@ Gathering the GW energies for each planewave set, one gets:
         4   5.915 -11.650 -15.250   3.790   0.806  -0.241 -11.497   0.152   6.068
         5   8.445  -9.697  -3.218  -5.583   0.818  -0.223  -8.965   0.733   9.178
     
-
 So that [[ecutwfn]]=5.0 ([[npwwfn]]=137) can be considered to lead to
 eigenenergies converged within 0.01 eV.
 
-
-
 ## 4 Convergence on the number of planewaves to calculate Σx (optional)
-
   
 Second, we check the convergence on the number of planewaves in the
 calculation of Σx. This study in done in tgw1_4.in As mentioned in the
@@ -530,39 +442,28 @@ corresponding convergence study.
 
 In this lesson, this convergence study will be done by defining five datasets,
 with increasing [[ecutsigx]]:
-
-    
     
     ndtset     7
     ecutsigx:  3.0
     ecutsigx+  1.0
     
-
 In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 ../tgw1_4.in, and modify the tgw1_x.files file as usual. Edit the tgw1_4.in
 file, and take the time to examine it.
 
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_4.log &
-    
 
 Edit the output file. The number of plane waves used for Σx is mentioned in
 the fragments of output:
-
-    
     
      SIGMA fundamental parameters:
      PLASMON POLE MODEL
      number of plane-waves for SigmaX                   59
      number of plane-waves for SigmaC and W             59
     
-
 Gathering the GW energies for each planewave set, one gets:
-
-    
     
      number of plane-waves for SigmaX                   59
      number of plane-waves for SigmaC and W             59
@@ -609,10 +510,7 @@ Gathering the GW energies for each planewave set, one gets:
 
 So that ecutsigx=6.0 (npwsigx=169) can be considered converged within 0.01 eV.
 
-
-
 ## 5 Convergence on the number of bands to calculate Σc (important)
-
   
 At last, as concerns the computation of the self-energy, we check the
 convergence on the number of bands in the calculation of Σc. This convergence
@@ -621,28 +519,20 @@ convergence study for the number of bands for the dielectric matrix.
 
 The convergence on the number of bands to calculate the Self-Energy will be
 done by defining five datasets, with increasing [[nband]]:
-
-    
     
     ndtset  5
     nband:  50
     nband+  50
-    
 
 In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 ../tgw1_5.in, and modify the tgw1_x.files file as usual. Edit the tgw1_5.in
 file, and take the time to examine it.  
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_5.log &
-    
 
 Edit the output file. The number of bands used for the self-energy is
 mentioned in the fragments of output:
-
-    
     
      SIGMA fundamental parameters:
      PLASMON POLE MODEL
@@ -651,10 +541,7 @@ mentioned in the fragments of output:
      number of plane-waves for wavefunctions           137
      number of bands                                    50
     
-
 Gathering the GW energies for each number of bands, one gets:
-
-    
     
      number of bands                                   50
         4   5.915 -11.639 -15.244   3.878   0.807  -0.240 -11.419   0.220   6.135
@@ -682,29 +569,19 @@ So that nband=100 can be considered converged within 0.01 eV.
 At this stage, we know that for the self-energy computation, we need
 [[ecutwfn]]=5.0 [[ecutsigx]]=6.0, [[nband]]=100 .
 
-
-
-## 6 Convergence on the number of planewaves in the wavefunctions to calculate the
-screening (ε-1) (optional)
-
+## 6 Convergence on the number of planewaves in the wavefunctions to calculate the screening (ε-1) (optional)
   
 Now, we come back to the calculation of the screening. Adequate convergence
 studies will couple the change of parameters for [[optdriver]]=3 with a
 computation of the GW energy changes. One cannot rely on the convergence of
-the macroscopic dielectric constant to assess the convergence of the GW
-energies.
+the macroscopic dielectric constant to assess the convergence of the GW energies.
 
 As a consequence, we will define a double loop over the datasets:
-
-    
     
     ndtset      10
     udtset      5  2
-    
 
 The datasets 12,22,32,42 and 52, drive the computation of the GW energies:
-
-    
     
     # Calculation of the Self-Energy matrix elements (GW corrections)
     optdriver?2   4
@@ -713,53 +590,37 @@ The datasets 12,22,32,42 and 52, drive the computation of the GW energies:
     ecutsigx      6.0
     nband?2       100
     
-
-The datasets 11,21,31,41 and 51, drive the corresponding computation of the
-screening:
-
-    
+The datasets 11,21,31,41 and 51, drive the corresponding computation of the screening:
     
     # Calculation of the screening (epsilon^-1 matrix)
     optdriver?1  3
     
-
 In this latter series, we will have to vary the three different parameters
 [[ecutwfn]], [[ecuteps]] and [[nband]].
 
 First, we check the convergence on the number of planewaves to describe the
 wavefunctions, in the calculation of the screening. This will be done by
 defining five datasets, with increasing [[ecutwfn]]:
-
-    
     
     ecutwfn:?   3.0
     ecutwfn+?   1.0
-    
 
 In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 ../tgw1_6.in, and modify the tgw1_x.files file as usual. Edit the tgw1_6.in
 file, and take the time to examine it.  
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_6.log &
-    
 
 Edit the output file. The number of plane waves used for the wavefunctions in
 the computation of the screening is mentioned in the fragments of output:
-
-    
     
      EPSILON^-1 parameters (SCR file):
      dimension of the eps^-1 matrix                    169
      number of plane-waves for wavefunctions            59
-    
 
 Gathering the macroscopic dielectric constant and GW energies for each
 planewave set, one gets:
-
-    
     
      dielectric constant =  99.4320
      dielectric constant without local fields = 147.6068
@@ -795,11 +656,7 @@ planewave set, one gets:
 So that [[ecutwfn]]=4.0 ([[npwwfn]]=113) can be considered to lead to
 eigenenergies converged within 0.01 eV.
 
-
-
-## 7 Convergence on the number of bands to calculate the screening (ε-1)
-(important)
-
+## 7 Convergence on the number of bands to calculate the screening (ε-1) (important)
   
 This convergence study is rather important. It can be done at the same time as
 the convergence study for the number of bands for the self-energy. Note that
@@ -808,10 +665,7 @@ can be lowered by a large amount by resorting to the extrapolar technique (see
 the input variable [[gwcomp]]).
 
 Second, we check the convergence on the number of bands in the calculation of
-the screening. This will be done by defining five datasets, with increasing
-[[nband]]:
-
-    
+the screening. This will be done by defining five datasets, with increasing [[nband]]:
     
     nband11  25
     nband21  50
@@ -825,16 +679,11 @@ In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 file, and take the time to examine it.
 
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_7.log &
-    
 
 Edit the output file. The number of bands used for the wavefunctions in the
 computation of the screening is mentioned in the fragments of output:
-
-    
     
      EPSILON^-1 parameters (SCR file):
      dimension of the eps^-1 matrix                    169
@@ -844,8 +693,6 @@ computation of the screening is mentioned in the fragments of output:
 
 Gathering the macroscopic dielectric constant and GW energies for each number
 of bands, one gets:
-
-    
     
      dielectric constant =  99.8529
      dielectric constant without local fields = 144.5675
@@ -878,48 +725,33 @@ of bands, one gets:
         5   8.445  -9.675  -3.213  -5.801   0.813  -0.230  -9.137   0.537   8.983
     
 
-So that the computation using 100 bands can be considered converged within
-0.01 eV.
-
-
+So that the computation using 100 bands can be considered converged within 0.01 eV.
 
 ## 8 Convergence on the dimension of the screening ε-1 matrix (important)
-
   
 Third, we check the convergence on the number of plane waves in the
 calculation of the screening. This will be done by defining six datasets, with
 increasing [[ecuteps]]:
-
-    
     
     ecuteps:?     3.0
     ecuteps+?     1.0
-    
 
 In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 ../tgw1_8.in, and modify the tgw1_x.files file as usual. Edit the tgw1_8.in
 file, and take the time to examine it.
 
 Then, issue:
-
-    
     
     abinit < tgw1_x.files >& tgw1_8.log &
-    
 
 Edit the output file. The number of bands used for the wavefunctions in the
 computation of the screening is mentioned in the fragments of output:
-
-    
     
      EPSILON^-1 parameters (SCR file):
      dimension of the eps^-1 matrix                     59
-    
 
 Gathering the macroscopic dielectric constant and GW energies for each number
 of bands, one gets:
-
-    
     
      dielectric constant = 102.1696
      dielectric constant without local fields = 144.5703
@@ -956,7 +788,6 @@ of bands, one gets:
         4   5.915 -11.639 -15.244   3.577   0.807  -0.239 -11.662  -0.023   5.892
         5   8.445  -9.675  -3.213  -5.792   0.813  -0.230  -9.130   0.544   8.990
     
-
 So that ecuteps=6.0 (npweps=169) can be considered converged within 0.01 eV.
 
 At this stage, we know that for the screening computation, we need
@@ -971,10 +802,7 @@ increase very rapidly from one possible grid to the next denser one. This is
 why we will leave this out of the present tutorial, and consider that we
 already know a sufficient k-point grid, for the last calculation.
 
-
-
 ## 9 Calculation of the GW corrections for the band gap in Γ
-
   
 Now we try to perform a GW calculation for a real problem: the calculation of
 the GW corrections for the direct band gap of bulk Silicon in Γ.
@@ -982,29 +810,18 @@ the GW corrections for the direct band gap of bulk Silicon in Γ.
 In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 ../tgw1_9.in, and modify the tgw1_x.files file as usual. Then, edit the
 tgw1_9.in file, and, without examining it, comment the line
-
-    
     
      ngkpt    2 2 2         # Density of k points used for the automatic tests of the tutorial
     
-
 and uncomment the line
-
-    
     
     #ngkpt    4 4 4        # Density of k points needed for a converged calculation
-    
 
-Then,  
-Issue:
-
-    
+Then, issue:
     
     abinit < tgw1_x.files >& tgw1_9.log &
-    
 
-This job lasts about 1 minute so it is worth to run it before the examination
-of the input file.
+This job lasts about 1 minute so it is worth to run it before the examination of the input file.
 
 Now, you can examine it.  
 We need the usual part of the input file to perform a ground state
@@ -1021,8 +838,7 @@ the Kohn-Sham structure in a set of 19 k-points in the Irreducible Brillouin
 Zone. This set of k-points is also derived from a 4x4x4 FCC grid, but a NON-
 SHIFTED one. It has the same density of points as the 10 k-point set, but the
 symmetries are not used in a very efficient way. However, this set contains
-the Γ point, which allows us to tackle the computation of the band gap at this
-point.
+the Γ point, which allows us to tackle the computation of the band gap at this point.
 
 In dataset 3 we calculate the screening. The screening calculation is very
 time-consuming. So, we have decided to decrease a bit the parameters found in
@@ -1048,8 +864,6 @@ Finally in dataset 4 we calculate the self-energy matrix element in Γ, using
 the previously determined parameters.
 
 You should obtain the following results:
-
-    
     
      k =    0.000   0.000   0.000
      Band     E0  VxcLDA    SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
@@ -1059,15 +873,11 @@ You should obtain the following results:
      E^0_gap          2.513
      E^GW_gap         3.126
      DeltaE^GW_gap    0.613
-    
 
 So that the LDA energy gap in Γ is about 2.53 eV, while the GW correction is
 about 0.64 eV, so that the GW band gap found is 3.17 eV.
 
-One can compare now what have been obtained to what one can get from the
-literature.
-
-    
+One can compare now what have been obtained to what one can get from the literature.
     
      EXP         3.40 eV   Landolt-Boernstein	
     
@@ -1085,15 +895,13 @@ literature.
      GW  (FLAPW) 3.12 eV   W. Ku and A.G. Eguiluz, PRL 89, 126401 (2002)
      GW          3.17 eV   present work
     
-
 The values are spread over an interval of 0.2 eV. They depend on the details
 of the calculation. In the case of pseudopotential calculations, they depend
 of course on the pseudopotential used. However, a GW result is hardly
 meaningful beyond 0.1 eV, in the present state of the art. But this goes also
 with the other source of inaccuracy, the choice of the pseudopotential, that
 can arrive up to even 0.2 eV. This can also be taken into account when
-choosing the level of accuracy for the convergence parameters in the GW
-calculation.
+choosing the level of accuracy for the convergence parameters in the GW calculation.
 
 Finally, it is possible to calculate a full band plot of a system. There are
 two possible techniques. The first one is based on the use of Wannier
@@ -1108,12 +916,9 @@ the Kohn-Sham band structure at any point, by using a GW correction for the
 k-points where it has not been calculated explicitly, using a fit of the GW
 correction at a sparse set of points.
 
-
-
 ## Advanced features in the GW code
-
    
-The user might switch to the [second GW tutorial](lesson_gw2.html) before
+The user might switch to the [lesson:gw2|second GW tutorial] before
 coming back to the present section.
 
 #### **Calculations without using the Plasmon-Pole model**
@@ -1140,8 +945,7 @@ by the maximum frequency calculated (input variable [[freqspmax]]).
 #### **Self-consistent calculations**
 
 The details in the implementation and the justification for the approximations
-retained can be found in F. Bruneval, N. Vast, and L. Reining, Phys. Rev. B
-**74** , 045102 (2006).  
+retained can be found in F. Bruneval, N. Vast, and L. Reining, Phys. Rev. B **74** , 045102 (2006).  
 The only added input variables are [[getqps]] and [[irdqps]]. These variables
 concerns the reading of the _QPS file, that contains the eigenvalues and the
 unitary transform matrices of a previous quasiparticle calculation. QPS stands
@@ -1149,8 +953,7 @@ for "QuasiParticle Structure".
 The only modified input variables for self-consistent calculations are
 [[gwcalctyp]] and [[bdgw]].  
 When the variable [[gwcalctyp]] is in between 0 and 9, The code calculates the
-quasiparticle energies only and does not output any QPS file (as in a standard
-GW run).  
+quasiparticle energies only and does not output any QPS file (as in a standard GW run).  
 When the variable [[gwcalctyp]] is in between 10 and 19, the code calculates
 the quasiparticle energies only and outputs them in a QPS file.  
 When the variable [[gwcalctyp]] is in between 20 and 29, the code calculates
@@ -1159,8 +962,7 @@ For a full self-consistency calculation, the quasiparticle wavefunctions are
 expanded in the basis set of the Kohn-Sham wavefunctions. The variable
 [[bdgw]] now indicates the size of all matrices to be calculated and
 diagonalized. The quasiparticle wavefunctions are consequently linear
-combinations of the Kohn-Sham wavefunctions in between the min and max values
-of bdgw.
+combinations of the Kohn-Sham wavefunctions in between the min and max values of bdgw.
 
 A correct self-consistent calculation should consist of the following runs:
 
@@ -1183,11 +985,8 @@ initialization reasons. Therefore, a correct HF calculations should look like
   * 5) Sigma calculation (with the WFK and the new QPS file): outputs a newer QPS file 
   * ............ and so on, until the desired accuracy is reached 
 
-In the case of a self-consistent calculation, the output is slightly more
-complex:  
+In the case of a self-consistent calculation, the output is slightly more complex:  
 **For instance, iteration 2**
-
-    
     
      k =    0.500   0.250   0.000
      Band     E_lda  <Vxclda>    E(N-1) <Hhartree>    SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
@@ -1204,44 +1003,19 @@ complex:
      E^GW_gap         5.764
      DeltaE^GW_gap    2.080
     
-
 The columns are
 
   * **Band** : index of the band   
-  
-
   * **E_lda** : LDA eigenvalue   
-  
-
   * **< Vxclda>**: diagonal expectation value of the xc potential in between LDA bra and ket   
-  
-
   * **E(N-1)** : quasiparticle energy of the previous iteration (equal to LDA for the first iteration)   
-  
-
   * **< Hhartree>**: diagonal expectation value of the Hartree Hamiltonian (equal to E_lda - <Vxclda> for the first iteration only)   
-  
-
   * **SigX** : diagonal expectation value of the exchange self-energy   
-  
-
-  * **SigC[E(N-1)]** : diagonal expectation value of the correlation self-energy (evaluated for the energy of the preceeding iteration)   
-  
-
+  * **SigC[E(N-1)]** : diagonal expectation value of the correlation self-energy 
+    (evaluated for the energy of the preceeding iteration)   
   * **Z** : quasiparticle renormalization factor Z (taken equal to 1 in methods HF, SEX, COHSEX and model GW)   
-  
-
   * **dSigC/dE** : Derivative of the correlation self-energy with respect to the energy   
-  
-
   * **Sig[E(N)]** : Total self-energy for the new quasiparticle energy   
-  
-
   * **DeltaE** : Energy difference with respect to the previous step   
-  
-
   * **E(N)_pert** : QP energy as obtained by the usual perturbative method   
-  
-
   * **E(N)_diago** : QP energy as obtained by the full diagonalization 
-

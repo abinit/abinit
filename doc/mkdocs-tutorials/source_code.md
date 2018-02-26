@@ -4,7 +4,9 @@ authors: YP
 
 # Developing for ABINIT  
 
-## Introducing ABINIT to new developers (WARNING : some parts are severely outdated ...).  
+## Introducing ABINIT to new developers 
+
+WARNING : some parts are severely outdated ...
 
 This tutorial introduces ABINIT to the new developers. We want here to give a
 first insight into the internals of ABINIT. In other words, you will look at
@@ -12,14 +14,9 @@ what's under the cap. Being an ABINIT user is not required though it will help
 a lot, in particular when writing a test case for your contribution. However
 some experience in programming is necessary if you want to take maximum
 benefit from this lesson. In particular, some ease with Fortran 90, 95 or 2003
-will be truly welcome. Familiarity with the command line will be wonderful
-too.
-
-WARNING : some parts are severely outdated.
-
+will be truly welcome. Familiarity with the command line will be wonderful too.
 
 ## 1 Context
-
   
 The ABINIT package is aimed at being used by different groups of people,
 without mandatory control by the main contributors of the ABINIT group. In the
@@ -47,14 +44,11 @@ files, and to comment the modifications and additions as much as possible, in
 order to facilitate the maintenance and the future modifications.
 
 A lot of information for the ABINIT developers can be found in the
-[developer's corner,](http://dev.abinit.org), especially, [How to
-contribute](http://dev.abinit.org/doc/for-new-developers/how-to-contribute),
+[developer's corner,](http://dev.abinit.org), especially, 
+[How to contribute](http://dev.abinit.org/doc/for-new-developers/how-to-contribute),
 and [Specificities](http://dev.abinit.org/doc/particulars),
 
-
-
 ## 2 Objectives
-
   
 The main goals of this lesson are to provide you with a useful understanding
 of the source tree structure and the build process, as well as sensibilize you
@@ -73,10 +67,7 @@ that you want to test it with ABINIT. Here are the steps we will take:
 For this lesson, your input variable will be a real number called " _lesson_
 ". The task devoted to your routine is just to print this variable.
 
-
-
 ## 3 Tasks
-
   
 #### Get the source and compile the code
 
@@ -84,15 +75,13 @@ There are two ways of getting the source code of ABINIT:
 
   * directly from the ABINIT web site ([abinit.org/](https://www.abinit.org/)) by downloading the tarball;
   * from the ABINIT gitlab.
-  * 
 
-While the first method is straightforward, the second one requires you to know
-how to use git(lab). Please see the [ABINIT gitlab Wiki
-section](https://wiki.abinit.org/doku.php?id=developers:specificities_git_abinit/).
+While the first method is straightforward, the second one requires you to know how to use git(lab). 
+Please see the [ABINIT gitlab Wiki section](http://wiki.abinit.org/doku.php?id=developers:specificities_git_abinit/).
 
 Once you have got the tarball, uncompress it by typing:
 
-tar xvzf abinit- _< version>_.tar.gz
+    tar xvzf abinit- _< version>_.tar.gz
 
 where _< version>_ is the version number you downloaded, e.g. "7.4.2". Then go
 into the newly-created _abinit- <version>_ directory and have a look at it. To
@@ -100,13 +89,11 @@ get get more familiar with the source tree structure, have a closer look at
 the [Directories and files](http://dev.abinit.org/doc/for-adv-
 developers/source-tree) Web page. Then answer the following questions:
 
-Q1. If you need off-line documentation, in which directories will you look
-for?
+Q1. If you need off-line documentation, in which directories will you look for?
 
 Q2. Where can be found the tests?
 
-Q3. What do the numbers in the names of the " _src_ " subdirectories stand
-for?
+Q3. What do the numbers in the names of the " _src_ " subdirectories stand for?
 
 Q4. In the source subdirectories, what do the _abinit.src_ files contain? In
 your opinion, what is their purpose?
@@ -118,7 +105,7 @@ the INSTALL file. Please read it now.
 
 Before actually starting the compilation, type:
 
-./configure --help | more
+    ./configure --help
 
 and read carefully the output. You might then find useful to have a look at
 the template for config files stored in _~abinit/doc/build/config-template.ac_
@@ -149,8 +136,7 @@ Q9. Where is the _wrtout_ subroutine? What is its purpose? How does it work?
 
 Please examine the file _~abinit/doc/developers/programmer_guide.txt_ and
 _~abinit/doc/developers/rules_coding.txt_. This might help writing your own
-subroutine. To actually start, go to the subdirectory you've identified before
-and type:
+subroutine. To actually start, go to the subdirectory you've identified before and type:
 
 sh ../../util/developers/mkroutine.sh handle_lesson
 
@@ -178,7 +164,7 @@ test-suite)
 
 Q10. What do you need to do in order to have a new test added?
 
-Implement your test and issue `./Runtests.py v7[999]` in the _tests/_
+Implement your test and issue `./runtests.py v7[999]` in the _tests/_
 subdirectory, to check that it works fine.
 
 #### Create a patch for the project leader
@@ -198,11 +184,8 @@ Q11. Which options will you give to the _diff_ command to produce the patch ?
 
 Q12. How will you proceed exactly to create it ?
 
-
-
 ## 4 Solutions
 
-  
 Even if we provide you here with the answers to some of the questions, we
 highly recommend you to try by yourself before looking at them. Please read
 this section only as a last resort.
@@ -211,10 +194,10 @@ R1. In _~abinit/doc/_ , of course.
 
 R2. In _~abinit/tests/_ , of course.
 
-R3. According to [Directories and files](http://dev.abinit.org/doc/for-adv-
-developers/source-tree), they correspond to a hierarchical structuring of the
-dependencies within ABINIT. The higher the level, the more the dependencies on
-lower levels.
+R3. According to 
+[Directories and files](http://dev.abinit.org/doc/for-adv-developers/source-tree), 
+they correspond to a hierarchical structuring of the
+dependencies within ABINIT. The higher the level, the more the dependencies on lower levels.
 
 R4. They contain the list of source files to compile, and allow the developers
 to explore several ways at once by giving them the choice of what to put in
@@ -255,6 +238,3 @@ commands will do:
 
 _Note: in case you are using Bazaar, you will have to exclude the '.bzr*'
 files from the diff by adding "` -x '.bzr*'`" to the other options._
-
-
-

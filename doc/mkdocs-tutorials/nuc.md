@@ -15,16 +15,13 @@ interest in Moessbauer, NMR, and NQR spectroscopy, namely:
 
 This lesson should take about 1 hour.
 
-
 ## 1 Electric field gradient
-
   
 Various spectroscopies, including nuclear magnetic resonance and nuclear
 quadrupole resonance (NMR and NQR), as well as Moessbauer spectroscopy, show
 spectral features arising from the electric field gradient at the nuclear
 sites. Note that the electric field gradient (EFG) considered here arises from
-the distribution of charge within the solid, not due to any external electric
-fields.
+the distribution of charge within the solid, not due to any external electric fields.
 
 The way that the EFG is observed in spectroscopic experiments is through its
 coupling to the nuclear electric quadrupole moment. The physics of this
@@ -39,8 +36,8 @@ especially is quite sensitive to the details of the distribution at short
 range, and so it is necessary to use the PAW formalism to compute the gradient
 accurately. The various sources of charge in the PAW decomposition are
 summarized in the following equation:  
-![](../documents/lesson_nuc/charge.gif)  
 
+![](../documents/lesson_nuc/charge.gif)  
   
 Here the "v" subscript indicates valence, "c" indicates core, and "Z"
 indicates the ions. Essentially the gradient must be computed for each source
@@ -49,18 +46,16 @@ of charge, which is done in the code as follows:
   * Valence space described by planewaves: expression for gradient is Fourier-transformed at each nuclear site. 
   * Ion cores: gradient is computed by an Ewald sum method 
   * On-site PAW contributions: moments of densities are integrated in real space around each atom, weighted by the gradient operator 
+
 The code reports each contribution separately if requested.
 
 The electric field gradient computation is performed at the end of a ground-
 state calculation, and takes almost no additional time. The tutorial file is
 for stishovite, a polymorph of SiO2. In addition to typical ground state
 variables, only two additional variables are added:
-
-    
     
             prtefg  2
             quadmom 0.0 -0.02558
-    
 
 The first variable instructs Abinit to compute and print the electric field
 gradient, and the second gives the quadrupole moments of the nuclei, one for
@@ -70,8 +65,6 @@ isotope of oxygen with a non-zero quadrupole moment.
 
 After running the file tnuc_1.in through abinit, you can find the following
 near the end of the output file:
-
-    
     
      Electric Field Gradient Calculation 
     
@@ -95,8 +88,6 @@ quadrupole moment of Si-29 is zero, so although there's a gradient there's
 nothing in the nucleus for it to couple to.
 
 Atom 2 is an oxygen atom, and its entry in the output is:
-
-    
     
      Atom   2, typat   2: Cq =      6.603688 MHz     eta =      0.140953
     
@@ -124,13 +115,9 @@ Atom 2 is an oxygen atom, and its entry in the output is:
           efg_paw :      0.621908    -0.174446     0.000000
           efg_paw :      0.000000     0.000000     0.348892
     
-
 Now we see the electric field gradient coupling, in frequency units, along
 with the asymmetry of the coupling tensor, and, finally, the three
 contributions to the total. Note that the valence part, efg_el, is quite
 small, while the ionic part and the on-site PAW part are larger. In fact, the
 PAW part is largest--this is why these calculations give very poor results
 with norm-conserving pseudopotentials, and need the full accuracy of PAW.
-
-
-
