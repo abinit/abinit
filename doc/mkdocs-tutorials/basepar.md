@@ -272,7 +272,7 @@ machine, and the sequential part of ABINIT), you will not be able to decrease
 further the Wall clock time seen by one processor. It is not worth to try to
 use more processors. You should get a curve similar to this one:
 
-![](../documents/lesson_basepar/lesson_basepar_speedup.png)
+![](basepar_assets/lesson_basepar_speedup.png)
 
 The red curve materializes the speed-up achieved, while the green one is the
 "y = x" line. The shape of the red curve will vary depending on your hardware

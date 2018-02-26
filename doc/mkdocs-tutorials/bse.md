@@ -364,7 +364,7 @@ will plot the imaginary part of the macroscopic dielectric function (the
 absorption spectrum) for the first q-point. You should obtain a graphic
 similar to the one reported below
 
-![](../documents/lesson_bse/tbs2_1.png)
+![](bse_assets/tbs2_1.png)
 
 Note that these results are not converged, we postpone the discussion
 about convergence tests to the next paragraphs of this tutorial.
@@ -384,7 +384,7 @@ Use the sequence of gnuplot command
 to plot the absorption spectrum obtained with the three different approaches.
 The final result is reported in the figure below.
 
-![](../documents/lesson_bse/tbs2_2.png)
+![](bse_assets/tbs2_2.png)
 
 The RPA-KS spectrum underestimates the experimental optical threshold due to
 the well know band gap problem of DFT. Most importantly, the amplitude of the
@@ -516,7 +516,7 @@ Use the following sequence of gnuplot commands:
 to plot on the same graphic the absorption spectrum obtained with different
 transition spaces. You should obtain a graphic similar to this one:
 
-![](../documents/lesson_bse/tbs3.png)
+![](bse_assets/tbs3.png)
 
 The results obtained with ([[bs_loband]]=4, [[nband]]=5) are clearly
 unconverged as the basis set contains too few transitions that are not able to
@@ -609,7 +609,7 @@ Once the calculation is completed, plot the spectra obtained with different [[ec
     gnuplot>  p "tbs_4o_DS4_EXC_MDF" u 1:3 w l
     
 
-![](../documents/lesson_bse/tbs4.png)
+![](bse_assets/tbs4.png)
 
 The spectrum is found to converge quickly in [[ecuteps]]. The curves obtained
 with [[ecuteps]]=3 and 4 Ha are almost indistinguishable from each other. Our
@@ -661,7 +661,7 @@ CPU times required by different k-meshes on Intel Xeon X5570:
 machine. For you convenience, we have collected the results of the convergence
 test in the figure below.
 
-![](../documents/lesson_bse/tbs5.png)
+![](bse_assets/tbs5.png)
 
 As anticipated, the spectrum converges slowly with the number of k-points and
 our first calculation done with the 4x4x4 grid is severely unconverged. The
@@ -729,4 +729,4 @@ also employed for the conjugate-gradient minimization. For a balanced
 distribution of computational work, the number of processors should divide the
 total number of resonant transitions.
 
-![](../documents/lesson_paral_mbt/MPI_mv.png)
+![](paral_mbt_assets/MPI_mv.png)

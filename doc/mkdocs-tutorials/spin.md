@@ -104,8 +104,14 @@ for the magnetic and non magnetic case respectively. We can extract the values
 for use in a plotting software.  
 Traditionally, in order to enhance visibility, one affects with a negative
 sign the DOS of  minority  electrons. 
-If we compare the [DOS of the magnetized](../documents/lesson_spin/bccfe_mag_dos2.jpg) system 
-and the [non magnetized](../documents/lesson_spin/bccfe_nonmag_dos2.jpg) system, 
+If we compare the DOS of the magnetized] system 
+
+![](spin_assets/bccfe_mag_dos2.jpg)
+
+and the non magnetized system
+
+![](spin_assets/bccfe_nonmag_dos2.jpg)
+
 we observe that the up and down DOS have been  "shifted" with respect each other.  
 The integrated density of states yields the number of electrons for each spin
 direction and we see the magnetization which arises from the fact that there
@@ -281,8 +287,10 @@ by looking at the integrated density of states which is different only for the
 d-channel. The difference between up and down is 0.68, in rough agreement
 (regarding our very rude methods of integration) with the previous
 calculation. Using a calculation with the same number of k points for the
-projected DOS, we can [plot](../documents/lesson_spin/energy_diff_fccfe.jpg)
-the up-down integrated dos difference for the d-channel. 
+projected DOS, we can plot the up-down integrated dos difference for the d-channel. 
+
+![](spin_lesson/energy_diff_fccfe.jpg)
+
 Note that there is some scatter in this graph, due to the finite number of digits (2 decimal
 places) of the integrated dos given in the file tspin_3o_DS3_DOS_AT0002.  
   

@@ -35,14 +35,14 @@ This lesson should take less than two hours to be done if a powerful parallel
 computer is available.
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](lesson_basepar.html).
+explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 
 ## 1 The structure of the parallelism for the DFPT part of ABINIT
 
 **1.1.** Let us recall first the basic structure of typical DFPT calculations.
 This is summarized in box 1.  
 
-![Schema 1](../documents/lesson_paral_dfpt/DFPT_Structure.png)  
+![Schema 1](paral_dfpt_assets/DFPT_Structure.png)  
 
 The step 1 is done in a preliminary ground-state calculation (either by an
 independent run, or by computing them using an earlier dataset before the DFPT
@@ -65,7 +65,7 @@ steps 2 and 3. These are not time-consuming sections. No parallelism is needed.
 wavefunctions and potentials (step 2 of box 1), which is the really time-
 consuming part of any DFPT calculation, are presented in box 2.  
 
-![Schema 2](../documents/lesson_paral_dfpt/DFPT_Equations.png)  
+![Schema 2](paral_dfpt_assets/DFPT_Equations.png)  
 
 The parallelism currently implemented for the DFPT part of ABINIT is based on
 the parallel distribution of the most important arrays: the set of first-order
@@ -77,7 +77,7 @@ space), different such wavefunctions might be distributed over different
 computing cores. This easily achieves a combined k point, spin and band index
 parallelism, as explained in box 3.  
 
-![Schema 3](../documents/lesson_paral_dfpt/1WFs.png)  
+![Schema 3](paral_dfpt_assets/1WFs.png)  
 
 **1.3.** The parallelism over k points, band index and spin for the set of
 wavefunctions is implemented in all relevant steps, except for the reading
@@ -383,7 +383,7 @@ with 128 processors.
 The next figure presents the speed-up of a typical calculation with increasing
 number of computing cores (also, the efficiency of the calculation). 
 
-![Schema 1](../documents/lesson_paral_dfpt/Speedup.jpeg)  
+![Schema 1](paral_dfpt_assets/Speedup.jpeg)  
 
 Beyond 300 computing cores, the sequential parts of the code start to
 dominate. With more realistic computing parameters (ecut 40), they dominate

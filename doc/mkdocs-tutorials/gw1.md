@@ -87,7 +87,7 @@ In order to perform a standard one-shot GW calculation one has to:
 
 The flowchart diagram of a standard one-shot run is depicted in the figure below.
 
-![](../documents/lesson_gw1/gw_flowchart.png)
+![](gw1_assets/gw_flowchart.png)
 
 The input file tgw1_1.in has precisely that structure: there are four datasets.
 

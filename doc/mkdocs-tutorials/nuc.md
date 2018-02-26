@@ -37,7 +37,7 @@ range, and so it is necessary to use the PAW formalism to compute the gradient
 accurately. The various sources of charge in the PAW decomposition are
 summarized in the following equation:  
 
-![](../documents/lesson_nuc/charge.gif)  
+![](nuc_assets/charge.gif)  
   
 Here the "v" subscript indicates valence, "c" indicates core, and "Z"
 indicates the ions. Essentially the gradient must be computed for each source

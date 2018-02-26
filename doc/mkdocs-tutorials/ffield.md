@@ -412,7 +412,7 @@ that the quadratic term is almost negligible. This clearly appears in the
 figure below where the field dependence of the force for a larger range of
 electric fields is plotted.
 
-![](../documents/lesson_nlo/image001.gif)
+![](nlo_assets/image001.gif)
 
 We can therefore extract with a good accuracy the Born effective charge as :
     
@@ -465,7 +465,7 @@ the same, showing again that the quadratic term is almost negligible. This
 clearly appears in the figure below where the field dependence of the
 polarization for a larger range of electric fields is plotted.
 
-![](../documents/lesson_ffield/image004.gif)
+![](ffield_assets/image004.gif)
 
 We can therefore extract with a good accuracy the linear optical dielectric susceptibility:
     
@@ -492,7 +492,7 @@ able to extract the piezoelectric constants. You can try to do it as an
 exercise. As the calculation here was at clamped ions, you will get the
 clamped ion proper piezoelectric constants. At [[ecut]]=5, you should obtain -0.69088 C/m^2.
 
-![](../documents/lesson_ffield/image007.gif)
+![](ffield_assets/image007.gif)
 
 Redoing the same kind of finite field calculation when allowing the ions to
 relax, one can access the relaxed ion proper piezoelectric constant. 

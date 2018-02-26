@@ -415,7 +415,7 @@ If you use the "xmgrace" tool, launch:
 
 You should get this:  
 
-![Projected DOS - 4 proj](../documents/lesson_paw1/DOS-4proj.jpg)  
+![Projected DOS - 4 proj](paw1_assets/DOS-4proj.jpg)  
 
 As you can see, the smooth PW contribution and the PS on-site contribution are close.  
 So, in a first approach, they cancel; we could approximate the DOS by the AE
@@ -463,7 +463,11 @@ tpaw1_4o_6proj_DOS_AT0001.
   
 Then, plot the contributions to the projected DOS for the two new DOS files.
 You should get:  
-![Projected DOS - 2 proj](../documents/lesson_paw1/DOS-2proj.jpg)![Projected DOS - 6 proj](../documents/lesson_paw1/DOS-6proj.jpg)  
+
+![Projected DOS - 2 proj](paw1_assets/DOS-2proj.jpg)
+
+![Projected DOS - 6 proj](paw1_assets/DOS-6proj.jpg)  
+
 Adding the DOS obtained in the previous section to the comparison, you
 immediately see that the superposition of the Smooth part DOS and the PS on-
 site DOS depends on the completeness of the partial wave basis !  
@@ -527,7 +531,7 @@ Launch ABINIT with these files; you should obtain the tpaw1_5.out.
 From the tpaw1_5.out file, you can extract the 7 values of acell and 7 values
 of etotal, then put them into a file and plot it with a graphical tool. You should get:  
 
-![diamond: etotal vs acell](../documents/lesson_paw1/etotal-acell.jpg)  
+![diamond: etotal vs acell](paw1_assets/etotal-acell.jpg)  
 
 From this curve, you can extract the cell values of a0 and B (with the method
 of your choice, for example by a Birch-Murnhagan spline fit).  

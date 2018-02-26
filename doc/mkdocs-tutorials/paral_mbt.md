@@ -162,7 +162,7 @@ three different steps that can be schematically described as follows:
 
   1. Each node computes the partial contribution to the RPA polarizability: 
 
-![](../documents/lesson_paral_mbt/gwpara2_chi0.png)
+![](paral_mbt_assets/gwpara2_chi0.png)
 
   2. The partial results are collected on each node. 
 
@@ -193,9 +193,9 @@ degradation of the total speedup observed for large number of processors is
 mainly due to the portions of the computation that are not parallelized,
 namely the reading of the WFK file and the matrix inversion (qloop).
 
-![](../documents/lesson_paral_mbt/screening_speedup.png)
+![](paral_mbt_assets/screening_speedup.png)
 
-![](../documents/lesson_paral_mbt/screening_rel_times.png)
+![](paral_mbt_assets/screening_rel_times.png)
 
 At this point, the most important technical details of the implementation have
 been covered, and we can finally run ABINIT over nn CPU cores using
@@ -344,7 +344,7 @@ calculated using the Adler-Wiser and the Hilbert transform method. You might
 try to reproduce these results (the EELF is reported in the file tmbt_3o_EELF,
 a much denser k-sampling is required to achieve convergence).
 
-![](../documents/lesson_paral_mbt/comp-AW-spect.png)
+![](paral_mbt_assets/comp-AW-spect.png)
 
 ## 4 Computing the one-shot GW corrections in parallel
 
@@ -391,7 +391,7 @@ the wavefunctions:
 
   2. The [[nband]] bands are distributed using the following partition scheme: 
 
-![](../documents/lesson_paral_mbt/band_distribution_sigma.png)
+![](paral_mbt_assets/band_distribution_sigma.png)
 
 where we have assumed a calculation done with four nodes (the index in the box
 denotes the MPI rank).
@@ -426,7 +426,7 @@ scaling departs from the linear behavior due to the unbalanced distribution of
 the occupied bands. The non-scalable parts of the implementation (init1,
 rdkss) limit the total speedup due to Amdhal's law.
 
-![](../documents/lesson_paral_mbt/sigma_analysis.png)
+![](paral_mbt_assets/sigma_analysis.png)
 
 The implementation presents good memory scalability since the largest arrays
 are distributed. Only the size of the screening does not scale with the number
@@ -460,7 +460,7 @@ account that this calculation has been performed at the theoretical LDA
 parameters, while the experimental structure is used in all the input files of
 this tutorial).
 
-![](../documents/lesson_paral_mbt/SiO2_KSG0W0_PPM1.png)
+![](paral_mbt_assets/SiO2_KSG0W0_PPM1.png)
 
 ## 5 Basic rules for efficient parallel calculations
 

@@ -292,9 +292,12 @@ but the following might perhaps do the work:
 You should see a nice phonon band structure for AlAs. Well, not so nice, after
 all, because there are two strange dips for the highest phonon band, at the Gamma point.  
 This is due to the lack of LO-TO splitting for the ANADDB treatment of the
-first list of vector. The correct phonon band structure is presented
-[here](../documents/lesson_rf2/trf2_6.out.eps). You can correct the LO-TO
-splitting by the following little hack.
+first list of vector. 
+The correct phonon band structure is:
+
+![](rf2_assets/trf2_6.out.png)
+
+You can correct the LO-TO splitting by the following little hack.
 
 Edit the file trf2_5_B2EPS.freq, and note that the value of the frequency, in
 the sixth column, has a discontinuity exactly for the Gamma point (the three

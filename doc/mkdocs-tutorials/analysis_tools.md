@@ -146,7 +146,7 @@ file, you will see that this is a simple two columns file. You can visualize
 it with your favorite plotting software (ex: xmgrace, gnuplot, ...). If you
 open this file with xmgrace, you will obtain the following graph:
 
-![](../documents/lesson_analysis_tools/si_den_111.png)
+![](analysis_tools_assets/si_den_111.png)
 
 We can learn quite a lot from this graph. Looking at the input file, we see
 that we have a silicon atom at the origin and another 1/4 along the diagonal.

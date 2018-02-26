@@ -362,7 +362,7 @@ and has produced a number of additional files:
   * the resistivity as a function of temperature (teph_6.out_ep_RHO and figure) and
   * the thermal conductivity as a function of temperature (teph_6.out_ep_WTH) but ONLY the electronic contribution. You are still missing the phonon-phonon interactions, which are the limiting factor in the thermal conductivity beyond a few 100 K. For metals at even higher temperature the electrons will often dominate again as they contain more degrees of freedom.
 
-![Resistivity of Al as a function of T](../documents/lesson_eph/teph_6_RHO.png)
+![Resistivity of Al as a function of T](eph_assets/teph_6_RHO.png)
 
 The high T behavior is necessarily linear if you include only first order e-p
 coupling and neglect the variation of the GKK off of the Fermi surface. The

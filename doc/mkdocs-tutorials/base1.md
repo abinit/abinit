@@ -468,7 +468,10 @@ energies gathered in the final echo of variables:
         etotal20 -1.0899835224E+00
         etotal21 -1.0867972868E+00
     
-You might try to [plot](../documents/lesson_base1/Plot1.jpg) these data. 
+You might try plot to these data:
+
+![EOS plot](base1_assets/Plot1.jpg) 
+
 The minimum of energy in the above list is clearly between dataset 11 and 12, that is:
     
          xcart11 -7.5000000000E-01  0.0000000000E+00  0.0000000000E+00
@@ -558,18 +561,18 @@ file, see sections
 [6.6](../../users/generated_files/help_abinit.html#localpotfile) and
 [6.7](../../users/generated_files/help_abinit.html#wavefctfile)
 
-Such a density file can be read by ABINIT, to restart a calculation (see the input variable [[iscf]], when its value is -2), but more usually, by an utility called "cut3d". This utility is available in the ABINIT package. You might try to use it now, to generate two-dimensional cuts in the density, and visualize the charge density contours.   
-Read the corresponding [Cut3D help file](../../users/generated_files/help_cut3d.html). 
+Such a density file can be read by ABINIT, to restart a calculation (see the input variable [[iscf]], when its value is -2), but more usually, by an utility called "cut3d". This utility is available in the ABINIT package. 
+You might try to use it now, to generate two-dimensional cuts in the density, and visualize the charge density contours.   
+Read the corresponding [[help:cut3d|Cut3D help file]]
 Then, try to run cut3d to analyse **tbase1_xo_DEN**. You should first try to translate the unformatted
 density data to indexed formatted data, by using option 6 in the adequate
 menu. Save the indexed formatted data to file **tbase1_xo_DEN_indexed**. Then,
 edit this file, to have an idea of the content of the _DEN files.  
 For further treatment, you might choose to select another option than 6. In
 particular, if you have access to MATLAB, choose option 5. With minor
-modifications (set ngx=ngy=ngz to 30) you will be able to use the file dim.m
-present in ~abinit/doc/tutorial/documents/lesson_base1 to visualize the
-3-Dimensional isosurfaces. Another option might be to use the XCrysDen
-software, for which you need to use option 9.
+modifications (set ngx=ngy=ngz to 30) you will be able to use the file [dim.m](base1_assets/dim.m)
+to visualize the 3-Dimensional isosurfaces. 
+Another option might be to use the XCrysDen software, for which you need to use option 9.
 
 ## Computation of the atomisation energy
   

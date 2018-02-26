@@ -138,7 +138,7 @@ _cut3d_ and _XcrysDen_ or _VMD_ ) you can see that the positron is localized
 inside the vacancy. You can see below how the positron (in red, isodensity at
 30% of the maximum density) localized the silicon monovacancy looks like:
 
-![](../documents/lesson_positron/posdensity.png)
+![](positron_assets/posdensity.png)
 
 ## 3 Performing self consistent electron-positron calculations for a vacancy
   
@@ -323,7 +323,7 @@ rho_001, rho_011, rho_111 from the fifth step to for instance si4el_001, si4el_0
 By plotting the Doppler spectra in the (001) direction calculated with 4 and
 12 valence electrons, you should obtain a figure like this:
 
-![](../documents/lesson_positron/doppler.png)
+![](positron_assets/doppler.png)
 
 The dataset with 4 valence electrons is not complete enough to describe the
 positron wavefunction around the nucleus. This is reflected in the
