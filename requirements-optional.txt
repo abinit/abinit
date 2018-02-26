@@ -1,0 +1,13 @@
+#graphviz or python-graphviz if conda
+numpy
+networkx
+plotly
+#matplotlib
+py_w3c
+# Unit tests
+#pytest
+#pytest-cov
+#pytest-xdist
+#pytest-sugar
+#scripttest
+#python-coveralls

@@ -688,7 +688,7 @@ agreement with the experiment.
     Compare the imaginary part of the macroscopic dielectric function obtained with and without coupling. 
     Do you find significant differences? (Caveat: calculations with coupling cannot use the Haydock method 
     and are much more CPU demanding. You might have to decrease some input parameters to have results in reasonable time.) 
-  * Calculate the one-shot GW corrections for silicon following the [[first GW lesson|lesson:gw1]] of the GW tutorial. 
+  * Calculate the one-shot GW corrections for silicon following the [[lesson:gw1|first GW lesson]] of the GW tutorial. 
     Then use the `_GW` file produced by the code to calculate the absorption spectrum. 
 
 ## 7 Notes on the MPI implementation

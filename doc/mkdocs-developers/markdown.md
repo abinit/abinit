@@ -335,13 +335,16 @@ Namespace      | Markdown                         | Result
  `lesson`      | `[[lesson:gw1]]`                 | [[lesson:gw1]]
  `topic`       | `[[topic:BSE]]`                  | [[topic:BSE]]
  `help`        | `[[help:abinit]]`                | [[help:abinit]]
- `theorydoc`   | `[[theorydoc:mbpt]]`             | [[theorydoc:mbpt]]
+ `theory`      | `[[theory:mbpt]]`                | [[theory:mbpt]]
  `varset`      | `[[varset:bse]]`                 | [[varset:bse]]
- `bib`         | `[[bib:Amadon2008]]`             | [[bib:Amadon2008]]
+ `cite`        | `[[cite:Amadon2008]]`            | [[cite:Amadon2008]]
  `ac`          | `[[ac:abiref_gnu_5.3_debug.ac]]` | [[ac:abiref_gnu_5.3_debug.ac]]
  `pdf`         | `[[pdf:howto_chebfi.pdf]]`       | [[pdf:howto_chebfi.pdf]]
  `src`         | `[[src:94_scfcv/scfcv.F90]]`     | [[src:94_scfcv/scfcv.F90]]
 
+!!! important
+
+    theorydoc and bib are deprecated and replaced by theory and cite, respectively.
 
 Also in this case, it's possible to specify the name of the link with the
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].

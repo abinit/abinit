@@ -1,0 +1,11 @@
+html2text
+# Pinned versions
+#-mkdocs==0.16.3
+#-mkdocs-material==1.12.2
+mkdocs
+mkdocs-material
+pymdown-extensions
+python-markdown-math
+pyyaml
+pygments
+pybtex
