@@ -452,6 +452,13 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
 
 ! *********************************************************************
 
+ ABI_UNUSED(dtfil%ireadwf)
+ ABI_UNUSED(ikpt)
+ ABI_UNUSED(isppol)
+ ABI_UNUSED(mband)
+ ABI_UNUSED(mkmem)
+ ABI_UNUSED(nsppol)
+
 !Check sizes
  if (size(cprj_jband)/=0) then
    if (size(cprj_jband)/=rf2%nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then

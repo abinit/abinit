@@ -1151,7 +1151,7 @@ end subroutine pawdata_chunk
 !!  paw_setup<paw_setup_type>=Datatype gathering information on XML paw setup.
 !!
 !! PARENTS
-!!      abinit,inpspheads,mover_effpot
+!!      abinit,inpspheads
 !!
 !! CHILDREN
 !!      paw_rdfromline

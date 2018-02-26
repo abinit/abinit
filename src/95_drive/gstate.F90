@@ -1168,9 +1168,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  !! orbital magnetization initialization
  dtorbmag%orbmag = dtset%orbmag
  if (dtorbmag%orbmag > 0) then
-    call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
-&                   rprimd,symrec,xred)
+   call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
+&   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&   rprimd,symrec,xred)
  end if
  
 
@@ -1585,12 +1585,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if (associated(pwind)) then
-    ABI_DEALLOCATE(pwind)
+   ABI_DEALLOCATE(pwind)
  end if
  if (associated(pwnsfac)) then
-    ABI_DEALLOCATE(pwnsfac)
+   ABI_DEALLOCATE(pwnsfac)
  end if
-  if ((dtset%berryopt<0).or.&
+ if ((dtset%berryopt<0).or.&
 & (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17)) then
    if (xmpi_paral == 1) then

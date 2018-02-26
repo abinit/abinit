@@ -70,7 +70,7 @@
 #include "abi_common.h"
 
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
-&          nhat1gr,nhat1grdim,nkxc,nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
+&          nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
 &          rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
 
  use defs_basis
@@ -93,7 +93,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhatdim,nhat1dim,nhat1grdim,optnc
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat,nkxc_cur
+ integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -118,6 +118,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !  Compute Vxc(r)^(1) in the spin frame aligned with \vec{m} and rotate it back
 
  DBG_ENTER("COLL")
+ ABI_UNUSED(nhat1gr)
 
  call timab(181,1,tsec)
 
@@ -182,10 +183,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    if (optnc==1) then
      if(present(ixcrot)) then
        call rotate_back_mag_dfpt(option,vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
-&                                mag_norm_in=m_norm,rot_method=ixcrot)
+&       mag_norm_in=m_norm,rot_method=ixcrot)
      else
        call rotate_back_mag_dfpt(option,vxc1_diag,vxc1,vxc,kxc,rhor1_,mag,nfft,cplex,&
-&                                mag_norm_in=m_norm)
+&       mag_norm_in=m_norm)
      end if
    else
      call rotate_back_mag(vxc1_diag,vxc1,mag,nfft,mag_norm_in=m_norm)

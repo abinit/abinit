@@ -97,8 +97,8 @@
 
  hermitian=1
  call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,hermitian,&
-&  0,0,icg,icg,ikpt,isppol,istwf,nband,mcg,mcg,mcprj,mcprj,mkmem,&
-&  mpi_enreg,natom,nattyp,nband,nband,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
+& 0,0,icg,icg,ikpt,isppol,istwf,nband,mcg,mcg,mcprj,mcprj,mkmem,&
+& mpi_enreg,natom,nattyp,nband,nband,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
 
 !Cholesky factorization: O = U^H U with U upper triangle matrix.
  call ZPOTRF('U',nband,smn,nband,ierr)
@@ -107,7 +107,7 @@
  dmn=zero
  do ii=1,nband
    dmn(1,ii,ii)=one 
- enddo
+ end do
  call ZTRSM('Right','Upper','Normal','Normal',nband,nband,cone,smn,nband,dmn,nband)
 
  inplace=1

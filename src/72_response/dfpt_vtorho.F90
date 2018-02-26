@@ -439,16 +439,16 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !  Continue to initialize the Hamiltonian
    call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,with_nonlocal=.true.)
+     call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,with_nonlocal=.true.)
      if (ipert==natom+11) then ! load vlocal1
-       call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1)
+       call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,vlocal1=vlocal1)
      end if
    end if
 
    if (ipert==natom+5) then !SPr deb, in case of magnetic field perturbation, no non-local
-     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1)
+     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1)
    end if
 
 !  Nullify contribution to 1st-order density from this k-point
