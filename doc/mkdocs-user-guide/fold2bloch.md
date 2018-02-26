@@ -6,11 +6,7 @@ authors: AB,  OR
 
 ## This file explains the use and i/o parameters needed for the "fold2Bloch" post-processor of the ABINIT package.  
 
-
-
-
 ## 0 To be filled
-
   
 This program generates an unfolded spectrum in a small cell, from a folded
 spectrum of eigenvalues in a supercell. The new k-wavevectors and the weights
@@ -22,25 +18,16 @@ Fold2Bloch uses **_wfk_open_read, wfk_read_band_block and hdr_io_** routines
 from the ABINIT package to read the _WFK file header and information about the
 element structure which is used for our calculations.
 
-It will be easier to discover the present file with the help of the tutorial
-([[lesson_fold2bloch]]).  
-It is worthwhile to print this help file, for ease of reading.
-
-
+It will be easier to discover the present file with the help of the tutorial ([[lesson:fold2bloch]]).  
 
 ## 1 Compiling instructions
-
   
 Compiled as part of abinit package. Fold2Bloch does not differentiate between
 parallel and serial configuration so it always compiles for serial operation.
 
-
-
 ## 2 Execution
-
   
-The program fold2Bloch is executed by invoking the following command _from the
-directory of the case file_ :
+The program fold2Bloch is executed by invoking the following command _from the directory of the case file_ :
 
 **fold2Bloch case_WFK x:y:z**
 
@@ -59,15 +46,12 @@ NOTE:
 If cell structure is spin polarized then there are two output files:  
 **fold2Block_up.out** and **fold2Bloch_down.out**
 
-
-
 ## 3 Output sample
-
   
 _**Output Sample**_
 
-Below are three randomly selected parts from an output file. The data is
-presented as follows (from left to right columns):
+Below are three randomly selected parts from an output file. 
+The data is presented as follows (from left to right columns):
 
 New K Values (x, y, z) Eigenvalue(Ht) Weight
 
@@ -164,10 +148,6 @@ New K Values (x, y, z) Eigenvalue(Ht) Weight
 -0.333333 -0.166667 1.000000 0.040617 0.499997
 
 -0.333333 -0.166667 -1.000000 0.040617 0.500003
-
-  
-
-
 
 ## 4 Subroutines and functions
 
@@ -299,8 +279,7 @@ Weights : an array containing weights of each group
 
 _Local_
 
-TGroupc, Sums, counter, sumtot, remainder_x, remainder_y, remainder_z, jj, kk,
-ll, pp, el
+TGroupc, Sums, counter, sumtot, remainder_x, remainder_y, remainder_z, jj, kk, ll, pp, el
 
 TGroupC : an array containing groups of sorted coefficients  
 Sums : an array containing sums of squared coefficients in each group  
@@ -337,14 +316,11 @@ nsppol : integer indicating up/down polarization (1 if none, 2 if polarized)
 nspinor : number of local orbitals, from hdr%nspinor  
 npwarr : number of vectors in each kpoint, from hdr%npwarr  
 nband : number of bands in K point, from hdr%nband  
-  
-  
 
 _Output_
 
 nkval, eig, weights  
-(written to fold2Bloch.out or fold2Bloch_up.out and fold2Bloch_down.out if
-spin polarized)
+(written to fold2Bloch.out or fold2Bloch_up.out and fold2Bloch_down.out if spin polarized)
 
 nkval : new K points after unfolding  
 eigval : original eigenvalues  
@@ -364,7 +340,3 @@ mband : integer maximum number of bands
 mcg : integer maximum possible number of coefficients to allocate them all  
  **  
 **  
-  
-
-
-

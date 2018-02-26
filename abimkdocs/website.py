@@ -32,7 +32,7 @@ from doc.tests.pymods.termcolor import cprint
 from .variables import Variable
 
 
-ABINIT_REPO = "/Users/gmatteo/git_repos/abinit_quick_prs/"
+ABINIT_REPO = "/Users/gmatteo/git_repos/abinit/"
 if not os.path.exists(ABINIT_REPO):
     raise ValueError("ABINIT_REPO: %s does not exist\n. Please change the global variable in the python module." %
             ABINIT_REPO)
