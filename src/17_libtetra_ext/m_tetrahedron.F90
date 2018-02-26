@@ -114,7 +114,7 @@ contains
 !!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
-!!      sort_tetra
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -173,7 +173,7 @@ end subroutine destroy_tetra
 !!      thmeig
 !!
 !! CHILDREN
-!!      sort_tetra
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -493,7 +493,7 @@ end subroutine init_tetra
 !!      gstate,wfk_analyze
 !!
 !! CHILDREN
-!!      sort_tetra
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -600,10 +600,10 @@ end subroutine tetra_write
 !!  dtweightde(nkpt,nene) = derivative of tweight wrt energy
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_phonons,thmeig
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,thmeig
 !!
 !! CHILDREN
-!!      sort_tetra
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -662,7 +662,7 @@ end subroutine get_tetra_weight
 !! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
 !!
 !! PARENTS
-!!      m_fstab,m_tetrahedron
+!!      m_fstab,m_phonons,m_tetrahedron
 !!
 !! CHILDREN
 !!      get_onetetra_,sort_tetra
@@ -819,7 +819,7 @@ end subroutine tetra_blochl_weights
 !! PARENTS
 !!
 !! CHILDREN
-!!      sort_tetra
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1328,7 +1328,7 @@ end subroutine get_dbl_tetra_weight
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      sort_tetra
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1492,7 +1492,7 @@ end function tetralib_has_mpi
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      sort_tetra
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1587,7 +1587,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  integer :: ieps,nn1,nn2,nn3,nn4
  double precision  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
  double precision  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
- double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31
+ double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31,gval
  double precision  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
  double precision  :: deleps1, deleps2, deleps3, deleps4
  double precision  :: invepsum, cc_pre, dccde_pre
@@ -1862,7 +1862,11 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
    eps = enemin
    do ieps=1,nene
      tmp = eps - cc
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gau_prefactor*exp(-tmp*tmp*gau_width2)
+     gval = gau_prefactor*exp(-tmp*tmp*gau_width2)
+     !dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + gval
+     !dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + gval
+     !dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + gval
+     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gval
      eps = eps + deltaene
    end do
  end if ! end degenerate tetrahedron if

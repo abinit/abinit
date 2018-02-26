@@ -539,7 +539,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver,m_ddb_hdr,mover_effpot
+!!      driver,m_ddb_hdr
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init

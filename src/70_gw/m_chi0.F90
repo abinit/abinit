@@ -149,6 +149,8 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 
 ! *************************************************************************
 
+ ABI_UNUSED(nspinor)
+
  nthreads = xomp_get_max_threads()
 
  SELECT CASE (Ep%symchi)
@@ -1109,7 +1111,7 @@ end subroutine accumulate_sfchi0_q0
 !!
 !! FUNCTION
 !! Update the spectral function of the irreducible polarizability for the contribution
-!! of one pair of occupied-unoccupied states, for each frequenciy.
+!! of one pair of occupied-unoccupied states, for each frequency.
 !! If symchi==1, the symmetries of the little group of the external q-point are used
 !! to symmetrize the contribution in the full Brillouin zone. In this case, the routine computes:
 !!
@@ -1158,7 +1160,7 @@ end subroutine accumulate_sfchi0_q0
 !!
 !! SOURCE
 
-subroutine assemblychi0sf(ik_bz,nspinor,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
+subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 & factocc,my_wl,iomegal,wl,my_wr,iomegar,wr,nomegasf,chi0sf)
 
 
@@ -1173,7 +1175,7 @@ subroutine assemblychi0sf(ik_bz,nspinor,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_ep
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_bz,iomegal,iomegar,my_wl,my_wr,nomegasf,npwe,npwepG0
- integer,intent(in) :: nspinor,symchi
+ integer,intent(in) :: symchi
  real(dp),intent(in) :: factocc,wl,wr
  type(gsphere_t),intent(in) :: Gsph_epsG0
  type(littlegroup_t),intent(in) :: Ltg_q

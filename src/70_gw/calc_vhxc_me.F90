@@ -36,7 +36,6 @@
 !!  vxc(nfftf,nspden)= xc potential in real space on the fine FFT grid
 !!  Wfd <type (wfd_t)>=Structure gathering information on the wavefunctions.
 !!  rhor(nfftf,nspden)=density in real space (smooth part if PAW).
-!!  rhog(2,nfftf)=density in reciprocal space (smooth part if PAW).
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
 !!  kstab(2,Wfd%nkibz,Wfd%nsppol)=Table temporary used to be compatible with the old implementation.
@@ -84,7 +83,7 @@
 
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
-&  rhor,rhog,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
+&  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
 &  taug,taur) ! optional arguments
 
  use defs_basis
@@ -135,7 +134,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer,intent(in) :: ngfftf(18)
  integer,intent(in) :: kstab(2,Wfd%nkibz,Wfd%nsppol)
  real(dp),intent(in) :: vhartr(nfftf),vxc(nfftf,Wfd%nspden),vtrial(nfftf,Wfd%nspden)
- real(dp),intent(in) :: rhor(nfftf,Wfd%nspden),rhog(2,nfftf)
+ real(dp),intent(in) :: rhor(nfftf,Wfd%nspden)
  real(dp),intent(in) :: nhat(nfftf,Wfd%nspden*Wfd%usepaw)
  real(dp),intent(in) :: nhatgr(nfftf,Wfd%nspden,3*nhatgrdim)
  real(dp),intent(in),optional :: taur(nfftf,Wfd%nspden*Dtset%usekden),taug(2,nfftf*Dtset%usekden)

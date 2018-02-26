@@ -173,7 +173,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  case(4)
 
-   call predict_ga(itimimage,itimimage_eff,idum,ga_param,natom,nimage,&
+   call predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 &   ntimimage_stored,results_img)
 
  case(5)

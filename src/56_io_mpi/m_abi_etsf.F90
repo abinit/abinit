@@ -327,7 +327,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  character(len=fnlen),intent(in) :: filapp
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
- type(wvl_wf_type),intent(in) :: wfs
+ type(wvl_wf_type),optional,intent(in) :: wfs
 !arrays
  integer,intent(in) :: lmn_size(psps%npsp)
 
@@ -341,9 +341,11 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  type(etsf_dims) :: dims
  type(etsf_groups_flags) :: flags
  type(etsf_io_low_error) :: error
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_ETSF_IO
 !Initialize the filename
  filetsf = nctk_ncify(filapp)
  call wrtout(std_out,ABI_FUNC//': about to create file '//TRIM(filetsf),'COLL')
@@ -421,6 +423,13 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  
 ! Close the file.
  NCF_CHECK(nf90_close(ncid))
+#else
+ ABI_UNUSED(dtset%ntypat)
+ ABI_UNUSED(filapp)
+ ABI_UNUSED(itype)
+ ABI_UNUSED(kdep)
+ ABI_UNUSED(lmn_size)
+ if(.false. .and. present(wfs))write(std_out,*)' OK'
 #endif
 
 end subroutine abi_etsf_init
@@ -472,9 +481,11 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 !Local variables-------------------------------
 #ifdef HAVE_ETSF_IO
  integer :: ncerr
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_ETSF_IO
 !Define dimensions.
  ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 6),nctkdim_t("psptitlen", 132)])
  NCF_CHECK(ncerr)
@@ -516,11 +527,14 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
    ncerr = nctk_def_arrays(ncid, nctkarr_t("number_of_wavelets", "i", "number_of_wavelet_resolutions"))
    NCF_CHECK(ncerr)
  end if
-#endif
+#else
 
 !if ETSF_IO is undefined, do nothing
+ ABI_UNUSED(ncid)
  ABI_UNUSED(ntypat)
  ABI_UNUSED(lmn_size)
+ ABI_UNUSED(usewvl)
+#endif
 
 end subroutine ini_wf_etsf
 !!***

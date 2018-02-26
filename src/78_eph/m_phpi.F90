@@ -462,7 +462,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
            !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
            !&mpi_spintab=mpi_enreg%my_isppoltab)
-       call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+       call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&                   ! In

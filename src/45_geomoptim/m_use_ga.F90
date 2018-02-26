@@ -82,7 +82,7 @@ MODULE m_use_ga
 
 CONTAINS
 
-subroutine predict_ga(itimimage,itimimage_eff,idum,ga_param,natom,nimage,&
+subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 &                     ntimimage_stored,results_img)
 
 
@@ -98,7 +98,7 @@ subroutine predict_ga(itimimage,itimimage_eff,idum,ga_param,natom,nimage,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)     :: itimimage,itimimage_eff,natom,nimage,ntimimage_stored
+ integer,intent(in)     :: itimimage_eff,natom,nimage,ntimimage_stored
  integer,intent(inout)  :: idum
 !arrays
  type(results_img_type) :: results_img(nimage,ntimimage_stored)

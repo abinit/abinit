@@ -94,7 +94,7 @@
 !!    for a group of valence bands defined by minbd and maxbd.
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,getcgqphase,make_grad_berry
+!!      berryphase_new,cgwf,chern_number,getcgqphase,make_grad_berry
 !!
 !! CHILDREN
 !!      dzgedi,dzgefa,overlap_g

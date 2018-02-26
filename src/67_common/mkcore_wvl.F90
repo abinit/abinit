@@ -487,6 +487,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 
 #else
  BIGDFT_NOTENABLED_ERROR()
+ ABI_UNUSED(xcccrc)
  if (.false.) write(std_out,*) natom,nfft,nspden,ntypat,n1xccc,n3xccc,option,mpi_comm_wvl,&
 & wvl_den%symObj,wvl_descr%h(1),atindx1(1),nattyp(1),rprimd(1,1),vxc(1,1),&
 & xred(1,1),xccc1d(1,1,1),corstr(1),grxc(1,1),xccc3d(1),pawrad(1)%mesh_size,pawtab(1)%lmn_size

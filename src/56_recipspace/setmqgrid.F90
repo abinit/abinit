@@ -96,9 +96,9 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
  if (usepaw==1) then
    if(ecutdg<tol6)then
      write(message,'(a)')&
-&      'The value of (paw)ecutdg is zero or negative, which is forbidden.'
+&     'The value of (paw)ecutdg is zero or negative, which is forbidden.'
      MSG_ERROR(message)
-   endif
+   end if
    gmaxdg=one/(sqrt2*pi)*sqrt(ecutdg)
    if (mqgriddg == 0) then
      mqgriddg2=ceiling(gmaxdg/gvecnorm*nptsgvec)
