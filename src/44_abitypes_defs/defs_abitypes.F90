@@ -622,6 +622,7 @@ type dataset_type
  integer :: vdw_supercell(3)
  integer :: vdw_typfrag(100)
  integer :: wvl_ngauss(2)
+ integer :: prtlammps(2)
 
 !Integer allocatables
  integer, allocatable ::  algalch(:)    ! algalch(ntypalch)
