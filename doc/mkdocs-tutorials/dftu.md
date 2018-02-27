@@ -12,8 +12,7 @@ You will learn what is a DFT+U calculation and what are the main input
 variables controlling this type of calculation.
 
 It is supposed that you already know how to do PAW calculations using ABINIT.
-Please follow the two lessons on PAW in ABINIT ([PAW1](lesson_paw1.html),
-[PAW2](lesson_paw2.html)), if this is not the case.
+Please follow the two lessons on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
 
 This lesson should take about 1 hour to complete.
 

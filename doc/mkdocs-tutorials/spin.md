@@ -28,6 +28,9 @@ for the other lessons. Why not "Work_spin" (so ~abinit/tests/tutorial/Input/Work
 The file ~abinit/tests/tutorial/Input/tspin_x.files lists the file names and root names. 
 You can copy it in the Work_spin directory (and change it, when needed, as usual).  
 You can also copy the file ~abinit/tests/tutorial/Input/tspin_1.in in Work_spin. 
+
+{% dialog tests/tutorial/Input/tspin_x.files tests/tutorial/Input/tspin_1.in %}
+
 This is your input file. You can run the calculation, then you
 should edit the input file, and read it carefully.  
 Because we are going to perform magnetic calculations, there a two new types of variables:  
@@ -38,8 +41,9 @@ Because we are going to perform magnetic calculations, there a two new types of 
 Please, read their description in the help file.  
 You will work at fixed [[ecut]] (=18Ha) and k-point grid, defined by [[ngkpt]]
 (the 4x4x4 Monkhorst-Pack grid). 
-It is implicit that in "real life", you should do a convergence test with respect to both convergence parameters.  
+It is implicit that in *real life*, you should do a convergence test with respect to both convergence parameters.  
 This takes about 12 seconds on a modern PC (one needs a sufficiently large cut-off to exhibit magnetic effects).  
+
 We will compare the output with and without magnetization. (Hence, there are two datasets in the run)  
 We now look at the output file.  
 In the magnetic case, the electronic density is split in two parts, 
@@ -83,8 +87,8 @@ The total magnetization, its integral on the unit cell, is now in the magnetic c
   
 We observe that the total density (up+down) yields 8.000 as expected.  
   
-The magnetization density is not the only changed quantity. The energy is
-changed too, and we get:  
+The magnetization density is not the only changed quantity. 
+The energy is changed too, and we get:  
   
     etotal1  -2.4661707268E+01  (no magnetization)  
     etotal2  -2.4670792868E+01  (with magnetization)  
@@ -138,11 +142,13 @@ For instance, if the atom at [x,y,0] possesses an "up" magnetization, the atom
 at [x,y,1/2] would possess a down magnetization etc...  
 To describe such a structure, we merely need two atoms, [0,0,0] and
 [1/2,0,1/2] and a unit cell comprising those two atoms.  
-Also, each atom will be given opposite magnetization with the help of the
-variable [[spinat]].  
+Also, each atom will be given opposite magnetization with the help of the variable [[spinat]].  
   
 You can copy the file ~abinit/tests/tutorial/Input/tspin_2.in in Work_spin.
 This is your input file.  Modify accordingly the tspin_x.files file. 
+
+{% dialog tests/tutorial/Input/tspin_2.in %}
+
 You can run the calculation, then you should edit the tspin_2.in file, and briefly
 look at the two changes with respect to the file tspin_1.in: the change of
 unit cell basis vectors [[rprim]], the new [[spinat]].  
@@ -163,7 +169,7 @@ If we now run again the calculation, this total computation time is
 approximately 30 seconds on a recent CPU.  
 If we look at the eigenvalues and occupations, they are again affected by a
 factor 2, which results from the symmetry considerations alluded to above, and
-not from the "usual" spin degeneracy : the potential for spin-up is equal to
+not from the "usual" spin degeneracy: the potential for spin-up is equal to
 the potential for spin-down, shifted by the antiferromagnetic translation
 vector. Eigenenergies are identical for spin-up and spin-down, but
 wavefunctions are shifted one with respect to the other.  
@@ -236,8 +242,11 @@ We will not even assume that the initial spins are of the same magnitude.
   
 You can copy the file ~abinit/tests/tutorial/Input/tspin_3.in in Work_spin.
 This is your input file. You can modify the file tspin_x.files and immediately
-start running the calculation. Then, you should edit it. Note the values of
-[[spinat]]. In this job, we wish again to characterize the magnetic structure.  
+start running the calculation. Then, you should edit it. 
+
+{% dialog tests/tutorial/Input/tspin_3.in %}
+
+Note the values of [[spinat]]. In this job, we wish again to characterize the magnetic structure.  
 We are not going to use zeta as in the preceding calculation, but we will here
 use another feature of abinit: atom and angular momentum projected densities of state.  
 These are densities of state weighted by the projection of the wave functions
@@ -336,6 +345,9 @@ Replace the last line of the tspin_x.files by
 You can copy the file ~abinit/tests/tutorial/Input/tspin_5.in in Work_spin.
 Change accordingly the file names in tspin_x.files, then run the calculation.
 It takes about 20 secs on a recent computer.  
+
+{% dialog tests/tutorial/Input/tspin_5.in %}
+
 The input file contains one new variable:  
 
   * [[nspinor]]
@@ -423,8 +435,11 @@ Replace the last line of the tspin_x.files by
 You can copy the file ~abinit/tests/tutorial/Input/tspin_6.in in Work_spin
 (one Bismuth atom in a large cell). Change accordingly the file names in
 tspin_x.files, then run the calculation. It takes about 10 secs on a recent
-computer. Two datasets are executed: the first one without spin-orbit
-coupling, the second one using  [[pawspnorb]]=1.  
+computer. 
+
+{% dialog tests/tutorial/Input/tspin_6.in %}
+
+Two datasets are executed: the first one without spin-orbit coupling, the second one using  [[pawspnorb]]=1.  
 
 The results (eigenvalues) are:  
 
@@ -456,9 +471,8 @@ A perfect agreement even with a small simulation cell and very small values of p
 ## 6 Rotation of the magnetization and spin-orbit
   
 The most spectacular manifestation of the spin-orbit coupling is the energy
-associated with a rotation of the magntisation with respect with the cristal axis. 
-It is at the origin of the magneto cristalline anisotropy of paramount technological importance.  
+associated with a rotation of the magnetisation with respect with the crystal axis. 
+It is at the origin of the magneto crystalline anisotropy of paramount technological importance.  
 
 * * *
-This ABINIT tutorial is now finished...  
 GZ would like to thank B. Siberchicot for useful comments.

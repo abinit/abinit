@@ -14,45 +14,31 @@ basic variables to govern the numerical efficiency.
 It is supposed that you already know how to use ABINIT in the norm conserving
 pseudopotential case.
 
-This lesson should take about 1 hour. And it is important to note that all the
-cases in the tutorial are not converged they are just examples to show how to use the code.
+This lesson should take about 1 hour. And it is important to note that the examples in this tutorial 
+are not converged, they are just examples to show how to use the code.
 
 ## 1 Summary of Wannier90 in ABINIT
   
 Wannier90 is a code that computes MLWFs (see [www.wannier.org](http://www.wannier.org) ). 
 Wannier90 uses the methodology introduced by N. Marzari and D. Vanderbilt in 1997 and it is
 highly recommended to read the following papers to understand its basics:
-
-MV
-    
-     N. Marzari and D. Vanderbilt, _Maximally localized generalized
-    Wannier functions for composite energy bands_ , Phys. Rev. B 56, 12847
-    (1997)
-    
-
-SMV
-    
-     I. Souza, N. Marzari and D. Vanderbilt, _Maximally localized
-    Wannier functions for entangled energy bands_ , Phys. Rev. B 65,
-    035109 (2002)
-    
+[[cite:Marzari1997]] (MV) and [[cite:Souza2002a]] (SMV).
 
 Wannier functions (WFs) can be obtained from Bloch states by means of the formulas 1-3 of SMV. 
 As you may note there is a freedom of choice of Bloch orbital's phase which is reflected 
 on the shape and the spatial extent of the WF.
 i.e., for different phases there will be WFs with different spatial localizations. 
+
 To obtain the MLWFs we minimize the spread of the WF with respect to the choice of phase. 
-This is done by using a steepest-descent algorithm, see section D of [MV](lesson_wannier90.html#MV).  
+This is done by using a steepest-descent algorithm, see section D of [[cite:Marzari1997]]. 
 After a ground state calculation the Wannier90 code will obtain the MLWFs
 requiring just two ingredients:
 
   * The overlaps between the cell periodic part of the Bloch states |u_nk>   
-M_mn= < u_mk | u_nk+b >  
-See Eq. 25 of MV.
+    M_mn = < u_mk | u_nk+b > See Eq. 25 of MV.
 
-  * As a starting guess the projection of the Bloch states |psi_nk> onto trial localized orbitals |g_n>   
-A_mn= < psi_mk | g_n >  
-See section D of SMV.
+  * As a starting guess the projection of the Bloch states |psi_nk> onto trial localized orbitals |g_n>
+    A_mn= < psi_mk | g_n >. See section D of SMV.
 
 What ABINIT do is to take the Bloch functions from a ground state calculation
 and compute these two ingredients. Then, Wannier90 is run. Wannier90 is
@@ -66,14 +52,14 @@ You may have to recompile it using the flag `--enable-wannier90`.
 
 Now we will compute a set of MLWFs for the silicon case. 
 We are going to extract the Wannier functions corresponding to the four valence states of silicon.  
-_Before beginning, you might consider to work in a different sub-directory as
-for the other lessons. Why not "Work_w90"?_
+
+*Before beginning, you might consider to work in a different sub-directory as
+for the other lessons. Why not "Work_w90"?*
 
     mkdir Work_w90
     cd Work_w90
 
-Copy the files tw90_1.files, tw90_1.in and wannier90.win from the
-tests/tutoplug directory to "Work_w90":
+Copy the files tw90_1.files, tw90_1.in and wannier90.win from the tests/tutoplug directory to "Work_w90":
 
     cp ../tw90_1.files
     cp ../tw90_1.in
@@ -88,15 +74,22 @@ Now you are ready to run abinit. Please type in:
     abinit < tw90_1.files >& log
   
 Let's examine the input file tw90_1.in, while the calculation is running.  
+
+{% dialog tests/tutoplugs/Input/tw90_1.in %}
+
 The input file should look familiar to you. It is indeed the silicon case. It
 has two data sets: first a SCF calculation and then a NSCF calculation which
 will call the Wannier90 library. The only new input variable is [[prtwant]]
 which has to be set to 2 in order to use the Wannier90 utility.
 
-Now lets look the secondary input file wannier90.win. This is a mandatory
-input file required by the Wannier90 library. There are many variables that
-can be defined inside this file. In our case we used **num_wann** and
-**num_iter**. These variables are to be used in the minimization of the spread
+Now lets look the secondary input file wannier90.win. 
+
+{% dialog tests/tutoplugs/Input/wannier90.win %}
+
+This is a mandatory input file required by the Wannier90 library. 
+There are many variables that can be defined inside this file. 
+In our case we used **num_wann** and **num_iter**. 
+These variables are to be used in the minimization of the spread
 to obtain the MLWF. In particular, **num_wann** tell us the number of Wannier
 functions to extract while **num_iter** sets the number of iterations. There
 are also variables to govern the disentanglement procedure outlined in SMV
@@ -104,8 +97,7 @@ which are not used in this simple case. The complete list of input variables
 can be found in the Wannier90 user guide (see [www.wannier.org](http://www.wannier.org)).
 
 We can now examine the log file. After the convergence of the SCF cycle is
-reached. We can see that the Wannier90 library is called. You will find the
-following lines:
+reached. We can see that the Wannier90 library is called. You will find the following lines:
     
       Calculation of overlap and call to Wannier90 library 
       to obtain Maximally Localized Wannier functions
@@ -116,22 +108,25 @@ following lines:
       - wannier90.mmn contains the overlap
       - wannier90.eig contains the eigenvalues
     
-
 This is an explanation of the input and output files for the Wannier90
 library. As you can see many new files were created. The input files for
 Wannier90 which were created by ABINIT are:
 
   * **wannier90random.amn** contains a list of projections to be used as a starting guess of the WF. 
     This is the A_mn matrix which was mentioned before in this tutorial. 
+
   * **wannier90.eig** contains a list of eigenvalues for each k-point and band. 
+
   * **wannier90.mmn** contains the overlaps between the cell periodic part of the Bloch states. 
     This is the M_mn matrix mentioned before in this tutorial. 
+
   * **UNK..** files containing the wavefunction in real space for every k-point. 
 
 Once these files were computed by ABINIT the Wannier90 library was used. 
 The output files of Wannier90 are:
 
   * **wannier90.wout** is the main output file of the library. You should read it carefully to see the details of the calculation. 
+
   * **wannier90.chk** is required to restart a calculation is case you use Wannier90 in standalone mode. In our case it is not used. 
 
 If you want to obtain information about the disentanglement procedure just type:
@@ -144,7 +139,6 @@ You will obtain a table of the following form:
      |  Iter     Omega_I(i-1)      Omega_I(i)      Delta (frac.)    Time   |<-- DIS
      +---------------------------------------------------------------------+<-- DIS
     
-
 Similarly to obtain information about the steepest-descent minimization just issue:
 
     grep CONV wannier90.wout
@@ -164,28 +158,29 @@ You can see the Wannier functions in [xcrysden](http://www.xcrysden.org) format.
     xcrysden --xsf wannier90_00001.xsf
     
 To see the isosurface click on: Tools->Data Grid -> OK
-And modify the Isovalue, put, for instance, 0.3 and check the option "Render +/- isovalue" then click on OK
+And modify the isovalue, put, for instance, 0.3 and check the option "Render +/- isovalue" then click on OK
 
-**Notes:**
+!!! important
 
-  * It is important to set [[istwfk]] equal to 1 for every k-point avoiding using symmetries. 
-    The reason is that the formalism used to extract the MLWF assumes that you have a uniform grid of k-points. 
-    See section IV of MV. 
-  * The number of Wannier functions to extract should be minor or equal to the number of bands. 
-    If _nband > nwan_ then the disentanglement routines will be called. 
-  * The number of k-points should be equal to ngkpt(1)*ngkpt(2)*ngkpt(3). 
-    This is achieved by using the input variables [[kptopt]]= 3, [[ngkpt]] and [[nshiftk]]= 1. 
-  * The prefix of all wannier90 files in this sample case is _wannier90_.   
+    * It is important to set [[istwfk]] equal to 1 for every k-point avoiding using symmetries. 
+      The reason is that the formalism used to extract the MLWF assumes that you have a uniform grid of k-points. 
+      See section IV of MV. 
 
-Other possible prefixes are w90_ and **abo** __w90_ , where **abo** is the fourth line on your .file file.  
-To setup the prefix, ABINIT will first look for a file named **abo**
-__w90.win_ if it is not found then it will look for _w90.win_ and finally for _wannier90.win_.
+    * The number of Wannier functions to extract should be minor or equal to the number of bands. 
+      If _nband > nwan_ then the disentanglement routines will be called. 
+
+    * The number of k-points should be equal to ngkpt(1)*ngkpt(2)*ngkpt(3). 
+      This is achieved by using the input variables [[kptopt]]= 3, [[ngkpt]] and [[nshiftk]]= 1. 
+
+    * The prefix of all wannier90 files in this sample case is _wannier90_.   
+      Other possible prefixes are w90_ and **abo** __w90_ , where **abo** is the fourth line on your .file file.  
+      To setup the prefix, ABINIT will first look for a file named **abo**
+      __w90.win_ if it is not found then it will look for _w90.win_ and finally for _wannier90.win_.
 
 ## 3 A PAW case
   
 Before starting it is assumed that you have already completed the [[lesson:paw1]] and [[lesson:paw2]]
 
-The PAW method is implemented in such a way that it is very easy to use. 
 For silicon, we just have to add the variable [[pawecutdg]]. 
 And the PAW Atomic Data is included in the pseudopotential file. 
 An example has already been prepared.
@@ -202,9 +197,11 @@ Now, just run abinit again
   
 As it is expected, the results should be similar than those of the PW case.
 
-**Important** For the PAW case the UNK files are not those of the real
-wavefunctions. The contribution inside the spheres is not computed, however,
-they can be used to plot the Wannier functions.
+!!! important
+
+    For the PAW case the UNK files are not those of the real
+    wavefunctions. The contribution inside the spheres is not computed, however,
+    they can be used to plot the Wannier functions.
 
 ## 4 Defining the initial projections
   
@@ -226,17 +223,20 @@ Now run abinit
 
 While it is running we can start to examine the input files.  
 Open the main input file tw90_3.in. The file is divided into three datasets.
+
+{% dialog tests/tutoplugs/Input/tw90_3.in %}
+
 First a SCF calculation is done. What follows is a NSCF calculation including
 more bands. Finally, in the third dataset we just read the wavefunction from
 the previous one and the Wannier90 library is called. w90iniprj is a keyword
 used to indicate that the initial projections will be given in the **.win** file.
 
-**Note.**
+!!! note
 
-You may notice that the **.win** file is now called tw90_3o_DS2_w90.win. 
-It has the following form: prefix_dataset_w90.win, where the prefix is taken from 
-the third line of your .file file. and dataset is the dataset number 
-at which you call Wannier90 (dataset 2 in this example). 
+    You may notice that the **.win** file is now called tw90_3o_DS2_w90.win. 
+    It has the following form: prefix_dataset_w90.win, where the prefix is taken from 
+    the third line of your .file file. and dataset is the dataset number 
+    at which you call Wannier90 (dataset 2 in this example). 
 
 Now open the **.win** file. The initial projections will be the sp3 hybrid
 orbitals centered in the position of the silicon atom. This is written explicitly as:
@@ -293,5 +293,3 @@ Now run Wannier90:
     [abinit-home]/plugins/wannier90/wannier90.x tw90_4o_DS3_w90
 
 The interpolated bandstructure is in: tw90_4o_DS3_w90_band.dat
-
-Now you can continue to discover the capabilities of Wannier90.

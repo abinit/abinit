@@ -57,6 +57,8 @@ variables, only two additional variables are added:
             prtefg  2
             quadmom 0.0 -0.02558
 
+{% dialog tests/tutorial/Input/tnuc_1.in %}
+
 The first variable instructs Abinit to compute and print the electric field
 gradient, and the second gives the quadrupole moments of the nuclei, one for
 each type of atom. Here we are considering silicon and oxygen, and in
@@ -119,5 +121,5 @@ Now we see the electric field gradient coupling, in frequency units, along
 with the asymmetry of the coupling tensor, and, finally, the three
 contributions to the total. Note that the valence part, efg_el, is quite
 small, while the ionic part and the on-site PAW part are larger. In fact, the
-PAW part is largest--this is why these calculations give very poor results
+PAW part is largest -- this is why these calculations give very poor results
 with norm-conserving pseudopotentials, and need the full accuracy of PAW.

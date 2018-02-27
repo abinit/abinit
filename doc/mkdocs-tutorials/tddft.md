@@ -33,8 +33,7 @@ A comprehensive description of the underlying formalism is given in
      <http://dx.doi.org/10.1016/S1380-7323(96)80093-8>
 
 However this reference might be hard to get, that is why we have based the
-tutorial instead on the following (also early) papers: 
-[[Casida1998]], [[Casida1998a]], and [[Vasiliev1998]].
+tutorial instead on the following (also early) papers: [[Casida1998]], [[Casida1998a]], and [[Vasiliev1998]].
 
 The first of these papers, [[Casida1998]], will be used as main reference for our tutorial.
 
@@ -60,7 +59,7 @@ difference between spin-singlet and spin-triplet states. See Eqs.(1.3) and
 The construction of the coupling matrix can be done on the basis of an
 exchange-correlation kernel that is derived from the exchange-correlation
 functional used for the ground-state, but this is not a requirement of the
-theory, since such a correspondance only holds for the exact functional. In
+theory, since such a correspondence only holds for the exact functional. In
 practice, the approximation to the XC potential and the one to the XC kernel
 are often different. See section III of [[Casida1998]].
 
@@ -100,7 +99,7 @@ We will now compute and analyse the excitation energies of the diatomic molecule
 This is a rather simple system, with cylindrical symmetry,
 allowing interesting understanding. Although we will suppose that you are
 familiarized with quantum numbers for diatomic molecules, this should not play
-an important role in the understanding of the way to use Abinit's
+an important role in the understanding of the way to use Abinit
 implementation of Casida's formalism.
 
 *Before beginning, you might consider to work in a different subdirectory as
@@ -119,16 +118,21 @@ So, issue now:
   
 The computation is quite fast : about 15 secs on a 2.8 GHz PC.  
 Let's examine the input file ttddft_1.in.  
-There are two datasets : the first one corresponds to a typical ground-state
+
+{% dialog tests/tutorial/Input/ttddft_1.in %}
+
+There are two datasets: the first one corresponds to a typical ground-state
 calculation, with only occupied bands. The density and wavefunctions are
 written, for use in the second data set. The second dataset is the one where
 the TDDFT calculation is done. Moreover, the non-self-consistent calculation
 of the occupied eigenfunctions and corresponding eigenenergies is also
-accomplished. This is obtained by setting [[iscf]] to -1. Please, take now
-some time to read the information about this value of [[iscf]], and the few
+accomplished. This is obtained by setting [[iscf]] to -1. 
+
+Please, take now some time to read the information about this value of [[iscf]], and the few
 input variables that acquire some meaning in this context (namely,
 [[boxcenter]], [[td_mexcit]], and [[td_maxene]]). Actually, this is most of
-the information that should be known to use the TDDFT in ABINIT !  
+the information that should be known to use the TDDFT in ABINIT!  
+
 You will note that we have 5 occupied bands (defined for dataset 1), and that
 we add 7 unoccupied bands in the dataset 2, to obtain a total of 12 bands. The
 box is not very large (6x5x5 Angstrom), the cutoff is quite reasonable, 25
@@ -144,8 +148,8 @@ information, in order to reach the following information:
      Splitting of  12 bands in   5 occupied bands, and   7 unoccupied bands,
      giving    35 excitations.
 
-The matrix that is diagonalized, in the Casida's formalism, is thus a 35x35
-matrix. It will give 35 excitation energies.  
+The matrix that is diagonalized, in the Casida's formalism, is thus a 35x35 matrix. 
+It will give 35 excitation energies.  
 Then, follows the list of excitation energies, obtained from the difference of
 Kohn-Sham eigenvalues (occupied and unoccupied), for further reference. They
 are ordered by increasing energy. In order to analyze the TDDFT as well as
@@ -196,7 +200,7 @@ obtained (see the next section of the output file):
     
 The excitation energies are numbered according to increasing energies, in Ha
 as well as in eV. The total energy is also given (adding excitation energy to
-the the ground-state energy), and finally, the two major contributions to each
+the ground-state energy), and finally, the two major contributions to each
 of these excitations are mentioned (size of the contribution then identification).
 
 It is seen that the first and second excitations are degenerate (numerical
@@ -208,6 +212,7 @@ unoccupied state 8). The quadruplet of Kohn-Sham energy differences, that was
 observed at 3.64203E-01 Ha, has been split into one doublet and two singlets,
 with numbers 4 (the lowest singlet), 5-6 (the doublet) while the last singlet
 is not present in the 20 lowest excitations.  
+
 The list of oscillator strength is then provided.
     
       Oscillator strengths :  (elements smaller than 1.e-6 are set to zero)
@@ -225,8 +230,7 @@ The list of oscillator strength is then provided.
        ...
     
 The first six transitions are forbidden, with zero oscillator strength. The
-seventh and eighth transitions are allowed, with sizeable YY, YZ and ZZ
-components.
+seventh and eighth transitions are allowed, with sizeable YY, YZ and ZZ components.
 
 Next, one finds the excitation energies for the spin-triplet states:
     
@@ -395,10 +399,9 @@ LDA/TDLDA results (from [[Casida1998]]) and experimental results :
     Triplet Delta_u   :  8.89    8.82     8.88
     Triplet Sigma_u-  :  9.72    9.63     9.67
     
-
 Our calculation is based on pseudopotentials, while Casida's calculation is an
 all-electron one. This fact might account for the 0.1-0.2 eV discrepancy
-between both calculations (it is of course the user's responsability to test
+between both calculations (it is of course the user's responsibility to test
 the influence of different pseudopotentials on his/her calculations). The
 agreement with experimental data is on the order of 0.2 eV, with the exception
 of the Triplet Pi_g state (0.4 eV). In particular, we note that LDA/TDLDA is
@@ -407,13 +410,13 @@ of our problems was intrinsic to the LDA/TDLDA approximation ...
 
 ## 4 The choice of the exchange-correlation potential
   
-As emphasized in [[Casida1998]], choosing a different functional for the self-
-consistent part (XC potential) and the generation of the coupling matrix (XC
+As emphasized in [[Casida1998]], choosing a different functional for the self-consistent part 
+(XC potential) and the generation of the coupling matrix (XC
 kernel) can give a better description of the higher-lying states. Indeed, a
 potential with a -1/r tail (unlike the LDA or GGA) like the van Leeuwen-
 Baerends one, can reproduce fairly well the ionisation energy, giving a much
 better description of the Rydberg states. Still, the LDA kernel works pretty well.
 
-In order to activate this procedure, set the value of ixc in dataset 1 to the
+In order to activate this procedure, set the value of [[ixc]] in dataset 1 to the
 SCF functional, and the value of ixc in dataset 2 to the XC functional to be
 used for the kernel. Use pseudopotentials that agree with the SCF functional.

@@ -26,32 +26,26 @@ finite electric field calculations.
 This lesson should take about 1 hour and 30 minutes.
 
 The basic theory for Berry phase computation of the polarization was proposed
-by R. D. King-Smith and D. Vanderbilt, _Phys. Rev. B_ **47** , 1651 (1993).
-The longer (excellent) paper D. Vanderbilt and R. D. King-Smith, _Phys. Rev.
-B_ **48** , 4442 (1993) clarifies many aspects of this theory (especially in
-view of application to AlAs, as in this tutorial). One might benefit also from
-a reading of R. Resta, _Rev. Mod. Physics_ **66** , 899 (1994).
+by R. D. King-Smith and D. Vanderbilt in [[cite:Kingsmith1993]].
+The longer (excellent) paper D. Vanderbilt and R. D. King-Smith ([[cite:Vanderbilt1993]])
+clarifies many aspects of this theory (especially in view of application to AlAs, as in this tutorial). 
+One might benefit also from a reading of the review article [[cite:Resta1994].
 
 In order to gain the theoretical background needed to perform a calculation
 with a finite electric field, you should consider reading the following papers:
-
-  * I. Souza, J. Iniguez and D. Vanderbilt, _Phys. Rev. Lett_ **89** , 117602 (2002)
-  * R. Nunes and X. Gonze, _Phys. Rev. B_ **63** , 155107 (2001)
-  * M. Veithen, [PhD thesis](https://www.abinit.org/sites/default/files/PhD-M.Veithen.pdf)
-
+[[cite:Souza2002]], [[cite:Nunes2001]] and 
+M. Veithen [PhD thesis](https://www.abinit.org/sites/default/files/PhD-M.Veithen.pdf)
 Finally, the extension to the PAW formalism specifically in ABINIT is
-discussed in Gonze _et al.,_ _Comp. Phys. Commun._ **180** , 2582 (2009) and
-Zwanziger _et al.,_ _Comp. Mater. Sci._ **58** , 113 (2012).
+discussed in [[cite:Gonze2009]] and [[cite:Zwanziger2012]].
 
 ## 1 Ground-state properties of AlAs and general parameters
   
-*Before beginning, you might consider working in a different subdirectory, as
-for the other lessons. 
+*Before beginning, you might consider working in a different subdirectory, as for the other lessons. 
 Why not create "Work-ffield" in ~abinit/tests/tutorespfn/Input?*
 
 In this tutorial we will assume that the ground-state properties of AlAs have
-been previously obtained, and that the corresponding convergence studies have
-been done. We will adopt the following set of generic parameters:
+been previously obtained, and that the corresponding convergence studies have been done. 
+We will adopt the following set of generic parameters:
     
        acell               10.53
        ixc                 3
@@ -73,15 +67,16 @@ been done. We will adopt the following set of generic parameters:
 
 In principle, the [[acell]] to be used should be the one corresponding to the
 optimized structure at the [[ecut]], and [[ngkpt]] combined with [[nshiftk]]
-and [[shiftk]], chosen for the calculations. Unfortunately, for the purpose of
-this tutorial, in order to limit the duration of the runs, we have to work at
-an unusually low cutoff of 2.8 Ha for which the optimized lattice constant is
+and [[shiftk]], chosen for the calculations. 
+
+Unfortunately, for the purpose of this tutorial, in order to limit the duration of the runs, 
+we have to work at an unusually low cutoff of 2.8 Ha for which the optimized lattice constant is
 equal to 7.45*0.707*2 Bohr=10.53 Bohr (instead of the converged value of 10.64
 Bohr). For comparison, results with [[ecut]]=5 are also reported and, in that
 case, were obtained at the optimized lattice constant of 10.64 bohr. For those
 who would like to try later, convergence tests and structural optimizations
 can be done using the file [[tests/tutorespfn/Input/tnlo_1.in]]. Before going
-further, you might refresh your memory concerning the other variables :
+further, you might refresh your memory concerning the other variables:
 [[ixc]], [[ecutsm]], [[dilatmx]].
 
 ## 2 Berry phase calculation of polarization in zero field
@@ -95,6 +90,8 @@ You can now copy the file [[tests/tutorespfn/Input/tffield_1.in]] and
 [[tests/tutorespfn/Input/tffield_x.files]] in Work-ffield, and modify the
 latter as usual (for example, edit it so that the various file names it
 contains refer to tffield_1 rather than tffield_x).
+
+{% dialog tests/tutorespfn/Input/tffield_x.files tests/tutorespfn/Input/tffield_1.in %}
 
 Note that two pseudopotentials are mentioned in this "files" file: one for the
 Aluminum atom, and one for the Arsenic atom. The first to be mentioned, for
@@ -157,8 +154,7 @@ The output reports values of the Berry phase for individual k-point strings.
                Polarization    -8.913274846E-01 C/m^2
     
 The "Remapping in [-1,1]" is there to avoid the quantum of polarization. As
-discussed in H. Djani, E. Bousquet, A. Kellou, Ph. Ghosez, _Phys. Rev. B_
-**86** , 054107 (2012), the indeterminacy of the quantum phase, directly
+discussed in [[cite:Djani2012]], the indeterminacy of the quantum phase, directly
 related to the quantum of polarization, can lead to spurious effects (see Fig.
 2 of the above-mentioned paper). By remapping on the [-1,1] interval, any
 indeterminacy is removed. However, removing such a quantum of polarization
@@ -166,12 +162,10 @@ between two calculations might give the false impression that one is on the
 same polarization branch in the two calculations, while actually the branch is
 made different by this remapping. Cross-checking the polarization results by
 computing the Born effective charge, further multiplied by the displacements
-between the two geometries is an excellent way to estimate the amplitude of
-the polarization.
+between the two geometries is an excellent way to estimate the amplitude of the polarization.
 
-Other subtleties of Berry phases, explained in D. Vanderbilt and R. D. King-
-Smith, _Phys. Rev. B_ **48** , 4442 (1993), also apply. First, note that
-neither the electronic Berry phase nor the ionic phase vanish in this highly
+Other subtleties of Berry phases, explained in [[cite:Vanderbilt1993]] also apply. 
+First, note that neither the electronic Berry phase nor the ionic phase vanish in this highly
 symmetric case, contrary to intuition. Even though AlAs does not have
 inversion symmetry, it does have tetrahedral symmetry, which would be enough
 to make an ordinary vector vanish. But a lattice-valued vector does not have
@@ -225,7 +219,6 @@ tau = -0.01
          Ionic:                        -0.155388624E+01  -0.154800587E+01  -0.154800587E+01  
          Total:                        -0.154786828E+01  -0.154382391E+01  -0.154382391E+01
     
-
 From the previous data, we can extract the Born effective charge of Al. Values
 to be used are those in a.u., in order to find the charge in electron unit. It
 corresponds to (the volume of the primitive unit cell must be specified in Bohr too):
@@ -235,8 +228,11 @@ corresponds to (the volume of the primitive unit cell must be specified in Bohr 
                = 2.06
   
 For comparison, the calculation using Density-Functional Perturbation Theory
-(DFPT) can be done by using the file
-~abinit/tests/tutorespfn/Input/tffield_2.in. Actually, the file tffield_2.in
+(DFPT) can be done by using the file ~abinit/tests/tutorespfn/Input/tffield_2.in. 
+
+{% dialog tests/tutorespfn/Input/tffield_2.in %}
+
+Actually, the file tffield_2.in
 not only leads to the computation of the Born effective charges, but also the
 computation of the piezoelectric constants (see later).
 
@@ -251,10 +247,18 @@ better converged calculations.
 
 The DDB generated by ~abinit/tests/tutorespfn/Input/tffield_2.in can be fed in
 anaddb, thanks to the ~abinit/tests/tutorespfn/Input/tffield_3.in input file
-and the tffield_3.files file. Note that tffield_3.files is expecting the DDB
-to be named tffield_2o_DS3_DDB, so either adjust tffield_x.files before
-running tffield_2.in to match this, or else change the name of the DDB file
-after generation. In any case, the DFPT calculation gives for the
+and the tffield_3.files file. 
+
+{% dialog tests/tutorespfn/Input/tffield_3.files tests/tutorespfn/Input/tffield_3.in %}
+
+!!! note
+
+    Note that tffield_3.files is expecting the DDB
+    to be named tffield_2o_DS3_DDB, so either adjust tffield_x.files before
+    running tffield_2.in to match this, or else change the name of the DDB file
+    after generation. 
+    
+In any case, the DFPT calculation gives for the
 piezoelectric constants (as well as the elastic constants), as found in
 tffield_3.out, the following:
     
@@ -266,9 +270,10 @@ tffield_3.out, the following:
      ...
           0.04575010      0.00000000      0.00000000
     
+{% dialog tests/tutorespfn/Refs/tffield_3.out %}
 
-Restarting case ffield_2 and ffield_3 with [[ecut]]=5 (three minutes on a PC 3
-GHz), one gets the following values
+Restarting case ffield_2 and ffield_3 with [[ecut]]=5 
+(three minutes on a PC 3 GHz), one gets the following values
     
       Proper piezoelectric constants (clamped ion) (unit:c/m^2)
      ...
@@ -282,12 +287,17 @@ The latter value, where the ionic relaxation largely suppresses the electronic
 piezoelectricity, will be much more difficult to converge than the clamped ion result.
 
 Using the Berry phase approach it is also possible to compute the
-piezoelectric constant from finite difference of polarization with respect to
-strains. This can be done considering clamped ions or relaxed ions
-configurations. For this purpose, have a look at the files
+piezoelectric constant from finite difference of polarization with respect to strains. 
+This can be done considering clamped ions or relaxed ions
+configurations. 
+
+For this purpose, have a look at the files
 ~abinit/tests/tutorespfn/Input/tffield_4.in (clamped ions) and
-~abinit/tests/tutorespfn/Input/tffield_5.in (relaxed ions). Notice how in the
-relaxed ion case, the input file includes [[ionmov]]=2 and [[optcell]]=0, in
+~abinit/tests/tutorespfn/Input/tffield_5.in (relaxed ions). 
+
+{% dialog tests/tutorespfn/Input/tffield_4.in tests/tutorespfn/Input/tffield_5.in %}
+
+Notice how in the relaxed ion case, the input file includes [[ionmov]]=2 and [[optcell]]=0, in
 order to relax the ion positions at fixed cell geometry. These calculations
 should give the following final results (obtained by taking finite difference
 expressions of the strains for different electric fields)
@@ -326,9 +336,12 @@ in excellent agreement with the above-mentioned DFPT values.
 In this section, you will learn how to perform a calculation with a finite electric field.
 
 You can now copy the file ~abinit/tests/tutorespfn/Input/tffield_6.in in Work-
-ffield, and modify the tffield_x.files accordingly. You can start the run
-immediately, it will take one minute on a PC 3GHz. It performs a finite field
-calculation at clamped atomic positions. You can look at this input file to
+ffield, and modify the tffield_x.files accordingly. 
+
+{% dialog tests/tutorespfn/Input/tffield_6.in %}
+
+You can start the run immediately, it will take one minute on a PC 3GHz. 
+It performs a finite field calculation at clamped atomic positions. You can look at this input file to
 identify the features specific to the finite field calculation.
 
 As general parameters, one has to specify [[nband]], [[nbdbuf]] and [[kptopt]]:
@@ -342,9 +355,11 @@ in zero field. For that purpose, it is necessary to set the values of [[berryopt
     
             berryopt11     -1
             rfdir11        1 1 1
-    
-_Important warning:_ you cannot use berryopt to +1 to initiate a finite field
-calculation. You must begin with berryopt -1.
+
+!!! warning
+
+    You cannot use berryopt to +1 to initiate a finite field calculation. 
+    You must begin with berryopt -1.
 
 After that, there are different steps corresponding to various value of the
 electric field, thanks to [[efield]]. For those steps, it is important to take
@@ -366,8 +381,8 @@ still be reached for k-point grids providing a reasonable degree of
 convergence. A compromise must however be found.
 
 As these calculations are quite long, the input file has been limited to very
-small fields. Three cases have been selected : E = 0, E = +0.0001 and E =
--0.0001. If you have time later, you can relax this constraint and perform a
+small fields. Three cases have been selected: E = 0, E = +0.0001 and E = -0.0001. 
+If you have time later, you can relax this constraint and perform a
 more exhaustive calculations for a larger set of fields.
 
 You can now start the run. Various quantities can be extracted from the finite
@@ -429,7 +444,7 @@ later for the [lesson on static Non-linear properties](nlo).
 Going back to the output file, you can also look at the evolution of the
 polarization with the field.
 
-E=0
+E = 0
     
     Polarization in cartesian coordinates (a.u.):
      (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])

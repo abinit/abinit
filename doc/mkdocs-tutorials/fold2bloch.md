@@ -11,6 +11,7 @@ model compound alloys, defects, etc. The band structure obtained directly from
 these calculations is hard to interpret due to the Brillouin zone folding as a
 result of its reduced size for the supercell, compared to that for the
 unperturbed host unit cell.  
+
 This lesson aims at demonstrating how to unfold the band structure of a
 supercell and present it in the basis of conventional Bloch wave vectors
 inherent to the unperturbed unit cell. We will construct a supercell of 6
@@ -21,9 +22,7 @@ See also the [[help_fold2bloch]].
 
 This lesson should take about 1 hour.
 
-
 ## 1 Creating a Hydrogen supercell structure
-
   
 Let's begin with the simplest structure: a lattice of hydrogen atoms. It is a
 convenient starting point since the hybridization between s-orbitals results
@@ -57,60 +56,51 @@ they will be affected by the zone folding.
 
 Fig. 2: Brillouin zone of the supercell.
 
-_Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_fold2Bloch" ?_
+*Before beginning, you might consider to work in a different subdirectory as
+for the other lessons. Why not "Work_fold2Bloch"?*
 
-In order to use the fold2Bloch, you need to first generate a wave function
-file (_WFK file).
+In order to use the fold2Bloch, you need to first generate a wave function file (_WFK file).
 
 In the directory ~abinit/tests/tutorial/Input/Work_fold2Bloch, copy the files
-[[tests/tutorial/Input/tfold2bloch_1.files]] and
-[[tests/tutorial/Input/tfold2bloch_1.in]]. The input file has two datasets,
-the first to generate the _WFK file, and the second to draw the band
-structure.
+tests/tutorial/Input/tfold2bloch_1.files and tests/tutorial/Input/tfold2bloch_1.in. 
 
-Now you are ready to run Abinit. Issue the following :
+{% dialog tests/tutorial/Input/tfold2bloch_1.files tests/tutorial/Input/tfold2bloch_1.in %}
 
-* _abinit tfold2bloch_1.files > & tfold1bloch_1.log & _
+The input file has two datasets,
+the first to generate the _WFK file, and the second to draw the band structure.
+
+Now you are ready to run Abinit. Issue the following:
+
+    abinit tfold2bloch_1.files > & tfold1bloch_1.log &
 
 This will generate a self consistent charge density for the 6 Hydrogen atom
 supercell structure, and the wave function file, tfold2bloch_1o_WFK, which is
 needed for unfolding with fold2Bloch.
 
-
-
 ## 2 Folded band structure
-
   
 Before we proceed with the unfolding, let's plot the "standard" band structure
 of a supercell. We will be looking for signatures of the zone folding. In
 order to do this you will need the following scripts:
-
-    
-    
-    
-    
     
     energy_eig-abinit.sh; and
     plot_band.m
     
-    
-    which are located at /abinit/doc/tutorial/lesson_fold2Bloch/
-    
+which are located at /abinit/doc/tutorial/lesson_fold2Bloch/
 
 Execute the energy_eig-avinit.sh script
 
-* _./energy_eig-abinit.sh tfold2bloch_1o_DS2_EIG_
+    ./energy_eig-abinit.sh tfold2bloch_1o_DS2_EIG_
+
 This will generate an output file: tfold2bloch_1o_DS2_EIG.dat
 
-Edit plot_band.m file and point to the newly created
-tfold2bloch_1o_DS2_EIG.dat file.
+Edit plot_band.m file and point to the newly created tfold2bloch_1o_DS2_EIG.dat file.
 
-* _data=load('tfold2bloch_1o_DS2_EIG.dat');_
+    data=load('tfold2bloch_1o_DS2_EIG.dat');
 
 Then, run the plot_band.m script in MatLab
 
->&gtplot;_band
+    >&gtplot;_band
 
 This will plot the band structure of the 6 atom Hydrogen supercell created.
 
@@ -125,10 +115,7 @@ along directions Y-Gamma and Z-Gamma. The band structure is folded according
 to the multiplicity along those directions used when constructing the
 supercell (Fig. 1b).
 
-
-
 ## 3 Bloch spectral weights with fold2Bloch
-
   
 Next step is to execute fold2Bloch using the wave function file from the 2nd
 dataset, and multiplicity in the corresponding directions, used when
@@ -137,75 +124,60 @@ arguments. For this example the multiplicity used was (1:2:3)
 
 Execute the following command:
 
-* _fold2Bloch tfold2bloch_WFK 1:2:3_
+    fold2Bloch tfold2bloch_WFK 1:2:3
 
 You should see the following:
-
     
     
-    
-    
-    
-               ***********************
-               ** Fold2Bloch V 1.0  **
-               **Build  Oct 16, 2014**
-               ***********************
-             2% Processing K point:    0.000000   -0.500000    0.000000
-             4% Processing K point:    0.000000   -0.450000    0.000000
-             6% Processing K point:    0.000000   -0.400000    0.000000
-    	 ...
-            95% Processing K point:    0.000000    0.000000    0.400000
-            97% Processing K point:    0.000000    0.000000    0.450000
-           100% Processing K point:    0.000000    0.000000    0.500000
-          Number of K points processed:          43
-          Data was written to: fold2Bloch.out
-          Data format: KX, KY, KZ, Eigenvalue(Ha), Weight
-    
-    
-    
-    
+```
+      ***********************
+      ** Fold2Bloch V 1.0  **
+      **Build  Oct 16, 2014**
+      ***********************
+    2% Processing K point:    0.000000   -0.500000    0.000000
+    4% Processing K point:    0.000000   -0.450000    0.000000
+    6% Processing K point:    0.000000   -0.400000    0.000000
+...
+   95% Processing K point:    0.000000    0.000000    0.400000
+   97% Processing K point:    0.000000    0.000000    0.450000
+  100% Processing K point:    0.000000    0.000000    0.500000
+ Number of K points processed:          43
+ Data was written to: fold2Bloch.out
+ Data format: KX, KY, KZ, Eigenvalue(Ha), Weight
+```
 
 That output tells us which K-point was processed, total number of K-points
 processed, outputfile, and the format that the data is written in.
 
-Now take a look at the "fold2Bloch.out". The first few lines should be as
-follows:
+Now take a look at the "fold2Bloch.out". The first few lines should be as follows:
 
-* _less fold2Bloch.out_
+    less fold2Bloch.out
     
-    
-    
-    
-    
-       0.000000  -0.250000   0.000000  -0.317960   0.579542
-       0.000000  -0.250000   0.333333  -0.317960   0.000000
-       0.000000  -0.250000  -0.333333  -0.317960   0.000000
-       0.000000   0.250000   0.000000  -0.317960   0.420458
-       0.000000   0.250000   0.333333  -0.317960   0.000000
-       0.000000   0.250000  -0.333333  -0.317960   0.000000
-       0.000000  -0.250000   0.000000  -0.317960   0.420458
-       0.000000  -0.250000   0.333333  -0.317960   0.000000
-       0.000000  -0.250000  -0.333333  -0.317960   0.000000
-       0.000000   0.250000   0.000000  -0.317960   0.579542
-       0.000000   0.250000   0.333333  -0.317960   0.000000
-       0.000000   0.250000  -0.333333  -0.317960   0.000000
-       0.000000  -0.250000   0.000000  -0.093527   0.000000
-       0.000000  -0.250000   0.333333  -0.093527   0.315820
-       0.000000  -0.250000  -0.333333  -0.093527   0.251111
-       0.000000   0.250000   0.000000  -0.093527   0.000000
-       0.000000   0.250000   0.333333  -0.093527   0.144884
-       0.000000   0.250000  -0.333333  -0.093527   0.288185
-       0.000000  -0.250000   0.000000  -0.093527   0.000000
-       0.000000  -0.250000   0.333333  -0.093527   0.494070
-       0.000000  -0.250000  -0.333333  -0.093527   0.103712
-       0.000000   0.250000   0.000000  -0.093527   0.000000
-       0.000000   0.250000   0.333333  -0.093527   0.386301
-       0.000000   0.250000  -0.333333  -0.093527   0.015917
-       ...
-    
-    
-    
-    
+    0.000000  -0.250000   0.000000  -0.317960   0.579542
+    0.000000  -0.250000   0.333333  -0.317960   0.000000
+    0.000000  -0.250000  -0.333333  -0.317960   0.000000
+    0.000000   0.250000   0.000000  -0.317960   0.420458
+    0.000000   0.250000   0.333333  -0.317960   0.000000
+    0.000000   0.250000  -0.333333  -0.317960   0.000000
+    0.000000  -0.250000   0.000000  -0.317960   0.420458
+    0.000000  -0.250000   0.333333  -0.317960   0.000000
+    0.000000  -0.250000  -0.333333  -0.317960   0.000000
+    0.000000   0.250000   0.000000  -0.317960   0.579542
+    0.000000   0.250000   0.333333  -0.317960   0.000000
+    0.000000   0.250000  -0.333333  -0.317960   0.000000
+    0.000000  -0.250000   0.000000  -0.093527   0.000000
+    0.000000  -0.250000   0.333333  -0.093527   0.315820
+    0.000000  -0.250000  -0.333333  -0.093527   0.251111
+    0.000000   0.250000   0.000000  -0.093527   0.000000
+    0.000000   0.250000   0.333333  -0.093527   0.144884
+    0.000000   0.250000  -0.333333  -0.093527   0.288185
+    0.000000  -0.250000   0.000000  -0.093527   0.000000
+    0.000000  -0.250000   0.333333  -0.093527   0.494070
+    0.000000  -0.250000  -0.333333  -0.093527   0.103712
+    0.000000   0.250000   0.000000  -0.093527   0.000000
+    0.000000   0.250000   0.333333  -0.093527   0.386301
+    0.000000   0.250000  -0.333333  -0.093527   0.015917
+    ...
 
 Let's take a moment to analyse the output. Columns 1-3 correspond to  kx,ky
 and kz of the unfolded bands; the 4th column is the energy eigenvalue in [Ha]
@@ -225,13 +197,12 @@ express an exclusive Bloch character any longer. This can have some
 interesting consequences for transport or optical properties, which are not
 apparent from the folded band structure.
 
-Note: the whole output is much bigger than the sample provided above. For the
-band structure visualization proceed to the next step.
+!!! note
 
-
+    the whole output is much bigger than the sample provided above. For the
+    band structure visualization proceed to the next step.
 
 ## 4 Unfolded band structure
-
   
 Lets visualize the unfolded band structure. It is different from a regular
 band structure plot, though. Now we have one additional dimension -- the Bloch
@@ -241,43 +212,34 @@ weight. The following MatLab script will help you build a graph for any
 fold2Bloch output: [ubs_dots.m](fold2Bloch_assets/ubs_dots.m)
 
 Make sure the following parameters in ubs_dots.m are set as follows:
+    
+```matlab
+KPATH = [0 1/2 0; ...
+        0 0 0; ...
+        0 0 1/2];
 
+finpt='tfold2bloch_1o.f2b';
+```
+
+and:
     
+```matlab
+G = [0.3333333 0.0000000 0.0000000;
+   0.000000  0.1666667 0.0000000;
+   0.000000  0.000000  0.1111111]; % Reciprocal latt. vect. [Bohr^-1] from *.out
+```
     
+Reciprocal lattice vector information must match that in tfold2bloch_1.out:
     
-    
-    
-    _KPATH = [0 1/2 0; ...
-            0 0 0; ...
-            0 0 1/2];
-    
-    finpt='tfold2bloch_1o.f2b';_ 
-    
-    
-     and:
-    
-    
-    
-    _G = [0.3333333 0.0000000 0.0000000;
-       0.000000  0.1666667 0.0000000;
-       0.000000  0.000000  0.1111111]; % Reciprocal latt. vect. [Bohr^-1] from *.out_
-    
-    
-     Reciprocal lattice vector information must match that in tfold2bloch_1.out:
-    
-    
-    _Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+    Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
      R(1)=  3.0000000  0.0000000  0.0000000  G(1)=  0.3333333  0.0000000  0.0000000
      R(2)=  0.0000000  6.0000000  0.0000000  G(2)=  0.0000000  0.1666667  0.0000000
      R(3)=  0.0000000  0.0000000  9.0000000  G(3)=  0.0000000  0.0000000  0.1111111
      Unit cell volume ucvol=  1.6200000E+02 bohr^3
      Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-    
-    
-    _
 
-For graphing any other fold2Bloch output, make sure that the "%%Init
-Parameters" are set accordinly to size of the supercell constructed.
+For graphing any other fold2Bloch output, make sure that the "%%Init Parameters" 
+are set accordingly to size of the supercell constructed.
 
 After running the script you should see the following graph:
 
@@ -287,5 +249,3 @@ As you can see the unfolded band structure perfectly reproduces the
 anticipated dispersion relation _E(k) = E 0 \- 2A cos(k b)_. We can even
 estimate the magnitude of the hopping matrix element between adjacent atoms
 VssG = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in VssG = -2.75 eV.
-
-You reached the end of the lesson on how to unfold a simplest band structure.
