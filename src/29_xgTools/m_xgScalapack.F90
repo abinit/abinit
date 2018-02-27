@@ -107,6 +107,7 @@ module m_xgScalapack
     integer            , intent(in   ) :: verbosity
     logical            , intent(  out) :: usable
     double precision :: tsec(2)
+#ifdef HAVE_LINALG_SCALAPACK
     integer :: maxProc
     integer :: nproc
     integer :: subgroup
@@ -114,6 +115,10 @@ module m_xgScalapack
     integer :: ierr
     integer :: test_row
     integer :: test_col
+#else
+   ABI_UNUSED(comm)
+   ABI_UNUSED(maxDim)
+#endif
 
     call timab(M__tim_init,1,tsec)
 
@@ -257,6 +262,7 @@ module m_xgScalapack
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: eigenvalues
+#ifdef HAVE_LINALG_SCALAPACK
     double precision, pointer :: matrix(:,:) !(cplex*nbli_global,nbco_global)
     double precision, pointer :: eigenvalues_tmp(:,:)
     double precision, pointer :: vector(:)
@@ -265,6 +271,11 @@ module m_xgScalapack
     integer :: istwf_k
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
+#else
+    ABI_UNUSED(xgScalapack)
+    ABI_UNUSED(matrixA)
+    ABI_UNUSED(eigenvalues)
+#endif
 
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_heev,1,tsec)
@@ -324,6 +335,7 @@ module m_xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: matrixB
     type(xgBlock_t)    , intent(inout) :: eigenvalues
+#ifdef HAVE_LINALG_SCALAPACK
     double precision, pointer :: matrix1(:,:) !(cplex*nbli_global,nbco_global)
     double precision, pointer :: matrix2(:,:) !(cplex*nbli_global,nbco_global)
     double precision, pointer :: eigenvalues_tmp(:,:)
@@ -333,6 +345,12 @@ module m_xgScalapack
     integer :: istwf_k
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
+#else
+    ABI_UNUSED(xgScalapack)
+    ABI_UNUSED(matrixA)
+    ABI_UNUSED(matrixB)
+    ABI_UNUSED(eigenvalues)
+#endif
 
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_hegv,1,tsec)
@@ -445,7 +463,11 @@ module m_xgScalapack
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
     double precision :: tsec(2)
+#ifdef HAVE_LINALG_SCALAPACK
     integer :: ierr
+#else
+    ABI_UNUSED(xgScalapack)
+#endif
 
     call timab(M__tim_free,1,tsec)
 #ifdef HAVE_LINALG_SCALAPACK

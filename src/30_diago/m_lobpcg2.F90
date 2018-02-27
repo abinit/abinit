@@ -769,7 +769,9 @@ module m_lobpcg2
     integer :: subdim
     !integer :: neigen
     double precision :: abstol
+#ifdef HAVE_LINALG_SCALAPACK
     logical :: use_slk
+#endif
     type(xg_t) :: vec
     type(xg_t) :: subA
     type(xg_t) :: subB

@@ -1573,7 +1573,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
          message='low-level xgBlock type '
        case(77)
-         list(:18)=(/1690,1691,1692,1693,1694/)
+         list(:5)=(/1690,1691,1692,1693,1694/)
          message='low-level xgScalapack type '
        case default   
          cycle ! This allows to disable temporarily some partitionings
