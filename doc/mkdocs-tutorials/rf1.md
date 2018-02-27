@@ -14,8 +14,8 @@ This lesson aims at showing how to get the following physical properties, for an
   * the LO-TO splitting 
   * the phonon frequencies and eigenvectors at other q-points in the Brillouin Zone 
 
-You will learn to use of density-functional perturbation theory (DFPT)
-features of ABINIT. In order to learn the use of the associated codes Mrgddb
+You will learn to use of density-functional perturbation theory (DFPT) features of ABINIT. 
+In order to learn the use of the associated codes Mrgddb
 and Anaddb, to produce efficiently phonon band structures and the associated
 thermodynamical properties, please see the [[lesson:rf2|tutorial DFPT 2]]
 
@@ -24,12 +24,14 @@ This lesson should take about 2 hours.
 ## 1 The ground-state geometry of AlAs
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not create "Work_rf1" in ~abinit/tests/tutorespfn/Input ?*
+for the other lessons. Why not create "Work_rf1" in ~abinit/tests/tutorespfn/Input?*
 
-NOTE: the reference directory that contains the example files for the
-tutorial is no more ~abinit/tests/tutorial (as for the basic lessons and the
-specialized, non-DFPT ones), but ~abinit/tests/tutorespfn. 
-This will be the case for all the DFPT based part of the tutorial.
+!!! important
+
+    The reference directory that contains the example files for the
+    tutorial is no more ~abinit/tests/tutorial (as for the basic lessons and the
+    specialized, non-DFPT ones), but ~abinit/tests/tutorespfn. 
+    This will be the case for all the DFPT based part of the tutorial.
 
 The file ~abinit/tests/tutorespfn/Input/trf1_x.files lists the file names and root names. 
 You can copy it in the Work_rf1 directory (and change it, as usual). 
@@ -43,27 +45,27 @@ tutorials, at variance with the four "basic" lessons.
 You can also copy the file ~abinit/tests/tutorespfn/Input/trf1_1.in in Work_rf1. 
 This is your input file. You should edit it, and read it carefully.
 
-Because of the use of two types of atoms, have a look at the following input variables :
+{% dialog tests/tutorespfn/Input/trf1_x.files tests/tutorespfn/Input/trf1_1.in tests/tutorespfn/Refs/trf1_1.out %}
+
+Because of the use of two types of atoms, have a look at the following input variables:
 
 * [[ntypat]] 
 * [[typat]] 
 
-Note that the value of [[tolvrs]] is rather stringent. This is because the
-wavefunctions determined by the present run will be used later as starting
-point of the DFPT calculation. However, the number of steps, [[nstep]], in
-this example file has been set to 15, and you will see that this is not enough
-to reach the target [[tolvrs]]. 
-In production runs, you should choose a larger value of [[nstep]], sufficient 
-to reach your target [[tolvrs]]. 
+Note that the value of [[tolvrs]] is rather stringent. 
+This is because the wavefunctions determined by the present run will be used later as starting
+point of the DFPT calculation. 
+However, the number of steps, [[nstep]], in this example file has been set to 15, and 
+you will see that this is not enough to reach the target [[tolvrs]]. 
+In production runs, you should choose a larger value of [[nstep]], sufficient  to reach your target [[tolvrs]]. 
 In the present tutorial, due to portability concerns related to automatic testing, we could
 not allow a larger [[nstep]] value. 
 This minor problem with some tutorial examples was mentioned briefly in 
 [a side note to the answer to question 1 of lesson 1](lesson_base1.html#aq1). 
 So, do not follow blindly all examples in the tutorials: check by yourself the convergence of your runs!
 
-You will work at fixed [[ecut]] (=3Ha) and k-point grid, defined by
-[[kptrlatt]] (the 8x8x8 Monkhorst-Pack grid). 
-It is implicit that in "real life", you should do a convergence test with respect to both parameters. 
+You will work at fixed [[ecut]] (3Ha) and k-point grid, defined by [[kptrlatt]] (the 8x8x8 Monkhorst-Pack grid). 
+It is implicit that in *real life*, you should do a convergence test with respect to both parameters. 
 We postpone the discussion of the accuracy of these choices and
 the choice of pseudopotential to the end of the fifth section of this tutorial. 
 They give acceptable results, not very accurate, but, more important, the speed is reasonable for a tutorial.  
@@ -72,10 +74,11 @@ You should make the run (a few seconds), and obtain the following value for
 the energy, in the final echo section:
     
      etotal   -9.7626837450E+00
+
 However, we will rely later on a more accurate (more digits) value of this
 total energy, that can be found about a dozen of lines before this final echo:
     
-        >>>>>>>>> Etotal= -9.76268374500280E+00
+    >>>>>>>>> Etotal= -9.76268374500280E+00
 
 The output file also mentions that the forces on both atoms vanish.
 
@@ -83,19 +86,21 @@ The run that you just made will be considered as defining a ground-state
 configuration, on top of which responses to perturbations will be computed.
 The main output of this ground-state run is the wavefunction file trf1_1o_WFK,
 that you can already rename as trf1_1i_WFK. Indeed, it will be used in the
-next runs, as an input file. **So, in the corresponding "files" file for all
-the following runs, at third line, pay attention TO KEEP "trf1_1i", even if
-you change the root name for output files (fourth line) to "trf1_2o" or
-"trf1_3o", as well as the first, second and fifth lines of this file.**
+next runs, as an input file. 
+
+!!! warning
+
+    So, in the corresponding "files" file for all the following runs, at third line, 
+    pay attention **to keep** "trf1_1i", even if you change the root name for output files (fourth line) 
+    to "trf1_2o" or "trf1_3o", as well as the first, second and fifth lines of this file.
 
 ## 2 Frozen-phonon calculation of a second derivative of the total energy
 
 We will now aim at computing the second derivative of the total energy with
-respect to an atomic displacement by different means. For that purpose, 
-you must first read 
+respect to an atomic displacement by different means. 
+For that purpose,  you must first read 
 [sections 0 and the first paragraph of section 1](../../users/generated_files/help_respfn.html#0) 
 of the respfn_help file (the auxiliary help file, that deals specifically with the DFPT features).
-
 We will explain later, in more detail, the signification of the different
 input parameters introduced in section 1 of the respfn_help file.
 
@@ -105,11 +110,14 @@ atom along the first axis of the reduced coordinates.
 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_2.in in Work_rf1.
 This is your input file. You should edit it and briefly look at the two
-changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in :
+changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in:
 the change of [[xred]], and the reading of the wavefunction file, using the
-[[irdwfk]] input variable. Then, you can make the run. The symmetry is lowered
+[[irdwfk]] input variable. 
+Then, you can make the run. The symmetry is lowered
 with respect to the ground-state geometry, so that the number of k-points
 increases a lot, and of course, the CPU time.
+
+{% dialog tests/tutorespfn/Input/trf1_2.in tests/tutorespfn/Refs/trf1_2.out %}
 
 From this run, it is possible to get the values of the total energy, and the
 value of the gradient of the total energy (dE) with respect to change of
@@ -123,16 +131,15 @@ reduced coordinate (dt):
 
 The change of reduced coordinate of the Al atom along the first axis was
 rather small (1/1000), and we can make an estimate of the second derivative of
-the total energy with respect to the reduced coordinate thanks to finite-
-difference formulas.
+the total energy with respect to the reduced coordinate thanks to finite-difference formulas.
 
-We start first from the total-energy difference. The total energy is symmetric
-with respect to that perturbation, so that it has no linear term. The
-difference between the ground-state value (-9.76268374500280E+00 hartree) of
+We start first from the total-energy difference. 
+The total energy is symmetric with respect to that perturbation, so that it has no linear term. 
+The difference between the ground-state value (-9.76268374500280E+00 hartree) of
 the previous run, and the perturbed value (-9.76268124105767E+00 hartree) of
 the present one, is thus one half of the square of the coordinate change
-(1/1000) times the second derivative of total energy (2DTE). From these
-number, the 2DTE is 5.0078902589 hartree.
+(1/1000) times the second derivative of total energy (2DTE). 
+From these number, the 2DTE is 5.0078902589 hartree.
 
 Alternatively, we can start from the reduced gradients. The value of the
 reduced gradient with respect to a displacement of the Al atom along the first
@@ -141,8 +148,8 @@ product of the 2DTE by the reduced coordinate difference. The estimate of the
 2DTE is thus 5.007937776 hartree. The agreement with the other estimate is
 rather good (4.10^-5 Hartree).
 
-However, it is possible to do much better, thanks to the use of a higher-order
-finite-difference formula. For this purpose, one can perform another
+However, it is possible to do much better, thanks to the use of a higher-order finite-difference formula. 
+For this purpose, one can perform another
 calculation, in which the change of reduced coordinate along the first axis is
 0.002, instead of 0.001. The doubling of the perturbation allows for a rather
 simple higher-order estimation, as we will see later. The results of this
@@ -160,7 +167,9 @@ of forces, the value 0.010016307568 has to be multiplied by 1000/2). The
 combination of these data with the previous estimate can be done thanks to an
 higher-order finite-difference formula, in which the difference of estimations
 (the largest perturbation minus the smallest one) is divided by three, and
-then subtracted from the smallest estimation. As far as the total-energy
+then subtracted from the smallest estimation. 
+
+As far as the total-energy
 estimation is concerned, the difference is 0.00011194 Ha, which divided by
 three, and subtracted from 5.00789025 hartree, gives 5.00785294 hartree. The
 same higher-order procedure for force estimates gives 5.0078657 hartree. So,
@@ -214,6 +223,8 @@ Accordingly, you should get familiarized with the new input variables :
 [[rfphon]], [[rfatpol]], [[rfdir]]. Then, pay attention to the special use of
 the [[kptopt]] input variable. It will be explained in more detail later.
 
+{% dialog tests/tutorespfn/Input/trf1_3.in %}
+
 When you have understood the purpose of the input variable values specified
 before the "Common input variables" section, you can make the code run.
 
@@ -229,8 +240,11 @@ ABINIT has created four different files:
   * trf1_3o_DDB (the derivative database) 
 
 Let us have a look at the output file. You can follow the description provided
-in the [section 6.2](../../users/generated_files/help_respfn.html#6.2) of the
-respfn_help file. You should be able to find the place where the iterations
+in the [section 6.2](../../users/generated_files/help_respfn.html#6.2) of the respfn_help file. 
+
+{% dialog tests/tutorespfn/Refs/trf1_3.out %}
+
+You should be able to find the place where the iterations
 for the minimisation (with respect to the unique perturbation) take place:
     
           iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
@@ -261,15 +275,18 @@ DFPT approach calls for some accuracy considerations. These can be found in
 We are now in the position to compute the full dynamical matrix at Gamma (q=0). 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_4.in in
 Work_rf1. This is your input file. You should edit it. 
+
 As for test rf1_3, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are
 all gathered in the first part of this file. Moreover, the changes with
 respect to trf1_3.in concern only the input variables [[rfatpol]], and [[rfdir]]. 
 Namely, all the atoms will be displaced, in all the directions.
 
-There are six perturbations to consider. So, one might think that the CPU time
-will raise accordingly. This is not true, as ABINIT is able to determine which
-perturbations are the symmetric of another perturbation, see [section 3](../../users/generated_files/help_respfn.html#3) 
-of the respfn_help file.
+{% dialog tests/tutorespfn/Input/trf1_3.in%}
+
+There are six perturbations to consider. 
+So, one might think that the CPU time will raise accordingly. 
+This is not true, as ABINIT is able to determine which perturbations are the symmetric of another perturbation, 
+see [section 3](../../users/generated_files/help_respfn.html#3) of the respfn_help file.
 
 Now, you can make the run. You edit the file trf1_4.out, and notice that the
 response to two perturbations were computed explicitly, while the response to
@@ -279,7 +296,7 @@ the other four could be deduced by using the symmetries.
         1)    idir= 1    ipert=   1
         2)    idir= 1    ipert=   2
     
-Nothing mysterious : one of the two irreducible perturbations is for the Al
+Nothing mysterious: one of the two irreducible perturbations is for the Al
 atom, placed in a rather symmetric local site, and the other perturbation is for the As atom.
 
 The phonon frequencies, obtained by diagonalizing the dynamical matrix (where
@@ -292,14 +309,15 @@ the atomic masses have been taken into account, see [[amu]]), are given as follo
      Phonon frequencies in cm-1    :
     -  5.616089E-01  5.616089E-01  5.616092E-01  3.442590E+02  3.442590E+02
     -  3.442590E+02
-    
 
-_You might wonder about the dash sign present in the first column of the two
-lines giving the frequencies in cm-1. The first column of the main ABINIT
-output files is always dedicated to signs needed to automatically treat the
-comparison with respect to reference files. Except if you become a ABINIT
-developer, you should ignore these signs. In the present case, they should not
-be interpreted as a minus sign for the floating numbers that follow them._
+!!! tip
+
+    You might wonder about the dash sign present in the first column of the two
+    lines giving the frequencies in cm-1. The first column of the main ABINIT
+    output files is always dedicated to signs needed to automatically treat the
+    comparison with respect to reference files. Except if you become a ABINIT
+    developer, you should ignore these signs. In the present case, they should not
+    be interpreted as a minus sign for the floating numbers that follow them._
 
 There is a good news about this result, and a bad news. The good news is that
 there are indeed three acoustic modes, with frequency rather close to zero
@@ -349,16 +367,18 @@ section of the present tutorial. The sections to be read are :
 You are now in the position to compute the full dynamical matrix at Gamma (q=0), 
 including the coupling with an homogeneous electric field. 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_5.in in Work_rf1. 
-This is your input file. You should edit it. As for the other RF tests, the changes with
-respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are all gathered
-in the first part of this file. Unlike the other tests, however, the multi-
-dataset mode was used, computing from scratch the ground-state properties,
-then computing the effect of the ddk perturbation, then the effect of all
+This is your input file. You should edit it. 
+
+{% dialog tests/tutorespfn/Input/trf1_5.in tests/tutorespfn/Refs/trf1_5.out %}
+
+As for the other RF tests, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are all gathered
+in the first part of this file. 
+Unlike the other tests, however, the multi-dataset mode was used, computing from scratch 
+the ground-state properties, then computing the effect of the ddk perturbation, then the effect of all
 other perturbations (electric field as well as atomic displacements).
 
-The analysis of the output file is even more cumbersome than the previous
-ones. Let us skip the first dataset. In the dataset 2 section, one
-perturbation is correctly selected:
+The analysis of the output file is even more cumbersome than the previous ones. 
+Let us skip the first dataset. In the dataset 2 section, one perturbation is correctly selected:
     
      ==>  initialize data related to q vector <==
     
@@ -515,12 +535,16 @@ completely avoided. For an explanation of this fact, see for example section IV
 of X. Gonze, Phys. Rev. B55, 10337 (1997).
 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_6.in in Work_rf1.
-This is your input file. You should edit it. As for the other RF tests, the
-changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are
-all gathered in the first part of this file. The multi-dataset mode is used,
-computing from scratch the ground-state properties, then computing different
-dynamical matrices. The run is about 2 minutes on a 2.8 GHz machine. So, you
-would better leave your computer running, and either read more of the ABINIT documentation 
+This is your input file. You should edit it. 
+
+{% dialog tests/tutorespfn/Input/trf1_6.in tests/tutorespfn/Refs/trf1_6.out %}
+
+As for the other RF tests, the changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in are
+all gathered in the first part of this file. 
+The multi-dataset mode is used, computing from scratch the ground-state properties, then computing different
+dynamical matrices. 
+The run is about 2 minutes on a 2.8 GHz machine. 
+So, you would better leave your computer running, and either read more of the ABINIT documentation 
 (why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]), or make a walk).
 
 The results of this simulation can be compared to those provided in the Gianozzi et al paper. 

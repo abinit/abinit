@@ -1326,7 +1326,7 @@ Enter any string to search in the database. Clicking without any request will gi
         button = """\
 <button type="button" id="{btn_id}" class="btn btn-default btn-labeled">
   <span class="btn-label"><i class="fa fa-window-restore" aria-hidden="true"></i></span>View {path}
-</button>.""".format(**locals())
+</button>""".format(**locals())
 
         dialog = """
 <div id="{dialog_id}" class="my_dialog" title="{title}" hidden><div>{text}</div></div>

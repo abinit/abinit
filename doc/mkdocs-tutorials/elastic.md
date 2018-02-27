@@ -23,25 +23,24 @@ This lesson should take about two hours.
 
 ## 1 The ground-state geometry of (hypothetical) wurtzite AlAs
 
-  
 *Before beginning, you might consider working in a different subdirectory as for the other lessons. 
 Why not create "Work_elast" in ~abinit/tests/tutorespfn/Input?*
 
-You should copy the files ~abinit/tests/tutorespfn/Input/telast_1.files and
-telast_1.in into Work_elast. You may wish to start the calculation (less than
-one minute on a standard 3GHz machine) before you read the following. You
-should open your input file telast_1.in with an editor and examine it as you
-read this discussion.
+You should copy the files ~abinit/tests/tutorespfn/Input/telast_1.files and telast_1.in into Work_elast. 
+You may wish to start the calculation (less than
+one minute on a standard 3GHz machine) before you read the following. 
+You should open your input file telast_1.in with an editor and examine it as you read this discussion.
+
+{% dialog tests/tutorespfn/Input/telast_1.files tests/tutorespfn/Input/telast_1.in %}
 
 The hypothetical wurtzite structure for AlAs retains the tetrahedral
-coordination of the atoms of the actual zincblende structure of AlAs, but has
-a hexagonal lattice. It was chosen for this lesson because the atomic
-positions are not completely determined by symmetry. Both the atomic positions
-and the lattice constants should be optimized before beginning DFPT
-calculations, especially those related to strain properties. While GS
-structural optimization was treated in lessons 1-3, we are introducing a few
-new features here, and you should look at the following new input variables
-which will be discussed below:  
+coordination of the atoms of the actual zincblende structure of AlAs, but has a hexagonal lattice. 
+It was chosen for this lesson because the atomic
+positions are not completely determined by symmetry. 
+Both the atomic positions and the lattice constants should be optimized before beginning DFPT
+calculations, especially those related to strain properties. 
+While GS structural optimization was treated in lessons 1-3, we are introducing a few
+new features here, and you should look at the following new input variables which will be discussed below:  
 
   * [[getxred]] 
   * [[iatfix]] 
@@ -56,15 +55,15 @@ positions [[xred]] are a starting approximation, and will be replaced by our
 converged results in the remaining input files, as will [[acell]].
 
 We will work with a fixed plane wave cutoff [[ecut]] (=6 Ha), but introduce
-[[ecutsm]] (=0.5 Ha)as in [lesson 3](base3) to smear the cutoff,
+[[ecutsm]] (0.5 Ha)as in [lesson 3](base3) to smear the cutoff,
 which produces smoothly varying stresses as the lattice parameters are
-optimized. We will keep the same value of [[ecutsm]] for the DFPTcalculations
+optimized. We will keep the same value of [[ecutsm]] for the DFPT calculations
 as well, since changing it from the optimization run value could reintroduce
 non-zero forces and stresses. For the k-point grid, we must explicitly specify
 [[shiftk]] since the default value results in a grid shifted so as to break
 hexagonal symmetry. The RF strain calculations check this, and will exit with
-an error message if the grid does not have the proper symmetry. The self-
-consistency procedures follow [lesson RF1](rf1).
+an error message if the grid does not have the proper symmetry. 
+The self-consistency procedures follow [lesson RF1](rf1).
 
 Dataset 1 optimizes the atomic positions keeping the lattice parameters fixed,
 setting [[ionmov]]=2 as in [lesson 1](base1). The optimization
@@ -98,10 +97,13 @@ that way, so we may as well develop good habits.
 Now we shall examine the results of the structural optimization run. As
 always, we should first examine the log file to make sure the run has
 terminated cleanly. There are a number of warnings, but none of them are
-apparently serious. Next, let us edit the output file, telast_1.out. The first
-thing to look for is to see whether Abinit recognized the symmetry of the
-system. In setting up a new data file, it's easy to make mistakes, so this is
-a valuable check. We see
+apparently serious. Next, let us edit the output file, telast_1.out. 
+
+{% dialog tests/tutorespfn/Refs/telast_1.out %}
+
+The first thing to look for is to see whether Abinit recognized the symmetry of the
+system. In setting up a new data file, it's easy to make mistakes, so this is a valuable check. 
+We see
     
     DATASET    1 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 
@@ -135,24 +137,21 @@ the end of telast_1.out:
     
 With your editor, copy and paste these into telast_2.in at the indicated
 places in the "Common input data" area. Be sure to change acell2 and xred2 to
-acell and xred since these common values will apply to all datasets in the
-next set of calculations.  
+acell and xred since these common values will apply to all datasets in the next set of calculations.  
 
 ## 2 Response-function calculations of several second derivatives of the total energy
   
 We will now compute second derivatives of the total energy (2DTE's) with
 respect to all the perturbations we need to compute elastic and piezoelectric
-properties. You may want to review [sections 0 and the first paragraph of
-section 1](../../users/generated_files/help_respfn.html#0) of the respfn_help
-file which you studied in lesson RF1. We will introduce only one new input
-variable for the strain perturbation,
+properties. You may want to review the first paragraphs of the [[help:respfn]]
+which you studied in lesson RF1. 
+We will introduce only one new input variable for the strain perturbation,
 
   * [[rfstrs]]   
 
 The treatment of strain as a perturbation has some subtle aspects. It would be
 a good idea to read  Metric tensor formulation of strain in density-functional
-perturbation theory, by D. R. Hamann, Xifan Wu, Karin M. Rabe, and David
-Vanderbilt, [Phys. Rev. B 71, 035117 (2005)](http://dx.doi.org/10.1103/PhysRevB.71.035117), 
+perturbation theory, by D. R. Hamann, Xifan Wu, Karin M. Rabe, and David Vanderbilt [[cite:Hamann2005]]
 especially Sec. II and Sec. IV. We will do all the RF calculations you learned in lesson RF1 together
 with strain, so you should review the variables
 
@@ -166,6 +165,8 @@ calculation while you read (less than 2 minutes on a standard 3GHz machine).
 Look at telast_2.in in your editor to follow the discussion, and double check
 that you have copied acell and xred as discussed in the last section.
 
+{% dialog tests/tutorespfn/Input/telast_2.in %}
+
 This has been set up as a self-contained calculation with three datasets. The
 first is simply a GS run to obtain the GS wave functions we will need for the
 DFPT calculations. We have removed the convergence test from the common input
@@ -174,17 +175,19 @@ datasets. We set a tight limit on the convergence of the self-consistent
 potential with [[tolvrs]]. Since we have specified [[nband]]=8, all the bands
 are occupied and the potential test also assures us that all the wave
 functions are well converged. This issue will come up again in the section on
-metals . We could have used the output wave functions telast_1o_DS2_WFK as
+metals. We could have used the output wave functions telast_1o_DS2_WFK as
 input for our RF calculations and skipped dataset 1, but redoing the GS
 calculation takes relatively little time for this simple system .
 
 Dataset 2 involves the calculation of the derivatives of the wave functions
 with respect to the Brillouin-zone wave vector, the so-called ddk wave
 functions. Recall that these are auxiliary quantities needed to compute the
-response to the[ electric field perturbation](lesson_rf1.html#5) and
-introduced in lesson RF1 . It would be a good idea to review the relevant
+response to the [electric field perturbation](lesson_rf1.html#5) and
+introduced in lesson RF1. It would be a good idea to review the relevant
 parts of [section 1](../../users/generated_files/help_respfn.html#1) of the
-respfn_help file. Examining this section of telast_2.in, note that electric
+respfn_help file. 
+
+Examining this section of telast_2.in, note that electric
 field as well as strain are uniform perturbations, only are defined for
 [[qpt]]= 0 0 0. [[rfelfd]]= 2 specifies that we want the ddk calculation to be
 performed, which requires [[iscf]]= -3. The ddk wave functions will be used to
@@ -265,11 +268,11 @@ Searching backwards for ETOT you will find
 
 Abinit is solving a set of Schroedinger-like equations for the first-order
 wave functions, and these functions minimize a variational expression for the
-2DTE.  (Technically, they are called self-consistent Sternheimer equations.)
+2DTE (Technically, they are called self-consistent Sternheimer equations)
 The  energy  convergence looks similar to that of GS calculations.  The fact
 that vres2, the residual of the self-consistent first-order potential, has
 reached [[tolvrs]] well within [[nstep]] (40) iterations indicates that the
-2DTE calculation for this perturbation (xy strain) has converged . It would
+2DTE calculation for this perturbation (xy strain) has converged. It would
 pay to examine a few more cases for different perturbations (unless you have
 looked through all the warnings in the log).
 
@@ -299,21 +302,21 @@ Another convergence item to examine in your .out file is
 This detailed breakdown of the contributions to 2DTE is probably of limited
 interest, but you should compare "2DEtotal" and "non-var. 2DEtotal" from the
 last three lines. While the first-order wave function for the present
-perturbation minimizes a variational  expression for the second derivative
+perturbation minimizes a variational expression for the second derivative
 with respect to this perturbation as we just saw, the various 2DTE given as
 elastic tensors, etc. in the output and in the DDB file are all computed using
-non-variational expressions.  Using the non-variational expressions, mixed
+non-variational expressions. Using the non-variational expressions, mixed
 second derivatives with respect to the present perturbation and all other
 perturbations of interest can be computed directly from the present first-
 order wave functions. The disadvantage is that the non-variational result
 has errors which are linearly proportional to convergence errors in the GS and
-first-order wave functions.  Since errors in the variational 2DEtotal are
-second-order in wave-function convergence errors, comparing this to the non-
-variational result for the diagonal second derivative will give an idea of the
+first-order wave functions. Since errors in the variational 2DEtotal are
+second-order in wave-function convergence errors, comparing this to the non-variational 
+result for the diagonal second derivative will give an idea of the
 accuracy of the latter and perhaps indicate the need for tighter convergence
-tolerances for both the GS and RF wave functions.  This is discussed in  X.
-Gonze and C. Lee, Phys. Rev. B 55, 10355 (1997) , Sec. II.  For an atomic-
-displacement perturbation, the corresponding breakdown of the 2DTE is headed
+tolerances for both the GS and RF wave functions.  
+This is discussed in  X. Gonze and C. Lee, Phys. Rev. B 55, 10355 (1997) , Sec. II.  
+For an atomic-displacement perturbation, the corresponding breakdown of the 2DTE is headed
 "Thirteen components."
 
 Now let us take a look at the results we want, the various 2DTE's. They begin
@@ -350,7 +353,7 @@ types of 2DTE's follows (all converted to Cartesian coordinates and in atomic un
                 .....
     
 This contains the interatomic force constant data that will be used later to
-include atomic relaxation effects.  "asr" refers to the acoustic sum rule,
+include atomic relaxation effects. "asr" refers to the acoustic sum rule,
 which basically is a way of making sure that forces sum to zero when an atom is displaced.
     
       Effective charges, in cartesian coordinates,
@@ -406,7 +409,7 @@ for these corrections. You are probably wrong, and any non-zero term indicates a
        1    1   3    7         0.0000000000         0.0000000000  
 
 Finally, we have the piezoelectric tensor, the 2DTE with respect to one strain
-and one uniform electric field component.  (Yes, there are non-zero elements.)  
+and one uniform electric field component. (Yes, there are non-zero elements.)  
 
 ## 3 ANADDB calculation of atom-relaxation effects
   
@@ -422,15 +425,14 @@ description of the variables. You should read the descriptions of
   * [[anaddb:chneut]].
 
 For the theory underlying the incorporation of atom-relaxation corrections, it
-is recommended you see  X. Wu, D. Vanderbilt, and D. R. Hamann, 
-[Phys. Rev, B 72, 035105 (2005)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.72.035105) .  
+is recommended you see  X. Wu, D. Vanderbilt, and D. R. Hamann [[Wu2005]].
   
 Anaddb can do lots of other things, such as calculate the frequency-dependent
 dielectric tensor, interpolate the phonon spectrum to make nice phonon
 dispersion plots, calculate Raman spectra, etc., but we are focusing on the
 minimum needed for the elastic and piezoelectric constants at zero electric field.  
   
-We also mention that [mrgddb](../../users/generated_files/help_mrgddb.html)
+We also mention that [[help:mrgddb|mrgddb]]
 is another utility program that can be used to combine DDB files generated in
 several different datasets or in different runs into a single DDB file that
 can be analyzed by anaddb. One particular usage would be to combine the DDB
@@ -441,7 +443,11 @@ tensor discussed in [notes by A. R. Oganov](../../theory/documents/elasticity-og
   
 Now would be a good time to edit telast_3.in and observe that it is very
 simple, consisting of nothing more than the four variables listed above set to
-appropriate values. The telast_3.files file is used with anaddb in the same
+appropriate values. 
+
+{% dialog tests/tutorespfn/Input/telast_3.files tests/tutorespfn/Input/telast_3.in %}
+
+The telast_3.files file is used with anaddb in the same
 manner as the abinit .files you are by now used to. The first two lines
 specify the .in and .out files, the third line specifies the DDB file, and the
 last two lines are dummy names which would be used in connection with other
@@ -534,6 +540,9 @@ a few of these numbers by a finite-difference method to gain confidence in the R
 ## 4 Finite-difference calculation of elastic and piezoelectric constants
 
 You should copy telast_4.in and telast_4.files into your Work_elast directory.
+
+{% dialog tests/tutorespfn/Input/telast_4.in %}
+
 Editing telast_4.in, you will see that it has four datasets, the first two
 with the c-axis contracted 0.01% and the second two with it expanded 0.01%,
 which we specified by changing the third row of [[rprim]]. The common data is
@@ -552,14 +561,14 @@ calculated in a GS calculation by integrating the gradient with respect to
 **k** of the GS wave functions over the Brillouin zone. In GS calculations,
 the gradients are approximated by finite-difference expressions constructed
 from neighboring points in the **k** mesh. These are closely related to the
-ddk wave functions used in RF calculations in section 2 and introduced in [
-lesson RF1, section 5](lesson_rf1.html#5) . We will use [[berryopt]] = -1,
+ddk wave functions used in RF calculations in section 2 and introduced in 
+[lesson RF1, section 5](lesson_rf1.html#5). We will use [[berryopt]] = -1,
 which utilizes an improved coding of the calculation, and must specify
 [[rfdir]] = 1 1 1 so that the Cartesian components of the polarization are computed.  
   
 Now, run the telast_4 calculation, which should only take a minute or two, and
 edit telast_4.out. To calculate the elastic constants, we need to find the
-stresses  sigma(1 1) and sigma(3 3) . We see that each of the four datasets
+stresses  sigma(1 1) and sigma(3 3). We see that each of the four datasets
 have stress results, but that there are slight differences between those from,
 for example dataset 1 and dataset 2, which should be identical. Despite our
 tight limit, this is still a convergence issue. Look at the following convergence results,  
@@ -591,8 +600,8 @@ compared to  21.09029 GPa, the 3,1 elastic-tensor element.
 The good agreement we found from this simple numerical differentiation
 required that we had accurately relaxed the lattice so that the stress of the
 unstrained structure was very small. Similar numerical-derivative comparisons
-for systems with finite stress are more complicated, as discussed in [notes
-by A. R. Oganov](../../theory/documents/elasticity-oganov.pdf). 
+for systems with finite stress are more complicated, as discussed in 
+[notes by A. R. Oganov](../../theory/documents/elasticity-oganov.pdf). 
 Numerical- derivative comparisons for the relaxed-ion results are extremely challenging
 since they require relaxing atomic forces to exceedingly small limits.
 
@@ -618,7 +627,7 @@ What is wrong? There are two possibilities. The first is that the RF
 calculation produces the proper piezoelectric tensor, while numerical
 differentiation of the polarization produces the improper piezoelectric
 tensor. This is a subtle point, for which you are referred to  D. Vanderbilt,
-J. Phys. Chem. Solids 61, 147 (2000) . The improper-to-proper transformation
+J. Phys. Chem. Solids 61, 147 (2000). The improper-to-proper transformation
 only effects certain tensor elements, however, and for our particular
 combination of crystal symmetry and choice of strain there is no correction.
 The second possibility is the subject of the next section.
@@ -635,6 +644,8 @@ Rabe, and D. Vanderbilt, Phys. Rev. B 66, 104108 (2002) , Abinit has
 incorporated the ability to use finite-difference ddk wave functions from GS
 calculations in RF calculations of electric-field-related 2DTE's. Copy
 telast_5.in and telast_5.files into Work_elast, and edit telast_5.in.
+
+{% dialog tests/tutorespfn/Input/telast_5.in %}
 
 You should compare this with our previous RF data, telast_2.in, and note that
 dataset1 and the Common data (after entering relaxed structural results) are
@@ -654,6 +665,9 @@ Now edit telast_5.out, looking for the piezoelectric tensor,
       dir pert dir pert          real part        imaginary part
     
        3    6   3    7        -0.0130314050         0.0000000000
+
+
+{% dialog tests/tutorespfn/Refs/telast_5.out %}
   
 We immediately see a problem -- this output, like most of the .out file, is in
 atomic units, while we computed our numerical derivative in conventional C/m^2
@@ -674,15 +688,15 @@ pays to have alternative ways to test results, and besides, this didn't take
 much time. (Have you found the conversion factor on your own yet?)  
 
 ## 6 Response-function calculation of the elastic constants of Al metal
-
   
 For metals, the existence of partially occupied bands is a complicating
-feature for RF as well as GS calculations.  Now would be a good time to review
-[lesson 4](base4) which dealt in detail with the interplay between
-**k** -sample convergence and Fermi-surface broadening, especially section [4.3](lesson_base4.html#43).  
-You should copy telast_6.in and telast_6.files
-into Work_elast, and begin your run while you read on, since it involves a
-convergence study with multiple datasets and may take about two minutes.  
+feature for RF as well as GS calculations.  
+Now would be a good time to review [lesson 4](base4) which dealt in detail with the interplay between
+**k**-sample convergence and Fermi-surface broadening, especially section [4.3](lesson_base4.html#43).  
+You should copy telast_6.in and telast_6.files into Work_elast, and begin your run 
+while you read on, since it involves a convergence study with multiple datasets and may take about two minutes.  
+
+{% dialog tests/tutorespfn/Input/telast_6.in %}
   
 While the run is in progress, edit telast_6.in.  As in t43.in, we will set
 [[udtset]] to specify a double loop.  In the present case, however, the outer
@@ -694,16 +708,16 @@ inner loop will be successively
   3. Non-self-consistent GS run to converge unoccupied or slightly-occupied bands.
   4. RF run for symmetry-inequivalent elastic constants.
 
-In Sectionsection 1 , we did a separate GS structural optimization run and
-transferred the results by hand to RF  run section 2 .  Because we are doing a
+In Section 1, we did a separate GS structural optimization run and
+transferred the results by hand to RF  run section 2.  Because we are doing a
 convergence test here, we have combined these steps, and use [[getcell]] to
 transfer the optimized coordinates from the first dataset of the inner loop
 forward to the rest.  If we were doing a more complicated structure with
 internal coordinates that were also optimized, we would need to use both this
 and [[getxred]] to transfer these, as in telast_1.in.  
   
-The specific data for inner-loop dataset 1 is very similar to that for
-telast_1.in.  Inner-loop dataset 2 is a bit of a hack.  We need the density
+The specific data for inner-loop dataset 1 is very similar to that for telast_1.in.  
+Inner-loop dataset 2 is a bit of a hack.  We need the density
 for inner-loop dataset 3, and while we could set [[prtden]] = 1 in dataset 1,
 this would produce a separate density file for every step in the structural
 optimization, and it isn't clear how to automatically pick out the last one.
@@ -805,13 +819,17 @@ difference for a nearly-free-electron metal.
 It is important to bear in mind that the way a tensor like the elastic tensor
 appears is a function of the frame used. Thus for the aluminum fcc case
 considered above, the nonzero elements are _C 11_, _C 12_, and _C 44_,
-_provided that the crystal axes are aligned with the laboratory frame._ For an
-arbitrary alignment of the crystal axes, many more _C ij_ elements will be
-non-zero, and this can be confusing. It's easy to see why this happens if you
+_provided that the crystal axes are aligned with the laboratory frame._ 
+For an arbitrary alignment of the crystal axes, many more _C ij_ elements will be
+non-zero, and this can be confusing. 
+
+It's easy to see why this happens if you
 imagine actually measuring the elastic tensor elements. If you start with the
 conventional cubic cell, and apply pressure to one face, you can measure _C
 11_. But if you turn the cell to some random angle, you'll measure a response
-that is a mixture of _C 11_ and _C 12_. Within ABINIT, if the aluminum fcc
+that is a mixture of _C 11_ and _C 12_. 
+
+Within ABINIT, if the aluminum fcc
 cell is described using [[angdeg]] and [[acell]], then an axis of the
 primitive cell will be aligned along the laboratory _z_ axis but this will not
 lead to a (conventional) cell alignment with the laboratory frame. The
@@ -819,7 +837,9 @@ resulting elastic tensor will be correct but will appear to be more
 complicated than in the illustration above. It can be rotated back to a simple
 frame by hand (bearing in mind that all four indices of the fourth-rank
 elastic tensor have to be rotated!) but it's easier to start with a more
-conventional alignment of the unit cell. If you use a standard text like
+conventional alignment of the unit cell. 
+
+If you use a standard text like
 Bradley and Cracknell, The Mathematical Theory of Symmetry in Solids, Oxford
 you can find the standard primitive cell descriptions for the Bravais lattice
 types and these are aligned as much as possible with a standard laboratory frame.

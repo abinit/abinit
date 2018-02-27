@@ -18,13 +18,16 @@ This lesson should take about 1 hour.
 
 ## Computing the total energy of silicon at fixed number of k points
 
-_Before beginning, you might consider to work in a different subdirectory as
-for lesson_base1 or lesson_base2 . Why not "Work3" ?_
+*Before beginning, you might consider to work in a different subdirectory as
+for lesson_base1 or lesson_base2 . Why not "Work3"?*
 
 The file ~abinit/tests/tutorial/Input/tbase3_x.files lists the file names and root names. 
 You can copy it in the Work3 directory and change it as you did for the tbase1_x.files and tbase2_x.files files. 
 You can also copy the file ~abinit/tests/tutorial/Input/tbase3_1.in in Work3. 
 This is your input file.
+
+{% dialog tests/tutorial/Input/tbase3_1.in %}
+
 You should edit it, read it carefully, have a look at the following "new" input variables, and their explanation:
 
 * [[rprim]] 
@@ -32,12 +35,12 @@ You should edit it, read it carefully, have a look at the following "new" input 
 * [[kptopt]], [[ngkpt]], [[nshiftk]], [[shiftk]], [[kptrlatt]], (not easy ... take your time !) 
 * [[diemac]] (compared to isolated molecules, another value is used, while [[diemix]] has been suppressed). 
 
-Note also the following: you will work at fixed [[ecut]] (=8Ha). 
-It is implicit that in "real life", you should do a convergence test with respect to [[ecut]] ...  
-Here, a suitable [[ecut]] is given to you. It will allow to obtain 0.2% relative accuracy on lattice parameters.
+Note also the following: you will work at fixed [[ecut]] (8Ha). 
+It is implicit that in *real life*, you should do a convergence test with respect to `ecut`. 
+Here, a suitable `ecut` is given to you. It will allow to obtain 0.2% relative accuracy on lattice parameters.
 
 When you have read the input file, you can run the code, as usual (it will run for a few seconds).  
-Then, read the output file, and note the total energy.
+Then, read the output file, and note the total energy:
     
        etotal   -8.8662238960E+00
 
@@ -66,6 +69,9 @@ case ABINIT will compare its computed value (from the grid) with this input valu
 We take this opportunity to examine the behaviour of ABINIT when a problem is detected. 
 Let's suppose that with `ngkpt1 4 4 4`, one mentions `nkpt1 2`. 
 The input file ~abinit/tests/tutorial/Input/tbase3_2.in is an example. 
+
+{% dialog tests/tutorial/Input/tbase3_2.in %}
+
 Do not forget to change tbase3_x.files, if you are using that file name. 
 The message that you get a few dozen of lines before the end of the log file is:
     
@@ -95,14 +101,17 @@ As the computation of [[nkpt]] for specific grids of k points is not an easy
 task, while the even more important selection of specific economical grids
 (the best ratio between the accuracy of the integration in the Brillouin zone
 and the number of k-points) is more difficult, some help to the user is provided by ABINIT. 
-ABINIT is able to examine automatically different k point
+
+The code is able to examine automatically different k point
 grids, and to propose the best grids for integration. 
-This is described in the abinit_help file, see the input variable [[prtkpt]], and the associated
+This is described in the [[help:abinit]], see the input variable [[prtkpt]], and the associated
 characterisation of the integral accuracy, described in [[kptrlen]]. 
-The generation of lists of k-point sets is done in different test cases, in the
-directory ~abinit/tests/v2. 
-You can directly have a look at the output files in ~abinit/tests/v2/Refs, 
-the output files for the tests 61 to 73.
+
+!!! tip
+
+    The generation of lists of k-point sets is done in different test cases, in ~abinit/tests/v2. 
+    You can directly have a look at the output files in ~abinit/tests/v2/Refs, 
+    the output files for the tests 61 to 73.
 
 When one begins the study of a new material, it is strongly advised to examine
 first the list of k points grids, and select (at least) three efficient ones, for the k point convergence study. 
@@ -116,12 +125,15 @@ The latter is clearly to be preferred!
 
 ## 3 Actually performing the convergence study with respect to k points
 
-In order to understand k-point grids, you should read the Monkhorst and Pack
-paper, Phys. Rev. B 13, 5188 (1976) ... Well, maybe not immediately ... 
+In order to understand k-point grids, you should read [[cite:Monkhorst1976]].
+Well, maybe not immediately.
 In the meantime, you can try the above-mentioned convergence study.
 
 The input file ~abinit/tests/tutorial/Input/tbase3_3.in is an example, while
 ~abinit/tests/tutorial/Refs/tbase3_3.out is a reference output file. 
+
+{% dialog tests/tutorial/Input/tbase3_3.in tests/tutorial/Refs/tbase3_3.out %}
+
 In this output file, you should have a look at the echo of input variables. 
 As you know, these are preprocessed, and, in particular, [[ngkpt]] and [[shiftk]] are
 used to generate the list of k points ([[kpt]]) and their weights ([[wtk]]).
@@ -135,7 +147,7 @@ From the output file, here is the evolution of total energy per unit cell:
         etotal4  -8.8726056405E+00
 
 The difference between dataset 3 and dataset 4 is rather small. 
-Even the dataset 2 gives an accuracy of about 0.0001 Ha  
+Even the dataset 2 gives an accuracy of about 0.0001 Ha.
 So, our converged value for the total energy, at fixed [[acell]], fixed [[ecut]], is -8.8726 Ha .
 
 ## 4 Determination of the lattice parameters
@@ -155,6 +167,8 @@ Do not test all the k point grids, only those with nkpt 2 and 10.
 The input file ~abinit/tests/tutorial/Input/tbase3_4.in is an example, while
 ~abinit/tests/tutorial/Refs/tbase3_4.out is a reference output file.  
 
+{% dialog tests/tutorial/Input/tbase3_4.in tests/tutorial/Refs/tbase3_4.out %}
+
 You should obtain the following evolution of the lattice parameters:
     
          acell1   1.0233363682E+01  1.0233363682E+01  1.0233363682E+01 Bohr
@@ -172,7 +186,7 @@ The stress tensor is given in Hartree/Bohr^3, and the order of the components is
                             11  22  33
                             23  13  12
     
-There is only a 0.13% relative difference between [[acell]]1 and [[acell]]2 .  
+There is only a 0.13% relative difference between `acell1` and `acell2`.  
 So, our converged LDA value for Silicon, with the 14si.pspnc pseudopotential
 (see the tbase3_x.files file) is 10.216 Bohr (actually 10.21644...), that is 5.406 Angstrom. 
 The experimental value is `5.431 Angstrom at 25 degree Celsius`, see 
@@ -201,7 +215,7 @@ The circuit will be obtained easily by the following choice of segment end point
 Note:
 
   1. the last Gamma point is in another cell of the reciprocal space than the first one, 
-     this choice allows to construct the X-U-Gamma line easily ;
+     this choice allows to construct the X-U-Gamma line easily;
 
   2. the k-points are specified using reduced coordinates - in agreement with the input setting 
      of the primitive 2-atom unit cell - in standard textbooks, you will often find the L, Gamma or X point 
@@ -232,6 +246,8 @@ calculation in which you output the density ([[prtden]] 1), and, for the second 
 The input file ~abinit/tests/tutorial/Input/tbase3_5.in is an example, while
 ~abinit/tests/tutorial/Refs/tbase3_5.out is a reference output file.
 
+{% dialog tests/tutorial/Input/tbase3_5.in tests/tutorial/Refs/tbase3_5.out %}
+
 You should find the band structure starting at (second dataset):
     
      Eigenvalues (   eV  ) for nkpt=  40  k points:
@@ -250,8 +266,7 @@ One needs a graphical tool to represent all these data ...
 In a separate file (_EIG), you will find the list of k-points and eigenenergies 
 (the input variable [[prteig]] is set by default to 1).
 
-Even without a graphical tool we will have a quick look at the values at L,
-Gamma, X and Gamma again:
+Even without a graphical tool we will have a quick look at the values at L, Gamma, X and Gamma again:
     
      kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
       -3.78815  -1.15872   4.69668   4.69668   7.38795   9.23867   9.23867  13.45707
@@ -268,10 +283,10 @@ Gamma, X and Gamma again:
 The last gamma is exactly equivalent to the first gamma. It can be checked
 that the top of the valence band is obtained at Gamma (=5.91814 eV). 
 The width of the valence band is 12.09 eV, the lowest unoccupied state at X is 0.594 eV
-higher than the top of the valence band, at Gamma. The Si is described as an
-indirect band gap material (this is correct), with a band-gap of about 0.594
-eV (this is quantitatively quite wrong: the experimental value 1.17 eV is at
-25 degree Celsius). 
+higher than the top of the valence band, at Gamma. 
+
+The Si is described as an indirect band gap material (this is correct), with a band-gap of about 0.594
+eV (this is quantitatively quite wrong: the experimental value 1.17 eV is at 25 degree Celsius). 
 The minimum of the conduction band is even slightly displaced with respect to X, see kpt # 21. 
 This underestimation of the band gap is well-known (the famous DFT band-gap problem). 
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
@@ -283,18 +298,19 @@ M.L. Cohen and J.R. Chelikowski
 Electronic structure and optical properties of semiconductors  
 Springer-Verlag New-York (1988).
 
-There is a subtlety that is worth to comment about. In non-self-consistent
-calculations, like those performed in the present band structure calculation,
-with [[iscf]]=-2, not all bands are converged within the tolerance [[tolwfr]].
-Indeed, the two upper bands (by default) have not been taken into account to
-apply this convergence criterion: they constitute a "buffer". 
-The number of such "buffer" bands is governed by the input variable [[nbdbuf]].
+!!! important
 
-It can happen that the highest (or two highest) band(s), if not separated by a
-gap from non-treated bands, can exhibit a very slow convergence rate. 
-This buffer allows to achieve convergence of "important", non-buffer bands. 
-In the present case, 6 bands have been converged with a residual better than
-[[tolwfr]], while the two upper bands are less converged (still sufficiently
-for graphical representation of the band structure). 
-In order to achieve the same convergence for all 8 bands, it is advised to use [[nband]]=10 
-(that is, 8 + 2).
+    There is a subtlety that is worth to comment about. 
+    In non-self-consistent calculations, like those performed in the present band structure calculation,
+    with [[iscf]]=-2, not all bands are converged within the tolerance [[tolwfr]].
+    Indeed, the two upper bands (by default) have not been taken into account to
+    apply this convergence criterion: they constitute a "buffer". 
+    The number of such "buffer" bands is governed by the input variable [[nbdbuf]].
+
+    It can happen that the highest (or two highest) band(s), if not separated by a
+    gap from non-treated bands, can exhibit a very slow convergence rate. 
+    This buffer allows to achieve convergence of "important", non-buffer bands. 
+    In the present case, 6 bands have been converged with a residual better than
+    [[tolwfr]], while the two upper bands are less converged (still sufficiently
+    for graphical representation of the band structure). 
+    In order to achieve the same convergence for all 8 bands, it is advised to use [[nband]]=10  (that is, 8 + 2).
