@@ -115,9 +115,6 @@ module m_xgScalapack
     integer :: ierr
     integer :: test_row
     integer :: test_col
-#else
-   ABI_UNUSED(comm)
-   ABI_UNUSED(maxDim)
 #endif
 
     call timab(M__tim_init,1,tsec)
@@ -271,10 +268,6 @@ module m_xgScalapack
     integer :: istwf_k
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
-#else
-    ABI_UNUSED(xgScalapack)
-    ABI_UNUSED(matrixA)
-    ABI_UNUSED(eigenvalues)
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -345,11 +338,6 @@ module m_xgScalapack
     integer :: istwf_k
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
-#else
-    ABI_UNUSED(xgScalapack)
-    ABI_UNUSED(matrixA)
-    ABI_UNUSED(matrixB)
-    ABI_UNUSED(eigenvalues)
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -465,8 +453,6 @@ module m_xgScalapack
     double precision :: tsec(2)
 #ifdef HAVE_LINALG_SCALAPACK
     integer :: ierr
-#else
-    ABI_UNUSED(xgScalapack)
 #endif
 
     call timab(M__tim_free,1,tsec)
