@@ -115,6 +115,9 @@ module m_xgScalapack
     integer :: ierr
     integer :: test_row
     integer :: test_col
+#else
+    ABI_UNUSED(comm)
+    ABI_UNUSED(maxDim)
 #endif
 
     call timab(M__tim_init,1,tsec)
@@ -306,6 +309,7 @@ module m_xgScalapack
 
     call xgScalapack_scatter(xgScalapack,matrixA)
     call xgScalapack_scatter(xgScalapack,eigenvalues)
+    call xmpi_barrier(xgScalapack%comms(M__WORLD))
 #else
    MSG_ERROR("ScaLAPACK support not available")
 #endif
@@ -380,6 +384,7 @@ module m_xgScalapack
 
     call xgScalapack_scatter(xgScalapack,matrixA)
     call xgScalapack_scatter(xgScalapack,eigenvalues)
+    call xmpi_barrier(xgScalapack%comms(M__WORLD))
 #else
    MSG_ERROR("ScaLAPACK support not available")
 #endif
@@ -402,7 +407,7 @@ module m_xgScalapack
     double precision, pointer :: tab(:,:)
     double precision :: tsec(2)
     integer :: cols, rows
-    integer :: ierr
+    integer :: ierr,req
     integer :: sendto, receivefrom
     integer :: lap
 
@@ -415,7 +420,8 @@ module m_xgScalapack
       lap = 1
       sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
       do while ( sendto < xgScalapack%size(M__WORLD) ) 
-        call xmpi_send(tab,sendto,sendto,xgScalapack%comms(M__WORLD),ierr)
+        !call xmpi_send(tab,sendto,sendto,xgScalapack%comms(M__WORLD),ierr)
+        call xmpi_isend(tab,sendto,sendto,xgScalapack%comms(M__WORLD),req,ierr)
         if ( ierr /= 0 ) then
           MSG_ERROR("Error sending data")
         end if
@@ -425,7 +431,8 @@ module m_xgScalapack
     else if ( xgScalapack%comms(M__UNUSED) /= xmpi_comm_null ) then
       receivefrom = MODULO(xgScalapack%rank(M__WORLD), xgScalapack%size(M__SLK))
       if ( receivefrom >= 0 ) then
-        call xmpi_recv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),ierr)
+        !call xmpi_recv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),ierr)
+        call xmpi_irecv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),req,ierr)
         if ( ierr /= 0 ) then
           MSG_ERROR("Error receiving data")
         end if
