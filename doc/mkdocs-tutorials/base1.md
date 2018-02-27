@@ -16,14 +16,14 @@ This lesson aims at showing how to get the following physical properties:
 You will learn about the two input files, the basic input variables, the
 existence of defaults, the actions of the parser, and the use of the multi-dataset feature. 
 You will also learn about the two output files as well as the density file.
-This first lesson covers the sections 1, 3, 4 and 6 of the [[help_abinit]].
+This first lesson covers the first sections of the [[help:abinit]].
 
 The very first step is a detailed tour of the input and output files: you are
-like a tourist, and you discover a town in a coach. You will have a bit more freedom after that first step.
+like a tourist, and you discover a town in a coach. 
+You will have a bit more freedom after that first step.
 It is supposed that you have some good knowledge of UNIX/Linux.
 
 This lesson should take about 2 hours.
-
 
 ## Computing the (pseudo) total energy, and some associated quantities
   
@@ -31,7 +31,7 @@ The first step (the most important, and the most difficult!).
 
 Note that the present tutorial will use four different windows: one to
 visualize the text of the tutorial (the present window), a second to run the
-code, a third to visualize sections of the [[help_abinit]] (that will open
+code, a third to visualize sections of the [[help:abinit]] (that will open
 automatically), and a fourth one for the description of input variables (that
 will also open automatically). Try to manage adequately these four windows.
 
@@ -543,7 +543,11 @@ same computation is done on different platforms.
 The charge density has already been computed, for all geometries, in the
 above-mentioned runs. Here, we will print this quantity.
 
-We start from the optimized interatomic distance 1.522 Bohr, and make a run at fixed geometry. The input variable [[prtden]] must be set to 1. To understand correctly the content of the [[prtden]] description, it is worth to read a much more detailed description of the "files" file, in [section 4 ](../../users/generated_files/help_abinit.html#4) of the abinit_help file. 
+We start from the optimized interatomic distance 1.522 Bohr, and make a run at fixed geometry. 
+The input variable [[prtden]] must be set to 1. 
+To understand correctly the content of the [[prtden]] description, it is worth to read a much 
+more detailed description of the "files" file, in 
+[section 4](../../users/generated_files/help_abinit.html#4) of the abinit_help file. 
 
 The input file [[tests/tutorial/Input/tbase1_4.in]] is an example of input file for a run that will print a density. If you decide to use this file, do not forget to change the file names in tbase1_x.files. The run will take a few seconds. 
 
@@ -551,8 +555,7 @@ The density will be output in the **tbase1_xo_DEN** file. Try to edit it ...
 No luck ! This file is unformatted, not written using the ASCII code. Even if
 you cannot read it, its description is provided in the abinit_help. It
 contains first a header, then the density numbers. The description of the
-header is presented in [section
-6.4](../../users/generated_files/help_abinit.html#header) of the abinit_help
+header is presented in [section 6.4](../../users/generated_files/help_abinit.html#header) of the abinit_help
 file, while the body of the _DEN file is presented in [section
 6.5](../../users/generated_files/help_abinit.html#densoutputfile). It is the
 appropriate time to read also the description of the potential files and
@@ -583,8 +586,13 @@ energy of H2 and twice the total energy of H.
 There are some subtleties in the calculation of an isolated atom.
 
 * in many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]] ; 
-* the highest occupied level might be degenerate with the lowest unoccupied level of the same spin, in which case the techniques usually appropriate for metals are to be used (see [lesson_base4](lesson_base4.html)) 
-* also often, the symmetry of the ground-state charge density will NOT be spherical, so that the automatic determination of symmetries by the code, based on the atomic coordinates, should be disabled, see the input variable [[nsym]], to be set to 1 in this case. 
+
+* the highest occupied level might be degenerate with the lowest unoccupied level of the same spin, 
+  in which case the techniques usually appropriate for metals are to be used (see [lesson base4](base4)) 
+
+* also often, the symmetry of the ground-state charge density will NOT be spherical, so that the automatic 
+  determination of symmetries by the code, based on the atomic coordinates, should be disabled, 
+  see the input variable [[nsym]], to be set to 1 in this case. 
   
 For Hydrogen, we are lucky that the ground state is spherical (1s orbital),
 and that the highest occupied level and lowest unoccupied level, although
@@ -683,7 +691,8 @@ atomisation energy [eV] | 4.506       | 4.747
 The bond length is awful (nearly 10% off), and the atomisation energy is a bit too low, 5% off.
 What is wrong??  
 
-Well, are you sure that the input parameters that we did not discuss are correct? These are:
+Well, are you sure that the input parameters that we did not discuss are correct? 
+These are:
 
 * [[ecut]] (the plane-wave kinetic energy cut-off) 
 * [[acell]] (the supercell size) 
@@ -693,8 +702,7 @@ Well, are you sure that the input parameters that we did not discuss are correct
   
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation 
 (as well as the local-spin-density approximation) in the
-Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter
-table (Phys. Rev. B 54, 1703 (1996)).
+Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table (Phys. Rev. B 54, 1703 (1996)).
 
 We will see in the [[lesson:base2|next lesson]] how to address the choice
 of these parameters (except the pseudopotential).

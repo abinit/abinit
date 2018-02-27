@@ -146,7 +146,7 @@ pages:
       #- Statistics: mkdocs-variables/varset_stats.md
       #- Connections: mkdocs-variables/connections.md
 - Lessons:
-    - Overview: mkdocs-tutorials/welcome.md
+    - Overview: mkdocs-tutorials/index.md
     - Base Tutorials: 
         - Base1: mkdocs-tutorials/base1.md
         - Base2: mkdocs-tutorials/base2.md
