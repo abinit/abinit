@@ -2,6 +2,14 @@
 Warning pattern : 'Unused dummy argument'
 **********************************************************************
 m_dummy.F90 = line: 35, var: 'unused_arg' [32_util]
+m_xgScalapack.F90 = line: 251, var: 'eigenvalues' [29_xgTools]
+m_xgScalapack.F90 = line: 251, var: 'matrixa' [29_xgTools]
+m_xgScalapack.F90 = line: 251, var: 'xgscalapack' [29_xgTools]
+m_xgScalapack.F90 = line: 321, var: 'eigenvalues' [29_xgTools]
+m_xgScalapack.F90 = line: 321, var: 'matrixa' [29_xgTools]
+m_xgScalapack.F90 = line: 321, var: 'matrixb' [29_xgTools]
+m_xgScalapack.F90 = line: 321, var: 'xgscalapack' [29_xgTools]
+m_xgScalapack.F90 = line: 449, var: 'xgscalapack' [29_xgTools]
 **********************************************************************
-Warning count = 1
+Warning count = 9
 **********************************************************************
