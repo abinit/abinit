@@ -150,8 +150,11 @@ class MyEntry(Entry):
     """
     @lazy_property
     def authors(self):
-        """String with authors."""
-        return ", ".join(my_unicode(p) for p in self.persons["author"])
+        """String with authors. Empty if authors are not provided."""
+        try:
+            return ", ".join(my_unicode(p) for p in self.persons["author"])
+        except KeyError:
+            return ""
 
     def to_markdown(self, bibtex_ui="button"):
         """
@@ -163,9 +166,11 @@ class MyEntry(Entry):
         """
         fields = self.fields
         # Remove {} from (Latex) title.
+        # TODO: title must be present
         title = "*%s*" % fields["title"].replace("{", "").replace("}", "")
         authors = self.authors
 
+        # FIXME: enforce format at the level of the unit tests
         if self.type == "article":
             s = '{}  \n{}  \n'.format(authors, title)
             if "eprint" in fields:
@@ -173,9 +178,9 @@ class MyEntry(Entry):
                         fields["eprint"], fields["year"])
             else:
                 s += "{} **{}**, {} ({})".format(fields["journal"], fields["volume"],
-                        fields["pages"], fields["year"])
+                        fields.get("pages", ""), fields["year"])
 
-        elif self.type in ("book", "incollection"):
+        elif self.type in ("book", "inproceedings", "incollection"):
             # FIXME Better treatment for incollection
             #editors = ", ".join(str(e) for e in self.persons["editor"]])
             s = '{}  \n{}  \n'.format(authors, title)
@@ -186,7 +191,7 @@ class MyEntry(Entry):
         elif self.type in ("phdthesis", "mastersthesis"):
             s = '{}  \n{}  \n{} ({})'.format(authors, title, fields["school"], fields["year"])
 
-        elif self.type == "misc":
+        elif self.type in ("misc", "unpublished"):
             s = '{}  \n{} ({})'.format(authors, title, fields["year"])
 
         else:
@@ -334,7 +339,7 @@ class Website(object):
 
         # Get bibtex references and cast to MyEntry instance.
         # FIXME
-        bib_path = os.path.join(self.root, "my_abiref.bib")
+        bib_path = os.path.join(self.root, "mkdocs-abiref.bib")
         #bib_path = os.path.join(self.root, "biblio/origin_files/abiref.bib")
         self.bib_data = parse_file(bib_path, bib_format="bibtex")
         for entry in self.bib_data.entries.values():
