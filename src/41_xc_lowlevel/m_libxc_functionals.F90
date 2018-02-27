@@ -1770,8 +1770,10 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 !scalars
  integer :: family,ii
  character(len=100) :: c_name,x_name,msg
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xc_name
  character(kind=C_CHAR,len=1),pointer :: strg_c
+#endif
 !arrays
  integer :: trial_id(2)
 
