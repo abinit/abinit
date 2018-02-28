@@ -493,6 +493,7 @@ def get_variables_code():
         #yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "mkdocs-variables", "abinit_vars.yml")
         yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "variables", "origin_files", "abinit_vars.yml")
         _VARS = VarDatabase.from_file(yaml_path)
+        #_VARS = VarDatabase.from_pyfiles()
     return _VARS
 
 
@@ -501,12 +502,23 @@ class VarDatabase(OrderedDict):
     This object stores the full set of input variables for all the Abinit executables.
     in a dictionary mapping the name of the code to a subdictionary of variables.
     """
-    #@classmethod
-    #def from_pymodules(cls, dirpath=None):
-    #    """Initialize the object from python modules."""
-    #    if dirpath is None:
-    #        dirpath = os.path.dirname(os.path.abspath(__file__)))
-    #    pyfiles = [f for f in os.listdir(dirpath) if f.startswith("variables_") and f.endswith(".py")]
+    @classmethod
+    def from_pyfiles(cls, dirpath=None):
+        """Initialize the object from python modules."""
+        if dirpath is None:
+            dirpath = os.path.dirname(os.path.abspath(__file__))
+        pyfiles = [f for f in os.listdir(dirpath) if f.startswith("variables_") and f.endswith(".py")]
+        new = cls()
+        #for pyf in pyfiles:
+        #for exname in sorted(set(v.executable for v in vlist)):
+        #    vd = InputVariables.from_pyfile()
+        #    items = [(v.name, v) for v in vlist if v.executable == exname]
+        #    vd = InputVariables(sorted(items, key=lambda t: t[0]))
+        #    vd.executable = exname
+        #    vd.all_varset = sorted(set(v.varset for v in vd.values()))
+        #    new[exname] =  vd
+
+        return new
 
     @classmethod
     def from_file(cls, yaml_path):
@@ -676,6 +688,15 @@ class InputVariables(OrderedDict):
     """
     Dictionary storing the variables used by one executable.
     """
+    @classmethod
+    def from_pyfile(cls, filepath):
+        import imp
+        module = imp.load_source(filepath, filepath)
+        new = cls()
+        #new.executable = module.executable
+        #new.all_varset = sorted(set(v.varset for v in vd.values()))
+        return new
+
     def groupby_first_letter(self):
         keys = sorted(self.keys(), key=lambda n: n[0].upper())
         od = OrderedDict()

@@ -7,13 +7,13 @@ patch_syspath()
 
 import os
 
-from ..abimkdocs.website import MyEntry
+from abimkdocs.website import MyEntry
 
 
 class BibrefTest(AbimkdocsTest):
 
     def test_bibref(self):
-        bibpath = os.path.join(os.path.dirname(__file__), "..", "doc", "abiref.bib")
+        bibpath = os.path.join(os.path.dirname(__file__), "..", "doc", "mkdocs-abiref.bib")
         assert os.path.isfile(bibpath)
 
         # Get bibtex references and cast to MyEntry instance.

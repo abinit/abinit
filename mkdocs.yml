@@ -143,8 +143,8 @@ pages:
     - Optic: mkdocs-variables/optic.md
     - Aim: mkdocs-variables/aim.md
     - External Parameters: mkdocs-variables/external_parameters.md
-      #- Statistics: mkdocs-variables/varset_stats.md
-      #- Connections: mkdocs-variables/connections.md
+    - Statistics: mkdocs-variables/varset_stats.md
+    #- Connections: mkdocs-variables/connections.md
 - Lessons:
     - Overview: mkdocs-tutorials/index.md
     - Base Tutorials: 
@@ -202,8 +202,8 @@ pages:
     - Abimkdocs: mkdocs-developers/abimkdocs.md
     - Markdown: mkdocs-developers/markdown.md
     - Test Suite: mkdocs-developers/testsuite.md
-      #- Code stats: mkdocs-developers/codestats.md
-      #- External Resources: mkdocs-developers/external_resources.md
+    #- Code stats: mkdocs-developers/codestats.md
+    #- External Resources: mkdocs-developers/external_resources.md
 - About:
     - Release Notes: mkdocs-about/release-notes.md
     - Contributing: mkdocs-about/contributing.md
@@ -234,9 +234,6 @@ markdown_extensions:
   #- pymdownx.critic
   - pymdownx.details
   - pymdownx.inlinehilite
-  #- pymdownx.magiclink:
-  #-     base_repo_url: https://github.com/abinit/abinit
-  #-     repo_url_shortener: true
   - pymdownx.mark
   - pymdownx.smartsymbols:
         registered: false

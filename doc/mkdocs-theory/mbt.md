@@ -577,12 +577,14 @@ contributions coming from the poles of the integrand lying inside the contour:
 
 ![](mbt_assets/contour.svg)
 
-\begin{equation} 
-\label{eq:GW_CD} \Sigma_c(\ww) = \dfrac{i}{2\pi} \Bigl \{
-2\pi\,i \sum_{z_p}^\mcC \lim_{z\rightarrow z_p}
-G(z)\,{W}^{\text{c}}(z)\,(z-z_p) -\int__{-\infty}^{+\infty}
-G(\ww+i\ww')\,{W}^{\text{c}}(i\ww') \dd(i\ww') \Bigr \}. 
-\end{equation} 
+\begin{equation}
+\label{eq:GW_CD}
+\Sigma_c(\ww) = \dfrac{i}{2\pi} \Bigl\{ 
+ 2\pi\,i \sum_{z_p}^\mcC \lim_{z\rightarrow z_p} G(z)\,{W}^{\text{c}}(z)\,(z-z_p) 
+ -\int_{-\infty}^{+\infty} G(\ww+i\ww')\,{W}^{\text{c}}(i\ww') \dd(i\ww')
+ \Bigr\}.
+\end{equation}
+
 
 In the above equation, the first sum is restricted to the poles lying inside the path
 _C_. _W_ c( _z_ ) represents the frequency dependent part of the screened
