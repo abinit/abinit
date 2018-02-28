@@ -313,8 +313,8 @@ module m_xgScalapack
 #else
    MSG_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
-   ABI_UNUSED(matrixA%space)
-   ABI_UNUSED(eigenvalues%space)
+   ABI_UNUSED(matrixA%normal)
+   ABI_UNUSED(eigenvalues%normal)
 #endif
 
   end subroutine xgScalapack_heev
@@ -391,9 +391,9 @@ module m_xgScalapack
 #else
    MSG_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
-   ABI_UNUSED(matrixA%space)
-   ABI_UNUSED(matrixB%space)
-   ABI_UNUSED(eigenvalues%space)
+   ABI_UNUSED(matrixA%normal)
+   ABI_UNUSED(matrixB%normal)
+   ABI_UNUSED(eigenvalues%normal)
 #endif
 
   end subroutine xgScalapack_hegv
