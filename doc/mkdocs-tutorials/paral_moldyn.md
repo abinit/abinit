@@ -8,14 +8,13 @@ authors: JB
 
 This lesson aims at showing how to perform molecular dynamics with ABINIT
 using a parallel computer.
-
 You will learn how to launch molecular dynamics calculation and what are the
 main input variables that govern convergence and numerical efficiency.  
 
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial 
-[A first introduction to ABINIT in parallel](lesson_basepar.html), and 
-[ground state with plane waves](lesson_paral_gspw.html).
+[A first introduction to ABINIT in parallel](basepar), and 
+[ground state with plane waves](paral_gspw).
 
 This lesson should take about 1.5 hour to be done and requires to have at
 least a 200 CPU core parallel computer.
@@ -25,35 +24,36 @@ least a 200 CPU core parallel computer.
 The basic idea underlying Ab Initio Molecular Dynamics (AIMD) is to compute
 the forces acting on the nuclei from electronic structure calculations that
 are performed as the molecular dynamics trajectory is generated. 
-An AIMD calculation assumes only that the system is composed of  nuclei and
+
+An AIMD calculation assumes only that the system is composed of nuclei and
 electrons, that the Born -Oppenheimer approximation is valid, and that the
 dynamics of the nuclei can be treated classically on the ground-state
 electronic surface. It allows both equilibrium thermodynamic and dynamical
 properties of a system at finite temperature to be computed. For example
 melting temperatures, phase transitions, atomic vibrations, structure
 factor... but also XANES or IR spectrum can be obtained with this technique.
+
 AIMD deals with supercells of hundred to thousand of atoms (usually, the
 larger, the better!). In addition Molecular Dynamics simulations can be
 performed for days, weeks or even months! They are therefore very time
 consuming and can not be done without the help of high speed and massively
 parallel computing.
 
-* * *
-
-*Before continuing, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_paral_moldyn" ?_ _In what follows, the
-name of files are mentioned as if you were in this subdirectory.  
-All the input files can be found in the __~abinit/tests/tutoparal/Input
-directory.*
-
 In the following, when "run ABINIT over nn CPU cores" appears, you have to use
 a specific command line according to the operating system and architecture of
 the computer you are using. This can be for instance: mpirun -n nn abinit <
 abinit.files or the use of a specific submission file.
 
-*You can compare your results with several reference output files located in_
-_~abinit/tests/tutorial/Refs and __~abinit/tests/tutorial/Refs/ __directories
-(for the present tutorial they are named tmoldyn_*.out).*
+!!! important
+
+    Before continuing, you might consider to work in a different subdirectory as
+    for the other lessons. Why not "Work_paral_moldyn"? 
+    In what follows, the name of files are mentioned as if you were in this subdirectory.  
+    All the input files can be found in the ~abinit/tests/tutoparal/Input directory.
+
+    You can compare your results with several reference output files located in
+    ~abinit/tests/tutorial/Refs and __~abinit/tests/tutorial/Refs/ directories
+    (for the present tutorial they are named tmoldyn_*.out).
 
 ## 2 Performing molecular dynamics with ABINIT
   
@@ -61,12 +61,12 @@ There are different algorithms to do molecular dynamics. See the input
 variable [[ionmov]], with values 1, 6, 7, 8, 9, 12, 13 and 14. [[dtion]]
 controls the ion time steps in atomic units of time (one atomic time unit is
 2.418884e-17 seconds, which is the value of Planck's constant in hartree*sec).
-The default value is 100. You should try several values for **dtion** in order
+The default value is 100. You should try several values for [[dtion]] in order
 to establish the stable and efficient choice. For example this value should
 decrease at high pressure.  
   
-Except for the  isothermal/isenthalpic ([[ionmov]] 13) ensemble the input
-variable "[[optcell]]" must be set to 0.  
+Except for the isothermal/isenthalpic ([[ionmov]] 13) ensemble the input
+variable [[optcell]] must be set to 0.  
 You have also to define the maximal number of timesteps of the molecular dynamics.  
   
 Usually you can set the input variable [[ntime]] to a large value, 5000, since
@@ -74,8 +74,11 @@ there is no "end" to a molecular dynamics simulation. You can always stop or
 restart the calculation at your convenience by using the input variable [[restartxf]].
 
 The input file tmoldyn_01.in is an example of a file that contains data for a
-molecular dynamics simulation using the isokinetic ensemble for aluminum. Open
-the tmoldyn_01.in file and look at it carefully. The unit cell is defined at
+molecular dynamics simulation using the isokinetic ensemble for aluminum. 
+
+{% dialog tests/tutoparal/Input/tmoldyn_01.in %}
+
+Open the tmoldyn_01.in file and look at it carefully. The unit cell is defined at
 the end. It is a 2x2x2 fcc supercell containing 32 atoms of Al. [[ionmov]] is
 set to 12 for the isokinetic ensemble, and since [[ntime]] is set to 50,
 ABINIT will carry on 50 time steps of molecular dynamics. The calculation will
@@ -84,10 +87,13 @@ gives the initial and final temperature in Kelvin of the simulation. The
 temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]]
 timesteps. Here the temperature will stay constant during the whole simulation.  
-Note that we use the same temperature for the ions and the electrons :
-[[occopt]] has been set to 3 for a Fermi-Dirac smearing and [[tsmear]] has
-been set to 3000 Kelvin. Nothing prevent you to use different electronic and
-ionic temperature, you just have to know why you are doing so!
+
+!!! note
+
+    Note that we use the same temperature for the ions and the electrons:
+    [[occopt]] has been set to 3 for a Fermi-Dirac smearing and [[tsmear]] has
+    been set to 3000 Kelvin. Nothing prevent you to use different electronic and
+    ionic temperature, you just have to know why you are doing so!
 
 Molecular dynamics simulations are always large calculations, dealing with
 supercells of hundreds to thousands of atoms. Therefore they are always
@@ -109,7 +115,7 @@ output file. For each iteration you will see the coordinates, the forces, the
 velocities and the kinetic and the total energy.
 
 In addition, ABINIT should have generated a HIST.nc file, which contains the
-whole history of the molecular dynamics simulation : atomic positions,
+whole history of the molecular dynamics simulation: atomic positions,
 velocities, primitive translations, stress tensor, energies... at each time
 step. This file will be used to restart the calculation if you want to perform
 more time steps or to extract the necessary informations to make use of the
@@ -126,10 +132,13 @@ calculation. You can check that by comparing tmoldyn_01.out and
 tmoldyn_01.outA. There is only one HIST.nc file and it contains the history of
 the two calculations.
 
-Now we can calculate and plot several quantities. We need for that the
-diag_moldyn.py python script. You can find it in the
-_~abinit/doc/tutorial/documents/lesson_paral_moldyn_ directory (link [here](paral_moldyn_assets/diag_moldyn.py)).  
-Run the diag_modyn.py script (type: "python diag_moldyn.py").  
+Now we can calculate and plot several quantities. 
+We need for that the diag_moldyn.py python script. 
+You can find it in the _~abinit/doc/tutorial/documents/lesson_paral_moldyn_ 
+directory (link [here](paral_moldyn_assets/diag_moldyn.py)).  
+Run the script as:
+
+    python diag_moldyn.py
 
 You can read (on standard output) the average value and the standard deviation
 of the total energy, the temperature and the pressure. You have also generated
@@ -149,8 +158,11 @@ section we will make convergence studies with respect to these parameters.
 **3.a** **Computing the convergence in K-points**
 
 The files tmoldyn_02.in and tmoldyn_03.in are input files for 2x2x2 and 3x3x3
-K-points grid respectively, or 4 and 14 K-points in the irreducible Brillouin
-zone. Since the parallelisation is the most efficient over the k-point level
+K-points grid respectively, or 4 and 14 K-points in the irreducible Brillouin zone. 
+
+{% dialog tests/tutoparal/Input/tmoldyn_02.in tests/tutoparal/Input/tmoldyn_03.in %}
+
+Since the parallelisation is the most efficient over the k-point level
 you should always put [[nkpt]] to the largest possible value before increasing
 [[npfft]] and [[npband]]. We have followed this rule in the input files.
 Change the name of the previous file PRESS to PRESS01 to save it. Run now
@@ -171,9 +183,11 @@ We also have to check if our cell is sufficiently large to give reliable
 physical quantities. In the previous section we used a 2x2x2 fcc supercell.
 tmoldyn_04.in is an input file for a 3x3x3 fcc supercell and therefore
 contains 108 atoms. [[nband]] and [[acell]] has been scaled accordingly to
-take into account the new size of the cell. Run now ABINIT in parallel over 45
-CPU cores and then diag_moldyn.py (note that the output file is very big, and
-no reference has been provided for comparison). Save the pressure to PRESS04.
+take into account the new size of the cell. 
+
+Run now ABINIT in parallel over 45 CPU cores and then diag_moldyn.py 
+(note that the output file is very big, and no reference has been provided for comparison). 
+Save the pressure to PRESS04.
 tmoldyn_05.in has the same cell but a 2x2x2 K-points grid (note that the
 output file is very big, and no reference has been provided for comparison).
 Run it over the adequate number of cores and save the pressure to PRESS05.
@@ -185,8 +199,7 @@ file tmoldyn_06.in has 256 atoms. Of course, [[nband]] and [[acell]] has been
 scaled. This calculation should last for 30 min over 60 CPU cores (note that
 the output file is very big, and no reference has been provided for
 comparison). Run it and save the pressure to PRESS06. Plot now PRESS02,
-PRESS04 and PRESS06, remove the first steps and compare the pressure average
-values:
+PRESS04 and PRESS06, remove the first steps and compare the pressure average values:
 
 ![cells](paral_moldyn_assets/cell.png)  
 
@@ -205,13 +218,15 @@ ecut to 3Ha. This is too small, for Al, it should be closer to 8 Ha.
 
 ## 4 Compute the melting temperature of Al at a given pressure
   
-As an exemple of what can be done in molecular dynamics, we are going to
+As an example of what can be done in molecular dynamics, we are going to
 calculate the melting temperature of aluminum using the so-called Heat Until
 it Melts (HUM) method. In this method the solid phase is heated gradually
 until melting occurs. Let us start with a temperature of 5500K.  
 An example of file is given with tmoldyn_07.in. To work fast, we use a 32
 atoms supercell and the gamma point (note that the output file is very big,
 and no reference has been provided for comparison).  
+
+{% dialog tests/tutoparal/Input/tmoldyn_07.in %}
   
 Run ABINIT in parallel over 30 CPU cores and then diag_moldyn.py.  
 Save the pressure to PRESS71. Plot the atomic positions, you see that at this

@@ -26,33 +26,36 @@ Energy Path (MEP) between an initial (i) and a final (f) configuration. It is
 inspired from the Nudge Elastic Band (NEB) method. An elastic chain of
 configurations joining (i) to (f) is progressively driven to the MEP using an
 iterative procedure in which each iteration consists of two steps:  
-(1) evolution step: the images are moved following the atomic forces,  
-(2) reparametrization step: the images are equally redistributed along the string.  
-The algorithm presently implemented in ABINIT is the so-called "simplified
-string method" [2]. It has been designed for the sampling of smooth energy landscapes.  
-[1] "String method for the study of rare events", W. E, W. Ren, E. Vanden-
-Eijnden, Physical Review B 66, 052301 (2002).  
+
+1. evolution step: the images are moved following the atomic forces,  
+2. reparametrization step: the images are equally redistributed along the string.  
+
+The algorithm presently implemented in ABINIT is the so-called "simplified string method" [2]. 
+It has been designed for the sampling of smooth energy landscapes.  
+[1] "String method for the study of rare events", W. E, W. Ren, E. Vanden-Eijnden, Physical Review B 66, 052301 (2002).  
 [2] "Simplified string method for computing the minimum energy path in
 barrier-crossing events", W. E, W. Ren, E. Vanden-Eijnden, J. Chem. Phys. 126, 164103 (2007).  
 
-Before continuing you might work in a different subdirectory as for the other
-lessons. Why not "work_paral_string" ? In what follows, the names of files are
-mentionned as if you were in this subdirectory.  
-All the input files can be found in the ~abinit/tests/tutoparal/Input directory.  
-You can compare your results with reference output files located in
-~abinit/tests/tutoparal/Refs.  
+*Before continuing you might work in a different subdirectory as for the other
+lessons. Why not "work_paral_string"?* 
+
+!!! important
+
+    In what follows, the names of files are mentioned as if you were in this subdirectory.
+    All the input files can be found in the ~abinit/tests/tutoparal/Input directory.
+    You can compare your results with reference output files located in ~abinit/tests/tutoparal/Refs.  
   
-In the following, when "run ABINIT over nn CPU cores" appears, you have to use
-a specific command line according to the operating system and architecture of
-the computer you are using. This can be for instance: mpirun -n nn abinit <
-abinit.files or the use of a specific submission file.  
+    In the following, when "run ABINIT over nn CPU cores" appears, you have to use
+    a specific command line according to the operating system and architecture of
+    the computer you are using. This can be for instance: mpirun -n nn abinit < abinit.files 
+    or the use of a specific submission file.
 
 ## 2 Computation of the initial and final configurations
 
 We propose to compute the energy barrier for transferring a proton from an
 hydronium ion (H3O+) onto a NH3 molecule:  
 
-    H3O+ \+ NH3 -> H2O + NH4+
+    H3O+ + NH3 --> H2O + NH4+
 
 Starting from an hydronium ion and an ammoniac molecule, we obtain as final
 state a water molecule and an ammonium ion NH4+. In such a process, the MEP
@@ -73,6 +76,8 @@ final points. The input files tstring_01.in and tstring_02.in contain
 respectively two geometries close to the initial and final states of the
 system. You have first to optimize properly these initial and final
 configurations, using for instance the Broyden algorithm implemented in ABINIT.  
+
+{% dialog tests/tutoparal/Input/tstring_01.in tests/tutoparal/Input/tstring_02.in %}
   
 Open the tstring_01.in file and look at it carefully. The unit cell is defined
 at the end. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
@@ -92,67 +97,74 @@ Then run the calculation in parallel over 20 CPU cores, first for the initial
 configuration (tstring_01.in), and then for the final one (tstring_02.in). You
 should obtain the following positions:  
   
-1) for the initial configuration  
+1) for the initial configuration:
 
-           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
-                      -3.7593832509E-01 -2.8581911534E-01  8.7109635973E-01  
-                      -3.8439081179E-01  8.6764073738E-01 -2.8530130333E-01  
-                       4.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
-                       4.3461703447E+00 -9.9808458269E-02 -9.5466143436E-01  
-                       4.3190273240E+00 -7.8675247603E-01  5.6699786920E-01  
-                       4.3411410402E+00  8.7383785043E-01  4.0224838603E-01  
-                       1.0280313162E+00  2.2598784215E-02  1.5561763093E-02  
+```
+xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
+           -3.7593832509E-01 -2.8581911534E-01  8.7109635973E-01  
+           -3.8439081179E-01  8.6764073738E-01 -2.8530130333E-01  
+            4.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
+            4.3461703447E+00 -9.9808458269E-02 -9.5466143436E-01  
+            4.3190273240E+00 -7.8675247603E-01  5.6699786920E-01  
+            4.3411410402E+00  8.7383785043E-01  4.0224838603E-01  
+            1.0280313162E+00  2.2598784215E-02  1.5561763093E-02  
+```
   
-2) for the final configuration  
+2) for the final configuration:
 
-           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
-                      -3.0400286349E-01 -1.9039526061E-01  9.0873550186E-01  
-                      -3.2251946581E-01  9.0284480687E-01 -1.8824324581E-01  
-                       4.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
-                       4.4876385468E+00 -1.4925704575E-01 -8.9716581956E-01  
-                       4.2142401901E+00 -7.8694929117E-01  6.3097154506E-01  
-                       4.3498225718E+00  8.7106686509E-01  4.2709343135E-01  
-                       2.9570301511E+00  5.5992672027E-02 -1.3560839453E-01  
+```
+xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
+           -3.0400286349E-01 -1.9039526061E-01  9.0873550186E-01  
+           -3.2251946581E-01  9.0284480687E-01 -1.8824324581E-01  
+            4.0000000000E+00  0.0000000000E+00  0.0000000000E+00  
+            4.4876385468E+00 -1.4925704575E-01 -8.9716581956E-01  
+            4.2142401901E+00 -7.8694929117E-01  6.3097154506E-01  
+            4.3498225718E+00  8.7106686509E-01  4.2709343135E-01  
+            2.9570301511E+00  5.5992672027E-02 -1.3560839453E-01  
+```
 
 ## 3 Related keywords
   
 Once you have properly optimized the initial and final states of the process,
-you can turn to the computation of the MEP. Let us first have a look at the
-related keywords.  
+you can turn to the computation of the MEP. Let us first have a look at the related keywords.  
   
-1) [[imgmov]]: selects an algorithm using replicas of the unit cell. 
-    For the string method, choose 2.  
+[[imgmov]]
+:       Selects an algorithm using replicas of the unit cell. 
+        For the string method, choose 2.
 
-2) [[nimage]]: gives the number of replicas of the unit cell including the
-    initial and final ones.  
+[[nimage]] 
+:       gives the number of replicas of the unit cell including the initial and final ones.
 
-3) [[dynimage]]([[nimage]]): arrays of flags specifying if the image evolves
-    or not (0: does not evolve; 1: evolves).  
+[[dynimage]]([[nimage]])
+:       arrays of flags specifying if the image evolves or not (0: does not evolve; 1: evolves).  
 
-4) [[ntimimage]]: gives the maximum number of iterations (for the relaxation
-    of the string).  
+[[ntimimage]]
+:       gives the maximum number of iterations (for the relaxation of the string).  
 
-5) [[tolimg]]: convergence criterion (in Hartree) on the total energy
-    (averaged over the [[nimage]] images).  
+[[tolimg]]
+:       convergence criterion (in Hartree) on the total energy (averaged over the [[nimage]] images).  
 
-6) [[fxcartfactor]]: "time step" (in Bohr^2/Hartree) for the evolution step of
-    the string method. For the time being (ABINITv6.10), only steepest-descent
-    algorithm is implemented.  
+[[fxcartfactor]]
+:       "time step" (in Bohr^2/Hartree) for the evolution step of
+        the string method. For the time being (ABINITv6.10), only steepest-descent
+        algorithm is implemented.  
 
-7) [[npimage]]: gives the number of processors among which the work load over
-    the image level is shared. Only dynamical images are considered (images for
-    which [[dynimage]] is 1). This input variable can be automatically set by
-    ABINIT if the number of processors is large enough.  
+[[npimage]]
+:       gives the number of processors among which the work load over
+        the image level is shared. Only dynamical images are considered (images for
+        which [[dynimage]] is 1). This input variable can be automatically set by
+        ABINIT if the number of processors is large enough.  
 
-8) [[prtvolimg]]: governs the printing volume in the output file (0: full
-    output; 1: intermediate; 2: minimum output).
+[[prtvolimg]]
+:       governs the printing volume in the output file (0: full output; 1: intermediate; 2: minimum output).
 
 ## 4 Computation of the MEP without parallelism over images
   
 You can now start with the string method.
-
 First, for test purpose, we will not use the parallelism over images and will
 thus only perform one step of string method.
+
+{% dialog tests/tutoparal/Input/tstring_03.in %}
 
 Open the tstring_03.in file and look at it. The initial and final
 configurations are specified at the end through the keywords [[xangst] and
@@ -169,19 +181,19 @@ this calculation has to be run over 20 CPU cores.
 
 ## 5 Computation of the MEP using parallelism over images
   
-Now you can perform the complete computation of the MEP using the parallelism
-over the images.  
+Now you can perform the complete computation of the MEP using the parallelism over the images.
+
+{% dialog tests/tutoparal/Input/tstring_04.in %}
   
 Open the tstring_04.in file. The keyword [[npimage]] has been set to 10, and
-[[ntimimage]] has been increased to 50.  
-  
+[[ntimimage]] has been increased to 50.
 This calculation has thus to be run over 200 CPU cores. Note that the output
-file is very big, so that no reference file is provided in the ABINIT package.  
+file is very big, so that no reference file is provided in the ABINIT package.
   
 The convergence of the string method algorithm is controlled by [[tolimg]],
 which has been set to 0.0001 Ha. In order to obtain a more lisible output
-file, you can decrease the printing volume and set [[prtvolimg]] to 2. Here
-again, you might use the tstring.files. Edit it and adapt it with the
+file, you can decrease the printing volume and set [[prtvolimg]] to 2.
+Here again, you might use the tstring.files. Edit it and adapt it with the
 appropriate file names. Then run ABINIT over 200 CPU cores.  
   
 When the calculation is completed, ABINIT provides you with 12 configurations
@@ -199,10 +211,12 @@ presence of the NH3 molecule.
   
 Note that the total energy of each of the 12 replicas of the simulation cell
 can be found at the end of the output file in the section:  
- -outvars: echo values of variables after computation  \--------  
+
+```
+-outvars: echo values of variables after computation  --------  
+```
   
-The total energies are printed out as: etotal_1img, etotal_2img, ....,
-etotal_12img.  
+The total energies are printed out as: etotal_1img, etotal_2img, ...., etotal_12img.
 Also, you can can have a look at the atomic positions in each image: in
 cartesian coordinates (xcart_1img, xcart_2img, ...) or in reduced coordinates
 (xred_1img, xred_2img, ...). Similarly, the forces are printed out:
@@ -218,7 +232,7 @@ The keyword [[npimage]] can be automatically set by ABINIT. It takes the
 requested total number of CPU cores divided by the number of dynamical images.
 The remaining cores are, if possible, distributed over k, band and FFT.  
   
-Let us test this functionnality. Edit again the tstring_04.in file and comment
+Let us test this functionality. Edit again the tstring_04.in file and comment
 the [[npimage]] line. Then run the calculation again over a number of cores of
 your choice (less than 200). If the code stops with an error message
 indicating that the number of kpt, band and FFT processors is not correct,
@@ -265,8 +279,7 @@ these starting images will be specified by the keywords [[xangst]],
 [[nimage|xangst_2img]], [[nimage|xangst_3img]] ... [[nimage|xangst_12img]].
 You can copy them directly from the output file obtained at the previous
 section. The graph below superimposes the path obtained with 12 images and
-[[tolimg]]=0.001 (red curve) and the one with 12 images and [[tolimg]]=0.0001
-(black curve).  
+[[tolimg]]=0.001 (red curve) and the one with 12 images and [[tolimg]]=0.0001 (black curve).  
 
 ![image](paral_images_assets/curve3.png)  
 

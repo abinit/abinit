@@ -55,6 +55,8 @@ the precision of the calculation by varying the [[wvl_hgrid]] and
 [[wvl_crmult]] variables. This is not the purpose of this tutorial, so we will
 use the given values (0.45Bohr and 5).
 
+{% dialog tests/tutoparal/Input/tgswvl_01.in  %}
+
 Run ABINIT with 3 processors. The overall time is printed at the end of the
 output file (and of the log):
     
@@ -183,8 +185,12 @@ same run time (since the load balancing will be better).
   
 Let's do the same with a bigger molecule and a finer grid. Open the file
 `tgswvl_02.in`. It contains the definition of an alkane chain of 65 atoms,
-providing 64 orbitals. Run this input file with {1, 2, 4, 8, 16, 24, 32, 48,
-64} processors. The run with one processor should take less than one hour. If
+providing 64 orbitals. 
+
+{% dialog tests/tutoparal/Input/tgswvl_02.in %}
+
+Run this input file with {1, 2, 4, 8, 16, 24, 32, 48, 64} processors. 
+The run with one processor should take less than one hour. If
 the time is short, one can reduce [[wvl_hgrid]] in the input file to 0.45.
 
 ![Speedup for the C21H44 alkane chain](paral_gswvl_assets/speedup-C21.png) 

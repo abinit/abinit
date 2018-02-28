@@ -12,47 +12,48 @@ different steps of a typical G0W0 calculation, and how to setup the parameters
 of the run in order to achieve good speedup. α-quartz SiO2 is used as test case.
 
 It is supposed that you have some knowledge about UNIX/Linux, and you know how to submit MPI jobs.
-
-This lesson should take about 1.5 hour and requires to have at least a 200 CPU
-core parallel computer.
-
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial [A first introduction to ABINIT in parallel](lesson_basepar.html).
 
-In the following, when "run ABINIT over nn CPU cores" appears, you have to use
-a specific command line according to the operating system and architecture of
-the computer you are using. This can be for instance:
-    
-    mpirun -n nn abinit < abinit.files 
+This lesson should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
 
-or the use of a specific submission file.
+!!! important
+
+    In the following, when "run ABINIT over nn CPU cores" appears, you have to use
+    a specific command line according to the operating system and architecture of
+    the computer you are using. This can be for instance:
+        
+        mpirun -n nn abinit < abinit.files 
+
+    or the use of a specific submission file.
 
 ## 1 Generating the WFK file in parallel
+
+*Before beginning, you should create a working directory whose name might be
+"Work_mbt" (so ~abinit/tests/tutoparal/Input/Work_mbt).*
   
 The input files necessary to run the examples related to this tutorial are
 located in the directory ~abinit/tests/tutoparal/Input.
+We will do most of the actions of this tutorial in this working directory. 
 
-Before beginning, you should create a working directory whose name might be
-"Work_mbt" (so ~abinit/tests/tutoparal/Input/Work_mbt).
-
-We will do most of the actions of this tutorial in this working directory. In
-the [[lesson:gw1|first lesson]] of the GW tutorial, we have learned how to
+In the [[lesson:gw1|first lesson]] of the GW tutorial, we have learned how to
 generate the WFK file with the sequential version of the code. 
 Now we will perform a similar calculation taking advantage of the k-point parallelism
 implemented in the ground-state part.
 
-First of all, you should copy the files file tmbt_1.files in the working
-directory Work_mbt:
+First of all, you should copy the files file tmbt_1.files in the working directory Work_mbt:
     
     >>> cd Work_mbt
     >>> cp ../tmbt_1.files . 
 
 The abinit files files is described in [section 1.1](../../users/generated_files/help_abinit.html#intro1) 
-of the abinit_help file. 
+of the abinit_help file.
 Please, read it now if you haven't done it yet!
 
 Now open the input file ~abinit/tests/tutoparal/Input/tmbt_1.in in your
 preferred editor, and look at its structure.
+
+{% dialog tests/tutoparal/Input/tmbt_1.files tests/tutoparal/Input/tmbt_1.in %}
 
 The first dataset performs a rather standard SCF calculation to obtain the
 ground-state density. The second dataset reads the density file and calculates
@@ -65,9 +66,8 @@ the Kohn-Sham band structure including many empty states:
     nband2      160    # Number of (occ and empty) bands computed in the NSCF cycle.
     nbdbuf2     10     # A large buffer helps to reduce the number of NSCF steps.
     
-We have already encountered these variables in the [[lesson:gw1|first lesson]] of the GW tutorial 
-so their meaning should be familiar to you.
-
+We have already encountered these variables in the [[lesson:gw1|first lesson]] 
+of the GW tutorial so their meaning should be familiar to you.
 The only thing worth stressing is that this calculation solves the NSCF cycle
 with the conjugate-gradient method ([[paral_kgb]] == 0)
 
@@ -119,6 +119,8 @@ symbolic link pointing to the WFK file we have generated in the previous step:
 Now open the input file ~abinit/tests/tutoparal/Input/tmbt_2.in so that we can
 discuss its structure.
 
+{% dialog tests/tutoparal/Input/tmbt_2.in %}
+
 The set of parameters controlling the screening computation is summarized below:
     
     optdriver   3   # Screening run
@@ -160,13 +162,13 @@ FULL set of occupied bands while the empty states are distributed among the
 nodes. The parallel computation of the inverse dielectric matrix is done in
 three different steps that can be schematically described as follows:
 
-  1. Each node computes the partial contribution to the RPA polarizability: 
+1. Each node computes the partial contribution to the RPA polarizability: 
 
-![](paral_mbt_assets/gwpara2_chi0.png)
+    ![](paral_mbt_assets/gwpara2_chi0.png)
 
-  2. The partial results are collected on each node. 
+2. The partial results are collected on each node. 
 
-  3. The master node performs the matrix inversion to obtain the inverse dielectric matrix and writes the final result on file. 
+3. The master node performs the matrix inversion to obtain the inverse dielectric matrix and writes the final result on file. 
 
 Both the first and second step of the algorithm are expected to scale well
 with the number of processors. Step 3, on the contrary, is performed in
@@ -223,8 +225,7 @@ distributed among the nodes. For a sequential calculation, we have
      Remaining bands to be divided among processors   nbcw =    26
      Number of bands treated by each node ~   26
     
-The value reported in the last line will decrease when the computation is done
-with more processors.
+The value reported in the last line will decrease when the computation is done with more processors.
 
 The memory allocated for the wavefunctions scales with the number of
 processors. You can use the grep utility to extract this information from the
@@ -253,10 +254,7 @@ intensive part of the execution. For this reason the code provides the input
 variable [[fftgw]] that can be used to decrease the number of FFT points for
 better efficiency. The second digit of the input variable [[gwmem]], instead,
 governs the storage of the real space orbitals and can used to avoid the
-storage of the costly array _ur_ at the price of an increase in computational
-time.
-
-####
+storage of the costly array _ur_ at the price of an increase in computational time.
 
 #### **2.d Manual parallelization over q-points.**
 
@@ -294,8 +292,9 @@ and then create a symbolic link pointing to the WFK file.
 The input file is ~abinit/tests/tutoparal/Input/tmbt_3.in. Open it so that we
 can have a look at its structure.
 
-A snapshot of the most important parameters governing the algorithm is
-reported below.
+{% dialog tests/tutoparal/Input/tmbt_3.in %}
+
+A snapshot of the most important parameters governing the algorithm is reported below.
     
     gwcalctyp   2    # Contour-deformation technique.
     spmeth      1    # Enable the spectral method.
@@ -362,19 +361,23 @@ directory. Then create two symbolic links for the SCR and the WFK file:
 
 Now open the input file ~abinit/tests/tutoparal/Input/tmbt_4.in.
 
+{% dialog tests/tutoparal/Input/tmbt_4.in %}
+
 The most important parameters of the calculation are reported below:
     
-    optdriver   4            # Sigma run.
-    irdwfk      1  
-    irdscr      1
-    gwcalctyp   0 ppmodel 1  # G0W0 calculation with the plasmon-pole approximation.
-    #gwcalctyp  2            # Uncomment this line to use the contour-deformation technique but remember to change the SCR file!
-    gwpara      2            # Parallelization over bands.
-    symsigma    1            # To enable the symmetrization of the self-energy matrix elements.
-    ecutwfn    24            # Cutoff for the wavefunctions.
-    ecuteps     8            # Cutoff in the correlation part.
-    ecutsigx   20            # Cutoff in the exchange part.
-    nband       50           # Number of bands for the correlation part.
+```
+optdriver   4            # Sigma run.
+irdwfk      1  
+irdscr      1
+gwcalctyp   0 ppmodel 1  # G0W0 calculation with the plasmon-pole approximation.
+#gwcalctyp  2            # Uncomment this line to use the contour-deformation technique but remember to change the SCR file!
+gwpara      2            # Parallelization over bands.
+symsigma    1            # To enable the symmetrization of the self-energy matrix elements.
+ecutwfn    24            # Cutoff for the wavefunctions.
+ecuteps     8            # Cutoff in the correlation part.
+ecutsigx   20            # Cutoff in the exchange part.
+nband       50           # Number of bands for the correlation part.
+```
     
 For our purposes, it suffices to say that this input file defines a standard
 one-shot calculation with the plasmon-pole model approximation. We refer to
@@ -387,14 +390,15 @@ energy part significantly differs from the one used to compute the screening.
 In what follows, we briefly describe the two-step procedure used to distribute
 the wavefunctions:
 
-  1. Each node reads and stores in memory the states where the QP corrections are computed (the list of states specified by [[kptgw]] and [[bdgw]]). 
+1. Each node reads and stores in memory the states where the QP corrections are computed 
+   (the list of states specified by [[kptgw]] and [[bdgw]]). 
 
-  2. The [[nband]] bands are distributed using the following partition scheme: 
+2. The [[nband]] bands are distributed using the following partition scheme: 
 
-![](paral_mbt_assets/band_distribution_sigma.png)
+   ![](paral_mbt_assets/band_distribution_sigma.png)
 
-where we have assumed a calculation done with four nodes (the index in the box
-denotes the MPI rank).
+   where we have assumed a calculation done with four nodes (the index in the box
+   denotes the MPI rank).
 
 By virtue of the particular distribution adopted, the computation of the
 correlation part is expected to scale well with the number CPUs. The maximum
@@ -402,8 +406,7 @@ number of processors that can be used is limited by [[nband]]. Note, however,
 that only a subset of processors will receive the occupied states when the
 bands are distributed in step 2. As a consequence, the theoretical maximum
 speedup that can be obtained in the exchange part is limited by the
-availability of the occupied states on the different MPI nodes involved in the
-run.
+availability of the occupied states on the different MPI nodes involved in the run.
 
 The best-case scenario is when the QP corrections are wanted for all the
 occupied states. In this case, indeed, each node can compute part of the self-
@@ -414,8 +417,7 @@ processors will participate to the calculation of the exchange part.
 
 To summarize: The MPI computation of the correlation part is efficient when
 the number of processors divides **nband**. Optimal scaling in the exchange
-part is obtained only when each node possesses the full set of occupied
-states.
+part is obtained only when each node possesses the full set of occupied states.
 
 The two figures below show the speedup of the sigma part as function of the
 number of processors. The self-energy is calculated for 5 quasiparticle states
@@ -423,8 +425,8 @@ using nband=1024 (205 occupied states). Note that this setup is close to the
 worst-case scenario. The computation of the self-energy matrix elements
 (csigme) scales well up to 64 processors. For large number number of CPUs, the
 scaling departs from the linear behavior due to the unbalanced distribution of
-the occupied bands. The non-scalable parts of the implementation (init1,
-rdkss) limit the total speedup due to Amdhal's law.
+the occupied bands. The non-scalable parts of the implementation 
+(init1, rdkss) limit the total speedup due to Amdhal's law.
 
 ![](paral_mbt_assets/sigma_analysis.png)
 
@@ -464,28 +466,27 @@ this tutorial).
 
 ## 5 Basic rules for efficient parallel calculations
 
-  
-  1. Remember that "Anything that can possibly go wrong, does" so, when writing your input file, try to "Keep It Short and Simple". 
+1. Remember that "Anything that can possibly go wrong, does" so, when writing your input file, try to "Keep It Short and Simple". 
 
-  2. Do one thing and do it well:   
-    Avoid using different values of [[optdriver]] in the same input file. Each
-    runlevel employs different approaches to distribute memory and CPU time, hence
-    it is almost impossible to find the number of processors that will produce a
-    balanced run in each dataset.
+2. Do one thing and do it well:   
+  Avoid using different values of [[optdriver]] in the same input file. Each
+  runlevel employs different approaches to distribute memory and CPU time, hence
+  it is almost impossible to find the number of processors that will produce a
+  balanced run in each dataset.
 
-  3. Prime number theorem:   
-    Convergence studies should be executed in parallel only when the parameters
-    that are tested do not interfere with the MPI algorithm. For example, the
-    convergence study in the number of bands in the screening should be done in
-    separated input files when [[gwpara]]=2 is used.
+3. Prime number theorem:   
+  Convergence studies should be executed in parallel only when the parameters
+  that are tested do not interfere with the MPI algorithm. For example, the
+  convergence study in the number of bands in the screening should be done in
+  separated input files when [[gwpara]]=2 is used.
 
-  4. Less is more:   
-    Split big calculations into smaller runs whenever possible. For example,
-    screening calculations can be split over q-points. The calculation of the
-    self-energy can be easily split over [[kptgw]] and [[bdgw]].
+4. Less is more:   
+  Split big calculations into smaller runs whenever possible. For example,
+  screening calculations can be split over q-points. The calculation of the
+  self-energy can be easily split over [[kptgw]] and [[bdgw]].
 
-  5. Look before you leap:   
-    Use the converge tests to estimate how the CPU-time and the memory
-    requirements depend on the parameter that is tested. Having an estimate of the
-    computing resources is very helpful when one has to launch the final
-    calculation with converged parameters.
+5. Look before you leap:   
+  Use the converge tests to estimate how the CPU-time and the memory
+  requirements depend on the parameter that is tested. Having an estimate of the
+  computing resources is very helpful when one has to launch the final
+  calculation with converged parameters.
