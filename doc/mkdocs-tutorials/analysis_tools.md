@@ -4,16 +4,16 @@ authors: MC, SP
 
 # Lesson on analysis tools  
 
-## How to use the program *cut3d*  
+## How to use cut3d
 
-This lesson covers some of the features available in the program *cut3d*. The
+This lesson covers some of the features available in the program cut3d. The
 help file of this program can be view at [[help:cut3d]].
 
-The `cut3d` program can produce output that can be read by several other programs. 
+The cut3d program can produce output that can be read by several other programs. 
 At present, at least XCrySDen ([www.xcrysden.org](http://www.xcrysden.org/), freely available) 
 is known to support this output.
 
-The *cut3d* program can be used to treat data in a density file (_DEN), a
+The cut3d program can be used to treat data in a density file (_DEN), a
 potential file (_POT) or a wavefunction file (_WFK). In this lesson will we
 see how to use this program to obtain the value of the density on a line.
 
@@ -22,12 +22,12 @@ This lesson should take about 15 minutes.
 ## 1 Obtaining the density and wavefunctions files for Silicon
   
 We will first start by a simple example: viewing Silicon density information.
-Before using the *cut3d* program, we first have to generate the density and
+Before using the cut3d program, we first have to generate the density and
 the wavefunctions files by running the Abinit program. For this simple case,
-we will use the last input file used in [lesson 3](lesson_base3.html#35)
-(tbase3_5.in). That input file contains two datasets, one to obtain a self-
-consistent density and the other to obtain a selected number of k-point
-wavefunctions. If you do not have the output of this case, you will need to
+we will use the last input file used in [lesson 3](base3)
+(tbase3_5.in). That input file contains two datasets, one to obtain a 
+self-consistent density and the other to obtain a selected number of k-point wavefunctions. 
+If you do not have the output of this case, you will need to
 rerun it, at this stage, this should be fairly easy for you!
 
 The output files that are of interest for us now are:
@@ -36,9 +36,10 @@ The output files that are of interest for us now are:
     tbase3_5o_DS1_WFK
     tbase3_5o_DS2_WFK
 
-**NOTE:** To ask Abinit to output the density, you have to set the input
-parameter [[prtden]] to 1 in the input file as it was done in the first dataset in
-this example.
+!!! important
+
+    To ask Abinit to output the density, you have to set the input
+    parameter [[prtden]] to 1 in the input file as it was done in the first dataset in this example.
 
 **NOTE:** In DS1, the self-consistent dataset, we have a good density (file:
 tbase3_5o_DS1_DEN) which is physically relevant. Careful, if you run a non-
@@ -53,10 +54,10 @@ that we want to analyse.
 
 ## 2 Getting the density on a given line
   
-Now we are ready to use the *cut3d* program. First we must make sure that we
+Now we are ready to use the cut3d program. First we must make sure that we
 have compiled the program. If you have run the command  "make" in the Abinit
-main directory, and everything went well, then you have obtained the _abinit_
-program and all the accompanying program, in particular *cut3d*. You can
+main directory, and everything went well, then you have obtained the abinit
+program and all the accompanying program, in particular cut3d. You can
 obtain only the cut3d program by issuing the command  "make cut3d" in the Abinit main directory.
 
 Assuming that we are in the directory Tutorial/Work_tools, and the cut3d
@@ -64,7 +65,7 @@ program can be accessed by simply typing its name, now write the command:
     
     cut3d
 
-The *cut3d* program will ask you several questions in order to determine what
+The cut3d program will ask you several questions in order to determine what
 you want him to do. In this lesson, the text coming from the cut3d program are
 in black and the input that you have to type in are in  red.
 
@@ -84,7 +85,7 @@ You will then see:
      or unformatted binary header + 3D data (=1) ? 
 
 Your answer is 1 as generally all output of Abinit are in unformatted binary
-form. After you have pressed enter, *cut3d* prints out a lot of information
+form. After you have pressed enter, cut3d prints out a lot of information
 contained in this file that explain how that density was obtained. At this
 point, you can double check that this is really the file that you want to
 analyse. Then you will have the choices:
@@ -125,9 +126,9 @@ You will get the message:
     Type the second point coordinates (Bohrs):
        -> X-dir Y-dir Z-dir: 
 
-Looking at the input file, we see that the cubic side has a length of 10.217
-bohr. To get 2 unit cells, you will enter 20.434 20.434 20.434. You will then
-be asked for the line resolution.
+Looking at the input file, we see that the cubic side has a length of 10.217 bohr. 
+To get 2 unit cells, you will enter 20.434 20.434 20.434. 
+You will then be asked for the line resolution.
     
     Enter line resolution: 
 
@@ -140,7 +141,7 @@ Enter something meaningful, si_den_111.dat.
     
     More analysis of the 3D file ? (1=default=yes,2=no)
 
-Enter 2 to finish with *cut3d*. If you do a list of the files in your working
+Enter 2 to finish with cut3d. If you do a list of the files in your working
 directory, you should see the  "si_den_111.dat" file. You can look at this
 file, you will see that this is a simple two columns file. You can visualize
 it with your favorite plotting software (ex: xmgrace, gnuplot, ...). If you
@@ -163,7 +164,10 @@ each the dimensions of the cube. More explicitly, let us chose one of the
 corner as origin, and define reduced coordinates, varying from 0 to 1 inside
 the parallelepiped, the density inside the parallelepiped is given by
     
-     density(dx,dy,dz)=density(0,0,0)+ c100 * dx + c010 * dy + c001 * dz + c110 * dx * dy + c101 * dx * dz + c011 * dy * dz + c111 * dx * dy * dz
+     density(dx,dy,dz)= density(0,0,0) + 
+        c100 * dx + c010 * dy + c001 * dz + 
+        c110 * dx * dy + c101 * dx * dz + 
+        c011 * dy * dz + c111 * dx * dy * dz
     
 where the 7 coefficients c100, c010, c001, c110, c101, c011, c111 are to be
 determined from the knowledge of the density at the 7 other corners.
@@ -177,12 +181,14 @@ profile along the bond, with a fine FFT grid, behave quite smoothly, and reach
 its maximum at the mid point between the two atoms, in contrast to the figure
 presented previously.
 
-**NOTE:** An important point to remember when doing visualization of density
-obtained with a pseudopotential calculation is that the core charge is not
-included! This is the reason why we use pseudopotential and the charge we get
-is only the valence charge. It is possible to include some of the core charge
-by doing calculations using pseudos with partial core charge. The fact that
-the core charge is missing means that there is no charge at the nucleus of our
-atoms. This means that we are getting low density at the nucleus center and we
-have to remember that this is not a physical effect! The location of the
-silicon atoms have been indicating by blue arrows.
+!!! note
+
+    An important point to remember when doing visualization of density
+    obtained with a pseudopotential calculation is that the core charge is not
+    included! This is the reason why we use pseudopotential and the charge we get
+    is only the valence charge. It is possible to include some of the core charge
+    by doing calculations using pseudos with partial core charge. The fact that
+    the core charge is missing means that there is no charge at the nucleus of our
+    atoms. This means that we are getting low density at the nucleus center and we
+    have to remember that this is not a physical effect! The location of the
+    silicon atoms have been indicating by blue arrows.

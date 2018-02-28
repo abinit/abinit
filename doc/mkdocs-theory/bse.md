@@ -122,7 +122,7 @@ L = L^0 + L^0 K L \Longrightarrow L = \bigl [ 1 - L^0 K]^{-1} L^0
 that involves the Bethe-Salpeter kernel _K_ :
 
 \begin{equation}\label{eq:BSE_kernel_LF} 
-K(1234) = \underbrace{\delta(12)\delta(34)\bar v(13)}_{Exchange} \-
+K(1234) = \underbrace{\delta(12)\delta(34)\bar v(13)}_{Exchange} -
 \underbrace{\delta(13)\delta(24)W(12)}_{Coulomb} 
 \end{equation} 
 
@@ -149,14 +149,14 @@ particle orbitals) using:
 
 \begin{equation} F(1234) = 
 \sum_{ \substack{(n_1 n_2) \\\ (n_3 n_4)} }
-\psi_{n_1}^\\*(1) \psi_{n_2}(2)\, F_{ (n_1 n_2) (n_3 n_4) }\, \psi_{n_3}(3)
-\psi_{n_4}^\\*(4) 
+\psi_{n_1}^\*(1) \psi_{n_2}(2)\, F_{ (n_1 n_2) (n_3 n_4) }\, \psi_{n_3}(3)
+\psi_{n_4}^\*(4) 
 \end{equation} 
 
 and 
 
 \begin{equation} F_{ (n_1 n_2) (n_3 n_4)
-} = \int F(1234) \psi_{n_1}(1) \psi_{n_2}^\\*(2) \psi_{n_3}^\\*(3)
+} = \int F(1234) \psi_{n_1}(1) \psi_{n_2}^\*(2) \psi_{n_3}^\*(3)
 \psi_{n_4}(4) \dd (1234) \end{equation} 
 
 where _n i_ is a shorthand notation to denote band, **k** -point and spin index. 
@@ -183,13 +183,27 @@ L = \bigl [ H-\ww \bigr]^{-1}\,F
 
 The explicit form for _H_ and _F_ in the transition space is given by 
 
-\begin{equation} H =
-\left( \begin{array}{c|cc}  & |v'c'\kk'\rangle & |c'v'\kk'\rangle \\\ \hline
-\langle vc\kk| & R & C \\\ %\hline \langle cv\kk| & -C^* & -R^* \\\
-\end{array} \right) \end{equation} \begin{equation} F = \left(
-\begin{array}{c|cc} & |v'c'\kk'\rangle & |c'v'\kk'\rangle \\\ \hline \langle
-vc\kk| & 1 & 0 \\\ %\hline \langle cv\kk| & 0 & -1 \\\ \end{array} \right)
-\end{equation}  
+\begin{equation}
+H =
+\left( 
+\begin{array}{c|cc} 
+  &   |v'c'\kk'\rangle & |c'v'\kk'\rangle \\ \hline 
+\langle vc\kk|  & R  &  C  \\ %\hline 
+\langle cv\kk|  &  -C^* & -R^*   \\
+\end{array}
+\right) 
+\end{equation}
+
+\begin{equation}
+F =
+\left( 
+\begin{array}{c|cc} 
+  &   |v'c'\kk'\rangle & |c'v'\kk'\rangle     \\ \hline 
+\langle vc\kk|  & 1  &  0   \\ %\hline 
+\langle cv\kk|  & 0  & -1   \\
+\end{array}
+\right) 
+\end{equation}
 
 where valence states are indicated by the indices _v_ , _v'_ while _c_ , _c'_
 are used for conduction bands. The _R_ sub-matrix is Hermitian and is usually
@@ -245,7 +259,7 @@ where
 
 \begin{equation} P(\qq)_{n_1 n_2} = \langle n_2|e^{i\qq\cdot\rr}|n_1 \rangle
 \underset{\qq \rightarrow 0}{ \approx} \delta_{n_1 n_2} + i \qq \cdot \langle
-n_2|\rr|n_1 \rangle \+ O(q^2) 
+n_2|\rr|n_1 \rangle + O(q^2) 
 \end{equation} 
 
 is the matrix element of the dipole operator in transition space.
@@ -298,8 +312,12 @@ spectral representation of _H_ in terms of eigenvalues and right eigenvectors of
 \begin{cases} H |\lambda\rangle = \ee_\lambda |\lambda\rangle
 \\\ \\\ O_{\lambda\lambda'} = \langle\lambda|\lambda'\rangle \\\ \\\ H =
 \sum_{\lambda \lambda'} \ee_\lambda |\lambda\rangle O_{\lambda \lambda'}
-\langle\lambda'| \end{cases} \end{equation} Then, as discussed in [2], the
-inverse of [ _H_ -ω] is obtained according to \begin{equation} \bigl[ H -\ww
+\langle\lambda'| \end{cases} 
+\end{equation} 
+
+Then, as discussed in [2], the inverse of [ _H_ -ω] is obtained according to 
+
+\begin{equation} \bigl[ H -\ww
 \bigr]^{-1} = \sum_{\lambda \lambda'} |\lambda\rangle \dfrac{O_{\lambda
 \lambda'}^{-1}}{(\ee_\lambda - \ww)} \langle\lambda'| 
 \end{equation} 
@@ -313,12 +331,24 @@ tridiagonal matrix [3]. Without entering into detail, one can schematically
 represent the Haydock technique as an algorithmic procedure that transforms a
 dense (hermitian) matrix into a sparse (tridiagonal) one:
 
-\begin{equation} 
-R = R^\\* = \begin{pmatrix} *  & * & * & * & * \\\ * & * & *
-& * & * \\\ * & * & * & * & * \\\ * & * & * & * & * \\\ * & * & * & * & *
-\end{pmatrix} \Longrightarrow \begin{pmatrix} a_1 & b_2 & & & \\\ b_2 & a_2 &
-b_3 & & \\\ & b_3 & * & * & \\\ & & * & * & * \\\ & & & * & * \end{pmatrix}
-\end{equation} 
+\begin{equation}
+ R = R^\* =
+\begin{pmatrix}
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & *
+\end{pmatrix}
+\Longrightarrow
+\begin{pmatrix}
+a_1 & b_2 &     &   &  \\
+b_2 & a_2 & b_3 &   &  \\
+    & b_3 & *   & * &  \\
+    &     & *   & * & * \\
+    &     &     & * & * 
+\end{pmatrix}
+\end{equation}
 
 Once the coefficient of the tridiagonal form are know, the
 macroscopic dielectric function is evaluated in terms of the continued fraction: 

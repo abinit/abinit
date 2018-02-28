@@ -8,8 +8,8 @@ authors: FBruneval, XG
 
 This lesson aims at showing how to obtain self-energy corrections to the DFT
 Kohn-Sham eigenvalues within the GW approximation, in the metallic case,
-without the use of a plasmon-pole model. The band width and Fermi energy of
-Aluminum will be computed.  
+without the use of a plasmon-pole model. 
+The band width and Fermi energy of Aluminum will be computed.  
 
 The user may read the paper
 
@@ -22,16 +22,16 @@ the use of a plasmon-pole model to calculate the frequency convolution of G
 and W can be found in
 
   * S. Lebegue, S. Arnaud, M. Alouani, P. Bloechl, Phys. Rev. B 67, 155208 (2003), 
-with the relevant formulas. We will refer to these papers as the
-Bruneval[2006] and the Lebegue[2003] papers.
+
+with the relevant formulas. We will refer to these papers as the [[cite:Bruneval2006]] 
+and the [[cite:Lebegue2003]] papers.
 
 A brief description of the equations implemented in the code can be found in the [[theory:mbp|GW_notes]]
-
-Also, it is suggested to [[bib:acknow#b|acknowledge]] the efforts of
-developers of the GW part of ABINIT, by citing [[cite:Gonze2005|2005 ABINIT publication]].
+Also, it is suggested to acknowledge the efforts of developers of the GW part of ABINIT, 
+by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic lessons of ABINIT, see the
-[tutorial home page](lesson_welcome.html), as well as the [[lesson:gw1|first lesson on GW]].
+[tutorial home page](index), as well as the [[lesson:gw1|first lesson on GW]].
 
 This lesson should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
@@ -41,7 +41,7 @@ reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 *Before beginning, you might consider to work in a different subdirectory as
 for the other lessons. Why not "Work_gw2"?*
 
-In [[lesson:base4|lesson 4]], you computed different properties of
+In [[lesson:base4|lesson 4]], we have computed different properties of
 Aluminum within the LDA. Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
@@ -53,6 +53,8 @@ tgw2_x.files file as usual (see [[lesson:base1]]).
 Then (supposing abinit is the proper alias), issue:
     
     abinit < tgw2_x.files >& tgw2_1.log &
+
+{% dialog tests/tutorial/Input/tgw2_x.files tests/tutorial/Input/tgw2_1.in %}
     
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
@@ -84,6 +86,8 @@ tgw2_2.in, and modify the tgw2_x.files file as usual (replace occurrences of
 twg2_x by tgw2_2). Also, copy the WFK file (tgw2_1o_WFK) to tgw2_2i_WFK. Then
 run the calculation (it should take about 30 seconds on a 3 GHz PC).
 
+{% dialog tests/tutorial/Input/tgw2_2.in %}
+
 We now have to consider starting a GW calculation. However, unlike in the case
 of Silicon in the previous GW tutorial, where we were focussing on quantities
 close to the Fermi energy (spanning a range of a few eV), here we need to
@@ -91,8 +95,8 @@ consider a much wider range of energy: the bottom of the valence band lies
 around -11 eV below the Fermi level. Unfortunately, this energy is of the same
 order of magnitude as the plasmon excitations. With a rough evaluation, the
 classical plasma frequency for a homogeneous electron gas with a density equal
-to the average valence density of Aluminum is 15.77 eV. Hence, using plasmon-
-pole models may be not really appropriate.
+to the average valence density of Aluminum is 15.77 eV. Hence, using 
+plasmon-pole models may be not really appropriate.
 
 In what follows, one will compute the GW band structure without a plasmon-pole
 model, by performing explicitly the numerical frequency convolution. In
@@ -129,8 +133,12 @@ determination of the Fermi energy raises a completely new problem: one should
 sample the Brillouin Zone, to get new energies (quasi-particle energies) and
 then determine the Fermi energy. This is actually the first step towards a self-consistency!
 
-Examine the input file tgw2_3.in. The first thirty lines contain the important
-information. There, you find some input variables with values that you are
+Examine the input file tgw2_3.in:
+
+{% dialog tests/tutorial/Input/tgw2_3.in %}
+
+The first thirty lines contain the important information. 
+There, you find some input variables with values that you are
 already familiarized with, like [[optdriver]], [[ecutsigx]], [[ecutwfn]].
 Then, comes the input variable [[gwcalctyp]]=12. The value _x2_ corresponds to
 a contour integration. The value _1x_ corresponds to a self-consistent
@@ -166,9 +174,10 @@ band width, 10.404 eV. Using converged parameters, the band width will be
   
 The access to the non-plasmon-pole-model self-energy (real and imaginary part)
 has additional benefit, e.g. an accurate spectral function can be computed,
-see Lebegue[2003]. You may be interested to see the plasmon satellite of
-Aluminum, which can be accounted for within the GW approximation. Remember the
-spectral function is almost (except some matrix elements) the spectrum which
+see [[cite:Lebegue2003]]. You may be interested to see the plasmon satellite of
+Aluminum, which can be accounted for within the GW approximation. 
+
+Remember that the spectral function is almost (except some matrix elements) the spectrum which
 is measured in photoemission spectroscopy (PES). In PES, a photon impinges the
 sample and extracts an electron from the material. The difference of energy
 between the incoming photon and the obtained electron gives the binding energy
@@ -186,7 +195,10 @@ In order not to lose time, this calculation can be started before the
 examination of the input file. So, copy the file tgw2_4.in, and modify the
 tgw4_x.files file as usual (replace occurrences of twg2_x by tgw2_4). Also,
 copy the WFK file (tgw2_1o_WFK) to tgw2_4i_WFK, and the screening file
-(tgw2_2o_SCR) to tgw2_4i_SCR. Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
+(tgw2_2o_SCR) to tgw2_4i_SCR. 
+Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
+
+{% dialog tests/tutorial/Input/tgw2_4.in %}
 
 Compared to the previous file (tgw2_3.in), the input file contains two
 additional keywords: [[nfreqsp]], and [[freqspmax]]. Also, the computation of
@@ -208,4 +220,3 @@ Another file, tgw2_4o_GW, is worth to mention: it contains information to be
 used for the subsequent calculation of excitonic effects by the EXC code
 (usually available at http://theory.polytechnique.fr/codes/exc; if not, see
 the [ETSF software page](http://www.etsf.eu/resources/software/codes) and further links).
-

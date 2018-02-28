@@ -41,8 +41,10 @@ To this purpose it is useful to introduce the following notation to denote the
 charged excitation energies of the $N$-electron system [[Onida2002]]:
 
 \begin{equation} 
-\varepsilon_i = \begin{cases} E_i^{(N+1)}-E_0^N & \text{if
-$\varepsilon_i$ > $\mu$} \\\ E_0^N-E_i^{(N-1)} & \text{if $\varepsilon_i$ < $\mu$} , \end{cases} 
+\varepsilon_i = 
+\begin{cases} 
+E_i^{(N+1)} - E_0^N & \text{if}\,\varepsilon_i > \mu \\\ E_0^N-E_i^{(N-1)} & \text{if}\,\varepsilon_i < \mu, 
+\end{cases} 
 \end{equation} 
 
 where _E 0N_ is the ground state energy of
@@ -60,7 +62,7 @@ in the following are the so-called Lehmann amplitudes defined, in the Schrodinge
 The Lehmann representation of the Green's function
 
 \begin{equation} \label{eq:Lehmann_representation} 
-G (\rr_1,\rr_2;\ww) = \sum_i \frac{\Psi_i(\rr_1)\Psi_i^\\*(\rr_2)} {\ww-\ee_i
+G (\rr_1,\rr_2;\ww) = \sum_i \frac{\Psi_i(\rr_1)\Psi_i^\*(\rr_2)} {\ww-\ee_i
 +i\eta\,\sign(\ee_i-\mu)} \qquad\eta \rightarrow 0^+, 
 \end{equation} 
 
@@ -98,7 +100,7 @@ renormalized electron in the many-body system by solving the quasiparticle
 
 \begin{equation} \label{eq:QP_equation} 
 \Bigl[ {\hat h}_0(\rr_1) + v_H(\rr_1)
-\Bigr] \Psi(\rr_1) + \int\,\Sigma(\rr_1,\rr_2;\ee^\QP)\Psi(\rr_2)\dd\rr_2, = \ee^\QP \Psi(\rr_1) 
+\Bigr] \Psi(\rr_1) + \int\,\Sigma(\rr_1,\rr_2;\ee^\QP)\Psi(\rr_2)\dd\rr_2 = \ee^\QP \Psi(\rr_1) 
 \end{equation}  
 
 The QP eigenstates so obtained can be used
@@ -459,7 +461,7 @@ quasiparticle amplitudes
 
 \begin{equation}\label{eq:Sigma_x} 
 \Sigma_x(\rr_1,\rr_2)= -\sum_\kk^\BZ
-\sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
+\sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
 \end{equation} 
 
 while the dynamic part Σc(ω) accounts for correlation effects beyond Σx.
@@ -576,10 +578,10 @@ contributions coming from the poles of the integrand lying inside the contour:
 ![](mbt_assets/contour.svg)
 
 \begin{equation} 
-\label{eq:GW_CD} \Sigma_c(\ww) = \dfrac{i}{2\pi} \Bigl\\{
+\label{eq:GW_CD} \Sigma_c(\ww) = \dfrac{i}{2\pi} \Bigl \{
 2\pi\,i \sum_{z_p}^\mcC \lim_{z\rightarrow z_p}
-G(z)\,{W}^{\text{c}}(z)\,(z-z_p) -\int_\minf^\pinf
-G(\ww+i\ww')\,{W}^{\text{c}}(i\ww') \dd(i\ww') \Bigr\\}. 
+G(z)\,{W}^{\text{c}}(z)\,(z-z_p) -\int__{-\infty}^{+\infty}
+G(\ww+i\ww')\,{W}^{\text{c}}(i\ww') \dd(i\ww') \Bigr \}. 
 \end{equation} 
 
 In the above equation, the first sum is restricted to the poles lying inside the path

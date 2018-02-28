@@ -41,7 +41,7 @@ correction - is subtracted from the Hamiltonian.
 
 In Abinit, two double-counting corrections are currently implemented:
 
--The Full localized limit (FLL) [[cite:Lichtenstein1995]]
+-The Full localized limit (FLL) [[cite:Liechtenstein1995]]
 
 -The Around Mean Field (AMF) [[cite:Czyzyk1994]] 
 

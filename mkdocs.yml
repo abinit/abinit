@@ -264,8 +264,8 @@ theme:
         tabs: true
 
 plugins:
-    - search
     - abidocs
+    #- search
 
 extra:
     version: 8.5.4
