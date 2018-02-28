@@ -312,7 +312,9 @@ module m_xgScalapack
     call xmpi_barrier(xgScalapack%comms(M__WORLD))
 #else
    MSG_ERROR("ScaLAPACK support not available")
-   if(.false.)write(std_out,*)xgScalapack,matrixA,eigenvalues
+   ABI_UNUSED(xgScalapack%verbosity)
+   ABI_UNUSED(matrixA%space)
+   ABI_UNUSED(eigenvalues%space)
 #endif
 
   end subroutine xgScalapack_heev
@@ -388,7 +390,10 @@ module m_xgScalapack
     call xmpi_barrier(xgScalapack%comms(M__WORLD))
 #else
    MSG_ERROR("ScaLAPACK support not available")
-   if(.false.)write(std_out,*)xgScalapack,matrixA,matrixB,eigenvalues
+   ABI_UNUSED(xgScalapack%verbosity)
+   ABI_UNUSED(matrixA%space)
+   ABI_UNUSED(matrixB%space)
+   ABI_UNUSED(eigenvalues%space)
 #endif
 
   end subroutine xgScalapack_hegv
@@ -474,7 +479,7 @@ module m_xgScalapack
       call MPI_Comm_free(xgScalapack%comms(M__UNUSED),ierr)
     end if 
 #else
-    if(.false.)write(std_out,*)xgScalapack
+    ABI_UNUSED(xgScalapack%verbosity)
 #endif
     call timab(M__tim_free,2,tsec)
 
