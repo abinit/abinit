@@ -9,9 +9,9 @@ authors: DJA
 This lesson aims to show how you can determine U for further DFT+U
 calculations consistently and in a fast an easy way. You will learn to prepare
 the input files for the determination and to use the main parameters implemented for this aim.  
-It is supposed that you already know how to run ABINIT in the PAW mode (lesson [PAW1](lesson_paw1.html)). 
-Obviously, you should also read the lesson [DFT+U](lesson_dftu.html), and likely the lesson 
-[PAW2](lesson_paw2.html), to generate PAW atomic data.  
+It is supposed that you already know how to run ABINIT in the PAW mode (lesson [PAW1](paw1)). 
+Obviously, you should also read the lesson [DFT+U](dftu), and likely the lesson  [PAW2](paw2), 
+to generate PAW atomic data.  
 
 This lesson should take about 1/2 hour.
 
@@ -24,12 +24,12 @@ as the response to an infinitesimal change of of occupation of the orbital by
 the electrons dn. Then U is the second derivative of the energy with respect
 to the occupation U=d^2E/ d^2n. The first method fixed the occupation by
 cutting the hopping terms of localized orbitals. Later propositions
-constrained the occupation through Lagrange multipliers [3,5]. The lagrange
+constrained the occupation through Lagrange multipliers [3,5]. The Lagrange
 multiplier \alpha corresponds to a local potential that has to be applied to
 augment or decrease the occupation by +/-1 electron. Note that the occupation
 need not to vary by 1 electron, but the occupation shift can be infinitesimal.
 
-It is recommanded to read the following papers to understand the basic
+It is recommended to read the following papers to understand the basic
 concepts of the linear response calculations to calculate U:
 
 [1] "A LDA+U study of selected iron compounds ", M. Cococcioni, Ph.D. thesis,
@@ -58,28 +58,34 @@ Amadon, S. Biermann, unpublished (2010)
 
 ## 2 Determine U in ABINIT
   
-_Before continuing, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_udet" ?_ _In what follows, the name of
-files are mentioned as if you were in this subdirectory.  
-All the input files can be found in the __~abinit/tests/tutorial/Input directory._
+*Before continuing, you might consider to work in a different subdirectory as
+for the other lessons. Why not "Work_udet"?* 
 
- _You can compare your results with reference output files located in_
-_~abinit/tests/tutorial/Refs __directories (for the present tutorial they are
-named tudet*.out)._
+!!! important
+
+    In what follows, the name of files are mentioned as if you were in this subdirectory.  
+    All the input files can be found in the ~abinit/tests/tutorial/Input directory
+     You can compare your results with reference output files located in
+    _~abinit/tests/tutorial/Refs directories (for the present tutorial they are named tudet*.out).
 
 The input file tudet_1.in is an example of a file to prepare a wave function
 for further processing. You might use the file tudet_1.files as a "files"
 file, and get the corresponding output file ../Refs/tudet_1.out).  
+
 Copy the files tudet_1.in and tudet_1.files in your work directory, and run ABINIT:
     
     abinit < tudet_1.files > tudet_1.log  
 
 In the meantime, you can read the input file and see that this is a usual
-DFT+U calculation, with U=0. This setting allows us to read the occupations of
+DFT+U calculation, with U=0. 
+
+{% dialog tests/tutorial/Input/tudet_1.files tests/tutorial/Input/tudet_1.in %}
+
+This setting allows us to read the occupations of
 the Fe 3d orbitals ([[lpawu]] 2). The cell contains 2 atoms. This is the
 minimum to get reasonable response matrices. We converge the electronic
 structure to a high accuracy ([[tolvrs]] 10d-12), which usually allows to
-determine occupations with a precision of 10d-10. The ecut is chosen very low,
+determine occupations with a precision of 10d-10. The [[ecut]] is chosen very low,
 in order to accelerate calculations.  
 We do not suppress the writing of the _WFK file, because this is the input for
 the calculations of U.
@@ -89,9 +95,11 @@ Copy the files tudet_2.in and tudet_2.files in your work directory, and run ABIN
     
     abinit < tudet_2.files > tudet_1.log  
 
+{% dialog tests/tutorial/Input/tudet_2.files tests/tutorial/Input/tudet_2.in %}
+
 As you can see from the tudet_2.files file, this run uses the tudet_1o_WFK as
-an imput. In the tudet_2.in all the symmetry relations are specified
-explicitely. In the tudet_2.log you can verify that none of the symmetries
+an input. In the tudet_2.in all the symmetry relations are specified
+explicitly. In the tudet_2.log you can verify that none of the symmetries
 connects atoms 1 with atom 2:  
     
     symatm: atom number    1 is reached starting at atom   
@@ -112,15 +120,15 @@ separately on the atoms surrounding the atom on which you apply the perturbation
 You can generate these symmetries, in a separate run, where you specify the
 atom where the perturbation is done as a different species. From the output
 you read the number of symmetries ([[nsym]]), the symmetry relations
-([[symrel]]) and the non-symmorphic vectors ([[tnons]]tnons). This is already
+([[symrel]]) and the non-symmorphic vectors ([[tnons]]). This is already
 done here and inserted in the tudet_2.in file. Note that you can alternatively
 just break all the symmetries ([[nsym]]=1), or break specific symmetries by
 displacing the impurity atom in the preliminary run. However, for the
 determination of U, the positions should be the ideal positions and only the
 symmetry should be reduced.
 
-For the rest, usually it is enough to set "[[macro_uj]] 1" to run the
-calculation of U. Note also, that the "[[irdwfk]] 1" and the "[[tolvrs]] 1d-8"
+For the rest, usually it is enough to set [[macro_uj]] 1 to run the
+calculation of U. Note also, that the [[irdwfk]] 1 and the [[tolvrs]] 1d-8
 need not be set explicitly, because they are the defaults with [[macro_uj]] 1.
 
 Once the calculation tudet_2 is converged, you can have look at the output.
@@ -131,7 +139,6 @@ You can see, that the atomic shift ([[atvshift]]) is automatically set:
                            0.00000    0.00000    0.00000    0.00000    0.00000
                            0.00000    0.00000    0.00000    0.00000    0.00000
     
-
 This means, that all the 10 3d spin-spin orbitals on the first Fe atom where
 shifted by 0.1 eV (=0.00367 Ha). On the second atom no shift was applied.
 Self-consistency was reached twice: Once for a positive shift, once for the negative shift:
@@ -154,11 +161,11 @@ calculated and should use in your further calculations. U_ASA is an estimate
 of U for more extended projectors and U_\inf is the estimate for a projector
 extended even further.
 
-Although it is enough to set "[[macro_uj]] 1", you can further tune your runs.
+Although it is enough to set [[macro_uj]] 1, you can further tune your runs.
 As a standard, the potential shift to the 1st atom treated in DFT+U, with a
 potential shift of 0.1 eV. If you wish to determine U on the second atom you
-put "[[pawujat]] 2". To change the size of the potential shift use e.g.
-"[[pawujv]] 0.05 eV". Our tests show that 0.1 eV is the optimal value, but the
+put [[pawujat]] 2. To change the size of the potential shift use e.g.
+[[pawujv]] 0.05 eV. Our tests show that 0.1 eV is the optimal value, but the
 linear response is linear in a wide range (1-0.001 eV).
 
 ## 3 The ujdet utility

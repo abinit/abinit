@@ -41,12 +41,12 @@ correction - is subtracted from the Hamiltonian.
 
 In Abinit, two double-counting corrections are currently implemented:
 
--The Full localized limit (FLL) (see A. Lichtenstein et al PRB 52, 5467 (1995))
+-The Full localized limit (FLL) [[cite:Lichtenstein1995]]
 
--The Around Mean Field (AMF) (see M. T. Czyzyk and G. A. Sawatzky PRB 49, 14211 (1994))
+-The Around Mean Field (AMF) [[cite:Czyzyk1994]] 
 
-For some systems, the result might depend on the choice of the double-counting
-method. However, the two methods generally give similar results.
+For some systems, the result might depend on the choice of the double-counting method. 
+However, the two methods generally give similar results.
 
 ## 1 Ground state calculation of NiO using LDA
   
@@ -54,8 +54,9 @@ You might create a subdirectory of the ~abinit/tests/tutorial directory, and
 use it for the tutorial. In what follows, the names of files will be mentioned
 as if you were in this subdirectory
 
-_Copy the files ../Input/tdftu_1.in and ../Input/tdftu_1.files in your Work
-directory and run_
+*Copy the files ../Input/tdftu_1.in and ../Input/tdftu_x.files in your Work directory and run*
+
+{% dialog tests/tutorial/Input/tdftu_x.files tests/tutorial/Input/tdftu_1.in %}
 
 This run should take less than 30 seconds on a PC 3 GHz. It calculates the LDA
 ground state of the NiO crystal. A low cutoff and a small number of k-points
@@ -66,18 +67,18 @@ The NiO crystallizes in the rocksalt structure, with one Ni and one O atom in
 the primitive cell (the crystallographic primitive cell). However, NiO is
 known to exhibit an antiferromagnetic ordering at low temperature (along the
 <111> direction). From the electronic point of view, the true unit cell has
-two Ni and two O atoms : the local magnetic moment around the first Ni atom
+two Ni and two O atoms: the local magnetic moment around the first Ni atom
 will have a sign opposite to the one of the other Ni atom.
 
 You should take some time to examine the values used for the input variables
-[[xred]], [[rprim]] (note the last line !), [[typat]], [[spinat]], [[nsppol]],
+[[xred]], [[rprim]] (note the last line!), [[typat]], [[spinat]], [[nsppol]],
 and [[nspden]], that define this antiferromagnetic ordering along the <111>
 direction (of a conventional cubic cell).
 
 If you take a look at the output file (tdftu_1.out), you can see the
 integrated total density in the PAW spheres (see the [PAW1](lesson_paw1.html)
 and [PAW2](lesson_paw2.html) tutorials on PAW formalism). This value roughly
-estimate the magnetic moment of NiO :
+estimate the magnetic moment of NiO:
     
      Integrated total density in atomic spheres:
      -------------------------------------------
@@ -92,8 +93,9 @@ The atoms in the output file, are listed as in the [[typat]] variable (the
 first two are nickel atoms and the last two are oxygen atoms). The results
 indicate that spins are located in each nickel atom of the doubled primitive
 cell. Fortunately, the LDA succeeds to give an antiferromagnetic ground state
-for the NiO. But the result does not agree with the experimental data. The
-magnetic moment (the difference between up and down spin on the nickel atom)
+for the NiO. But the result does not agree with the experimental data. 
+
+The magnetic moment (the difference between up and down spin on the nickel atom)
 range around 1.6-1.9 according to experiments (A. K. Cheetham and D. A. O.
 Hope, Phys. Rev. B. 27, 6964 (1983), H. A. Alperin, J. Phys. Soc. Jpn. 17, 12
 (1962), W. Neubeck et al., J. Appl. Phys. 85, 4847 (1999), G. A. Sawatzky and
@@ -116,7 +118,6 @@ why we want to improve our functional, and be able to manage the strong correlat
   
 As seen previously, the LDA does not gives good results for the magnetization
 and band gap compared to experiments.
-
 At this stage, we will try to improve the correspondence between calculation
 and experimental data. First, we will use the DFT(LDA)+U with the Full
 localized limit (FLL) double-counting method.
@@ -125,14 +126,18 @@ FLL and AMF double-counting expressions are given in the papers listed above,
 and use the adequate number of electrons for each spin. For the Hubbard term,
 the rotationally invariant interaction is used.
 
-It is important to notice that in order to use LDA+U in Abinit, you must
-employ PAW pseudopotentials.
+!!! note
 
-_You should run abinit on the input file tdftu_2.in. This calculation takes
-less than 30 seconds on a PC 3.0 GHz_
+    It is important to notice that in order to use LDA+U in Abinit, you must
+    employ PAW pseudopotentials.
 
-During the calculation, you can take a look at the input file. Some variable
-describing the LDA+U parameters have been added to the previous file. All
+*You should run abinit on the input file tdftu_2.in. This calculation takes
+less than 30 seconds on a PC 3.0 GHz*
+During the calculation, you can take a look at the input file. 
+
+{% dialog tests/tutorial/Input/tdftu_2.in %}
+
+Some variable describing the LDA+U parameters have been added to the previous file. All
 other parameters were kept constant from the preceding calculation. First, you
 must set the variable [[usepawu]] to one (for the FLL method) and two (for the
 AMT method) in order to enable the LDA+U calculation. Then, with [[lpawu]] you
@@ -150,9 +155,8 @@ interaction, with [[jpawu]]. Note that you can choose the energy unit by
 indicating at the end of the line the unit abbreviation (e.g. eV or Ha). For
 NiO, we will use variables that are generally accepted for this type of compound:
 
-[[upawu]]= 8.0 eV
-
-[[jpawu]]= 0.8 eV (10 % of U)
+    upawu 8.0 eV
+    jpawu 0.8 eV (10% of U)
 
 You can take a look at the result of the calculation. The magnetic moment is now:
     
@@ -195,7 +199,7 @@ The fact that [[spinat]] works for NiO comes from the relative simplicity of thi
 
 ## 3 Initialization of the density matrix
   
-_You should begin by running the tdftu_3.in file before continuing._
+*You should begin by running the tdftu_3.in file before continuing.*
 
 In order to help the LDA+U find the ground state, you can define the initial
 density matrix for correlated orbitals with [[dmatpawu]] To enable this
@@ -203,6 +207,8 @@ feature, [[usedmatpu]] must be set to a non-zero value (default is 0). When
 positive, the density matrix is kept to the [[dmatpawu]] value for the
 [[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]] is 5, 
 thus the spin-density matrix is kept constant for 5 SCF steps.
+
+{% dialog tests/tutorial/Input/tdftu_3.in %}
 
 In the log file (not the usual output file), you might find for each step, the
 calculated density matrix, followed by the imposed density matrix. After the
@@ -256,8 +262,11 @@ electrons for each spin independently and the complete interactions U(m1,m2,m3,m
 As in the preceding run, we will start with a fixed density matrix for d
 orbitals. You might now start your calculation, with the tdftu_4.in and
 tdftu_4.files, or skip the calculation, and rely on the reference file
-provided in the ~abinit/tests/tutorial/Refs directory. Examine the tdftu_4.in
-file. The only difference in the input file compared to tdftu_3.in is the
+provided in the ~abinit/tests/tutorial/Refs directory. Examine the tdftu_4.in file. 
+
+{% dialog tests/tutorial/Input/tdftu_4.in %}
+
+The only difference in the input file compared to tdftu_3.in is the
 value of [[usepawu]] = 2. We obtain a band gap of 4.3 eV. The value of the
 band gap with AMF and FLL is different. However, we have to remember that
 these results are not well converged. By contrast, the magnetization,
@@ -277,5 +286,4 @@ spin. The AMF should be used when orbital occupations are near the average occup
 ## 5 Projected density of states in LDA+U
   
 Using prtdos 3, you can now compute the projected d and f density of states.
-For more information about projected density of states, for more details see
-the [PAW1](lesson_paw1.html) tutorial.
+For more information about projected density of states, for more details see the [PAW1](paw1) tutorial.

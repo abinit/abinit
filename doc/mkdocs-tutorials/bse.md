@@ -12,7 +12,7 @@ Crystalline silicon is used as test case. A brief description of the formalism
 can be found in the [[theory:bse|Bether-Salpeter notes]].
 
 The user should be familiarized with the four basic lessons of ABINIT and the
-first lesson of the GW tutorial, see the [tutorial home page](lesson_welcome.html).
+[first lesson of the GW tutorial](gw1).
 
 This lesson should take about one hour to be completed.
 
@@ -32,6 +32,8 @@ The input file is located in ~abinit/tests/tutorial/Input/tbs_1.in. The header
 reports a brief description of the calculation so read it carefully. Don't
 worry if some parts are not clear to you as we are going to discuss the
 calculation in step by step fashion.
+
+{% dialog tests/tutorial/Input/tbs_1.files tests/tutorial/Input/tbs_1.in %}
 
 This input file generates the two WFK files and the screening file needed for
 the subsequent Bethe-Salpeter computations. The first dataset performs a
@@ -144,6 +146,8 @@ to put the job in background so that we can examine tbs_2.in.
 Now open ~abinit/tests/tutorial/Input/tbs_2.in in your preferred editor and go
 to the next section where we discuss the most important variables governing a
 typical BS computation.
+
+{% dialog tests/tutorial/Input/tbs_2.files tests/tutorial/Input/tbs_2.in %}
 
 #### **2.a The structure of the input file.**
 
@@ -407,9 +411,19 @@ is already able to capture the most important physics.
 
 #### **2.c Optional Exercises.**
 
-  * Change the value of the Lorentzian broadening [[zcut]] used to avoid divergences in the continued fraction. Then restart the Haydock algorithm from the _BSR and _HAYDR_SAVE files using the appropriate variables. What is the main effect of the broadening on the final spectrum. Does the number of iterations needed to converge depend on the broadening? 
-  * Use the appropriate values for [[bs_exchange_term]] and [[bs_coulomb_term]] to calculate the BS spectrum without local field effects. Compare the results obtained with and without local field effects. 
-  * Modify the input file tbs_2.in so that the code reads in the resonant block produced in the previous run and calculates the spectrum employing the method based on the direct diagonalization (use [[irdbsreso]] to restart the run but remember to rename the file with the resonant block). Compare the CPU time needed by the two algorithms as a function of the number of transitions in the transition space. Which one has the best scaling? 
+  * Change the value of the Lorentzian broadening [[zcut]] used to avoid divergences in the continued fraction. 
+    Then restart the Haydock algorithm from the _BSR and _HAYDR_SAVE files using the appropriate variables. 
+    What is the main effect of the broadening on the final spectrum. 
+    Does the number of iterations needed to converge depend on the broadening? 
+
+  * Use the appropriate values for [[bs_exchange_term]] and [[bs_coulomb_term]] to calculate the BS spectrum 
+    without local field effects. Compare the results obtained with and without local field effects. 
+
+  * Modify the input file tbs_2.in so that the code reads in the resonant block produced in the previous run 
+    and calculates the spectrum employing the method based on the direct diagonalization (use [[irdbsreso]] 
+    to restart the run but remember to rename the file with the resonant block). 
+    Compare the CPU time needed by the two algorithms as a function of the number of transitions in the transition space. 
+    Which one has the best scaling? 
 
 **2.d Preliminary discussion about convergence studies **
 
@@ -461,6 +475,8 @@ to perform calculations with different values for [[bs_loband]] and [[nband]]
 
 Before running the test take some time to read the input file
 ~abinit/tests/tutorial/Input/tbs_3.in.
+
+{% dialog tests/tutorial/Input/tbs_3.in %}
 
 The convergence in the number of transitions is performed by defining five
 datasets with different values for [[nband]] and [[bs_loband]]
@@ -600,6 +616,8 @@ Now issue
 
 to execute the test (it should take around 2 minutes).
 
+{% dialog tests/tutorial/Input/tbs_4.in %}
+
 Once the calculation is completed, plot the spectra obtained with different [[ecuteps]] using
     
     >>> gnuplot
@@ -640,11 +658,12 @@ a standard BS calculation (generation of two WFK file, screening calculation,
 BS run) into a single input. The calculation is done with the converged
 parameters found in the previous studies, only [[ngkpt]] has been intentionally left undefined.
 
+{% dialog tests/tutorial/Input/tbs_5.in %}
+
 Use tbs_5.in as a template for performing BS calculations with different
 k-meshes. For example, you might try to compare the three meshes 4x4x4, 5x5x5,
 and 6x6x6. To facilitate the analysis of the results, we suggest to run the
-calculations in different directories so that we can keep the output results
-separated.
+calculations in different directories so that we can keep the output results separated.
 
 Be aware that both the CPU time as well as the memory requirements increase
 quickly with the number of divisions in the mesh. These are, for example, the
@@ -688,6 +707,7 @@ agreement with the experiment.
     Compare the imaginary part of the macroscopic dielectric function obtained with and without coupling. 
     Do you find significant differences? (Caveat: calculations with coupling cannot use the Haydock method 
     and are much more CPU demanding. You might have to decrease some input parameters to have results in reasonable time.) 
+
   * Calculate the one-shot GW corrections for silicon following the [[lesson:gw1|first GW lesson]] of the GW tutorial. 
     Then use the `_GW` file produced by the code to calculate the absorption spectrum. 
 

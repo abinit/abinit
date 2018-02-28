@@ -17,8 +17,7 @@ This lesson should take about 1.5 hour.
 
 ## 1 Summary of the PAW method
   
-The PAW (Projector Augmented-Wave) method has been introduced by Peter Blochl
-in 1994. As he says, 
+The PAW (Projector Augmented-Wave) method has been introduced by Peter Blochl in 1994. As he says, 
 
 > The projector augmented-wave method is an extension of
   augmented wave methods and the pseudopotential approach, which combines their
@@ -35,8 +34,7 @@ waves  | φi> form a basis of atomic wavefunctions; |~φi> are "pseudized"
 partial waves (obtained from | φi>), and ~pi are dual functions of the |~φi>
 called projectors.  
 It is therefore possible to write every quantity depending on Ψn (density,
-energy, Hamiltonian) as a function of~Ψn and to find~Ψn by solving self-
-consistent equations.
+energy, Hamiltonian) as a function of~Ψn and to find~Ψn by solving self-consistent equations.
 
 The PAW method has two main advantages:  
 
@@ -49,22 +47,22 @@ will have to use a special atomic data file (PAW dataset) that contains the
 φi,~φi and ~pi and that plays the same role as a pseudopotential file.
 
 It is highly recommended to read the following papers to understand correctly
-the basic concepts of the PAW method: [[Bloechl1994]] and [[Kresse1999]].
-
-The implementation of the PAW method in ABINIT is detailed in [[Torrent2008]],
+the basic concepts of the PAW method: [[cite:Bloechl1994]] and [[cite:Kresse1999]].
+The implementation of the PAW method in ABINIT is detailed in [[cite:Torrent2008]],
 describing specific notations and formulations
 
 ## 2 Using PAW with ABINIT
   
-_Before continuing, you might consider to work in a different subdirectory as
+*Before continuing, you might consider to work in a different subdirectory as
 for the other lessons. Why not "Work_paw1" ?_ _In what follows, the name of
 files are mentioned as if you were in this subdirectory.  
-All the input files can be found in the __~abinit/tests/tutorial/Input
-directory._
+All the input files can be found in the __~abinit/tests/tutorial/Input directory.*
 
- _You can compare your results with reference output files located in_
-_~abinit/tests/tutorial/Refs and __~abinit/tests/tutorial/Refs/tpaw1_addons_
-_directories (for the present tutorial they are named tpaw1_*.out)._
+!!! important
+
+    *You can compare your results with reference output files located in
+    ~abinit/tests/tutorial/Refs and ~abinit/tests/tutorial/Refs/tpaw1_addons
+    directories (for the present tutorial they are named `tpaw1_*.out`).*
 
 The input file tpaw1_1.in is an example of a file that contains data for
 computing the total energy for diamond at the experimental volume (within the
@@ -77,6 +75,8 @@ Copy the files tpaw1_1.in and tpaw1_1.files in your work directory, and run ABIN
 
 In the meantime, you can read the input file and see that there is no PAW input variable.  
 ABINIT should run very quickly...  
+
+{% dialog tests/tutorial/Input/tpaw1_1.files tests/tutorial/Input/tpaw1_1.in %}
   
 Now, open the tpaw1_1.files and modify the last line; replace the 6c.pspnc file by 6c.lda.atompaw.
 
@@ -84,26 +84,27 @@ Run ABINIT again:
     
     abinit < tpaw1_1.files > tmp-log
 
-Your run should stop before en ! 
+Your run should stop almost immediately! 
 The input file is missing a mandatory argument: [[pawecutdg]] !!
 
-Add the line "pawecutdg 50." in the tpaw1_1.in file and run ABINIT again.  
-Now ABINIT runs to the end.
+Add the line "pawecutdg 50." in the tpaw1_1.in file and run ABINIT again. Now ABINIT runs to the end.
 
-Note that the time needed for the PAW run is greater than the time needed for
-the norm-conserving pseudopotential run; indeed, at constant value of plane
-wave cut-off energy [[ecut]] PAW requires more computational resources:    
+!!! note
 
-* the "on-site" contributions have to be computed,  
-* the nonlocal contribution of the PAW dataset uses 2 projectors per angular momentum, 
-  while the nonlocal contribution of the present norm-conserving pseudopotential uses only one.  
+    The time needed for the PAW run is greater than the time needed for
+    the norm-conserving pseudopotential run; indeed, at constant value of plane
+    wave cut-off energy [[ecut]] PAW requires more computational resources:    
 
-However, as the plane wave cut-off energy required by PAW is much smaller than
-the cut-off needed for the norm-conserving pseudopotential (see next section),
-a PAW calculation will actually require less CPU time.
+    * the "on-site" contributions have to be computed,  
+    * the nonlocal contribution of the PAW dataset uses 2 projectors per angular momentum, 
+      while the nonlocal contribution of the present norm-conserving pseudopotential uses only one.  
 
-Let's open the output file and have a look inside (be careful, it is the last
-output file of the tpaw1_1 series).  
+    However, as the plane wave cut-off energy required by PAW is much smaller than
+    the cut-off needed for the norm-conserving pseudopotential (see next section),
+    a PAW calculation will actually require less CPU time.
+
+Let's open the output file and have a look inside 
+(be careful, it is the last output file of the tpaw1_1 series).  
 Compared to an output file for a norm-conserving pseudopotential run, an
 output file for PAW contains the following specific topics:
 
@@ -127,8 +128,7 @@ The use of two FFT grids, mentioned as:
              ecut(hartree)=     50.000   => boxcut(ratio)=   2.10918 
 
 A specific description of the PAW dataset (you might follow the tutorial
-PAW2, devoted to the building of the PAW atomic data, for a complete
-understanding of the file):
+PAW2, devoted to the building of the PAW atomic data, for a complete understanding of the file):
   
      Pseudopotential format is: paw4  
      basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1  
@@ -241,7 +241,7 @@ You should obtain the values (output file tpaw1_2.out) :
     etotal8  -1.2069642342E+01  
     etotal9  -1.2073328672E+01
 
-You can check that the  etotal convergence (at the 1 mHartree level) is not
+You can check that the etotal convergence (at the 1 mHartree level) is not
 achieved for ecut=24 Hartree.
 
 **3.b** **Computing the convergence in ecut for diamond in the PAW case**
@@ -290,6 +290,8 @@ Use now the input file tpaw1_3.in and the associated tpaw1_3.files file.
 The only difference with the tpaw1_2.in file is that [[ecut]] is fixed to 12
 Ha, while [[pawecutdg]] runs from 12 to 39 Ha.
 
+{% dialog tests/tutorial/Input/tpaw1_3.files tests/tutorial/Input/tpaw1_3.in %}
+
 Launch ABINIT with these files; you should obtain the values (file tpaw1_3.out):
 
     etotal1  -1.1524629595E+01  
@@ -309,10 +311,12 @@ pawecutdg=12 Ha in order to obtain an energy change lower than 1 mHa. In
 practice, it is better to keep a security margin. Here, for pawecutdg=24 Ha
 (5th dataset), the energy change is lower than 0.001 mHa``: this choice will be more than enough.
 
-Note the steps in the convergence. They are due to the sudden (integer)
-changes in the grid size (see the output values for  [[ngfftdg]]) which do not
-occur for each increase of [[pawecutdg]]. To avoid troubles due to these
-steps, it is better to choose a value of pawecutdg slightly higher.  
+!!! note
+
+    Note the steps in the convergence. They are due to the sudden (integer)
+    changes in the grid size (see the output values for  [[ngfftdg]]) which do not
+    occur for each increase of [[pawecutdg]]. To avoid troubles due to these
+    steps, it is better to choose a value of pawecutdg slightly higher.  
 
 The convergence of the compensation charge has a similar behaviour; it is
 possible to check it in the output file, just after the SCF cycle by looking at:
@@ -370,6 +374,8 @@ ABINIT is now asked to compute the Density Of State (DOS) (see the  [[prtdos]]
 keyword in the input file). Also note that more k-points are used in order to
 increase the accuracy of the DOS. [[ecut]] is set to 12 Ha, while [[pawecutdg]] is 24 Ha.
 
+{% dialog tests/tutorial/Input/tpaw1_4.in %}
+
 Launch ABINIT with these files; you should obtain the tpaw1_4.out and the DOS file (tpaw1_4o_DOS):
     
     abinit < tpaw1_4.files > tmp-log
@@ -397,6 +403,7 @@ Let's remember that:
 |Ψn>  =~|Ψn>+  Σ (φi  -~φi) <~pi  |~Ψn >
 
 Within PAW, the total projected DOS has 3 contributions:  
+
 1- the smooth plane-waves contribution (from~|Ψn>)  
 2- the all-electron on-site contribution (from φi  <~pi  |~Ψn >)  
 3- the pseudo on-site contribution (from~φi <~pi  |~Ψn >).
@@ -436,6 +443,7 @@ Note that, in the previous section, we used a "standard" PAW dataset, with 2
 partial waves per angular momentum. It is generally the best compromise
 between the completeness of the partial wave basis and the efficiency of the
 PAW dataset (the more partial waves you have, the longer the CPU time used by ABINIT is).  
+
 Let's have a look at the ~abinit/tests/Psps_for_tests/6c.lda.atompaw file. The
 sixth line indicates the number of partial waves and their l angular momentum.
 In the present file, "0 0 1 1" means "two l=0 partial waves, two l=1 partial waves".  
@@ -524,6 +532,9 @@ Let's test with ABINIT.
 We use now the input file tpaw1_5.in and the associated tpaw1_5.files file.  
 ABINIT is now asked to compute values of etotal for several cell parameters
 around 3.54 angstrom, using the standard PAW dataset.  
+
+{% dialog tests/tutorial/Input/tpaw1_5.in %}
+
 Launch ABINIT with these files; you should obtain the tpaw1_5.out.
     
     abinit < tpaw1_5.files > tmp-log
@@ -577,8 +588,7 @@ mixed during the SC cycle; by default, the mixing is done in the same way as the
 **8.b** **Overlap of PAW spheres**
 
 In principle, the PAW formalism is only valid for non-overlapping augmentation
-regions (PAW spheres). But, in usual cases, a small overlap between spheres is
-acceptable.  
+regions (PAW spheres). But, in usual cases, a small overlap between spheres is acceptable.  
 By default, ABINIT checks that the distances between atoms are large enough to
 avoid overlap; a "small" voluminal overlap of 5% is accepted by default. This
 value can be tuned with the [[pawovlp]] input keyword. The overlap check can
@@ -640,13 +650,10 @@ charge density in case of GGA
 The above list is not exhaustive. several other keywords can be used to tune
 ABINIT PAW calculations.
 
-**  
-**
-
 **8.e** **PAW+U**
 
 If the system under study contains strongly correlated electrons, the  LDA+U
-method can be useful. It is controlled by the  [[usepawu]],   [[lpawu]],
+method can be useful. It is controlled by the  [[usepawu]], [[lpawu]],
 [[upawu]] and [[jpawu]] input keywords. Note that the formalism implemented in
 ABINIT is approximate, i.e. it is only valid if:  
 

@@ -11,10 +11,8 @@ DFT Kohn-Sham eigenvalues in the GW approximation.
 
 A brief description of the formalism and of the equations implemented in the
 code can be found in the [[theory:mbt|GW_notes]].
-
 The different formulas of the GW formalism have been written in a [[pdf:gwa.pdf|pdf document]]
 by Valerio Olevano (who also wrote the first version of this tutorial).
-
 For a much more consistent discussion of the theoretical aspects of the GW
 method we refer the reader to the review
 
@@ -22,12 +20,10 @@ method we refer the reader to the review
 in Solid State Physics 54, 1-218 (2000), also available 
 [here](https://www.abinit.org/sites/default/files/quasiparticle_calculations_in_solids.pdf.bz2).
 
-It is suggested to [[bib:acknow#b|acknowledge]] the efforts of developers of
+It is suggested to acknowledge the efforts of developers of
 the GW part of ABINIT, by citing the [[Gonze2005|2005 ABINIT publication]].
 
-The user should be familiarized with the four basic lessons of ABINIT, see the
-[tutorial home page](lesson_welcome.html).
-
+The user should be familiarized with the four basic lessons of ABINIT, see the [tutorial home page](index).
 After this first tutorial on GW, you should read the [[lesson:gw2|second lesson on GW]]
 
 This lesson should take about 2 hours.
@@ -35,9 +31,9 @@ This lesson should take about 2 hours.
 ## 1 General example of well converged GW calculation
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other lessons. Why not "Work_gw1"?*h
+for the other lessons. Why not "Work_gw1"?*
 
-At the end of [lesson 3](lesson_base3.html#35), we computed the Kohn-Sham band
+At the end of [lesson 3](base3), we computed the Kohn-Sham band
 structure of silicon. In this approximation, the band dispersion as well as
 the band widths are reasonable, but the band gaps are qualitatively wrong.
 Now, we will compute the band gaps much more accurately, using the so-called
@@ -47,8 +43,8 @@ We start by an example, in which we show how to perform in a single input file
 the calculation of the ground state density, the Kohn Sham band structure, the
 screening, and the GW corrections. We use reasonable values for the parameters
 of the calculation. The discussion on the convergence tests is postponed to
-the next paragraphs. We will see that GW calculations are MUCH MORE time-
-consuming than the computation of the Kohn-Sham eigenvalues.
+the next paragraphs. We will see that GW calculations are **much more** time-consuming 
+than the computation of the Kohn-Sham eigenvalues.
 
 So, let us run immediately this calculation, and while it is running, we will
 explain what has been done.
@@ -61,10 +57,8 @@ Then, issue:
     
     abinit < tgw1_x.files >& tgw1_1.log &
 
-It is very important to run this job in background because it takes about 1
-minute. In the meantime, you should read the following.
-
-####
+It is very important to run this job in background because it takes about 1 minute. 
+In the meantime, you should read the following.
 
 #### **1.a The four steps of a GW calculation.**
 
@@ -101,22 +95,20 @@ dataset, the code calculates the quasiparticle energies for the 4th and 5th band
 
 So, you can edit this tgw1_1.in file.
 
+{% dialog tests/tutorial/Input/tgw1_x.files tests/tutorial/Input/tgw1_1.in %}
+
 The dataset-independent part of this file (the last half of the file),
 contains the usual set of input variables describing the cell, atom types,
 number, position, planewave cut-off energy, SCF convergence parameters driving
 the Kohn-Sham band structure calculation. Then, for the fourth datasets, you
 will find specialized additional input variables.
 
-####
-
 #### **1.b Generating the Kohn-Sham band structure: the WFK file.**
 
 Dataset 1 is a rather standard SCF calculation. It's worth noticing that we
-use tolvrs to stop the SCF cycle because we want a well-converged KS potential
+use [[tolvrs]] to stop the SCF cycle because we want a well-converged KS potential
 to be used in the subsequent NSCF calculation. Dataset 2 computes 40 bands and
-we set nbdbuf to 5 so that only the first 35 states must be converged within
-tolwfr. This tricks allows us to save several minimization steps because the
-last bands usually require more iterations to converge
+we set [[nbdbuf]] to 5 so that only the first 35 states must be converged within [[tolwfr]]. 
     
     ############
     # Dataset 1
@@ -134,9 +126,11 @@ last bands usually require more iterations to converge
     iscf2       -2
     getden2     -1
     tolwfr2  1.0d-18     # Will stop when this tolerance is achieved 
-    
 
-####
+!!! important
+
+    The [[nbdbuf]] tricks allows us to save several minimization steps because the
+    last bands usually require more iterations to converge
 
 #### **1.c Generating the screening: the SCR file.**
 
@@ -176,8 +170,6 @@ frequencies are usually close to 0.5 Hartree. The parameters for the screening
 calculation are not far from the ones that give converged Energy Loss Function
 (-Im \epsilon^-1_00) spectra, So that one can start up by using indications
 from EELS calculations existing in literature.
-
-####
 
 #### **1.d Computing the GW energies.**
 
@@ -226,8 +218,6 @@ minimum/maximum band whose energies are calculated for the given k-point.
 There is an additional parameter, called [[zcut]], related to the self-energy
 computation. It is meant to avoid some divergences that might occur in the
 calculation due to integrable poles along the integration path.
-
-####
 
 #### **1.e Examination of the output file.**
 
@@ -392,6 +382,8 @@ Then, issue:
     
     abinit < tgw1_x.files >& tgw1_3.log &
 
+{% dialog tests/tutorial/Input/tgw1_3.in %}
+
 Edit the output file. The number of plane waves used for the wavefunctions in
 the computation of the self-energy is mentioned in the fragments of output:
     
@@ -450,6 +442,8 @@ with increasing [[ecutsigx]]:
 In directory ~abinit/tests/tutorial/Input/Work_gw1, copy the file
 ../tgw1_4.in, and modify the tgw1_x.files file as usual. Edit the tgw1_4.in
 file, and take the time to examine it.
+
+{% dialog tests/tutorial/Input/tgw1_4.in %}
 
 Then, issue:
     
@@ -530,6 +524,8 @@ file, and take the time to examine it.
 Then, issue:
     
     abinit < tgw1_x.files >& tgw1_5.log &
+
+{% dialog tests/tutorial/Input/tgw1_5.in %}
 
 Edit the output file. The number of bands used for the self-energy is
 mentioned in the fragments of output:
@@ -612,6 +608,8 @@ Then, issue:
     
     abinit < tgw1_x.files >& tgw1_6.log &
 
+{% dialog tests/tutorial/Input/tgw1_6.in %}
+
 Edit the output file. The number of plane waves used for the wavefunctions in
 the computation of the screening is mentioned in the fragments of output:
     
@@ -682,6 +680,8 @@ Then, issue:
     
     abinit < tgw1_x.files >& tgw1_7.log &
 
+{% dialog tests/tutorial/Input/tgw1_7.in %}
+
 Edit the output file. The number of bands used for the wavefunctions in the
 computation of the screening is mentioned in the fragments of output:
     
@@ -743,6 +743,8 @@ file, and take the time to examine it.
 Then, issue:
     
     abinit < tgw1_x.files >& tgw1_8.log &
+
+{% dialog tests/tutorial/Input/tgw1_8.in %}
 
 Edit the output file. The number of bands used for the wavefunctions in the
 computation of the screening is mentioned in the fragments of output:
@@ -822,8 +824,10 @@ Then, issue:
     abinit < tgw1_x.files >& tgw1_9.log &
 
 This job lasts about 1 minute so it is worth to run it before the examination of the input file.
-
 Now, you can examine it.  
+
+{% dialog tests/tutorial/Input/tgw1_9.in %}
+
 We need the usual part of the input file to perform a ground state
 calculation. This is done in dataset 1 and at the end we print out the
 density. We use a 4x4x4 FCC grid (so, 256 k points in the full Brillouin
