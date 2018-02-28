@@ -1471,9 +1471,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
    0.2500  0.2500  0.2500    2  3.07084E-24 kpt; spin; max resid(k); each band:
   1.92E-26 7.99E-26 5.90E-25 1.67E-27 1.02E-25 6.42E-28 1.83E-27 2.90E-27
   1.63E-26 9.13E-28 1.17E-25 3.07E-24 1.36E-25 1.20E-26 1.31E-24 1.78E-26
-  5.22E-25 1.10E-26 1.59E-24 2.26E-25 4.59E-28 8.33E-28 8.19E-26 8.07E-25
-  7.25E-26 6.46E-28 6.09E-25 1.35E-25 6.19E-26 2.66E-26 3.69E-25 9.55E-26
-  1.38E-27 1.78E-25
+  5.22E-25 1.10E-26 1.59E-24 2.26E-25 5.43E-28 8.19E-28 8.19E-26 8.07E-25
+  7.23E-26 6.14E-28 6.09E-25 1.35E-25 6.19E-26 2.66E-26 3.68E-25 9.55E-26
+  1.44E-27 1.79E-25
   -0.2500  0.2500  0.2500    2  3.38988E-24 kpt; spin; max resid(k); each band:
   6.59E-26 4.68E-26 1.77E-25 2.64E-25 2.64E-26 3.60E-26 2.95E-26 3.62E-26
   2.25E-27 9.04E-27 1.90E-25 6.33E-25 5.58E-25 5.90E-25 3.39E-24 1.61E-24
@@ -1506,7 +1506,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
               =  4.194787732493  4.194787732493  4.194787732493 angstroms
  prteigrs : about to open file t99_MPI4o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.17599   Average Vxc (hartree)=  -0.52233
- Magnetization (Bohr magneton)=  1.97886152E-09
+ Magnetization (Bohr magneton)=  1.97896810E-09
  Total spin up =  2.39999998E+01   Total spin down =  2.39999998E+01
  Eigenvalues (hartree) for nkpt=   3  k points, SPIN UP:
  kpt#   1, nband= 34, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1615,28 +1615,28 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.84264341628005E+01
+    Kinetic energy  =  2.84139468201459E+01
     Hartree energy  =  5.43364850934589E+01
     XC energy       = -3.18912226498659E+01
     Ewald energy    = -2.37912533090452E+02
     PspCore energy  =  2.13909366386736E+01
     Loc. psp. energy= -1.49020313631237E+02
-    Spherical terms = -7.23985352874220E+01
-    >>>>> Internal E= -3.87068748764045E+02
+    Spherical terms = -7.23985352874226E+01
+    >>>>> Internal E= -3.87081236106700E+02
 
-    >>>>>>>>> Etotal= -3.87068748764045E+02
+    >>>>>>>>> Etotal= -3.87081236106700E+02
 
  "Double-counting" decomposition of free energy:
     Band energy     = -4.03308482406027E+01
     Ewald energy    = -2.37912533090452E+02
     PspCore energy  =  2.13909366386736E+01
     Dble-C XC-energy= -4.43641153926082E+01
-    Spherical terms = -6.94820510442727E+01
-    >>>>> Internal E= -3.70698611129262E+02
+    Spherical terms = -6.94820510442733E+01
+    >>>>> Internal E= -3.70698611129263E+02
 
-    >>>> Etotal (DC)= -3.70698611129262E+02
+    >>>> Etotal (DC)= -3.70698611129263E+02
 
-  >Total energy in eV           = -1.05326763028283E+04
+  >Total energy in eV           = -1.05330161007027E+04
   >Total DC energy in eV        = -1.00872222038072E+04
 --------------------------------------------------------------------------------
 
