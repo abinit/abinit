@@ -7,45 +7,32 @@ authors: XG
 ## Overview of the ABINIT tutorial.  
 
 The lessons of this tutorial are aimed at teaching the use of ABINIT, in the
-UNIX/Linux OS and its variants (Mac OS X, AIX ...). They might be used for
-other operating systems, but the commands have to be adapted.
-
-Note that they can be accessed from the ABINIT web site as well as from your
-local ~abinit/doc/tutorial/generated_files/lesson_welcome.html file. The
-latter solution is of course preferable, as the response time will not depend
-on the network traffic.
+UNIX/Linux OS and its variants (MacOSX, AIX ...). 
+They might be used for other operating systems, but the commands have to be adapted.
 
 At present, more than thirty lessons are available. Each of them is at most
 two hours of student work. Lessons 1-4 cover the basics, other lectures are
-more specialized. There are dependencies between lessons. The following schema
-should help you to understand these dependencies. In blue, one has the basic
-lessons. The blocks in red represents additional lessons related to ground-
-state features of ABINIT. Response-function features of ABINIT are explained
-in the lessons in the green blocks. Finally, the Many-Body Perturbation Theory
-capabilities are demonstrated in the lessons belonging to the violet blocks.
-The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
+more specialized. There are dependencies between lessons.
+The following schema should help you to understand these dependencies. 
 
 ![Schema 1](index_assets/tutorial_flowchart_v6.png)
+:   In blue, one has the basic lessons. The blocks in red represents additional lessons related 
+    to ground-state features. Response-function features are explained
+    in the lessons in the green blocks. Finally, the Many-Body Perturbation Theory
+    capabilities are demonstrated in the lessons belonging to the violet blocks.
+    The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
 
 Before following the tutorials, you should have read the 
-["new user's guide"](../../users/generated_files/help_new_user.html), as well as the pages
-1045-1058 of the paper "Iterative minimization techniques for ab initio total-
-energy calculations: molecular dynamics and conjugate gradients", by M.C.
-Payne, M.P. Teter, D.C. Allan, T.A. Arias and J.D. Joannopoulos, Rev. Mod.
-Phys. 64, 1045 (1992) or, if you have more time, you should browse through the
-Chaps. 1 to 13 , and appendices L and M of the book Electronic Structure.
-Basic Theory and Practical Methods. R. M. Martin. Cambridge University Press
-(2004) ISBN 0 521 78285 6. The latter reference is a must if you have not yet
-used another electronic structure code or a Quantum Chemistry package.
+[[help:new_user|new user's guide]], as well as the pages
+1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
+If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book 
+[[cite:Martin2008|this book]] by R. M. Martin.
+The latter reference is a must if you have not yet used another electronic structure code or a Quantum Chemistry package.
 
 After the tutorial, you might find it useful to learn about the test cases
 contained in the subdirectories of ~abinit/tests/, e.g. the directories fast,
-v1, v2, ... , that provide many example input files. You should have a look at
-the README files of these directories.
-
-Additional information can be found in the ~abinit/doc directory, including
-the description of the ABINIT project, guide lines for developpers, more on
-the use of the code (tuning) ...
+v1, v2, ... , that provide many example input files. 
+You should have a look at the README files of these directories.
 
 ### Brief description of each lesson's content
 
@@ -200,6 +187,8 @@ corresponding tutorial for the sequential calculation.**
   * [Parallelism of Many-Body Perturbation calculations (GW)](paral_mbt) allows to speed up 
     the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
 
-NOTE that not all features of ABINIT are covered by these tutorials. 
-For a complete feature list, please see the [[help_features]]. 
-For examples on how to use these features, please see the ~abinit/tests/* directories and their accompanying README files.
+!!! note
+    Note that not all features of ABINIT are covered by these tutorials. 
+    For a complete feature list, please see the [[help_features]]. 
+    For examples on how to use these features, please see the ~abinit/tests/* 
+    directories and their accompanying README files.

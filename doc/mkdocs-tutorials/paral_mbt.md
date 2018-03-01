@@ -46,10 +46,6 @@ First of all, you should copy the files file tmbt_1.files in the working directo
     >>> cd Work_mbt
     >>> cp ../tmbt_1.files . 
 
-The abinit files files is described in [section 1.1](../../users/generated_files/help_abinit.html#intro1) 
-of the abinit_help file.
-Please, read it now if you haven't done it yet!
-
 Now open the input file ~abinit/tests/tutoparal/Input/tmbt_1.in in your
 preferred editor, and look at its structure.
 
@@ -108,8 +104,7 @@ increase the number of bands in proportion to your computing resources.
   
 In this part of the tutorial, we will compute the RPA polarizability with the
 Adler-Wiser approach. The basic equations are discussed in this
-[section](../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space)
-of the GW notes.
+[[theory:mbt#5-the-rpa-polarizability-in-fourier-space|section]] of the GW notes.
 
 First copy the files file tmbt_2.file in the working directory, then create a
 symbolic link pointing to the WFK file we have generated in the previous step:
@@ -248,8 +243,8 @@ FFT divisions used in the GW code can be extracted from the main output file usi
               total number of points  =    26244
     
 As discussed in this
-[section](../../theory/generated_files/theorydoc_mbt.html#oscillator_notes) of
-the GW notes, the Fast Fourier Transform represents one of the most CPU
+[[theory:mbt#6-notes-on-the-calculation-of-the-oscillator-matrix-elements|section]] of the GW notes,
+the Fast Fourier Transform represents one of the most CPU
 intensive part of the execution. For this reason the code provides the input
 variable [[fftgw]] that can be used to decrease the number of FFT points for
 better efficiency. The second digit of the input variable [[gwmem]], instead,
@@ -259,8 +254,9 @@ storage of the costly array _ur_ at the price of an increase in computational ti
 #### **2.d Manual parallelization over q-points.**
 
 The computational effort required by the screening computation scales linearly
-with the number of q-points. As explained in this
-[section](../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space)
+with the number of q-points. 
+As explained in this
+[[theory:mbt#5-the-rpa-polarizability-in-fourier-space|section]]
 of the GW notes, the code exploits the symmetries of the screening function so
 that only the irreducible Brillouin zone (IBZ) has to be calculated
 explicitly. On the other hand, a large number of q-points might be needed to
@@ -289,8 +285,8 @@ and then create a symbolic link pointing to the WFK file.
     
     >>> ln -s tmbt_1o_DS2_WFK tmbt_3i_WFK
     
-The input file is ~abinit/tests/tutoparal/Input/tmbt_3.in. Open it so that we
-can have a look at its structure.
+The input file is ~abinit/tests/tutoparal/Input/tmbt_3.in. 
+Open it so that we can have a look at its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_3.in %}
 

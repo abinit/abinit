@@ -2,7 +2,7 @@
 authors: DCA, XG, RC
 ---
 
-# new user help file  
+# New user help file  
 
 This page gives a beginner's introduction to the ABINIT resources, 
 the package, and the main ABINIT applications.  
@@ -15,19 +15,14 @@ files in the ABINIT package. The ABINIT project includes also resources
 provided on the [ABINIT Web site](https://www.abinit.org) and 
 the [Github organization](https://github.com/abinit).
 
-Before reading the present file, and get some grasp about the main ABINIT
+Before reading the present page, and get some grasp about the main ABINIT
 application, you should get some theoretical background. In case you have
 already used another electronic structure code, or a quantum chemistry code,
-it might be sufficient to read the introduction of the paper ``Iterative
-minimization techniques for ab initio total-energy calculations: molecular
-dynamics and conjugate gradients'' M. C. Payne, M. P. Teter, D. C. Allan, T.
-A. Arias, and J. D. Joannopoulos, Rev. Mod. Phys. 64, 1045-1097 (1992).
-
+it might be sufficient to read the introduction of [[cite:Payne1992|this review article]]
+by M. C. Payne, M. P. Teter, D. C. Allan, T. A. Arias, and J. D. Joannopoulos.
 If you have never used another electronic structure code or a Quantum
 Chemistry package, you should complete such reading by going (at your own
-pace) through the Chaps. 1 to 13 , and appendices L and M of the book
-Electronic Structure. Basic Theory and Practical Methods. R. M. Martin.
-Cambridge University Press (2004) ISBN 0 521 78285 6.
+pace) through the Chaps. 1 to 13 , and appendices L and M of  [[cite:Martin2008|this book]] by R. M. Martin.
 
 After having gone through the present New User's Guide, you should follow the
 [[lesson:index|ABINIT tutorial]].
@@ -42,8 +37,7 @@ pseudopotentials and a planewave basis, or augmented plane waves, or even wavele
 Some possibilities of ABINIT go beyond Density Functional Theory,
 i.e. the many-body perturbation theory (GW approximation the Bethe-Salpether
 equation), Time-Dependent Density Functional Theory, Dynamical Mean-Field
-Theory, the Allen-Heine-Cardona theory to find temperature-dependent
-electronic structure. 
+Theory, the Allen-Heine-Cardona theory to find temperature-dependent electronic structure. 
 
 ABINIT also includes options to optimize the geometry
 according to the DFT forces and stresses, or to perform molecular dynamics
@@ -58,14 +52,16 @@ the present Web page, just to get an overview, but it might prove more
 fruitful to have first downloaded the ABINIT package and at least unpacked it,
 see the [installation notes](https://www.abinit.org/installation).
 
-We will use the name "~abinit" to refer to the directory that contains the
-ABINIT package after download. In practice, a version number is appended to
-this name, to give for example: abinit-8.4.0. The ABINIT package versioning
-scheme is explained later in this file.
+!!! note
+
+    We will use the name "~abinit" to refer to the directory that contains the
+    ABINIT package after download. In practice, a version number is appended to
+    this name, to give for example: abinit-8.4.0. The ABINIT package versioning
+    scheme is explained later in this file.
 
 ~abinit contains different subdirectories. For example, the present file, as
-well as other descriptive files, should be found in ~abinit/doc/users. Other
-subdirectories will be described later.
+well as other descriptive files, should be found in ~abinit/doc/.
+Other subdirectories will be described later.
 
 ## The main executable: abinit
   
@@ -91,7 +87,6 @@ The detailed description of input variables is given in many "Variable Set" file
   * Files handling variables, [[varset:files]]
   * Parallelisation variables, [[varset:paral]]
   * Density Functional Perturbation Theory variables, [[varset:dfpt]]
-  * ... 
 
 A set of examples aimed at guiding the beginner is available in the [[lesson:index|tutorials]].
 
@@ -102,13 +97,15 @@ subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
 Many different sorts of pseudopotentials can be used with ABINIT. 
 Most of them can be found on the [atomic data files](https://www.abinit.org/downloads/atomic-data-files) 
 page of the ABINIT web site. 
-There are official recommended pseudopotentials tables (the PAW JTH
-table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials. 
-A subset of existing pseudopotentials are used for test
-cases, and are located in the ~abinit/tests/Psps_for_tests directory, but they
-are not recommended for production. 
+There are official recommended pseudopotentials tables 
+(the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials. 
 Information on pseudopotential files can be found in the [ABINIT help file](help_abinit.html#5) 
 and the ~abinit/doc/psp_infos directory.
+
+!!! warning
+
+    A subset of existing pseudopotentials are used for test cases, and are located in the 
+    ~abinit/tests/Psps_for_tests directory but they **are not recommended** for production. 
 
 ## Other programs in the package
   
@@ -252,12 +249,12 @@ In addition, wavefunctions can be input (starting point) or output (result of
 the calculation), and possibly, charge density and/or electrostatic potential,
 if they have been asked for. These three sets of data are stored in unformatted files.  
 
-The Density Of States (DOS) can also be an output as a formatted (readable) file.  
-An analysis of geometry can also be provided (GEO file)  
+The Density Of States (DOS) can also be an output as a formatted (readable) file.
+An analysis of geometry can also be provided (GEO file).
 The name of these files is constructed from a "root" name, that must be
 different for input files and output files, and that is provided by the user,
 to which the code will append a descriptor, like WFK for wavefunctions, DEN
-for the density, POT for the potential, DOS for the density of states ...
+for the density, POT for the potential, DOS for the density of states...
 
 There are also different temporary files. A "root" name should be provided by
 the user, from which the code generates a full name. Amongst these files,
@@ -268,7 +265,7 @@ code, in long jobs. The [[help:abinit|ABINIT help file]] contains more details.
   
 The simplest sort of job computes an electronic structure for a fixed set of
 atomic positions within a periodic unit cell. By electronic structure, we mean
-a set of eigenvalues and wavefunctions which achieve the lowest (DFT) energy
+a set of eigenvalues and wavefunctions which achieve the lowest DFT energy
 possible for that basis set (that number of planewaves). 
 
 The code takes the description of the unit cell and atomic positions and assembles a crystal

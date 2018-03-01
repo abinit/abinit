@@ -4,27 +4,27 @@ authors: MT, FJ
 
 # First lesson on the projector-augmented wave (PAW) technique  
 
-## Projector Augmented-Wave technique, how to use it ?  
+## Projector Augmented-Wave technique, how to use it?  
 
 This lesson aims at showing how to perform a calculation in the frame of the PAW method.
 
 You will learn how to launch a PAW calculation and what are the main input
-variables that govern convergence and numerical efficiency.  
-It is supposed that you already know how to use ABINIT in the norm-conserving
-pseudopotential case.  
+variables that govern convergence and numerical efficiency.
+It is supposed that you already know how to use ABINIT in the norm-conserving pseudopotential case.  
 
 This lesson should take about 1.5 hour.
 
 ## 1 Summary of the PAW method
   
-The PAW (Projector Augmented-Wave) method has been introduced by Peter Blochl in 1994. As he says, 
+The PAW (Projector Augmented-Wave) method has been introduced by Peter Blochl in 1994. 
+As he says:
 
 > The projector augmented-wave method is an extension of
   augmented wave methods and the pseudopotential approach, which combines their
   traditions into a unified electronic structure method".  
   It is based on a linear and invertible transformation (the PAW transformation)
   that connects the "true" wavefunctions Ψn with "auxiliary" (or "pseudo") soft
-  wavefunctions Ψn :
+  wavefunctions Ψn:
 
 |Ψn>  =~|Ψn>+  Σ (φi  -~φi) <~pi  |~Ψn >
 
@@ -38,18 +38,20 @@ energy, Hamiltonian) as a function of~Ψn and to find~Ψn by solving self-consis
 
 The PAW method has two main advantages:  
 
-1) From~Ψn, it is always possible to obtain the true "all electron" wavefunction Ψn.  
-2) The convergency is comparable to an ultrasoft pseudopotential one.
+1. From~Ψn, it is always possible to obtain the true "all electron" wavefunction Ψn.  
+2. The convergency is comparable to an ultrasoft pseudopotential one.
 
 From a practical point of view (user's point of view), a PAW calculation is
 rather similar to a norm-conserving pseudopotential one. Most noticeably, one
 will have to use a special atomic data file (PAW dataset) that contains the
 φi,~φi and ~pi and that plays the same role as a pseudopotential file.
 
-It is highly recommended to read the following papers to understand correctly
-the basic concepts of the PAW method: [[cite:Bloechl1994]] and [[cite:Kresse1999]].
-The implementation of the PAW method in ABINIT is detailed in [[cite:Torrent2008]],
-describing specific notations and formulations
+!!! tip
+
+    It is highly recommended to read the following papers to understand correctly
+    the basic concepts of the PAW method: [[cite:Bloechl1994]] and [[cite:Kresse1999]].
+    The implementation of the PAW method in ABINIT is detailed in [[cite:Torrent2008]],
+    describing specific notations and formulations
 
 ## 2 Using PAW with ABINIT
   
@@ -68,13 +70,13 @@ The input file tpaw1_1.in is an example of a file that contains data for
 computing the total energy for diamond at the experimental volume (within the
 LDA exchange-correlation functional). You might use the file tpaw1_1.files
 (with a standard norm-conserving pseudopotential) as a "files" file, and get
-the corresponding output file (it is available as ../Refs/tpaw1_1.out).  
+the corresponding output file (it is available in ../Refs/tpaw1_1.out).  
 Copy the files tpaw1_1.in and tpaw1_1.files in your work directory, and run ABINIT:
     
     abinit < tpaw1_1.files > tmp-log
 
 In the meantime, you can read the input file and see that there is no PAW input variable.  
-ABINIT should run very quickly...  
+ABINIT should run very quickly...
 
 {% dialog tests/tutorial/Input/tpaw1_1.files tests/tutorial/Input/tpaw1_1.in %}
   
@@ -84,10 +86,14 @@ Run ABINIT again:
     
     abinit < tpaw1_1.files > tmp-log
 
-Your run should stop almost immediately! 
-The input file is missing a mandatory argument: [[pawecutdg]] !!
+Your run should stop almost immediately!
+The input file is missing the mandatory argument [[pawecutdg]]!!
 
-Add the line "pawecutdg 50." in the tpaw1_1.in file and run ABINIT again. Now ABINIT runs to the end.
+Add the line:
+
+    pawecutdg 50
+    
+to tpaw1_1.in file and run ABINIT again. Now the code runs to the end.
 
 !!! note
 
@@ -103,19 +109,18 @@ Add the line "pawecutdg 50." in the tpaw1_1.in file and run ABINIT again. Now AB
     the cut-off needed for the norm-conserving pseudopotential (see next section),
     a PAW calculation will actually require less CPU time.
 
-Let's open the output file and have a look inside 
-(be careful, it is the last output file of the tpaw1_1 series).  
+Let's open the output file and have a look inside
+(be careful, it is the last output file of the tpaw1_1 series).
 Compared to an output file for a norm-conserving pseudopotential run, an
 output file for PAW contains the following specific topics:
 
-At the beginning of the file:
-
-Some specific default PAW input variables ([[ngfftdg]], [[pawecutdg]], and
+At the beginning of the file,
+some specific default PAW input variables ([[ngfftdg]], [[pawecutdg]], and
 [[useylm]]) are mentioned in the section:
 
     -outvars: echo values of preprocessed input variables --------
 
-The use of two FFT grids, mentioned as:
+The use of two FFT grids, mentioned in:
 
      Coarse grid specifications (used for wave-functions):  
       
@@ -127,8 +132,8 @@ The use of two FFT grids, mentioned as:
      getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32  
              ecut(hartree)=     50.000   => boxcut(ratio)=   2.10918 
 
-A specific description of the PAW dataset (you might follow the tutorial
-PAW2, devoted to the building of the PAW atomic data, for a complete understanding of the file):
+A specific description of the PAW dataset (you might follow the tutorial [[lesson:paw2|PAW2]], 
+devoted to the building of the PAW atomic data, for a complete understanding of the file):
   
      Pseudopotential format is: paw4  
      basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1  
@@ -161,8 +166,8 @@ spheres) on the "spherical" grid and also in the whole simulation cell on the
     Compensation charge over fine fft grid    =      0.413177280314290
 
   
-Information concerning the non-local term (pseudopotential strength Dij)
-and the spherical density matrix (augmentation wave occupancies Rhoij):
+Information concerning the non-local term (pseudopotential strength $D_{ij}$)
+and the spherical density matrix (augmentation wave occupancies $\rho_{ij}$):
 
      ==== Results concerning PAW augmentation regions ====  
       
@@ -178,10 +183,8 @@ and the spherical density matrix (augmentation wave occupancies Rhoij):
      Atom #  2  
       ...
 
-At the end of the file:
-
-The decomposition of the total energy both by direct calculation and double
-counting calculation:
+At the end of the file we find the decomposition of the total energy both 
+by direct calculation and double counting calculation:
 
     --------------------------------------------------------------------------------  
      Components of total free energy (in Hartree) :  
@@ -210,16 +213,16 @@ Note that the total energy calculated in PAW is not the same as the one
 obtained in the norm-conserving pseudopotential case. This is normal: in the
 norm-conserving potential case, the energy reference has been arbitrarily
 modified by the pseudopotential construction procedure. Comparing total
-energies computed with different PAW potentials is more meaningful : most of
+energies computed with different PAW potentials is more meaningful: most of
 the parts of the energy are calculated exactly, and in general you should be
-able to compare numbers for (valence) _energies_ between different PAW potentials or different codes.
+able to compare numbers for (valence) *energies* between different PAW potentials or different codes.
 
 ## 3 The convergence on plane-wave cut-off
   
 As in the usual case, the critical convergence parameter is the cut-off
 defining the size of the plane-wave basis...
 
-**3.a** **Computing the convergence in ecut for  diamond in the norm-conserving case**
+**3.a** **Computing the convergence in ecut for diamond in the norm-conserving case**
 
 The input file tpaw1_2.in contains data for computing the convergence in ecut
 for diamond (at experimental volume). There are 9 datasets, for which [[ecut]]
@@ -229,7 +232,7 @@ pseudopotential), and run ABINIT:
     
     abinit < tpaw1_2.files > tmp-log
 
-You should obtain the values (output file tpaw1_2.out) :
+You should obtain the values (output file tpaw1_2.out):
 
     etotal1  -1.1628880677E+01  
     etotal2  -1.1828052470E+01  
@@ -242,13 +245,13 @@ You should obtain the values (output file tpaw1_2.out) :
     etotal9  -1.2073328672E+01
 
 You can check that the etotal convergence (at the 1 mHartree level) is not
-achieved for ecut=24 Hartree.
+achieved for ecut = 24 Hartree.
 
 **3.b** **Computing the convergence in ecut for diamond in the PAW case**
 
-Use the same input files as in section 1.a.  
-Again, modify the last line of tpaw1_2.files, replacing the 6c.pspnc file by 6c.lda.atompaw.  
-Run ABINIT again and open the output file (it should be tpaw1_2.outA)  
+Use the same input files as in section 1.a.
+Again, modify the last line of tpaw1_2.files, replacing the 6c.pspnc file by 6c.lda.atompaw.
+Run ABINIT again and open the output file (it should be tpaw1_2.outA)
 You should obtain the values:
 
     etotal1  -1.1474828697E+01  
@@ -261,22 +264,23 @@ You should obtain the values:
     etotal8  -1.1525947400E+01  
     etotal9  -1.1525954817E+01
 
-You can check that:  
-The etotal convergence (at 1 mHartree) is achieved for 12<=ecut<=14 Hartree
-(etotal4 is within 1 mHartree of the final value);  
-The  etotal convergence (at 0.1 mHartree) is achieved for 16<=ecut<=18 Hartree
-(etotal6 is within 0.1 mHartree of the final value).
+You can check that:
+
+1. The etotal convergence (at 1 mHartree) is achieved for 12<=ecut<=14 Hartree
+   (etotal4 is within 1 mHartree of the final value);  
+2. The etotal convergence (at 0.1 mHartree) is achieved for 16<=ecut<=18 Hartree
+   (etotal6 is within 0.1 mHartree of the final value).
 
 So with the same input, a PAW calculation for diamond needs a lower cutoff,
 compared to a norm-conserving pseudopotential calculation.
 
 ## 4 The convergence on the double grid FFT cut-off
   
-In a norm-conserving pseudopotential calculation, the (plane wave) density
+In a norm-conserving calculation, the (plane wave) density
 grid is (at least) twice bigger than the wavefunctions grid, in each
 direction. In a PAW calculation, the (plane wave) density grid is tunable
 thanks to the input variable [[pawecutdg]] (PAW: ECUT for Double Grid). This
-is needed because of the mapping of  objects (densities, potentials) located
+is needed because of the mapping of objects (densities, potentials) located
 in the augmentation regions (PAW spheres) onto the global FFT grid.  
 The number of points of the Fourier grid located in the spheres must be high
 enough to preserve the accuracy. It is determined from the cut-off energy
@@ -327,7 +331,7 @@ possible to check it in the output file, just after the SCF cycle by looking at:
      Compensation charge over spherical meshes =      0.409392121335747  
      Compensation charge over fine fft grid    =      0.409392418241149
 
-The two values of the integrated compensation charge density must be close to each other.  
+The two values of the integrated compensation charge density must be close to each other.
 Note that, for numerical reasons, they cannot be exactly the same (integration
 over a radial grid does not use the same scheme as integration over a FFT grid).
 
@@ -347,29 +351,31 @@ You should obtain the values:
     etotal9  -1.1525958319E+01
 
 You can check again that:  
-The etotal convergence (at the 1 mHartree level) is achieved for 12<=ecut<=14 Hartree;
-The etotal convergence (at the 0.1 mHartree level) is achieved for 16<=ecut<=18 Hartree.  
+
+1. The etotal convergence (at the 1 mHartree level) is achieved for 12<=ecut<=14 Hartree;
+2. The etotal convergence (at the 0.1 mHartree level) is achieved for 16<=ecut<=18 Hartree.  
   
-Note 1:  
-Associated with the input variable [[pawecutdg]] is the input variable
-[[ngfftdg]]: it gives the size of the FFT grid associated with [[pawecutdg]].
-Note that [[pawecutdg]] is only useful to define the FFT grid for the density
-in a convenient way. You can therefore tune directly [[ngfftdg]] to define the
-size of the FFT grid for the density.  
+Note 1 
+:   Associated with the input variable [[pawecutdg]] is the input variable
+    [[ngfftdg]]: it gives the size of the FFT grid associated with [[pawecutdg]].
+    Note that [[pawecutdg]] is only useful to define the FFT grid for the density
+    in a convenient way. You can therefore tune directly [[ngfftdg]] to define the
+    size of the FFT grid for the density.  
   
-Note 2:  
-Although [[pawecutdg]] should always be checked, in practice, a common use it
-to put it bigger than [[ecut]] and keep it constant during all calculations.
-Increasing [[pawecutdg]] slightly changes the CPU execution time, but above
-all it is memory-consuming.  
-Note that, if [[ecut]] is already high, there is no need for a high
-[[pawecutdg]].  
-Last warning: when testing [[ecut]] convergency, [[pawecutdg]] has to remain
-constant to obtain consistent results.
+Note 2 
+:   Although [[pawecutdg]] should always be checked, in practice, a common use it
+    to put it bigger than [[ecut]] and keep it constant during all calculations.
+    Increasing [[pawecutdg]] slightly changes the CPU execution time, but above
+    all it is memory-consuming.
+    Note that, if [[ecut]] is already high, there is no need for a high [[pawecutdg]].  
+
+!!! important
+    When testing [[ecut]] convergency, [[pawecutdg]] has to remain
+    constant to obtain consistent results.
 
 ## 5 Plotting PAW contributions to the Density of States (DOS)
   
-We use now the input file tpaw1_4.in and the associated tpaw1_4.files file.  
+We now use the input file tpaw1_4.in and the associated tpaw1_4.files file.
 ABINIT is now asked to compute the Density Of State (DOS) (see the  [[prtdos]]
 keyword in the input file). Also note that more k-points are used in order to
 increase the accuracy of the DOS. [[ecut]] is set to 12 Ha, while [[pawecutdg]] is 24 Ha.
@@ -395,64 +401,67 @@ The " [[prtdos]] 3" statement now requires the output of the projected DOS;
 "[[natsph]] 1  [[iatsph]] 1  [[ratsph]] 1.5" selects the first carbon atom as
 the center of projection, and sets the radius of the projection area to 1.5
 atomic units (this is exactly the radius of the PAW augmentation regions:
-generally the best choice).  
+generally the best choice).
 The "[[pawprtdos]] 1" is specific to PAW. With this option, ABINIT is asked to
-compute all the contributions to the projected DOS.  
+compute all the contributions to the projected DOS.
+
 Let's remember that:
 
 |Ψn>  =~|Ψn>+  Σ (φi  -~φi) <~pi  |~Ψn >
 
 Within PAW, the total projected DOS has 3 contributions:  
 
-1- the smooth plane-waves contribution (from~|Ψn>)  
-2- the all-electron on-site contribution (from φi  <~pi  |~Ψn >)  
-3- the pseudo on-site contribution (from~φi <~pi  |~Ψn >).
+1. the smooth plane-waves contribution (from~|Ψn>)  
+2. the all-electron on-site contribution (from φi  <~pi  |~Ψn >)  
+3. the pseudo on-site contribution (from~φi <~pi  |~Ψn >).
 
 Launch ABINIT again (with the modified input file). You get a new DOS file,
-named tpaw1_4o_DOS_AT0001.  
+named tpaw1_4o_DOS_AT0001.
 You can edit it and look inside; it contains the 3 PAW contributions
 (mentioned above) for each angular momentum. In the diamond case, only l=0 and
-l=1 momenta are treated.  
+l=1 momenta are treated.
+
 Now, plot the file, using the 7th, 12th and 17th columns with respect to the
 2nd one; it plots the 3 PAW contributions for l=0 (the total DOS is the sum of
-the three contributions).  
+the three contributions).
 If you use the "xmgrace" tool, launch:
     
     xmgrace -block tpaw1_4o_DOS_AT0001 -bxy 1:7 -bxy 1:12 -bxy 1:17
 
-You should get this:  
+You should get this:
 
 ![Projected DOS - 4 proj](paw1_assets/DOS-4proj.jpg)  
 
-As you can see, the smooth PW contribution and the PS on-site contribution are close.  
+As you can see, the smooth PW contribution and the PS on-site contribution are close.
 So, in a first approach, they cancel; we could approximate the DOS by the AE
-on-site part taken alone.  
+on-site part taken alone.
 That is exactly what is done when [[pawprtdos]]=2; in that case, only the AE
 on-site contribution is computed and given as a good approximation of the
 total projected DOS. The main advantage of this option is the decrease of the
-CPU time needed to compute the DOS (it is instantaneously computed).  
+CPU time needed to compute the DOS (it is instantaneously computed).
   
 But, as you will see in the next section, this approximation is only valid when:
 
-(1) the~φi basis is complete enough  
-(2) the electronic density is mainly contained in the sphere defined by [[ratsph]].
+1. the~φi basis is complete enough  
+2. the electronic density is mainly contained in the sphere defined by [[ratsph]].
 
 ## 6 Testing the completeness of the PAW partial wave basis
   
 Note that, in the previous section, we used a "standard" PAW dataset, with 2
 partial waves per angular momentum. It is generally the best compromise
 between the completeness of the partial wave basis and the efficiency of the
-PAW dataset (the more partial waves you have, the longer the CPU time used by ABINIT is).  
+PAW dataset (the more partial waves you have, the longer the CPU time used by ABINIT is).
 
-Let's have a look at the ~abinit/tests/Psps_for_tests/6c.lda.atompaw file. The
-sixth line indicates the number of partial waves and their l angular momentum.
+Let's have a look at the ~abinit/tests/Psps_for_tests/6c.lda.atompaw file.
+The sixth line indicates the number of partial waves and their l angular momentum.
 In the present file, "0 0 1 1" means "two l=0 partial waves, two l=1 partial waves".  
+
 Now, let's open the  ~abinit/tests/Psps_for_tests/6c.lda.test-2proj.atompaw
 and ~abinit/tests/Psps_for_tests/6c.lda.test-6proj.atompaw files. In the first
 file, only one partial wave per l is present; in the second one, 3 partial
 waves per l are present. In other words, the completeness of the partial wave
 basis increases when you use 6c.lda.test-2proj.atompaw, 6c.lda.atompaw and
-6c.lda.test-6proj.atompaw.  
+6c.lda.test-6proj.atompaw.
   
 Now, let's plot the DOS for the two new PAW datasets.  
 
@@ -470,38 +479,32 @@ tpaw1_4o_2proj_DOS_AT0001.
 tpaw1_4o_6proj_DOS_AT0001.
   
 Then, plot the contributions to the projected DOS for the two new DOS files.
-You should get:  
+You should get:
 
 ![Projected DOS - 2 proj](paw1_assets/DOS-2proj.jpg)
 
 ![Projected DOS - 6 proj](paw1_assets/DOS-6proj.jpg)  
 
 Adding the DOS obtained in the previous section to the comparison, you
-immediately see that the superposition of the Smooth part DOS and the PS on-
-site DOS depends on the completeness of the partial wave basis !  
+immediately see that the superposition of the Smooth part DOS and the PS 
+on-site DOS depends on the completeness of the partial wave basis!
   
 Now, you can have a look at the 3 output files (one for each PAW dataset)...
-for instance in a comparison tool.  
+for instance in a comparison tool.
 A way to estimate the completeness of the partial wave basis is to compare
-derivatives of total energy; if you look at the stress stensor:  
+derivatives of total energy; if you look at the stress stensor:
 
-For the 2 partial-wave bases:  -1.0866668849E-03 -1.0866668849E-03
--1.0866668849E-03  0.  0.  0.  
-For the 4 partial-wave basis:   4.1504385879E-04  4.1504385879E-04
-4.1504385879E-04  0.  0.  0.  
-For the 6 partial-wave basis:   4.1469803037E-04  4.1469803037E-04
-4.1469803037E-04  0.  0.  0.
+    For the 2 partial-wave bases:  -1.0866668849E-03 -1.0866668849E-03 -1.0866668849E-03  0.  0.  0.  
+    For the 4 partial-wave basis:   4.1504385879E-04  4.1504385879E-04  4.1504385879E-04  0.  0.  0.  
+    For the 6 partial-wave basis:   4.1469803037E-04  4.1469803037E-04  4.1469803037E-04  0.  0.  0.
 
-The 2 partial-wave basis is clearly not complete; the 4 partial-wave basis
-results are correct...  
+The 2 partial-wave basis is clearly not complete; the 4 partial-wave basis results are correct...
 Such a test is useful to estimate the precision we can expect on the stress
-tensor (at least due to the partial wave basis).  
+tensor (at least due to the partial wave basis).
   
-You can compare other results in the 3 output files: total energy,
-eigenvalues, occupations...  
+You can compare other results in the 3 output files: total energy, eigenvalues, occupations...
 Also notice that the dimensions of the PAW on-site quantities change: have a
-look at "Pseudopotential strength Dij" or "Augmentation waves occupancies
-Rhoij" sections...  
+look at "Pseudopotential strength Dij" or "Augmentation waves occupancies Rhoij" sections...
   
 Note: if you want to learn how to generate PAW datasets with different partial
 wave bases, you might follow the tutorial PAW2.
@@ -554,7 +557,7 @@ These results are in excellent agreement with FP-LAPW ones!
 
 ## 8 Additional comments about PAW in ABINIT
   
-**8.a** **Mixing scheme for the Self-Consistent cycle; decomposition of the total energy.**
+#### **Mixing scheme for the Self-Consistent cycle; decomposition of the total energy**
 
 The use of an efficient mixing scheme in the self-consistent loop is a crucial
 point to minimize the number of steps to achieve convergence. This mixing can
@@ -585,10 +588,10 @@ and look at the difference between both values of energy.
 Also note that PAW ρij quantities (occupancies of partial waves) also are
 mixed during the SC cycle; by default, the mixing is done in the same way as the density.  
 
-**8.b** **Overlap of PAW spheres**
+#### **Overlap of PAW spheres**
 
 In principle, the PAW formalism is only valid for non-overlapping augmentation
-regions (PAW spheres). But, in usual cases, a small overlap between spheres is acceptable.  
+regions (PAW spheres). But, in usual cases, a small overlap between spheres is acceptable.
 By default, ABINIT checks that the distances between atoms are large enough to
 avoid overlap; a "small" voluminal overlap of 5% is accepted by default. This
 value can be tuned with the [[pawovlp]] input keyword. The overlap check can
@@ -604,66 +607,81 @@ is eventually printed...
 Also note that you can control the compensation charge radius and shape
 function while generating the PAW dataset (see tutorial PAW2).
 
-****
-
-**8.c** **Printing volume for PAW**
+#### **Printing volume for PAW**
 
 If you want to get more detailed output concerning the PAW computation, you
-can use the [[pawprtvol]] input keyword. See its description in the user's
-manual...  
+can use the [[pawprtvol]] input keyword. See its description in the user's manual...
 It is particularly useful to print details about pseudopotential strength
-(Dij) or partial waves occupancies (ρij).  
+($D_{ij}$) or partial waves occupancies ($\rho_{ij}$).  
 
-**8.d** **Additional PAW input variables**
+#### **Additional PAW input variables**
 
-Looking at the [[varset:basic|~abinit/doc/input_variables/varset_basic.html]]
-file, you can find input ABINIT keywords specific to PAW. They are to be used
-when tuning the computation, in order to gain accuracy or save CPU time.  
-Warning : in a standard computation, these variables should not be modified !  
+Looking at the [[varset:basic]] file, you can find input ABINIT keywords specific to PAW. 
+They are to be used when tuning the computation, in order to gain accuracy or save CPU time.
+
+!!! warning
+    In a standard computation, these variables should not be modified!
   
 Variables that can be used to gain accuracy (in ascending order of importance):  
 
-[[pawxcdev]]: control the accuracy of exchange-correlation on-site potentials
-(try pawxcdev=2 to increase accuracy).  
-[[mqgriddg]]: control the accuracy of spline fits to transfer
-densities/potentials from FFT grid to spherical grid.  
-[[pawnzlm]]: control the computation of moments of spherical densities that
-should be zero by symmetry.
+[[pawxcdev]]
+:   control the accuracy of exchange-correlation on-site potentials
+    (try pawxcdev=2 to increase accuracy).  
+
+[[mqgriddg]]
+: control the accuracy of spline fits to transfer densities/potentials from FFT grid to spherical grid.  
+
+[[pawnzlm]]
+: control the computation of moments of spherical densities that should be zero by symmetry.
   
 Variables that can be used to save memory (in ascending order of importance):  
 
-[[pawstgylm]]: control the storage of spherical harmonics computed around atoms.
+[[pawstgylm]]
+: control the storage of spherical harmonics computed around atoms.
 
-[[pawmixdg]]: control on which grid the potential/density is mixed during SCF cycles.  
-[[pawlcutd]]: control the number of angular momenta to take into account in on-site densities.  
-[[pawlmix]]: control the number of ρij to be mixed during SCF cycle.
+[[pawmixdg]]
+: control on which grid the potential/density is mixed during SCF cycles.  
+
+[[pawlcutd]]
+: control the number of angular momenta to take into account in on-site densities.  
+
+[[pawlmix]]
+: control the number of ρij to be mixed during SCF cycle.
   
 Variables that can be used to save CPU time (in ascending order of importance):
 
-[[pawnhatxc]]: control the numerical treatment of gradients of compensation
-charge density in case of GGA  
-[[pawstgylm]]: control the storage of spherical harmonics computed around atoms.  
-[[pawlcutd]]: control the number of angular momenta to take into account in on-site densities.  
-[[pawlmix]]: control the number of ρij to be mixed during SCF cycle.  
-[[bxctmindg]]: can be used to decrease the size of fine FFT grid for a given value of pawecutdg.
+[[pawnhatxc]]
+: control the numerical treatment of gradients of compensation charge density in case of GGA  
 
-The above list is not exhaustive. several other keywords can be used to tune
-ABINIT PAW calculations.
+[[pawstgylm]]
+: control the storage of spherical harmonics computed around atoms.  
 
-**8.e** **PAW+U**
+[[pawlcutd]]
+: control the number of angular momenta to take into account in on-site densities.  
 
-If the system under study contains strongly correlated electrons, the  LDA+U
+[[pawlmix]]
+: control the number of ρij to be mixed during SCF cycle.  
+
+[[bxctmindg]]
+: can be used to decrease the size of fine FFT grid for a given value of pawecutdg.
+
+The above list is not exhaustive.
+Several other keywords can be used to tune ABINIT PAW calculations.
+
+### PAW+U
+
+If the system under study contains strongly correlated electrons, the LDA+U
 method can be useful. It is controlled by the  [[usepawu]], [[lpawu]],
-[[upawu]] and [[jpawu]] input keywords. Note that the formalism implemented in
-ABINIT is approximate, i.e. it is only valid if:  
+[[upawu]] and [[jpawu]] input keywords. 
+Note that the formalism implemented in ABINIT is approximate, i.e. it is only valid if:  
 
-(1) the~φi basis is complete enough ;  
-(2) the electronic density is mainly contained in the PAW sphere.  
+1. the ~φi basis is complete enough ;  
+2. the electronic density is mainly contained in the PAW sphere.  
 
 The approximation done here is the same as the one explained in the 5th
-section of this tutorial: considering that smooth PW contributions and PS on-
-site contributions are closely related, only the AE on-site contribution is
-computed; it is indeed a very good approximation.  
+section of this tutorial: considering that smooth PW contributions and PS 
+on-site contributions are closely related, only the AE on-site contribution is
+computed; it is indeed a very good approximation.
   
 Converging a Self-Consistent Cycle, or ensuring the global minimum is reached,
-with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help...  
+with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help...

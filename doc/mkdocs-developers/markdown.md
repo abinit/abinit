@@ -906,7 +906,7 @@ one should take into account the *extra directory* created by Mkdocs.
 In a nutshell, **prepend** a `../` to the relative path you would use inside the shell to specify the location
 of that resource with respect to the present page.
 
-For istance, to build a Bootstrap carousel in this page using the images located in 
+For instance, to build a Bootstrap carousel in this page using the images located in 
 the `~abinit/doc/tutorials/bse_assets/` directory, one should use:
 
 ```html

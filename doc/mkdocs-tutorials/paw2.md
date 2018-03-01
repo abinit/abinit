@@ -10,21 +10,21 @@ This lesson aims at showing how to compute atomic data files for the projector-a
 
 You will learn how to generate the atomic data and what the main variables are
 to govern their softness and transferability.
-It is supposed you already know how to use ABINIT in the PAW case  
+It is supposed you already know how to use ABINIT in the PAW case
   
 This lesson should take about 1h30.
 
 ## 1 The PAW atomic dataset - introduction
   
 The PAW method is based on the definition of atomic spheres (augmentation
-regions) of radius rPAW around the atoms of the system in which a base of
+regions) of radius $r_{PAW}$ around the atoms of the system in which a base of
 atomic partial waves φi, of "pseudized" partial waves~φi, and of projectors~pi
 (dual to~φi) have to be defined. This set of partial-waves and projectors
-functions plus some additional atomic data are stored in a so-called _PAW
-dataset_. A PAW dataset has to be generated for each atomic species in order
+functions plus some additional atomic data are stored in a so-called *PAW dataset*. 
+A PAW dataset has to be generated for each atomic species in order
 to reproduce atomic behavior as accurate as possible while requiring minimal
 CPU and memory resources in executing ABINIT for the crystal simulations.
-These two constraints are conflicting.  
+These two constraints are conflicting.
 
 The PAW dataset generation is the purpose of this tutorial.  
 It is done according the following procedure (all parameters that define a PAW dataset are in bold):  
@@ -62,7 +62,7 @@ The user can choose between two PAW dataset generators to produce
 atomic files directly readable by ABINIT.
 The first one is the PAW generator ATOMPAW (originally by N. Holzwarth) and
 the second one is the Ultra-Soft (US) generator (originally written by D.
-Vanderbilt). In this tutorial, we concentrate only on ATOMPAW.  
+Vanderbilt). In this tutorial, we concentrate only on ATOMPAW.
 
 It is highly recommended to refer to the following papers to understand
 correctly the generation of PAW atomic datasets:
@@ -97,13 +97,12 @@ Otherwise, you can try:
     ~abinit_compilation_directory/fallbacks/exports/bin/atompaw-abinit
 
 !!! note
-
     In the following, we name atompaw the ATOMPAW executable.
   
-How to use Atompaw?  
+How to use Atompaw?
 
-  * Edit an input file in a text editor (content of input explained [here](paw2_assets/atompaw-usersguide.pdf))
-  * Run: atompaw < inputfile
+1. Edit an input file in a text editor (content of input explained [here](paw2_assets/atompaw-usersguide.pdf))
+2. Run: atompaw < inputfile
 
 Partial waves φi, PS partial waves~φi and projectors~pi are given in wfn.i files.
 Logarithmic derivatives from atomic Hamiltonian and PAW Hamiltonian
@@ -113,13 +112,14 @@ can be found in the Atom_name file (Atom_name is the first parameter of the inpu
 Resulting PAW dataset is contained in:
 
 Atom_name.XCfunc-paw.abinit file
-:       specific format for ABINIT; present only if requested in inputfile.
+:   specific format for ABINIT; present only if requested in inputfile.
 
 Atom_name.atomicdata file
-:       specific format for PWPAW code)
+:   specific format for PWPAW code)
 
 Atom_name.XCfunc.xml file
-:       normalized XML file according to the [PAWXML specifications](https://wiki.fysik.dtu.dk/gpaw/setups/pawxml.html).
+:   normalized XML file according to the
+    [PAWXML specifications](https://wiki.fysik.dtu.dk/gpaw/setups/pawxml.html).
 
 ## 3 First (and basic) PAW dataset for Nickel
   
@@ -143,15 +143,15 @@ This file has been built in the following way:
 
   * Next lines: define the electronic configuration:
 
-How many electronic states do we need to include in the computation?  
+How many electronic states do we need to include in the computation?
 Besides the fully and partially occupied states, it is recommended to add all
 states that could be reached by electrons in the solid. Here, for Nickel, the
 4p state is concerned. So we decide to add it in the computation.
 
-\- A line with the maximum n quantum number for each electronic shell; 
+\- A line with the maximum n quantum number for each electronic shell;
    here "4 4 3" means *4s, 4p, 3d*.
 
-\- Definition of occupation numbers:  
+\- Definition of occupation numbers:
 
 For each partially occupied shell enter the occupation number. An excited
 configuration may be useful if the PAW dataset is intended for use in a
@@ -195,27 +195,27 @@ Partial-waves basis generation:
 
   * A line with lmax the maximum l for the partial waves basis. Here lmax=2.
 
-  * A line with the rPAW radius. Select it to be slightly less than half the inter-atomic distance 
-  in the solid (as a first choice). Here rPAW=2.3 a.u. If only one radius is input, 
+  * A line with the rPAW radius. Select it to be slightly less than half the inter-atomic distance
+  in the solid (as a first choice). Here rPAW=2.3 a.u. If only one radius is input,
   all others pseudization radii will be equal to rPAW (rc, rcore, rVloc and rshape).
 
-  * Next lines: add additional partial-waves φi if needed: choose to have 2 partial-waves 
-  per angular momentum in the basis (this choice is not necessarily optimal but this is the most common one; 
-  if rPAW is small enough, 1 partial-wave per l may suffice). As a first guess, put all reference energies 
+  * Next lines: add additional partial-waves φi if needed: choose to have 2 partial-waves
+  per angular momentum in the basis (this choice is not necessarily optimal but this is the most common one;
+  if rPAW is small enough, 1 partial-wave per l may suffice). As a first guess, put all reference energies
   for additional partial-waves to 0 Rydberg.
 
 Note that for each angular momentum, valence states already are included in
 the partial waves basis. Here *4s, 4p and 3d* states already are in the basis
 For each angular momentum, first add "y" to add an additional partial wave.
-Then, next line, put the value in Rydberg units. 
+Then, next line, put the value in Rydberg units.
 Repeat this for each new partial wave and finally put "n"
-In the present file,  
+In the present file:
 
     y  
     0.5  
     n
 
-means that an additional s\- partial wave at Eref=0.5 Ry as been added.  
+means that an additional s\- partial wave at Eref=0.5 Ry as been added.
 
     y  
     0.  
@@ -227,7 +227,7 @@ means that an additional p\- partial wave at Eref=0. Ry has been added.
     0.  
     n
 
-means that an additional d- partial wave at Eref=0. Ry as been added.  
+means that an additional d- partial wave at Eref=0. Ry as been added.
 Finally, partial waves basis contains two s-, two p-  and two d\- partial waves.
 
   * Next line: definition of the generation scheme for pseudo partial waves~φi, and of projectors~pi. 
@@ -244,7 +244,7 @@ Finally, partial waves basis contains two s-, two p-  and two d\- partial waves.
 
   * A 0 (zero) to end the file.
   
-At this stage, run atompaw. For this purpose, simply enter: 
+At this stage, run atompaw. For this purpose, simply enter:
 
     atompaw <Ni.atompaw.input1  
 
@@ -287,7 +287,7 @@ named Ni (name extracted from first line of input file). Open it. It should look
       6 999   2   0.0000000E+00  1.3369075E+01 0.0000000E+00  
      evale from matrix elements -1.85182309373359203E+02
 
-The generated PAW dataset (contained in Ni.atomicdata, Ni.GGA-PBE-paw.abinit 
+The generated PAW dataset (contained in Ni.atomicdata, Ni.GGA-PBE-paw.abinit
 or Ni.GGA-PBE.xml file) is a first draft.
 Several parameters have to be adjusted, in order to get accurate results and efficient DFT calculations.
 
@@ -324,7 +324,7 @@ Small grids give PAW dataset with small size (in kB) and run faster in ABINIT,
 but accuracy can be affected.
 
 \- Note that the final rPAW value ("rc = ..." in Ni file) change with the
-grid; just because rPAW is adjusted in order to belong exactly to the radial grid. 
+grid; just because rPAW is adjusted in order to belong exactly to the radial grid.
 By looking in ATOMPAW [user's guide](paw2_assets/atompaw-usersguide.pdf), you can choose to keep it constant.
 
 \- Also note that, if the results are difficult to get converged 
@@ -332,9 +332,9 @@ By looking in ATOMPAW [user's guide](paw2_assets/atompaw-usersguide.pdf), you ca
 
   * The relativistic approximation of the wave equation:
 
-Scalar-relativistic option should give better results than non-relativistic one, 
+Scalar-relativistic option should give better results than non-relativistic one,
 but it sometimes produces difficulties for the convergence of the atomic problem 
-(either at the all-electrons resolution step or at the PAW Hamiltonian solution step). 
+(either at the all-electrons resolution step or at the PAW Hamiltonian solution step).
 If convergence cannot be reached, try a non-relativistic calculation (not recommended for high Z materials).
 
 For the following, note that you always should check the Ni file, especially
@@ -346,7 +346,7 @@ PAW parameters ("evale from matrix elements"). These two results should be in cl
   
 Examine the partial-waves, PS partial-waves and projectors.
 These are saved in files named wfni, where i ranges over the number of partial
-waves used, so 6 in the present example. Each file contains 4 columns: 
+waves used, so 6 in the present example. Each file contains 4 columns:
 the radius in column 1, the partial wave φi in column 2, the PS partial wave~φi in
 column 3, and the projector~ pi in column 4. Plot the three curves as a
 function of radius using a plotting tool of your choice.
@@ -403,18 +403,18 @@ and of the pseudized problem. In our Ni example, l=0, 1 or 2.
 
 The logarithmic derivatives should have the following properties:
 
-  * The 2 curves should be superimposed as much as possible. 
-    By construction, they are superimposed at the two energies corresponding to the two l partial-waves. 
+  * The 2 curves should be superimposed as much as possible.
+    By construction, they are superimposed at the two energies corresponding to the two l partial-waves.
     If the superimposition is not good enough, the reference energy for the second l partial-wave should be changed.
 
-  * Generally a discontinuity in the logarithmic derivative curve appears at 0<=E0<=4 Rydberg. 
+  * Generally a discontinuity in the logarithmic derivative curve appears at 0<=E0<=4 Rydberg.
   A reasonable choice is to choose the 2 reference energies so that E0 is in between.
 
-  * Too close reference energies produce "hard" projector functions 
-    (as previously seen in section 5). But moving reference energies away 
+  * Too close reference energies produce "hard" projector functions
+    (as previously seen in section 5). But moving reference energies away
     from each other can damage accuracy of logarithmic derivatives
 
-Here are the three logarithmic derivative curves for the current dataset:  
+Here are the three logarithmic derivative curves for the current dataset:
 
 ![l=0 log derivatives](paw2_assets/log0a.jpg)
 
@@ -431,18 +431,18 @@ You should get:
 
 ![l=0 log derivatives](paw2_assets/log0b.jpg)
   
-Then put Eref=4Ry for the second p\- state (line 21); run ATOMPAW again. 
-Plot again the logderiv.1 file. You should get:  
+Then put Eref=4Ry for the second p\- state (line 21); run ATOMPAW again.
+Plot again the logderiv.1 file. You should get:
 
 ![l=1 log derivatives](paw2_assets/log1b.jpg)
 
 Now, all PAW logarithmic derivatives match with the exact ones in a reasonable interval.
   
-Note: enlarging energy range of logarithmic derivatives plots  
+Note: enlarging energy range of logarithmic derivatives plots
 It is possible to change the interval of energies used to plot logarithmic
 derivatives (default is [-5;5]) and also to compute them at more points
 (default is 200). Just add the following keywords at the end of the SECOND
-LINE of the input file:  
+LINE of the input file:
 logderivrange -10 10 500  
 In the above example ATOMPAW plots logarithmic derivatives for energies in
 [-10;10] at 500 points.  
@@ -468,7 +468,7 @@ A third solution is to select a simple "bessel" pseudopotential (replace
 noticeably decrease the matching radius rVloc if one wants to keep reasonable
 physical results. Selecting a value of rVloc between 0.6*rPAW and 0.8*rPAW is
 a good choice; but the best way to adjust rVloc value is to have a look at the
-two values of evale in Ni file which are sensitive to the choice of rVloc. 
+two values of evale in Ni file which are sensitive to the choice of rVloc.
 To change the value of  rVloc, one has to detail the line containing all radii
 (rPAW, rshape, rVloc and rcore); see [user's guide](paw2_assets/atompaw-usersguide.pdf).
 
@@ -553,7 +553,7 @@ Use this input file for ATOMPAW: ~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.inp
 As you can see (by editing the file)  "bloechl" has been changed by "custom rrkj"
 and 6 rc values have been added at the end of the file; each one
 correspond to the matching radius of one PS partial wave.
-Repeat the entire procedure (ATOMPAW \+ ABINIT)... and get a new ABINIT output file.
+Repeat the entire procedure (ATOMPAW + ABINIT)... and get a new ABINIT output file.
 Note: you have to look again at log derivatives in order to verify that they still are correct...
 
       ecut1   8.00000000E+00 Hartree  
@@ -641,7 +641,7 @@ Final remarks:
 
 ## 8 Testing against physical quantities
   
-Finally, the last step is to examine carefully the physical quantities obtained with the PAW dataset.  
+Finally, the last step is to examine carefully the physical quantities obtained with the PAW dataset.
 
 Copy ~abinit/tests/tutorial/Input/tpaw2_2.in in your working directory.
 Edit it, to activate the eight datasets (instead of one).
@@ -653,7 +653,7 @@ Run ABINIT (this may take a while...).
 {% dialog tests/tutorial/Input/tpaw2_2.in %}
 
 ABINIT computes the converged ground state of ferromagnetic FCC Nickel for several volumes around equilibrium.
-Plot the etotal vs acell curve: 
+Plot the etotal vs acell curve:
 
 ![etotal vs acell](paw2_assets/acell-etotal.jpg)  
 
@@ -665,22 +665,22 @@ From this graph and output file, you can extract some physical quantities:
   
 Compare these results with published results:
 
-  * GGA-FLAPW (all-electrons \- ref [3]):
+* GGA-FLAPW (all-electrons \- ref [3]):
 
-a0 = 3.52 angstrom  
-B = 200 GPa  
-μ = 0.60
+    a0 = 3.52 angstrom  
+    B = 200 GPa  
+    μ = 0.60
 
-  * GGA-PAW (VASP - ref [3]):
+* GGA-PAW (VASP - ref [3]):
 
-a0 = 3.52 angstrom  
-B = 194 GPa  
-μ = 0.61
+    a0 = 3.52 angstrom  
+    B = 194 GPa  
+    μ = 0.61
 
-  * Experimental results from Dewaele, Torrent, Loubeyre, Mezouar. Phys. Rev. B 78, 104102 (2008):
+* Experimental results from Dewaele, Torrent, Loubeyre, Mezouar. Phys. Rev. B 78, 104102 (2008):
 
-a0 = 3.52 angstrom  
-B = 183 GPa
+    a0 = 3.52 angstrom  
+    B = 183 GPa
 
 You should always compare results with all-electrons ones (or other PAW computations),
 not with experimental ones...
@@ -702,7 +702,7 @@ dataset is used for non-standard solid structures or thermodynamical domains.
 
 Optional exercise: let's add 3s and 3p semi-core states in PAW dataset!
 
-Repeat the procedure (ATOMPAW \+ ABINIT) with ~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input.semicore file...
+Repeat the procedure (ATOMPAW + ABINIT) with ~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input.semicore file...
 The run is a bit longer as more electrons have to be treated by ABINIT.
 Look at a0, B or μ variation.
 
@@ -753,7 +753,7 @@ In your working directory, re-use the dataset with Bloechl projectors
 Replace the last line but one ("default") by "rsoptim 8. 2 0.0001"
 (8., 2 and 0.0001 are the values for gmax, γ/gmax and W).
 Run ATOMPAW.
-You get a new psp file for ABINIT.  
+You get a new psp file for ABINIT.
 Run ABINIT with it using the ~abinit/tests/tutorial/Input/tpaw2_1.in file.
 Compare the results with those obtained in section 7.
 
