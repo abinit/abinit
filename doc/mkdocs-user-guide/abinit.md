@@ -211,11 +211,8 @@ The **characteristics** can be one of the following : **DEVELOP** ,
 **NO_MULTI** , **INTERNAL_ONLY** , **INPUT_ONLY** , **EVOLVING** , **ENERGY**
 , **LENGTH** , **MAGNETIC FIELD** , as described now.
 
-**
 
 #### Physical information
-
-**
 
 The **ENERGY** , **LENGTH** and **MAGNETIC FIELD** characteristics indicate
 that the physical meaning of the variable is known by ABINIT, so that ABINIT
@@ -337,8 +334,6 @@ understand when one looks at examples, see below) :
   * (2) If this modified variable name does not exist, it will look whether a metacharacter, a series or a double-loop data set has been defined, see sections 3.4 or 3.5.
   * (3) If the variable name appended with the index of the dataset does not exist, and if there is no series nor double-loop dataset for this keyword, it looks for an occurrence of the variable name without any index appended, and take the corresponding data. (This corresponds to the single dataset mode)
   * (4) If such occurrences do not exist, it takes the default value. (Also, similar to the single dataset mode)
-
-    
     
         ---------------
     
@@ -513,7 +508,7 @@ variables, some output variables are also summarized, using the same conventions
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
-## 4 More detailed presentation of the 'files' file
+## 4 More detailed presentation of the files file
   
 Note: _This "files" file is called _ab.files_ in section 1 ._
 
@@ -582,8 +577,7 @@ dataset mode, this root will be complemented by ' **_DS** ' and the dataset
 index. Also in the multi-dataset mode, the root "abo" can be used to build the
 name of **input** files, thanks to the 'get' variables. The list of possible
 output files, with their name created from the root 'abo' is the following (a
-similar list exists when ' **_DS** ' and the dataset index are appended to
-'abo') :
+similar list exists when ' **_DS** ' and the dataset index are appended to 'abo') :
 
   * **abo_WFK**   
 Filename of file containing output wavefunction coefficients, if [[nqpt]]=0.
