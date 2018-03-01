@@ -631,6 +631,20 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  ABI_DEALLOCATE(kg1_k)
 
+ ! =======================================================================================
+ ! compute pawdij terms arising from <u_n1k1|H_k2|u_n3k3>
+ ! =======================================================================================
+
+ ! term 2b: from vhnzc - vthnzc
+ do itypat=1, dtset%ntypat
+    if ( (pawtab(itypat)%has_vhnzc .NE. 2) .OR. (pawtab(itypat)%has_vhtnzc .NE. 2) ) then
+       message = "VH[n_Zc] or VH[tn_Zc] not present in pawtab..."
+       MSG_ERROR(message)
+    end if
+ end do
+
+! call pawtwdij_2b(dtorbmag,pawrad,pawtab)
+ 
  call timab(1009,2,tsec)
  call timab(1001,2,tsec)
 
