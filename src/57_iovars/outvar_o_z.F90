@@ -596,6 +596,10 @@
  intarr(1,:)=dtsets(:)%prtxml
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtxml','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtlammps(1)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtlammps','INT',0)
+
+
 !prt1dm
  intarr(1,:)=dtsets(:)%prt1dm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt1dm','INT',0)

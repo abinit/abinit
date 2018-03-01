@@ -23785,6 +23785,34 @@
     varset: files
     vartype: integer
 - !variable
+    abivarname: prtlammps
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 0 0
+    dimensions: 2
+    excludes: null
+    mnemonics: PRinT LAMMPS file
+    requires: null
+    text: |-
+        <p>
+         Print out the positions and forces during a AIMD simulation every (x) ion steps in LAMMPS dump format custom style. Note the ouput format for atomic information is fixed as follows:
+         <br />
+         Atom-ID Atom-Type x(uw/us) y(uw/us) z(uw/us) fx fy fz
+        <br />
+         Here uw/us indicate unwrapped and unscaled cartesian coordinates in perodic cell. The files can be visualized using VMD/OVITO and can also be used as initial configurations for classical MD simulations. 
+        <br />
+	 Example:
+	 prtlammps 1 1
+	 prtlammps 1 10
+        <br />
+	For more information on the LAMMPS dump style format please see http://lammps.sandia.gov/doc/Section_howto.html#howto-12 and http://lammps.sandia.gov/doc/dump.html. 
+        </p>
+    topics: MolecularDynamics_useful
+    varset: dev
+    vartype: integer
+- !variable
     abivarname: prtmbm@anaddb
     characteristics: null
     commentdefault: null

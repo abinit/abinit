@@ -246,7 +246,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !10. Output for each icycle (and itime)
 !11. Symmetrize atomic coordinates over space group elements
 !12. => Call to SCFCV routine and fill history with forces
-!13. Write the history into the _HIST file
+!13. Write the history into the _HIST file (or LAMMPS dump file format)
 !14. Output after SCFCV
 !15. => Test Convergence of forces and stresses
 !16. => Precondition forces, stress and energy
@@ -702,7 +702,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if
 
 !    ###########################################################
-!    ### 13. Write the history into the _HIST file
+!    ### 13. Write the history into the _HIST file or LAMMPS dump style
 !    ###
 
 #if defined HAVE_NETCDF
@@ -712,6 +712,17 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
+
+
+!! Output LAMMPS dump style format of positions and forces (see 95_deriver/prtlammps.F90)
+if (scfcv_args%dtset%prtlammps(1) == 1 .and. mod(itime,scfcv_args%dtset%prtlammps(2)) == 0) then
+   !!Inform abinit output that lammps file is being written
+   write(message,*) 'WRITING POSITIONS & FORCES TO LAMMPS DUMP FILE FOR MD STEP: ',&
+&  scfcv_args%dtset%prtlammps(2)
+   call wrtout(std_out,message,'COLL') 
+   call prtlammps(dtfil%filnam_ds(4),scfcv_args%dtset%natom, scfcv_args%dtset%ntypat,&
+&                 rprimd, scfcv_args%dtset%typat,itime,xred,scfcv_args%results_gs%fcart)
+end if !! end call to prtlammps
 
 !    ###########################################################
 !    ### 14. Output after SCFCV

@@ -924,6 +924,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%vdw_supercell(:)   = dtin%vdw_supercell(:)
  dtout%vdw_typfrag(:)     = dtin%vdw_typfrag(:)
  dtout%wvl_ngauss(:)      = dtin%wvl_ngauss(:)
+ dtout%prtlammps(:)       = dtin%prtlammps(:)
 
 !Copy reals from dtin to dtout
  dtout%adpimd_gamma       = dtin%adpimd_gamma

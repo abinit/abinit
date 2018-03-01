@@ -2129,6 +2129,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtxml',tread,'INT')
  if(tread==1) dtset%prtxml=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'prtlammps',tread,'INT')
+ if(tread==1) dtset%prtlammps(1:2)=intarr(1:2)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ratsph_extra',tread,'DPR')
  if(tread==1) dtset%ratsph_extra=dprarr(1)
 
