@@ -18,8 +18,7 @@
          relaxation using BFGS. Molecular dynamic is also available for test purposes.
          <p>However, DFPT or excited-state calculations (except &Delta;-SCF) cannot be performed.
     tutorials  : |-
-          <li><a href="../../tutorial/generated_files/lesson_paral_gswvl.html">Parallelism for ground-state
-          calculations, with wavelets</a> presents the parallelism of ABINIT,
-          when wavelets are used as a basis function instead of planewaves, for
+          <li>[[lesson:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] 
+          presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for
           the computation of total energy, density, and ground state properties</li>
     end : default

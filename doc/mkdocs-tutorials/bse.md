@@ -192,7 +192,7 @@ part of the kernel, hence this calculation includes local-field effects. The
 variable [[bs_coulomb_term]] is used to select among different options that
 are available for the Coulomb term (please take some time to read the
 description of the variable and the relevant equations in the Bethe-Salpeter
-notes ([[theorydoc_bse]]). Finally [[bs_coupling]]=0 specifies that the off-
+notes ([[theory:bse]]). Finally [[bs_coupling]]=0 specifies that the off-
 diagonal coupling blocks should be neglected (Tamm-Dancoff approximation).
 This particular combination of parameters thus corresponds to a Bethe-Salpeter
 calculation within the Tamm-Dancoff approximation with local field effects included.

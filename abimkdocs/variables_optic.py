@@ -21,12 +21,11 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-In Eq. 46 of [Ref. 1](../../users/generated_files/help_optic.html#Ref1), it is
-clear that when ever wnm(k) is equal to w, there is a resonance. Numerically
-this would lead to an infinity. In order to avoid this one could do two things.
+In Eq. 46 of [[cite:Sharma2004], it is clear that when ever wnm(k) is equal to w, there is a resonance.
+Numerically this would lead to an infinity. In order to avoid this one could do two things.
 
 You could change the sum over k-points to integration and then use
-linear tetrahedron method (see [Ref.2](../../users/generated_files/help_optic.html#Ref2) for details).
+linear tetrahedron method (see [[cite:Hughes1996]] for details).
 Another way to get around the problem is, like we do in the present case, avoid this
 singularity by adding a small complex number to the denominator. This prevents
 the denominator from ever going to 0 and acts as a broadening to the spectrum.
@@ -94,7 +93,7 @@ Variable(
     requires=None,
     text="""
 This tells which component of the dielectric tensor you want to calculate.
-These numbers are called a and b Eqs. 46 in [Ref. 1](../../users/generated_files/help_optic.html#Ref1).
+These numbers are called a and b Eqs. 46 in [[Sharma2004]].
 1 2 3 represent x y and z respectively. For example 11 would be xx and 32 would mean zy.
 """,
 ),
@@ -135,7 +134,7 @@ Variable(
     requires=None,
     text="""
 This tells which component of the dielectric tensor you want to calculate.
-These numbers are called a, b and c in [Ref. 1](../../users/generated_files/help_optic.html#Ref1).
+These numbers are called a, b and c in [[cite:Sharma2004]].
 1 2 3 represent x y and z respectively. For example 111 would be xxx and 321 would mean zyx.
 """,
 ),
@@ -156,7 +155,7 @@ Variable(
     text="""
 How many components out of 9 of the linear optical dielectric tensor do you
 want to calculate. Most of these are either equal or zero depending upon the
-symmetry of the material (for detail see [Ref. 3](../../users/generated_files/help_optic.html#Ref3)).
+symmetry of the material (for detail see [[cite:Draxl2006]]).
 Note that the directions are along the Cartesian axis.
 """,
 ),
@@ -177,7 +176,7 @@ Variable(
     text="""
 How many components out of 27 of the non-linear optical dielectric tensor do
 you want to calculate. Most of these are either equal or zero depending upon
-the symmetry of the material (for detail see [Ref. 3](../../users/generated_files/help_optic.html#Ref3)).
+the symmetry of the material (for detail see [[cite:Draxl2006]]).
 Note that the directions are along the Cartesian axis.
 """,
 ),
@@ -203,7 +202,7 @@ one needs to correct for this. This can be achieved in two ways.
 The scissors shift is normally chosen to be the difference between the experimental and
 theoretical band-gap and is used to shift the conduction bands only. Another
 way in which you do not have to rely on experimental data is to determine the
-self energy using the [GW approach](../../tutorial/generated_files/lesson_gw1.html).
+self energy using the [[lesson:gw1|GW approach]].
 In this case the opening of the gap due to the GW correction can be used as scissor shift.
 """,
 ),

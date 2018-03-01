@@ -13,8 +13,8 @@
        will be performed (computation of susceptibility matrices, integration along the real+imaginary axes).
        In the present topic, the input variables connected to such definitions are gathered.
     tutorials  : |-
-       <li><a href="../../tutorial/generated_files/lesson_gw2.html">The second lesson on GW (GW2)</a> deals with
-       the computation of the quasi-particle band structure of Aluminum, in
-       the GW approximation (so, much better than the Kohn-Sham LDA band
-       structure) without using the plasmon-pole model. </li>
+        <li>[[lesson:gw|The second lesson on GW (GW2)]] deals with
+        the computation of the quasi-particle band structure of Aluminum, in
+        the GW approximation (so, much better than the Kohn-Sham LDA band
+        structure) without using the plasmon-pole model. </li>
     end : default

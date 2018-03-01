@@ -16,7 +16,7 @@
        <p>The input variables needed to perform the interpolation over the Brillouin Zone are described in [[topic:PhononBands]] and are not listed again in the present topic.
 
     tutorials  : |-
-       <li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
+       <li>[[lesson:rf2|The lesson Response-Function 2 (RF2)]]
        presents the analysis of the DDBs that have been introduced in the
        preceeding lesson RF1.  The computation of the interatomic forces and
        the computation of thermodynamical properties is an outcome of this

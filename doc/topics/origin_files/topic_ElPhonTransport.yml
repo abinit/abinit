@@ -45,8 +45,7 @@
         <p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
          <p>
     tutorials  : |-
-        <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
-         electron-phonon interaction</a> presents the use of the utility MRGKK
+        <li> [[lesson:eph|The lesson on the electron-phonon interaction]] presents the use of the utility MRGKK
          and ANADDB to examine the electron-phonon interaction and the
          subsequent calculation of superconductivity temperature (for bulk
          systems).</li>

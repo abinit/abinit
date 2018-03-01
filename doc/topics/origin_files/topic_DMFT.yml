@@ -71,7 +71,7 @@
         [[dmftctqmc_order]] gives a histogram of the perturbation orders during the simulation, [[dmftctqmc_gmove]] customizes the global move tries (mainly useful for systems with high/low spin configurations), and [[dmftctqmc_meas]] sets the frequency of measurement of quantities.
 
     tutorials  : |-
-              <li><a href="../../tutorial/generated_files/lesson_dmft.html">The lesson on DFT+DMFT</a> shows
-              how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite : DFT+U.</li>
+        <li>[[lesson:dmft|The lesson on DFT+DMFT]] shows
+        how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite: DFT+U.</li>
 
     end : default

@@ -35,9 +35,9 @@
         <p> Specified lattice parameters, or angles, or atomic positions,
          can be kept fixed if needed, see [[topic_GeoConstraints]].
     tutorials  : |-
-           <li><a href="../../tutorial/generated_files/lesson_paral_images.html">Parallelism based on "images",
-           e.g. for the determination of transitions paths (string method)</a>,
-           that can be activated on top of the "KGB" parallelism for force
-           calculations.</li>
+            <li>[[lesson:paral_images|Parallelism based on "images"]],
+            e.g. for the determination of transitions paths (string method)</a>,
+            that can be activated on top of the "KGB" parallelism for force
+            calculations.</li>
 
     end : default

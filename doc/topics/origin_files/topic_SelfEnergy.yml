@@ -48,16 +48,15 @@
         thanks to the "extrapolar" method.
         <p>The frequency meshes, used e.g. for integration along the real and imaginary axes are described in [[topic_FrequencyMeshMBPT]].
     tutorials  : |-
-       <li><a href="../../tutorial/generated_files/lesson_gw1.html">The first lesson on GW (GW1)</a> deals with
+       <li>The first lesson on GW ([[lesson:gw1|GW1]]) deals with
        the computation of the quasi-particle band gap of Silicon 
        (semiconductor), in the GW approximation (much better than the
        Kohn-Sham LDA band structure), with a plasmon-pole model. </li>
-       <li><a href="../../tutorial/generated_files/lesson_gw2.html">The second lesson on GW (GW2)</a> deals with
+       <li>The second lesson on GW ([[lesson:gw1|GW2]])  deals with
        the computation of the quasi-particle band structure of Aluminum, in
        the GW approximation (so, much better than the Kohn-Sham LDA band
        structure) without using the plasmon-pole model. </li>
-       <li><a href="../../tutorial/generated_files/lesson_paral_mbt.html">Parallelism of Many-Body
-       Perturbation calculations (GW)</a> allows to speed up the calculation of
-       accurate electronic structures (quasi-particle band structure,
+       <li>[[lesson:paral_mbt|The lesson on Parallelism of Many-Body Perturbation calculations (GW)]] 
+       allows to speed up the calculation of accurate electronic structures (quasi-particle band structure,
        including many-body effects).</li>
     end : default

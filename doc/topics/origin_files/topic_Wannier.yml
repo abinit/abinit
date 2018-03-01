@@ -28,8 +28,8 @@
 
 
     tutorials  : |-
-              <li><a href="../../tutorial/generated_files/lesson_wannier90.html">The lesson on Wannier90</a> deals
-              with the Wannier90 library to obtain Maximally Localized Wannier
-              Functions.</li>
+            <li>[[lesson:wannier90|The lesson on Wannier90]] deals
+            with the Wannier90 library to obtain Maximally Localized Wannier
+            Functions.</li>
 
     end : default

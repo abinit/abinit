@@ -30,8 +30,7 @@
        charges, LO-TO splitting, phonons in the whole Brillouin zone. The
        creation of the "Derivative Data Base" (DDB) is presented.</li>
  
-       <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
-       electron-phonon interaction</a> presents the use of the utility MRGKK
+       <li> [[lesson:eph|The lesson on the electron-phonon interaction]] presents the use of the utility MRGKK
        and ANADDB to examine the electron-phonon interaction and the
        subsequent calculation of superconductivity temperature (for bulk
        systems).</li>

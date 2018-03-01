@@ -25,7 +25,7 @@
        <p>Thanks to the locality provided by PAW partial wave basis, it is possible to perform response function calculations for correlated electron materials. The LDA+U formalism is usable without any restriction for the PAW+DFPT calculations.
 
        <p> All the tutorials dedicated to response functions can be followed both with norm-conserving pseudopotentials and with PAW atomic datasets.
-       <p> More detailed explanations to perform a response calculation are given in the <a href="../../users/generated_files/help_respfn.html">help_respfn </a>file. 
+       <p> More detailed explanations to perform a response calculation are given in the [[help:respfn]].
 
     tutorials  : |-
        <li>[[lesson_rf1|The lesson Response-Function 1 (RF1)]]

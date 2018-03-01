@@ -2223,13 +2223,12 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Select a particular set of Data Blocks in the DDB. (PRESENTLY, ONLY OPTION 1
-IS AVAILABLE)
+Select a particular set of Data Blocks in the DDB. (PRESENTLY, ONLY OPTION 1 IS AVAILABLE)
 
   * 1 --> Blocks obtained by a non-stationary formulation.
   * 2 --> Blocks obtained by a stationary formulation.
 
-For more detailed explanations, see [[help_abinit]] If the information in the
+For more detailed explanations, see [[help:abinit]] If the information in the
 DDB is available, always use the option 2. If not, you can try option 1, which is less accurate.
 """,
 ),

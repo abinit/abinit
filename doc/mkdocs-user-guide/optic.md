@@ -21,22 +21,21 @@ the present ordering of the help files and tutorial, this is not obvious. In a
 future version, the tutorials and help files will be reorder and modified.
 
 It will be easier to discover the present file with the help of the [[lesson:optic]].  
-It is worthwhile to print this help file, for ease of reading.
 
 ## 1 Introduction
   
 Optic allows to compute the frequency dependent linear optical dielectric
-function and second order nonlinear optical susceptibility. An introduction to
-such computations is given in the following paper:
+function and second order nonlinear optical susceptibility. 
+An introduction to such computations is given in the following paper:
 
-  * Ref. 1 : S. Sharma and C. Ambrosch-Draxl Physica Scripta T109, 128 (2004) or online: <http://arxiv.org/abs/cond-mat/0305016>
+  * Ref. 1: S. [[cite:Sharma2004|Physica Scripta T109, 128 (2004)]] or online: <http://arxiv.org/abs/cond-mat/0305016>
 
 The following are also very useful references:
 
-  * Ref. 2 : James L. P. Hughes and J. E. Sipe, Phys. Rev. B 53 10751 (1996) 
-  * Ref. 3 : C. Ambrosch-Draxl and J. O. Sofo, online: <http://arxiv.org/abs/cond-mat/0402523>
-  * Ref. 4 : S. Sharma J. K. Dewhurst and C. Ambrosch-Draxl Phys. Rev. B 67 165332 (2003) 
-    or online: <http://arxiv.org/abs/cond-mat/0211512>
+  * Ref. 2: James L. P. Hughes and J. E. Sipe, [[cite:Hughes1996|Phys. Rev. B 53 10751 (1996)]]
+  * Ref. 3: C. Ambrosch-Draxl and J. O. Sofo ([[cite:Draxl2006]] online: <http://arxiv.org/abs/cond-mat/0402523>
+  * Ref. 4: S. Sharma J. K. Dewhurst and C. Ambrosch-Draxl Phys. Rev. B 67 165332 (2003) 
+    [[cite:Sharma2003]] or online: <http://arxiv.org/abs/cond-mat/0211512>
 
 Before going to the detailed explanation of the Optic utility, the user is
 advised to get familiar to the theory behind it, explained in these
@@ -53,7 +52,7 @@ Ref. 1 to determine the nonlinear optical response of the material under investi
 The use of Optic is quite simple:
     
     optic < optic.files > optic.log
-
+    
 where the optic.files file contains three information: the name of the input
 file, the name of an output file (actually unused), and the root name for all
 other output files. These input files will be described in the next section.
@@ -80,12 +79,10 @@ Moreover, a straightforward relationship exists between these matrix
 elements, and the matrix elements of the momentum operator.
 
 The main abinit program has the capability to compute derivatives of
-wavefunctions with respect to their wavevector. This is explained in the
-[**ABINIT (respfn) help file**](help_respfn.html). Such a calculation implies
-treating three d/dk perturbations, with numbers 3*natom+1, 3*natom+2 and
+wavefunctions with respect to their wavevector. This is explained in the [[help:respfn]]. 
+Such a calculation implies treating three d/dk perturbations, with numbers 3*natom+1, 3*natom+2 and
 3*natom+3 (that is, for a unit cell with 2 atoms, perturbations number 7, 8
-and 9). In the 2-atom case, the associated files needed for Optic have the
-index _1WF7 , _1WF8 , and _1WF9.
+and 9). In the 2-atom case, the associated files needed for Optic have the index _1WF7 , _1WF8 , and _1WF9.
 
 The formalism implemented in Optic treats explicitly the eigenstates lying in
 the range of energy between the lowest occupied wavefunction and the highest
@@ -94,6 +91,7 @@ All the other ones are neglected. This has two important consequences for the pr
 
   * The ground calculation must produce explicitly all the eigenstates and eigenvalues 
     for that target range of energy, so it cannot be restricted to the occupied wavefunctions only
+
   * One does not need the full change of Bloch wavefunctions with respect to d/dk, but 
     only the matrix elements between the wavefunctions of this range of energy
 

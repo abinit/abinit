@@ -32,8 +32,7 @@
       the thermal conductivity, and the thermopower 
       (electron transport, high temperature, Kubo-Greenwood formalism) real as well as imaginary part.
     tutorials  : |-
-       <li>See 
-       <a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that
+       <li>See [[lesson:optic|The lesson on Optic]], the utility that
        allows to obtain the frequency dependent linear optical dielectric
        function and the frequency dependent second order nonlinear optical
        susceptibility, in the simple "Sum-Over-State" approximation.</li>

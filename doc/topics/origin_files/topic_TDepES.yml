@@ -36,7 +36,6 @@
           <p>For the temperature dependence of the Fermi energy, see [[topic_ElPhonTransport]].
     tutorials  : |-
 
-        <li>A lesson has been developed on <a href="../../tutorial/generated_files/lesson_tdepes.html">
-        the temperature dependence of the electronic structure</a>.</li>
+        <li>A lesson has been developed on [[lesson:tdepes.html|the temperature dependence of the electronic structure]]:.</li>
 
     end : default

@@ -38,7 +38,7 @@
 
          <p>
     tutorials  : |-
-          <li><a href="../../tutorial/generated_files/lesson_dftu.html">The lesson on DFT+U</a> shows
-          how to perform a DFT+U calculation using ABINIT, and will lead to
-          compute the projected DOS of NiO. Prerequisite : PAW1.</li>
+        <li>[[lesson:dftu|The lesson on DFT+U]] shows
+        how to perform a DFT+U calculation using ABINIT, and will lead to
+        compute the projected DOS of NiO. Prerequisite : PAW1.</li>
     end : default

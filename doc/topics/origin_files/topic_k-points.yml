@@ -63,7 +63,7 @@
           natom * nkpt can be much smaller than this (for an isolated molecule
           in a sufficiently large supercell, one k-point is enough).
     tutorials  : |-
-          <li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
+          <li>[[lesson:base3|The lesson 3]] deals with crystalline
           silicon (an insulator): the definition of a k-point grid, the smearing
           of the cut-off energy, the computation of a band structure, and again,
           convergence studies ...</li>

@@ -32,16 +32,16 @@
          <p>Atomic positions can also be generated at random, see [[random_atpos]].
          <p>Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
     tutorials  : |-
-         <li><a href="../../tutorial/generated_files/lesson_base1.html">The lesson 1</a> deals with the H2
+         <li>[[lesson:base1|The lesson 1]] deals with the H2
          molecule : get the total energy, the electronic energies, the charge
          density, the bond length, the atomisation energy </li>
-         <li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
+         <li>[[lesson:base2|The lesson 2]] deals again with the H2
          molecule: convergence studies, LDA versus GGA </li>
-         <li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
+         <li>[[lesson:base3|The lesson 3]] deals with crystalline
          silicon (an insulator): the definition of a k-point grid, the smearing
          of the cut-off energy, the computation of a band structure, and again,
          convergence studies ...</li>
-         <li><a href="../../tutorial/generated_files/lesson_base4.html">The lesson 4</a> deals with crystalline
+         <li>[[lesson:base4|The lesson 4]] deals with crystalline
          aluminum (a metal), and its surface: occupation numbers, smearing the
          Fermi-Dirac distribution, the surface energy, and again, convergence
          studies ...</li>

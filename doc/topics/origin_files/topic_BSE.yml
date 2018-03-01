@@ -68,7 +68,7 @@
           <p> In the non-spin-polarized case, spin-singlet as well as spin-triplet excitations are computed. Spin-polarized case is also available.
 
     tutorials  : |-
-        <li><a href="../../tutorial/generated_files/lesson_bse.html">The lesson on the Bethe-Salpeter Equation (BSE)</a> deals with the
+        <li>The [[lesson:bse]] lesson on the Bethe-Salpeter Equation (BSE)</a> deals with the
         computation of the macroscopic dielectric function of Silicon within
         the Bethe-Salpeter equation. </li>
  

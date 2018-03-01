@@ -22,8 +22,7 @@
         setting [[anaddb:prtnest]] to 1 (output to _NEST).
          <p>
     tutorials  : |-
-        <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
-         electron-phonon interaction</a> presents the use of the utility MRGKK
+        <li>The lesson on the [[lesson:eph|electron-phonon interaction]] presents the use of the utility MRGKK
          and ANADDB to examine the electron-phonon interaction and the
          subsequent calculation of superconductivity temperature (for bulk
          systems).</li>

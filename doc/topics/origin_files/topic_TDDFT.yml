@@ -15,7 +15,7 @@
          pseudopotentials). See the explanations given in the [[lesson:tddft]] lesson of tutorial. The [[iscf]] input variable must be set to -1.
          <p>In the non-spin-polarized case, spin-singlet as well as spin-triplet excitations are computed. Spin-polarized case is also available.
     tutorials  : |-
-           <li><a href="../../tutorial/generated_files/lesson_tddft.html">The lesson on TDDFT</a> deals with the
+           <li>[[lesson:tddft|The lesson on TDDFT]] deals with the
            computation of the excitation spectrum of finite systems, thanks to
            the Time-Dependent Density Functional Theory approach, in the
            Cassida formalism.</li> 

@@ -31,7 +31,7 @@
        displacement fields and mixed boundary conditions (a mix of electric field and displacement field) can be computed as well. 
 
     tutorials  : |-
-       <li><a href="../../tutorial/generated_files/lesson_ffield.html">The lesson on polarization and finite
+       <li>The [[lesson:ffield]|lesson on polarization and finite
        electric field</a> deals with the computation of the polarization of
        an insulator (e.g. ferroelectric, or dielectric material) thanks to
        the Berry phase approach, and also presents the computation of

@@ -91,8 +91,7 @@
         it is showed how to perform such studies on a variety of compounds.
 
     tutorials  : |-
-
-      <li><a href="../../tutorial/generated_files/lesson_nuc.html">The lesson on the properties of the nuclei</a> 
-      shows how to compute the electric field gradient. Prerequisite : PAW1.</li>
+        <li>[[lesson:nuc|The lesson on the properties of the nuclei]]
+        shows how to compute the electric field gradient. Prerequisite : PAW1.</li>
  
     end : default
