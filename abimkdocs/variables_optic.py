@@ -15,11 +15,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="BROADENING",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 In Eq. 46 of [[cite:Sharma2004], it is clear that when ever wnm(k) is equal to w, there is a resonance.
 Numerically this would lead to an infinity. In order to avoid this one could do two things.
@@ -41,11 +36,7 @@ Variable(
     dimensions="scalar",
     defaultval=None,
     mnemonics="DDK FILE",
-    characteristics=None,
     commentdefault="no default",
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Specify the filename that has been produced by the preparatory Abinit run.
 This file must contain the matrix elements of the d/dk operator along direction X.
@@ -65,11 +56,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="Delta OMEGA",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 The step and maximum sets your energy grid for the calculation using the
 formula number of energy mesh points=maximum/step (zero excluded). So in order
@@ -86,11 +72,6 @@ Variable(
     dimensions=[['num_lin_comp']],
     defaultval=0,
     mnemonics="LINear COMPonents",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 This tells which component of the dielectric tensor you want to calculate.
 These numbers are called a and b Eqs. 46 in [[Sharma2004]].
@@ -106,11 +87,6 @@ Variable(
     dimensions="scalar",
     defaultval="1 Ha",
     mnemonics="MAXimum value of OMEGA",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 The step and maximum sets your energy grid for the calculation using the
 formula number of energy mesh points=maximum/step (zero excluded). So in order
@@ -127,11 +103,6 @@ Variable(
     dimensions=[['num_nonlin_comp']],
     defaultval=0,
     mnemonics="NON-LINear COMPonents",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 This tells which component of the dielectric tensor you want to calculate.
 These numbers are called a, b and c in [[cite:Sharma2004]].
@@ -147,11 +118,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of LINear COMPonents",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 How many components out of 9 of the linear optical dielectric tensor do you
 want to calculate. Most of these are either equal or zero depending upon the
@@ -168,11 +134,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of NON-LINear COMPonents",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 How many components out of 27 of the non-linear optical dielectric tensor do
 you want to calculate. Most of these are either equal or zero depending upon
@@ -189,11 +150,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="SCISSOR operator",
-    characteristics=None,
     commentdefault="in Ha",
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 LDA/GGA are known to underestimate the band-gap by up to 100%. In order
 to get the optical spectrum and make a realistic comparison with experiments
@@ -215,11 +172,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="TOLERANCE",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 When energy denominators are smaller than **tolerance** , the term is discarded from the sum.
 """,
@@ -233,11 +185,7 @@ Variable(
     dimensions="scalar",
     defaultval=None,
     mnemonics="WaveFunction K FILE",
-    characteristics=None,
     commentdefault="no default",
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Specify the filename that has been produced by the preparatory Abinit run.
 This file must contain the matrix elements of the d/dk operator along

@@ -15,11 +15,6 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="index of ATOM",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Index of the investigated atom.
 """,
@@ -33,11 +28,6 @@ Variable(
     dimensions="scalar",
     defaultval=1.0,
     mnemonics="bader ATomic RADius",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 A first estimation of the Bader radius (not too important - it is used only
 two times)
@@ -52,11 +42,6 @@ Variable(
     dimensions="scalar",
     defaultval=0.98,
     mnemonics="COeFFicient 1",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 See the input variable [[ratmin@aim]].
 """,
@@ -70,11 +55,6 @@ Variable(
     dimensions="scalar",
     defaultval=0.95,
     mnemonics="COeFFicient 2",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 See the input variable [[ratmin@aim]].
 """,
@@ -88,11 +68,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="computation of CRITical points",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Drives the computation of critical points.
 
@@ -127,11 +102,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="electronic DENsity OUTput",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Output of the electronic density. The specification of the line (plane) in the
 real space must be given in the input variable [[vpts@aim]] and grid in
@@ -152,11 +122,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Density or Laplacian TYP output",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Specification of the contribution of the electronic density corresponding to
 the density and/or laplacian output (see [[denout@aim]] and [[lapout@aim]])
@@ -175,11 +140,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-2",
     mnemonics="DPCLIM",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 If two "numerically different" critical points are separated by less than
 **dpclim** , they are considered to be the same critical point. This often
@@ -198,11 +158,6 @@ Variable(
     dimensions=[3],
     defaultval=MultipleValue({'number': 3, 'value': 0.0}),
     mnemonics="FOLlow DEParture",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Needed in the case [[aim:follow]]=1 only. Defines the starting point.
 """,
@@ -216,11 +171,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="FOLLOW the gradient path",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Follow the gradient path to the corresponding atom starting from the position
 specified in the input variable [[aim:foldep]].
@@ -235,11 +185,6 @@ Variable(
     dimensions="scalar",
     defaultval=0.5,
     mnemonics="FOLlow STeP",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 The first step for following the gradient path.
 """,
@@ -253,11 +198,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GraPhic output for the bader SURFace",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Drives the graphic output (gnuplot script) of the irreducible part of the
 calculated Bader surface.
@@ -275,11 +215,6 @@ Variable(
     dimensions="scalar",
     defaultval=100,
     mnemonics="numer of INtegration PoinTs",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Number of radial points used for integration of the Bader charge (not too
 sensitive).
@@ -294,11 +229,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Integration of the charge density RHO",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Drives the integration of the charge of the Bader atom.
 
@@ -315,11 +245,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Integration of the VOLume",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Drives the integration of the volume of the Bader atom.
 
@@ -336,11 +261,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="electronic density LAPlacian OUTput",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Output of the laplacian of electronic density. The specification of the line
 (plane) in the real space must be given in the input variable [[aim:vpts]] and
@@ -361,11 +281,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-12",
     mnemonics="Low GRADient criterion",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 The search for one particular CP is decided to be successful when either the
 norm of the gradient of the electron density is smaller than **lgrad** or when
@@ -386,11 +301,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-5",
     mnemonics="Low GRADient criterion 2",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Determines the criterion for deciding that a CP has been found. See
 [[aim:lgrad]] for more details.
@@ -405,11 +315,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-10",
     mnemonics="Length of the planned search STEP",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Determines the criterion for deciding a CP has been found. See [[aim:lgrad]]
 for more details.
@@ -424,11 +329,6 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-5",
     mnemonics="Length of the planned search STEP 2",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Determines the criterion for deciding that a CP has been found. See
 [[aim:lgrad]] for more details.
@@ -443,11 +343,6 @@ Variable(
     dimensions="scalar",
     defaultval=10.0,
     mnemonics="MAXimal ATomic Distance",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Atoms within this maximal distance are considered in order to start the search
 of a CP.
@@ -466,11 +361,6 @@ Variable(
     dimensions="scalar",
     defaultval=5.0,
     mnemonics="MAXimal CP Distance",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 The CPs are searched for within this maximal distance.
 
@@ -488,11 +378,6 @@ Variable(
     dimensions=[2],
     defaultval=MultipleValue({'number': 2, 'value': 30}),
     mnemonics="Number of GRID points",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Defines the grid in real space, for the density and laplacian outputs,
 governed by [[aim:denout]] and [[aim:lapout]].
@@ -507,11 +392,6 @@ Variable(
     dimensions="scalar",
     defaultval=48,
     mnemonics="Number of PHI angle",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 With [[aim:ntheta]], this variable defines the angular grid for the
 integration within the Bader volume, in particular, the number of phi angles,
@@ -530,11 +410,6 @@ Variable(
     dimensions="scalar",
     defaultval=3,
     mnemonics="Number of Supercell points in direction A",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 These variables define a "supercell", from the primitive cell repeated along
 each primitive direction. This supercell is build as follows :
@@ -561,11 +436,6 @@ Variable(
     dimensions="scalar",
     defaultval=3,
     mnemonics="Number of Supercell points in direction B",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 These variables define a "supercell", from the primitive cell repeated along
 each primitive direction. This supercell is build as follows :
@@ -592,11 +462,6 @@ Variable(
     dimensions="scalar",
     defaultval=3,
     mnemonics="Number of Supercell points in direction C",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 These variables define a "supercell", from the primitive cell repeated along
 each primitive direction. This supercell is build as follows :
@@ -623,11 +488,6 @@ Variable(
     dimensions="scalar",
     defaultval=32,
     mnemonics="Number of THETA angles",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 With [[aim:nphi]], this variable defines the angular grid for the integration
 within the Bader volume, in particular, the number of theta angles, to be used
@@ -645,11 +505,6 @@ Variable(
     dimensions="scalar",
     defaultval=2.0,
     mnemonics="PHI MAXimal angle",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Angular limits of integration of the Bader volume for the phi variables. The
 number of integration points is given by [[aim:nphi]]. The range of
@@ -665,11 +520,6 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="PHI MINimal angle",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Angular limits of integration of the Bader volume for the phi variables. The
 number of integration points is given by [[aim:nphi]]. The range of
@@ -685,11 +535,6 @@ Variable(
     dimensions="scalar",
     defaultval=0.05,
     mnemonics="RADial STeP",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 The length of the first step in the search of the exact Bader radius.
 """,
@@ -703,11 +548,6 @@ Variable(
     dimensions="scalar",
     defaultval=1.0,
     mnemonics="Radius Atomic MINimal",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 The first estimation of the smallest radius of the basin of the atom (the
 distance at which the procedure that follows the gradient path announces that
@@ -729,11 +569,6 @@ Variable(
     dimensions=[2],
     defaultval=MultipleValue({'number': 2, 'value': 0.0}),
     mnemonics="Radius SURface DIRection",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 In the case [[aim:rsurf]]=1, gives the direction (angular coordinates
 theta,phi) along which the radius of the Bader surface is to be determined.
@@ -748,11 +583,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="computation of the Radius bader SURFace",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Drive the computation of the radius of the Bader surface for the angles
 specified in the input variable [[aim:rsurdir]]
@@ -770,11 +600,6 @@ Variable(
     dimensions=[3],
     defaultval="1.0 1.0 1.0",
     mnemonics="SCALing of the cartesian coordinates",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 SCALing of the cartesian coordinates.
 """,
@@ -788,11 +613,6 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="computation of the bader SURFace",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Drive the computation of the full Bader surface.
 
@@ -809,11 +629,6 @@ Variable(
     dimensions="scalar",
     defaultval="pi",
     mnemonics="THETA MAXimal angle",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Angular limits of integration of the Bader volume for the theta variables. The
 number of integration points is given by [[aim:ntheta]]. The range of
@@ -829,11 +644,6 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="THETA MINimal angle",
-    characteristics=None,
-    commentdefault=None,
-    commentdims=None,
-    excludes=None,
-    requires=None,
     text="""
 Angular limits of integration of the Bader volume for the theta variables. The
 number of integration points is given by [[aim:ntheta]]. The range of
@@ -849,11 +659,7 @@ Variable(
     dimensions=[6],
     defaultval=MultipleValue({'number': 6, 'value': 0.0}),
     mnemonics="Vectors defining the PoinTS of the surface",
-    characteristics=None,
-    commentdefault=None,
     commentdims="6 for 1D, 9 for 2D",
-    excludes=None,
-    requires=None,
     text="""
 Basic vectors of the line or rectangle in real space, defining the points for
 which the density or laplacian will be computed, thanks to [[aim:denout]] or

@@ -14,33 +14,60 @@ except ImportError:
 
 class Variable(object):
 
-    def __init__(self, vartype=None, characteristics=None,
-                 mnemonics=None, dimensions=None, defaultval=None,
-                 text=None, abivarname=None, varset=None, excludes=None, requires=None,
-                 commentdefault=None, commentdims=None, topics=None):
+    def __init__(self,
+                 abivarname=None,
+                 varset=None,
+                 vartype=None,
+                 topics=None,
+                 dimensions=None,
+                 defaultval=None,
+                 mnemonics=None,
+                 characteristics=None,
+                 excludes=None,
+                 requires=None,
+                 commentdefault=None,
+                 commentdims=None,
+                 text=None,
+                 ):
         """
         Args:
-            vartype = ''                   # String containing the type
-            characteristics = None         # String containing the characteristics
-            mnemonics = None               # String containing the mnemonics
-            dimensions = None              # Array containing either int, formula or another variable  TODO: shape?
-            defaultval = None              # Either constant number, formula or another variable
-            text = None                    # Description (str)
-            abivarname = None              # Name of the variable (str)   code@name
+            abivarname (str): Name of the variable (including @code if not abinit e.g asr@anaddb).
+                Required
+            varset (str): The group this variable belongs to (could be code if code has no group).
+                Required
+            vartype (str): The type of the variable. Required
+            topics (list): List of strings with topics. Required
+            dimensions: List of strings with dimensions of "scalar". Required.
+            defaultval: Default value. None if no default is provided. Other possibilities are ...
+                Either constant number, formula or another variable
+            mnemonics (str): Mnemonic string (required).
+            characteristics (list): List of characteristics or None
+            excludes (str): String with variables that are exluded if this variable is given.
+            requires (str): String with variables that are required
+            commentdefault=None,
+            commentdims=None,
+            text: markdown string with description. Required.
         """
-        self.vartype = vartype
-        self.characteristics = characteristics
-        self.mnemonics = mnemonics
-        self.dimensions = dimensions
-        self.defaultval = defaultval
-        self.text = text
         self.abivarname = abivarname
         self.varset = varset
-        self.commentdefault = commentdefault
-        self.commentdims = commentdims
+        self.vartype = vartype
         self.topics = topics
+        self.dimensions = dimensions
+        self.defaultval = defaultval
+        self.mnemonics = mnemonics
+        self.characteristics = characteristics
         self.excludes = excludes
         self.requires = requires
+        self.commentdefault = commentdefault
+        self.commentdims = commentdims
+        self.text = text
+
+        errors = []
+        for a in ("abivarname", "varset", "vartype", "topics", "dimensions", "text"):
+            if getattr(self, a) is None:
+                errors.append("attribute %s is mandatory" % a)
+        if errors:
+            raise ValueError("Errors in %s:\n%s" % (self.abivarname, "\n".join(errors)))
 
     @property
     def name(self):
