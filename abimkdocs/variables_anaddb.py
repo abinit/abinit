@@ -67,7 +67,9 @@ Variable(
 Govern the imposition of the Acoustic Sum Rule (ASR).
 
   * 0 => no ASR for interatomic force constants is imposed.
-  * 1 or 2 => the ASR for interatomic force constants is imposed by modifying the on-site interatomic force constants, in a symmetric way ( **asr** =2), or in the more general case, unconstrained way ( **asr** =1).
+  * 1 or 2 => the ASR for interatomic force constants is imposed by modifying
+  the on-site interatomic force constants, in a symmetric way ( **asr** =2),
+  or in the more general case, unconstrained way ( **asr** =1).
 
 More detailed explanations: the total energy should be invariant under
 translation of the crystal as a whole. This would guarantee that the three
@@ -155,7 +157,7 @@ Variable(
     requires=None,
     text="""
 The actual numbers of the atoms for which the interatomic force constant have
-to be written and eventually analysed.  
+to be written and eventually analysed.
 
 WARNING: there will be an in-place change of meaning of atifc (this is
 confusing, and should be taken away in one future version - sorry for this).
@@ -178,7 +180,7 @@ Variable(
     text="""
 Allow setting the target band gap, in eV. ([[elphflag@anaddb]]=1).
 
-NOTE XG20170811 : apparently no effective test for this input variable. Also,
+NOTE XG20170811: apparently no effective test for this input variable. Also,
 the descirption is strange ...!
 """,
 ),
@@ -200,10 +202,10 @@ Variable(
 Allows to specify the Bravais lattice of the crystal, in order to help to
 generate a grid of special q points.
 
-  * 1 => all the lattices (including FCC, BCC and hexagonal) 
-  * 2 => specific for Face Centered lattices 
-  * 3 => specific for Body Centered lattices 
-  * 4 => specific for the Hexagonal lattice 
+  * 1 => all the lattices (including FCC, BCC and hexagonal)
+  * 2 => specific for Face Centered lattices
+  * 3 => specific for Body Centered lattices
+  * 4 => specific for the Hexagonal lattice
 
 Note that in the latter case, the rprim of the unit cell have to be 1.0 0.0
 0.0 -.5 sqrt(3)/2 0.0 0.0 0.0 1.0 in order for the code to work properly.
@@ -227,18 +229,19 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Set the treatment of the Charge Neutrality requirement for the effective
-charges.
+Set the treatment of the Charge Neutrality requirement for the effective charges.
 
   * chneut=0 => no ASR for effective charges is imposed
-  * chneut=1 => the ASR for effective charges is imposed by giving to each atom an equal portion of the missing charge. See Eq.(48) in Phys. Rev. B55, 10355 (1997).
-  * chneut=2 => the ASR for effective charges is imposed by giving to each atom a portion of the missing charge proportional to the screening charge already present. See Eq.(49) in Phys. Rev. B55, 10355 (1997).
+  * chneut=1 => the ASR for effective charges is imposed by giving to each atom
+    an equal portion of the missing charge. See Eq.(48) in Phys. Rev. B55, 10355 (1997).
+  * chneut=2 => the ASR for effective charges is imposed by giving to each atom a portion
+    of the missing charge proportional to the screening charge already present.
+    See Eq.(49) in Phys. Rev. B55, 10355 (1997).
 
 More detailed explanation: the sum of the effective charges in the unit cell
 should be equal to zero. It is not the case in the DDB, and this sum rule is
 sometimes strongly violated. In particular, this will make the lowest
-frequencies at Gamma non-zero. There is no "best" way of imposing the ASR on
-effective charges.
+frequencies at Gamma non-zero. There is no "best" way of imposing the ASR on effective charges.
 """,
 ),
 
@@ -256,13 +259,39 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Integer. Frequency-dependent dielectric tensor flag.  
+Integer. Frequency-dependent dielectric tensor flag.
 
   * 0 => No dielectric tensor is calculated.
-  * 1 => The frequency-dependent dielectric tensor is calculated. Requirements for preceding response-function DDB generation run: electric-field and full atomic-displacement responses. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0. The frequencies are defined by the [[anaddb:nfreq]],[[anaddb:frmin]],[[anaddb:frmax]] variables. Also, the generalized Lyddane-Sachs-Teller relation will be used as an independent check of the dielectric tensor at zero frequency (this for the directions defined in the phonon list 2. See [[anaddb:nph2l]].
-  * 2 => Only the electronic dielectric tensor is calculated. It corresponds to a zero-frequency homogeneous field, with quenched atomic positions. For large band gap materials, this quantity is measurable because the highest phonon frequency is on the order of a few tenths of eV, and the band gap is larger than 5eV. Requirements for preceding response-function DDB generation: electric-field response. Set [[rfelfd]] = 1 or 3 (preferably 3). Note that the same information on the electronic dielectric tensor will be printed in the .out file of the [[rfelfd]] run. 
-  * 3 => Compute and print the relaxed-ion dielectric tensor. Requirements for preceding response-function DDB generation run: electric-field and full atomic-displacement responses. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0 (needed because the inverse of force-constant tensor is required). Furthermore, in the anaddb input file the variable [[anaddb:nph2l]] must be nonzero in order to initiate computation of atomic displacements. If only the dielectric response is needed it is sufficient to set [[anaddb:nph2l]] to 1 and leave [[anaddb:qph2l]] at its default value (the Gamma point). Note that the relaxed-ion dielectric tensor computed here can also be obtained as the zero-frequency limit of the frequency-dependent dielectric tensor using input variables dieflag=1 and frmin=0.0. (The results obtained using these two approaches should agree to good numerical precision.) The ability to compute and print the static dielectric tensor here is provided for completeness and consistency with the other tensor quantities that are computed in this section of the code. 
-  * 4 => Calculate dielectric tensor of both relaxed ion and free stress. We need information of internal strain and elastic tensor (relaxed ion) in this computation. So please set: [[anaddb:elaflag]]=2,3,4 or 5 and [[anaddb:instrflag]]=1
+
+  * 1 => The frequency-dependent dielectric tensor is calculated.
+  Requirements for preceding response-function DDB generation run: electric-field and full atomic-displacement responses.
+  Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0.
+  The frequencies are defined by the [[anaddb:nfreq]], [[anaddb:frmin]], [[anaddb:frmax]] variables.
+  Also, the generalized Lyddane-Sachs-Teller relation will be used as an independent check of the dielectric tensor
+  at zero frequency (this for the directions defined in the phonon list 2. See [[anaddb:nph2l]].
+
+  * 2 => Only the electronic dielectric tensor is calculated. It corresponds to a zero-frequency homogeneous field,
+   with quenched atomic positions. For large band gap materials, this quantity is measurable because the
+   highest phonon frequency is on the order of a few tenths of eV, and the band gap is larger than 5eV.
+   Requirements for preceding response-function DDB generation: electric-field response.
+   Set [[rfelfd]] = 1 or 3 (preferably 3). Note that the same information on the electronic dielectric tensor
+   will be printed in the .out file of the [[rfelfd]] run.
+
+  * 3 => Compute and print the relaxed-ion dielectric tensor.
+  Requirements for preceding response-function DDB generation run:
+  electric-field and full atomic-displacement responses. Set [[rfstrs]] = 1, 2, or 3 (preferably 3).
+  Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0
+  (needed because the inverse of force-constant tensor is required). Furthermore, in the anaddb input file
+  the variable [[anaddb:nph2l]] must be nonzero in order to initiate computation of atomic displacements.
+  If only the dielectric response is needed it is sufficient to set [[anaddb:nph2l]] to 1 and leave [[anaddb:qph2l]]
+  at its default value (the Gamma point). Note that the relaxed-ion dielectric tensor computed here can also be obtained
+  as the zero-frequency limit of the frequency-dependent dielectric tensor using input variables dieflag=1 and frmin=0.0.
+  (The results obtained using these two approaches should agree to good numerical precision.)
+  The ability to compute and print the static dielectric tensor here is provided for completeness
+  and consistency with the other tensor quantities that are computed in this section of the code.
+  * 4 => Calculate dielectric tensor of both relaxed ion and free stress.
+  We need information of internal strain and elastic tensor (relaxed ion) in this computation.
+  So please set: [[anaddb:elaflag]]=2,3,4 or 5 and [[anaddb:instrflag]]=1
 """,
 ),
 
@@ -280,8 +309,12 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-  * 0 => the dipole-dipole interaction is not handled separately in the treatment of the interatomic forces. This option is available for testing purposes or if effective charge and/or dielectric tensor is not available in the derivative database. It gives results much less accurate than **dipdip** =1.
-  * 1 => the dipole-dipole interaction is subtracted from the dynamical matrices before Fourier transform, so that only the short-range part is handled in real space. Of course, it is reintroduced analytically when the phonon spectrum is interpolated, or if the interatomic force constants have to be analysed in real space.
+  * 0 => the dipole-dipole interaction is not handled separately in the treatment of the interatomic forces.
+    This option is available for testing purposes or if effective charge and/or dielectric tensor is not available
+    in the derivative database. It gives results much less accurate than **dipdip** =1.
+  * 1 => the dipole-dipole interaction is subtracted from the dynamical matrices before Fourier transform,
+    so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
+    when the phonon spectrum is interpolated, or if the interatomic force constants have to be analysed in real space.
 
 The abinit input variable [[dipdip]] has a similar meaning.
 """,
@@ -302,7 +335,7 @@ Variable(
     requires=None,
     text="""
 The input variable **dosdeltae** is used to define the step of the frequency
-grid used to calculate the phonon density of states when [[anaddb:prtdos]]=1.
+grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
 """,
 ),
 
@@ -321,7 +354,7 @@ Variable(
     requires=None,
     text="""
 **dossmear** defines the gaussian broadening used to calculate the phonon
-density of states when [[anaddb:prtdos]]=1.
+density of states when [[anaddb:prtdos]] = 1.
 """,
 ),
 
@@ -380,9 +413,9 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-  * 0 => do not write the phonon eigenvectors;
-  * 1 or 2 => write the phonon eigenvectors;
-  * 4 => generate output files for band2eps (drawing tool for the phonon band structure);
+* 0 => do not write the phonon eigenvectors;
+* 1 or 2 => write the phonon eigenvectors;
+* 4 => generate output files for band2eps (drawing tool for the phonon band structure);
 """,
 ),
 
@@ -403,11 +436,29 @@ Variable(
 Flag for calculation of elastic and compliance tensors
 
   * 0 => No elastic or compliance tensor will be calculated.
-  * 1 => Only clamped-ion elastic and compliance tensors will be calculated. Requirements for preceding response-function DDB generation run: Strain perturbation. Set [[rfstrs]] to 1, 2, or 3. Note that [[rfstrs]]=3 is recommended so that responses to both uniaxial and shear strains will be computed. 
-  * 2 => Both relaxed- and clamped-ion elastic and compliance tensor will be calculated, but only the relaxed-ion quantities will be printed. The input variable [[anaddb:instrflag]] should also be set to 1, because the internal-strain tensor is needed to compute the relaxed-ion corrections. Requirements for preceding response-function DDB generation run: Strain and atomic-displacement responses at Q=0. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0 (needed because the inverse of force-constant tensor is required). 
-  * 3 => Both relaxed and clamped-ion elastic and compliance tensors will be printed out. The input variable [[anaddb:instrflag]] should also be set to 1. Requirements for preceding response-function DDB generation run: Same as for **elaflag** =2. 
-  * 4 => Calculate the elastic and compliance tensors (relaxed ion) at fixed displacement field, the relaxed-ion tensors at fixed electric field will be printed out too, for comparison. When **elaflag** =4, we need the information of internal strain and relaxed-ion dielectric tensor to build the whole tensor, so we need set [[anaddb:instrflag]]=1 and [[anaddb:dieflag]]=3 or 4 . 
-  * 5 => Calculate the relaxed ion elastic and compliance tensors, considering the stress left inside cell. At the same time, bare relaxed ion tensors will still be printed out for comparison. In this calculation, stress tensor is needed to compute the correction term, so one supposed to merge the first order derivative data base (DDB file) with the second order derivative data base (DDB file) into a new DDB file, which can contain both information. And the program will also check for the users.
+  * 1 => Only clamped-ion elastic and compliance tensors will be calculated.
+    Requirements for preceding response-function DDB generation run: Strain perturbation.
+    Set [[rfstrs]] to 1, 2, or 3. Note that [[rfstrs]]=3 is recommended so that responses
+    to both uniaxial and shear strains will be computed.
+  * 2 => Both relaxed- and clamped-ion elastic and compliance tensor will be calculated,
+    but only the relaxed-ion quantities will be printed. The input variable [[anaddb:instrflag]] should also be set to 1,
+    because the internal-strain tensor is needed to compute the relaxed-ion corrections.
+    Requirements for preceding response-function DDB generation run:
+    Strain and atomic-displacement responses at Q=0. Set [[rfstrs]] = 1, 2, or 3 (preferably 3).
+    Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0
+    (needed because the inverse of force-constant tensor is required).
+  * 3 => Both relaxed and clamped-ion elastic and compliance tensors will be printed out.
+   The input variable [[anaddb:instrflag]] should also be set to 1.
+   Requirements for preceding response-function DDB generation run: Same as for **elaflag** =2.
+  * 4 => Calculate the elastic and compliance tensors (relaxed ion) at fixed displacement field,
+    the relaxed-ion tensors at fixed electric field will be printed out too, for comparison.
+    When **elaflag** =4, we need the information of internal strain and relaxed-ion dielectric tensor
+    to build the whole tensor, so we need set [[anaddb:instrflag]]=1 and [[anaddb:dieflag]]=3 or 4 .
+  * 5 => Calculate the relaxed ion elastic and compliance tensors, considering the stress left inside cell.
+    At the same time, bare relaxed ion tensors will still be printed out for comparison.
+    In this calculation, stress tensor is needed to compute the correction term, so one supposed
+    to merge the first order derivative data base (DDB file) with the second order derivative data base (DDB file)
+    into a new DDB file, which can contain both information. And the program will also check for the users.
 """,
 ),
 
@@ -425,9 +476,8 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-If non-zero, will fix artificially the value of the Fermi energy (e.g. for
-semiconductors), in the electron-phonon case. Note that [[anaddb:elph_fermie]]
-and [[anaddb:ep_extrael]] should not be used at the same time.
+If non-zero, will fix artificially the value of the Fermi energy (e.g. for semiconductors),
+in the electron-phonon case. Note that [[anaddb:elph_fermie]] and [[anaddb:ep_extrael]] should not be used at the same time.
 ([[anaddb:elphflag]]=1).
 """,
 ),
@@ -446,8 +496,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-If **elphflag** is 1, anaddb performs an analysis of the electron-phonon
-coupling.
+If **elphflag** is 1, anaddb performs an analysis of the electron-phonon coupling.
 """,
 ),
 
@@ -484,7 +533,7 @@ Variable(
     requires=None,
     text="""
 Give the energy for the phonon frequency output (in the output file, not in
-the console log file, for which Hartree units are used).  
+the console log file, for which Hartree units are used).
 
   * 0 => Hartree and cm-1;
   * 1 => meV and Thz;
@@ -614,8 +663,7 @@ Variable(
     text="""
 In case a non-uniform grid of q-points is being used, for direct calculation
 of the electron-phonon quantities without interpolation, this specifies the
-number of q-points to be found in the GKK file, independently of the normal
-anaddb input (ngqpt)
+number of q-points to be found in the GKK file, independently of the normal anaddb input (ngqpt)
 """,
 ),
 
@@ -652,8 +700,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-For electron-phonon calculations, print out matrix elements for use by the
-yambo code.
+For electron-phonon calculations, print out matrix elements for use by the yambo code.
 """,
 ),
 
@@ -721,7 +768,8 @@ If different from zero, **freeze_displ** will be used as the amplitude of a
 phonon displacement. For each q-point and mode in the [[anaddb:qph1l]] list, a
 file will be created containing a supercell of atoms with the corresponding
 phonon displacements frozen in. This is typically useful to freeze a soft
-phonon mode, then let it relax in abinit afterwards.  
+phonon mode, then let it relax in abinit afterwards.
+
 **freeze_displ** is unitless, but has a physical meaning: it is related to the
 Bose distribution n_B and the frequency w_qs of the phonon mode. At a given
 temperature T, **freeze_displ** will give the mean square displacement of
@@ -729,8 +777,9 @@ atoms (along with the displacement vectors, which are in Bohr). In atomic
 units **freeze_displ** = sqrt((0.5 + n_B(w_qs/kT) / w_qs) Typical values are
 50-200 for a frequency of a few hundred cm-1 and room temperature. If all you
 want is to break the symmetry in the right direction, any reasonable value
-(10-50) should be ok.  
-**WARNING** : this will create a _lot_ of files (3*natom*nph1l), so it should
+(10-50) should be ok.
+
+**WARNING**: this will create a _lot_ of files (3*natom*nph1l), so it should
 be used with a small number [[anaddb:nph1l]] of q-points for interpolation.
 """,
 ),
@@ -749,8 +798,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Value of the largest frequency for the frequency-dependent dielectric tensor,
-in Hartree.
+Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
 """,
 ),
 
@@ -768,8 +816,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Value of the lowest frequency for the frequency-dependent dielectric tensor,
-in Hartree.
+Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
 """,
 ),
 
@@ -813,8 +860,7 @@ number of DDB files is defined by [[anaddb:gruns_nddbs]] (possible values are:
 different volumes (usually ± 1% of the equilibrium volume). The DDB files must
 be ordered according to the volume of the unit cell (the DDB with smallest
 volume comes first) and the volume increment must be constant. The code
-computes the derivative of the dynamical matrix wrt the volume using central
-finite difference.
+computes the derivative of the dynamical matrix wrt the volume using central finite difference.
 """,
 ),
 
@@ -832,8 +878,8 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-This variable defines the number of DDB files (read from
-[[anaddb:gruns_ddbs]]) used for the calculation of the Gruneisen parameters.
+This variable defines the number of DDB files (read from [[anaddb:gruns_ddbs]])
+used for the calculation of the Gruneisen parameters.
 """,
 ),
 
@@ -889,8 +935,8 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-  * 0 => no analysis of interatomic force constants; 
-  * 1 => analysis of interatomic force constants. 
+  * 0 => no analysis of interatomic force constants;
+  * 1 => analysis of interatomic force constants.
 
 If the analysis is activated, one get the trace of the matrices between pairs
 of atoms, if [[anaddb:dipdip]] is 1, get also the trace of the short-range and
@@ -921,13 +967,17 @@ Variable(
     requires=None,
     text="""
   * 0 => do all calculations directly from the DDB, without the use of the interatomic force constant.
-  * 1 => calculate and use the interatomic force constants for interpolating the phonon spectrum and dynamical matrices at every q wavevector, and eventually analyse the interatomic force constants, according to the informations given by [[anaddb:atifc]],[[anaddb:dipdip]],[[anaddb:ifcana]],[[anaddb:ifcout]],[[anaddb:natifc]],[[anaddb:nsphere]],[[anaddb:rifcsph]]
+  * 1 => calculate and use the interatomic force constants for interpolating the phonon spectrum
+    and dynamical matrices at every q wavevector, and eventually analyse the interatomic force constants,
+    according to the informations given by [[anaddb:atifc]], [[anaddb:dipdip]], [[anaddb:ifcana]], [[anaddb:ifcout]],
+    [[anaddb:natifc]], [[anaddb:nsphere]], [[anaddb:rifcsph]]
 
 More detailed explanations: if the dynamical matrices are known on a regular
 set of wavevectors, they can be used to get the interatomic forces, which are
 simply their Fourier transform. When non-analyticities can been removed by the
-use of effective charge at Gamma (option offered by putting [[anaddb:dipdip]]
-to 1), the interatomic forces are known to decay rather fast (in real space).
+use of effective charge at Gamma (option offered by putting [[anaddb:dipdip]] to 1),
+the interatomic forces are known to decay rather fast (in real space).
+
 The interatomic forces generated from a small set of dynamical matrices could
 be of sufficient range to allow the remaining interatomic forces to be
 neglected. This gives a practical way to interpolate the content of a small
@@ -994,10 +1044,12 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Internal strain tensor flag.  
+Internal strain tensor flag.
 
   * 0 => No internal-strain calculation.
-  * 1 => Print out both force-response and displacement-response internal-strain tensor. Requirements for preceding response-function DDB generation run: Strain and full atomic-displacement responses. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0.
+  * 1 => Print out both force-response and displacement-response internal-strain tensor.
+    Requirements for preceding response-function DDB generation run: Strain and full atomic-displacement responses.
+    Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0.
 """,
 ),
 
@@ -1019,11 +1071,27 @@ Indices of the elements of the strain tensor that are fixed during a
 structural relaxation at constrained polarisation:
 
   * 0 => No elastic or compliance tensor will be calculated.
-  * 1 => Only clamped-ion elastic and compliance tensors will be calculated. Requirements for preceding response-function DDB generation run: Strain perturbation. Set [[rfstrs]] to 1, 2, or 3. Note that [[rfstrs]]>=3 is recommended so that responses to both uniaxial and shear strains will be computed. 
-  * 2 => Both relaxed- and clamped-ion elastic and compliance tensor will be calculated, but only the relaxed-ion quantities will be printed. The input variable [[anaddb:instrflag]] should also be set to 1, because the internal-strain tensor is needed to compute the relaxed-ion corrections. Requirements for preceding response-function DDB generation run: Strain and atomic-displacement responses at Q=0. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0 (needed because the inverse of force-constant tensor is required). 
-  * 3 => Both relaxed and clamped-ion elastic and compliance tensors will be printed out. The input variable [[anaddb:instrflag]] should also be set to 1\. Requirements for preceding response-function DDB generation run: Same as for [[anaddb:elaflag]]=2'. 
-  * 4 => Calculate the elastic and compliance tensors (relaxed ion) at fixed displacement field, the relaxed-ion tensors at fixed electric field will be printed out too, for comparison. When [[anaddb:elaflag]]=4, we need the information of internal strain and relaxed-ion dielectric tensor to build the whole tensor, so we need set [[anaddb:instrflag]]=1 and [[anaddb:dieflag]]=3 or 4 . 
-  * 5 => Calculate the relaxed ion elastic and compliance tensors, considering the stress left inside cell. At the same time, bare relaxed ion tensors will still be printed out for comparison. In this calculation, stress tensor is needed to compute the correction term, so one supposed to merge the first order derivative data base (DDB file) with the second order derivative data base (DDB file) into a new DDB file, which can contain both information. And the program will also check for the users. 
+  * 1 => Only clamped-ion elastic and compliance tensors will be calculated. Requirements for
+    preceding response-function DDB generation run: Strain perturbation. Set [[rfstrs]] to 1, 2, or 3.
+    Note that [[rfstrs]]>=3 is recommended so that responses to both uniaxial and shear strains will be computed.
+  * 2 => Both relaxed- and clamped-ion elastic and compliance tensor will be calculated, but only
+    the relaxed-ion quantities will be printed. The input variable [[anaddb:instrflag]] should also be set to 1,
+    because the internal-strain tensor is needed to compute the relaxed-ion corrections.
+    Requirements for preceding response-function DDB generation run: Strain and atomic-displacement responses at Q=0.
+    Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation
+    of phonons at Q=0 (needed because the inverse of force-constant tensor is required).
+  * 3 => Both relaxed and clamped-ion elastic and compliance tensors will be printed out.
+    The input variable [[anaddb:instrflag]] should also be set to 1.
+    Requirements for preceding response-function DDB generation run: Same as for [[anaddb:elaflag]]=2'.
+  * 4 => Calculate the elastic and compliance tensors (relaxed ion) at fixed displacement field,
+    the relaxed-ion tensors at fixed electric field will be printed out too, for comparison.
+    When [[anaddb:elaflag]]=4, we need the information of internal strain and relaxed-ion dielectric tensor
+    to build the whole tensor, so we need set [[anaddb:instrflag]]=1 and [[anaddb:dieflag]]=3 or 4 .
+  * 5 => Calculate the relaxed ion elastic and compliance tensors, considering the stress left inside cell.
+    At the same time, bare relaxed ion tensors will still be printed out for comparison.
+    In this calculation, stress tensor is needed to compute the correction term, so one supposed
+    to merge the first order derivative data base (DDB file) with the second order derivative data base (DDB file)
+    into a new DDB file, which can contain both information. And the program will also check for the users.
 
 See [[anaddb:polflag]].
 """,
@@ -1044,8 +1112,8 @@ Variable(
     requires=None,
     text="""
 Unnormalized lattice vectors for the k-point grid in reciprocal space (see
-[[kptrlatt]] abinit variable definitionas well). Input needed in electron-
-phonon calculations using nesting functions or tetrahedron integration.
+[[kptrlatt]] abinit variable definitionas well). Input needed in electron-phonon
+calculations using nesting functions or tetrahedron integration.
 """,
 ),
 
@@ -1063,8 +1131,8 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-As kptrlatt above, but for a finer grid of k-points. Under development. Does
-not work yet, as of June 2010.
+As kptrlatt above, but for a finer grid of k-points. Under development.
+Does not work yet, as of June 2010.
 """,
 ),
 
@@ -1219,9 +1287,8 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-The Monkhorst-Pack grid linear dimensions, for the finer of the series of fine
-grids. Used for the integration of thermodynamical functions (Bose-Einstein
-distribution) or for the DOS.
+The Monkhorst-Pack grid linear dimensions, for the finer of the series of fine grids.
+Used for the integration of thermodynamical functions (Bose-Einstein distribution) or for the DOS.
 """,
 ),
 
@@ -1260,8 +1327,7 @@ Variable(
 This number define the series of grids that will be used for the estimation of
 the phonon DOS. The coarsest will be tried first, then the next, ... then the
 one described by [[anaddb:ng2qpt]]. The intermediate grids are defined for
-igrid=1... **ngrids** , by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/
-**ngrids**
+igrid=1... **ngrids** , by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/**ngrids**
 """,
 ),
 
@@ -1283,7 +1349,8 @@ Non-linear properties flag.
 
   * 0 => do not compute non-linear properties ;
   * 1 => the electrooptic tensor, Raman susceptibilities and non-linear optical susceptibilities are calculated;
-  * 2 => only the non-linear optical susceptibilities and first-order changes of the dielectric tensor induced by an atomic displacement are calculated;
+  * 2 => only the non-linear optical susceptibilities and first-order changes of the dielectric tensor
+    induced by an atomic displacement are calculated;
   * 3 => only the non-linear optical susceptibility is calculated.
 """,
 ),
@@ -1334,12 +1401,11 @@ to note that non-analyticities in the dynamical matrices are present at Gamma,
 due to the long-range Coulomb forces. So, going to Gamma along different
 directions can give different results.
 
-The wavevectors in list 2 will be used to:  
-\- generate and diagonalize a dynamical matrix, and print the corresponding
-eigenvalues.  
-\- calculate the generalized Lyddane-Sachs-Teller relation. Note that if the
-three first numbers are zero, then the code will do a calculation at Gamma
-without non-analyticities.
+The wavevectors in list 2 will be used to:
+
+* generate and diagonalize a dynamical matrix, and print the corresponding eigenvalues.
+* calculate the generalized Lyddane-Sachs-Teller relation. Note that if the
+  three first numbers are zero, then the code will do a calculation at Gamma without non-analyticities.
 """,
 ),
 
@@ -1406,15 +1472,13 @@ frequencies in a small sphere around Gamma. The truncated IFCs are then used
 for further post-processing. The results of the test are reported in the main
 output file. This option is useful to obtain a initial guess of nsphere: the
 value that leads to stable frequencies and gives linear dispersion for the
-acoustic modes around Gamma is usually smaller that the one reported by
-nsphere -1.
+acoustic modes around Gamma is usually smaller that the one reported by nsphere -1.
 
 This number defines the atoms for which the short range part of the
 interatomic force constants, after imposition of the acoustic sum rule, will
 not be put to zero. This option is available for testing purposes (evaluate
 the range of the interatomic force constants), because the acoustic sum rule
-will be violated if some atoms are no more included in the inverse Fourier
-Transform.
+will be violated if some atoms are no more included in the inverse Fourier Transform.
 """,
 ),
 
@@ -1458,8 +1522,7 @@ and [[anaddb:temperinc]] variables. The default temperature grid goes from
 100K to 1000K by step of 100K. For the largest temperatures, for most solids,
 anharmonic effects not accounted in the harmonic approximation implemented in
 anaddb will be important. For weakly bounded systems (e.g. Van der Waals
-solids), such anharmonic effects might be important already at room
-temperature.
+solids), such anharmonic effects might be important already at room temperature.
 """,
 ),
 
@@ -1477,7 +1540,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Integer. The width of the largest channel used to sample the frequencies. The
+The width of the largest channel used to sample the frequencies. The
 code will generate different sets of channels, with decreasing widths (by step
 of 1 cm-1), from this channel width to 1, eventually. It considers to have
 converged when the convergence criterion based on [[anaddb:dostol]] and
@@ -1543,13 +1606,39 @@ Variable(
 Flag for calculation of piezoelectric tensors
 
   * 0 => No piezoelectric tensor will be calculated.
-  * 1 => Only the clamped-ion piezoelectric tensor is computed and printed. Requirements for preceding response-function DDB generation run: Strain and electric-field responses. For the electric-field part, one needs results from a prior 'ddk perturbation' run. Note that even if only a limited number of piezoelectric tensor terms are wanted (as determined by rfstrs and rfdir in this calculation) it is necessary to set rfdir = 1 1 1 in the d/dk calculation for most structures. The only obvious exception to this requirement is cases in which the primitive lattice vectors are all aligned with the cartesian axes. The code will omit terms in the output piezoelectric tensor for which the available d/dk set is incomplete. Thus: Set [[rfstrs]] to 1, 2, or 3i (preferably 3) 
-  * 2 => Both relaxed- and clamped-ion elastic and compliance tensor will be calculated, but only the relaxed-ion quantities will be printed. The input variable [[anaddb:instrflag]] should also be set to 1, because the internal-strain tensor is needed to compute the relaxed-ion corrections. Requirements for preceding response-function DDB generation run: Strain, electric-field and full atomic-displacement responses at Q=0. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfelfd]] = 3. Set [[rfatpol]] and <[[rfdir]] to do a full calculation of phonons at Q=0 (needed because the inverse of force-constant tensor is required). 
-  * 3 => Both relaxed and clamped-ion piezoelectric tensors will be printed out. The input variable [[anaddb:instrflag]] should also be set to 1. Requirements for preceding response-function DDB generation run: Same as for **piezoflag** =2. 
-  * 4 => Calculate the piezoelectric d tensor (relaxed ion). In order to calculate the piezoelectric d tensor, we need information of internal strain and elastic tensor (relaxed ion). So we should set [[anaddb:elaflag]]= 2,3,4, or 5 and [[anaddb:instrflag]]=1. The subroutine will also do a check for you, and print warning message without stopping even if flags were not correctly set. 
-  * 5 => Calculate the piezoelectric g tensor (relaxed ion). In this computation, we need information of internal strain, elastic tensor (relaxed ion) and dielectric tensor (relaxed ion). So we should set: [[anaddb:instrflag]]=1, [[anaddb:elaflag]]=2,3,4 or 5, [[anaddb:dieflag]]=3 or 4. The subroutine will also do a check for you, and print warning message without stopping even if flags were not correctly set. 
-  * 6 => Calculate the piezoelectric h tensor (relaxed ion). In this calculation, we need information of internal strain and dielectric tensor (relaxed ion). So we need set: [[anaddb:instrflag]]=1 and [[anaddb:dieflag]]=3 or 4. The subroutine will also do a check for you, and print warning message without stopping even if flags were not correctly set. 
-  * 7 => calculate all the possible piezoelectric tensors, including e (clamped and relaxed ion), d, g and h tensors. The flags should be set to satisfy the above rules from 1 to 6.
+  * 1 => Only the clamped-ion piezoelectric tensor is computed and printed.
+    Requirements for preceding response-function DDB generation run: Strain and electric-field responses.
+    For the electric-field part, one needs results from a prior 'ddk perturbation' run.
+    Note that even if only a limited number of piezoelectric tensor terms are wanted
+    (as determined by rfstrs and rfdir in this calculation) it is necessary to set rfdir = 1 1 1
+    in the d/dk calculation for most structures. The only obvious exception to this requirement
+    is cases in which the primitive lattice vectors are all aligned with the cartesian axes.
+    The code will omit terms in the output piezoelectric tensor for which the available d/dk set is incomplete.
+    Thus: Set [[rfstrs]] to 1, 2, or 3i (preferably 3)
+  * 2 => Both relaxed- and clamped-ion elastic and compliance tensor will be calculated,
+    but only the relaxed-ion quantities will be printed. The input variable [[anaddb:instrflag]]
+    should also be set to 1, because the internal-strain tensor is needed to compute the relaxed-ion corrections.
+    Requirements for preceding response-function DDB generation run: Strain, electric-field and full atomic-displacement
+    responses at Q=0. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfelfd]] = 3.
+    Set [[rfatpol]] and <[[rfdir]] to do a full calculation of phonons at Q=0
+    (needed because the inverse of force-constant tensor is required).
+  * 3 => Both relaxed and clamped-ion piezoelectric tensors will be printed out.
+    The input variable [[anaddb:instrflag]] should also be set to 1.
+    Requirements for preceding response-function DDB generation run: Same as for **piezoflag** =2.
+  * 4 => Calculate the piezoelectric d tensor (relaxed ion). In order to calculate the piezoelectric d tensor,
+    we need information of internal strain and elastic tensor (relaxed ion).
+    So we should set [[anaddb:elaflag]]= 2,3,4, or 5 and [[anaddb:instrflag]]=1.
+    The subroutine will also do a check for you, and print warning message without stopping even if flags were not correctly set.
+  * 5 => Calculate the piezoelectric g tensor (relaxed ion). In this computation,
+    we need information of internal strain, elastic tensor (relaxed ion) and dielectric tensor (relaxed ion).
+    So we should set: [[anaddb:instrflag]]=1, [[anaddb:elaflag]]=2,3,4 or 5, [[anaddb:dieflag]]=3 or 4.
+    The subroutine will also do a check for you, and print warning message without stopping even if flags were not correctly set.
+  * 6 => Calculate the piezoelectric h tensor (relaxed ion). In this calculation, we need information
+    of internal strain and dielectric tensor (relaxed ion). So we need set: [[anaddb:instrflag]]=1
+    and [[anaddb:dieflag]]=3 or 4. The subroutine will also do a check for you, and print warning message
+    without stopping even if flags were not correctly set.
+  * 7 => calculate all the possible piezoelectric tensors, including e (clamped and relaxed ion), d, g and h tensors.
+    The flags should be set to satisfy the above rules from 1 to 6.
 """,
 ),
 
@@ -1578,19 +1667,18 @@ variable [[anaddb:targetpol]]. The user starts from a given configuration of a
 crystal and performs a ground-state calculation of the Hellman-Feynman forces
 and stresses and the Berry phase polarization as well as a linear response
 calculation of the whole matrix of second-order energy derivatives with
-respect to atomic displacement, strains and electric field.  
+respect to atomic displacement, strains and electric field.
 In case **polflag** =1, ANADDB solves the linear system of equations (13) of
 the Na Sai paper, and computes new atomic positions (if [[anaddb:relaxat]]=1)
 and lattice constant (if [[anaddb:relaxstr]]=1). Then, the user uses these
 parameters to perform a new ground-state and linear-response calculation. This
 must be repeated until convergence is reached. The user can also fix some
 atomic positions, or strains, thanks to the input variables [[anaddb:natfix]],
-[[anaddb:nstrfix]],[[anaddb:iatfix]],[[anaddb:istrfix]].  
+[[anaddb:nstrfix]],[[anaddb:iatfix]],[[anaddb:istrfix]].
 In case both [[anaddb:relaxat]] and [[anaddb:relaxstr]] are 0, while
-**polflag** =1, ANADDB only computes the polarization in cartesian
-coordinates.
+**polflag** =1, ANADDB only computes the polarization in cartesian coordinates.
 
-<As described in the Na Sai's paper, it is important to use the finite
+As described in the Na Sai's paper, it is important to use the finite
 difference expression of the ddk ([[berryopt]]=2 or -2) in the linear response
 calculation of the effective charges and the piezoelectric tensor.
 """,
@@ -1610,8 +1698,8 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Flag to print out the Interatomic Force Constants in real space to a file. The
-available options are:
+Flag to print out the Interatomic Force Constants in real space to a file.
+The available options are:
 
   * 0 => do nothing (IFC are printed to the log file);
   * 1 => write out the IFC in file ifcinfo.out (the name is fixed) to be used by AI2PS from John Rehr's group
@@ -1632,8 +1720,8 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-  * 0 => do not write the BoltzTraP input files;
-  * 1 => write out the input files for BoLTZTRaP code.
+* 0 => do not write the BoltzTraP input files;
+* 1 => write out the input files for BoLTZTRaP code.
 """,
 ),
 
@@ -1651,8 +1739,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Flag to print out the DDB file interpolated with the Interatomic Force
-Constants.
+Flag to print out the DDB file interpolated with the Interatomic Force Constants.
 
 The available options are:
 
@@ -1678,13 +1765,12 @@ Variable(
 The **prtdos** variable is used to calculate the phonon density of states,
 PHDOS, by Fourier interpolating the interatomic force constants on the (dense)
 q-mesh defined by [[anaddb:ng2qpt]]. Note that the variable [[anaddb:ifcflag]]
-must be set to 1 since the interatomic force constants are supposed to be
-known.
+must be set to 1 since the interatomic force constants are supposed to be known.
 
 The available options are:
 
   * 0 => no output of PHDOS (default);
-  * 1 => calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]]. 
+  * 1 => calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]].
 
 The step of the frequency grid employed to calculate the DOS can be defined
 through the input variable [[anaddb:dosdeltae]].
@@ -1759,14 +1845,16 @@ Variable(
     text="""
 Only for electron-phonon calculations. This input variable is used to
 calculate the nesting function defined as: \chi_{nm}(q) = \sum_k
-\delta(\epsilon_{k,n}-epsilon_F) \delta(\epsilon_{k+q,m}-\epsilon_F). The
-nesting factor is calculated for every point of the k-grid employed during the
+\delta(\epsilon_{k,n}-epsilon_F) \delta(\epsilon_{k+q,m}-\epsilon_F).
+
+The nesting factor is calculated for every point of the k-grid employed during the
 previous GS calculation. The values are subsequently interpolated along the
 trajectory in q space defined by [[anaddb:qpath]], and written in the _NEST
 file using the X-Y format ( **prtnest** =1). It is also possible to analyze
 the behavior of the function in the reciprocal unit cell saving the values in
-the NEST_XSF file that can be read using [XCrySDen](http://www.xcrysden.org) (
-**prtnest** =2). Note that in the present implementation what is really
+the NEST_XSF file that can be read using [XCrySDen](http://www.xcrysden.org) (**prtnest** =2).
+
+Note that in the present implementation what is really
 printed to file is the "total nesting" defined as \sum_{nm} \chi_{nm}(q).
 Limitations: the k-grid defined by [[kptrlatt]] must be orthogonal in
 reciprocal space, moreover off-diagonal elements are not allowed, i.e kptrlatt
@@ -1795,8 +1883,10 @@ Variable(
 Only if [[anaddb:ifcflag]]=1. This option specifies the file format for the
 phonon band structure. Possible values:
 
-  * 1 Write frequencies in xmgrace format. A file with extension `PHBANDS.agr` is produced. Use `xmgrace file_PHBANDS.agr` to visualize the data
-  * 2 Write frequencies in gnuplot format. The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script. Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.
+  * 1 Write frequencies in xmgrace format. A file with extension `PHBANDS.agr` is produced.
+     Use `xmgrace file_PHBANDS.agr` to visualize the data
+  * 2 Write frequencies in gnuplot format. The code produces a `PHBANDS.dat` file with the eigenvalues
+    and a `PHBANDS.gnuplot` script. Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.
 """,
 ),
 
@@ -1819,8 +1909,8 @@ Only if [[anaddb:ifcflag]]=1. The available options are:
   * 0 => do not write the SR/LR decomposition of phonon frequencies;
   * 1 => write out the SR/LR decomposition of the square of phonon frequencies at each q-point specified in [[anaddb:qph1l]].
 
-For details see _Europhys. Lett., 33 (9), pp. 713-718 (1996)_. See also
-[[anaddb:ifcflag]], [[anaddb:ifcflag]] and [[anaddb:dipdip]].
+For details see _Europhys. Lett., 33 (9), pp. 713-718 (1996)_.
+See also [[anaddb:ifcflag]], [[anaddb:ifcflag]] and [[anaddb:dipdip]].
 """,
 ),
 
@@ -1828,11 +1918,7 @@ Variable(
     abivarname="prtvol@anaddb",
     varset="anaddb",
     vartype="integer",
-    topics=['Phonons_useful',
- 'PhononBands_useful',
- 'Temperature_useful',
- 'PhononWidth_useful',
- 'ElPhonTransport_useful'],
+    topics=['Phonons_useful', 'PhononBands_useful', 'Temperature_useful', 'PhononWidth_useful', 'ElPhonTransport_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT VOLume",
@@ -1877,26 +1963,27 @@ use 0.0 0.0 0.0 , 0.0 0.5 0.5 , 0.5 0.0 0.5 , 0.5 0.5 0.0 or 0.5 0.5 0.5 , 0.0
 
 Further comments: by using this technique, it is possible to increase smoothly
 the number of q-points, at least less abruptly than relying on series of grids
-like (for the full cubic symmetry):  
-1x1x1 => (0 0 0)  
-2x2x2 (shifted) => (.25 .25 .25)  
-2x2x2 => 1x1x1 + (.5 0 0) (.5 .5 0) (.5 .5 0)  
+like (for the full cubic symmetry):
+
+1x1x1 => (0 0 0)
+2x2x2 (shifted) => (.25 .25 .25)
+2x2x2 => 1x1x1 + (.5 0 0) (.5 .5 0) (.5 .5 0)
 4x4x4 => 2x2x2 + (.25 0 0) (.25 .25 0) (.25 .5 0) (.25 .25 .25) (.25 .25 .5)
-(.25 .5 .5)  
-...  
-  
+(.25 .5 .5)
+...
+
 with respectively 1, 1, 4 and 10 q-points, corresponding to a number of points
 in the full BZ of 1, 8, 8 and 64. Indeed, the following grids are made
-available:  
-1x1x1 with nqshft=2 => (0 0 0) (.5 .5 .5)  
-1x1x1 with nqshft=4 => (0 0 0) (.5 .5 0)  
-1x1x1 with nqshft=4 (shifted) => (.5 0 0) (.5 .5 .5)  
-2x2x2 with nqshft=2 => 2x2x2 + (.25 .25 .25)  
-2x2x2 with nqshft=4 => 2x2x2 + (.25 .25 0) (.25 .25 .5)  
+available:
+1x1x1 with nqshft=2 => (0 0 0) (.5 .5 .5)
+1x1x1 with nqshft=4 => (0 0 0) (.5 .5 0)
+1x1x1 with nqshft=4 (shifted) => (.5 0 0) (.5 .5 .5)
+2x2x2 with nqshft=2 => 2x2x2 + (.25 .25 .25)
+2x2x2 with nqshft=4 => 2x2x2 + (.25 .25 0) (.25 .25 .5)
 2x2x2 with nqshft=4 (shifted) => (.25 0 0) (.25 .25 .25) (.5 .5 .25) (.25 .5
-0)  
-...  
-  
+0)
+...
+
 with respectively 2, 2, 2, 5, 6 and 4 q-points, corresponding to a number of
 points in the full BZ of 2, 4, 4, 16, 32 and 32.
 
@@ -1989,7 +2076,7 @@ numbers divided by the fourth one (a normalisation factor). The coordinates
 are defined with respect to the unit vectors that spans the Brillouin zone.
 Note that this set of axes can be non-orthogonal and not normed. The
 normalisation factor makes easier the input of wavevector such as
-(1/3,1/3,1/3), represented by 1.0 1.0 1.0 3.0 .  
+(1/3,1/3,1/3), represented by 1.0 1.0 1.0 3.0 .
 The internal representation of this array is as follows: for each wavevector,
 the three first numbers are stored in the array qph1l(3,nph1l), while the
 fourth is stored in the array qnrml1(nph1l).
@@ -2024,7 +2111,7 @@ calculation at Gamma without non-analyticities.
 Also note that the code automatically set the imaginary part of the dynamical
 matrix to zero. This is useful to compute the phonon frequencies when half of
 the k-points has been used, by the virtue of the time-reversal symmetry (which
-may induce parasitic imaginary parts...).  
+may induce parasitic imaginary parts...).
 The internal representation of this array is as follows: for each wavevector,
 the three first numbers are stored in the array qph2l(3,nph2l), while the
 fourth is stored in the array qnrml2(nph2l).
@@ -2069,7 +2156,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Govern the imposition of the sum-rule on the Raman tensors.  
+Govern the imposition of the sum-rule on the Raman tensors.
 As in the case of the Born effective charges, the first-order derivatives of
 the linear dielectric susceptibility with respect to an atomic displacement
 must vanish when they are summed over all atoms. This sum rule is broken in
@@ -2078,7 +2165,8 @@ imposed by giving each atom a part of the discrepancy.
 
   * 0 => no sum rule is imposed;
   * 1 => impose the sum rule on the Raman tensors, giving each atom an equal part of the discrepancy;
-  * 2 => impose the sum rule on the Raman tensors, giving each atom a part of the discrepancy proportional to the magnitude of its contribution to the Raman tensor.
+  * 2 => impose the sum rule on the Raman tensors, giving each atom a part of the discrepancy
+    proportional to the magnitude of its contribution to the Raman tensor.
 
 For the time being, **ramansr** =1 is the preferred choice.
 """,
@@ -2137,14 +2225,13 @@ Variable(
     requires=None,
     text="""
 Select a particular set of Data Blocks in the DDB. (PRESENTLY, ONLY OPTION 1
-IS AVAILABLE)  
+IS AVAILABLE)
 
   * 1 => Blocks obtained by a non-stationary formulation.
   * 2 => Blocks obtained by a stationary formulation.
 
 For more detailed explanations, see [[help_abinit]] If the information in the
-DDB is available, always use the option 2. If not, you can try option 1, which
-is less accurate.
+DDB is available, always use the option 2. If not, you can try option 1, which is less accurate.
 """,
 ),
 
@@ -2163,8 +2250,7 @@ Variable(
     requires=None,
     text="""
 Cut-off radius for the sphere for interatomic force constant, see also the
-alternative [[anaddb:nsphere]]. If **rifcsph** = 0: maximum extent allowed by
-the grid .
+alternative [[anaddb:nsphere]]. If **rifcsph** = 0: maximum extent allowed by the grid.
 
 This number defines the atoms for which the short range part of the
 interatomic force constants, after imposition of the acoustic sum rule, will
@@ -2189,12 +2275,12 @@ Variable(
 Select some parts of the effective charge tensor. (This is done after the
 application or non-application of the ASR for effective charges). The
 transformed effective charges are then used for all the subsequent
-calculations.  
+calculations.
 
   * 0 => The effective charge tensor is left as it is.
-  * 1 => For each atom, the effective charge tensor is made isotropic, by calculating the trace of the matrix, dividing it by 3, and using this number in a diagonal effective charge tensor. 
+  * 1 => For each atom, the effective charge tensor is made isotropic, by calculating the
+    trace of the matrix, dividing it by 3, and using this number in a diagonal effective charge tensor.
   * 2 => For each atom, the effective charge tensor is made symmetric, by simply averaging on symmetrical elements.
-  * 
 
 Note: this is for analysis the effect of anisotropy in the effective charge.
 The result with non-zero **selectz** are unphysical.
@@ -2215,15 +2301,13 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-If **symdynmat** is equal to 1, the dynamical matrix is symmetrized before the
-diagonalization.  
+If **symdynmat** is equal to 1, the dynamical matrix is symmetrized before the diagonalization.
 This is especially useful when the set of primitive vectors of the unit cell
 and their opposite do not reflect the symmetries of the Bravais lattice
 (typical case: body-centered tetragonal lattices ; FCC and BCC lattices might
 be treated with the proper setting of the [[anaddb:brav]] variable), and the
 interpolation procedure based on interatomic force constant is used: there are
-some slight symmetry breaking effects. The latter can be bypassed by this
-additional symmetrization.
+some slight symmetry breaking effects. The latter can be bypassed by this additional symmetrization.
 """,
 ),
 
@@ -2261,8 +2345,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Target value of the polarization in cartesian coordinates and in C/m^2. See
-[[anaddb:polflag]].
+Target value of the polarization in cartesian coordinates and in C/m^2. See [[anaddb:polflag]].
 """,
 ),
 
@@ -2280,8 +2363,7 @@ Variable(
     excludes=None,
     requires=None,
     text="""
-Flag controlling the Fermi surface integration technique used for electron-
-phonon quantities.
+Flag controlling the Fermi surface integration technique used for electron-phonon quantities.
 
   * 0 = tetrahedron method (no adjustable parameter)
   * 1 = Gaussian smearing (see [[anaddb:elphsmear]])
@@ -2309,8 +2391,7 @@ transport properties. See the associated [[anaddb:tempermin]] and
 1000K by step of 100K. For the largest temperatures, for most solids,
 anharmonic effects not accounted in the harmonic approximation implemented in
 anaddb will be important. For weakly bounded systems (e.g. Van der Waals
-solids), such anharmonic effects might be important already at room
-temperature.
+solids), such anharmonic effects might be important already at room temperature.
 """,
 ),
 
@@ -2366,8 +2447,7 @@ of MD and configuration averaging.
 The supercell vectors are not constrained to be collinear with the normal
 lattice vectors: this effect is obtained by using a diagonal
 Thermal_supercell. The lines of the matrix describe the linear combination of
-the primitive cell lattice vectors yielding the supercell vectors, as for
-kptrlatt.
+the primitive cell lattice vectors yielding the supercell vectors, as for kptrlatt.
 
 For the moment this feature is under development and it looks like the
 relative phases of the displacements are not fixed properly yet... (Aug 2017)
@@ -2390,20 +2470,20 @@ Variable(
     text="""
 Flag controlling the calculation of thermal quantities.
 
-  * When **thmflag** == 1, the code will compute, using the histogram method: 
-    * the normalized phonon DOS 
-    * the phonon internal energy, free energy, entropy, constant volume heat capacity as a function of the temperature 
+  * When **thmflag** == 1, the code will compute, using the histogram method:
+    * the normalized phonon DOS
+    * the phonon internal energy, free energy, entropy, constant volume heat capacity as a function of the temperature
     * the Debye-Waller factors (tensors) for each atom, as a function of the temperature
-    * the mean-square velocity tensor for each atom, as a function of temperature 
-    * the "average frequency" as a function of the temperature 
-  * When **thmflag** == 2, all the phonon frequencies for the q points in the second grid are printed. 
+    * the mean-square velocity tensor for each atom, as a function of temperature
+    * the "average frequency" as a function of the temperature
+  * When **thmflag** == 2, all the phonon frequencies for the q points in the second grid are printed.
   * When **thmflag** == 3, 5 or 7, the thermal corrections to the electronic eigenvalues are calculated. If **thmflag** ==3, the list of phonon wavevector from the first list is used (with equal weight for all wavevectors in this list), while if **thmflag** ==5 or 7, the first grid of wavevectors is used, possibly folded to the irreducible Brillouin Zone if symmetry operations are present, or if they are recomputed (this happens for **thmflag** ==7).
   * When **thmflag** == 4 or 6, the temperature broadening (electron lifetime) of the electronic eigenvalues is calculated. If **thmflag** ==4, the list of phonon wavevector from the first list is used (with equal weight for all wavevectors in this list), while if **thmflag** ==6, the first grid of wavevectors is used, possibly folded to the irreducible Brillouin Zone if symmetry operations are present or if they are recomputed (this happens for **thmflag** ==8).
 
 WARNING: The use of symmetries for the temperature dependence of the
 eigenenergies is tricky ! It can only be valid for the k points that respect
 the symmetries (i.e. the Gamma point), provided one also averages over the
-degenerate states.  
+degenerate states.
 
 Input variables that may be needed if this flag is activated:
 [[anaddb:dostol]], [[anaddb:nchan]], [[anaddb:ntemper]], [[anaddb:temperinc]],
@@ -2482,3 +2562,4 @@ The default values will not work.
 ),
 
 ]
+
