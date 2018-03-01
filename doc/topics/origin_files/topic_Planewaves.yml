@@ -28,5 +28,5 @@
          silicon (an insulator): the definition of a k-point grid, the smearing
          of the cut-off energy, the computation of a band structure, and again,
          convergence studies ...</li>
-         <li>The first lesson on the [[lesson_paw1|the projector-augmented wave]] technique.
+         <li>The first lesson on the [[lesson:paw1|the projector-augmented wave]] technique.
     end : default 

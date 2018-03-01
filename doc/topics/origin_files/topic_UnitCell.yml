@@ -29,5 +29,5 @@
          and also generate all the nuclei positions from the irreducible ones. 
          See [[topic:SmartSymm]].
     tutorials : |
-         <li>[[lesson:base4#44|Fourth basic lesson]] Determination of the surface energy of aluminum (100): changing the orientation of the unit cell.
+         <li>[[lesson:base4|Fourth basic lesson]] Determination of the surface energy of aluminum (100): changing the orientation of the unit cell.
     end : default 

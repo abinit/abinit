@@ -181,8 +181,7 @@ lines in teph_3.in give the output format (0 for binary or 1 for ascii), then
 the name of the ground state wavefunction file. The fourth line contains 3
 integers, which give the number of _1WF files (which can also be used to
 salvage the GKK), the number of _GKK files, and the number of perturbations in
-the _GKK files. Thus, MRGGKK functions very much like
-[MRGDDB](../../users/generated_files/help_mrgddb.html), and can merge _GKK
+the _GKK files. Thus, MRGGKK functions very much like [help:mrgddb|MRGDDB], and can merge _GKK
 files which already contain several perturbations (q-points or atomic
 displacements). Finally, the names of the different _1WF and _GKK files are listed.
 

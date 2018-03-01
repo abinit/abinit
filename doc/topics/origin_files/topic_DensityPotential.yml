@@ -16,8 +16,8 @@
       It can analyse the charge contained in an atomic sphere, 
       and determine the angular momentum projected charge (l=0 to 4) contained in that sphere. 
       (only available for norm-conserving pseudopotentials) 
-      <p>See the [[help_cut3d]], as well as the [[lesson_analysis_tools]].
+      <p>See the [[help:cut3d]], as well as the [[lesson:analysis_tools]].
     tutorials : |-
-      <li>[[lesson_analysis_tools]] explains the use and i/o parameters needed for the "Cut 3-Dimensional files" 
+      <li>[[lesson:analysis_tools]] explains the use and i/o parameters needed for the "Cut 3-Dimensional files" 
       post-processor of the ABINIT package
     end : default

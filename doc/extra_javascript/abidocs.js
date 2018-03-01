@@ -283,3 +283,13 @@ function abidocs_guidedtour() {
 
     intro.start();
 }
+
+function set_warning(txt) {
+  var warningbox = document.getElementById('warning_box');
+  warningbox.innerHTML = "<div class='alert warning'><span id='cbn' class='closebtn'>&times;</span><strong>Warning!</strong> ".concat(txt, "</div>");
+  var close = document.getElementById("cbn");
+  close.onclick = function(){
+     var div = document.getElementById('warning_box');
+     setTimeout(function(){ div.innerHTML = ""; }, 100);
+  }
+}

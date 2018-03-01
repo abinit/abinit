@@ -23,7 +23,7 @@
         for experts, with [[optdriver]]==7 are related to this development, that is not yet operational as of v8.5 .
 
     tutorials  : |-
-       <li>[[lesson_rf1|The lesson Response-Function 1 (RF1)]]
+       <li>[[lesson:rf1|The lesson Response-Function 1 (RF1)]]
        presents the basics of DFPT calculations within ABINIT. The example
        given is the study of dynamical and dielectric properties of AlAs (an
        insulator): phonons at Gamma, dielectric constant, Born effective

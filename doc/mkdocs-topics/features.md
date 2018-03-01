@@ -5,7 +5,6 @@ authors: FJ, XG
 # ABINIT features  
 
 ## An overview of ABINIT settings and features, for beginners and more experienced users.
-  
 
 This document gives an overview of the features implemented in the ABINIT
 package, grouped in different topics, for the beginner as well as more experienced user. 
@@ -17,7 +16,7 @@ It also gives a synthetic view on the needed settings.
 Documenting the features of a large scientific code is a complex task. The
 present list of features refers to different "topics". Each topic has a
 dedicated page, which should be quick to read, unlike the
-[[lesson:welcome|lessons of the tutorial]], each of which is usually at least
+[[lesson:index|lessons of the tutorial]], each of which is usually at least
 one hour work. Many of the topics make the link between a physical property or
 quantity (including bibliographical references for the theory, and sometimes
 pointing to published work using this feature) and the way it is to be
@@ -38,7 +37,6 @@ but to point to it if appropriate. Not all the ABINIT documentation is covered
 by the Web-accessible documents, there are still a few unlinked documents in
 the subdirectories of ~abinit/doc (work is in progress to make it all available).
 Discussions on the [ABINIT forum](https://forum.abinit.org) might also allow to get information.
-
 
 ## 2 ABINIT specifications for static DFT calculations
   
@@ -71,7 +69,7 @@ that apply, generally speaking, to all types of calculations are explained later
   7. [[topic:spinpolarisation|Spin-polarised systems and spin-orbit coupling]]
   8. [[topic:Coulomb|Coulomb interaction and charged cells]]
 
-### 2.3 Numerical settings for electrons: basis set, planewaves and real space sampling, Brillouin zone sampling, ...
+### 2.3 Numerical settings for electrons: basis set, planewaves and real space sampling, Brillouin zone sampling ...
   
   1. [[topic:Planewaves|Planewaves and real space sampling]]
   2. [[topic:PAW|PAW special settings]]
@@ -94,7 +92,7 @@ that apply, generally speaking, to all types of calculations are explained later
   4. [[topic:EFG|Electric field gradients]]
   5. [[topic:Artificial|Artificial modifications of the system]]
 
-## 3 Global control parameters : flow, parallelism, output files, output content, timing and memory control, ...
+## 3 Global control parameters: flow, parallelism, output files, output content, timing and memory control ...
   
   1. [[topic:multidtset|Multi-dataset calculations]]
   2. [[topic:parallelism|Parallelism and ABINIT]]
@@ -113,8 +111,8 @@ that apply, generally speaking, to all types of calculations are explained later
 
 ## 5 Correlated electrons
   
-When correlated electrons are to be considered (in most cases, when **d and f
-orbitals** play an active role), it is necessary to go beyond the standard DFT
+When correlated electrons are to be considered (in most cases, when *d* and *f*
+orbitals play an active role), it is necessary to go beyond the standard DFT
 framework. ABINIT enables the following possibilities:
 
   1. [[topic:Hybrids|Hybrid functionals]]

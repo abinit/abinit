@@ -7,8 +7,8 @@ authors: XG, DCA
 ## This file explains the i/o parameters needed for the derivative database (DDB) merging code (MRGDDB).  
   
 The user is advised to be familiar with the main [[help:abinit]] help file
-before reading the present file. It is important to read also the [**Analysis
-of Derivative DataBase code (Anaddb) help file**](help_anaddb.html) to complement the present reading.
+before reading the present file. It is important to read also the [[help:anaddb]]
+to complement the present reading.
 
 ## 1 Introduction
   
@@ -39,6 +39,7 @@ the different input DDB: natom, [[ntypat]], [[nband]], [[acell]], [[amu]],
 [[ecut]], [[ixc]], lloc, [[ngfft]], [[occ]], [[rprim]], [[typat]], [[xred]],
 zion. For [[nband]] and [[occ]], the value of [[occopt]] is taken into account (see abinit help file). 
 If possible, MRGDDB will produce a DDB with occopt=0.
+
 In case of two different data sets, the code will print an error message and
 stop. The code cannot merge two DDB that have been generated using two
 different geometries or convergence ([[ecut]], ...) parameters. The only
@@ -49,7 +50,9 @@ largest set of k-points inside the new DDB. MRGDDB will copy the latest date
 of the transfer or current DDB and copy it in the new DDB. It will also take
 the less accurate tolwfr and copy it in the new DDB. This ends the first part
 of the action of MRGDDB, namely to compare the information of the two
-different DDB. When the checking is done, MRGDDB will check the content of the
+different DDB. 
+
+When the checking is done, MRGDDB will check the content of the
 different data blocks and constitute the new DDB by copying sequentially the
 non-identical blocks and merging the identical blocks. In case two elements
 are identical, MRGDDB copies the value of the transfer DDB. (This latter

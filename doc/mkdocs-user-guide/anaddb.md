@@ -17,7 +17,7 @@ related to the [[help:abinit|main ABINIT executable]], to the
 [[help:respfn|DFPT features of ABINIT]], and to the [[help:mrgddb|DDB merge tool]].
 
 It will be easier to discover the present file with the help of the tutorial
-([[lesson_welcome]]), especially the lesson on response functions ([[lesson:rf2]]).  
+([[lesson:index]]), especially the lesson on response functions ([[lesson:rf2]]).  
 
 ## 1 Introduction
   
@@ -84,15 +84,12 @@ also identified. However, the multidataset mode is not available.
   
 This ANADDB utility is able to perform many different tasks, each governed by
 a selected set of input variables, with also some input variables common to
-many of the different tasks. The 'flag' variables activates the different
-tasks (e.g. [[dieflag@anaddb]], [[thmflag@anaddb]], [[elphflag@anaddb]], ...).
+many of the different tasks. The 'flag' variables activates the different tasks 
+e.g. [[dieflag@anaddb]], [[thmflag@anaddb]], [[elphflag@anaddb]]
 
 The list of input variables for the anaddb input file are presented in the
 [[varset:anaddb]] variable set. In order to discover them, it is easier to use
 the different lessons of the tutorial: start with the second lesson on
-response functions ([[lesson_rf2]]), then follow the lesson on elasticity and
-piezoelectricity ([[lesson_elastic]]), the lesson on electron-phonon
-interaction ([[lesson_eph]]), and the lesson on non-linear properties ([[lesson_nlo]]). 
-
-_If you are discovering this file with the help of the
-tutorial, you can go back to the tutorial window._
+response functions ([[lesson:rf2]]), then follow the lesson on elasticity and
+piezoelectricity ([[lesson:elastic]]), the lesson on electron-phonon
+interaction ([[lesson:eph]]), and the lesson on non-linear properties ([[lesson:nlo]]). 

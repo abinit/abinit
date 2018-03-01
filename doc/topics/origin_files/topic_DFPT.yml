@@ -28,7 +28,7 @@
        <p> More detailed explanations to perform a response calculation are given in the [[help:respfn]].
 
     tutorials  : |-
-       <li>[[lesson_rf1|The lesson Response-Function 1 (RF1)]]
+       <li>[[lesson:rf1|The lesson Response-Function 1 (RF1)]]
        presents the basics of DFPT calculations within ABINIT. The example
        given is the study of dynamical and dielectric properties of AlAs (an
        insulator): phonons at Gamma, dielectric constant, Born effective

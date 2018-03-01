@@ -67,11 +67,34 @@ body {
     /* counter-increment: section-4; */
 }
 
-/* https://codemyui.com/expand-on-hover-link-style/ */
+/*
+a {
+  outline: none;
+  text-decoration: none;
+  padding: 2px 1px 0;
+}
+
+a:link {
+  color: blue;
+}
+
+a:visited {
+  color: purple;
+}
+
+a:focus, a:hover {
+  border-bottom: 1px solid;
+}
+
+a:active {
+  color: red;
+} 
+*/
+
+/* https://codemyui.com/expand-on-hover-link-style/ 
 a.wikilink {
   text-decoration: none;
   margin: 0 2px;
-  /* color: black !important; */
   color: #3f51b5 !important;
   position: relative;
 }
@@ -84,7 +107,6 @@ a.wikilink:before {
   width: 100%;
   height: 3px;
   background-color: #E65100;
-  /* background-color: #3f51b5; */
   content: '';
   opacity: .3;
   -webkit-transform: scaleX(.9);
@@ -95,32 +117,6 @@ a.wikilink:before {
 a.wikilink:hover:before {
   opacity: 1;
   -webkit-transform: scaleX(1);
-}
-
-/*
-    text-decoration: underline;
-    color: #E65100;
-    border-color: #FF8500;
-    border-color: #E65100;
-    md-nav__link
-    md-source
-    md-footer-social__link
-    md-footer-nav__link
-
-:not() selector
-.reMode_hover:not(.reMode_selected):hover
-{
-   background-color: #f0ac00;
-}
-
-/* wikilink style 
-a.wikilink:link {
-    color: black !important;
-    border-bottom: 1px solid #000;
-    border-color: #E65100;
-    padding-bottom: 1px;
-    text-decoration: none;
-    font-style: italic;
 }
 */
 

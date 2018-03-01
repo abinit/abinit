@@ -157,8 +157,10 @@ Presently, [[algalch]] can only have the value 1, that is:
   * the local potentials are mixed, thanks to the [[mixalch]] mixing coefficients
   * the form factors of the non-local projectors are all preserved, and all considered to generate the alchemical potential
   * the scalar coefficients of the non-local projectors are multiplied by the proportion of the corresponding type of atom that is present in [[mixalch]]
-  * the characteristic radius for the core charge is a linear combination of the characteristic radii of the core charges, build with the [[mixalch]] mixing coefficients
-  * the core charge function f(r/rc) is a linear combination of the core charge functions, build with the [[mixalch]] mixing coefficients
+  * the characteristic radius for the core charge is a linear combination of the characteristic radii
+    of the core charges, build with the [[mixalch]] mixing coefficients
+  * the core charge function f(r/rc) is a linear combination of the core charge functions,
+    build with the [[mixalch]] mixing coefficients
 
 Later, other algorithms for the mixing might be included.
 

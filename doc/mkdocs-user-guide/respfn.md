@@ -10,7 +10,7 @@ The user is advised to be familiar with the main [[help_abinit]] before
 reading the present file.
 
 It will be easier to discover the present file with the help of the tutorial,
-see [[lesson_welcome]] and [[lesson_rf1]].  
+see [[lesson:index]] and [[lesson:rf1]].  
 It is worthwhile to print this help file, for ease of reading.
 
 ## 0 Introducing the computation of responses
@@ -168,8 +168,8 @@ a description of the ground-state wavefunction file names generated from the
 root names provided in the 'files' file. In the multi-dataset mode, the
 following input variables will be relevant : [[getwfk]], and [[getwfq]]. The
 file names of the ground-state wavefunction file follow the same convention as
-for the ground-state case. Thus, the corresponding section of the [abinit
-help](help_abinit.html#4) file can be read, if needed.
+for the ground-state case. Thus, the corresponding section of the 
+[abinit help](help_abinit.html#4) file can be read, if needed.
 
 In the case of an electric field perturbation, the output 1WF of the
 corresponding ddk perturbation is needed as input. If the option [[rfelfd]]=1

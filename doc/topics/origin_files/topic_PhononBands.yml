@@ -16,9 +16,9 @@
        <p>The two-phonon sum and difference spectra can also be obtained, see [[anaddb:dossum]].
        <p>For the related computation of temperature-dependent properties, see [[topic_Temperature]].
     tutorials  : |-
-       <li>[[lesson_rf2|The lesson Response-Function 2 (RF2)]]
+       <li>[[lesson:rf2|The lesson Response-Function 2 (RF2)]]
        presents the analysis of the DDBs that have been introduced in the
-       [[lesson_rf1]].  The computation of the interatomic forces and
+       [[lesson:rf1]].  The computation of the interatomic forces and
        the computation of thermodynamical properties is an outcome of this
        lesson.</li>
     end : default

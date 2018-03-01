@@ -57,6 +57,6 @@
          <h4><b>Van der Waals functionals:</b></h4>
          <br/>Several <a href="topic_vdw.html">Van der Waals functionals</a> are available : Grimme (D2, D3, D3(Becke-Johnson)), Silvestrelli.
     tutorials  : |-
-          <li>The [[lesson_base2]] deals with the H<sub>2</sub>
-          molecule: convergence studies, LDA versus GGA </li>
+        <li>The [[lesson:base2]] deals with the H<sub>2</sub>
+        molecule: convergence studies, LDA versus GGA </li>
     end : default 
