@@ -4,7 +4,8 @@ authors: PCasek, FF, XG
 
 # the AIM utility  
 
-## This file explains the use and i/o parameters needed for the Atom-In-Molecule (AIM - Bader analysis) utility of the ABINIT package.  
+This file explains the use and i/o parameters needed for the Atom-In-Molecule 
+(AIM - Bader analysis) utility of the ABINIT package.  
 The AIM utility allows to analyse charge densities produced by the ABINIT
 code. The AIM analysis (Atom-In-Molecule) has been proposed by Bader. Thanks
 to topological properties of the charge density, the space is partitioned in

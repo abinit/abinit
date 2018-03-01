@@ -216,8 +216,7 @@ you have chosen to issue ./configure in the ~abinit directory. If you have
 issued ./configure in another directory, it will be placed accordingly.
 
 The 'make' command can also be used in many different ways, by mentioning one
-or more targets. A (partial) list of targets for users can be obtained by
-typing:
+or more targets. A (partial) list of targets for users can be obtained by typing:
    
     make help
 
@@ -244,7 +243,7 @@ or
     
     make help_dev
 
-Finally,
+Finally:
     
     make install
 

@@ -84,7 +84,7 @@ class VariablesTest(AbimkdocsTest):
                 # topic --> list of tribes
                 assert len(var.topic_tribes)
                 var.validate()
-            except ValueError as exc:
+            except Exception as exc:
                 errors.append(str(exc))
 
         if errors:

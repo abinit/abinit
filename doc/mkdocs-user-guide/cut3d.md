@@ -4,7 +4,8 @@ authors: XG, RC, GMR, JFB, MCote
 
 # the Cut3D utility  
 
-## This file explains the use and i/o parameters needed for the "Cut 3-Dimensional files" post-processor of the ABINIT package.  
+This file explains the use and i/o parameters needed for the 
+"Cut 3-Dimensional files" post-processor of the ABINIT package.  
 
 This code is able to analyse the files produced by ABINIT, that contain
 3-Dimensional real space data, like all types of potential files, density

@@ -4,7 +4,7 @@ authors: DCA,  XG
 
 # ABINIT, the main code  
 
-## This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.  
+This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.  
 
 The new user is advised to read first the [[help:new_user|new user helpfile]],
 before reading the present file. 
@@ -12,9 +12,8 @@ It will be easier to discover the present file with the help of the [[lesson:ind
 
 When the user will be sufficiently familiarized with ABINIT, reading the
 ~abinit/doc/users/tuning.txt file might be useful (this file, as many
-additional documentation files, is not available on the Web, but is available
-in the package). For calculating response properties using abinit, the
-complementary [[help:respfn]] is needed.
+additional documentation files, is not available on the Web, but is available in the package). 
+For calculating response properties using abinit, the complementary [[help:respfn]] is needed.
 
 ## 1 How to run the code?
 
@@ -25,7 +24,6 @@ pseudopotential files, the user must create a "files" file which lists names
 for the files the job will require, including the main input file, the main
 output file, root names for other input, output, or temporary files, and the
 names of different pseudopotential or PAW atomic data files (one per line).
-
 The files file (called for example ab.files) could look like:
     
        ab_in

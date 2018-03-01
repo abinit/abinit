@@ -4,7 +4,7 @@ authors: RShaltaf
 
 # the Mrgscr utility  
 
-## This file explains the i/o parameters needed for the screening files (SCR) merging code (MRGSCR).  
+This file explains the i/o parameters needed for the screening files (SCR) merging code (MRGSCR).  
 
 The user is advised to be familiar with the main [[help_abinit]] especially
 the GW part before reading the present file.

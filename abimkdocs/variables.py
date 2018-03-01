@@ -4,91 +4,40 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 import io
 
+from itertools import groupby
 from html2text import html2text
-
 try:
     import yaml
 except ImportError:
     raise ImportError("pyyaml package is not installed. Install it with `pip install pyyaml`")
 
-from itertools import groupby
 
-
-def format_dimensions(dimensions):
-
-  if dimensions is None:
-    s = ''
-  elif dimensions == "scalar":
-    s = 'scalar'
-  else:
-    #s = str(dimensions)
-    if isinstance(dimensions,list):
-      s = '('
-      for dim in dimensions:
-        s += str(dim) + ','
-
-      s = s[:-1]
-      s += ')'
-    else:
-      s = str(dimensions)
-
-  return s
-
-class literal(str): pass
-
-def literal_unicode_representer(dumper, data):
-    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
-
-yaml.add_representer(literal, literal_unicode_representer)
-
-def valuewithunit_representer(dumper, data):
-    return dumper.represent_mapping('!valuewithunit', data.__dict__)
-
-####################################################################################################
-
-# Classes
-
-####################################################################################################
-
-class Variable(yaml.YAMLObject):
-    vartype = ''                   # String containing the type
-    characteristics = None          # String containing the characteristics
-    mnemonics = None               # String containing the mnemonics
-    dimensions = None              # Array containing either int, formula or another variable  TODO: shape?
-    defaultval = None              # Either constant number, formula or another variable
-    text = None                    # Description (str)
-    abivarname = None              # Name of the variable (str)   code@name
-    commentdefault = None
-    commentdims = None
-    varset = None
-    range = None        # TODO This is not used and should be removed
-    requires = None
-    excludes = None
-    executables = None  # TODO This is not used and should be removed
-    topics = None
-
-    yaml_tag = u'!variable'
-
-    def attrs(self):
-        return ['vartype', 'characteristics', 'mnemonics', 'dimensions', 'defaultval', 'text',
-                'abivarname', 'varset', 'executables', 'topics']
+class Variable(object):
 
     def __init__(self, vartype=None, characteristics=None,
                  mnemonics=None, dimensions=None, defaultval=None,
-                 text=None, abivarname=None, executables=None, varset=None, range=None, excludes=None, requires=None,
+                 text=None, abivarname=None, varset=None, excludes=None, requires=None,
                  commentdefault=None, commentdims=None, topics=None):
+        """
+        Args:
+            vartype = ''                   # String containing the type
+            characteristics = None         # String containing the characteristics
+            mnemonics = None               # String containing the mnemonics
+            dimensions = None              # Array containing either int, formula or another variable  TODO: shape?
+            defaultval = None              # Either constant number, formula or another variable
+            text = None                    # Description (str)
+            abivarname = None              # Name of the variable (str)   code@name
+        """
         self.vartype = vartype
         self.characteristics = characteristics
         self.mnemonics = mnemonics
         self.dimensions = dimensions
         self.defaultval = defaultval
-        self.text = literal(text)
+        self.text = text
         self.abivarname = abivarname
         self.varset = varset
-        self.executables = executables
         self.commentdefault = commentdefault
         self.commentdims = commentdims
-        self.range = range
         self.topics = topics
         self.excludes = excludes
         self.requires = requires
@@ -196,6 +145,25 @@ class Variable(yaml.YAMLObject):
         cls = a.get("class") if cls is None else cls
         return '<a href="%s" class="%s">%s</a>' % (a.get("href"), cls, a.text if label is None else label)
 
+    @staticmethod
+    def format_dimensions(dimensions):
+        if dimensions is None:
+          s = ''
+        elif dimensions == "scalar":
+          s = 'scalar'
+        else:
+          #s = str(dimensions)
+          if isinstance(dimensions, (list, tuple)):
+            s = '('
+            for dim in dimensions:
+              s += str(dim) + ','
+            s = s[:-1]
+            s += ')'
+          else:
+            s = str(dimensions)
+
+        return s
+
     def to_markdown(self, with_hr=True):
         lines = []; app = lines.append
 
@@ -207,7 +175,7 @@ class Variable(yaml.YAMLObject):
             app("*Mentioned in topic(s):* %s  " % ", ".join("[[topic:%s]]" % k for k in self.topic_tribes))
         app("*Variable type:* %s  " % str(self.vartype))
         if self.dimensions:
-           app("*Dimensions:* %s  " % format_dimensions(self.dimensions))
+           app("*Dimensions:* %s  " % self.format_dimensions(self.dimensions))
         if self.commentdims:
             app("*Commentdims:* %s  " % self.commentdims)
         app("*Default value:* %s  " % self.defaultval)
@@ -255,7 +223,6 @@ class Variable(yaml.YAMLObject):
 
         # Add text with description.
         if self.text is not None:
-            #md_text = html2text(self.text)
             md_text = self.text
             app(2 * "\n")
             app(md_text)
@@ -331,8 +298,6 @@ class Variable(yaml.YAMLObject):
             raise ValueError("\n".join(errors))
 
 
-####################################################################################################
-
 class Components(yaml.YAMLObject):
     name = None  # String containing section name
     keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
@@ -354,9 +319,9 @@ class Components(yaml.YAMLObject):
 
     yaml_tag = u'!components'
 
-    def attrs(self):
-        return ['name', 'keyword', 'authors', 'howto', 'header', 'title', 'subtitle', 'purpose', 'advice',
-                'copyright', 'introduction', 'links', 'menu', 'tofcontent_header', 'tutorials', 'examples', 'end']
+    #def attrs(self):
+    #    return ['name', 'keyword', 'authors', 'howto', 'header', 'title', 'subtitle', 'purpose', 'advice',
+    #            'copyright', 'introduction', 'links', 'menu', 'tofcontent_header', 'tutorials', 'examples', 'end']
 
     #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
     def __init__(self, name=None, keyword=None, authors=None, howto=None, header=None, title=None, subtitle=None, purpose=None, advice=None,
@@ -379,13 +344,9 @@ class Components(yaml.YAMLObject):
         self.examples = examples
         self.end      = end
 
-####################################################################################################
-
-#class ValueWithUnit(yaml.YAMLObject):
 class ValueWithUnit(object):
     value = None
     units = None
-    yaml_tag = u'!valuewithunit'
 
     def __init__(self, value=None, units=None):
         self.value = value
@@ -397,16 +358,12 @@ class ValueWithUnit(object):
     def __repr__(self):
         return str(self)
 
-####################################################################################################
-
-class Range(yaml.YAMLObject):
+class Range(object):
     """
     Specifies a range (start:stop:step)
     """
     start = None
     stop = None
-
-    yaml_tag = u'!range'
 
     def __init__(self, start=None, stop=None):
         self.start = start
@@ -432,9 +389,7 @@ class Range(yaml.YAMLObject):
         else:
             return None
 
-####################################################################################################
 
-#class ValueWithConditions(yaml.YAMLObject):
 class ValueWithConditions(dict):
     """
     Used for variables whose value depends on a list of conditions.
@@ -445,8 +400,6 @@ class ValueWithConditions(dict):
 
         Means that the variable is set to 6 if paral_kgb == 1 else 2
     """
-    yaml_tag = u'!valuewithconditions'
-
     def __repr__(self):
         s = ''
         for key in self:
@@ -458,9 +411,7 @@ class ValueWithConditions(dict):
     def __str__(self):
         return self.__repr__()
 
-####################################################################################################
 
-#class MultipleValue(yaml.YAMLObject):
 class MultipleValue(dict):
     """
     Used for variables that can assume multiple values.
@@ -468,11 +419,8 @@ class MultipleValue(dict):
     abivarname="istwfk",
     defaultval=MultipleValue({'number': None, 'value': 0}),
     """
-
     number = None
     value = None
-
-    yaml_tag = u'!multiplevalue'
 
     def __init__(self, number=None, value=None):
         self.number = number
@@ -490,17 +438,15 @@ from collections import OrderedDict
 
 _VARS = None
 
-def get_variables_code(use_pymods=True):
+def get_variables_code():
     """
     Return the database of variable and cache it. Main entry point for client code.
     """
     global _VARS
     if _VARS is None:
-        if use_pymods:
-            _VARS = VarDatabase.from_pyfiles()
-        else:
-            yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "variables", "origin_files", "abinit_vars.yml")
-            _VARS = VarDatabase.from_file(yaml_path)
+        _VARS = VarDatabase.from_pyfiles()
+        #yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "variables", "origin_files", "abinit_vars.yml")
+        #_VARS = VarDatabase.from_file(yaml_path)
 
     return _VARS
 
@@ -518,16 +464,11 @@ class VarDatabase(OrderedDict):
         pyfiles = [os.path.join(dirpath, f) for f in os.listdir(dirpath) if
                    f.startswith("variables_") and f.endswith(".py")]
         new = cls()
-        #for exname in sorted(set(v.executable for v in vlist)):
         for pyf in pyfiles:
-            print("pyf", pyf)
             vd = InputVariables.from_pyfile(pyf)
-            #items = [(v.name, v) for v in vlist if v.executable == exname]
-            #vd = InputVariables(sorted(items, key=lambda t: t[0]))
-            #vd.executable = exname
-            #vd.all_varset = sorted(set(v.varset for v in vd.values()))
-            new[vd.executable] =  vd
+            new[vd.executable] = vd
 
+        # TODO
         # Read list of strings with possible character of variables.
         yaml_path = "/Users/gmatteo/git_repos/abinit/doc/variables/origin_files/"
         with io.open(os.path.join(os.path.dirname(yaml_path), "characteristics.yml"), "rt", encoding="utf-8") as f:
@@ -542,31 +483,31 @@ class VarDatabase(OrderedDict):
 
         return new
 
-    @classmethod
-    def from_file(cls, yaml_path):
-        with io.open(yaml_path, 'rt', encoding="utf-8") as f:
-            vlist = yaml.load(f)
+    #@classmethod
+    #def from_file(cls, yaml_path):
+    #    with io.open(yaml_path, 'rt', encoding="utf-8") as f:
+    #        vlist = yaml.load(f)
 
-        new = cls()
-        # Read list of strings with possible character of variables.
-        with io.open(os.path.join(os.path.dirname(yaml_path), "characteristics.yml"), "rt", encoding="utf-8") as f:
-            new.characteristics = yaml.load(f)
+    #    new = cls()
+    #    # Read list of strings with possible character of variables.
+    #    with io.open(os.path.join(os.path.dirname(yaml_path), "characteristics.yml"), "rt", encoding="utf-8") as f:
+    #        new.characteristics = yaml.load(f)
 
-        # Read list of `external_params` i.e. external parameters that are not input variables,
-        # but that are used in the documentation of other variables
-        # then convert to dict {name --> description}
-        with io.open(os.path.join(os.path.dirname(yaml_path), "list_externalvars.yml"), "rt", encoding="utf-8") as f:
-            d = {k: v for k, v in yaml.load(f)}
-            new.external_params = OrderedDict([(k, d[k]) for k in sorted(d.keys())])
+    #    # Read list of `external_params` i.e. external parameters that are not input variables,
+    #    # but that are used in the documentation of other variables
+    #    # then convert to dict {name --> description}
+    #    with io.open(os.path.join(os.path.dirname(yaml_path), "list_externalvars.yml"), "rt", encoding="utf-8") as f:
+    #        d = {k: v for k, v in yaml.load(f)}
+    #        new.external_params = OrderedDict([(k, d[k]) for k in sorted(d.keys())])
 
-        for exname in sorted(set(v.executable for v in vlist)):
-            items = [(v.name, v) for v in vlist if v.executable == exname]
-            vd = InputVariables(sorted(items, key=lambda t: t[0]))
-            vd.executable = exname
-            vd.all_varset = sorted(set(v.varset for v in vd.values()))
-            new[exname] =  vd
+    #    for exname in sorted(set(v.executable for v in vlist)):
+    #        items = [(v.name, v) for v in vlist if v.executable == exname]
+    #        vd = InputVariables(sorted(items, key=lambda t: t[0]))
+    #        vd.executable = exname
+    #        vd.all_varset = sorted(set(v.varset for v in vd.values()))
+    #        new[exname] =  vd
 
-        return new
+    #    return new
 
     def iter_allvars(self):
         """Iterate over all variables. Flat view."""
@@ -650,11 +591,6 @@ class VarDatabase(OrderedDict):
             lines = ["""\
 from __future__ import print_function, division, unicode_literals, absolute_import
 
-# We don't install with setup.py hence we have to add this directory to sys.path
-#import sys
-#import os
-#sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
 ValueWithConditions = dict
 
@@ -665,8 +601,6 @@ Variable=dict\nvariables = ["""
                 text = html2text(var.text)
                 text = '"""\n' + text.rstrip() + '\n"""'
                 assert var.range is None
-                assert var.executables is None
-                #executables=None,
                 #range=None,
                 s = """\
 Variable(

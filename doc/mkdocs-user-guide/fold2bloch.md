@@ -4,10 +4,8 @@ authors: AB,  OR
 
 # the Fold2Bloch utility  
 
-## This file explains the use and i/o parameters needed for the "fold2Bloch" post-processor of the ABINIT package.  
+This file explains the use and i/o parameters needed for the "fold2Bloch" post-processor of the ABINIT package.  
 
-## 0 To be filled
-  
 This program generates an unfolded spectrum in a small cell, from a folded
 spectrum of eigenvalues in a supercell. The new k-wavevectors and the weights
 for the range of energies (standard postscript file **_fold2Bloch.out**_ ) are

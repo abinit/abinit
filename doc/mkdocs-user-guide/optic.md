@@ -4,17 +4,16 @@ authors: SS, XG, YG
 
 # the Optic utility  
 
-## Frequency dependent linear optical dielectric function and second order nonlinear optical susceptibility.  
+Frequency dependent linear optical dielectric function and second order nonlinear optical susceptibility.  
 
 This file explains the i/o parameters needed for the calculation of the
 frequency dependent linear optical dielectric function and second order
 nonlinear optical susceptibility, in the RPA approximation (sum over states
 using independent electronic states) thanks to the Optic utility of the ABINIT package.
-
 The user is advised to be familiar with the main [[help:abinit]] before reading the present file.
 
 A knowledge of the computation of the linear response d/dk perturbation,
-explained in the [ABINIT (respfn) help file](help_respfn.html), is also requested. 
+explained in the [[help:respfn]], is also requested. 
 Actually, a full understanding of the ABINIT treatment of
 perturbation (respfn) should NOT be requested in order to use Optic, but with
 the present ordering of the help files and tutorial, this is not obvious. In a

@@ -4,22 +4,24 @@ authors: XG, DCA
 
 # DFPT  
 
-## This file complements the main [[help_abinit]], for matters related to responses to perturbations (computed using DFPT)
-  
-The user is advised to be familiar with the main [[help_abinit]] before
+This file complements the main [[help_abinit]], for matters related 
+to responses to perturbations (computed using DFPT)
+The user is advised to be familiar with the main [[help:abinit]] before
 reading the present file.
-
-It will be easier to discover the present file with the help of the tutorial,
-see [[lesson:index]] and [[lesson:rf1]].  
-It is worthwhile to print this help file, for ease of reading.
+It will be easier to discover the present file with the help 
+of the [[lesson:index|tutorial]], and the [[lesson:rf1]].  
 
 ## 0 Introducing the computation of responses
   
 ABINIT can compute the response to different perturbations, and provide access
 to quantities that are second derivatives of total energy (2DTE) with respect
-to these perturbations. Presently, they can be of three types : (1) phonons,
-(2) static homogeneous electric field, and (3) strain. The physical properties
-connected to 2DTE with respect to perturbations (1) and (2) are the phonon
+to these perturbations. Presently, they can be of three types: 
+
+1. phonons,
+2. static homogeneous electric field
+3. strain. 
+
+The physical propertiesconnected to 2DTE with respect to perturbations (1) and (2) are the phonon
 dynamical matrices, the dielectric tensor, and the Born effective charges,
 while the additional strain perturbation (3), mixed with phonon and electric
 field leads to elastic constant, internal strain, and piezoelectricity.
@@ -28,13 +30,12 @@ More functionalities of the computation of responses should be implemented
 sooner or later. The alchemical perturbation is one of the candidates, as well
 as the homogeneous magnetic field perturbation. Some third derivatives of the
 total energy (3DTE) are also implemented. The 3DTE might give phonon-phonon
-coupling, non-linear electric response, anharmonic elastic constants,
-Gruneisen parameters,...
+coupling, non-linear electric response, anharmonic elastic constants, Gruneisen parameters,...
 
 The basic quantities that ABINIT will compute are the FIRST-order derivatives
 of the wavefunctions (1WF) with respect to these perturbations. The later
-calculation of the 2DTE and 3DTE from these 1WF is an easy computational task
-: the construction of the 2DTE with respect to perturbations j1 and j2
+calculation of the 2DTE and 3DTE from these 1WF is an easy computational task: 
+the construction of the 2DTE with respect to perturbations j1 and j2
 involves mainly evaluating matrix elements between the 1WF of j1 and/or the
 1WF of j2. More details on this technique can be found in X. Gonze, Phys. Rev.
 B55, 10337 (1997) and X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
@@ -44,16 +45,15 @@ variational principle and an algorithm rather similar to the one used to find
 the ground-state (unperturbed) wavefunctions. Thus, a lot of technical details
 and parameters are the same for both ground-state and response-function
 calculations. This justifies the development of one unique code for these two
-classes of properties : many of the routines of abinit are common in these
+classes of properties: many of the routines of abinit are common in these
 calculations, or had to be duplicated, but with relatively small modifications.
 
 The ABINIT code performs a rather primitive analysis of the calculated 2DTEs.
 For example, it gives the phonon frequencies, electronic dielectric tensor and
 effective charges. But the main output of the code is the Derivative DataBase
-(DDB) : a file that contains the set of all 2DTEs and 3DTEs calculated by the
+(DDB): a file that contains the set of all 2DTEs and 3DTEs calculated by the
 code. This DDB can be manipulated by the MRGDDB code, and fully analyzed by
-the Anaddb code. See the corresponding help files 
-([Mrgddb help file](help_mrgddb.html), and [Anaddb help file](help_anaddb.html)).
+the Anaddb code. See the corresponding [[help:mrgddb]] and [[help:anaddb]].
 
 ## 1 Description of perturbations
   
@@ -63,16 +63,15 @@ coordinates). It is characterized by two integer numbers and one wavevector.
 The two integer numbers are the number of the moved atom, which will be noted
 "ipert", and the number of the axis of the unit cell, which will be noted
 "idir". "ipert" for phonon perturbation can have values between 1 and
-[[natom]], "idir" can have values between 1 and 3. The set of all possible
-phonon perturbations for one wavevector has thus (3*[[natom]]) elements. From
-this basis set, all phonons can be constructed by linear combination. The set
-of atoms to be moved in one dataset of ABINIT is determined by the input
+[[natom]], "idir" can have values between 1 and 3. 
+
+The set of all possible phonon perturbations for one wavevector has thus (3*[[natom]]) elements. 
+From this basis set, all phonons can be constructed by linear combination. 
+The set of atoms to be moved in one dataset of ABINIT is determined by the input
 variable [[rfatpol]]. The set of directions to be considered in one dataset of
 ABINIT is determined by the input variable [[rfdir]]. The wavevector to be
 considered in one dataset of ABINIT is determined by the input variables
 [[nqpt]], [[qpt]], and [[qptnrm]].
-
-_If you follow the tutorial, you should go back to the tutorial window now._
 
 The perturbations of the **electric field** type are
 
@@ -83,20 +82,22 @@ The perturbations of the **electric field** type are
     The perturbation is the change of wavevector by dk in the Hamiltonian, hence the perturbation 
     is referred to as the derivative dk perturbation ("ddk" perturbation). 
 
-Note 1: the ddk perturbation is defined as the derivative with respect to k
-in reduced coordinates; this is equivalent to applying a linear perturbation
-of strength 2*pi along the conjugate direction in real space. This statement
-comes from the derivation of the phase factor exp(i*2*pi*k*r) with respect to
-k in reduced coordinates.
+Note 1
+:   the ddk perturbation is defined as the derivative with respect to k
+    in reduced coordinates; this is equivalent to applying a linear perturbation
+    of strength 2*pi along the conjugate direction in real space. This statement
+    comes from the derivation of the phase factor exp(i*2*pi*k*r) with respect to
+    k in reduced coordinates.
 
-Note 2: in case the electric field type perturbation is computed inside a
-finite electric field, the derivative of the Hamiltonian with respect to the
-electronic wavevector is not computed : everything is done by a finite-
-difference technique. Also, the definition of the homogeneous electric field
-perturbation is not along the axes of the reciprocal lattice, but in cartesian
-coordinates. Sorry for the possible confusion ...
+Note 2
+:   in case the electric field type perturbation is computed inside a
+    finite electric field, the derivative of the Hamiltonian with respect to the
+    electronic wavevector is not computed: everything is done by a finite-
+    difference technique. Also, the definition of the homogeneous electric field
+    perturbation is not along the axes of the reciprocal lattice, but in cartesian
+    coordinates. Sorry for the possible confusion ...
 
-These electric-type perturbations are also characterized by two numbers :
+These electric-type perturbations are also characterized by two numbers:
 "ipert" being natom+1 for the ddk perturbation and natom+2 for the electric
 field, and "idir" being 1, 2 or 3, as for phonon perturbations. Although the
 possibility of electric field characterized by a non-zero wavevector is
@@ -134,8 +135,7 @@ gamma when a non-phonon perturbation is considered); a number called
 The 2DTE, being derivative of the total energy with respect to two
 perturbations, will be characterized by two sets of (idir,ipert), or by two
 pertcase numbers, while 3DTE will need three such sets or pertcase numbers. In
-addition they will depend on one wavevector (for 2DTE) or two wavevectors (for
-3DTE).
+addition they will depend on one wavevector (for 2DTE) or two wavevectors (for 3DTE).
 
 In the present (non-stationary) implementation of the 2DTE, the first pertcase
 corresponds to the perturbation that gives the derivative of the potential,
@@ -166,7 +166,7 @@ fact that ABINIT is able to exploit.
 One should have a look at the input variables [[irdwfk]], and [[irdwfq]], for
 a description of the ground-state wavefunction file names generated from the
 root names provided in the 'files' file. In the multi-dataset mode, the
-following input variables will be relevant : [[getwfk]], and [[getwfq]]. The
+following input variables will be relevant: [[getwfk]], and [[getwfq]]. The
 file names of the ground-state wavefunction file follow the same convention as
 for the ground-state case. Thus, the corresponding section of the 
 [abinit help](help_abinit.html#4) file can be read, if needed.
@@ -195,13 +195,13 @@ wavefunction output file:
 
 Such a file might be used as input of another computation, or of another dataset.
 
-The relevant input variables are : [[ird1wf]], and [[irdddk]], as well as
+The relevant input variables are: [[ird1wf]], and [[irdddk]], as well as
 [[get1wf]], and [[getddk]], in the multi-dataset mode.
 
 ## 3 The use of symmetries
   
-In order to understand correctly the behaviour of response-function runs, some
-information on the use of symmetries must be given.
+In order to understand correctly the behaviour of response-function runs, 
+some information on the use of symmetries must be given.
 
 Some perturbations (including their wavevector) may be invariant for some
 symmetries. ABINIT is able to use symmetries to skip perturbations of which a
@@ -223,9 +223,9 @@ automatically, by using the symmetries that leave each perturbation invariant.
 Accordingly, the preferred way to generate the k-point grid is of course to
 use the [[ngkpt]] or [[kptrlatt]] input variables, with different values of [[kptopt]]:
 
-  * [[kptopt]]=1 for the ground state
-  * [[kptopt]]=2 for response functions at q=0 
-  * [[kptopt]]=3 for response functions at non-zero q 
+  * kptopt = 1 for the ground state
+  * kptopt = 2 for response functions at q=0 
+  * kptopt = 3 for response functions at non-zero q 
 
 ## 4 Organisation of response-function computations
   
@@ -233,10 +233,11 @@ In agreement with the information provided in the previous sections, different
 cases can be distinguished.
 
 When one considers the response to an atomic displacement with q=0, the
-following procedure is suggested :
+following procedure is suggested:
 
   * first, a self-consistent ground-state computation with the restricted set of special points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
+
   * second, a self-consistent response-function computation with the atomic displacement perturbation, 
     with the half set of special points (with [[kptopt]]=2)
 
@@ -245,17 +246,20 @@ procedure is suggested:
 
   * first, a self-consistent ground-state computation with the restricted set of special points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
+
   * second, a non-self-consistent response-function computation of the d/dk perturbation, 
     with the half set of special points (with [[kptopt]]=2, and [[iscf]]=-3)
+
   * third, a self-consistent response-function computation of the electric field perturbation, 
     with the half set of special points (with [[kptopt]]=2)
 
 When one considers the response to an atomic displacement in the special case
 where q connects k-points that both belong to the special k-point grid, the
-following procedure is suggested :
+following procedure is suggested:
 
   * first, a self-consistent ground-state computation with the restricted set of special points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
+
   * second, a self-consistent response-function computation of the atomic displacement perturbation, 
     with the full set of special points (with [[kptopt]]=3)
 
@@ -264,8 +268,10 @@ point, the following procedure is suggested:
 
   * first, a self-consistent ground-state computation with the restricted set of special points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
+
   * second, a non-self-consistent ground-state run with the set of k+q points, that might be 
     reduced thanks to symmetries (with [[kptopt]]=1)
+
   * third, a self-consistent response-function computation of the atomic displacement perturbation, 
     with the full set of special points (with [[kptopt]]=3)
 
@@ -276,8 +282,10 @@ effective charges are needed, can be combined as follows:
 
   * first, a self-consistent ground-state computation with the restricted set of special points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
+
   * second, the three non-self-consistent response-function computations (one for each direction) 
     of the d/dk perturbation, with the half set of special points (with [[kptopt]]=2, and [[iscf]]=-3)
+
   * third, all the self-consistent response-function computations of the electric field perturbations 
     and of the atomic displacements, with the half set of special points (with [[kptopt]]=2)
 
@@ -287,12 +295,16 @@ perturbations at q=0 and a general q point are to be performed, they will be com
 
   * first, a self-consistent ground-state computation with the restricted set of special points 
     in the Irreducible Brillouin Zone (with [[kptopt]]=1)
+
   * second, the three non-self-consistent response-function computations (one for each direction) 
     of the d/dk perturbation, with the half set of special points (with [[kptopt]]=2, and [[iscf]]=-3)
+
   * third, all q=0 self-consistent response-function computations of the electric field perturbations 
     and of the atomic displacements, with the half set of special points (with [[kptopt]]=2)
+
   * fourth, a non-self-consistent ground-state computation with the set of k+q points, 
     that might be reduced thanks to symmetries (with [[kptopt]]=1)
+
   * fifth, the self-consistent response-function computations of the atomic displacement perturbations 
     with a q wavevector, with the full set of special points (with [[kptopt]]=3)
 
@@ -304,23 +316,26 @@ ground-state wavefunction should be very good. The same is true at the level
 of the ddk wavefunctions.
 
 As mentioned in the introduction, inside the response-function part of the
-code, the calculation proceeds in two steps : first the calculation of the
+code, the calculation proceeds in two steps: first the calculation of the
 first order derivative of the wavefunctions (1WF), then the combinations of
 these 1WF to build the 2DTE and 3DTE.
 
 In an initialisation part, the input file and all the ground-state files are
 read, and a few basic quantities are constructed.
 
-In the first part, every perturbation is examined, one at a time, separately :
+In the first part, every perturbation is examined, one at a time, separately:
 
   * A file containing previous RF wavefunctions is eventually read.
+
   * The minimisation of the variational expression is performed, and this procedure generates 
     the 1WF as well as the first-order density and potential.
+
   * It is possible, knowing these quantities for the perturbation ipert1, to construct all the 2DTE 
     with respect to this perturbation and any ipert2, except for ipert2 being an homogeneous electric field, 
     in which case the derivative of the ground-state wavefunctions with respect to their wavevector (ddk) is also needed. 
     This feature has been implemented for ipert2 being any phonon (of the same wavevector than ipert1), 
     or an homogeneous electric field.
+
   * The first-order wavefunctions (1WF) are written as well as the first-order density or potential (if requested).
 
 ## 5 List of relevant input variables
@@ -372,7 +387,7 @@ this file. Afterwards, the content of the main output file differs a bit...
 
 The main output file reports on the initialisation of the ground-state
 wavefunctions at k+q, then the loop on the perturbations begins. For each
-perturbation, there is :
+perturbation, there is:
 
   * a short description of the perturbation
   * the timing information
@@ -470,7 +485,7 @@ grouped by blocks of data.
 Note that the DDB output of the ABINIT code can be merged with other DDBs as
 described in the Mrgddb help file.
 
-The first part contains :
+The first part contains:
 
   * the DDB version number (that defines the structure of the DDB)
   * seven parameters needed for the dimensionning of the DDB file 
@@ -483,7 +498,7 @@ The first part contains :
 
 Note: the format and content of this first part of the DDBs have to be updated in the future ...
 
-The second part contains :
+The second part contains:
 
   * the number of data blocks
   * for each data block, the type of the block, its number of elements, and the list of elements.
@@ -513,7 +528,7 @@ parameters the user choose for the RF run, and the preparatory GS runs.
 We will now review the convergence parameters, usually the same as for the GS
 calculations, indicating only the specific features related to RF calculations.
 
-Input parameters that could influence the accuracy of the calculation are :
+Input parameters that could influence the accuracy of the calculation are:
 
   * [[ecut]] (the energy cut-off, that depends strongly on the pseudopotential)
   * [[ixc]] (describing the exchange-correlation functional)
@@ -544,7 +559,7 @@ phonons at 30Ha, then another full calculation at 35Ha, then another at
 40Ha... It is an error to rely on tolerance on the total energy (for example
 1mHa/atom) or geometry (accuracy of one part per thousand on the bond lengths)
 to draw 'a priori' conclusions on the convergence of other quantities, and not
-monitor the convergence of these directly. To be clear : if phonon frequencies
+monitor the convergence of these directly. To be clear: if phonon frequencies
 are needed, check the convergence of phonon frequencies !
 
 The user should note that for bands with very small occupancy in the metallic

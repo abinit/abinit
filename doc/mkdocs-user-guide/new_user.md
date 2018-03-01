@@ -4,9 +4,10 @@ authors: DCA, XG, RC
 
 # new user help file  
 
-## This file gives a beginner's introduction to the ABINIT resources, the ABINIT package, and the main ABINIT application.  
+This page gives a beginner's introduction to the ABINIT resources, 
+the package, and the main ABINIT applications.  
 
-## 1 Foreword
+## Foreword
   
 The ABINIT project is a group effort of dozens of people worldwide, whose
 central outcome is the main ABINIT application, delivered with many other
@@ -31,17 +32,20 @@ Cambridge University Press (2004) ISBN 0 521 78285 6.
 After having gone through the present New User's Guide, you should follow the
 [[lesson:index|ABINIT tutorial]].
 
-## 2 Introduction
+## Introduction
   
 ABINIT is a package whose main program allows to find the total energy, charge
 density and electronic structure of systems made of electrons and nuclei
 (molecules and periodic solids) within Density Functional Theory, using
-pseudopotentials and a planewave basis, or augmented plane waves, or even
-wavelets. Some possibilities of ABINIT go beyond Density Functional Theory,
+pseudopotentials and a planewave basis, or augmented plane waves, or even wavelets. 
+
+Some possibilities of ABINIT go beyond Density Functional Theory,
 i.e. the many-body perturbation theory (GW approximation the Bethe-Salpether
 equation), Time-Dependent Density Functional Theory, Dynamical Mean-Field
 Theory, the Allen-Heine-Cardona theory to find temperature-dependent
-electronic structure. ABINIT also includes options to optimize the geometry
+electronic structure. 
+
+ABINIT also includes options to optimize the geometry
 according to the DFT forces and stresses, or to perform molecular dynamics
 simulation using these forces, or to generate dynamical (vibrations - phonons)
 properties, dielectric properties, mechanical properties, thermodynamical
@@ -56,29 +60,29 @@ see the [installation notes](https://www.abinit.org/installation).
 
 We will use the name "~abinit" to refer to the directory that contains the
 ABINIT package after download. In practice, a version number is appended to
-this name, to give for example: abinit-8.4.0 . The ABINIT package versioning
+this name, to give for example: abinit-8.4.0. The ABINIT package versioning
 scheme is explained later in this file.
 
 ~abinit contains different subdirectories. For example, the present file, as
-well as other descriptive files, should be found in ~abinit/doc/users . Other
+well as other descriptive files, should be found in ~abinit/doc/users. Other
 subdirectories will be described later.
 
-## 3 The main executable: abinit
+## The main executable: abinit
   
 After compilation, the main code will be present in the package as
 ~abinit/src/98_main/abinit (or perhaps at another place, depending on your installation).
 
 To run abinit you need four things:
 
-  * (1) Access to the executable, abinit. 
-  * (2) An input file. 
-  * (3) A files file (list of file names in a file). 
-  * (4) A pseudopotential input file for each kind of element in the unit cell. 
+1. Access to the executable, abinit. 
+2. An input file. 
+3. A files file (list of file names in a file). 
+4. A pseudopotential input file for each kind of element in the unit cell. 
 
 With these items a job can be run.
 
 The full list of input variables, all of which are provided in the single
-input file, is given in the ABINIT [[varset:allvars|list of all variable]].  
+input file, is given in the ABINIT [[varset:allvars|list of all variable]].
 The detailed description of input variables is given in many "Variable Set" files, including:
 
   * Basic variables, [[varset:basic]]
@@ -89,7 +93,7 @@ The detailed description of input variables is given in many "Variable Set" file
   * Density Functional Perturbation Theory variables, [[varset:dfpt]]
   * ... 
 
-A set of examples aimed at guiding the beginner is available in the tutorial ([[lesson:index]]).
+A set of examples aimed at guiding the beginner is available in the [[lesson:index|tutorials]].
 
 Other test cases (more than 800 input files) can be found in the ~abinit/test
 subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
@@ -106,14 +110,12 @@ are not recommended for production.
 Information on pseudopotential files can be found in the [ABINIT help file](help_abinit.html#5) 
 and the ~abinit/doc/psp_infos directory.
 
-## 4 Other programs in the package
+## Other programs in the package
   
 In addition to abinit, there are utility programs provided in the package.
-
-Some utility programs are written in F90 (like the main abinit program), and
-their sources is also in ~abinit/src/98_main.  
-These include: mrgddb , anaddb , aim , conducti, optics, 
-mrgscr , cut3d , and fold2Bloch.
+Some utility programs are written in Fortran (like the main abinit program), and
+their sources is also in ~abinit/src/98_main. 
+These include:
 
 mrgddb and anaddb 
 :   allow to post-process responses to atomic
@@ -141,12 +143,12 @@ aim
 conducti
 :   allows one to compute the frequency-dependent optical conductivity.
 
-Some utility programs are not written in F90, but in Python. They are
+Some utility programs are not written in Fortran, but in Python. They are
 contained in ~abinit/scripts, where post-processing (numerous tools) and pre-
 processing scripts are distinguished. Some allows one to visualize ABINIT
-outputs, like abinit_eignc_to_bandstructure.py .
+outputs, like abinit_eignc_to_bandstructure.py.
 
-## 5 Other resources outside the ABINIT package
+## Other resources outside the ABINIT package
   
 In addition to the ABINIT package, other resources can be obtained from the
 [ABINIT GitHub site](https://github.com/abinit). The sources of the latest
@@ -235,10 +237,10 @@ input file, are listed below:
     [[ntime]]           number of molecular dynamics or relaxation steps
     [[tolmxf]]          force tolerance for structural relaxation in Hartree/Bohr
 
-## 7 Output files
+## Output files
   
-Output from an abinit run shows up in several files and in the standard
-output. Usually one runs the command with a pipe of standard output to a log
+Output from an abinit run shows up in several files and in the standard output. 
+Usually one runs the command with a pipe of standard output to a log
 file, which can be inspected for warnings or error messages if anything goes
 wrong or otherwise can be discarded at the end of a run. The more easily
 readable formatted output goes to the output file whose name is given in the
@@ -248,8 +250,8 @@ that is usually kept for archival purposes.
 
 In addition, wavefunctions can be input (starting point) or output (result of
 the calculation), and possibly, charge density and/or electrostatic potential,
-if they have been asked for. These three sets of data are stored in
-unformatted files.  
+if they have been asked for. These three sets of data are stored in unformatted files.  
+
 The Density Of States (DOS) can also be an output as a formatted (readable) file.  
 An analysis of geometry can also be provided (GEO file)  
 The name of these files is constructed from a "root" name, that must be
@@ -262,13 +264,14 @@ the user, from which the code generates a full name. Amongst these files,
 there is a "status" file, summarizing the current status of advancement of the
 code, in long jobs. The [[help:abinit|ABINIT help file]] contains more details.
 
-## 8 What does the code do?
+## What does the code do?
   
 The simplest sort of job computes an electronic structure for a fixed set of
 atomic positions within a periodic unit cell. By electronic structure, we mean
 a set of eigenvalues and wavefunctions which achieve the lowest (DFT) energy
-possible for that basis set (that number of planewaves). The code takes the
-description of the unit cell and atomic positions and assembles a crystal
+possible for that basis set (that number of planewaves). 
+
+The code takes the description of the unit cell and atomic positions and assembles a crystal
 potential from the input atomic pseudopotentials, then uses either an input
 wavefunction or simple gaussians to generate the initial charge density and
 screening potential, then uses a self-consistent algorithm to iteratively
@@ -282,7 +285,7 @@ molecular dynamics. It can also be used to find responses to atomic
 displacements and homogeneous electric field, so that the full phonon band
 structure can be constructed.
 
-## 9 Versioning logic
+## Versioning logic
   
 We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
 

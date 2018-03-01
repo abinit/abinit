@@ -4,8 +4,6 @@ authors: XG, DCA
 
 # the Mrgddb utility  
 
-## This file explains the i/o parameters needed for the derivative database (DDB) merging code (MRGDDB).  
-  
 The user is advised to be familiar with the main [[help:abinit]] help file
 before reading the present file. It is important to read also the [[help:anaddb]]
 to complement the present reading.

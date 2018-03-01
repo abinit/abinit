@@ -1,9 +1,10 @@
 ---
 authors: XG, DCA
 ---
+
 # the Anaddb utility  
 
-## This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code of the ABINIT package.  
+This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code of the ABINIT package.  
 
 This code is able to compute interatomic force constants, but also, more
 generally, many different physical properties from databases containing
@@ -16,8 +17,8 @@ this topic, he/she will read different help files of the ABINIT package,
 related to the [[help:abinit|main ABINIT executable]], to the
 [[help:respfn|DFPT features of ABINIT]], and to the [[help:mrgddb|DDB merge tool]].
 
-It will be easier to discover the present file with the help of the tutorial
-([[lesson:index]]), especially the lesson on response functions ([[lesson:rf2]]).  
+It will be easier to discover the present file with the help of the [[lesson:index|tutorial]],
+especially the lesson on response functions ([[lesson:rf2]]).  
 
 ## 1 Introduction
   
