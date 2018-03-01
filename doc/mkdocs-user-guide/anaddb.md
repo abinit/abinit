@@ -2,9 +2,9 @@
 authors: XG, DCA
 ---
 
-# the Anaddb utility  
+# The anaddb utility  
 
-This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code of the ABINIT package.  
+This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code.
 
 This code is able to compute interatomic force constants, but also, more
 generally, many different physical properties from databases containing
@@ -60,7 +60,7 @@ for the main input or output files is presently 264 characters.
 
 The main executable file is called anaddb. Supposing that the "files" file is
 called anaddb.files, and that the executable is placed in your working
-directory, anaddb is run interactively (in Unix) with the command
+directory, anaddb is run interactively (in Unix) with the command:
 
     anaddb < anaddb.files >& log
   
@@ -69,9 +69,11 @@ or, in the background, with the command
     anaddb < anaddb.files >& log &
 
 where standard out and standard error are piped to the log file called "log"
-(piping the standard error, thanks to the '&' sign placed after '>' is
-**really important** for the analysis of eventual failures, when not due to
-ABINIT, but to other sources, like disk full problem ...). 
+
+!!! tip
+    Piping the standard error, thanks to the '&' sign placed after '>' is
+    **really important** for the analysis of eventual failures, when not due to
+    ABINIT, but to other sources, like disk full problem.
 
 The user can specify any names he/she wishes for any of these files. Variations of the
 above commands could be needed, depending on the flavor of UNIX that is used

@@ -2,7 +2,7 @@
 authors: XG, DCA
 ---
 
-# the Mrgddb utility  
+# The mrgddb utility  
 
 The user is advised to be familiar with the main [[help:abinit]] help file
 before reading the present file. It is important to read also the [[help:anaddb]]

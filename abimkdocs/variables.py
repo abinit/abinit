@@ -319,10 +319,6 @@ class Components(yaml.YAMLObject):
 
     yaml_tag = u'!components'
 
-    #def attrs(self):
-    #    return ['name', 'keyword', 'authors', 'howto', 'header', 'title', 'subtitle', 'purpose', 'advice',
-    #            'copyright', 'introduction', 'links', 'menu', 'tofcontent_header', 'tutorials', 'examples', 'end']
-
     #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
     def __init__(self, name=None, keyword=None, authors=None, howto=None, header=None, title=None, subtitle=None, purpose=None, advice=None,
                  copyright=None, links=None, menu=None, tofcontent_header=None, tutorials=None, examples=None, end=None):

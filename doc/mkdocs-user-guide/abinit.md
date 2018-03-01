@@ -68,7 +68,7 @@ or, in the background, with the command
 where standard out and standard error are piped to the log file called "log"
 (piping the standard error, thanks to the '&' sign placed after '>' is
 **really important** for the analysis of eventual failures, when not due to
-ABINIT, but to other sources, like disk full problem ...). The user can
+ABINIT, but to other sources, like disk full problem...). The user can
 specify any names he/she wishes for any of these files. Variations of the
 above commands could be needed, depending on the flavor of UNIX that is used
 on the platform that is considered for running the code.  
@@ -98,26 +98,20 @@ efficiency is present in many places of the code, and addressed briefly at the
 end of the present help file.
 
 We recommend a good introduction to many different concepts valid for this
-code, available in a Reviews of Modern Physics article, ``Iterative
-minimization techniques for ab initio total-energy calculations: molecular
-dynamics and conjugate gradients'', M. C. Payne, M. P. Teter, D. C. Allan, T.
-A. Arias, and J. D. Joannopoulos, Rev. Mod. Phys. 64, 1045-1097 (1992).  
-This paper does NOT reflect the present status of the code. ABINIT is closer
-in spirit to the paper of of Kresse and Furthmuller, see the
-[[bib:biblio|bibliography]] list.
-
+code, available in this [[cite:Payne1992|Reviews of Modern Physics article]].
+Note that this paper does NOT reflect the present status of the code. 
+ABINIT is closer in spirit to the [[cite:Kresse1996|paper]] of Kresse and Furthmuller.
 If you have never used another electronic structure code or a Quantum
 Chemistry package, you should browse through the Chaps. 1 to 13, and
-appendices L and M of the book Electronic Structure. Basic Theory and
-Practical Methods. R. M. Martin. Cambridge University Press (2004) ISBN 0 521 78285 6.
+appendices L and M of [[cite:Martin2008|this book]] by R. M. Martin
 
 ## 3 The input file
 
 ### 3.1 Format of the input file
   
-Note that this input file was called ab_in in the example of  section 1.1 .  
-We first explain the content of the input file without use of the "multi-
-dataset" possibility (that will be explained in section 3.3).
+Note that this input file was called ab_in in the example of section 1.1.  
+We first explain the content of the input file without use of the 
+"multi-dataset" possibility (that will be explained in section 3.3).
 
 The parameters are input to the code from a single input file. Each parameter
 value is provided by giving the name of the input variable and then placing
@@ -329,7 +323,7 @@ variable will determined by the following **rules** (actually, it is easier to
 understand when one looks at examples, see below):
 
   * (1) ABINIT looks whether the variable name (e.g. [[ecut]] ), appended with the index 
-    of the dataset (e.g. [[jdtset]]=2), exists (e.g. "ecut2" ) . It will take the data that follows this keyword, if it exists.
+    of the dataset (e.g. [[jdtset]]=2), exists (e.g. "ecut2" ). It will take the data that follows this keyword, if it exists.
 
   * (2) If this modified variable name does not exist, it will look whether a metacharacter, 
     a series or a double-loop data set has been defined, see sections 3.4 or 3.5.
@@ -515,7 +509,7 @@ variables, some output variables are also summarized, using the same conventions
 
 ## 4 More detailed presentation of the files file
   
-Note: _This "files" file is called _ab.files_ in section 1 ._
+Note: _This "files" file is called _ab.files_ in section 1._
 
 As mentioned in section 1 (you might read it again if needed), the "files"
 file contains the file names or root names needed to build file names. These
@@ -546,7 +540,7 @@ created from the root 'abi', is the following (a similar list exist when '
 
   * **abi_WFK**   
 filename of file containing input wavefunction coefficients created from an
-earlier run (with [[nqpt]]=0). Will be opened and read if [[irdwfk]] is 1 .
+earlier run (with [[nqpt]]=0). Will be opened and read if [[irdwfk]] is 1.
 The wavefunction file is unformatted and can be very large. **Warning**: in
 the multi dataset mode, if getwfk is non-zero, a wavefunction file build from
 **abo** will be read.
@@ -643,7 +637,7 @@ filename of file containing output wavefunction coefficients, if
 [[nbandkss]]/=0. This wavefunction file is unformatted and can be very large.
 Its purpose is to start a GW calculation using M.Torrent's code. A different
 format than for **abo_WFK** is used, see the file
-~abinit/doc/developers/format_KSS.txt .
+~abinit/doc/developers/format_KSS.txt.
 
   * **abo_EIG**   
 A file containing the electronic eigenvalues, for subsequent plotting of band
@@ -657,7 +651,7 @@ the SCF calculation. The value of x will be A, B, C, and D. Then, x will be 1,
 2, 3 ..., actually in agreement with the value of itime (see the keyword
 [[ntime]])  
 \- other ionmov cases: the initialisation phase take only one SCF call. The
-value of x will be 0 for that call. Then, the value of x is 1, 2, 3 ... in
+value of x will be 0 for that call. Then, the value of x is 1, 2, 3... in
 agreement with the value of itime (see the keyword [[ntime]])
 
 **tmp**  
@@ -735,8 +729,8 @@ The **main output file** is a formatted output file to be kept as the permanent 
 
 Note that it is expected **not** to exist at the beginning of the run:  
 If a file with the name specified in the "files" file already exists, the code
-will generate, from the given one, another name, appended with **.A** . If
-this new name already exists, it will try to append **.B**, and so on, until **.Z** .  
+will generate, from the given one, another name, appended with **.A**. If
+this new name already exists, it will try to append **.B**, and so on, until **.Z**.  
 Then, the code stops, and asks you to clean the directory.
 
 The **main output file** starts with a heading:
@@ -761,13 +755,14 @@ The code reports:
 
   * the real and reciprocal space translation vectors ( _Note_: the definition of the reciprocal vector is such that Ri.Gj= deltaij)
   * the volume of the unit cell
-  * the ratio between linear dimension of the FFT box and the sphere of plane waves, called " **boxcut** ".   
+  * the ratio between linear dimension of the FFT box and the sphere of plane waves, called boxcut
 
-It must be above 2 for exact treatment of convolutions by FFT. [[ngfft]] has
-been automatically chosen to give a boxcut value larger than 2, but not much
+It must be above 2 for exact treatment of convolutions by FFT. 
+[[ngfft]] has been automatically chosen to give a boxcut value larger than 2, but not much
 larger, since more CPU time is needed for larger FFT grids;
 
-  * the code also mention that for the same FFT grid you might treat (slightly) larger [[ecut]] (so, with a rather small increase of CPU time) 
+  * the code also mention that for the same FFT grid you might treat (slightly) larger [[ecut]] 
+    (so, with a rather small increase of CPU time) 
 
   * the heading for each pseudopotential which has been input 
 
@@ -801,7 +796,7 @@ Next the code reports information for each SCF iteration:
     The latter two are directly related to forces on each atom.
 
   * Then comes an assessment of the SCF convergence: the criterion for fulfillment of the SCF criterion 
-    (defined by [[toldfe]], [[toldff]], [[tolwfr]] or [[tolvrs]]) might be satisfied or not ... 
+    (defined by [[toldfe]], [[toldff]], [[tolwfr]] or [[tolvrs]]) might be satisfied or not... 
   * Then the stresses are reported. 
 
 This ends the content of a fixed atomic position calculation.
@@ -836,80 +831,75 @@ geometry, by comparing the Fermi energy in a slab and the potential in the
 vacuum in the same supercell.
 
   * Next are the minimum and maximum values for charge density, and next smaller or larger values (in order to see degeneracies). 
+
   * Next are the total energy (Ha and eV) and its components: 
     * kinetic, 
     * Hartree, 
     * exchange and correlation (xc), 
     * Ewald (ion-ion energy), 
-    * " _core correction_ " to the local pseudopotential, 
+    * *core correction* to the local pseudopotential, 
     * local pseudopotential, and 
     * nonlocal pseudopotential.  The sum of the Kohn-Sham energies (termed "band energy") is also given. 
-  * Next is the stress tensor,   
-(1/ucvol) d(Etot)/d(strain(a,b))  
-for Etot=total energy per unit cell and  
-**a**, **b** are **x**, **y**, or **z** components of strain.  
-The stress tensor is given in cartesian coordinates in Hartree/Bohr 3 and GPa.  
-The basics of the stress tensor are described in O. H. Nielsen and Richard M.
-Martin, see the [[bib:biblio|bibliography]] file.
+
+  * Next is the stress tensor, (1/ucvol) d(Etot)/d(strain(a,b))
+    for Etot=total energy per unit cell and **a**, **b** are **x**, **y**, or **z** components of strain.
+    The stress tensor is given in cartesian coordinates in Hartree/Bohr 3 and GPa.
+    The basics of the stress tensor are described in [[cite:Nielsen1985]].
 
 Having finished all the calculations for the different datasets, the code
 echoes the parameters listed in the input file, using the latest values e.g.
 for [[xred]], [[vel]], and [[xcart]], and supplement them with the values
-obtained for the total energy, the forces and stresses, as well as occupation numbers.  
+obtained for the total energy, the forces and stresses, as well as occupation numbers.
 The latter echoes are very convenient for a quick look at the result of calculation!
 
 This is followed finally by the timing output: both "cpu" time and "wall
-clock" time as provided by calls within the code.  
+clock" time as provided by calls within the code.
 The total cpu and wall clock times are reported first, in seconds, minutes,
-and hours for convenient checking at a glance.  
+and hours for convenient checking at a glance.
 Next are the cpu and wall times for the principal time-consuming subroutine
 calls, each of which is independent of the others. The sum of these times
-usually accounts for about 90% of the run time.  
+usually accounts for about 90% of the run time.
+
 The main subroutines, for BIG jobs, are
 
-  * (1) fourwf: the subroutine which performs the fast Fourier transform for the wavefunctions: 
-  * (2) fourdp: the subroutine which performs the fast Fourier transform related to density and potential 
-  * (3) rhohxc: computes the Hartree and exchange-correlation energy and potential and sometimes derivative of potential; only the XC timing is reported, excluding time connected to the FFTs: `xc:pot/=fourdp.`
-  * (4) nonlop: computes 
-    
-        < G | Vnon-local | C >
-
-the matrix elements of the nonlocal pseudopotential;
-
-  * (5) projbd: Gram-Schmidt orthogonalisation 
+1. fourwf: the subroutine which performs the fast Fourier transform for the wavefunctions: 
+2. fourdp: the subroutine which performs the fast Fourier transform related to density and potential 
+3. rhohxc: computes the Hartree and exchange-correlation energy and potential and sometimes 
+   derivative of potential; only the XC timing is reported, excluding time connected to the FFTs: `xc:pot/=fourdp.`
+4. nonlop: computes the matrix elements of the nonlocal pseudopotential: $\langle G|V_{non-local}|C \rangle$
+5. projbd: Gram-Schmidt orthogonalisation 
 
 In case of small jobs, other (initialisation) routines may take a larger
 share, and the sum of the times for the principal time-consuming subroutine
-calls will not make 90% of the run time..
+calls will not make 90% of the run time.
 
 If the long printing option has been selected ([[prtvol]]=1), the code gives
-much more information in the whole output file. These should be rather self-
-explanatory, usually. Some need more explanation.  
+much more information in the whole output file. These should be rather 
+self-explanatory, usually. Some need more explanation.  
 In particular the cpu and wall times for major subroutines which are NOT
 independent of each other; for example vtorho conducts the loop over k points
 and calls practically everything else. In case of a ground state calculation,
-at fixed atomic positions, these subroutines are
+at fixed atomic positions, these subroutines are:
 
-  * (1) **abinit**: the main routine 
-  * (2) **driver**: select ground state or response calculations 
-  * (3) **gstate**: the driver of the ground state calculations 
-  * (4) **scfcv**: the SCF cycle driver 
-  * (5) **vtorho**: compute the density from the potential (it includes a loop over spins and k-points) 
-  * (6) **vtowfk**: compute the wavefunctions at one particular k-point (includes a non self consistent loop, and a loop over bands) 
-  * (7) **cgwf**: optimize one wavefunction in a fixed potential 
-  * (8) **getghc**: computes < G | H | C >, that is, applies the Hamiltonian operator to an input vector. 
-
+1. **abinit**: the main routine 
+2. **driver**: select ground state or response calculations 
+3. **gstate**: the driver of the ground state calculations 
+4. **scfcv**: the SCF cycle driver 
+5. **vtorho**: compute the density from the potential (it includes a loop over spins and k-points) 
+6. **vtowfk**: compute the wavefunctions at one particular k-point (includes a non self consistent loop, and a loop over bands) 
+7. **cgwf**: optimize one wavefunction in a fixed potential 
+8. **getghc**: computes $\langle G|H|C\rangle$, that is, applies the Hamiltonian operator to an input vector. 
 
 ### 6.4 The header
   
 The **wavefunction files**, **density files**, and **potential files** all
-begin with the same records, called the "header".  
-This header is treated using a hdr_type data structure inside ABINIT. There are
-dedicated routines inside ABINIT for initializing a header, updating it,
-reading the header of an unformatted disk file, writing a header to an
-unformatted disk file, echoing a header to a formatted disk file, cleaning a header data structure.
+begin with the same records, called the "header".
+This header is treated using the hdr_type Fortran data structure inside ABINIT. 
+There are dedicated routines inside ABINIT for initializing a header, updating it,
+reading the header of an unformatted disk file, writing a header to an unformatted disk file,
+echoing a header to a formatted disk file, cleaning a header data structure.
 
-The header is made of 4+[[ntypat]] unformatted records, obtained by the
+The header is made of 4 + [[ntypat]] unformatted records, obtained by the
 following Fortran90 instructions (format 5.7):
     
 ```fortran
@@ -992,7 +982,6 @@ The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was:
 ```
 
 ### 6.5 The density output file
-
   
 This is an unformatted data file containing the electron density on the real
 space FFT grid. It consists of the header records followed by
@@ -1011,9 +1000,9 @@ only one present when [[nspden]]=1) is always the total charge density. When
 [[nspden]]=2, the second component is the density associated with spin-up
 electrons. When [[nspden]]=4, the second, third and fourth components
 correspond to the x, y and z projections of the local magnetization, in units
-of hbar/2 . Note that the meaning of the different components of the density
+of hbar/2. Note that the meaning of the different components of the density
 differs for the density array (rhor) and for the different potential arrays
-(vxc ...), see section  6.6 .
+(vxc...), see section  6.6.
 
 To identify the points in real space which correspond with the index "ir"
 above, consider the following.  
@@ -1291,10 +1280,3 @@ system size.
     so you have less freedom. Still, be sure that your supercell is large enough for your properties 
     of interest to be accurate at the level you want it to be. 
   * For a slab calculation: you must increase the vacuum in the cell, but also the thickness of your slab systematically... 
-
-## 8 Final remarks
-
-The ABINIT package is developed by the ABINIT group. The status of this
-package and the ABINIT group are explained in the file
-~abinit/doc/users/context.txt and ~abinit/doc/developers/planning.txt, or
-some recent version of them.

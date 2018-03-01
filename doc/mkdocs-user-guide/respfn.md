@@ -2,26 +2,24 @@
 authors: XG, DCA
 ---
 
-# DFPT  
+# The DFPT code
 
-This file complements the main [[help_abinit]], for matters related 
-to responses to perturbations (computed using DFPT)
-The user is advised to be familiar with the main [[help:abinit]] before
-reading the present file.
-It will be easier to discover the present file with the help 
-of the [[lesson:index|tutorial]], and the [[lesson:rf1]].  
+This page complements the main [[help:abinit]], for matters related
+to responses to perturbations computed with DFPT.
+It will be easier to discover the present file with the help of the [[lesson:rf1]].  
 
 ## 0 Introducing the computation of responses
   
 ABINIT can compute the response to different perturbations, and provide access
 to quantities that are second derivatives of total energy (2DTE) with respect
-to these perturbations. Presently, they can be of three types: 
+to these perturbations. 
+Presently, they can be of three types: 
 
 1. phonons,
 2. static homogeneous electric field
 3. strain. 
 
-The physical propertiesconnected to 2DTE with respect to perturbations (1) and (2) are the phonon
+The physical properties connected to 2DTE with respect to perturbations (1) and (2) are the phonon
 dynamical matrices, the dielectric tensor, and the Born effective charges,
 while the additional strain perturbation (3), mixed with phonon and electric
 field leads to elastic constant, internal strain, and piezoelectricity.
@@ -32,17 +30,16 @@ as the homogeneous magnetic field perturbation. Some third derivatives of the
 total energy (3DTE) are also implemented. The 3DTE might give phonon-phonon
 coupling, non-linear electric response, anharmonic elastic constants, Gruneisen parameters,...
 
-The basic quantities that ABINIT will compute are the FIRST-order derivatives
+The basic quantities that ABINIT will compute are the **first-order** derivatives
 of the wavefunctions (1WF) with respect to these perturbations. The later
-calculation of the 2DTE and 3DTE from these 1WF is an easy computational task: 
+calculation of the 2DTE and 3DTE from these 1WF is an easy computational task:
 the construction of the 2DTE with respect to perturbations j1 and j2
-involves mainly evaluating matrix elements between the 1WF of j1 and/or the
-1WF of j2. More details on this technique can be found in X. Gonze, Phys. Rev.
-B55, 10337 (1997) and X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+involves mainly evaluating matrix elements between the 1WF of j1 and/or the 1WF of j2. 
+More details on this technique can be found in [[cite:Gonze1997]] and [[cite:Gonze1997a]].
 
 The calculation of the 1WF for a particular perturbation is done using a
 variational principle and an algorithm rather similar to the one used to find
-the ground-state (unperturbed) wavefunctions. Thus, a lot of technical details
+the unperturbed ground-state wavefunctions. Thus, a lot of technical details
 and parameters are the same for both ground-state and response-function
 calculations. This justifies the development of one unique code for these two
 classes of properties: many of the routines of abinit are common in these
@@ -58,14 +55,17 @@ the Anaddb code. See the corresponding [[help:mrgddb]] and [[help:anaddb]].
 ## 1 Description of perturbations
   
 The perturbation of the **phonon** type is the displacement of one atom along
-one of the axis of the unit cell, by a unit of length (in reduced
-coordinates). It is characterized by two integer numbers and one wavevector.
+one of the axis of the unit cell, by a unit of length (in reduced coordinates).
+It is characterized by two integer numbers and one wavevector.
 The two integer numbers are the number of the moved atom, which will be noted
-"ipert", and the number of the axis of the unit cell, which will be noted
-"idir". "ipert" for phonon perturbation can have values between 1 and
-[[natom]], "idir" can have values between 1 and 3. 
+**ipert**, and the number of the axis of the unit cell, which will be noted **idir**. 
 
-The set of all possible phonon perturbations for one wavevector has thus (3*[[natom]]) elements. 
+!!! important
+
+    *ipert* for phonon perturbation can have values between 1 and [[natom]],
+    *idir* can have values between 1 and 3.
+
+The set of all possible phonon perturbations for one wavevector has thus 3 * [[natom]] elements. 
 From this basis set, all phonons can be constructed by linear combination. 
 The set of atoms to be moved in one dataset of ABINIT is determined by the input
 variable [[rfatpol]]. The set of directions to be considered in one dataset of
@@ -98,8 +98,8 @@ Note 2
     coordinates. Sorry for the possible confusion ...
 
 These electric-type perturbations are also characterized by two numbers:
-"ipert" being natom+1 for the ddk perturbation and natom+2 for the electric
-field, and "idir" being 1, 2 or 3, as for phonon perturbations. Although the
+*ipert* being natom + 1 for the ddk perturbation and natom + 2 for the electric
+field, and *idir* being 1, 2 or 3, as for phonon perturbations. Although the
 possibility of electric field characterized by a non-zero wavevector is
 envisioned for a future version of the code, at present only homogeneous
 fields are considered. So the wavevector of the electric field type
@@ -107,35 +107,48 @@ perturbations is Gamma (q=0).
 
 The perturbations of the **strain** type are either an uniaxial strain or a
 shear strain. The strain perturbations are considered in cartesian coordinates
-(x,y,z). They are characterized by two numbers, with "ipert" being natom+3 for
-the uniaxial strains, and natom+4 for the shear strains, and "idir" describe
-the particular component. Explicitly, for uniaxial strains, idir=1 gives the
-xx strain perturbation, idir=2 gives the yy strain perturbation, idir=3 gives
-the zz strain perturbation, while for shear strains, idir=1 gives the yz
-strain perturbation, idir=2 gives the xz perturbation, and idir=3 gives the xy perturbation.  
+(x,y,z). They are characterized by two numbers, with *ipert* being natom + 3 for
+the uniaxial strains, and natom + 4 for the shear strains, and *idir* describes
+the particular component. 
+
+Explicitly, for uniaxial strains:
+
+* idir = 1 gives the xx strain perturbation, 
+* idir = 2 gives the yy strain perturbation, 
+* idir = 3 gives the zz strain perturbation, 
+
+while for shear strains:
+
+* idir=1 gives the yz strain perturbation, 
+* idir=2 gives the xz perturbation, 
+* idir=3 gives the xy perturbation.  
+
 Note that the "rigid-atom" elastic constants, as output of ABINIT, are those
 obtained with **frozen** internal coordinates. The internal coordinate
 relaxation, needed to give "physical" elastic constants can be handled through
-the knowledge of the internal strain and dynamical matrix at Gamma, in ANADDB.  
+the knowledge of the internal strain and dynamical matrix at Gamma, in ANADDB.
 Of course, if all the internal coordinate are fixed by symmetry, all the
 internal strains vanish, and the "rigid-atom" and "physical" elastic constants are equal.  
 Limitations of the present implementation (as of v5.7):
 
-  * Symmetry is presently used to skip redundant k points in the BZ sum, but not to skip redundant strain perturbations.
+  * Symmetry is presently used to skip redundant k points in the BZ sum, 
+    but not to skip redundant strain perturbations.
 
-We also define the index of the perturbation, called "pertcase", equal to idir
-+ 3*ipert. Accordingly, pertcase runs from 1 to 3*(natom+4), and will be
-needed to identify output and input files, see section 6 .
+We also define the index of the perturbation, called *pertcase*, equal to idir + 3*ipert. 
+Accordingly, pertcase runs from 1 to 3 * (natom + 4), and will be
+needed to identify output and input files, see section 6.
 
-To summarize, the perturbations are characterized by two numbers, "ipert" from
-1 to natom+4, and "idir", from 1 to 3, as well as one wavevector (that is
-gamma when a non-phonon perturbation is considered); a number called
-"pertcase" combines "ipert" and "idir", and runs from 1 to 3*(natom+4).
+!!! summary
+
+    To summarize, the perturbations are characterized by two numbers, **ipert** from
+    1 to natom + 4, and **idir**, from 1 to 3, as well as one wavevector (that is
+    gamma when a non-phonon perturbation is considered). A number called
+    **pertcase** combines *ipert* and *idir*, and runs from 1 to 3 * (natom + 4).
 
 The 2DTE, being derivative of the total energy with respect to two
 perturbations, will be characterized by two sets of (idir,ipert), or by two
-pertcase numbers, while 3DTE will need three such sets or pertcase numbers. In
-addition they will depend on one wavevector (for 2DTE) or two wavevectors (for 3DTE).
+pertcase numbers, while 3DTE will need three such sets or pertcase numbers.
+In addition they will depend on one wavevector (for 2DTE) or two wavevectors (for 3DTE).
 
 In the present (non-stationary) implementation of the 2DTE, the first pertcase
 corresponds to the perturbation that gives the derivative of the potential,
@@ -204,7 +217,7 @@ In order to understand correctly the behaviour of response-function runs,
 some information on the use of symmetries must be given.
 
 Some perturbations (including their wavevector) may be invariant for some
-symmetries. ABINIT is able to use symmetries to skip perturbations of which a
+symmetries. The code is able to use symmetries to skip perturbations of which a
 symmetric has already been calculated (except in the case of strain
 perturbations). ABINIT is also able to use the symmetries that keeps the
 perturbations invariant to reduce the number of k points needed for the
