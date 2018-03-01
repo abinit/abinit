@@ -52,7 +52,7 @@ def valuewithunit_representer(dumper, data):
 
 class Variable(yaml.YAMLObject):
     vartype = ''                   # String containing the type
-    characteristic = None          # String containing the characteristics
+    characteristics = None          # String containing the characteristics
     mnemonics = None               # String containing the mnemonics
     dimensions = None              # Array containing either int, formula or another variable  TODO: shape?
     defaultval = None              # Either constant number, formula or another variable
@@ -70,18 +70,18 @@ class Variable(yaml.YAMLObject):
     yaml_tag = u'!variable'
 
     def attrs(self):
-        return ['vartype', 'characteristic', 'mnemonics', 'dimensions', 'defaultval', 'text',
+        return ['vartype', 'characteristics', 'mnemonics', 'dimensions', 'defaultval', 'text',
                 'abivarname', 'varset', 'executables', 'topics']
 
-    def __init__(self, vartype=None, characteristic=None,
-                 mnemonics=None, dimensions=None, default=None,
-                 text=None, abivarname=None, executables=None, varset=None, range=None,
+    def __init__(self, vartype=None, characteristics=None,
+                 mnemonics=None, dimensions=None, defaultval=None,
+                 text=None, abivarname=None, executables=None, varset=None, range=None, excludes=None, requires=None,
                  commentdefault=None, commentdims=None, topics=None):
         self.vartype = vartype
-        self.characteristic = characteristic
+        self.characteristics = characteristics
         self.mnemonics = mnemonics
         self.dimensions = dimensions
-        self.defaultval = default
+        self.defaultval = defaultval
         self.text = literal(text)
         self.abivarname = abivarname
         self.varset = varset
@@ -90,6 +90,8 @@ class Variable(yaml.YAMLObject):
         self.commentdims = commentdims
         self.range = range
         self.topics = topics
+        self.excludes = excludes
+        self.requires = requires
 
     @property
     def name(self):
@@ -119,7 +121,8 @@ class Variable(yaml.YAMLObject):
         else:
             assert self.topics is not None
             od = OrderedDict()
-            for tok in self.topics.split(","):
+            #for tok in self.topics.split(","):
+            for tok in self.topics:
                 topic, tribe = [s.strip() for s in tok.split("_")]
                 if topic not in od: od[topic] = []
                 od[topic].append(tribe)
@@ -252,7 +255,8 @@ class Variable(yaml.YAMLObject):
 
         # Add text with description.
         if self.text is not None:
-            md_text = html2text(self.text)
+            #md_text = html2text(self.text)
+            md_text = self.text
             app(2 * "\n")
             app(md_text)
         else:
@@ -377,7 +381,8 @@ class Components(yaml.YAMLObject):
 
 ####################################################################################################
 
-class ValueWithUnit(yaml.YAMLObject):
+#class ValueWithUnit(yaml.YAMLObject):
+class ValueWithUnit(object):
     value = None
     units = None
     yaml_tag = u'!valuewithunit'
@@ -429,7 +434,8 @@ class Range(yaml.YAMLObject):
 
 ####################################################################################################
 
-class ValueWithConditions(yaml.YAMLObject):
+#class ValueWithConditions(yaml.YAMLObject):
+class ValueWithConditions(dict):
     """
     Used for variables whose value depends on a list of conditions.
 
@@ -443,10 +449,10 @@ class ValueWithConditions(yaml.YAMLObject):
 
     def __repr__(self):
         s = ''
-        for key in self.__dict__.keys():
+        for key in self:
             if key != 'defaultval':
-                s += str(self.__dict__[key]) + ' if ' + str(key) + ',\n'
-        s += str(self.defaultval) + ' otherwise.\n'
+                s += str(self[key]) + ' if ' + str(key) + ',\n'
+        s += str(self["defaultval"]) + ' otherwise.\n'
         return s
 
     def __str__(self):
@@ -454,7 +460,8 @@ class ValueWithConditions(yaml.YAMLObject):
 
 ####################################################################################################
 
-class MultipleValue(yaml.YAMLObject):
+#class MultipleValue(yaml.YAMLObject):
+class MultipleValue(dict):
     """
     Used for variables that can assume multiple values.
 
@@ -483,17 +490,18 @@ from collections import OrderedDict
 
 _VARS = None
 
-def get_variables_code():
+def get_variables_code(use_pymods=True):
     """
     Return the database of variable and cache it. Main entry point for client code.
     """
     global _VARS
     if _VARS is None:
-        # FIXME
-        #yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "mkdocs-variables", "abinit_vars.yml")
-        yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "variables", "origin_files", "abinit_vars.yml")
-        _VARS = VarDatabase.from_file(yaml_path)
-        #_VARS = VarDatabase.from_pyfiles()
+        if use_pymods:
+            _VARS = VarDatabase.from_pyfiles()
+        else:
+            yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "variables", "origin_files", "abinit_vars.yml")
+            _VARS = VarDatabase.from_file(yaml_path)
+
     return _VARS
 
 
@@ -507,16 +515,30 @@ class VarDatabase(OrderedDict):
         """Initialize the object from python modules."""
         if dirpath is None:
             dirpath = os.path.dirname(os.path.abspath(__file__))
-        pyfiles = [f for f in os.listdir(dirpath) if f.startswith("variables_") and f.endswith(".py")]
+        pyfiles = [os.path.join(dirpath, f) for f in os.listdir(dirpath) if
+                   f.startswith("variables_") and f.endswith(".py")]
         new = cls()
-        #for pyf in pyfiles:
         #for exname in sorted(set(v.executable for v in vlist)):
-        #    vd = InputVariables.from_pyfile()
-        #    items = [(v.name, v) for v in vlist if v.executable == exname]
-        #    vd = InputVariables(sorted(items, key=lambda t: t[0]))
-        #    vd.executable = exname
-        #    vd.all_varset = sorted(set(v.varset for v in vd.values()))
-        #    new[exname] =  vd
+        for pyf in pyfiles:
+            print("pyf", pyf)
+            vd = InputVariables.from_pyfile(pyf)
+            #items = [(v.name, v) for v in vlist if v.executable == exname]
+            #vd = InputVariables(sorted(items, key=lambda t: t[0]))
+            #vd.executable = exname
+            #vd.all_varset = sorted(set(v.varset for v in vd.values()))
+            new[vd.executable] =  vd
+
+        # Read list of strings with possible character of variables.
+        yaml_path = "/Users/gmatteo/git_repos/abinit/doc/variables/origin_files/"
+        with io.open(os.path.join(os.path.dirname(yaml_path), "characteristics.yml"), "rt", encoding="utf-8") as f:
+            new.characteristics = yaml.load(f)
+
+        # Read list of `external_params` i.e. external parameters that are not input variables,
+        # but that are used in the documentation of other variables
+        # then convert to dict {name --> description}
+        with io.open(os.path.join(os.path.dirname(yaml_path), "list_externalvars.yml"), "rt", encoding="utf-8") as f:
+            d = {k: v for k, v in yaml.load(f)}
+            new.external_params = OrderedDict([(k, d[k]) for k in sorted(d.keys())])
 
         return new
 
@@ -573,9 +595,10 @@ class VarDatabase(OrderedDict):
     #    with open(json_path, "wt") as fh:
     #        json.dump(oldd, fh, indent=indent)
 
-    def write_pymods(self):
+    def write_pymods(self, dirpath="."):
         """
         """
+        dirpath = os.path.abspath(dirpath)
         from pprint import pformat
         def nones2arg(obj, must_be_string=False):
             if obj is None:
@@ -628,11 +651,12 @@ class VarDatabase(OrderedDict):
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 # We don't install with setup.py hence we have to add this directory to sys.path
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+#import sys
+#import os
+#sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-#from abimkdocs.variables import ValueWithUnit, ValueWithConditions, MultipleValue, Range
+from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+ValueWithConditions = dict
 
 Variable=dict\nvariables = ["""
 ]
@@ -679,7 +703,8 @@ Variable(
                 #print(s)
 
             lines.append("]")
-            with open("variables_%s.py" % code, "wt") as fh:
+            # Write file
+            with open(os.path.join(dirpath, "variables_%s.py" % code), "wt") as fh:
                 fh.write("\n".join(lines))
                 fh.write("\n")
 
@@ -693,8 +718,12 @@ class InputVariables(OrderedDict):
         import imp
         module = imp.load_source(filepath, filepath)
         new = cls()
-        #new.executable = module.executable
-        #new.all_varset = sorted(set(v.varset for v in vd.values()))
+        new.executable = module.executable
+        vlist = [Variable(**d) for d in module.variables]
+        vlist = sorted(vlist, key=lambda v: v.name)
+        for v in vlist:
+            new[v.name] = v
+        new.all_varset = sorted(set(v.varset for v in new.values()))
         return new
 
     def groupby_first_letter(self):

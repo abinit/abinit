@@ -16,7 +16,7 @@ class WebsiteTest(AbimkdocsTest):
         website = Website.build("./doc", deploy=False, verbose=10)
         assert website is website.get()
         assert not website.warnings
-        #websitefind_unreferenced_mds(self):
+        #website.find_unreferenced_mds()
 
         # Test (Abinit) wikilink syntax: [namespace:name#fragment|text]
         # URLs are supposed to be relative to page_rpath.
