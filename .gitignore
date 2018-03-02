@@ -7,6 +7,9 @@ config.h.in~
 .idea
 .*.sw[op]
 __pycache__
+*.egg
+*.egg-info
+mkdocs_plugins/dist
 Makefile.am
 Makefile.in
 Makefile
@@ -36,7 +39,6 @@ interfaces_*.F90
 tmp-*
 tmp_*
 ui_*.py
-abipy.egg-info
 math.so
 positions.so
 topology.so
@@ -396,7 +398,6 @@ bzr.status
 special/special.env
 special.env
 doc/input_variables/YML_vars_test
-scripts/*/*/*.egg-info
 scripts/*/*/build
 scripts/*/*/dist
 /tests/built-in/Input/*_o_*

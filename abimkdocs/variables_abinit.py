@@ -134,9 +134,9 @@ potentials from the different [[npspalch]] pseudopotentials dedicated to this us
 Presently, [[algalch]] can only have the value 1, that is:
 
   * the local potentials are mixed, thanks to the [[mixalch]] mixing coefficients
-  * the form factors of the non-local projectors are all preserved, 
+  * the form factors of the non-local projectors are all preserved,
     and all considered to generate the alchemical potential
-  * the scalar coefficients of the non-local projectors are multiplied by the 
+  * the scalar coefficients of the non-local projectors are multiplied by the
     proportion of the corresponding type of atom that is present in [[mixalch]]
   * the characteristic radius for the core charge is a linear combination of the characteristic radii
     of the core charges, build with the [[mixalch]] mixing coefficients
@@ -1164,7 +1164,7 @@ user reads the description of the input variables [[freqim_alpha]],
 The integration to be performed for each matrix element of the self energy
 along the imaginary axis is of the form:
 
-![](../vargw_img/self_energy_cd.png)
+![](variables_assets/self_energy_cd.png)
 
 Where  _ ω _ is the frequency point along the real axis,  _ ε s  _ is an
 eigenvalue, and  _i ω' _ is the variable along the imaginary axis. Thus the
@@ -1196,7 +1196,7 @@ the **Mrgscr** utility and plotting them for visual inspection.
 
   * **Default** \- The default grid is an exponentially increasing grid given by the formula:
 
-![](../vargw_img/cd_default_grid.png)
+![](variables_assets/cd_default_grid.png)
 
 Here  _ ω p  _ is the plasma frequency (by default determined by the average
 density of the system, but this can be overridden by setting [[ppmfrq]]).  _N_
@@ -1215,7 +1215,7 @@ for speed and accurate results with few grid points for **cd_frqim_method =
 
   * **Inverse z transform** \- This grid is activated by the use of the variable [[gw_frqim_inzgrid]]. This is the standard  _[0, ∞[ -> [0,1] _ transform using the formula:
 
-![](../vargw_img/cd_inzgrid.png)
+![](variables_assets/cd_inzgrid.png)
 
 Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The grid points are then picked by an equidistant grid (number of
@@ -2376,7 +2376,7 @@ This option can be used to diagonalize the occupation matrix Nocc_{m,m_prime}.
 Relevant values are:
 
   * 0: deactivated.
-  * 1: occupation matrix is diagonalized and printed in log file at each SCF cycle 
+  * 1: occupation matrix is diagonalized and printed in log file at each SCF cycle
     (eigenvectors are also given in the log file).
   * 2: for testing purpose.
 """,
@@ -5096,7 +5096,7 @@ Variable(
 by using an equidistant grid in the variable  _z ⊂ [0,1] _ where the transform
 is:
 
-![](../vargw_img/cd_inzgrid.png)
+![](variables_assets/cd_inzgrid.png)
 
 Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The equidistant grid in z is determined uniquely by [[nfreqim]])
@@ -5118,7 +5118,7 @@ Variable(
 using an equidistant grid in the variable  _z ⊂ [0,1] _ where the transform
 is:
 
-![](../vargw_img/cd_inzgrid_re.png)
+![](variables_assets/cd_inzgrid_re.png)
 
 Here  _ ω p  _ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The equidistant grid in z is determined uniquely by [[nfreqre]] )
