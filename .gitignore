@@ -9,7 +9,6 @@ config.h.in~
 __pycache__
 *.egg
 *.egg-info
-mkdocs_plugins/dist
 Makefile.am
 Makefile.in
 Makefile
@@ -118,6 +117,9 @@ tests/TestBot_MPI*/*
 /config/wrappers/wrap-mpicc
 /config/wrappers/wrap-mpicxx
 /config/wrappers/wrap-mpifc
+
+# Documentation
+mkdocs_plugins/dist
 /site/
 /doc/abinit-doc-*.tar.gz
 /doc/aclocal.m4
@@ -172,6 +174,8 @@ tests/TestBot_MPI*/*
 /doc/*/*.log
 /doc/*/*.toc
 /doc/*/*/*~
+
+# fallbacks
 /fallbacks/aclocal.m4
 /fallbacks/autom4te.cache
 /fallbacks/configure

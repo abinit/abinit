@@ -119,31 +119,31 @@ pages:
     - mkdocs-topics/Wavelets.md
     - mkdocs-topics/xc.md
 - Variables:
-    - All Variables: mkdocs-variables/index.md
+    - All Variables: variables/index.md
     - Abinit:
-        - Basic: mkdocs-variables/basic.md
-        - Bethe-Salpeter: mkdocs-variables/bse.md
-        - Developers: mkdocs-variables/dev.md
-        - DMFT: mkdocs-variables/dmft.md
-        - Electron-Phonon: mkdocs-variables/eph.md
-        - Varff: mkdocs-variables/ffield.md
-        - File-handling: mkdocs-variables/files.md
-        - Geometry: mkdocs-variables/geo.md
-        - Ground-State: mkdocs-variables/gstate.md
-        - GW: mkdocs-variables/gw.md
-        - Internal: mkdocs-variables/internal.md
-        - Parallelism: mkdocs-variables/paral.md
-        - PAW: mkdocs-variables/paw.md
-        - DFPT: mkdocs-variables/dfpt.md
-        - Relaxation: mkdocs-variables/rlx.md
-        - VdW: mkdocs-variables/vdw.md
-        - Wannier90: mkdocs-variables/w90.md
-    - Anaddb: mkdocs-variables/anaddb.md
-    - Optic: mkdocs-variables/optic.md
-    - Aim: mkdocs-variables/aim.md
-    - External Parameters: mkdocs-variables/external_parameters.md
-    - Statistics: mkdocs-variables/varset_stats.md
-    #- Connections: mkdocs-variables/connections.md
+        - Basic: variables/basic.md
+        - Bethe-Salpeter: variables/bse.md
+        - Developers: variables/dev.md
+        - DMFT: variables/dmft.md
+        - Electron-Phonon: variables/eph.md
+        - Varff: variables/ffield.md
+        - File-handling: variables/files.md
+        - Geometry: variables/geo.md
+        - Ground-State: variables/gstate.md
+        - GW: variables/gw.md
+        - Internal: variables/internal.md
+        - Parallelism: variables/paral.md
+        - PAW: variables/paw.md
+        - DFPT: variables/dfpt.md
+        - Relaxation: variables/rlx.md
+        - VdW: variables/vdw.md
+        - Wannier90: variables/w90.md
+    - Anaddb: variables/anaddb.md
+    - Optic: variables/optic.md
+    - Aim: variables/aim.md
+    - External Parameters: variables/external_parameters.md
+    - Statistics: variables/varset_stats.md
+    #- Connections: variables/connections.md
 - Lessons:
     - Overview: mkdocs-tutorials/index.md
     - Base Tutorials: 

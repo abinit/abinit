@@ -13,7 +13,7 @@ from abimkdocs.website import MyEntry
 class BibrefTest(AbimkdocsTest):
 
     def test_bibref(self):
-        bibpath = os.path.join(os.path.dirname(__file__), "..", "doc", "mkdocs-abiref.bib")
+        bibpath = os.path.join(os.path.dirname(__file__), "..", "doc", "abiref.bib")
         assert os.path.isfile(bibpath)
 
         # Get bibtex references and cast to MyEntry instance.

@@ -512,7 +512,7 @@ class VarDatabase(OrderedDict):
         # FIXME
         # Read list of strings with possible character of variables.
         #yaml_path = "/Users/gmatteo/git_repos/abinit/doc/variables/origin_files/"
-        yaml_path = os.path.abspath(os.path.join(dirpath, "..", "doc", "variables", "origin_files"))
+        yaml_path = os.path.abspath(os.path.join(dirpath, "..", "doc", "variables"))
         with io.open(os.path.join(yaml_path, "characteristics.yml"), "rt", encoding="utf-8") as f:
             new.characteristics = yaml.load(f)
 

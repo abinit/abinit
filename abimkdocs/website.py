@@ -341,9 +341,7 @@ class Website(object):
         self.variables_code = get_variables_code()
 
         # Get bibtex references and cast to MyEntry instance.
-        # FIXME
-        bib_path = os.path.join(self.root, "mkdocs-abiref.bib")
-        #bib_path = os.path.join(self.root, "biblio/origin_files/abiref.bib")
+        bib_path = os.path.join(self.root, "abiref.bib")
         self.bib_data = parse_file(bib_path, bib_format="bibtex")
         for entry in self.bib_data.entries.values():
             entry.__class__ = MyEntry
@@ -532,7 +530,7 @@ Change the input yaml files or the python code
 
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}
-        with self.new_mdfile("mkdocs-variables", "index.md", meta=meta) as mdf:
+        with self.new_mdfile("variables", "index.md", meta=meta) as mdf:
             for code, vd in self.variables_code.items():
                 mdf.write("## %s variables   \n\n" % code)
                 mdf.write(vd.get_vartabs_html(self, mdf.rpath))
@@ -543,7 +541,7 @@ Change the input yaml files or the python code
             mdf.write(self.build_varsearch_html(mdf.rpath))
 
         # Build markdown page with external parameters.
-        with self.new_mdfile("mkdocs-variables", "external_parameters.md") as mdf:
+        with self.new_mdfile("variables", "external_parameters.md") as mdf:
             mdf.write("""\
 This document lists and provides the description of the name (keywords) of external parameters
 that are not input variables, but that are used in the documentation of other variables,
@@ -560,7 +558,7 @@ You can change these parameters at compile or run time usually.
             for varset in vd.all_varset:
                 var_list = [v for v in vd.values() if v.varset == varset]
                 meta = {"description": "%s input variables" % varset}
-                with self.new_mdfile("mkdocs-variables", varset + ".md", meta=meta) as mdf:
+                with self.new_mdfile("variables", varset + ".md", meta=meta) as mdf:
                     mdf.write("""\
 # {varset} input variables
 
@@ -574,7 +572,7 @@ This document lists and provides the description of the name (keywords) of the
         # Add plotly figures.
         # TODO: Replace it with dot
         if False and self.deploy:
-            with self.new_mdfile("mkdocs-variables", "connections.md", meta={"plotly": True}) as mdf:
+            with self.new_mdfile("variables", "connections.md", meta={"plotly": True}) as mdf:
                 mdf.write("# Dependency graphs  \n")
                 mdf.write("""
 These graphs show the dependencies of the input variables towards each other.
@@ -587,7 +585,7 @@ The colormap gives the number of input variables connected to the node.
                         #mdf.write(vd.get_plotly_networkx(varset=varset, include_plotlyjs=False))
 
         # Write Markdown page with statistics.
-        with self.new_mdfile("mkdocs-variables", "varset_stats.md") as mdf:
+        with self.new_mdfile("variables", "varset_stats.md") as mdf:
             mdf.write("""
 # Input variables, statistics
 
@@ -1025,14 +1023,14 @@ The bibtex file is available [here](../abiref.bib).
                     # Handle [[dipdip@anaddb|text]]
                     vname, code = name.split("@")
                     var = self.variables_code[code][vname]
-                    url = "/mkdocs-variables/%s#%s" % (var.varset, var.name)
+                    url = "/variables/%s#%s" % (var.varset, var.name)
                     if a.text is None: a.text = name
                     html_classes.append("codevar-wikilink")
 
                 elif name in self.variables_code["abinit"]:
                     # Handle link to Abinit variable e.g. [[ecut|text]]
                     var = self.variables_code["abinit"][name]
-                    url = "/mkdocs-variables/%s#%s" % (var.varset, var.name)
+                    url = "/variables/%s#%s" % (var.varset, var.name)
                     html_classes.append("codevar-wikilink")
                     if a.text is None:
                         a.text = var.name if not var.is_internal else "%%%s" % var.name
@@ -1080,7 +1078,7 @@ The bibtex file is available [here](../abiref.bib).
                     content = ("This is an external parameter\n"
                                "typically compilation parameters, available libraries, or number of processors.\n"
                                "You can change these parameters at compile or runtime usually.\n")
-                    url = "/mkdocs-variables/external_parameters#%s" % self.slugify(name)
+                    url = "/variables/external_parameters#%s" % self.slugify(name)
                     if a.text is None: a.text = name
                     add_popover(a, title=self.variables_code.external_params[name], content=content)
 
@@ -1094,7 +1092,7 @@ The bibtex file is available [here](../abiref.bib).
                 # Handle [[anaddb:asr|text]] or [[abinit:ecut|text]]
                 assert fragment is None
                 var = self.variables_code[namespace][name]
-                url = "/mkdocs-variables/%s#%s" % (var.varset, var.name)
+                url = "/variables/%s#%s" % (var.varset, var.name)
                 html_classes.append("codevar-wikilink")
                 if a.text is None:
                     a.text = var.name if not var.is_internal else "%%%s" % var.name
@@ -1153,9 +1151,9 @@ The bibtex file is available [here](../abiref.bib).
                 # Handle [[varset:BSE|text]]
                 assert fragment is None
                 if name == "allvars":
-                    url = "/mkdocs-variables/index"
+                    url = "/variables/index"
                 else:
-                    url = "/mkdocs-variables/%s" % name
+                    url = "/variables/%s" % name
                 if a.text is None: a.text = "%s varset" % name
 
             elif namespace == "test":
