@@ -178,7 +178,7 @@ wavefunctions, eigenenergies, density, potential, etc. Some necessitates
 additional tuning parameters or are linked to postprocessing tools and are
 described in the following topics. Some others are actually activated through
 a single printing parameter, such as the Electron Localization Function (ELF -
-see [[prtelf]]). See the list of "printing" input variables in [[topic_printing]].
+see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]].
 
   1. [[topic:ElecBandStructure|Electronic band structure and related topics]]
   2. [[topic:ElecDOS|Electronic DOS and related topics]]

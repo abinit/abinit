@@ -697,8 +697,7 @@ This page gives hints on how to {howto} with the ABINIT package.
 {tutorials}""".format(tutorials=html2text(tutorials))
 
             meta = {"authors": top.authors, "description": "%s Abinit topic" % topic}
-            with self.new_mdfile("mkdocs-topics", topic + ".md", meta=meta) as mdf:
-            #with self.new_mdfile("topics", topic + ".md", meta=meta) as mdf:
+            with self.new_mdfile("topics", topic + ".md", meta=meta) as mdf:
                 mdf.write(text)
 
         # Now write topics index.md (sorted by first character)
@@ -707,7 +706,7 @@ This page gives hints on how to {howto} with the ABINIT package.
             index_md.extend("- [[topic:%s|%s]]: %s" % (topic, topic, self.howto_topic[topic]) for topic in group)
 
         meta = {"description": "List of Abinit topics"}
-        with self.new_mdfile("mkdocs-topics", "index.md", meta=meta) as mdf:
+        with self.new_mdfile("topics", "index.md", meta=meta) as mdf:
             mdf.write("\n".join(index_md))
 
         # Build page with full list of tests grouped by `suite_name`.
@@ -1007,7 +1006,7 @@ The bibtex file is available [here](../abiref.bib).
                 elif name.startswith("topic_"):
                     # Handle [[topic_SelfEnergy|text]]
                     name = name.replace("topic_" , " ", 1).strip()
-                    url = "/mkdocs-topics/%s" % name
+                    url = "/topics/%s" % name
                     if a.text is None: a.text = "%s topic" % name
                     html_classes.append("topic-wikilink")
                     add_popover(a, content=self.howto_topic[name])
@@ -1112,7 +1111,7 @@ The bibtex file is available [here](../abiref.bib).
 
             elif namespace == "topic":
                 # Handle [[topic:BSE|text]]
-                url = "/mkdocs-topics/%s" % name
+                url = "/topics/%s" % name
                 html_classes.append("topic-wikilink")
                 if a.text is None: a.text = "%s_%s" % (namespace, name)
                 add_popover(a, content=self.howto_topic[name])
