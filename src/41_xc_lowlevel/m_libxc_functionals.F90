@@ -762,7 +762,7 @@ end subroutine libxc_functionals_init
  libxc_functionals_fullname=trim(libxc_functionals_fullname)
 #endif
 
-end function libxc_functionals_fullname
+ end function libxc_functionals_fullname
 !!***
 
 !----------------------------------------------------------------------
@@ -1250,12 +1250,12 @@ end function libxc_functionals_nspin
 !scalars
  integer  :: ii,ipts
  logical :: is_gga,is_mgga
- real(dp) :: xc_tb09_c_
+ real(dp) :: exctmp,xc_tb09_c_
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
 !arrays
- real(dp),target :: rhotmp(nspden),sigma(3),exctmp,vxctmp(nspden),vsigma(3)
+ real(dp),target :: rhotmp(nspden),sigma(3),vxctmp(nspden),vsigma(3)
  real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6),v3rho3(4)
  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
  type(libxc_functional_type),pointer :: xc_funcs(:)
@@ -1965,8 +1965,8 @@ end function libxc_functionals_gga_from_hybrid
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
-     param_c(1)=real(cc,kind=C_DOUBLE)
-     call xc_func_set_params(xc_funcs(ii)%conf,param_c,npar_c)
+       param_c(1)=real(cc,kind=C_DOUBLE)
+       call xc_func_set_params(xc_funcs(ii)%conf,param_c,npar_c)
 #endif
      end if
    end do
@@ -1995,7 +1995,6 @@ end subroutine libxc_functionals_set_tb09
 
 #if defined HAVE_FC_ISO_C_BINDING
 function xc_char_to_c(f_string) result(c_string)
-!Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2003,17 +2002,20 @@ function xc_char_to_c(f_string) result(c_string)
 #define ABI_FUNC 'xc_char_to_c'
 !End of the abilint section
 
+!Arguments ------------------------------------
  character(len=*),intent(in) :: f_string
  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
 !Local variables -------------------------------
  integer :: ii,strlen
+
 !! *************************************************************************
+
  strlen=len_trim(f_string)
  forall(ii=1:strlen)
    c_string(ii)=f_string(ii:ii)
  end forall
  c_string(strlen+1)=C_NULL_CHAR
- end function xc_char_to_c
+end function xc_char_to_c
 #endif
 !!***
 
@@ -2042,7 +2044,6 @@ function xc_char_to_c(f_string) result(c_string)
 
 #if defined HAVE_FC_ISO_C_BINDING
 subroutine xc_char_to_f(c_string,f_string)
-!Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2050,17 +2051,20 @@ subroutine xc_char_to_f(c_string,f_string)
 #define ABI_FUNC 'xc_char_to_f'
 !End of the abilint section
 
+!Arguments ------------------------------------
  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
  character(len=*),intent(out) :: f_string
 !Local variables -------------------------------
  integer :: ii
+
 !! *************************************************************************
+
  ii=1
  do while(c_string(ii)/=C_NULL_CHAR.and.ii<=len(f_string))
    f_string(ii:ii)=c_string(ii) ; ii=ii+1
  end do
  if (ii<len(f_string)) f_string(ii:)=' '
- end subroutine xc_char_to_f
+end subroutine xc_char_to_f
 #endif
 !!***
 
