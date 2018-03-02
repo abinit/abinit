@@ -9,3 +9,10 @@ python-markdown-math
 pyyaml
 pygments
 pybtex
+
+#graphviz or python-graphviz if conda
+py_w3c
+# Unit tests
+pytest
+#pytest-cov
+#pytest-xdist
