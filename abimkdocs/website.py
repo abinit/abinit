@@ -745,7 +745,7 @@ This page gives hints on how to {howto} with the ABINIT package.
                 citation2pages[citation].append(page)
 
         meta = {"description": "Bibliographical references mentioned in the ABINIT documentation"}
-        with self.new_mdfile("mkdocs-theory", "bibliography.md", meta=meta) as mdf:
+        with self.new_mdfile("theory", "bibliography.md", meta=meta) as mdf:
             lines = []
             lines.append("""\
 # Bibliography
@@ -777,13 +777,13 @@ The bibtex file is available [here](../abiref.bib).
                 raise RuntimeError("Cannot find `acknow` section in components")
 
         meta = {"description": "Suggested acknowledgments and references"}
-        with self.new_mdfile("mkdocs-theory", "acknowledgments.md", meta=meta) as mdf:
+        with self.new_mdfile("theory", "acknowledgments.md", meta=meta) as mdf:
             mdf.write("# Acknowledgments  \n")
             mdf.write(html2text(comp.purpose))
             mdf.write(html2text(comp.introduction))
 
         meta = {"description": "List of PDF files provided by the Abinit documentation"}
-        with self.new_mdfile("mkdocs-theory", "documents.md", meta=meta) as mdf:
+        with self.new_mdfile("theory", "documents.md", meta=meta) as mdf:
             mdf.write("# PDF files  \n")
             for fname, path in self.pdfs.items():
                 mdf.write("## %s  \n" % fname)
@@ -1037,7 +1037,7 @@ The bibtex file is available [here](../abiref.bib).
                 elif name in self.bib_data.entries:
                     # Handle citation
                     ref = self.bib_data.entries[name]
-                    url = "/mkdocs-theory/bibliography#%s" % self.slugify(name)
+                    url = "/theory/bibliography#%s" % self.slugify(name)
                     content = ref.fields.get("title", "Unknown")
                     if content == "Unknown":
                         self.warn("Entry for %s does not provide title" % name)
@@ -1121,14 +1121,14 @@ The bibtex file is available [here](../abiref.bib).
                     self.warn("%s in %s is deprecated" % (token, page_rpath))
                 # Handle [[bib:biblio|bibliography]]
                 if name == "biblio":
-                    url = "/mkdocs-theory/bibliography/"
+                    url = "/theory/bibliography/"
                     if a.text is None: a.text = "bibliography"
                 else:
                     # Handle [[bib:Amadon2008]]
                     # TODO bib --> cite
                     try:
                         ref = self.bib_data.entries[name]
-                        url = "/mkdocs-theory/bibliography#%s" % self.slugify(name)
+                        url = "/theory/bibliography#%s" % self.slugify(name)
                         add_popover(a, content=ref.fields["title"]) #+ "\n\n" + ref.authors
                         if a.text is None: a.text = "[%s]" % name
                         html_classes.append("citation-wikilink")
@@ -1142,7 +1142,7 @@ The bibtex file is available [here](../abiref.bib).
                     self.warn("%s in %s is deprecated" % (token, page_rpath))
                 # TODO theorydoc --> theory
                 # Handle [[theorydoc:mbpt|text]]
-                url = "/mkdocs-theory/%s" % name
+                url = "/theory/%s" % name
                 html_classes.append("theory-wikilink")
                 if a.text is None: a.text = name
 

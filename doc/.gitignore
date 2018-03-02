@@ -105,6 +105,6 @@ topics/Wavelets.md
 topics/xc.md
 topics/index.md
 developers/testsuite.md
-mkdocs-theory/bibliography.md
-mkdocs-theory/acknowledgments.md
-mkdocs-theory/documents.md
+theory/bibliography.md
+theory/acknowledgments.md
+theory/documents.md

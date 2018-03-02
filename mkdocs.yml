@@ -191,12 +191,12 @@ pages:
     - tutorial/tddft.md
     - tutorial/wannier90.md
 - Theory:
-    #- Wavefunctions: mkdocs-theory/wavefunctions.md
-    - Many-Body Perturbation Theory: mkdocs-theory/mbt.md
-    - Bethe-Salpeter: mkdocs-theory/bse.md
-    - Documents: mkdocs-theory/documents.md
-    - Acknowledgments: mkdocs-theory/acknowledgments.md
-    - Bibliography: mkdocs-theory/bibliography.md
+    #- Wavefunctions: theory/wavefunctions.md
+    - Many-Body Perturbation Theory: theory/mbt.md
+    - Bethe-Salpeter: theory/bse.md
+    - Documents: theory/documents.md
+    - Acknowledgments: theory/acknowledgments.md
+    - Bibliography: theory/bibliography.md
 - Developers:
     - Abimkdocs: developers/abimkdocs.md
     - Markdown: developers/markdown.md

@@ -42,7 +42,7 @@ class WebsiteTest(AbimkdocsTest):
         assert e.get("href") == "../variables/basic#ecut" and e.text == "ecut"
 
         e = element("Gonze2009")
-        assert e.get("href") == "../mkdocs-theory/bibliography#gonze2009" and e.text == "[Gonze2009]"
+        assert e.get("href") == "../theory/bibliography#gonze2009" and e.text == "[Gonze2009]"
 
         e = element("~abinit/tests/v1/Input/t01.in|t01.in")
         assert e.get("href") == "../tests/v1/Input/t01.in" and e.text == "t01.in"
@@ -67,9 +67,9 @@ class WebsiteTest(AbimkdocsTest):
         #e = element("topic:BSE|BSE topic")
         #assert e.get("href") == "../topics/bse" and e.text == "BSE topic"
         e = element("cite:Amadon2008|Read this")
-        assert e.get("href") == "../mkdocs-theory/bibliography#amadon2008" and e.text == "Read this"
+        assert e.get("href") == "../theory/bibliography#amadon2008" and e.text == "Read this"
         e = element("theory:mbt|GW Notes")
-        assert e.get("href") == "../mkdocs-theory/mbt" and e.text == "GW Notes"
+        assert e.get("href") == "../theory/mbt" and e.text == "GW Notes"
         e = element("varset:allvars|All vars")
         assert e.get("href") == "../variables/index" and e.text == "All vars"
         e = element("varset:bse|BSE varset")
