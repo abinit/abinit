@@ -346,10 +346,9 @@ class Website(object):
         for entry in self.bib_data.entries.values():
             entry.__class__ = MyEntry
 
-        # FIXME
         # Read code statistics from file and produce json file.
-        #self.abinit_stats = AbinitStats(os.path.join(self.root, "statistics.txt"))
-        #self.abinit_stats.json_dump(os.path.join(self.root, "data", "statistics.json"))
+        self.abinit_stats = AbinitStats(os.path.join(self.root, "maintainers", "statistics.txt"))
+        self.abinit_stats.json_dump(os.path.join(self.root, "developers", "statistics.json"))
 
         # Build AbinitTestSuite object.
         from doc import tests as tmod

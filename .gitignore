@@ -121,6 +121,7 @@ tests/TestBot_MPI*/*
 # Documentation
 mkdocs_plugins/dist
 /site/
+/doc/developers/statistics.json
 /doc/abinit-doc-*.tar.gz
 /doc/aclocal.m4
 /doc/autom4te.cache

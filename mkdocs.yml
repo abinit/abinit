@@ -209,7 +209,7 @@ pages:
         - psp5: developers/psp5spinorbit_info.md
         - psp6: developers/psp6_info.md
         - psp8: developers/psp8_info.md
-    #- Code stats: developers/codestats.md
+    - Code stats: developers/codestats.md
     #- External Resources: developers/external_resources.md
 - About:
     - Release Notes: about/release-notes.md
@@ -272,8 +272,8 @@ plugins:
     #- search
 
 extra:
-    version: 8.5.4
-    previous_published_versions: [8.2.0, 8.1.0] 
+    version: 8.7.6
+    previous_published_versions: [] #8.2.0
     social:
         - type: github-alt
           link: https://github.com/abinit/abinit
@@ -290,9 +290,9 @@ extra_css:
     - css/my_codehilite.css
 
 extra_javascript:
-    - https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js
     - extra_javascript/jquery.dialogextend.min.js
     - extra_javascript/abidocs.js
+    #- https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js
 
 copyright: Copyright &copy; 2018 The Abinit Group
 
