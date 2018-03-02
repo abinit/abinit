@@ -43,11 +43,12 @@ to get the documentation of `COMMAND`.
 ## How to add new variables
 
 The yaml database has been replaced by python modules.
-The variables are now declared in `abimkdocs/variables_CODENANE.py`.
+The variables are now declared in `~abinit/abimkdocs/variables_CODENANE.py`.
+
 This file consists of a list of dictionaries, each dictionary
 contains the declaration of a single variable and the associated documentation in markdown format.
-Wikilinks, latex and markdonw extensions can be used inside `text`.
-This is, for example, the declaration of `accuracy` in python:
+Wikilinks, latex and markdown extensions can be used inside `text`.
+This is, for example, the declaration of the `accuracy` variable in python:
 
 ```python
 Variable(
@@ -69,15 +70,14 @@ accuracy         | 1         | 2          | 3            | 4            | 5     
 [[fband]]        | 0.5       | 0.5        | 0.5          | 0.5          | 0.75      | 0.75
 ...
 
-
 For a parallel calculation, [[timopt]] is enforced to be 0.
 ...
 """,
 ),
 ```
 
-Adding a new variable is easy. Edit the python module and add a new item at the end of the list.
-A template is provided
+Adding a new variable is easy. Edit the python module and add a new item at the end of the list. 
+A template is provided ...
 
 
 ## How to add a new bibtex entry

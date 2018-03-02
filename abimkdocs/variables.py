@@ -12,6 +12,24 @@ except ImportError:
     raise ImportError("pyyaml package is not installed. Install it with `pip install pyyaml`")
 
 
+def splitall(path):
+    """Return list with all components of a path."""
+    import os, sys
+    allparts = []
+    while True:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
+
+
 class Variable(object):
 
     def __init__(self,
@@ -493,14 +511,15 @@ class VarDatabase(OrderedDict):
 
         # FIXME
         # Read list of strings with possible character of variables.
-        yaml_path = "/Users/gmatteo/git_repos/abinit/doc/variables/origin_files/"
-        with io.open(os.path.join(os.path.dirname(yaml_path), "characteristics.yml"), "rt", encoding="utf-8") as f:
+        #yaml_path = "/Users/gmatteo/git_repos/abinit/doc/variables/origin_files/"
+        yaml_path = os.path.abspath(os.path.join(dirpath, "..", "doc", "variables", "origin_files"))
+        with io.open(os.path.join(yaml_path, "characteristics.yml"), "rt", encoding="utf-8") as f:
             new.characteristics = yaml.load(f)
 
         # Read list of `external_params` i.e. external parameters that are not input variables,
         # but that are used in the documentation of other variables
         # then convert to dict {name --> description}
-        with io.open(os.path.join(os.path.dirname(yaml_path), "list_externalvars.yml"), "rt", encoding="utf-8") as f:
+        with io.open(os.path.join(yaml_path, "list_externalvars.yml"), "rt", encoding="utf-8") as f:
             d = {k: v for k, v in yaml.load(f)}
             new.external_params = OrderedDict([(k, d[k]) for k in sorted(d.keys())])
 
@@ -723,107 +742,6 @@ class InputVariables(OrderedDict):
 
         return html + "</div></div>"
 
-    #def get_plotly_networkx(self, varset="all", layout_type="spring", include_plotlyjs=False):
-    #    # https://plot.ly/python/network-graphs/
-    #    # Build the graph
-    #    import networkx as nx
-    #    g, edge_labels = nx.Graph(), {}
-    #    for i, (name, var) in enumerate(self.items()):
-    #        if varset != "all" and var.varset != varset: continue
-    #        parents = var.get_parent_names()
-    #        if not parents: continue
-    #        g.add_node(var, name=name)
-    #        for parent in parents:
-    #            #print(parent, "is parent of ", name)
-    #            parent = self[parent]
-    #            g.add_edge(parent, var)
-
-    #            # TODO: Add getters! What about locked nodes!
-    #            #i = [dep.node for dep in child.deps].index(task)
-    #            #edge_labels[(task, child)] = " ".join(child.deps[i].exts)
-
-    #    # Get positions for all nodes using layout_type.
-    #    # e.g. pos = nx.spring_layout(g, iterations=80)
-    #    pos = getattr(nx, layout_type + "_layout")(g) #, scale=100000, iterations=30)
-    #    #pos = nx.spring_layout(g, k=2, iterations=100)
-
-    #    # Add edges as disconnected lines in a single trace and nodes as a scatter trace
-    #    import plotly
-    #    import plotly.graph_objs as go
-    #    from textwrap import fill
-    #    edge_trace = go.Scatter(
-    #        x=[],
-    #        y=[],
-    #        line=go.Line(width=2.0, color='#888', dash="dot"),
-    #        hoverinfo='none',
-    #        mode='lines',
-    #    )
-
-    #    for edge in g.edges():
-    #        x0, y0 = pos[edge[0]]
-    #        x1, y1 = pos[edge[1]]
-    #        edge_trace['x'] += [x0, x1, None]
-    #        edge_trace['y'] += [y0, y1, None]
-
-    #    node_trace = go.Scatter(
-    #        x=[],
-    #        y=[],
-    #        text=[v.name for v in g],
-    #        textposition='bottom',
-    #        mode='markers+text',
-    #        hoverinfo='text',
-    #        #hovertext=[fill(html2text(v.text), width=90) for v in g.nodes()],
-    #        hovertext=[v.mnemonics for v in g.nodes()],
-    #        marker=go.Marker(
-    #            showscale=True,
-    #            # colorscale options
-    #            # 'Greys' | 'Greens' | 'Bluered' | 'Hot' | 'Picnic' | 'Portland' |
-    #            # Jet' | 'RdBu' | 'Blackbody' | 'Earth' | 'Electric' | 'YIOrRd' | 'YIGnBu'
-    #            colorscale='YIGnBu',
-    #            reversescale=True,
-    #            color=[],
-    #            size=20,
-    #            colorbar=dict(
-    #                thickness=15,
-    #                title='Node Connections',
-    #                xanchor='left',
-    #                titleside='right'
-    #            ),
-    #            line=dict(width=2)))
-
-    #    for node in g.nodes():
-    #        x, y = pos[node]
-    #        node_trace['x'].append(x)
-    #        node_trace['y'].append(y)
-
-    #    # Color node points by the number of connections.
-    #    for node, adjacencies in enumerate(g.adjacency_list()):
-    #        node_trace['marker']['color'].append(len(adjacencies))
-    #        node_info = '# of connections: '+str(len(adjacencies))
-    #        #node_trace['text'].append(node_info)
-
-    #    fig = go.Figure(data=go.Data([edge_trace, node_trace]),
-    #                 layout=go.Layout(
-    #                    title='<br>Network graph for varset %s' % varset,
-    #                    titlefont=dict(size=16),
-    #                    showlegend=False,
-    #                    hovermode='closest',
-    #                    margin=dict(b=20,l=5,r=5,t=40),
-    #                    annotations=[ dict(
-    #                        text="Network for varset %s" % varset,
-    #                        showarrow=False,
-    #                        xref="paper", yref="paper",
-    #                        x=0.005, y=-0.002 ) ],
-    #                    xaxis=go.XAxis(showgrid=False, zeroline=False, showticklabels=False),
-    #                    yaxis=go.YAxis(showgrid=False, zeroline=False, showticklabels=False)))
-
-    #    #py.iplot(fig, filename='networkx')
-    #    #plotly.offline.plot(fig)
-    #    s = plotly.offline.plot(fig, include_plotlyjs=include_plotlyjs, output_type='div')
-    #    #print(s)
-
-    #    return s
-
     def get_graphviz_varname(self, varname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
         Generate task graph in the DOT language (only parents and children of this task).
@@ -989,21 +907,3 @@ class InputVariables(OrderedDict):
                     graph.edge(var.name, ovar.name, **edge_kwargs) #, label=edge_label, color=self.color_hex
 
         return graph
-
-
-def splitall(path):
-    """Return list with all components of a path."""
-    import os, sys
-    allparts = []
-    while True:
-        parts = os.path.split(path)
-        if parts[0] == path:  # sentinel for absolute paths
-            allparts.insert(0, parts[0])
-            break
-        elif parts[1] == path: # sentinel for relative paths
-            allparts.insert(0, parts[1])
-            break
-        else:
-            path = parts[0]
-            allparts.insert(0, parts[1])
-    return allparts

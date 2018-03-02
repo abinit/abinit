@@ -32,7 +32,9 @@ from doc.tests.pymods.termcolor import cprint
 from .variables import Variable
 
 
-ABINIT_REPO = "/Users/gmatteo/git_repos/abinit/"
+#ABINIT_REPO = "/Users/gmatteo/git_repos/abinit/"
+ABINIT_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+print(ABINIT_REPO)
 if not os.path.exists(ABINIT_REPO):
     raise ValueError("ABINIT_REPO: %s does not exist\n. Please change the global variable in the python module." %
             ABINIT_REPO)
@@ -1422,55 +1424,6 @@ Enter any string to search in the database. Clicking without any request will gi
 
         return s
 
-#    def editor_panel(self, path, title=None):
-#        title = path if title is None else str(title)
-#        path = os.path.join(self.root, path)
-#        with io.open(path, "rt", encoding="utf-8") as fh:
-#            text = escape(fh.read(), tag="pre", cls="small-text")
-#
-#        return """\
-#<div class="md-container">
-#  <div class="panel panel-default">
-#    <div class="panel-heading">{title}</div>
-#    <div class="panel-body"><div class="editor" hidden id="{editor_id}">{text}</div></div>
-#</div></div>""".format(editor_id=gen_id(), **locals())
-
-#    def editor_tabs(self, paths, title=None):
-#        title = "EditorTabs" if title is None else str(title)
-#        apaths = [os.path.join(self.root, p) for p in paths]
-#
-#        text_list = []
-#        for path in apaths:
-#            with io.open(path, "rt", encoding="utf-8") as fh:
-#                text_list.append(escape(fh.read(), tag="pre", cls="small-text"))
-#        tab_ids = gen_id(n=len(text_list))
-#        editor_ids = gen_id(n=len(text_list))
-#
-#        # https://codepen.io/wizly/pen/BlKxo?editors=1000
-#        s = """\
-#<div class="md-container">
-#  <div>{title}</div>
-#    <div>
-#      <!-- Nav tabs -->
-#      <ul class="nav nav-pills nav-justified">""".format(title=title)
-#
-#        for i, (path, tid) in enumerate(zip(paths, tab_ids)):
-#            s += """<li class="{li_class}"><a href="{href}" data-toggle="pill">{path}</a></li>""".format(
-#                li_class="active" if i == 0 else " ", href="#%s" % tid, path=path)
-#
-#        s +=  """\
-#        </ul>
-#        <!-- Tab panes -->
-#        <div class="tab-content clearfix">"""
-#
-#        for i, (text, tid, editor_id) in enumerate(zip(text_list, tab_ids, editor_ids)):
-#            s += """\
-#<div class="tab-pane {active}" id="{tid}">
-#<div id="{editor_id}" class="editor" hidden>{text}</div></div>
-#""".format(active="fade in active" if i == 0 else "fade", tid=tid, editor_id=editor_id, text=text)
-#
-#        return s + 3 * "</div>"
-
 
 class Page(object):
 
@@ -1546,66 +1499,35 @@ class MarkdownPage(Page):
                 elif "topic-wikilink" in link_class:
                     self.topics.add(token) # TODO: Should be name
 
-        """
-        # Add rpath to meta (useful to give the origin of errors in markdown extensions)
-        if len(lines) > 1 and lines[0].startswith("---"):
-            for i, l in enumerate(lines[1:]):
-                if l.startswith("---"):
-                    i += 1
-                    break
-            else:
-                raise RuntimeError("Cannot find second `---` marker in %s" % path)
-
-            # Cannot used OrderedDict because markdown parser does not understand !!python/object
-            # If py2, convert strings to ascii to avoid !!unicode in meta!
-            d = dict(**yaml.load("\n".join(lines[1:i])))
-
-            rpath = "/" + os.path.relpath(path, website.root)
-            if "rpath" not in d:
-                raise RuntimeError("rpath front matter entry missing in %s" % self.path)
-            if d["rpath"] != rpath:
-                raise RuntimeError("Wrong rpath in %s.\nExpecting `%s` but got `%s`" % (self.path, rpath, d["rpath"]))
-
-            # This to add rpat automatically to md pages. WARNING: Requires py3k.
-            if False and "rpath" not in d or d["rpath"] != rpath and sys.version_info[0] >= 3:
-                d["rpath"] = rpath
-                del lines[1:i]
-                lines.insert(1, yaml.dump(d, indent=4, default_flow_style=False).strip())
-                with io.open(self.path, "wt", encoding="utf-8") as fh:
-                    fh.write("\n".join(lines))
-
-        #print(self)
-        """
-
-    def _get_meta(self, lines):
-        """ Parse Meta-Data and store in Markdown.Meta. """
-        # https://github.com/Python-Markdown/markdown/blob/master/markdown/extensions/meta.py
-        from markdown.extensions.meta import BEGIN_RE, END_RE, META_RE, META_MORE_RE
-        meta = {}
-        key = None
-        if lines and BEGIN_RE.match(lines[0]):
-            lines.pop(0)
-        while lines:
-            line = lines.pop(0)
-            m1 = META_RE.match(line)
-            if line.strip() == '' or END_RE.match(line):
-                break  # blank line or end of YAML header - done
-            if m1:
-                key = m1.group('key').lower().strip()
-                value = m1.group('value').strip()
-                try:
-                    meta[key].append(value)
-                except KeyError:
-                    meta[key] = [value]
-            else:
-                m2 = META_MORE_RE.match(line)
-                if m2 and key:
-                    # Add another line to existing key
-                    meta[key].append(m2.group('value').strip())
-                else:
-                    lines.insert(0, line)
-                    break  # no meta data - done
-        return meta
+    #def _get_meta(self, lines):
+    #    """ Parse Meta-Data and store in Markdown.Meta. """
+    #    # https://github.com/Python-Markdown/markdown/blob/master/markdown/extensions/meta.py
+    #    from markdown.extensions.meta import BEGIN_RE, END_RE, META_RE, META_MORE_RE
+    #    meta = {}
+    #    key = None
+    #    if lines and BEGIN_RE.match(lines[0]):
+    #        lines.pop(0)
+    #    while lines:
+    #        line = lines.pop(0)
+    #        m1 = META_RE.match(line)
+    #        if line.strip() == '' or END_RE.match(line):
+    #            break  # blank line or end of YAML header - done
+    #        if m1:
+    #            key = m1.group('key').lower().strip()
+    #            value = m1.group('value').strip()
+    #            try:
+    #                meta[key].append(value)
+    #            except KeyError:
+    #                meta[key] = [value]
+    #        else:
+    #            m2 = META_MORE_RE.match(line)
+    #            if m2 and key:
+    #                # Add another line to existing key
+    #                meta[key].append(m2.group('value').strip())
+    #            else:
+    #                lines.insert(0, line)
+    #                break  # no meta data - done
+    #    return meta
 
 
 class HtmlPage(Page):
@@ -1668,42 +1590,6 @@ class AbinitStats(object):
         import json
         with io.open(path, "wt", encoding="utf-8") as fh:
             fh.write(my_unicode(json.dumps(self.data, ensure_ascii=False)))
-
-
-def build_modal_with_ajax():
-    # https://stackoverflow.com/questions/19663555/bootstrap-3-how-to-load-content-in-modal-body-via-ajax#answer-27718674
-    modal = """
-
-<!-- Default bootstrap modal example -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// Fill modal with content from link href
-$(function() {
-    $("#myModal").on("show.bs.modal", function(e) {
-        var link = $(e.relatedTarget);
-        $(this).find(".modal-body").load(link.attr("href"));
-    });
-});
-</script>
-
-"""
-    return modal
-    #mdf.write("""### <a href="{rpath}" data-toggle="modal" data-target="#myModal" data-remote="false"> {rpath} </a>  \n\n""".format(rpath=rpath))
 
 
 class HTMLValidator(object):
