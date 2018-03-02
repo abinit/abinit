@@ -176,7 +176,7 @@ module m_sigmaph
    ! Depends on spin because all denerate states should be included when symmetries are used.
 
   integer,allocatable :: kcalc2ibz(:,:)
-    !kcalc2ibz (nkcalc, 6))
+    !kcalc2ibz(nkcalc, 6))
     ! Mapping kcalc --> ibz as reported by listkk.
 
   real(dp),allocatable :: kcalc(:,:)
@@ -1746,6 +1746,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("kcalc", "dp", "three, nkcalc"), &
+     nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
      nctkarr_t("kTmesh", "dp", "ntemp"), &
      nctkarr_t("mu_e", "dp", "ntemp"), &
      nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
@@ -1806,6 +1807,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), new%kcalc))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), new%kcalc))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), new%kTmesh))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), new%mu_e))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), aimag(new%ieta)))
