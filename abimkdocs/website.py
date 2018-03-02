@@ -1014,7 +1014,7 @@ The bibtex file is available [here](../abiref.bib).
                 elif name.startswith("help_"):
                     # Handle [[help_abinit|text]]
                     code = name.replace("help_" , " ", 1).strip()
-                    url = "/mkdocs-user-guide/%s" % code
+                    url = "/guide/%s" % code
                     if a.text is None: a.text = "%s help file" % code
                     html_classes.append("user-guide-wikilink")
 
@@ -1069,7 +1069,7 @@ The bibtex file is available [here](../abiref.bib).
 
                 elif name in self.variables_code.characteristics:
                     # handle [[ENERGY]] by building internal link to abinit user guide
-                    url = "/mkdocs-user-guide/abinit/#32-more-about-abinit-input-variables"
+                    url = "/guide/abinit/#32-more-about-abinit-input-variables"
                     if a.text is None: a.text = name
 
                 elif name in self.variables_code.external_params:
@@ -1105,7 +1105,7 @@ The bibtex file is available [here](../abiref.bib).
 
             elif namespace == "help":
                 # Handle [[help:optic|text] NB: [[help_codename]] is echoed "codename help file"
-                url = "/mkdocs-user-guide/%s" % name
+                url = "/guide/%s" % name
                 if a.text is None: a.text = "%s help file" % name
                 html_classes.append("user-guide-wikilink")
 

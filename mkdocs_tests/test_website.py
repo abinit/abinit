@@ -33,7 +33,7 @@ class WebsiteTest(AbimkdocsTest):
         #e = element("topic_SelfEnergy|self-energy")
         #assert e.get("href") == "..//topics/SelfEnergy" and e.text == "self-energy"
         e = element("help:abinit|See Abinit help")
-        assert e.get("href") == "../mkdocs-user-guide/abinit" and e.text == "See Abinit help"
+        assert e.get("href") == "../guide/abinit" and e.text == "See Abinit help"
         e = element("dipdip@anaddb|See anaddb")
         assert e.get("href") == "../variables/anaddb#dipdip" and e.text == "See anaddb"
         e = element("dipdip@anaddb")
@@ -50,7 +50,7 @@ class WebsiteTest(AbimkdocsTest):
         assert e.get("href") == "../tests/Psps_for_tests/6c.lda.atompaw" and e.text == "6c.paw"
 
         e = element("ENERGY")
-        #assert e.get("href") == "/mkdocs-user-guide/abinit#32-more-about-abinit-input-variables" and e.text == "ENERGY"
+        #assert e.get("href") == "/guide/abinit#32-more-about-abinit-input-variables" and e.text == "ENERGY"
         e = element("AUTO_FROM_PSP")
         assert e.get("href") == "../variables/external_parameters#auto_from_psp" and e.text == "AUTO_FROM_PSP"
 
@@ -62,7 +62,7 @@ class WebsiteTest(AbimkdocsTest):
         e = element("lesson:wannier90|w90")
         assert e.get("href") == "wannier90" and e.text == "w90"
         e = element("help:abinit|Abinit help")
-        assert e.get("href") == "../mkdocs-user-guide/abinit" and e.text == "Abinit help"
+        assert e.get("href") == "../guide/abinit" and e.text == "Abinit help"
         # TODO howto_topic
         #e = element("topic:BSE|BSE topic")
         #assert e.get("href") == "../topics/bse" and e.text == "BSE topic"
