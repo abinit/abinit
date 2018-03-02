@@ -714,7 +714,7 @@ This page gives hints on how to {howto} with the ABINIT package.
         meta = {"description": "List of Abinit tests"}
         items = [(rpath, test) for (rpath, test) in self.rpath2test.items()]
 
-        with self.new_mdfile("mkdocs-developers", "testsuite.md", meta=meta) as mdf:
+        with self.new_mdfile("developers", "testsuite.md", meta=meta) as mdf:
             for suite_name, group in sort_and_groupby(items, key=lambda t: t[1].suite_name):
                 group = list(group)
                 mdf.write('## %s  \n\n' % suite_name)

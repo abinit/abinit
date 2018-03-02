@@ -198,15 +198,15 @@ pages:
     - Acknowledgments: mkdocs-theory/acknowledgments.md
     - Bibliography: mkdocs-theory/bibliography.md
 - Developers:
-    - Abimkdocs: mkdocs-developers/abimkdocs.md
-    - Markdown: mkdocs-developers/markdown.md
-    - Test Suite: mkdocs-developers/testsuite.md
-    #- Code stats: mkdocs-developers/codestats.md
-    #- External Resources: mkdocs-developers/external_resources.md
+    - Abimkdocs: developers/abimkdocs.md
+    - Markdown: developers/markdown.md
+    - Test Suite: developers/testsuite.md
+    #- Code stats: developers/codestats.md
+    #- External Resources: developers/external_resources.md
 - About:
-    - Release Notes: mkdocs-about/release-notes.md
-    - Contributing: mkdocs-about/contributing.md
-    - License: mkdocs-about/license.md
+    - Release Notes: about/release-notes.md
+    - Contributing: about/contributing.md
+    - License: about/license.md
 
 markdown_extensions:
   - markdown.extensions.meta

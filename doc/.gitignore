@@ -104,7 +104,7 @@ topics/Wannier.md
 topics/Wavelets.md
 topics/xc.md
 topics/index.md
-mkdocs-developers/testsuite.md
+developers/testsuite.md
 mkdocs-theory/bibliography.md
 mkdocs-theory/acknowledgments.md
 mkdocs-theory/documents.md
