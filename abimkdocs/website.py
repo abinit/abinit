@@ -1099,7 +1099,7 @@ The bibtex file is available [here](../abiref.bib).
             elif namespace == "lesson":
                 # Handle [[lesson:wannier90|text]]
                 if name == "index": name = ""
-                url = "/mkdocs-tutorials/%s" % name
+                url = "/tutorial/%s" % name
                 if a.text is None: a.text = "%s %s" % (name, namespace)
                 html_classes.append("lesson-wikilink")
 

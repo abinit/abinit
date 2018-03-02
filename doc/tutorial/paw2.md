@@ -129,7 +129,7 @@ In a first stage, copy a simple input file for ATOMPAW in your working directory
 (find it in ~abinit/doc/tutorial/paw2/paw2_assets/Ni.atompaw.input1).
 Edit this file.
 
-{% dialog mkdocs-tutorials/paw2_assets/Ni.atompaw.input1 %}
+{% dialog tutorial/paw2_assets/Ni.atompaw.input1 %}
 
 This file has been built in the following way:
 
@@ -548,7 +548,7 @@ But we will not test this case here as it produces problematic results for this 
 
 Use this input file for ATOMPAW: ~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input2
 
-{% dialog mkdocs-tutorials/paw2_assets/Ni.atompaw.input2 %}
+{% dialog tutorial/paw2_assets/Ni.atompaw.input2 %}
 
 As you can see (by editing the file)  "bloechl" has been changed by "custom rrkj"
 and 6 rc values have been added at the end of the file; each one
@@ -589,7 +589,7 @@ Optional exercise: let's go back to Vanderbilt projectors
 Repeat the procedure (ATOMPAW + ABINIT) with
 ~abinit/doc/tutorial/lesson_paw2/Ni.atompaw.input.vanderbilt file.
 
-{% dialog mkdocs-tutorials/paw2_assets/Ni.atompaw.input.vanderbilt %}
+{% dialog tutorial/paw2_assets/Ni.atompaw.input.vanderbilt %}
 
 As you can see ABINIT convergence cannot be achieved!
 You can try whatever you want with radii and/or references energies in the

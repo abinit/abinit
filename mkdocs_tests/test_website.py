@@ -20,7 +20,7 @@ class WebsiteTest(AbimkdocsTest):
 
         # Test (Abinit) wikilink syntax: [namespace:name#fragment|text]
         # URLs are supposed to be relative to page_rpath.
-        def element(token, page_rpath="/mkdocs-tutorials/base1.md"):
+        def element(token, page_rpath="/tutorial/base1.md"):
             return website.get_wikilink(token, page_rpath)
 
         e = element("https://www.abinit.org|Abinit website")

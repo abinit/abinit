@@ -47,6 +47,11 @@ to get the list of commands and:
 
 to get the documentation of `COMMAND`.
 
+## Notes
+
+topics are still in Yaml format
+wikilink syntax: [[names|text]] will become [[text|namespace]]
+
 ## Troubleshooting
 
 If you get error message about ASCII being used as default encoding on your machine add:

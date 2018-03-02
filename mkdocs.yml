@@ -145,51 +145,51 @@ pages:
     - Statistics: variables/varset_stats.md
     #- Connections: variables/connections.md
 - Lessons:
-    - Overview: mkdocs-tutorials/index.md
+    - Overview: tutorial/index.md
     - Base Tutorials: 
-        - Base1: mkdocs-tutorials/base1.md
-        - Base2: mkdocs-tutorials/base2.md
-        - Base3: mkdocs-tutorials/base3.md
-        - Base4: mkdocs-tutorials/base4.md
-        - Spin: mkdocs-tutorials/spin.md
+        - Base1: tutorial/base1.md
+        - Base2: tutorial/base2.md
+        - Base3: tutorial/base3.md
+        - Base4: tutorial/base4.md
+        - Spin: tutorial/spin.md
     - PAW:
-        - PAW1: mkdocs-tutorials/paw1.md
-        - PAW2: mkdocs-tutorials/paw2.md
-        - PAW3: mkdocs-tutorials/paw3.md
+        - PAW1: tutorial/paw1.md
+        - PAW2: tutorial/paw2.md
+        - PAW3: tutorial/paw3.md
     - DFT_PLUS_U:
-        - mkdocs-tutorials/dftu.md
-        - mkdocs-tutorials/udet.md
-        - mkdocs-tutorials/ucalc_crpa.md
+        - tutorial/dftu.md
+        - tutorial/udet.md
+        - tutorial/ucalc_crpa.md
     - DFPT:
-        - RF1: mkdocs-tutorials/rf1.md
-        - RF2: mkdocs-tutorials/rf2.md
-        - Elastic: mkdocs-tutorials/elastic.md
-        - mkdocs-tutorials/ffield.md
-        - mkdocs-tutorials/nlo.md
-    - DMFT: mkdocs-tutorials/dmft.md
+        - RF1: tutorial/rf1.md
+        - RF2: tutorial/rf2.md
+        - Elastic: tutorial/elastic.md
+        - tutorial/ffield.md
+        - tutorial/nlo.md
+    - DMFT: tutorial/dmft.md
     - EPH: 
-        - mkdocs-tutorials/eph.md
-        - mkdocs-tutorials/tdepes.md
+        - tutorial/eph.md
+        - tutorial/tdepes.md
     - Many-Body:
-        - GW1: mkdocs-tutorials/gw1.md
-        - GW2: mkdocs-tutorials/gw2.md
-        - Bethe-Salpeter: mkdocs-tutorials/bse.md
+        - GW1: tutorial/gw1.md
+        - GW2: tutorial/gw2.md
+        - Bethe-Salpeter: tutorial/bse.md
     - Parallelism:
-        - Base: mkdocs-tutorials/basepar.md
-        - GSPW: mkdocs-tutorials/paral_gspw.md
-        - GSWVL: mkdocs-tutorials/paral_gswvl.md
-        - DFPT: mkdocs-tutorials/paral_dfpt.md
-        - Images: mkdocs-tutorials/paral_images.md
-        - Many-Body: mkdocs-tutorials/paral_mbt.md
-        - Moldyn: mkdocs-tutorials/paral_moldyn.md
-    - mkdocs-tutorials/analysis_tools.md
-    - mkdocs-tutorials/fold2bloch.md
-    - mkdocs-tutorials/nuc.md
-    - mkdocs-tutorials/optic.md
-    - mkdocs-tutorials/positron.md
-    - mkdocs-tutorials/source_code.md
-    - mkdocs-tutorials/tddft.md
-    - mkdocs-tutorials/wannier90.md
+        - Base: tutorial/basepar.md
+        - GSPW: tutorial/paral_gspw.md
+        - GSWVL: tutorial/paral_gswvl.md
+        - DFPT: tutorial/paral_dfpt.md
+        - Images: tutorial/paral_images.md
+        - Many-Body: tutorial/paral_mbt.md
+        - Moldyn: tutorial/paral_moldyn.md
+    - tutorial/analysis_tools.md
+    - tutorial/fold2bloch.md
+    - tutorial/nuc.md
+    - tutorial/optic.md
+    - tutorial/positron.md
+    - tutorial/source_code.md
+    - tutorial/tddft.md
+    - tutorial/wannier90.md
 - Theory:
     #- Wavefunctions: mkdocs-theory/wavefunctions.md
     - Many-Body Perturbation Theory: mkdocs-theory/mbt.md
