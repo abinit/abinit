@@ -40,10 +40,19 @@ to get the list of commands and:
 
 to get the documentation of `COMMAND`.
 
+## Troubleshooting
+
+If you get error message about ASCII being used as default encoding on your machine add:
+
+    export LC_ALL=en_US.UTF-8  
+    export LANG=en_US.UTF-8
+
+to your ~/.bashrc and source it
+
 ## How to add new variables
 
 The yaml database has been replaced by python modules.
-The variables are now declared in `~abinit/abimkdocs/variables_CODENANE.py`.
+The variables are now declared in `~abinit/abimkdocs/variables_CODENAME.py`.
 
 This file consists of a list of dictionaries, each dictionary
 contains the declaration of a single variable and the associated documentation in markdown format.

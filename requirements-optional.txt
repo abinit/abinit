@@ -1,11 +1,10 @@
 #graphviz or python-graphviz if conda
-numpy
-networkx
-plotly
+#networkx
+#plotly
 #matplotlib
 py_w3c
 # Unit tests
-#pytest
+pytest
 #pytest-cov
 #pytest-xdist
 #pytest-sugar

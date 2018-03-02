@@ -201,20 +201,21 @@ class MyEntry(Entry):
 
         s += "  \n"
         if "url" in fields:
-            #s += 'URL: <a href="{url}" target="_blank">{url}</a><br>'.format(url=fields["url"])
-            s += 'URL: <{url}>  \n'.format(url=fields["url"])
+            s += 'URL: <a href="{url}" target="_blank">{url}</a><br>'.format(url=fields["url"])
+            #s += 'URL: <{url}>  \n'.format(url=fields["url"])
         elif "doi" in fields:
             doi = fields["doi"]
             doi_root = "https://doi.org/"
             if not doi.startswith(doi_root): doi = doi_root + doi
-            s += 'DOI: <{doi}>  \n'.format(doi=doi)
-            #s += 'DOI: <a href="{doi}" target="_blank">{doi}</a><br>'.format(doi=doi)
+            #s += 'DOI: <{doi}>  \n'.format(doi=doi)
+            s += 'DOI: <a href="{doi}" target="_blank">{doi}</a><br>'.format(doi=doi)
 
         # Add modal window with bibtex button/link.
         if bibtex_ui is not None:
             assert bibtex_ui in ("link", "button")
             btn, modal = self.get_bibtex_btn_modal(link=bibtex_ui=="link")
             s += btn + modal
+
         return s
 
     def to_html(self):
@@ -477,7 +478,9 @@ Change the input yaml files or the python code
 
             Unicode characters in meta are not supported (annoying portability issue with py2.7)
         """
-        path = os.path.join(self.root, dirname, mdname)
+        dirpath = os.path.join(self.root, dirname)
+        if not os.path.isdir(dirpath): os.mkdir(dirpath)
+        path = os.path.join(dirpath, mdname)
         assert path not in self.md_generated
         self.md_generated.append(path)
         if self.verbose: print("Generating markdown file: `%s`" % path)
