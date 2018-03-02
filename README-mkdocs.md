@@ -2,20 +2,18 @@
 
 Install the python packages required to build the static website with:
 
-    $ cd ~abinit/docs
-    $ pip install -r requirements.txt
+    pip install -r requirements.txt
 
 then install the mkdocs plugin with:
 
-    $ cd mkdocs_plugins
-    $ python setup.py install
+    cd mkdocs_plugins
+    python setup.py install
 
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
-Make sure you are in `~abinit/docs`, and then start *our customized* server 
-by running the `mksite.py` serve command:
+Make sure you are in `~abinit`, and then start *our customized* server 
+by running the `mksite.py` serve command with the `--dirtyreload` option:
 
 ```console
-$ cd ~abinit/docs
 $ ./mksite.py serve --dirtyreload
 Regenerating database...
 Saving database to /Users/gmatteo/git_repos/abidocs/doc/tests/test_suite.cpkl
@@ -43,6 +41,44 @@ to get the list of commands and:
 to get the documentation of `COMMAND`.
 
 ## How to add new variables
+
+The yaml database has been replaced by python modules.
+The variables are now declared in `abimkdocs/variables_CODENANE.py`.
+This file consists of a list of dictionaries, each dictionary
+contains the declaration of a single variable and the associated documentation in markdown format.
+Wikilinks, latex and markdonw extensions can be used inside `text`.
+This is, for example, the declaration of `accuracy` in python:
+
+```python
+Variable(
+    abivarname="accuracy",
+    varset="basic",
+    vartype="integer",
+    topics=['Planewaves_basic', 'SCFControl_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="ACCURACY",
+    text="""
+Allows to tune the accuracy of a calculation by setting automatically the
+variables according to the following table:
+
+accuracy         | 1         | 2          | 3            | 4            | 5         | 6
+---              |---        |---         |---           |---           |---        |---
+[[ecut]]         | E_min     | E_med      | E_med        | E_max        | E_max     | E_max
+[[pawecutdg]]    | ecut      | ecut       | 1.2 * ecut   | 1.5 * ecut   | 2 * ecut  | 2 * ecut
+[[fband]]        | 0.5       | 0.5        | 0.5          | 0.5          | 0.75      | 0.75
+...
+
+
+For a parallel calculation, [[timopt]] is enforced to be 0.
+...
+""",
+),
+```
+
+Adding a new variable is easy. Edit the python module and add a new item at the end of the list.
+A template is provided
+
 
 ## How to add a new bibtex entry
 

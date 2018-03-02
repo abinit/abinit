@@ -30,7 +30,7 @@ accuracy         | 1         | 2          | 3            | 4            | 5     
 [[pawovlp]]      | 10        | 7          | 7            | 5            | 5         | 5
 [[pawnhatxc]]    | 0         | 1          | 1            | 1            | 1         | 1
 [[tolvrs]]       | 1.0d-3    | 1.0d-5     | 1.0d-7       | 1.0d-9       | 1.0d-10   | 1.0d-12
-[[tolmxf]]       | 1.0d-3    | 5.0d-4     | 1.0d-4       | 5.0d-5**     | 1.0d-6    | 1.0d-6
+[[tolmxf]]       | 1.0d-3    | 5.0d-4     | 1.0d-4       | 5.0d-5       | 1.0d-6    | 1.0d-6
 [[optforces]]    | 1         | 1          | 2            | 2            | 2         | 2
 [[timopt]]       | 0         | 0          | 1            | 1            | 1         | 1
 [[npulayit]]     | 4         | 7          | 7            | 7            | 15        | 15
@@ -8467,7 +8467,6 @@ Variable(
     vartype="integer",
     topics=['BandOcc_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Maximum number of BANDs",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -8592,7 +8591,6 @@ Variable(
     vartype="integer",
     topics=['TransPath_basic'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Minimal Energy Path ordinary differential equation SOLVER",
     text="""
 Relevant only when [[imgmov]]=2 (String Method) or 5 (Nudged Elastic Band).
@@ -8634,7 +8632,6 @@ Variable(
     vartype="integer",
     topics=['Planewaves_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Maximum of nGFFT",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -8648,7 +8645,6 @@ Variable(
     vartype="integer",
     topics=['Planewaves_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Maximum of nGFFT for the Double Grid",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -8662,7 +8658,6 @@ Variable(
     vartype="real",
     topics=['AtomTypes_useful'],
     dimensions=['[[npspalch]]', '[[ntypalch]]'],
-    defaultval=None,
     mnemonics="MIXing coefficients for ALCHemical potentials",
     characteristics=['[[EVOLVING]]'],
     text="""
@@ -8733,7 +8728,6 @@ Variable(
     vartype="integer",
     topics=['Planewaves_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Maximum number of Plane Waves",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -8881,7 +8875,6 @@ Variable(
     vartype="integer",
     topics=['DFT+U_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of AToms on which PAW+U is applied",
     characteristics=['[[INTERNAL_ONLY]]'],
     requires="[[usepawu]]==1",
@@ -8973,7 +8966,6 @@ Variable(
     vartype="integer",
     topics=['BandOcc_basic'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of BANDs",
     commentdefault=" the estimated number of occupied bands +1 (TODO provide the mathematical formulation)",
     text="""
@@ -9003,7 +8995,6 @@ Variable(
     vartype="integer",
     topics=['Hybrids_useful'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of BANDs for (Hartree)-Fock exact exchange",
     commentdefault="the estimated number of occupied bands (TODO: provide the mathematical formulation)",
     text="""
@@ -9236,7 +9227,6 @@ Variable(
     vartype="integer",
     topics=['k-points_useful', 'ElecBandStructure_useful'],
     dimensions=['abs([[kptopt]])'],
-    defaultval=None,
     mnemonics="Number of DIVisions of K lines",
     characteristics=['[[INPUT_ONLY]]'],
     commentdefault="Will be generated automatically from [[ndivsm]] if the latter is defined.",
@@ -9275,7 +9265,6 @@ Variable(
     vartype="integer",
     topics=['k-points_useful', 'ElecBandStructure_basic'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of DIVisions for the SMallest segment",
     characteristics=['[[INPUT_ONLY]]'],
     text="""
@@ -9316,7 +9305,6 @@ Variable(
     vartype="integer",
     topics=['PIMD_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of DYNamical IMAGEs",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -9406,7 +9394,6 @@ Variable(
     vartype="integer",
     topics=['Planewaves_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of FFT points",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -9428,7 +9415,6 @@ Variable(
     vartype="integer",
     topics=['Planewaves_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of FFT points for the Double Grid",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -9465,7 +9451,6 @@ Variable(
     vartype="integer",
     topics=['FrequencyMeshMBPT_basic'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix",
     requires="[[optdriver]]==4",
     text="""
@@ -9792,7 +9777,6 @@ Variable(
     vartype="integer",
     topics=['Hybrids_expert'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of K - Points for (Hartree) Fock exact exchange",
     text="""
 [[nkpthf]] gives the number of k points used to sample the full Brillouin zone
@@ -10344,7 +10328,6 @@ Variable(
     vartype="integer",
     topics=['Susceptibility_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of PlaneWaves for EPSilon (the dielectric matrix)",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -10388,7 +10371,6 @@ Variable(
     vartype="integer",
     topics=['SelfEnergy_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of PlaneWaves for SIGma eXchange",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -10404,7 +10386,6 @@ Variable(
     vartype="integer",
     topics=['Susceptibility_internal', 'SelfEnergy_internal'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of PlaneWaves for WaveFunctioNs",
     characteristics=['[[INTERNAL_ONLY]]'],
     text="""
@@ -10819,7 +10800,6 @@ Variable(
     vartype="integer",
     topics=['Artificial_expert'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="Number of Z reduced coordinates that define the spatial CHEMical POTential",
     text="""
 Defines the number of z reduced coordinates that defines the spatially varying
@@ -10834,7 +10814,6 @@ Variable(
     vartype="integer",
     topics=['AtomManipulator_basic'],
     dimensions=['[[objan]]'],
-    defaultval=None,
     mnemonics="OBJect A: list of AToms",
     characteristics=['[[INPUT_ONLY]]'],
     requires="'[[nobj]]==1'",
@@ -10854,7 +10833,6 @@ Variable(
     vartype="real",
     topics=['AtomManipulator_useful'],
     dimensions=[6],
-    defaultval=None,
     mnemonics="OBJect A: AXis",
     characteristics=['[[INPUT_ONLY]]', '[[LENGTH]]'],
     commentdefault="""[[objaax]] must be provided if ([[nobj]]==1 and one component of [[objaro]] != 0). Moreover,
@@ -10879,7 +10857,6 @@ Variable(
     vartype="integer",
     topics=['AtomManipulator_basic'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="OBJect A: Number of atoms",
     characteristics=['[[INPUT_ONLY]]'],
     commentdefault=""" [[objan]] MUST be provided if [[nobj]]==1.
@@ -10981,7 +10958,6 @@ Variable(
     vartype="integer",
     topics=['AtomManipulator_useful'],
     dimensions=['[[objbn]]'],
-    defaultval=None,
     mnemonics="OBJect B: list of AToms",
     characteristics=['[[INPUT_ONLY]]'],
     requires="[[nobj]]==2",
@@ -11002,7 +10978,6 @@ Variable(
     vartype="real",
     topics=['AtomManipulator_useful'],
     dimensions=[6],
-    defaultval=None,
     mnemonics="OBJect B: AXis",
     characteristics=['[[INPUT_ONLY]]', '[[LENGTH]]'],
     commentdefault="""[[objbax]] must be provided if ([[nobj]]==1 and one component of [[objaro]] != 0). Moreover,
@@ -11027,7 +11002,6 @@ Variable(
     vartype="integer",
     topics=['AtomManipulator_useful'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="OBJect B: Number of atoms",
     characteristics=['[[INPUT_ONLY]]'],
     commentdefault=" [[objan]] and [[objbn]] MUST be provided if [[nobj]]==2.",
@@ -15265,7 +15239,6 @@ Variable(
     vartype="real",
     topics=['UnitCell_internal'],
     dimensions=[3, 3],
-    defaultval=None,
     mnemonics="Real space PRIMitive translations, Dimensional",
     characteristics=['[[INTERNAL_ONLY]]', '[[EVOLVING]]'],
     commentdims="Internally, it is represented as rprimd(3,3,[[nimage]]).",
@@ -16316,7 +16289,6 @@ Variable(
     vartype="real",
     topics=['crystal_useful'],
     dimensions=[3, '[[nsym]]'],
-    defaultval=None,
     mnemonics="Translation NON-Symmorphic vectors",
     text="""
 Gives the (nonsymmorphic) translation vectors associated with the symmetries
@@ -16783,7 +16755,6 @@ Variable(
     vartype="integer",
     topics=['multidtset_basic'],
     dimensions=[2],
-    defaultval=None,
     mnemonics="Upper limit on DaTa SETs",
     commentdefault="It is not used when it is not defined",
     text="""
@@ -17422,7 +17393,6 @@ Variable(
     vartype="integer",
     topics=['AtomManipulator_useful'],
     dimensions=['[[vacnum]]'],
-    defaultval=None,
     mnemonics="VACancies LiST",
     characteristics=['[[INPUT_ONLY]]'],
     text="""
@@ -17453,7 +17423,6 @@ Variable(
     vartype="integer",
     topics=['k-points_expert'],
     dimensions=[3],
-    defaultval=None,
     mnemonics="VACUUM identification",
     characteristics=['[[INPUT_ONLY]]'],
     text="""
@@ -18449,7 +18418,6 @@ Variable(
     vartype="real",
     topics=['crystal_compulsory'],
     dimensions=[3, 'min([[natom]],[[natrd]])'],
-    defaultval=None,
     mnemonics="vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-",
     characteristics=['[[INPUT_ONLY]]'],
     text="""
@@ -18531,7 +18499,6 @@ Variable(
     vartype="real",
     topics=['crystal_compulsory'],
     dimensions=[3, 'min([[natom]],[[natrd]])'],
-    defaultval=None,
     mnemonics="vectors (X) of atom positions in CARTesian coordinates",
     characteristics=['[[EVOLVING]]', '[[LENGTH]]'],
     text="""
@@ -18616,7 +18583,6 @@ Variable(
     vartype="string",
     topics=['crystal_useful'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="XYZ FILE input for geometry",
     characteristics=['[[INPUT_ONLY]]'],
     text="""
@@ -18700,7 +18666,6 @@ Variable(
     vartype="real",
     topics=['AtomTypes_compulsory', 'PseudosPAW_compulsory'],
     dimensions=['[[npsp]]'],
-    defaultval=None,
     mnemonics="charge -Z- of the NUCLeus",
     characteristics=['[[NO_MULTI]]'],
     text="""

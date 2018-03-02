@@ -506,7 +506,7 @@ The explicit expression for _J_ depends on the method used to treat the
 screened interaction. The code implements four different plasmon-pole
 techniques to model the frequency dependence of **W** in an efficient but
 approximate way, alternatively, it is possible to use the more sophisticated
-frequency integration of the contour deformation method [[Lebegue2003] for
+frequency integration of the contour deformation method [[cite:Lebegue2003]] for
 accurate QP calculations (see the related variables [[ppmodel]] and [[gwcalctyp]]).
 
 The double sum over **G** -vectors is performed for all the plane waves
@@ -569,7 +569,7 @@ reader to the original papers cited in the documentation of the variable.
 ## 10 Contour deformation technique
   
 The contour deformation method was proposed in order to avoid having to deal
-with quantities close to the real axis as much as possible [[Lebegue2003]].
+with quantities close to the real axis as much as possible [[cite:Lebegue2003]].
 The integral over the real frequency axis can be transformed into an integral
 over the contour depicted in red in the figure below. The integral over real
 frequency is traded with an integration along the imaginary axis plus

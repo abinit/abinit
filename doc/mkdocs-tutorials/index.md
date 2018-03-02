@@ -15,12 +15,51 @@ two hours of student work. Lessons 1-4 cover the basics, other lectures are
 more specialized. There are dependencies between lessons.
 The following schema should help you to understand these dependencies. 
 
-![Schema 1](index_assets/tutorial_flowchart_v6.png)
-:   In blue, one has the basic lessons. The blocks in red represents additional lessons related 
-    to ground-state features. Response-function features are explained
-    in the lessons in the green blocks. Finally, the Many-Body Perturbation Theory
-    capabilities are demonstrated in the lessons belonging to the violet blocks.
-    The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
+<center>
+<map id="map1" name="map1"> 
+<area shape="rect" coords="120  , 5 ,260 , 80 " href="base1" /> <!--2,3,4-->
+<area shape="rect" coords="30  ,135 ,170 ,160 " href="spin" />
+<area shape="rect" coords="30  ,165 , 99 ,189 " href="paw1" />
+<area shape="rect" coords="100 ,165 ,129 ,189 " href="paw2" />
+<area shape="rect" coords="130 ,165 ,170 ,189 " href="paw3" />
+<area shape="rect" coords="30  ,190 ,170 ,240 " href="nuc" /> 
+<area shape="rect" coords="30  ,245 , 99 ,272 " href="dftu" />
+<area shape="rect" coords="100 ,245 ,170 ,272 " href="dmft" />
+<area shape="rect" coords="30  ,273 ,100 ,300 " href="ucalc_crpa" />
+<area shape="rect" coords="100 ,273 ,170 ,300 " href="udet" />
+<area shape="rect" coords="30  ,305 ,170 ,330 " href="ffield" />
+<area shape="rect" coords="30  ,335 ,170 ,360 " href="positron" />
+<area shape="rect" coords="30  ,370 ,170 ,395 " href="tddft" />
+<area shape="rect" coords="30  ,400 ,170 ,425 " href="analysis_tools" />
+<area shape="rect" coords="30  ,430 ,170 ,455 " href="fold2bloch" />
+<area shape="rect" coords="30  ,460 ,170 ,485 " href="wannier90" />
+<area shape="rect" coords="30  ,490 ,170 ,515" href="source_code" />
+<area shape="rect" coords="230  ,135 ,376 ,199 " href="rf1" />
+<area shape="rect" coords="230  ,215 ,376 ,245 " href="optic" />
+<area shape="rect" coords="230  ,265 ,376 ,289 " href="rf2" />
+<area shape="rect" coords="230  ,290 ,376 ,309 " href="eph" /> 
+<area shape="rect" coords="230  ,310 ,376 ,334 " href="tdepes" /> 
+<area shape="rect" coords="230  ,335 ,327 ,365 " href="elastic" /> 
+<area shape="rect" coords="328  ,335 ,376 ,365 " href="nlo" /> 
+<area shape="rect" coords="360  ,420 ,456 ,465 " href="gw1" />
+<area shape="rect" coords="360  ,480 ,456 ,502 " href="gw2" /> 
+<area shape="rect" coords="360  ,503 ,456 ,525 " href="bse" /> 
+<area shape="rect" coords="530  , 5 ,670 , 80 " href="basepar" />
+<area shape="rect" coords="520  ,125 ,695 ,175 " href="gspw" />
+<area shape="rect" coords="520  ,180 ,695 ,235 " href="moldyn" />
+<area shape="rect" coords="520  ,240 ,695 ,300 " href="images" />
+<area shape="rect" coords="520  ,305 ,695 ,365 " href="gswvl" />
+<area shape="rect" coords="520  ,380 ,695 ,435 " href="paral_dfpt" />
+<area shape="rect" coords="520  ,445 ,695 ,500 " href="paral_mbt" />
+</map>
+<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v6.png" usemap="#map1"/>
+</center>
+
+In blue, one has the basic lessons. The blocks in red represents additional lessons related 
+to ground-state features. Response-function features are explained
+in the lessons in the green blocks. Finally, the Many-Body Perturbation Theory
+capabilities are demonstrated in the lessons belonging to the violet blocks.
+The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
 
 Before following the tutorials, you should have read the 
 [[help:new_user|new user's guide]], as well as the pages
@@ -188,6 +227,7 @@ corresponding tutorial for the sequential calculation.**
     the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
 
 !!! note
+
     Note that not all features of ABINIT are covered by these tutorials. 
     For a complete feature list, please see the [[help_features]]. 
     For examples on how to use these features, please see the ~abinit/tests/* 

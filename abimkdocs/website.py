@@ -568,7 +568,7 @@ This document lists and provides the description of the name (keywords) of the
 
         # Add plotly figures.
         # TODO: Replace it with dot
-        if self.deploy:
+        if False and self.deploy:
             with self.new_mdfile("mkdocs-variables", "connections.md", meta={"plotly": True}) as mdf:
                 mdf.write("# Dependency graphs  \n")
                 mdf.write("""
@@ -579,7 +579,7 @@ The colormap gives the number of input variables connected to the node.
                 for code, vd in self.variables_code.items():
                     for varset in vd.all_varset:
                         mdf.write("## %s, varset: %s  \n\n" % (code, varset))
-                        mdf.write(vd.get_plotly_networkx(varset=varset, include_plotlyjs=False))
+                        #mdf.write(vd.get_plotly_networkx(varset=varset, include_plotlyjs=False))
 
         # Write Markdown page with statistics.
         with self.new_mdfile("mkdocs-variables", "varset_stats.md") as mdf:
@@ -886,10 +886,11 @@ The bibtex file is available [here](../abiref.bib).
                 if self.verbose: print("Triggering action:", action, "with args:", str(args))
 
                 if action == "editor":
-                    if len(args) > 1:
-                        new_lines.extend(self.editor_tabs(args, title=None).splitlines())
-                    else:
-                        new_lines.extend(self.editor_panel(args[0], title=None).splitlines())
+                    raise NonImplementedError("")
+                    #if len(args) > 1:
+                    #    new_lines.extend(self.editor_tabs(args, title=None).splitlines())
+                    #else:
+                    #    new_lines.extend(self.editor_panel(args[0], title=None).splitlines())
                 elif action == "modal":
                     if len(args) > 1:
                         new_lines.extend(self.modal_with_tabs(args).splitlines())
@@ -1421,54 +1422,54 @@ Enter any string to search in the database. Clicking without any request will gi
 
         return s
 
-    def editor_panel(self, path, title=None):
-        title = path if title is None else str(title)
-        path = os.path.join(self.root, path)
-        with io.open(path, "rt", encoding="utf-8") as fh:
-            text = escape(fh.read(), tag="pre", cls="small-text")
+#    def editor_panel(self, path, title=None):
+#        title = path if title is None else str(title)
+#        path = os.path.join(self.root, path)
+#        with io.open(path, "rt", encoding="utf-8") as fh:
+#            text = escape(fh.read(), tag="pre", cls="small-text")
+#
+#        return """\
+#<div class="md-container">
+#  <div class="panel panel-default">
+#    <div class="panel-heading">{title}</div>
+#    <div class="panel-body"><div class="editor" hidden id="{editor_id}">{text}</div></div>
+#</div></div>""".format(editor_id=gen_id(), **locals())
 
-        return """\
-<div class="md-container">
-  <div class="panel panel-default">
-    <div class="panel-heading">{title}</div>
-    <div class="panel-body"><div class="editor" hidden id="{editor_id}">{text}</div></div>
-</div></div>""".format(editor_id=gen_id(), **locals())
-
-    def editor_tabs(self, paths, title=None):
-        title = "EditorTabs" if title is None else str(title)
-        apaths = [os.path.join(self.root, p) for p in paths]
-
-        text_list = []
-        for path in apaths:
-            with io.open(path, "rt", encoding="utf-8") as fh:
-                text_list.append(escape(fh.read(), tag="pre", cls="small-text"))
-        tab_ids = gen_id(n=len(text_list))
-        editor_ids = gen_id(n=len(text_list))
-
-        # https://codepen.io/wizly/pen/BlKxo?editors=1000
-        s = """\
-<div class="md-container">
-  <div>{title}</div>
-    <div>
-      <!-- Nav tabs -->
-      <ul class="nav nav-pills nav-justified">""".format(title=title)
-
-        for i, (path, tid) in enumerate(zip(paths, tab_ids)):
-            s += """<li class="{li_class}"><a href="{href}" data-toggle="pill">{path}</a></li>""".format(
-                li_class="active" if i == 0 else " ", href="#%s" % tid, path=path)
-
-        s +=  """\
-        </ul>
-        <!-- Tab panes -->
-        <div class="tab-content clearfix">"""
-
-        for i, (text, tid, editor_id) in enumerate(zip(text_list, tab_ids, editor_ids)):
-            s += """\
-<div class="tab-pane {active}" id="{tid}">
-<div id="{editor_id}" class="editor" hidden>{text}</div></div>
-""".format(active="fade in active" if i == 0 else "fade", tid=tid, editor_id=editor_id, text=text)
-
-        return s + 3 * "</div>"
+#    def editor_tabs(self, paths, title=None):
+#        title = "EditorTabs" if title is None else str(title)
+#        apaths = [os.path.join(self.root, p) for p in paths]
+#
+#        text_list = []
+#        for path in apaths:
+#            with io.open(path, "rt", encoding="utf-8") as fh:
+#                text_list.append(escape(fh.read(), tag="pre", cls="small-text"))
+#        tab_ids = gen_id(n=len(text_list))
+#        editor_ids = gen_id(n=len(text_list))
+#
+#        # https://codepen.io/wizly/pen/BlKxo?editors=1000
+#        s = """\
+#<div class="md-container">
+#  <div>{title}</div>
+#    <div>
+#      <!-- Nav tabs -->
+#      <ul class="nav nav-pills nav-justified">""".format(title=title)
+#
+#        for i, (path, tid) in enumerate(zip(paths, tab_ids)):
+#            s += """<li class="{li_class}"><a href="{href}" data-toggle="pill">{path}</a></li>""".format(
+#                li_class="active" if i == 0 else " ", href="#%s" % tid, path=path)
+#
+#        s +=  """\
+#        </ul>
+#        <!-- Tab panes -->
+#        <div class="tab-content clearfix">"""
+#
+#        for i, (text, tid, editor_id) in enumerate(zip(text_list, tab_ids, editor_ids)):
+#            s += """\
+#<div class="tab-pane {active}" id="{tid}">
+#<div id="{editor_id}" class="editor" hidden>{text}</div></div>
+#""".format(active="fade in active" if i == 0 else "fade", tid=tid, editor_id=editor_id, text=text)
+#
+#        return s + 3 * "</div>"
 
 
 class Page(object):

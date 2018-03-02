@@ -675,27 +675,6 @@ a modal window with tabs is produced
 
 {% modal tests/v1/Input/t01.in tests/v1/Input/t02.in %}
 
-To create a panel with the output file use:
-
-```
-    {% editor tests/v1/Refs/t01.out %}
-```
-
-that gives:
-
-{% editor tests/v1/Refs/t01.out %}
-
-Also in this case, a multi-tab panel is produced if multiple files are used such as in:
-
-```
-    {% editor tests/v1/Refs/t01.out tests/v1/Refs/t02.out %}
-```
-
-that produces:
-
-{% editor tests/v1/Refs/t01.out tests/v1/Refs/t02.out %}
-
-
 ## MathJax
 
 Formulas written in LaTeX are interpreted automatically (at visualization time) thanks to the

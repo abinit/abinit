@@ -34,7 +34,6 @@ Variable(
     vartype="string",
     topics=['Optic_basic'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="DDK FILE",
     commentdefault="no default",
     text="""
@@ -183,7 +182,6 @@ Variable(
     vartype="string",
     topics=['Optic_basic'],
     dimensions="scalar",
-    defaultval=None,
     mnemonics="WaveFunction K FILE",
     commentdefault="no default",
     text="""
