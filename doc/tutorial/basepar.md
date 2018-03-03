@@ -144,7 +144,7 @@ that have been parallelized, and for which a tutorial is available, include:
 * [ground state with plane waves](paral_gspw),
 * [ground state with wavelets](paral_gswvl),
 * [molecular dynamics](paral_moldyn),
-* [parallelism on "images"](paral_imagesl),
+* [parallelism on "images"](paral_images),
 * [density-functional perturbation theory (DFPT)](paral_dfpt),
 * [Many-Body Perturbation Theory](paral_mbt).
 

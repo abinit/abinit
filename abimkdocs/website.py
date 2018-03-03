@@ -1191,12 +1191,13 @@ The bibtex file is available [here](../abiref.bib).
                 html_classes.append("abifile-wikilink")
 
             elif namespace == "pdf":
-                # Handle [[pdf:howto_chebfi.pdf]]
+                # Handle [[pdf:howto_chebfi.pdf]] or [[pdf:howto_chebfi]]
+                if not name.endswith(".pdf"): name += ".pdf"
                 try:
                     path = self.pdfs[name]
                     url = "/" + os.path.relpath(path, self.root)
                 except KeyError:
-                    self.warn("Cannot file pdf `%s` specified in wikilink `%s` in `%s`" % (name, token, page_rpath))
+                    self.warn("Cannot find pdf file `%s` specified in wikilink `%s` in `%s`" % (name, token, page_rpath))
                     url, a.text = "FAKE_URL", "FAKE_URL"
 
                 if a.text is None: a.text = name

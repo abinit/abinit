@@ -30,7 +30,7 @@
          <p>There is also a (non-graphical) atom manipulator in ABINIT, see [[topic:AtomManipulator]].
          <p>ABINIT can read XYZ files, see [[xyzfile]].
          <p>Atomic positions can also be generated at random, see [[random_atpos]].
-         <p>Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+         <p>Details about the way the crystal structure is defined in ABINIT can be found [[pdf:geometry|here]].
     tutorials  : |-
          <li>[[lesson:base1|The lesson 1]] deals with the H2
          molecule : get the total energy, the electronic energies, the charge

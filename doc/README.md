@@ -144,3 +144,17 @@ Use
     pytest -v ./tests/test_variables.py
 
 to execute a particular module.
+
+## Checking links with linkchecker
+
+Build the website with:
+
+    ./mksite.py build
+
+then use
+
+    linkchecker site/index.html > links.err
+
+!!! important
+
+    For the time being, one has to use python2.7

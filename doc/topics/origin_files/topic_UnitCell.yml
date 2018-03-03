@@ -20,7 +20,7 @@
          If it is not the case, exchange two of them.
          <p>
          More information about the way the real space lattice, 
-         the reciprocal lattice, and symmetries are defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+         the reciprocal lattice, and symmetries are defined in ABINIT can be found [[pdf:geometry|here]].
          <p><b>Smart symmetriser</b><p>
          ABINIT has also a smart symmetriser capability, when [[spgroup]]!=0 and [[brvltt]]=-1. 
          In this case, the CONVENTIONAL unit cell must be input through the usual 
