@@ -13,7 +13,7 @@ of the run in order to achieve good speedup. α-quartz SiO2 is used as test case
 
 It is supposed that you have some knowledge about UNIX/Linux, and you know how to submit MPI jobs.
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](lesson_basepar.html).
+explained in the tutorial [A first introduction to ABINIT in parallel](basepar.md).
 
 This lesson should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
 

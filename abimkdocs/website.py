@@ -767,8 +767,12 @@ The bibtex file is available [here](../abiref.bib).
 
             mdf.write("\n".join(lines))
 
-        # Write acknowledgments page.
+
         repo_path = os.path.join(ABINIT_REPO, "doc/biblio/origin_files/")
+
+        # Now we use md version.
+        """
+        # Write acknowledgments page.
         with io.open(os.path.join(repo_path, "bibfiles.yml"), "rt", encoding="utf-8") as fh:
             for comp in yaml.load(fh):
                 if comp.name == "acknow": break
@@ -780,6 +784,7 @@ The bibtex file is available [here](../abiref.bib).
             mdf.write("# Acknowledgments  \n")
             mdf.write(html2text(comp.purpose))
             mdf.write(html2text(comp.introduction))
+        """
 
         meta = {"description": "List of PDF files provided by the Abinit documentation"}
         with self.new_mdfile("theory", "documents.md", meta=meta) as mdf:
@@ -937,7 +942,7 @@ The bibtex file is available [here](../abiref.bib).
 
     def get_wikilink(self, token, page_rpath):
         """
-        Involked by the wikilink extension to implement the wikilink syntax: [namespace:name#fragment|text]
+        Invoked by the wikilink extension to implement the wikilink syntax: [namespace:name#fragment|text]
 
         Args:
             token: The string enclosed between square brackets.
@@ -1109,10 +1114,14 @@ The bibtex file is available [here](../abiref.bib).
 
             elif namespace == "topic":
                 # Handle [[topic:BSE|text]]
-                url = "/topics/%s" % name
                 html_classes.append("topic-wikilink")
-                if a.text is None: a.text = "%s_%s" % (namespace, name)
-                add_popover(a, content=self.howto_topic[name])
+                if name == "index":
+                    url = "/topics/"
+                    if a.text is None: a.text = "Topics index"
+                else:
+                    url = "/topics/%s" % name
+                    if a.text is None: a.text = "%s_%s" % (namespace, name)
+                    add_popover(a, content=self.howto_topic[name])
 
             elif namespace in ("bib", "cite"):
                 if namespace == "bib":
@@ -1127,7 +1136,8 @@ The bibtex file is available [here](../abiref.bib).
                     try:
                         ref = self.bib_data.entries[name]
                         url = "/theory/bibliography#%s" % self.slugify(name)
-                        add_popover(a, content=ref.fields["title"]) #+ "\n\n" + ref.authors
+                        content = ref.fields["title"].replace("{", "").replace("}", "") #+ "\n\n" + ref.authors
+                        add_popover(a, content=content)
                         if a.text is None: a.text = "[%s]" % name
                         html_classes.append("citation-wikilink")
                     except Exception as exc:
@@ -1202,7 +1212,6 @@ The bibtex file is available [here](../abiref.bib).
 
             # TODO? Issue
             #Fix issue https://github.com/abinit/abinit/issues/1
-
             else:
                 self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
                 url, a.text = "FAKE_URL", "FAKE_URL"
@@ -1235,7 +1244,7 @@ The bibtex file is available [here](../abiref.bib).
             if end: url = "%s#%s" % (url, end)
 
         if self.verbose: print("token", token, "page_rpath", page_rpath, "url", url)
-        a.set('href', url)
+        a.set('href', url.strip())
         if target: a.set('target', target)
         return a
 
