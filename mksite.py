@@ -4,7 +4,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import sys
 import os
+import warnings
 import mkdocs.__main__
+
+if sys.version_info < (3, 6):
+    for i in range(50):
+        warnings.warn("""Python >= 3.6 is STRONGLY recommended when building the Abinit documentation""")
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir = os.path.dirname(os.path.abspath(__file__))

@@ -6,11 +6,11 @@ from setuptools import setup
 
 
 setup(
-    name="abidocs-mkdocs-plugin",
+    name="abimkdocs-plugin",
     version="0.1",
     entry_points={
         'mkdocs.plugins': [
-            'abidocs = plugins:AbidocsPlugin',
+            'abimkdocs = abimkdocs_plugin:AbiMkdocsPlugin',
         ]
     }
 )

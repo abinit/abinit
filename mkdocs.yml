@@ -267,7 +267,7 @@ theme:
         tabs: true
 
 plugins:
-    - abidocs
+    - abimkdocs
     #- search
 
 extra:
@@ -291,7 +291,6 @@ extra_css:
 extra_javascript:
     - extra_javascript/jquery.dialogextend.min.js
     - extra_javascript/abidocs.js
-    #- https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js
 
 copyright: Copyright &copy; 2018 The Abinit Group
 

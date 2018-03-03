@@ -1,8 +1,10 @@
-from __future__ import absolute_import, unicode_literals, print_function
+# coding: utf-8
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 from mkdocs.plugins import BasePlugin
 
-class AbidocsPlugin(BasePlugin):
+
+class AbiMkdocsPlugin(BasePlugin):
 
     #def on_config(self, config, **kwargs):
     #    config['theme'].static_templates.add('my_template.html')

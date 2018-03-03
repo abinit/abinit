@@ -89,3 +89,40 @@ class VariablesTest(AbimkdocsTest):
 
         if errors:
             raise ValueError("\n".join(errors))
+
+    def test_variables_in_tests(self):
+        # Build database with all input variables indexed by code name.
+        from abimkdocs.variables import get_variables_code
+        variables_code = get_variables_code()
+
+        from collections import Counter
+        count_code = {}
+        for code, d in variables_code.items():
+            count_code[code] = Counter({k: 0 for k in d})
+
+        # Build AbinitTestSuite object.
+        from doc import tests as tmod
+        tests = []
+        for t in tmod.abitests.select_tests(suite_args=[], regenerate=True):
+            # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
+            if hasattr(t, "tests"):
+                tests.extend(t.tests)
+            else:
+                tests.append(t)
+
+        black_list = set([
+            "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr",
+            "mrgddb", "mrggkk", "mrgdv", "band2eps", "ujdet", "fold2Bloch", "macroave",
+        ])
+        for test in tests:
+            if test.executable in black_list: continue
+            #print(test)
+            vnset = test.get_varname_set()
+            #print(vnset)
+            count_code[test.executable].update(vnset)
+
+        for code, count in count_code.items():
+            for vname, c in count.items():
+                if c == 0:
+                    print(code, vname)
+        assert 0

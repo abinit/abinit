@@ -32,9 +32,7 @@ from doc.tests.pymods.termcolor import cprint
 from .variables import Variable
 
 
-#ABINIT_REPO = "/Users/gmatteo/git_repos/abinit/"
 ABINIT_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-print(ABINIT_REPO)
 if not os.path.exists(ABINIT_REPO):
     raise ValueError("ABINIT_REPO: %s does not exist\n. Please change the global variable in the python module." %
             ABINIT_REPO)
@@ -385,15 +383,11 @@ class Website(object):
 
         codes_without_vars = set()
         white_list = set([
-            "atompaw",
-            "cut3d",
+            "atompaw", "cut3d",
             #"multibinit",
-            "mrgddb",
-            "mrggkk",
-            "band2eps",
+            "mrgddb", "mrggkk", "band2eps",
             #"ujdet",
-            "fold2Bloch",
-            "fftprof",
+            "fold2Bloch", "fftprof",
             #"conducti",
             "mrgscr",
             #"macroave",
@@ -767,24 +761,7 @@ The bibtex file is available [here](../abiref.bib).
 
             mdf.write("\n".join(lines))
 
-
         repo_path = os.path.join(ABINIT_REPO, "doc/biblio/origin_files/")
-
-        # Now we use md version.
-        """
-        # Write acknowledgments page.
-        with io.open(os.path.join(repo_path, "bibfiles.yml"), "rt", encoding="utf-8") as fh:
-            for comp in yaml.load(fh):
-                if comp.name == "acknow": break
-            else:
-                raise RuntimeError("Cannot find `acknow` section in components")
-
-        meta = {"description": "Suggested acknowledgments and references"}
-        with self.new_mdfile("theory", "acknowledgments.md", meta=meta) as mdf:
-            mdf.write("# Acknowledgments  \n")
-            mdf.write(html2text(comp.purpose))
-            mdf.write(html2text(comp.introduction))
-        """
 
         meta = {"description": "List of PDF files provided by the Abinit documentation"}
         with self.new_mdfile("theory", "documents.md", meta=meta) as mdf:
@@ -1494,6 +1471,8 @@ class MarkdownPage(Page):
         with io.open(self.path, "rt", encoding="utf-8") as fh:
            string = fh.read()
         lines = string.split("\n")
+        #""" Parse Meta-Data and store in Markdown.Meta. """
+        # https://github.com/Python-Markdown/markdown/blob/master/markdown/extensions/meta.py
         #self.meta = self._get_meta(string.split("\n"))
 
         # Note: this logic is able to detect backlinks only if wikilinks syntax is used.
@@ -1504,8 +1483,6 @@ class MarkdownPage(Page):
             except Exception as exc:
                 cprint("Exception while trying to handle wikilink `%s` in `%s`" % (token, self.path))
                 raise
-                print(exc)
-                continue
 
             if hasattr(link, "get"):
                 link_class = link.get("class", "")
@@ -1513,36 +1490,6 @@ class MarkdownPage(Page):
                     self.citations.add(token)  # TODO Should be name
                 elif "topic-wikilink" in link_class:
                     self.topics.add(token) # TODO: Should be name
-
-    #def _get_meta(self, lines):
-    #    """ Parse Meta-Data and store in Markdown.Meta. """
-    #    # https://github.com/Python-Markdown/markdown/blob/master/markdown/extensions/meta.py
-    #    from markdown.extensions.meta import BEGIN_RE, END_RE, META_RE, META_MORE_RE
-    #    meta = {}
-    #    key = None
-    #    if lines and BEGIN_RE.match(lines[0]):
-    #        lines.pop(0)
-    #    while lines:
-    #        line = lines.pop(0)
-    #        m1 = META_RE.match(line)
-    #        if line.strip() == '' or END_RE.match(line):
-    #            break  # blank line or end of YAML header - done
-    #        if m1:
-    #            key = m1.group('key').lower().strip()
-    #            value = m1.group('value').strip()
-    #            try:
-    #                meta[key].append(value)
-    #            except KeyError:
-    #                meta[key] = [value]
-    #        else:
-    #            m2 = META_MORE_RE.match(line)
-    #            if m2 and key:
-    #                # Add another line to existing key
-    #                meta[key].append(m2.group('value').strip())
-    #            else:
-    #                lines.insert(0, line)
-    #                break  # no meta data - done
-    #    return meta
 
 
 class HtmlPage(Page):
