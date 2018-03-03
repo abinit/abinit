@@ -721,7 +721,7 @@ consistent with [[spgroup]].
 The space groups 146, 148, 155, 160, 161, 166, 167, when used with
 [[spgaxor]]=1 (hexagonal axes) will have [[brvltt]]=7 and two associated
 translations: (2/3, 1/3, 1/3) and (1/3, 2/3, 2/3).
-For more details see the space group [help file](../../users/spacegrouphelpfile.html).
+For more details see the [[help:spacegroup]].
 """,
 ),
 
@@ -2556,8 +2556,8 @@ http://dx.doi.org/10.1016/j.cpc.2016.04.003
 ](http://dx.doi.org/10.1016/j.cpc.2016.04.003).
 The TRIQS/CT Hyb implementation is described in [ Comp. Phys. Comm. 200, 274
 (2016) ](http://dx.doi.org/10.1016/j.cpc.2015.10.023). Before using it, it has
-to be installed following instructions at
-https://triqs.ipht.cnrs.fr/1.x/install.html. Starting from release 8.6.0, the
+to be installed following instructions available [here](https://triqs.ipht.cnrs.fr/1.x/install.html).
+Starting from release 8.6.0, the
 interface is valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. An example of a
 config.ac file to compile ABINIT with TRIQS can be found in
 ~/doc/build/config-examples/ubu_gnu_4.9_triqs.ac.
@@ -11426,7 +11426,7 @@ Variable(
     defaultval=0,
     mnemonics="PAPI OPTion",
     text="""
-[ PAPI ](http://icl.cs.utk.edu/papi/index.html) aims to provide the tool
+[PAPI](http://icl.cs.utk.edu/papi/index.html) aims to provide the tool
 designer and application engineer with a consistent interface and methodology
 for use of the performance counter hardware found in most major
 microprocessors. PAPI enables software engineers to see, in near real time,
@@ -11490,9 +11490,8 @@ point, parallelise over the two other levels: the band and FFT ones. For nproc
 (which is not yet the default). For nproc>=50, the best speed-up is achieved
 for [[npband]] >=4*[[npfft]].
 
-For additional information, download F. Bottin presentation at the [ ABINIT
-workshop 2007
-](https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html)
+For additional information, download F. Bottin presentation at the
+[ABINIT workshop 2007](https://www.abinit.org/sites/default/files/oldsites/workshop_07/program.html)
 
 Suggested acknowledgments:
 F. Bottin, S. Leroux, A. Knyazev and G. Zerah, _Large scale ab initio
@@ -13499,8 +13498,7 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial
-~abinit/doc/tutorial/lesson_eph.html and in ~abinit/doc/users/elphon_manual.ps
+electron-phonon treatment in ABINIT is given in the tutorial [[lesson:eph]].
 """,
 ),
 
@@ -14130,8 +14128,8 @@ use in CASINO. See the ABINIT theoretical background documents
 ABINIT/Infos/Theory/geometry.pdf and ABINIT/Infos/Theory/1WF.pdf for more
 information.
 The first of these requirements is met by setting the ABINIT input variable
-kptopt to 2 (see ABINIT/Infos/varbas.html#kptopt) and the second by setting
-istwfk to 1 for all the k points (see ABINIT/Infos/vardev.html#istwfk). Since
+[[kptopt]] to 2 and the second by setting
+[[istwfk]] to 1 for all the k points. Since
 CASINO is typically run with relatively small numbers of k-points, this is
 easily done by defining an array of "1" in the input file.
 For example, for the 8 k-points generated with ngkpt 2 2 2, we add the
@@ -15585,12 +15583,10 @@ possible axes permutations
   * 5 abc -> bac
   * 6 abc -> cba
 
-Monoclinic: there are 3 or 9 possibilities depending on the space group. See
-the space group [ help file ](../../users/spacegrouphelpfile.html) for
-details. In the log/output file the notation used to describe the monoclinic
-groups is for example:
-15:c1, A2/a_c = C2/c
-where,
+Monoclinic: there are 3 or 9 possibilities depending on the space group.
+For more details see the [[help:spacegroup]].
+In the log/output file the notation used to describe the monoclinic
+groups is for example: 15:c1, A2/a_c = C2/c where,
 
   * 15 represents the space group number,
   * c1 the orientation as it appears on the web page,
@@ -15622,7 +15618,7 @@ It is defined according to the origin choice in the International Tables of
 Crystallography.
 It applies only to the space groups 48, 50, 59, 70, 85, 86, 88, 125, 126, 129,
 130, 133, 134, 137, 141, 142, 201, 203, 222, 224, 227, 228.
-For details see the space group [help file](../../users/spacegrouphelpfile.html).
+For more details see the [[help:spacegroup]].
 """,
 ),
 
@@ -15646,7 +15642,7 @@ The references for computing the symmetry corresponding to the space groups are:
   * International Tables for Crystallography, 1983, Ed. Theo Hahn, D. Reidel Publishing Company
   * The mathematical theory of symmetry in solids, Representation theory for point groups and space groups, 1972, C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford.
 
-For details see the space group [help file](../../users/spacegrouphelpfile.html).
+For more details see the [[help:spacegroup]].
 """,
 ),
 
@@ -18409,8 +18405,7 @@ provided, then the values of [[xred]] will be computed from the provided
 provide starting coordinates).
 One and only one of [[xred]], [[xcart]] and [[xangst]] must be provided.
 The conversion factor between Bohr and Angstrom is 1 Bohr=0.5291772108
-Angstrom, see the [ NIST site
-](http://physics.nist.gov/cuu/Constants/index.html).
+Angstrom, see the [NIST site](http://physics.nist.gov/cuu/Constants/index.html).
 Atomic positions evolve if [[ionmov]]/=0. In constrast with [[xred]] and
 [[xcart]], [[xangst]] is not internal.
 """,

@@ -342,6 +342,8 @@ Namespace      | Markdown                         | Result
 
  See [[help:abinit#files-file]]
 
+For more details see the [[help:spacegroup]].
+
 !!! important
 
     theorydoc and bib are deprecated and replaced by theory and cite, respectively.

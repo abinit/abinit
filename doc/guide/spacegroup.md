@@ -1,14 +1,66 @@
-<html><HEAD><Title>SG description</Title></HEAD>
-        <BODY bgcolor="#ffffff">
+---
+authors: RC
+---
 
-<hr>
-<h1>List of 230 3D symmetry space groups</h1>
-<h3>This page presents the list of the 230 3D symmetry space groups with characteristics, and also, if applicable, derivatives of the space group.
-The table is a help for the input in the <A href="https://www.abinit.org">ABINIT</A> code.
-You may see either the <a title="Space groups" class="internal-link" href="spacegrouphelpfile.html">definition</a> of the table entries 
-or the <a title="SG description" class="internal-link" href="spgrdescription.html">full table</a> (present page)
-</h3>
-<hr>
+# List of 230 3D symmetry space groups
+
+This page presents the list of the 230 3D symmetry space groups with
+characteristics, and also, if applicable, derivatives of the space group. 
+
+This list of symmetry groups is part of the on-line help of the ABINIT code.
+Besides *classical* crystallographic information, it provides the values of
+certain symmetry-related variables used in the input file of the ABINIT code.
+
+The table entries are as follows:
+
+SPGROUP
+:   *SPace GROUP number* as found in the International Tables of Crystallography, 1986 edition.
+
+SPGAXOR
+:   *SPace Group AXis ORientation*, the orientation of the unit cell axis. The allowed values are: 
+
+    * Trigonal groups:
+        * 1 represents the hexagonal axes
+        * 2 represents the rhombohedral axes
+    * Orthorhombic groups:
+        * 1 abc -> abc
+        * 2 abc -> cab
+        * 3 abc -> bca
+        * 4 abc -> acb
+        * 5 abc -> bac
+        * 6 abc -> cba
+    * Monoclinic: 3 or 9 possibilities depending on the space group
+
+SPGORIG
+:   *SPace Group ORIGin*, the position of the origin in the unit cell. 
+    The allowed values are 1 and 2. they correspond to the actual choices in the 
+    International Tables of Crystallography, 1986 edition. 
+
+BRVLTT
+:   *BRaVais LaTTice*, the type of Bravais lattice. The allowed values are:
+
+    * 1 = Primitive with no associated translations
+    * 2 = Inner centered with (a/2 + b/2 + c/2) associated translation
+    * 3 = Face centered with (a/2 + b/2; b/2 + c/2; c/2 + a/2) associated translations
+    * 4 = C - centered with (a/2 + b/2) associated translation
+    * 5 = A - centered with (b/2 + c/2) associated translation
+    * 6 = B - centered with (c/2 + a/2) associated translation
+    * 7 = Rhombohedral lattice
+
+INTERNATIONAL
+: the INTERNATIONAL notation of the space group
+
+SCHOENFLIES
+: the equivalent SCHOENFLIES notation of the space group
+
+MULTIPLICITY (x y z)
+: the maximum multiplicity, after applying Bravais lattice translations,  corresponding to a general position (x y z)
+
+
+## List of 230 3D symmetry space groups
+
+This section presents the list of the 230 3D symmetry space groups with
+characteristics, and also, if applicable, derivatives of the space group. 
 
 <TABLE BORDER = "2" cellspacing = "2" cellpadding = "5">
 <tr>
@@ -534,9 +586,4 @@ or the <a title="SG description" class="internal-link" href="spgrdescription.htm
 <tr><td>  229  </td><td>  1  </td><td>  1  </td><td>  2  </td><td>  Im-3m  </td><td>  Oh<SUP>9</SUP>  </td><td>  96  </td></tr>
 <tr><td>  230  </td><td>  1  </td><td>  1  </td><td>  2  </td><td>  Ia-3d  </td><td>  Oh<SUP>10</SUP>  </td><td>  96  </td></tr>
 </TABLE>
-<hr>
-<div>
-This page has been created by Razvan Caracas.
-<br>Copyright (C) 2000-2018 ABINIT group (RC)
-</div>
 </body></html>
