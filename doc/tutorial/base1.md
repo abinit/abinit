@@ -191,7 +191,7 @@ later, what is in the `tbase1_1.out` and `log` output files.
 
 !!! tip
 
-    Running the code is described in the [section 1.2](../../users/generated_files/help_abinit.html#exec) of the abinit help file. 
+    Running the code is described in [[help:abinit#exec|section 1.2]] of the abinit help file. 
     Please, read it now.
 
 It is now time to edit the `tbase1_1.in` file. 
@@ -245,12 +245,11 @@ First, open the "log" file. You can begin to read it. It is nasty. Jump to its e
 You will find there the number of WARNINGS and COMMENTS that were issued by the code during execution. 
 You might try to find them in the file (localize the keywords "WARNING" or "COMMENT" in this file). 
 Some of them are for the experienced user. For the present time, we will ignore them. 
-You can find more information about messages in the log file in the 
-[section 6.1](../../users/generated_files/help_abinit.html#logfile) of the abinit help file.
+You can find more information about messages in the log file in
+[[help:abinit#logfile|this section]] of the abinit help file.
 
 Then, open the [[tests/tutorial/Refs/tbase1_1.out]] file. 
-You find some general information about the output file in 
-[section 6.2](../../users/generated_files/help_abinit.html#outputfile) of the abinit help file. 
+You find some general information about the output file [[help:abint#outputfile|here]] .
 You should also: 
 
 * examine the header of `tbase1_1.out` 
@@ -367,7 +366,7 @@ Could you answer the following questions?
         kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
         -0.36525  -0.01379
   
-    As mentioned in the [abinit_help](../../users/generated_files/help_abinit.html#averagepot) file,
+    As mentioned in the [[help:abinit#averagepot|abinit help file]]
     the absolute value of eigenenergies is not meaningful. Only differences of eigenenergies, as well 
     as differences with the potential. The difference is 0.35147 Hartree, that is 9.564 eV .  
     Moreover, remember that Kohn-Sham eigenenergies are formally NOT connected to
@@ -395,7 +394,7 @@ you should read the corresponding descriptive section in the ABINIT help file.
 We will now complete the description of the meaning of each term: there are
 still a few indications that you should be aware of, even if you will not use
 them in the tutorial. These might appear in the description of some input variables...
-For this, you should read the [section 3.2](../../users/generated_files/help_abinit.html#parameters) 
+For this, you should read the [[help:abinit#parameters|section 3.2]]
 of the abinit help file.
 
 There are three methodologies to compute the optimal distance between the two Hydrogen atoms.
@@ -418,11 +417,11 @@ drive these 21 calculations, changing automatically the variable [[xcart]] in
 the input file, and then gather all the data, in a convenient form to be plotted.  
 Well, are you a UNIX guru? If not, there is an easier path, all within ABINIT!
 
-This is the multi-dataset mode. Detailed explanations about it can be found in
-sections [3.3](../../users/generated_files/help_abinit.html#multidataset),
-[3.4](../../users/generated_files/help_abinit.html#series),
-[3.5](../../users/generated_files/help_abinit.html#loop) and
-[3.6](../../users/generated_files/help_abinit.html#3.6), of the abinit help file.
+This is the multi-dataset mode. Detailed explanations about it can be found in sections 
+[[help:abinit#multidataset|3.3]],
+[[help:abinit#series|3.4]],
+[[help:abinit#loop|3.5]] and
+[[help:abinit#filenames-multidataset|3.6]] of the abinit help file.
 
 Now, can you write an input file that will do the computation described above 
 (interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of 0.05 Bohr)? You might start from `tbase1_1.in`. 
@@ -547,7 +546,7 @@ We start from the optimized interatomic distance 1.522 Bohr, and make a run at f
 The input variable [[prtden]] must be set to 1. 
 To understand correctly the content of the [[prtden]] description, it is worth to read a much 
 more detailed description of the "files" file, in 
-[section 4](../../users/generated_files/help_abinit.html#4) of the abinit_help file. 
+[[help:abinit#files-file|section 4]] of the abinit_help file. 
 
 The input file [[tests/tutorial/Input/tbase1_4.in]] is an example of input file for a run that will print a density. If you decide to use this file, do not forget to change the file names in tbase1_x.files. The run will take a few seconds. 
 
@@ -555,14 +554,12 @@ The density will be output in the **tbase1_xo_DEN** file. Try to edit it ...
 No luck ! This file is unformatted, not written using the ASCII code. Even if
 you cannot read it, its description is provided in the abinit_help. It
 contains first a header, then the density numbers. The description of the
-header is presented in [section 6.4](../../users/generated_files/help_abinit.html#header) of the abinit_help
-file, while the body of the _DEN file is presented in [section
-6.5](../../users/generated_files/help_abinit.html#densoutputfile). It is the
+header is presented in [[help:abinit#header|section 6.4]] of the abinit_help
+file, while the body of the _DEN file is presented in 
+[section 6.5](../../users/generated_files/help_abinit.html#densoutputfile). It is the
 appropriate time to read also the description of the potential files and
 wavefunctions files, as these files contain the same header as the density
-file, see sections
-[6.6](../../users/generated_files/help_abinit.html#localpotfile) and
-[6.7](../../users/generated_files/help_abinit.html#wavefctfile)
+file, see sections [[help:abiint#localpotfile|6.6]] and [[help:abiint#wfkfile|6.7]].
 
 Such a density file can be read by ABINIT, to restart a calculation (see the input variable [[iscf]], when its value is -2), but more usually, by an utility called "cut3d". This utility is available in the ABINIT package. 
 You might try to use it now, to generate two-dimensional cuts in the density, and visualize the charge density contours.   

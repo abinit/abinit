@@ -333,14 +333,19 @@ Examples:
 Namespace      | Markdown                         | Result
 -------------  | -------------------------------- |
  `lesson`      | `[[lesson:gw1]]`                 | [[lesson:gw1]]
+ `lesson`      | `[[lesson:index]]`               | [[lesson:index]]
  `topic`       | `[[topic:BSE]]`                  | [[topic:BSE]]
+ `topic`       | `[[topic:index]]`                | [[topic:index]]
  `help`        | `[[help:abinit]]`                | [[help:abinit]]
  `theory`      | `[[theory:mbt]]`                 | [[theory:mbt]]
  `varset`      | `[[varset:bse]]`                 | [[varset:bse]]
  `cite`        | `[[cite:Amadon2008]]`            | [[cite:Amadon2008]]
  `ac`          | `[[ac:abiref_gnu_5.3_debug.ac]]` | [[ac:abiref_gnu_5.3_debug.ac]]
  `pdf`         | `[[pdf:howto_chebfi.pdf]]`       | [[pdf:howto_chebfi.pdf]]
+ `pdf`         | `[[pdf:howto_chebfi]]`           | [[pdf:howto_chebfi]]
  `src`         | `[[src:94_scfcv/scfcv.F90]]`     | [[src:94_scfcv/scfcv.F90]]
+
+ See [[help:abinit#files-file]]
 
 !!! important
 

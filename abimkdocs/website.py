@@ -426,6 +426,7 @@ class Website(object):
             key=lambda t: t[0]))
 
         cprint("Initial website generation completed in %.2f [s]" % (time.time() - start), "green")
+        cprint("Invoking mksite to build HTML from MD files. It could take a while...", "green")
 
         self.do_not_edit_comment = """\
 <!--
@@ -1101,9 +1102,12 @@ The bibtex file is available [here](../abiref.bib).
 
             elif namespace == "lesson":
                 # Handle [[lesson:wannier90|text]]
-                if name == "index": name = ""
-                url = "/tutorial/%s" % name
-                if a.text is None: a.text = "%s %s" % (name, namespace)
+                if name == "index":
+                    url = "/tutorial/"
+                    if a.text is None: a.text = "lesson index"
+                else:
+                    url = "/tutorial/%s" % name
+                    if a.text is None: a.text = "%s %s" % (name, namespace)
                 html_classes.append("lesson-wikilink")
 
             elif namespace == "help":

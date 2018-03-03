@@ -53,6 +53,7 @@ Other examples are given in the subdirectories of the ~abinit/tests directory.
     132 characters. It is 112 characters for the root strings, since they will be
     supplemented by different character strings.
 
+<a id="exec"></a>
 ### 1.2 Running the code
   
 The main executable file is called abinit. Supposing that the "files" file is
@@ -196,6 +197,7 @@ parsing, to remove case sensitivity.
 More than one parameter per line may be given. If a given parameter name is
 given more than once in the input file, an error message is printed, and the code stops.
 
+<a id="parameters"></a>
 ### 3.2 More about ABINIT input variables
   
 In each section of the ABINIT input variables files, a generic information on
@@ -298,6 +300,7 @@ directory where the job was started. The code should also smoothly end. In
 both cases, the stop is not immediate. It can take a significant fraction
 (about 20% at most) of one SCF step to execute properly the instruction still needed.
 
+<a id="multidatasets"></a>
 ### 3.3 The multi-dataset mode
   
 Until now, we have assumed that the user wants to make computations
@@ -378,7 +381,7 @@ and the second run will use "acell5" and "ecut5":
 
 Note that ecut1, ecut2 and ecut3 are not used.
 
-
+<a id="series"></a>
 ### 3.4 Defining a series
   
 Rule (2) is split in three parts: (2a), (2b) and (2c). Series relate with (2b):
@@ -419,6 +422,7 @@ is equivalent to
 
 In both cases, there are six datasets, with increasing values of [[ecut]].
 
+<a id="loop"></a>
 ### 3.5 Defining a double loop dataset
   
 To define a double loop dataset, one has first to define the upper limit of
@@ -483,6 +487,7 @@ is equivalent to
 
     More examples can be found in the directory ~abinit/tests/v1, cases 59 and later.
 
+<a id="filenames-multidataset"></a>
 ### 3.6 File names in the multi-dataset mode
   
 The root names for input and output files (potential, density, wavefunctions
@@ -507,6 +512,7 @@ variables, some output variables are also summarized, using the same conventions
   * **fcart** (cartesian forces) 
   * **strten** (the stress tensor). 
 
+<a id="files-file"></a>
 ## 4 More detailed presentation of the files file
   
 Note: _This "files" file is called _ab.files_ in section 1._
@@ -695,6 +701,7 @@ Explanation of the output from the code
 
 Output from the code goes to several places listed below.
 
+<a id="logfile"></a>
 ### 6.1 The log file
   
 The "log" file (this is the standard UNIX output file, and corresponds to
@@ -722,6 +729,7 @@ Also, the code gives the number of **WARNING** or **COMMENT** it issued. It is
 advised to read at least the **WARNING** messages, during the first month of
 ABINIT use.
 
+<a id="outputfile"></a>
 ### 6.2 The main output file
   
 The **main output file** is a formatted output file to be kept as the permanent record of the run.
@@ -814,6 +822,7 @@ of [[ntime]], the code output more information:
   * Next are the length scales of the unit cell in Bohr and in Angstroms. 
   * Next are the eigenvalues of each band for each k point, in eV or Hartree or both depending on the choice of [[enunit]].   
 
+<a id="averagepot"></a>
 NOTE that the average electrostatic potential of a periodically repeated cell is UNDEFINED.  
 In the present implementation, the average Hartree potential and local
 potential are imposed to be zero, but not the average exchange-correlation
@@ -889,6 +898,7 @@ at fixed atomic positions, these subroutines are:
 7. **cgwf**: optimize one wavefunction in a fixed potential 
 8. **getghc**: computes $\langle G|H|C\rangle$, that is, applies the Hamiltonian operator to an input vector. 
 
+<a id="header"></a>
 ### 6.4 The header
   
 The **wavefunction files**, **density files**, and **potential files** all
@@ -980,6 +990,7 @@ The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was:
      endif
 ```
 
+<a id="denfile"></a>
 ### 6.5 The density output file
   
 This is an unformatted data file containing the electron density on the real
@@ -1023,6 +1034,7 @@ by 1/ngfft(3), and so forth until ir varies all the way from 1 to
 diagonally opposite from the origin, or right alongside the origin if the
 whole grid is viewed as being periodically repeated.
 
+<a id="localpotfile"></a>
 ### 6.6 The potential files
   
 Also unformatted files consisting of the header records and
@@ -1046,6 +1058,7 @@ potential. Note that the Hartree potential is NOT spin-dependent, but in order
 to use the same format as for the other potential files, the spin-independent
 array is written twice, once for spin-up and one for spin-down.
 
+<a id="wfkfile"></a>
 **6.7. The wavefunction output file**
 
 This is an unformatted data file containing the planewaves coefficients of all
