@@ -271,14 +271,13 @@ of the **mrgscr** utility (see also the automatic tests v3/t87, v3/t88 and v3/t8
 
 ## 3 Computing the screening in parallel using the Hilbert transform method
   
-As discussed in the
-[GW_notes](../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space),
+As discussed in the [[theory:mbt#RPA_Fourier_space|GW_notes]]
 the algorithm based on the Adler-Wiser expression is not optimal when many
 frequencies are wanted. In this paragraph, we therefore discuss how to use the
 Hilbert transform method to calculate the RPA polarizability on a dense
 frequency mesh. The equations implemented in the code are documented in 
-[this section](../../theory/generated_files/theorydoc_mbt.html#hilbert_transform) of
-the GW notes.
+[[theory:mbt#hilbert_transform|in this section]].
+
 
 As usual, we have to copy the files file tmbt_3.file in the working directory,
 and then create a symbolic link pointing to the WFK file.
@@ -305,10 +304,9 @@ The input file is similar to the one we used for the Adler-Wiser calculation.
 The input variable [[spmeth]] enables the spectral method. [[nomegasf]]
 defines the number of ω′ points in the linear mesh used for the spectral
 function i.e. the number of ω′ in the
-[equation](../../theory/generated_files/theorydoc_mbt.html#hilbert_transform)
-for the spectral function.
+[[theory:mbt#hilbert_transform|equation]] for the spectral function.
 
-As discussed in the [GW notes](../../theory/generated_files/theorydoc_mbt.html#hilbert_transform), the
+As discussed in the [[theory:mbt#hilbert_transform|GW notes] for the spectral function.
 Hilbert transform method is much more memory demanding that the Adler-Wiser
 approach, mainly because of the large value of [[nomegasf]] that is usually
 needed to converge the results. Fortunately, the particular distribution of
@@ -345,9 +343,8 @@ a much denser k-sampling is required to achieve convergence).
 
   
 In this last paragraph, we discuss how to calculate G0W0 corrections in
-parallel with [[gwpara]]=2. The basic equations used to compute the self-
-energy matrix elements are discussed in [this part](../../theory/generated_files/theorydoc_mbt.html#evaluation_gw_sigma) 
-of the GW notes.
+parallel with [[gwpara]]=2. The basic equations used to compute the self-energy matrix elements are discussed in 
+[[theory:mbt#evaluation_gw_sigma|this part]] of the GW notes.
 
 Before running the calculation, copy the files file tmbt_4.file in the working
 directory. Then create two symbolic links for the SCR and the WFK file:

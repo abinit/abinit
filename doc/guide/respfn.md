@@ -8,6 +8,7 @@ This page complements the main [[help:abinit]], for matters related
 to responses to perturbations computed with DFPT.
 It will be easier to discover the present file with the help of the [[lesson:rf1]].  
 
+<a id="intro"></a> 
 ## 0 Introducing the computation of responses
   
 ABINIT can compute the response to different perturbations, and provide access
@@ -52,6 +53,7 @@ effective charges. But the main output of the code is the Derivative DataBase
 code. This DDB can be manipulated by the MRGDDB code, and fully analyzed by
 the Anaddb code. See the corresponding [[help:mrgddb]] and [[help:anaddb]].
 
+<a id="1"></a>
 ## 1 Description of perturbations
   
 The perturbation of the **phonon** type is the displacement of one atom along
@@ -155,6 +157,7 @@ corresponds to the perturbation that gives the derivative of the potential,
 and the second pertcase corresponds to the perturbation that gives the
 derivative of the wavefunctions.
 
+<a id="2"></a>
 ## 2 Filenames and input of ground-state wavefunctions
   
 The same 'files' file as for GS calculations is used for RF calculations.
@@ -211,6 +214,7 @@ Such a file might be used as input of another computation, or of another dataset
 The relevant input variables are: [[ird1wf]], and [[irdddk]], as well as
 [[get1wf]], and [[getddk]], in the multi-dataset mode.
 
+<a id="symmetries"></a>
 ## 3 The use of symmetries
   
 In order to understand correctly the behaviour of response-function runs, 
@@ -240,6 +244,7 @@ use the [[ngkpt]] or [[kptrlatt]] input variables, with different values of [[kp
   * kptopt = 2 for response functions at q=0 
   * kptopt = 3 for response functions at non-zero q 
 
+<a id="4"></a>
 ## 4 Organisation of response-function computations
   
 In agreement with the information provided in the previous sections, different
@@ -351,6 +356,7 @@ In the first part, every perturbation is examined, one at a time, separately:
 
   * The first-order wavefunctions (1WF) are written as well as the first-order density or potential (if requested).
 
+<a id="5"></a>
 ## 5 List of relevant input variables
   
 A subset of the ABINIT input variables have a modified meaning or a modified
@@ -374,7 +380,7 @@ Note that the code will do a RF calculation ([[optdriver]]=1) when one of
   * [[dfpt_sciss]]
   * [[tolwfr]], [[toldfe]], [[tolvrs]]
 
-
+<a id="output"></a>
 ## 6 The different output files
   
 Output from the code goes to several places listed below.
@@ -489,6 +495,7 @@ Here, rhor1 is the change of electron density in electrons/Bohr^3. The
 parameter cplex is 1 when q=0 and 2 when q/=0 . Indeed, for q=0, the density
 change is a real quantity, while it is complex in general when q/=0 .
 
+<a id="ddb"></a>
 **6.5. The derivative database (DDB)**
 
 It is made of two parts. The first should allow one to unambiguously identify
@@ -528,6 +535,7 @@ behaviour might be improved, as it is sometimes confusing ...
 
 _If you follow the tutorial, you should go back to the tutorial window now._
 
+<a id="numerical-quality"></a>
 ## 7 Numerical quality of the calculations
   
 It is possible to get from the RF calculations essentially EXACT derivatives

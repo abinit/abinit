@@ -99,7 +99,7 @@ next runs, as an input file.
 We will now aim at computing the second derivative of the total energy with
 respect to an atomic displacement by different means. 
 For that purpose,  you must first read 
-[sections 0 and the first paragraph of section 1](../../users/generated_files/help_respfn.html#0) 
+[[help:respfn#intro|sections 0 and the first paragraph of section 1]]
 of the respfn_help file (the auxiliary help file, that deals specifically with the DFPT features).
 We will explain later, in more detail, the signification of the different
 input parameters introduced in section 1 of the respfn_help file.
@@ -229,7 +229,7 @@ When you have understood the purpose of the input variable values specified
 before the "Common input variables" section, you can make the code run.
 
 Then, we need to analyze the different output files. For that purpose, you should read 
-the content of the [section 6](../../users/generated_files/help_respfn.html#6) of the respfn_help file.
+the content of the [[help:respfn#output|section 6]] of the respfn_help file.
 Read it quickly, as we will come back to the most important points hereafter.
 
 ABINIT has created four different files:
@@ -240,7 +240,7 @@ ABINIT has created four different files:
   * trf1_3o_DDB (the derivative database) 
 
 Let us have a look at the output file. You can follow the description provided
-in the [section 6.2](../../users/generated_files/help_respfn.html#6.2) of the respfn_help file. 
+in the [[help:respfn#output|section 6.2]] of the respfn_help file. 
 
 {% dialog tests/tutorespfn/Refs/trf1_3.out %}
 
@@ -261,14 +261,13 @@ in excellent agreement with the higher-order finite-difference values for the
 2DTE, determined in the previous section: 5.007855 hartree from the energy
 differences, and 5.007852 hartree from the force differences.
 
-Now, you can read the remaining of the [section 6.2](../../users/generated_files/help_respfn.html#6.2) 
-of the respfn_help file. 
+Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn_help file. 
 Then, you should also edit the trf1_3o_DDB file, and read the
-corresponding [section 6.5](../../users/generated_files/help_respfn.html#6.5) of the respfn_help file.
+corresponding [help:respfn#ddb|section 6.5]] of the respfn_help file.
 
 Finally, the excellent agreement between the finite-difference formula and the
 DFPT approach calls for some accuracy considerations. These can be found in 
-[section 7](../../users/generated_files/help_respfn.html#7) of the respfn_help file.
+[[help:respfn#numerical-quality|section 7]] of the respfn_help file.
 
 ## 4 DFPT calculation of the dynamical matrix at Gamma
   
@@ -286,7 +285,7 @@ Namely, all the atoms will be displaced, in all the directions.
 There are six perturbations to consider. 
 So, one might think that the CPU time will raise accordingly. 
 This is not true, as ABINIT is able to determine which perturbations are the symmetric of another perturbation, 
-see [section 3](../../users/generated_files/help_respfn.html#3) of the respfn_help file.
+see [[help:respfn#symmetries|section 3]] of the respfn_help file.
 
 Now, you can make the run. You edit the file trf1_4.out, and notice that the
 response to two perturbations were computed explicitly, while the response to
@@ -359,10 +358,10 @@ should be read. These sections also present the information needed to compute
 phonons with non-zero q wavevector, which will be the subject of the next
 section of the present tutorial. The sections to be read are :
 
-  * the part of [section 1](../../users/generated_files/help_respfn.html#1) that had not yet been read 
-  * [section 2](../../users/generated_files/help_respfn.html#2)
-  * [section 4](../../users/generated_files/help_respfn.html#4)
-  * and, for completeness,[section 5](../../users/generated_files/help_respfn.html#5) 
+  * the part of [[help:respfn#1|section 1]] that had not yet been read 
+  * [[help:respfn#2|section 2]] 
+  * [[help:respfn#2|section 4]] 
+  * and, for completeness, [[help:respfn#2|section 5]]
 
 You are now in the position to compute the full dynamical matrix at Gamma (q=0), 
 including the coupling with an homogeneous electric field. 

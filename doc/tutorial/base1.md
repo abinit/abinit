@@ -65,7 +65,7 @@ It gives the information needed for the code to build other file names.
 
 !!! tip
 
-    You will discover more about this file in [section 1.1](../../users/generated_files/help_abinit.html#intro1) 
+    You will discover more about this file in [[help:abinit#intro|section 1.1]]
     of the help file. Please, read it now.
 
 Modify the first and second lines of `tbase1_x.files` file, so that they read:  
@@ -201,7 +201,7 @@ It is now time to edit the `tbase1_1.in` file.
 You can have a first glance at it. It is not very long: about 50 lines, mostly comments. 
 Do not try to understand everything immediately. 
 After having gone through it, you should read general explanation about its content, and the format of such 
-input files in the [section 3.1](../../users/generated_files/help_abinit.html#intro3) of the abinit help file. 
+input files in the [[help:abinit#input|section 3.1]] of the abinit help file. 
 
 You might now examine in more details some input variables. 
 An alphabetically ordered [[varset:allvars|index of all variables]] is provided, and their description is 
@@ -304,7 +304,7 @@ instead of the default istwfk=1.
 :       are alternative ways to [[xcart]] to specify the positions of atoms within the primitive cell.
 
 Now, you can start reading the description of the remaining of the
-`tbase1_1.out` file, in [section 6.3](../../users/generated_files/help_abinit.html#6.3) of the abinit help file.
+`tbase1_1.out` file, in [[help:abinit#6.3|[section 6.3]] of the abinit help file.
 Look at the `tbase1_1.out` file at the same time.
 
 You have read completely an output file! 
@@ -555,11 +555,10 @@ No luck ! This file is unformatted, not written using the ASCII code. Even if
 you cannot read it, its description is provided in the abinit_help. It
 contains first a header, then the density numbers. The description of the
 header is presented in [[help:abinit#header|section 6.4]] of the abinit_help
-file, while the body of the _DEN file is presented in 
-[section 6.5](../../users/generated_files/help_abinit.html#densoutputfile). It is the
-appropriate time to read also the description of the potential files and
+file, while the body of the _DEN file is presented in [[help:abinit#denfile|section 6.5]].
+It is the appropriate time to read also the description of the potential files and
 wavefunctions files, as these files contain the same header as the density
-file, see sections [[help:abiint#localpotfile|6.6]] and [[help:abiint#wfkfile|6.7]].
+file, see sections [[help:abinit#localpotfile|6.6]] and [[help:abinit#wfkfile|6.7]].
 
 Such a density file can be read by ABINIT, to restart a calculation (see the input variable [[iscf]], when its value is -2), but more usually, by an utility called "cut3d". This utility is available in the ABINIT package. 
 You might try to use it now, to generate two-dimensional cuts in the density, and visualize the charge density contours.   

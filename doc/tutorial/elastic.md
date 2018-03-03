@@ -184,8 +184,7 @@ with respect to the Brillouin-zone wave vector, the so-called ddk wave
 functions. Recall that these are auxiliary quantities needed to compute the
 response to the [electric field perturbation](lesson_rf1.html#5) and
 introduced in lesson RF1. It would be a good idea to review the relevant
-parts of [section 1](../../users/generated_files/help_respfn.html#1) of the
-respfn_help file. 
+parts of [[help:respfn#1|section 1]] of the respfn_help file. 
 
 Examining this section of telast_2.in, note that electric
 field as well as strain are uniform perturbations, only are defined for
@@ -243,7 +242,7 @@ number of needed iterations in, for example, convergence testing. We take note
 of a few conventions in the file names. The root output file name telast_2o is
 from the 4th line of the "files" file. The dataset producing the file is next.
 Finally, the first-order wave function 1WF files have a final "pertcase"
-number described in [section 1](../../users/generated_files/help_respfn.html#1) of the respfn_help file.
+number described in [[help:respfn#1|section 1]] of the respfn_help file.
 While telast_2.in specifies all atomic displacements, only the symmetry-
 inequivalent perturbations are treated, so the "pertcase" list is incomplete.
 All cases specified in the input data are treated for the strain perturbation.  

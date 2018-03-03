@@ -163,9 +163,8 @@ of ABINIT and are used to read the files produced in the previous paragraph
 
 The code expects to find an input WFK file and an input SCR file whose name is
 constructed according to prefix specified in the files file tbs_2.files (see
-[section 1.1](../../users/generated_files/help_abinit.html#intro1) of the
-abinit_help file). This is the reason why we had to create the two symbolic
-links before running the code.
+[[help:abinit#files-file|this section]] of the abinit_help file). 
+This is the reason why we had to create the two symbolic links before running the code.
 
 Then we have a list of five variables specifying how to construct the
 excitonic Hamiltonian.

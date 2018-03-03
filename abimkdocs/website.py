@@ -426,7 +426,6 @@ class Website(object):
             key=lambda t: t[0]))
 
         cprint("Initial website generation completed in %.2f [s]" % (time.time() - start), "green")
-        cprint("Invoking mksite to build HTML from MD files. It could take a while...", "green")
 
         self.do_not_edit_comment = """\
 <!--

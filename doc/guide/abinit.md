@@ -15,6 +15,7 @@ When the user will be sufficiently familiarized with ABINIT, reading the
 additional documentation files, is not available on the Web, but is available in the package). 
 For calculating response properties using abinit, the complementary [[help:respfn]] is needed.
 
+<a id="intro"></a>
 ## 1 How to run the code?
 
 ### 1.1 Introducing the 'files' file
@@ -74,6 +75,7 @@ specify any names he/she wishes for any of these files. Variations of the
 above commands could be needed, depending on the flavor of UNIX that is used
 on the platform that is considered for running the code.  
 
+<a id="2"></a>
 ## 2 The underlying theoretical framework and algorithms
 
 See the [[bib:biblio|bibliography]] file.
@@ -106,6 +108,7 @@ If you have never used another electronic structure code or a Quantum
 Chemistry package, you should browse through the Chaps. 1 to 13, and
 appendices L and M of [[cite:Martin2008|this book]] by R. M. Martin
 
+<a id="input"></a>
 ## 3 The input file
 
 ### 3.1 Format of the input file
@@ -597,8 +600,8 @@ Same as **abo_WFK**, but for first-order wavefunctions, xx is the index of
 the perturbation, see the section [6.3](help_respfn.html#6.3) of the [[help:respfn]].
 
   * **abo_DDB**   
-The derivative database, produced by a response-function dataset, see the
-section [6.5](help_respfn.html#6.5) of the [[help:respfn]]
+The derivative database, produced by a response-function dataset, see [[help:respfn#ddb|this section]]
+of the respfn help file.
 
   * **abo_DEN**   
 filename of file containing density, in the case [[ionmov]]=0. See the keyword
@@ -674,6 +677,7 @@ are formatted. There must be as many filenames provided sequentially here as
 there are types of atoms in the system, and the order in which the names are
 given establishes the identity of the atoms in the unit cell. (psp2, psp3, ...)
 
+<a id="5"></a>
 ## 5 The pseudopotential files and PAW atomic data files
   
 Actually, no real understanding of these files is needed to run the code. The
@@ -751,6 +755,7 @@ Then, for each dataset, it reports the point symmetry group and Bravais
 lattice, and the expected memory needs. It echoes the input data, and report
 on checks of data consistency for each dataset.
 
+<a id="6.3"></a>
 ### 6.3 More on the main output file
   
 Then, for each dataset, the real computation is done, and the code will report
@@ -1168,6 +1173,7 @@ In ABINITv7, N was set at N=100. However, with ABINITv8, N has been switched
 to 2. It can be changed "by hand", though: modify NPROC_NO_EXTRA_LOG in
 src/10_defs/defs_basis.F90 and recompile. See src/95_drive/iofn1.F90 for more explanation.
 
+<a id="7"></a>
 ## 7 Numerical quality of the calculations
   
 The following section describes various parameters which affect convergence

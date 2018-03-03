@@ -258,6 +258,7 @@ expansion of the self-energy matrix element around the KS energy, as depicted be
 
 ![](mbt_assets/self_energy_taylor.svg)
 
+<a id="RPA_Fourier_space"></a>
 ## The RPA polarizability in Fourier space
   
 In the reciprocal space and frequency domain (implying a Fourier transform
@@ -381,6 +382,7 @@ setting of **fftgw 21** is safe, a setting of **fftgw 11** is fast but can be
 inaccurate, and a setting of **fftgw 31** gives the maximum possible accuracy
 at a significant computational cost.
 
+<a id="hilbert_transform"></a>
 ## Hilbert transform method
   
 The computational effort for the evaluation of the RPA polarizability with the
@@ -436,6 +438,7 @@ such as for the evaluation of optical spectra, or accurate contour deformation
 integrations, or even mapping full grids in the complex plane, the Hilbert
 transform method can be significantly faster, and its use is well worth considering.
 
+<a if="evaluation_gw_sigma"></a>
 ## Evaluation of the GW self-energy
   
 Following the standard approach, we separate the screened interaction into the

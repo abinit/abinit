@@ -77,8 +77,7 @@ Next step is to compute the linear and nonlinear optical response: once the
 momentum matrix elements are available you are ready to determine the optical
 response (up to second order in the current implementation) for material under study.
 
-First, read the [section 3](../../users/generated_files/help_optic.html#3) 
-of the Optic help file.
+First, read the [[help:optic#input|section 3]] of the Optic help file.
 
 Copy the files ~abinit/tests/tutorespfn/Input/toptic_2.files and
 ~abinit/tests/tutorespfn/Input/toptic_2.in in "Work_optic".
@@ -98,7 +97,7 @@ It will take a few seconds to run. You have produced numerous output files.
 Now, you can examine some of these output files. 
 
 The header contains the information about the calculation. 
-See the [section 4](../../users/generated_files/help_optic.html#4) of the Optic help file.
+See the [[help:optic#output|section 4]] of the Optic help file.
 These files can be plotted in xmgrace, please do so using the following
 command and look at the results. (If you do not have xmgrace installed on your
 computer, please get it from the Web, and install it, or alternatively, use
@@ -128,8 +127,7 @@ and the Real part with:
     
     xmgrace toptic_2_0002_0002_0002-ChiTotRe.out
 
-It might be the perfect time to finish the [[help:optic]], 
-with [section 5](../../users/generated_files/help_optic.html#5).
+It might be the perfect time to finish with [[help:optic#troubleshooting|section 5]] of the optic help file.
 
 For comparison, we have included in the tutorial, three files that have been
 obtained with a much better k point sampling (still with a low cut-off energy

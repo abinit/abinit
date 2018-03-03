@@ -86,9 +86,7 @@ Convergence issues are discussed in [[help:abinit#7|section 7]] of the abinit he
 You should read it. 
 By the way, you have read many parts of the abinit_help file! 
 You are missing the sections
-[2](../../users/generated_files/help_abinit.html#2),
-[5](../../users/generated_files/help_abinit.html#5),
-[8](../../users/generated_files/help_abinit.html#8). 
+[help:abinit#2|2]], [help:abinit#5|5]],  [help:abinit#7|7]].
 
 You are also missing the description of many input variables. 
 We suggest that you finish reading entirely the abinit_help file now, while 
@@ -115,7 +113,7 @@ between doing different runs of the tbase2_1.in file with different values of
 [[ecut]], or doing a double loop of datasets, as proposed in ~abinit/tests/tutorial/Input/tbase2_2.in. 
 The values of [[ecut]] have been chosen between 10Ha and 35Ha, by step of 5 Ha. 
 If you want to make a double loop, you might benefit of reading again the 
-[double-loop section](../../users/generated_files/help_abinit.html#loop) of the abinit_help file.
+[[help:abinit#loop|double-loop section]] of the abinit_help file.
 
 **2.2.a** You have likely seen a big increase of the CPU time needed to do the
 calculation. You should also look at the increase of the memory needed to do

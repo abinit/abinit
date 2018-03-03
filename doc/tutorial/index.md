@@ -229,6 +229,6 @@ corresponding tutorial for the sequential calculation.**
 !!! note
 
     Note that not all features of ABINIT are covered by these tutorials. 
-    For a complete feature list, please see the [Topics page](../topics). 
+    For a complete feature list, please see the [[topic:index|Topics page]].
     For examples on how to use these features, please see the ~abinit/tests/* 
     directories and their accompanying README files.

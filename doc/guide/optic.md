@@ -2,7 +2,7 @@
 authors: SS, XG, YG
 ---
 
-# the Optic utility  
+# The optic utility  
 
 Frequency dependent linear optical dielectric function and second order nonlinear optical susceptibility.  
 
@@ -100,6 +100,7 @@ explicitly ground-state wavefunctions are computed at the very beginning of
 the abinit(respfn) run. It is not worth to make a full calculation of the
 modification of the wavefunctions due to a change of wavevector.
 
+<a id="input"></a>
 ## 3 Optic input file and input variables
   
 A typical optic.files file is presented below:
@@ -137,6 +138,7 @@ FILES, PARAMETERS and COMPUTATIONS must be kept unaltered.
 
 The list of input variables for the optic input file is presented in the topics [[topic:Optic]].
 
+<a id="output"></a>
 ## 4 Optic output files
   
 #### **4.1. Linear optical response data files**
@@ -172,7 +174,8 @@ above files you can find information about the calculation. Some results of
 nonlinear optical spectrum for GaAs(LiF???) are presented in this document to
 show what can be expected.
 
-## 5 Trouble shooting
+<a id="troubleshooting"></a>
+## 5 Troubleshooting
   
 1) All I get is zeros in my *-linopt.out file. Why?
 
