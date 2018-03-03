@@ -141,14 +141,14 @@ parallel version of ABINIT. Please keep also in mind that in some situations,
 parallelization is simply impossible. At the present time, the parts of ABINIT
 that have been parallelized, and for which a tutorial is available, include:
 
-* [ground state with plane waves](paral_gspw.html),
-* [ground state with wavelets](paral_gswvl.html),
-* [molecular dynamics](paral_moldyn.html),
-* [parallelism on "images"](paral_images.html),
-* [density-functional perturbation theory (DFPT)](paral_dfpt.html),
-* [Many-Body Perturbation Theory](paral_mbt.html).
+* [ground state with plane waves](paral_gspw),
+* [ground state with wavelets](paral_gswvl),
+* [molecular dynamics](paral_moldyn),
+* [parallelism on "images"](paral_imagesl),
+* [density-functional perturbation theory (DFPT)](paral_dfpt),
+* [Many-Body Perturbation Theory](paral_mbt).
 
-Note that the tutorial on [ground state with plane waves](paral_gspw.html) presents a complete overview of this
+Note that the tutorial on [ground state with plane waves](paral_gspw) presents a complete overview of this
 parallelism, including up to four levels of parallelisation and, as such, is rather complex. 
 Of course, it is also quite powerful, and allows to use several hundreds of processors.
 

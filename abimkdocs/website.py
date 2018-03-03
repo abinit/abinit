@@ -1186,7 +1186,7 @@ The bibtex file is available [here](../abiref.bib).
                     path = self.pdfs[name]
                     url = "/" + os.path.relpath(path, self.root)
                 except KeyError:
-                    self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
+                    self.warn("Cannot file pdf `%s` specified in wikilink `%s` in `%s`" % (name, token, page_rpath))
                     url, a.text = "FAKE_URL", "FAKE_URL"
 
                 if a.text is None: a.text = name

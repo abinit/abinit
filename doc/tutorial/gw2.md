@@ -26,7 +26,7 @@ and W can be found in
 with the relevant formulas. We will refer to these papers as the [[cite:Bruneval2006]] 
 and the [[cite:Lebegue2003]] papers.
 
-A brief description of the equations implemented in the code can be found in the [[theory:mbpt|GW_notes]]
+A brief description of the equations implemented in the code can be found in the [[theory:mbt|GW_notes]]
 Also, it is suggested to acknowledge the efforts of developers of the GW part of ABINIT, 
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 

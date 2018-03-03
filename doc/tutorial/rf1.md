@@ -61,7 +61,7 @@ In production runs, you should choose a larger value of [[nstep]], sufficient  t
 In the present tutorial, due to portability concerns related to automatic testing, we could
 not allow a larger [[nstep]] value. 
 This minor problem with some tutorial examples was mentioned briefly in 
-[a side note to the answer to question 1 of lesson 1](lesson_base1.html#aq1). 
+[a side note to the answer to question 1 of lesson 1](base1#aq1). 
 So, do not follow blindly all examples in the tutorials: check by yourself the convergence of your runs!
 
 You will work at fixed [[ecut]] (3Ha) and k-point grid, defined by [[kptrlatt]] (the 8x8x8 Monkhorst-Pack grid). 

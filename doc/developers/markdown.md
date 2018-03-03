@@ -395,7 +395,7 @@ As for dokuwiki, some external links are also recognized. The following case are
 | `https://www.abinit.org` | https://www.abinit.org
 
 It's also possible to specify the name of the link with the `|` separator:
-`[[https://wiki.abinit.org | The ABINIT Wiki]]` that gives [[https://wiki.abinit.org | The ABINIT Wiki]]
+`[[https://wiki.abinit.org|The ABINIT Wiki]]` that gives [[https://wiki.abinit.org|The ABINIT Wiki]]
 
 
 ### Permalinks

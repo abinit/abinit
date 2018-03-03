@@ -56,7 +56,7 @@ of the inverse of the _whole_ microscopic dielectric matrix. This element
 depends on the _entire_ matrix and cannot simply be calculated by taking the
 inverse of the first element of the non-inverted matrix.
 
-In the [[(theory:mbt#RPA_Fourier_space||GW_notes]], we have discussed how
+In the [[theory:mbt#RPA_Fourier_space|GW_notes]], we have discussed how
 to calculate the irreducible polarizability and thus the absorption spectrum
 within the random phase approximation (RPA). It turns out, however, that the
 RPA dielectric function evaluated with Kohn-Sham orbitals and eigenvalues

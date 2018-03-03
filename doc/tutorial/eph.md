@@ -228,7 +228,7 @@ The new variables are at the head of the file:
 [[anaddb:elphflag]] is a flag to turn on the calculation of the electron-
 phonon quantities. The first quantities which will be calculated are the
 phonon linewidths along a path in reciprocal space (exactly like the band
-structure in [Lesson 3.5](lesson_base3.html#35)). The path is specified by the
+structure in [[lesson:base3]]. The path is specified by the
 variable [[anaddb:qpath]] giving the apexes of the path in reciprocal space,
 which are usually special points of high symmetry. The number of points is
 given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon band
@@ -311,7 +311,7 @@ the Fermi surface. This is the "true" velocity the charge will move at, once
 you have displaced the Fermi sphere a little bit in k space (see, e.g.
 Ashcroft and Mermin as well). The velocity can be related simply to a
 commutator of the position, which is also used for dielectric response, using
-a DDK calculation (see [the Gamma point phonon tutorial](./lesson_rf1.html#5)). 
+a DDK calculation (see [[lesson:rf1|the Gamma point phonon tutorial]].
 The phonon calculation at Gamma need not include the electric field (this is a metal after all, so the effect on the
 phonons should be negligible), but we need an additional dataset to calculate
 the 3 DDK files along the 3 primitive directions of the unit cell. To be more
