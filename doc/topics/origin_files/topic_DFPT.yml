@@ -41,14 +41,14 @@
        the computation of thermodynamical properties is an outcome of this
        lesson.</li>
 
-       <li>[[lesson_elastic|The lesson on the elastic properties]] 
+       <li>[[lesson:elastic|The lesson on the elastic properties]] 
        presents the computation with respect to the strain perturbation and its responses: elastic constants,
        piezoelectricity.</li>
 
-       <li>[[lesson_paral_dfpt|Parallelism of response-function calculations]].
+       <li>[[lesson:paral_dfpt|Parallelism of response-function calculations]].
        Additional information to use the DFPT in parallel.</li>
 
-       <li>[[lesson_nlo|Lesson on static non-linear properties]].
+       <li>[[lesson:nlo|Lesson on static non-linear properties]].
        Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.</li>
 
     end : default

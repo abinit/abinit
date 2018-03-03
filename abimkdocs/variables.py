@@ -4,6 +4,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import os
 import io
 
+from collections import OrderedDict
 from itertools import groupby
 from html2text import html2text
 try:
@@ -133,12 +134,12 @@ class Variable(object):
         """Abinit wikilink."""
         return "[[%s:%s]]" % (self.executable, self.name)
 
+    def __repr__(self):
+        """variable name + mnemonics"""
+        return self.abivarname + "  <" + str(self.definition) + ">"
+
     def __str__(self):
         return self.to_string()
-
-    # MG new code
-    #def __repr__(self):
-    #    return "Variable " + str(self.abivarname) + " (default = " + str(self.defaultval) + ")"
 
     def to_string(self, verbose=0):
         return "Variable " + str(self.abivarname) + " (default = " + str(self.defaultval) + ")"
@@ -342,6 +343,17 @@ class Variable(object):
         if errors:
             raise ValueError("\n".join(errors))
 
+    # From abipy
+    #def _repr_html_(self):
+    #    """Integration with jupyter notebooks."""
+    #    html = "<h2>Default value:</h2>" + str(self.defaultval) + "<br/><h2>Description</h2>" + str(self.text)
+    #    return html.replace("[[", "<b>").replace("]]", "</b>")
+
+    #def browse(self):
+    #    """Open variable documentation in browser."""
+    #    import webbrowser
+    #    return webbrowser.open(self.url)
+
 
 class Components(yaml.YAMLObject):
     name = None  # String containing section name
@@ -473,10 +485,6 @@ class MultipleValue(dict):
         else:
             return str(self.number) + "*" + str(self.value)
 
-
-# My Code
-from collections import OrderedDict
-
 _VARS = None
 
 def get_variables_code():
@@ -484,11 +492,7 @@ def get_variables_code():
     Return the database of variable and cache it. Main entry point for client code.
     """
     global _VARS
-    if _VARS is None:
-        _VARS = VarDatabase.from_pyfiles()
-        #yaml_path = os.path.join(os.path.dirname(__file__), "..", "doc", "variables", "origin_files", "abinit_vars.yml")
-        #_VARS = VarDatabase.from_file(yaml_path)
-
+    if _VARS is None: _VARS = VarDatabase.from_pyfiles()
     return _VARS
 
 
@@ -524,32 +528,6 @@ class VarDatabase(OrderedDict):
             new.external_params = OrderedDict([(k, d[k]) for k in sorted(d.keys())])
 
         return new
-
-    #@classmethod
-    #def from_file(cls, yaml_path):
-    #    with io.open(yaml_path, 'rt', encoding="utf-8") as f:
-    #        vlist = yaml.load(f)
-
-    #    new = cls()
-    #    # Read list of strings with possible character of variables.
-    #    with io.open(os.path.join(os.path.dirname(yaml_path), "characteristics.yml"), "rt", encoding="utf-8") as f:
-    #        new.characteristics = yaml.load(f)
-
-    #    # Read list of `external_params` i.e. external parameters that are not input variables,
-    #    # but that are used in the documentation of other variables
-    #    # then convert to dict {name --> description}
-    #    with io.open(os.path.join(os.path.dirname(yaml_path), "list_externalvars.yml"), "rt", encoding="utf-8") as f:
-    #        d = {k: v for k, v in yaml.load(f)}
-    #        new.external_params = OrderedDict([(k, d[k]) for k in sorted(d.keys())])
-
-    #    for exname in sorted(set(v.executable for v in vlist)):
-    #        items = [(v.name, v) for v in vlist if v.executable == exname]
-    #        vd = InputVariables(sorted(items, key=lambda t: t[0]))
-    #        vd.executable = exname
-    #        vd.all_varset = sorted(set(v.varset for v in vd.values()))
-    #        new[exname] =  vd
-
-    #    return new
 
     def iter_allvars(self):
         """Iterate over all variables. Flat view."""

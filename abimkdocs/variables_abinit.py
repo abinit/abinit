@@ -14561,7 +14561,7 @@ procedure (in version 4.2, this procedure is NOT implemented, unfortunately):
 from the Bader analysis, one can define the radius of the sphere that contains
 the same charge as the Bader volume. This "Equivalent Bader charge atomic
 radius" might then be used to perform the present analysis. See the
-[[help_aim]] for more explanations. Another physically motivated choice would
+[[help:aim]] for more explanations. Another physically motivated choice would
 be to rely on another charge partitioning, like the Hirshfeld one (see the
 cut3d utility). The advantage of using charge partitioning schemes comes from
 the fact that the sum of atomic DOS, for all angular momenta and atoms,

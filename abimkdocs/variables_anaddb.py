@@ -1432,7 +1432,7 @@ Variable(
 Only for electron-phonon calculations. The available options are:
 
   * 0 --> do not write the Fermi Surface;
-  * 1 --> write out the Fermi Surface in the BXSF format used by [[www.xcrysden.org|XCrySDen]].
+  * 1 --> write out the Fermi Surface in the BXSF format used by [XCrySDen](http://www.xcrysden.org).
 
 Further comments:
 

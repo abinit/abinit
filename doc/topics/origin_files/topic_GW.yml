@@ -37,7 +37,7 @@
         the computation of the quasi-particle band structure of Aluminum, in
         the GW approximation (so, much better than the Kohn-Sham LDA band
         structure) without using the plasmon-pole model. </li>
-        <li>[[lesson:mbt|Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of
+        <li>[[lesson:paral_mbt|Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of
         accurate electronic structures (quasi-particle band structure,
         including many-body effects).</li>
     

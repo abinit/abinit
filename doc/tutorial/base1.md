@@ -334,8 +334,8 @@ Could you answer the following questions?
 
     Side note: in most of the tutorial examples, [[nstep]] will be enough to reach
     the target tolerance, defined by one of the "tolXXX" input variables. However,
-    this is not always the case (e.g. the test case 1 of the [lesson DFPT
-    1](lesson_rf1.html)), because of some portability problems, that could only be
+    this is not always the case (e.g. the test case 1 of the [[lesson:rf1|lesson DFPT 1]] 
+    because of some portability problems, that could only be
     solved by stopping the SCF cycles before the required tolerance.
 
 ??? note "Q2. Is the energy likely more converged than [[toldfe]]?"
@@ -394,8 +394,8 @@ you should read the corresponding descriptive section in the ABINIT help file.
 
 We will now complete the description of the meaning of each term: there are
 still a few indications that you should be aware of, even if you will not use
-them in the tutorial. These might appear in the description of some input
-variables ... For this, you should read the [section 3.2](../../users/generated_files/help_abinit.html#parameters) 
+them in the tutorial. These might appear in the description of some input variables...
+For this, you should read the [section 3.2](../../users/generated_files/help_abinit.html#parameters) 
 of the abinit help file.
 
 There are three methodologies to compute the optimal distance between the two Hydrogen atoms.

@@ -45,10 +45,10 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="360  ,480 ,456 ,502 " href="gw2/index.html" /> 
 <area shape="rect" coords="360  ,503 ,456 ,525 " href="bse/index.html" /> 
 <area shape="rect" coords="530  , 5 ,670 , 80 " href="basepar/index.html" />
-<area shape="rect" coords="520  ,125 ,695 ,175 " href="gspw/index.html" />
-<area shape="rect" coords="520  ,180 ,695 ,235 " href="moldyn/index.html" />
-<area shape="rect" coords="520  ,240 ,695 ,300 " href="images/index.html" />
-<area shape="rect" coords="520  ,305 ,695 ,365 " href="gswvl/index.html" />
+<area shape="rect" coords="520  ,125 ,695 ,175 " href="paral_gspw/index.html" />
+<area shape="rect" coords="520  ,180 ,695 ,235 " href="paral_moldyn/index.html" />
+<area shape="rect" coords="520  ,240 ,695 ,300 " href="paral_images/index.html" />
+<area shape="rect" coords="520  ,305 ,695 ,365 " href="paral_gswvl/index.html" />
 <area shape="rect" coords="520  ,380 ,695 ,435 " href="paral_dfpt/index.html" />
 <area shape="rect" coords="520  ,445 ,695 ,500 " href="paral_mbt/index.html" />
 </map>

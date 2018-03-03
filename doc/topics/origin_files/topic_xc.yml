@@ -20,7 +20,7 @@
          ABINIT will nevertheless do the calculation.
 
          <p>Many exchange-correlation functionals are available (see the list in the description of [[ixc]]),
-         through two different implementations : one is the native ABINIT implementation,
+         through two different implementations: one is the native ABINIT implementation,
          the other is the ETSF library of XC functionals (LibXC is a plug-in to ABINIT).
          In the native ABINIT set,
          most of the important local approximations (LDA) are
@@ -40,7 +40,7 @@
          <h4><b>Hybrid functionals:</b></h4>
          <br/>The exchange can also be computed on the basis of the Fock expression (exact exchange), and the correlation
          can be computed on the basis of the RPA approximation (see the GW section).
-         <a href="topic_Hybrids.html">Hybrid functionals</a> calculations (HSE06, PBE0, B3LYP) can be performed.
+         [[topic:Hybrids|Hybrid functionals]] calculations (HSE06, PBE0, B3LYP) can be performed.
          The implementation of the exact exchange, correlation and hybrid does not deliver the forces and stresses at present,
          at the exception of forces with norm-conserving pseudopotentials.
 
@@ -55,7 +55,8 @@
 
          <br/>
          <h4><b>Van der Waals functionals:</b></h4>
-         <br/>Several <a href="topic_vdw.html">Van der Waals functionals</a> are available : Grimme (D2, D3, D3(Becke-Johnson)), Silvestrelli.
+         <br/>
+         [[topic|vdw|Several Van der Waals functionals]] are available: Grimme (D2, D3, D3(Becke-Johnson)), Silvestrelli.
     tutorials  : |-
         <li>The [[lesson:base2]] deals with the H<sub>2</sub>
         molecule: convergence studies, LDA versus GGA </li>

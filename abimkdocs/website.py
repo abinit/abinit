@@ -992,7 +992,7 @@ The bibtex file is available [here](../abiref.bib).
                 if a.text is None: a.text = fragment
             else:
                 if name.startswith("lesson_"):
-                    self.warn("lesson_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
+                    self.warn("lesson_NAME is DEPRECATED, use lesson:name. %s in %s is deprecated" % (token, page_rpath))
                     # Handle [[lesson_gw1|text]]
                     url = "/tutorials/%s" % name.replace("lesson_" , " ", 1).strip()
                     if a.text is None: a.text = name
@@ -1008,7 +1008,7 @@ The bibtex file is available [here](../abiref.bib).
                     add_popover(a, content=self.howto_topic[name])
 
                 elif name.startswith("help_"):
-                    self.warn("help_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
+                    self.warn("help_NAME is DEPRECATED, use help:name. %s in %s is deprecated" % (token, page_rpath))
                     # Handle [[help_abinit|text]]
                     code = name.replace("help_" , " ", 1).strip()
                     url = "/guide/%s" % code

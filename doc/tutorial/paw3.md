@@ -763,7 +763,7 @@ better, so let us see if we can make it so.
 
 Now that you know the target values, is up to you to experiment and see if you
 can improve this dataset. The techniques are well documented in tutorial
-[PAW2](./lesson_paw2.html). Here's a brief summary of main points to be concerned about:
+[PAW2](paw2). Here's a brief summary of main points to be concerned about:
 
   * Use the keyword series "custom rrkj ...", or "custom polynom ...", or "custom polynom2 ...", 
     if you want to have maximum control over the convergence properties of the projectors.

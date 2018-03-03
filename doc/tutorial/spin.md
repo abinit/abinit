@@ -298,7 +298,7 @@ d-channel. The difference between up and down is 0.68, in rough agreement
 calculation. Using a calculation with the same number of k points for the
 projected DOS, we can plot the up-down integrated dos difference for the d-channel. 
 
-![](spin_lesson/energy_diff_fccfe.jpg)
+![](spin_assets/energy_diff_fccfe.jpg)
 
 Note that there is some scatter in this graph, due to the finite number of digits (2 decimal
 places) of the integrated dos given in the file tspin_3o_DS3_DOS_AT0002.  

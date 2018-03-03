@@ -56,7 +56,7 @@ of the inverse of the _whole_ microscopic dielectric matrix. This element
 depends on the _entire_ matrix and cannot simply be calculated by taking the
 inverse of the first element of the non-inverted matrix.
 
-In the [GW_notes](theorydoc_mbt.html#RPA_Fourier_space), we have discussed how
+In the [[(theory:mbt#RPA_Fourier_space||GW_notes]], we have discussed how
 to calculate the irreducible polarizability and thus the absorption spectrum
 within the random phase approximation (RPA). It turns out, however, that the
 RPA dielectric function evaluated with Kohn-Sham orbitals and eigenvalues
@@ -97,8 +97,7 @@ the reducible independent-particle polarizability according to
 $$ \chi^0(12) = L^0(11, 22) $$ while the two-point contraction of _L_ gives
 the reducible many-body polarizability. $$ \hat\chi(12) = L(11, 22) $$ that
 should not be confused with the _irreducible_ polarizability of the many-body
-system (denoted with a tilde in the formulas in the
-[GW_notes](theorydoc_mbt.html#RPA_Fourier_space)). 
+system (denoted with a tilde in the formulas in the [[theory:mbt#RPA_Fourier_space|GW_notes]]).
 
 The utility of working in terms of the reducible quantities is that the macroscopic dielectric function
 _**with**_ local field effects is obtained directly from the reducible
@@ -284,7 +283,7 @@ The flowchart of a typical Bethe-Salpeter run is schematically depicted in the d
 
 The KSS file is represented with an ellipsis. The path on the left indicated
 with blue arrows represents the RPA calculation ([[optdriver]]=3) that
-produces the SCR file (see also the [first lesson](gw1) of the GW tutorial).
+produces the SCR file (see also the [[lesson:gw1|first lesson]] of the GW tutorial).
 Once the KSS and the SCR file are available, we can finally construct the
 Hamiltonian and solve the Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
 
@@ -406,7 +405,8 @@ v'\kk'|e^{i(\qq +\GG_1)\cdot \rr}|v\kk \rangle \langle c \kk
 The number of **G**-vectors in W and in the modified Coulomb interaction is specified through
 [[ecuteps]] while the wavefuctions entering the oscillator matrix elements are
 expanded on a **G** -sphere of energy [[ecutwfn]]. The computation of the
-oscillator matrix elements is discussed in [this section](theorydoc_mbt.html#oscillator_notes) of the _GW_ Notes.
+oscillator matrix elements is discussed in 
+[[theory:mbt#oscillator_notes|this section]] of the _GW_ Notes.
 
 The input variable [[bs_exchange_term]] can be used to disable the computation
 of the exchange term, this option is mainly used for performing optical

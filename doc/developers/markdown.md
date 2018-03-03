@@ -133,20 +133,20 @@ Content Cell  | Content Cell
 To include figures, use the standard Markdown syntax:
 
 ```md
-![](../tutorials/bse_assets/tbs2_1.png)
+![](../tutorial/bse_assets/tbs2_1.png)
 ```
 
-![](../tutorials/bse_assets/tbs2_1.png)
+![](../tutorial/bse_assets/tbs2_1.png)
 
 For figures with a caption use the [markdown-figures extension](https://github.com/helderco/markdown-figures):
 
 ```md
-![](../tutorials/bse_assets/tbs5.png)
+![](../tutorial/bse_assets/tbs5.png)
 :   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 ```
 
-![](../tutorials/bse_assets/tbs5.png)
+![](../tutorial/bse_assets/tbs5.png)
 :   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 
@@ -156,7 +156,7 @@ The caption can contain Latex equations as well as [Abinit wiki links](#wiki-lin
 <!--
 !!! note
     In the two examples, the location of the png files is given by relative URLs (relative to this page). 
-    In the first example we have used a root-relative URL (`/tutorials/bse_assets/tbs2_1.png`) where
+    In the first example we have used a root-relative URL (`/tutorial/bse_assets/tbs2_1.png`) where
     the "root" `/` corresponds to the `~abinit/doc` directory if you are running the webserver locally 
     or to the Abinit website domain if the documentation is served on the internet. 
     In the second example, we have used a relative URL (relative to this page). 
@@ -335,7 +335,7 @@ Namespace      | Markdown                         | Result
  `lesson`      | `[[lesson:gw1]]`                 | [[lesson:gw1]]
  `topic`       | `[[topic:BSE]]`                  | [[topic:BSE]]
  `help`        | `[[help:abinit]]`                | [[help:abinit]]
- `theory`      | `[[theory:mbpt]]`                | [[theory:mbpt]]
+ `theory`      | `[[theory:mbt]]`                 | [[theory:mbt]]
  `varset`      | `[[varset:bse]]`                 | [[varset:bse]]
  `cite`        | `[[cite:Amadon2008]]`            | [[cite:Amadon2008]]
  `ac`          | `[[ac:abiref_gnu_5.3_debug.ac]]` | [[ac:abiref_gnu_5.3_debug.ac]]
@@ -391,8 +391,8 @@ As for dokuwiki, some external links are also recognized. The following case are
 
 | Markdown | Result |
 | :-- | :-- |
-| `[[www.abinit.org]]` | [[www.abinit.org]]
-| `www.abinit.org` | www.abinit.org
+| `[[https://www.abinit.org]]` | [[https://www.abinit.org]]
+| `https://www.abinit.org` | https://www.abinit.org
 
 It's also possible to specify the name of the link with the `|` separator:
 `[[https://wiki.abinit.org | The ABINIT Wiki]]` that gives [[https://wiki.abinit.org | The ABINIT Wiki]]
@@ -873,7 +873,7 @@ In a nutshell, **prepend** a `../` to the relative path you would use inside the
 of that resource with respect to the present page.
 
 For instance, to build a Bootstrap carousel in this page using the images located in 
-the `~abinit/doc/tutorials/bse_assets/` directory, one should use:
+the `~abinit/doc/tutorial/bse_assets/` directory, one should use:
 
 ```html
 <div id="myCarousel" class="carousel slide" data-ride="carousel">
@@ -885,11 +885,11 @@ the `~abinit/doc/tutorials/bse_assets/` directory, one should use:
   <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
     <div class="item active">
-      <img src="../../tutorials/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
+      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
       <div class="carousel-caption">Unconverged BSE optical spectrum</div>
     </div>
     <div class="item">
-      <img src="../../tutorials/bse_assets/tbs5.png" alt="Converged BSE spectrum">
+      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
       <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
     </div>
   </div>
@@ -910,11 +910,11 @@ that produces:
   <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
     <div class="item active">
-      <img src="../../tutorials/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
+      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
       <div class="carousel-caption">Unconverged BSE optical spectrum</div>
     </div>
     <div class="item">
-      <img src="../../tutorials/bse_assets/tbs5.png" alt="Converged BSE spectrum">
+      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
       <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
     </div>
   </div>
@@ -931,7 +931,7 @@ that produces:
 </div>
 
 !!! warning
-    Do not use root-relative URLs (e.g. `/tutorials/bse_assets/tbs5.png`) in HTML code 
+    Do not use root-relative URLs (e.g. `/tutorial/bse_assets/tbs5.png`) in HTML code 
     because this will create problems when the site is deployed.
     Besides relative URLs allow us to serve multiple versions of the Abinit documentation 
     associated to the different versions of the code.
