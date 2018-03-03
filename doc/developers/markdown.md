@@ -228,7 +228,7 @@ links within our documentation, in particular links to:
 * The input variables declared in `abinit_vars.yml`.
 * The bibliographic citations declared in `abiref.bib`.
 * Input files or pseudopotentials used in the Abinit test suite.
-* Website pages commonly mentioned such as e.g. the [[topics:index|topics page]].
+* Website pages commonly mentioned such as e.g. the [[topic:index|topics page]].
 
 For this reason, we use the [extentions API](https://pythonhosted.org/Markdown/extensions/api.html)
 provided by python Markdown to extend the syntax of the parser.

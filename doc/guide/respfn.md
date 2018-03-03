@@ -185,7 +185,7 @@ root names provided in the 'files' file. In the multi-dataset mode, the
 following input variables will be relevant: [[getwfk]], and [[getwfq]]. The
 file names of the ground-state wavefunction file follow the same convention as
 for the ground-state case. Thus, the corresponding section of the 
-[abinit help](help_abinit.html#4) file can be read, if needed.
+[[help:abinit#files-file|corresponding section]] fof the abinit help file, if needed.
 
 In the case of an electric field perturbation, the output 1WF of the
 corresponding ddk perturbation is needed as input. If the option [[rfelfd]]=1
@@ -196,7 +196,7 @@ Usually, the use of [[rfelfd]]=1 is not recommended, as the ddk computation is
 the most often done with different parameters as the electric field perturbation.
 
 The nomenclature of first-order wavefunction files is also given in the
-[abinit help](help_abinit.html#4) file, but it is worth to specify it in more
+[[help:abinit#files-file|abinit help]] file, but it is worth to specify it in more
 detail here. The root name is formed from the string of character in the third
 line of the 'files' file (for an input file) or the fourth line of the 'files'
 file (for an output file), that is complemented, in the multi-dataset mode, by
@@ -400,8 +400,8 @@ related to response functions will be intertwined with those concerned with
 ground-state case. We explain here the parts related to the RF computation.
 
 The initialisation part is the same as for the GS. So, the reader is advised
-to read the section [6.2](help_abinit.html#outputfile) the abinit help file,
-as well as the first paragraph of the section [6.3](help_abinit.html#6.3) of
+to read [[help:abinit#outputfile|section 6.2]] the abinit help file,
+as well as the first paragraph of the section [[help:abinit#6.3|6.3]] of
 this file. Afterwards, the content of the main output file differs a bit...
 
 The main output file reports on the initialisation of the ground-state
@@ -452,7 +452,7 @@ Finally, the code provides the timing information.
 
 These are unformatted data files containing the planewaves coefficients of all
 the wavefunctions, written in the following format. First, the header (see
-section [6.4](help_abinit.html#header) of the abinit help file), followed by
+[[help:abinit#header|section 6.4]] of the abinit help file), followed by
     
 ```fortran
      bantot=0                                    <-- counts over all bands

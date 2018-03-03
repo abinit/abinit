@@ -1,6 +1,5 @@
 site_name: abinit
-site_url: https://www.abinit.org
-#site_url: https://gmatteo.github.io/test_abidocs/
+#site_url: https://www.abinit.org
 site_description: Abinit documentation
 site_author: The Abinit group
 #edit_uri: edit/master/docs/

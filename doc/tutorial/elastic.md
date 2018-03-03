@@ -182,7 +182,7 @@ calculation takes relatively little time for this simple system .
 Dataset 2 involves the calculation of the derivatives of the wave functions
 with respect to the Brillouin-zone wave vector, the so-called ddk wave
 functions. Recall that these are auxiliary quantities needed to compute the
-response to the [electric field perturbation](lesson_rf1.html#5) and
+response to the [[lesson:rf1#5|electric field perturbation]] and
 introduced in lesson RF1. It would be a good idea to review the relevant
 parts of [[help:respfn#1|section 1]] of the respfn_help file. 
 
@@ -561,7 +561,7 @@ calculated in a GS calculation by integrating the gradient with respect to
 the gradients are approximated by finite-difference expressions constructed
 from neighboring points in the **k** mesh. These are closely related to the
 ddk wave functions used in RF calculations in section 2 and introduced in 
-[lesson RF1, section 5](lesson_rf1.html#5). We will use [[berryopt]] = -1,
+[[lesson:rf1#5|lesson RF1, section 5]]. We will use [[berryopt]] = -1,
 which utilizes an improved coding of the calculation, and must specify
 [[rfdir]] = 1 1 1 so that the Cartesian components of the polarization are computed.  
   
@@ -691,7 +691,7 @@ much time. (Have you found the conversion factor on your own yet?)
 For metals, the existence of partially occupied bands is a complicating
 feature for RF as well as GS calculations.  
 Now would be a good time to review [lesson 4](base4) which dealt in detail with the interplay between
-**k**-sample convergence and Fermi-surface broadening, especially section [4.3](lesson_base4.html#43).  
+**k**-sample convergence and Fermi-surface broadening, especially [[lesson:base4#3|section 3]].
 You should copy telast_6.in and telast_6.files into Work_elast, and begin your run 
 while you read on, since it involves a convergence study with multiple datasets and may take about two minutes.  
 

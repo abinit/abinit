@@ -249,7 +249,7 @@ You can find more information about messages in the log file in
 [[help:abinit#logfile|this section]] of the abinit help file.
 
 Then, open the [[tests/tutorial/Refs/tbase1_1.out]] file. 
-You find some general information about the output file [[help:abint#outputfile|here]] .
+You find some general information about the output file [[help:abinit#outputfile|here]] .
 You should also: 
 
 * examine the header of `tbase1_1.out` 

@@ -115,6 +115,7 @@ values for different values of [[tsmear]].
 
 In what follows, we will restrict ourselves to the grids with [[nkpt]]=2, 10 and 28.
 
+<a id="3"></a>
 ## 3 The convergence study with respect to both number of k points AND broadening factor (tsmear)
 
 The theoretical convergence rate for [[tsmear]] ending to 0, in the case of [[occopt]]=4, is quartic. 

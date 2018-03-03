@@ -337,6 +337,7 @@ calculations of phonon frequencies.
 
 Thus we have now to treat correctly the homogeneous electric field type perturbation.
 
+<a id="5"></a>
 ## 5 DFPT calculation of the effect of an homogeneous electric field
   
 The treatment of the homogeneous electric field perturbation is formally much
