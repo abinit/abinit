@@ -23,7 +23,8 @@ in Solid State Physics 54, 1-218 (2000), also available
 It is suggested to acknowledge the efforts of developers of
 the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
-The user should be familiarized with the four basic lessons of ABINIT, see the [tutorial home page](index).
+The user should be familiarized with the four basic lessons of ABINIT, 
+see the [[help:index|tutorial home page]]
 After this first tutorial on GW, you should read the [[lesson:gw2|second lesson on GW]]
 
 This lesson should take about 2 hours.
@@ -49,9 +50,9 @@ than the computation of the Kohn-Sham eigenvalues.
 So, let us run immediately this calculation, and while it is running, we will
 explain what has been done.
 
-In the directory ~abinit/tests/tutorial/Input/Work_gw1, copy the files
+*In the directory ~abinit/tests/tutorial/Input/Work_gw1, copy the files
 ~abinit/tests/tutorial/Input/tgw1_x.files and tgw1_1.in, and modify the
-tgw1_x.files file as usual (see lesson 1).
+tgw1_x.files file as usual (see lesson 1).*
 
 Then, issue:
     

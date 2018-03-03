@@ -1,3 +1,4 @@
+# coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 executable = "aim"
@@ -71,11 +72,11 @@ Variable(
     text="""
 Drives the computation of critical points.
 
-  * [0] not 
-  * [-1] reading from the file ``root''.crit 
-  * [1] calculated (simplified version) 
-  * [2] calculated (standard version - recommended) 
-  * [3] calculated (the original version) 
+  * [0] not
+  * [-1] reading from the file ``root''.crit
+  * [1] calculated (simplified version)
+  * [2] calculated (standard version - recommended)
+  * [3] calculated (the original version)
 
 The original version searches all critical points (CPs) starting from the
 center between two and three atoms (atom - neighbor(s)) by Newton-Raphson
@@ -108,8 +109,8 @@ real space must be given in the input variable [[vpts@aim]] and grid in
 [[ngrid@aim]]. It is also possible to get only the valence density or the core
 density (see [[dltyp@aim]]).
 
-  * 0, no output 
-  * 1, 1D distribution 
+  * 0, no output
+  * 1, 1D distribution
   * 2, 2D distribution
 """,
 ),
@@ -126,8 +127,8 @@ Variable(
 Specification of the contribution of the electronic density corresponding to
 the density and/or laplacian output (see [[denout@aim]] and [[lapout@aim]])
 
-  * 0, total electronic density 
-  * 1, only the valence density 
+  * 0, total electronic density
+  * 1, only the valence density
   * 2, only the core density
 """,
 ),
@@ -202,7 +203,7 @@ Variable(
 Drives the graphic output (gnuplot script) of the irreducible part of the
 calculated Bader surface.
 
-  * 0, not output 
+  * 0, not output
   * 1, output
 """,
 ),
@@ -232,7 +233,7 @@ Variable(
     text="""
 Drives the integration of the charge of the Bader atom.
 
-  * 0, not calculated 
+  * 0, not calculated
   * 1, calculated (usual mode)
 """,
 ),
@@ -248,7 +249,7 @@ Variable(
     text="""
 Drives the integration of the volume of the Bader atom.
 
-  * 0, not calculated 
+  * 0, not calculated
   * 1, calculated
 """,
 ),
@@ -267,8 +268,8 @@ Output of the laplacian of electronic density. The specification of the line
 grid in [[aim:ngrid]]. It is also possible to get only the valence density or
 the core density (see [[aim:dltyp]]).
 
-  * 0, no output 
-  * 1, 1D distribution 
+  * 0, no output
+  * 1, 1D distribution
   * 2, 2D distribution
 """,
 ),
@@ -414,8 +415,8 @@ Variable(
 These variables define a "supercell", from the primitive cell repeated along
 each primitive direction. This supercell is build as follows :
 
-    
-    
+
+
       do isa=-nsa,nsa
        do isb=-nsb,nsb
         do isc=-nsc,nsc
@@ -440,8 +441,8 @@ Variable(
 These variables define a "supercell", from the primitive cell repeated along
 each primitive direction. This supercell is build as follows :
 
-    
-    
+
+
       do isa=-nsa,nsa
        do isb=-nsb,nsb
         do isc=-nsc,nsc
@@ -466,8 +467,8 @@ Variable(
 These variables define a "supercell", from the primitive cell repeated along
 each primitive direction. This supercell is build as follows :
 
-    
-    
+
+
       do isa=-nsa,nsa
        do isb=-nsb,nsb
         do isc=-nsc,nsc
@@ -587,7 +588,7 @@ Variable(
 Drive the computation of the radius of the Bader surface for the angles
 specified in the input variable [[aim:rsurdir]]
 
-  * 0, not calculated 
+  * 0, not calculated
   * 1, calculated
 """,
 ),
@@ -616,7 +617,7 @@ Variable(
     text="""
 Drive the computation of the full Bader surface.
 
-  * 0, not calculated 
+  * 0, not calculated
   * 1, calculated
 """,
 ),

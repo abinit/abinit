@@ -78,8 +78,6 @@ on the platform that is considered for running the code.
 <a id="2"></a>
 ## 2 The underlying theoretical framework and algorithms
 
-See the [[bib:biblio|bibliography]] file.
-
 The methods employed in this computer code to solve the electronic structure
 problem are described in part in different review papers as well as research
 papers. The code is an implementation of the Local Density Approximation to

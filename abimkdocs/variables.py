@@ -671,11 +671,10 @@ class InputVariables(OrderedDict):
     def from_pyfile(cls, filepath):
         import imp
         module = imp.load_source(filepath, filepath)
+        vlist = [Variable(**d) for d in module.variables]
         new = cls()
         new.executable = module.executable
-        vlist = [Variable(**d) for d in module.variables]
-        vlist = sorted(vlist, key=lambda v: v.name)
-        for v in vlist:
+        for v in sorted(vlist, key=lambda v: v.name):
             new[v.name] = v
         new.all_varset = sorted(set(v.varset for v in new.values()))
         return new

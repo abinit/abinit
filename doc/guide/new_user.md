@@ -99,7 +99,7 @@ Most of them can be found on the [atomic data files](https://www.abinit.org/down
 page of the ABINIT web site. 
 There are official recommended pseudopotentials tables 
 (the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials. 
-Information on pseudopotential files can be found in the [ABINIT help file](help_abinit.html#5) 
+Information on pseudopotential files can be found in the [[help:abinit#5|ABINIT help file]]
 and the ~abinit/doc/psp_infos directory.
 
 !!! warning
@@ -212,7 +212,6 @@ input file, are listed below:
     [[ecut]]            planewave kinetic energy cutoff in Hartree
     [[kptopt]]          option for specifying the k-point grid
                     if [[kptopt]]=1, automatic generation, using ngkpt and shiftk.
-                    (for the latter, see the [help_abinit](help_abinit.html) file)
     [[ngkpt]](3)        dimensions of the three-dimensional grid of k-points
     [[occopt]]          set the occupation of electronic levels:
                      =1 for semiconductors

@@ -1111,8 +1111,12 @@ The bibtex file is available [here](../abiref.bib).
 
             elif namespace == "help":
                 # Handle [[help:optic|text] NB: [[help_codename]] is echoed "codename help file"
-                url = "/guide/%s" % name
-                if a.text is None: a.text = "%s help file" % name
+                if name == "index":
+                    url = "/guide/"
+                    if a.text is None: a.text = "tutorial index"
+                else:
+                    url = "/guide/%s" % name
+                    if a.text is None: a.text = "%s help file" % name
                 html_classes.append("user-guide-wikilink")
 
             elif namespace == "topic":
