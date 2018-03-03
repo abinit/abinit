@@ -16,28 +16,28 @@
        Currently ABINIT can perform calculations based on either the DFT-D methods or the 
        vdW-WF methods, as described later, both belonging to the first group. 
 
-       <p>A fully customizable implementation of the vdW-DF method [[Dion2004]], a self-consistent approach, 
+       <p>A fully customizable implementation of the vdW-DF method [[cite:Dion2004]], a self-consistent approach, 
        and an adaptation of the strategy followed by G.Roman-Perez
-       <i>et al.</i> [[Romanperez2009]] to the case of ABINIT are under development.
+       <i>et al.</i> [[cite:Romanperez2009]] to the case of ABINIT are under development.
        It will offer around 25 ajustable parameters and be delivered with graphical tools to help
        users assess the quality of their kernels. It does not only aim at performing
        production calculations with vdW-DF, but also at helping researchers who
        develop new density functionals optimised for systems requiring van-der-Waals
        interactions.
-       <p>The DFT-D methods have been implemented inside ABINIT, namely DFT-D2 [[Grimme2006]], DFT-D3 [[Grimme2010]] and DFT-D3(BJ) [[Grimme2010a]]. 
+       <p>The DFT-D methods have been implemented inside ABINIT, namely DFT-D2 [[cite:Grimme2006]], DFT-D3 [[cite:Grimme2010]] and DFT-D3(BJ) [[cite:Grimme2010a]]. 
        In these cases, pair-wise terms (and 3-body corrections for DFT-D3 and DFT-D3(BJ)) are added to the DFT energy, which are independent of the electronic density, in order to mimic the vdW interactions.
        The implementation includes the contributions of these methods to forces and stresses, in view of geometry optimization, as well as
        to first-order response functions like dynamical matrices, clamped elastic constants and internal strain coupling parameters.
 
        <p>To activate DFT-D dispersion correction, two keywords are in use: [[vdw_xc]] = 5/6/7 to choose between DFT-D2, DFT-D3 and DFT-D3(BJ), and [[vdw_tol]], 
        to control the inclusion of largely distant pairs (those giving a contribution below [[vdw_tol]] are ignored). 
-       It is also possible to include 3-body corrections [[Grimme2010]] (for ground-state only) with the keyword [[vdw_tol_3bt]], which also controls the tolerance over this term. 
+       It is also possible to include 3-body corrections [[cite:Grimme2010]] (for ground-state only) with the keyword [[vdw_tol_3bt]], which also controls the tolerance over this term. 
 
        <p>Methods based on maximally localized Wannier functions (MLWFs) to calculate vdW energy 
        corrections have also been implemented in ABINIT. In this case the pair-wise terms come from 
        contributions of pairs of MLWFs rather than from atoms. Among the implemented methods in ABINIT
-       it is found vdW-WF1 [[Silvestrelli2008]],[[Silvestrelli2009]] vdW-WF2 [[Ambrosetti2012]] and vdW-QHO-WF [[Silvestrelli2013]]. A full description of the 
-       implementation of vdW-WF1 is reported in [[Espejo2012]]. 
+       it is found vdW-WF1 [[cite:Silvestrelli2008]], [[cite:Silvestrelli2009]] vdW-WF2 [[cite:Ambrosetti2012]] and vdW-QHO-WF [[cite:Silvestrelli2013]]. A full description of the 
+       implementation of vdW-WF1 is reported in [[cite:Espejo2012]]. 
 
        <p>Selection of one of these 3 methods is achieved by using  [[vdw_xc]]=10/11/14 respectivelly. 
        Since vdW-WF1 and vdW-WF2 methods are approximations for the dispersion energy of non overlapping electronic 

@@ -20,7 +20,7 @@
               <li>or the specific computation of wavefunctions and eigenenergies e.g. to get an electronic band structure.  
             </ul>
           In the first case, please complete the present topic
-          by reading [[topic_BandOcc]], while in the second case, please read [[topic_ElecBandStructure]].
+          by reading [[topic:BandOcc]], while in the second case, please read [[topic:ElecBandStructure]].
           <p>In the first case, the Brillouin zone must be sampled adequately, with
           grids that, in general will be homogeneous distributions of k-points throughout the Brillouin Zone (e.g. Monkhorst-Pack
           grids, or their generalisations)..
@@ -29,7 +29,7 @@
           including a measure of their accuracy in term of integration
           within the Brillouin Zone, see [[prtkpt]], [[kptrlen]]. For metals, a joint convergenc study on [[tsmear]] AND the
           k-point grid is important.
-          <p>For the definition of a path of k-points, see [[topic_ElecBandStructure]].
+          <p>For the definition of a path of k-points, see [[topic:ElecBandStructure]].
           <br>
           <p>More detailed explanation concerning the convergence with respect to the k-point sampling.
           The number of k-points to be used

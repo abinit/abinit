@@ -11,7 +11,7 @@
     introduction : | 
       Although formally not justified, difference in total energy using constrained occupation numbers
       sometimes results in surprisingly good agreement with experimental results, for neutral excitations,
-      in molecules or doped solids. See e.g. [[Jia2017]].
+      in molecules or doped solids. See e.g. [[cite:Jia2017]].
       <p>The manual specification of the occupation numbers is needed in this case. This is accomplished
       with the input variable [[occ]], coupled with [[occopt]]=0 for the homogeneous occupation of a band
       throughout the Brillouin Zone, or with [[occopt]]=2 for the specific occupation of a state for a selected k-wavevector.

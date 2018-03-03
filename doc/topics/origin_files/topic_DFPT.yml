@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
 
-       <p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... Even non-linear properties can be computed, like the Raman intensities (for the latter, see [[topic_nonlinear]])..
+       <p>Density-Functional Perturbation Theory (DFPT) allows one to address a large variety of physical observables. Many properties of interest can be computed directly from the derivatives of the energy, without the use of finite differences: phonons modes, elastic tensors, effective charges, dielectric tensors, etc... Even non-linear properties can be computed, like the Raman intensities (for the latter, see [[topic:nonlinear]])..
        <p>A DFPT calculation workflow is conducted as follows:
        <li> Run a Ground-State calculation in order to extract the Kohn-Sham pseudo wave-functions; these must be extremely well converged.</li>
 
@@ -35,7 +35,7 @@
        charges, LO-TO splitting, phonons in the whole Brillouin zone. The
        creation of the "Derivative Data Base" (DDB) is presented.</li>
 
-       <li>[[lesson_rf2|The lesson Response-Function 2 (RF2)]]
+       <li>[[lesson:rf2|The lesson Response-Function 2 (RF2)]]
        presents the analysis of the DDBs that have been introduced in the
        preceeding lesson RF1.  The computation of the interatomic forces and
        the computation of thermodynamical properties is an outcome of this

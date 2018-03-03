@@ -11,7 +11,7 @@ DFT Kohn-Sham eigenvalues in the GW approximation.
 
 A brief description of the formalism and of the equations implemented in the
 code can be found in the [[theory:mbt|GW_notes]].
-The different formulas of the GW formalism have been written in a [[pdf:gwa.pdf|pdf document]]
+The different formulas of the GW formalism have been written in a [[pdf:gwa|pdf document]]
 by Valerio Olevano (who also wrote the first version of this tutorial).
 For a much more consistent discussion of the theoretical aspects of the GW
 method we refer the reader to the review
@@ -21,7 +21,7 @@ in Solid State Physics 54, 1-218 (2000), also available
 [here](https://www.abinit.org/sites/default/files/quasiparticle_calculations_in_solids.pdf.bz2).
 
 It is suggested to acknowledge the efforts of developers of
-the GW part of ABINIT, by citing the [[Gonze2005|2005 ABINIT publication]].
+the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic lessons of ABINIT, see the [tutorial home page](index).
 After this first tutorial on GW, you should read the [[lesson:gw2|second lesson on GW]]

@@ -565,6 +565,7 @@ This document lists and provides the description of the name (keywords) of the
 {varset} input variables to be used in the input file for the {executable} executable.
 
 """.format(varset=varset, executable=vd.executable))
+
                     for i, var in enumerate(var_list):
                         mdf.write(var.to_markdown(with_hr=False))
 
@@ -719,7 +720,6 @@ This page gives hints on how to {howto} with the ABINIT package.
                 mdf.write('## %s  \n\n' % suite_name)
                 for i, (rpath, test) in enumerate(group):
                     mdf.write('### [[%s]]   \n\n' % rpath)
-                    #mdf.write('### <a href="{rpath}"> {rpath} </a> \n\n'.format(rpath=rpath))
                     mdf.write(my_unicode(test.description))
                     mdf.write("\n\n")
                     mdf.write("Executable: %s   \n" % test.executable)
@@ -886,13 +886,8 @@ The bibtex file is available [here](../abiref.bib).
                 action = args.pop(0)
                 if self.verbose: print("Triggering action:", action, "with args:", str(args))
 
-                if action == "editor":
-                    raise NonImplementedError("")
-                    #if len(args) > 1:
-                    #    new_lines.extend(self.editor_tabs(args, title=None).splitlines())
-                    #else:
-                    #    new_lines.extend(self.editor_panel(args[0], title=None).splitlines())
-                elif action == "modal":
+                # Dispatch according to action.
+                if action == "modal":
                     if len(args) > 1:
                         new_lines.extend(self.modal_with_tabs(args).splitlines())
                     else:
@@ -997,6 +992,7 @@ The bibtex file is available [here](../abiref.bib).
                 if a.text is None: a.text = fragment
             else:
                 if name.startswith("lesson_"):
+                    self.warn("lesson_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
                     # Handle [[lesson_gw1|text]]
                     url = "/tutorials/%s" % name.replace("lesson_" , " ", 1).strip()
                     if a.text is None: a.text = name
@@ -1004,6 +1000,7 @@ The bibtex file is available [here](../abiref.bib).
 
                 elif name.startswith("topic_"):
                     # Handle [[topic_SelfEnergy|text]]
+                    self.warn("topic_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
                     name = name.replace("topic_" , " ", 1).strip()
                     url = "/topics/%s" % name
                     if a.text is None: a.text = "%s topic" % name
@@ -1011,6 +1008,7 @@ The bibtex file is available [here](../abiref.bib).
                     add_popover(a, content=self.howto_topic[name])
 
                 elif name.startswith("help_"):
+                    self.warn("help_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
                     # Handle [[help_abinit|text]]
                     code = name.replace("help_" , " ", 1).strip()
                     url = "/guide/%s" % code
@@ -1035,6 +1033,7 @@ The bibtex file is available [here](../abiref.bib).
 
                 elif name in self.bib_data.entries:
                     # Handle citation
+                    self.warn("DEPRECATED citation without `cite` --> %s in %s is deprecated" % (token, page_rpath))
                     ref = self.bib_data.entries[name]
                     url = "/theory/bibliography#%s" % self.slugify(name)
                     content = ref.fields.get("title", "Unknown")

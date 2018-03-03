@@ -76,8 +76,8 @@ and [[nspden]], that define this antiferromagnetic ordering along the <111>
 direction (of a conventional cubic cell).
 
 If you take a look at the output file (tdftu_1.out), you can see the
-integrated total density in the PAW spheres (see the [PAW1](lesson_paw1.html)
-and [PAW2](lesson_paw2.html) tutorials on PAW formalism). This value roughly
+integrated total density in the PAW spheres (see the [PAW1](paw1)
+and [PAW2](paw2) tutorials on PAW formalism). This value roughly
 estimate the magnetic moment of NiO:
     
      Integrated total density in atomic spheres:

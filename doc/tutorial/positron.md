@@ -274,7 +274,7 @@ file (one per atom type), which need to be provided. This core WF file should
 be named '<psp_file_name>.corewf' (where <psp_file_name> is the name of the
 pseudo-potential (or PAW) file) or 'corewf.abinit <ityp>' (where <ityp> is the
 index of the atom type). Core WF files can be obtained with the atompaw tool
-(see [[lesson_paw2|lesson on generating the PAW datasets]]) by the use of the
+(see [[lesson:paw2|lesson on generating the PAW datasets]]) by the use of the
 'prtcorewf' keyword. You will find the core wavefunction file used in this calculation in
     
     ~abinit/tests/Psps_for_tests/Si.LDA-PW-paw.abinit.corewf
@@ -344,4 +344,4 @@ unphysically high probability at high momenta in the spectrum.
 Further explanation of the influence of the PAW dataset on the Doppler spectra
 can be found in Phys. Rev. B 92, 125113 (2015). In case you need to generate
 your own dataset for momentum distribution calculations, you can follow the
-lesson on generating the PAW datasets [[lesson_paw2|lesson on generating the PAW datasets]].
+lesson on generating the PAW datasets [[lesson:paw2|lesson on generating the PAW datasets]].

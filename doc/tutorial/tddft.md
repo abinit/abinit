@@ -33,9 +33,10 @@ A comprehensive description of the underlying formalism is given in
      <http://dx.doi.org/10.1016/S1380-7323(96)80093-8>
 
 However this reference might be hard to get, that is why we have based the
-tutorial instead on the following (also early) papers: [[Casida1998]], [[Casida1998a]], and [[Vasiliev1998]].
+tutorial instead on the following (also early) papers:
+[[cite:Casida1998]], [[cite:Casida1998a]], and [[cite:Vasiliev1998]].
 
-The first of these papers, [[Casida1998]], will be used as main reference for our tutorial.
+The first of these papers, [[cite:Casida1998]], will be used as main reference for our tutorial.
 
 From these papers, you will learn that a TDDFT calculation of electronic
 excitation energies start first from a usual ground-state calculation, with a
@@ -46,7 +47,7 @@ difference in energy between an excited state and the ground state), although
 there is no real theoretical justification for this similarity.
 
 These differences between Kohn-Sham electronic energies are the starting point
-of Casida's approach : in the framework of TDDFT, their square give the main
+of Casida's approach: in the framework of TDDFT, their square give the main
 contribution to the diagonal part of a matrix, whose eigenvalues will be the
 square of the excitation energies. One has to add to the diagonal matrix made
 from the squares of Kohn-Sham energy differences, a coupling matrix, whose
@@ -54,14 +55,14 @@ elements are four-wavefunction integrals of the Coulomb and Exchange-
 Correlation kernel. The exchange-correlation kernel contribution will differ
 in the spin-singlet and in the spin-triplet states, this being the only
 difference between spin-singlet and spin-triplet states. See Eqs.(1.3) and
-(1.4) of [[Casida1998a]], and Eqs.(1-2) of [[Vasiliev1998]].
+(1.4) of [[cite:Casida1998a]], and Eqs.(1-2) of [[cite:Vasiliev1998]].
 
 The construction of the coupling matrix can be done on the basis of an
 exchange-correlation kernel that is derived from the exchange-correlation
 functional used for the ground-state, but this is not a requirement of the
 theory, since such a correspondence only holds for the exact functional. In
 practice, the approximation to the XC potential and the one to the XC kernel
-are often different. See section III of [[Casida1998]].
+are often different. See section III of [[cite:Casida1998]].
 
 A big drawback of the currently known XC potentials and XC kernels is observed
 when the system is infinite in at least one direction (e.g. polymers, slabs,
@@ -81,11 +82,11 @@ obtain the frequency-dependent polarizability, and corresponding optical
 spectrum. In the ABINIT implementation, the oscillators strengths are given as
 a second-rank tensor, in cartesian coordinates, as well as the average over
 all directions usually used for molecules and clusters. It is left to the user
-to generate the polarisability spectrum, according to e.g. Eq.(1.2) of [[Casida1998a]].
+to generate the polarisability spectrum, according to e.g. Eq.(1.2) of [[cite:Casida1998a]].
 
 One can also combine the ground state total energy with the electronic
 excitation energies to obtain Born-Oppenheimer potential energy curves for
-excited states. This is illustrated for formaldehyde in [[Casida1998a]].
+excited states. This is illustrated for formaldehyde in [[cite:Casida1998a]].
 
 Given its simplicity, and the relatively modest CPU cost of this type of
 calculation, Casida's approach enjoys a wide popularity. There has been
@@ -107,7 +108,7 @@ for the other lessons. Why not "Work_tddft"?*
 
 Now, you are ready to run ABINIT and prepare the needed file.
 
-Copy the files ttddft_x.files and ttddft_1.in in "Work_tddft" :
+Copy the files ttddft_x.files and ttddft_1.in in "Work_tddft":
 
     cp ../ttddft_x.files
     cp ../ttddft_1.in
@@ -116,7 +117,7 @@ So, issue now:
 
     ../../abinit < ttddft_x.files >& log
   
-The computation is quite fast : about 15 secs on a 2.8 GHz PC.  
+The computation is quite fast: about 15 secs on a 2.8 GHz PC.  
 Let's examine the input file ttddft_1.in.  
 
 {% dialog tests/tutorial/Input/ttddft_1.in %}
@@ -154,7 +155,7 @@ Then, follows the list of excitation energies, obtained from the difference of
 Kohn-Sham eigenvalues (occupied and unoccupied), for further reference. They
 are ordered by increasing energy. In order to analyze the TDDFT as well as
 experimental data in the next section, let us mention that the Kohn-Sham
-eigenfunctions in this simulation have the following characteristics :
+eigenfunctions in this simulation have the following characteristics:
 
   * The first and fifth states are (non-degenerate) occupied sigma states (m=0), with even parity 
   * The second state is a (non-degenerate) occupied sigma state (m=0), with odd parity 
@@ -278,7 +279,7 @@ states, could not be attributed on the sole basis of the knowledge of Kohn-
 Sham orbitals quantum numbers.
 
 The lowest-lying experimental spin-singlet excitation energies, see table III
-of [[Casida1998]], are as follows:
+of [[cite:Casida1998]], are as follows:
     
     9.31 eV   m=+1,-1  even parity (Pi_g state)
     9.92 eV   m=0      odd parity  (Sigma_u- state)
@@ -292,7 +293,7 @@ and the lowest-lying experimental spin-triplet excitations energies are:
     9.67 eV   m=0      odd parity  (Sigma_u- state)
 
 In several cases, the agreement is quite satisfactory, on the order of 0.1-0.2
-eV. However, there are also noticeable discrepancies. Indeed, we have to understand, in our simulation :
+eV. However, there are also noticeable discrepancies. Indeed, we have to understand, in our simulation:
 
   * The appearance of the spin-singlet Sigma_g state at 9.86 eV (Spin-singlet state 2)
   * The inversion between the spin-triplet Pi_g and Sigma_u states (Spin-triplet states 1 and 2)
@@ -362,7 +363,7 @@ has increased, but not enough.
 
 We finally examine the effect of the cell size. Again, this is fairly easy.
 One can e.g. set up a double dataset loop. The following results are obtained,
-for acell = (6 5 5), (7 6 6), (8 7 7), (9 8 8), (10 9 9) and (12 11 11) :
+for acell = (6 5 5), (7 6 6), (8 7 7), (9 8 8), (10 9 9) and (12 11 11):
     
     Singlet 1 :  9.47   9.37   9.33   9.33   9.33   9.33
     Singlet 2 :  9.86   9.78   9.84   9.91   9.96  10.03
@@ -380,7 +381,7 @@ the states, that was remarked when comparing against experimental data.
 Indeed, the singlet 2 and triplet 4 states energy increases strongly with the
 cell size, while all other states quickly stabilize (except the still higher singlet 5 state).
 
-There is one lesson to be learned from that convergence study : the
+There is one lesson to be learned from that convergence study: the
 convergence of different states can be quite different. Usually, converging
 the lower excited states do not require too much effort, while it is quite
 difficult, especially concerning the supercell size, to converge higher states.
@@ -388,7 +389,7 @@ difficult, especially concerning the supercell size, to converge higher states.
 At this stage, we will simply stop this convergence study, and give the
 results of an ABINIT calculation using ecut 45 Hartree, acell 12 11 11, and 30
 bands (not fully converged, though !), then compare the results with other
-LDA/TDLDA results (from [[Casida1998]]) and experimental results :
+LDA/TDLDA results (from [[cite:Casida1998]]) and experimental results:
     
                         present Casida experimental
     Singlet Pi_g      :  9.25    9.05     9.31
@@ -410,7 +411,7 @@ of our problems was intrinsic to the LDA/TDLDA approximation ...
 
 ## 4 The choice of the exchange-correlation potential
   
-As emphasized in [[Casida1998]], choosing a different functional for the self-consistent part 
+As emphasized in [[cite:Casida1998]], choosing a different functional for the self-consistent part 
 (XC potential) and the generation of the coupling matrix (XC
 kernel) can give a better description of the higher-lying states. Indeed, a
 potential with a -1/r tail (unlike the LDA or GGA) like the van Leeuwen-

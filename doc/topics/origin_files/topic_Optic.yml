@@ -18,15 +18,15 @@
       This neglects all electron-hole interaction (so no excitonic effects), but might provide meaningful results
       in many case, sometimes even quantitatively. A first problem is linked with the erroneous
       band gap of the material, but this might be corrected by a scissor approximation, see e.g. [[scissor@optic]]. 
-      <p>In ABINIT one can either work in the IPA (see below), or take into account the excitonic effects, see [[topic_BSE]].
+      <p>In ABINIT one can either work in the IPA (see below), or take into account the excitonic effects, see [[topic:BSE]].
       <p>
       In the ABINIT package, there are two different utilities to compute optical response 
-      in the independent-particle approximation : [[help:optic]] and conducti. They have been developed independently
+      in the independent-particle approximation: [[help:optic]] and conducti. They have been developed independently
       of each other, and thus overlap significantly.
       The first one permits to cover the linear and non-linear optical properties as a function of the frequency. 
       It provides the optical dielectric tensor, the second-harmonic generation (SHG) as well as the optical rectification
       tensor (or electro-optic tensor) - without the contribution from the nuclei displacements. For the further inclusion
-      of the contribution from nuclei displacements, see [[topic_nonlinear]].
+      of the contribution from nuclei displacements, see [[topic:nonlinear]].
       <p>The second utility "conducti" has more capabilities only at the linear level, but provides
       electronic conductivity, dielectric tensor, index of refraction, reflectivity, absorption, 
       the thermal conductivity, and the thermopower 

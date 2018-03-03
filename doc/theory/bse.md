@@ -366,9 +366,9 @@ Another distinct advantage is that the Haydock method is less
 memory demanding than the direct diagonalization since only three temporary
 vectors are required instead of the full set of eigenvectors.
 
-Note that the original formulation of the method presented in [[Haydock1980]
+Note that the original formulation of the method presented in [[cite:Haydock1980]
 assumes an Hermitian operator thus it can be used only for TDA calculations.
-We refer the reader to [[Gruning2009]] for a generalization of the method to
+We refer the reader to [[cite:Gruning2009]] for a generalization of the method to
 the case in which the coupling term cannot be neglected. The main drawback of
 the method is that it does not give direct access to the excitonic spectrum
 hence it cannot be used to calculate binding energies or to plot the excitonic
@@ -384,7 +384,7 @@ testing and does not support calculations with the coupling term.
 Our implementation employs planewaves to expand the periodic part of the Bloch
 states, _u_ , and the two-point function _W(r,r')_ that becomes a **q**
 -dependent matrix in reciprocal-space. The conventions used for the transforms
-are documented in [this section](theorydoc_mbt.html#notations) of the _GW_ notes.
+are documented in [this section](mbt.md#notations) of the _GW_ notes.
 
 The matrix elements of the exchange term are evaluated in reciprocal space using:
 
@@ -443,7 +443,7 @@ neglected because it only introduces terms that are quadratic in **q**.
 Unfortunately, the above expression cannot be directly used because the matrix
 elements of the position operator are ill-defined when wavefunctions obey
 Born-von Karman periodic boundary conditions. For this reason, the first order
-contribution has to be evaluated using the equivalent expression [[Baroni1986]]
+contribution has to be evaluated using the equivalent expression [[cite:Baroni1986]]
 
 \begin{equation} 
 \langle b_1,\kmq|e^{-i\qq\cdot\rr}|b_2,\kk\rangle

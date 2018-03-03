@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
           <p> There are two ways to obtain Wannier functions with ABINIT: 
-          <li>The first one is to use an internal implementation of Projected Local Orbital Wannier functions [[Amadon2008]], [[Amadon2015]] that can be activated with the input variable [[plowan_compute]].
+              <li>The first one is to use an internal implementation of Projected Local Orbital Wannier functions [[cite:Amadon2008]], [[cite:Amadon2015]] that can be activated with the input variable [[plowan_compute]].
           The variables [[plowan_bandi]] and [[plowan_bandf]] specifies the Kohn Sham bands that are used to built Wannier functions,
           whereas variables [[plowan_natom]],[[plowan_iatom]],[[plowan_nbl]], [[plowan_lcalc]], and [[plowan_projcalc]] specify
           the atoms, angular momentum and projectors corresponding to the projected local Orbital Wannier functions.

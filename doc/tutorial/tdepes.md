@@ -16,7 +16,7 @@ periodic solids:
   * The lifetime/broadening of eigenenergies  
 
 For the theory related to the temperature-dependent calculations, you can read
-the following papers: [[Ponce2015]], [[Ponce2014]] and [[Ponce2014a]].
+the following papers: [[cite:Ponce2015]], [[cite:Ponce2014]] and [[cite:Ponce2014a]].
 
 There are two ways to compute the temperature dependence with Abinit:
 

@@ -20,6 +20,6 @@
           using input variables similar to the k-points, and then, for each dataset, the number of the 
           q-point in the set is indicated thanks to [[iqpt]]. This applies to the generation of q-point grids as well as to
           q-point paths to produce phonon band structures.
-          <p>The input variables for specifying q-points in ANADDB are specified in [[topic_Phonons]] and [[topic_PhononBands]].
+          <p>The input variables for specifying q-points in ANADDB are specified in [[topic:Phonons]] and [[topic:PhononBands]].
     tutorials  : |-
     end : default 

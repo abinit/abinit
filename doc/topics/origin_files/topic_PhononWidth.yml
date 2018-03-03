@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
         <p>This topic concerns metals only.
-        <p>After generating a GKK file (see [[topic_ElPhonInt]]), the Electron-Phonon Coupling (EPC) 
+        <p>After generating a GKK file (see [[topic:ElPhonInt]]), the Electron-Phonon Coupling (EPC) 
         analysis is performed in anaddb, setting [[anaddb:elphflag]]
         variable to 1. Most of the procedure is automatic, but can be
         lengthy if a large number of k-points is being used. The [[anaddb:nqpath]] and

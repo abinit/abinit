@@ -10,11 +10,11 @@
     links     : default
     introduction : |- 
        The Fourier transformation of the phonon dynamical matrices generates interatomic force constants in real space,
-       as explained in [[Gonze1997a]]. Backtransforming to reciprocal space gives the Fourier interpolation
-       of the initial phonon band structure. After such Fourier interpolation, the DOS can be produced (see [[Lee1995]]),
+       as explained in [[cite:Gonze1997a]]. Backtransforming to reciprocal space gives the Fourier interpolation
+       of the initial phonon band structure. After such Fourier interpolation, the DOS can be produced (see [[cite:Lee1995]]),
        the phonon eigenenergies plotted along lines, the slope of the energy versus cristalline momentum evaluated (to give sound velocity).
        <p>The two-phonon sum and difference spectra can also be obtained, see [[anaddb:dossum]].
-       <p>For the related computation of temperature-dependent properties, see [[topic_Temperature]].
+       <p>For the related computation of temperature-dependent properties, see [[topic:Temperature]].
     tutorials  : |-
        <li>[[lesson:rf2|The lesson Response-Function 2 (RF2)]]
        presents the analysis of the DDBs that have been introduced in the

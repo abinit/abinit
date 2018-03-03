@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
         <p>In principle, the exact self-energy can be obtained by solving self-consistently the set of coupled integro-differential equations
-        proposed by Hedin [[Hedin1965]]. The fundamental building blocks of Hedin's equations are, besides &Sigma;(1,2), 
+        proposed by Hedin [[cite:Hedin1965]]. The fundamental building blocks of Hedin's equations are, besides &Sigma;(1,2), 
         the Green's function of the interacting many-body system, G(1,2), the Green's function of an appropriate noninteracting system, G<sub>0</sub>(1,2),
         and the irreducible polarizability, &chi;(1,2), which, through the inverse dielectric matrix &epsilon;<sup>-1</sup>(1,2),
         re-normalizes the static Coulomb potential, resulting in the dynamical screened interaction W(1,2). 
@@ -28,8 +28,8 @@
         <p>Four different plasmon pole models (PPMs) are available in ABINIT.
         The choice of the particular PPM to be used is controlled by the variable [[ppmodel]].
         The first two options ([[ppmodel]]=1,2) refer to approximations employed in the pioneering implementations 
-        of the GW formalism: the plasmon-pole models of Godby-Needs [[Godby1989]] (GN) 
-        and Hybertsen and Louie [[Hybertsen1986]] (HL).
+        of the GW formalism: the plasmon-pole models of Godby-Needs [[cite:Godby1989]] (GN) 
+        and Hybertsen and Louie [[cite:Hybertsen1986]] (HL).
         <p>The contour deformation technique is activated by setting the input variable [[gwcalctyp]] to 2.
         The integration along the imaginary axis requires the calculation of &epsilon;<sup>-1</sup>(&omega;) for purely imaginary frequencies.
         The frequency mesh for the quadrature is governed by the input variable [[nfreqim]], and can be very coarse 
@@ -46,7 +46,7 @@
         <p> As vertex corrections, the bootstrap kernel and others can be included in the self-consistent W. The Faleev method, see PRL 93, 126406 (2004), is implemented.
         <p> Convergence over the number of unoccupied band is much improved with respect to usual implementations of GW, 
         thanks to the "extrapolar" method.
-        <p>The frequency meshes, used e.g. for integration along the real and imaginary axes are described in [[topic_FrequencyMeshMBPT]].
+        <p>The frequency meshes, used e.g. for integration along the real and imaginary axes are described in [[topic:FrequencyMeshMBPT]].
     tutorials  : |-
        <li>The first lesson on GW ([[lesson:gw1|GW1]]) deals with
        the computation of the quasi-particle band gap of Silicon 

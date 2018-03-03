@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
 
-         <p>A complementary magnetic constraint method has been implemented in the ABINIT code, wherein the magnetization around each atom is pushed to a desired (vectorial) value. The constraint can either be on the full vector quantity, $\vec{m}$, or only on the direction <b>m</b>.  This is mainly useful for non collinear systems, where the direction and amplitude of the magnetic moment can change. The method follows that used in the Quantum Espresso [[Moscaconte2007]] and VASP [[Ma2015]] codes: a Lagrangian constraint is applied to the energy, and works through a resulting term in the potential, which acts on the different spin components. The magnetization in a sphere &Omega;<sub>i</sub> around atom i at position <b>R</b><sub>i</sub> is calculated as:
+         <p>A complementary magnetic constraint method has been implemented in the ABINIT code, wherein the magnetization around each atom is pushed to a desired (vectorial) value. The constraint can either be on the full vector quantity, $\vec{m}$, or only on the direction <b>m</b>.  This is mainly useful for non collinear systems, where the direction and amplitude of the magnetic moment can change. The method follows that used in the Quantum Espresso [[cite:Moscaconte2007]] and VASP [[cite:Ma2015]] codes: a Lagrangian constraint is applied to the energy, and works through a resulting term in the potential, which acts on the different spin components. The magnetization in a sphere &Omega;<sub>i</sub> around atom i at position <b>R</b><sub>i</sub> is calculated as:
          <p><b>m</b> =&int;<sub>&Omega;<sub>i</sub></sub> <b>m</b>(<b>r</b>) d<b>r</b>
 
          <p>and the corresponding potential for spin component &alpha; is written as:

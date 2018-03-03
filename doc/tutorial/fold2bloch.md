@@ -18,7 +18,7 @@ inherent to the unperturbed unit cell. We will construct a supercell of 6
 hydrogen atoms, perform self-consistent cycle and plot the corresponding band
 structure. At the end, we will recover the familiar dispersion relation using
 the fold2Bloch utility.  
-See also the [[help_fold2bloch]].
+See also the [[help:fold2bloch]].
 
 This lesson should take about 1 hour.
 

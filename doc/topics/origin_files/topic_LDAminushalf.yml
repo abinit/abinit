@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
          <p> This feature is available only in PAW. The LDA-1/2 framework is described in
-         [[Ferreira2008]]. In ABINIT, the LDA-1/2 approximation needs to use PAW data files that contain a small potential vminushalf that is added to the local potential inside the code.
+         [[cite:Ferreira2008]]. In ABINIT, the LDA-1/2 approximation needs to use PAW data files that contain a small potential vminushalf that is added to the local potential inside the code.
          The LDA-1/2 approach is based on Slater's half occupation technique to restore the band gap of semi-conductors and insulators.
 
 

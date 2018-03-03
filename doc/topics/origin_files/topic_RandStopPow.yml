@@ -12,7 +12,7 @@
 
        <p>The slowing down of a swift charged particle inside condensed matter has been a subject of intense interest
        since the advent of quantum-mechanics.
-       The Lindhard formula [[Lindhard1954]] that gives the polarizability of the free electron gas has been developed specifically for this purpose.
+       The Lindhard formula [[cite:Lindhard1954]] that gives the polarizability of the free electron gas has been developed specifically for this purpose.
        The kinetic energy lost by the impinging particle by unit of path length is named the stopping power.
        For large velocities, the stopping power is dominated by its electronic contribution: the arriving particle induces electronic excitations in the target.
        These electronic excitations in the target can be related to the inverse dielectric function &epsilon;<sup>-1</sup>(<b>q</b>,&omega;)
@@ -24,7 +24,7 @@
        <p>where Z and <b>v</b> are respectively the charge and the velocity of the impinging particle,
        &Omega; is the unit cell volume, N<sub><b>q</b></sub> is the number of <b>q</b>-points in the first Brillouin zone,
        and <b>G</b> are reciprocal lattice vectors.
-       <p>Apart from an overall factor of 2, this equation is identical to the formula published [[Campillo1998]].
+       <p>Apart from an overall factor of 2, this equation is identical to the formula published [[cite:Campillo1998]].
 
        <p>The GW module of ABINIT gives access to the full inverse dielectric function for a grid of frequencies &omega;.
        Then, the implementation of the above equation is a post-processing employing a spline interpolation of the inverse dielectric function in order to evaluate

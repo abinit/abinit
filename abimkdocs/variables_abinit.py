@@ -2284,7 +2284,7 @@ Restriction: In order to use dmatpawu, [[lpawu]] must be identical for all atom 
 The occupation matrix is in the basis of real spherical harmonics Slm (note
 that this differs from the choice made when [[prtdosm]]=1 , that is in the
 basis of complex spherical harmonics). They are ordered by increasing m, and
-are defined e.g. in [[Blancoa1997]]  . For the case l=2 (d states), the five
+are defined e.g. in [[cite:Blancoa1997]]  . For the case l=2 (d states), the five
 columns corresponds respectively to (the normalisation factor has been dropped)
 
   * m=-2, xy
@@ -3372,7 +3372,7 @@ can be specified with [[kptbounds]] and [[nkpath]]. einterp consists of 4
 entries. The first element specificies the interpolation method.
 
   * 0 --> No interpolation (default)
-  * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[Pickett1988]]
+  * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]
   * 2 --> B-spline interpolation.
 
 The meaning of the other entries depend on the interpolation technique
@@ -3380,7 +3380,7 @@ selected.
 In the case of star-function interpolation:
 
   * einterp(2): Number of star-functions per ab-initio k-point
-  * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[Uehara2000]].
+  * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[cite:Uehara2000]].
     In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of
     the lattice vectors included in the star expansion
   * einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9
@@ -7303,8 +7303,8 @@ The value [[ixc]]=10 is used internally: gives the difference between
 
   * 0 --> NO xc;
 
-  * 1 --> LDA or LSD, Teter Pade parametrization (4/93, published in [[Goedecker1996]], which reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
-  * 2 --> LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) [[Perdew1981]]
+  * 1 --> LDA or LSD, Teter Pade parametrization (4/93, published in [[cite:Goedecker1996]], which reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
+  * 2 --> LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) [[cite:Perdew1981]]
   * 3 --> LDA, old Teter rational polynomial parametrization (4/91) fit to Ceperley-Alder data (no spin-polarization)
   * 4 --> LDA, Wigner functional (no spin-polarization)
   * 5 --> LDA, Hedin-Lundqvist functional (no spin-polarization)
@@ -7367,9 +7367,9 @@ This means having [[usekden]]=1 .
   * 006 --> XC_LDA_C_XALPHA ! Slater's Xalpha ]
   * 007 --> XC_LDA_C_VWN ! Vosko, Wilk, & Nussair [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
   * 008 --> XC_LDA_C_VWN_RPA ! Vosko, Wilk, & Nussair (RPA) [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
-  * 009 --> XC_LDA_C_PZ ! Perdew & Zunger [[Perdew1981]]
-  * 010 --> XC_LDA_C_PZ_MOD ! Perdew & Zunger (Modified) [[Perdew1981]] Modified to improve the matching between the low and high rs part ]
-  * 011 --> XC_LDA_C_OB_PZ ! Ortiz & Ballone (PZ) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ; G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ; [[Perdew1981]] ]
+  * 009 --> XC_LDA_C_PZ ! Perdew & Zunger [[cite:Perdew1981]]
+  * 010 --> XC_LDA_C_PZ_MOD ! Perdew & Zunger (Modified) [[cite:Perdew1981]] Modified to improve the matching between the low and high rs part ]
+  * 011 --> XC_LDA_C_OB_PZ ! Ortiz & Ballone (PZ) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ; G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ; [[cite:Perdew1981]] ]
   * 012 --> XC_LDA_C_PW ! Perdew & Wang [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
   * 013 --> XC_LDA_C_PW_MOD ! Perdew & Wang (Modified) [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ; Added extra digits to some constants as in the PBE routine see [ https://www.chem.uci.edu/~kieron/dftold2/pbe.php ](https://www.chem.uci.edu/~kieron/dftold2/pbe.php) (at some point it was available at http://dft.uci.edu/pbe.php) ]
   * 014 --> XC_LDA_C_OB_PW ! Ortiz & Ballone (PW) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ; G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ; JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
@@ -11185,7 +11185,7 @@ function in the tail)
 Same smeared delta function as [[occopt]]=4, with different a.
 
     * [[occopt]]=6:
-Smearing of Methfessel and Paxton [[Methfessel1989]] with Hermite polynomial
+Smearing of Methfessel and Paxton [[cite:Methfessel1989]] with Hermite polynomial
 of degree 2, corresponding to "Cold smearing" of N. Marzari with a=0 (so, same
 smeared delta function as [[occopt]]=4, with different a).
 

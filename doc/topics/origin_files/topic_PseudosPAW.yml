@@ -51,7 +51,7 @@
       such that there are ABINIT automatic tests in which a PAW atomic data is generated, and then
       used in ABINIT. There is also a dedicated tutorial to ATOMPAW/ABINIT.
       <p><b>Miscellaneous</b>
-      <p>Norm-conserving pseudopotentials can be mixed, to generate "alchemical" pseudoatoms, see [[topic_AtomTypes]].
+      <p>Norm-conserving pseudopotentials can be mixed, to generate "alchemical" pseudoatoms, see [[topic:AtomTypes]].
     tutorials : |
       <li>[[lesson:paw2|Second lesson on the projector-augmented wave technique]] The generation of atomic data.
       <li>[[lesson:paw3|Third lesson on the projector-augmented wave technique]] Testing PAW datasets against an all-electron code.

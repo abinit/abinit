@@ -12,9 +12,9 @@ are important for understanding the different steps of the calculation and the
 role played by the input variables used to control the run. A much more
 consistent and rigorous introduction to the physical concept of Green's
 function and self-energy can be found in any standard textbook on Many-Body
-theory, see for example [[Abrikosov1975]], [[Fetter1971]], [[Mattuck1976]].
+theory, see for example [[cite:Abrikosov1975]], [[cite:Fetter1971]], [[cite:Mattuck1976]].
 
-## 1 Green's function and self-energy
+## Green's function and self-energy
   
 The time-ordered Green's function $G(12)$, also called the propagator, defines
 the probability amplitude for the propagation of an added or removed electron
@@ -28,7 +28,7 @@ G(1,2) = -i\left\langle \Theta_0^N \left| \hat{T} \left[
 
 where the matrix element is taken in the Heisenberg representation, $\hat{T}$ is the time-ordering 
 operator and the creation and annihilation field operators act on the ground state of the $N$-electron many-
-body Hamiltonian (the conventions used in the equations are explained in the section on [[#notations]]). 
+body Hamiltonian (the conventions used in the equations are explained in the section on [notation](#notations). 
 The propagator contains only part of the full
 information carried by the many-body wave function, but it includes the
 relevant part for the study of charged excitations. Also, any single-particle
@@ -36,9 +36,9 @@ operator acting on the system can be evaluated once the Green's function is know
 
 Useful physical information about the charged excitation energies of the many-
 body system can be obtained by expressing the propagator in the so-called
-Lehmann representation. [[Abrikosov1975]], [[Fetter1971]], [[Mattuck1976]]. 
+Lehmann representation. [[cite:Abrikosov1975]], [[cite:Fetter1971]], [[cite:Mattuck1976]]. 
 To this purpose it is useful to introduce the following notation to denote the
-charged excitation energies of the $N$-electron system [[Onida2002]]:
+charged excitation energies of the $N$-electron system [[cite:Onida2002]]:
 
 \begin{equation} 
 \varepsilon_i = 
@@ -96,7 +96,7 @@ The self-energy is not a mere mathematical device used in a roundabout way to
 obtain _G_ but is has a direct physical meaning. The knowledge of the self-
 energy operator, allows one to describe the quantum-mechanical state of a
 renormalized electron in the many-body system by solving the quasiparticle
-(QP) equation [[Onida2002]]:
+(QP) equation [[cite:Onida2002]]:
 
 \begin{equation} \label{eq:QP_equation} 
 \Bigl[ {\hat h}_0(\rr_1) + v_H(\rr_1)
@@ -109,9 +109,9 @@ equation departs from the Kohn Sham equation since the QP eigenvectors and
 eigenvalues do have a direct physical meaning: they can be used to obtain both
 the charge density of the interacting system and to describe the properties of charged excitations.
 
-## 2 Hedin's equations
+## Hedin's equations
   
-In 1965 Hedin [[Hedin1965]] showed how to derive a set of coupled integro-
+In 1965 Hedin [[cite:Hedin1965]] showed how to derive a set of coupled integro-
 differential equations whose self-consistent solution, in principle, gives the
 exact self-energy of the system and therefore the exact _G_.
 
@@ -145,13 +145,13 @@ The pentagon sketched in the figure below shows how the various physical quantit
 The polarization function renormalises the bare interaction resulting in the
 screened interaction _W_ (12). The screened interaction, _W_ (12), the many-
 body propagator _G_ (12), and the vertex function, Γ(12;3), which describe the
-interactions between virtual hole and electron excitations [[Onida2002]], are
+interactions between virtual hole and electron excitations [[cite:Onida2002]], are
 the essential ingredients for the determination of Σ(12).
 
 The iteration starts by setting _G_ = _G 0_. Then the set of equations should
 in principle be iterated until self-consistency in all terms is reached.
 
-## 3 The GW approximation
+## The GW approximation
   
 The practical solution of Hedin's equations is extremely complicated as they
 are not just numerical relations but contain a functional derivative in the
@@ -160,7 +160,7 @@ challenging. The set of equations can, however, be iterated assuming that only
 a few iterations are actually needed to obtain physically meaningful results.
 
 A widely used approach to the approximate solution of Hedin's equations is the
-so-called _GW_ approximation [[Hedin1965]], which consists in approximating
+so-called _GW_ approximation [[cite:Hedin1965]], which consists in approximating
 the vertex function with a local and instantaneous function:
 
 \begin{equation} 
@@ -179,7 +179,7 @@ Thanks to the neglect of vertex corrections, the irreducible polarizability _χ_
 \end{equation}
 
 which, once rewritten in terms of orbitals and energies, reduces to the RPA
-expression proposed by Adler [[Adler1962]] and Wiser [[Wiser1963]].
+expression proposed by Adler [[cite:Adler1962]] and Wiser [[cite:Wiser1963]].
 
 In real space, the self-energy reduces to a simple direct product of the
 dressed electron propagator, _G_ (12), and the dynamically screened interaction, _W_ (12):
@@ -226,7 +226,7 @@ calculated with KS energies and wave functions:
 \chi^0(12) = -i \Go^\KS(12)\Go^\KS(12). 
 \end{equation}
 
-## 4 Perturbative approach
+## Perturbative approach
   
 Despite all the fundamental differences between many-body theory and DFT, the
 Kohn-Sham exchange-correlation potential can be seen as a static, local and
@@ -237,10 +237,10 @@ are usually in qualitative agreement with experiment.
 This observation suggests that a simple, albeit accurate, solution for the QP
 energies can be obtained using first-order perturbation theory, treating the
 exchange and correlation potential, _V xc_, as a zeroth-order approximation to
-the non-local and energy dependent self-energy [[Hybertsen1985]], [[Hybertsen1986]]
+the non-local and energy dependent self-energy [[cite:Hybertsen1985]], [[cite:Hybertsen1986]]
 
 Under the assumption that the QP wavefunctions equal the KS orbitals, we can
-expand the self-energy operator around _ε KS_ obtaining a closed expression for _ε QP_ :
+expand the self-energy operator around _ε KS_ obtaining a closed expression for _ε QP_:
 
 \begin{equation} \label{eq:implicit_QP_energy} 
 \ee^\QP = \ee^\KS + Z \langle\Psi^\KS|\Sigma(\ee^\KS)-\vxc|\Psi^\KS\rangle. 
@@ -258,7 +258,7 @@ expansion of the self-energy matrix element around the KS energy, as depicted be
 
 ![](mbt_assets/self_energy_taylor.svg)
 
-## 5 The RPA polarizability in Fourier space
+## The RPA polarizability in Fourier space
   
 In the reciprocal space and frequency domain (implying a Fourier transform
 (FT) of the real space coordinates and time variables), the independent-
@@ -269,7 +269,7 @@ particle polarizability assumes the form:
 where only the transitions between valence ( _v_ ) and conduction states (_c_) contribute 
 (for simplicity we have assumed a semiconductor with time-
 reversal invariance, the conventions used for the Fourier transform are
-discussed in the [[#notations|notation]] section).
+discussed in the [notation](#notations) section).
 
 The number of bands used to compute the polarizability is specified by
 [[nband]], while [[zcut]] gives the small complex shift used to avoid the
@@ -310,7 +310,7 @@ related to the irreducible polarizability by the following relation
 \end{equation} 
 
 from which the inverse dielectric function is obtained via matrix inversion. Following Adler
-[[Adler1962]], the macroscopic dielectric function, єMLF(ω), can be directly
+[[cite:Adler1962]], the macroscopic dielectric function, єMLF(ω), can be directly
 related to the inverse of the microscopic dielectric matrix by means of:
 
 \begin{equation} \label{eq:abs_LFE} 
@@ -330,7 +330,7 @@ due to the so called local-field effects introduced by the presence of the cryst
 These spectra, if calculated, are typically output as ... **_LF** and ... **_NLF**
 files during the course of a calculation.
 
-## 6 Notes on the calculation of the oscillator matrix elements
+## Notes on the calculation of the oscillator matrix elements
   
 Many body calculations require the evaluation of integrals involving the
 oscillator matrix elements
@@ -352,7 +352,7 @@ link and use the FFTW3 library in GW calculations (controlled by setting
 [[fftalg]] 312). The performance of the various FFT libraries for a given type
 of calculation can be benchmarked with the **fftprof** utility.
 
-For a given set of indices ( _b 1_, _b 2_, **k** , **q** ), the calculation of
+For a given set of indices ( _b 1_, _b 2_, **k**, **q** ), the calculation of
 the oscillator is done in four different steps:
 
   1. The two wavefunctions in the irreducible wedge are FFT transformed from the **G** -space to the real space representation, 
@@ -381,7 +381,7 @@ setting of **fftgw 21** is safe, a setting of **fftgw 11** is fast but can be
 inaccurate, and a setting of **fftgw 31** gives the maximum possible accuracy
 at a significant computational cost.
 
-## 7 Hilbert transform method
+## Hilbert transform method
   
 The computational effort for the evaluation of the RPA polarizability with the
 Adler-Wiser expression scales linearly with the number of frequencies computed
@@ -393,18 +393,18 @@ has to be performed separately for each frequency.
 
 This linear scaling represents a serious problem, especially when many
 frequencies are wanted, for example when computing QP corrections within the
-contour deformation technique described in the [[lesson_gw2|second lesson]] of the GW tutorial.
+contour deformation technique described in the [[lesson:gw2|second lesson]] of the GW tutorial.
 
 This computational bottleneck can be removed, under certain circumstances, by
-employing an efficient algorithm proposed in [[Miyake2000]] and subsequently
-revisited in [[Shishkin2006]], in which only the spectral function
+employing an efficient algorithm proposed in [[cite:Miyake2000]] and subsequently
+revisited in [[cite:Shishkin2006]], in which only the spectral function
 
 ![](mbt_assets/sf_chi0.svg)
 
 has to be evaluated in terms of electronic transitions between valence and
 conduction states. The Dirac delta function can be approximated either by
 means of a triangular function centered at the energy transition following
-[[Shishkin2006]] or a gaussian approximant following [[Miyake2000]] (see the
+[[cite:Shishkin2006]] or a gaussian approximant following [[cite:Miyake2000]] (see the
 related input variables [[spmeth]], and [[spbroad]]). The spectral function is
 evaluated on a linear frequency mesh which covers the entire set of transition
 energies included in the calculation. The number of points in the mesh is given by [[nomegasf]].
@@ -436,7 +436,7 @@ such as for the evaluation of optical spectra, or accurate contour deformation
 integrations, or even mapping full grids in the complex plane, the Hilbert
 transform method can be significantly faster, and its use is well worth considering.
 
-## 8 Evaluation of the GW self-energy
+## Evaluation of the GW self-energy
   
 Following the standard approach, we separate the screened interaction into the
 static bare Coulomb term and a frequency-dependent contribution according to:
@@ -520,7 +520,7 @@ Note that here, in contrast to the exchange term, the sum over the band index
 _n_ should extend up to infinity although in practice only a finite number of
 states can be used (specified by [[nband]]).
 
-## 9 Plasmon-pole models
+## Plasmon-pole models
   
 One of the major computational efforts in self-energy calculations is
 represented by the calculation of the frequency dependence of the screened
@@ -561,12 +561,12 @@ is calculated from the average electronic density of the system. The plasmon-
 pole parameters of [[ppmodel]]=2 are calculated so as to reproduce the static
 limit exactly and to fulfill a generalized frequency sum rule relating the
 imaginary part of the many-body inverse dielectric matrix to the plasma
-frequency and the charge density [[Hybertsen1986]]
+frequency and the charge density [[cite:Hybertsen1986]]
 
 For a discussion of the models corresponding to [[ppmodel]]=3,4 we refer the
 reader to the original papers cited in the documentation of the variable.
 
-## 10 Contour deformation technique
+## Contour deformation technique
   
 The contour deformation method was proposed in order to avoid having to deal
 with quantities close to the real axis as much as possible [[cite:Lebegue2003]].
@@ -602,7 +602,7 @@ frequencies since the integrand is typically very smooth. Only the residues of
 the integrand have to be evaluated at the complex poles contributed by the
 Green's function whose frequency dependence is known.
 
-## 11 Notations
+## Notations
   
 The following shorthand notations are employed: 
 

@@ -425,7 +425,7 @@ description of the variables. You should read the descriptions of
   * [[anaddb:chneut]].
 
 For the theory underlying the incorporation of atom-relaxation corrections, it
-is recommended you see  X. Wu, D. Vanderbilt, and D. R. Hamann [[Wu2005]].
+is recommended you see  X. Wu, D. Vanderbilt, and D. R. Hamann [[cite:Wu2005]].
   
 Anaddb can do lots of other things, such as calculate the frequency-dependent
 dielectric tensor, interpolate the phonon spectrum to make nice phonon

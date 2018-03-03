@@ -24,9 +24,9 @@
         however, as our experience and others have shown that the PAW formalism
         together with a typical chemical valence/core separation are sufficient
         for accurate description of nuclear point properties such as the electric
-        field gradient [[Petrilli1998]],[[Profeta2003]],[[Zwanziger2008]], 
-        Fermi contact interaction [[Zwanziger2009]] and magnetic chemical
-        shielding [[Pickard2001]].
+        field gradient [[cite:Petrilli1998]], [[cite:Profeta2003]], [[cite:Zwanziger2008]], 
+        Fermi contact interaction [[cite:Zwanziger2009]] and magnetic chemical
+        shielding [[cite:Pickard2001]].
 
         <p>Both the electric field gradient and Fermi contact interaction are
         ground-state observables, and their computation adds negligible time to
@@ -39,7 +39,7 @@
         sphere charge densities contribute matrix elements of (3x<sub>&alpha;</sub> x<sub>&beta;</sub>
         -r<sup>2</sup>&delta;<sub>&alpha;&beta;</sub>)/r<sup>5</sup>, weighted by the charge densities in each
         channel determined by the self-consistent minimization procedure. This
-        treatment [[Zwanziger2008]] is more flexible than for example assuming
+        treatment [[cite:Zwanziger2008]] is more flexible than for example assuming
         all bands are doubly occupied, and permits the current approach to be used
         with more complex electronic and magnetic states than just insulators.
 
@@ -55,7 +55,7 @@
         for comparison purposes. The point charges by atom are supplied through the additional
         variable [[ptcharge]].
         Detailed examples of the use of ABINIT to compute EFG's can be found in 
-        [[Zwanziger2008]],[[Zwanziger2009a]]. 
+        [[cite:Zwanziger2008]], [[cite:Zwanziger2009a]]. 
 
         <p>The Fermi contact interaction, which is just the electron density evaluated
         precisely at the nuclear location, is an important component of the isomer
@@ -67,7 +67,7 @@
         three-dimensional Dirac delta function centered on the nuclear position
         <b>R</b>. Because of the short-range nature of the delta function, in the
         PAW-transformed version of the observable only matrix elements of the on-site
-        all-electron valence functions are required [[Zwanziger2009]], and these
+        all-electron valence functions are required [[cite:Zwanziger2009]], and these
         are evaluated from a linear fit to the first few points of the PAW radial
         functions.
 
@@ -87,11 +87,11 @@
         to the absorber and source respectively. Because of the linearity of this formula in the density
         at the absorber (sample) nucleus, the only unknown (&Delta;&lang;r<sup>2</sup>&rang;) can be obtained
         by comparing the calculated values in several standards to experiment and then the computations
-        can be used to interpret the measurements of new materials. In [[Zwanziger2009]] 
+        can be used to interpret the measurements of new materials. In [[cite:Zwanziger2009]] 
         it is showed how to perform such studies on a variety of compounds.
 
     tutorials  : |-
         <li>[[lesson:nuc|The lesson on the properties of the nuclei]]
-        shows how to compute the electric field gradient. Prerequisite : PAW1.</li>
+        shows how to compute the electric field gradient. Prerequisite: PAW1.</li>
  
     end : default

@@ -49,7 +49,7 @@
          When [[useexexch]]=1, the hybrid functional PBE0 is used in PAW, 
          inside PAW spheres only, and only for correlated orbitals given by [[lexexch]]. 
          To change the ratio of exact exchange, see also [[exchmix]]. 
-         The implementation of local exact exchange in ABINIT is provided in [[Jollet2009]]. 
+         The implementation of local exact exchange in ABINIT is provided in [[cite:Jollet2009]]. 
          See useful input variables [[exchmix]], [[lexexch]] and [[useexexch]].
          <br/>
 

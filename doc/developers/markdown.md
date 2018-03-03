@@ -269,7 +269,7 @@ Examples:
 | `[[abinit:ecut]]` | [[abinit:ecut]]
 | `[[anaddb:dipdip]]` | [[anaddb:dipdip]]
 | `[[dipdip@anaddb]]` | [[dipdip@anaddb]]
-| `[[Amadon2008]]` | [[Amadon2008]]
+| `[[cite:Amadon2008]]` | [[cite:Amadon2008]]
 | `[[~abinit/tests/tutorial/Input/tbase1_1.in]]` | [[~abinit/tests/tutorial/Input/tbase1_1.in]]
 | `[[tests/tutorial/Input/tbase1_1.in]]` | [[tests/tutorial/Input/tbase1_1.in]]
 | `[[test:libxc_41]]` | [[test:libxc_41]]
@@ -300,9 +300,9 @@ See [this section](#markdown-quick-reference) for more info
 
 To specify the name of the anchor in a bibliographic citation use the syntax with the `|` separator:
 
-    Please consult [[Gonze2016 | the last generic ABINIT article]].
+    Please consult [[cite:Gonze2016 | the last generic ABINIT article]].
 
-that is rendered in HTML as: Please consult [[Gonze2016 | the last generic ABINIT article]].
+that is rendered in HTML as: Please consult [[cite:Gonze2016 | the last generic ABINIT article]].
 
 The script does a bit of formatting in these examples: it keeps one pair of square brackets
 in the case of a bibliographic reference, and add "~abinit/" in the case of a path.
@@ -381,19 +381,6 @@ that produces: Fix https://github.com/abinit/abinit/issues/1
 !!! note
     This extension is useful to generate nice changelogs and [release notes](/about/release-notes).
 
-
-For compatibility reasons, `mksite.py` supports the following features provided by `generate_doc.py`
-although I would prefer to encourange the use of namespaces:
-
-Actually, using the real name of the file without suffix, e.g. `lesson_gw1` will also be recognized,
-although this real name is echoed, instead of the name without namespace.
-
-`[[lesson_gw1]]` becomes [[lesson_gw1]]
-
-There is an added formatting by generate_doc.py, in the case of the help files:
-`[[help_codename]]`is echoed "codename help file":
-
-`[[help_abinit]]` becomes [[help_abinit]]
 
 ### External links
 

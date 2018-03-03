@@ -9,7 +9,7 @@
     copyright : default
     links     : default
     introduction : |- 
-      <p>All the files that have the density and potential format, see [[topic_printing]] can be analyzed
+      <p>All the files that have the density and potential format, see [[topic:printing]] can be analyzed
       with the "Cut3D" postprocessor. In particular, it can produce two-dimensional cuts (or one-dimensional cuts) through the three-dimensional
       data, suitable for later visualisation using e.g. [[topic:Abipy]].
       It can perform the Hirshfeld computation of atomic charges. 

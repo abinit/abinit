@@ -10,7 +10,7 @@
     links     : default
     introduction : |- 
        <p>The DFPT theory to compute the elastic, piezoelectric and internal strain tensors
-       is presented in [[Hamann2005]].
+       is presented in [[cite:Hamann2005]].
        <p>See the [[topic:DFPT|generalities about DFPT]] as well as the tutorial [[lesson:elastic]].
        For the preliminary runs of ABINIT, see [[rfstrs]], while for ANADDB, see [[anaddb:elaflag]] for the
        elastic tensor, and [[anaddb:piezoflag]] for the piezoelectric tensor.

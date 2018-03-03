@@ -15,8 +15,8 @@
        the combination of the atomic displacements and electric field type perturbations opens also the access to
        Born effective charges, electronic (for frequencies lower than the electronic band gap) dielectric constants,
        and then, to infra-red reflectivity of materials (in the infinite lifetime approximation).
-       See [[Gonze1997a]] for the presentation of the theory with DFPT.
-       <p> In ABINIT, with one dataset for a fixed wavevector (see [[topic_q-points]]), one can compute all such 
+       See [[cite:Gonze1997a]] for the presentation of the theory with DFPT.
+       <p> In ABINIT, with one dataset for a fixed wavevector (see [[topic:q-points]]), one can compute all such 
        second-order derivatives. ABINIT will already perform some post-processing treatment of the
        second-order derivatives (e.g. computation of the dynamical matrix, and corresponding eigenenergies and eigendisplacements), 
        although the most extended post-processing treatment is provided by ANADDB. Thus, there is some overlap of the two executables, with some
@@ -25,12 +25,12 @@
        because of the previously mentioned difference in capabilities. In the database of input variables, 
        the input variables related to ABINIT or ANADDB are clearly distinguished.
        <p>The band-by-band decomposition of the Born effective charge tensors can be computed thanks to [[prtbbb]]. 
-       The related localization tensor (see [[Veithen2002]] can also be computed.  
-       <p>Phonon calculations are arbitrary q-points can be done under finite electric field ([[topic_Berry]]).
+       The related localization tensor (see [[cite:Veithen2002]] can also be computed.  
+       <p>Phonon calculations are arbitrary q-points can be done under finite electric field ([[topic:Berry]]).
        <p>It will be the easiest to discover the capabilities of these two executables through the
        [[lesson:rf1]] of the tutorial.
-       <p>See [[topic_DFPT]] for the general information about DFPT, [[topic_q-points]] for the specification of q-points,
-       and [[topic_PhononBands]] for the computation of full phonon bands.
+       <p>See [[topic:DFPT]] for the general information about DFPT, [[topic:q-points]] for the specification of q-points,
+       and [[topic:PhononBands]] for the computation of full phonon bands.
     tutorials  : |-
        <li>[[lesson:rf1|The lesson Response-Function 1 (RF1)]]
        presents the basics of DFPT calculations within ABINIT. The example

@@ -12,9 +12,9 @@
       The major factors governing the speed of an ABINIT run, for a given physical system, 
       are:  
       <ul>
-        <li>the size of the planewave basis set , see [[topic_Planewaves]];</li> 
-        <li>the size of the wavevector grid sampling, see [[topic_k-points]];</li> 
-        <li>and the parallelism, see [[topic_parallelism]].</li>
+        <li>the size of the planewave basis set , see [[topic:Planewaves]];</li> 
+        <li>the size of the wavevector grid sampling, see [[topic:k-points]];</li> 
+        <li>and the parallelism, see [[topic:parallelism]].</li>
       </ul>
       For the two first factors, there is a trade-off between CPU time and precision of the computation,
       while for the third factor, there is some limit on the maximal speed-up that can be achieved (and also, 

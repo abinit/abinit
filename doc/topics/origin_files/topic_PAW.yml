@@ -10,9 +10,9 @@
     links     : default
     introduction : |- 
          <p>The PAW atomic data can be used with plane waves as well as with wavelets. Specificities of PAW for use with planewaves
-         are presented here. See [[topic_Wavelets]] for its use with wavelets.
-         <p>The way the PAW method is implemented with planewaves in ABINIT is described in [[Torrent2008]].
-         <br/> The use of PAW atomic data (equivalent to pseudopotential file for the norm-conserving case) automatically launch a PAW calculation. ABINIT is provided with the JTH [[Jollet2014]] PAW atomic data table on the ABINIT web site.
+         are presented here. See [[topic:Wavelets]] for its use with wavelets.
+         <p>The way the PAW method is implemented with planewaves in ABINIT is described in [[cite:Torrent2008]].
+         <br/> The use of PAW atomic data (equivalent to pseudopotential file for the norm-conserving case) automatically launch a PAW calculation. ABINIT is provided with the JTH [[cite:Jollet2014]] PAW atomic data table on the ABINIT web site.
          <br/> To perform a standard PAW calculation, the input file is the same than for a norm-conserving one, except that the variable [[pawecutdg]] must be specified (see below). In the case the input variable [[accuracy]] is used, the input variable [[pawecutdg]] is automatically used.
          <br/> Some physical functionalities are available only in the PAW framework: DFT+U, DMFT, local exact exchange,...
 
@@ -24,7 +24,7 @@
             an alternative to norm-conserving pseudopotentials, with a sizeable
             accuracy and CPU time advantage.</li>
             <li>The lesson on the generation of PAW atomic data files ([[lesson:paw2|PAW2]])  
-            presents the generation of atomic data for use with the PAW method. Prerequisite : PAW1.</li>
+            presents the generation of atomic data for use with the PAW method. Prerequisite: PAW1.</li>
             <li>The lesson on the validation of a PAW
             atomic datafile ([[lesson:paw3|PAW3]]) demonstrates how to test a generated PAW
             dataset using ABINIT, against the ELK all-electron code, for diamond

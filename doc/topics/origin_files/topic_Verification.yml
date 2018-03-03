@@ -14,8 +14,8 @@
       by making detailed comparisons with independently developed software applications.
       <p> The ground state total energy, geometry relaxation, phonon frequencies, 
       electron-phonon matrix elements, temperature dependence of the electronic gap has been cross checked with Quantum Espresso and YAMBO. 
-      See [[Ponce2014]].
+      See [[cite:Ponce2014]].
       <p> It is possible to choose the same convention for the definition of the average eletrostatic potential, than Quantum Espresso, 
-      allowing verification of results for charged systems. See [[Bruneval2014]].
-      <p>See the "Validation" section in [[topic_PseudosPAW]].
+      allowing verification of results for charged systems. See [[cite:Bruneval2014]].
+      <p>See the "Validation" section in [[topic:PseudosPAW]].
     end : default 

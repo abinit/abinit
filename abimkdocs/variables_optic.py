@@ -73,7 +73,7 @@ Variable(
     mnemonics="LINear COMPonents",
     text="""
 This tells which component of the dielectric tensor you want to calculate.
-These numbers are called a and b Eqs. 46 in [[Sharma2004]].
+These numbers are called a and b Eqs. 46 in [[cite:Sharma2004]].
 1 2 3 represent x y and z respectively. For example 11 would be xx and 32 would mean zy.
 """,
 ),

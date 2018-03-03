@@ -12,7 +12,7 @@
       For a long time, ABINIT has produced files in either text format or in Fortran binary format.
       This has the drawback of being difficult to read by other codes, and also being difficult to maintain in the long run,
       as any change must be propagated to the reading routines. 
-      <p>Following the advent of the Nanoquanta/ETSF file format (http://www.etsf.eu/fileformats), ABINIT has gradually shifted 
+      <p>Following the advent of the [Nanoquanta/ETSF file format](http://www.etsf.eu/fileformats), ABINIT has gradually shifted 
       toward the use of file formats that are addressable by content, especially NetCDF and XML. 
       <p>NetCDF is used to file that typically store a large amount of data, like wavefunctions, density, potentials, etc .
       One should even shift to HDF5 in due time for these files.

@@ -10,16 +10,17 @@
     links     : default
     introduction : |- 
         <p><b> This functionality is not in production.</b>
-        <p>A high performance G<sub>0</sub>W<sub>0</sub> implementation [[Janssen2015]] has been developed within ABINIT.
-        It is more efficient than the traditional implementation [[Gonze2009]],[[Giantomassi2011]] thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix. However, note that this implementation has only limited applicability at present (see below).
+        <p>A high performance G<sub>0</sub>W<sub>0</sub> implementation [[cite:Janssen2015]] has been developed within ABINIT.
+    It is more efficient than the traditional implementation [[cite:Gonze2009]], [[cite:Giantomassi2011]] thanks to the treatment of the two major bottlenecks: the summations over conduction states and the inversion of the dielectric matrix. However, note that this implementation has only limited applicability at present (see below).
         <li>The first bottleneck is circumvented by converting the summations into Sternheimer equations.
-        Note that the introduction of approximations beyond the G<sub>0</sub>W<sub>0</sub> (such as analytic continuation [[Rieger1999]]) is avoided thanks to use of the simplified quasiminimal residual (SQMR) algorithm [[Freund1995]].</li>
+        Note that the introduction of approximations beyond the G<sub>0</sub>W<sub>0</sub> (such as analytic continuation 
+        [[cite:Rieger1999]]) is avoided thanks to use of the simplified quasiminimal residual (SQMR) algorithm [[cite:Freund1995]].</li>
         <li>Then, the second bottleneck is assessed by expressing the dielectric matrix in a Lanczos basis, which reduces the matrix size by orders of magnitude with respect to a plane wave basis.</li>
-        A model dielectric operator has also been developed [[Janssen2015]] and can optionally be used to further reduce the dielectric matrix size.
+        A model dielectric operator has also been developed [[cite:Janssen2015]] and can optionally be used to further reduce the dielectric matrix size.
         The resulting implementation exhibits a 500-fold speedup for the silane molecule, without introducing approximations beyond the G<sub>0</sub>W<sub>0</sub> formalism and the pseudopotential method.
         <p>At the time of writing, the implementation supports simulations of molecular systems only (only one k-point).
         <p>Furthermore, it does not supports PAW and spinors. 
-        <p>However, it supports parallelism over bands and FFTs [[Bottin2008]]. 
+        <p>However, it supports parallelism over bands and FFTs [[cite:Bottin2008]]. 
 
         <p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set [[optdriver]]= 66 in the input file. 
         This type of calculation requires that the ground state density and wavefunctions be available from disk (using [[getden]] and [[getwfk]]). 

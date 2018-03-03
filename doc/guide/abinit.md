@@ -253,8 +253,8 @@ an 'object' ([[objaax]], [[objaax]], [[objbax]], [[objatr]], [[objbtr]]), and
 the initial velocity of atoms ([[vel]] if needed).
 
 The initial atomic positions can be input in Bohr or Angstrom through
-'[[xcart]]', but also, independently, in Angstrom through '[[xangst]]', or
-even in reduced coordinates, through '[[xred]]'.
+[[xcart]], but also, independently, in Angstrom through [[xangst]], or
+even in reduced coordinates, through [[xred]].
 
 #### Flow information
 
@@ -588,12 +588,11 @@ always output, either with the name **abo_WFK**, or with the name
 
   * **abo_1WFxx**   
 Same as **abo_WFK**, but for first-order wavefunctions, xx is the index of
-the perturbation, see the section [6.3](help_respfn.html#6.3) of the
-[[help_respfn]].
+the perturbation, see the section [6.3](help_respfn.html#6.3) of the [[help:respfn]].
 
   * **abo_DDB**   
 The derivative database, produced by a response-function dataset, see the
-section [6.5](help_respfn.html#6.5) of the [[help_respfn]]
+section [6.5](help_respfn.html#6.5) of the [[help:respfn]]
 
   * **abo_DEN**   
 filename of file containing density, in the case [[ionmov]]=0. See the keyword
@@ -774,7 +773,7 @@ larger, since more CPU time is needed for larger FFT grids;
   arithmetic average and geometric average. 
 
 Until here, the output of a ground-state computation is identical to the one
-of a response-function calculation. See the [[help_respfn]] for the latter,
+of a response-function calculation. See the [[help:respfn]] for the latter,
 especially section [6.2](help_respfn.html#6.2).
 
 Next the code reports information for each SCF iteration:
