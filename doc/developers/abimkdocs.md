@@ -258,32 +258,47 @@ required entry in the front matter.
 
 ### Input variables
 
-Edit the file `abinit_vars.yml` with the `Abivars.jar` GUI:
+The yaml database has been replaced by python modules.
+The variables are now declared in `~abinit/abimkdocs/variables_CODENAME.py`.
 
-    java -jar Abivars.jar
-  
-A window should open, and you can fill the requested information.
-To add a new variable, click on `Edit` (upper right) then click on `Add new variable`.
+This file consists of a list of dictionaries, each dictionary
+contains the declaration of a single variable and the associated documentation in markdown format.
+Wikilinks, latex and markdown extensions can be used inside `text`.
+Adding a new variable is easy. Edit the python module and add a new item at the end of the list. 
+A template is provided ...
 
 Note that input variables for the executables other than the main abinit (e.g. anaddb, aim, optic) are 
 denoted `input_variable_name@executable`, e.g. `dipdip@anaddb`
 (this allows to waive the ambiguity with the dipdip input variable used in the main abinit).
 
-After having edited the info related to one input variable 
-(see the [file format specifications](abinit_varsyml-format))
-you must still **save** the entire file (click on "File" (upper right) then "Save"). 
-Just editing one input variable and saving the changes will only go to some internal variable, 
-and this is NOT saving your modifications in the YAML storage file.
-Then, build the HTML pages using `mksite.py serve`.
-
+After having edited the python modules you **must rerun** `mksite serve` to see the changes.
 
 ### Bibliographic reference
 
-Edit the file `~abinit/doc/abiref.bib` with your preferred editor (it's a standard bibtex file).
+Citations must be in bibtex format and provide enough information so that the python code
+can generate appropriated links in the website.
+For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your bibtex files
+(there are units tests to enforce the presence of particular entries in the bibtex document and
+your bibtex may not fullfill these requirements).
+
+A much better solution is to use BetterBib and the DOI of the article to fetch data 
+from Crossref and produce the bibtex entry. 
+BetterBib is available from the Python Package Index, so simply type:
+
+    pip install betterbib
+
+and then use doi2bibtex from the command line:
+
+    doi2bibtex 10.1103/PhysRevLett.96.066402
+
+Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key 
+(make sure it's not a duplicated entry).
 Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008" 
 (start with an uppercase letter, then lower case, then four-digit year). 
 Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
 Then, build the HTML pages using `mksite.py serve`.
+
+Run the tests in `./tests/test_bibtex.py` with pytest (see next section) to validate your changes.
 
 If you know the DOI of the article, it's possible to use [BetterBib](https://github.com/nschloe/betterbib)
 to fetch data from [Crossref](http://www.crossref.org/) and produce the bibtex entry.
@@ -312,7 +327,6 @@ doi2bibtex 10.1103/PhysRevLett.96.066402
 }
 ```
 
-
 ### Topics
 
 The topic HTML files are assembled by `mksite.py` from different sources.
@@ -326,7 +340,7 @@ The "text" content of the "introduction" section is in plain HTML.
 At variance, the other sections of the `topic_NAME.html` are created from other sources. 
 The list of input variables that are relevant to this topics is assembled from the information
 given for these input variables, see [Input variables: how_to_add_modify](#how-to-addmodify)
-as well as [Topics and tribes](topics-and-tribes), while the list of relevant input files
+as well as Topics and tribes
 is assembled from the information in each of these input files (add a line "#%% topics = " in the last section of the input file.). 
 The bibliography list is assembled from the references cited in the "introduction" section, 
 that use [Shortcuts for Web links](markdown.md#links).
@@ -358,7 +372,6 @@ The different components are used by the script generate_doc.py as follows:
 
 Then, build the HTML using `mksite.py serve`.
 
-
 ### Lessons
 
 The major part of each lesson HTML file comes from `~abinit/doc/topics/origin_files/lesson_NAME.yml`,
@@ -384,7 +397,6 @@ In order to add a new lesson, introduce a new section in `lessons.yml`, and crea
 
 Then, build the HTML using `mksite.py`.
 
-
 ### Help files
 
 The structuration for help files is very similar to the one for the lessons of the tutorial.
@@ -393,7 +405,6 @@ although selected high-level information (name, keyword, author and subtitle)
 is contained in `~abinit/doc/topics/origin_files/helps.yml`.
 
 Do not forget to build the HTML using generate_doc.py.
-
 
 ### Theory documents
 
@@ -485,13 +496,6 @@ Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]]
     We are already using Markdown on gitlab to document our merge requests.
     This means that we can easily integrate all this gitlab documentation
     with the release notes published on the website.
-
-
-## abinit_vars.yml format
-
-As values in the `~abinit/doc/input_variables/origin_files/abinit_vars.yml` file, 
-you can specify numbers, string, arrays, following the [YAML specifications](http://en.wikipedia.org/wiki/YAML).
-Several "types" are defined to allow sufficient flexibility in the specifications, as follows.
 
 
 ### !variable object

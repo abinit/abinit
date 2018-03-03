@@ -121,6 +121,11 @@ and then use doi2bibtex from the command line:
 
 Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key 
 (make sure it's not a duplicated entry).
+Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008" 
+(start with an uppercase letter, then lower case, then four-digit year). 
+Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
+Then, build the HTML pages using `mksite.py serve`.
+
 Run the tests in `./tests/test_bibtex.py` with pytest (see next section) to validate your changes.
 
 ## Running the unit tests

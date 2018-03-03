@@ -1158,7 +1158,7 @@ The bibtex file is available [here](../abiref.bib).
                 # Handle [[varset:BSE|text]]
                 assert fragment is None
                 if name == "allvars":
-                    url = "/variables/index"
+                    url = "/variables/"
                 else:
                     url = "/variables/%s" % name
                 if a.text is None: a.text = "%s varset" % name

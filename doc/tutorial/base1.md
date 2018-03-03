@@ -42,7 +42,7 @@ Go to the Tutorial directory (that we refer as `~abinit/tests/tutorial/Input`).
   
 In that directory, you will find the necessary input files to run the examples related to this tutorial. 
 Take a few seconds to read the names of the files already present in `~abinit/tests/tutorial/Input`. 
-Compare with the lessons mentioned in the index of the [Tutorial home page](index).
+Compare with the lessons mentioned in the index of the [Tutorial home page](index.md).
 You will find other input files, specific for the Density Functional
 Perturbation Theory ("Response functions") capabilities in the directory `~abinit/tests/tutorespfn/Input`. 
 

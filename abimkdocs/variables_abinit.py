@@ -6536,11 +6536,6 @@ computation of the atomic forces and positions between t=0 and t=lotf_nitex.
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
 
-  * 30 --> Using a supercell, calculate a self consistent phonon structure as in PRL 100 095901 (2008). The initial phonon eigenvectors and eigenvalues are read in, and then atoms are displaced according to the normal modes populated at a given temperature until convergence of the vibrational free energy (or so I hope)
-**Purpose:** Phonon structure
-**Cell optimization:** No (Use [[optcell]]=0 only)
-**Related variables:**
-
 No meaning for RF calculations.
 """,
 ),
