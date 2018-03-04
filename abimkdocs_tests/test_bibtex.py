@@ -49,7 +49,7 @@ class BibrefTest(AbimkdocsTest):
 
         for key, entry in bib_data.entries.items():
             # TODO validate_entry(entry)
-            #assert entry.to_markdown()
+            assert entry.to_abimarkdown()
             assert entry.to_html()
             assert entry.to_bibtex()
             assert entry.get_bibtex_btn_modal(link=False)

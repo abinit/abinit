@@ -30,60 +30,7 @@ from pygments import highlight
 from pygments.lexers import BashLexer, BibTeXLexer
 from pygments.formatters import HtmlFormatter
 from doc.tests.pymods.termcolor import cprint
-from .variables import Variable
-
-
-class lazy_property(object):
-    """
-    lazy_property descriptor
-
-    Used as a decorator to create lazy attributes. Lazy attributes
-    are evaluated on first use.
-    """
-
-    def __init__(self, func):
-        self.__func = func
-        from functools import wraps
-        wraps(self.__func)(self)
-
-    def __get__(self, inst, inst_cls):
-        if inst is None:
-            return self
-
-        if not hasattr(inst, '__dict__'):
-            raise AttributeError("'%s' object has no attribute '__dict__'"
-                                 % (inst_cls.__name__,))
-
-        name = self.__name__
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
-
-        value = self.__func(inst)
-        inst.__dict__[name] = value
-        return value
-
-    @classmethod
-    def invalidate(cls, inst, name):
-        """Invalidate a lazy attribute.
-
-        This obviously violates the lazy contract. A subclass of lazy
-        may however have a contract where invalidation is appropriate.
-        """
-        inst_cls = inst.__class__
-
-        if not hasattr(inst, '__dict__'):
-            raise AttributeError("'%s' object has no attribute '__dict__'"
-                                 % (inst_cls.__name__,))
-
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
-
-        if not isinstance(getattr(inst_cls, name), cls):
-            raise AttributeError("'%s.%s' is not a %s attribute"
-                                 % (inst_cls.__name__, name, cls.__name__))
-
-        if name in inst.__dict__:
-            del inst.__dict__[name]
+from .variables import Variable, lazy_property
 
 
 def my_unicode(s):
@@ -151,9 +98,9 @@ class MyEntry(Entry):
         except KeyError:
             return ""
 
-    def to_markdown(self, bibtex_ui="button"):
+    def to_abimarkdown(self, bibtex_ui="button"):
         """
-        Return markdown string with bibliographic entry.
+        Return markdown string with bibliographic entry. Can use Abinit markdown extensions
 
         Args:
             bibtex_ui: If not None a modal window with the bibtex entry is added.
@@ -213,7 +160,7 @@ class MyEntry(Entry):
 
     def to_html(self):
         """Return string with entry in HTML format."""
-        return markdown.markdown(self.to_markdown())
+        return markdown.markdown(self.to_abimarkdown())
 
     def to_bibtex(self):
         """Return the data as a unicode string in the given format."""
@@ -590,7 +537,7 @@ This document lists and provides the description of the name (keywords) of the
 """.format(varset=varset, executable=vd.executable))
 
                     for i, var in enumerate(var_list):
-                        mdf.write(var.to_markdown(with_hr=False))
+                        mdf.write(var.to_abimarkdown(with_hr=False))
 
         # Add plotly figures.
         # TODO: Replace it with dot
@@ -680,7 +627,7 @@ in order of number of occurrence in the input files provided with the package.
                 items = sorted([(v.topic_tribes[topic][0], v) for v in vlist], key=lambda t: sort_tribes(t))
                 for tribe, group in sort_and_groupby(items, key=lambda t: t[0]):
                     lines.append("*%s:*\n" % tribe)
-                    lines.extend("- %s  %s" % (v.mdlink, v.mnemonics) for (_, v) in group)
+                    lines.extend("- %s  %s" % (v.wikilink, v.mnemonics) for (_, v) in group)
                     lines.append(" ")
                 related_variables = "\n".join(lines)
 
@@ -782,7 +729,7 @@ The bibtex file is available [here](../abiref.bib).
                 entry = self.bib_data.entries[name]
                 lines.append("\n\n## **%s** \n\n" % name)
                 try:
-                    lines.append(entry.to_markdown())
+                    lines.append(entry.to_abimarkdown())
                 except Exception as exc:
                     raise ValueError("Exception while trying to convert bibtex entry `%s`\n%s\n" % (name, str(exc)))
                 if citation2pages[name]:

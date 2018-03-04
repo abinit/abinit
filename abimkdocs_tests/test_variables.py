@@ -24,27 +24,41 @@ class VariablesTest(AbimkdocsTest):
         assert ecut != None
         assert ecut.name == "ecut"
         assert ecut.vartype == "real"
+        assert not ecut.isarray
         assert ecut != abinit_vars["pawecutdg"]
         assert ecut in {ecut: "foo"}
         assert ecut.executable == "abinit"
-        assert ecut.mdlink == "[[abinit:ecut]]"
+        assert ecut.wikilink == "[[abinit:ecut]]"
+        assert not ecut.depends_on_dimension("ntypat")
         assert not ecut.is_internal
         assert abinit_vars["mpw"].is_internal
+        acell = abinit_vars["acell"]
+        assert acell.isarray
+        assert not acell.depends_on_dimension("ntypat")
+        xred = abinit_vars["xred"]
+        assert xred.isarray and xred.varset == "basic" and "[[EVOLVING]]" in xred.characteristics
+        assert xred.depends_on_dimension("natom")
+        assert xred.depends_on_dimension("natrd")
+        assert len(acell.dimensions) == 1 and acell.dimensions[0] == 3
         abinit_asr = abinit_vars["asr"]
         anaddb_asr = vars_code["anaddb"]["asr"]
         assert abinit_asr.executable == "abinit"
         assert abinit_asr.name == "asr"
         assert anaddb_asr.executable == "anaddb"
         assert anaddb_asr.name == "asr"
-        assert anaddb_asr.mdlink == "[[anaddb:asr]]"
+        assert anaddb_asr.wikilink == "[[anaddb:asr]]"
         assert anaddb_asr != abinit_asr
         symsigma_parents = abinit_vars["symsigma"].get_parent_names()
         assert len(symsigma_parents) > 0 and "optdriver" in symsigma_parents
 
+        # The text of this variable contaings greek symbols in HTML.
+        var = abinit_vars["cd_frqim_method"]
+        repr(var); str(var)
+
         # Test "tricky" variables.
         fxcartfactor = vars_code["abinit"]["fxcartfactor"]
         str(fxcartfactor)
-        assert fxcartfactor.to_markdown()
+        assert fxcartfactor.to_abimarkdown()
         d = fxcartfactor.topic_tribes
         assert fxcartfactor.topic_tribes is d and len(d) == 2
         assert "expert" in d["TransPath"] and "expert" in d['GeoOpt']
@@ -54,7 +68,7 @@ class VariablesTest(AbimkdocsTest):
 
         iomode = vars_code["abinit"]["iomode"]
         str(iomode)
-        assert iomode.to_markdown()
+        assert iomode.to_abimarkdown()
         assert len(iomode.characteristics) == 1 and iomode.characteristics[0] == "[[DEVELOP]]"
         assert isinstance(iomode.defaultval, ValueWithConditions)
         # TODO: waiting for new version dict-based.
@@ -62,7 +76,7 @@ class VariablesTest(AbimkdocsTest):
         #assert iomode.defaultval['[[MPI_IO]] and [[paral_kgb]]==1'] == 1
 
         istwfk = vars_code["abinit"]["istwfk"]
-        assert istwfk.to_markdown()
+        assert istwfk.to_abimarkdown()
         assert istwfk.characteristics is None and istwfk.vartype == "integer" and istwfk.varset == "dev"
         assert istwfk.dimensions == ["[[nkpt]]"]
         assert isinstance(istwfk.defaultval, MultipleValue)
@@ -76,13 +90,39 @@ class VariablesTest(AbimkdocsTest):
         #assert jdtset.defaultval.start == 1
         #assert jdtset.defaultval.stop == "[[ndtset]]"
 
+        # Abipy test
+        # Database methods.
+        database = abinit_vars
+        assert database.apropos("ecut")
+        #assert len(database.json_dumps_varnames())
+
+        print("vargeo section:\n", database.vars_with_section("vargeo"))
+        for section in database.sections:
+            assert len(database.vars_with_section(section))
+
+        for charact in database.characteristics:
+            print("character:", charact)
+            assert len(database.vars_with_char(charact))
+
+        name2section = database.name2section
+        assert name2section["ecut"] == "basic" and name2section["ionmov"] == "rlx"
+
+        print("d:", database.group_by_section("ecut"), "hello")
+        assert database.group_by_section("ecut") ==  {'basic': ['ecut']}
+
+        #abinit_help("ecut", info=True)
+        # Should not raise
+        #abinit_help("foobar", info=True)
+
         errors = []
         for var in vars_code.iter_allvars():
             try:
                 assert repr(var)
                 assert str(var)
                 #assert var.to_string(verbose=2)
-                assert var.to_markdown()
+                #str(var._repr_html_())
+                assert var.info
+                assert var.to_abimarkdown()
                 # topic --> list of tribes
                 assert len(var.topic_tribes)
                 var.validate()
