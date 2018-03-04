@@ -1,18 +1,24 @@
 ## Getting started
 
+!!! warning:
+    
+    The code supports py2.7 and python3.6 but py3k is **strongly** suggested
+    especially when building the final version before deploying 
+    as py3k has native support for unicode.
+
 Install the python packages required to build the static website with:
 
     pip install -r requirements.txt
 
 then install the mkdocs plugin with:
 
-    cd mkdocs_plugins
+    cd abimkdocs_plugins
     python setup.py install
 
 If you use conda, you may want to create a new environment based on python3.6 with:
 
-    conda create -n abinit-mkdocs-2 python=3.6
-    source activate abinit-mkdocs
+    conda create -n abinit-abimkdocs-2 python=3.6
+    source activate abinit-abimkdocs
 
 and then install the packages with pip (see above commands).
 
@@ -157,4 +163,4 @@ then use
 
 !!! important
 
-    For the time being, one has to use python2.7
+    For the time being, linkchecker python2.7

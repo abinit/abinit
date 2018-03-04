@@ -134,9 +134,9 @@ class Variable(object):
         """Abinit wikilink."""
         return "[[%s:%s]]" % (self.executable, self.name)
 
-    def __repr__(self):
-        """variable name + mnemonics"""
-        return self.abivarname + "  <" + str(self.definition) + ">"
+    #def __repr__(self):
+    #    """variable name + mnemonics"""
+    #    return self.abivarname + "  <" + str(self.definition) + ">"
 
     def __str__(self):
         return self.to_string()

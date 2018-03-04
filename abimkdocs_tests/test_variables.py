@@ -121,8 +121,15 @@ class VariablesTest(AbimkdocsTest):
             #print(vnset)
             count_code[test.executable].update(vnset)
 
+        untested = {}
         for code, count in count_code.items():
+            untested[code] = []
             for vname, c in count.items():
-                if c == 0:
+                if c == 0 and not variables_code[code][vname].is_internal:
                     print(code, vname)
-        assert 0
+                    untested[code].append(vname)
+
+        for code in sorted(untested.keys()):
+            untested[code] = sorted(untested[code])
+            print(code, untested[code])
+        #assert 0

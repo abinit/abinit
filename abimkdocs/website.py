@@ -610,6 +610,7 @@ in order of number of occurrence in the input files provided with the package.
                     lines.append('<li class="list-group-item %s"> %s <span class="badge"> %d </span></li>' % (cls, s, count))
                 mdf.write("\n".join(lines) + "</ul>")
 
+        # TODO: Use md skeletong + fields filled by python (jinja?)
         cprint("Generating Markdown files with topics ...", "green")
         repo_path = os.path.join(ABINIT_REPO, "doc/topics/origin_files/")
         with io.open(os.path.join(repo_path, "list_of_topics.yml"), "rt", encoding="utf-8") as fh:
@@ -760,8 +761,6 @@ The bibtex file is available [here](../abiref.bib).
                         for url in sorted([page.url for page in citation2pages[name]])))
 
             mdf.write("\n".join(lines))
-
-        repo_path = os.path.join(ABINIT_REPO, "doc/biblio/origin_files/")
 
         meta = {"description": "List of PDF files provided by the Abinit documentation"}
         with self.new_mdfile("theory", "documents.md", meta=meta) as mdf:
@@ -1049,7 +1048,7 @@ The bibtex file is available [here](../abiref.bib).
 
                 elif name in self.variables_code.characteristics:
                     # handle [[ENERGY]] by building internal link to abinit user guide
-                    url = "/guide/abinit/#32-more-about-abinit-input-variables"
+                    url = "/guide/abinit#parameters"
                     if a.text is None: a.text = name
 
                 elif name in self.variables_code.external_params:

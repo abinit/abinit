@@ -8,8 +8,7 @@ import warnings
 import mkdocs.__main__
 
 if sys.version_info < (3, 6):
-    for i in range(50):
-        warnings.warn("""Python >= 3.6 is STRONGLY recommended when building the Abinit documentation""")
+    warnings.warn("""Python >= 3.6 is STRONGLY recommended when building the Abinit documentation""")
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir = os.path.dirname(os.path.abspath(__file__))
@@ -144,7 +143,7 @@ def main():
         website.generate_markdown_files()
 
     if "--dry-run" in sys.argv: return 0
-    print("Invoking mksite to build HTML from MD files. It could take a while...")
+    print("Invoking mkdocs.__main__ to build HTML from MD files. It could take a while...")
     mkdocs_retcode = mkdocs.__main__.cli()
     return mkdocs_retcode + len(website.warnings)
 

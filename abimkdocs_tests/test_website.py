@@ -71,7 +71,7 @@ class WebsiteTest(AbimkdocsTest):
         e = element("theory:mbt|GW Notes")
         assert e.get("href") == "../theory/mbt" and e.text == "GW Notes"
         e = element("varset:allvars|All vars")
-        assert e.get("href") == "../variables/index" and e.text == "All vars"
+        assert e.get("href") == "../variables/" and e.text == "All vars"
         e = element("varset:bse|BSE varset")
         assert e.get("href") == "../variables/bse" and e.text == "BSE varset"
 

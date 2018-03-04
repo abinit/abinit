@@ -1,82 +1,46 @@
-
 TODO list for the documentation of ABINIT
 =========================================
 
+The first version of this TODO was written by Yann.
+Several points have been adressed in the mkdocs version but ther
+are still points worth discussing
 
 * General remarks:
 
-	* In prevision of the Autotools support and packaging, the documentation
-	  should be reorganized in relevant sections => needs discussion.
-	* Copyright and history information might be inserted as comments.
-	* To be discussed: which files should exist in one format only, and which
-	  ones should be multi-format?
-	* Dependencies should be stored somewhere, to known what to update and
-	  when.
-
-* README:
-
-	* Should contain much more accurate documentation.
-	* Remove copyright notice.
-
-* abinit_help.html:
-
-	* Prepare text version for markdown.
-	* Remove links at bottom.
-	* Remove copyright notice.
-
-* acknowledgments.html:
-
-	* File name is confusing: who acknowledges who? Should be something like
-	  acknowledge-howto.html.
-	* Prepare text version for markdown.
-	* Remove links at bottom.
-	* Remove copyright notice.
+    * In prevision of the Autotools support and packaging, the documentation
+    should be reorganized in relevant sections => needs discussion.
+    * Copyright and history information might be inserted as comments.
+    * To be discussed: which files should exist in one format only, and which
+    ones should be multi-format?
+    * Dependencies should be stored somewhere, to known what to update and when.
 
 * aim_help.html:
 
-	* Is it up-to-date?
-	* List of input variables should be handled by a database.
-	* Prepare text version for markdown.
-	* Remove links at bottom.
-	* Remove copyright notice.
-
-	* Prepare text version for markdown.
-	* Remove links at bottom.
-	* Remove copyright notice.
+    * Is it up-to-date?
 
 * aimhelp.tex,aimhelp.ps:
 
-	* Do not match aim_help.html => which is the right one?
+    * Do not match aim_help.html => which is the right one?
 
 * anaddb_help.html:
 
-	* Is it up-to-date?
-	* List of input variables should be handled by a database.
-	* Prepare text version for markdown.
-	* Remove links at bottom.
-	* Remove copyright notice.
+    * Is it up-to-date?
 
 * band2eps_help:
 
-	* Can barely be called documentation => restart from scratch.
-
-* bibliography.html:
-
-	* Should be generated automatically from the database.
+	* Can barely be called documentation (and executable) => restart from scratch.
 
 * check_list:
 
-	* To whom is it truly useful?
+	* To whom is it truly useful? 
+        MG: Xavier.
+        @Xavier: Could you move the file somewhere>
 
 * conducti_manual.tex:
 
 	* Is it complete and accurate?
 	* Is it up-to-date?
 
-* context:
-
-	* Test if it is ready for markdown.
-	* Remove copyright notice.
 
 * contributors:
 
@@ -87,8 +51,6 @@ TODO list for the documentation of ABINIT
 
 	* Is it complete and accurate?
 	* Is it up-to-date?
-	* Reformat for markdown.
-	* Remove copyright notice.
 
 * cut3d_help.html:
 
@@ -105,10 +67,6 @@ TODO list for the documentation of ABINIT
 
 	* Violation of the GPL: where is the source? Should be relicensed?
 
-* formabinit.css:
-
-	* Totally useless now (the web site) => should be removed.
-
 * format_KSS:
 
 	* Is it complete and accurate?
@@ -120,13 +78,6 @@ TODO list for the documentation of ABINIT
 	* Is it complete and accurate?
 	* Is it up-to-date?
 	* Reformat for markdown.
-
-* varset_allvars.html:
-
-	* Is it up-to-date?
-	* Should be generated automatically from a database.
-	* Remove links at bottom.
-	* Remove copyright notice.
 
 * known_problems.x.y.z:
 
@@ -145,32 +96,20 @@ TODO list for the documentation of ABINIT
 	* Remove links at bottom.
 	* Remove copyright notice.
 
-* netiquette.html:
-
-	* Actively maintained by MM.
-	* Prepare text version for markdown.
-	* Remove copyright notice.
-
 * new_user_guide.html:
 
 	* Is it complete and accurate?
 	* Is it up-to-date?
-	* Prepare text version for markdown.
-	* Remove links at bottom.
-	* Remove copyright notice.
 
 * other_codes:
 
 	* Probably out-of-date.
 	* Set-up a database?
-	* Remove copyright notice.
 
 * paral_use:
 
 	* Is it complete and accurate?
 	* Is it up-to-date?
-	* Reformat for markdown.
-	* Remove copyright notice.
 
 * piezoelectric.txt:
 
@@ -194,38 +133,15 @@ TODO list for the documentation of ABINIT
 
 	* Is it complete and accurate?
 	* Is it up-to-date?
-	* Prepare text version for markdown (may take time).
-	* Remove links at bottom.
-	* Remove copyright notice.
 
-* respfn_help.keep:
+* spacegrouphelpfile.html, spgrdefinition.html, spgrdescription.html, spgrhead.html, spgrcopyright.html:
 
-	* Should be somewhere else.
-
-* spacegrouphelpfile.html, spgrdefinition.html, spgrdescription.html,
-  spgrhead.html:
-
-	* Should be rewritten.
-
-* spgrcopyright.html:
-
-	* Should be removed.
+	* Should be rewritten. DONE by MG
 
 * tuning:
 
 	* Is it complete and accurate?
 	* Is it up-to-date?
-	* Reformat for markdown.
-	* Remove copyright notice.
-
-* varbas.html, vardev.html, varfil.html, vargeo.html, vargs.html, vargw.html,
-  varint.html, varpar.html, varpaw.html, varrf.html, varrlx.html:
-
-	* Are they complete and accurate?
-	* Are they up-to-date?
-	* Should be handled by a database => needs discussion.
-	* Remove links at top and bottom.
-	* Remove copyright notice.
 
 * welcome.html:
 
@@ -318,4 +234,3 @@ TODO list for the documentation of ABINIT
 	* Should be part of a PDF manual too.
 	* Remove links at top and bottom.
 	* Remove copyright notice.
-
