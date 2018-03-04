@@ -304,7 +304,7 @@ instead of the default istwfk=1.
 :       are alternative ways to [[xcart]] to specify the positions of atoms within the primitive cell.
 
 Now, you can start reading the description of the remaining of the
-`tbase1_1.out` file, in [[help:abinit#6.3|[section 6.3]] of the abinit help file.
+`tbase1_1.out` file, in [[help:abinit#6.3|section 6.3]] of the abinit help file.
 Look at the `tbase1_1.out` file at the same time.
 
 You have read completely an output file! 
@@ -618,7 +618,7 @@ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -0.11112
 ```
 
-If you run again, while having inserted in the input file '[[prtvol]] 2', because [[occopt]], 
+If you run again, while having inserted in the input file [[prtvol]] 2, because [[occopt]], 
 the charge density and spin polarisation at each point of the FFT grid is also analyzed: 
     
 ```

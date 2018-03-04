@@ -9,15 +9,15 @@ import os
 import json
 
 from collections import OrderedDict
-from abimkdocs.variables import get_variables_code, ValueWithUnit, ValueWithConditions, MultipleValue, Range
+from abimkdocs.variables import get_codevars, ValueWithUnit, ValueWithConditions, MultipleValue, Range
 
 class VariablesTest(AbimkdocsTest):
 
     def test_variables(self):
-        vars_code = get_variables_code()
-        assert vars_code is get_variables_code()
-        assert "abinit" in vars_code
-        abinit_vars = vars_code["abinit"]
+        codevars = get_codevars()
+        assert codevars is get_codevars()
+        assert "abinit" in codevars
+        abinit_vars = codevars["abinit"]
         assert "ecut" in abinit_vars
         ecut = abinit_vars["ecut"]
         assert ecut == ecut
@@ -41,7 +41,7 @@ class VariablesTest(AbimkdocsTest):
         assert xred.depends_on_dimension("natrd")
         assert len(acell.dimensions) == 1 and acell.dimensions[0] == 3
         abinit_asr = abinit_vars["asr"]
-        anaddb_asr = vars_code["anaddb"]["asr"]
+        anaddb_asr = codevars["anaddb"]["asr"]
         assert abinit_asr.executable == "abinit"
         assert abinit_asr.name == "asr"
         assert anaddb_asr.executable == "anaddb"
@@ -56,7 +56,7 @@ class VariablesTest(AbimkdocsTest):
         repr(var); str(var)
 
         # Test "tricky" variables.
-        fxcartfactor = vars_code["abinit"]["fxcartfactor"]
+        fxcartfactor = codevars["abinit"]["fxcartfactor"]
         str(fxcartfactor)
         assert fxcartfactor.to_abimarkdown()
         d = fxcartfactor.topic_tribes
@@ -66,7 +66,7 @@ class VariablesTest(AbimkdocsTest):
         assert fxcartfactor.defaultval.units == "(Bohr^2)/Hartree"
         assert fxcartfactor.defaultval.value == 1
 
-        iomode = vars_code["abinit"]["iomode"]
+        iomode = codevars["abinit"]["iomode"]
         str(iomode)
         assert iomode.to_abimarkdown()
         assert len(iomode.characteristics) == 1 and iomode.characteristics[0] == "[[DEVELOP]]"
@@ -75,7 +75,7 @@ class VariablesTest(AbimkdocsTest):
         #assert iomode.defaultval["defaultval"] == 0
         #assert iomode.defaultval['[[MPI_IO]] and [[paral_kgb]]==1'] == 1
 
-        istwfk = vars_code["abinit"]["istwfk"]
+        istwfk = codevars["abinit"]["istwfk"]
         assert istwfk.to_abimarkdown()
         assert istwfk.characteristics is None and istwfk.vartype == "integer" and istwfk.varset == "dev"
         assert istwfk.dimensions == ["[[nkpt]]"]
@@ -85,7 +85,7 @@ class VariablesTest(AbimkdocsTest):
         assert istwfk.requires is None
         assert "nkpt" in istwfk.get_parent_names()
 
-        jdtset = vars_code["abinit"]["jdtset"]
+        jdtset = codevars["abinit"]["jdtset"]
         assert isinstance(jdtset.defaultval, Range)
         #assert jdtset.defaultval.start == 1
         #assert jdtset.defaultval.stop == "[[ndtset]]"
@@ -114,11 +114,11 @@ class VariablesTest(AbimkdocsTest):
         # Should not raise
         #abinit_help("foobar", info=True)
 
-        #for codename, d in vars_code.items():
+        #for codename, d in codevars.items():
         #    d.validate_vars()
 
         errors = []
-        for var in vars_code.iter_allvars():
+        for var in codevars.iter_allvars():
             try:
                 assert repr(var)
                 assert str(var)
@@ -128,7 +128,7 @@ class VariablesTest(AbimkdocsTest):
                 assert var.to_abimarkdown()
                 # topic --> list of tribes
                 assert len(var.topic_tribes)
-                var.validate(ref_characteristics=vars_code.characteristics)
+                var.validate(ref_characteristics=codevars.characteristics)
             except Exception as exc:
                 errors.append(str(exc))
 
@@ -143,8 +143,8 @@ class VariablesTest(AbimkdocsTest):
         Finally compare the new dictionary with the reference one and fail if they don't match.
         """
         # Build database with all input variables indexed by code name.
-        from abimkdocs.variables import get_variables_code
-        variables_code = get_variables_code()
+        from abimkdocs.variables import get_codevars
+        codevars = get_codevars()
 
         # Build AbinitTestSuite object.
         from doc import tests as tmod
@@ -153,7 +153,7 @@ class VariablesTest(AbimkdocsTest):
         # Build conter for the different codes, keys are the varnames from the database.
         from collections import Counter
         count_code = {}
-        for code, d in variables_code.items():
+        for code, d in codevars.items():
             count_code[code] = Counter({k: 0 for k in d})
 
         black_list = set([
@@ -172,7 +172,7 @@ class VariablesTest(AbimkdocsTest):
             untested[code] = []
             # Add it if var is not tested and not internal.
             for vname, c in count.items():
-                if c == 0 and not variables_code[code][vname].is_internal:
+                if c == 0 and not codevars[code][vname].is_internal:
                     print(code, vname)
                     untested[code].append(vname)
 

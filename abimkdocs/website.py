@@ -278,8 +278,8 @@ class Website(object):
         self.markdown = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
 
         # Build database with all input variables indexed by code name.
-        from .variables import get_variables_code
-        self.variables_code = get_variables_code()
+        from .variables import get_codevars
+        self.codevars = get_codevars()
 
         # Get bibtex references and cast to MyEntry instance.
         bib_path = os.path.join(self.root, "abiref.bib")
@@ -304,7 +304,7 @@ class Website(object):
         #print(self.rpath2test.keys())
 
         # Find variables used in tests.
-        for var in self.variables_code.iter_allvars():
+        for var in self.codevars.iter_allvars():
             assert not hasattr(var, "tests")
             var.tests = []
             var.tests_info = {}
@@ -330,7 +330,7 @@ class Website(object):
         ])
 
         for test in tests:
-            vd = self.variables_code.get(test.executable, None)
+            vd = self.codevars.get(test.executable, None)
             # Not all codes have variables documented in the database e.g. multibinit
             if vd is None:
                 if test.executable not in codes_without_vars:
@@ -343,7 +343,7 @@ class Website(object):
                 var.tests.append(test)
 
         # Pre-compute vars.tests and their frequency.
-        for var in self.variables_code.iter_allvars():
+        for var in self.codevars.iter_allvars():
             var.tests_info["num_all_tests"] = len([t for t in tests if t.executable == var.executable])
             var.tests_info["num_all_tutorial_tests"] = len([t for t in tests
                 if t.executable == var.executable and t.suite_name.startswith("tuto")])
@@ -500,7 +500,7 @@ This page gathers the autoconf files used by the buildbot testfarm
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}
         with self.new_mdfile("variables", "index.md", meta=meta) as mdf:
-            for code, vd in self.variables_code.items():
+            for code, vd in self.codevars.items():
                 mdf.write("## %s variables   \n\n" % code)
                 mdf.write(vd.get_vartabs_html(self, mdf.rpath))
                 #mdf.write(2*"\n" + "* * *\n")
@@ -518,11 +518,11 @@ typically compilation parameters, available libraries, or number of processors.
 You can change these parameters at compile or run time usually.
 
 """)
-            for pname, info in self.variables_code.external_params.items():
+            for pname, info in self.codevars.external_params.items():
                 mdf.write("## %s  \n%s  \n\n" % (pname, info))
 
         # Build markdown pages for the different sets of variables.
-        for code, vd in self.variables_code.items():
+        for code, vd in self.codevars.items():
             cprint("Generating markdown files with input variables of code: `%s`..." % vd.executable, "green")
             for varset in vd.all_varset:
                 var_list = [v for v in vd.values() if v.varset == varset]
@@ -549,7 +549,7 @@ These graphs show the dependencies of the input variables towards each other.
 The colormap gives the number of input variables connected to the node.
 
 """)
-                for code, vd in self.variables_code.items():
+                for code, vd in self.codevars.items():
                     for varset in vd.all_varset:
                         mdf.write("## %s, varset: %s  \n\n" % (code, varset))
                         #mdf.write(vd.get_plotly_networkx(varset=varset, include_plotlyjs=False))
@@ -563,7 +563,7 @@ This document lists the input variables for ABINIT and three post-processors of 
 in order of number of occurrence in the input files provided with the package.
 
 """)
-            for code, vd in self.variables_code.items():
+            for code, vd in self.codevars.items():
                 num_tests = len([test for test in self.rpath2test.values() if test.executable == code])
                 mdf.write("\n\n## %s \n\n" % code)
                 mdf.write("%d tests\n\n" % num_tests)
@@ -612,7 +612,7 @@ in order of number of occurrence in the input files provided with the package.
             # Order and group vlist by tribes and write list with links.
             # TODO: Can we have multiple tribes with the same topic?
             related_variables = "No variable associated to this topic."
-            vlist = [var for var in self.variables_code.iter_allvars() if topic in var.topic_tribes]
+            vlist = [var for var in self.codevars.iter_allvars() if topic in var.topic_tribes]
             if vlist:
                 lines = []
                 def sort_tribes(t):
@@ -979,14 +979,14 @@ The bibtex file is available [here](../abiref.bib).
                 elif "@" in name:
                     # Handle [[dipdip@anaddb|text]]
                     vname, code = name.split("@")
-                    var = self.variables_code[code][vname]
+                    var = self.codevars[code][vname]
                     url = "/variables/%s#%s" % (var.varset, var.name)
                     if a.text is None: a.text = name
                     html_classes.append("codevar-wikilink")
 
-                elif name in self.variables_code["abinit"]:
+                elif name in self.codevars["abinit"]:
                     # Handle link to Abinit variable e.g. [[ecut|text]]
-                    var = self.variables_code["abinit"][name]
+                    var = self.codevars["abinit"][name]
                     url = "/variables/%s#%s" % (var.varset, var.name)
                     html_classes.append("codevar-wikilink")
                     if a.text is None:
@@ -1026,19 +1026,19 @@ The bibtex file is available [here](../abiref.bib).
                     target = "_blank"
                     html_classes.append("abifile-wikilink")
 
-                elif name in self.variables_code.characteristics:
+                elif name in self.codevars.characteristics:
                     # handle [[ENERGY]] by building internal link to abinit user guide
                     url = "/guide/abinit#parameters"
                     if a.text is None: a.text = name
 
-                elif name in self.variables_code.external_params:
+                elif name in self.codevars.external_params:
                     # handle [[AUTO_FROM_PSP]] by building link with popover
                     content = ("This is an external parameter\n"
                                "typically compilation parameters, available libraries, or number of processors.\n"
                                "You can change these parameters at compile or runtime usually.\n")
                     url = "/variables/external_parameters#%s" % self.slugify(name)
                     if a.text is None: a.text = name
-                    add_popover(a, title=self.variables_code.external_params[name], content=content)
+                    add_popover(a, title=self.codevars.external_params[name], content=content)
 
                 else:
                     self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
@@ -1046,10 +1046,10 @@ The bibtex file is available [here](../abiref.bib).
 
         else:
             # namespace is defined
-            if namespace in self.variables_code:
+            if namespace in self.codevars:
                 # Handle [[anaddb:asr|text]] or [[abinit:ecut|text]]
                 assert fragment is None
-                var = self.variables_code[namespace][name]
+                var = self.codevars[namespace][name]
                 url = "/variables/%s#%s" % (var.varset, var.name)
                 html_classes.append("codevar-wikilink")
                 if a.text is None:
@@ -1215,7 +1215,7 @@ The bibtex file is available [here](../abiref.bib).
     def build_varsearch_html(self, page_rpath):
         # Build single dictionary mapping varname --> var. Add @code if not abinit.
         allvars = {}
-        for code, vd in self.variables_code.items():
+        for code, vd in self.codevars.items():
             allvars.update({v.abivarname: v for v in vd.values()})
 
         tabs = "\n".join("""\

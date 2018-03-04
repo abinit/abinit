@@ -114,6 +114,29 @@ def splitall(path):
     return allparts
 
 
+# Unit names.
+ABI_UNITS = [
+    'au',
+    'Angstr',
+    'Angstrom',
+    'Angstroms',
+    'Bohr',
+    'Bohrs',
+    'eV',
+    'Ha',
+    'Hartree',
+    'Hartrees',
+    'K',
+    'Ry',
+    'Rydberg',
+    'Rydbergs',
+    'T',
+    'Tesla',
+]
+
+# Operators.
+ABI_OPS = ['sqrt', 'end', '*', '/']
+
 class Variable(object):
     """
     """
@@ -443,6 +466,8 @@ class Variable(object):
         errors = []
         eapp = errors.append
 
+	# TODO: varset should not be a variable!
+
         svar = "None"
         try:
             svar = str(self)
@@ -637,9 +662,10 @@ class MultipleValue(object):
 
 _VARS = None
 
-def get_variables_code():
+def get_codevars():
     """
-    Return the database of variable and cache it. Main entry point for client code.
+    Return the database of variables indexed by code name and cache it.
+    Main entry point for client code.
     """
     global _VARS
     if _VARS is None: _VARS = VarDatabase.from_pyfiles()
