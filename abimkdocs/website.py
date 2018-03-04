@@ -344,17 +344,9 @@ class Website(object):
         self.abinit_stats = AbinitStats(os.path.join(self.root, "maintainers", "statistics.txt"))
         self.abinit_stats.json_dump(os.path.join(self.root, "developers", "statistics.json"))
 
-        # Build AbinitTestSuite object.
+        # Build flat list of tests.
         from doc import tests as tmod
-        tests = []
-        for t in tmod.abitests.select_tests(suite_args=[], regenerate=True):
-            # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
-            # See https://stackoverflow.com/questions/9006740/isinstance-and-type-equivelence-failure-due-to-import-mechanism-python-djan
-            #if isinstance(t, ChainOfTests):
-            if hasattr(t, "tests"):
-                tests.extend(t.tests)
-            else:
-                tests.append(t)
+        tests = tmod.abitests.select_tests(suite_args=[], regenerate=True, flat_list=True)
 
         # Construct dictionary rpath --> test. Use OrderedDict to have deterministic behaviour.
         self.rpath2test = {}

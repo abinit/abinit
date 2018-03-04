@@ -8,7 +8,7 @@ import warnings
 import mkdocs.__main__
 
 if sys.version_info < (3, 6):
-    warnings.warn("""Python >= 3.6 is STRONGLY recommended when building the Abinit documentation""")
+    warnings.warn("Python >= 3.6 is STRONGLY recommended when building the Abinit documentation\n" * 20)
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir = os.path.dirname(os.path.abspath(__file__))

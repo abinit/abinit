@@ -547,7 +547,7 @@ Other related input variables are:
   * in case of [[berryopt]]=1,2, or 3: [[bdberry]] and [[kberry]]; also, [[nberry]] must be larger than 0;
   * in case of [[berryopt]]=-1,-2, or -3: the variable [[rfdir]] must be used to specify the primitive vector along which the projection of the polarization or the ddk will be computed. For example if [[berryopt]]=-1 and [[rfdir]]=1 0 0, the projection of the polarization along the reciprocal lattice vector G_1 is computed. In case [[rfdir]]=1 1 1, ABINIT computes the projection of P along G_1, G_2 and G_3 and transforms the results to cartesian coordinates;
   * in cases where [[berryopt]] is negative, [[berrystep]] allow a computation of multiple-step Berry phase in order to accelerate the convergence.
-  * [[efield]] and [[rfdir]] in case of [[berryopt]]=4 ;
+  * [[efield]] and [[rfdir]] in case of [[berryopt]]=4;
 
 The cases [[berryopt]]=-1,-2,-3, 4, 6, 7, 14, 16, and 17 have to be used with [[occopt]]=1.
 
@@ -1482,7 +1482,7 @@ correlation grid.
 
 When [[chksymbreak]]=1, the code stops (or issue a warning) if:
 
-  * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4 ;
+  * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
   * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
     or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
 
@@ -6562,8 +6562,8 @@ The possible values of [[iprcel]] correspond to:
   * Between 41 and 49 --> compute the RPA dielectric matrix at the first step, and recompute it at a later step, and take into account the mixing factor [[diemix]].
   * Between 51 and 59 --> same as between 41 and 49, but compute the RPA dielectric matrix by another mean
   * Between 61 and 69 --> same as between 41 and 49, but compute the electronic dielectric matrix instead of the RPA one.
-  * Between 71 and 78 --> STILL UNDER DEVELOPMENT -- NOT USABLE ; Use the modified Kerker preconditioner with a real-space formulation (basic formulation is shown at [[dielng]]). The dielectric matrix is approximated thanks to [[diemac]] and [[dielng]]. Note that [[diemix]] is also used.
-  * 79 --> STILL UNDER DEVELOPMENT -- NOT USABLE ; same as previous but with an alternate algorithm.
+  * Between 71 and 78 --> STILL UNDER DEVELOPMENT -- NOT USABLE; Use the modified Kerker preconditioner with a real-space formulation (basic formulation is shown at [[dielng]]). The dielectric matrix is approximated thanks to [[diemac]] and [[dielng]]. Note that [[diemix]] is also used.
+  * 79 --> STILL UNDER DEVELOPMENT -- NOT USABLE; same as previous but with an alternate algorithm.
   * 141 to 169 --> same as Between 41 and 69 (but, the dielectric matrix is also recomputed every iprcel modulo 10 step).
 
 The computation of the dielectric matrix (for 0 [100]< [[iprcel]] < 70 [100])
@@ -7317,7 +7317,7 @@ The value [[ixc]]=10 is used internally: gives the difference between
   * 18 --> (NOT AVAILABLE: used internally for GGA BLYP pseudopotentials from M. Krack, see Theor. Chem. Acc. 114, 145 (2005), available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/blyp) \- use the LibXC instead, with [[ixc]]=-106131.
   * 19 --> (NOT AVAILABLE: used internally for GGA BP86 pseudopotentials from M. Krack, see Theor. Chem. Acc. 114, 145 (2005), available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/bp) \- use the LibXC instead, with [[ixc]]=-106132.
 
-  * 20 --> Fermi-Amaldi xc ( -1/N Hartree energy, where N is the number of electrons per cell ; G=0 is not taken into account however), for TDDFT tests. No spin-pol. Does not work for RF.
+  * 20 --> Fermi-Amaldi xc ( -1/N Hartree energy, where N is the number of electrons per cell; G=0 is not taken into account however), for TDDFT tests. No spin-pol. Does not work for RF.
   * 21 --> same as 20, except that the xc-kernel is the LDA ([[ixc]]=1) one, for TDDFT tests.
   * 22 --> same as 20, except that the xc-kernel is the Burke-Petersilka-Gross hybrid, for TDDFT tests.
   * 23 --> GGA of Z. Wu and R.E. Cohen, Phys. Rev. 73, 235116 (2006).
@@ -7363,10 +7363,10 @@ This means having [[usekden]]=1.
   * 008 --> XC_LDA_C_VWN_RPA ! Vosko, Wilk, & Nussair (RPA) [SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980) ]
   * 009 --> XC_LDA_C_PZ ! Perdew & Zunger [[cite:Perdew1981]]
   * 010 --> XC_LDA_C_PZ_MOD ! Perdew & Zunger (Modified) [[cite:Perdew1981]] Modified to improve the matching between the low and high rs part ]
-  * 011 --> XC_LDA_C_OB_PZ ! Ortiz & Ballone (PZ) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ; G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ; [[cite:Perdew1981]] ]
+  * 011 --> XC_LDA_C_OB_PZ ! Ortiz & Ballone (PZ) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994); G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997); [[cite:Perdew1981]] ]
   * 012 --> XC_LDA_C_PW ! Perdew & Wang [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
-  * 013 --> XC_LDA_C_PW_MOD ! Perdew & Wang (Modified) [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ; Added extra digits to some constants as in the PBE routine see [ https://www.chem.uci.edu/~kieron/dftold2/pbe.php ](https://www.chem.uci.edu/~kieron/dftold2/pbe.php) (at some point it was available at http://dft.uci.edu/pbe.php) ]
-  * 014 --> XC_LDA_C_OB_PW ! Ortiz & Ballone (PW) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ; G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ; JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
+  * 013 --> XC_LDA_C_PW_MOD ! Perdew & Wang (Modified) [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992); Added extra digits to some constants as in the PBE routine see [ https://www.chem.uci.edu/~kieron/dftold2/pbe.php ](https://www.chem.uci.edu/~kieron/dftold2/pbe.php) (at some point it was available at http://dft.uci.edu/pbe.php) ]
+  * 014 --> XC_LDA_C_OB_PW ! Ortiz & Ballone (PW) [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994); G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997); JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ]
   * 017 --> XC_LDA_C_vBH ! von Barth & Hedin [U von Barth and L Hedin, J. Phys. C: Solid State Phys. 5, 1629 (1972) ]
   * 020 --> XC_LDA_XC_TETER93 ! Teter 93 parametrization [S Goedecker, M Teter, J Hutter, PRB 54, 1703 (1996) ]
   * 022 --> XC_LDA_C_ML1 ! Modified LSD (version 1) of Proynov and Salahub [EI Proynov and D Salahub, Phys. Rev. B 49, 7874 (1994) ]
@@ -7385,7 +7385,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 85 --> XC_GGA_C_OP_G96 ! one-parameter progressive functional (G96 version) [T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999) ]
   * 86 --> XC_GGA_C_OP_PBE ! one-parameter progressive functional (PBE version) [T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999) ]
   * 87 --> XC_GGA_C_OP_B88 ! one-parameter progressive functional (B88 version) [T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999) ]
-  * 88 --> XC_GGA_C_FT97 ! Filatov & Thiel correlation [M Filatov & W Thiel, Int. J. Quant. Chem. 62, 603-616 (1997) ; M Filatov & W Thiel, Mol Phys 91, 847 (1997) ] WARNING: this functional is not tested. Use at your own risks.
+  * 88 --> XC_GGA_C_FT97 ! Filatov & Thiel correlation [M Filatov & W Thiel, Int. J. Quant. Chem. 62, 603-616 (1997); M Filatov & W Thiel, Mol Phys 91, 847 (1997) ] WARNING: this functional is not tested. Use at your own risks.
   * 89 --> XC_GGA_C_SPBE ! PBE correlation to be used with the SSB exchange [M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009) ]
   * 90 --> XC_GGA_X_SSB_SW ! Swarta, Sola and Bickelhaupt correction to PBE [M Swart, M Sola, and FM Bickelhaupt, J. Comp. Meth. Sci. Engin. 9, 69 (2009) ]
   * 91 --> XC_GGA_X_SSB ! WARNING: This functional gives NaN on IBM (XG20130608). Swarta, Sola and Bickelhaupt [M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009) ]
@@ -7398,15 +7398,15 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 98 -->  XC_GGA_X_BPCCAC ! BPCCAC (GRAC for the energy) [E Bremond, D Pilard, I Ciofini, H Chermette, C Adamo, and P Cortona, Theor Chem Acc 131, 1184 (2012) ]
   * 99 -->  XC_GGA_C_REVTCA ! Tognetti, Cortona, Adamo (revised) [V Tognetti, P Cortona, and C Adamo, Chem. Phys. Lett. 460, 536-539 (2008) ]
   * 100 -->  XC_GGA_C_TCA ! Tognetti, Cortona, Adamo [V Tognetti, P Cortona, and C Adamo, J. Chem. Phys. 128, 034101 (2008) ]
-  * 101 -->  XC_GGA_X_PBE ! Perdew, Burke & Ernzerhof exchange [JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996) ; JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997) ]
+  * 101 -->  XC_GGA_X_PBE ! Perdew, Burke & Ernzerhof exchange [JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996); JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997) ]
   * 102 -->  XC_GGA_X_PBE_R ! Perdew, Burke & Ernzerhof exchange (revised) [Y Zhang and W Yang, Phys. Rev. Lett 80, 890 (1998) ]
   * 103 -->  XC_GGA_X_B86 ! Becke 86 Xalfa,beta,gamma [AD Becke, J. Chem. Phys 84, 4524 (1986) ]
-  * 104 -->  XC_GGA_X_HERMAN ! Herman Xalphabeta GGA [F Herman, JP Van Dyke, and IB Ortenburger, Phys. Rev. Lett. 22, 807 (1969) ; F Herman, IB Ortenburger, and JP Van Dyke, Int. J. Quantum Chem. Symp. 3, 827 (1970) ]
-  * 105 -->  XC_GGA_X_B86_MGC ! Becke 86 Xalfa,beta,gamma (with mod. grad. correction) [AD Becke, J. Chem. Phys 84, 4524 (1986) ; AD Becke, J. Chem. Phys 85, 7184 (1986) ]
+  * 104 -->  XC_GGA_X_HERMAN ! Herman Xalphabeta GGA [F Herman, JP Van Dyke, and IB Ortenburger, Phys. Rev. Lett. 22, 807 (1969); F Herman, IB Ortenburger, and JP Van Dyke, Int. J. Quantum Chem. Symp. 3, 827 (1970) ]
+  * 105 -->  XC_GGA_X_B86_MGC ! Becke 86 Xalfa,beta,gamma (with mod. grad. correction) [AD Becke, J. Chem. Phys 84, 4524 (1986); AD Becke, J. Chem. Phys 85, 7184 (1986) ]
   * 106 -->  XC_GGA_X_B88 ! Becke 88 [AD Becke, Phys. Rev. A 38, 3098 (1988) ]
   * 107 -->  XC_GGA_X_G96 ! Gill 96 [PMW Gill, Mol. Phys. 89, 433 (1996) ]
   * 108 -->  XC_GGA_X_PW86 ! Perdew & Wang 86 [JP Perdew and Y Wang, Phys. Rev. B 33, 8800 (1986) ]
-  * 109 -->  XC_GGA_X_PW91 ! Perdew & Wang 91 [JP Perdew, in Proceedings of the 21st Annual International Symposium on the Electronic Structure of Solids, ed. by P Ziesche and H Eschrig (Akademie Verlag, Berlin, 1991), p. 11. ; JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 46, 6671 (1992) ; JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 48, 4978(E) (1993) ]
+  * 109 -->  XC_GGA_X_PW91 ! Perdew & Wang 91 [JP Perdew, in Proceedings of the 21st Annual International Symposium on the Electronic Structure of Solids, ed. by P Ziesche and H Eschrig (Akademie Verlag, Berlin, 1991), p. 11.; JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 46, 6671 (1992); JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 48, 4978(E) (1993) ]
   * 110 -->  XC_GGA_X_OPTX ! Handy & Cohen OPTX 01 [NC Handy and AJ Cohen, Mol. Phys. 99, 403 (2001) ]
   * 111 -->  XC_GGA_X_DK87_R1 ! dePristo & Kress 87 (version R1) [AE DePristo and JD Kress, J. Chem. Phys. 86, 1425 (1987) ]
   * 112 -->  XC_GGA_X_DK87_R2 ! dePristo & Kress 87 (version R2) [AE DePristo and JD Kress, J. Chem. Phys. 86, 1425 (1987) ]
@@ -7417,18 +7417,18 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 117 -->  XC_GGA_X_RPBE ! Hammer, Hansen & Norskov (PBE-like) [B Hammer, LB Hansen and JK Norskov, Phys. Rev. B 59, 7413 (1999) ]
   * 118 -->  XC_GGA_X_WC ! Wu & Cohen [Z Wu and RE Cohen, Phys. Rev. B 73, 235116 (2006) ]
   * 119 -->  XC_GGA_X_mPW91 ! Modified form of PW91 by Adamo & Barone [C Adamo and V Barone, J. Chem. Phys. 108, 664 (1998) ]
-  * 120 -->  XC_GGA_X_AM05 ! Armiento & Mattsson 05 exchange [R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005) ; AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008) ]
+  * 120 -->  XC_GGA_X_AM05 ! Armiento & Mattsson 05 exchange [R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005); AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008) ]
   * 121 -->  XC_GGA_X_PBEA ! Madsen (PBE-like) [G Madsen, Phys. Rev. B 75, 195108 (2007) ]
   * 122 -->  XC_GGA_X_MPBE ! Adamo & Barone modification to PBE [C Adamo and V Barone, J. Chem. Phys. 116, 5933 (2002) ]
   * 123 -->  XC_GGA_X_XPBE ! xPBE reparametrization by Xu & Goddard [X Xu and WA Goddard III, J. Chem. Phys. 121, 4068 (2004) ]
   * 125 -->  XC_GGA_X_BAYESIAN ! Bayesian best fit for the enhancement factor [JJ Mortensen, K Kaasbjerg, SL Frederiksen, JK Norskov, JP Sethna, and KW Jacobsen, Phys. Rev. Lett. 95, 216401 (2005) ]
   * 126 -->  XC_GGA_X_PBE_JSJR ! PBE JSJR reparametrization by Pedroza, Silva & Capelle [LS Pedroza, AJR da Silva, and K. Capelle, Phys. Rev. B 79, 201106(R) (2009) ]
-  * 130 -->  XC_GGA_C_PBE ! Perdew, Burke & Ernzerhof correlation [JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996) ; JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997) ]
+  * 130 -->  XC_GGA_C_PBE ! Perdew, Burke & Ernzerhof correlation [JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996); JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997) ]
   * 131 -->  XC_GGA_C_LYP ! Lee, Yang & Parr [C Lee, W Yang and RG Parr, Phys. Rev. B 37, 785 (1988) B Miehlich, A Savin, H Stoll and H Preuss, Chem. Phys. Lett. 157, 200 (1989) ]
   * 132 -->  XC_GGA_C_P86 ! Perdew 86 [JP Perdew, Phys. Rev. B 33, 8822 (1986) ]
   * 133 -->  XC_GGA_C_PBE_SOL ! Perdew, Burke & Ernzerhof correlation SOL [JP Perdew, et al, Phys. Rev. Lett. 100, 136406 (2008) ]
   * 134 -->  XC_GGA_C_PW91 ! Perdew & Wang 91 [JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 46, 6671 (1992) ]
-  * 135 -->  XC_GGA_C_AM05 ! Armiento & Mattsson 05 correlation [ R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005) ; AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008) ]
+  * 135 -->  XC_GGA_C_AM05 ! Armiento & Mattsson 05 correlation [ R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005); AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008) ]
   * 136 -->  XC_GGA_C_XPBE ! xPBE reparametrization by Xu & Goddard [X Xu and WA Goddard III, J. Chem. Phys. 121, 4068 (2004) ]
   * 137 -->  XC_GGA_C_LM ! Langreth and Mehl correlation [DC Langreth and MJ Mehl, Phys. Rev. Lett. 47, 446 (1981) ]
   * 138 -->  XC_GGA_C_PBE_JRGX ! JRGX reparametrization by Pedroza, Silva & Capelle [LS Pedroza, AJR da Silva, and K. Capelle, Phys. Rev. B 79, 201106(R) (2009) ]
@@ -7443,7 +7443,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 147 -->  XC_GGA_C_WL ! Wilson & Levy [LC Wilson and M Levy, Phys. Rev. B 41, 12930 (1990) ]
   * 148 -->  XC_GGA_C_WI ! Wilson & Ivanov [LC Wilson & S Ivanov, Int. J. Quantum Chem. 69, 523-532 (1998) ]
   * 149 -->  XC_GGA_X_MB88 ! Modified Becke 88 for proton transfer [V Tognetti and C Adamo, J. Phys. Chem. A 113, 14415-14419 (2009) ]
-  * 150 -->  XC_GGA_X_SOGGA ! Second-order generalized gradient approximation [Y Zhao and DG Truhlar, J. Chem. Phys. 128, 184109 (2008) ; http://comp.chem.umn.edu/mfm/index.html ]
+  * 150 -->  XC_GGA_X_SOGGA ! Second-order generalized gradient approximation [Y Zhao and DG Truhlar, J. Chem. Phys. 128, 184109 (2008); http://comp.chem.umn.edu/mfm/index.html ]
   * 151 -->  XC_GGA_X_SOGGA11 ! Second-order generalized gradient approximation 2011 [R Peverati, Y Zhao, and DG Truhlar, J. Phys. Chem. Lett. 2, 1911-1997 (2011); http://comp.chem.umn.edu/mfm/index.html ]
   * 152 -->  XC_GGA_C_SOGGA11 ! Second-order generalized gradient approximation 2011 [R Peverati, Y Zhao, and DG Truhlar, J. Phys. Chem. Lett. 2, 1911-1997 (2011); http://comp.chem.umn.edu/mfm/index.html ]
   * 153 -->  XC_GGA_C_WI0 ! Wilson & Ivanov initial version [LC Wilson & S Ivanov, Int. J. Quantum Chem. 69, 523-532 (1998) ]
@@ -7474,7 +7474,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
   * 179 -->  XC_GGA_XC_SB98_2a ! Schmider-Becke 98 parameterization 2a [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
   * 180 -->  XC_GGA_XC_SB98_2b ! Schmider-Becke 98 parameterization 2b [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
   * 181 -->  XC_GGA_XC_SB98_2c ! Schmider-Becke 98 parameterization 2c [HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998) ]
-  * 183 -->  XC_GGA_X_OL2 ! Exchange form based on Ou-Yang and Levy v.2 [P Fuentealba and O Reyes, Chem. Phys. Lett. 232, 31-34 (1995) ; H Ou-Yang, M Levy, Int. J. of Quant. Chem. 40, 379-388 (1991) ]
+  * 183 -->  XC_GGA_X_OL2 ! Exchange form based on Ou-Yang and Levy v.2 [P Fuentealba and O Reyes, Chem. Phys. Lett. 232, 31-34 (1995); H Ou-Yang, M Levy, Int. J. of Quant. Chem. 40, 379-388 (1991) ]
   * 184 -->  XC_GGA_X_APBE ! mu fixed from the semiclassical neutral atom [LA Constantin, E Fabiano, S Laricchia, and F Della Sala, Phys. Rev. Lett. 106, 186406 (2011) ]
   * 186 -->  XC_GGA_C_APBE ! mu fixed from the semiclassical neutral atom [LA Constantin, E Fabiano, S Laricchia, and F Della Sala, Phys. Rev. Lett. 106, 186406 (2011) ]
   * 191 -->  XC_GGA_X_HTBS! Haas, Tran, Blaha, and Schwarz [P Haas, F Tran, P Blaha, and K Schwarz, Phys. Rev. B 83, 205117 (2011) ]
@@ -7497,7 +7497,7 @@ GGA functionals (do not forget to add a minus sign, as discussed above)
 MetaGGA functionals (do not forget to add a minus sign, as discussed above).
 See Sun et al, PRB 84, 035117 (2011) for the formulas.
 
-  * 202 -->  XC_MGGA_X_TPSS ! Tao, Perdew, Staroverov & Scuseria [J Tao, JP Perdew, VN Staroverov, and G Scuseria, Phys. Rev. Lett. 91, 146401 (2003) ; JP Perdew, J Tao, VN Staroverov, and G Scuseria, J. Chem. Phys. 120, 6898 (2004) ]
+  * 202 -->  XC_MGGA_X_TPSS ! Tao, Perdew, Staroverov & Scuseria [J Tao, JP Perdew, VN Staroverov, and G Scuseria, Phys. Rev. Lett. 91, 146401 (2003); JP Perdew, J Tao, VN Staroverov, and G Scuseria, J. Chem. Phys. 120, 6898 (2004) ]
   * 203 -->  XC_MGGA_X_M06L ! Zhao, Truhlar exchange [Y Zhao and DG Truhlar, JCP 125, 194101 (2006); Y Zhao and DG Truhlar, Theor. Chem. Account 120, 215 (2008) ]
   * 204 -->  XC_MGGA_X_GVT4 ! GVT4 (X part of VSXC) from van Voorhis and Scuseria [T Van Voorhis and GE Scuseria, JCP 109, 400 (1998) ]
   * 205 -->  XC_MGGA_X_TAU_HCTH ! tau-HCTH from Boese and Handy [AD Boese and NC Handy, JCP 116, 9559 (2002) ]
@@ -7828,7 +7828,7 @@ lattice, the conversion might be more difficult. See the description of
 cartesian coordinates to the primitive vectors in the reciprocal space. In
 order to help a bit, we list below a series of typical values, for the FCC,
 BCC, hexagonal and rhombohedral Bravais lattices. Note: all the data below
-are given in dimensionless units ; they have to be rescaled by the actual
+are given in dimensionless units; they have to be rescaled by the actual
 lengths defined by the [[acell]] values. However, [[kptbounds]] values can be
 used as such, if the values of [[rprim]] given below are adopted.
 
@@ -7871,9 +7871,9 @@ the work: L-Gamma-X-W-K,U-L-W-X-K,U-Gamma with
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
 found using the conventional cartesian coordinates:
-l(L-Gamma)=sqrt(3)/4=0.433... ; l(Gamma-X)=1/2=0.5 ; l(X-W)=1/4=0.25 ;
-l(W-K)=sqrt(2)/8=0.177... ; l(K-L)=sqrt(6)/8=0.306... ;
-l(L-W)=sqrt(2)/4=0.354... ; l(W-X)=1/4=0.25 ; l(X-K)=sqrt(2)/8=0.177... ;
+l(L-Gamma)=sqrt(3)/4=0.433...; l(Gamma-X)=1/2=0.5; l(X-W)=1/4=0.25;
+l(W-K)=sqrt(2)/8=0.177...; l(K-L)=sqrt(6)/8=0.306...;
+l(L-W)=sqrt(2)/4=0.354...; l(W-X)=1/4=0.25; l(X-K)=sqrt(2)/8=0.177...;
 l(K-Gamma)=sqrt(2).3/8=0.530...
 
 B. **BCC lattice**
@@ -7897,9 +7897,9 @@ So, if you want to specify a typical circuit, the following might do the work: G
 
 The lengths of segments (this information is useful to draw the band
 structure, with the correct relative scale between special points) can be
-found using the conventional cartesian coordinates: l(Gamma-H)=1/2=0.5 ;
-l(H-N)=sqrt(2)/4=0.354... ; l(N-Gamma)=sqrt(2)/4=0.354... ;
-l(Gamma-P)=sqrt(3)/4=0.433... ; l(P-N)=1/4=0.25 ; l(N-P)=1/4=0.25 ;
+found using the conventional cartesian coordinates: l(Gamma-H)=1/2=0.5;
+l(H-N)=sqrt(2)/4=0.354...; l(N-Gamma)=sqrt(2)/4=0.354...;
+l(Gamma-P)=sqrt(3)/4=0.433...; l(P-N)=1/4=0.25; l(N-P)=1/4=0.25;
 l(P-H)=sqrt(3)/4=0.433...
 
 C. **Hexagonal lattices**
@@ -7928,12 +7928,12 @@ one needs to know the a and c lattice parameters. Also, in what follows, we
 omit the 2*pi factor sometimes present in the definition of the reciprocal
 space vectors. The reciprocal vectors are (1/a 1/(sqrt(3)*a) 0), (0
 2/(sqrt(3)*a) 0), (0 0 1/c). The lengths of the above-mentioned segments can
-be computed as: l(K-Gamma)=2/(3*a)=0.666.../a ;
-l(Gamma-M)=1/(sqrt(3)*a)=0.577.../a ; l(M-K)=1/(3*a)=0.333.../a ;
-l(K-H)=1/(2*c)=0.5.../c ; l(H-A)=2/(3*a)=0.666.../a ;
-l(A-L)=1/(sqrt(3)*a)=0.577.../a ; l(L-H)=1/(3*a)=0.333.../a ;
-l(H-L)=1/(3*a)=0.333.../a ; l(L-M)=1/(2*c)=0.5.../c ;
-l(M-Gamma)=-1/(sqrt(3)*a)=0.577.../a ; l(Gamma-A)=1/(2*c)=0.5.../c
+be computed as: l(K-Gamma)=2/(3*a)=0.666.../a;
+l(Gamma-M)=1/(sqrt(3)*a)=0.577.../a; l(M-K)=1/(3*a)=0.333.../a;
+l(K-H)=1/(2*c)=0.5.../c; l(H-A)=2/(3*a)=0.666.../a;
+l(A-L)=1/(sqrt(3)*a)=0.577.../a; l(L-H)=1/(3*a)=0.333.../a;
+l(H-L)=1/(3*a)=0.333.../a; l(L-M)=1/(2*c)=0.5.../c;
+l(M-Gamma)=-1/(sqrt(3)*a)=0.577.../a; l(Gamma-A)=1/(2*c)=0.5.../c
 
 D. **Rhombohedral lattices**
 
@@ -7984,7 +7984,7 @@ space vectors. The reciprocal vectors are (2/(3*a) 0 1/(3*c)), -(1/(3*a)
 1/(sqrt(3)*a) 1/(3*c), -(1/(3*a) -1/(sqrt(3)*a) 1/(3*c) ). The lengths of the
 above-mentioned segments can be computed as:
 l(X-Gamma)=2/(sqrt(3)*a)=1.155.../a, with
-l(K-Gamma)=(1+(a/c)^2/4)*4/(3*sqrt(3)*a); l(Gamma-T)=1/(2*c) ;
+l(K-Gamma)=(1+(a/c)^2/4)*4/(3*sqrt(3)*a); l(Gamma-T)=1/(2*c);
 l(T-L)=2/(sqrt(3)*a)=1.155.../a, with l(T-W)=(1-(a/c)^2/2)*4/(3*sqrt(3)*a);
 l(L-Gamma)=sqrt(4/(a^2)+1/(c^2))/3 l(Gamma-X)=sqrt(1/(a^2)+1/(c^2))*2/3
 """,
@@ -8599,17 +8599,17 @@ Compatible with all MEP search methods.
 Compatible only with Nudged Elastic Band ([[imgmov]]=5).
 _See, for instance: J. Chem. Phys. 128, 134106 (2008)._
 
-  * 2 --> **Local Broyden-Fletcher-Goldfarb-Shanno (L-BFGS) algorithm** ; each image along the band is minimized with a different instance of the BFGS optimizer.
+  * 2 --> **Local Broyden-Fletcher-Goldfarb-Shanno (L-BFGS) algorithm**; each image along the band is minimized with a different instance of the BFGS optimizer.
 Compatible only with Nudged Elastic Band ([[imgmov]]=5).
 _See, for instance: J. Chem. Phys. 128, 134106 (2008)._
 IN [[DEVELOP]]PMENT - NOT RELIABLE
 
-  * 3 --> **Global Broyden-Fletcher-Goldfarb-Shanno (GL-BFGS) algorithm** ; all images along the band are minimized with a single instance of the BFGS optimizer.
+  * 3 --> **Global Broyden-Fletcher-Goldfarb-Shanno (GL-BFGS) algorithm**; all images along the band are minimized with a single instance of the BFGS optimizer.
 Compatible only with Nudged Elastic Band ([[imgmov]]=5).
 _See, for instance: J. Chem. Phys. 128, 134106 (2008)._
 IN [[DEVELOP]]PMENT - NOT RELIABLE
 
-  * 4 --> **Fourth-order Runge-Kutta method** ; the images along the band are moved every four steps (1 <=istep<=[[ntimimage]]) following the Runge-Kutta algorithm, the time step being [[fxcartfactor]].
+  * 4 --> **Fourth-order Runge-Kutta method**; the images along the band are moved every four steps (1 <=istep<=[[ntimimage]]) following the Runge-Kutta algorithm, the time step being [[fxcartfactor]].
 Compatible only with Simplified String Method ([[imgmov]]=2 and
 [[string_algo]]=1 or 2).
 _See: J. Chem. Phys. 126, 164103 (2007)._
@@ -9063,7 +9063,7 @@ Variable(
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
 [[nband]] bands, are to be considered as part of a buffer. This concept is
 useful in three situations: in non-self-consistent calculations, for the
-determination of the convergence tolerance ; for response functions of metals,
+determination of the convergence tolerance; for response functions of metals,
 to avoid instabilities, and also when finite electric fields or non-linear
 responses (with electric field perturbations) are considered. For the two
 first, the need of a buffer is a natural requirement of the problem, so that
@@ -9189,28 +9189,28 @@ file:
 
     netcdf md32.outH_moldyn1 {
     dimensions:
-       time = UNLIMITED ; // (11 currently)
-       DimTensor = 6 ;
-       DimCoord = 3 ;
-       NbAtoms = 32 ;
-       DimVector = 3 ;
-       DimScalar = 1 ;
+       time = UNLIMITED; // (11 currently)
+       DimTensor = 6;
+       DimCoord = 3;
+       NbAtoms = 32;
+       DimVector = 3;
+       DimScalar = 1;
     variables:
-       double E_pot(time) ;
-          E_pot:units = "hartree" ;
-       double E_kin(time) ;
-          E_kin:units = "hartree" ;
-       double Stress(time, DimTensor) ;
-          Stress:units = "hartree/Bohr^3" ;
-       double Position(time, DimCoord, NbAtoms) ;
-          Position:units = "Bohr" ;
-       double Celerity(time, DimCoord, NbAtoms) ;
-          Celerity:units = "Bohr/(atomic time unit)" ;
-       double PrimitiveVector1(DimVector) ;
-       double PrimitiveVector2(DimVector) ;
-       double PrimitiveVector3(DimVector) ;
-       double Cell_Volume(DimScalar) ;
-          Cell_Volume:units = "Bohr^3" ;
+       double E_pot(time);
+          E_pot:units = "hartree";
+       double E_kin(time);
+          E_kin:units = "hartree";
+       double Stress(time, DimTensor);
+          Stress:units = "hartree/Bohr^3";
+       double Position(time, DimCoord, NbAtoms);
+          Position:units = "Bohr";
+       double Celerity(time, DimCoord, NbAtoms);
+          Celerity:units = "Bohr/(atomic time unit)";
+       double PrimitiveVector1(DimVector);
+       double PrimitiveVector2(DimVector);
+       double PrimitiveVector3(DimVector);
+       double Cell_Volume(DimScalar);
+          Cell_Volume:units = "Bohr^3";
     }
 """,
 ),
@@ -10505,7 +10505,7 @@ allowed x, y and z magnetization (useful only with [[nspinor]]=2 and
 symmetry - and thus spontaneous magnetization, or with spin-orbit, if one
 allows for spontaneous non-collinear magnetism). Not yet available for
 response functions. Also note that, with [[nspden]]=4, time-reversal symmetry
-is not taken into account (at present ; this has to be checked) and thus
+is not taken into account (at present; this has to be checked) and thus
 [[kptopt]] has to be different from 1 or 2.
 
 The default ([[nspden]]=[[nsppol]]) does not suit the case of vector magnetization.
@@ -11796,7 +11796,7 @@ If set to 0, all lm-moments of the sphere contributions to the density are
 computed at each electronic iteration.
 If set to 1, only non-zero lm-moments of the sphere contributions to the
 density are computed at each electronic iteration (they are all computed at
-the first iteration then only those found to be non-zero will be computed ;
+the first iteration then only those found to be non-zero will be computed;
 thus the first iteration is more cpu intensive)
 """,
 ),
@@ -14641,7 +14641,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     text="""
 Used in Recursion method ([[tfkinfunc]]=2). Determine the number of
-discretisation points to compute some path integral in the recursion method ;
+discretisation points to compute some path integral in the recursion method;
 those path integrals are used to compute the entropy and the eigenvalues
 energy. during the latest SFC cycles.
 """,
@@ -14984,7 +14984,7 @@ with respect to k, independently of the electric field perturbation itself.
 electric field are different, one often does the calculation of derivatives in
 a separate dataset, followed by calculation of electric field response as well
 as phonon.
-The options 2 and 3 proves useful in that context ; also, in case a scissor
+The options 2 and 3 proves useful in that context; also, in case a scissor
 shift is to be used, it is usually not applied for the d/dk response).
 """,
 ),
@@ -15910,8 +15910,8 @@ Variable(
     defaultval=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     mnemonics="STRess TARGET",
     text="""
-The components of the stress tensor must be stored according to: (1,1)->1 ;
-(2,2)->2 ; (3,3)->3 ; (2,3)->4 ; (3,1)->5 ; (1,2)->6\. The conversion factor
+The components of the stress tensor must be stored according to: (1,1)->1;
+(2,2)->2; (3,3)->3; (2,3)->4; (3,1)->5; (1,2)->6\. The conversion factor
 between Ha/Bohr**3 and GPa is: 1 Ha/Bohr**3 = 29421.033d0 GPa.
 Not used if [[optcell]]==0.
 """,
@@ -16135,7 +16135,7 @@ it is necessary to find the best set of preconditionning parameters
 the default Pulay mixing is used).
 
   * [[tfkinfunc]]=12: same as **tfkinfunc** =11, but without the initialization steps. Gradient correction is directly added.
-  * [[tfkinfunc]]=2: the Recursion Method is used in order to compute electronic density, entropy, Fermi energy and eigenvalues energy. This method computes the density without computing any orbital, is efficient at high temperature, with a efficient parallelization (almost perfect scalability). When that option is in use, the [[ecut]] input variable is no longer a convergence parameter ; [[ngfft]] becomes the main convergence parameter: you should adapt ecut for the ngfft grid you need (it is not yet automatically computed). Other convergence parameter are for the energetic values: [[recnrec]], [[recptrott]], [[recnpath]].
+  * [[tfkinfunc]]=2: the Recursion Method is used in order to compute electronic density, entropy, Fermi energy and eigenvalues energy. This method computes the density without computing any orbital, is efficient at high temperature, with a efficient parallelization (almost perfect scalability). When that option is in use, the [[ecut]] input variable is no longer a convergence parameter; [[ngfft]] becomes the main convergence parameter: you should adapt ecut for the ngfft grid you need (it is not yet automatically computed). Other convergence parameter are for the energetic values: [[recnrec]], [[recptrott]], [[recnpath]].
 Since the convergence of the self-consistent cycle is determined directly by
 the convergence of the density: [[toldfe]], [[toldff]], [[tolrff]],
 [[tolvrs]], [[tolwfr]] are not used, and are replaced by [[rectolden]]; the
@@ -18210,7 +18210,7 @@ Variable(
     defaultval="[[AUTO_FROM_PSP]]",
     mnemonics="WaveFunction OPTimisation ALGorithm",
     characteristics=['[[DEVELOP]]'],
-    commentdefault="0 when [[usepaw]]=0 (norm-conserving pseudopotentials), 10 when [[usepaw]]=1 (PAW) ; 114 if [[paral_kgb]]=1.",
+    commentdefault="0 when [[usepaw]]=0 (norm-conserving pseudopotentials), 10 when [[usepaw]]=1 (PAW); 114 if [[paral_kgb]]=1.",
     text="""
 Allows one to choose the algorithm for the optimisation of the wavefunctions.
 The different possibilities are:
@@ -18219,7 +18219,7 @@ The different possibilities are:
   * [[wfoptalg]]=2: minimisation of the residual with respect to different shifts, in order to cover the whole set of occupied bands, with possibility to parallelize over blocks of states (or bands). The number of states in a block is defined in [[nbdblock]]. THIS IS STILL IN DEVELOPMENT.
   * [[wfoptalg]]=3: minimisation of the residual with respect to a shift. Available only in the non-self-consistent case [[iscf]]=-2, in order to find eigenvalues and wavefunctions close to a prescribed value.
   * [[wfoptalg]]=4: (see also [[wfoptalg]]=14), a parallel code based on the Locally Optimal Block Preconditioned Conjugate Gradient (LOBPCG) method of Knyazev. [ Reference: A.V. Knyazev, "Toward the Optimal Preconditioned Eigensolver: Locally Optimal Block Preconditioned Conjugate Gradient Method". SIAM Journal on Scientific Computing 23, pp517-541 (2001) ](http://dx.doi.org/10.1137/S1064827500366124) . The implementation rests on the [ matlab program by Knyazev ](http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m) . [ Reference A. V. Knyazev, I. Lashuk, M. E. Argentati, and E. Ovchinnikov, Block Locally Optimal Preconditioned Eigenvalue Xolvers (BLOPEX) in hypre and PETSc (2007). SIAM Journal on Scientific Computing (SISC). 25(5): 2224-2239 ](http://dx.doi.org/10.1137/060661624) . For more information see [ F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Large scale ab initio calculations based on three levels of parallelization. (2008). Computational Material Science, 42(2), 329-336. ](http://dx.doi.org/10.1016/j.commatsci.2007.07.019)
-  * [[wfoptalg]]=10: (for PAW) standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states, but modified scheme described in Kresse, Furthmuller, PRB 54, 11169 (1996) (modified kinetic energy, modified preconditionning, minimal orthogonalization, ...) ;
+  * [[wfoptalg]]=10: (for PAW) standard state-by-state conjugate gradient algorithm, with no possibility to parallelize over the states, but modified scheme described in Kresse, Furthmuller, PRB 54, 11169 (1996) (modified kinetic energy, modified preconditionning, minimal orthogonalization, ...);
   * [[wfoptalg]]=14: the recommended for parallel code, the same as [[wfoptalg]]=4 except that the preconditioning of the block vectors does not depend on the kinetic energy of each band, and the orthogonalization after the LOBPCG algorithm is no longer performed. The first modification increases the convergence and the second one the efficiency.
   * [[wfoptalg]]=114: A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library. With more than 1 thread [[npfft]] shoud NOT be used for the time being.
   * [[wfoptalg]]=1: new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms. By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary. For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]]. For more information, see the [ performance guide ](../../theory/howto_chebfi.pdf) and the [ paper ](https://arxiv.org/abs/1406.4350) by A. Levitt and M. Torrent. Status: experimental but usable. Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.

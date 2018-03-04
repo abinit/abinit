@@ -4,9 +4,9 @@ This file provides a description of the operations needed to install the
 ABINIT package, to generate the executable and to make the tests. 
 It provides also the description of simple modifications of the package, for developers.
 
-See a recent version of the [new user's guide](../users/new_user_guide.html),
+See a recent version of the [new user's guide](guide/new_user.md),
 for an introduction to the abinit package. 
-See a recent version of the  [[help:abinit]] file for learning how to use the code. 
+See a recent version of the [[help:abinit]] file for learning how to use the code. 
 Both of them can be found either on the Web, or in the doc subdirectory of the package.
 
 Any comment or suggestion to improve the procedure will be welcome! 
@@ -347,20 +347,14 @@ appropriate library to be installed in order to work properly.
 
 For further information on these internal tests, see the ~abinit/tests/built-in/README file.
 
-You might now read the [new user's guide](../users/new_user_guide.html), in
+You might now read the [new user's guide](guide/new_user.md), in
 order to learn how to use the code, and then to follow the four basic
-tutorials, see the [entry page for the tutorials](../tutorial/welcome.html).
+tutorials, see the [entry page for the tutorials](tutorial/index.md).
 This is useful if you consider that the installation has been successful. Or
 you might continue to read the present Web page, and try to perform the speed
 tests, as well as the other tests.
 
 ## How to make the other tests?
-
-Although it is possible to make the other tests without knowing really how to
-use the code (since all steps involved - the run and subsequent analysis - are
-done automatically), for the other tests, it is recommended to read the 
-[new user's guide](../users/new_user_guide.html), and then to follow the four basic
-tutorials, see the [entry page for the tutorials](../tutorial/welcome.html).
 
 Let us pursue with the testing procedure. Go to the ~abinit/tests directory, and issue:
     
@@ -411,8 +405,7 @@ used (automatically), possibly the other input files (like pseudopotentials),
 the output files to be analyzed, the admitted tolerances with respect to
 reference output files, the author of the test, and a brief description of the test.
 
-To run only the tests in this directory, simply issue, in the ~abinit/tests/
-directory:
+To run only the tests in this directory, simply issue, in the ~abinit/tests/ directory:
     
     ./runtests.py fast
 
@@ -472,8 +465,7 @@ differences in:
   * the platform description (possibly);
   * the overall execution time (this is ALWAYS printed, even without differences).
 
-So, a successful execution of one test case may be announced as follows in the
-fldiff.report file:
+So, a successful execution of one test case may be announced as follows in the fldiff.report file:
     
     Case_1
     2
@@ -491,8 +483,7 @@ fldiff.report file:
 The fldiff.report file will have one such section for each test_case that was
 run. It begins with the number of the test case, then includes a few blocks of
 three lines: the number of the line where something is happening, followed by
-the content of the two lines. Finally, there is a one-line summary for each
-test case.
+the content of the two lines. Finally, there is a one-line summary for each test case.
 
 More information on the fldiff script can be found in the ~abinit/tests/Scripts/fldiff.pl file.
 

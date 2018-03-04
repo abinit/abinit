@@ -174,17 +174,19 @@ before it and after it (again, multiple blanks are irrelevant).
 ABINIT has also some (very limited) interpretor capabilities:
 
   * It can identify one slash sign (/) being placed between two numbers 
-    (without a separating blank) as being the definition of a fraction (e.g. 1/3 will be interpreted as 0.33333333333333d0) ; 
+    (without a separating blank) as being the definition of a fraction 
+    (e.g. 1/3 will be interpreted as 0.33333333333333d0); 
 
   * It can identify sqrt(...) or -sqrt(...) as being the definition of a square root, 
-    when applied to one valid number - also without a separating blank - (e.g. -sqrt(0.75) will be interpreted as -0.8660254038d0) ; 
+    when applied to one valid number - also without a separating blank - 
+    (e.g. -sqrt(0.75) will be interpreted as -0.8660254038d0); 
 
   * Note, however, that these capabilities are NOT recursive. 
     At most, a sqrt identifier can contain an expression that uses a fraction (e.g. sqrt(3/4) is OK), 
     but two fractions (or two sqrt) cannot be used in one expression, and a sqrt cannot be present 
     in the numerator or denominator of a fraction. 
 
-Comments should be placed to the right of the comment characters # or ! ;
+Comments should be placed to the right of the comment characters # or !;
 anything to the right of a "#" or a "!" on any line is simply ignored by the
 parser. Additional text, not preceded by a "#" or a "!" would not otherwise
 cause trouble unless the text inadvertently contained character strings which
@@ -206,9 +208,16 @@ the input variable is given: a **mnemonics**, possibly some
 **characteristics**, the **variable type** (integer, real, string), and the
 **default value**. Then, follows the description of the variable.
 
-The **characteristics** can be one of the following: **DEVELOP**,
-**NO_MULTI**, **INTERNAL_ONLY**, **INPUT_ONLY**, **EVOLVING**, **ENERGY**
-, **LENGTH**, **MAGNETIC FIELD**, as described now.
+The **characteristics** can be one of the following: 
+
+-   **DEVELOP**,
+-   **NO_MULTI**
+-   **INTERNAL_ONLY**
+-   **INPUT_ONLY**
+-   **EVOLVING**
+-   **ENERGY**
+-   **LENGTH**
+-   **MAGNETIC FIELD**
 
 #### Physical information
 
@@ -219,23 +228,26 @@ can treat its physical dimensions with some units.
 The use of the atomic unit system (e.g. the Hartree for energy, about 27.211
 eV, and the Bohr for lengths about 0.529 Angstroms) is strictly enforced
 within the code. However, the dimension of some input variables can be
-specified and read correctly. At present, this applies to three types of
+specified and read correctly. 
+
+At present, this applies to three types of
 variables: those that have the dimension of an energy, those that have a
 dimension of length, and those that have a dimension of magnetic field. The
-first class of variables have the characteristics ' **ENERGY** ', and can be
-specified in atomic units (Hartree), or electron-volts, or Rydbergs, or even
-Kelvin. The second class of variables have the characteristics ' **LENGTH** ',
+first class of variables have the characteristics **ENERGY**, and can be
+specified in atomic units (Hartree), or electron-volts, or Rydbergs, or even Kelvin. 
+
+The second class of variables have the characteristics **LENGTH**,
 and can be specified in atomic units (Bohr) and angstrom. The third class of
-variables have the characteristics ' **MAGNETIC FIELD** ', and can be
+variables have the characteristics **MAGNETIC FIELD**, and can be
 specified in atomic units and Tesla. The abinit parser recognize a dimension
 if it is specified after the list of numbers following the input variable
 keyword, in the input file. The specification can be upper or lower case, or a
 mix thereof. Here is the list of recognized chains of characters:
 
-  * 'Ry ' => Rydberg (for energies) 
-  * 'eV ' => electron-volts (for energies) 
-  * 'K ' => Kelvin (for energies) 
-  * 'Angstr...' => Angstrom (for lengths) 
+  * Ry --> Rydberg (for energies) 
+  * eV --> electron-volts (for energies) 
+  * K  --> Kelvin (for energies) 
+  * Angstr --> Angstrom (for lengths) 
 
 Except in the case of 'Angstr', the abbreviation must be used (i.e. 'Rydberg'
 will not be recognized presently). Other character chains, like "au" (for
@@ -263,15 +275,15 @@ even in reduced coordinates, through [[xred]].
 
 Most of the variables can be used in the multi-dataset mode (see section 3.3),
 but those that must have a unique value throughout all the datasets are
-signaled with the indication ' **NO_MULTI** '.
+signaled with the indication **NO_MULTI**.
 
-Some of the input variables, with characteristics ' **INPUT_ONLY** ' are only
+Some of the input variables, with characteristics **INPUT_ONLY** are only
 used by the parser, to initialize other input variables, but are not
 transmitted inside the code, beyond the parser. In particular, they are not
 echoed in the output file.
 
-At variance, some internal variables, with characteristics ' **INTERNAL_ONLY**
-' are documented in the help files, but are not accessible as input variables.
+At variance, some internal variables, with characteristics **INTERNAL_ONLY** 
+are documented in the help files, but are not accessible as input variables.
 The documentation is provided because such variables are sometimes mentioned
 in the output file.
 
@@ -279,11 +291,11 @@ Most of the input variables do not change while a run is performed. Some of
 them, by contrast, may evolve, like the atomic positions, the atomic
 velocities, the cell shape, and the occupation numbers. Their echo, after the
 run has proceeded, will of course differ from their input value. They are
-signaled by the indication ' **EVOLVING** '.
+signaled by the indication **EVOLVING**.
 
 #### Other information
 
-'**DEVELOP**' refers to input variables that are not used in production
+**DEVELOP** refers to input variables that are not used in production
 runs, but have been introduced during development time, of a feature that is
 likely not finalized. For non ABINIT developers, it is strongly advised to skip them.
 
@@ -492,17 +504,17 @@ is equivalent to
 ### 3.6 File names in the multi-dataset mode
   
 The root names for input and output files (potential, density, wavefunctions
-and so on) will receive an appendix: ' **_DS** ' followed by the index of the
+and so on) will receive an appendix: **_DS** followed by the index of the
 dataset. See section 4.
 
-The ' **get** ' variables can be used to chain the calculations.
+The  **get** variables can be used to chain the calculations.
 
 Let us mention a few of them: [[getwfk]], [[getwfq]], [[getddk]], [[get1wf]],
 [[getden]], [[getcell]], [[getxred]] and [[getxcart]].
 
   * [[getwfk]] allows to take the output wavefunctions of a previous dataset and use them as input wavefunctions 
   * [[getwfq]], [[getddk]] and [[get1wf]] do similar things for response function calculations 
-  * [[getden]] does the same for the density ; [[getcell]] does the same for [[acell]] and [[rprim]] 
+  * [[getden]] does the same for the density; [[getcell]] does the same for [[acell]] and [[rprim]] 
   * [[getxred]] and [[getxcart]] do the same for the atomic positions, either in reduced coordinates, or in cartesian coordinates. 
 
 The different variables corresponding to each dataset are echoed using the
@@ -540,10 +552,10 @@ the record of the run in a nicer looking format.
 **abi**  
 The other files READ by the code will have a name that is constructed from the
 root "abi". This apply to optionally read wavefunction, density or potential
-files. In the multi-dataset mode, this root will be complemented by ' **_DS**
-' and the dataset index. The list of possible input files, with their name
-created from the root 'abi', is the following (a similar list exist when '
-**_DS** ' and the dataset index are appended to 'abi'):
+files. In the multi-dataset mode, this root will be complemented by **_DS**
+and the dataset index. The list of possible input files, with their name
+created from the root 'abi', is the following (a similar list exist when 
+**_DS** and the dataset index are appended to 'abi'):
 
   * **abi_WFK**   
 filename of file containing input wavefunction coefficients created from an
@@ -578,11 +590,11 @@ filename of file containing an approximate hessian, for eventual
 Except "ab_out" and "log", the other files WRITTEN by the code will have a
 name that is constructed from the root "abo". This apply to optionally written
 wavefunction, density, potential, or density of states files. In the multi-
-dataset mode, this root will be complemented by ' **_DS** ' and the dataset
+dataset mode, this root will be complemented by **_DS** and the dataset
 index. Also in the multi-dataset mode, the root "abo" can be used to build the
 name of **input** files, thanks to the 'get' variables. The list of possible
 output files, with their name created from the root 'abo' is the following (a
-similar list exists when ' **_DS** ' and the dataset index are appended to 'abo'):
+similar list exists when **_DS** and the dataset index are appended to 'abo'):
 
   * **abo_WFK**   
 Filename of file containing output wavefunction coefficients, if [[nqpt]]=0.
@@ -924,7 +936,7 @@ following Fortran90 instructions (format 5.7):
     & npwarr(1:nkpt),so_psp(1:npsp),symafm(1:nsym),symrel(1:3,1:3,1:nsym),typat(1:natom),&
     & kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),znucltypat(1:ntypat),wtk(1:nkpt)
      do ipsp=1,npsp
-    ! (npsp lines, 1 for each pseudopotential ; npsp=ntypat, except if alchemical pseudo-atoms)
+    ! (npsp lines, 1 for each pseudopotential; npsp=ntypat, except if alchemical pseudo-atoms)
       write(unit=unit) title,znuclpsp,zionpsp,pspso,pspdat,pspcod,pspxc,lmn_size
      enddo
     !(in case of usepaw==0, final record: residm, coordinates, total energy, Fermi energy)
@@ -980,7 +992,7 @@ The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was:
     & npwarr(1:nkpt),so_typat(1:ntypat),symafm(1:nsym),symrel(1:3,1:3,1:nsym),typat(1:natom),&
     & kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),znucltypat(1:ntypat)
      do ipsp=1,npsp
-    ! (npsp lines, 1 for each pseudopotential ; npsp=ntypat, except if alchemical pseudo-atoms)
+    ! (npsp lines, 1 for each pseudopotential; npsp=ntypat, except if alchemical pseudo-atoms)
       write(unit=unit) title,znuclpsp,zionpsp,pspso,pspdat,pspcod,pspxc,lmn_size
      enddo
     !(in case of usepaw==0, final record: residm, coordinates, total energy, Fermi energy)

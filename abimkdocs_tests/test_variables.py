@@ -6,8 +6,10 @@ from .tools import patch_syspath, AbimkdocsTest
 patch_syspath()
 
 import os
-from abimkdocs.variables import get_variables_code, ValueWithUnit, ValueWithConditions, MultipleValue, Range
+import json
 
+from collections import OrderedDict
+from abimkdocs.variables import get_variables_code, ValueWithUnit, ValueWithConditions, MultipleValue, Range
 
 class VariablesTest(AbimkdocsTest):
 
@@ -91,24 +93,25 @@ class VariablesTest(AbimkdocsTest):
             raise ValueError("\n".join(errors))
 
     def test_variables_in_tests(self):
+        """
+        Find variables that are not tested by comparing the database of variables
+        with the input file of the test.
+        Build dictionary with list of untested variables for the different codes.
+        Finally compare the new dictionary with the reference one and fail if they don't match.
+        """
         # Build database with all input variables indexed by code name.
         from abimkdocs.variables import get_variables_code
         variables_code = get_variables_code()
 
+        # Build AbinitTestSuite object.
+        from doc import tests as tmod
+        tests = tmod.abitests.select_tests(suite_args=[], regenerate=True, flat_list=True)
+
+        # Build conter for the different codes, keys are the varnames from the database.
         from collections import Counter
         count_code = {}
         for code, d in variables_code.items():
             count_code[code] = Counter({k: 0 for k in d})
-
-        # Build AbinitTestSuite object.
-        from doc import tests as tmod
-        tests = []
-        for t in tmod.abitests.select_tests(suite_args=[], regenerate=True):
-            # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
-            if hasattr(t, "tests"):
-                tests.extend(t.tests)
-            else:
-                tests.append(t)
 
         black_list = set([
             "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr",
@@ -121,9 +124,10 @@ class VariablesTest(AbimkdocsTest):
             #print(vnset)
             count_code[test.executable].update(vnset)
 
-        untested = {}
+        untested = OrderedDict()
         for code, count in count_code.items():
             untested[code] = []
+            # Add it if var is not tested and not internal.
             for vname, c in count.items():
                 if c == 0 and not variables_code[code][vname].is_internal:
                     print(code, vname)
@@ -133,3 +137,15 @@ class VariablesTest(AbimkdocsTest):
             untested[code] = sorted(untested[code])
             print(code, untested[code])
         #assert 0
+
+        ref_json_path = os.path.join(os.path.dirname(__file__), "untested_variables.json")
+        update_ref = False
+        if update_ref:
+            with open(ref_json_path, "wt") as fh:
+                json.dump(untested, fh, indent=4)
+        else:
+            with open(ref_json_path, "rt") as fh:
+                ref_untested = json.load(fh)
+
+            self.assertDictEqual(untested, ref_untested,
+                msg="Detected mismatch between reference file and new list of untested variables.")
