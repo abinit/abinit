@@ -196,7 +196,7 @@ class Variable(object):
         return code
 
     @property
-    def absolute_url(self):
+    def website_url(self):
         """
         The absolute URL associated to this variable on the Abinit website.
         """
@@ -268,15 +268,15 @@ class Variable(object):
         return json.dumps(d, indent=4, sort_keys=True)
 
     # From abipy
-    #def _repr_html_(self):
-    #    """Integration with jupyter notebooks."""
-    #    html = "<h2>Default value:</h2>" + str(self.defaultval) + "<br/><h2>Description</h2>" + str(self.text)
-    #    return html.replace("[[", "<b>").replace("]]", "</b>")
+    def _repr_html_(self):
+        """Integration with jupyter notebooks."""
+        html = "<h2>Default value:</h2>" + str(self.defaultval) + "<br/><h2>Description</h2>" + str(self.text)
+        return html.replace("[[", "<b>").replace("]]", "</b>")
 
     def browse(self):
         """Open variable documentation in browser."""
         import webbrowser
-        return webbrowser.open(self.absolute_url)
+        return webbrowser.open(self.website_url)
 
     @lazy_property
     def isarray(self):
@@ -305,10 +305,10 @@ class Variable(object):
     #    root = "https://www.abinit.org/sites/default/files/last/input_variables/html_automatically_generated/"
     #    return root + "%s.html#%s" % (self.section, self.varname)
 
-    #def html_link(self, label=None):
-    #    """String with the URL of the web page."""
-    #    label = self.varname if label is None else label
-    #    return '<a href="%s" target="_blank">%s</a>' % (self.url, label)
+    def html_link(self, label=None):
+        """String with the URL of the web page."""
+        label = self.name if label is None else label
+        return '<a href="%s" target="_blank">%s</a>' % (self.website_url, label)
 
     def get_parent_names(self):
         """
@@ -438,7 +438,7 @@ class Variable(object):
 
         return "\n".join(lines)
 
-    def validate(self):
+    def validate(self, ref_characteristics):
         """Validate variable. Raises ValueError if not valid."""
         errors = []
         eapp = errors.append
@@ -474,13 +474,14 @@ class Variable(object):
                     retcode += 1
         """
 
+	# Compare the characteristics of this variable with the refs to detect possible typos.
         if self.characteristics is not None:
             if not isinstance(self.characteristics, list):
                 eapp("The field characteristics of %s is not a list" % svar)
-            #else:
-            #    for cat in self.characteristics:
-            #        if cat.replace("[[", "").replace("]]", "") not in characteristics:
-            #            eapp(The characteristics %s  of %s is not valid" % (cat, self))
+            else:
+                for cat in self.characteristics:
+                    if cat.replace("[[", "").replace("]]", "") not in ref_characteristics:
+                        eapp("The characteristics %s of %s is not valid" % (cat, svar))
 
         if self.dimensions is None:
             eapp("%s does not have a dimension. If it is a *scalar*, it must be declared so." % svar)
@@ -492,7 +493,7 @@ class Variable(object):
         if self.varset is None:
             eapp('`%s` does not have a varset' % svar)
         #else:
-        #    if not isinstance(self.varset, str) or self.varset not in varset_names:
+        #    if not isinstance(self.varset, str) or self.varset not in ref_varset:
         #        print('The field varset of %s should be one of the valid varsets' % str(self))
 
         if len(self.name) > 20:
@@ -662,12 +663,9 @@ class VarDatabase(OrderedDict):
             vd = InputVariables.from_pyfile(pyf)
             new[vd.executable] = vd
 
-        # FIXME
-        # Read list of strings with possible character of variables.
-        #yaml_path = os.path.abspath(os.path.join(dirpath, "..", "doc", "variables"))
-        #with io.open(os.path.join(yaml_path, "characteristics.yml"), "rt", encoding="utf-8") as f:
-        #    new.characteristics = yaml.load(f)
-
+        # List of strings with possible character of variables.
+	# This is the reference set that will checked against the input
+	# given by the developer in the variables_CODENAME modules.
         new.characteristics = [
             "DEVELOP",
             "EVOLVING",
@@ -679,13 +677,8 @@ class VarDatabase(OrderedDict):
             "NO_MULTI",
         ]
 
-        # Read list of `external_params` i.e. external parameters that are not input variables,
-        # but that are used in the documentation of other variables
-        # then convert to dict {name --> description}
-        #with io.open(os.path.join(yaml_path, "list_externalvars.yml"), "rt", encoding="utf-8") as f:
-        #    d = {k: v for k, v in yaml.load(f)}
-        #    new.external_params = OrderedDict([(k, d[k]) for k in sorted(d.keys())])
-
+        # `external_params` i.e. external parameters that are not input variables,
+        # but that are used in the documentation of other variables.
         new.external_params = OrderedDict([
             ("AUTO_FROM_PSP", "Means that the value is read from the PSP file"),
             ("CUDA", "True if CUDA is enabled (compilation)"),
@@ -709,26 +702,31 @@ class VarDatabase(OrderedDict):
     #    """JSON string with the list of variable names extracted from the database."""
     #    return json.dumps(list(self.keys()))
 
-    #def get_version_endpoints(self):
-    #    """
-    #    docs.abinit.org/vardocs/abinit/asr?version=8.6.2
-    #    """
-    #    code_urls = {}
-    #    for codename, vard in self.items()
-    #        code_urls[codename] = d = {}
-    #        for vname, var in var.items():
-    #            d[vname] = var.url
-    #    return version, code_urls
+    def get_version_endpoints(self):
+        """
+        docs.abinit.org/vardocs/abinit/asr?version=8.6.2
+        """
+	# Webiste will serve
+	# asr@anaddb at /variables/anaddb#asr
+	# asr@abinit at /variables/eph#asr
+	# asr@abinit at /variables/abinit/eph#asr
+        code_urls = {}
+        for codename, vard in self.items():
+            code_urls[codename] = d = {}
+            for vname, var in var.items():
+                d[vname] = "/variables/%s/%s#%s" % (codename, var.varset, var.name)
+	# TODO: version and change mkdocs.yml
+        return version, code_urls
 
-    #def update_json_endpoints(self, json_path, indent=4):
-    #    import json
-    #    with open(json_path, "rt") as fh:
-    #        oldd = json.load(fh)
-    #    new_version, newd = self.get_version_endpoints()
-    #    assert new_version not in oldd
-    #    oldd[new_version] = newd
-    #    with open(json_path, "wt") as fh:
-    #        json.dump(oldd, fh, indent=indent)
+    def update_json_endpoints(self, json_path, indent=4):
+        import json
+        with open(json_path, "rt") as fh:
+            oldd = json.load(fh)
+        new_version, newd = self.get_version_endpoints()
+        assert new_version not in oldd
+        oldd[new_version] = newd
+        with open(json_path, "wt") as fh:
+            json.dump(oldd, fh, indent=indent)
 
     def write_pymods(self, dirpath="."):
         """
@@ -1038,7 +1036,7 @@ class InputVariables(OrderedDict):
                 height="0.25",
                 #color=var.color_hex,
                 label=str(var),
-                URL=var.absolute_url,
+                URL=var.website_url,
                 target="_top",
                 tooltip=str(var.mnemonics),
             )
@@ -1120,7 +1118,7 @@ class InputVariables(OrderedDict):
                 height="0.25",
                 #color=var.color_hex,
                 label=str(var),
-                URL=var.absolute_url,
+                URL=var.website_url,
                 target="_top",
                 tooltip=str(var.mnemonics),
             )

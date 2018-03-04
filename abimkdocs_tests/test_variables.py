@@ -114,18 +114,21 @@ class VariablesTest(AbimkdocsTest):
         # Should not raise
         #abinit_help("foobar", info=True)
 
+        #for codename, d in vars_code.items():
+        #    d.validate_vars()
+
         errors = []
         for var in vars_code.iter_allvars():
             try:
                 assert repr(var)
                 assert str(var)
                 #assert var.to_string(verbose=2)
-                #str(var._repr_html_())
+                str(var._repr_html_())
                 assert var.info
                 assert var.to_abimarkdown()
                 # topic --> list of tribes
                 assert len(var.topic_tribes)
-                var.validate()
+                var.validate(ref_characteristics=vars_code.characteristics)
             except Exception as exc:
                 errors.append(str(exc))
 

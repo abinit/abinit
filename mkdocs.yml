@@ -124,6 +124,7 @@ pages:
 - Variables:
     - All Variables: variables/index.md
     - Abinit:
+        # TODO: variables/abinit/bse ?
         - Basic: variables/basic.md
         - Bethe-Salpeter: variables/bse.md
         - Developers: variables/dev.md
