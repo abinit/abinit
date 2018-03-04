@@ -595,7 +595,7 @@ always output, either with the name **abo_WFK**, or with the name
 
   * **abo_1WFxx**   
 Same as **abo_WFK**, but for first-order wavefunctions, xx is the index of
-the perturbation, see the section [6.3](help_respfn.html#6.3) of the [[help:respfn]].
+the perturbation, see the section [[help:respfn#6.3|section 6.3]] of the [[help:respfn]].
 
   * **abo_DDB**   
 The derivative database, produced by a response-function dataset, see [[help:respfn#ddb|this section]]
@@ -785,7 +785,7 @@ larger, since more CPU time is needed for larger FFT grids;
 
 Until here, the output of a ground-state computation is identical to the one
 of a response-function calculation. See the [[help:respfn]] for the latter,
-especially section [6.2](help_respfn.html#6.2).
+especially [[help:respfn#6.2|section 6.2]].
 
 Next the code reports information for each SCF iteration:
 

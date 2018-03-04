@@ -120,6 +120,7 @@ pages:
     - topics/Wannier.md
     - topics/Wavelets.md
     - topics/xc.md
+    - External Resources: topics/external_resources.md
 - Variables:
     - All Variables: variables/index.md
     - Abinit:

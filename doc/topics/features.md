@@ -42,9 +42,9 @@ Discussions on the [ABINIT forum](https://forum.abinit.org) might also allow to 
   
 The topic [[topic:GSintroduction|Building an input file]] briefly explains the
 content of an ABINIT input file. The following topics go more into the
-details, however restricting to **static DFT calculations** , without doing
+details, however restricting to **static DFT calculations**, without doing
 anything fancy with the exchange-correlation functionals. Going beyond these
-is left for other sections ([[help:features#3|Sec. 3]] and beyond). In
+is left for other sections (Section 3 and beyond). In
 particular, for any accurate electronic properties, e.g. correct band
 structure, optical response, or for strongly correlated electrons, please go
 beyond the present sec. 2. Also, topics related to global control parameters,

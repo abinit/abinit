@@ -59,7 +59,7 @@ Variable(
     vartype="real",
     topics=['UnitCell_basic'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 1}),
+    defaultval=MultipleValue(number=3, value=1),
     mnemonics="CELL lattice vector scaling",
     characteristics=['[[EVOLVING]]', '[[LENGTH]]'],
     commentdims="represented internally as acell(3,[[nimage]])",
@@ -123,7 +123,7 @@ Variable(
     vartype="integer",
     topics=['AtomTypes_expert'],
     dimensions=['[[ntypalch]]'],
-    defaultval=MultipleValue({'number': None, 'value': 1}),
+    defaultval=MultipleValue(number=None, value=1),
     mnemonics="ALGorithm for generating ALCHemical pseudopotentials",
     text="""
 Used for the generation of alchemical pseudopotentials, that is, when
@@ -250,7 +250,7 @@ Variable(
     vartype="real",
     topics=['DFT+U_expert'],
     dimensions=['[[natvshift]]', '[[nsppol]]', '[[natom]]'],
-    defaultval=MultipleValue({'number': None, 'value': '0.0d0'}),
+    defaultval=MultipleValue(number=None, value=0.0),
     mnemonics="ATomic potential (V) energy SHIFTs",
     characteristics=['[[DEVELOP]]'],
     requires="[[usepawu]] /= 0 and [[natvshift]] in [5,7]",
@@ -432,7 +432,7 @@ Variable(
     vartype="integer",
     topics=['Berry_basic'],
     dimensions=[4],
-    defaultval=MultipleValue({'number': 4, 'value': 0}),
+    defaultval=MultipleValue(number=4, value=0),
     mnemonics="BanD limits for BERRY phase",
     requires="[[berryopt]] in [1, 2, 3] and [[nberry]] > 0",
     text="""
@@ -477,7 +477,7 @@ Variable(
     vartype="integer",
     topics=['GW_basic', 'SelfEnergy_basic'],
     dimensions=[2, '[[nkptgw]]', '[[nsppol]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="BanDs for GW calculation",
     requires="[[optdriver]]==4",
     text="""
@@ -622,7 +622,7 @@ Variable(
     vartype="real",
     topics=['MagField_expert'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="finite B FIELD calculation",
     text="""
 Perform finite magnetic field calculation.
@@ -1974,7 +1974,7 @@ Variable(
     vartype="real",
     topics=['Berry_basic'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="Displacement FIELD",
     requires="[[berryopt]] = 6, [[efield]]",
     text="""
@@ -2271,7 +2271,7 @@ Variable(
  '2*max([[lpawu]])+1',
  'max([[nsppol]], [[nspinor]])',
  '[[natpawu]]'],
-    defaultval=MultipleValue({'number': None, 'value': -10.0}),
+    defaultval=MultipleValue(number=None, value=-10.0),
     mnemonics="initial Density MATrix for PAW+U",
     requires="[[usepaw]]==1 and [[usepawu]]==1 and [[usedmatpu]]!=0",
     text="""
@@ -2976,7 +2976,7 @@ Variable(
     vartype="integer",
     topics=['PIMD_expert', 'TransPath_expert'],
     dimensions=['[[nimage]]'],
-    defaultval=MultipleValue({'number': None, 'value': 1}),
+    defaultval=MultipleValue(number=None, value=1),
     mnemonics="DYNamics of the IMAGE",
     commentdefault="if [[imgmov]] in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage([[nimage]])</b>=0.",
     text="""
@@ -3157,7 +3157,7 @@ Variable(
     vartype="real",
     topics=['Berry_basic'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="Electric FIELD",
     requires="[[berryopt]] = 4 or 6",
     text="""
@@ -4200,7 +4200,7 @@ Variable(
     vartype="real",
     topics=['spinpolarisation_useful', 'SmartSymm_useful'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0}),
+    defaultval=MultipleValue(number=3, value=0),
     mnemonics="GENerator of the translation for Anti-FerroMagnetic space group",
     text="""
 This input variable might be used to define a Shubnikov type IV magnetic space
@@ -7222,7 +7222,7 @@ Variable(
     vartype="integer",
     topics=['k-points_useful', 'TuningSpeed_basic'],
     dimensions=['[[nkpt]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="Integer for choice of STorage of WaveFunction at each k point",
     commentdefault="For RF calculations, the Default is not used: <b>istwfk</b> is forced to be 1 deep inside the code, for all k points. For spin-orbit calculations ([[nspinor]]=2), <b>istwfk</b> is also forced to be 1, for all k points.",
     text="""
@@ -7692,7 +7692,7 @@ Variable(
     vartype="integer",
     topics=['Berry_basic'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0}),
+    defaultval=MultipleValue(number=3, value=0),
     mnemonics="electric/displacement FIELD DIRection",
     requires="[[berryopt]] = 17",
     text="""
@@ -7722,7 +7722,7 @@ Variable(
     vartype="real",
     topics=['DFT+U_compulsory'],
     dimensions=['[[ntypat]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of J for PAW+U",
     characteristics=['[[ENERGY]]'],
     requires="[[usepaw]]==1 and [[usepawu]]==1",
@@ -7739,7 +7739,7 @@ Variable(
     vartype="integer",
     topics=['Berry_basic'],
     dimensions=[3, '[[nberry]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="K wavevectors for BERRY phase computation",
     requires="[[berryopt]] = 1, 2, or 3",
     text="""
@@ -7996,7 +7996,7 @@ Variable(
     vartype="real",
     topics=['SelfEnergy_basic'],
     dimensions=[3, '[[nkptgw]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0.0}),
+    defaultval=MultipleValue(number=None, value=0.0),
     mnemonics="K-PoinTs for GW calculations",
     requires="[[optdriver]]==4",
     text="""
@@ -8118,7 +8118,7 @@ Variable(
     vartype="integer",
     topics=['k-points_useful'],
     dimensions=[3, 3],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="K - PoinTs grid: Real space LATTice",
     excludes="specified([[ngkpt]])",
     text="""
@@ -8210,7 +8210,7 @@ Variable(
     vartype="integer",
     topics=['LDAminushalf_compulsory'],
     dimensions=['[[ntypat]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="LDA minus half",
     text="""
 For each type of atom, gives whether a LDA-1/2 calculation is to be performed.
@@ -8327,7 +8327,7 @@ Variable(
     vartype="integer",
     topics=['DFT+U_compulsory'],
     dimensions=['[[ntypat]]'],
-    defaultval=MultipleValue({'number': None, 'value': -1}),
+    defaultval=MultipleValue(number=None, value=-1),
     mnemonics="value of angular momentum L for PAW+U",
     requires="[[usepawu]]==1 or [[usepawu]]== 2",
     text="""
@@ -10898,7 +10898,7 @@ Variable(
     vartype="real",
     topics=['AtomManipulator_useful'],
     dimensions=[4],
-    defaultval=MultipleValue({'number': 4, 'value': '0.0d0'}),
+    defaultval=MultipleValue(number=4, value=0.0),
     mnemonics="OBJect A: ROtations",
     characteristics=['[[INPUT_ONLY]]'],
     commentdefault="(no rotation)",
@@ -10923,7 +10923,7 @@ Variable(
     vartype="real",
     topics=['AtomManipulator_useful'],
     dimensions=[12],
-    defaultval=MultipleValue({'number': 12, 'value': '0.0d0'}),
+    defaultval=MultipleValue(number=12, value=0.0),
     mnemonics="OBJect A: TRanslations",
     characteristics=['[[INPUT_ONLY]]', '[[LENGTH]]'],
     commentdefault="(no translation)",
@@ -11043,7 +11043,7 @@ Variable(
     vartype="real",
     topics=['AtomManipulator_useful'],
     dimensions=[4],
-    defaultval=MultipleValue({'number': 4, 'value': '0.0d0'}),
+    defaultval=MultipleValue(number=4, value=0.0),
     mnemonics="OBJect B: ROtations",
     characteristics=['[[INPUT_ONLY]]'],
     commentdefault="(no rotation)",
@@ -11068,7 +11068,7 @@ Variable(
     vartype="real",
     topics=['AtomManipulator_useful'],
     dimensions=[12],
-    defaultval=MultipleValue({'number': 12, 'value': '0.0d0'}),
+    defaultval=MultipleValue(number=12, value=0.0),
     mnemonics="OBJect B: TRanslations",
     characteristics=['[[INPUT_ONLY]]', '[[LENGTH]]'],
     commentdefault="(no translation)",
@@ -11096,7 +11096,7 @@ Variable(
     vartype="real",
     topics=['BandOcc_basic'],
     dimensions=['[[nband]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="OCCupation numbers",
     characteristics=['[[EVOLVING]]'],
     text="""
@@ -12612,7 +12612,7 @@ Variable(
     vartype="real",
     topics=['Berry_useful'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0}),
+    defaultval=MultipleValue(number=3, value=0),
     mnemonics="POLarization for CENtrosymmetric geometry",
     text="""
 When doing a finite electric displacement field calculation, if the structure
@@ -14215,7 +14215,7 @@ Variable(
     vartype="real",
     topics=['EFG_basic'],
     dimensions=['[[ntypat]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="PoinT CHARGEs",
     requires="[[usepaw]]==1 and [[prtefg]]>=3",
     text="""
@@ -14256,7 +14256,7 @@ Variable(
     vartype="real",
     topics=['RandStopPow_basic'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 1.0}),
+    defaultval=MultipleValue(number=3, value=1.0),
     mnemonics="Particle VELocity MAXimum",
     requires="[[optdriver]]==3",
     text="""
@@ -14291,7 +14291,7 @@ Variable(
     vartype="real",
     topics=['PIMD_basic', 'MolecularDynamics_basic'],
     dimensions=['[[nnos]]'],
-    defaultval=MultipleValue({'number': None, 'value': 10.0}),
+    defaultval=MultipleValue(number=None, value=10.0),
     mnemonics="Q thermostat MASS",
     text="""
 This are the masses of the chains of [[nnos]] thermostats to be used when
@@ -14350,7 +14350,7 @@ Variable(
     vartype="real",
     topics=['Susceptibility_useful'],
     dimensions=[3, '[[nqptdm]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0.0}),
+    defaultval=MultipleValue(number=None, value=0.0),
     mnemonics="Q-PoinTs for the Dielectric Matrix",
     requires="[[optdriver]]==3 and [[nqptdm]]!=0",
     text="""
@@ -14368,7 +14368,7 @@ Variable(
     vartype="real",
     topics=[' DFPT_internal'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0}),
+    defaultval=MultipleValue(number=3, value=0),
     mnemonics="Q-PoinT re-Normalized",
     characteristics=['[[INTERNAL_ONLY]]'],
     requires="[[nqpt]]==1",
@@ -14463,7 +14463,7 @@ Variable(
     vartype="integer",
     topics=['q-points_useful'],
     dimensions=[3, 3],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="Q - PoinTs grid: Real space LATTice",
     characteristics=['[[INPUT_ONLY]]'],
     excludes="specified([[ngqpt]])",
@@ -14491,7 +14491,7 @@ Variable(
     vartype="real",
     topics=['EFG_basic'],
     dimensions=['[[ntypat]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="QUADrupole MOMents",
     requires="[[usepaw]]==1 and [[prtefg]]>=1",
     text="""
@@ -14742,7 +14742,7 @@ Variable(
     vartype="real",
     topics=['Berry_useful'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="REDuced Displacement FIELD",
     requires="[[berryopt]] = 16, [[red_efield]]",
     text="""
@@ -14761,7 +14761,7 @@ Variable(
     vartype="real",
     topics=['Berry_useful'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="REDuced Electric FIELD",
     requires="[[berryopt]] = 16",
     text="""
@@ -14780,7 +14780,7 @@ Variable(
     vartype="real",
     topics=['Berry_useful'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="REDuced Electric FIELD BAR",
     requires="[[berryopt]] = 14",
     text="""
@@ -15239,7 +15239,7 @@ Variable(
     vartype="real",
     topics=['UnitCell_useful'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 1}),
+    defaultval=MultipleValue(number=3, value=1),
     mnemonics="SCALE CARTesian coordinates",
     characteristics=['[[INPUT_ONLY]]'],
     text="""
@@ -15509,7 +15509,7 @@ Variable(
     vartype="integer",
     topics=['spinpolarisation_useful'],
     dimensions=['[[npsp]]'],
-    defaultval=MultipleValue({'number': '[[npsp]]', 'value': 1}),
+    defaultval=MultipleValue(number='[[npsp]]', value=1),
     mnemonics="Spin-Orbit treatment for each PSeudoPotential",
     requires="[[nspinor]]==2 and [[usepaw]]==0",
     text="""
@@ -15923,7 +15923,7 @@ Variable(
     vartype="integer",
     topics=['spinpolarisation_useful'],
     dimensions=['[[nsym]]'],
-    defaultval=MultipleValue({'number': '[[nsym]]', 'value': 1}),
+    defaultval=MultipleValue(number='[[nsym]]', value=1),
     mnemonics="SYMmetries, Anti-FerroMagnetic characteristics",
     text="""
 In case the material is magnetic (well, this is only interesting in the case
@@ -16764,7 +16764,7 @@ Variable(
     vartype="real",
     topics=['DFT+U_compulsory'],
     dimensions=['[[ntypat]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of U for PAW+U",
     characteristics=['[[ENERGY]]'],
     requires="[[usepaw]]==1 and [[usepawu]]==1",
@@ -17445,7 +17445,7 @@ Variable(
     vartype="real",
     topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions=[3],
-    defaultval=MultipleValue({'number': 3, 'value': 0.0}),
+    defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="V (potential) CUT-off GEOmetry",
     requires="[[icutcoul]] in [1,2]",
     text="""
@@ -17932,7 +17932,7 @@ Variable(
     vartype="integer",
     topics=['vdw_basic'],
     dimensions=['[[natom]]'],
-    defaultval=MultipleValue({'number': 1, 'value': '[[natom]]'}),
+    defaultval=MultipleValue(number=1, value='[[natom]]'),
     mnemonics="Van Der Waals TYPe of FRAGment",
     characteristics=['[[DEVELOP]]'],
     requires="[[vdw_xc]] in [10,11]",
@@ -18013,7 +18013,7 @@ Variable(
     vartype="real",
     topics=['PIMD_useful', 'MolecularDynamics_basic'],
     dimensions=[3, '[[natom]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="VELocity",
     characteristics=['[[EVOLVING]]'],
     commentdims="It is represented internally as [[vel]](3,[[natom]],[[nimage]])",
@@ -18036,7 +18036,7 @@ Variable(
     vartype="real",
     topics=['PIMD_expert'],
     dimensions=[3, 3],
-    defaultval=MultipleValue({'number': None, 'value': 3}),
+    defaultval=MultipleValue(number=None, value=3),
     mnemonics="VELocity of the CELL parameters",
     characteristics=['[[EVOLVING]]'],
     commentdims="It is represented internally as [[vel_cell]](3,3,[[nimage]])",
@@ -18262,7 +18262,7 @@ Variable(
     vartype="real",
     topics=['k-points_useful'],
     dimensions=['[[nkpt]]'],
-    defaultval=MultipleValue({'number': '[[nkpt]]', 'value': 1.0}),
+    defaultval=MultipleValue(number='[[nkpt]]', value=1.0),
     mnemonics="WeighTs for K points",
     commentdefault="Except when [[kptopt]]/=0",
     text="""
@@ -18517,7 +18517,7 @@ Variable(
     vartype="real",
     topics=['crystal_compulsory'],
     dimensions=[3, 'min([[natom]],[[natrd]])'],
-    defaultval=MultipleValue({'number': None, 'value': 0.0}),
+    defaultval=MultipleValue(number=None, value=0.0),
     mnemonics="vectors (X) of atom positions in REDuced coordinates",
     characteristics=['[[EVOLVING]]'],
     commentdims="represented internally as xred(3,[[natom]],[[nimage]])",
@@ -18544,7 +18544,7 @@ Variable(
     vartype="real",
     topics=['printing_prdos'],
     dimensions=[3, '[[natsph_extra]]'],
-    defaultval=MultipleValue({'number': None, 'value': 0.0}),
+    defaultval=MultipleValue(number=None, value=0.0),
     mnemonics="X(position) in REDuced coordinates of the SPHeres for dos projection in the EXTRA set",
     requires="[[natsph_extra]] > 0",
     text="""
@@ -18655,5 +18655,5 @@ For a "dummy" atom, with [[znucl]]=0, as used in the case of calculations
 with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
 """,
 ),
-
+#{"abinit_version": "8.7.3"},
 ]

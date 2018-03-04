@@ -392,6 +392,7 @@ state (GS) results. Eventually, the output of datasets related to response
 functions will be intertwined with those concerned with ground-state case. The
 purpose of this file is the same as in the GS case, and the use of error messages is unchanged.
 
+<a id="6.2"></a>
 **6.2. The main output file**
 
 This file is the same as the main output file of the abinit code when
@@ -448,6 +449,7 @@ A Warning message is issued if the above information cannot be trusted.
 
 Finally, the code provides the timing information.
 
+<a id="6.3"></a>
 **6.3. The first-order wavefunction (1WF) files**
 
 These are unformatted data files containing the planewaves coefficients of all

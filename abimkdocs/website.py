@@ -33,12 +33,6 @@ from doc.tests.pymods.termcolor import cprint
 from .variables import Variable
 
 
-ABINIT_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if not os.path.exists(ABINIT_REPO):
-    raise ValueError("ABINIT_REPO: %s does not exist\n. Please change the global variable in the python module." %
-            ABINIT_REPO)
-
-
 class lazy_property(object):
     """
     lazy_property descriptor
@@ -653,9 +647,9 @@ in order of number of occurrence in the input files provided with the package.
                     lines.append('<li class="list-group-item %s"> %s <span class="badge"> %d </span></li>' % (cls, s, count))
                 mdf.write("\n".join(lines) + "</ul>")
 
-        # TODO: Use md skeletong + fields filled by python (jinja?)
+        # TODO: Use md skeleton + fields filled by python (jinja?)
         cprint("Generating Markdown files with topics ...", "green")
-        repo_path = os.path.join(ABINIT_REPO, "doc/topics/origin_files/")
+        repo_path = os.path.join(self.root, "topics", "origin_files")
         with io.open(os.path.join(repo_path, "list_of_topics.yml"), "rt", encoding="utf-8") as fh:
             self.all_topics = sorted(yaml.load(fh), key=lambda t: t[0].upper())
         with io.open(os.path.join(repo_path, "list_relevances.yml"), "rt", encoding="utf-8") as fh:
@@ -1126,7 +1120,7 @@ The bibtex file is available [here](../abiref.bib).
                 # Handle [[lesson:wannier90|text]]
                 if name == "index":
                     url = "/tutorial/"
-                    if a.text is None: a.text = "lesson index"
+                    if a.text is None: a.text = "tutorial home page"
                 else:
                     url = "/tutorial/%s" % name
                     if a.text is None: a.text = "%s %s" % (name, namespace)
@@ -1136,7 +1130,7 @@ The bibtex file is available [here](../abiref.bib).
                 # Handle [[help:optic|text] NB: [[help_codename]] is echoed "codename help file"
                 if name == "index":
                     url = "/guide/"
-                    if a.text is None: a.text = "tutorial index"
+                    if a.text is None: a.text = "user-guide home page"
                 else:
                     url = "/guide/%s" % name
                     if a.text is None: a.text = "%s help file" % name

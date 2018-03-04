@@ -202,7 +202,7 @@ The video below gives an overwiew of the command line options of `runtests.py`
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
 More advanced features such as video galleries require a bit of HTML/CSS/JS code in the Markdown page.
-See for example the [Abinit video gallery](/developers/external_resources#abinit-videos)
+See for example the [Abinit video gallery](../topics/external_resources#abinit-videos)
 built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 

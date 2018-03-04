@@ -46,6 +46,8 @@ class Variable(object):
                  requires=None,
                  commentdefault=None,
                  commentdims=None,
+                 added_in_version=None,
+                 alternative_name=None,
                  text=None,
                  ):
         """
@@ -65,6 +67,10 @@ class Variable(object):
             requires (str): String with variables that are required.
             commentdefault=None,
             commentdims=None,
+            added_in_version (str): String with the Abinit version in which this variable was added.
+                None if variable is present in Abinit <= 8.6.3
+            alternative_name: alias name (used if a new variable with a different name was introduced, in place
+                of of an old variable that is still supported.
             text: markdown string with documentation. Required.
         """
         self.abivarname = abivarname
@@ -79,6 +85,8 @@ class Variable(object):
         self.requires = requires
         self.commentdefault = commentdefault
         self.commentdims = commentdims
+        self.added_in_version = added_in_version
+        self.alternative_name = alternative_name
         self.text = text
 
         errors = []
@@ -465,16 +473,13 @@ class ValueWithConditions(dict):
         return self.__repr__()
 
 
-class MultipleValue(dict):
+class MultipleValue(object):
     """
     Used for variables that can assume multiple values.
 
     abivarname="istwfk",
     defaultval=MultipleValue({'number': None, 'value': 0}),
     """
-    number = None
-    value = None
-
     def __init__(self, number=None, value=None):
         self.number = number
         self.value = value
@@ -483,7 +488,7 @@ class MultipleValue(dict):
         if self.number is None:
             return "*" + str(self.value)
         else:
-            return str(self.number) + "*" + str(self.value)
+            return str(self.number) + " * " + str(self.value)
 
 _VARS = None
 
