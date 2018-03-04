@@ -1,6 +1,6 @@
 ## Getting started
 
-!!! warning:
+!!! warning
     
     The code supports py2.7 and python3.6 but py3k is **strongly** suggested
     especially when building the final version before deploying 

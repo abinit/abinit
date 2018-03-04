@@ -19,7 +19,11 @@ pages:
 - User Guide:
     - NewUser: guide/new_user.md
     #- Introduction: index.md
-    - Installation:  installation.md
+    - Installation: 
+        - HowTo: installation.md
+        - MacOSX: README_MacOSX.md
+        - GPUs: README_gpu.md
+        - Xlf: README_xlf.md
     - Abinit: guide/abinit.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
@@ -207,6 +211,7 @@ pages:
         - psp6: developers/psp6_info.md
         - psp8: developers/psp8_info.md
     - Code stats: developers/codestats.md
+    - Autoconf_examples: developers/autoconf_examples.md
     #- External Resources: developers/external_resources.md
 - About:
     - Release Notes: about/release-notes.md

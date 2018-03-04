@@ -14,6 +14,7 @@ import os
 import io
 import time
 import re
+import shutil
 import uuid
 import pickle
 import yaml
@@ -304,6 +305,7 @@ class Website(object):
         self.deploy = bool(deploy)
         self.verbose = verbose
         self.md_generated = []
+        self.ignored_paths = []
         self.warnings = []
 
         # Read mkdocs configuration file.
@@ -475,19 +477,19 @@ Change the input yaml files or the python code
         assert path not in self.md_generated
         self.md_generated.append(path)
         if self.verbose: print("Generating markdown file: `%s`" % path)
-        rpath = "/" + os.path.relpath(path, self.root)
-        if meta is None: meta = {}
-        assert "rpath" not in meta
-        #meta["rpath"] = rpath
-        # Must convert to ASCII to avoid !!python/unicode tags in YAML doc
-        # (mkdocs does not use pyaml to parse the front matter).
-        if sys.version_info[0] <= 2:
-            meta = {k.encode("ascii", errors="strict"): meta[k] for k in meta}
-        s = yaml.dump(meta, indent=4, default_flow_style=False).strip().replace(" !!python/unicode", "")
+
         mdf = io.open(path, "wt", encoding="utf-8")
-        mdf.write("---\n%s\n---\n" % s)
+        if meta is not None:
+            # Must convert to ASCII to avoid !!python/unicode tags in YAML doc
+            # (mkdocs does not use yaml to parse the front matter).
+            if sys.version_info[0] <= 2:
+                meta = {k.encode("ascii", errors="strict"): meta[k] for k in meta}
+            s = yaml.dump(meta, indent=4, default_flow_style=False).strip().replace(" !!python/unicode", "")
+            mdf.write("---\n%s\n---\n" % s)
+
         mdf.write(self.do_not_edit_comment)
-        mdf.rpath = rpath
+        mdf.rpath = "/" + os.path.relpath(path, self.root)
+
         return mdf
 
     def generate_mdindex(self, dirname):
@@ -513,6 +515,44 @@ Change the input yaml files or the python code
         #with self.new_mdfile(dirname, "index.md") as mdf:
         #    mdf.write("\n".join(index_md))
 
+    def copy_readme_files(self):
+        """
+        Copy README_*.md files from ~abint to ~abinit/doc and *git ignore* them.
+        Files must be included in mkdocs.yml in the `Installation` section.
+        """
+        top = os.path.abspath(os.path.join(self.root, ".."))
+        for f in os.listdir(top):
+            if f.startswith("README_") and f.endswith(".md"):
+                src = os.path.join(top, f)
+                dest = os.path.join(self.root, f)
+                shutil.copy(src, dest)
+                self.ignored_paths.append(dest)
+
+    def generate_page_with_ac_examples(self):
+        """Generate markdown pages with all ac exaples found in config-examples."""
+        dirpath = os.path.join(self.root, "build", "config-examples")
+        lines = []
+        app = lines.append
+        app("""
+# Autoconf examples
+
+This page gathers the autoconf files used by the buildbot testfarm
+
+""")
+        for f in os.listdir(dirpath):
+            path = os.path.join(dirpath, f)
+            if os.path.isdir(path): continue
+            app("## %s  " %  f)
+            with io.open(path, "rt", encoding="utf-8") as fh:
+                app("```shell")
+                app(fh.read())
+                app("```")
+                app("\n")
+
+        # Write MD file.
+        with self.new_mdfile("developers", "autoconf_examples.md") as mdf:
+            mdf.write("\n".join(lines))
+
     def generate_markdown_files(self):
         """Generate markdown files using the data stored in the bibtex file, the abivars file ..."""
         start = time.time()
@@ -520,6 +560,9 @@ Change the input yaml files or the python code
         # Convert test description from markdown to HTML
         #for t in self.rpath2test.values():
         #    t.description = self.convert_markdown(t.description)
+
+        self.copy_readme_files()
+        self.generate_page_with_ac_examples()
 
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}
@@ -780,6 +823,10 @@ The bibtex file is available [here](../abiref.bib).
         #        topic2pages[topic].append(page)
 
         with open(os.path.join(self.root, ".gitignore"), "wt") as fh:
+            fh.write("# The following md files have been copied from ~abinit and should be `git ignored`\n")
+            for p in self.ignored_paths:
+                fh.write(os.path.relpath(p, self.root) + "\n")
+
             fh.write("# The following md files have been automatically generated and should be `git ignored`\n")
             for p in self.md_generated:
                 fh.write(os.path.relpath(p, self.root) + "\n")

@@ -234,3 +234,6 @@ are still points worth discussing
 	* Should be part of a PDF manual too.
 	* Remove links at top and bottom.
 	* Remove copyright notice.
+
+
+* README_conda with ${CONDA_ENV}
