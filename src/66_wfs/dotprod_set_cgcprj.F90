@@ -129,21 +129,21 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
  if(hermitian==1)then
    if(nbd1/=nbd2)then
      MSG_ERROR(' With hermitian==1, nb1 and nb2 must be equal ')
-   endif
- endif
+   end if
+ end if
 
  ABI_ALLOCATE(cwavef1,(2,npw*nspinor))
  ABI_ALLOCATE(cwavef2,(2,npw*nspinor))
  if(usepaw==1) then
    ABI_DATATYPE_ALLOCATE(cprj1_k,(natom,nspinor*nbd1))
    ABI_DATATYPE_ALLOCATE(cprj2_k,(natom,nspinor*nbd2))
- endif
+ end if
  if(usepaw==1 .and. ibg1/=0) then
    call pawcprj_alloc(cprj1_k,cprj1(1,1)%ncpgr,dimcprj)
- endif
+ end if
  if(usepaw==1 .and. ibg2/=0) then
    call pawcprj_alloc(cprj2_k,cprj1(1,1)%ncpgr,dimcprj)
- endif
+ end if
 
  icgb1=icg1
  do ibd1=1,nbd1
@@ -155,9 +155,9 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
    end do
    if(usepaw==1 .and. ibg1/=0) then
      call pawcprj_get(atindx1,cprj1_k,cprj1,natom,1,ibg1,ikpt,1,isppol,mband,&
-&         mkmem,natom,nbd1,nbd1,nspinor,nsppol,0,&
-&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-   endif
+&     mkmem,natom,nbd1,nbd1,nspinor,nsppol,0,&
+&     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+   end if
 
    icgb2=icg2
    max_nbd2=nbd2
@@ -175,9 +175,9 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 
      if(usepaw==1 .and. ibg2/=0) then
        call pawcprj_get(atindx1,cprj2_k,cprj2,natom,1,ibg2,ikpt,1,isppol,mband,&
-&         mkmem,natom,nbd2,nbd2,nspinor,nsppol,0,&
-&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-     endif
+&       mkmem,natom,nbd2,nbd2,nspinor,nsppol,0,&
+&       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+     end if
 
 !    Calculate Smn=<cg1|cg2>
      call dotprod_g(dotr,doti,istwf,npw*nspinor,2,cwavef1,cwavef2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -261,7 +261,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
                end do
              end do
            end do
-         endif
+         end if
          ia=ia+nattyp(itypat)
        end do
      end if
@@ -282,9 +282,9 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
      do ibd2=ibd1+1,nbd2
        smn(1,ibd1,ibd2)= smn(1,ibd2,ibd1)
        smn(2,ibd1,ibd2)=-smn(2,ibd2,ibd1)
-     enddo
-   enddo
- endif
+     end do
+   end do
+ end if
 
 !DEBUG
 !write(std_out,*)' smn=',smn
@@ -295,57 +295,57 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 !DEBUG
 !Compute the eigenvalues of the projector S herm(S) or herm(S) S, depending on which has lowest dimension.
 !write(std_out,*)' dotprod_set_cgcprj : compute the projector matrix '
- nbd=min(nbd1,nbd2)
- ABI_ALLOCATE(proj,(2,nbd,nbd))
- proj(:,:,:)=zero
- if(nbd1<=nbd2)then
-   do ibd1=1,nbd1
-     do ibd2=1,nbd2
-       proj(1,:,ibd1)=proj(1,:,ibd1)+smn(1,:,ibd2)*smn(1,ibd1,ibd2)+smn(2,:,ibd2)*smn(2,ibd1,ibd2)
-       proj(2,:,ibd1)=proj(2,:,ibd1)-smn(1,:,ibd2)*smn(2,ibd1,ibd2)+smn(2,:,ibd2)*smn(1,ibd1,ibd2)
-     enddo
-   enddo
- else
-   do ibd2=1,nbd2
+   nbd=min(nbd1,nbd2)
+   ABI_ALLOCATE(proj,(2,nbd,nbd))
+   proj(:,:,:)=zero
+   if(nbd1<=nbd2)then
      do ibd1=1,nbd1
-       proj(1,:,ibd2)=proj(1,:,ibd2)+smn(1,ibd1,:)*smn(1,ibd1,ibd2)+smn(2,ibd1,:)*smn(2,ibd1,ibd2)
-       proj(2,:,ibd2)=proj(2,:,ibd2)+smn(1,ibd1,:)*smn(2,ibd1,ibd2)-smn(2,ibd1,:)*smn(1,ibd1,ibd2)
-     enddo
-   enddo
- endif
+       do ibd2=1,nbd2
+         proj(1,:,ibd1)=proj(1,:,ibd1)+smn(1,:,ibd2)*smn(1,ibd1,ibd2)+smn(2,:,ibd2)*smn(2,ibd1,ibd2)
+         proj(2,:,ibd1)=proj(2,:,ibd1)-smn(1,:,ibd2)*smn(2,ibd1,ibd2)+smn(2,:,ibd2)*smn(1,ibd1,ibd2)
+       end do
+     end do
+   else
+     do ibd2=1,nbd2
+       do ibd1=1,nbd1
+         proj(1,:,ibd2)=proj(1,:,ibd2)+smn(1,ibd1,:)*smn(1,ibd1,ibd2)+smn(2,ibd1,:)*smn(2,ibd1,ibd2)
+         proj(2,:,ibd2)=proj(2,:,ibd2)+smn(1,ibd1,:)*smn(2,ibd1,ibd2)-smn(2,ibd1,:)*smn(1,ibd1,ibd2)
+       end do
+     end do
+   end if
 
 !write(std_out,*)' proj=',proj
 
 !write(std_out,*)' dotprod_set_cgcprj : compute the eigenvalues of the projector '
- ABI_ALLOCATE(matrx,(2,(nbd*(nbd+1))/2))
- ii=1
- do i2=1,nbd
-   do i1=1,i2
-     matrx(1,ii)=proj(1,i1,i2)
-     matrx(2,ii)=proj(2,i1,i2)
-     ii=ii+1
+   ABI_ALLOCATE(matrx,(2,(nbd*(nbd+1))/2))
+   ii=1
+   do i2=1,nbd
+     do i1=1,i2
+       matrx(1,ii)=proj(1,i1,i2)
+       matrx(2,ii)=proj(2,i1,i2)
+       ii=ii+1
+     end do
    end do
- end do
 
- ABI_ALLOCATE(zhpev1,(2,2*nbd-1))
- ABI_ALLOCATE(zhpev2,(3*nbd-2))
- ABI_ALLOCATE(eigval,(nbd))
- ABI_ALLOCATE(eigvec,(2,nbd,nbd))
+   ABI_ALLOCATE(zhpev1,(2,2*nbd-1))
+   ABI_ALLOCATE(zhpev2,(3*nbd-2))
+   ABI_ALLOCATE(eigval,(nbd))
+   ABI_ALLOCATE(eigvec,(2,nbd,nbd))
 
- call ZHPEV ('V','U',nbd,matrx,eigval,eigvec,nbd,zhpev1,zhpev2,ier)
+   call ZHPEV ('V','U',nbd,matrx,eigval,eigvec,nbd,zhpev1,zhpev2,ier)
 
 !write(std_out,*)' eigval=',eigval
 
- ABI_DEALLOCATE(matrx)
- ABI_DEALLOCATE(zhpev1)
- ABI_DEALLOCATE(zhpev2)
- ABI_DEALLOCATE(eigval)
- ABI_DEALLOCATE(eigvec)
+   ABI_DEALLOCATE(matrx)
+   ABI_DEALLOCATE(zhpev1)
+   ABI_DEALLOCATE(zhpev2)
+   ABI_DEALLOCATE(eigval)
+   ABI_DEALLOCATE(eigvec)
 
- ABI_DEALLOCATE(proj)
+   ABI_DEALLOCATE(proj)
 !stop
 !ENDDEBUG
- endif
+ end if
 !====== End of debugging section ==========
 
  ABI_DEALLOCATE(cwavef1)
@@ -353,10 +353,10 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
  if(usepaw==1) then
    if(ibg1/=0)then
      call pawcprj_free(cprj1_k)
-   endif
+   end if
    if(ibg2/=0)then
      call pawcprj_free(cprj2_k)
-   endif
+   end if
    ABI_DATATYPE_DEALLOCATE(cprj1_k)
    ABI_DATATYPE_DEALLOCATE(cprj2_k)
  end if

@@ -238,8 +238,9 @@ binary_package_lite:
 dist-lite: distdir
 	tardir=$(distdir) && \
 	  cd $(distdir)/doc; rm -rf build* inp* t* guide  && \
-	  cd ../tests; rm -rf v* tuto* Psps* paral mpiio libxc gpu fast bigdft* && \
-	  cd ../abichecks; rm -rf abirules buildsys && \
+	  cd ../tests; rm -rf v* tuto* paral mpiio libxc gpu fast bigdft* && \
+          cd ../tests/Psps*; rm -rf $$(ls -I "*hpc*") && \
+	  cd ../../abichecks; rm -rf abirules buildsys && \
 	  cd ../..; \
 	  rm -rf $(distdir)/packages && \
 	  rm -rf $(distdir)/developers && \

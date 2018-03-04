@@ -440,7 +440,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Open and read pseudopotential files
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
 
  call timab(701,2,tsec)
@@ -1168,9 +1168,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  !! orbital magnetization initialization
  dtorbmag%orbmag = dtset%orbmag
  if (dtorbmag%orbmag > 0) then
-    call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
-&                   rprimd,symrec,xred)
+   call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
+&   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&   rprimd,symrec,xred)
  end if
  
 
@@ -1585,12 +1585,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if (associated(pwind)) then
-    ABI_DEALLOCATE(pwind)
+   ABI_DEALLOCATE(pwind)
  end if
  if (associated(pwnsfac)) then
-    ABI_DEALLOCATE(pwnsfac)
+   ABI_DEALLOCATE(pwnsfac)
  end if
-  if ((dtset%berryopt<0).or.&
+ if ((dtset%berryopt<0).or.&
 & (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17)) then
    if (xmpi_paral == 1) then
