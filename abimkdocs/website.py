@@ -464,8 +464,8 @@ Change the input yaml files or the python code
     def generate_page_with_ac_examples(self):
         """Generate markdown pages with all ac exaples found in config-examples."""
         dirpath = os.path.join(self.root, "build", "config-examples")
-        lines = []
-        app = lines.append
+        md_lines = []
+        app = md_lines.append
         app("""
 # Autoconf examples
 
@@ -477,14 +477,27 @@ This page gathers the autoconf files used by the buildbot testfarm
             if os.path.isdir(path): continue
             app("## %s  " %  f)
             with io.open(path, "rt", encoding="utf-8") as fh:
-                app("```shell")
-                app(fh.read())
-                app("```")
-                app("\n")
+                # Remove all comments except for options that are specified.
+                ac_lines = []
+                inblock = False
+                for l in reversed(fh.readlines()):
+                    l = l.strip()
+                    if not l:
+                        inblock = False
+                        continue
+                    if l and l[0].isalpha():
+                        inblock = True
+                        ac_lines.append(l + "\n")
+                    elif inblock:
+                        ac_lines.append(l)
+
+                app("\n\n```shell")
+                md_lines.extend(reversed(ac_lines))
+                app("```\n")
 
         # Write MD file.
         with self.new_mdfile("developers", "autoconf_examples.md") as mdf:
-            mdf.write("\n".join(lines))
+            mdf.write("\n".join(md_lines))
 
     def generate_markdown_files(self):
         """Generate markdown files using the data stored in the bibtex file, the abivars file ..."""
@@ -588,24 +601,15 @@ in order of number of occurrence in the input files provided with the package.
         # TODO: Use md skeleton + fields filled by python (jinja?)
         cprint("Generating Markdown files with topics ...", "green")
         repo_path = os.path.join(self.root, "topics", "origin_files")
-
-        with io.open(os.path.join(repo_path, "list_of_topics.yml"), "rt", encoding="utf-8") as fh:
-            self.all_topics = sorted(yaml.load(fh), key=lambda t: t[0].upper())
-        with io.open(os.path.join(repo_path, "list_relevances.yml"), "rt", encoding="utf-8") as fh:
-            # tribe_name --> description
-            self.all_tribes = OrderedDict(yaml.load(fh))
-        assert self.all_topics == ABI_TOPICS
-        assert self.all_tribes == ABI_RELEVANCES
-
         self.all_topics = ABI_TOPICS
-        self.all_tribes = ABI_RELEVANCES
+        self.all_relevances = ABI_RELEVANCES
 
         all_yamlfiles = os.listdir(repo_path)
         for topic in self.all_topics:
             all_yamlfiles.remove("topic_" + topic + ".yml")
         if all_yamlfiles:
-            print("all_yamlfiles", all_yamlfiles)
-            #raise RuntimeError()
+            raise RuntimeError("Found yaml files in topics not listed in python module `variable.py.\n%s" % (
+                str(all_yamlfiles)))
 
         # datastructures needed for topics index.md
         index_md = ["# Alphabetical list of topics\n"]
@@ -621,24 +625,25 @@ in order of number of occurrence in the input files provided with the package.
                 tutorials = top.tutorials.strip()
 
             # Find list of variables associated to this topic
-            # Order and group vlist by tribes and write list with links.
-            # TODO: Can we have multiple tribes with the same topic?
+            # Order and group vlist by relevances and write list with links.
+            # TODO: Can we have multiple relevances with the same topic?
             related_variables = "No variable associated to this topic."
             vlist = [var for var in self.codevars.iter_allvars() if topic in var.topic2relevances]
             if vlist:
                 lines = []
-                def sort_tribes(t):
+                def sort_relevances(t):
+                    # TODO: Add rank to ABI_RELEVANCES
                     try:
                         return {"basic": 0, "compulsory": 1, "expert": 2, "useful": 3, "internal": 4,
                                 "prpot": 5, "prfermi": 6, "prden": 7, "prgeo": 8, "prdos": 9, "prgs": 10,
                                 "prngs": 11, "prmisc": 12}[t[0]]
                     except KeyError:
-                        raise KeyError("Cannot find tribe `%s` in dict. Add it to sort_tribes with the proper rank."
+                        raise KeyError("Cannot find relevance `%s` in dict. Add it to sort_relevances with the proper rank."
                                 % str(t))
 
-                items = sorted([(v.topic2relevances[topic][0], v) for v in vlist], key=lambda t: sort_tribes(t))
-                for tribe, group in sort_and_groupby(items, key=lambda t: t[0]):
-                    lines.append("*%s:*\n" % tribe)
+                items = sorted([(v.topic2relevances[topic][0], v) for v in vlist], key=lambda t: sort_relevances(t))
+                for relevance, group in sort_and_groupby(items, key=lambda t: t[0]):
+                    lines.append("*%s:*\n" % relevance)
                     lines.extend("- %s  %s" % (v.wikilink, v.mnemonics) for (_, v) in group)
                     lines.append(" ")
                 related_variables = "\n".join(lines)
