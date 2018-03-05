@@ -94,10 +94,10 @@ The corresponding adiabaticity parameter is given by [[adpimd_gamma]].
 If equal to 0, no adiabatic Path-Integral Molecular Dynamics (standard PIMD) is performed.
 If equal to 1, adiabatic Path-Integral Molecular Dynamics is activated.
 Only relevant with [[pitransform]]=1 (normal mode transformation). In that case,
-\- the mass associated with to the zero-frequency mode is the true mass [[amu]],
-\- the mass associated to the other higher frequency modes of the polymer
+- the mass associated with to the zero-frequency mode is the true mass [[amu]],
+- the mass associated to the other higher frequency modes of the polymer
 chains is equal to the normal mode mass divided by [[adpimd_gamma]] (adiabaticity parameter),
-\- the equation of motion on the zero-frequency mode is not thermostated.
+- the equation of motion on the zero-frequency mode is not thermostated.
 NOT YET USABLE
 """,
 ),
@@ -368,9 +368,9 @@ Variable(
     topics=['Susceptibility_useful'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal",
+    mnemonics=r"evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal",
     requires="[[optdriver]]==3",
-    text="""
+    text=r"""
 This input variable defines whether the irreducible polarizability
 $\chi^{0}_{KS}$ is evaluated taking advantage of time-reversal symmetry or not.
 
@@ -516,7 +516,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="BERRY phase OPTions",
-    text="""
+    text=r"""
 Specifies the use of Berry phase for the computation of either the
 polarization, the derivatives with respect to the wavevector, or finite
 electric field calculations.
@@ -552,16 +552,15 @@ Other related input variables are:
 The cases [[berryopt]]=-1,-2,-3, 4, 6, 7, 14, 16, and 17 have to be used with [[occopt]]=1.
 
 The cases [[berryopt]]=-1 and 4, 6, 7, 14, 16, 17 are compatible with PAW,
-howevever, if in these cases one uses [[kptopt]]/=3, one must also use only
+howevever, if in these cases one uses [[kptopt]] /= 3, one must also use only
 symmorphic symmetries (either because the space group is symmorphic or the
 variable [[symmorphi]] is set to zero).
 
-For a phonon calculation under a finite electric field, respect the following
-procedure.
+For a phonon calculation under a finite electric field, respect the following procedure.
 
-  * 1\. Run a scf ground-state calculation at zero electric field to get wavefunctions to initialize the ground-state calculation in finite electric fields.
-  * 2\. Run a scf ground-state calculation in finite electric field. The electric field is controlled by the input variable [[efield]]. [[berryopt]] should be 4. The input variable [[kptopt]] should be set to be 2.
-  * 3\. Based on the wave functions obtained in step (2), perform phonon calculation by setting [[berryopt]]=4, [[kptopt]]=3 and The same value of [[efield]] than in step 2. [[nsym]] should be set to 1 currently but this restriction may be removed later. The other parameters are the same as phonon calculation at zero electric field.
+  * 1. Run a scf ground-state calculation at zero electric field to get wavefunctions to initialize the ground-state calculation in finite electric fields.
+  * 2. Run a scf ground-state calculation in finite electric field. The electric field is controlled by the input variable [[efield]]. [[berryopt]] should be 4. The input variable [[kptopt]] should be set to be 2.
+  * 3. Based on the wave functions obtained in step (2), perform phonon calculation by setting [[berryopt]]=4, [[kptopt]]=3 and The same value of [[efield]] than in step 2. [[nsym]] should be set to 1 currently but this restriction may be removed later. The other parameters are the same as phonon calculation at zero electric field.
   * Note: the choice of k-point sampling N x N x N should be the same in the three runs and N should be an even number.
 
 In case of finite electric and displacement field calculations
@@ -768,7 +767,7 @@ Variable(
     defaultval=1,
     mnemonics="Bethe-Salpeter CALCulation TYPE",
     requires="[[optdriver]] == 99",
-    text="""
+    text=r"""
 Possible values are 1,2,3.
 
 * 1 --> use the KS eigenvalues and wave functions stored in the KSS file to construct the transition space
@@ -817,7 +816,7 @@ Variable(
     defaultval=0,
     mnemonics="Bethe-Salpeter COUPLING",
     requires="[[optdriver]] == 99",
-    text="""
+    text=r"""
 The [[bs_coupling]] input variable defines the treatment of the coupling block
 of the Bethe-Salpeter Hamiltonian. Possible values are 0,1.
 
@@ -1151,7 +1150,7 @@ Variable(
     defaultval=1,
     mnemonics="Contour Deformation FReQuency integration on IMaginary axis Method",
     requires="[[optdriver]]==4  and [[gwcalctyp]] in [2,9,12,19,22,29]",
-    text="""
+    text=r"""
 [[cd_frqim_method]] defines the choice of integration method along the
 imaginary frequency axis for Contour Deformation calculations. The default
 method is very robust, fast and optimal for the vast majority of cases.
@@ -1195,7 +1194,7 @@ is controlled by [[nfreqre]] and corresponding variables. We highly recommend
 extracting various elements of the dielectric matrix from the _SCR file using
 the **Mrgscr** utility and plotting them for visual inspection.
 
-  * **Default** \- The default grid is an exponentially increasing grid given by the formula:
+  * **Default** - The default grid is an exponentially increasing grid given by the formula:
 
 ![](variables_assets/cd_default_grid.png)
 
@@ -1213,7 +1212,8 @@ low-frequency region. In more recent versions of ABINIT one can also simply
 adjust the parameter  _ α _ by using [[freqim_alpha]]. This grid is optimised
 for speed and accurate results with few grid points for **cd_frqim_method = 1**.
 
-  * **Inverse z transform** \- This grid is activated by the use of the variable [[gw_frqim_inzgrid]]. This is the standard  _[0, ∞[ -> [0,1] _ transform using the formula:
+  * **Inverse z transform** - This grid is activated by the use of the variable [[gw_frqim_inzgrid]].
+    This is the standard  _[0, ∞[ -> [0,1] _ transform using the formula:
 
 ![](variables_assets/cd_inzgrid.png)
 
@@ -1224,7 +1224,8 @@ easily be uniquely converged by just increasing [[nfreqim]]. Again the points
 are distributed so that approximately half of them lie below the plasma
 frequency.
 
-  * **User defined** \- The user can also define their own grid using the variables [[cd_customnimfrqs]] and [[cd_imfrqs]]. _With great power comes great responsibility!_
+  * **User defined** - The user can also define their own grid using the variables [[cd_customnimfrqs]] and [[cd_imfrqs]].
+    _With great power comes great responsibility!_
 
 The **Mrgscr** utility is handy in optimising the numerical effort expended in
 convergence studies. By estimating the densest grid one can afford to
@@ -1892,10 +1893,11 @@ Variable(
     mnemonics="DENSity and FORces PREDictor",
     characteristics=['[[DEVELOP]]'],
     requires="[[iscf]] >0",
-    text="""
+    text=r"""
 Used when [[iscf]]>0, to define:
-\- the way a change of density is derived from a change of atomic position,
-\- the way forces are corrected when the SCF cycle is not converged.
+
+- the way a change of density is derived from a change of atomic position,
+- the way forces are corrected when the SCF cycle is not converged.
 
 Supported values:
 
@@ -1911,20 +1913,19 @@ Similar negative values are also allowed (see the meaning later), for
 development purposes only. No meaning for RF calculations.
 
 For the time being,
-\- [[densfor_pred]]=3 must be used with [[ionmov]]=4 and [[iscf]]=5.
-\- [[densfor_pred]]=4, 5 or 6 must be used when band-FFT parallelism is selected.
-Otherwise, use [[densfor_pred]]=2
+
+- [[densfor_pred]]=3 must be used with [[ionmov]]=4 and [[iscf]]=5.
+- [[densfor_pred]]=4, 5 or 6 must be used when band-FFT parallelism is selected.
+  Otherwise, use [[densfor_pred]]=2
 
 **(*)** _Note concerning the correction of forces (use of [[densfor_pred]]=1,
 2, 3, 4 or 6)_:
-The force on the atom located at R is corrected by the addition of the
-following term:
-_F_residual=Int[dr.V_residual.dRho_atomic/dR]_, where Rho_atomic is an atomic
-(spherical) density.
-\- When such an atomic density (Rho_atomic) is found in the pseudopotential or
-PAW file, it is used. If not, a gaussian density (defined by [[densty]]
-parameter) is used.
-\- When SCF mixing is done on the density ([[iscf]] >=10), the potential
+The force on the atom located at R is corrected by the addition of the following term:
+_F_residual=Int[dr.V_residual.dRho_atomic/dR]_, where Rho_atomic is an atomic (spherical) density.
+
+- When such an atomic density (Rho_atomic) is found in the pseudopotential or
+PAW file, it is used. If not, a gaussian density (defined by [[densty]] parameter) is used.
+- When SCF mixing is done on the density ([[iscf]] >=10), the potential
 residual (V_residual) is obtained from the density residual with the first
 order formula _V_residual=dV/drho.Rho_residual_ and uses the exchange-
 correlation kernel _dVxc/drho=Kxc_ whose computation is time-consuming for GGA
@@ -1937,15 +1938,13 @@ the density) is always possible by giving a negative value to
 added, although in the density mixing scheme, the related GGA kernel is used
 instead of the hybrid functional kernel.
 
-**(**)** _Note concerning the use of [[densfor_pred]]=5 or 6 (density
-prediction)_:
+**(**)** _Note concerning the use of [[densfor_pred]]=5 or 6 (density prediction)_:
 The algorithm is described in _Computer Physics Communications **118** (1999)
 31-33 _. It uses an atomic (spherical) density. When such an atomic density
 is found in the pseudopotential or PAW file, it is used. If not, a gaussian
 density (defined by [[densty]] parameter) is used.
 Also note that, to be efficient, this algorithm requires a minimum convergence
-of the SCF cycle; Typically, vres2 (or nres2) has to be small enough (10  -4
-...10  -5  ).
+of the SCF cycle; Typically, vres2 (or nres2) has to be small enough (10  -4 ...10 -5  ).
 """,
 ),
 
@@ -3039,7 +3038,7 @@ Variable(
     mnemonics="Energy CUT-off for EPSilon (the dielectric matrix)",
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]]==3 or [[optdriver]]==4",
-    text="""
+    text=r"""
 [[ecuteps]] determines the cut-off energy of the planewave set used to
 represent the independent-particle susceptibility $\chi^{0}_{KS}$, the
 dielectric matrix $\epsilon$, and its inverse.
@@ -3120,7 +3119,7 @@ Variable(
     mnemonics="Energy CUT-off for WaveFunctioNs",
     characteristics=['[[ENERGY]]'],
     requires=" [[optdriver]]==3 or [[optdriver]]==4",
-    text="""
+    text=r"""
 [[ecutwfn]] determines the cut-off energy of the planewave set used to
 represent the wavefunctions in the formula that generates the independent-
 particle susceptibility $\chi^{0}_{KS}$ (for [[optdriver]]=3), or the self-
@@ -3612,12 +3611,12 @@ Variable(
     mnemonics="Eigenvalue SMEARing",
     characteristics=['[[ENERGY]]'],
     requires="[[smdelta]] != 0",
-    text="""
+    text=r"""
 that is, if the user is performing simulations of the electronic lifetimes
 induced by the electron-phonon coupling.
 
 The variable [[esmear]] determines the width of the functions approximating
-the delta function, \delta(e_{nk}-e_{n'k'}), present in the expression of the
+the delta function, $\delta(e_{nk}-e_{n'k'})$, present in the expression of the
 lifetimes. One should use a width comparable with the Debye frequency or the
 maximum phonon frequency.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since **ecut** has the
@@ -4066,10 +4065,10 @@ Gives the internal friction coefficient (atomic units) for Langevin dynamics
 (when [[ionmov]]=9): fixed temperature simulations with random forces.
 
 The equation of motion is:
-M  I  d  2  R  I  /dt  2  = F  I  \- [[friction]] M  I  dR  I  /dt - F_random
-I
-where F_random  I  is a Gaussian random force with average zero, and variance
-2 [[friction]] M  I  kT.
+
+    M  I  d  2  R  I  /dt  2  = F  I  - [[friction]] M  I  dR  I  /dt - F_random I
+
+where F_random  I  is a Gaussian random force with average zero, and variance 2 [[friction]] M  I  kT.
 The atomic unit of friction is hartrees*electronic mass*(atomic time
 units)/Bohr  2. See J. Chelikowsky, J. Phys. D: Appl Phys. 33(2000)R33.
 """,
@@ -4134,10 +4133,10 @@ Different methodologies to perform the roulette-wheel selection of parents.
 Even though, the objective function is the crystalline enthalpy (H_i), the
 weight of the population elements to be chosen from in a roulette-wheel
 selection can be given through different functions. We consider the following cases.
-1\. F = H_i / Sum H_i
-2\. F = exp(-(H_i-H_min)) / Sum exp(-(H_i-H_min))
-3\. F = (1/n_i) / Sum (1/n_i). Where n_i is the position in the ordered list
-of enthalpies
+
+1. F = H_i / Sum H_i
+2. F = exp(-(H_i-H_min)) / Sum exp(-(H_i-H_min))
+3. F = (1/n_i) / Sum (1/n_i). Where n_i is the position in the ordered list of enthalpies
 """,
 ),
 
@@ -5660,12 +5659,12 @@ Variable(
     defaultval="*0.0",
     mnemonics="GWLS LIST of the PROJection FREQuencies",
     requires="[[optdriver]]==66",
-    text="""
+    text=r"""
 This variable sets the frequencies to be used to construct the basis in which
 the Hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved by the construction of the dielectric matrix at finite
 frequencies. See section VI of Phys. Rev. B 91, 125120 (2015). For most cases,
-since the frequencies \Infty and (if [[gwls_recycle]]>0) 0.0 are used at no
+since the frequencies $\infty$ and (if [[gwls_recycle]]>0) 0.0 are used at no
 computational cost, [[gwls_n_proj_freq]]==0 (which means no ADDITIONAL
 frequency is to be used) is fine and no frequencies need to be picked up.
 """,
@@ -5710,8 +5709,8 @@ Variable(
     mnemonics="GWLS Number of PROJection FREQuencies",
     excludes="",
     requires="[[optdriver]]==66",
-    text="""
-This variable sets the number of frequencies, on top of \Infty and (if
+    text=r"""
+This variable sets the number of frequencies, on top of $\infty$ and (if
 [[gwls_recycle]]>0) 0.0, to be used for the construction of the basis in which
 the hamiltonian is projected to accelerate the solution of the Sternheimer
 equations involved in the construction of the dielectric matrix at finite
@@ -5778,7 +5777,7 @@ Variable(
     defaultval=2,
     mnemonics="GWLS RECYCLE",
     requires="[[optdriver]]==66",
-    text="""
+    text=r"""
 This variable let the user choose if and how he wants to recycle the solutions
 of the Sternheimer equations involved in the construction of the static dielectric matrix.
 
@@ -5789,8 +5788,8 @@ of the Sternheimer equations involved in the construction of the static dielectr
 If the user choose to recycle the solutions, they are used to construct the
 basis in which the hamiltonian is projected for the solution of the
 Sternheimer equations involved by the calculation of the dielectric matrix at
-finite frequencies. The other solutions used will be those at \omega \to
-\Infty (alwyas used) and those at \omega=[[gwls_list_proj_freq]]. For more
+finite frequencies. The other solutions used will be those at $\omega \to \Infty$
+(alwyas used) and those at \omega=[[gwls_list_proj_freq]]. For more
 information of the basis constructed, see section IV of Phys. Rev. B 91, 125120 (2015).
 
 It is important to note that the solutions rapidly take much space to store.
@@ -6548,7 +6547,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Integer for PReConditioning of ELectron response",
-    text="""
+    text=r"""
 Used when [[iscf]]>0, to define the SCF preconditioning scheme. Potential-
 based preconditioning schemes for the SCF loop (electronic part) are still a
 subject of active research. The present parameter (electronic part) describes
@@ -7059,7 +7058,7 @@ Variable(
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[usepaw]]==1': 17, '[[usewvl]]==1': 0, 'defaultval': 7}),
     mnemonics="Integer for Self-Consistent-Field cycles",
-    text="""
+    text=r"""
 Controls the self-consistency.
 Positive values --> this is the usual choice for doing the usual ground state
 (GS) calculations or for structural relaxation, where the potential has to be
@@ -7265,7 +7264,7 @@ Variable(
     defaultval=1,
     mnemonics="Index of eXchange-Correlation functional",
     commentdefault="Default corresponds to Teter parametrization. However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value",
-    text="""
+    text=r"""
 Controls the choice of exchange and correlation (xc). The list of XC
 functionals is given below. Positive values are for ABINIT native library of
 XC functionals, while negative values are for calling the much wider set of
@@ -9005,7 +9004,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of BANDs in the KSS file",
-    text="""
+    text=r"""
 This input variable is used for the preparation of a GW calculation: it is
 used in a GS run (where [[optdriver]]=0) to generate a _KSS file. In this run,
 [[nbandkss]] should be non-zero. The generated _KSS file can be subsequently
@@ -9021,10 +9020,8 @@ the eigenstates to be stored.
 The input variable [[iomode]] can be used to read and write KSS files
 according to different fileformat (presently only [[iomode]]=0 and 3 are
 available in the GW part).
-The precision of the KSS file can be tuned through the input variable
-[[kssform]].
-For more details about the format of the abo_KSS file, see the routine
-outkss.F90.
+The precision of the KSS file can be tuned through the input variable [[kssform]].
+For more details about the format of the abo_KSS file, see the routine outkss.F90.
 
 !!! warning
 
@@ -9468,7 +9465,7 @@ Variable(
     defaultval=0,
     mnemonics="Number of FREQuencies along the REal axis",
     requires="[[optdriver]]==3 and [[gwcalctyp]] in [2,12,22,9,19,29]",
-    text="""
+    text=r"""
 [[nfreqre]] sets the number of real frequencies used to calculate the
 dielectric matrix in order to perform the numerical integration of the GW self-energy.
 
@@ -9810,22 +9807,21 @@ Variable(
     defaultval=4,
     mnemonics="Non LOCal ALGorithm",
     characteristics=['[[DEVELOP]]'],
-    text="""
+    text=r"""
 Allows to choose the algorithm for non-local operator application. On super-
 scalar architectures, the default [[nloc_alg]]=4 is the best.
 More detailed explanations:
 
-\- [[nloc_alg]]=2: Should be efficient on vector machines. It is indeed the
-fastest algorithm for the NEC, but actual tests on Fujitsu machine did not
-gave better performances than the other options.
-\- [[nloc_alg]]=3: same as [[nloc_alg]]==2, but the loop order is inverted.
-\- [[nloc_alg]]=4: same as [[nloc_alg]]==3, but maximal use of registers has
-been coded. This should be especially efficient on scalar and super-scalar
-machines. This has been confirmed by tests.
+- [[nloc_alg]]=2: Should be efficient on vector machines. It is indeed the
+  fastest algorithm for the NEC, but actual tests on Fujitsu machine did not
+  gave better performances than the other options.
+- [[nloc_alg]]=3: same as [[nloc_alg]]==2, but the loop order is inverted.
+- [[nloc_alg]]=4: same as [[nloc_alg]]==3, but maximal use of registers has
+   been coded. This should be especially efficient on scalar and super-scalar
+   machines. This has been confirmed by tests.
 
 Note: internally, [[nloc_alg]] is stored in _nloalg(1)_. See also
-[[nloc_mem]] for the tuning of the memory used in the non-local operator
-application.
+[[nloc_mem]] for the tuning of the memory used in the non-local operator application.
 """,
 ),
 
@@ -9838,19 +9834,18 @@ Variable(
     defaultval=ValueWithConditions({'[[usepaw]]==1': 2, 'defaultval': 1}),
     mnemonics="Non LOCal MEMOry",
     characteristics=['[[DEVELOP]]'],
-    text="""
+    text=r"""
 Controls the memory use for the application of the non-local operator.
 More detailed explanations:
 
-\- [[nloc_mem]]==1: (k+G) vectors are not precomputed, in order to save
-memory space.
-\- [[nloc_mem]]==2: (k+G) vectors are precomputed, once per k-point.
-\- [[nloc_mem]]==-1 or -2: Negative values of [[nloc_mem]] correspond
-positive ones, where the phase precomputation has been suppressed, in order to
-save memory space, as an array _double precision: ph3d(2,npw,[[natom]])_ is
-saved (typically half the space needed for the wavefunctions at 1 k point -
-this corresponds to the silicon case). However, the computation of phases
-inside nonlop is somehow time-consuming.
+- [[nloc_mem]]==1: (k+G) vectors are not precomputed, in order to save memory space.
+- [[nloc_mem]]==2: (k+G) vectors are precomputed, once per k-point.
+- [[nloc_mem]]==-1 or -2: Negative values of [[nloc_mem]] correspond
+  positive ones, where the phase precomputation has been suppressed, in order to
+  save memory space, as an array _double precision: ph3d(2,npw,[[natom]])_ is
+  saved (typically half the space needed for the wavefunctions at 1 k point -
+  this corresponds to the silicon case). However, the computation of phases
+  inside nonlop is somehow time-consuming.
 
 Note: internally, sign([[nloc_mem]]) is stored in _nloalg(2)_ and
 abs([[nloc_mem]])-1 is stored in _nloalg(3)_. See also [[nloc_alg]] for the
@@ -9966,7 +9961,7 @@ Variable(
     mnemonics="Number of OMEGA to evaluate the Spectral Function",
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]]==3 and [[spmeth]]!=0",
-    text="""
+    text=r"""
 [[nomegasf]] defines the number of real frequencies used to describe the
 spectral function associated to the irreducible polarizability
 $\chi^{(0)}_{KS}$. The frequency mesh will cover the interval between 0 and
@@ -10324,7 +10319,7 @@ Variable(
     dimensions="scalar",
     mnemonics="Number of PlaneWaves for EPSilon (the dielectric matrix)",
     characteristics=['[[INTERNAL_ONLY]]'],
-    text="""
+    text=r"""
 [[npweps]] determines the size of the planewave set used to represent the
 independent-particle susceptibility $\chi^{(0)}_{KS}$, the dielectric matrix
 $\epsilon$ and its inverse.
@@ -10382,11 +10377,10 @@ Variable(
     dimensions="scalar",
     mnemonics="Number of PlaneWaves for WaveFunctioNs",
     characteristics=['[[INTERNAL_ONLY]]'],
-    text="""
+    text=r"""
 [[npwwfn]] is the size of the planewave set used to represent the
 wavefunctions in the formula that generates the independent-particle
-susceptibility $\chi^{(0)}_{KS}$. It is an internal variable, determined from
-[[ecutwfn]].
+susceptibility $\chi^{(0)}_{KS}$. It is an internal variable, determined from [[ecutwfn]].
 """,
 ),
 
@@ -11247,7 +11241,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="OPTimize the CELL shape and dimensions",
-    text="""
+    text=r"""
 Allows to optimize the unit cell shape and dimensions, when [[ionmov]]>=2 or
 3. The configuration for which the stress almost vanishes is iteratively
 determined, by using the same algorithms as for the nuclei positions. Will
@@ -11702,13 +11696,14 @@ Variable(
     defaultval=ValueWithConditions({'[[npfft]]==1': 0, 'defaultval': 1}),
     mnemonics="PAW - MIXing is done (or not) on the (fine) Double Grid",
     requires="[[usepaw]]==1",
-    text="""
+    text=r"""
 The choice made for this variable determines the grid on which the density (or
 potential) is mixed during the SCF cycle.
 
-\- If **pawmixdg=1** the density/potential is mixed in REAL space using the
+If **pawmixdg=1** the density/potential is mixed in REAL space using the
 fine FFT grid (defined by [[pawecutdg]] or [[ngfftdg]]).
-\- If **pawmixdg=0** the density/potential is mixed in RECIPROCAL space using
+
+If **pawmixdg=0** the density/potential is mixed in RECIPROCAL space using
 the coarse FFT grid (defined by [[ecut]] or [[ngfft]]). Only components of the
 coarse grid are mixed using the scheme defined by [[iscf]]; other components
 are only precondionned by [[diemix]] and simply mixed.
@@ -11720,9 +11715,10 @@ iterations and are COMPLEX arrays of size [[nfft]]. The memory saving is
 particularly efficient when using the Pulay mixing ([[iscf]]=7 or 17).
 
 In **wavelet** calculations [[usewvl]]=1:
-\- pawmixdg is set to 1 by default.
-\- A value of 0 is not allowed.
-\- Density/potential is mixed in REAL space (Here only one grid is used).
+
+    - pawmixdg is set to 1 by default.
+    - A value of 0 is not allowed.
+    - Density/potential is mixed in REAL space (Here only one grid is used).
 """,
 ),
 
@@ -11874,10 +11870,9 @@ percentage allowed without stopping the execution.
 volume of the overlap of two spheres by the volume of the smallest sphere.
 The following values are permitted for [[pawovlp]]:
 
-\- [[pawovlp]]<0\. : overlap is always allowed
-\- [[pawovlp]]=0. : no overlap is allowed
-\- [[pawovlp]]>0\. and <100\. : overlap is allowed only if it is less than
-[[pawovlp]] %
+- [[pawovlp]]<0\. : overlap is always allowed
+- [[pawovlp]]=0. : no overlap is allowed
+- [[pawovlp]]>0\. and <100\. : overlap is allowed only if it is less than [[pawovlp]] %
 """,
 ),
 
@@ -11942,24 +11937,25 @@ Variable(
 This input variable controls the computation and/or printing of contributions
 to the PAW partial DOS in _DOS file(s):
 
-\+ Plane-waves contribution
-\+ "on-site" all-electron contribution (phi)
-\- "on-site" pseudo contribution (phi_tild).
+* + Plane-waves contribution
+* + "on-site" all-electron contribution (phi)
+* - "on-site" pseudo contribution (phi_tild).
 
 If **pawprtdos=0:**
-\- The 3 contributions are computed; only the total partial DOS is output in
-_DOS file.
+
+- The 3 contributions are computed; only the total partial DOS is output in _DOS file.
+
 If **pawprtdos=1:**
-\- The 3 contributions are computed and output in _DOS file.
-\- In that case, integrated DOS is not output.
+
+- The 3 contributions are computed and output in _DOS file.
+- In that case, integrated DOS is not output.
+
 If **pawprtdos=2:**
-\- Only "on-site" all-electron contribution is computed and output in _DOS
-file.
-\- This a (very) good approximation of total DOS, provided that (1) the PAW
-local basis is complete, (2) the electronic charge is mostly contained in PAW
-spheres.
-\- In that case, the [[ratsph]] variable is automatically set to the PAW
-radius.
+
+- Only "on-site" all-electron contribution is computed and output in _DOS file.
+- This a (very) good approximation of total DOS, provided that (1) the PAW
+  local basis is complete, (2) the electronic charge is mostly contained in PAW spheres.
+- In that case, the [[ratsph]] variable is automatically set to the PAW radius.
 """,
 ),
 
@@ -11976,13 +11972,14 @@ Variable(
 Control print volume and debugging output for PAW in log file or standard
 output. If set to 0, the print volume is at its minimum.
 [[pawprtvol]] can have values from -3 to 3:
-\- [[pawprtvol]]=-1 or 1: matrices rho_ij (atomic occupancies) and D_ij (psp
-strength) are printed at each SCF cycle with details about their
-contributions.
-\- [[pawprtvol]]=-2 or 2: like -1 or 1 plus additional printing: moments of
-"on-site" densities, details about local exact exchange.
-\- [[pawprtvol]]=-3 or 3: like -2 or 2 plus additional printing: details about
-PAW+U, rotation matrices of sphercal harmonics.
+
+- [[pawprtvol]]=-1 or 1: matrices rho_ij (atomic occupancies) and D_ij (psp
+  strength) are printed at each SCF cycle with details about their contributions.
+- [[pawprtvol]]=-2 or 2: like -1 or 1 plus additional printing: moments of
+  "on-site" densities, details about local exact exchange.
+- [[pawprtvol]]=-3 or 3: like -2 or 2 plus additional printing: details about
+  PAW+U, rotation matrices of sphercal harmonics.
+
 When [[pawprtvol]]>=0, up to 12 components of rho_ij and D_ij matrices for the
 1st and last atom are printed.
 When [[pawprtvol]]<0, all components of rho_ij and D_ij matrices for all atoms
@@ -12063,7 +12060,7 @@ Variable(
     defaultval=1,
     mnemonics="PAW - option for the STorage of G_l(r).YLM(r)",
     requires="[[usepaw]]=1",
-    text="""
+    text=r"""
 When PAW is activated, the computation of compensation charge density (so
 called "hat" density) requires the computation of g_l(r).Y_lm(r) factors (and
 cartesian derivatives) at each point of real space contained in PAW spheres.
@@ -12073,8 +12070,9 @@ by putting [[pawstgylm]]=0; but, in that case, g_l(r).Y_lm(r) factors a re-
 computed each time they are needed and CPU time increases.
 
 Possible choices:
-\- [[pawstgylm]]=0: g_l(r).Y_lm(r) are not stored in memory and recomputed.
-\- [[pawstgylm]]=1: g_l(r).Y_lm(r) are stored in memory.
+
+- [[pawstgylm]]=0: g_l(r).Y_lm(r) are not stored in memory and recomputed.
+- [[pawstgylm]]=1: g_l(r).Y_lm(r) are stored in memory.
 
 Note:
 g_l(r) are shape functions (analytically known)
@@ -12091,12 +12089,12 @@ Variable(
     defaultval=0,
     mnemonics="PAW - SUSceptibility, inclusion of HAT (compensation charge) contribution",
     requires="[[usepaw]]==1 and [[optdriver]]==0",
-    text="""
+    text=r"""
 Ground-State calculation only.
 When a sophisticated preconditioning scheme is selected for the SCF cycle of a
 Ground-State calculation ([[iprcel]]>0), the computation of the susceptibility
 matrix is required several times during the cycle. This computation is
-computer time consuming, especially \-- within PAW -- because of the inclusion
+computer time consuming, especially -- within PAW -- because of the inclusion
 of additional terms due to the compensation charge density. As only a crude
 valuation of the susceptibilty matrix is needed (to evaluate a preconditioning
 matrix), the compensation charge contribution can be neglected to save CPU
@@ -12104,9 +12102,9 @@ time (select [[pawsushat]]=0). This approximation could be unfavourable in
 some cases; in the latter, we advise to put [[pawsushat]]=1.
 
 Possible choices:
-\- [[pawsushat]]=0: only plane-wave contribution to suscep. matrix is
-computed.
-\- [[pawsushat]]=1: the whole suscep. matrix (PW + PAW on-site) is computed.
+
+- [[pawsushat]]=0: only plane-wave contribution to suscep. matrix is computed.
+- [[pawsushat]]=1: the whole suscep. matrix (PW + PAW on-site) is computed.
 """,
 ),
 
@@ -12800,7 +12798,7 @@ Variable(
     defaultval=50,
     mnemonics="POSitron calculation: max. Number of STEPs for the two-component DFT",
     text="""
-Relevant only when [[positron]]<0\.
+Relevant only when [[positron]]<0.
 Sets the maximum number of electronic/positronic iterations that, when
 reached, will cause the two-component DFT SCF cycle to stop.
 The code will first compute the electronic ground-state, then the positronic
@@ -12838,14 +12836,14 @@ Variable(
     mnemonics="POSitron calculation: TOLerance on the DiFference of total Energy",
     characteristics=['[[ENERGY]]'],
     text="""
-Relevant only when [[positron]]<0\.
+Relevant only when [[positron]]<0.
 Sets a tolerance for absolute difference of total energy (of
 _ions+electrons+positron_ system) that, when reached, will cause the SCF cycle
 to stop before the number of steps is [[nstep]] or the number of
 electronic/positronic steps is [[posnstep]].
 
 Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
-the '[[ENERGY]]' characteristics.
+the [[ENERGY]] characteristics.
 Only one and only one of [[postoldfe]] or [[postoldff]] can be set.
 """,
 ),
@@ -12859,7 +12857,7 @@ Variable(
     defaultval=0,
     mnemonics="POSitron calculation: TOLerance on the DiFference of Forces",
     text="""
-Relevant only when [[positron]]<0\.
+Relevant only when [[positron]]<0.
 Sets a tolerance for absolute difference of maximum force acting on ions (due
 to _ions+electrons+positron_ system) that, when reached, will cause the SCF
 cycle to stop before the number of SCF steps is [[nstep]] or the number of
@@ -14012,9 +14010,8 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT WANT file",
-    text="""
-Flag used to indicate that either the Wannier90 or the WanT interfaces will be
-used.
+    text=r"""
+Flag used to indicate that either the Wannier90 or the WanT interfaces will be used.
 
   * [[prtwant]]=1 --> Use the **ABINIT- WanT** interface.
 
@@ -14027,9 +14024,9 @@ since Oct. 22, 2004.
 Notes: Several requirements must be fulfilled by the wavefunction. Among
 them, two are mandatory:
 
-    * 1\. An uniform grid of k-points, including the GAMMA point must be used.
-    * 2\. The use of time reversal symmetry is not allowed (istwfk=1)
-    * 3\. The list of k-points must be ordered, such that the coordinates, namely
+    * 1. An uniform grid of k-points, including the GAMMA point must be used.
+    * 2. The use of time reversal symmetry is not allowed (istwfk=1)
+    * 3. The list of k-points must be ordered, such that the coordinates, namely
       three-components vectors has the third index varying the most rapidly, then the second index, then the first index
 
 If these requirement are not fulfilled, the program will stop and an error
@@ -15094,7 +15091,7 @@ For self-consistent GW runs, [[rhoqpmix]] sets the mixing coefficient between
 the new and the previous electronic densities. This mixing damps the spurious
 oscillations in the Hartree potential when achieving self-consistency.
 [[rhoqpmix]] is meaningful only when doing self-consistency on the
-wavefunctions with [[gwcalctyp]] >= 20\.
+wavefunctions with [[gwcalctyp]] >= 20.
 """,
 ),
 
@@ -15763,7 +15760,7 @@ Variable(
     defaultval=0,
     mnemonics="SPectral METHod",
     requires="[[optdriver]]==4",
-    text="""
+    text=r"""
 The [[spmeth]] input variable defines the method used to calculate the
 irreducible polarizability $\chi^{(0)}_{KS}$.
 
@@ -15910,8 +15907,8 @@ Variable(
     defaultval=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     mnemonics="STRess TARGET",
     text="""
-The components of the stress tensor must be stored according to: (1,1)->1;
-(2,2)->2; (3,3)->3; (2,3)->4; (3,1)->5; (1,2)->6\. The conversion factor
+The components of the stress tensor must be stored according to: (1,1) -->1;
+(2,2) --> 2; (3,3) --> 3; (2,3) --> 4; (3,1) --> 5; (1,2) -->6. The conversion factor
 between Ha/Bohr**3 and GPa is: 1 Ha/Bohr**3 = 29421.033d0 GPa.
 Not used if [[optcell]]==0.
 """,
@@ -15939,8 +15936,10 @@ that is, if [[nsym]]=0, then ABINIT will use the values of [[spinat]] to
 determine the content of [[symafm]].
 The symmetries found as "antiferro magnetic" ([[symafm]]=-1) are used to
 symmetrize density and magnetization in the following cases:
-\- antiferromagnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=2)
-\- non-collinear magnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=4)
+
+- antiferromagnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=2)
+- non-collinear magnetism ([[nsppol]]=1, [[nspinor]]=1, [[nspden]]=4)
+
 In other cases they are not used.
 """,
 ),
@@ -15952,7 +15951,7 @@ Variable(
     topics=['Susceptibility_expert'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="SYMmetryze \chi_o",
+    mnemonics=r"SYMmetryze $\chi_o$",
     characteristics=['[[DEVELOP]]'],
     requires="[[optdriver]]==3",
     text="""
@@ -16916,12 +16915,10 @@ Note also that the density matrix has to respect some symmetry rules
 determined by the space group. If the symmetry is not respected in the input,
 the matrix is however automatically symmetrised.
 
-The sign of [[usedmatpu]] has influence only when [[ionmov]]/=0 (dynamics or
-relaxation):
-\- When [[usedmatpu]]>0, the density matrix is kept constant only at first
-ionic step
-\- When [[usedmatpu]]<0, the density matrix is kept constant at each ionic
-step
+The sign of [[usedmatpu]] has influence only when [[ionmov]] /= 0 (dynamics or relaxation):
+
+- When [[usedmatpu]]>0, the density matrix is kept constant only at first ionic step
+- When [[usedmatpu]]<0, the density matrix is kept constant at each ionic step
 """,
 ),
 
@@ -17071,7 +17068,7 @@ Variable(
     defaultval=0,
     mnemonics="USE PAW+U (spherical part)",
     requires="[[usepaw]]==1",
-    text="""
+    text=r"""
 Must be non-zero if a DFT+U calculation is done, or if a GW calculation
 following a DFT+U calculation is done (important!).
 
@@ -17088,8 +17085,7 @@ If LDA+U is activated ([[usepawu]]=1 or 2), the [[lpawu]], [[upawu]] and
 The implementation is done inside PAW augmentation regions only (cf Ref [4]).
 The initial density matrix can be given in the input file (see [[usedmatpu]]).
 The expression of the density matrix is chosen thanks to [[dmatpuopt]]. See
-also [ How_to_use_LDA_plus_U.txt ](../../users/How_to_use_LDA_plus_U.txt).
-for some informations.
+also [How_to_use_LDA_plus_U.txt](../../users/How_to_use_LDA_plus_U.txt). for further information.
 In the case of a GW calculation on top of a DFT+U, the absence of definition
 of a U value in the self-energy will LEAVE the underlying U from the DFT
 calculation. Thus, the code will actually do a GW+U @ DFT+U calculation. Note
@@ -17107,14 +17103,16 @@ It is possible to perform calculations of the type GW+U_prime @ DFT+U, so
 keeping a smaller U interaction in the GW calculation, by subtracting a
 smaller U than the one used in the DFT calculation. See the description of the
 [[upawu]] input variable.
+
 References:
+
 [1] V. I. Anisimov, J. Zaanen, and O. K. Andersen PRB 44, 943 (1991)
 [2] A.I. Lichtenstein, V.I. Anisimov and J. Zaanen PRB 52, 5467 (1995)
 [3] M. T. Czyzyk and G. A. Sawatzky PRB 49, 14211 (1994)
 [4] O. Bengone, M. Alouani, P. Blochl, and J. Hugel PRB 62, 16392 (2000)
 
 Suggested acknowledgment:
-\- B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
+- B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
 """,
 ),
 
@@ -18058,9 +18056,10 @@ Variable(
     dimensions="scalar",
     defaultval=100,
     mnemonics="VIScosity",
-    text="""
+    text=r"""
 The equation of motion is:
-M  I  d  2  R  I  /dt  2  = F  I  \- [[vis]] dR  I  /dt
+
+M  I  d  2  R  I  /dt  2  = F  I  - [[vis]] dR  I  /dt
 
 The atomic unit of viscosity is hartrees*(atomic time units)/Bohr 2. Units
 are not critical as this is a fictitious damping used to relax structures. A
@@ -18448,7 +18447,7 @@ Variable(
     dimensions="scalar",
     defaultval=99.99,
     mnemonics="Value of the c parameter in the eXchange-Correlation TB09 functional",
-    text="""
+    text=r"""
 The modified Becke-Johnson exchange-correlation functional by Tran and Blaha
 (Phys. Rev. Lett. 102, 226401 (2009)) reads:
 
@@ -18521,7 +18520,7 @@ Variable(
     mnemonics="vectors (X) of atom positions in REDuced coordinates",
     characteristics=['[[EVOLVING]]'],
     commentdims="represented internally as xred(3,[[natom]],[[nimage]])",
-    text="""
+    text=r"""
 Gives the atomic locations within unit cell in coordinates relative to real
 space primitive translations (NOT in cartesian coordinates). Thus these are
 fractional numbers typically between 0 and 1 and are dimensionless. The
@@ -18530,6 +18529,7 @@ R_cartesian = xred1*rprimd1+xred2*rprimd2+xred3*rprimd3
 where (xred1,xred2,xred3) are the "reduced coordinates" given in columns of
 "[[xred]]", (rprimd1,rprimd2,rprimd3) are the columns of primitive vectors
 array "[[rprimd]]" in Bohr.
+
 If you prefer to work only with cartesian coordinates, you may work entirely
 with "[[xcart]]" or "[[xangst]]" and ignore [[xred]], in which case [[xred]]
 must be absent from the input file.

@@ -1471,7 +1471,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the NESTing function",
-    text="""
+    text=r"""
 Only for electron-phonon calculations. This input variable is used to
 calculate the nesting function defined as: \chi_{nm}(q) = \sum_k
 \delta(\epsilon_{k,n}-epsilon_F) \delta(\epsilon_{k+q,m}-\epsilon_F).

@@ -9,6 +9,7 @@ import os
 import json
 
 from collections import OrderedDict
+from pprint import pprint
 from abimkdocs.variables import get_codevars, ValueWithUnit, ValueWithConditions, MultipleValue, Range
 
 
@@ -153,20 +154,38 @@ class VariablesTest(AbimkdocsTest):
         for code, d in codevars.items():
             count_code[code] = Counter({k: 0 for k in d})
 
+        ierr = 0
         doc_vnames = codevars["anaddb"].get_all_vnames(with_internal=False)
         anaddb_f90vnames = self.get_anaddb_varnames_from_f90()
         #print("anaddb_vames:", anaddb_f90vnames)
-        print("anaddb_f90vnames - doc_vnames", anaddb_f90vnames - doc_vnames)
-        print("doc_vnames - anaddb_f90vnames", doc_vnames - anaddb_f90vnames)
+        diff = anaddb_f90vnames - doc_vnames
+        if diff:
+            ierr += 1
+            print("The following variables are seen in anaddb F90 code but not in variables_anaddb.py")
+            pprint(diff)
+
+        diff = doc_vnames - anaddb_f90vnames
+        if diff:
+            ierr += 1
+            print("The following variables are seen in variables_anaddb.py but not in anaddb F90 code.")
+            pprint(diff)
 
         doc_vnames = codevars["abinit"].get_all_vnames(with_internal=False)
         abinit_f90vnames = self.get_abinit_varnames_from_f90()
         #print("abinit_f90vnames:", abinit_f90vnames)
-        print("abinit_f90vnames - doc_vnames", abinit_f90vnames - doc_vnames)
-        print("doc_vnames - abinit_f90vnames", doc_vnames - abinit_f90vnames)
 
-        assert 0
+        diff = abinit_f90vnames - doc_vnames
+        if diff:
+            ierr += 1
+            print("The following variables are seen in abinit F90 code but not in variables_abinit.py")
+            pprint(diff)
 
+        diff = doc_vnames - abinit_f90vnames
+        if diff:
+            ierr += 1
+            print("The following variables are seen in variables_abinit.py but not in abinit F90 code")
+            pprint(diff)
+        #assert 0
 
         # TODO: should parse chkvars and
         black_list = set([
@@ -175,9 +194,7 @@ class VariablesTest(AbimkdocsTest):
         ])
         for test in tests:
             if test.executable in black_list: continue
-            #print(test)
             vnset = test.get_varname_set()
-            #print(vnset)
             count_code[test.executable].update(vnset)
 
         untested = OrderedDict()
@@ -191,10 +208,12 @@ class VariablesTest(AbimkdocsTest):
 
         for code in sorted(untested.keys()):
             untested[code] = sorted(untested[code])
-            print(code, untested[code])
+            if untested[code]:
+                print("List of untested variables for code:", code)
+                pprint(untested[code])
         #assert 0
 
-        ref_json_path = os.path.join(os.path.dirpath(__file__), "untested_variables.json")
+        ref_json_path = os.path.join(os.path.dirname(__file__), "untested_variables.json")
         update_ref = False
         if update_ref:
             with open(ref_json_path, "wt") as fh:
