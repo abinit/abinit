@@ -62,6 +62,7 @@ class lazy_property(object):
         if name in inst.__dict__:
             del inst.__dict__[name]
 
+
 def is_string(s):
     """True if s behaves like a string (duck typing test)."""
     try:
@@ -132,6 +133,139 @@ ABI_UNITS = [
 # Operators.
 ABI_OPS = ['sqrt', 'end', '*', '/']
 
+
+# List of strings with possible character of variables.
+# This is the reference set that will checked against the input
+# given by the developer in the variables_CODENAME modules.
+ABI_CHARACTERISTICS = [
+    "DEVELOP",
+    "EVOLVING",
+    "ENERGY",
+    "INPUT_ONLY",
+    "INTERNAL_ONLY",
+    "LENGTH",
+    "MAGNETIC_FIELD",
+    "NO_MULTI",
+]
+
+# `external_params` i.e. external parameters that are not input variables,
+# but that are used in the documentation of other variables.
+ABI_EXTERNAL_PARAMS = OrderedDict([
+    ("AUTO_FROM_PSP", "Means that the value is read from the PSP file"),
+    ("CUDA", "True if CUDA is enabled (compilation)"),
+    ("ETSF_IO", "True if ETSF_IO is enabled (compilation)"),
+    ("FFTW3", "True if FFTW3 is enabled (compilation)"),
+    ("MPI_IO", "True if MPI_IO is enabled (compilation)"),
+    ("NPROC", "Number of processors used for Abinit"),
+    ("PARALLEL", "True if the code is compiled with MPI"),
+    ("SEQUENTIAL", "True if the code is compiled without MPI"),
+])
+
+# from list of topics.yml.
+ABI_TOPICS = [
+    "Abipy",
+    "APPA",
+    "Artificial",
+    "AtomManipulator",
+    "AtomTypes",
+    "Bader",
+    "Band2eps",
+    "Berry",
+    "BandOcc",
+    "BSE",
+    "ConstrainedPol",
+    "Control",
+    "Coulomb",
+    "CRPA",
+    "crystal",
+    "DFT+U",
+    "DeltaSCF",
+    "DensityPotential",
+    "Dev",
+    "DFPT",
+    "DMFT",
+    "EffMass",
+    "EFG",
+    "Elastic",
+    "ElPhonInt",
+    "ElPhonTransport",
+    "ElecDOS",
+    "ElecBandStructure",
+    "FileFormats",
+    "ForcesStresses",
+    "FrequencyMeshMBPT",
+    "GeoConstraints",
+    "GeoOpt",
+    "Git",
+    "GSintroduction",
+    "GW",
+    "GWls",
+    "Hybrids",
+    "k-points",
+    "LDAminushalf",
+    "LOTF",
+    "MagField",
+    "MagMom",
+    "MolecularDynamics",
+    "multidtset",
+    "nonlinear",
+    "Optic",
+    "Output",
+    "parallelism",
+    "PAW",
+    "PIMD",
+    "Planewaves",
+    "Phonons",
+    "PhononBands",
+    "PhononWidth",
+    "PortabilityNonRegression",
+    "positron",
+    "printing",
+    "PseudosPAW",
+    "q-points",
+    "RandStopPow",
+    "Recursion",
+    "RPACorrEn",
+    "SCFControl",
+    "SCFAlgorithms",
+    "SelfEnergy",
+    "SmartSymm",
+    "spinpolarisation",
+    "STM",
+    "Susceptibility",
+    "TDDFT",
+    "TDepES",
+    "Temperature",
+    "TransPath",
+    "TuningSpeed",
+    "Unfolding",
+    "UnitCell",
+    "vdw",
+    "Verification",
+    "Wannier",
+    "Wavelets",
+    "xc",
+]
+
+# Relevance associated to the topic
+# Taken from list_relevances.yml
+ABI_RELEVANCES = OrderedDict([
+    ("compulsory", 'Compulsory input variables'),
+    ("basic", 'Basic input variables'),
+    ("useful", 'Useful input variables'),
+    ("internal", 'Relevant internal variables'),
+    ("prpot", 'Printing input variables for potentials'),
+    ("prfermi", 'Printing input variables for fermi level or surfaces'),
+    ("prden", 'Printing input variables for density, eigenenergies, k-points and wavefunctions'),
+    ("prgeo", 'Printing input variables for geometry'),
+    ("prdos", "Printing DOS-related input variables"),
+    ("prgs", 'Printing other ground-state input variables'),
+    ("prngs", 'Printing non-ground-state input variables'),
+    ("prmisc", 'Printing miscellaneous files'),
+    ("expert",  'Input variables for experts'),
+])
+
+
 class Variable(object):
     """
     """
@@ -198,12 +332,12 @@ class Variable(object):
         if errors:
             raise ValueError("Errors in %s:\n%s" % (self.abivarname, "\n".join(errors)))
 
-    @property
+    @lazy_property
     def name(self):
         """Name of the variable without the executable name."""
         return self.abivarname if "@" not in self.abivarname else self.abivarname.split("@")[0]
 
-    @property
+    @lazy_property
     def executable(self):
         """string with the name of the code associated to this variable."""
         if "@" in self.abivarname:
@@ -213,7 +347,7 @@ class Variable(object):
             code = "abinit"
         return code
 
-    @property
+    @lazy_property
     def website_url(self):
         """
         The absolute URL associated to this variable on the Abinit website.
@@ -221,28 +355,23 @@ class Variable(object):
         #docs.abinit.org/vardocs/CODENAME/VARNAME?version=8.6.2
         return "https://www.docs.abinit.org/vardoc/%s/%s" % (self.executable, self.name)
 
-    @property
-    def topic_tribes(self):
+    @lazy_property
+    def topic2relevances(self):
         """topic --> list of tribes"""
-        if hasattr(self, "_topic_tribes"):
-            return self._topic_tribes
-        else:
-            assert self.topics is not None
-            od = OrderedDict()
-            #for tok in self.topics.split(","):
-            for tok in self.topics:
-                topic, tribe = [s.strip() for s in tok.split("_")]
-                if topic not in od: od[topic] = []
-                od[topic].append(tribe)
-            self._topic_tribes = od
-            return od
+        assert self.topics is not None
+        od = OrderedDict()
+        for tok in self.topics:
+            topic, tribe = [s.strip() for s in tok.split("_")]
+            if topic not in od: od[topic] = []
+            od[topic].append(tribe)
+        return od
 
-    @property
+    @lazy_property
     def is_internal(self):
         """True if this is an internal variable."""
         return self.characteristics is not None and '[[INTERNAL_ONLY]]' in self.characteristics
 
-    @property
+    @lazy_property
     def wikilink(self):
         """Abinit wikilink."""
         return "[[%s:%s]]" % (self.executable, self.name)
@@ -269,23 +398,22 @@ class Variable(object):
     def __ne__(self, other):
         return not (self == other)
 
-    @property
+    @lazy_property
     def info(self):
         """String with extra info on the variable."""
         attrs = [
             "vartype", "characteristics",  "mnemonics", "dimensions", "defaultval",
             "abivarname", "commentdefault", "commentdims", "varset",
             "requires", "excludes",
-            #added_in_version, alternative_name
+            "added_in_version", "alternative_name",
             ]
 
         def astr(obj):
             return str(obj).replace("[[", "").replace("]]", "")
 
-        d = {k: astr(getattr(self, k)) for k in attrs} #if getattr(self, k) is not None}
+        d = {k: astr(getattr(self, k)) for k in attrs if getattr(self, k) is not None}
         return json.dumps(d, indent=4, sort_keys=True)
 
-    # From abipy
     def _repr_html_(self):
         """Integration with jupyter notebooks."""
         html = "<h2>Default value:</h2>" + my_unicode(self.defaultval) + "<br/><h2>Description</h2>" + self.text
@@ -386,8 +514,8 @@ class Variable(object):
         app("*Mnemonics:* %s  " % str(self.mnemonics))
         if self.characteristics:
             app("*Characteristics:* %s  " % ", ".join(self.characteristics))
-        if self.topic_tribes:
-            app("*Mentioned in topic(s):* %s  " % ", ".join("[[topic:%s]]" % k for k in self.topic_tribes))
+        if self.topic2relevances:
+            app("*Mentioned in topic(s):* %s  " % ", ".join("[[topic:%s]]" % k for k in self.topic2relevances))
         app("*Variable type:* %s  " % str(self.vartype))
         if self.dimensions:
            app("*Dimensions:* %s  " % self.format_dimensions(self.dimensions))
@@ -437,29 +565,21 @@ class Variable(object):
             app("\n\n")
 
         # Add text with description.
-        if self.text is not None:
-            md_text = self.text
-            app(2 * "\n")
-            app(md_text)
-        else:
-            raise ValueError("Variable `%s` does not have description text!" % self.name)
-
-        if with_hr:
-            app("* * *" + 2*"\n")
+        app(2 * "\n")
+        app(self.text)
+        if with_hr: app("* * *" + 2*"\n")
 
         return "\n".join(lines)
 
-    def validate(self, ref_characteristics):
+    def validate(self):
         """Validate variable. Raises ValueError if not valid."""
         errors = []
         eapp = errors.append
 
-	# TODO: varset should not be a variable!
-
-        svar = "None"
         try:
             svar = str(self)
         except Exception as exc:
+            svar = "Unknown"
             eapp(str(exc))
 
         if self.abivarname is None:
@@ -473,19 +593,12 @@ class Variable(object):
         if self.topics is None:
             eapp("%s does not have at least one topic and the associated relevance" % svar)
 
-        """
-        topics_name_relevance = var.topics.split(',')
-        for topic_name_relevance in topics_name_relevance:
-              name_relevance = topic_name_relevance.split('_')
-              if not name_relevance[0].strip() in topics:
-                    print('FAIL: ', abivarname, ' delivers topicname_relevance ',name_relevance,
-                          ' with topicname ',name_relevance[0].strip(),' that does not belong to the allowed list')
-                    retcode += 1
-              if not name_relevance[1].strip() in relevance_names:
-                    print('FAIL: ', abivarname, ' delivers topicname_relevance ',name_relevance,
-                          ' with relevance ',name_relevance[1].strip(),' that does not belong to the allowed list')
-                    retcode += 1
-        """
+        for topic, relevances in self.topic2relevances.items():
+            if topic not in ABI_TOPICS:
+                eapp("%s delivers topic `%s` that does not belong to the allowed list" % (sname, topic))
+            for relevance in relevances:
+                if relevance not in ABI_RELEVANCES:
+                    eapp("%s delivers relevance `%s` that does not belong to the allowed list" % (sname, relevance))
 
 	# Compare the characteristics of this variable with the refs to detect possible typos.
         if self.characteristics is not None:
@@ -493,7 +606,7 @@ class Variable(object):
                 eapp("The field characteristics of %s is not a list" % svar)
             else:
                 for cat in self.characteristics:
-                    if cat.replace("[[", "").replace("]]", "") not in ref_characteristics:
+                    if cat.replace("[[", "").replace("]]", "") not in ABI_CHARACTERISTICS:
                         eapp("The characteristics %s of %s is not valid" % (cat, svar))
 
         if self.dimensions is None:
@@ -625,6 +738,11 @@ class VarDatabase(OrderedDict):
     This object stores the full set of input variables for all the Abinit executables.
     in a dictionary mapping the name of the code to a subdictionary of variables.
     """
+
+    # TODO: Change name
+    characteristics = ABI_CHARACTERISTICS
+    external_params = ABI_EXTERNAL_PARAMS
+
     @classmethod
     def from_pyfiles(cls, dirpath=None):
         """Initialize the object from python modules."""
@@ -637,32 +755,9 @@ class VarDatabase(OrderedDict):
             vd = InputVariables.from_pyfile(pyf)
             new[vd.executable] = vd
 
-        # List of strings with possible character of variables.
-	# This is the reference set that will checked against the input
-	# given by the developer in the variables_CODENAME modules.
-        new.characteristics = [
-            "DEVELOP",
-            "EVOLVING",
-            "ENERGY",
-            "INPUT_ONLY",
-            "INTERNAL_ONLY",
-            "LENGTH",
-            "MAGNETIC_FIELD",
-            "NO_MULTI",
-        ]
-
-        # `external_params` i.e. external parameters that are not input variables,
-        # but that are used in the documentation of other variables.
-        new.external_params = OrderedDict([
-            ("AUTO_FROM_PSP", "Means that the value is read from the PSP file"),
-            ("CUDA", "True if CUDA is enabled (compilation)"),
-            ("ETSF_IO", "True if ETSF_IO is enabled (compilation)"),
-            ("FFTW3", "True if FFTW3 is enabled (compilation)"),
-            ("MPI_IO", "True if MPI_IO is enabled (compilation)"),
-            ("NPROC", "Number of processors used for Abinit"),
-            ("PARALLEL", "True if the code is compiled with MPI"),
-            ("SEQUENTIAL", "True if the code is compiled without MPI"),
-        ])
+        # TODO: Change name
+        #new.characteristics = ABI_CHARACTERISTICS
+        #new.external_params = ABI_EXTERNAL_PARAMS
 
         return new
 
@@ -811,7 +906,6 @@ class InputVariables(OrderedDict):
     .. attributes:
 
 	executable: Name of executable e.g. anaddb
-	all_varset:
     """
     @classmethod
     def from_pyfile(cls, filepath):
@@ -823,11 +917,10 @@ class InputVariables(OrderedDict):
         new.executable = module.executable
         for v in sorted(vlist, key=lambda v: v.name):
             new[v.name] = v
-        #new.all_varset = sorted(set(v.varset for v in new.values()))
         return new
 
     @lazy_property
-    def all_varset(self):
+    def my_varset_list(self):
         """Set with the all the varset strings found in the database."""
         return sorted(set(v.varset for v in self.values()))
 
@@ -840,7 +933,7 @@ class InputVariables(OrderedDict):
         return d
 
     @lazy_property
-    def all_characteristics(self):
+    def my_characteristics(self):
         """Set with all characteristics found in the database. NB [] are removed from the string."""
         allchars = []
         for var in self.values():
@@ -911,7 +1004,7 @@ class InputVariables(OrderedDict):
                        "version of the database with a more recent Abinit?") % (name, self.executable)
                 raise KeyError(msg)
 
-        return OrderedDict([(sec, d[sec]) for sec in self.all_varset if d[sec]])
+        return OrderedDict([(sec, d[sec]) for sec in self.my_varset_list if d[sec]])
 
     def apropos(self, varname):
         """Return the list of :class:`Variable` objects that are related` to the given varname"""

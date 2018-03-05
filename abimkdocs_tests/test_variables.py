@@ -59,8 +59,8 @@ class VariablesTest(AbimkdocsTest):
         fxcartfactor = codevars["abinit"]["fxcartfactor"]
         str(fxcartfactor)
         assert fxcartfactor.to_abimarkdown()
-        d = fxcartfactor.topic_tribes
-        assert fxcartfactor.topic_tribes is d and len(d) == 2
+        d = fxcartfactor.topic2relevances
+        assert fxcartfactor.topic2relevances is d and len(d) == 2
         assert "expert" in d["TransPath"] and "expert" in d['GeoOpt']
         assert isinstance(fxcartfactor.defaultval, ValueWithUnit)
         assert fxcartfactor.defaultval.units == "(Bohr^2)/Hartree"
@@ -97,10 +97,10 @@ class VariablesTest(AbimkdocsTest):
         #assert len(database.json_dumps_varnames())
 
         print("vargeo section:\n", database.vars_with_varset("vargeo"))
-        for section in database.all_varset:
+        for section in database.my_varset_list:
             assert len(database.vars_with_varset(section))
 
-        for charact in database.all_characteristics:
+        for charact in database.my_characteristics:
             #print("character:", charact)
             assert len(database.vars_with_char(charact))
 
@@ -113,7 +113,6 @@ class VariablesTest(AbimkdocsTest):
         #abinit_help("ecut", info=True)
         # Should not raise
         #abinit_help("foobar", info=True)
-
         #for codename, d in codevars.items():
         #    d.validate_vars()
 
@@ -126,8 +125,8 @@ class VariablesTest(AbimkdocsTest):
                 assert var.info
                 assert var.to_abimarkdown()
                 # topic --> list of tribes
-                assert len(var.topic_tribes)
-                var.validate(ref_characteristics=codevars.characteristics)
+                assert len(var.topic2relevances)
+                var.validate()
             except Exception as exc:
                 print("Error in %s:\n%s" % (var.abivarname, str(exc)))
                 raise

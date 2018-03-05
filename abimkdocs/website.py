@@ -30,7 +30,7 @@ from pygments import highlight
 from pygments.lexers import BashLexer, BibTeXLexer
 from pygments.formatters import HtmlFormatter
 from doc.tests.pymods.termcolor import cprint
-from .variables import Variable, lazy_property
+from .variables import lazy_property, Variable,  ABI_TOPICS, ABI_RELEVANCES
 
 
 def my_unicode(s):
@@ -524,7 +524,7 @@ You can change these parameters at compile or run time usually.
         # Build markdown pages for the different sets of variables.
         for code, vd in self.codevars.items():
             cprint("Generating markdown files with input variables of code: `%s`..." % vd.executable, "green")
-            for varset in vd.all_varset:
+            for varset in vd.my_varset_list:
                 var_list = [v for v in vd.values() if v.varset == varset]
                 meta = {"description": "%s input variables" % varset}
                 with self.new_mdfile("variables", varset + ".md", meta=meta) as mdf:
@@ -550,9 +550,8 @@ The colormap gives the number of input variables connected to the node.
 
 """)
                 for code, vd in self.codevars.items():
-                    for varset in vd.all_varset:
+                    for varset in vd.my_varset_list:
                         mdf.write("## %s, varset: %s  \n\n" % (code, varset))
-                        #mdf.write(vd.get_plotly_networkx(varset=varset, include_plotlyjs=False))
 
         # Write Markdown page with statistics.
         with self.new_mdfile("variables", "varset_stats.md") as mdf:
@@ -589,11 +588,24 @@ in order of number of occurrence in the input files provided with the package.
         # TODO: Use md skeleton + fields filled by python (jinja?)
         cprint("Generating Markdown files with topics ...", "green")
         repo_path = os.path.join(self.root, "topics", "origin_files")
+
         with io.open(os.path.join(repo_path, "list_of_topics.yml"), "rt", encoding="utf-8") as fh:
             self.all_topics = sorted(yaml.load(fh), key=lambda t: t[0].upper())
         with io.open(os.path.join(repo_path, "list_relevances.yml"), "rt", encoding="utf-8") as fh:
             # tribe_name --> description
             self.all_tribes = OrderedDict(yaml.load(fh))
+        assert self.all_topics == ABI_TOPICS
+        assert self.all_tribes == ABI_RELEVANCES
+
+        self.all_topics = ABI_TOPICS
+        self.all_tribes = ABI_RELEVANCES
+
+        all_yamlfiles = os.listdir(repo_path)
+        for topic in self.all_topics:
+            all_yamlfiles.remove("topic_" + topic + ".yml")
+        if all_yamlfiles:
+            print("all_yamlfiles", all_yamlfiles)
+            #raise RuntimeError()
 
         # datastructures needed for topics index.md
         index_md = ["# Alphabetical list of topics\n"]
@@ -612,7 +624,7 @@ in order of number of occurrence in the input files provided with the package.
             # Order and group vlist by tribes and write list with links.
             # TODO: Can we have multiple tribes with the same topic?
             related_variables = "No variable associated to this topic."
-            vlist = [var for var in self.codevars.iter_allvars() if topic in var.topic_tribes]
+            vlist = [var for var in self.codevars.iter_allvars() if topic in var.topic2relevances]
             if vlist:
                 lines = []
                 def sort_tribes(t):
@@ -624,7 +636,7 @@ in order of number of occurrence in the input files provided with the package.
                         raise KeyError("Cannot find tribe `%s` in dict. Add it to sort_tribes with the proper rank."
                                 % str(t))
 
-                items = sorted([(v.topic_tribes[topic][0], v) for v in vlist], key=lambda t: sort_tribes(t))
+                items = sorted([(v.topic2relevances[topic][0], v) for v in vlist], key=lambda t: sort_tribes(t))
                 for tribe, group in sort_and_groupby(items, key=lambda t: t[0]):
                     lines.append("*%s:*\n" % tribe)
                     lines.extend("- %s  %s" % (v.wikilink, v.mnemonics) for (_, v) in group)
