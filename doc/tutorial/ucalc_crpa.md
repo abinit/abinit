@@ -12,13 +12,13 @@ and _J_ as they can be used in DFT+DMFT. The implementation is described in [[ci
 
 It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two lessons on PAW in
-ABINIT ([PAW1](paw1), [PAW2](paw2))). 
+ABINIT ([PAW1](paw1), [PAW2](paw2))).
 The DFT+U tutorial in ABINIT ([DFT+U](dftu)) might be useful to know some
 basic variables about correlated orbitals.
 
 The first GW tutorial in ABINIT ([GW](gw1)) is useful to learn how
-to compute the screening, and how to converge the relevant parameters (energy
-cutoffs and number of bands for the polarizability).
+to compute the screening, and how to converge the relevant parameters
+(energy cutoffs and number of bands for the polarizability).
 
 This lesson should take two hours to complete (you should have access to more than 8 processors).
 
@@ -30,8 +30,9 @@ metals or transition metals, which have partially filled _d_ or _f_ bands and
 thus localized electrons. cRPA relies on the fact that screening processes can
 be decomposed in two steps: Firstly, the bare Coulomb interaction is screened
 by non correlated electrons to produce the effective interaction _W r_.
+
 Secondly, correlated electrons screened this interaction to produce the fully
-screening interaction _W_. [[cite:Aryasetiawan2004]]). However, the second
+screening interaction _W_ [[cite:Aryasetiawan2004]]). However, the second
 screening process is taken into account when one uses a method which describes
 accurately the interaction among correlated electrons (such as Quantum Monte
 Carlo within the DFT+DMFT method). So, to avoid a double counting of screening
@@ -97,8 +98,10 @@ variable in the list of variables): the width of the line along each k-point
 path and for each band is proportional to the contribution of a given atomic
 orbital on this particular Kohn Sham Wavefunction. A low cutoff and a small
 number of k-points are used in order to speed up the calculation. During this
-time you can take a look at the input file. There are two datasets. The first
-one is a ground state calculations with [[nnsclo]]=3 and [[nline]]=3 in order
+time you can take a look at the input file. 
+
+There are two datasets. 
+The first one is a ground state calculations with [[nnsclo]]=3 and [[nline]]=3 in order
 to have well diagonalized eigenfunctions even for empty states. In practice,
 you have however to check that the residue of wavefunctions is small at the
 end of the calculation. In this calculation, we find 1.E-06, which is large
@@ -151,14 +154,14 @@ functions and compute effective interactions for these orbitals.
 As discussed briefly in Appendix A of [[cite:Amadon2014]] as well as in section III
 B of [[cite:Vaugier2012]] and Section II B of [[cite:Sakuma2013]], one can use different
 schemes for the cRPA calculations. Let us discuss these different models
-namely the ( _d-d_ ), ( _dp-dp_ ), ( _d-dp_ (a)), and ( _d-dp_ (b)) models. In
-the notation (A-B), A and B refers respectively to some bands of A-like and
+namely the ( _d-d_ ), ( _dp-dp_ ), ( _d-dp_ (a)), and ( _d-dp_ (b)) models.
+In the notation (A-B), A and B refers respectively to some bands of A-like and
 B-like character. Moreover, A refers to the definition of screening and B
 refers to the definition of correlated orbitals. To clarify this definition,
 we give below some examples:
 
   * ( _t 2g_- _t 2g_) model (or _t 2g_ model): The correlated orbitals are defined with only _t 2g_-like bands (bands 21, 22 and 23). The screening inside these bands is not taken into account to built the constrained polarizability. Note that if this case (and in the ( _d-d_ ) and ( _dp-dp_ ) models), using ucrpa=1 or 2 give the same results, provided one uses ucrpa_bands equal to ([[dmftbandi]] [[dmftbandf]] ). 
-  * ( _d-d_ ) model (or d model) : The correlated orbitals are defined with only _d_ -like bands (bands 21 to 25). The screening inside these bands is not taken into account. 
+  * ( _d-d_ ) model (or d model): The correlated orbitals are defined with only _d_ -like bands (bands 21 to 25). The screening inside these bands is not taken into account. 
   * ( _dp-dp_ ) model (or dp model): The correlated orbitals are defined with only _d_ -like and Op-like bands (bands 12 to 23). The screening inside these bands is not taken into account. 
   * ( _d-dp_ (a)) model: In this scheme the Wannier orbitals are constructed as in the ( _dp-dp_ ) model. However, in this scheme, one only supresses the screening inside _d_ -like bands ([[ucrpa]]=1). It is coherent with the fact that the DMFT will only be applied to the d orbitals: so the screening for Op-like bands need to be taken into account. 
   * ( _d-dp_ (b)) model: It is the same model as the ( _d-dp_ (a)), nevertheless, in this case, only the weighting scheme is used ([[ucrpa]]=2 in ABINIT). 
@@ -173,8 +176,8 @@ In this section, we will present the input variables and discuss how to
 extract useful information in the log file in the case of the _d-d_ model. The
 input file for a typical cRPA calculation (tucrpa_1.in) contains four datasets
 (as usual GW calculations, see the [GW tutorial](gw1.md#1a)): the
-first one is a well converged LDA calculation, the second is non self-
-consistent calculation to compute accurately full and empty states, the third
+first one is a well converged LDA calculation, the second is non self-consistent calculation
+to compute accurately full and empty states, the third
 computes the constrained non interacting polarizability, and the fourth
 computes effective interaction parameters _U_ and _J_. We discuss these four
 datasets in the next four subsections.
@@ -199,21 +202,22 @@ the full interaction matrix described in section 3.2.4 will not be correct.
 Before presenting the input variables for this dataset, we discuss two
 important physical parameters relevant to this dataset.
 
-  * Diagonalization of Kohn-Sham Hamiltonian  : As in the case of DFT+DMFT or GW calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined , including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucrpa_1.in. 
+  * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or GW calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucrpa_1.in. 
 
-  * Wannier functions : Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords ([[dmftbandi]] and [[dmftbandf]]). We emphasize that with respect to the discussion on models on section 3.1, [[dmftbandi]] and [[dmftbandf]] are used to define the so called A bands. We will see in dataset 2 how B bands are defined. In our case, as we are in the _d-d_ model, we choose only the _d_ -like bands as a starting point and [[dmftbandi]] and [[dmftbandf]] are thus equal to the first and last _d_ -like bands, namely 21 and 25. 
+  * Wannier functions: Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords ([[dmftbandi]] and [[dmftbandf]]). We emphasize that with respect to the discussion on models on section 3.1, [[dmftbandi]] and [[dmftbandf]] are used to define the so called A bands. We will see in dataset 2 how B bands are defined. In our case, as we are in the _d-d_ model, we choose only the _d_ -like bands as a starting point and [[dmftbandi]] and [[dmftbandf]] are thus equal to the first and last _d_ -like bands, namely 21 and 25. 
     
+```
     iscf2          -2    # Perform a non self-consistent calculation              
     nbandkss2      -1    # Number of bands in KSS file (-1 means the maximum possible) 
     kssform         3    # Format of the Wavefunction file (should be 3) 
     nbdbuf2         4    # The last four bands will not be perfectly diagonalized 
     tolwfr2   1.0d-18    # The criterion to stop diagonalization 
     
-    # == Compute Wannier functions 
+    # Compute Wannier functions 
     usedmft2        1    # Mandatory to enable the calculation of Wannier functions as in DMFT. 
     dmftbandi2     21    # Precise the definition of Wannier functions (also used for DMFT calculations) 
     dmftbandf2     25    # Precise the definition of Wannier functions (also used for DMFT calculations) 
-    
+```
 
 ##### 3.2.2. The third DATASET: Compute the constrained polarizability and dielectric function
 
@@ -224,27 +228,28 @@ peculiar to this dataset.
 We add some comments here on three most important topics
 
   * Definition of constrained polarizability: As in the discussion on models on section 3.1, the constrained polarizability is defined thanks to B-like bands. The keywords related to this definition is [[ucrpa_bands]]. According to the value of ucrpa, [[ucrpa_bands]] defined the bands for which the transitions are neglected, or (if ucrpa=2), it defined Wannier functions that are used in the weighting scheme (see Eq. (5) and (7) of section II of [[cite:Amadon2014]]). Alternatively and only if ucrpa=1, an energy windows can be defined (with variable [[ucrpa_window]]) to exclude the transition. In our case, as we are in the _d-d_ model, we neglect transitions inside the _d_ -like bands, so we choose [[ucrpa_bands]]= 21 25. 
-  * Convergence of the polarizability : [[nband]] and [[ecuteps]] are the two main variables that should be converged. Note that one must study the role of these variables directly on the effective interaction parameters to determine their relevant values. 
+  * Convergence of the polarizability: [[nband]] and [[ecuteps]] are the two main variables that should be converged. Note that one must study the role of these variables directly on the effective interaction parameters to determine their relevant values. 
   * Frequency mesh  of the polarizability: Can be useful if one wants to plot the frequency dependence of the effective interactions (as in e.g. [[cite:Amadon2014]]). 
     
-     optdriver3     3     # Keyword to launch the calculation of screening 
-     gwcalctyp3     2     # The screening will be used later with gwcalctyp 2 in the next dataset 
-     getwfk3       -1     # Obtain WFK file from previous dataset
-     ecuteps3     5.0     # Cut-off energy of the planewave set to represent the dielectric matrix.
-                                  #It is important to converge effective interactions as a function of this parameter.
-    
-    # -- Frequencies for dielectric matrix
-     nfreqre3       1     # Number of  real frequencies 
-     freqremax3    10 eV  # Maximal value of frequencies 
-     freqremin3     0 eV  # Minimal value of frequencies 
-     nfreqim3       0     # Number of  imaginary frequencies 
-    
-    # -- Ucrpa: screening
-     ucrpa_bands3  21 25  # Define the bands corresponding to the _d_ contribution 
-    
-     # -- Parallelism
-     gwpara3        1
-    
+```
+optdriver3     3     # Keyword to launch the calculation of screening 
+gwcalctyp3     2     # The screening will be used later with gwcalctyp 2 in the next dataset 
+getwfk3       -1     # Obtain WFK file from previous dataset
+ecuteps3     5.0     # Cut-off energy of the planewave set to represent the dielectric matrix.
+                             #It is important to converge effective interactions as a function of this parameter.
+
+# -- Frequencies for dielectric matrix
+nfreqre3       1     # Number of  real frequencies 
+freqremax3    10 eV  # Maximal value of frequencies 
+freqremin3     0 eV  # Minimal value of frequencies 
+nfreqim3       0     # Number of  imaginary frequencies 
+
+# -- Ucrpa: screening
+ucrpa_bands3  21 25  # Define the bands corresponding to the _d_ contribution 
+
+# -- Parallelism
+gwpara3        1
+```
 
 ##### 3.2.3. The fourth DATASET: Compute the effective interactions
 
@@ -264,13 +269,14 @@ We add some comments on convergence properties
 
   * The frequency mesh  must be the same as in the DATASET 2. 
     
+```
      optdriver4  4      # Self-Energy calculation
      gwcalctyp4  2      # activate HF or ucrpa
      getwfk4     1      # Obtain WFK file from dataset 1
      getscr4     2      # Obtain SCR file from previous dataset
      ecutsigx4  30.0    # Dimension of the G sum in Sigma_x.
     
-    # -- Frequencies for effective interactions
+     # -- Frequencies for effective interactions
      nfreqsp4    1
      freqspmax4 10 eV
      freqspmin4  0 eV
@@ -278,8 +284,9 @@ We add some comments on convergence properties
      mqgrid4   300      # Reduced but fine at least for SrVO3
      mqgriddg4 300      # Reduced but fine at least for SrVO3
     
-    # -- Parallelism
+     # -- Parallelism
      gwpara4 2          # do not change if nsppol=2
+```
     
 
 #####  3.2.4 The cRPA calculation: the log file (for the _d-d_ model)
@@ -295,6 +302,7 @@ a simple fast direct integration. Note that this information is complete only
 if you use XML PAW atomic data (as the one available on the JTH table
 available on the ABINIT website).
     
+```
          =======================================================================
       == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
          (it is assumed that the wavefunction for the first reference
@@ -316,6 +324,7 @@ available on the ABINIT website).
          The bare interaction (no renormalization) =     16.0038 eV
          The bare interaction (for a renorm. wfn ) =     22.5848 eV
      =======================================================================
+```
     
 Various quantities are computed, the one which is interesting to see here, is
 the bare interaction computed for a wavefunction truncated at a very large
@@ -334,11 +343,20 @@ interaction computed on Wannier orbitals.
        5 15.715 15.092 15.114 15.092 16.567
     
 
-    * First we see that diagonal interactions are larger than off-diagonal terms, which is logical, because electron interaction is larger if electrons are located in the same orbital. 
-    * We recover in these interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry (we remind, as listed in [[dmatpawu]], that the order of orbitals in ABINIT are xy, yz, z2, xy, x2-y2). 
-    * We note also that the interaction for _t 2g_ and _e g_ orbitals are not the same. This effect is compared in e.g. Appendix C.1 of [[cite:Vaugier2012]] to the usual Slater parametrization of interaction matrices. 
-    * Diagonal bare interactions are smaller to the bare interaction on atomic orbitals (17.8 eV, as discussed above). It shows that the Wannier functions (obtained within the _d-d_ model) are less localized than atomic orbitals. It is logical because these Wannier functions contain indeed a weight on O- _p_ orbitals. 
-    * From this interaction matrix, one can compute the average of all elements (the famous _U_ ), as well as the average of diagonal elements, which is sometimes used as another definition of _U_ (see Eq. (8) and (9) of [[cite:Amadon2014]]. The two quantities are written in the log file: 
+    * First we see that diagonal interactions are larger than off-diagonal terms, 
+      which is logical, because electron interaction is larger if electrons are located in the same orbital. 
+    * We recover in these interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry 
+      (we remind, as listed in [[dmatpawu]], that the order of orbitals in ABINIT are xy, yz, z2, xy, x2-y2). 
+    * We note also that the interaction for _t 2g_ and _e g_ orbitals are not the same. 
+      This effect is compared in e.g. Appendix C.1 of [[cite:Vaugier2012]] to the usual 
+      Slater parametrization of interaction matrices. 
+    * Diagonal bare interactions are smaller to the bare interaction on atomic orbitals 
+      (17.8 eV, as discussed above). It shows that the Wannier functions (obtained within the _d-d_ model) 
+      are less localized than atomic orbitals. It is logical because these Wannier functions contain indeed 
+      a weight on O- _p_ orbitals. 
+    * From this interaction matrix, one can compute the average of all elements (the famous _U_ ),
+      as well as the average of diagonal elements, which is sometimes used as another definition of _U_ 
+      (see Eq. (8) and (9) of [[cite:Amadon2014]]. The two quantities are written in the log file:
     
           Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   15.3789    0.0000
     
@@ -346,13 +364,14 @@ interaction computed on Wannier orbitals.
     
 
 [To speed up the calculation and if one needs only these average values of _U_
-and _J_ , one can use [[nsym]]=0 in the input file, but in this case, the
+and _J_, one can use [[nsym]]=0 in the input file, but in this case, the
 interaction matrix does not anymore reproduce the correct symmetry. For
-several correlated atoms, the implementation is under test and it is mandatory
-to use [[nsym]]=1.]
+several correlated atoms, the implementation is under test and it is mandatory to use [[nsym]]=1.]
 
-  * Bare exchange interaction. The exchange interaction matrix is also written as well as the average of off-diagonal elements, which is _J_. 
+  * Bare exchange interaction. The exchange interaction matrix is also written as well 
+    as the average of off-diagonal elements, which is _J_. 
     
+```
           Hund coupling J=U(m1,m1,m2,m2) for the bare interaction
      -      1      2      3      4      5
        1 16.041  0.482  0.555  0.478  0.249
@@ -362,10 +381,13 @@ to use [[nsym]]=1.]
        5  0.249  0.478  0.555  0.482 16.567
     
        bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=    0.6667    0.0000
+```
     
 
-  * Then, the cRPA effective interactions are given for all frequency. The first frequency is zero and the cRPA interactions are: 
+  * Then, the cRPA effective interactions are given for all frequency. 
+     The first frequency is zero and the cRPA interactions are: 
     
+```
           U'=U(m1,m2,m1,m2) for the cRPA interaction
      -      1      2      3      4      5
        1  3.434  2.432  2.338  2.432  2.966
@@ -387,16 +409,18 @@ to use [[nsym]]=1.]
        5  0.247  0.442  0.444  0.446  3.641
     
        cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
-    
+```
 
   * At the end of the calculation, the value of _U_ and _J_ as a function of frequency are gathered. 
     
-           -------------------------------------------------------------
+```
+       -------------------------------------------------------------
                 Average U and J as a function of frequency
        -------------------------------------------------------------
              omega           U(omega)            J(omega)
             0.000      2.7546   -0.0000      0.5997    0.0000
        -------------------------------------------------------------
+```
 
 ## 4 Convergence studies
 
@@ -482,7 +506,7 @@ of bare and effective interactions.
     
 
 Even if our calculation is not perfectly converged with respect to k-points,
-the results obtained for the _d-d_ , _dp-dp_ , and _d-dp (a)_ models are in
+the results obtained for the _d-d_, _dp-dp_, and _d-dp (a)_ models are in
 agreement (within 0.1 or 0.2 eV) with results obtained in Table V of
 [[cite:Amadon2014]] and references cited in this table.
 
@@ -495,14 +519,26 @@ interaction matrices using the Slater Kanamori expression (see e.g.
 
 We now briefly comment the physics of the results.
 
-  * Bare interactions. When the number of bands used is larger, the Wannier orbitals extension is smaller. Thus, the interaction obtained with Wannier functions obtained from _dp_ bands are larger than interactions obtained with Wannier functions obtained with _d_ bands and also larger than interaction obtained on atomic orbitals. 
-  * For the same Wannier functions ( _dp-dp, d-dp_ (a), _d-dp_ (b)), one can see the role of the screening on cRPA interactions: 
-    * When one supresses all transitions inside the _d_ -like and _p_ -like bands ( _dp-dp_ model), _U_ is large. 
-    * When only the transitions inside the _d_ -like bands are suppressed, _U_ is smaller ( _d-dp_ (a) model) in comparison to the _dp-dp_ model, because the screening is more efficient. 
-    * Lastly, when one uses the weighting scheme to compute the polarizability, _U_ is very small. Indeed, in this case, one can show that there are some residual transitions near the Fermi level (due to the hybridization between _d_ orbitals and O _p_ orbitals) which are very efficient to screen the interaction (A similar effect is discussed in [[cite:Amadon2014]] for UO 2 or [[cite:Sakuma2013]] for transition metal oxydes).  
+* Bare interactions. When the number of bands used is larger, the Wannier orbitals extension is smaller. 
+  Thus, the interaction obtained with Wannier functions obtained from _dp_ bands are larger 
+  than interactions obtained with Wannier functions obtained with _d_ bands and also larger 
+  than interaction obtained on atomic orbitals. 
+
+* For the same Wannier functions ( _dp-dp, d-dp_ (a), _d-dp_ (b)), one can see the role of 
+  the screening on cRPA interactions:
+
+      - When one supresses all transitions inside the _d_ -like and _p_ -like bands ( _dp-dp_ model), _U_ is large.
+      - When only the transitions inside the _d_ -like bands are suppressed, _U_ is smaller ( _d-dp_ (a) model)
+        in comparison to the _dp-dp_ model, because the screening is more efficient.
+      - Lastly, when one uses the weighting scheme to compute the polarizability, _U_ is very small.
+        Indeed, in this case, one can show that there are some residual transitions near the Fermi level
+        (due to the hybridization between _d_ orbitals and O _p_ orbitals) which are very efficient
+        to screen the interaction (A similar effect is discussed in [[cite:Amadon2014]] for UO 2 or
+        [[cite:Sakuma2013]] for transition metal oxydes).
+
 Finally, fully screened interactions (not discussed here) could also be
 computed for each definition of correlated orbitals by using the default
-values of [[ucrpa_bands]] .
+values of [[ucrpa_bands]].
 
 ## 6 Frequency dependent interactions
   

@@ -95,6 +95,8 @@
             extensions: ["AMSmath.js"],
             Macros: {
                 "*": "{\\dagger}",
+                "ra": "{\\rangle}",
+                "la": "{\\langle}",
                 // matchcal version
                 mcR: "{\\mathcal{R}}",
                 mcS: "{\\mathcal{S}}",
@@ -139,7 +141,13 @@
                 Sit: "{\\Si^\\tau}}",
                 // partial and functional derivative.
                 PDER: ["{\\dfrac{\\partial #1}{\\partial #2}}", 2],
-                FDER: ["{\\dfrac{\\delta #1}{\\delta #2}}", 2]
+                FDER: ["{\\dfrac{\\delta #1}{\\delta #2}}", 2],
+                // PAW
+                tPsi: "{\\tilde\\Psi}",
+                tpsi: "{\\tilde\\psi}",
+                tPhi: "{\\tilde\\Phi}",
+                tphi: "{\\tilde\\phi}",
+                tprj: "{\\tilde p}"
             }
           }
       });

@@ -17,29 +17,29 @@ This lesson should take about 1h30.
 ## 1 The PAW atomic dataset - introduction
   
 The PAW method is based on the definition of atomic spheres (augmentation
-regions) of radius $r_{PAW}$ around the atoms of the system in which a base of
-atomic partial waves φi, of "pseudized" partial waves~φi, and of projectors~pi
-(dual to~φi) have to be defined. This set of partial-waves and projectors
+regions) of radius $r_c$ around the atoms of the system in which a base of
+atomic partial waves $\phi_i$, of "pseudized" partial waves $\tphi_i$, and of projectors $\tprj_i$
+(dual to $\tphi_i$) have to be defined. This set of partial-waves and projectors
 functions plus some additional atomic data are stored in a so-called *PAW dataset*. 
 A PAW dataset has to be generated for each atomic species in order
 to reproduce atomic behavior as accurate as possible while requiring minimal
 CPU and memory resources in executing ABINIT for the crystal simulations.
 These two constraints are conflicting.
 
-The PAW dataset generation is the purpose of this tutorial.  
-It is done according the following procedure (all parameters that define a PAW dataset are in bold):  
+The PAW dataset generation is the purpose of this tutorial.
+It is done according the following procedure (all parameters that define a PAW dataset are in bold):
 
   1. Choose and define the concerned chemical species (name and atomic number).
 
-  2. Solve the atomic all-electrons problem in a given atomic configuration. 
-  The atomic problem is solved within the DFT formalism, using an exchange-correlation functional 
-  and either a Schrodinger (default) or scalar-relativistic approximation. 
-  It is a spherical problem and it is solved on a radial grid. 
+  2. Solve the atomic all-electrons problem in a given atomic configuration.
+  The atomic problem is solved within the DFT formalism, using an exchange-correlation functional
+  and either a Schrodinger (default) or scalar-relativistic approximation.
+  It is a spherical problem and it is solved on a radial grid.
   The atomic problem is solved for a given electronic configuration that can be an ionized/excited one.
 
-  3. Choose a set of electrons that will be considered as frozen around the nucleus (core electrons). 
-  The others electrons are valence ones and will be used in the PAW basis. 
-  The core density is then deduced from the core electrons wave functions. 
+  3. Choose a set of electrons that will be considered as frozen around the nucleus (core electrons).
+  The others electrons are valence ones and will be used in the PAW basis.
+  The core density is then deduced from the core electrons wave functions.
   A smooth core density equal to the core density outside a given rcore matching radius is computed.
 
   4. Choose the size of the PAW basis (number of partial-waves and projectors). 
@@ -47,19 +47,18 @@ It is done according the following procedure (all parameters that define a PAW d
   related to valence electrons (bound states) and/or additional atomic functions, solution 
   of the wave equation for a given l quantum number at arbitrary reference energies (unbound states).
 
-  5. Generate pseudo partial-waves (smooth partial-waves build with a pseudization scheme and 
-  equal to partial-waves outside a given rc matching radius) and associated projector functions. 
-  Pseudo partial-waves are solutions of the PAW Hamiltonian deduced from the atomic Hamiltonian 
-  by pseudizing the effective potential (a local pseudopotential is built and equal to effective 
-  potential outside a rvloc matching radius). Projectors and partial-waves are then 
+  5. Generate pseudo partial-waves (smooth partial-waves build with a pseudization scheme and
+  equal to partial-waves outside a given rc matching radius) and associated projector functions.
+  Pseudo partial-waves are solutions of the PAW Hamiltonian deduced from the atomic Hamiltonian
+  by pseudizing the effective potential (a local pseudopotential is built and equal to effective
+  potential outside a rvloc matching radius). Projectors and partial-waves are then
   orthogonalized with a chosen orthogonalization scheme.
 
-  6. Build a compensation charge density used later in order to retrieve the total charge of the atom. 
-  This compensation charge density is located inside the PAW spheres and based on an analytical shape function 
+  6. Build a compensation charge density used later in order to retrieve the total charge of the atom.
+  This compensation charge density is located inside the PAW spheres and based on an analytical shape function
   (which analytic form and localization radius rshape can be chosen).
 
-The user can choose between two PAW dataset generators to produce 
-atomic files directly readable by ABINIT.
+The user can choose between two PAW dataset generators to produce atomic files directly readable by ABINIT.
 The first one is the PAW generator ATOMPAW (originally by N. Holzwarth) and
 the second one is the Ultra-Soft (US) generator (originally written by D.
 Vanderbilt). In this tutorial, we concentrate only on ATOMPAW.
@@ -67,19 +66,23 @@ Vanderbilt). In this tutorial, we concentrate only on ATOMPAW.
 It is highly recommended to refer to the following papers to understand
 correctly the generation of PAW atomic datasets:
   
-[1] "Projector augmented-wave method, P.E. Blochl, Phys. Rev. B 50, 17953 (1994)  
-[2] "A projector Augmented Wave (PAW) code for electronic structure
-calculations, Part I : atompaw for generating atom-centered functions", N.
-Holzwarth et al., Computer Physics Communications, 329 (2001) (might also be
-available at http://www.wfu.edu/%7Enatalie/papers/pwpaw/atompaw.pdf)  
-[3] "From ultrasoft pseudopotentials to the projector augmented-wave method",
-G. Kresse, D. Joubert, Phys. Rev. B 59, 1758 (1999)  
-[4] "Electronic structure packages: two implementations of the Projector
-Augmented-Wave (PAW) formalism", M. Torrent et al., Computer Physics
-Communications 181, 1862 (2010) (might also be available at
-http://www.wfu.edu/%7Enatalie/papers/PAWform/PAWformman.sdarticle.pdf)  
-[5] "Notes for revised form of atompaw code", by N. Holzwarth, available at
-http://www.wfu.edu/%7Enatalie/papers/pwpaw/notes/atompaw/atompawEqns.pdf
+1. "Projector augmented-wave method, P.E. Blochl, Phys. Rev. B 50, 17953 (1994)  
+
+2. "A projector Augmented Wave (PAW) code for electronic structure
+    calculations, Part I : atompaw for generating atom-centered functions", N.
+    Holzwarth et al., Computer Physics Communications, 329 (2001) (might also be
+    available at <http://www.wfu.edu/%7Enatalie/papers/pwpaw/atompaw.pdf>)
+
+3. "From ultrasoft pseudopotentials to the projector augmented-wave method",
+    G. Kresse, D. Joubert, Phys. Rev. B 59, 1758 (1999)
+
+4. "Electronic structure packages: two implementations of the Projector
+    Augmented-Wave (PAW) formalism", M. Torrent et al., Computer Physics
+    Communications 181, 1862 (2010) (might also be available at
+    <http://www.wfu.edu/%7Enatalie/papers/PAWform/PAWformman.sdarticle.pdf>)
+
+5. "Notes for revised form of atompaw code", by N. Holzwarth, available at
+    <http://www.wfu.edu/%7Enatalie/papers/pwpaw/notes/atompaw/atompawEqns.pdf>
 
 ## 2 Use of the generation code
   
@@ -104,7 +107,7 @@ How to use Atompaw?
 1. Edit an input file in a text editor (content of input explained [here](paw2_assets/atompaw-usersguide.pdf))
 2. Run: atompaw < inputfile
 
-Partial waves φi, PS partial waves~φi and projectors~pi are given in wfn.i files.
+Partial waves $\phi_i$, PS partial waves $\tphi_i$ and projectors $\tprj_i$ are given in wfn.i files.
 Logarithmic derivatives from atomic Hamiltonian and PAW Hamiltonian
 resolutions are given in logderiv.l files.
 A summary of the atomic all-electrons computation and PAW dataset properties
@@ -125,7 +128,7 @@ Atom_name.XCfunc.xml file
   
 Our test case will be nickel *(1s2 2s2 2p6 3s2 3p6 3d8 4s2 4p0)*.
 
-In a first stage, copy a simple input file for ATOMPAW in your working directory 
+In a first stage, copy a simple input file for ATOMPAW in your working directory
 (find it in ~abinit/doc/tutorial/paw2/paw2_assets/Ni.atompaw.input1).
 Edit this file.
 
@@ -133,34 +136,33 @@ Edit this file.
 
 This file has been built in the following way:
 
-1-All-electrons calculation:
+1. All-electrons calculation:
 
-  * First line: define the material in the first line
+    * First line: define the material in the first line
 
-  * Second line: choose the exchange-correlation functional (LDA-PW or GGA-PBE) 
-  and select a scalar-relativistic wave equation (nonrelativistic or scalarrelativistic) 
-  and a (2000 points) logarithmic grid. 
+    * Second line: choose the exchange-correlation functional (LDA-PW or GGA-PBE)
+      and select a scalar-relativistic wave equation (nonrelativistic or scalarrelativistic)
+      and a (2000 points) logarithmic grid.
 
-  * Next lines: define the electronic configuration:
+    * Next lines: define the electronic configuration:
 
-How many electronic states do we need to include in the computation?
-Besides the fully and partially occupied states, it is recommended to add all
-states that could be reached by electrons in the solid. Here, for Nickel, the
-4p state is concerned. So we decide to add it in the computation.
+      *How many electronic states do we need to include in the computation?
+      Besides the fully and partially occupied states, it is recommended to add all
+      states that could be reached by electrons in the solid. Here, for Nickel, the
+      4p state is concerned. So we decide to add it in the computation.*
 
-\- A line with the maximum n quantum number for each electronic shell;
-   here "4 4 3" means *4s, 4p, 3d*.
+2. A line with the maximum n quantum number for each electronic shell; here "4 4 3" means *4s, 4p, 3d*.
 
-\- Definition of occupation numbers:
+3. Definition of occupation numbers:
 
-For each partially occupied shell enter the occupation number. An excited
-configuration may be useful if the PAW dataset is intended for use in a
-context where the material is charged (such as oxides). Although, in our
-experience, the results are not highly dependent on the chosen electronic configuration.  
-We choose here the 3d8 4s2 4p0 configuration. Only 3d and 4p shells are
-partially occupied ("3 2 8" " and "4 1 0" lines). A "0 0 0" ends the occupation section.
+   For each partially occupied shell enter the occupation number. An excited
+   configuration may be useful if the PAW dataset is intended for use in a
+   context where the material is charged (such as oxides). Although, in our
+   experience, the results are not highly dependent on the chosen electronic configuration.  
+   We choose here the *3d8 4s2 4p0* configuration. Only 3d and 4p shells are
+   partially occupied ("3 2 8" " and "4 1 0" lines). A "0 0 0" ends the occupation section.
 
-\- Selection of core and valence electrons selection: in a first approach,
+4. Selection of core and valence electrons selection: in a first approach,
 select only electrons from outer shells as valence. But, if particular
 thermodynamical conditions are to be simulated, it is generally needed to
 include "semi-core states" in the set of valence electrons. Semi-core states
@@ -199,7 +201,7 @@ Partial-waves basis generation:
   in the solid (as a first choice). Here rPAW=2.3 a.u. If only one radius is input,
   all others pseudization radii will be equal to rPAW (rc, rcore, rVloc and rshape).
 
-  * Next lines: add additional partial-waves φi if needed: choose to have 2 partial-waves
+  * Next lines: add additional partial-waves $\phi_i$ if needed: choose to have 2 partial-waves
   per angular momentum in the basis (this choice is not necessarily optimal but this is the most common one;
   if rPAW is small enough, 1 partial-wave per l may suffice). As a first guess, put all reference energies
   for additional partial-waves to 0 Rydberg.
@@ -230,7 +232,7 @@ means that an additional p\- partial wave at Eref=0. Ry has been added.
 means that an additional d- partial wave at Eref=0. Ry as been added.
 Finally, partial waves basis contains two s-, two p-  and two d\- partial waves.
 
-  * Next line: definition of the generation scheme for pseudo partial waves~φi, and of projectors~pi. 
+  * Next line: definition of the generation scheme for pseudo partial waves $\tphi_i$, and of projectors $\tprj_i$. 
   We begin here with a simple scheme (i.e. "Bloechl" scheme, proposed by P. Blochl in ref. [1]). 
   This will probably be changed later to make the PAW dataset more efficient.
 
@@ -347,18 +349,18 @@ PAW parameters ("evale from matrix elements"). These two results should be in cl
 Examine the partial-waves, PS partial-waves and projectors.
 These are saved in files named wfni, where i ranges over the number of partial
 waves used, so 6 in the present example. Each file contains 4 columns:
-the radius in column 1, the partial wave φi in column 2, the PS partial wave~φi in
-column 3, and the projector~ pi in column 4. Plot the three curves as a
+the radius in column 1, the partial wave $\phi_i$ in column 2, the PS partial wave $\tphi_i$ in
+column 3, and the projector $\tprj_i$ in column 4. Plot the three curves as a
 function of radius using a plotting tool of your choice.
 
 Here is the first s\- partial wave /projector of the Ni example:
 
 ![First s partial wave](paw2_assets/wfn1a.jpg)
 
-  * The φi should meet the~φi near or after the last maximum (or minimum). 
+  * The $\phi_i$ should meet the $\tphi_i$ near or after the last maximum (or minimum). 
     If not, it is preferable to change the value of the matching (pseudization) radius.
 
-  * The maxima of the ~φi and ~pi functions should have the same order of magnitude (but need not agree exactly). 
+  * The maxima of the $\tphi_i$ and $\tprj_i$ functions should have the same order of magnitude (but need not agree exactly). 
     If not, you can try to get this in three ways:
 
 \- Change the matching radius for this partial-wave; but this is not always
@@ -720,32 +722,33 @@ This optimization is not essential to produce efficient PAW datasets but
 it can be useful. We advise experienced users to try it.
 
 The idea is quite simple: when expressing the different atomic radial
-functions (φi,~φi, ~pi) on the plane waves basis, the number of plane waves
+functions ($\phi_i, \tphi_i, \tprj_i$) on the plane waves basis, the number of plane waves
 depends on the "locality" of these radial functions in reciprocal space.  
 In the following reference (we suggest to read it):  R.D. King-Smith, M.C.
 Payne, J.S. Lin, Phys. Rev. B 44, 13063 (1991)
 
-A method to enforce the locality (in reciprocal space) of projectors~pi is presented:
-
-Projectors~pi(g) expressed in reciprocal space are modified according to the following scheme:
+A method to enforce the locality (in reciprocal space) of projectors $\tprj_i$ is presented:
+Projectors $\tprj_i(g)$ expressed in reciprocal space are modified according to the following scheme:
 The reciprocal space is divided in 3 regions:
 
-\- If  g < gmax,~pi(g) is unchanged  
-\- If  g > γ,~pi(g) is set to zero  
-\- If gmax< g < γ,~pi(g) is modified so that the contribution of~pi(r) is
-conserved with an error W (as small as possible).
+* If $g < g_{max}$, $\tprj_i$(g) is unchanged
+
+* If $g > \gamma$, $\tprj_i$(g) is set to zero
+
+* If $ g_{max} < g < \gamma$, $\tprj_i(g)$ is modified so that the contribution of $\tprj_i(r)$ is
+  conserved with an error W (as small as possible).
 
 ![RSO](paw2_assets/RSO.png)
 
-The above transformation of~pi(g) is only possible if~pi(r) is defined outside
-the augmentation sphere up to a radius R0 (with R0>rc).
+The above transformation of $\tprj_i(g)$ is only possible if $\tprj_i(r)$ is defined outside
+the augmentation sphere up to a radius R0 (with R0 > rc).
 In practice we have to:
 
 1. Impose an error W (W is the maximum error admitted on total energy)  
-2. Adjust gmax according to Ecut (gmax<= Ecut)  
-3. Choose γ so that 2*gmax < γ < 3*gmax
+2. Adjust gmax according to Ecut ($g_{max} <= E_{cut}$)
+3. Choose $\gamma$ so that $2 g_{max} < \gamma < 3 g_{max}$
 
-and the ATOMPAW code apply the transformation to~pi and deduce R0 radius.  
+and the ATOMPAW code apply the transformation to $\tprj_i$ and deduce R0 radius.  
   
 You can test it now.
 In your working directory, re-use the dataset with Bloechl projectors
@@ -764,6 +767,6 @@ compare the efficiency of the atomic data; do not forget to test physical proper
 
 How to choose the RSO parameters?
 
-γ/gmax=2 and 0.0001 < W < 0.001 is a good choice.
+$\gamma / g_{max} = 2$ and $ 0.0001 < W < 0.001 $ is a good choice.
 gmax has to be adjusted. The lower gmax the faster the convergence is
 but too low gmax can produce unphysical results.
