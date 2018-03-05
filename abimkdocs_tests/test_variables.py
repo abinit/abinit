@@ -11,6 +11,7 @@ import json
 from collections import OrderedDict
 from abimkdocs.variables import get_codevars, ValueWithUnit, ValueWithConditions, MultipleValue, Range
 
+
 class VariablesTest(AbimkdocsTest):
 
     def test_variables(self):
@@ -152,6 +153,22 @@ class VariablesTest(AbimkdocsTest):
         for code, d in codevars.items():
             count_code[code] = Counter({k: 0 for k in d})
 
+        doc_vnames = codevars["anaddb"].get_all_vnames(with_internal=False)
+        anaddb_f90vnames = self.get_anaddb_varnames_from_f90()
+        #print("anaddb_vames:", anaddb_f90vnames)
+        print("anaddb_f90vnames - doc_vnames", anaddb_f90vnames - doc_vnames)
+        print("doc_vnames - anaddb_f90vnames", doc_vnames - anaddb_f90vnames)
+
+        doc_vnames = codevars["abinit"].get_all_vnames(with_internal=False)
+        abinit_f90vnames = self.get_abinit_varnames_from_f90()
+        #print("abinit_f90vnames:", abinit_f90vnames)
+        print("abinit_f90vnames - doc_vnames", abinit_f90vnames - doc_vnames)
+        print("doc_vnames - abinit_f90vnames", doc_vnames - abinit_f90vnames)
+
+        assert 0
+
+
+        # TODO: should parse chkvars and
         black_list = set([
             "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr",
             "mrgddb", "mrggkk", "mrgdv", "band2eps", "ujdet", "fold2Bloch", "macroave",
@@ -169,7 +186,7 @@ class VariablesTest(AbimkdocsTest):
             # Add it if var is not tested and not internal.
             for vname, c in count.items():
                 if c == 0 and not codevars[code][vname].is_internal:
-                    print(code, vname)
+                    #print(code, vname)
                     untested[code].append(vname)
 
         for code in sorted(untested.keys()):
@@ -177,7 +194,7 @@ class VariablesTest(AbimkdocsTest):
             print(code, untested[code])
         #assert 0
 
-        ref_json_path = os.path.join(os.path.dirname(__file__), "untested_variables.json")
+        ref_json_path = os.path.join(os.path.dirpath(__file__), "untested_variables.json")
         update_ref = False
         if update_ref:
             with open(ref_json_path, "wt") as fh:

@@ -941,6 +941,18 @@ class InputVariables(OrderedDict):
                 allchars.extend([c.replace("[", "").replace("]", "") for c in var.characteristics])
         return set(allchars)
 
+    def get_all_vnames(self, with_internal=False):
+        """
+        Return set with all the variable names including possible aliases.
+        """
+        doc_vnames = []
+        for name, var in self.items():
+            if not with_internal and var.is_internal: continue
+            doc_vnames.append(name)
+            if var.alternative_name is not None:
+                doc_vnames.append(var.alternative_name)
+        return set(doc_vnames)
+
     def groupby_first_letter(self):
         """Return ordered dict mapping first_char --> list of variables."""
         keys = sorted(self.keys(), key=lambda n: n[0].upper())
