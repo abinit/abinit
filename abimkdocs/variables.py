@@ -1,26 +1,21 @@
 # coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
 
+import sys
 import os
 import io
 import json
 
 from collections import OrderedDict, defaultdict
 from itertools import groupby
-from html2text import html2text
-try:
-    import yaml
-except ImportError:
-    raise ImportError("pyyaml package is not installed. Install it with `pip install pyyaml`")
 
 # Helper functions (coming from AbiPy)
-
 class lazy_property(object):
     """
     lazy_property descriptor
 
-    Used as a decorator to create lazy attributes. Lazy attributes
-    are evaluated on first use.
+    Used as a decorator to create lazy attributes.
+    Lazy attributes are evaluated on first use.
     """
 
     def __init__(self, func):
@@ -194,7 +189,7 @@ class Variable(object):
         self.commentdims = commentdims
         self.added_in_version = added_in_version
         self.alternative_name = alternative_name
-        self.text = text
+        self.text = my_unicode(text)
 
         errors = []
         for a in ("abivarname", "varset", "vartype", "topics", "dimensions", "text"):
@@ -293,7 +288,7 @@ class Variable(object):
     # From abipy
     def _repr_html_(self):
         """Integration with jupyter notebooks."""
-        html = "<h2>Default value:</h2>" + str(self.defaultval) + "<br/><h2>Description</h2>" + str(self.text)
+        html = "<h2>Default value:</h2>" + my_unicode(self.defaultval) + "<br/><h2>Description</h2>" + self.text
         return html.replace("[[", "<b>").replace("]]", "</b>")
 
     def browse(self):
@@ -320,13 +315,6 @@ class Variable(object):
         for d in self.dimensions:
             if key in str(d): return True
         return False
-
-    #@property
-    #def url(self):
-    #    """The url associated to the variable."""
-    #    # TODO: root will change once we move to the new website.
-    #    root = "https://www.abinit.org/sites/default/files/last/input_variables/html_automatically_generated/"
-    #    return root + "%s.html#%s" % (self.section, self.varname)
 
     def html_link(self, label=None):
         """String with the URL of the web page."""
@@ -527,50 +515,6 @@ class Variable(object):
         if errors:
             raise ValueError("\n".join(errors))
 
-
-class Components(yaml.YAMLObject):
-    name = None  # String containing section name
-    keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
-    authors = '' # String containing the list of authors.
-    howto  = ''  # For the 'topics' Should complete the sentence beginning with "How to"
-    header = ''  # Header of the file, possibly the 'default' one
-    title  = ''  # Title  of the file, possibly the 'default' one
-    subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
-    purpose   = ''  # Purpose  of the file, possibly the 'default' one
-    advice    = ''  # Advice  of the file, possibly the 'default' one
-    copyright = ''  # Copyright of the file, possibly the 'default' one
-    introduction = ''  # Introduction
-    links     = ''  # Links of the file, possibly the 'default' one
-    menu      = ''  # Menu of the file, possibly the 'default' one
-    tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
-    tutorials    = '' # List of relevant tutorials
-    examples     = '' # Relevant examples
-    end       = ''  # End of the file, possibly the 'default' one
-
-    yaml_tag = u'!components'
-
-    #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
-    def __init__(self, name=None, keyword=None, authors=None, howto=None, header=None,
-                 title=None, subtitle=None, purpose=None, advice=None,
-                 copyright=None, links=None, menu=None, tofcontent_header=None, tutorials=None, examples=None, end=None):
-        self.name = name
-        self.keyword = keyword
-        self.authors = authors
-        self.howto = howto
-        self.header = header
-        self.title  = title
-        self.subtitle = subtitle
-        self.purpose  = purpose
-        self.advice   = advice
-        self.copyright= copyright
-        self.introduction= introduction
-        self.links    = links
-        self.menu     = menu
-        self.tofcontent_header = tofcontent_header
-        self.tutorials = tutorials
-        self.examples = examples
-        self.end      = end
-
 class ValueWithUnit(object):
     value = None
     units = None
@@ -656,6 +600,10 @@ class MultipleValue(object):
         else:
             return str(self.number) + " * " + str(self.value)
 
+def my_unicode(s):
+    """Convert string to unicode (needed for py2.7 DOH!)"""
+    return unicode(s) if sys.version_info[0] <= 2 else str(s)
+
 ##############
 # Public API #
 ##############
@@ -724,10 +672,6 @@ class VarDatabase(OrderedDict):
             for var in vd.values():
                 yield var
 
-    #def json_dumps_varnames(self):
-    #    """JSON string with the list of variable names extracted from the database."""
-    #    return json.dumps(list(self.keys()))
-
     def get_version_endpoints(self):
         """
         docs.abinit.org/vardocs/abinit/asr?version=8.6.2
@@ -754,7 +698,7 @@ class VarDatabase(OrderedDict):
         with open(json_path, "wt") as fh:
             json.dump(oldd, fh, indent=indent)
 
-    def write_pymods(self, dirpath="."):
+    def _write_pymods(self, dirpath="."):
         """
         """
         dirpath = os.path.abspath(dirpath)
@@ -801,7 +745,6 @@ class VarDatabase(OrderedDict):
 
             raise TypeError("%s, %s" % (type(obj), str(obj)))
 
-        #for code in ["abinit", ]:
         for code in self:
             varsd = self[code]
 
@@ -826,10 +769,12 @@ Variable(
     defaultval={defaultval},
     mnemonics={mnemonics},
     characteristics={characteristics},
-    commentdefault={commentdefault},
-    commentdims={commentdims},
     excludes={excludes},
     requires={requires},
+    commentdefault={commentdefault},
+    commentdims={commentdims},
+    added_in_version=None,
+    alternative_name=None,
     text={text},
 ),
 """.format(vartype='"%s"' % var.vartype,
@@ -843,8 +788,10 @@ Variable(
           commentdefault=nones2arg(var.commentdefault),
           topics=topics2arg(var.topics),
           commentdims=nones2arg(var.commentdims),
-          text=text,
           defaultval=defaultval2arg(var.defaultval),
+	  added_in_version=var.added_in_version,
+	  alternative_name=var.alternative_name,
+          text=text,
           )
 
                 lines.append(s)
@@ -860,9 +807,15 @@ Variable(
 class InputVariables(OrderedDict):
     """
     Dictionary storing the variables used by one executable.
+
+    .. attributes:
+
+	executable: Name of executable e.g. anaddb
+	all_varset:
     """
     @classmethod
     def from_pyfile(cls, filepath):
+        """Initialize the object from python file."""
         import imp
         module = imp.load_source(filepath, filepath)
         vlist = [Variable(**d) for d in module.variables]
@@ -870,10 +823,33 @@ class InputVariables(OrderedDict):
         new.executable = module.executable
         for v in sorted(vlist, key=lambda v: v.name):
             new[v.name] = v
-        new.all_varset = sorted(set(v.varset for v in new.values()))
+        #new.all_varset = sorted(set(v.varset for v in new.values()))
         return new
 
+    @lazy_property
+    def all_varset(self):
+        """Set with the all the varset strings found in the database."""
+        return sorted(set(v.varset for v in self.values()))
+
+    @lazy_property
+    def name2varset(self):
+        """Dictionary mapping the name of the variable to the varset section."""
+        d = {}
+        for name, var in self.items():
+            d[name] = var.varset
+        return d
+
+    @lazy_property
+    def all_characteristics(self):
+        """Set with all characteristics found in the database. NB [] are removed from the string."""
+        allchars = []
+        for var in self.values():
+            if var.characteristics is not None:
+                allchars.extend([c.replace("[", "").replace("]", "") for c in var.characteristics])
+        return set(allchars)
+
     def groupby_first_letter(self):
+        """Return ordered dict mapping first_char --> list of variables."""
         keys = sorted(self.keys(), key=lambda n: n[0].upper())
         od = OrderedDict()
         for char, group in groupby(keys, key=lambda n: n[0].upper()):
@@ -913,21 +889,12 @@ class InputVariables(OrderedDict):
 
         return html + "</div></div>"
 
-    @lazy_property
-    def name2varset(self):
-        """
-        Dictionary mapping the name of the variable to the varset section.
-        """
-        d = {}
-        for name, var in self.items():
-            d[name] = var.varset
-        return d
-
     def group_by_varset(self, names):
         """
         Group a list of variable in sections.
 
-        Args: names: string or list of strings with ABINIT variable names.
+        Args:
+	    names: string or list of strings with ABINIT variable names.
 
         Return:
             Ordered dict mapping section_name to the list of variable names belonging to the section.
@@ -937,15 +904,14 @@ class InputVariables(OrderedDict):
 
         for name in list_strings(names):
             try:
-                sec = self.name2section[name]
-                print("sec", sec, "name", name)
+                sec = self.name2varset[name]
                 d[sec].append(name)
             except KeyError as exc:
-                raise KeyError("{}\n\nIf the key is a valid Abinit variable, try to remove\n"
-                               "~/.abinit/abipy/abinit_vars.pickle and rerun.".format(exc))
+                msg = ("`%s` is not a registered variable of code `%s`.\nPerhaps you are using an old " +
+                       "version of the database with a more recent Abinit?") % (name, self.executable)
+                raise KeyError(msg)
 
-        print("sections", self.sections)
-        return OrderedDict([(sec, d[sec]) for sec in self.sections if d[sec]])
+        return OrderedDict([(sec, d[sec]) for sec in self.all_varset if d[sec]])
 
     def apropos(self, varname):
         """Return the list of :class:`Variable` objects that are related` to the given varname"""
@@ -974,7 +940,7 @@ class InputVariables(OrderedDict):
 
     def vars_with_char(self, chars):
         """
-        List of :class:`Variable` with the specified characteristic.
+        Return list of :class:`Variable` with the specified characteristic.
         chars can be a string or a list of strings.
         """
         chars = ["[[" + c + "]]" for c in list_strings(chars)]
@@ -985,25 +951,6 @@ class InputVariables(OrderedDict):
                 varlist.append(v)
 
         return varlist
-
-    # Abipy API
-    @lazy_property
-    def characteristics(self):
-        allchars = []
-        for var in self.values():
-            if var.characteristics is not None:
-                allchars.extend([c.replace("[", "").replace("]", "") for c in var.characteristics])
-        return set(allchars)
-
-    @lazy_property
-    def varset(self):
-        return set(v.varset for v in self.values())
-
-    # AbiPy API
-    name2section = name2varset
-    group_by_section = group_by_varset
-    vars_with_section = vars_with_varset
-    sections = varset
 
     def get_graphviz_varname(self, varname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -1088,10 +1035,11 @@ class InputVariables(OrderedDict):
 
     def get_graphviz(self, varset=None, vartype=None, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
-        Generate task graph in the DOT language (only parents and children of this task).
+        Generate graph in the DOT language (only parents and children of this task).
 
         Args:
-            varname: Name of the variable.
+            varset: Select variables with this `varset`. Include all if None
+	    vartype: Select variables with this `vartype`. Include all
             engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']
             graph_attr: Mapping of (attribute, value) pairs for the graph.
             node_attr: Mapping of (attribute, value) pairs set for all nodes.
@@ -1099,9 +1047,6 @@ class InputVariables(OrderedDict):
 
         Returns: graphviz.Digraph <https://graphviz.readthedocs.io/en/stable/api.html#digraph>
         """
-        #if varset
-        #var = self[varname]
-
         # https://www.graphviz.org/doc/info/
         from graphviz import Digraph
         graph = Digraph("task", engine="dot" if engine == "automatic" else engine)
@@ -1171,53 +1116,3 @@ class InputVariables(OrderedDict):
                     graph.edge(var.name, ovar.name, **edge_kwargs) #, label=edge_label, color=self.color_hex
 
         return graph
-
-# abipy
-#def docvar(varname):
-#    """Return the `Variable` object associated to this name."""
-#    return get_abinit_variables()[varname]
-#
-#
-#def abinit_help(varname, info=True, stream=sys.stdout):
-#    """
-#    Print the abinit documentation on the ABINIT input variable `varname`
-#    """
-#    database = get_abinit_variables()
-#    if isinstance(varname, Variable): varname = varname.varname
-#    try:
-#        var = database[varname]
-#    except KeyError:
-#        return stream.write("Variable %s not in database" % varname)
-#
-#    html = "<h2>Default value:</h2> %s <br/><h2>Description</h2> %s" % (
-#        str(var.defaultval), str(var.text))
-#    text = html2text.html2text(html)
-#    if info: text += str(var.info)
-#    # FIXME: There are unicode chars in abinit doc (Greek symbols)
-#    text = text.replace("[[", "\033[1m").replace("]]", "\033[0m")
-#
-#    try:
-#        stream.write(text)
-#    except UnicodeEncodeError:
-#        stream.write(text.encode('ascii', 'ignore'))
-#    stream.write("\n")
-#
-#
-#def repr_html_from_abinit_string(text):
-#    """
-#    Given a string `text` with an Abinit input file, replace all variables
-#    with HTML links pointing to the official documentation. Return new string.
-#    """
-#    var_database = get_abinit_variables()
-#
-#    # https://stackoverflow.com/questions/6116978/python-replace-multiple-strings
-#    # define desired replacements here e.g. rep = {"condition1": "", "condition2": "text"}
-#    # ordered dict and sort by length is needed because variable names can overlap e.g. kpt, kptopt pair
-#    import re
-#    rep = {vname: var.html_link(label=vname) for vname, var in var_database.items()}
-#    rep = OrderedDict([(re.escape(k), rep[k]) for k in sorted(rep.keys(), key=lambda n: len(n), reverse=True)])
-#
-#    # Use these three lines to do the replacement
-#    pattern = re.compile("|".join(rep.keys()))
-#    text = pattern.sub(lambda m: rep[re.escape(m.group(0))], text)
-#    return text.replace("\n", "<br>")

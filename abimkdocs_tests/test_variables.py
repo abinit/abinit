@@ -96,19 +96,19 @@ class VariablesTest(AbimkdocsTest):
         assert database.apropos("ecut")
         #assert len(database.json_dumps_varnames())
 
-        print("vargeo section:\n", database.vars_with_section("vargeo"))
-        for section in database.sections:
-            assert len(database.vars_with_section(section))
+        print("vargeo section:\n", database.vars_with_varset("vargeo"))
+        for section in database.all_varset:
+            assert len(database.vars_with_varset(section))
 
-        for charact in database.characteristics:
-            print("character:", charact)
+        for charact in database.all_characteristics:
+            #print("character:", charact)
             assert len(database.vars_with_char(charact))
 
-        name2section = database.name2section
-        assert name2section["ecut"] == "basic" and name2section["ionmov"] == "rlx"
+        name2varset = database.name2varset
+        assert name2varset["ecut"] == "basic" and name2varset["ionmov"] == "rlx"
 
-        print("d:", database.group_by_section("ecut"), "hello")
-        assert database.group_by_section("ecut") ==  {'basic': ['ecut']}
+        print("d:", database.group_by_varset("ecut"), "hello")
+        assert database.group_by_varset("ecut") ==  {'basic': ['ecut']}
 
         #abinit_help("ecut", info=True)
         # Should not raise
@@ -117,23 +117,20 @@ class VariablesTest(AbimkdocsTest):
         #for codename, d in codevars.items():
         #    d.validate_vars()
 
-        errors = []
         for var in codevars.iter_allvars():
             try:
                 assert repr(var)
                 assert str(var)
-                #assert var.to_string(verbose=2)
-                str(var._repr_html_())
+                assert var.to_string(verbose=2)
+                assert var._repr_html_()
                 assert var.info
                 assert var.to_abimarkdown()
                 # topic --> list of tribes
                 assert len(var.topic_tribes)
                 var.validate(ref_characteristics=codevars.characteristics)
             except Exception as exc:
-                errors.append(str(exc))
-
-        if errors:
-            raise ValueError("\n".join(errors))
+                print("Error in %s:\n%s" % (var.abivarname, str(exc)))
+                raise
 
     def test_variables_in_tests(self):
         """
