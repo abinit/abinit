@@ -193,7 +193,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !- the values of indh from wfmixalg+1 to 2*wfmixalg-1 store the biorthogonalized output cgcprj (coming as argument)
 
 !First step
-  if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
+ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 
    indh=2   ! This input wavefunction is NOT the reference
    if(wfmixalg==2)indh=1 ! But this does not matter in the simple mixing case that has history_size=1
