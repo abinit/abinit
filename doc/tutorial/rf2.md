@@ -21,11 +21,10 @@ This lesson should take about 1 hour.
 *Before beginning, you might consider to work in a different subdirectory as
 for the other lessons. Why not create "Work_rf2" in ~abinit/tests/tutorespfn/Input?*
 
-This tutorial starts by the generation of a database, that is quite time-consuming. 
-We suggest you to start immediately this computation...  
+This tutorial starts by the generation of a database, that is quite time-consuming.
+We suggest you to start immediately this computation...
 Copy the files ~abinit/tests/tutorespfn/Input/trf2_1.files and
 ~abinit/tests/tutorespfn/Input/trf2_1.in in "Work_rf2".
-
 Issue now:
 
     abinit < trf2_1.files >& log &
@@ -48,8 +47,15 @@ In short, the idea is that, in order to compute properties for which the
 phonon frequencies are needed in all the Brillouin zone, one can use an
 elaborate Fourier interpolation, so that only few dynamical matrices need to
 be computed directly. Others will be computed by interpolation.
+A schematic representation of the different steps required to compute the 
+dynamical matrix in the IBZ and post-process the results with anaddb is given below.
+
+![](rf2_assets/ph_dde_workflow.png)
 
 Let us have a look at the input file trf2_1.in. 
+
+{% dialog tests/tutorespfn/Input/trf2_1.in %}
+
 The calculation is done for AlAs, the same crystalline material as for the previous lesson on DFPT. 
 Many input parameters are also quite similar, both at the level of the description
 of the unit cell, as for the choice of cut-off energy and k point grid.

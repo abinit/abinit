@@ -34,7 +34,7 @@ As he says:
 This relation is based on the definition of atomic spheres (augmentation
 regions) of radius $r_c$, around the atoms of the system in which the partial
 waves  $|\phi_i\rangle$ form a basis of atomic wavefunctions; $|\tphi_i\rangle$ are "pseudized"
-partial waves (obtained from $\phi_i\rangle$), and $\tprj_i\rangle$ are dual functions of the $|\tphi_i\rangle$
+partial waves (obtained from $|\phi_i\rangle$), and $|\tprj_i\rangle$ are dual functions of the $|\tphi_i\rangle$
 called projectors.
 It is therefore possible to write every quantity depending on $\Psi_n$ (density,
 energy, Hamiltonian) as a function of $\tPsi_n$ and to find $\tPsi_n$ by solving self-consistent equations.
@@ -124,34 +124,38 @@ some specific default PAW input variables ([[ngfftdg]], [[pawecutdg]], and
 
 The use of two FFT grids, mentioned in:
 
-     Coarse grid specifications (used for wave-functions):  
-      
-     getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18  
-             ecut(hartree)=     15.000   => boxcut(ratio)=   2.17276  
-      
-     Fine grid specifications (used for densities):  
-      
-     getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32  
-             ecut(hartree)=     50.000   => boxcut(ratio)=   2.10918 
+```
+Coarse grid specifications (used for wave-functions):  
+ 
+getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18  
+        ecut(hartree)=     15.000   => boxcut(ratio)=   2.17276  
+ 
+Fine grid specifications (used for densities):  
+ 
+getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32  
+        ecut(hartree)=     50.000   => boxcut(ratio)=   2.10918 
+```
 
 A specific description of the PAW dataset (you might follow the tutorial [[lesson:paw2|PAW2]], 
 devoted to the building of the PAW atomic data, for a complete understanding of the file):
   
-     Pseudopotential format is: paw4  
-     basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1  
-     Spheres core radius: rc_sph= 1.50000000  
-     4 radial meshes are used:  
-      - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size= 505 , AA= 0.21824E-02 BB=0.13095E-01  
-      - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size= 500 , AA= 0.21824E-02 BB=0.13095E-01  
-      - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size= 530 , AA= 0.21824E-02 BB=0.13095E-01  
-      - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size= 644 , AA= 0.21824E-02 BB=0.13095E-01  
-     Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2  
-     Radius for shape functions = sphere core radius  
-     Radial grid used for partial waves is grid 1  
-     Radial grid used for projectors is grid 2  
-     Radial grid used for (t)core density is grid 3  
-     Radial grid used for Vloc is grid 4  
-     Radial grid used for pseudo valence density is grid 4
+```
+Pseudopotential format is: paw4  
+basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1  
+Spheres core radius: rc_sph= 1.50000000  
+4 radial meshes are used:  
+ - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size= 505 , AA= 0.21824E-02 BB=0.13095E-01  
+ - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size= 500 , AA= 0.21824E-02 BB=0.13095E-01  
+ - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size= 530 , AA= 0.21824E-02 BB=0.13095E-01  
+ - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size= 644 , AA= 0.21824E-02 BB=0.13095E-01  
+Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2  
+Radius for shape functions = sphere core radius  
+Radial grid used for partial waves is grid 1  
+Radial grid used for projectors is grid 2  
+Radial grid used for (t)core density is grid 3  
+Radial grid used for Vloc is grid 4  
+Radial grid used for pseudo valence density is grid 4
+```
 
 After the SCF cycle section:
 
@@ -161,55 +165,61 @@ pseudopotentials); it is given calculated in the augmentation regions (PAW
 spheres) on the "spherical" grid and also in the whole simulation cell on the
 "FFT" grid. A discussion on these two values will be done in a forthcoming section.
 
-    PAW TEST:  
-    ==== Compensation charge inside spheres ============  
-    The following values must be close to each other ...  
-    Compensation charge over spherical meshes =      0.413178580356274  
-    Compensation charge over fine fft grid    =      0.413177280314290
+```
+PAW TEST:  
+==== Compensation charge inside spheres ============  
+The following values must be close to each other ...  
+Compensation charge over spherical meshes =      0.413178580356274  
+Compensation charge over fine fft grid    =      0.413177280314290
+```
 
   
 Information concerning the non-local term (pseudopotential strength $D_{ij}$)
 and the spherical density matrix (augmentation wave occupancies $\rho_{ij}$):
 
-     ==== Results concerning PAW augmentation regions ====  
-      
-     Total pseudopotential strength Dij (hartree):  
-     Atom #  1  
-       ...  
-     Atom #  2  
-       ...
+```
+==== Results concerning PAW augmentation regions ====  
+ 
+Total pseudopotential strength Dij (hartree):  
+Atom #  1  
+  ...  
+Atom #  2  
+  ...
 
-    Augmentation waves occupancies Rhoij:  
-     Atom #  1  
-      ...  
-     Atom #  2  
-      ...
+ugmentation waves occupancies Rhoij:  
+Atom #  1  
+ ...  
+Atom #  2  
+ ...
+```
 
 At the end of the file we find the decomposition of the total energy both 
 by direct calculation and double counting calculation:
 
-    --------------------------------------------------------------------------------  
-     Components of total free energy (in Hartree) :  
-      
-        Kinetic energy  =  6.40164318808980E+00  
-        Hartree energy  =  9.63456708252837E-01  
-        XC energy       = -3.53223656186138E+00  
-        Ewald energy    = -1.27864121210521E+01  
-        PspCore energy  =  5.41017918797015E-01  
-        Loc. psp. energy= -5.27003595856857E+00  
-        Spherical terms =  2.15689044331394E+00  
-        >>>>> Internal E= -1.15256763830284E+01  
-      
-     "Double-counting" decomposition of free energy:  
-        Band energy     =  6.87331579398577E-01  
-        Ewald energy    = -1.27864121210521E+01  
-        PspCore energy  =  5.41017918797015E-01  
-        Dble-C XC-energy=  1.22161340385476E-01  
-        Spherical terms = -8.97688814082645E-02  
-        >>>>> Internal E= -1.15256701638793E+01  
-      
-      >Total energy in eV           = -3.13629604304723E+02  
-      >Total DC energy in eV        = -3.13629435073068E+02
+```
+--------------------------------------------------------------------------------  
+ Components of total free energy (in Hartree) :  
+  
+    Kinetic energy  =  6.40164318808980E+00  
+    Hartree energy  =  9.63456708252837E-01  
+    XC energy       = -3.53223656186138E+00  
+    Ewald energy    = -1.27864121210521E+01  
+    PspCore energy  =  5.41017918797015E-01  
+    Loc. psp. energy= -5.27003595856857E+00  
+    Spherical terms =  2.15689044331394E+00  
+    >>>>> Internal E= -1.15256763830284E+01  
+  
+ "Double-counting" decomposition of free energy:  
+    Band energy     =  6.87331579398577E-01  
+    Ewald energy    = -1.27864121210521E+01  
+    PspCore energy  =  5.41017918797015E-01  
+    Dble-C XC-energy=  1.22161340385476E-01  
+    Spherical terms = -8.97688814082645E-02  
+    >>>>> Internal E= -1.15256701638793E+01  
+  
+  >Total energy in eV           = -3.13629604304723E+02  
+  >Total DC energy in eV        = -3.13629435073068E+02
+```
 
 Note that the total energy calculated in PAW is not the same as the one
 obtained in the norm-conserving pseudopotential case. This is normal: in the
@@ -327,11 +337,13 @@ practice, it is better to keep a security margin. Here, for pawecutdg=24 Ha
 The convergence of the compensation charge has a similar behaviour; it is
 possible to check it in the output file, just after the SCF cycle by looking at:
 
-     PAW TEST:  
-     ==== Compensation charge inside spheres ============  
-     The following values must be close...  
-     Compensation charge over spherical meshes =      0.409392121335747  
-     Compensation charge over fine fft grid    =      0.409392418241149
+```
+PAW TEST:  
+==== Compensation charge inside spheres ============  
+The following values must be close...  
+Compensation charge over spherical meshes =      0.409392121335747  
+Compensation charge over fine fft grid    =      0.409392418241149
+```
 
 The two values of the integrated compensation charge density must be close to each other.
 Note that, for numerical reasons, they cannot be exactly the same (integration
@@ -494,9 +506,11 @@ for instance in a comparison tool.
 A way to estimate the completeness of the partial wave basis is to compare
 derivatives of total energy; if you look at the stress stensor:
 
-    For the 2 partial-wave bases:  -1.0866668849E-03 -1.0866668849E-03 -1.0866668849E-03  0.  0.  0.  
-    For the 4 partial-wave basis:   4.1504385879E-04  4.1504385879E-04  4.1504385879E-04  0.  0.  0.  
-    For the 6 partial-wave basis:   4.1469803037E-04  4.1469803037E-04  4.1469803037E-04  0.  0.  0.
+```
+For the 2 partial-wave bases:  -1.0866668849E-03 -1.0866668849E-03 -1.0866668849E-03  0.  0.  0.  
+For the 4 partial-wave basis:   4.1504385879E-04  4.1504385879E-04  4.1504385879E-04  0.  0.  0.  
+For the 6 partial-wave basis:   4.1469803037E-04  4.1469803037E-04  4.1469803037E-04  0.  0.  0.
+```
 
 The 2 partial-wave basis is clearly not complete; the 4 partial-wave basis results are correct...
 Such a test is useful to estimate the precision we can expect on the stress

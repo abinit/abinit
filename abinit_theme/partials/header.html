@@ -1,16 +1,14 @@
 <header class="md-header" data-md-component="header">
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
-
       <div class="md-flex__cell md-flex__cell--shrink">
-        {% if config.extra.logo %}
-          <a href="{{ config.site_url | default(nav.homepage.url, true) }}" title="{{ config.site_name }}" class="md-logo md-header-nav__button">
-            <img src="{{ base_url }}/{{ config.extra.logo }}" width="24" height="24">
-          </a>
-        {% else %}
-          <a href="{{ config.site_url | default(nav.homepage.url, true) }}" title="{{ config.site_name }}" class="md-icon md-icon--home md-header-nav__button">
-          </a>
-        {% endif %}
+        <a href="{{ config.site_url | default(nav.homepage.url, true) }}" title="{{ config.site_name }}" class="md-header-nav__button md-logo">
+          {% if config.theme.logo.icon %}
+            <i class="md-icon">{{ config.theme.logo.icon }}</i>
+          {% else %}
+            <img src="{{ base_url }}/{{ config.theme.logo }}" width="48" height="48">
+          {% endif %}
+        </a>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
         <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
@@ -29,7 +27,6 @@
           {% endblock %}
         </span>
       </div>
-        
       <!-- Guided Tour with introjs. Add glow effect to button only if homepage -->
       <div class="md-flex__cell md-flex__cell--shrink">
           {% set glow = ' ' %} 
@@ -40,11 +37,12 @@
               onclick="abidocs_guidedtour()">
            <span class="fa fa-info-circle"></span></a>
       </div>
-
       <div class="md-flex__cell md-flex__cell--shrink">
         {% block search_box %}
-          <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
-          {% include "partials/search.html" %}
+          {% if "search" in config["plugins"] %}
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            {% include "partials/search.html" %}
+          {% endif %}
         {% endblock %}
       </div>
       {% if config.repo_url %}
@@ -54,7 +52,6 @@
           </div>
         </div>
       {% endif %}
-
       <div class="md-flex__cell md-flex__cell--shrink" id="previous_published_versions">
         <div class="dropdown">
           <button class="btn btn-basic btn-sm dropdown-toggle" type="button" data-toggle="dropdown">

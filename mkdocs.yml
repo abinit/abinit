@@ -1,5 +1,5 @@
 site_name: abinit
-#site_url: https://www.abinit.org
+site_url: https://www.abinit.org
 site_description: Abinit documentation
 site_author: The Abinit group
 #edit_uri: edit/master/doc/
@@ -264,7 +264,7 @@ markdown_extensions:
 theme:
     name: material
     custom_dir: abinit_theme
-    #logo: images/logo-abinit-2015.png
+    logo: images/logo-abinit-2015.png
     favicon: images/favicon.ico
     palette:
         primary: deep orange
