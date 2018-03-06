@@ -408,8 +408,7 @@ Change the input yaml files or the python code
         if not os.path.isdir(dirpath): os.mkdir(dirpath)
         path = os.path.join(dirpath, mdname)
         assert path not in self.md_generated
-        if not path.startswith("_"):
-            self.md_generated.append(path)
+        self.md_generated.append(path)
         if self.verbose: print("Generating markdown file: `%s`" % path)
 
         mdf = io.open(path, "wt", encoding="utf-8")
@@ -661,53 +660,7 @@ in order of number of occurrence in the input files provided with the package.
                     lines.append(" ")
                 selected_input_files = "\n".join(lines)
 
-            # Build markdown text and write md file.
-            text = """
-This page gives hints on how to {howto} with the ABINIT package.
-
-## Introduction
-
-{introduction}
-
-## Related Input Variables
-
-{related_variables}
-
-## Selected Input Files
-
-{selected_input_files}
-
-""".format(**locals())
-
-            template = """
-This page gives hints on how to {howto} with the ABINIT package.
-
-## Introduction
-
-{introduction}
-
-## Related Input Variables
-
-{related_variables}
-
-## Selected Input Files
-
-{selected_input_files}
-
-""".format(howto=howto, introduction=introduction, related_variables="{{ related_variables }}",
-          selected_input_files="{{ selected_input_files }}")
-
-            if tutorials:
-                text += """\
-## Tutorials
-
-{tutorials}""".format(tutorials=html2text(tutorials))
-
-                template += """\
-## Tutorials
-
-{tutorials}""".format(tutorials=html2text(tutorials))
-
+            # Read _markdown template, expand variables and write new md file.
             #meta = {"authors": top.authors, "description": "%s Abinit topic" % topic}
             #with self.new_mdfile("topics", topic + ".md", meta=meta) as mdf:
             #    mdf.write(text)

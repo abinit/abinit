@@ -25,8 +25,7 @@ stresses in their different components can be provided. A smearing scheme
 applied to the kinetic energy [[ecutsm]] allows one to get smooth energy
 curves as a function of lattice parameters and angles. A target stress can be
 given by the user ([[strtarget]]), the geometry optimization algorithm will
-try to find the primitive cell and atomic positions that deliver that target
-stress.
+try to find the primitive cell and atomic positions that deliver that target stress.
 
 The computation of forces and stresses is optional, see [[optforces]] and
 [[optstress]]. They are used to define SCF stopping criteria ([[toldff]],

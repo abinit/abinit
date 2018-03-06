@@ -23,13 +23,13 @@ keywords ([[lpawu]], [[upawu]], [[jpawu]], [[usedmatpu]], [[dmatpuopt]],
 
 In both the output and log files, we can find:
 
-\- The DFT+U contribution of energy which is contained inside the PAW
-Spherical terms in the output file.
+- The DFT+U contribution of energy which is contained inside the PAW
+  Spherical terms in the output file.
 
-\- The Decomposition of the LDA+U energy is given (Interaction energy, Double
-counting term, and sum of the two) in the log file.
+- The Decomposition of the LDA+U energy is given (Interaction energy, Double
+  counting term, and sum of the two) in the log file.
 
-\- The orbital density matrix (n_{m,m'}^{\sigma}), also called occupation
+- The orbital density matrix ($n_{m,m'}^{\sigma}$), also called occupation
 matrix (corresponding to Eq.(9) of [[cite:Bengone2000]] and Eq.(1) of
 [[cite:Liechtenstein1995]], see also [[cite:Amadon2008a]] and variable
 [[dmatpuopt]]) is also given for each atom in the basis of real spherical
