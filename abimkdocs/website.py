@@ -393,7 +393,7 @@ Change the input yaml files or the python code
         self.markdown.reset()
         return my_unicode(self.markdown.convert(source))
 
-    def new_mdfile(self, dirname, mdname, meta=None):
+    def new_mdfile(self, dirname, mdname, meta=None, with_comment=True):
         """
         Create new markdown file with name `mdname` in directory `dirname`.
         `meta` is an optional dictionary with meta-variables added to the front matter.
@@ -420,7 +420,8 @@ Change the input yaml files or the python code
             s = yaml.dump(meta, indent=4, default_flow_style=False).strip().replace(" !!python/unicode", "")
             mdf.write("---\n%s\n---\n" % s)
 
-        mdf.write(self.do_not_edit_comment)
+        if with_comment:
+            mdf.write(self.do_not_edit_comment)
         mdf.rpath = "/" + os.path.relpath(path, self.root)
 
         return mdf
@@ -598,22 +599,23 @@ in order of number of occurrence in the input files provided with the package.
                     lines.append('<li class="list-group-item %s"> %s <span class="badge"> %d </span></li>' % (cls, s, count))
                 mdf.write("\n".join(lines) + "</ul>")
 
-        # TODO: Use md skeleton + fields filled by python (jinja?)
+        # Topics
         cprint("Generating Markdown files with topics ...", "green")
-        repo_path = os.path.join(self.root, "topics", "origin_files")
         self.all_topics = ABI_TOPICS
         self.all_relevances = ABI_RELEVANCES
 
-        all_yamlfiles = os.listdir(repo_path)
+        dirpath = os.path.join(self.root, "topics")
+        all_mdfiles = [f for f in os.listdir(dirpath) if f.endswith(".md") and f.startswith("_")]
         for topic in self.all_topics:
-            all_yamlfiles.remove("topic_" + topic + ".yml")
-        if all_yamlfiles:
-            raise RuntimeError("Found yaml files in topics not listed in python module `variable.py.\n%s" % (
-                str(all_yamlfiles)))
+            all_mdfiles.remove("_" + topic + ".md")
+        if all_mdfiles:
+            raise RuntimeError("Found md files in topics not listed in python module `variable.py.\n%s" % (
+                str(all_mdfiles)))
 
         # datastructures needed for topics index.md
         index_md = ["# Alphabetical list of topics\n"]
         self.howto_topic = {}
+        repo_path = os.path.join(self.root, "topics", "origin_files")
         for topic in self.all_topics:
             # Read data from yaml file and generate markdown string.
             with io.open(os.path.join(repo_path, "topic_" + topic + ".yml"), "rt", encoding="utf-8") as fh:
@@ -623,6 +625,13 @@ in order of number of occurrence in the input files provided with the package.
                 howto = html2text(top.howto).strip().lstrip()
                 self.howto_topic[topic] = "How to " + howto if not howto.startswith("to ") else "How " + howto
                 tutorials = top.tutorials.strip()
+
+            dirpath = os.path.join(self.root, "topics")
+            with io.open(os.path.join(dirpath, "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
+                lines = fh.readlines()
+                lines.insert(1, "description: %s" % howto)
+            #with io.open(os.path.join(dirpath, "_" + topic + ".md"), "wt", encoding="utf-8") as fh:
+            #    fh.writelines(lines)
 
             # Find list of variables associated to this topic
             # Order and group vlist by relevances and write list with links.
@@ -660,19 +669,13 @@ in order of number of occurrence in the input files provided with the package.
                     lines.append(" ")
                 selected_input_files = "\n".join(lines)
 
-            # Read _markdown template, expand variables and write new md file.
-            #meta = {"authors": top.authors, "description": "%s Abinit topic" % topic}
-            #with self.new_mdfile("topics", topic + ".md", meta=meta) as mdf:
-            #    mdf.write(text)
-            #with self.new_mdfile("topics", "_" + topic + ".md", meta=meta) as mdf:
-            #    mdf.write(template)
-
+            # Read template, interpolate and write md file included in mkdocs.yml.
             with io.open(os.path.join(self.root, "topics", "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
                 template = fh.read()
                 template = template.replace("{{ related_variables }}", related_variables)
                 template = template.replace("{{ selected_input_files }}", selected_input_files)
 
-            with self.new_mdfile("topics", topic + ".md") as mdf:
+            with self.new_mdfile("topics", topic + ".md", with_comment=False) as mdf:
                 mdf.write(template)
 
         # Now write topics index.md (sorted by first character)

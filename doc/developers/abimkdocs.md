@@ -327,53 +327,29 @@ doi2bibtex 10.1103/PhysRevLett.96.066402
 
 ## Topics
 
-!!! warning
+The topic files are written in Markdown and can be found in ~abinit/doc/topics.
+The source files start with an underscore e.g. `_AbiPy.md`.
+These are templated files with text and two variables:
 
-    The treatment of topics will change in the next versions of the website.
-    This documentation is obsolete.
+```
+## Related Input Variables
 
-The topic HTML files are assembled by `mksite.py` from different sources.
+{{ related_variables }}
 
-The high-level information is contained in `~abinit/doc/topics/origin_files/topic_NAME.yml`,
-where NAME is the name of the topic. 
-The first section ("introduction") is also found in this file,
-as well as the information on lessons of the tutorial that are relevant for this topic. 
-The "text" content of the "introduction" section is in plain HTML.
+## Selected Input Files
 
-At variance, the other sections of the `topic_NAME.html` are created from other sources. 
-The list of input variables that are relevant to this topics is assembled from the information
-given for these input variables, see [Input variables: how_to_add_modify](#how-to-addmodify)
-as well as Topics and tribes
-is assembled from the information in each of these input files (add a line "#%% topics = " in the last section of the input file.). 
-The bibliography list is assembled from the references cited in the "introduction" section, 
-that use [Shortcuts for Web links](markdown.md#links).
+{{ selected_input_files }}
+```
 
-Note the file `default_topic.yml`, whose components are used in case they are not specified explicitly 
-in the more specific file `topic_NAME.yml`.
-The list of topics is found in the file `~abinit/doc/topics/origin_files/list_of_topics.yml`.
+that will be filled by `mksite.py` by inspecting the database of variables and the tests in test suite..
+A new Markdown file without underscore will be generated and included in `mkdocs.yml`.
 
-Thus, if you want to a modify "topic" Web page, the "introduction" and "tutorial" sections as well as 
-the name and some other high level info can be modified by editing `~abinit/doc/topics/origin_files/topic_NAME.yml`, 
-while you have to edit the relevant input variables and input files to modify the next sections. 
-You can modify the bibliography section only through a modification of the "introduction" and "tutorial" sections. 
+!!! important
 
-To add a new topic, add the name in `list_of_topics.yml`, and then create a corresponding `topic_NAME.yml` file.
-The different components are used by the script generate_doc.py as follows:
-
-* `name`: must be the name of the topics, also used in the name of file (`topic_name.yml`)
-* `keyword`: will be inserted in the HTML header to create the Web name of the HTML page, if the default header is used
-* `authors`: will be inserted in the copyright, if the default copyright is used
-* `howto`: will be inserted in the subtitle of the Web page "How to ... ?" if the default subtitle is ised
-* `header`: the HTML header (usually, take the default, that uses the component "keyword")
-* `title`: the title that will be echoed in the HTML page
-* `subtitle`: the subtitle (usually, take the default, that uses the component "howto")
-* `copyright`: the copyright (usually, take the default, that uses the component "authors")
-* `links`: list of links to other pages (usually, take the default)
-* `introduction`: see above
-* `tutorials`: see above
-* `end`: final tags, take the default
-
-Then, build the HTML using `mksite.py serve`.
+    You are supposed to edit the version with the underscore and provide enough
+    information in the declaration of the variable and in the `TEST_INFO` section
+    so that `mksite.py` can fill the complete the templated.
+    Remmber to restart `mksite.py` to see the changes.
 
 ## How to a add a new document
 
