@@ -236,7 +236,7 @@ CONTAINS  !=====================================================================
 !!  grid= the grid of processors used by Scalapack
 !!
 !! PARENTS
-!!      m_slk
+!!      m_slk,m_xgScalapack
 !!
 !! CHILDREN
 !!
@@ -2680,6 +2680,7 @@ end subroutine compute_generalized_eigen_problem
 !!  eigen= eigenvalues of the matrix
 !!
 !! PARENTS
+!!      m_xgScalapack
 !!
 !! CHILDREN
 !!
@@ -2815,6 +2816,7 @@ end subroutine compute_eigen1
 !!  eigen= eigenvalues of the matrix
 !!
 !! PARENTS
+!!      m_xgScalapack
 !!
 !! CHILDREN
 !!
