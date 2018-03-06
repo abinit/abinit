@@ -519,7 +519,7 @@ class Variable(object):
             app("*Mentioned in topic(s):* %s  " % ", ".join("[[topic:%s]]" % k for k in self.topic2relevances))
         app("*Variable type:* %s  " % str(self.vartype))
         if self.dimensions:
-           app("*Dimensions:* %s  " % self.format_dimensions(self.dimensions))
+            app("*Dimensions:* %s  " % self.format_dimensions(self.dimensions))
         if self.commentdims:
             app("*Commentdims:* %s  " % self.commentdims)
         app("*Default value:* %s  " % self.defaultval)
