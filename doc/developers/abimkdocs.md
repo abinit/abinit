@@ -120,9 +120,8 @@ The `~abinit/doc/mksite.py` script generates the website by converting markdown 
 The script:
 
 * Starts by creating python objects using the information reported in 
-    - the `abivars.yml file` for the input variables,
+    - the python files in abimkdocs with the input variables,
     - the `abiref.bib` for the list of Bibliographic references,
-    - a set of YAML files, 
     - the input files contained in `tests/*/Input`. 
 * Performs initial consistency checks.
 * Generate the markdown files for variables, citations, etc.  
@@ -144,7 +143,6 @@ The markdown files are stored inside the `doc` directory according to the follow
 ├── doc
 │   ├── about
 │   ├── css
-│   ├── data
 │   ├── developers
 │   ├── extra_javascript
 │   ├── images
@@ -152,13 +150,12 @@ The markdown files are stored inside the `doc` directory according to the follow
 │   ├── tests
 │   ├── theory
 │   ├── topics
-│   ├── tutorials
-│   └── user-guide
+│   ├── tutorial
+│   └── guide
 ```
 
 * about: Files with release notes, license
 * *css*: Extra CSS files used by the website
-* *data*: 
 * developers: Documentation for developers (documentation howtos, git, coding rules...)
 * *extra_javascript*: Extra javascript code used by the website
 * *images*: logos and favicon
@@ -166,8 +163,8 @@ The markdown files are stored inside the `doc` directory according to the follow
 * *tests*: symbolic links to the `~abinit/tests` directory.
 * theory: files with theoretical notes
 * topics: files with Abinit topics
-* tutorials: official Abinit lessons
-* user-guide: help files for main executables
+* tutorial: official Abinit lessons
+* guide: help files for main executables
 
 The directory in *italic* are mainly used to build the website and are not visible outside.
 The other directories contain markdown files, each directory is associated to an 
@@ -206,9 +203,8 @@ document enclosed between triple-dashed lines. Here is a basic example:
 
 ```yaml
 ---
-title: Blogging Like a Hacker
+title: Documenting Code Like a Hacker
 authors: MG
-rpath: /doc/developers/abimkdocs.md
 ---
 ```
 
@@ -217,13 +213,9 @@ or even create custom ones of your own.
 These variables will then be available to the framework.
 For instance, the list of authors is reported in the HTML page footer while `title` is added to 
 to the HTML meta section.
-`rpath` gives the location of the markdown page with respect to `~abinit/docs` and it's the only 
-required entry in the front matter.
 
 
 ## Documentation Guide lines
-
-==To be discussed==
 
 * Each paragraph name should be short enough to fit nicely in the menu, but also long enough to stand 
   on its own to a reasonable extent. 
@@ -253,10 +245,7 @@ required entry in the front matter.
   Writing in all caps is like shouting so use all caps sparingly.
 
 
-## How to add/modify?
-
-
-### Input variables
+## How to add/modify an nput variables
 
 The yaml database has been replaced by python modules.
 The variables are now declared in `~abinit/abimkdocs/variables_CODENAME.py`.
@@ -273,7 +262,12 @@ denoted `input_variable_name@executable`, e.g. `dipdip@anaddb`
 
 After having edited the python modules you **must rerun** `mksite serve` to see the changes.
 
-### Bibliographic reference
+!!! important
+
+    Use ```pytest abimkdocs-tests/test_variables.py``` to validate your changes
+    before rebuilding the documentation.
+
+## How to add a bibliographic reference
 
 Citations must be in bibtex format and provide enough information so that the python code
 can generate appropriated links in the website.
@@ -298,7 +292,11 @@ Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2
 Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
 Then, build the HTML pages using `mksite.py serve`.
 
-Run the tests in `./tests/test_bibtex.py` with pytest (see next section) to validate your changes.
+Run the tests with:
+
+    pytest ./tests/test_bibtex.py
+    
+with pytest to validate your changes.
 
 If you know the DOI of the article, it's possible to use [BetterBib](https://github.com/nschloe/betterbib)
 to fetch data from [Crossref](http://www.crossref.org/) and produce the bibtex entry.
@@ -327,7 +325,12 @@ doi2bibtex 10.1103/PhysRevLett.96.066402
 }
 ```
 
-### Topics
+## Topics
+
+!!! warning
+
+    The treatment of topics will change in the next versions of the website.
+    This documentation is obsolete.
 
 The topic HTML files are assembled by `mksite.py` from different sources.
 
@@ -372,49 +375,14 @@ The different components are used by the script generate_doc.py as follows:
 
 Then, build the HTML using `mksite.py serve`.
 
-### Lessons
+## How to a add a new document
 
-The major part of each lesson HTML file comes from `~abinit/doc/topics/origin_files/lesson_NAME.yml`,
-although selected high-level information (name, keyword, author and subtitle) 
-is contained in `~abinit/doc/topics/origin_files/lessons.yml`. 
-Note the last section of the latter file, that gives a default value for each component of a lesson file 
-that would not have been specified in either `lesson_NAME.yml` or the specific section of `lessons.yml`.
+In order to add a new lesson, create a new Markdown file in doc/tutorial and 
+register it in `mkdocs.yml` 
 
-The content of `~abinit/doc/topics/origin_files/lesson_NAME.yml` is either:
+Then, build the HTML using `mksite.py serve` and start to enjoy the Markdown syntax.
 
-* an "intro" section and a "body" section,
-* or (this is preferred), an "intro" section and a list of sections, each having a "title" and a "body".
-
-In the latter case, a table of content is automatically generated by generate_doc.py .
-The latter structure can be seen in `lesson_dmft.yml`.
-
-The "text" content of these section is in plain HTML.
-Note that the indentation is important in YAML. 
-The "text" lines in `lesson_NAME.yml` must be indented by at least two blanks.
-
-In order to add a new lesson, introduce a new section in `lessons.yml`, and create a new 
-`~abinit/doc/topics/origin_files/lesson_NAME.yml`.
-
-Then, build the HTML using `mksite.py`.
-
-### Help files
-
-The structuration for help files is very similar to the one for the lessons of the tutorial.
-The major part of comes from `~abinit/doc/users/origin_files/help_NAME.yml`,
-although selected high-level information (name, keyword, author and subtitle) 
-is contained in `~abinit/doc/topics/origin_files/helps.yml`.
-
-Do not forget to build the HTML using generate_doc.py.
-
-### Theory documents
-
-The structuration for theory documents is very similar to the one for the lessons of the tutorial.
-The major part of comes from `~abinit/doc/users/origin_files/theorydoc_NAME.yml`,
-although selected high-level information (name, keyword, author and subtitle) 
-is contained in `~abinit/doc/topics/origin_files/theorydocs.yml`.
-
-Do not forget to build the HTML using generate_doc.py.
-
+The structuration for help files and theory documents is very similar to the one for the lessons of the tutorial.
 
 ### Topics and tribes
 
@@ -423,8 +391,8 @@ has been required to belong to a **varset** (set of variables, e.g. `varbas`, `v
 However, starting in Summer 2017, we require every input variable to be also mentioned in at least one of the
 documentation "topics" and, for such topic, to be characterized by a "tribe".
 
-The allowed list of tribes (a generic list, irrespective of the topic) is contained in
-`~abinit/doc/topics/origin_files/list_tribes.yml`. 
+The allowed list of tribes (a generic list, irrespective of the topic) is declared in
+`~abinit/abimkdocs/variables.py`. 
 Standard names are:
 
 - `compulsory` (when such input variable **must** be present in the input file when the "feature" of the topic is activated)
@@ -449,7 +417,7 @@ The latter is a case where one input variable is associated to two topics, with 
 for topic "parallelism" and topic "GW".
 
 
-### Release Notes
+## Release Notes
 
 Release notes are written in Markdown so it's possible to use the [wikilink syntax](markdown.md#wiki-links)
 to insert links to new tests, new autoconf files and even links to pull-requests and issues that will redirect
@@ -498,7 +466,7 @@ Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]]
     with the release notes published on the website.
 
 
-### !variable object
+## Variable object
 
 It is the type that contains the other fields.  
 
@@ -546,7 +514,7 @@ vartype
   If there is no information of a type for a specific variable, its value must be "null".
 
 
-### !multiplevalue object
+### MultipleValue object
 
 This is the equivalent to the X * Y syntax in fortran.
 
@@ -565,7 +533,7 @@ will become
 If X is null, it means that you want to do *Y (all Y)
 
 
-### !range object
+### Range object
 
 ```yaml
   !range
@@ -576,7 +544,7 @@ If X is null, it means that you want to do *Y (all Y)
 As a default value, it means that the default value is 1, 2, ... N
 
 
-### !valuewithconditions object
+### ValueWithConditions object
 
 This type allows to specify conditions on values:
 
@@ -596,7 +564,7 @@ As a convention, we use "pythonic" way for expressions, so you can use "or", "an
 also as `[[varname]] in [1,2,5]` for example ...
 
 
-### !valuewithunit object
+### ValueWithUnit object
 
 This type allows to specify values with units:
 

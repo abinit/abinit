@@ -8,7 +8,8 @@ plotly: true
 This page is intended as a quick reference to the Markdown syntax and the extensions
 available in the Abinit documentation.
 Markdown can be used *almost everywhere*: user-guide, tutorials, release notes, theory notes, the 
-description of the input variables stored in `abinit_vars.yml` as well as the `TEST_INFO` section of the automatic tests.
+description of the input variables stored in python files inside `abimkdocs` as well as 
+in the `TEST_INFO` section of the automatic tests.
 
 As the [original/official Markdown syntax rules](https://daringfireball.net/projects/markdown/syntax#html)
 state:
@@ -28,7 +29,6 @@ Basic Markdown syntax already covers most of our needs and the *Abinit extension
 facilitate the integration between the documentation on the website and the new developments done in the gilab branch.
 This page, for example, is entirely written in Markdown with the exception of the last 
 two sections in which we discuss advanced features requiring some HTML code.
-The raw markdown file can be seen [here](https://raw.githubusercontent.com/gmatteo/test_abidocs/master/doc/developers/markdown.md).
 
 ## Markdown quick reference
 
@@ -168,10 +168,14 @@ Links to internal pdf files shipped with the Abinit documentation are inserted u
 base name of the pdf file and the [wikilink syntax](#wiki-links):
 
 ```
-    Please consult the [[pdf:howto_chebfi.pdf]] document.
+    Please consult the [[pdf:howto_chebfi]] document.
 ```
 
-that gives: Please consult the [[pdf:howto_chebfi.pdf]] document.
+that gives: Please consult the [[pdf:howto_chebfi]] document.
+
+!!! note
+
+    The `.pdf` extension at the end of the file is optional.
 
 This is the recommended approach to link pdf documents in the description of the input variables.
 In the lessons and in the theory notes, on the other hand, you may want to
@@ -215,12 +219,16 @@ The Markdown syntax for links is:
 | `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
-Remember that linking to a page that is located in the same directory is trivial `[The first PAW tutorial](paw1)`
-
 This is the **recommended** approach to create links to external resources or internal links to other pages 
 of the website especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
 Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) icon:
 <i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
+
+Remember that linking to a page that is located in the same directory is trivial in Markdown.
+All the lessons, for example, are placed in the same directory (~doc/tutorial).
+To refer to the first PAW tutorial from the second tutorial, use:
+
+    [The first PAW tutorial](paw1)
 
 There are however cases in which we would like to have an even simpler syntax to generate automatically
 links within our documentation, in particular links to:
@@ -246,12 +254,13 @@ The namespace is not echoed in the Web page, while if a `text` is given, it will
 `name` in the Web page (see examples below).
 
 !!! warning
+
     Do not use parentheses within the pair of double brackets, the whole expression will not be recognized.
 
 When an internal link is recognized, the dokuwiki string is replaced by the adequate HTML link
 There are a couple of names immediately recognized:
 
-* the name of an Abinit input variable e.g. "ecut"  (provided it is mentioned in `abinit_vars.yml`)
+* the name of an Abinit input variable e.g. "ecut"  (provided it is mentioned in `variables_abinit.py`)
 * the name of a bibliographical reference (provided it is mentioned in `abiref.bib`)
 * the path to a file in one of the `~abinit/tests/*/Input` directory
 * the path to a reference output file in one of the ~abinit/tests/tuto*/Refs directories
@@ -300,6 +309,10 @@ To specify the name of the anchor in a bibliographic citation use the syntax wit
 
 that is rendered in HTML as: Please consult [[cite:Gonze2016 | the last generic ABINIT article]].
 
+!!! warning
+
+    Please use the `cite` namespace. The syntax **without** namespace is deprecated and will be removed.
+
 The script does a bit of formatting in these examples: it keeps one pair of square brackets
 in the case of a bibliographic reference, and add "~abinit/" in the case of a path.
 The syntax `[[test:libxc_41]]` is preferable when documenting new tests in the release notes.
@@ -332,6 +345,7 @@ Namespace      | Markdown                         | Result
  `topic`       | `[[topic:BSE]]`                  | [[topic:BSE]]
  `topic`       | `[[topic:index]]`                | [[topic:index]]
  `help`        | `[[help:abinit]]`                | [[help:abinit]]
+ `help`        | `[[help:abinit#files-file]]`     | [[help:abinit#files-file]]
  `theory`      | `[[theory:mbt]]`                 | [[theory:mbt]]
  `varset`      | `[[varset:bse]]`                 | [[varset:bse]]
  `cite`        | `[[cite:Amadon2008]]`            | [[cite:Amadon2008]]
@@ -340,13 +354,17 @@ Namespace      | Markdown                         | Result
  `pdf`         | `[[pdf:howto_chebfi]]`           | [[pdf:howto_chebfi]]
  `src`         | `[[src:94_scfcv/scfcv.F90]]`     | [[src:94_scfcv/scfcv.F90]]
 
- See [[help:abinit#files-file]]
 
-For more details see the [[help:spacegroup]].
+`#files-file` is an HTML id defined in ~abinit/doc/guide/abinit.md with:
+
+```html
+<a id="files-file"></a>
+## 4 More detailed presentation of the files file
+```
 
 !!! important
 
-    theorydoc and bib are deprecated and replaced by theory and cite, respectively.
+    `theorydoc` and bib are deprecated and replaced by `theory` and `cite`, respectively.
 
 Also in this case, it's possible to specify the name of the link with the
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].
@@ -617,32 +635,6 @@ a modal window with tabs is produced:
 {% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
 
 
-<div id="la" hidden>
-The MIT License (MIT)
-
-Copyright (c) 2014 Mohammad Younes
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-</div>
-
-<a href='#' onclick="javascript:myDialog('#la');">Call alertifyjs</a>
-
 To create a button that opens a modal window containing the input file, use:
 
 ```
@@ -911,11 +903,10 @@ that produces:
   <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
     <div class="item active">
-      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
+      <img src="../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
       <div class="carousel-caption">Unconverged BSE optical spectrum</div>
     </div>
     <div class="item">
-      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
       <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
     </div>
   </div>

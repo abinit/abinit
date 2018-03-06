@@ -2,21 +2,28 @@
     name      : Abipy
     keyword   : Abipy
     authors   : SS,XG,YG
-    howto     : use the Abipy ABINIT post-processor
+    howto     : use the Abipy python package
     header    : default
     title     : <h1>Abipy</h1>
     subtitle  : default
     copyright : default
     links     : default
     introduction : |- 
-      [[https://github.com/abinit/abipy|AbiPy]] is a Python library to analyze the results produced by ABINIT. 
-      It also provides tools to generate input files and workflows to automate ab-initio calculations and typical convergence studies. 
-      AbiPy is interfaced with Pymatgen and this allows users 
-      to benefit from the different tools and python objects available in the pymatgen ecosystem.
-      <p> AbiPy can be used in conjunction with matplotlib, pandas, ipython and jupyter 
+      <p>
+      [AbiPy](https://github.com/abinit/abipy) is a Python library to analyze the results produced by Abinit,
+      It also provides tools to generate input files and workflows to automate
+      ab-initio calculations and typical convergence studies.
+      AbiPy is interfaced with [pymatgen](http://www.pymatgen.org) and this allows users to
+      benefit from the different tools and python objects available in the pymatgen ecosystem.
+      AbiPy can be used in conjunction with matplotlib, pandas, ipython and jupyter 
       thus providing a powerful and user-friendly environment for data analysis and visualization. 
-      Check out the list of plotting scripts available 
-      in the [[http://pythonhosted.org/abipy/examples/plot/index.html|examples/plot]] gallery. 
-      To learn more about the integration between jupyter and AbiPy, visit the collection of notebooks and the AbiPy lessons.
+      </p>
+      <p>
+      The official documentation of the stable version is available at <http://abinit.github.io/abipy>.
+      Check out our [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html>)
+      and the [gallery of AbiPy workflows](http://abinit.github.io/abipy/flow_gallery/index.html>)
+      To learn more about the integration between jupyter and AbiPy, visit our 
+      [collection of notebooks](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/index.ipynb)
+      </p>
     tutorials  : |-
     end : default
