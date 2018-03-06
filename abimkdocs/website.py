@@ -23,7 +23,6 @@ import markdown
 from collections import OrderedDict, defaultdict
 from itertools import groupby
 from pprint import pprint
-from html2text import html2text
 from pybtex.database import parse_file, Entry, BibliographyData
 from markdown.util import etree
 from pygments import highlight
@@ -504,10 +503,6 @@ This page gathers the autoconf files used by the buildbot testfarm
         """Generate markdown files using the data stored in the bibtex file, the abivars file ..."""
         start = time.time()
 
-        # Convert test description from markdown to HTML
-        #for t in self.rpath2test.values():
-        #    t.description = self.convert_markdown(t.description)
-
         self.copy_readme_files()
         self.generate_page_with_ac_examples()
 
@@ -517,8 +512,6 @@ This page gathers the autoconf files used by the buildbot testfarm
             for code, vd in self.codevars.items():
                 mdf.write("## %s variables   \n\n" % code)
                 mdf.write(vd.get_vartabs_html(self, mdf.rpath))
-                #mdf.write(2*"\n" + "* * *\n")
-            #mdf.write(2*"\n" + "* * *\n")
 
             # This for the table of variables implemented by Jordan
             mdf.write(self.build_varsearch_html(mdf.rpath))
@@ -615,23 +608,15 @@ in order of number of occurrence in the input files provided with the package.
         # datastructures needed for topics index.md
         index_md = ["# Alphabetical list of topics\n"]
         self.howto_topic = {}
-        repo_path = os.path.join(self.root, "topics", "origin_files")
         for topic in self.all_topics:
-            # Read data from yaml file and generate markdown string.
-            with io.open(os.path.join(repo_path, "topic_" + topic + ".yml"), "rt", encoding="utf-8") as fh:
-                top = yaml.load(fh)[0]
-                title = html2text(top.title)
-                introduction = html2text(top.introduction)
-                howto = html2text(top.howto).strip().lstrip()
-                self.howto_topic[topic] = "How to " + howto if not howto.startswith("to ") else "How " + howto
-                tutorials = top.tutorials.strip()
-
-            #dirpath = os.path.join(self.root, "topics")
-            #with io.open(os.path.join(dirpath, "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
-            #    lines = fh.readlines()
-            #    lines.insert(1, "description: %s\n" % howto.replace("\n", " "))
-            #with io.open(os.path.join(dirpath, "_" + topic + ".md"), "wt", encoding="utf-8") as fh:
-            #    fh.writelines(lines)
+            # Read description from md file.
+            with io.open(os.path.join(dirpath, "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
+                for line in fh:
+                    if "description:" in line:
+                        self.howto_topic[topic] = line.replace("description:", "").strip()
+                        break
+                else:
+                    raise RuntimeError("Cannot find `description:` in topic file: `%s`" % topic)
 
             # Find list of variables associated to this topic
             # Order and group vlist by relevances and write list with links.
@@ -1617,48 +1602,3 @@ class HTMLValidator(object):
                color="red" if num_err else "green")
 
         return num_err
-
-
-# Still needed for yaml topics. Can be removed when topics are converted into MD.
-class Components(yaml.YAMLObject):
-    name = None  # String containing section name
-    keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
-    authors = '' # String containing the list of authors.
-    howto  = ''  # For the 'topics' Should complete the sentence beginning with "How to"
-    header = ''  # Header of the file, possibly the 'default' one
-    title  = ''  # Title  of the file, possibly the 'default' one
-    subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
-    purpose   = ''  # Purpose  of the file, possibly the 'default' one
-    advice    = ''  # Advice  of the file, possibly the 'default' one
-    copyright = ''  # Copyright of the file, possibly the 'default' one
-    introduction = ''  # Introduction
-    links     = ''  # Links of the file, possibly the 'default' one
-    menu      = ''  # Menu of the file, possibly the 'default' one
-    tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
-    tutorials    = '' # List of relevant tutorials
-    examples     = '' # Relevant examples
-    end       = ''  # End of the file, possibly the 'default' one
-
-    yaml_tag = u'!components'
-
-    #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
-    def __init__(self, name=None, keyword=None, authors=None, howto=None, header=None,
-                 title=None, subtitle=None, purpose=None, advice=None,
-                 copyright=None, links=None, menu=None, tofcontent_header=None, tutorials=None, examples=None, end=None):
-        self.name = name
-        self.keyword = keyword
-        self.authors = authors
-        self.howto = howto
-        self.header = header
-        self.title  = title
-        self.subtitle = subtitle
-        self.purpose  = purpose
-        self.advice   = advice
-        self.copyright= copyright
-        self.introduction= introduction
-        self.links    = links
-        self.menu     = menu
-        self.tofcontent_header = tofcontent_header
-        self.tutorials = tutorials
-        self.examples = examples
-        self.end      = end
