@@ -3897,9 +3897,9 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
    ! a Wigner-Seitz cell around the origin. The origin is excluded from the list.
    ! TODO : in principle this should be only -1 to +1 for ii jj kk!
    nptws=0
-   do ii=-4,4
-     do jj=-4,4
-       do kk=-4,4
+   do ii=-2,2
+     do jj=-2,2
+       do kk=-2,2
          do idir=1,3
            pp(idir)=ii*ngqpt(1)*rprimd(idir,1)+ jj*ngqpt(2)*rprimd(idir,2)+ kk*ngqpt(3)*rprimd(idir,3)
          end do
