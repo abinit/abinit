@@ -75,6 +75,7 @@ module m_sigmaph
  public :: sigmaph   ! Main entry point to compute self-energy matrix elements
 !!***
 
+ ! Tables for degenerated KS states.
  type bids_t
    integer, allocatable :: vals(:)
  end type bids_t
@@ -594,7 +595,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      call dvdb_ftinterp_setup(dvdb, ifc%ngqpt, 1, [zero,zero,zero], nfftf, ngfftf, comm)
    end if
 
-   ! Allocate PW-arrays dimensioned with mpw
+   ! Allocate PW-arrays. Note mpw in kg_kq
    ABI_MALLOC(kg_k, (3, npw_k))
    kg_k = wfd%kdata(ik_ibz)%kg_k
    ABI_MALLOC(kg_kq, (3, mpw))
@@ -661,7 +662,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
        ! Quick-parallelization over q-points
-       !if (mod(iq_ibz, nprocs) /= my_rank) cycle
        if (all(distrib_bq(1:nbsum, iq_ibz) /= my_rank)) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
@@ -822,7 +822,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
        do ibsum_kq=1,nbsum
          if (distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
-
          ! This is to check whether the gkk elements in the degenerate subspace break symmetry
          !if (ibsum_kq >= bstart_ks .and. ibsum_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
@@ -1407,6 +1406,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! Copy important dimensions.
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
 
+ ! TODO: zcut
  ! Broadening parameter.
  new%ieta = j_dpc * 0.0001_dp
  if (dtset%elph2_imagden > tol12) new%ieta = j_dpc * dtset%elph2_imagden
@@ -1437,6 +1437,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  call ebands_free(tmp_ebands)
 
  ! Frequency mesh for sigma(w) and spectral function.
+ ! TODO: Use GW variables
  new%nwr = 101
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
  new%wr_step = 0.02 * eV_Ha
@@ -1463,6 +1464,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! to distribuite the calculations among the processors.
  new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
+ ! TODO: check gw_qprange > 0. Rename variable
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
    call wrtout(std_out, "Getting list of k-points for self-energy from kptgw and bdgw.")
@@ -1741,6 +1743,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eta", "wr_step"])
    NCF_CHECK(ncerr)
 
+   ! Define arrays for results.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
@@ -1762,6 +1765,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ])
    NCF_CHECK(ncerr)
 
+   ! TODO: Check the mesh
    if (new%nwr > 0) then
      ! These arrays get two extra dimensions on file (nkcalc, nsppol).
      ncerr = nctk_def_arrays(ncid, [ &
@@ -1807,7 +1811,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), new%kcalc))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), new%kcalc))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), new%kcalc2ibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), new%kTmesh))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), new%mu_e))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), aimag(new%ieta)))
@@ -1819,9 +1823,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Now reopen the file in parallel.
  call xmpi_barrier(comm)
- !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
- !NCF_CHECK(nctk_set_datamode(new%ncid))
  NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+ !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
 
@@ -1954,6 +1957,7 @@ end subroutine sigmaph_free
 !!  sigmaph_setup_kcalc
 !!
 !! FUNCTION
+!!  Prepare calculations of self-energy matrix elements for index ikcalc.
 !!
 !! INPUTS
 !!  crystal<crystal_t> = Crystal structure.
@@ -2022,8 +2026,10 @@ end subroutine sigmaph_setup_kcalc
 !!  sigmaph_gather_and_write
 !!
 !! FUNCTION
-!!  Compute QP energies, Z factor and spectral function (if required).
-!!  Save results to file.
+!!  Gather results from the MPI processes. Then master:
+!!
+!!      1. Compute QP energies, Z factor and spectral function (if required).
+!!      2. Save results to file.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=KS band energies.
@@ -2335,6 +2341,7 @@ end subroutine sigmaph_print
 !!  lgroup_new
 !!
 !! FUNCTION
+!!  Build little group of k-point.
 !!
 !! INPUTS
 !!  cryst(crystal_t)=Crystalline structure
