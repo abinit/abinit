@@ -408,7 +408,8 @@ Change the input yaml files or the python code
         if not os.path.isdir(dirpath): os.mkdir(dirpath)
         path = os.path.join(dirpath, mdname)
         assert path not in self.md_generated
-        self.md_generated.append(path)
+        if not path.startswith("_"):
+            self.md_generated.append(path)
         if self.verbose: print("Generating markdown file: `%s`" % path)
 
         mdf = io.open(path, "wt", encoding="utf-8")
@@ -678,15 +679,48 @@ This page gives hints on how to {howto} with the ABINIT package.
 
 """.format(**locals())
 
+            template = """
+This page gives hints on how to {howto} with the ABINIT package.
+
+## Introduction
+
+{introduction}
+
+## Related Input Variables
+
+{related_variables}
+
+## Selected Input Files
+
+{selected_input_files}
+
+""".format(howto=howto, introduction=introduction, related_variables="{{ related_variables }}",
+          selected_input_files="{{ selected_input_files }}")
+
             if tutorials:
                 text += """\
 ## Tutorials
 
 {tutorials}""".format(tutorials=html2text(tutorials))
 
-            meta = {"authors": top.authors, "description": "%s Abinit topic" % topic}
-            with self.new_mdfile("topics", topic + ".md", meta=meta) as mdf:
-                mdf.write(text)
+                template += """\
+## Tutorials
+
+{tutorials}""".format(tutorials=html2text(tutorials))
+
+            #meta = {"authors": top.authors, "description": "%s Abinit topic" % topic}
+            #with self.new_mdfile("topics", topic + ".md", meta=meta) as mdf:
+            #    mdf.write(text)
+            #with self.new_mdfile("topics", "_" + topic + ".md", meta=meta) as mdf:
+            #    mdf.write(template)
+
+            with io.open(os.path.join(self.root, "topics", "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
+                template = fh.read()
+                template = template.replace("{{ related_variables }}", related_variables)
+                template = template.replace("{{ selected_input_files }}", selected_input_files)
+
+            with self.new_mdfile("topics", topic + ".md") as mdf:
+                mdf.write(template)
 
         # Now write topics index.md (sorted by first character)
         for firstchar, group in sort_and_groupby(self.all_topics, key=lambda t: t[0].upper()):
