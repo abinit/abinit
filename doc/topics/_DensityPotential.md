@@ -1,6 +1,6 @@
 ---
-authors: SS,XG,YG
-description: DensityPotential Abinit topic
+description: How to analyze the densities and potentials
+authors: SS, XG, YG
 ---
 
 This page gives hints on how to analyze the densities and potentials with the ABINIT package.

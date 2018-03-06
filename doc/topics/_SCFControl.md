@@ -1,6 +1,6 @@
 ---
+description: How to control the SCF cycle
 authors: XG
-description: SCFControl Abinit topic
 ---
 
 This page gives hints on how to control the SCF cycle with the ABINIT package.

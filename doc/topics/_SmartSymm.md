@@ -1,6 +1,6 @@
 ---
+description: How to use the symetry information to build the system from the irreducible part of the primitive cell
 authors: FJ
-description: SmartSymm Abinit topic
 ---
 
 This page gives hints on how to use the symetry information to build the system from the irreducible part of

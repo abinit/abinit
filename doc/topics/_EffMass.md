@@ -1,6 +1,6 @@
 ---
+description: How to perform an effective mass calculation
 authors: JLaflamme
-description: EffMass Abinit topic
 ---
 
 This page gives hints on how to perform an effective mass calculation with the ABINIT package.

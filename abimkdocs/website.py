@@ -626,10 +626,10 @@ in order of number of occurrence in the input files provided with the package.
                 self.howto_topic[topic] = "How to " + howto if not howto.startswith("to ") else "How " + howto
                 tutorials = top.tutorials.strip()
 
-            dirpath = os.path.join(self.root, "topics")
-            with io.open(os.path.join(dirpath, "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
-                lines = fh.readlines()
-                lines.insert(1, "description: %s" % howto)
+            #dirpath = os.path.join(self.root, "topics")
+            #with io.open(os.path.join(dirpath, "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
+            #    lines = fh.readlines()
+            #    lines.insert(1, "description: %s\n" % howto.replace("\n", " "))
             #with io.open(os.path.join(dirpath, "_" + topic + ".md"), "wt", encoding="utf-8") as fh:
             #    fh.writelines(lines)
 

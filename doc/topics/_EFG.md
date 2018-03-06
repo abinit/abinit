@@ -1,6 +1,6 @@
 ---
+description: How to calculate electric fields gradients
 authors: JZ
-description: EFG Abinit topic
 ---
 
 This page gives hints on how to calculate electric fields gradients with the ABINIT package.

@@ -1,6 +1,6 @@
 ---
+description: How to plot phonon band structures
 authors: SS,XG,YG
-description: Band2eps Abinit topic
 ---
 
 This page gives hints on how to plot phonon band structures with the ABINIT package.

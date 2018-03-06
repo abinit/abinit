@@ -1,6 +1,6 @@
 ---
+description: How to compute elastic, piezoelectric and internal strain tensors from DFPT
 authors: MT
-description: Elastic Abinit topic
 ---
 
 This page gives hints on how to compute elastic, piezoelectric and internal strain tensors 

@@ -1,6 +1,6 @@
 ---
+description: How to to specify a crystal, with atomic positions and symmetries
 authors: FJ
-description: crystal Abinit topic
 ---
 
 This page gives hints on how to to specify a crystal, with atomic positions and symmetries with the ABINIT package.

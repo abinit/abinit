@@ -1,6 +1,6 @@
 ---
+description: How to perform some artificial modifications of the physics
 authors: XG
-description: Artificial Abinit topic
 ---
 
 This page gives hints on how to perform some artificial modifications of the physics with the ABINIT package.

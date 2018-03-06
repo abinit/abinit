@@ -1,6 +1,6 @@
 ---
+description: How to control the flow of ABINIT
 authors: XG
-description: Control Abinit topic
 ---
 
 This page gives hints on how to control the flow of ABINIT with the ABINIT package.

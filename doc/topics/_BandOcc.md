@@ -1,6 +1,6 @@
 ---
+description: How to to specify bands and occupation numbers, for metals or insulators
 authors: FJ
-description: BandOcc Abinit topic
 ---
 
 This page gives hints on how to to specify bands and occupation numbers, 

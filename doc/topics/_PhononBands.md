@@ -1,6 +1,6 @@
 ---
+description: How to compute phonon bands, density of states, interatomic force constants, sound velocity ...
 authors: MT
-description: PhononBands Abinit topic
 ---
 
 This page gives hints on how to compute phonon bands, density of states, interatomic force constants, sound

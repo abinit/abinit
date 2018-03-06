@@ -1,6 +1,6 @@
 ---
-authors: SS,XG,YG
-description: APPA Abinit topic
+description: How to use the APPA post-processing tool for the analysis of molecular dynamics output files (trajectories)
+authors: SS, XG, YG
 ---
 
 This page gives hints on how to use the APPA post-processing tool for the analysis of molecular dynamics

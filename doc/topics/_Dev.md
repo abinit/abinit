@@ -1,6 +1,6 @@
 ---
+description: How to modify ABINIT behaviour for developers
 authors: XG
-description: Dev Abinit topic
 ---
 
 This page gives hints on how to modify ABINIT behaviour for developers with the ABINIT package.

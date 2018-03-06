@@ -1,6 +1,6 @@
 ---
+description: How to perform a PIMD calculation
 authors: GG
-description: PIMD Abinit topic
 ---
 
 This page gives hints on how to perform a PIMD calculation with the ABINIT package.

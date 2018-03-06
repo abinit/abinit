@@ -1,4 +1,5 @@
 ---
+description: How to select the SCF algorithm
 authors: XG
 description: SCFAlgorithms Abinit topic
 ---

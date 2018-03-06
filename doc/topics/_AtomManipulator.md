@@ -1,6 +1,6 @@
 ---
+description: How to manipulate atoms and groups of atoms to generate the set of atomic positions
 authors: FJ
-description: AtomManipulator Abinit topic
 ---
 
 This page gives hints on how to manipulate atoms and groups of atoms to generate 

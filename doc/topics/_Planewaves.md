@@ -1,6 +1,6 @@
 ---
+description: How to perform numerically precise calculations with planewaves or projector- augmented waves and pseudopotentials
 authors: FJ
-description: Planewaves Abinit topic
 ---
 
 This page gives hints on how to perform numerically precise calculations with planewaves or projector-

@@ -1,6 +1,6 @@
 ---
+description: How to define frequency meshes (on the imaginary and real axes) for MBPT calculations
 authors: MG
-description: FrequencyMeshMBPT Abinit topic
 ---
 
 This page gives hints on how to define frequency meshes (on the imaginary and real axes) 

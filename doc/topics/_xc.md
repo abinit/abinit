@@ -1,6 +1,6 @@
 ---
+description: How to set parameters related to the exchange and correlation functionals
 authors: FJ
-description: xc Abinit topic
 ---
 
 This page gives hints on how to set parameters related to the exchange and correlation functionals with the ABINIT package.

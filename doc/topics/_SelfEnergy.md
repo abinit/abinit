@@ -1,6 +1,6 @@
 ---
+description: How to compute the electronic self-energy (due to electron-electron interaction)
 authors: MG
-description: SelfEnergy Abinit topic
 ---
 
 This page gives hints on how to compute the electronic self-energy (due to electron-electron interaction) with the ABINIT package.

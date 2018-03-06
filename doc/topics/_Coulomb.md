@@ -1,6 +1,6 @@
 ---
+description: How to treat adequately the Coulomb interaction, especially in charged cells,
 authors: FB
-description: Coulomb Abinit topic
 ---
 
 This page gives hints on how to treat adequately the Coulomb interaction, 

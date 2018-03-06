@@ -1,6 +1,6 @@
 ---
-authors: SS,XG,YG
-description: Optic Abinit topic
+description: How to compute linear and non-linear optical properties in the independent-particle approximation
+authors: SS, XG, YG
 ---
 
 This page gives hints on how to compute linear and non-linear optical properties 

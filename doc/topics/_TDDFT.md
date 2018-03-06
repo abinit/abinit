@@ -1,6 +1,6 @@
 ---
+description: How to perform time-dependent density-functional theory calculations of neutral excitation energies
 authors: FJ
-description: TDDFT Abinit topic
 ---
 
 This page gives hints on how to perform time-dependent density-functional theory calculations of neutral

@@ -1,6 +1,6 @@
 ---
+description: How to perform a LDA-1/2 calculation
 authors: F. Jollet, G. Zerah
-description: LDAminushalf Abinit topic
 ---
 
 This page gives hints on how to perform a LDA-1/2 calculation with the ABINIT package.

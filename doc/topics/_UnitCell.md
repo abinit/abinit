@@ -1,6 +1,6 @@
 ---
+description: How to specify the unit cell
 authors: FJ
-description: UnitCell Abinit topic
 ---
 
 This page gives hints on how to specify the unit cell with the ABINIT package.

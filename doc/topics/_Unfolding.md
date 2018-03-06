@@ -1,6 +1,6 @@
 ---
+description: How to unfold supercell band structures
 authors: OR
-description: Unfolding Abinit topic
 ---
 
 This page gives hints on how to unfold supercell band structures with the ABINIT package.

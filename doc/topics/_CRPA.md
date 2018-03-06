@@ -1,6 +1,6 @@
 ---
+description: How to calculate the effective Coulomb interaction
 authors: BAmadon
-description: CRPA Abinit topic
 ---
 
 This page gives hints on how to calculate the effective Coulomb interaction with the ABINIT package.

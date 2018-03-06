@@ -1,6 +1,6 @@
 ---
+description: How to check for regressions. 
 authors: XG
-description: PortabilityNonRegression Abinit topic
 ---
 
 This page gives hints on how to  with the ABINIT package.

@@ -1,4 +1,5 @@
 ---
+description: How to constrain the geometry of the system in geometry optimization, molecular dynamics or searches
 authors: GG
 description: GeoConstraints Abinit topic
 ---

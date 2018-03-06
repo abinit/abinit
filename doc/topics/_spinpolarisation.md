@@ -1,6 +1,6 @@
 ---
+description: How to set parameters for a spin-polarized calculation
 authors: FJ
-description: spinpolarisation Abinit topic
 ---
 
 This page gives hints on how to set parameters for a spin-polarized calculation with the ABINIT package.

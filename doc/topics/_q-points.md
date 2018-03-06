@@ -1,6 +1,6 @@
 ---
+description: How to set parameters related to the phonon wavevectors (q-points) in DFPT calculations
 authors: FJ
-description: q-points Abinit topic
 ---
 
 This page gives hints on how to set parameters related to the phonon wavevectors (q-points) in DFPT

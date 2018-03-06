@@ -1,6 +1,6 @@
 ---
+description: How to perform a DMFT calculation
 authors: BAmadon
-description: DMFT Abinit topic
 ---
 
 This page gives hints on how to perform a DMFT calculation with the ABINIT package.

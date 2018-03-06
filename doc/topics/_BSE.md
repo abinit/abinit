@@ -1,6 +1,6 @@
 ---
+description: How to perform a Bethe-Salpeter calculation of neutral excitation energies and dielectric function
 authors: MG
-description: BSE Abinit topic
 ---
 
 This page gives hints on how to perform a Bethe-Salpeter calculation of neutral excitation energies and

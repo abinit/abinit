@@ -1,6 +1,6 @@
 ---
+description: How to compute the linewidth (or lifetime) of phonons, due to the electron-phonon interaction
 authors: MV
-description: PhononWidth Abinit topic
 ---
 
 This page gives hints on how to compute the linewidth (or lifetime) of phonons, due to the electron-phonon

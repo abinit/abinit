@@ -1,6 +1,6 @@
 ---
+description: How to take into account an external magnetic field
 authors: EB
-description: MagField Abinit topic
 ---
 
 This page gives hints on how to take into account an external magnetic field with the ABINIT package.

@@ -1,6 +1,6 @@
 ---
+description: How to compute phonon frequencies and modes, IR and Raman spectra, Born effective charges, IR reflectivity ...
 authors: MT
-description: Phonons Abinit topic
 ---
 
 This page gives hints on how to compute phonon frequencies and modes, IR and Raman spectra, Born effective

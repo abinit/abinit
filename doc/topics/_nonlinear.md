@@ -1,6 +1,6 @@
 ---
+description: How to compute Raman intensity, and the related electro-optic coefficients
 authors: RC, XG
-description: nonlinear Abinit topic
 ---
 
 This page gives hints on how to compute Raman intensity, and the related electro-optic 

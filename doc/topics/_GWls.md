@@ -1,6 +1,6 @@
 ---
+description: How to perform a GW- Lanczos-Sternheimer calculation
 authors: JL
-description: GWls Abinit topic
 ---
 
 This page gives hints on how to perform a GW- Lanczos-Sternheimer calculation with the ABINIT package.

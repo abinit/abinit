@@ -1,6 +1,6 @@
 ---
+description: To to calculate the temperature dependence of the electronic structure
 authors: SP
-description: TDepES Abinit topic
 ---
 
 This page gives hints on how to calculate the temperature dependence of the electronic structure with the ABINIT package.

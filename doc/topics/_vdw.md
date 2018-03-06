@@ -1,6 +1,6 @@
 ---
+description: How to use Van der Waals functionals
 authors: YPouillon, BVanTroeye
-description: vdw Abinit topic
 ---
 
 This page gives hints on how to use Van der Waals functionals with the ABINIT package.

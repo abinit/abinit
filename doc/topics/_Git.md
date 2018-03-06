@@ -1,6 +1,6 @@
 ---
+description:  How to use git with Abinit
 authors: XG
-description: Git Abinit topic
 ---
 
 This page gives hints on how to  with the ABINIT package.

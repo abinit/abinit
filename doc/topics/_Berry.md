@@ -1,6 +1,6 @@
 ---
+description: How to compute the polarisation and take into account a finite homogeneous electric field
 authors: JZ
-description: Berry Abinit topic
 ---
 
 This page gives hints on how to compute the polarisation and take into account a finite homogeneous electric

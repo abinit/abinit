@@ -1,6 +1,6 @@
 ---
+description: How to use hybrid functionals
 authors: FJ
-description: Hybrids Abinit topic
 ---
 
 This page gives hints on how to use hybrid functionals with the ABINIT package.

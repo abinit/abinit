@@ -1,6 +1,6 @@
 ---
+description: How to tune the output of computed quantities
 authors: FJ
-description: Output Abinit topic
 ---
 
 This page gives hints on how to tune the output of computed quantities with the ABINIT package.

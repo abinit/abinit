@@ -1,6 +1,6 @@
 ---
+description: How to perform a geometry optimization
 authors: GG
-description: GeoOpt Abinit topic
 ---
 
 This page gives hints on how to perform a geometry optimization with the ABINIT package.

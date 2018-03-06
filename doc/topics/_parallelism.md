@@ -1,6 +1,6 @@
 ---
+description: How to set parameters for a parallel calculation
 authors: MT,FJ
-description: parallelism Abinit topic
 ---
 
 This page gives hints on how to set parameters for a parallel calculation with the ABINIT package.

@@ -1,6 +1,6 @@
 ---
+description: How to print some useful quantities
 authors: FJ
-description: printing Abinit topic
 ---
 
 This page gives hints on how to print some useful quantities with the ABINIT package.

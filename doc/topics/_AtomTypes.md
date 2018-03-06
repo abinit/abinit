@@ -1,6 +1,6 @@
 ---
+description: How to specify the types of atoms that form the system
 authors: FJ
-description: AtomTypes Abinit topic
 ---
 
 This page gives hints on how to specify the types of atoms that form the system.

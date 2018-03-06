@@ -1,6 +1,6 @@
 ---
+description: How to use the Abipy python package
 authors: MG
-description: Abipy Abinit topic
 ---
 
 This page gives hints on how to use the Abipy python package with the ABINIT package.

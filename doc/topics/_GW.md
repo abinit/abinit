@@ -1,6 +1,6 @@
 ---
+description: How to perform a GW calculation, including self-consistency
 authors: MG
-description: GW Abinit topic
 ---
 
 This page gives hints on how to perform a GW calculation, including self-consistency with the ABINIT package.

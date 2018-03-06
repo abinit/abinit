@@ -1,6 +1,6 @@
 ---
+description: How to compute the matrix elements of the electron-phonon interaction
 authors: MV
-description: ElPhonInt Abinit topic
 ---
 
 This page gives hints on how to compute the matrix elements of the electron-phonon interaction with the ABINIT package.

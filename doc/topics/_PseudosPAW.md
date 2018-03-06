@@ -1,6 +1,6 @@
 ---
+description: How to master the use of norm-conserving pseudopotentials and PAW atomic data, and their consequences
 authors: XG
-description: PseudosPAW Abinit topic
 ---
 
 This page gives hints on how to master the use of norm-conserving pseudopotentials and PAW atomic data, and

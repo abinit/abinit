@@ -1,4 +1,5 @@
 ---
+description: How to calculate the RPA correlation energy
 authors: FB
 description: RPACorrEn Abinit topic
 ---

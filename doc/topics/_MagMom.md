@@ -1,6 +1,6 @@
 ---
+description: How to perform calculation with constrained atomic magnetic moments
 authors: EB
-description: MagMom Abinit topic
 ---
 
 This page gives hints on how to perform calculation with constrained atomic magnetic moments with the ABINIT package.

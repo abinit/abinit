@@ -1,6 +1,6 @@
 ---
-authors: PCasek,FF,XG
-description: Bader Abinit topic
+description: How to perform a Bader analysis
+authors: PCasek, FF, XG
 ---
 
 This page gives hints on how to perform a Bader analysis with the ABINIT package.

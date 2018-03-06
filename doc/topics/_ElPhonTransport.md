@@ -1,6 +1,6 @@
 ---
+description: How to compute transport properties that are determined by the electron-phonon interaction (electrical resistivity, superconductivity, thermal conductivity)
 authors: MV
-description: ElPhonTransport Abinit topic
 ---
 
 This page gives hints on how to compute transport properties that are determined by the electron-phonon

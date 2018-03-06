@@ -1,6 +1,6 @@
 ---
+description: How to perform Wannier functions calculation
 authors: BAmadon
-description: Wannier Abinit topic
 ---
 
 This page gives hints on how to perform Wannier functions calculation with the ABINIT package.

@@ -1,6 +1,6 @@
 ---
+description: How to set parameters for a multi dataset calculation
 authors: XG
-description: multidtset Abinit topic
 ---
 
 This page gives hints on how to set parameters for a multi dataset calculation with the ABINIT package.

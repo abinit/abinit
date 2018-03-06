@@ -1,6 +1,6 @@
 ---
+description: How to compute vibrational free energy, entropy, specific heat, thermal expansion, as well as atomic temperature factors
 authors: XG
-description: Temperature Abinit topic
 ---
 
 This page gives hints on how to compute vibrational free energy, entropy, specific heat, thermal expansion, as

@@ -1,6 +1,6 @@
 ---
+description: How to optimize the geometry under constrained polarization
 authors: MT
-description: ConstrainedPol Abinit topic
 ---
 
 This page gives hints on how to optimize the geometry under constrained polarization with the ABINIT package.

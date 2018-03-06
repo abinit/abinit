@@ -1,6 +1,6 @@
 ---
+description: How to calculate transition paths
 authors: GG
-description: TransPath Abinit topic
 ---
 
 This page gives hints on how to calculate transition paths with the ABINIT package.

@@ -1,6 +1,6 @@
 ---
+description: How to generate the electronic DOS and related topics
 authors: XG
-description: ElecDOS Abinit topic
 ---
 
 This page gives hints on how to generate the electronic DOS and related topics with the ABINIT package.
