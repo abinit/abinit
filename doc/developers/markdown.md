@@ -903,10 +903,11 @@ that produces:
   <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
     <div class="item active">
-      <img src="../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
+      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
       <div class="carousel-caption">Unconverged BSE optical spectrum</div>
     </div>
     <div class="item">
+      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
       <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
     </div>
   </div>

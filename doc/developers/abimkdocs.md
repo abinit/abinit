@@ -492,7 +492,7 @@ vartype
 
 ### MultipleValue object
 
-This is the equivalent to the X * Y syntax in fortran.
+This is the equivalent to the X * Y syntax in the Abinit parser.
 
 <code>
   X * Y

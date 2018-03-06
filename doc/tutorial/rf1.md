@@ -215,9 +215,10 @@ This is your input file. You should examine it. The changes with respect to
 the file ~abinit/tests/tutorespfn/Input/trf1_1.in are all gathered in the
 first part of this file, before
     
-    #######################################################################
-    #Common input variables
-    
+```
+#######################################################################
+#Common input variables
+```
 
 Accordingly, you should get familiarized with the new input variables :
 [[rfphon]], [[rfatpol]], [[rfdir]]. Then, pay attention to the special use of

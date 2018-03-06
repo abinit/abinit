@@ -310,6 +310,7 @@ class Website(object):
 
         def test_get_varnames(test, varnames):
             # TODO: This should become a method of BaseTest and must be improved.
+            # See new method of BaseTest...
             with io.open(test.inp_fname, "rt", encoding="utf-8") as fh:
                 s = fh.read()
             vused = [v for v in varnames if v in s]
@@ -525,7 +526,7 @@ typically compilation parameters, available libraries, or number of processors.
 You can change these parameters at compile or run time usually.
 
 """)
-            for pname, info in self.codevars.external_params.items():
+            for pname, info in self.codevars.all_external_params.items():
                 mdf.write("## %s  \n%s  \n\n" % (pname, info))
 
         # Build markdown pages for the different sets of variables.
@@ -1018,19 +1019,19 @@ The bibtex file is available [here](../abiref.bib).
                     target = "_blank"
                     html_classes.append("abifile-wikilink")
 
-                elif name in self.codevars.characteristics:
+                elif name in self.codevars.all_characteristics:
                     # handle [[ENERGY]] by building internal link to abinit user guide
                     url = "/guide/abinit#parameters"
                     if a.text is None: a.text = name
 
-                elif name in self.codevars.external_params:
+                elif name in self.codevars.all_external_params:
                     # handle [[AUTO_FROM_PSP]] by building link with popover
                     content = ("This is an external parameter\n"
                                "typically compilation parameters, available libraries, or number of processors.\n"
                                "You can change these parameters at compile or runtime usually.\n")
                     url = "/variables/external_parameters#%s" % self.slugify(name)
                     if a.text is None: a.text = name
-                    add_popover(a, title=self.codevars.external_params[name], content=content)
+                    add_popover(a, title=self.codevars.all_external_params[name], content=content)
 
                 else:
                     self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))

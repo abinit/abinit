@@ -3,7 +3,6 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import sys
 import os
-import io
 import json
 
 from collections import OrderedDict, defaultdict
@@ -94,7 +93,6 @@ def list_strings(arg):
 
 def splitall(path):
     """Return list with all components of a path."""
-    import os, sys
     allparts = []
     while True:
         parts = os.path.split(path)
@@ -110,7 +108,7 @@ def splitall(path):
     return allparts
 
 
-# Unit names.
+# Unit names supported in Abinit input.
 ABI_UNITS = [
     'au',
     'Angstr',
@@ -130,7 +128,7 @@ ABI_UNITS = [
     'Tesla',
 ]
 
-# Operators.
+# Operators supported by parser
 ABI_OPS = ['sqrt', 'end', '*', '/']
 
 
@@ -148,8 +146,8 @@ ABI_CHARACTERISTICS = [
     "NO_MULTI",
 ]
 
-# `external_params` i.e. external parameters that are not input variables,
-# but that are used in the documentation of other variables.
+# external parametersare not input variables,
+# but are used in the documentation of other variables.
 ABI_EXTERNAL_PARAMS = OrderedDict([
     ("AUTO_FROM_PSP", "Means that the value is read from the PSP file"),
     ("CUDA", "True if CUDA is enabled (compilation)"),
@@ -161,7 +159,7 @@ ABI_EXTERNAL_PARAMS = OrderedDict([
     ("SEQUENTIAL", "True if the code is compiled without MPI"),
 ])
 
-# from list of topics.yml.
+# List of topics
 ABI_TOPICS = [
     "Abipy",
     "APPA",
@@ -248,7 +246,6 @@ ABI_TOPICS = [
 ]
 
 # Relevance associated to the topic
-# Taken from list_relevances.yml
 ABI_RELEVANCES = OrderedDict([
     ("compulsory", 'Compulsory input variables'),
     ("basic", 'Basic input variables'),
@@ -268,6 +265,9 @@ ABI_RELEVANCES = OrderedDict([
 
 class Variable(object):
     """
+    This object gathers information about a single variable. name, associated topics, description etc
+    It's constructed from the variables_CODENANE.py modules but client code usually
+    interact with variables via the :class:`VarDatabase` dictionary.
     """
     def __init__(self,
                  abivarname=None,
@@ -487,20 +487,21 @@ class Variable(object):
 
     @staticmethod
     def format_dimensions(dimensions):
+        """Pretty print dimensions."""
         if dimensions is None:
-          s = ''
+            s = ''
         elif dimensions == "scalar":
-          s = 'scalar'
+            s = 'scalar'
         else:
-          #s = str(dimensions)
-          if isinstance(dimensions, (list, tuple)):
-            s = '('
-            for dim in dimensions:
-              s += str(dim) + ','
-            s = s[:-1]
-            s += ')'
-          else:
-            s = str(dimensions)
+            #s = str(dimensions)
+            if isinstance(dimensions, (list, tuple)):
+                s = '('
+                for dim in dimensions:
+                    s += str(dim) + ','
+                s = s[:-1]
+                s += ')'
+            else:
+                s = str(dimensions)
 
         return s
 
@@ -629,9 +630,9 @@ class Variable(object):
             raise ValueError("\n".join(errors))
 
 class ValueWithUnit(object):
-    value = None
-    units = None
-
+    """
+    This type allows to specify values with units:
+    """
     def __init__(self, value=None, units=None):
         self.value = value
         self.units = units
@@ -654,6 +655,7 @@ class Range(object):
         self.stop = stop
 
     def isin(self, value):
+        """True if value is in range."""
         isin = True
         if self.start is not None:
             isin = isin and (self.start <= self.value)
@@ -699,9 +701,8 @@ class ValueWithConditions(dict):
 class MultipleValue(object):
     """
     Used for variables that can assume multiple values.
-
-    abivarname="istwfk",
-    defaultval=MultipleValue({'number': None, 'value': 0}),
+    This is the equivalent to the X * Y syntax in the Abinit parser.
+    If X is null, it means that you want to do *Y (all Y)
     """
     def __init__(self, number=None, value=None):
         self.number = number
@@ -739,13 +740,15 @@ class VarDatabase(OrderedDict):
     in a dictionary mapping the name of the code to a subdictionary of variables.
     """
 
-    # TODO: Change name
-    characteristics = ABI_CHARACTERISTICS
-    external_params = ABI_EXTERNAL_PARAMS
+    all_characteristics = ABI_CHARACTERISTICS
+    all_external_params = ABI_EXTERNAL_PARAMS
 
     @classmethod
     def from_pyfiles(cls, dirpath=None):
-        """Initialize the object from python modules."""
+        """
+        Initialize the object from python modules inside dirpath.
+        If dirpath is None, the directory of the present module is used.
+        """
         if dirpath is None:
             dirpath = os.path.dirname(os.path.abspath(__file__))
         pyfiles = [os.path.join(dirpath, f) for f in os.listdir(dirpath) if
@@ -754,10 +757,6 @@ class VarDatabase(OrderedDict):
         for pyf in pyfiles:
             vd = InputVariables.from_pyfile(pyf)
             new[vd.executable] = vd
-
-        # TODO: Change name
-        #new.characteristics = ABI_CHARACTERISTICS
-        #new.external_params = ABI_EXTERNAL_PARAMS
 
         return new
 
@@ -784,7 +783,10 @@ class VarDatabase(OrderedDict):
         return version, code_urls
 
     def update_json_endpoints(self, json_path, indent=4):
-        import json
+        """
+        Update the json file with the mapping varname --> relative url
+        used on the serve to implement the REST API.
+        """
         with open(json_path, "rt") as fh:
             oldd = json.load(fh)
         new_version, newd = self.get_version_endpoints()
@@ -795,6 +797,7 @@ class VarDatabase(OrderedDict):
 
     def _write_pymods(self, dirpath="."):
         """
+        Internal method used to regenerate the python modules.
         """
         dirpath = os.path.abspath(dirpath)
         from pprint import pformat
@@ -962,6 +965,7 @@ class InputVariables(OrderedDict):
         return od
 
     def get_vartabs_html(self, website, page_rpath):
+        """Return HTML string with all the variabes in tabular format."""
         ch2vars = self.groupby_first_letter()
         ch2vars["All"] = self.values()
         # http://getbootstrap.com/javascript/#tabs
