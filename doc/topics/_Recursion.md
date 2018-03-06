@@ -1,7 +1,6 @@
 ---
 description: How to perform orbital-free calculations
 authors: FJ
-description: Recursion Abinit topic
 ---
 
 This page gives hints on how to perform orbital-free calculations with the ABINIT package.

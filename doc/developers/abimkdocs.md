@@ -329,7 +329,7 @@ doi2bibtex 10.1103/PhysRevLett.96.066402
 
 The topic files are written in Markdown and can be found in ~abinit/doc/topics.
 The source files start with an underscore e.g. `_AbiPy.md`.
-These are templated files with text and two variables:
+These are template files with text and two variables:
 
 ```
 ## Related Input Variables
@@ -341,7 +341,7 @@ These are templated files with text and two variables:
 {{ selected_input_files }}
 ```
 
-that will be filled by `mksite.py` by inspecting the database of variables and the tests in test suite..
+that will be filled by `mksite.py` by inspecting the database of variables and the tests of the test suite..
 A new Markdown file without underscore will be generated and included in `mkdocs.yml`.
 
 !!! important
