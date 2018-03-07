@@ -68,7 +68,7 @@
 !!      psps_init_global,respfn,screening,sigma,status,timab,wfk_analyze,wrtout
 !!      xc_vdw_done,xc_vdw_init,xc_vdw_libxc_init,xc_vdw_memcheck,xc_vdw_read
 !!      xc_vdw_show,xc_vdw_trigger,xc_vdw_write,xcart2xred,xg_finalize
-!!      xmpi_bcast,xred2xcart
+!!      xgscalapack_config,xmpi_bcast,xred2xcart
 !!
 !! SOURCE
 
@@ -108,6 +108,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
  use m_dtset,        only : dtset_copy, dtset_free
  use m_mpinfo,       only : mpi_distrib_is_ok
+ use m_xgScalapack
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -263,6 +264,16 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
+
+   if ( dtset%np_slk == 0 ) then
+     call xgScalapack_config(SLK_DISABLED)
+   else if ( dtset%np_slk == 1000000 ) then
+     call xgScalapack_config(SLK_AUTO)
+   else if ( dtset%np_slk > 1 ) then
+     call xgScalapack_config(dtset%np_slk)
+   else 
+     call xgScalapack_config(SLK_AUTO)
+   end if
 
 !  Copy input values
    mkmems(1) = dtset%mkmem
