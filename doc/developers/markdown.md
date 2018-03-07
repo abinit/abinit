@@ -63,14 +63,18 @@ For a more complete introduction to Markdown, please consult the
 
 Blocks of code are either fenced by lines with three back-ticks ``` or are indented with **four spaces**.
 For example, the Markdown text:
-
+~~~text
 ```
-Inline `code` has `back-ticks around` it.
+Fenced code has three back-ticks around it.
+```
+~~~
+
+produces: 
+```
+Fenced code has three back-ticks around it.
 ```
 
-produces: Inline `code` has `back-ticks around` it.
-
-The fastest way to include shell commands is to indent the code with four space such as in:
+Alternatively, one can indent the code with four space such as in:
 
 ```md
     abinit < tbase1_x.files 2> log &
@@ -99,6 +103,16 @@ do ii=1, 10
   write(*,*)"Hello world"
 end do
 ```
+
+To obtain inline highlighting, simply use back-ticks. As an example:
+~~~text
+Inline `code` has `back-ticks` around it.
+~~~
+
+produces:
+
+Inline `code` has `back-ticks` around it.
+
 
 ### Tables
 
