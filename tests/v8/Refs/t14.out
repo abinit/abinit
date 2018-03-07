@@ -2,7 +2,7 @@
 .Version 8.5.1 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -34,17 +34,19 @@
    prt_model         1
      strcpli        -1
  Fit the coefficients :
-        fit_coeff         1
-       fit_cutoff       0.0
-       fit_option         0
-       fit_ncycle         2
-         fit_grid         1         1         1
-   fit_rangePower         3         4
-   fit_anhaStrain         0
-   fit_SPCoupling         1
-    fit_nbancoeff         0
+        fit_coeff  1
+ fit_generateTerm  0
+       fit_cutoff  0.00000000E+00
+       fit_option  0
+       fit_ncycle  2
+         fit_grid  1  1  1
+    fit_ts_option  0
+   fit_rangePower  3  4
+   fit_anhaStrain  0
+   fit_SPCoupling  1
+    fit_nbancoeff  0
      fit_bancoeff
-    fit_nfixcoeff         2
+    fit_nfixcoeff  2
      fit_fixcoeff         1     2
  Miscellaneous information :
          asr         2
@@ -172,27 +174,27 @@ dipdip_range         1         1         1
  Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
    Energy          :   3.7052088257134135E+00
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.8729467327226348E-03
-   Forces          :   7.3678367059221714E-03
-   Stresses        :   5.0511002680046302E-04
+   Forces+Stresses :   7.5066662460718152E-03
+   Forces          :   7.3678367059221732E-03
+   Stresses        :   1.3882954014964190E-04
 
- N   Selecting          MSEE              MSEFS              MSEF              MSES
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3      3         1.9765125847E+00  4.3922666391E-03  3.8456936182E-03  5.4657302093E-04
- 4      4         1.9767912499E+00  3.9837066556E-03  3.8415430215E-03  1.4216363416E-04
+ 3     3           1.9685974359E+00  4.0003838705E-03  3.8455523719E-03  1.5483149867E-04
+ 4     4           2.0031281256E+00  3.7876180836E-03  3.6336164702E-03  1.5400161341E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.9521245996E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.3342873988E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.3013657042E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>  -9.3589800830E-01 (Ru_x-O1_x)^2(eta_1)^1
+ 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/f.u.):
-   Energy          :   1.9767912499334965E+00
+   Energy          :   2.0031281255862630E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.9837066556193393E-03
-   Forces          :   3.8415430214621951E-03
-   Stresses        :   1.4216363415714458E-04
+   Forces+Stresses :   3.7876180836314273E-03
+   Forces          :   3.6336164702180729E-03
+   Stresses        :   1.5400161341335444E-04
 
 
 ================================================================================

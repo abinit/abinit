@@ -9,7 +9,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, GMR, VO, LR, RWG, YMN, RS)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, YMN, RS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -271,7 +271,7 @@ end subroutine zpad_free
 !!
 !! OUTPUT
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!  see also ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see also ~abinit/doc/variables/vargs.htm#ngfft
 !! nfftot= ngfft(1)*ngfft(2)*ngfft(3)=Total number of points in the FFT grid.
 !!
 !! NOTES
@@ -715,7 +715,7 @@ end function check_rot_fft
 !!  nsym=Number of symmetries.
 !!  symrel(3,3,nsym)=Symmetries in real space in reduced coordinates.
 !!  tnons(3,nsym)=Fractional translations.
-!!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  err(3,nsym)=The max error for each symmetry. (given in terms of the FFT vectors)
@@ -820,7 +820,7 @@ end function fft_check_rotrans
 !!  nsym=Number of symmetries.
 !!  symrel(3,3,nsym)=Symmetries in real space in reduced coordinates.
 !!  tnons(3,nsym)=Fractional translations.
-!!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  irottb(ngfftot,nsym)=Indeces of $R^{-1}(r-\tau)$ in the FFT box.
@@ -941,7 +941,7 @@ end subroutine rotate_fft_mesh
 !! INPUTS
 !! mG0(3)= For each reduced direction gives the max G0 component to account for umklapp processes.
 !! npwvec=Number of plane waves
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! gvec(3,npwvec)=Reduced coordinates of G vectors.
 !!
 !! OUTPUT
@@ -1168,7 +1168,7 @@ end function g2ifft
 !!  Returns the set of G-vectors in the FFT mesh and the maximal kinetic energy of k+G.
 !!
 !! INPUTS
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! kpt(3)=input k vector (reduced coordinates --in terms of reciprocal lattice primitive translations)
 !! gmet(3,3)=reciprocal space metric (bohr^-2)
 !!

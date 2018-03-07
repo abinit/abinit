@@ -11,7 +11,7 @@
 !! of the derivatives in this routine and the remaining of the code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (AF,DRH)
+!! Copyright (C) 1998-2018 ABINIT group (AF,DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

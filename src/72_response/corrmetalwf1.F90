@@ -10,7 +10,7 @@
 !! 1st-order WF orthogonal to C_n,k+q, restore the "active space" content of the first-order WF.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MT)
+!! Copyright (C) 2009-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

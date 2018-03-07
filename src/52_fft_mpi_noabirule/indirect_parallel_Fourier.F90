@@ -15,7 +15,7 @@
 !! A final ordering put everything in place
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GZ)
+!! Copyright (C) 1998-2018 ABINIT group (GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,9 +26,9 @@
 !!  left(2,nleft)=left hand side
 !!  mpi_enreg=information about MPI parallelization
 !!  ngleft(18)=contain all needed information about 3D FFT for the left hand side
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngright(18)=contain all needed information about 3D FFT for the right hand side
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nleft=second dimension of left array (for this processor)
 !!  nright=second dimension of right array (for this processor)
 !!  sizeindex=size of the index array (different form nright, because it is global to all proccessors)

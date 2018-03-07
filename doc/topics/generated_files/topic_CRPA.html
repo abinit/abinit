@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to calculate the effective Coulomb interaction with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (BAmadon)
+<h5>Copyright (C) 2016-2018 ABINIT group (BAmadon)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../users/generated_files/help_features.html#5">help_features#5</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#5">help_features#5</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_CRPA.html#1">Introduction.</a><li>2. <a href="topic_CRPA.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_CRPA.html#3">Related input variables.</a><li>4. <a href="topic_CRPA.html#4">Selected input files.</a><li>5. <a href="topic_CRPA.html#5">References.</a></ul>
@@ -45,10 +45,10 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <p>LDA+U as well as DFT+DMFT requires as input values the effective Coulomb interaction. Two ways to compute them are available in ABINIT.
 
-<p>Firstly, the constrained Random Phase Approximation <a href="../../biblio/generated_files/bib_biblio.html#Aryasetiawan2004">[Aryasetiawan2004]</a> <a href="../../input_variables/generated_files/varset_gw.html#ucrpa">ucrpa</a> allows one to take into account 
-the screening of the Coulomb interaction between correlated electrons, by non-interacting electrons. For non-entangled bands (<a href="../../input_variables/generated_files/varset_gw.html#ucrpa">ucrpa</a>= 1), the bands excluded from the polarisability
-can be specified either by a band index (<a href="../../input_variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a>) or an energy window (<a href="../../input_variables/generated_files/varset_gw.html#ucrpa_window">ucrpa_window</a>) <a href="../../biblio/generated_files/bib_biblio.html#Amadon2014">[Amadon2014]</a>.
-<p>For entangled bands (<a href="../../input_variables/generated_files/varset_gw.html#ucrpa">ucrpa</a>= 2}), the scheme used in ABINIT <a href="../../biblio/generated_files/bib_biblio.html#Shih2012">[Shih2012]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Sakuma2013">[Sakuma2013]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Amadon2014">[Amadon2014]</a> uses a band and k-point dependent
+<p>Firstly, the constrained Random Phase Approximation <a href="../../biblio/generated_files/bib_biblio.html#Aryasetiawan2004">[Aryasetiawan2004]</a> <a href="../../variables/generated_files/varset_gw.html#ucrpa">ucrpa</a> allows one to take into account 
+the screening of the Coulomb interaction between correlated electrons, by non-interacting electrons. For non-entangled bands (<a href="../../variables/generated_files/varset_gw.html#ucrpa">ucrpa</a>= 1), the bands excluded from the polarisability
+can be specified either by a band index (<a href="../../variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a>) or an energy window (<a href="../../variables/generated_files/varset_gw.html#ucrpa_window">ucrpa_window</a>) <a href="../../biblio/generated_files/bib_biblio.html#Amadon2014">[Amadon2014]</a>.
+<p>For entangled bands (<a href="../../variables/generated_files/varset_gw.html#ucrpa">ucrpa</a>= 2}), the scheme used in ABINIT <a href="../../biblio/generated_files/bib_biblio.html#Shih2012">[Shih2012]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Sakuma2013">[Sakuma2013]</a>,<a href="../../biblio/generated_files/bib_biblio.html#Amadon2014">[Amadon2014]</a> uses a band and k-point dependent
 weight to define the polarisability, using Wannier orbitals as correlated orbitals.
 <p>This method is well adapted to compute the effective interaction for the same orbitals used in DFT+DMFT. To
 use the same orbitals as in DFT+U, the Wannier functions can be ajusted such that the bare interaction is close to the bare interaction of atomic orbitals as used in DFT+<i>U</i> (see tutorial).
@@ -78,9 +78,9 @@ DFT+U approach. Prerequisite : DFT+U.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#ucrpa">ucrpa</a>   [calculation of the screened interaction U with the Constrained RPA method]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a>   [For the calculation of U with the Constrained RPA method, gives correlated BANDS]<br>
-... <a href="../../input_variables/generated_files/varset_gw.html#ucrpa_window">ucrpa_window</a>   [For the calculation of U with the Constrained RPA method, gives energy WINDOW]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#ucrpa">ucrpa</a>   [calculation of the screened interaction U with the Constrained RPA method]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_gw.html#ucrpa_bands">ucrpa_bands</a>   [For the calculation of U with the Constrained RPA method, gives correlated BANDS]<br>
+... <a href="../../variables/generated_files/varset_gw.html#ucrpa_window">ucrpa_window</a>   [For the calculation of U with the Constrained RPA method, gives energy WINDOW]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

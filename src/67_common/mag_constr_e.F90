@@ -7,7 +7,7 @@
 !! This routine is called to compute the energy corresponding to constrained magnetic moments.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (ILuk)
+!! Copyright (C) 1998-2018 ABINIT group (ILuk)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

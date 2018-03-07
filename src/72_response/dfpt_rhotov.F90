@@ -10,7 +10,7 @@
 !!   - some contributions to the 2nd-order energy
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,8 +18,6 @@
 !!
 !! INPUTS
 !!  cplex: if 1, real space 1-order WF on FFT grid are REAL; if 2, COMPLEX
-!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
-!!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
 !!  idir=direction of atomic displacement (=1,2 or 3 : displacement of atom ipert along the 1st, 2nd or 3rd axis).
 !!  ipert=type of the perturbation
@@ -28,7 +26,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  nhat1(cplex*nfft,2nspden*usepaw)= -PAW only- 1st-order compensation density
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
@@ -73,8 +71,8 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dotprod_vn,hartre,hartrestr
-!!      sqnorm_v,timab
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_v1zeeman,dotprod_vn
+!!      hartre,hartrestr,sqnorm_v,timab
 !!
 !! SOURCE
 
@@ -85,10 +83,10 @@
 #include "abi_common.h"
 
 
- subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
+ subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
-&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1)
+&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
 
  use defs_basis
  use defs_abitypes
@@ -111,14 +109,14 @@
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
- integer,intent(in) :: optene,optres,paral_kgb,usepaw,usexcnhat
+ integer,intent(in) :: optene,optres,paral_kgb,usepaw,usexcnhat,ixcrot
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: ehart01 !vz_i
  real(dp),intent(out) :: vres2
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kxc(nfft,nkxc)
- real(dp),intent(in) :: vxc(cplex*nfft,nspden)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),intent(in) :: vxc(nfft,nspden)
  real(dp),intent(in) :: nhat(nfft,nspden)
  real(dp),intent(in) :: nhat1(cplex*nfft,nspden)  !vz_d
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
@@ -147,9 +145,11 @@
 
  call timab(157,1,tsec)
 
- !FR EB
+ !FR EB SPr
  if (nspden==4) then
-   MSG_WARNING('DFPT with nspden=4 works just for m quantization axis along z, for insulators and norm-conserving psp!')
+   if(usepaw==1) then
+     MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
+   end if
  end if
 
 !Get size of FFT grid
@@ -177,43 +177,10 @@
    rhor1_ => rhor1
  end if
 
- ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+
  if(ipert==natom+5)then
-   if (nspden==4) then
-     if(idir==3)then       ! Zeeman field along the 3rd axis (z)   
-       v1zeeman(:,1)=-0.5d0
-       v1zeeman(:,2)=+0.5d0
-       v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)= 0.0d0
-     else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
-       v1zeeman(:,1)= 0.0d0
-       v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)=+0.5d0   
-     else                  ! Zeeman field along the 1st axis (x)
-       v1zeeman(:,1)= 0.0d0
-       v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)=-0.5d0
-       v1zeeman(:,4)= 0.0d0
-     end if
-   else if (nspden==2) then
-     v1zeeman(:,1)=-0.5d0
-     v1zeeman(:,2)= 0.5d0
-   else 
-     v1zeeman(:,1)= 0.0d0
-   end if
- else
-   if (nspden==4) then
-     v1zeeman(:,1)= 0.0d0
-     v1zeeman(:,2)= 0.0d0
-     v1zeeman(:,3)= 0.0d0
-     v1zeeman(:,4)= 0.0d0
-   else if (nspden==2) then
-     v1zeeman(:,1)= 0.0d0
-     v1zeeman(:,2)= 0.0d0   
-   else
-     v1zeeman(:,1)= 0.0d0         
-   end if
+   ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+   call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -254,8 +221,9 @@
    if (nspden==4) then
      optnc=1
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
-     call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1)
+
+     call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+&     nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1,ixcrot=ixcrot)
 
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
@@ -268,7 +236,9 @@
    if (usepaw==0) then
      call dotprod_vn(cplex,rhor1,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
-     call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+     if (ipert==natom+5) then
+       call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+     end if
    else
      if (usexcnhat/=0) then
        ABI_ALLOCATE(rhor1_nohat,(cplex*nfft,1))
@@ -281,6 +251,7 @@
        call dotprod_vn(cplex,rhor1_,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      end if
    end if
+
 !  Note that there is a factor 2 difference with the similar GS formula
    elpsp1=two*(elpsp1+elpsp10)
  end if
@@ -289,13 +260,14 @@
 !Compute XC valence contribution exc1 and complete eventually Vxc^(1)
  if (optene>0) then
    ABI_ALLOCATE(vxc1val,(cplex*nfft,nspden))
+   vxc1val=zero
    option=2
 !FR SPr EB non-collinear magnetism
    if (nspden==4) then
      optnc=1
      nkxc_cur=nkxc
-     call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     nkxc_cur,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1)
+     call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+&     nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1,ixcrot=ixcrot)
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
@@ -332,18 +304,21 @@
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)+v1zeeman(ifft,ispden)
+       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vresid1(ifft,ispden)=vxc1_(ifft,ispden)+v1zeeman(ifft,ispden)-vtrial1(ifft,ispden)
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)-vtrial1(ifft,ispden)
        end do
      end do
    end if
 
+   if (ipert==natom+5) then
+     vresid1 = vresid1 + v1zeeman
+   end if
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
 
@@ -355,16 +330,20 @@
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+v1zeeman(ifft,ispden)
+       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)+v1zeeman(ifft,ispden)
+         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
        end do
      end do
+   end if
+
+   if (ipert==natom+5) then
+     vtrial1 = vtrial1 + v1zeeman
    end if
 
  end if
@@ -377,7 +356,9 @@
    ABI_DEALLOCATE(vxc1_)
  end if
 
- ABI_DEALLOCATE(v1zeeman)
+ if (ipert==natom+5) then
+   ABI_DEALLOCATE(v1zeeman)
+ end if
 
  call timab(157,2,tsec)
 

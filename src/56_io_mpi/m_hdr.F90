@@ -11,7 +11,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2018 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -199,9 +199,9 @@ MODULE m_hdr
     !???
     abifile_t(varname="stm", fform=110, ext="STM", class="density"), &
     abifile_t(varname="kinedr", fform=70, ext="KDEN", class="density"), &
-    abifile_t(varname="elfr", fform=64, ext="EELF", class="density"), &
-    abifile_t(varname="elfr_up", fform=65, ext="EELF_UP", class="density"), &
-    abifile_t(varname="elfr_down", fform=66, ext="EELF_DOWN", class="density"), &
+    abifile_t(varname="elfr", fform=64, ext="ELF", class="density"), &
+    abifile_t(varname="elfr_up", fform=65, ext="ELF_UP", class="density"), &
+    abifile_t(varname="elfr_down", fform=66, ext="ELF_DOWN", class="density"), &
     abifile_t(varname="laprhor", fform=71, ext="LDEN", class="density"), &
 
     ! Files with potentials
@@ -392,11 +392,11 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  case ("PAWDEN")
    varname = "pawrhor"
    ! TODO: Other paw densities
- case ("EELF")
+ case ("ELF")
    varname = "elfr"
- case ("EELF_UP")
+ case ("ELF_UP")
    varname = "elfr_up"
- case ("EELF_DOWN")
+ case ("ELF_DOWN")
    varname = "elfr_down"
  case ("GDEN1")
    varname = "grhor_1"

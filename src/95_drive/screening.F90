@@ -7,7 +7,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
+!! Copyright (C) 2001-2018 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -316,7 +316,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !=============================================
 !==== Open and read pseudopotential files ====
 !=============================================
- call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level30,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
+ call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
 !=== Initialize dimensions and basic objects ===
  call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&

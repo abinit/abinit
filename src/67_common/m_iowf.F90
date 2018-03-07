@@ -7,7 +7,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -331,6 +331,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      !NCF_CHECK(ncerr)
 #else 
      MSG_ERROR("ETSF_IO is not activated")
+     ABI_UNUSED(psps%ntypat)
 #endif
    end if
 

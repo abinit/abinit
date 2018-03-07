@@ -7,7 +7,7 @@
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -176,8 +176,8 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: spad,spadc,spadc1,spadc2,irow,my_nbks
  integer :: ndegs,wtqm,wtqp,mod10
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,ifft,npw_k
- real(dp) :: fact_sp,theta_mu_minus_e0i,tol_empty,norm,gw_gsq
- complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
+ real(dp) :: fact_sp,theta_mu_minus_e0i,tol_empty,gw_gsq
+ complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
 !arrays

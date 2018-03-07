@@ -10,7 +10,7 @@
 !! and internal strain tensors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@
 !!  mgfft=maximum size of 1D FFTs
 !!  mpi_enreg=information about MPI parallelization
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftf(18)= -PAW ONLY- contain all needed information about 3D FFT for the fine grid
 !!              (ngfftf=ngfft for norm-conserving potential runs)
 !!  nkxc=2nd dimension of kxc

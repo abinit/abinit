@@ -7,7 +7,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 !!    %ktab(nbz)= table giving for each k-point in the BZ (kBZ), the corresponding
 !!    %ktabi(nbz)= for each k-point in the BZ defines whether inversion has to be considered
 !!    %ktabp(nbz)= phase factor associated to tnons
-!! gwx_ngfft(18)=Information about 3D FFT for the oscillator strengths, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! gwx_ngfft(18)=Information about 3D FFT for the oscillator strengths, see ~abinit/doc/variables/vargs.htm#ngfft
 !! gwx_nfftot=number of points of the FFT grid for GW wavefunctions
 !! Vcp <vcoul_t datatype> containing information on the cutoff technique
 !!    %vc_sqrt(npwx,nqibz)= square-root of the coulombian potential for q-points in the IBZ

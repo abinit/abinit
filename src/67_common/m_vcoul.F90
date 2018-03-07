@@ -10,7 +10,7 @@
 !!  Procedures to deal with the singularity for q-->0 are also provided.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2018 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1490,7 +1490,7 @@ end subroutine vcoul_print
 !!  Vcp<vcoul_t>=the datatype to be destroyed
 !!
 !! PARENTS
-!!      bethe_salpeter,gwls_hamiltonian,mrgscr,screening,sigma
+!!      bethe_salpeter,gwls_hamiltonian,mrgscr,screening,setup_sigma,sigma
 !!
 !! CHILDREN
 !!      calck0,paw_jbessel,quadrature

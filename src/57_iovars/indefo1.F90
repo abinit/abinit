@@ -9,7 +9,7 @@
 !!  as other input variables whose existence is needed for other initialisations to proceed).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (XG,MM,FF)
+!! Copyright (C) 2009-2018 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,6 +106,7 @@ subroutine indefo1(dtset)
  dtset%kptopt=0
 !L
  dtset%lexexch(:)=-1
+ dtset%ldaminushalf(:)=0
  dtset%lpawu(:)=-1
 !M
  dtset%maxestep=0.005d0

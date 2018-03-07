@@ -26,13 +26,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <h3>This page gives hints on how to compute phonon frequencies and modes, IR and Raman spectra, Born effective charges, IR reflectivity ... with the ABINIT package.
 <hr>
 
-<h5>Copyright (C) 2016-2017 ABINIT group (MT)
+<h5>Copyright (C) 2016-2018 ABINIT group (MT)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5>
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
- Mentioned in &nbsp; <a href="../../topics/generated_files/topic_nonlinear.html">topic_nonlinear</a>, &nbsp; <a href="../../topics/generated_files/topic_q-points.html">topic_q-points</a>, &nbsp; <a href="../../users/generated_files/help_features.html#6">help_features#6</a>. 
+ Mentioned in &nbsp; <a href="../../guide/generated_files/help_features.html#6">help_features#6</a>, &nbsp; <a href="../../topics/generated_files/topic_nonlinear.html">topic_nonlinear</a>, &nbsp; <a href="../../topics/generated_files/topic_q-points.html">topic_q-points</a>. 
  <hr>
  <h3><b>Table of content: </b></h3> 
  <ul> <li>1. <a href="topic_Phonons.html#1">Introduction.</a><li>2. <a href="topic_Phonons.html#2">Related lesson(s) of the tutorial.</a><li>3. <a href="topic_Phonons.html#3">Related input variables.</a><li>4. <a href="topic_Phonons.html#4">Selected input files.</a><li>5. <a href="topic_Phonons.html#5">References.</a></ul>
@@ -58,7 +58,7 @@ common input variables. Usually, the action of an input variable with the same n
 is very similar, although there are some input variables that govern more options in ANADDB then in ABINIT,
 because of the previously mentioned difference in capabilities. In the database of input variables, 
 the input variables related to ABINIT or ANADDB are clearly distinguished.
-<p>The band-by-band decomposition of the Born effective charge tensors can be computed thanks to <a href="../../input_variables/generated_files/varset_dfpt.html#prtbbb">prtbbb</a>. 
+<p>The band-by-band decomposition of the Born effective charge tensors can be computed thanks to <a href="../../variables/generated_files/varset_dfpt.html#prtbbb">prtbbb</a>. 
 The related localization tensor (see <a href="../../biblio/generated_files/bib_biblio.html#Veithen2002">[Veithen2002]</a> can also be computed.  
 <p>Phonon calculations are arbitrary q-points can be done under finite electric field (<a href="../../topics/generated_files/topic_Berry.html#">topic_Berry</a>).
 <p>It will be the easiest to discover the capabilities of these two executables through the
@@ -90,28 +90,28 @@ creation of the "Derivative Data Base" (DDB) is presented.</li>
 <h3><b>3. Related input variables.</b></h3>
 
 
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>   [Response Function : ATomic POLarisation]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>   [Response Function : DIRections]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#asr@anaddb">asr@anaddb</a>   [Acoustic Sum Rule]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag@anaddb</a>   [DIElectric FLAG]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt@anaddb</a>   [Number of Grids points for Q PoinTs]<br>
-... <a href="../../input_variables/generated_files/varset_dfpt.html#rfasr">rfasr</a>   [Response Function : Acoustic Sum Rule]<br>
-<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#chneut">chneut</a>   [CHarge NEUTrality treatment ]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut@anaddb</a>   [Integer for CHarge NEUTrality treatment]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#dipdip">dipdip</a>   [DIPole-DIPole interaction ]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#eivec@anaddb">eivec@anaddb</a>   [EIgenVECtors]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#enunit@anaddb">enunit@anaddb</a>   [ENergy UNITs]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#frmax@anaddb">frmax@anaddb</a>   [FRequency MAXimum]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#frmin@anaddb">frmin@anaddb</a>   [FRequency MINimum]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#nfreq@anaddb">nfreq@anaddb</a>   [Number of FREQuencies]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#prtvol@anaddb">prtvol@anaddb</a>   [PRinT VOLume]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#q1shft@anaddb">q1shft@anaddb</a>   [Q shifts for the grid number 1]<br>
-... <a href="../../input_variables/generated_files/varset_eph.html#symdynmat">symdynmat</a>   [SYMmetrize the DYNamical MATrix]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#symdynmat@anaddb">symdynmat@anaddb</a>   [SYMmetrize the DYNamical MATrix]<br>
-<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varset_anaddb.html#rfmeth@anaddb">rfmeth@anaddb</a>   [Response-Function METHod]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#selectz@anaddb">selectz@anaddb</a>   [SeLECT Z]<br>
-... <a href="../../input_variables/generated_files/varset_anaddb.html#thermal_supercell@anaddb">thermal_supercell@anaddb</a>   [THERMALized SUPERCELL lattice vectors]<br>
+<p>Compulsory input variables:<p>... <a href="../../variables/generated_files/varset_dfpt.html#rfatpol">rfatpol</a>   [Response Function : ATomic POLarisation]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#rfdir">rfdir</a>   [Response Function : DIRections]<br>
+<p>Basic input variables:<p>... <a href="../../variables/generated_files/varset_anaddb.html#asr@anaddb">asr@anaddb</a>   [Acoustic Sum Rule]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#dieflag@anaddb">dieflag@anaddb</a>   [DIElectric FLAG]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#ngqpt@anaddb">ngqpt@anaddb</a>   [Number of Grids points for Q PoinTs]<br>
+... <a href="../../variables/generated_files/varset_dfpt.html#rfasr">rfasr</a>   [Response Function : Acoustic Sum Rule]<br>
+<p>Useful input variables:<p>... <a href="../../variables/generated_files/varset_rlx.html#amu">amu</a>   [Atomic Mass Units]<br>
+... <a href="../../variables/generated_files/varset_eph.html#chneut">chneut</a>   [CHarge NEUTrality treatment ]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#chneut@anaddb">chneut@anaddb</a>   [Integer for CHarge NEUTrality treatment]<br>
+... <a href="../../variables/generated_files/varset_eph.html#dipdip">dipdip</a>   [DIPole-DIPole interaction ]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#eivec@anaddb">eivec@anaddb</a>   [EIgenVECtors]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#enunit@anaddb">enunit@anaddb</a>   [ENergy UNITs]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#frmax@anaddb">frmax@anaddb</a>   [FRequency MAXimum]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#frmin@anaddb">frmin@anaddb</a>   [FRequency MINimum]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#nfreq@anaddb">nfreq@anaddb</a>   [Number of FREQuencies]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#prtvol@anaddb">prtvol@anaddb</a>   [PRinT VOLume]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#q1shft@anaddb">q1shft@anaddb</a>   [Q shifts for the grid number 1]<br>
+... <a href="../../variables/generated_files/varset_eph.html#symdynmat">symdynmat</a>   [SYMmetrize the DYNamical MATrix]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#symdynmat@anaddb">symdynmat@anaddb</a>   [SYMmetrize the DYNamical MATrix]<br>
+<p>Input variables for experts:<p>... <a href="../../variables/generated_files/varset_anaddb.html#rfmeth@anaddb">rfmeth@anaddb</a>   [Response-Function METHod]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#selectz@anaddb">selectz@anaddb</a>   [SeLECT Z]<br>
+... <a href="../../variables/generated_files/varset_anaddb.html#thermal_supercell@anaddb">thermal_supercell@anaddb</a>   [THERMALized SUPERCELL lattice vectors]<br>
 
 <br><br><a href=#top>Go to the top</a>
 

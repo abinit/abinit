@@ -12,7 +12,7 @@
 !! Monkhorst-Pack set of k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (JCC,XG)
+!! Copyright (C) 1999-2018 ABINIT group (JCC,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,7 @@
 !!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983)
 !!
 !! PARENTS
-!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,m_fstab,m_ifc
+!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,initorbmag,m_fstab,m_ifc
 !!      m_tdep_abitypes
 !!
 !! CHILDREN

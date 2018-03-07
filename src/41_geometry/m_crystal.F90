@@ -7,7 +7,7 @@
 !! Module containing the definition of the crystal_t data type and methods used to handle it.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG, YP)
+!!  Copyright (C) 2008-2018 ABINIT group (MG, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -699,7 +699,7 @@ end subroutine print_symmetries
 !! symbols = array with the symbol of each atoms
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
 !!      mati3inv,sg_multable

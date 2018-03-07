@@ -8,7 +8,7 @@
 !!  Output file name is DEN.vtk
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (SPr)
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,13 +78,18 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
 !Local variables-------------------------------
 !scalars
- integer :: denvtk,nfields
+ integer :: denvtk,denxyz,denxyz_im,nfields
  integer :: nx,ny,nz,nfft_tot
- integer :: ii,jj,kk,ind,jfft
+ integer :: ii,jj,kk,ind,ispden
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
  real    :: rx,ry,rz
  integer :: nproc_fft,ir
  character(len=500) :: msg
+ character(len=10)  :: outformat
+ character(len=50)   :: fname_vtk
+ character(len=50)   :: fname_xyz
+ character(len=50)   :: fname_xyz_re
+ character(len=50)   :: fname_xyz_im
 !arrays
  real(dp),allocatable :: rhorfull(:,:)
 
@@ -109,7 +114,12 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
  DBG_EXIT("COLL")
 
-!write(std_out,*) ' Writing out .vtk file: ',fname
+ fname_vtk=adjustl(adjustr(fname)//".vtk")
+ fname_xyz=adjustl(adjustr(fname)//".xyz")
+ fname_xyz_re=adjustl(adjustr(fname)//"_re.xyz")
+ fname_xyz_im=adjustl(adjustr(fname)//"_im.xyz")
+ !write(std_out,*) ' Writing out .vtk file: ',fname_vtk
+ !write(std_out,*) ' Writing out .xyz file: ',fname_xyz
 
   !if 1 or two component density then write out either 1 or 2 scalar density fields
   !if 4, then write one scalar field (density) and one vector field (magnetization density)
@@ -151,9 +161,25 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  if(mpi_rank==mpi_head)then
 
     ! Open the output vtk file
-   if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
+   if (open_file(fname_vtk,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
      MSG_WARNING(msg)
      RETURN
+   end if
+
+   if(cplex==1) then
+     if (open_file(fname_xyz,msg,newunit=denxyz,status='replace',form='formatted') /=0) then
+       MSG_WARNING(msg)
+       RETURN
+     end if
+   else if (cplex==2) then
+     if (open_file(fname_xyz_re,msg,newunit=denxyz,status='replace',form='formatted') /=0) then
+       MSG_WARNING(msg)
+       RETURN
+     end if
+     if (open_file(fname_xyz_im,msg,newunit=denxyz_im,status='replace',form='formatted') /=0) then
+       MSG_WARNING(msg)
+       RETURN
+     end if
    end if
 
     ! Write the header of the output vtk file
@@ -164,6 +190,14 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
    write(denvtk,"(a,3i6)") 'DIMENSIONS ', nx,ny,nz
    write(denvtk,"(a,i18,a)") 'POINTS ',nfft_tot,' double'
 
+   if (nspden==1) then
+     outformat="(4e16.8)"
+   else if (nspden==2) then
+     outformat="(5e16.8)"
+   else
+     outformat="(7e16.8)"
+   end if
+
     ! Write out information about grid points
    do kk=0,nz-1
      do jj=0,ny-1
@@ -173,10 +207,23 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
          ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
          rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
          write(denvtk,'(3f16.8)') rx,ry,rz  !coordinates of the grid point
-
+         ind=1+ii+nx*(jj+ny*kk)
+         if (cplex==1) then
+           write(denxyz,outformat) rx,ry,rz,(rhorfull(ind,ispden),ispden=1,nspden)
+         else
+           write(denxyz,outformat)    rx,ry,rz,(rhorfull(2*ind-1,ispden),ispden=1,nspden)
+           write(denxyz_im,outformat) rx,ry,rz,(rhorfull(2*ind  ,ispden),ispden=1,nspden)
+         end if
        end do
      end do
    end do
+   
+   if(cplex==1) then
+     close(denxyz)
+   else
+     close(denxyz)
+     close(denxyz_im)
+   end if
 
     ! Write out information about field defined on the FFT mesh
    write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot

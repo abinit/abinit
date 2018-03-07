@@ -1,0 +1,255 @@
+\documentclass[11pt]{article}
+\pagestyle{empty}
+\textheight=26cm
+\topmargin=-2cm
+\textwidth=17cm
+\oddsidemargin=-0.5cm
+\begin{document}
+{\Huge \bf Help for the AIM utility of the ABINIT package} \\ \\
+
+     Copyright (C) 2002-2018 ABINIT group (PCasek,XG)
+     This file is distributed under the terms of the
+     GNU General Public License, see ~abinit/COPYING
+     or http://www.gnu.org/copyleft/gpl.txt .
+     For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+The AIM utility allows to analyse charge densities
+produced by the ABINIT code. The AIM analysis (Atom-In-Molecule)
+has been proposed by Bader. Thanks to topological
+properties of the charge density, the space is partitioned
+in non-overlapping regions, each containing a nucleus.
+The charge density of each region is attributed to the
+corresponding nucleus, hence the concept of Atom-In-Molecule.
+References to the relevant litterature are to be provided.
+
+The aim utility is generated in the same way as other
+ABINIT utilities (i.e. make allseq).
+
+To run the program one needs to prepare two files:
+\begin{description}
+\item [files-file] file which contains the name of the input files and the
+root for the names of the different output files.
+\item [input-file] file which gives the values of the input variables
+\end{description}
+Except this file you need the output file of ABINIT with the valence
+density in real space $(*\_DEN)$ and the core density files $(*.fc)$ sorting
+from the program for generating pseudopotentials FHI.
+LDA core density files have been generated for the
+whole periodic table, and are available on the ABINIT web site.
+Since the densities are weakly dependent on the choice of the
+XC functional, and moreover, charge density analysis
+is mostly a qualitative tool, these files can be used
+for other functionals. Still, if really accurate
+values for the Bader charge analysis are needed, one should
+generate core density files with the same XC functional as
+for the valence density.
+
+Usually, the grid in the real space for the valence density should be
+taken more fine than the one proposed by ABINIT.
+(For example for the lattice parameter 7-8~a.u. , ngfft at least 64
+gives the precision of the Bader charge estimated to be better
+than 0.003~electrons).
+To run the program type: $$aim\; < \; <files.file> $$
+
+The structure of the {\bf files-file} is as follows: \\[1.5\baselineskip]
+\begin{tabular}{cl}
+ *.in   & \# input-file \\
+ *.den  & \# valence density (output of ABINIT) \\
+ $<root>$ & \# the root of the names of different output files \\
+ at1.fc & \# core density files (in the same order as \\
+ ...    & \# in the ABINIT files-file) \\
+ atN.fc & \\
+\end{tabular} \\[1.5\baselineskip]
+The example of the files-file is shown in the file {\it ./example/mgo.files}.\\
+
+The {\bf input-file} is made in the same manner as the input file of
+ABINIT - it suffices to give the name of the input variable following
+by the value(s) separated by one or more white character(s).
+The names are not case sensitive. All input variables have the meaningful
+default value, however, you have to specify what you want to calculate
+(default = nothing). The example of the simple input file for Oxygen in
+bulk MgO is in {\it ./example/mgo.in}. There are also the
+corresponding output files in this directory.\\
+
+{\large \bf \centering The output files}\\ \\
+The atomic units and cartesian coordinates are used for all output
+parameters. The names of the output files are of the form $<root>.suffixe$.
+There are three main output files: \\
+\begin{description}
+\item [*.crit] - the file with the CPs - they are listing in the order BCPs, RCPs and CCPs.
+The line of the output contains these informations:
+$$ position \quad \frac{eigen\  values}{of\  Hessian} \quad \frac{index\
+of\  the}{bonded\  atom}\footnote{BCPs only} \quad \Delta \rho_c \quad \rho_c, $$
+where position is done with respect to the considered atom.
+\pagebreak
+\item [*.surf] - the file with the Bader surface - there is the head
+of the form:\\[3mm]
+\begin{tabular}{ccc}
+index of the atom & \multicolumn{2}{c}{position} \\
+ntheta & thetamin & thetamax \\
+nphi & phimin & phimax \\
+\end{tabular} \\
+and the list of the Bader surface radiuses:
+$$ \theta \quad \phi \quad r(\theta,\phi) \quad
+W(\theta,\phi)\footnote{the weight for the Gauss quadrature}. $$
+The minimal and maximal radiuses are done at the last line.
+\item [*.out] - the central output file - there are many informations
+which are clearly described.
+Here is some additional information on the integration - there is separated
+integrations of the core and the valence density.
+In both cases the radial integration
+is performed using cubic splines and the angular ones by Gauss
+quadrature. However the principal part of the core density
+{\it of the considered atom} is integrated in the
+sphere of minimal Bader radius using spherical symmetry.
+The rest of the core density (of this atom, out of this sphere)
+together with all the core contributions of the neighbors are added to the
+valence density integration. In the ouput file, there is the result of
+the {\it complete} integration of the core density of the atom,
+then the two contributions (spherical integration vs. the others)
+and then the total Bader charge.
+\item [*.log] - the log file - a lot of informations but it is not
+very nice actually.
+\item [*.gp] - gnuplot script showing the calculated part of the Bader
+  surface with lines.
+\end{description}
+The gnuplot scripts are made in the manner that one needs type only\\
+{\bf load  '{\it file}'} (quotes are necessary).\\
+Note, that this isn't considered as
+the visualization (it is only for working purpose)!
+
+
+
+{\large \bf \centering The list of the input variables}\\ \\
+The atomic units and cartesian coordinates are used for all input
+parameters. \\
+
+{\bf \centering  Driver variables}\\
+\begin{description}
+\item [surf] the calculus of the Bader surface
+  \begin{description}
+    \item [0(d)] not
+    \item [-1] reading from the file ``root''.surf
+    \item [1] calculated
+  \end{description}
+\item [crit] the calculus of the critical points
+  \begin{description}
+    \item [0(d)] not
+    \item [-1] reading from the file ``root''.crit
+    \item [1] calculated (simplified version)
+    \item [2] calculated (standard version)
+    \item [3] calculated (the original version)
+  \end{description}
+  {\bf The original version} searches all CPs starting from the center betwen
+  two and three atoms (atom - neighbor(s)) by
+  Newton-Raphson algorithm - without tests (not recommended) - don't
+  use together with surface analyse!
+{\bf The simplified and standard version} searches CP(3,-1) starting
+  from the center of the pairs~atom-neighbor; then CP(3,1) from the
+  center between two CP(3,-1) and finally CP(3,3) from the center
+  between two CP(3,1). The robust Popeliers's algorithm is used.
+  The difference between two is based in the fact
+  that {\bf the standard version} makes the test if the CP is really
+  on the Bader surface of the calculated atom for each CP, while
+  {\bf the simplified version} only for CP(3,-1). When CP analyse is
+  rather fast (with respect surface determination) 2 is recommended.
+  In all cases the number of neighbors considered is limited by
+  distance cutoff (variable {\bf maxatd})
+\item [irho] the integration of the charge of the Bader atom
+  \begin{description}
+    \item [0(d)] not calculated
+    \item [1] calculated
+  \end{description}
+\item [ivol] the integration of the volume of the Bader atom
+  \begin{description}
+    \item [0(d)] not calculated
+    \item [1] calculated
+  \end{description}
+\item [rsur] the determination of the rayon of the Bader surface for
+the angles specified in the input variable {\bf rsurdir}.
+  \begin{description}
+    \item [0(d)] not calculated
+    \item [1] calculated
+  \end{description}
+\item [follow] follow the gradient path to the corresponding atom
+starting from the position specified in the input variable {\bf foldep}.
+  \begin{description}
+    \item [0(d)] not calculated
+    \item [1] calculated
+  \end{description}
+\item [denout,lapout] the additional output of electronic density
+and of the laplacian of electronic density. The specification of the
+line (plane) in the real space must be given in the input variable
+{\bf vpts} and grid in {\bf ngrid}. It is also possible to get only the
+valence density or the core density (see {\bf dltyp}).
+  \begin{description}
+    \item [0(d)] not
+    \item [1] 1D distribution
+    \item [2] 2D distribution
+  \end{description}
+\item [dltyp] the specification of the contribution of the electronic
+density corresponding to the additional output (denout, lapout).
+  \begin{description}
+    \item [0(d)] total electronic density
+    \item [1] only the valence density
+    \item [2] only the core density
+  \end{description}
+\item [gpsurf]  the additional graphic output (gnuplot script) of the
+irreducible part of the calculated Bader surface.
+  \begin{description}
+    \item [0(d)] not
+    \item [1] given
+  \end{description}
+\end{description}
+
+{\bf Input variables}\\
+\begin{description}
+\item [atom] the index of the investigated atom (1 - default)
+\item [nsa,nsb,nsc] the number of the primitive cell to be constructed
+in each direction and each sense of the primitive translation to
+simulate lattice ((3,3,3) - default).
+\item [inpt] the number of radial points used for integration of the
+Bader charge (100 - default) (not too sensitive).
+\item [ntheta,nphi] the angular grid for the integration of the Bader
+charge (32 $\times$ 48 - default). Proposition : 20 for $[0,\pi/2]$,
+32~for $[0,\pi]$ and 48 for $[0,2\pi]$.
+\item [thetamin,thetamax] the limit of the angular region of the
+Bader surface which is calculated ($[0,\pi]$ - default).
+\item [phimin,phimax] the limit of the angular region of the
+Bader surface which is calculated ($[0,2\pi]$ - default)
+\item [atrad] the first estimation of the Bader radius (not too
+important - it is used only two times) (1.0 - default).
+\item [radstp] the first step in searching the exact Bader radius
+(0.05 - default) (0.03 is well usually)
+\item [folstp] the first step for following the gradient path
+(0.05 - default)
+\item [ratmin] the first estimation of the least radius of the bassin of the
+atom (the distance in which the procedure following the gradient path
+annonces that the gradient path finishes in the corresponding atom)
+(1.0 - default). This parameter is very important for the speed of the
+calcul, but this first estimation is not usually used because program
+makes the new one based on the knowledge of CPs. In fact after
+the CP analyse, the new estimation is done by the product of adhoc
+parameter coff1 (0.98) ({\bf adhoc.f90}) and the distance of the nearest
+bonding CP. If there is problem later, coff2 (0.95) is used instead.
+\item [scal] the scaling of the cartesian coordinates for the calcul
+of the distances ($x'[i]=x[i]/scal[i]$)
+($[1.0,1.0,1.0]$ - default) - not really usefull.
+\item [maxatd] - the maximal distance for the atoms considering for
+searching CP (10.0 - default).
+\item [maxcpd] - the maximal distance of CPs considering for the
+corresponding atom (5.0 - default).
+\item [rsurdir] variable only for the case rsurf=1 i.e. for the
+  calcul of the singular Bader radius (rsur) = corresponding
+  angular coordinates ($[0.0,0.0]$ - default).
+\item [foldep] variable only for the case follow=1 i.e. for the
+procedure following only the gradient path (follow) - starting point
+($[0.0,0.0,0.0]$ - default).
+\item [ngrid] dependent variable for the additional output
+(denout, lapout) - the grid in the real space ($[30,30]$ - default)
+\item [vpts] dependent variable for the additional output
+(denout, lapout) - the points defining the basic vector(s) of the line
+or rectangle in real space (the first = the basic point)
+(all points are par default nulify).
+\end{description}
+\end{document}
