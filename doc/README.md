@@ -12,7 +12,7 @@ Install the python packages required to build the static website with:
 
 then install the mkdocs plugin with:
 
-    cd abimkdocs_plugins
+    cd abimkdocs_plugin
     python setup.py install
 
 If you use conda, you may want to create a new environment based on python3.6 with:
