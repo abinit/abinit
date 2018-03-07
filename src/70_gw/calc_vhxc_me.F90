@@ -272,7 +272,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      end if
    end if
 
-   write(msg, '(a, f4.2)') ' Fock fraction = ', max(Dtset%hyb_mixing,Dtset%hyb_mixing_sr)
+   write(msg, '(a, f4.2)') ' Fock fraction = ', max(abs(Dtset%hyb_mixing),abs(Dtset%hyb_mixing_sr))
    call wrtout(std_out,msg,'COLL')
    write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',Dtset%hyb_range_dft, ' (bohr^-1)'
    call wrtout(std_out,msg,'COLL')
