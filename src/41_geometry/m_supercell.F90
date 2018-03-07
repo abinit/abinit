@@ -401,6 +401,8 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 
  ! fix gauge by imposing real displacement for first atom in first direction 
  ! multiply by normalized complex conjugate of first element
+ ! NB 6 March 2018: this may be imposing a positive (not just real) displacement for 1st atom along x!!! 
+ ! That might be problematic below, though for the thermal displacement method freeze_displ swaps sign for each new mode 
  phase = cmplx(one,zero)
  if (abs(zdispl(1,1)) > tol10) then
    phase = conjg(zdispl(1,1)) / abs(zdispl(1,1))
