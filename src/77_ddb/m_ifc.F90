@@ -613,7 +613,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- new_wght = 1
+ new_wght = (nqshft.eq.0)
  call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
 &     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
 
