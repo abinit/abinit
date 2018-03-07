@@ -128,10 +128,10 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
  if(usepaw==1) then
    ABI_DATATYPE_ALLOCATE(cprj1_k,(natom,nspinor*nbd))
    ABI_DATATYPE_ALLOCATE(cprj2_k,(natom,nspinor*nbd))
- endif
+ end if
  if(usepaw==1) then
    call pawcprj_alloc(cprj1_k,cprj_set(1,1,1)%ncpgr,dimcprj)
- endif
+ end if
 
  smn(:,:,:)=zero
 
@@ -149,9 +149,9 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
      end do
      if(usepaw==1) then
        call pawcprj_get(atindx1,cprj1_k,cprj_set(:,:,ind_set1),natom,1,ibg,ikpt,1,isppol,mband,&
-&         mkmem,natom,nbd,nbd,nspinor,nsppol,0,&
-&         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-     endif
+&       mkmem,natom,nbd,nbd,nspinor,nsppol,0,&
+&       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+     end if
 
      do iset2=1,nset2
 
@@ -171,7 +171,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
            call pawcprj_get(atindx1,cprj2_k,cprj_set(:,:,ind_set2),natom,1,ibg,ikpt,1,isppol,mband,&
 &           mkmem,natom,nbd,nbd,nspinor,nsppol,0,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         endif
+         end if
 
 !        Calculate Smn=<cg1|cg2>
          call dotprod_g(dotr,doti,istwf,npw*nspinor,2,cwavef1,cwavef2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -199,7 +199,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
              end do
              ia=ia+nattyp(itypat)
            end do
-         endif ! usepaw
+         end if ! usepaw
 
 !      if(.false.)then
        else 
@@ -227,16 +227,16 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
              end do
              ia=ia+nattyp(itypat)
            end do
-         endif ! usepaw
+         end if ! usepaw
          doti=zero
 
-       endif ! Compare ind_set1 and ind_set2
- 
+       end if ! Compare ind_set1 and ind_set2
+       
        smn(1,iset1,iset2)=smn(1,iset1,iset2)+dotr
        smn(2,iset1,iset2)=smn(2,iset1,iset2)+doti
 
-     enddo ! iset2
-   enddo ! iset1
+     end do ! iset2
+   end do ! iset1
 
 !  End loop over bands ibd 
    icgb=icgb+npw*nspinor
@@ -250,9 +250,9 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
      if(ind_set2<ind_set1 .and. ind_set2>shift_set1)then
        smn(1,iset1,iset2)= smn(1,iset2,iset1)
        smn(2,iset1,iset2)=-smn(2,iset2,iset1)
-     endif
-   enddo
- enddo
+     end if
+   end do
+ end do
 
  ABI_DEALLOCATE(cwavef1)
  ABI_DEALLOCATE(cwavef2)

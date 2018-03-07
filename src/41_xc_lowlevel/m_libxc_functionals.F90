@@ -10,7 +10,7 @@
 !!  Also contains basic container datatype for LibXC interfacing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MOliveira,LHH,FL,GMR,MT)
+!! Copyright (C) 2008-2017 ABINIT group (MOliveira,LHH,FL,GMR,MT)
 !! This file is distributed under the terms of the
 !! GNU Gener_al Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1745,6 +1745,10 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
      endif
    end if
 
+#else
+   ABI_UNUSED(hyb_mixing)
+   ABI_UNUSED(hyb_mixing_sr)
+   ABI_UNUSED(hyb_range)
 #endif
 
  end do

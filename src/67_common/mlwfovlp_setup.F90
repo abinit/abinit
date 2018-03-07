@@ -239,8 +239,11 @@
      end if
 #endif
    end do !isppol
-
-
+#else
+   ABI_UNUSED(gamma_only)
+   ABI_UNUSED(real_lattice)
+   ABI_UNUSED(recip_lattice)
+   ABI_UNUSED(spinors)
 #endif
 !  do isppol=1,nsppol
 !  if(spin.ne.0 .and. spin.ne.isppol) cycle

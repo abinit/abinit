@@ -1105,8 +1105,8 @@ end subroutine abihist_copy
 !! INPUTS
 !!  hist_in <type(abihist)>
 !!  tolerance
-!!  store_all = flag to known if we need to increment ihist (store all the history)
-!!              or just call shift (store just le last step)
+!!  store_all = flag to know if we need to increment ihist (store all the history)
+!!              or just call shift (store just the last step)
 !!
 !! OUTPUT
 !!  similar= 1 the records are consistent
@@ -1150,6 +1150,8 @@ real(dp) :: x,y
 !array
 character(len= 500) :: msg
 ! ***************************************************************
+
+ ABI_UNUSED(store_all)
 
  similar=1
 
@@ -1239,6 +1241,7 @@ end subroutine abihist_compare_and_copy
 !!  ifirst=1 if first access to the file
 !!  itime = index of the step in the hist file
 !!  natom=Number of atoms.
+!!  nctime=NetCdf TIME between output of molecular dynamics informations 
 !!  ntypat=Number of type of atoms.
 !!  typat(natom)=Type of each natom
 !!   amu(ntypat)=mass of the atoms (atomic mass unit)
@@ -1259,7 +1262,7 @@ end subroutine abihist_compare_and_copy
 !!
 !! SOURCE
 
-subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
+subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 &                        typat,amu,znucl,dtion,mdtemp)
 
 
@@ -1273,7 +1276,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,itime,natom,ntypat
+ integer,intent(in) :: ifirst,itime,natom,nctime,ntypat
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
 !arrays
@@ -1284,11 +1287,11 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
 !scalars
- integer :: ncerr,ncid,npsp
+ integer :: itime_file,ncerr,ncid,npsp
  integer :: xcart_id,xred_id,fcart_id,fred_id
  integer :: vel_id,vel_cell_id,etotal_id,acell_id,rprimd_id,strten_id
  integer :: ekin_id,entropy_id,mdtime_id
- logical :: has_nimage=.false.
+ logical :: has_nimage=.false.,need_to_write
  integer, parameter :: imgmov=0
 !arrays
 #endif
@@ -1297,10 +1300,14 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
 
 #if defined HAVE_NETCDF
 
-
+ need_to_write = .FALSE.
+ if(nctime==0 .or. ifirst==1 .or. (itime > nctime .and.mod(itime,nctime) == 0)) need_to_write = .TRUE.
+!Return if we don't need to write the HIST file at this step
+ if (.not. need_to_write) return
+ 
  if (ifirst==1) then
 !##### First access: Create NetCDF file and write defs
-
+   
    write(std_out,*) 'Write iteration in HIST netCDF file'
    npsp=size(znucl)
 
@@ -1309,36 +1316,46 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
    NCF_CHECK_MSG(ncerr," create netcdf history file")
 
 !  Define all dims and vars
-   call def_file_hist(ncid,filename,natom,1,ntypat,npsp,has_nimage)
+   call def_file_hist(ncid,natom,1,ntypat,npsp,has_nimage)
 
 !  Write variables that do not change
 !  (they are not read in a hist structure).
    call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
 
+!  Compute the itime for the hist file
+   itime_file = 1
  else
 !##### itime>2 access: just open NetCDF file
 
-   write(std_out,*) 'Write iteration in HIST netCDF file'
+   if(need_to_write) then
+    
+     write(std_out,*) 'Write iteration in HIST netCDF file'
+   
+!    Open netCDF file
+     ncerr = nf90_open(path=trim(filename),mode=NF90_WRITE, ncid=ncid)
+     NCF_CHECK_MSG(ncerr," open netcdf history file")
 
-!  Open netCDF file
-   ncerr = nf90_open(path=trim(filename),mode=NF90_WRITE, ncid=ncid)
-   NCF_CHECK_MSG(ncerr," open netcdf history file")
+!    Compute the itime for the hist file     
+     itime_file = itime
+     if(nctime > 0) itime_file = int(anint(real(itime / nctime,sp)))
 
+   end if
  endif
 
-!##### Write variables into the dataset
-!Get the IDs
- call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
-&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
+ if(need_to_write) then
+  !##### Write variables into the dataset
+  !Get the IDs
+   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+&       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 !Write
- call write_vars_hist(ncid,hist,natom,has_nimage,1,itime,&
-&     xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
-&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+   call write_vars_hist(ncid,hist,natom,has_nimage,1,itime_file,&
+&       xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+&       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !##### Close the file
- ncerr = nf90_close(ncid)
- NCF_CHECK_MSG(ncerr," close netcdf history file")
-
+   ncerr = nf90_close(ncid)
+   NCF_CHECK_MSG(ncerr," close netcdf history file")
+ end if
 #endif
 
 end subroutine write_md_hist
@@ -1465,7 +1482,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
        ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=ncid)
        NCF_CHECK_MSG(ncerr," create netcdf history file")
 !      Define all dims and vars
-       call def_file_hist(ncid,filename,natom,nimage_,ntypat,npsp,has_nimage)
+       call def_file_hist(ncid,natom,nimage_,ntypat,npsp,has_nimage)
 !      Write variables that do not change
 !      (they are not read in a hist structure).
        call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu,mdtemp)
@@ -1764,7 +1781,7 @@ end subroutine read_md_hist_img
 !!
 !! SOURCE
 
-subroutine def_file_hist(ncid,filename,natom,nimage,ntypat,npsp,has_nimage)
+subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1780,7 +1797,6 @@ implicit none
  integer,intent(in) :: ncid
  integer,intent(in) :: natom,nimage,ntypat,npsp
  logical,intent(in) :: has_nimage
- character(len=*),intent(in) :: filename
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF

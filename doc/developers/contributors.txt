@@ -39,7 +39,7 @@ Lucas Baguet              lucas.baguet@cea.fr
 Jean-Michel Beuken        jean-michel.beuken@uclouvain.be
 Jordan Bieder             jordan.bieder@cea.fr
 Anton Bokhanchuk          antonbokhanchuk@gmail.com
-Fran\c{c}ois Bottin           francois.bottin@cea.fr
+Fran\c{c}ois Bottin       francois.bottin@cea.fr
 Yohann Bouchet            yohann.bouchet@cea.fr
 Eric Bousquet             eric.Bousquet@ulg.ac.be
 Fabien Bruneval           fabien.bruneval@cea.fr

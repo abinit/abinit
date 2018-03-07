@@ -24,7 +24,6 @@
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-!!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
@@ -70,7 +69,7 @@
 
 #include "abi_common.h"
 
- subroutine mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,hdr,kg,&
+ subroutine mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -113,7 +112,6 @@
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
- type(hdr_type),intent(in) :: hdr
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
 !arrays
@@ -183,8 +181,6 @@
 #endif
 
 !************************************************************************
-
- ABI_UNUSED(hdr%natom)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !1) Initialize variables and allocations
@@ -1188,7 +1184,6 @@
 !                end if
 !                if(ISNAN(dble(caux3))) then
 !                write(std_out,*) 'NaN: caux3(ikpt,iwan,iband,kk,jj):',ikpt,iwan,iband,kk,jj
-!                write(std_out,*) 'caux,caux2 and occ=',caux,caux2,occ(jj),ch10 
 !                end if
 !                END DEBUG 
                end do
@@ -1221,7 +1216,8 @@
      ABI_DEALLOCATE(occ_wan)
      ABI_DEALLOCATE(tdocc_wan)
    end if
-
+#else
+   ABI_UNUSED(occ)
 #endif
 !  FIXME: looks like there is no automatic test which goes through here: g95 bot did not catch
 !  the missing deallocations

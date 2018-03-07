@@ -354,7 +354,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(951,1,tsec)
  if (dtset%prtwant==2) then
 
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,hdr,kg,&
+   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -369,7 +369,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
 
 !  Call Wannier90
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,hdr,kg,&
+   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)

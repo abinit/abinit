@@ -1593,7 +1593,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  character(len=1) :: tag_l,tag_1m,tag_is
  character(len=2) :: tag_2m
  character(len=10) :: tag_il,tag_at,tag_grace
- character(len=500) :: message
+ character(len=1500) :: message
  character(len=fnlen) :: tmpfil
  type(atomdata_t) :: atom
 !arrays

@@ -961,32 +961,32 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 !------------------------------------------------------------------------------
 
  if (usepaw == 1 .and. dtefield%has_expibi == 1) then
-    ABI_ALLOCATE(calc_expibi,(2,natom))
-    do idir = 1, 3
-       dk = dtefield%dkvecs(1:3,idir)
-       calc_expibi = zero
-       call expibi(calc_expibi,dk,natom,xred)
-       dtefield%expibi(1:2,1:natom,idir) = calc_expibi
-    end do
+   ABI_ALLOCATE(calc_expibi,(2,natom))
+   do idir = 1, 3
+     dk = dtefield%dkvecs(1:3,idir)
+     calc_expibi = zero
+     call expibi(calc_expibi,dk,natom,xred)
+     dtefield%expibi(1:2,1:natom,idir) = calc_expibi
+   end do
 !   call expibi(dtefield%expibi,dtefield%dkvecs,natom,xred)
    dtefield%has_expibi = 2
    ABI_DEALLOCATE(calc_expibi)
  end if
 
  if (usepaw == 1 .and. dtefield%has_qijb == 1) then
-    ABI_ALLOCATE(calc_qijb,(2,dtefield%lmn2max,natom))
+   ABI_ALLOCATE(calc_qijb,(2,dtefield%lmn2max,natom))
 
-    do idir = 1, 3
-       dk = dtefield%dkvecs(1:3,idir)
-       calc_qijb = zero
-       call qijb_kk(calc_qijb,dk,dtefield%expibi(1:2,1:natom,idir),&
-&        gprimd,dtefield%lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
-       dtefield%qijb_kk(1:2,1:dtefield%lmn2max,1:natom,idir) = calc_qijb
+   do idir = 1, 3
+     dk = dtefield%dkvecs(1:3,idir)
+     calc_qijb = zero
+     call qijb_kk(calc_qijb,dk,dtefield%expibi(1:2,1:natom,idir),&
+&     gprimd,dtefield%lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
+     dtefield%qijb_kk(1:2,1:dtefield%lmn2max,1:natom,idir) = calc_qijb
 !    call qijb_kk(dtefield%qijb_kk,dtefield%dkvecs,dtefield%expibi,&
 ! &   gprimd,dtefield%lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
-    end do
-    dtefield%has_qijb = 2
-    ABI_DEALLOCATE(calc_qijb)
+   end do
+   dtefield%has_qijb = 2
+   ABI_DEALLOCATE(calc_qijb)
  end if
  
  if (usepaw == 1 .and. dtefield%has_rij == 1) then
