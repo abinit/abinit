@@ -245,7 +245,7 @@ to the HTML meta section.
   Writing in all caps is like shouting so use all caps sparingly.
 
 
-## How to add/modify an nput variables
+## How to add/modify an input variable 
 
 The yaml database has been replaced by python modules.
 The variables are now declared in `~abinit/abimkdocs/variables_CODENAME.py`.
