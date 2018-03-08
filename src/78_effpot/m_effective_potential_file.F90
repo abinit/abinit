@@ -2888,8 +2888,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   end do
 
   if (abs(wcount1-wcount2)/(wcount1+wcount2)>tol8) then
-    write(message,'(2a,ES15.4,a,ES15.4,a)')'The total wghatm is no more the same',ch10,&
-&                        icount1,' before and ', icount2, ' now.'
+    write(message,'(2a,es15.4,a,es15.4,a,es15.4)')'The total wghatm has changed',ch10,&
+&    wcount1,' before and ', wcount2, ' now, difference being ',wcount1-wcount2
     MSG_BUG(message)
   end if
 
