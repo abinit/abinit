@@ -16,9 +16,10 @@ use_directory_urls: True
 
 pages:
 #- Quick Start: 
+#- Home: index.md
 - User Guide:
-    - NewUser: guide/new_user.md
-    #- Introduction: index.md
+    #- NewUser: guide/new_user.md
+    - NewUser: index.md
     - Installation: 
         - HowTo: installation.md
         - MacOSX: README_MacOSX.md
