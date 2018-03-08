@@ -155,7 +155,7 @@ Variable(
 Allow setting the target band gap, in eV. ([[elphflag@anaddb]]=1).
 
 NOTE XG20170811: apparently no effective test for this input variable. Also,
-the descirption is strange ...!
+the description is strange ...!
 """,
 ),
 
@@ -181,6 +181,11 @@ Note that in the latter case, the rprim of the unit cell have to be 1.0 0.0
 
 Warning: the generation of q-points in anaddb is rather old-fashioned, and
 should be replaced by routines used by the main abinit code.
+
+Warning:
+The value brav=-1 is used for backwards compatibility: it corresponds to brav=1, with the weights for the
+interpolation of the phonon band structure determined by another (now obsolete) algorithm than the default (new as v8.7) algorithm
+based on Wigner-Seitz cells. The default algorithm has a correct treatment of symmetries.
 """,
 ),
 
