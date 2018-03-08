@@ -1740,12 +1740,17 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "symsigma", "nbsum"])
    NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"])
+   NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eta", "wr_step"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"])
    NCF_CHECK(ncerr)
 
    ! Define arrays for results.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("ngqpt", "int", "three"), &
+     nctkarr_t("eph_ngqpt_fine", "int", "three"), &
      nctkarr_t("ddb_ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
@@ -1800,15 +1805,21 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
    ncerr = nctk_write_iscalars(ncid, &
-       [character(len=nctk_slen) :: "symsigma", "nbsum"], &
-       [new%symsigma, new%nbsum])
+       [character(len=nctk_slen) :: "symsigma", "nbsum", "symdynmat", "eph_intmeth", "eph_transport"], &
+       [new%symsigma, new%nbsum, dtset%symdynmat, dtset%eph_intmeth, dtset%eph_transport])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, &
      [character(len=nctk_slen) :: "eta", "wr_step"], &
      [aimag(new%ieta), new%wr_step])
    NCF_CHECK(ncerr)
 
+   ncerr = nctk_write_dpscalars(ncid, &
+     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"], &
+     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie])
+   NCF_CHECK(ncerr)
+
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), new%ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))

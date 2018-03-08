@@ -3960,6 +3960,13 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
  end if
 
+ ! TODO: Support nsig in phgamma_init
+ eph_scalprod = 0
+ gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
+
+ call phgamma_init(gams,cryst,ifc,dtset%symdynmat,eph_scalprod,dtset%eph_transport,gamma_ngqpt,nsppol,nspinor,n0)
+ call wrtout(std_out, sjoin("Will compute",itoa(gams%nqibz),"q-points in the IBZ"))
+
  ncid = nctk_noid
 #ifdef HAVE_NETCDF
  ! Open the netcdf file used to store the results of the calculation.
@@ -3972,7 +3979,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ! Add used eph dimensions.
    !ncerr = nctk_def_dims(ncid, [ &
    !  nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
-   !  nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
    !  nctkdim_t("nqibz", new%nqibz), nctkdim_t("nqbz", new%nqbz)], &
    !  defmode=.True.)
    !NCF_CHECK(ncerr)
@@ -3984,6 +3990,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
    ! Define arrays for results.
    ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
      nctkarr_t("ddb_ngqpt", "int", "three") &
    ])
@@ -4003,18 +4010,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie])
    NCF_CHECK(ncerr)
 
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
  end if
 #endif
  call edos_free(edos)
-
- ! TODO: Support nsig in phgamma_init
- eph_scalprod = 0
- gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
-
- call phgamma_init(gams,cryst,ifc,dtset%symdynmat,eph_scalprod,dtset%eph_transport,gamma_ngqpt,nsppol,nspinor,n0)
- call wrtout(std_out, sjoin("Will compute",itoa(gams%nqibz),"q-points in the IBZ"))
 
  ! Open the DVDB file
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
