@@ -2551,7 +2551,7 @@ end subroutine asrif9
 !! See bigbx9 for the algorithm.
 !!
 !! INPUTS
-!! brav= Bravais Lattice (1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
 !! ngqpt(3)= Numbers used to generate the q points to sample the
 !!   Brillouin zone using an homogeneous grid
 !! nqshft= number of q-points in the repeated cell for the Brillouin zone sampling
@@ -2631,7 +2631,7 @@ end subroutine make_bigbox
 !! matrix into its corresponding interatomic force.
 !!
 !! INPUTS
-!! brav= Bravais Lattice (1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
 !! choice= if 0, simply count nrpt ; if 1, checks that the input mrpt
 !!   is the same as nrpt, and generate rpt(3,mrpt)
 !! mrpt=dimension of rpt
@@ -2693,7 +2693,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 
 !Simple Cubic Lattice
- if (brav==1) then
+ if (abs(brav)==1) then
    lim1=((ngqpt(1))+1)*lqshft+buffer
    lim2=((ngqpt(2))+1)*lqshft+buffer
    lim3=((ngqpt(3))+1)*lqshft+buffer
@@ -2809,7 +2809,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    end if
 
  else
-   write(msg,'(a,i0,a)')' The value of brav= ',brav,' is not allowed (should be 1, 2 or 4).'
+   write(msg,'(a,i0,a)')' The value of brav= ',brav,' is not allowed (should be -1, 1, 2 or 4).'
    MSG_BUG(msg)
  end if
 
@@ -2828,7 +2828,7 @@ end subroutine bigbx9
 !! to its correspondent (rcan) in canonical coordinates.
 !!
 !! INPUTS
-!! brav= Bravais Lattice (1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
 !! natom= Number of atoms in the unit cell
 !! rprim(3,3)= Normalized coordinates  of primitive vectors
 !!
@@ -2885,7 +2885,7 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
 !Study of the different cases for the Bravais lattice:
 
 !Simple Cubic Lattice
- if (brav==1) then
+ if (abs(brav)==1) then
 
    do iatom=1,natom
 
@@ -3028,12 +3028,12 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
      trans(:,iatom)=tt(:)-rcan(:,iatom)
    end do
 
-!  End of the possible cases for brav : 1, 2, 4.
+!  End of the possible cases for brav : -1, 1, 2, 4.
  else
 
    write(message, '(a,i0,a,a,a)' )&
 &   'The required value of brav=',brav,' is not available.',ch10,&
-&   'It should be 1,2 or 4 .'
+&   'It should be -1, 1,2 or 4 .'
    MSG_BUG(message)
  end if
 
@@ -3142,7 +3142,7 @@ end subroutine canct9
 !! the Big Box needed to generate the interatomic forces.
 !!
 !! INPUTS
-!! brav=bravais lattice (1=simple lattice,2=face centered lattice,
+!! brav=bravais lattice (1 or -1=simple lattice,2=face centered lattice,
 !!  3=centered lattice,4=hexagonal lattice)
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
@@ -3180,7 +3180,7 @@ subroutine chkrp9(brav,rprim)
 
 ! *********************************************************************
 
- if (brav==1) then
+ if (abs(brav)==1) then
 !  Simple Cubic Lattice No condition in this case !
    continue
 
@@ -3245,7 +3245,7 @@ subroutine chkrp9(brav,rprim)
 
    write(message, '(a,i4,a,a,a,a,a)' )&
 &   'The value of brav=',brav,' is not allowed.',ch10,&
-&   'Only  1,2,3 or 4 are allowed.',ch10,&
+&   'Only  -1, 1,2,3 or 4 are allowed.',ch10,&
 &   'Action: change the value of brav in your input file.'
    MSG_ERROR(message)
  end if
@@ -3763,7 +3763,7 @@ end subroutine ifclo9
 !! The R points outside the chosen space will have a 0 weight.
 !!
 !! INPUTS
-!! brav = Bravais lattice (1=S.C.;2=F.C.C.;4=Hex.)
+!! brav = Bravais lattice (1 or -1=S.C.;2=F.C.C.;4=Hex. -1 is for old algo to find weights, =1 is for Wigner-Seitz algo)
 !! gprim(3,3)= Normalized coordinates in reciprocal space
 !! natom= Number of atoms in the unit cell
 !! ngqpt(6)= Numbers used to sample the Brillouin zone
@@ -3777,7 +3777,6 @@ end subroutine ifclo9
 !! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3))
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!! new_wght=Activates new weights for brav=1 (0=old version, 1=new version)
 !!
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
@@ -3791,7 +3790,7 @@ end subroutine ifclo9
 !!
 !! SOURCE
 
-subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,new_wght,wghatm)
+subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,wghatm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3804,7 +3803,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt,new_wght
+ integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt
  real(dp),intent(out) :: r_inscribed_sphere
 !arrays
  integer,intent(inout) :: ngqpt(9)
@@ -3813,7 +3812,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,nptws,nreq
+ integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,new_wght,nptws,nreq
  integer :: idir
  real(dp) :: factor,sumwght,normsq,proj
  character(len=500) :: message
@@ -3886,7 +3885,8 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
  end if
  if(nqshft/=1)factor=factor*2
 
- if (new_wght==1) then
+ if (ibrav==1) then
+
    ! Does not support multiple shifts
    if (nqshft/=1) then
      write(message, '(a)' ) 'This version of the weights does not support nqshft/=1.'
@@ -3939,7 +3939,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
    do ib=1,natom
 
 !    Simple Lattice
-     if (brav==1) then
+     if (abs(brav)==1) then
 !      In this case, it is better to work in reduced coordinates
 !      As rcan is in canonical coordinates, => multiplication by gprim
        do ii=1,3
@@ -3956,13 +3956,13 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !      Compute the difference vector
 
 !      Simple Cubic Lattice
-       if (brav==1) then
+       if (abs(brav)==1) then
 !        Change of rpt to reduced coordinates
          do ii=1,3
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
            rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
          end do
-         if (new_wght==1) then
+         if (brav==1) then
            ! rdiff in cartesian coordinates
            do ii=1,3
              rdiff_tmp(ii)=rdiff(1)*rprimd(ii,1)+rdiff(2)*rprimd(ii,2)+rdiff(3)*rprimd(ii,3)
@@ -3982,7 +3982,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 
        if(nqshft==1 .and. brav/=4)then
 
-         if (brav/=1 .or. new_wght==0) then
+         if (brav/=1) then
            do ii=1,3
 !            If the rpt vector is greater than
 !            the allowed space => weight = 0.0
@@ -4179,7 +4179,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 &       'The number of q points is : ',nqpt,ch10,&
 &       'You might increase "buffer" in bigbx9.f, and recompile.',ch10,&
 &       'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
-&       'if brav/=1, in which case you should change brav to 1.'
+&       'if abs(brav)/=1, in which case you should change brav to 1.'
        MSG_BUG(message)
      end if
    end do
