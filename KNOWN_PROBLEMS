@@ -36,12 +36,14 @@ allows to get correct results.
 gnu 4.9 and 5.4: libxc#82 is disactivated on tikal
 gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi, and abiref_gnu_5.3_XX
 
-Intel ifort compiler (presently tested : 13.1, 14.0, 15.0, 16.0, 17.0)
+Intel ifort compiler (presently tested : 13.1, 14.0, 15.0, 16.0, 17.0, 18.0)
 Ifort 13.1, mpiio#25, mpiio#26, paral#25, paral#29i, paral#93, paral#94 are disactivated (MPI IO, KGB, or calculations with exact exchange)
 Ifort 14.0 is mostly OK, except for paral#93 and paral#94.
 Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07.
+There seems to be a bug in Ifort 18.0 : the ADVANCE='NO' specification for the write instruction does not work apparently.
+ In ABINIT, there are a few occurences of this command, in particular for mrgscr and mrgdv... So we are waiting for Ifort 18.1 ... 
 
 NAG Compilo
 Nag 6.2, mostly OK, except for test etsf_io#4, mpiio#28, v7#80, paral#25, paral#30
