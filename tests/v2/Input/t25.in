@@ -16,7 +16,7 @@
    atifc  2 3    ! List of atoms
 
 !Wavevector grid number 1 (coarse grid, from DDB)
-  brav    1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  brav   -1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
   ngqpt   2  2  2   ! Monkhorst-Pack indices
   nqshft  4         ! number of q-points in repeated basic q-cell
   q1shft   0.0  0.0  0.0
