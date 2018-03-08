@@ -224,7 +224,7 @@ Values initialized with zeros
 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =       12473.4865 (m/s)
+-                                   =          12.4735 [km/s]
 
  Debye frequency from partial sums:     0.5262667706E-02 (Ha)
 -                                 =     0.3462669009E+02 (THz)
@@ -279,13 +279,14 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-Number of bands in sum: 54
+Number of bands in self-energy: 54
 Symsigma: 0 Timrev: 1
-delta shift: 1.000000E-01 [eV]
-Number of real frequencies: 101 , Step: 2.000000E-02 [eV]
+Imaginary shift in the denominator: 1.000000E-01 [eV]
+Number of frequencies along the real axis: 101 , Step: 2.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
-ngqpt: [2,2,2]
-Number of q-points in the BZ: 8
+Ab-initio q-mesh from DDB file: [2,2,2]
+Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+Number of q-points in the IBZ: 3
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
@@ -369,7 +370,7 @@ Values initialized with zeros
 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =       12473.4865 (m/s)
+-                                   =          12.4735 [km/s]
 
  Debye frequency from partial sums:     0.5262667706E-02 (Ha)
 -                                 =     0.3462669009E+02 (THz)
@@ -406,13 +407,14 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in sum: 54
+Number of bands in self-energy: 54
 Symsigma: 1 Timrev: 1
-delta shift: 1.000000E-01 [eV]
-Number of real frequencies: 101 , Step: 2.000000E-02 [eV]
+Imaginary shift in the denominator: 1.000000E-01 [eV]
+Number of frequencies along the real axis: 101 , Step: 2.000000E-02 [eV]
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
-ngqpt: [2,2,2]
-Number of q-points in the BZ: 8
+Ab-initio q-mesh from DDB file: [2,2,2]
+Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+Number of q-points in the IBZ: 3
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8

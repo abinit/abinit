@@ -3541,14 +3541,14 @@ Variable(
     defaultval=[0, 0, 0],
     mnemonics="Electron-PHonon: Number of Grid Q-PoinTs in FINE grid.",
     text="""
-This variable activates the interpolation of the first-order variation of the
+This variable activates the **interpolation** of the first-order variation of the
 self-consistent potential in the electron-phonon code. If eph_nqgpt_fine
 differs from [0, 0, 0], the code will use the Fourier transform to interpolate
 the DFPT potentials on this fine q-mesh starting from the irreducible set of
 q-points read from the DDB file. This approach is similar to the one used to
 interpolate the interatomic force constants in q-space. If eph_ngqpt_fine is
 not given, the EPH code uses the list of irreducible q-points reported in the
-DDB file (default behavior).
+DDB file i.e. [[ddb_ngqpt]] (default behavior).
 """,
 ),
 

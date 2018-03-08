@@ -3851,6 +3851,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  integer :: isig,n1,n2,n3,n4,n5,n6,nspden,eph_scalprod,do_ftv1q
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
  real(dp) :: cpu,wall,gflops
  real(dp) :: edos_step,edos_broad
  real(dp) :: ecut,eshift,eig0nk,dotr,doti,dksqmax
@@ -3965,6 +3968,43 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    NCF_CHECK(edos_ncwrite(edos, ncid))
+
+   ! Add used eph dimensions.
+   !ncerr = nctk_def_dims(ncid, [ &
+   !  nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
+   !  nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
+   !  nctkdim_t("nqibz", new%nqibz), nctkdim_t("nqbz", new%nqbz)], &
+   !  defmode=.True.)
+   !NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"])
+   NCF_CHECK(ncerr)
+
+   ! Define arrays for results.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("eph_ngqpt_fine", "int", "three"), &
+     nctkarr_t("ddb_ngqpt", "int", "three") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! ======================================================
+   ! Write data that do not depend on the (kpt, spin) loop.
+   ! ======================================================
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+   ncerr = nctk_write_iscalars(ncid, &
+       [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"], &
+       [dtset%eph_intmeth, dtset%eph_transport, dtset%symdynmat])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_write_dpscalars(ncid, &
+     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"], &
+     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
  end if
 #endif
  call edos_free(edos)

@@ -469,7 +469,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
- if (my_rank == master) call sigmaph_print(sigma, ab_out)
+ if (my_rank == master) call sigmaph_print(sigma, dtset, ab_out)
 
  ! This is the maximum number of PWs for all possible k+q treated.
  mpw = sigma%mpw; gmax = sigma%gmax
@@ -1746,6 +1746,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! Define arrays for results.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("ngqpt", "int", "three"), &
+     nctkarr_t("ddb_ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("kcalc", "dp", "three, nkcalc"), &
@@ -1808,6 +1809,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), new%ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), new%kcalc))
@@ -2116,11 +2118,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
            end do
          end do
        end if
-
        !if (self%has_nuq_terms) then
        !  self%vals_nuq(it, bids(:), :, :, :) = sum(self%vals_nuq(it, bids(:), :, :, :)) / nstates
        !end if
-
      end do ! it
    end do ! ideg
  end if ! symsigma == +1
@@ -2285,6 +2285,7 @@ end subroutine sigmaph_gather_and_write
 !!  Print self-energy and QP corrections for given (k-point, spin).
 !!
 !! INPUTS
+!!  dtset<dataset_type>=All input variables for this dataset.
 !!  unt=Fortran unit number
 !!
 !! PARENTS
@@ -2294,7 +2295,7 @@ end subroutine sigmaph_gather_and_write
 !!
 !! SOURCE
 
-subroutine sigmaph_print(self, unt)
+subroutine sigmaph_print(self, dtset, unt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2307,6 +2308,7 @@ subroutine sigmaph_print(self, unt)
 
 !Arguments ------------------------------------
  integer,intent(in) :: unt
+ type(dataset_type),intent(in) :: dtset
  type(sigmaph_t),intent(in) :: self
 
 !Local variables-------------------------------
@@ -2316,14 +2318,16 @@ subroutine sigmaph_print(self, unt)
 ! *************************************************************************
 
  ! Write dimensions
- write(unt,"(a)")sjoin("Number of bands in self-energy summation:", itoa(self%nbsum))
+ write(unt,"(a)")sjoin("Number of bands in self-energy:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
- write(unt,"(a)")sjoin("delta shift: ", ftoa(aimag(self%ieta) * Ha_eV), "[eV]")
+ write(unt,"(a)")sjoin("Imaginary shift in the denominator: ", ftoa(aimag(self%ieta) * Ha_eV), "[eV]")
  write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
  write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
- write(unt,"(a)")sjoin("ngqpt:", ltoa(self%ngqpt))
- write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
+ write(unt,"(a)")sjoin("Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
+ write(unt,"(a)")sjoin("Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
+ !write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
+ write(unt,"(a)")sjoin("Number of q-points in the IBZ:", itoa(self%nqibz))
  write(unt,"(a)")"List of K-points for self-energy corrections:"
  do ikc=1,self%nkcalc
    do is=1,self%nsppol
