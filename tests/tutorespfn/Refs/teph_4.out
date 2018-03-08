@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ANADDB 
+.Version 8.7.6 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h52 )
+.Starting date : Thu  8 Mar 2018.
+- ( at 06h21 )
   
 
 ================================================================================
@@ -74,6 +74,7 @@
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.011  and twall      0.011 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -135,9 +136,9 @@
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -7.900267E-04    1.415627E-05    2.536159E-01
-       2        6.627384E-04    4.128605E-05    1.051067E+00
-       3        6.627384E-04    4.128605E-05    1.051067E+00
+       1       -1.070823E-03    4.447357E-06    4.336884E-02
+       2        9.899831E-04    5.870691E-05    6.697997E-01
+       3        9.899831E-04    5.870691E-05    6.697997E-01
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -149,19 +150,19 @@
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
  mka2f: lambda <omega^2> =     8.891284E-07
- mka2f: lambda <omega^3> =     7.757272E-10
- mka2f: lambda <omega^4> =     8.715049E-13
- mka2f: lambda <omega^5> =     1.108658E-15
- mka2f: isotropic lambda =     8.337445E+00
- mka2f: omegalog  =     1.769558E-04 (Ha)     5.587816E+01 (Kelvin)
+ mka2f: lambda <omega^3> =     9.635612E-10
+ mka2f: lambda <omega^4> =     1.146305E-12
+ mka2f: lambda <omega^5> =     1.460943E-15
+ mka2f: isotropic lambda =     1.312184E+00
+ mka2f: omegalog  =     6.231136E-04 (Ha)     1.967635E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     4.038730E-05 (Ha)     1.275328E+01 (Kelvin)
+-mka2f: MacMillan Tc =     5.436092E-05 (Ha)     1.716580E+01 (Kelvin)
 
 ================================================================================
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
@@ -175,12 +176,12 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  2.71774530E-07  4.50906597E-03
+-  1  0.00000000E+00  0.00000000E+00 -4.50906598E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -4.50906597E-03  2.71774513E-07
+-  1  0.00000000E+00 -4.50906598E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -192,13 +193,13 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
 
 ================================================================================
 
-+Total cpu time      1.154  and wall time      1.154 sec
++Total cpu time      1.323  and wall time      1.323 sec
 
  anaddb : the run completed succesfully.
