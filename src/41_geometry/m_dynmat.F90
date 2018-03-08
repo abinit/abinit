@@ -3885,7 +3885,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
  end if
  if(nqshft/=1)factor=factor*2
 
- if (ibrav==1) then
+ if (brav==1) then
 
    ! Does not support multiple shifts
    if (nqshft/=1) then
