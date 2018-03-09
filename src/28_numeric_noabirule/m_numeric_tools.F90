@@ -111,6 +111,7 @@ MODULE m_numeric_tools
  end interface get_trace
 
  interface get_diag
+   module procedure get_diag_int
    module procedure get_diag_rdp
    module procedure get_diag_cdp
  end interface get_diag
@@ -769,6 +770,51 @@ pure function get_trace_cdp(matrix) result(trace)
 end function get_trace_cdp
 !!***
 
+!!****f* m_numeric_tools/get_diag_int
+!! NAME
+!!  get_diag_int
+!!
+!! FUNCTION
+!!  Return the diagonal of a square matrix as a vector
+!!
+!! INPUTS
+!!  matrix(:,:)
+!!
+!! OUTPUT
+!!  diag(:)=the diagonal
+!!
+!! SOURCE
+
+function get_diag_int(mat) result(diag)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_diag_rdp'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mat(:,:)
+ integer :: diag(SIZE(mat,1))
+
+!Local variables-------------------------------
+ integer :: ii
+! *************************************************************************
+
+ ii=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
+& __FILE__,__LINE__)
+
+ do ii=1,SIZE(mat,1)
+  diag(ii)=mat(ii,ii)
+ end do
+
+end function get_diag_int
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_numeric_tools/get_diag_rdp
@@ -776,13 +822,13 @@ end function get_trace_cdp
 !!  get_diag_rdp
 !!
 !! FUNCTION
-!!  Return the trace of a square matrix as a vector
+!!  Return the diagonal of a square matrix as a vector
 !!
 !! INPUTS
 !!  matrix(:,:)
 !!
 !! OUTPUT
-!!  diag(:)=the diagonalr
+!!  diag(:)=the diagonal
 !!
 !! SOURCE
 function get_diag_rdp(mat) result(diag)

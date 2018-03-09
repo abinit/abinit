@@ -41,13 +41,13 @@ module m_phgamma
 
  use m_time,           only : cwtime
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
+ use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm, get_diag
  use m_io_tools,       only : open_file
  use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
  !use m_cgtools,        only : set_istwfk
- use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
+ use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam, asrif9
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
@@ -514,9 +514,9 @@ end subroutine phgamma_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_phgamma/phgamma_finalize
+!!****f* m_phgamma/phgamma_print
 !! NAME
-!! phgamma_finalize
+!! phgamma_print
 !!
 !! FUNCTION
 !!  Finalize the phgamma_t datatype.
@@ -524,7 +524,7 @@ end subroutine phgamma_init
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure.
 !! ifc<ifc_type>=Interatomic force constants.
-!! n0(nsppol)=Density of states at the Fermi level.
+!! ncid=Netcdf file handler (already open in the caller).
 !!
 !! OUTPUT
 !! gams<phgamma_t>
@@ -536,13 +536,13 @@ end subroutine phgamma_init
 !!
 !! SOURCE
 
-subroutine phgamma_finalize(gams,cryst,ifc)
+subroutine phgamma_print(gams,cryst,ifc,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phgamma_finalize'
+#define ABI_FUNC 'phgamma_print'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -553,6 +553,7 @@ subroutine phgamma_finalize(gams,cryst,ifc)
  type(phgamma_t),intent(inout) :: gams
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: ncid
 
 !Local variables-------------------------------
 !scalars
@@ -561,18 +562,9 @@ subroutine phgamma_finalize(gams,cryst,ifc)
  character(len=500) :: msg
 !arrays
  real(dp) :: phfrq(3*cryst%natom),gamma_ph(3*cryst%natom),lambda_ph(3*cryst%natom)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom)
 
 ! *************************************************************************
-
- ! This call is not executed in elphon!
- if (gams%symgamma == 1) then
-   do spin=1,gams%nsppol
-     do iq_ibz=1,gams%nqibz
-       call tgamma_symm(cryst,gams%qibz(:,iq_ibz),gams%vals_qibz(:,:,:,iq_ibz,spin))
-     end do
-   end do
- end if
 
  ! ==========================================================
  ! write data to files for each q point
@@ -588,6 +580,19 @@ subroutine phgamma_finalize(gams,cryst,ifc)
      do mu=1,gams%natom3
        lambda_tot = lambda_tot + lambda_ph(mu) * gams%wtq(iq_ibz)
      end do
+
+#ifdef HAVE_NETCDF
+   ! Write data to netcdf file
+   if (ncid /= nctk_noid) then
+     !NCF_CHECK(nctk_set_datamode(ncid))
+     if (spin == 1) then
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreq_qibz"), phfrq, start=[1, iq_ibz]))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qibz'), displ_cart, start=[1, 1, 1, iq_ibz]))
+     end if
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phgamma_qibz'), gamma_ph, start=[1, iq_ibz, spin]))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phlambda_qibz'), lambda_ph, start=[1, iq_ibz, spin]))
+   end if
+#endif
 
      ! Output to the main output file
      if (gams%nsppol == 2) then
@@ -613,7 +618,7 @@ subroutine phgamma_finalize(gams,cryst,ifc)
 
  write(ab_out,"(a,f8.4)")" lambda= ",lambda_tot
 
-end subroutine phgamma_finalize
+end subroutine phgamma_print
 !!***
 
 !----------------------------------------------------------------------
@@ -1025,7 +1030,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor1=1
- integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr
+ integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr,ii,asr
  !character(len=500) :: msg
  type(kptrank_type) :: qrank
 !arrays
@@ -1033,7 +1038,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
  real(dp) :: qirr(3),tmp_qpt(3)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
- real(dp),allocatable :: gamma_qpt(:,:,:,:)
+ real(dp),allocatable :: gamma_qpt(:,:,:,:),atmfrc(:,:)
 
 ! *************************************************************************
 
@@ -1142,6 +1147,18 @@ subroutine phgamma_interp_setup(gams,cryst,action)
      do spin=1,gams%nsppol
        call ftgam(gams%wghatm,gams%vals_bz(:,:,:,spin),gams%vals_rpt(:,:,:,spin),gams%natom,gams%nqbz,&
           gams%nrpt,qtor1, coskr, sinkr)
+
+       asr = 0
+       if (asr /= 0) then
+         ABI_MALLOC(atmfrc, (3*gams%natom*3*gams%natom,gams%nrpt))
+         do ii=1,2
+           atmfrc = gams%vals_rpt(ii,:,:,spin)
+           !gals%vals_rpt(2,:,,spin) = zero
+           call asrif9(asr, atmfrc, gams%natom, gams%nrpt, gams%rpt, gams%wghatm)
+           gams%vals_rpt(ii,:,:,spin) = atmfrc
+         end do
+         ABI_FREE(atmfrc)
+       end if
      end do
 
      ABI_FREE(coskr)
@@ -3965,23 +3982,20 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
  call phgamma_init(gams,cryst,ifc,dtset%symdynmat,eph_scalprod,dtset%eph_transport,gamma_ngqpt,nsppol,nspinor,n0)
- call wrtout(std_out, sjoin("Will compute",itoa(gams%nqibz),"q-points in the IBZ"))
+ call wrtout(std_out, sjoin("Will compute", itoa(gams%nqibz), "q-points in the IBZ"))
 
  ncid = nctk_noid
 #ifdef HAVE_NETCDF
  ! Open the netcdf file used to store the results of the calculation.
  if (my_rank == master) then
-   NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_EPH.nc"), xmpi_comm_self))
+   NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_A2F.nc"), xmpi_comm_self))
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    NCF_CHECK(edos_ncwrite(edos, ncid))
 
-   ! Add used eph dimensions.
-   !ncerr = nctk_def_dims(ncid, [ &
-   !  nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
-   !  nctkdim_t("nqibz", new%nqibz), nctkdim_t("nqbz", new%nqbz)], &
-   !  defmode=.True.)
-   !NCF_CHECK(ncerr)
+   ! Add eph dimensions.
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("nqibz", gams%nqibz), nctkdim_t("natom3", natom3)], defmode=.True.)
+   NCF_CHECK(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"], defmode=.True.)
    NCF_CHECK(ncerr)
@@ -3992,7 +4006,14 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
-     nctkarr_t("ddb_ngqpt", "int", "three") &
+     nctkarr_t("ddb_ngqpt", "int", "three"), &
+     ! linewidths in IBZ
+     nctkarr_t('qibz', "dp", "number_of_reduced_dimensions, nqibz"), &
+     nctkarr_t('wtq', "dp", "nqibz"), &
+     nctkarr_t('phfreq_qibz', "dp", "natom3, nqibz"), &
+     nctkarr_t('phdispl_cart_qibz', "dp", "two, natom3, natom3, nqibz"), &
+     nctkarr_t('phgamma_qibz', "dp", "natom3, nqibz, number_of_spins"), &
+     nctkarr_t('phlambda_qibz', "dp", "natom3, nqibz, number_of_spins") &
    ])
    NCF_CHECK(ncerr)
 
@@ -4010,6 +4031,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie])
    NCF_CHECK(ncerr)
 
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), gams%qibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wtq'), gams%wtq))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
@@ -4301,13 +4324,11 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
           1,cryst%symafm,cryst%symrel,timrev1,use_symrec=.False.)
 
        if (dksqmax > tol12) then
-         write(msg, '(7a,es16.6,4a)' )&
-          'The WFK file cannot be used to start thee present calculation ',ch10,&
-          'It was asked that the wavefunctions be accurate, but',ch10,&
-          'at least one of the k points could not be generated from a symmetrical one.',ch10,&
-          'dksqmax=',dksqmax,ch10,&
-          'Action: check your WFK file and k point input variables',ch10,&
-          '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+         write(msg, '(3a,es16.6,7a)' )&
+          "The WFK file cannot be used to compute phonon linewidths.",ch10,&
+          "At least one of the k-points could not be generated from a symmetrical one. dksqmax: ",dksqmax,ch10,&
+          "Q-mesh: ",ltoa(gamma_ngqpt),", K-mesh (from kptrlatt) ",ltoa(get_diag(dtset%kptrlatt)), &
+          'Action: check your WFK file and (k,q) point input variables'
           MSG_ERROR(msg)
        end if
 
@@ -4621,7 +4642,17 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_FREE(gvvvals_out_qibz)
  end if
 
- call phgamma_finalize(gams,cryst,ifc)
+ ! This call is not executed in elphon!
+ if (gams%symgamma == 1) then
+   do spin=1,gams%nsppol
+     do iq_ibz=1,gams%nqibz
+       call tgamma_symm(cryst,gams%qibz(:,iq_ibz),gams%vals_qibz(:,:,:,iq_ibz,spin))
+     end do
+   end do
+ end if
+
+ ! Print gamma(IBZ) to ab_out and ncid
+ if (my_rank == master) call phgamma_print(gams, cryst, ifc, ncid)
 
  ! Interpolate linewidths along the q-path.
  call phgamma_linwid(gams,cryst,ifc,dtset%ph_ndivsm,dtset%ph_nqpath,dtset%ph_qpath,dtfil%filnam_ds(4),ncid,wminmax,comm)

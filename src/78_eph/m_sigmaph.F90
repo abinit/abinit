@@ -48,7 +48,7 @@ module m_sigmaph
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r
+ use m_numeric_tools,  only : arth, c2r, get_diag
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
@@ -705,13 +705,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          1,cryst%symafm,cryst%symrel,sigma%timrev,use_symrec=.False.)
 
        if (dksqmax > tol12) then
-         write(msg, '(7a,es16.6,4a)' )&
-          'The WFK file cannot be used to start the present calculation ',ch10,&
-          'It was asked that the wavefunctions be accurate, but',ch10,&
-          'at least one of the k points could not be generated from a symmetrical one.',ch10,&
-          'dksqmax=',dksqmax,ch10,&
-          'Action: check your WFK file and k point input variables',ch10,&
-          '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+         write(msg, '(3a,es16.6,7a)' )&
+          "The WFK file cannot be used to compute self-energy corrections.",ch10,&
+          "At least one of the k-points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+          "Q-mesh: ",ltoa(sigma%ngqpt),", K-mesh (from kptrlatt) ",ltoa(get_diag(dtset%kptrlatt)), ch10, &
+          'Action: check your WFK file and (k,q) point input variables'
          MSG_ERROR(msg)
        end if
 
