@@ -1,6 +1,6 @@
 
 .Version 8.7.6 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  8 Mar 2018.
-- ( at 23h02 )
+.Starting date : Fri  9 Mar 2018.
+- ( at 06h52 )
   
 - input  file    -> t44.in
 - output file    -> t44.out
@@ -226,12 +226,12 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5483362868E-02 (at units)
--                                   =          11.9959 [km/s]
+ Average speed of sound partial sums:     0.5701666765E-02 (at units)
+-                                   =          12.4735 [km/s]
 
- Debye frequency from partial sums:     0.5061172088E-02 (Ha)
--                                 =     0.3330091261E+02 (THz)
--Debye temperature from partial sums:     0.1598189845E+04 (K)
+ Debye frequency from partial sums:     0.5262667706E-02 (Ha)
+-                                 =     0.3462669009E+02 (THz)
+-Debye temperature from partial sums:     0.1661817053E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -264,8 +264,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__henrique/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__henrique/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -365,12 +365,12 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5483362868E-02 (at units)
--                                   =          11.9959 [km/s]
+ Average speed of sound partial sums:     0.5701666765E-02 (at units)
+-                                   =          12.4735 [km/s]
 
- Debye frequency from partial sums:     0.5061172088E-02 (Ha)
--                                 =     0.3330091261E+02 (THz)
--Debye temperature from partial sums:     0.1598189845E+04 (K)
+ Debye frequency from partial sums:     0.5262667706E-02 (Ha)
+-                                 =     0.3462669009E+02 (THz)
+-Debye temperature from partial sums:     0.1661817053E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -575,41 +575,10 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         10.1        0.17      0.003
-- Total wall clock time (s,m,h):         10.3        0.17      0.003
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           10.1, wall_time =           10.3
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- pspini                         0.356   3.5      0.358   3.5              2      -1.00        0.99       0.99
-- fourwf%(pot)                   0.154   1.5      0.161   1.6           1104      -1.00        0.96       0.96
-- timing timab                   0.119   1.2      0.119   1.2             10      -1.00        1.00       1.00
-- invars2                        0.054   0.5      0.054   0.5              2      -1.00        1.00       1.00
-- others (109)                  -0.014  -0.1     -0.026  -0.3             -1      -1.00        0.55       0.55
--<END_TIMER>
--
-- subtotal                       0.668   6.6      0.666   6.4                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          10.1, wall_time =          10.3
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- pspini                         0.356   3.5      0.358   3.5              2      -1.00        0.99       0.99
-- fourwf%(pot)                   0.154   1.5      0.161   1.6           1104      -1.00        0.96       0.96
-- timing timab                   0.119   1.2      0.119   1.2             10      -1.00        1.00       1.00
-- invars2                        0.054   0.5      0.054   0.5              2      -1.00        1.00       1.00
-- others (109)                  -0.014  -0.1     -0.026  -0.3             -1      -1.00        0.55       0.55
--<END_TIMER>
 
-- subtotal                       0.668   6.6      0.666   6.4                                  1.00       1.00
 
 ================================================================================
 
@@ -675,10 +644,10 @@ P           mkmem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         10.1  wall=         10.3
+- Proc.   0 individual time (sec): cpu=         10.4  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.1  wall=         10.3
+.Delivered   2 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.4  wall=         10.5
