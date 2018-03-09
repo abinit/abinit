@@ -51,7 +51,6 @@ ph_ngqpt   16 16 16   # q-mesh for Fourier interpolatation of IFC and a2F(w)
 ph_nqshift 1
 ph_qshift 
   0 0 0 
-brav -1        # This is calling the old algorithm to compute the weights of the Fourier interpolation
 
 ###############
 ## DATASET 1 ##
