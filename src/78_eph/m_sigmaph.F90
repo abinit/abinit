@@ -1740,9 +1740,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(ncerr)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"])
    NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "ph_intmeth"], defmode=.True.)
+   NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eta", "wr_step"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ph_wstep", "ph_smear"])
    NCF_CHECK(ncerr)
 
    ! Define arrays for results.
@@ -1750,6 +1754,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
      nctkarr_t("ddb_ngqpt", "int", "three"), &
+     nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("kcalc", "dp", "three, nkcalc"), &
@@ -1803,8 +1808,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
    ncerr = nctk_write_iscalars(ncid, &
-       [character(len=nctk_slen) :: "symsigma", "nbsum", "symdynmat", "eph_intmeth", "eph_transport"], &
-       [new%symsigma, new%nbsum, dtset%symdynmat, dtset%eph_intmeth, dtset%eph_transport])
+       [character(len=nctk_slen) :: "symsigma", "nbsum", "symdynmat", "ph_intmeth", "eph_intmeth", "eph_transport"], &
+       [new%symsigma, new%nbsum, dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, dtset%eph_transport])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, &
      [character(len=nctk_slen) :: "eta", "wr_step"], &
@@ -1812,13 +1817,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(ncid, &
-     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"], &
-     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie])
+     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
+     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, dtset%ph_wstep, dtset%ph_smear])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), new%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), new%kcalc))

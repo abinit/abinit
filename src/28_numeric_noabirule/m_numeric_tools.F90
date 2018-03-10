@@ -791,7 +791,7 @@ function get_diag_int(mat) result(diag)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'get_diag_rdp'
+#define ABI_FUNC 'get_diag_int'
 !End of the abilint section
 
  implicit none

@@ -101,6 +101,9 @@ module m_phgamma
   integer :: symgamma
   ! 1 if gamma matrices should be symmetrized by symdyma when using Fourier interpolation
 
+  integer :: asr
+  ! If "Acoustic rule at gamma should be enforced.
+
   integer :: ndir_transp
   ! 0 if no transport, otherwise 3
 
@@ -314,7 +317,9 @@ module m_phgamma
  public :: a2fw_tr_write           ! Write alpha^2F(w) to an external file in text/netcdf format
 !!***
 
- real(dp),private,parameter :: EPH_WTOL=tol7
+ ! TODO: increase
+ !real(dp),private,parameter :: EPH_WTOL=tol7
+ real(dp),private,parameter :: EPH_WTOL=tol6
    ! Tolerance for phonon frequencies.
    ! Lambda coefficients are set to zero when abs(w) < EPH_WTOL
    ! This tolerance is also used in the integrals of a2F(w).
@@ -472,6 +477,8 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,eph_transport,ngqp
  ! Set basic dimensions.
  gams%natom = cryst%natom; gams%natom3 = 3*cryst%natom; gams%nsppol = nsppol; gams%nspinor = nspinor
  gams%symgamma = symdynmat; gams%eph_scalprod = eph_scalprod
+ gams%asr = ifc%asr
+ gams%asr = 0
 
  gams%ndir_transp = 0; if (eph_transport > 0) gams%ndir_transp = 3
 
@@ -1030,7 +1037,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor1=1
- integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr,ii,asr
+ integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr,ii
  !character(len=500) :: msg
  type(kptrank_type) :: qrank
 !arrays
@@ -1148,13 +1155,14 @@ subroutine phgamma_interp_setup(gams,cryst,action)
        call ftgam(gams%wghatm,gams%vals_bz(:,:,:,spin),gams%vals_rpt(:,:,:,spin),gams%natom,gams%nqbz,&
           gams%nrpt,qtor1, coskr, sinkr)
 
-       asr = 0
-       if (asr /= 0) then
+       ! Enforce "acoustic" rule on vals_rpt
+       ! This call is not executed in elphon!
+       if (gams%asr /= 0) then
          ABI_MALLOC(atmfrc, (3*gams%natom*3*gams%natom,gams%nrpt))
          do ii=1,2
            atmfrc = gams%vals_rpt(ii,:,:,spin)
            !gals%vals_rpt(2,:,,spin) = zero
-           call asrif9(asr, atmfrc, gams%natom, gams%nrpt, gams%rpt, gams%wghatm)
+           call asrif9(gams%asr, atmfrc, gams%natom, gams%nrpt, gams%rpt, gams%wghatm)
            gams%vals_rpt(ii,:,:,spin) = atmfrc
          end do
          ABI_FREE(atmfrc)
@@ -3541,7 +3549,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 !ENDDEBUG
        if(abs(a2f_tr_logmom_int(nomega))<log(greatest_real*tol6))then
          omega_log(idir,jdir) = exp(a2f_tr_logmom_int(nomega))
-       else   
+       else
          omega_log(idir,jdir)=greatest_real*tol6
        endif
      end do
