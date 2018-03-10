@@ -2326,7 +2326,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Local variables-------------------------------
 !scalar
- real(dp):: icount1,icount2
+ real(dp):: wcount1,wcount2
  integer :: chneut,i1,i2,i3,ia,ib,iblok,idir1,idir2,ierr,ii,ipert1,iphl1
  integer :: ipert2,irpt,irpt2,ivarA,ivarB,max1,max2,max3,min1,min2,min3
  integer :: msize,mpert,natom,nblok,nrpt_new,nrpt_new2,rftyp,selectz
@@ -2733,9 +2733,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !store the number of ifc before rearrangement
 
 ! Store the sum of the weight of IFC for the final check
-  icount1 = 0
+  wcount1 = 0
   do irpt=1,ifc%nrpt
-    icount1 = icount1 + sum(ifc%wghatm(:,:,irpt))
+    wcount1 = wcount1 + sum(ifc%wghatm(:,:,irpt))
   end do
 
 !Set the maximum and the miminum for the bound of the cell
@@ -2882,14 +2882,14 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_DEALLOCATE(cell_red)
 
 ! Final check
-  icount2 = 0
+  wcount2 = 0
   do irpt = 1, effective_potential%harmonics_terms%ifcs%nrpt
-    icount2 = icount2 + sum(effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt))
+    wcount2 = wcount2 + sum(effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt))
   end do
 
-  if (abs(icount1-icount2)>tol16) then
-    write(message,'(2a,ES15.4,a,ES15.4,a)')'The total wghatm is no more the same',ch10,&
-&                        icount1,' before and ', icount2, ' now.'
+  if (abs(wcount1-wcount2)/(wcount1+wcount2)>tol8) then
+    write(message,'(2a,es15.4,a,es15.4,a,es15.4)')'The total wghatm has changed',ch10,&
+&    wcount1,' before and ', wcount2, ' now, difference being ',wcount1-wcount2
     MSG_BUG(message)
   end if
 

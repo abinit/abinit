@@ -3635,7 +3635,15 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
          end if
        end do
        call simpson_int(nomega,wstep,a2f_tr_logmom,a2f_tr_logmom_int)
-       omega_log(idir,jdir) = exp(a2f_tr_logmom_int(nomega))
+!DEBUG
+!      write(std_out,*)' iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)=',&
+!          & iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)
+!ENDDEBUG
+       if(abs(a2f_tr_logmom_int(nomega))<log(greatest_real*tol6))then
+         omega_log(idir,jdir) = exp(a2f_tr_logmom_int(nomega))
+       else   
+         omega_log(idir,jdir)=greatest_real*tol6
+       endif
      end do
    end do
 
