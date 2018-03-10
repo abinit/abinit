@@ -2888,6 +2888,9 @@ end subroutine a2fw_write
 !!  reltol = relative tolerance accepted for exit of main Eliashberg loop
 !!  comm=MPI communicator
 !!
+!! TODO
+!!  Implement python version in AbiPy
+!!
 !! OUTPUT
 !!
 !! PARENTS
@@ -3999,7 +4002,11 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"], defmode=.True.)
    NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "ph_intmeth"], defmode=.True.)
+   NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ph_wstep", "ph_smear"])
    NCF_CHECK(ncerr)
 
    ! Define arrays for results.
@@ -4007,6 +4014,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
      nctkarr_t("ddb_ngqpt", "int", "three"), &
+     nctkarr_t("ph_ngqpt", "int", "three"), &
      ! linewidths in IBZ
      nctkarr_t('qibz', "dp", "number_of_reduced_dimensions, nqibz"), &
      nctkarr_t('wtq', "dp", "nqibz"), &
@@ -4023,18 +4031,19 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    NCF_CHECK(nctk_set_datamode(ncid))
 
    ncerr = nctk_write_iscalars(ncid, &
-       [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"], &
-       [dtset%eph_intmeth, dtset%eph_transport, dtset%symdynmat])
+       [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat", "ph_intmeth"], &
+       [dtset%eph_intmeth, dtset%eph_transport, dtset%symdynmat, dtset%ph_intmeth])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, &
-     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"], &
-     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie])
+     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
+     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, dtset%ph_wstep, dtset%ph_smear])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), gams%qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wtq'), gams%wtq))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
  end if
 #endif
