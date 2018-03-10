@@ -3,7 +3,6 @@ authors: MG, XG
 ---
 
 This page describes the details of the documentation system of Abinit and how to contribute to it. 
-A *Proof of concept* website is available at <https://gmatteo.github.io/test_abidocs>.
 
 Most of the documentation is written in [Markdown](https://en.wikipedia.org/wiki/Markdown)
 a lightweight markup language with plain text 
@@ -126,7 +125,7 @@ The script:
 * Performs initial consistency checks.
 * Generate the markdown files for variables, citations, etc.  
 * Invoke `mkdocs` to parse the markdown files declared in `mkdocs.yml`
-* Expands special strings, of the form `[[namespace:name#section|text]]` to create HTML links.
+* Expands special strings, of the form <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [namespace:name#section|text] &#93; </span> to create HTML links.
 * Creates the needed HMTL files 
 
 The expansion of special strings is documented in the [links section](markdown.md#links). 
@@ -245,7 +244,7 @@ to the HTML meta section.
   Writing in all caps is like shouting so use all caps sparingly.
 
 
-## How to add/modify an nput variables
+## How to add/modify an input variable 
 
 The yaml database has been replaced by python modules.
 The variables are now declared in `~abinit/abimkdocs/variables_CODENAME.py`.
@@ -537,7 +536,7 @@ As condition, please use strings with the most basic expressions,
 containing <, < =, >, >=, ==, !=, +, -, *, /, etc to allow for further simple parsing !
 
 As a convention, we use "pythonic" way for expressions, so you can use "or", "and" and "in" 
-also as `[[varname]] in [1,2,5]` for example ...
+also as <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [varname] &#93; in [1,2,5]</span> for example ...
 
 
 ### ValueWithUnit object
@@ -565,5 +564,5 @@ the CONDITION to be fulfilled.
 
 Pay attention to strings. If it is recognized as string directly, you don't need ticks (' ').
 Otherwise, you need to put ticks. 
-For example, if you want to use a link as a value, use a link shortcut like `[[abivarname]]`. 
+For example, if you want to use a link as a value, use a link shortcut like <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [abivarname] &#93; </span>. 
 See the doc about link shortcuts at [links shortcuts](markdown.md#links). 

@@ -1614,7 +1614,7 @@ end subroutine nlopt
 !!
 !! INPUTS
 !!  filename=DDB filename.
-!!  brav = 1 -> simple lattice; 2 -> face-centered cubic;
+!!  brav = 1 or -1 -> simple lattice; 2 -> face-centered cubic;
 !!         3 -> body-centered lattice; 4 -> hexagonal lattice (D6h)
 !!  natom=Number of atoms in the unit cell
 !!  atifc(natom)=list of the atom ifc to be analysed
@@ -1742,9 +1742,9 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    ABI_FREE(indsym)
    ABI_FREE(xcart)
 
-   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when brav/=1
+   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
    ! This section is needed to preserver the behaviour of the old implementation.
-   if (brav/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
+   if (abs(brav)/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
      if(abs(rprim(1,2))<tol6)then
        write(message, '(a,i0,7a)' )&
 &       'The input DDB value of brav is ',brav,',',ch10,&
