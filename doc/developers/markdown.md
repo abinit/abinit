@@ -259,9 +259,9 @@ Typical cases are discussed in the next sections.
 ### Wiki links
 
 The wikilink syntax is used with two pairs of square brackets and possible separators (:, # and |).
-In the simple case, this gives `[[name]]` although the more general form is:
+In the simple case, this gives <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [name] &#93;</span> although the more general form is
 
-    [[namespace:name#section|text]]
+<span style="background-color: #E0E0E0;font-size:90%;"> &#91; [namespace:name#section|text] &#93;</span>
 
 where `namespace`, `section` and `text` are optional (in such case, the adequate separator should not be mentioned).
 The namespace is not echoed in the Web page, while if a `text` is given, it will supercede the echo of the
@@ -389,7 +389,7 @@ with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1
     as discussed in the [Permalinks section](#Permalinks).
 
 
-Be careful when including a wikilink inside other square brackets e.g. `[2+[[ecut]]]**2`
+Be careful when including a wikilink inside other square brackets e.g. <span style="background-color: #E0E0E0;font-size:90%;">[2+ &#91; [ecut] &#93; ]**2</span>
 as the occurrence of `]]]` confuses the parser.
 The problem is easily solved by inserting whitespaces in the expression:
 
