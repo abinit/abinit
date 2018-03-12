@@ -3511,8 +3511,8 @@ Variable(
 This variable defines the technique for the integration on the Fermi surface
 of electron-phonon quantities.
 
-1 for Gaussian technique with broadening factor [[eph_fsmear]].
-2 for tetrahedron method.
+* 1 --> Gaussian technique with broadening factor [[eph_fsmear]].
+* 2 --> Tetrahedron method.
 
 See also [[eph_fsewin]], [[eph_extrael]] and [[eph_fermie]].
 """,
@@ -3540,31 +3540,45 @@ Variable(
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Electron-PHonon: Number of Grid Q-PoinTs in FINE grid.",
-    text="""
+    text=r"""
 This variable activates the **interpolation** of the first-order variation of the
-self-consistent potential in the electron-phonon code. If eph_nqgpt_fine
-differs from [0, 0, 0], the code will use the Fourier transform to interpolate
+self-consistent potential in the electron-phonon code ([[optdriver]] == 7).
+
+If eph_nqgpt_fine differs from [0, 0, 0], the code will use the Fourier transform to interpolate
 the DFPT potentials on this fine q-mesh starting from the irreducible set of
-q-points read from the DDB file. This approach is similar to the one used to
+q-points read from the DVDB file. This approach is similar to the one used to
 interpolate the interatomic force constants in q-space. If eph_ngqpt_fine is
 not given, the EPH code uses the list of irreducible q-points reported in the
 DDB file i.e. [[ddb_ngqpt]] (default behavior).
+
+!!! important
+
+    The computation of the electron-phonon matrix elements requires the knowledge of $\psi_{\bf k}$
+    and $\psi_{\bf k + q}$. This means that the k-mesh for electrons found in the WFK must be
+    compatible with the one given in *eph_ngqpt_fine*.
+    The code can interpolate DFPT potentials but won't try to interpolate KS wavefunctions.
+    and will stop if ${\bf k + q}$ is not found in the WFK file.
 """,
 ),
 
 Variable(
     abivarname="eph_task",
-    varset="dfpt",
+    varset="eph",
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Electron-PHonon: Task",
-    characteristics=['[[DEVELOP]]'],
     text="""
-When [[optdriver]]==7, select the task to be performed. The choice is among:
-[[eph_task]]=1: phonon linewidth
-[[eph_task]]=2: electron-phonon coupling elements
+When [[optdriver]]==7, select the task to be performed.
+The choice is among:
+
+    0 --> No computation (mainly used to access the post-processing tools)
+    1 --> Compute phonon linewidths in metals.
+    2 --> Compute electron-phonon matrix elements
+    3 --> Compute phonon self-energy.
+    4 --> Compute EPH self-energy (Fan-Migdal + Debye-Waller)
+    5 --> Interpolate the DFPT potentials.
 """,
 ),
 
@@ -3579,7 +3593,7 @@ Variable(
     text="""
 NB - this does not work yet. This variable can be used to turn on the
 calculation of transport quantities in the eph module of abinit. Value of 1
-corresponds to elastic LOVA as in the PRB by Savrasov and Savrasov
+corresponds to elastic LOVA as in the PRB by [[cite:Savrasov1996]].
 """,
 ),
 
@@ -12224,15 +12238,15 @@ Variable(
     mnemonics="PHonons: Number of DIVisions for sampling the SMallest segment",
     text="""
 This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to
-define the q-path used for phonon band structures and phonon linewidths. It
-gives the number of points used to sample the smallest segment in the q-path
+define the q-path used for phonon band structures and phonon linewidths.
+It gives the number of points used to sample the smallest segment in the q-path
 specified by [[ph_qpath]].
 """,
 ),
 
 Variable(
     abivarname="ph_ngqpt",
-    varset="dfpt",
+    varset="eph",
     vartype="integer",
     topics=['q-points_useful'],
     dimensions=[3],
@@ -12240,8 +12254,8 @@ Variable(
     mnemonics="PHonons: Number of Grid points for Q-PoinT mesh.",
     text="""
 This variable defines the q-mesh used to compute the phonon DOS and the
-Eliashberg function via Fourier interpolation. Related input variables:
-[[ph_qshift]] and [[ph_nqshift]].
+Eliashberg function via Fourier interpolation.
+Related input variables: [[ph_qshift]] and [[ph_nqshift]].
 """,
 ),
 
@@ -12275,7 +12289,7 @@ code assumes a Gamma-centered mesh. The shifts are specified by [[ph_qshift]].
 
 Variable(
     abivarname="ph_qpath",
-    varset="dfpt",
+    varset="eph",
     vartype="real",
     topics=['q-points_useful'],
     dimensions=[3, 'ph_nqpath'],
@@ -12284,8 +12298,8 @@ Variable(
     requires="specified([[ph_nqpath]])",
     text="""
 This array contains the list of special q-points used to construct the q-path
-for phonon band structures and phonon linewidths. See also [[ph_nqpath]] and
-[[[ph_ndivsm]].
+used to (Fourier) interpolate phonon band structures and phonon linewidths.
+See also [[ph_nqpath]] and [[[ph_ndivsm]].
 """,
 ),
 
@@ -12300,8 +12314,8 @@ Variable(
     requires="[[ph_nqshift]]",
     text="""
 This array gives the shifts to be used to construct the q-mesh for computing
-the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]]. If not
-given, a Gamma-centered mesh is used.
+the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]].
+If not given, a Gamma-centered mesh is used.
 """,
 ),
 

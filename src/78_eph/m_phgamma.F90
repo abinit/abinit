@@ -43,6 +43,7 @@ module m_phgamma
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm, get_diag
  use m_io_tools,       only : open_file
+ use m_geometry,       only : normv
  use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
@@ -246,7 +247,7 @@ module m_phgamma
  public :: a2fw_init            ! Calculates the FS averaged alpha^2F(w) function.
  public :: a2fw_write           ! Write alpha^2F(w) to an external file in text/netcdf format
  public :: a2fw_moment          ! Compute moments of alpha^2F(w)/w .
- public :: a2fw_solve_gap
+ !public :: a2fw_solve_gap       ! DEPRECATED
 !!***
 
 !!****t* m_phgamma/a2fw_tr_t
@@ -320,9 +321,12 @@ module m_phgamma
  ! TODO: increase
  !real(dp),private,parameter :: EPH_WTOL=tol7
  real(dp),private,parameter :: EPH_WTOL=tol6
+ !real(dp),private,parameter :: EPH_WTOL=tol5
    ! Tolerance for phonon frequencies.
    ! Lambda coefficients are set to zero when abs(w) < EPH_WTOL
    ! This tolerance is also used in the integrals of a2F(w).
+
+ real(dp),private,parameter :: EPH_Q0TOL = 0.01_dp
 
 contains  !=====================================================
 !!***
@@ -477,7 +481,7 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,eph_transport,ngqp
  ! Set basic dimensions.
  gams%natom = cryst%natom; gams%natom3 = 3*cryst%natom; gams%nsppol = nsppol; gams%nspinor = nspinor
  gams%symgamma = symdynmat; gams%eph_scalprod = eph_scalprod
- gams%asr = ifc%asr
+ !gams%asr = ifc%asr
  gams%asr = 0
 
  gams%ndir_transp = 0; if (eph_transport > 0) gams%ndir_transp = 3
@@ -836,6 +840,15 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
    if (abs(phfrq(nu1)) > EPH_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
  end do
 
+ ! This to avoid spurious results for the acoustic modes.
+ ! In principle, gamma(q) --> 0 and lambda(q) --> 0 for q --> 0
+ ! but the Fourier interpolated gammas do not fulfill this property so we set everything
+ ! to zero when we are inside a sphere or radius
+ if (normv(gams%qibz(:,iq_ibz), cryst%gmet, "G") < EPH_Q0TOL) then
+   gamma_ph(1:3) = zero
+   lambda_ph(1:3) = zero
+ end if
+
 end subroutine phgamma_eval_qibz
 !!***
 
@@ -987,6 +1000,16 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
    lambda_ph(nu1) = zero
    if (abs(phfrq(nu1)) > EPH_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
  end do
+
+ ! This to avoid spurious results for the acoustic modes.
+ ! In principle, gamma(q) --> 0 and lambda(q) --> 0 for q --> 0
+ ! but the Fourier interpolated gammas do not fulfill this property so we set everything
+ ! to zero when we are inside a sphere or radius
+ if (normv(qpt, cryst%gmet, "G") < EPH_Q0TOL) then
+   write(std_out,*)"Setting values to zero."
+   gamma_ph(1:3) = zero
+   lambda_ph(1:3) = zero
+ end if
 
 end subroutine phgamma_interp
 !!***

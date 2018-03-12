@@ -192,11 +192,9 @@ or k-points can extend up to 20 minutes or more.
 ## 4 Basic ANADDB calculation of electron-phonon quantities
   
 The general theory of electron-phonon coupling and Eliashberg
-superconductivity is reviewed in _Theory of Superconducting Tc, P.B. Allen and
-B. Mitrovic in Sol. State Phys. **37** (1982) ed. Ehrenreich, Seitz, and
-Turnbull_. The first implementations similar to that in ABINIT are those in
-_S.Y. Savrasov and D.Y. Savrasov, Phys. Rev. B **54** 16487 (1996)_ and _A.Y.
-Liu and A.A. Quong, Phys. Rev. B **53** R7575-R7579 (1996)_.
+superconductivity is reviewed in [[cite:Allen1983|Theory of Superconducting Tc]], 
+by P.B. Allen and B. Mitrovic.
+The first implementations similar to that in ABINIT are those in [[cite:Savrasov1996]] and [[cite:Liu1996]].
 
 File ~abinit/tests/tutorespfn/Input/teph_4.in contains the input needed by
 ANADDB to carry out the calculation of the electron-phonon quantities. ANADDB
@@ -247,10 +245,10 @@ to the density of states of the phonons, but is weighted according to the
 coupling of the phonons to the electrons. It is output to a file with suffix
 _A2F, which is ready to be represented using any graphical software (Xmgr,
 matlab, OpenDX...). The first inverse moment of α²F gives the global coupling
-strength, or mass renormalization factor, λ. From λ, using the McMillan
-formula ( _Phys. Rev. **167** 331-344 (1968)_ ) as modified by Allen and Dynes
-( _Phys. Rev. B **12** 905 (1975)_ ), ANADDB calculates the critical
-temperature for superconductivity. The formula contains an adjustable
+strength, or mass renormalization factor, λ. From λ, using the [[cite:McMillan1968|McMillan formula]]
+as modified by [[cite:Allen1975|Allen and Dynes]]
+ANADDB calculates the critical temperature for superconductivity. 
+The formula contains an adjustable
 parameter μ* which approximates the effect of Coulomb interactions, and is
 given by the input variable [[anaddb:mustar]]. For Al with the k-point grid
 given and a value of μ=0.136 the ANADDB output file shows the following values
