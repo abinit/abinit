@@ -94,13 +94,13 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 !Local variables ---------------------------------------
 !Arrays
 !scalars
- integer :: iatom,iatom_rhoij,ilmn,ispden,itypat,j0lmn,jl,jlmn,jspden,klmn,klmn1,my_comm_atom
+ integer :: iatom,iatom_rhoij,ilmn,ispden,itypat,j0lmn,jl,jlmn,jspden,klmn,klmn1,ln,lnspinat0,my_comm_atom
  integer :: ngrhoij0,nlmnmix0,nselect,nselect1,nspden_rhoij,use_rhoij_0,use_rhoijres0
  real(dp) :: ratio,ro,roshift,zratio,zz
- logical :: my_atmtab_allocated,paral_atom,spinat_zero,test_exexch,test_pawu
+ logical :: my_atmtab_allocated,paral_atom,spinat_zero,test_exexch,test_pawu,test_lnspinat
 !arrays
- integer,pointer :: my_atmtab(:)
-
+ integer,pointer :: my_atmtab(:),lnspinat(:)
+ real(dp),allocatable :: occ(:)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -142,18 +142,41 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
    iatom=iatom_rhoij;if (paral_atom) iatom=my_atmtab(iatom_rhoij)
    itypat=typat(iatom)
    nselect=0
+   ABI_ALLOCATE(lnspinat,(pawtab(itypat)%basis_size))
+   lnspinat=-1
+! Determine occupancies of each orbital
+   if (nspden_rhoij==2) then
+     ABI_ALLOCATE(occ,(pawtab(itypat)%basis_size))
+     occ=zero
+     do jlmn=1,pawtab(itypat)%lmn_size
+       ln=pawtab(itypat)%indlmn(5,jlmn)
+       klmn=jlmn*(jlmn+1)/2
+       occ(ln)=occ(ln)+pawtab(itypat)%rhoij0(klmn)
+     end do
+     do ln=1,pawtab(itypat)%basis_size
+       if(pawtab(itypat)%orbitals(ln)==0.and.occ(ln)==1) lnspinat(ln)=ln
+       if(pawtab(itypat)%orbitals(ln)==1.and.(occ(ln)>=1.and.occ(ln)<=5)) lnspinat(ln)=ln
+       if(pawtab(itypat)%orbitals(ln)==2.and.(occ(ln)>=1.and.occ(ln)<=9)) lnspinat(ln)=ln
+       if(pawtab(itypat)%orbitals(ln)==3.and.(occ(ln)>=1.and.occ(ln)<=13)) lnspinat(ln)=ln
+     end do
+     ABI_DEALLOCATE(occ)
+   end if
+   lnspinat0=maxval(lnspinat)
+
 
 !  Determine Z (trace of rhoij0 or part of it)
    zz=zero
    do jlmn=1,pawtab(itypat)%lmn_size
      jl=pawtab(itypat)%indlmn(1,jlmn)
+     ln=pawtab(itypat)%indlmn(5,jlmn)
      j0lmn=jlmn*(jlmn-1)/2
+     test_lnspinat=(lnspinat0==-1.or.lnspinat(ln)==ln)
      test_pawu=(lpawu(itypat)==-1.or.lpawu(itypat)==jl)
      test_exexch=(lexexch(itypat)==-1.or.lexexch(itypat)==jl)
      do ilmn=1,jlmn
        klmn=j0lmn+ilmn
-       if ((ilmn==jlmn).and.test_pawu.and.test_exexch) &
-&       zz=zz+pawtab(itypat)%rhoij0(klmn)
+       if ((ilmn==jlmn).and.test_pawu.and.test_exexch.and.test_lnspinat) &
+&        zz=zz+pawtab(itypat)%rhoij0(klmn)
      end do
    end do
 
@@ -185,13 +208,15 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
      nselect=0;nselect1=1-cplex
      do jlmn=1,pawtab(itypat)%lmn_size
        jl=pawtab(itypat)%indlmn(1,jlmn)
+       ln=pawtab(itypat)%indlmn(5,jlmn)
        j0lmn=jlmn*(jlmn-1)/2
+       test_lnspinat=(lnspinat0==-1.or.lnspinat(ln)==ln)
        test_pawu=(lpawu(itypat)==-1.or.lpawu(itypat)==jl)
        test_exexch=(lexexch(itypat)==-1.or.lexexch(itypat)==jl)
        do ilmn=1,jlmn
          klmn=j0lmn+ilmn
          ro=pawtab(itypat)%rhoij0(klmn)
-         if ((ilmn==jlmn).and.test_pawu.and.test_exexch) then
+         if ((ilmn==jlmn).and.test_pawu.and.test_exexch.and.test_lnspinat) then
            ro=ro*ratio*(roshift+zratio)
          else
            ro=ro*ratio*roshift
@@ -225,7 +250,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 !   if (pawrhoij(iatom_rhoij)%nspden==4.and.spinat_zero) then
 !     pawrhoij(iatom_rhoij)%rhoijp(:,4)=pawrhoij(iatom_rhoij)%rhoijp(:,4)+tol10
 !   end if
-
+   ABI_DEALLOCATE(lnspinat)
  end do ! iatom_rhoij
 
 !Destroy atom table used for parallelism
