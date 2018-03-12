@@ -5694,11 +5694,11 @@ Variable(
     mnemonics="GWLS MODEL PARAMETER",
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]]==66",
-    text="""
+    text=r"""
 This is the width of the lorentzian, in Ha, used to model the frequency
 dependence of the dielectric matrix in the GWLS calculation (see eqs. (12),
 (13), (14), (15), (16) and (34) of Phys. Rev. B 91, 125120 (2015)). More
-precisely, this parameter is the value of \alpha used in eq. (34). This model
+precisely, this parameter is the value of $\alpha$ used in eq. (34). This model
 is then used to separate the integration over frequencies into a 'model' part
 (second term of eq. (12)) and a 'exact - model' part (first term of eq. (12)).
 Since the 'model' part can be integrated analytically (see eqs. (15), (16) and
@@ -6587,7 +6587,7 @@ bands in the calculation is usually enough (use [[nband]]).
 
 NOTES:
 
-  * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]]  < 100\.
+  * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]]  < 100.
   * For non-homogeneous relatively large cells [[iprcel]]=45 will likely give a large improvement over [[iprcel]]=0.
   * In case of PAW and [[iprcel]]>0, see [[pawsushat]] input variable. By default, an approximation (which can be suppressed) is done for the computation of susceptibility matrix.
   * For extremely large inhomogeneous cells where computation of the full dielectric matrix takes too many weeks, 70 < [[iprcel]] < 80 is advised.
@@ -7107,15 +7107,15 @@ but for inhomogeneous systems, you might gain a lot with [[iprcel]]=45.
 cycle is not variational - this should not affect the other properties, and at
 convergence, all values are OK)
 
-\- In the norm-conserving case, the default option is [[iscf]]=7, which is a
+- In the norm-conserving case, the default option is [[iscf]]=7, which is a
 compromise between speed and reliability. The value [[iscf]]= 2 is safer but
 slower.
-\- In the PAW case, default option is [[iscf]]=17. In PAW you have the
+- In the PAW case, default option is [[iscf]]=17. In PAW you have the
 possibility to mix density/potential on the fine or coarse FFT grid (see
 [[pawmixdg]]).
-\- Note that a Pulay mixing ([[iscf]]=7 or 17) with [[npulayit]] =1 (resp. 2)
+- Note that a Pulay mixing ([[iscf]]=7 or 17) with [[npulayit]] =1 (resp. 2)
 is equivalent to an Anderson mixing with [[iscf]]=3 or 13 (resp. 4 or 14).
-\- Also note that:
+- Also note that:
 * when mixing is done on potential (iscf <10), total energy is computed by "direct" decomposition.
 * when mixing is done on density (iscf >=10), total energy is computed by "double counting" decomposition.
 "Direct" and "double counting" decomposition of energy are equal when SCF
@@ -11884,9 +11884,9 @@ percentage allowed without stopping the execution.
 volume of the overlap of two spheres by the volume of the smallest sphere.
 The following values are permitted for [[pawovlp]]:
 
-- [[pawovlp]]<0\. : overlap is always allowed
-- [[pawovlp]]=0. : no overlap is allowed
-- [[pawovlp]]>0\. and <100\. : overlap is allowed only if it is less than [[pawovlp]] %
+- [[pawovlp]] < 0 --> overlap is always allowed
+- [[pawovlp]] = 0 --> no overlap is allowed
+- [[pawovlp]] > 0 and < 100 --> overlap is allowed only if it is less than [[pawovlp]] %
 """,
 ),
 
@@ -12238,8 +12238,8 @@ Variable(
     mnemonics="PHonons: Number of DIVisions for sampling the SMallest segment",
     text="""
 This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to
-define the q-path used for phonon band structures and phonon linewidths.
-It gives the number of points used to sample the smallest segment in the q-path
+define the q-path used for phonon band structures and phonon linewidths. It
+gives the number of points used to sample the smallest segment in the q-path
 specified by [[ph_qpath]].
 """,
 ),
@@ -13932,7 +13932,7 @@ code to stop at some point.
 Debugging options:
 
   * = -1 --> stop in abinit (main program), before call driver. Useful to see the effect of the preprocessing of input variables (memory needed, effect of symmetries, k points...) without going further. Run very fast, on the order of the second.
-  * =-2 --> same as -1, except that print only the first dataset. All the non default input variables associated to all datasets are printed in the output file, but only for the first dataset. Also all the input variables are written in the NetCDF file \"OUT.nc\", even if the value is the default.
+  * =-2 --> same as -1, except that print only the first dataset. All the non default input variables associated to all datasets are printed in the output file, but only for the first dataset. Also all the input variables are written in the NetCDF file "OUT.nc", even if the value is the default.
   * = -3 --> stop in gstate, before call scfcv, move or brdmin. Useful to debug pseudopotentials
   * = -4 --> stop in move, after completion of all loops
   * = -5 --> stop in brdmin, after completion of all loops
@@ -18248,7 +18248,7 @@ Variable(
     defaultval=0,
     mnemonics="WeighTs for AToms in CONstraint equations",
     characteristics=['[[NO_MULTI]]'],
-    text="""
+    text=r"""
 Gives the weights determining how the motion of atoms is constrained during
 structural optimization or molecular dynamics (see [[nconeq]], [[natcon]],
 and [[iatcon]]). For each of the [[nconeq]] independent constraint equations,
@@ -18264,8 +18264,8 @@ Different types of motion constraints can be implemented this way. For example,
     nconeq 1 natcon 2 iatcon 1 2 wtatcon 0 0 +1 0 0 -1
 
 could be used to constrain the relative height difference of two adsorbate
-atoms on a surface (assuming their masses are equal), since F'  z,1  \- F'
-z,2  = 0 implies z  1  \- z  2  = constant.
+atoms on a surface (assuming their masses are equal), since F'  z,1  - F'
+z,2  = 0 implies z  1  - z  2  = constant.
 """,
 ),
 
