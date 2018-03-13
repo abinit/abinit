@@ -192,7 +192,7 @@ or k-points can extend up to 20 minutes or more.
 ## 4 Basic ANADDB calculation of electron-phonon quantities
   
 The general theory of electron-phonon coupling and Eliashberg
-superconductivity is reviewed in [[cite:Allen1983|Theory of Superconducting Tc]], 
+superconductivity is reviewed in [[cite:Allen1983a|Theory of Superconducting Tc]], 
 by P.B. Allen and B. Mitrovic.
 The first implementations similar to that in ABINIT are those in [[cite:Savrasov1996]] and [[cite:Liu1996]].
 

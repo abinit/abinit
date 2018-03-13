@@ -352,8 +352,17 @@ class Variable(object):
         """
         The absolute URL associated to this variable on the Abinit website.
         """
+        # This is gonna be the official API on the server
         #docs.abinit.org/vardocs/CODENAME/VARNAME?version=8.6.2
-        return "https://www.docs.abinit.org/vardoc/%s/%s" % (self.executable, self.name)
+        #return "https://docs.abinit.org/vardocs/%s/%s" % (self.executable, self.name)
+
+        # For the time being, we have to use:
+        # variables/eph/#asr
+        # variables/anaddb#asr
+        if self.executable == "abinit":
+            return "https://docs.abinit.org/variables/%s#%s" % (self.varset, self.name)
+        else:
+            return "https://docs.abinit.org/variables/%s#%s" % (self.executable, self.name)
 
     @lazy_property
     def topic2relevances(self):
@@ -768,16 +777,19 @@ class VarDatabase(OrderedDict):
 
     def get_version_endpoints(self):
         """
-        docs.abinit.org/vardocs/abinit/asr?version=8.6.2
+        API used by the webser to serve the documentation of a variable given codename, varname, [version]:
+
+            docs.abinit.org/vardocs/abinit/asr?version=8.6.2
+
+        # asr@anaddb at /variables/anaddb#asr
+        # asr@abinit at /variables/eph#asr
+        # asr@abinit at /variables/abinit/eph#asr
         """
-	# Webiste will serve
-	# asr@anaddb at /variables/anaddb#asr
-	# asr@abinit at /variables/eph#asr
-	# asr@abinit at /variables/abinit/eph#asr
         code_urls = {}
         for codename, vard in self.items():
             code_urls[codename] = d = {}
             for vname, var in var.items():
+                # This is the internal convention used to build the mkdocs site.
                 d[vname] = "/variables/%s/%s#%s" % (codename, var.varset, var.name)
 	# TODO: version and change mkdocs.yml
         return version, code_urls
@@ -785,10 +797,11 @@ class VarDatabase(OrderedDict):
     def update_json_endpoints(self, json_path, indent=4):
         """
         Update the json file with the mapping varname --> relative url
-        used on the serve to implement the REST API.
+        used by the webserve to implement the `vardocs` API.
         """
         with open(json_path, "rt") as fh:
             oldd = json.load(fh)
+
         new_version, newd = self.get_version_endpoints()
         assert new_version not in oldd
         oldd[new_version] = newd
