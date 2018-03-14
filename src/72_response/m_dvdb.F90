@@ -752,10 +752,11 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
  write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
- write(std_out,"(a)")"List of q-points:"
- do iq=1,db%nqpt
+ write(std_out,"(a)")"List of q-points: min(10, nqpt)"
+ do iq=1,min(db%nqpt, 10)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
  end do
+ if (db%nqpt > 10) write(std_out,"(a)")"..."
 
  write(std_out,"(a)")sjoin("Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
  if (db%has_dielt_zeff) then

@@ -1280,7 +1280,8 @@ elemental real(dp) function nfd(ee, kT, mu)
  ee_mu = ee - mu
 
  !TODO: Find good tols.
- if (kT > tol16) then
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol6) then
    arg = ee_mu / kT
    nfd = one / (exp(arg) + one)
  else
@@ -1338,7 +1339,8 @@ elemental real(dp) function nbe(ee, kT, mu)
  ee_mu = ee - mu
 
  !TODO: Find good tols.
- if (kT > tol16) then
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol6) then
    arg = ee_mu / kT
    if (ee_mu > tol12) then
      nbe = one / (exp(arg) - one)
@@ -1436,6 +1438,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
+ ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
+ ABI_CHECK(dtset%tmesh(2) >= dtset%tmesh(1), "tmesh(2) < tmesh(1)")
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
@@ -1451,12 +1455,15 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e = ebands%fermie
 
+ ! TODO
+#if 0
  call ebands_copy(ebands, tmp_ebands)
  do it=1,new%ntemp
    call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
    new%mu_e(it) = tmp_ebands%fermie
  end do
  call ebands_free(tmp_ebands)
+#endif
 
  ! Frequency mesh for sigma(w) and spectral function.
  ! TODO: Use GW variables but change default
@@ -1629,13 +1636,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    !kk_ibz = ebands%kptns(:,ik_ibz)
 
    if (dksqmax > tol12) then
-     write(msg, '(7a,es16.6,4a)' )&
-      'The WFK file cannot be used to start thee present calculation ',ch10,&
-      'It was asked that the wavefunctions be accurate, but',ch10,&
-      'at least one of the k points could not be generated from a symmetrical one.',ch10,&
-      'dksqmax=',dksqmax,ch10,&
-      'Action: check your WFK file and k point input variables',ch10,&
-      '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+      write(msg, '(4a,es16.6,7a)' )&
+       "The WFK file cannot be used to compute self-energy corrections at kpoint: ",ktoa(kk),ch10,&
+       "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+       "Q-mesh: ",ltoa(new%ngqpt),", K-mesh (from kptrlatt) ",ltoa(get_diag(dtset%kptrlatt)), ch10, &
+       'Action: check your WFK file and (k,q) point input variables'
       MSG_ERROR(msg)
    end if
 
@@ -2442,7 +2447,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0
+ integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,verbose=0
  integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym),symafm_lg(3,3,2*cryst%nsym)
@@ -2498,13 +2503,15 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  ABI_FREE(wtk_folded)
  ABI_FREE(wtk)
 
- do ik=1,new%nkibz_q
-   if (ik <= nkibz) then
-     write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), ktoa(new%kibz_q(:,ik) - kibz(:,ik)), ftoa(new%wtk_q(ik)))
-   else
-     write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), "[---]", ftoa(new%wtk_q(ik)))
-   end if
- end do
+ if (verbose /= 0) then
+   do ik=1,new%nkibz_q
+     if (ik <= nkibz) then
+       write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), ktoa(new%kibz_q(:,ik) - kibz(:,ik)), ftoa(new%wtk_q(ik)))
+     else
+       write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), "[---]", ftoa(new%wtk_q(ik)))
+     end if
+   end do
+ end if
 
 end function lgroup_new
 !!***
