@@ -48,7 +48,7 @@ module m_sigmaph
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, get_diag
+ use m_numeric_tools,  only : arth, c2r, get_diag, linfit
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
@@ -406,7 +406,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
- real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact
+ real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
@@ -618,7 +618,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        sigma%vals_wr = zero
        do ib_k=1,nbcalc_ks
          band = ib_k + bstart_ks - 1
-         eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr/2)
+         eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr / 2)
          sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
        end do
      end if
@@ -890,10 +890,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
                ! TODO: Find good tolerances to treat limits
                !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
+               !if (nsppol == 1 .and. nspinor == 1 .and. nspden == 1) f_mkq = f_mkq * half
 
                ! Accumulate Sigma(w=eKS) for state ib_k
-               cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
-                        (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
+               cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                        (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
 
                ! Accumulate contribution to Eliashberg functions (Fan term)
@@ -909,14 +910,31 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                end if
 
                ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
-               cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta)**2 &
-                       -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)**2
+#if 0
+!old derivative
+               cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) ** 2 &
+                       -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ** 2
                sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * cfact
+#else
+
+               !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+               !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               !sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
+               cfact = (eig0nk - eig0mkq + wqnu + sigma%ieta)
+               gmod2 = cfact * dconjg(cfact)
+               cfact = (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               hmod2 = cfact * dconjg(cfact)
+
+               sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * ( &
+                 (nqnu + f_mkq)        * (gmod2 - two * (eig0nk - eig0mkq + wqnu) ** 2) / gmod2 ** 2 + &
+                 (nqnu - f_mkq + one)  * (hmod2 - two * (eig0nk - eig0mkq - wqnu) ** 2) / hmod2 ** 2   &
+               )
+#endif
 
                ! Accumulate Sigma(w) for state ib_k
                if (sigma%nwr > 0) then
-                 cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - sigma%ieta) + &
-                               (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu - sigma%ieta)
+                 cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
+                               (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
                  sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * cfact_wr(:)
                end if
              end do ! it
@@ -971,8 +989,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      ! Integral over IBZ. Note that here we can use IBZ(k=0).
      ! symsigma == 0 activates sum over full BZ for debugging purpose.
+     ! TODO Bug if symsigma 0
      nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
-     do iq_ibz=1,sigma%nqibz
+     !do iq_ibz=1,sigma%nqibz
+     do iq_ibz=1,nq
        if (mod(iq_ibz, nprocs) /= my_rank) cycle
        if (abs(sigma%symsigma) == 1) then
          qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
@@ -1069,8 +1089,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
              do it=1,sigma%ntemp
                rfact = - weigth_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / ediff
+               ! acculate DW, add it to Sigma(e0) and Sigma(w)
                sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
+               if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
 
                ! Accumulate contribution to Eliashberg functions (DW term)
                if (sigma%gfw_nomega > 0) then
@@ -1079,7 +1101,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                end if
 
                if (sigma%has_nuq_terms) then
-                 !TODO: in principle iq_ibz --> iq_bz
+                   !TODO: in principle iq_ibz --> iq_bz if symsigma == 0
                  sigma%vals_nuq(it, ib_k, nu, iq_ibz, 2) = sigma%vals_nuq(it, ib_k, nu, iq_ibz, 2) + &
                    gkk2 * rfact / weigth_q
                end if
@@ -1201,7 +1223,7 @@ subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_nu
      num_smallw = num_smallw + 1; cycle
    end if
 
-   ! Transform the gkk from atom,red_dir basis to phonon mode basis
+   ! Transform the gkk from atom, red_dir basis to phonon mode basis
    do ipc=1,3*natom
      gkk_nu(1,:,:,:,nu) = gkk_nu(1,:,:,:,nu) &
        + gkk_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
@@ -1224,7 +1246,7 @@ end subroutine gkknu_from_atm
 !!  nfd
 !!
 !! FUNCTION
-!!  Fermi-Dirac statistic
+!!  Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
 !!
 !! INPUTS
 !!   ee=Single particle energy in Ha
@@ -1256,10 +1278,10 @@ elemental real(dp) function nfd(ee, kT, mu)
 ! *************************************************************************
 
  ee_mu = ee - mu
- arg = ee_mu / kT
 
- !TODO: Find decent value.
+ !TODO: Find good tols.
  if (kT > tol16) then
+   arg = ee_mu / kT
    nfd = one / (exp(arg) + one)
  else
    ! Heaviside
@@ -1282,7 +1304,7 @@ end function nfd
 !!  nbe
 !!
 !! FUNCTION
-!!   Bose-Einstein statistic
+!!   Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
 !!
 !! INPUTS
 !!   ee=Single particle energy in Ha
@@ -1314,16 +1336,17 @@ elemental real(dp) function nbe(ee, kT, mu)
 ! *************************************************************************
 
  ee_mu = ee - mu
- arg = ee_mu / kT
 
+ !TODO: Find good tols.
  if (kT > tol16) then
+   arg = ee_mu / kT
    if (ee_mu > tol12) then
      nbe = one / (exp(arg) - one)
    else
      nbe = zero
    end if
  else
-   ! No condensate for T-->0
+   ! No condensate for T --> 0
    nbe = zero
  end if
 
@@ -1405,10 +1428,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
 
  ! TODO: zcut
- ! Broadening parameter.
- new%ieta = j_dpc * 0.0001_dp
- if (dtset%elph2_imagden > tol12) new%ieta = j_dpc * dtset%elph2_imagden
- new%ieta = j_dpc * 0.1_dp * eV_Ha
+ ! Broadening parameter from zcut
+ !new%ieta = j_dpc * 0.0001_dp
+ !if (dtset%elph2_imagden > tol12) new%ieta = j_dpc * dtset%elph2_imagden
+ !new%ieta = j_dpc * 0.1_dp * eV_Ha
+ new%ieta = +j_dpc * dtset%zcut
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
@@ -1435,12 +1459,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  call ebands_free(tmp_ebands)
 
  ! Frequency mesh for sigma(w) and spectral function.
- ! TODO: Use GW variables
- new%nwr = 101
+ ! TODO: Use GW variables but change default
+ !dtset%freqspmin
+ !dtset%freqspmax
+ !dtset%nfreqsp
+ new%nwr = 201
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
- new%wr_step = 0.02 * eV_Ha
+ new%wr_step = 0.05 * eV_Ha
 
- ! TODO: Use ph_ngqpt?
  ! Define q-mesh for integration.
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
  new%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
@@ -1462,7 +1488,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! to distribuite the calculations among the processors.
  new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
- ! TODO: check gw_qprange > 0. Rename variable
+ ! TODO: debug gw_qprange > 0. Rename variable
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
    call wrtout(std_out, "Getting list of k-points for self-energy from kptgw and bdgw.")
@@ -2081,6 +2107,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  integer,parameter :: master=0
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond
+ real(dp) :: smrt,alpha,beta,e0pde(9)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
 !arrays
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
@@ -2106,6 +2133,19 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  if (my_rank /= master) return
 
  ik_ibz = self%kcalc2ibz(ikcalc, 1)
+
+#if 0
+ ! This to compute derivative of Re Sigma with 9 points.
+ write(ab_out, *)"finite derivative"
+ iw = 1 + (self%nwr / 2) - 4
+ e0pde = arth(zero, self%wr_step, 9)
+ do ibc=1,self%nbcalc_ks(ikcalc,spin)
+   do it=1,self%ntemp
+     smrt = linfit(9, e0pde, real(self%vals_wr(iw:iw+8, it, ibc)), alpha, beta)
+     self%dvals_de0ks(it, ibc) = alpha
+   end do
+ end do
+#endif
 
  if (self%symsigma == +1) then
    ! Average self-energy matrix elements in the degenerate subspace.
@@ -2162,9 +2202,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    write(ab_out,"(a)")" "
  end if
 
- do it=1,self%ntemp
+ ! FIXME
  !do it=1,1
-   ! FIXME
+ do it=1,self%ntemp
    if (it == 1) then
      if (self%nsppol == 1) then
        write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)))
@@ -2182,10 +2222,11 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      dw = self%dw_vals(it, ibc)
      fan0 = real(sig0c) - dw
      ! TODO: Note that here I use the full Sigma including the imaginary part
-     zc = one / (one - self%dvals_de0ks(it, ibc))
-     !zc = one / (one - real(self%dvals_de0ks(it, ibc))
+     !zc = one / (one - self%dvals_de0ks(it, ibc))
+     zc = one / (one - real(self%dvals_de0ks(it, ibc)))
      ze0_vals(it, ibc) = real(zc)
-     qpe = kse + sig0c
+     !qpe = kse + sig0c
+     qpe = kse + real(zc) * real(sig0c)
      if (ibc == 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
@@ -2196,6 +2237,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
        kse_cond = kse; qpe_cond = qpe
      end if
      if (it == 1) then
+       !   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
        write(ab_out, "(i4,10(f8.3,1x))") &
          band, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
          real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
@@ -2226,6 +2268,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  end do ! it
 
  ! Write data to netcdf file
+ ! :**Only master writes**
  ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
 
 #ifdef HAVE_NETCDF
@@ -2262,7 +2305,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_wr"), c2r(self%vals_wr), start=[1,1,1,1,ikcalc,spin]))
 
    ! Compute spectral function.
-   ! A = 1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] **2 + Im Sigma(ww) ** 2])
+   ! A = 1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] ** 2 + Im Sigma(ww) ** 2])
    ABI_MALLOC(aw, (self%nwr, self%ntemp, self%max_nbcalc))
 
    do ib=1,self%nbcalc_ks(ikcalc,spin)
