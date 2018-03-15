@@ -56,7 +56,7 @@ see the [installation notes](https://www.abinit.org/installation).
 
     We will use the name "~abinit" to refer to the directory that contains the
     ABINIT package after download. In practice, a version number is appended to
-    this name, to give for example: abinit-8.4.0. The ABINIT package versioning
+    this name, to give for example: abinit-8.8.0. The ABINIT package versioning
     scheme is explained later in this file.
 
 ~abinit contains different subdirectories. For example, the present file, as

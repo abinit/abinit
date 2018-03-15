@@ -4,7 +4,7 @@ This file provides a description of the operations needed to install the
 ABINIT package, to generate the executable and to make the tests. 
 It provides also the description of simple modifications of the package, for developers.
 
-See a recent version of the [new user's guide](guide/new_user.md),
+See a recent version of the [[help:new_user|new user's guide]],
 for an introduction to the abinit package. 
 See a recent version of the [[help:abinit]] file for learning how to use the code. 
 Both of them can be found either on the Web, or in the doc subdirectory of the package.
@@ -347,7 +347,7 @@ appropriate library to be installed in order to work properly.
 
 For further information on these internal tests, see the ~abinit/tests/built-in/README file.
 
-You might now read the [new user's guide](guide/new_user.md), in
+You might now read the [[help:new_user|new user's guide]], in
 order to learn how to use the code, and then to follow the four basic
 tutorials, see the [entry page for the tutorials](tutorial/index.md).
 This is useful if you consider that the installation has been successful. Or

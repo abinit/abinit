@@ -388,8 +388,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
    brav=inp%brav
 
-   if(brav/=1)then
-     message = ' The possibility to have brav/=1 for thmeig was disabled.'
+   if(abs(brav)/=1)then
+     message = ' The possibility to have abs(brav)/=1 for thmeig was disabled.'
      MSG_ERROR(message)
    end if
 
