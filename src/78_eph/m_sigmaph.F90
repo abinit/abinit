@@ -407,7 +407,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2
- complex(dpc) :: cfact,dka,dkap,dkpa,dkpap
+ complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,my_ieta,cplx_ediff
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -423,7 +423,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: lf(2),rg(2),res(2)
- real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq
+ real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
  !real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom)
  !real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
@@ -893,8 +893,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                !if (nsppol == 1 .and. nspinor == 1 .and. nspden == 1) f_mkq = f_mkq * half
 
                ! Accumulate Sigma(w=eKS) for state ib_k
-               cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                        (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               !my_ieta = sigma%ieta * sign(one, ebands%fermie - eig0nk)
+               my_ieta = sigma%ieta
+               cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
+                        (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)
+
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
 
                ! Accumulate contribution to Eliashberg functions (Fan term)
@@ -912,17 +915,17 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
 #if 0
 !old derivative
-               cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) ** 2 &
-                       -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ** 2
+               cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) ** 2 &
+                       -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta) ** 2
                sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * cfact
 #else
 
-               !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-               !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
+               !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)
                !sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
-               cfact = (eig0nk - eig0mkq + wqnu + sigma%ieta)
+               cfact = (eig0nk - eig0mkq + wqnu + my_ieta)
                gmod2 = cfact * dconjg(cfact)
-               cfact = (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               cfact = (eig0nk - eig0mkq - wqnu + my_ieta)
                hmod2 = cfact * dconjg(cfact)
 
                sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * ( &
@@ -933,8 +936,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                ! Accumulate Sigma(w) for state ib_k
                if (sigma%nwr > 0) then
-                 cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
-                               (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
+                 my_ieta = sigma%ieta
+                 cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + my_ieta) + &
+                               (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + my_ieta)
                  sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * cfact_wr(:)
                end if
              end do ! it
@@ -977,8 +981,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        sqrt_phfrq0 = zero
      end where
      d0mat = reshape(displ_cart, [2, natom3, natom3])
+     ! cmat contains the displament vectors as complex array
      cmat = dcmplx(d0mat(1,:,:), d0mat(2,:,:))
-     ! Multiply by the masses...
+     ! Multiply d by M to get e * M^{1/2}
      do nu=1,natom3
        do ip1=1,natom3
          idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
@@ -989,19 +994,32 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      ! Integral over IBZ. Note that here we can use IBZ(k=0).
      ! symsigma == 0 activates sum over full BZ for debugging purpose.
-     ! TODO Bug if symsigma 0
-     nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
+     ! For the time being, integrate over full BZ
+     ! TODO Bug if symsigma 0 ?
+     nq = sigma%nqibz
+     if (sigma%symsigma == 0) nq = sigma%nqbz
+     !if (sigma%symsigma == 0) nq = sigma%nqibz_k
      !do iq_ibz=1,sigma%nqibz
+     nq = sigma%nqbz
      do iq_ibz=1,nq
-       if (mod(iq_ibz, nprocs) /= my_rank) cycle
+       if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
+#if 1
+       qpt = sigma%qbz(:,iq_ibz); weigth_q = one / sigma%nqbz
+#else
        if (abs(sigma%symsigma) == 1) then
          qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
+         !qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
        else
          qpt = sigma%qbz(:,iq_ibz); weigth_q = one / sigma%nqbz
+         !qpt = sigma%qibz_k(:,iq_ibz); weigth_q = sigma%wtq_k(iq_ibz)
        end if
+#endif
+
+       ! Get ph for this q-point.
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
 
        ! Compute hka_mn matrix with shape: (natom3, nbsum, nbcalc_ks))
+       ! Needed for Giustino's equation.
        ! dbwl_nu(2, nbcalc_ks, nbsum, natom3)
        do in=1,nbcalc_ks
          do im=1,nbsum
@@ -1009,13 +1027,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                           sqrt_phfrq0(:) * dbwl_nu(2, in, im, :))
            do ii=1,natom3
              cvec2 = cmat(ii,:)
-             hka_mn(ii, im, in) = xdotu(natom3, cvec2, 1, cvec1, 1)
+             !hka_mn(ii, im, in) = xdotu(natom3, cvec2, 1, cvec1, 1)
+             hka_mn(ii, im, in) = dot_product(dconjg(cvec2), cvec1)
              !hka_mn(ii, im, in) = dconjg(hka_mn(ii, im, in))
              !write(std_out,*)"hka_mn: ",hka_mn(ii, im, in)
            end do
          end do
        end do
 
+       ! Sum over modes for this q-point.
        do nu=1,natom3
          ! Ignore acoustic or unstable modes.
          wqnu = phfrq(nu); if (wqnu < tol6) cycle
@@ -1038,6 +1058,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            end do
          end do
 
+         ! Giustino's equation in RMP
          ! gdw2_mn = diag(conjg(H) T H) / (2 w(qu,nu))
          ! tpp(natom3, natom3), hka_mn(natom3, nbsum, nbcalc_ks)
          ABI_MALLOC(wmat1, (natom3, nbsum, nbcalc_ks))
@@ -1050,12 +1071,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              !cfact = dot_product(wmat1(:, ibsum, ib_k), wmat1(:, ibsum, ib_k))
              !cfact = xdotc(natom3, hka_mn(:, ibsum, ib_k), 1, wmat1(:, ibsum, ib_k), 1)
              !cfact = xdotu(natom3, hka_mn(:, ibsum, ib_k), 1, wmat1(:, ibsum, ib_k), 1)
-             !write(std_out, *)"cfact: ", cfact / (two * wqnu)
              gdw2_mn(ibsum, ib_k) = real(cfact) / (two * wqnu)
+             !write(std_out, *)"gdw2_mn: ", gdw2_mn(ibsum, ib_k)
            end do
          end do
          ABI_FREE(wmat1)
-         gdw2_mn = zero
+         !gdw2_mn = zero
 
          ! Get phonon occupation for all temperatures.
          nqnu_tlist = nbe(wqnu, sigma%kTmesh(:), zero)
@@ -1066,11 +1087,17 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            do ib_k=1,nbcalc_ks
              band = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band, ik_ibz, spin)
-             ! Ignore n == m and degenerate states.
-             ediff = (eig0nk - eig0mk); if (abs(ediff) < tol12) cycle
+             ! Handle n == m and degenerate states (either ignore or add broadening)
+             cplx_ediff = (eig0nk - eig0mk)
+             !if (abs(cplx_diff) < tol12) cplx_ediff = tol10
+             !if (abs(cplx_ediff) < tol12) cycle
+             !if (abs(cplx_ediff) < tol6) cycle
+             if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
 
+#if 1
              ! Compute DW term following XG paper. Check prefactor.
              ! gkk0_atm(2, nbcalc_ks, nbsum, natom3)
+             ! previous version
              gdw2_mn(ibsum, ib_k) = zero
              do ip2=1,natom3
                do ip1=1,natom3
@@ -1082,26 +1109,26 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                   )
                end do
              end do
-             !gdw2_mn(ibsum, ib_k)
-             !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
-             !gdw2_mn(ibsum, ib_k) = zero
              gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
+             !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
+#endif
 
+             ! accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              do it=1,sigma%ntemp
-               rfact = - weigth_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / ediff
-               ! acculate DW, add it to Sigma(e0) and Sigma(w)
+               cfact = - weigth_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / cplx_ediff
+               rfact = real(cfact)
                sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
                if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
 
-               ! Accumulate contribution to Eliashberg functions (DW term)
+               ! Optionally, accumulate contribution to Eliashberg functions (DW term)
                if (sigma%gfw_nomega > 0) then
                  sigma%gfw_vals(:, it, 2, ib_k) = sigma%gfw_vals(:, it, 2, ib_k) + &
                    rfact * dt_weights(:, 1)
                end if
 
                if (sigma%has_nuq_terms) then
-                   !TODO: in principle iq_ibz --> iq_bz if symsigma == 0
+                 ! TODO: in principle iq_ibz --> iq_bz if symsigma == 0
                  sigma%vals_nuq(it, ib_k, nu, iq_ibz, 2) = sigma%vals_nuq(it, ib_k, nu, iq_ibz, 2) + &
                    gkk2 * rfact / weigth_q
                end if
@@ -2114,6 +2141,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond
  real(dp) :: smrt,alpha,beta,e0pde(9)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
+ character(len=500) :: msg
 !arrays
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
@@ -2141,13 +2169,22 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
 #if 0
  ! This to compute derivative of Re Sigma with 9 points.
- write(ab_out, *)"finite derivative"
+ write(ab_out, *)"Using finite derivative"
  iw = 1 + (self%nwr / 2) - 4
  e0pde = arth(zero, self%wr_step, 9)
  do ibc=1,self%nbcalc_ks(ikcalc,spin)
    do it=1,self%ntemp
      smrt = linfit(9, e0pde, real(self%vals_wr(iw:iw+8, it, ibc)), alpha, beta)
      self%dvals_de0ks(it, ibc) = alpha
+     if (smrt > 0.1 / Ha_eV) then
+       write(msg,'(3a,i0,a,i0,2a,2(f22.15,2a))')&
+         'Values of Re Sig_c are not linear ',ch10,&
+         'band index ibc = ',ibc,' spin component = ',spin,ch10,&
+         'root mean square= ',smrt,ch10,&
+         'estimated slope = ',alpha,ch10,&
+         'Omega [eV] SigC [eV]'
+       MSG_WARNING(msg)
+     end if
    end do
  end do
 #endif
