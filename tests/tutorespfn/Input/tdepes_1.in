@@ -24,8 +24,8 @@
  getwfq3  2
  nqpt3    1
  qpt3     0.0 0.0 0.0  # Calculation at Gamma
- ieig2rf3 1            # Static eigenvalues corrections using DFPT (Sternheimer)
- #ieig2rf3 5            # Static eigenvalues corrections using DFPT (Sternheimer)
+ #ieig2rf3 1            # Static eigenvalues corrections using DFPT (Sternheimer)
+ ieig2rf3 5            # Static eigenvalues corrections using DFPT (Sternheimer)
  smdelta3 1            # Flag required to produce the _EIGI2D used to 
                        # compute the lifetime of electronic levels.
                        # smdelta = 1 ==> Fermi-Dirac smearing.

@@ -1,11 +1,10 @@
-1                  
-2                  
-temperature4_bis   
-0.1                
-0.1                
-0 0.5              
-0 1000 50          
-8                  
+1
+1
+temperature4_bis
+y
+1000 50
+y
+8
 tdepes_4o_DS14_DDB
 tdepes_4o_DS24_DDB
 tdepes_4o_DS34_DDB
@@ -30,12 +29,12 @@ tdepes_4o_DS54_EIGR2D.nc
 tdepes_4o_DS64_EIGR2D.nc
 tdepes_4o_DS74_EIGR2D.nc
 tdepes_4o_DS84_EIGR2D.nc
-tdepes_4o_DS14_GKK.nc
-tdepes_4o_DS24_GKK.nc
-tdepes_4o_DS34_GKK.nc
-tdepes_4o_DS44_GKK.nc
-tdepes_4o_DS54_GKK.nc
-tdepes_4o_DS64_GKK.nc
-tdepes_4o_DS74_GKK.nc
-tdepes_4o_DS84_GKK.nc
+tdepes_4o_DS14_EIGI2D.nc
+tdepes_4o_DS24_EIGI2D.nc
+tdepes_4o_DS34_EIGI2D.nc
+tdepes_4o_DS44_EIGI2D.nc
+tdepes_4o_DS54_EIGI2D.nc
+tdepes_4o_DS64_EIGI2D.nc
+tdepes_4o_DS74_EIGI2D.nc
+tdepes_4o_DS84_EIGI2D.nc
 tdepes_4o_DS11_EIG.nc
