@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.7.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  6 Sep 2017.
-- ( at 12h52 )
+.Starting date : Fri 16 Mar 2018.
+- ( at 08h44 )
   
 - input  file    -> tdepes_3.in
 - output file    -> tdepes_3.out
@@ -530,28 +530,28 @@ _ WF disk file :      0.077 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
            getwfq83        -1
           ieig2rf11         0
           ieig2rf12         0
-          ieig2rf13         1
+          ieig2rf13         5
           ieig2rf21         0
           ieig2rf22         0
-          ieig2rf23         1
+          ieig2rf23         5
           ieig2rf31         0
           ieig2rf32         0
-          ieig2rf33         1
+          ieig2rf33         5
           ieig2rf41         0
           ieig2rf42         0
-          ieig2rf43         1
+          ieig2rf43         5
           ieig2rf51         0
           ieig2rf52         0
-          ieig2rf53         1
+          ieig2rf53         5
           ieig2rf61         0
           ieig2rf62         0
-          ieig2rf63         1
+          ieig2rf63         5
           ieig2rf71         0
           ieig2rf72         0
-          ieig2rf73         1
+          ieig2rf73         5
           ieig2rf81         0
           ieig2rf82         0
-          ieig2rf83         1
+          ieig2rf83         5
              iscf11         7
              iscf12        -2
              iscf13         7
@@ -951,8 +951,8 @@ P          mk1mem           8
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -961,7 +961,7 @@ P          mk1mem           8
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -1466,17 +1466,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -8.8690182199E+01 Ha. 2DEnonrelax=    9.9961514088E+01 Ha)
     (  non-var. 2DEtotal :    1.1271164045E+01 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -1.4465249883E+00    0.0000000000E+00
-   1   1   2   1   -7.2326414148E-01   -8.4590447099E-07
-   1   1   3   1   -7.2326106877E-01    2.3378296575E-07
-   2   1   1   1   -7.2326414148E-01    8.4590447099E-07
-   2   1   2   1   -1.4465366769E+00    0.0000000000E+00
-   2   1   3   1   -7.2326347678E-01    4.3910967266E-07
-   3   1   1   1   -7.2326106877E-01   -2.3378296575E-07
-   3   1   2   1   -7.2326347678E-01   -4.3910967266E-07
-   3   1   3   1   -1.4465218104E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -1607,6 +1596,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 -  4.015409E+01  4.138119E+01  4.314688E+01  2.128782E+03  2.128788E+03
 -  2.128794E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -1.4465249883E+00    0.0000000000E+00
+   1   1   2   1   -7.2326414148E-01   -8.4590447099E-07
+   1   1   3   1   -7.2326106877E-01    2.3378296575E-07
+   2   1   1   1   -7.2326414148E-01    8.4590447099E-07
+   2   1   2   1   -1.4465366769E+00    0.0000000000E+00
+   2   1   3   1   -7.2326347678E-01    4.3910967266E-07
+   3   1   1   1   -7.2326106877E-01   -2.3378296575E-07
+   3   1   2   1   -7.2326347678E-01   -4.3910967266E-07
+   3   1   3   1   -1.4465218104E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    1.9449537012E-09    0.0000000000E+00
+   1   1   2   1    1.3040921606E-09   -3.8851150000E-10
+   1   1   3   1    1.3083193150E-09    1.0627313752E-09
+   2   1   1   1    1.3040921606E-09    3.8851150000E-10
+   2   1   2   1    9.5200083564E-10    0.0000000000E+00
+   2   1   3   1    6.6494415813E-10    9.7390326230E-10
+   3   1   1   1    1.3083193150E-09   -1.0627313752E-09
+   3   1   2   1    6.6494415813E-10   -9.7390326230E-10
+   3   1   3   1    1.4607532322E-09    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -2189,17 +2202,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -9.1591692578E+01 Ha. 2DEnonrelax=    1.0134419426E+02 Ha)
     (  non-var. 2DEtotal :    9.7522700635E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -5.1237847154E+00    0.0000000000E+00
-   1   1   2   1   -7.1344735975E-01   -3.1900348471E-05
-   1   1   3   1   -7.1325782429E-01   -8.0968639497E-05
-   2   1   1   1   -7.1344735975E-01    3.1900348471E-05
-   2   1   2   1   -1.4266388188E+00    0.0000000000E+00
-   2   1   3   1   -7.1332388846E-01   -4.1304509028E-06
-   3   1   1   1   -7.1325782429E-01    8.0968639497E-05
-   3   1   2   1   -7.1332388846E-01    4.1304509028E-06
-   3   1   3   1   -1.4266549006E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -2330,6 +2332,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 -  7.805305E+02  7.805424E+02  1.438856E+03  1.761144E+03  1.817562E+03
 -  1.817563E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -5.1237847154E+00    0.0000000000E+00
+   1   1   2   1   -7.1344735975E-01   -3.1900348471E-05
+   1   1   3   1   -7.1325782429E-01   -8.0968639497E-05
+   2   1   1   1   -7.1344735975E-01    3.1900348471E-05
+   2   1   2   1   -1.4266388188E+00    0.0000000000E+00
+   2   1   3   1   -7.1332388846E-01   -4.1304509028E-06
+   3   1   1   1   -7.1325782429E-01    8.0968639497E-05
+   3   1   2   1   -7.1332388846E-01    4.1304509028E-06
+   3   1   3   1   -1.4266549006E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    2.1902747557E-02    0.0000000000E+00
+   1   1   2   1    9.0185243512E-07    2.6247283755E-07
+   1   1   3   1   -3.1816121016E-07    5.1177090410E-07
+   2   1   1   1    9.0185243512E-07   -2.6247283755E-07
+   2   1   2   1    0.0000000000E+00    0.0000000000E+00
+   2   1   3   1    0.0000000000E+00    0.0000000000E+00
+   3   1   1   1   -3.1816121016E-07   -5.1177090410E-07
+   3   1   2   1    0.0000000000E+00    0.0000000000E+00
+   3   1   3   1    0.0000000000E+00    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -2570,8 +2596,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.90017
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2580,7 +2606,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -3010,17 +3036,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -9.6217285117E+01 Ha. 2DEnonrelax=    1.0271156262E+02 Ha)
     (  non-var. 2DEtotal :    6.4941090564E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -3.4355894649E+00    0.0000000000E+00
-   1   1   2   1   -6.5757324246E-01   -8.9634470886E-06
-   1   1   3   1   -6.5756021981E-01   -3.3391498143E-07
-   2   1   1   1   -6.5757324246E-01    8.9634470886E-06
-   2   1   2   1   -1.3151106372E+00    0.0000000000E+00
-   2   1   3   1   -6.5755414308E-01    3.6170436207E-07
-   3   1   1   1   -6.5756021981E-01    3.3391498144E-07
-   3   1   2   1   -6.5755414308E-01   -3.6170436207E-07
-   3   1   3   1   -1.3151147978E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -3151,6 +3166,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 -  2.037269E+02  2.037817E+02  1.229250E+03  1.592334E+03  1.592357E+03
 -  2.048674E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -3.4355894649E+00    0.0000000000E+00
+   1   1   2   1   -6.5757324246E-01   -8.9634470886E-06
+   1   1   3   1   -6.5756021981E-01   -3.3391498143E-07
+   2   1   1   1   -6.5757324246E-01    8.9634470886E-06
+   2   1   2   1   -1.3151106372E+00    0.0000000000E+00
+   2   1   3   1   -6.5755414308E-01    3.6170436207E-07
+   3   1   1   1   -6.5756021981E-01    3.3391498144E-07
+   3   1   2   1   -6.5755414308E-01   -3.6170436207E-07
+   3   1   3   1   -1.3151147978E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    3.6485291514E-09    0.0000000000E+00
+   1   1   2   1    0.0000000000E+00    0.0000000000E+00
+   1   1   3   1    0.0000000000E+00    0.0000000000E+00
+   2   1   1   1    0.0000000000E+00    0.0000000000E+00
+   2   1   2   1    0.0000000000E+00    0.0000000000E+00
+   2   1   3   1    0.0000000000E+00    0.0000000000E+00
+   3   1   1   1    0.0000000000E+00    0.0000000000E+00
+   3   1   2   1    0.0000000000E+00    0.0000000000E+00
+   3   1   3   1    0.0000000000E+00    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -3206,8 +3245,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3216,7 +3255,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -3730,17 +3769,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -9.4648567882E+01 Ha. 2DEnonrelax=    1.0465446798E+02 Ha)
     (  non-var. 2DEtotal :    1.0005714626E+01 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -3.4713667747E+00    0.0000000000E+00
-   1   1   2   1   -2.6707026391E+00    1.8679276972E-05
-   1   1   3   1   -8.0060837667E-01   -4.6042849822E-06
-   2   1   1   1   -2.6707026391E+00   -1.8679276972E-05
-   2   1   2   1   -3.4713821188E+00    0.0000000000E+00
-   2   1   3   1   -8.0061250169E-01   -1.4264641937E-06
-   3   1   1   1   -8.0060837667E-01    4.6042849821E-06
-   3   1   2   1   -8.0061250169E-01    1.4264641937E-06
-   3   1   3   1   -1.6013357000E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -3871,6 +3899,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 -  1.028718E+03  1.028746E+03  1.657986E+03  1.719967E+03  1.720010E+03
 -  1.907996E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -3.4713667747E+00    0.0000000000E+00
+   1   1   2   1   -2.6707026391E+00    1.8679276972E-05
+   1   1   3   1   -8.0060837667E-01   -4.6042849822E-06
+   2   1   1   1   -2.6707026391E+00   -1.8679276972E-05
+   2   1   2   1   -3.4713821188E+00    0.0000000000E+00
+   2   1   3   1   -8.0061250169E-01   -1.4264641937E-06
+   3   1   1   1   -8.0060837667E-01    4.6042849821E-06
+   3   1   2   1   -8.0061250169E-01    1.4264641937E-06
+   3   1   3   1   -1.6013357000E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    1.5372874882E-03    0.0000000000E+00
+   1   1   2   1    1.5372921354E-03   -1.6420892905E-08
+   1   1   3   1   -3.9531418270E-08    6.6600917798E-09
+   2   1   1   1    1.5372921354E-03    1.6420892905E-08
+   2   1   2   1    1.5372967828E-03    0.0000000000E+00
+   2   1   3   1   -3.9531608914E-08    6.6596896492E-09
+   3   1   1   1   -3.9531418270E-08   -6.6600917798E-09
+   3   1   2   1   -3.9531608914E-08   -6.6596896492E-09
+   3   1   3   1    0.0000000000E+00    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -4111,8 +4163,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.91034
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4121,7 +4173,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -4443,17 +4495,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -9.9505915563E+01 Ha. 2DEnonrelax=    1.0613980742E+02 Ha)
     (  non-var. 2DEtotal :    6.6337174357E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -2.8317621642E+00    0.0000000000E+00
-   1   1   2   1   -1.3066064228E+00   -6.8190130142E-04
-   1   1   3   1   -7.6801266833E-01   -7.7567830925E-06
-   2   1   1   1   -1.3066064228E+00    6.8190130142E-04
-   2   1   2   1   -1.9928643126E+00    0.0000000000E+00
-   2   1   3   1   -7.6799508915E-01   -4.3536182245E-06
-   3   1   1   1   -7.6801266833E-01    7.7567830926E-06
-   3   1   2   1   -7.6799508915E-01    4.3536182245E-06
-   3   1   3   1   -1.5360006648E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -4584,6 +4625,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 -  8.448847E+02  1.325770E+03  1.340754E+03  1.386043E+03  1.656000E+03
 -  1.926776E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -2.8317621642E+00    0.0000000000E+00
+   1   1   2   1   -1.3066064228E+00   -6.8190130142E-04
+   1   1   3   1   -7.6801266833E-01   -7.7567830925E-06
+   2   1   1   1   -1.3066064228E+00    6.8190130142E-04
+   2   1   2   1   -1.9928643126E+00    0.0000000000E+00
+   2   1   3   1   -7.6799508915E-01   -4.3536182245E-06
+   3   1   1   1   -7.6801266833E-01    7.7567830926E-06
+   3   1   2   1   -7.6799508915E-01    4.3536182245E-06
+   3   1   3   1   -1.5360006648E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    6.7344745052E-10    0.0000000000E+00
+   1   1   2   1    4.0502830986E-10    1.0148001554E-10
+   1   1   3   1    0.0000000000E+00    0.0000000000E+00
+   2   1   1   1    4.0502830986E-10   -1.0148001554E-10
+   2   1   2   1    2.5888601309E-10    0.0000000000E+00
+   2   1   3   1    0.0000000000E+00    0.0000000000E+00
+   3   1   1   1    0.0000000000E+00    0.0000000000E+00
+   3   1   2   1    0.0000000000E+00    0.0000000000E+00
+   3   1   3   1    0.0000000000E+00    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -4639,8 +4704,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4649,7 +4714,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -5161,17 +5226,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -9.2594352261E+01 Ha. 2DEnonrelax=    1.0280456701E+02 Ha)
     (  non-var. 2DEtotal :    1.0210038253E+01 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -2.2466560705E+00    0.0000000000E+00
-   1   1   2   1   -4.8655334892E-01   -1.8421616796E-01
-   1   1   3   1   -7.3578562051E-01   -9.8591860950E-06
-   2   1   1   1   -4.8655334892E-01    1.8421616796E-01
-   2   1   2   1   -2.2466755540E+00    0.0000000000E+00
-   2   1   3   1   -7.3582595326E-01   -6.8281095800E-06
-   3   1   1   1   -7.3578562051E-01    9.8591860950E-06
-   3   1   2   1   -7.3582595326E-01    6.8281095800E-06
-   3   1   3   1   -1.4716230527E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -5302,6 +5356,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 -  1.186520E+03  1.404216E+03  1.542093E+03  1.640963E+03  1.786390E+03
 -  1.897311E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -2.2466560705E+00    0.0000000000E+00
+   1   1   2   1   -4.8655334892E-01   -1.8421616796E-01
+   1   1   3   1   -7.3578562051E-01   -9.8591860950E-06
+   2   1   1   1   -4.8655334892E-01    1.8421616796E-01
+   2   1   2   1   -2.2466755540E+00    0.0000000000E+00
+   2   1   3   1   -7.3582595326E-01   -6.8281095800E-06
+   3   1   1   1   -7.3578562051E-01    9.8591860950E-06
+   3   1   2   1   -7.3582595326E-01    6.8281095800E-06
+   3   1   3   1   -1.4716230527E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    1.0475491748E-07    0.0000000000E+00
+   1   1   2   1   -8.0741028962E-08    6.6744070197E-08
+   1   1   3   1    0.0000000000E+00    0.0000000000E+00
+   2   1   1   1   -8.0741028962E-08   -6.6744070197E-08
+   2   1   2   1    1.0475770426E-07    0.0000000000E+00
+   2   1   3   1    0.0000000000E+00    0.0000000000E+00
+   3   1   1   1    0.0000000000E+00    0.0000000000E+00
+   3   1   2   1    0.0000000000E+00    0.0000000000E+00
+   3   1   3   1    0.0000000000E+00    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -5542,8 +5620,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.90599
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5552,7 +5630,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -5872,17 +5950,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -1.1170484973E+02 Ha. 2DEnonrelax=    1.0965431346E+02 Ha)
     (  non-var. 2DEtotal :   -2.0506398985E+00 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -2.2692841256E+00    0.0000000000E+00
-   1   1   2   1   -1.5389683612E+00   -8.6723431286E-06
-   1   1   3   1   -7.3032303240E-01    3.7065987933E-06
-   2   1   1   1   -1.5389683612E+00    8.6723431286E-06
-   2   1   2   1   -2.2692814208E+00    0.0000000000E+00
-   2   1   3   1   -7.3032179412E-01    9.8246103165E-06
-   3   1   1   1   -7.3032303240E-01   -3.7065987933E-06
-   3   1   2   1   -7.3032179412E-01   -9.8246103165E-06
-   3   1   3   1   -1.4606306921E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -6013,6 +6080,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 - -1.532118E+03 -1.532114E+03  1.197106E+03  1.197147E+03  1.647333E+03
 -  1.668849E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -2.2692841256E+00    0.0000000000E+00
+   1   1   2   1   -1.5389683612E+00   -8.6723431286E-06
+   1   1   3   1   -7.3032303240E-01    3.7065987933E-06
+   2   1   1   1   -1.5389683612E+00    8.6723431286E-06
+   2   1   2   1   -2.2692814208E+00    0.0000000000E+00
+   2   1   3   1   -7.3032179412E-01    9.8246103165E-06
+   3   1   1   1   -7.3032303240E-01   -3.7065987933E-06
+   3   1   2   1   -7.3032179412E-01   -9.8246103165E-06
+   3   1   3   1   -1.4606306921E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    0.0000000000E+00    0.0000000000E+00
+   1   1   2   1    0.0000000000E+00    0.0000000000E+00
+   1   1   3   1    0.0000000000E+00    0.0000000000E+00
+   2   1   1   1    0.0000000000E+00    0.0000000000E+00
+   2   1   2   1    0.0000000000E+00    0.0000000000E+00
+   2   1   3   1    0.0000000000E+00    0.0000000000E+00
+   3   1   1   1    0.0000000000E+00    0.0000000000E+00
+   3   1   2   1    0.0000000000E+00    0.0000000000E+00
+   3   1   3   1    0.0000000000E+00    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -6068,8 +6159,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6078,7 +6169,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -6274,8 +6365,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.91179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gmatteo_mkdocs/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6284,7 +6375,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -6610,17 +6701,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     (2DErelax=   -1.0531001888E+02 Ha. 2DEnonrelax=    1.1815374616E+02 Ha)
     (  non-var. 2DEtotal :    1.2843683602E+01 Ha)
 
- Components of second-order derivatives of the electronic energy, EIGR2D.
- For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -2.1513431299E+00    0.0000000000E+00
-   1   1   2   1   -1.2189502212E+00    5.3093449551E-02
-   1   1   3   1   -9.3241148293E-01    5.3087155881E-02
-   2   1   1   1   -1.2189502212E+00   -5.3093449551E-02
-   2   1   2   1   -2.4378943692E+00    0.0000000000E+00
-   2   1   3   1   -1.2189445619E+00    5.3082060366E-02
-   3   1   1   1   -9.3241148293E-01   -5.3087155881E-02
-   3   1   2   1   -1.2189445619E+00   -5.3082060366E-02
-   3   1   3   1   -2.1513342901E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -6751,6 +6831,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  Phonon energies in Kelvin  :
 -  1.402672E+03  1.428515E+03  1.502631E+03  1.519039E+03  1.888585E+03
 -  1.901990E+03
+ Components of second-order derivatives of the electronic energy, EIGR2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1   -2.1513431299E+00    0.0000000000E+00
+   1   1   2   1   -1.2189502212E+00    5.3093449551E-02
+   1   1   3   1   -9.3241148293E-01    5.3087155881E-02
+   2   1   1   1   -1.2189502212E+00   -5.3093449551E-02
+   2   1   2   1   -2.4378943692E+00    0.0000000000E+00
+   2   1   3   1   -1.2189445619E+00    5.3082060366E-02
+   3   1   1   1   -9.3241148293E-01   -5.3087155881E-02
+   3   1   2   1   -1.2189445619E+00   -5.3082060366E-02
+   3   1   3   1   -2.1513342901E+00    0.0000000000E+00
+ 
+ Components of second-order derivatives of the electronic energy, EIGI2D.
+ For automatic tests, printing the matrix for the first k-point, first band, first atom.
+   1   1   1   1    0.0000000000E+00    0.0000000000E+00
+   1   1   2   1    0.0000000000E+00    0.0000000000E+00
+   1   1   3   1    0.0000000000E+00    0.0000000000E+00
+   2   1   1   1    0.0000000000E+00    0.0000000000E+00
+   2   1   2   1    0.0000000000E+00    0.0000000000E+00
+   2   1   3   1    0.0000000000E+00    0.0000000000E+00
+   3   1   1   1    0.0000000000E+00    0.0000000000E+00
+   3   1   2   1    0.0000000000E+00    0.0000000000E+00
+   3   1   3   1    0.0000000000E+00    0.0000000000E+00
+ 
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -6919,28 +7023,28 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
            getwfq83        -1
           ieig2rf11         0
           ieig2rf12         0
-          ieig2rf13         1
+          ieig2rf13         5
           ieig2rf21         0
           ieig2rf22         0
-          ieig2rf23         1
+          ieig2rf23         5
           ieig2rf31         0
           ieig2rf32         0
-          ieig2rf33         1
+          ieig2rf33         5
           ieig2rf41         0
           ieig2rf42         0
-          ieig2rf43         1
+          ieig2rf43         5
           ieig2rf51         0
           ieig2rf52         0
-          ieig2rf53         1
+          ieig2rf53         5
           ieig2rf61         0
           ieig2rf62         0
-          ieig2rf63         1
+          ieig2rf63         5
           ieig2rf71         0
           ieig2rf72         0
-          ieig2rf73         1
+          ieig2rf73         5
           ieig2rf81         0
           ieig2rf82         0
-          ieig2rf83         1
+          ieig2rf83         5
              iscf11         7
              iscf12        -2
              iscf13         7
@@ -7385,10 +7489,10 @@ P          mk1mem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         17.3  wall=         25.2
+- Proc.   0 individual time (sec): cpu=         15.1  wall=         16.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered 143 WARNINGs and  72 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.3  wall=         25.2
+.Delivered 143 WARNINGs and  96 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.1  wall=         16.5
