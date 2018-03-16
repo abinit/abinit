@@ -874,7 +874,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          weigth_q = sigma%wtq_k(iq_ibz)
 
          do nu=1,natom3
-           wqnu = phfrq(nu)
+           ! Ignore acoustic or unstable modes.
+           wqnu = phfrq(nu); if (wqnu < tol6) cycle
+
            ! Compute gaussian weights for Eliashberg function.
            if (sigma%gfw_nomega > 0) call gspline_eval(gspl, wqnu, sigma%gfw_nomega, sigma%gfw_mesh, dt_weights)
 
@@ -905,7 +907,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  sigma%gfw_vals(:, it, 1, ib_k) = sigma%gfw_vals(:, it, 1, ib_k) + &
                    gkk2 * cfact * dt_weights(:, 1)
                end if
-
                if (sigma%has_nuq_terms) then
                  !TODO: in principle iq_ibz --> iq_bz
                  sigma%vals_nuq(it, ib_k, nu, iq_ibz, 1) = sigma%vals_nuq(it, ib_k, nu, iq_ibz, 1) + &
@@ -915,11 +916,19 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
 #if 0
 !old derivative
+               ! This to avoid numerical instability
+               !my_ieta = five * sigma%ieta
                cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) ** 2 &
                        -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta) ** 2
+
+               ! Try to avoid numerical instability
+               !dka = (eig0nk - eig0mkq + wqnu + my_ieta) ** 2 *  (eig0nk - eig0mkq - wqnu + my_ieta) ** 2
+               !cfact = -(nqnu + f_mkq) * (eig0nk - eig0mkq - wqnu + my_ieta) ** 2 &
+               !        -(nqnu - f_mkq + one) * (eig0nk - eig0mkq + wqnu + my_ieta) ** 2
+               !cfact = cfact / dka
+
                sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * cfact
 #else
-
                !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
                !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)
                !sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
@@ -1089,10 +1098,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              eig0nk = ebands%eig(band, ik_ibz, spin)
              ! Handle n == m and degenerate states (either ignore or add broadening)
              cplx_ediff = (eig0nk - eig0mk)
-             !if (abs(cplx_diff) < tol12) cplx_ediff = tol10
-             !if (abs(cplx_ediff) < tol12) cycle
-             !if (abs(cplx_ediff) < tol6) cycle
              if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
+             !if (abs(cplx_ediff) < tol6) cycle
 
 #if 1
              ! Compute DW term following XG paper. Check prefactor.
@@ -1108,10 +1115,22 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    gkk0_atm(2, ib_k, ibsum, ip2) * gkk0_atm(2, ib_k, ibsum, ip1) &
                   )
                end do
+
+               !do ip1=1,natom3
+               !  gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) + tpp(ip1,ip2) * ( &
+               !    gkk0_atm(1, ib_k, ibsum, ip1) * gkk0_atm(1, ib_k, ibsum, ip2) + &
+               !    gkk0_atm(2, ib_k, ibsum, ip1) * gkk0_atm(2, ib_k, ibsum, ip2)  ) + &
+               !    tpp(ip2, ip1) * ( &
+               !    gkk0_atm(1, ib_k, ibsum, ip2) * gkk0_atm(1, ib_k, ibsum, ip1) + &
+               !    gkk0_atm(2, ib_k, ibsum, ip2) * gkk0_atm(2, ib_k, ibsum, ip1) &
+               !   )
+               !end do
+
              end do
              gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
              !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
 #endif
+             ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
 
              ! accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              do it=1,sigma%ntemp
@@ -1367,9 +1386,9 @@ elemental real(dp) function nbe(ee, kT, mu)
 
  !TODO: Find good tols.
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
- if (kT > tol6) then
+ if (kT > tol12) then
    arg = ee_mu / kT
-   if (ee_mu > tol12) then
+   if (arg > tol12 .and. arg < 600._dp) then
      nbe = one / (exp(arg) - one)
    else
      nbe = zero
@@ -1456,12 +1475,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! Copy important dimensions.
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
 
- ! TODO: zcut
  ! Broadening parameter from zcut
- !new%ieta = j_dpc * 0.0001_dp
- !if (dtset%elph2_imagden > tol12) new%ieta = j_dpc * dtset%elph2_imagden
- !new%ieta = j_dpc * 0.1_dp * eV_Ha
- new%ieta = +j_dpc * dtset%zcut
+ new%ieta = + j_dpc * dtset%zcut
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
@@ -1482,7 +1497,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e = ebands%fermie
 
- ! TODO
+ ! TODO T == 0 >> SIGSEGV
 #if 0
  call ebands_copy(ebands, tmp_ebands)
  do it=1,new%ntemp
@@ -2138,7 +2153,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 !Local variables-------------------------------
  integer,parameter :: master=0
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond
- real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond
+ real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_adb,qpe_adb_val,qpe_adb_cond
  real(dp) :: smrt,alpha,beta,e0pde(9)
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  character(len=500) :: msg
@@ -2267,16 +2282,16 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      !zc = one / (one - self%dvals_de0ks(it, ibc))
      zc = one / (one - real(self%dvals_de0ks(it, ibc)))
      ze0_vals(it, ibc) = real(zc)
-     !qpe = kse + sig0c
      qpe = kse + real(zc) * real(sig0c)
+     qpe_adb = kse + real(sig0c)
      if (ibc == 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
      if (band == ib_val) then
-       kse_val = kse; qpe_val = qpe
+       kse_val = kse; qpe_val = qpe; qpe_adb_val = qpe_adb
      end if
      if (band == ib_cond) then
-       kse_cond = kse; qpe_cond = qpe
+       kse_cond = kse; qpe_cond = qpe; qpe_adb_cond = qpe_adb
      end if
      if (it == 1) then
        !   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
@@ -2288,12 +2303,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
-     qpadb_enes(it, ibc) = qpe
+     qpadb_enes(it, ibc) = qpe_adb
      qp_enes(it, ibc) = qpe
      if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
        ! We have enough states to compute the gap.
        if (it == 1) ks_gap = kse_cond - kse_val
-       qpadb_gaps(it) = real(qpe_cond - qpe_val)
+       qpadb_gaps(it) = qpe_adb_cond - qpe_adb_val
        qp_gaps(it) = real(qpe_cond - qpe_val)
      end if
    end do ! ibc
@@ -2303,8 +2318,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      write(ab_out, "(a)")" "
      write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
        "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-     write(ab_out, "(a,f8.3)")" QP gap: ",qp_gaps(it) * Ha_eV
-     write(ab_out, "(a,f8.3)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV
+     write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (adiabatic: ",qpadb_gaps(it) * Ha_eV, ")"
+     write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
+         " (adiabatic: ",(qpadb_gaps(it) - ks_gap) * Ha_eV, ")"
      write(ab_out, "(a)")" "
    end if
  end do ! it
@@ -2315,7 +2331,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
 #ifdef HAVE_NETCDF
  ! Write self-energy matrix elements for this (kpt, spin)
- ! Cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack
+ ! Cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack memory.
  !shape3(1) = 2; shape4(1) = 2; shape5(1) = 2; shape6(1) = 2
 
  !shape3(2:) = shape(self%vals_e0ks); call c_f_pointer(c_loc(self%vals_e0ks), rdata3, shape3)
@@ -2333,7 +2349,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  !shape3(2:) = shape(qp_enes); call c_f_pointer(c_loc(qp_enes), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), c2r(qp_enes), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ze0_vals"), ze0_vals, start=[1,1,ikcalc,spin]))
-
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_enes"), ks_enes, start=[1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_gaps"), ks_gap, start=[ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_gaps"), qpadb_gaps, start=[1,ikcalc,spin]))
@@ -2367,7 +2382,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    !shape5(2:) = shape(self%gfw_vals); call c_f_pointer(c_loc(self%gfw_vals), rdata5, shape5)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "gfw_vals"), c2r(self%gfw_vals), start=[1,1,1,1,1,ikcalc,spin]))
  end if
-
  if (self%has_nuq_terms) then
    !shape6(2:) = shape(self%vals_nuq); call c_f_pointer(c_loc(self%vals_nuq), rdata6, shape6)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_nuq"), c2r(self%vals_nuq), start=[1,1,1,1,1,1,ikcalc,spin]))
@@ -2420,7 +2434,7 @@ subroutine sigmaph_print(self, dtset, unt)
  ! Write dimensions
  write(unt,"(a)")sjoin("Number of bands in self-energy:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
- write(unt,"(a)")sjoin("Imaginary shift in the denominator: ", ftoa(aimag(self%ieta) * Ha_eV), "[eV]")
+ write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
  write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
