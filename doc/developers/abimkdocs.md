@@ -359,14 +359,14 @@ Then, build the HTML using `mksite.py serve` and start to enjoy the Markdown syn
 
 The structuration for help files and theory documents is very similar to the one for the lessons of the tutorial.
 
-### Topics and tribes
+### Topics and relevances
 
 Since the beginning of the ABINIT HTML documentation, every input variable 
 has been required to belong to a **varset** (set of variables, e.g. `varbas`, `varfil`).
 However, starting in Summer 2017, we require every input variable to be also mentioned in at least one of the
-documentation "topics" and, for such topic, to be characterized by a "tribe".
+documentation "topics" and, for such topic, to be characterized by a "relevance".
 
-The allowed list of tribes (a generic list, irrespective of the topic) is declared in
+The allowed list of relevances (a generic list, irrespective of the topic) is declared in
 `~abinit/abimkdocs/variables.py`. 
 Standard names are:
 
@@ -375,10 +375,10 @@ Standard names are:
 - `useful` (when the default value is used most of the time)
 - `expert` (when only expert users should use other values than the default)
 
-Other tribe names have been allowed for specific topics, in which such a classification 
+Other relevance names have been allowed for specific topics, in which such a classification 
 (compulsory/basic/useful/expert) is not a relevant one.
 
-In order to specify the (possibly several) combinations of topic+tribe to which an input variable is attached,
+In order to specify the (possibly several) combinations of topic+relevance to which an input variable is attached,
 the field "topics" is used inside the `~abinit/doc/input_variables/generated_doc/abinit_vars.yml` file
 (and can be filled thanks to the use of the Abivars.jar GUI).
 
@@ -388,7 +388,7 @@ Some examples:
 * for mdwall: "MolecularDynamics_expert"
 * for gwpara: "parallelism_useful, GW_basic"
 
-The latter is a case where one input variable is associated to two topics, with a different tribe 
+The latter is a case where one input variable is associated to two topics, with a different relevance
 for topic "parallelism" and topic "GW".
 
 
@@ -478,7 +478,7 @@ text
 : Free text describing the input variable
 
 topics
-: A string, specified in [topics_and_tribes](#topics-and-tribes)
+: A string, specified in [topics_and_relevances](#topics-and-relevances)
 
 varset
 : a unique "set of variables" to which the variable belong. 
