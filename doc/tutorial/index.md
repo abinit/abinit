@@ -62,8 +62,7 @@ capabilities are demonstrated in the lessons belonging to the dark brown blocks.
 The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
 
 Before following the tutorials, you should have read the 
-[[help:new_user|new user's guide]], 
-[new user's guide](help:new_user),
+[new user's guide](..),
 as well as the pages
 1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
 If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book 
