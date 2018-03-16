@@ -48,7 +48,7 @@
  ntypat 1
  znucl 6
  diemac 6
- ecut 5               # Underconverged ecut. 
+ ecut 10              # Underconverged ecut. 
  enunit 2
  nstep 50
  istwfk *1
