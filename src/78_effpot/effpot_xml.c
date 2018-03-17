@@ -29,7 +29,7 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-//define type for dynamical array 
+//define type for dynamical double format array 
 typedef struct {
   double *array;
   size_t used;
@@ -55,6 +55,48 @@ void freeArray(Array *a) {
   a->array = NULL;
   a->used = a->size = 0;
 }
+
+void copyArraytoCArray(Array *l, double **a){
+  *a=(double *) malloc(sizeof(double)*l->used);
+  for(size_t i=0;i<l->used;i++){
+    (*a)[i]=l->array[i];
+  }
+}
+
+//define type for dynamical int type array
+typedef struct {
+  int *array;
+  size_t used;
+  size_t size;
+} IntArray;
+
+void initIntArray(IntArray *a, size_t initialSize) {
+  a->array = (int *)malloc(initialSize * sizeof(int));
+  a->used = 0;
+  a->size = initialSize;
+}
+
+void insertIntArray(IntArray *a, int element) {
+  if (a->used == a->size) {
+    a->size *= 2;
+    a->array = (int *)realloc(a->array, a->size * sizeof(int));
+  }
+  a->array[a->used++] = element;
+}
+
+void freeIntArray(IntArray *a) {
+  free(a->array);
+  a->array = NULL;
+  a->used = a->size = 0;
+}
+
+void copyIntArrayToCIntArray(IntArray *l, int **a){
+  *a=(int *) malloc(sizeof(int)*l->used);
+  for(size_t i=0;i<l->used;i++){
+    (*a)[i]=l->array[i];
+  }
+}
+
 
 
 void effpot_xml_checkXML(char *filename,char *name_xml){  
@@ -109,7 +151,7 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
       iatom++;
       uri = xmlGetProp(cur, (const  xmlChar *) "mass");
       insertArray(&typat,strtod(uri,NULL)); 
-      xmlFree(uri);      
+      xmlFree(uri);
     } 
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "local_force_constant"))) {irpt1++;}
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "total_force_constant"))) {irpt2++;}

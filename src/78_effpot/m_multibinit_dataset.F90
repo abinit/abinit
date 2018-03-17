@@ -86,6 +86,7 @@ module m_multibinit_dataset
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
+  ! TODO hexu: why integer dtion?
   integer :: dtion
   integer :: dynamics
   integer :: natifc
@@ -107,7 +108,6 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: restartxf
   integer :: symdynmat
-
   integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
@@ -119,6 +119,11 @@ module m_multibinit_dataset
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
+
+  ! TODO hexu: add parameters for spin.
+  integer :: ntime_spin
+  integer :: nmatom
+
 
 ! Real(dp)
   real(dp) :: bmass
@@ -141,6 +146,11 @@ module m_multibinit_dataset
   real(dp) :: conf_cutoff_strain(6)
   real(dp) :: rprim(3,3)
   real(dp) :: q1shft(3,4)
+
+  ! TODO hexu:add parameters for spin
+  real(dp) :: damping_factor_spin
+  real(dp) :: dtspin
+
 
 ! Integer arrays
   integer, allocatable :: atifc(:)
