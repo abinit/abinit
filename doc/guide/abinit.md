@@ -6,7 +6,7 @@ authors: DCA,  XG
 
 This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.  
 
-The new user is advised to read first the [[help:new_user|new user helpfile]],
+The new user is advised to read first the [new user's guide](..),
 before reading the present file. 
 It will be easier to discover the present file with the help of the [[lesson:index|tutorial]].
 
@@ -692,7 +692,7 @@ given establishes the identity of the atoms in the unit cell. (psp2, psp3, ...)
   
 Actually, no real understanding of these files is needed to run the code. The
 recommended pseudopotentials can be downloaded from the ABINIT Web site at
-[[https://www.abinit.org/downloads/atomic-data-files]]. Documentation is
+[[https://www.abinit.org/psp-tables]]. Documentation is
 provided there as well as in the dedicated [[topic:PseudosPAW]]. Note that it
 is not possible to mix norm-conserving pseudopotentials and PAW atomic data
 sets in the same run. Also, every such file has been generated for a

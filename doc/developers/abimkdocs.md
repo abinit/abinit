@@ -15,7 +15,7 @@ entries given in the `~abinit/doc/abiref.bib` file.
 
 The website is automatically generated with [MkDocs](http://www.mkdocs.org/)
 a static site generator geared towards project documentation.
-MkDocs employs [Python-Markdown](https://pythonhosted.org/Markdown) to parse the Markdown documentation
+MkDocs employs [Python-Markdown](https://pypi.python.org/pypi/Markdown) to parse the Markdown documentation
 and use a single [YAML](http://en.wikipedia.org/wiki/YAML) configuration file (`mkdocs.yml`) 
 defining the organization of the pages on the website.
 Navigation bars, header and footer are generated *automatically* by the framework
