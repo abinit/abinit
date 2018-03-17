@@ -20,7 +20,7 @@ here follows a short list of instructions needed to install it:
   1. Download, gunzip and untar the 
     [latest version of the ABINIT package](http://www.abinit.org/downloads/abinit-packages) (abinit-x.y.z.tar.gz) 
     from the abinit Web site, then change the current directory to the top of the directory that was created. 
-    If you do not know what all this means, go to **1\. How to get a version of ABINIT? (Section 1B Normal users)**
+    If you do not know what all this means, go to [How to get a version of ABINIT? (Section 1B Normal users)](#1b-normal-user)
   2. Issue configure or ./configure (or first create a tmp directory, then cd tmp, then ../configure)
   3. Issue make (or make mj4 , or make multi multi_nprocs=n for using "n" processors on a SMP machine 
     where you have to replace "n" by its value) 
@@ -66,7 +66,7 @@ We will distinguish two cases:
 
 You should read only the appropriate section (you can safely ignore the other one ...).
 
-### 1.A. Expert user of developer
+### 1.A. Expert user or developer
 
 You have a F90 compiler under UNIX/Linux or MacOS X, as well as (free)
 software like git, automake, autoconf, libtool, perl, python, and you want to
@@ -77,9 +77,9 @@ refer to this case as the "autotools development mode".
 If you do not have these tools, and would like to have them, please consult
 your local computer guru, and the following pages:
 
-  * [An overview of ABINIT development](http://dev.abinit.org/doc/for-new-developers/how-to-contribute)
-  * [10 steps to hike ABINIT](http://dev.abinit.org/doc/for-new-developers/abinit-5-in-10-steps)
-  * [ABINIT environment](http://dev.abinit.org/environment)
+  * [An overview of ABINIT development](https://wiki.abinit.org/doku.php?id=developers:overview)
+  * [10 steps to hike ABINIT](https://wiki.abinit.org/doku.php?id=developers:hike)
+  * [Buildbot and the test farm](https://wiki.abinit.org/doku.php?id=bb:overview)
 
 If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.
@@ -123,7 +123,8 @@ You have a F90 compiler under UNIX/Linux or MacOS X and you want simply to
 **compile the source files**, and, from time to time, **modify and/or add a
 new file**. This is the case of most users, system managers, and also many
 developers. If you want to modify and/or add a new file, please consult the
-section 7\. For developers: how to modify the code? after reading the present
+[section For developers: How to modify the code?](#for-developers-how-to-modify-the-code).
+after reading the present
 section. In what follows, _x.y.z_ represents the ABINIT version.
 
 In order to get the ABINIT package, you have first to download the file
