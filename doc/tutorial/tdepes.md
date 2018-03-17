@@ -76,12 +76,29 @@ The reference input files for this lesson are located in
 are in ~abinit/tests/tutorespfn/Refs.
 The prefix for files is **tdepes**.
 
-First, run the calculation using the [[tests/tutorespfn/Input/tdepes_1.in]] input file
-(note the use of the [[ieig2rf]] = 5 input variable required by the python script)
-You can use the [[tests/tutorespfn/Input/tdepes_1.files]] files file to execute abinit
-(it will always be the same, just change the last digit for the other Abinit calculations):
+First, examine the [[tests/tutorespfn/Input/tdepes_1.in]] input file
+(note the use of the [[ieig2rf]] = 5 input variable required by the python script).
+{% dialog tests/tutorespfn/Input/tdepes_1.in %}
 
-{% dialog tests/tutorespfn/Input/tdepes_1.files tests/tutorespfn/Input/tdepes_1.in %}
+We will use [[tests/tutorespfn/Input/tdepes_1.files]] to execute abinit
+(it will be the same file for the other Abinit calculations of this tutorial,
+except that the last digit of the names have to be changed in this file ...
+
+{% dialog tests/tutorespfn/Input/tdepes_1.files %}
+
+In order to run abinit, we suggest that you create a working directory as subdirectory of ~abinit/tests/tutorespfn/Input, then
+copy/modify the relevant files. In detail :
+
+    mkdir Work 
+    cd Work
+    cp ../*in ../*files .
+
+Then edit the [[tests/tutorespfn/Input/tdepes_1.files]] to give the proper location of the pseudopotential file.
+Finally, issue    
+
+    abinit < tdepes_1.files > tdepes_1.out
+
+(where `abinit`might have to be replaced by the proper location of the abinit executable).
 
 ### If Abinit is compiled with Netcdf...
 
@@ -92,7 +109,7 @@ two atomic displacements, the electron-phonon matrix elements used to compute
 the renormalization of the eigenenergies and the electron-phonon matrix
 elements used to compute the lifetime of the electronic states. 
 
-You can now copy the post-processing python scipts from
+You can now copy the post-processing python scripts from
 ~abinit/scripts/post_processing/temperature-dependence/rf_final.py.
 Make sure you are in the directory containing the output files produced by the code and then:
 
@@ -132,7 +149,7 @@ tdepes_1o_DS1_EIG.nc       # Name of the unperturbed EIG.nc file with Eigenvalue
 
 Alternatively, copy this example, **remove** all the comments after `#`  and then run
 
-    ./temperature_final_example < temperature_final_example 
+    ./temperature_final_example < temperature_final_example.in
 
 {% dialog tests/tutorespfn/Input/temperature_final_example.in %}
 
@@ -211,21 +228,27 @@ The python code has generated the following files:
   at each k-point for each band. It also contains the evolution of each band with temperature at k=Γ. 
 -->
 
-We can for example visualize the temperature dependence at k=Γ of the HOMO bands (`Band: 3` dataset in the file) 
-with the contribution of only the q=Γ from the **temperature.txt** file.  
+We can for example visualize the temperature dependence at k=Γ of the HOMO bands 
+(`Band: 3` dataset in the **temperature.txt** file, that you can examine) 
+with the contribution of only the q=Γ .
 
+<!--
 ![](tdepes_assets/plot1.png)
 
 Here you can see that the HOMO correction goes down with temperature. This is
 due to the use of underconvergence parameters. If you increase [[ecut]] from
 5 to 10, you get the following plot.  
+-->
 
 ![](tdepes_assets/plot2.png)
 
-Now, the HOMO eigenenergies correction goes up with temperature... You can
+The HOMO eigenenergies correction goes up with temperature... You can
 also plot the LUMO corrections and see that they go down. The
 ZPR correction as well as their temperature dependence usually closes the gap
-of semiconductors.
+of semiconductors. 
+
+As usual, checking whether the input parameters give converged values is of course important.
+The run used [[ecut]]=10. With [[ecut]]=5, the HOMO correction goes down with temperature.
 
 ### If Abinit is **not** compiled with Netcdf ...
 
