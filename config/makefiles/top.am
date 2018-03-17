@@ -65,10 +65,10 @@ tests_in:
 
 # Help
 help:
-	@more $(top_srcdir)/doc/help_make/help_make_top
+	@more $(top_srcdir)/doc/help_make/help_make_top.txt
 
 help_dev dev_help dev:
-	@more $(top_srcdir)/doc/help_make/help_make_top_dev
+	@more $(top_srcdir)/doc/help_make/help_make_top_dev.txt
 
 # ---------------------------------------------------------------------------- #
 

@@ -9,8 +9,9 @@ a lightweight markup language with plain text
 [formatting syntax](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 The documentation includes the User Guide, the Abinit lessons, the topics, the release notes
 as well as the pages with the [input variables](../variables/) and the [bibliographic references](../theory/bibliography.md)
-that are generated *automatically* in python from the information reported in `abinit_vars.yml` and the bibtex 
-entries given in the `abiref.bib` file.
+that are generated *automatically* in python from the information reported in 
+`~abinit/mkdocs/variables_abinit.py` (and similar files in the same directory for other main executables) and the bibtex 
+entries given in the `~abinit/doc/abiref.bib` file.
 
 The website is automatically generated with [MkDocs](http://www.mkdocs.org/)
 a static site generator geared towards project documentation.
@@ -49,10 +50,10 @@ and finally regenerate the website with MkDocs.
 
 ## Getting started
 
+Make sure you are in the top ABINIT directory.
 Install the python packages required to build the website with:
 
 ```sh
-cd ~abinit/docs
 pip install -r requirements.txt
 ```
 
@@ -61,11 +62,10 @@ pip install -r requirements.txt
     The entire documentation supports Unicode so feel free to use unicode symbols in the docs.
 
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
-Make sure you are in `~abinit/docs`, and then start *our customized* server 
+Then start *our customized* server 
 by running the `mksite.py serve` command:
 
 ```sh
-cd ~abinit/docs
 ./mksite.py serve
 
 Regenerating database...
@@ -120,8 +120,8 @@ The script:
 
 * Starts by creating python objects using the information reported in 
     - the python files in abimkdocs with the input variables,
-    - the `abiref.bib` for the list of Bibliographic references,
-    - the input files contained in `tests/*/Input`. 
+    - the `~abinit/doc/abiref.bib` for the list of Bibliographic references,
+    - the input files contained in `~abinit/tests/*/Input`. 
 * Performs initial consistency checks.
 * Generate the markdown files for variables, citations, etc.  
 * Invoke `mkdocs` to parse the markdown files declared in `mkdocs.yml`
@@ -359,14 +359,14 @@ Then, build the HTML using `mksite.py serve` and start to enjoy the Markdown syn
 
 The structuration for help files and theory documents is very similar to the one for the lessons of the tutorial.
 
-### Topics and tribes
+### Topics and relevances
 
 Since the beginning of the ABINIT HTML documentation, every input variable 
 has been required to belong to a **varset** (set of variables, e.g. `varbas`, `varfil`).
 However, starting in Summer 2017, we require every input variable to be also mentioned in at least one of the
-documentation "topics" and, for such topic, to be characterized by a "tribe".
+documentation "topics" and, for such topic, to be characterized by a "relevance".
 
-The allowed list of tribes (a generic list, irrespective of the topic) is declared in
+The allowed list of relevances (a generic list, irrespective of the topic) is declared in
 `~abinit/abimkdocs/variables.py`. 
 Standard names are:
 
@@ -375,12 +375,12 @@ Standard names are:
 - `useful` (when the default value is used most of the time)
 - `expert` (when only expert users should use other values than the default)
 
-Other tribe names have been allowed for specific topics, in which such a classification 
+Other relevance names have been allowed for specific topics, in which such a classification 
 (compulsory/basic/useful/expert) is not a relevant one.
 
-In order to specify the (possibly several) combinations of topic+tribe to which an input variable is attached,
-the field "topics" is used inside the `~abinit/doc/input_variables/generated_doc/abinit_vars.yml` file
-(and can be filled thanks to the use of the Abivars.jar GUI).
+In order to specify the (possibly several) combinations of topic+relevance to which an input variable is attached,
+the field "topics" is used inside the `~abinit/abimkdocs/variables_abinit.py` file
+(and similar files in the same directory for the other executables).
 
 Some examples:
 
@@ -388,7 +388,7 @@ Some examples:
 * for mdwall: "MolecularDynamics_expert"
 * for gwpara: "parallelism_useful, GW_basic"
 
-The latter is a case where one input variable is associated to two topics, with a different tribe 
+The latter is a case where one input variable is associated to two topics, with a different relevance
 for topic "parallelism" and topic "GW".
 
 
@@ -478,7 +478,7 @@ text
 : Free text describing the input variable
 
 topics
-: A string, specified in [topics_and_tribes](#topics-and-tribes)
+: A string, specified in [topics_and_relevances](#topics-and-relevances)
 
 varset
 : a unique "set of variables" to which the variable belong. 

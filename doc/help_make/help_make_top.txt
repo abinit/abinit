@@ -44,3 +44,4 @@ to `tests`, and use the `runtests.py` script. Use:
 
 to obtain the list of available options.
 ==============================================================================
+[This file can be found at doc/help_make/help_make_top.txt]

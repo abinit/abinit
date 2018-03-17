@@ -20,11 +20,6 @@ pages:
 - User Guide:
     #- NewUser: guide/new_user.md
     - NewUser: index.md
-    - Installation: 
-        - HowTo: installation.md
-        - MacOSX: README_MacOSX.md
-        - GPUs: README_gpu.md
-        - Xlf: README_xlf.md
     - Abinit: guide/abinit.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
@@ -35,6 +30,11 @@ pages:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
+    - Installation:
+        - HowTo: installation.md
+        - MacOSX: README_MacOSX.md
+        - GPUs: README_gpu.md
+        - Xlf: README_xlf.md
 
 - Topics:
     - Features: topics/features.md
