@@ -1,6 +1,6 @@
 
 .Version 8.7.6 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin15.3.0_gnu6.4 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 18 Mar 2018.
-- ( at 16h23 )
+- ( at 18h13 )
   
 - input  file    -> tdepes_2.in
 - output file    -> tdepes_2.out
@@ -80,7 +80,7 @@ P           mkmem           8
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-        prtebands           0
+           prtvol          -1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -149,275 +149,24 @@ P           mkmem           8
 
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
-================================================================================
-== DATASET  1 ==================================================================
--   nproc =    1
-
- Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
- Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  3.3375000  3.3375000  G(1)= -0.1498127  0.1498127  0.1498127
- R(2)=  3.3375000  0.0000000  3.3375000  G(2)=  0.1498127 -0.1498127  0.1498127
- R(3)=  3.3375000  3.3375000  0.0000000  G(3)=  0.1498127  0.1498127 -0.1498127
- Unit cell volume ucvol=  7.4352199E+01 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
-         ecut(hartree)=     10.000   => boxcut(ratio)=   2.09426
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
--  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
--  6.00000   4.00000    940714                znucl, zion, pspdat
-    1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    0  10.372  24.987    1   1.4850707        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
-  pspatm : epsatm=    0.92590353
-         --- l  ekb(1:nproj) -->
-             0    4.921466
- pspatm: atomic psp has been read  and splines computed
-
-   1.48144565E+01                                ecore*ucvol(ha*bohr**3)
---------------------------------------------------------------------------------
-
-_setup2: Arith. and geom. avg. npw (full set) are     113.109     113.006
-
-================================================================================
- Integrated electronic density in atomic spheres:
- ------------------------------------------------
- Atom  Sphere_radius  Integrated_density
-    1        2.00000          3.59972127
-    2        2.00000          3.71921954
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   6.1571E-01; max=  1.0660E+00
- reduced coordinates (array xred) for    2 atoms
-       0.000000000000      0.000000000000      0.000000000000
-       0.250000000000      0.250000000000      0.250000000000
-
- cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.88306446683456     0.88306446683456     0.88306446683456
- length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
-              =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_2o_DS1_EIG
- Eigenvalues (hartree) for nkpt=   8  k points:
- kpt#   1, nband= 12, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-********** ********** ********** ********** ********** ********** ********** **********
-********** ********** ********** **********
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
- Eigenvalues (   eV  ) for nkpt=   8  k points:
- kpt#   1, nband= 12, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  Infinity   Infinity   Infinity   Infinity   Infinity   Infinity   Infinity   Infinity
-  Infinity   Infinity   Infinity   Infinity
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.04390757664235E+00
-    Hartree energy  =  6.10759307293653E-01
-    XC energy       = -4.25793286439996E+00
-    Ewald energy    = -1.29121750870816E+01
-    PspCore energy  =  1.99247051596180E-01
-    Loc. psp. energy= -4.84121752855192E+00
-    NL   psp  energy=  2.55037327785417E+00
-    >>>>>>>>> Etotal= -1.16070382666471E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.15843573751443E+02 ; Band energy (Ha)=   0.0000000000E+00
---------------------------------------------------------------------------------
+ abinit : before driver, prtvol=-1, debugging mode => will skip driver
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
- -outvars: echo values of variables after computation  --------
-            acell      6.6750000000E+00  6.6750000000E+00  6.6750000000E+00 Bohr
-              amu      1.20110000E+01
-           diemac      6.00000000E+00
-             ecut      1.00000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
-           enunit           2
-           etotal1    -1.1607038267E+01
-            fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
--          fftalg         312
-           istwfk        1    0    1    0    0    0    1    0
-           jdtset        1
-              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
-         kptrlatt        4    0    0      0    4    0      0    0    4
-          kptrlen      1.88797511E+01
-P           mkmem           8
-            natom           2
-            nband          12
-           ndtset           1
-            ngfft          15      15      15
-             nkpt           8
-            nstep           0
-             nsym          48
-           ntypat           1
-              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-        prtebands           0
-            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
-                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
-                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
-          spgroup         227
-           strten1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
-                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
-                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
-                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
-                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
-                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
-                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
-                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
-                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
-                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
-                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
-                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
-                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
-                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
-                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
-                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
-                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
-                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
-                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
-                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
-                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
-                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
-                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-            tnons      0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-           tolvrs      1.00000000E-08
-            typat      1  1
-              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
-                         0.04688    0.09375
-           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.8306446683E-01  8.8306446683E-01  8.8306446683E-01
-            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6687500000E+00  1.6687500000E+00  1.6687500000E+00
-             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-            znucl        6.00000
 
-================================================================================
+ abinit : before driver, prtvol=-1, debugging mode => will skip outvars
 
 
 - Timing analysis has been suppressed with timopt=0
 
 
 
-================================================================================
-
- Suggested references for the acknowledgment of ABINIT usage.
-
- The users of ABINIT have little formal obligations with respect to the ABINIT group
- (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
- However, it is common practice in the scientific literature,
- to acknowledge the efforts of people that have made the research possible.
- In this spirit, please find below suggested citations of work written by ABINIT developers,
- corresponding to implementations inside of ABINIT that you have used in the present run.
- Note also that it will be of great value to readers of publications presenting these results,
- to read papers enabling them to understand the theoretical formalism and details
- of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- [1] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
-- The licence allows the authors to put it on the Web.
--
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
--
-- [3] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
--
-- And optionally:
--
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.5
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.3  wall=          0.5
+.Delivered   0 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.1  wall=          0.1

@@ -2,8 +2,8 @@
 # This is the set of values that have been changed compared to the previous ABINIT run.
 ndtset 1
 nstep 0    
-prtebands 0            # This is to avoid trying to write eigenenergies that have not been computed.
-ngkpt 4 4 4            # Underconverged : k-grid should be at least 4x4x4 for diamond to be converged.
+prtvol -1              # This is to stop immediately after computation of the set of k points
+ngkpt 4 4 4            # The grid for which we try to compute the number of k points
 nshiftk 1
 shiftk 0.0 0.0 0.0
 nsym 0
