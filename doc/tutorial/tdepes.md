@@ -14,6 +14,8 @@ This lesson aims at showing how to get the following physical properties, for pe
 
   * The lifetime/broadening of eigenenergies  
 
+This lesson should take about 1 hour to be done.
+
 For the theory related to the temperature-dependent calculations, you can read
 the following papers: [[cite:Ponce2015]], [[cite:Ponce2014]] and [[cite:Ponce2014a]].
 
@@ -67,9 +69,7 @@ There are two ways to compute the temperature dependence with Abinit:
           TIMER flavor  : abinit
           TRIO flavor   : netcdf
 
-This lesson should take about 1 hour to be done.
-
-## 1 Calculation of the ZPR of eigenenergies at q=Γ
+## 1 Calculation of the ZPR of eigenenergies at q=Γ. 
   
 The reference input files for this lesson are located in
 ~abinit/tests/tutorespfn/Input and the corresponding reference output files
@@ -96,11 +96,12 @@ This induces the creation of the Derivative DataBase file tdepes_1o_DS3_DDB.
 The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
 this option generating the needed netCDF files tdepes_1o_DS3_EIGR2D.nc and tdepes_1o_DS3_GKK.nc .
 
-We will use [[tests/tutorespfn/Input/tdepes_1.files]] to execute abinit.
+We will use [[tests/tutorespfn/Input/tdepes_1.files]], with minor modifications -see below-, to execute abinit.
 
 {% dialog tests/tutorespfn/Input/tdepes_1.files %}
 
-In order to run abinit, we suggest that you create a working directory as subdirectory of ~abinit/tests/tutorespfn/Input, then
+In order to run abinit, we suggest that you create a working directory, why not call it `Work`, 
+as subdirectory of ~abinit/tests/tutorespfn/Input, then
 copy/modify the relevant files. Explicitly:
 
     cd ~abinit/tests/tutorespfn/Input
@@ -115,14 +116,16 @@ Finally, issue
 
     abinit < tdepes_1.files > tdepes_1.stdout
 
-(where `abinit` might have to be replaced by the proper location of the abinit executable).
+(where `abinit` might have to be replaced by the proper location of the abinit executable, or by ./abinit if you have
+copied abinit in the Work directory).
 
 <!--
 ### If Abinit is compiled with Netcdf...
 -->
 
-If you have compiled the code with Netcdf, the calculation will produce _EIG.nc,
-_DDB, EIGR2D.nc and EIGI2D.nc that contain respectively the eigenvalues (GS or
+If you have compiled the code with Netcdf, the calculation will produce 
+different _EIG.nc,
+_DDB, EIGR2D.nc and EIGI2D.nc files, that contain respectively the eigenvalues (GS or
 perturbed), the second-order derivative of the total energy with respect to
 two atomic displacements, the electron-phonon matrix elements used to compute
 the renormalization of the eigenenergies and the electron-phonon matrix
@@ -146,14 +149,13 @@ You can then simply run the python script with the following command:
     
     ./temperature_final.py
 
-and enter the information asked by the script
-
-A typical example of input file (contained in ~abinit/tests/tutorespfn/Input/temperature_final_example.in) for the script is:
+and enter the information asked by the script, typically the following
+(data contained in ~abinit/tests/tutorespfn/Input/tdepes_1_temperature.in):
 
 ```
 1                          # Number of cpus 
 2                          # Static ZPR computed in the Allen-Heine-Cardona theory
-temperature                # Prefix for output files
+temperature_1              # Prefix for output files
 0.1                        # Value of the smearing parameter for AHC (in eV)
 0.1                        # Gaussian broadening for the Eliashberg function and PDOS (in eV)
 0 0.5                      # Energy range for the PDOS and Eliashberg calculations (in eV)
@@ -166,7 +168,7 @@ tdepes_1o_DS3_GKK.nc       # Name of the 0 GKK file
 tdepes_1o_DS1_EIG.nc       # Name of the unperturbed EIG.nc file with Eigenvalues at $k$
 ```
 
-Alternatively, copy this example, **remove** all the comments after `#`  and then run
+Alternatively, copy this example file in the Work directory if not yet done, and then run
 
     ./temperature_final.py < tdepes_1_temperature.in
 
@@ -187,7 +189,7 @@ Alternatively, copy this example, **remove** all the comments after `#`  and the
     if you are using [conda](https://conda.io/miniconda.html)
 
 
-You should see on the screen:
+You should see on the screen an output similar to:
 
 ```shell
 Start on 15/3/2018 at 13h29
@@ -231,12 +233,12 @@ Runtime: 0 seconds (or 0.0 minutes)
 
 The python code has generated the following files:
 
-**temperature.txt** 
+**temperature_1.txt** 
 : This text file contains the zero-point motion (ZPM) correction at each k-point for each band. 
-  It also contain the evolution of each band with temperature at k=Γ. 
+  It also contain the evolution of each band with temperature at k=$\Gamma$.
   At the end of the file, the Fan/DDW contribution is also reported. 
 
-**temperature_EP.nc** 
+**temperature_1_EP.nc** 
 : This netcdf file contains a number for each k-point, 
   for each band and each temperature. The real part of this number is the ZPM correction 
   and the imaginary part is the lifetime. 
@@ -244,12 +246,12 @@ The python code has generated the following files:
 <!--
 **temperature_BRD.txt** 
 : This text file contains the lifetime of the electronic states 
-  at each k-point for each band. It also contains the evolution of each band with temperature at k=Γ. 
+  at each k-point for each band. It also contains the evolution of each band with temperature at k=$\Gamma$. 
 -->
 
-We can for example visualize the temperature dependence at k=Γ of the HOMO bands 
-(`Band: 3` section in the **temperature.txt** file, that you can examine) 
-with the contribution of only the q=Γ .
+We can for example visualize the temperature dependence at k=$\Gamma$  of the HOMO bands 
+(`Band: 3` section in the **temperature_1.txt** file, that you can examine) 
+with the contribution of only q=$\Gamma$.
 
 <!--
 ![](tdepes_assets/plot1.png)
@@ -324,6 +326,7 @@ The run will generate 3 files:
 
 ![](tdepes_assets/Eq1.png)
 
+
 **tdepes_2.out_ep_PDS**
 :  This file contains the phonon density of states 
 
@@ -347,7 +350,7 @@ END OF OBSOLETE
 Convergence studies with respect to most of the parameters will rely on obvious modifications
 of the input file detailed in the previous section. However, using more than one 
 q-point phonon wavevector needs a non-trivial generalisation of this procedure.
-This is because each q-point needs to be treated in a different dataset.
+This is because each q-point needs to be treated in a different dataset in the current version of ABINIT.
 
 <!--
 From now on we will only describe the approach with Abinit **compiled with Netcdf support**. 
@@ -361,24 +364,27 @@ Both grids have been used in the Ref. [[cite:Ponce2014]], see e.g. Fig. 3 of thi
 For the random integration method you
 should create a script that generates random q-points, perform the Abinit
 calculations at these points, gather the results and analyze them.
-The script will detect that you used random
+The temperature_final.py script will detect that you used random
 integration thanks to the weight of the q-point stored in the _EIGR2D.nc file
 and perform the integration accordingly.
 The random integration converges slowly but in a consistent manner. 
 
-Since this methods is a little bit less user-friendly, we will focus on the homogenous integration. 
-In this case, the user must specify the overall q-point grid, using input variables like
-[[ngqpt]], [[qptopt]], [[shiftq]], [[nshiftq]], i.e. variables whose names
+However, since this method is a little bit less user-friendly than the one based on homogeneous grids, 
+we will focus on this homogenous integration. Even simpler, it is not trivial.
+In this case, the user must specify in the ABINIT input file the homogeneous q-point grid, 
+using input variables like
+[[ngqpt]], [[qptopt]], [[shiftq]], [[nshiftq]], ..., i.e. variables whose names
 are similar to those used to specify the k-point grid (for electrons). 
 
-However, there are several difficulties here. 
+There are several difficulties here. 
 First, the symmetry operations of the crystal will be used
 to decrease the number of q-wavevectors, but they cannot be used as well to decrease the k-point grid.
-By convention, in ABINIT, in such case, with [[nsym]]=1 the k-point grid will be generated in the Full Brillouin zone,
+How this different behaviour of k-grids and q-grids can be handled by ABINIT ?
+By convention, in such case, with [[nsym]]=1 the k-point grid will be generated in the Full Brillouin zone,
 without use of symmetries, while the q-point grid with [[qptopt]]=1 with be generated in the irreducible Brillouin Zone,
 despite [[nsym]]=1. In order to generate q-point grids that are not folded in the irreducible Brillouin Zone, use another value of [[qptopt]].
 
-This yields another problem. Indeed, the number of ABINIT datasets is expected to be given in the input file, by the user,
+Second, the number of ABINIT datasets is expected to be given in the input file, by the user,
 but not determined on-the-flight by ABINIT. Still, this number of datasets is determined by the number of q points...
 Thus, the user will have to compute it before being able to launch the real q-point calculations, since it determines [[ndtset]].
 
@@ -387,50 +393,124 @@ How to determine the number of irreducible q points ?
 Well, the easiest procedure is to compute it for an equivalent k-point grid, by a quick run.
 
 An example will clarify this.
-Suppose that one is looking for the number of q-points determined by 
+Suppose that one is looking for the number of q-points corresponding to
 
     ngqpt 4 4 4          
     qptopt 1
     nshiftq 1
     shiftq 0.0 0.0 0.0
 
-The first thing we need to do is to determine the number of q-point in the IBZ for a given
-q-point grid. We choose here a 4x4x4 q-point grid. 
+One make a quick ABINIT run with [[tests/tutorespfn/Input/tdepes_2.in]].
+Note that several input variables have been changed with respect to [[tests/tutorespfn/Input/tdepes_1.in]]:
 
-Use the input file [[tests/tutorespfn/Input/tdepes_3.in]]. 
+    ndtset 1
+    nstep 0
+    ngkpt 4 4 4            
+    nshiftk 1
+    shiftk 0.0 0.0 0.0
+    nsym 0
+
+In this example, the new values of [[ndtset]] and [[nstep]] allow a fast run ([[nline]]==0 might be specified as well,
+or even, the run might be interrupted after a few seconds, since the number of k points is very quickly available). 
+Then, the k-point grid is
+specified thanks to [[ngkpt]], [[nshiftk]], [[shiftk]], replacing the corresponding input variables for the q-point
+grid. The use of symmetries has been reenabled thanks to [[nsym]]=0.
+
+After possibly modifying [[tests/tutorespfn/Input/tdepes_2.files]] to account for the location of the pseudopotential file, as above, issue:
+
+    abinit < tdepes_2.files > tdepes_2.stdout
+
+Now, the number of points can be seen in the output file :
+
+```
+             nkpt           8
+```
+
+the list of these eight k-points being given in 
+```
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+```
+
+We are now ready to launch the determination of the
+_EIG.nc, _DDB, EIGR2D.nc and EIGI2D.nc files, with 8 q-points.
+As for the $\Gamma$ calculation of the previous section, we will rely on three
+datasets for each q-point. This permits a well-structured set of calculations,
+although there is some redundancy. Indeed, the first of these dataset will correspond
+to an unperturbed ground-state calculation identical for all q. It is done very quickly because
+the converged wavefunctions are already available. The second dataset will correspond to
+a non-self-consistent ground-state calculation at k+q (it is also quick thanks to previously available wavefunctions), 
+and the third dataset will correspond to the DFPT calculations at k+q (this is the CPU intensive part) .
+
+So, compared to the first run in this lesson, we have replaced  
+
+    ndtset 3  ==>  ndtset 24 udtset 8 3
+
+in the input file [[tests/tutorespfn/Input/tdepes_3.in]], and adjusted accordinagly all input variables that were dataset-dependent. 
 
 {% dialog tests/tutorespfn/Input/tdepes_3.in %}
 
-Launch this job, and kill it after a few seconds. 
-Then look into the log file to find the following line after the list of q-points:
-    
-```
-symkpt : the number of k-points, thanks to the symmetries,
-is reduced to     8
-```
+Please, refer to the 
+[[help:abinit#35-defining-a-double-loop-dataset|explanation of the usage of a double-loop of datasets]]
+if you are confused about the meaning of [[udtset]], and the usage of the corresponding metacharacters.
+We have indeed also introduced 
 
-In general, in order to get the number of q-points, launch a "fake" run with a
-k-point grid equivalent to the q-point grid you want to use in your
-calculation. Now that we know that the 4x4x4 q-point grid reduces to 8 points in the IBZ,
-we can make the following substitution into the input file
-    
-    ndtset 3 udtset 1 3 ==>  ndtset 24 udtset 8 3
+    iqpt:? 1
+    iqpt+? 1
 
-and launch the calculation. 
-When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3.files]] in the 
+that translates into 
+
+    iqpt11 1
+    iqpt12 1
+    iqpt13 1
+    iqpt21 2
+    iqpt22 2
+    iqpt23 2
+    iqpt31 3
+     ...
+
+allowing to perform calculations for three datasets at each q-point.
+
+After possibly modifying [[tests/tutorespfn/Input/tdepes_3.files]] to account for the location of the pseudopotential file, as above, issue:
+
+    abinit < tdepes_3.files > tdepes_3.stdout
+
+This is a significantly longer ABINIT run, also producing many files.
+
+When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3_temperature.in]] in the 
 working directory and launch the python script with:
     
-    ./temperature_final.py < tdepes_3.files
+    ./temperature_final.py < tdepes_3_temperature.in
 
 {% dialog tests/tutorespfn/Input/tdepes_3.files %}
 
-Plotting the same HOMO band at k=Γ for a 4x4x4 q-point grid gives a very different result
-than previously (note that this graph has been obtained with [[ecut]] = 10).  
+Examination of the same HOMO band at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
+than previously. Indeed, for the ZPR, one finds
 
+    Band: 3
+    0.0 0.154686616316
+
+instead of
+
+    Band: 3
+    0.0 0.0464876236664
+
+that, is, the ZPR is about three times smaller, and similary for the temperature dependence.
+
+
+<!--
 ![](tdepes_assets/plot3.png)
+-->
 
 As a matter of fact, diamond requires an extremely dense q-point grid (40x40x40) to be converged. 
 On the bright side, each q-point calculation is independent and thus the parallel scaling is ideal...
+Running separate jobs for different q-points is quite easy thanks to the dtset approach.
 
 ## 3 Calculation of the eigenenergies correction along high-symmetry lines
   
@@ -515,6 +595,7 @@ grid of 6x6x6 and an increasing [[ngqpt]] grid to get converged results:
 
 As you can see the limiting factor for the convergence study is the
 convergence of the LUMO band at Γ. This band is not the lowest in energy (the
+convergence of the LUMO band at Γ. This band is not the lowest in energy (the
 lowest is on the line between Γ and X) and therefore this band is rather
 unstable. This can also be seen by the fact that it has a large electronic
 broadening, meaning that this state will decay quickly into another state.
@@ -531,7 +612,7 @@ accurate values of the ZPR at 0K you can look at the table above.
 ### Possible issue while converging your calculations
 
 If you use an extremely fine q-point grid, the acoustic phonon frequencies for
-q-points close to Γ will be wrongly determined by Abinit. Indeed in order to
+q-points close to $\Gamma$ will be wrongly determined by Abinit. Indeed in order to
 have correct phonon frequencies, you have to impose the acousting sum rule
 with anaddb and [[asr@anaddb]]. 
 Since this feature is not available in the python script, we have to reject the
@@ -539,4 +620,6 @@ contribution of the acoustic phonon close to Γ if their phonon frequency is
 lower than 1E-6 Ha. Otherwise you get unphysically large contribution. 
 
 You can tune this parameter by editing the variable "tol6 = 1E-6" in the beginning of the script.
+
+
 For example, for the last 43x43x43 calculation, it was set to 1E-4.

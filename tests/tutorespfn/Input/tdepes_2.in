@@ -5,13 +5,9 @@ nstep 0
 ngkpt 4 4 4            # Underconverged : k-grid should be at least 4x4x4 for diamond to be converged.
 nshiftk 1
 shiftk 0.0 0.0 0.0
-
 nsym 0
 
-
-
 # C in diamond structure. 
- ndtset 1
  elph2_imagden 0.1 eV   # Imaginary shift of the denominator of the sum-over-states 
                         # in the perturbation denominator. Usual value is 0.1 eV to reproduce
                         # experimental broadening at 300K. Increasing the value help the 
