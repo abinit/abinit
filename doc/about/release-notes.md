@@ -29,11 +29,13 @@ A.1 The interface between ABINIT and TRIQS has been changed, such that TRIQS 1.4
     No backward compatibility with TRIQS 1.3 has been coded, sorry. See D.4.
 
 A.2 Some changes of names :
-     - input variable gwls_sternheimer_kmax has become [[gwls_stern_kmax]];
-     - input variable gwls_dielectric_model has become [[gwls_diel_model]];
-     - input variable prt_effpot has become [[prt_model]] (multibinit input variable);
-     - input variable effmass has become [[erffmass_free]];
-     - lesson tlda has become tdftu;
+
+* input variable gwls_sternheimer_kmax has become [[gwls_stern_kmax]];
+* input variable gwls_dielectric_model has become [[gwls_diel_model]];
+* input variable prt_effpot has become prt_model (multibinit input variable);
+* input variable effmass has become [[effmass_free]];
+* lesson tlda has become tdftu;
+
     Also, the input variable gwls_second_model_parameter, not used, has been suppressed.
 
 A.3 The definition of Hund's coupling J as computed within cRPA has changed: it now uses the same convention as
@@ -45,7 +47,7 @@ A.3 The definition of Hund's coupling J as computed within cRPA has changed: it 
 
 ###B.  Most noticeable achievements
 
-B.1 The whole ABINIT documentation has been significantly improved by the introduction of "Topics", replacing the
+B.1 The whole ABINIT documentation has been significantly improved by the introduction of Topics, replacing the
     previous "lists of ABINIT features". All the capabilities of ABINIT are now presented in about 70 short topic Web pages.
     Those topic web pages usually have :
     - a brief introduction;
@@ -53,10 +55,10 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
     - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
     - possibly example input files;
     - list of references.
-    Entry point : see the new header of any ABINIT documentation file (e.g. the new user's guide)
+    Entry point : see the new header of any ABINIT documentation file (e.g. the [new user's guide](..) )
     By F. Jollet and X. Gonze (also tests/fixes by B. Amadon, M. Torrent).
 
-B.2 A central bibliography database abiref.bib has been created, and linked to the
+B.2 A central [[theory:bibliography]] database abiref.bib has been created, and linked to the
     above-mentioned topics (B.1) but also to other parts of the ABINIT documentation (e.g. input variable list,
     the lessons of the tutorial, the theory documents, the acknowledgments ...).
     More than 200 bibliographical references are present.  Not all bibliographical references of the doc have been entered in this
@@ -77,32 +79,33 @@ B.5 Several important developments related to electron-phonon matrix element com
     The long-range part of the phonon coupling potential is modeled with the Born effective charges and the dielectric tensor.
     This long-range part is substracted from the potential before the Fourier interpolation then added after the interpolation.
     The resulting potential is in much better agreement with the full calculation, as can be verified from the el-ph matrix elements.
-    Also, a functionality has been added in the eph driver (eph_task=5) to only interpolate the phonon potential onto a fine q-point grid.
+    Also, a functionality has been added in the eph driver ([[eph_task]]=5) to only interpolate the phonon potential onto a fine q-point grid.
     The interpolation is performed one perturbation at a time, and is thus more memory efficient than the previous procedures.
     There is additional testing of the new "driver" optdrive=7 specifically dealing with electron-phonon
     related computations (including zero-point renormalisation), especially the interpolation.
     The symmetries have been fixed.
-    See new tests v8#61-65.
+    See new tests [[test:v8_61]]-[[test:v8_65]].
     By  G. Antonius and M. Giantomassi.
 
 B.6 ABINIT can now read pseudopotentials in the PSML 1.1 format, as described in https://arxiv.org/abs/1707.08938. This XML-based format is
     produced by ONCVPSP 3.2 and 3.3, as well as SIESTA's ATOM 4.2, and allows to perform calculations with the exact same pseudopotential files
-    in both ABINIT and SIESTA. See the new directory ~abinit/tests/psml, tests #1 to 14.
+    in both ABINIT and SIESTA. See the new directory ~abinit/tests/psml, tests [[test:psml_01]] to [[test:psml_14]].
     Note: patches are provided at https://launchpad.net/pspgenpatch to enable PSML output in ONCVPSP.
     By Y. Pouillon, M. Verstraete, J. Junquera and A. Garcia.
 
 B.7 ABINIT is now interfaced with Libxc 3.0. The interface with Libxc 4.0 is in preparation.
-    Tests libxc#06,07,17,18,20, 21 have been modified, because some functionals of libxc v2.0 have changed category in v3.0.
+    Tests [[test:libxc_06]], [[test:libxc_07]], [[test:libxc_17]], [[test:libxc_18]], [[test:libxc_20]], [[test:libxc_21]] 
+    have been modified, because some functionals of libxc v2.0 have changed category in v3.0.
     By M. Torrent.
 
-B.8 A new lesson of the tutorial, called "Electron-positron annihilation" has been created.
+B.8 A new lesson of the tutorial, called [[lesson:positron|Electron-positron annihilation]] has been created.
     By J. Wiktor and M. Torrent.
 
-B.9 The new input variable chkdilatmx has been introduced, to allow expert users to make
+B.9 The new input variable [[chkdilatmx]] has been introduced, to allow expert users to make
     ABINIT bypass the stopping criterion related to dilatmx. In practice, if the condition related
     to dilatmx is not met, ABINIT continues, and delivers an (approximate) optimized geometry and energy,
     that might be used by external drivers like e.g. USPEX to continue the search for global optimized structures.
-    See input variable chkdilatmx, and test v3#42 .
+    See input variable [[chkdilatmx]], and test [[test:v3_42]].
     By X. Gonze.
 
 B.10 Implementation of the LDA-1/2 methodology.
