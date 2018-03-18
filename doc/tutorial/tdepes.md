@@ -378,8 +378,10 @@ using input variables like
 are similar to those used to specify the k-point grid (for electrons). 
 
 There are several difficulties here. 
-First, the symmetry operations of the crystal will be used
-to decrease the number of q-wavevectors, but they cannot be used as well to decrease the k-point grid.
+First, since we focus on the k=$\Gamma$ point, we expect to be able to use symmetries to decrease the computational
+load, as $\Gamma$ is invariant under all symmetry operations of the crystal. The symmetry operations of the crystal will be used
+to decrease the number of q-wavevectors, but they cannot be used as well to decrease the k-point grid during the corresponding
+self-consistent phonon computation.
 How this different behaviour of k-grids and q-grids can be handled by ABINIT ?
 By convention, in such case, with [[nsym]]=1 the k-point grid will be generated in the Full Brillouin zone,
 without use of symmetries, while the q-point grid with [[qptopt]]=1 with be generated in the irreducible Brillouin Zone,
@@ -517,6 +519,7 @@ Running separate jobs for different q-points is quite easy thanks to the dtset a
   
 The calculation of the electronic eigenvalue correction due to electron-phonon
 coupling along high-symmetry lines requires the use of 6 datasets per q-point.
+Moreover, the choice of an arbitrary k-wavevector breaks all symmetries of the crystal.
 Different datasets are required to compute the following quantites:
 
 $\Psi^{(0)}_{kHom}$
@@ -542,7 +545,8 @@ We will use the [[tests/tutorespfn/Input/tdepes_4.in]] input file
 {% dialog tests/tutorespfn/Input/tdepes_4.in %}
 
 Note the use of the usual input variables to define a path in the Brillouin Zone to build an electronic band structure:
-[[kptbounds]], [[kptopt]], and [[ndivsm]].
+[[kptbounds]], [[kptopt]], and [[ndivsm]]. Note also that we have defined [[qptopt]]=3. The number of q-points
+is thus very easy to determine, as being the product of [[ngqpt]] values times [[nqshift]]. Here a very rough 2*2*2 grid has been chosen.
 
 After possibly modifying [[tests/tutorespfn/Input/tdepes_4.files]] to account for the location of the pseudopotential file, as above, issue:
 
@@ -576,7 +580,7 @@ Now run the script:
 with the following input data:
     
 ```
-tdepes4_EP.nc
+temperature_4_EP.nc
 L \Gamma X W K L W X K \Gamma
 -20 30
 0

@@ -1,5 +1,4 @@
 
- ndtset 1
 .Version 8.7.6 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin15.3.0_gnu6.4 computer) 
 
@@ -16,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 18 Mar 2018.
-- ( at 09h32 )
+- ( at 16h23 )
   
 - input  file    -> tdepes_2.in
 - output file    -> tdepes_2.out
@@ -41,8 +40,6 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
-:q
-
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
@@ -83,6 +80,7 @@ P           mkmem           8
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+        prtebands           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -278,6 +276,7 @@ P           mkmem           8
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+        prtebands           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -415,10 +414,10 @@ P           mkmem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.2  wall=          0.3
++Overall time at end (sec) : cpu=          0.3  wall=          0.5
