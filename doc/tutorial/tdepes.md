@@ -14,9 +14,9 @@ This lesson aims at showing how to get the following physical properties, for pe
 
   * The lifetime/broadening of eigenenergies  
 
-This lesson should take about 1 hour to be done.
+It should take about 1 hour.
 
-For the theory related to the temperature-dependent calculations, you can read
+For the theory related to the temperature-dependent calculations, please read
 the following papers: [[cite:Ponce2015]], [[cite:Ponce2014]] and [[cite:Ponce2014a]].
 
 There are two ways to compute the temperature dependence with Abinit:
@@ -75,7 +75,8 @@ The reference input files for this lesson are located in
 ~abinit/tests/tutorespfn/Input and the corresponding reference output files
 are in ~abinit/tests/tutorespfn/Refs.
 The prefix for files is **tdepes**. As usual, we use the shorthand `~abinit` to indicate
-the root directory where the abinit package has been deployed.
+the root directory where the abinit package has been deployed, but most often
+consider the paths are relative this that directory.
 
 First, examine the [[tests/tutorespfn/Input/tdepes_1.in]] input file.
 {% dialog tests/tutorespfn/Input/tdepes_1.in %}
@@ -91,7 +92,7 @@ This second dataset produces the wavefunction file tdepes_1o_DS2_WFQ, that is re
 as well as the tdepes_1o_DS1_WFK file from the first dataset ([[getwfk]]3=1).
 
 The third dataset corresponds to a DFPT phonon calculation ([[rfphon]]3=1) 
-with perturbation of all atoms ([[rfatpol]]3= 1 2) in all directions ([[rfdir]]3= 1 1 1).
+with displacement of all atoms ([[rfatpol]]3= 1 2) in all directions ([[rfdir]]3= 1 1 1).
 This induces the creation of the Derivative DataBase file tdepes_1o_DS3_DDB.
 The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
 this option generating the needed netCDF files tdepes_1o_DS3_EIGR2D.nc and tdepes_1o_DS3_GKK.nc .
@@ -124,20 +125,22 @@ copied abinit in the Work directory).
 -->
 
 If you have compiled the code with Netcdf, the calculation will produce 
-different _EIG.nc,
+several _EIG.nc,
 _DDB, EIGR2D.nc and EIGI2D.nc files, that contain respectively the eigenvalues (GS or
 perturbed), the second-order derivative of the total energy with respect to
 two atomic displacements, the electron-phonon matrix elements used to compute
 the renormalization of the eigenenergies and the electron-phonon matrix
 elements used to compute the lifetime of the electronic states. 
 
-You can now copy the post-processing python scripts from
-~abinit/scripts/post_processing/temperature-dependence/rf_final.py.
-Make sure you are in the directory containing the output files produced by the code and then:
+You can now copy three post-processing python files from
+~abinit/scripts/post_processing/temperature-dependence .
+Make sure you are in the directory containing the output files produced by the code and issue:
 
     cp ~abinit/scripts/post_processing/temperature-dependence/temperature_final.py .
     cp ~abinit/scripts/post_processing/temperature-dependence/rf_final.py .
     cp ~abinit/scripts/post_processing/temperature-dependence/plot_bs.py .
+
+in which ~abinit has been replaced by the proper path.
 
 
 <!--
@@ -203,7 +206,7 @@ Start on 15/3/2018 at 13h29
                                       |_|                              Version 1.3
 
 This script compute the static/dynamic zero-point motion
-  and the temperature dependance of eigenenergies due to electron-phonon interaction.
+  and the temperature dependence of eigenenergies due to electron-phonon interaction.
   The electronic lifetime can also be computed.
 
   WARNING: The first Q-point MUST be the Gamma point.

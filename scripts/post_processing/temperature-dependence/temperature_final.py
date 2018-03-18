@@ -57,7 +57,7 @@ def main():
   """
 
   header +=  '\nThis script compute the static/dynamic zero-point motion \n\
-  and the temperature dependance of eigenenergies due to electron-phonon interaction.\n\
+  and the temperature dependence of eigenenergies due to electron-phonon interaction.\n\
   The electronic lifetime can also be computed. \n\n\
   WARNING: The first Q-point MUST be the Gamma point.\n'
    
