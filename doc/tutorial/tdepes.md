@@ -408,12 +408,14 @@ Note that several input variables have been changed with respect to [[tests/tuto
 
     ndtset 1
     nstep 0
+    prtebands 0
     ngkpt 4 4 4            
     nshiftk 1
     shiftk 0.0 0.0 0.0
     nsym 0
 
-In this example, the new values of [[ndtset]] and [[nstep]] allow a fast run ([[nline]]==0 might be specified as well,
+In this example, the new values of [[ndtset]] and [[nstep]], and the definition of [[prtebands]] 
+allow a fast run ([[nline]]==0 might be specified as well,
 or even, the run might be interrupted after a few seconds, since the number of k points is very quickly available). 
 Then, the k-point grid is
 specified thanks to [[ngkpt]], [[nshiftk]], [[shiftk]], replacing the corresponding input variables for the q-point
@@ -546,7 +548,7 @@ We will use the [[tests/tutorespfn/Input/tdepes_4.in]] input file
 
 Note the use of the usual input variables to define a path in the Brillouin Zone to build an electronic band structure:
 [[kptbounds]], [[kptopt]], and [[ndivsm]]. Note also that we have defined [[qptopt]]=3. The number of q-points
-is thus very easy to determine, as being the product of [[ngqpt]] values times [[nqshift]]. Here a very rough 2*2*2 grid has been chosen.
+is thus very easy to determine, as being the product of [[ngqpt]] values times [[nshiftq]]. Here a very rough 2*2*2 grid has been chosen.
 
 After possibly modifying [[tests/tutorespfn/Input/tdepes_4.files]] to account for the location of the pseudopotential file, as above, issue:
 
@@ -575,7 +577,7 @@ You can now copy the plotting script (Plot-EP-BS) python file from
 ~abinit/scripts/post_processing/plot_bs.py into the directory where you did all the calculations.  
 Now run the script:
 
-    ./plot_bs.py < bs.input
+    ./plot_bs.py 
 
 with the following input data:
     
@@ -586,7 +588,11 @@ L \Gamma X W K L W X K \Gamma
 0
 ```
 
-This should give you the following bandstructure  
+or more directly 
+
+    ./plot_bs.py < tdepes_4_plot_bs.in
+
+This should give the following bandstructure  
 
 ![](tdepes_assets/plot4.png)
 
@@ -596,13 +602,14 @@ renormalization at a defined temperature (here 0K). Finally the area around
 the dashed line is the lifetime of the electronic eigenstates.
 
 Notice all the spiky jumps in the renormalization. This
-is because we did a completely under-converged calculation.
+is because we did a completely under-converged calculation
+with respect to the q-point sampling.
 
 It is possible to converge the calculations using [[ecut]]=30 Ha, a [[ngkpt]]
 grid of 6x6x6 and an increasing [[ngqpt]] grid to get converged results:
     
-    | Convergence study ZPR and inverse lifetime(1/τ) [meV] at 0K               |
-    | q-grid   | Nb qpt |       Γ25'       |        Γ15       |      Min Γ-X     | 
+    | Convergence study ZPR and inverse lifetime(1/τ) [eV] at 0K                |
+    | q-grid   | Nb qpt |       Γ25'      |        Γ15       |      Min Γ-X     | 
     |          | in IBZ |  ZPR   |  1/τ   |   ZPR   |  1/τ   |   ZPR   |  1/τ   |
     | 4x4x4    |  8     | 0.1175 | 0.0701 | -0.3178 | 0.1916 | -0.1570 | 0.0250 |
     | 10x10x10 |  47    | 0.1390 | 0.0580 | -0.3288 | 0.1847 | -0.1605 | 0.0308 |
@@ -612,9 +619,8 @@ grid of 6x6x6 and an increasing [[ngqpt]] grid to get converged results:
     | 43x43x43 |  2024  | 0.1447 | 0.0572 | -0.2650 | 0.1821 | -0.1592 | 0.0297 |
 
 As you can see the limiting factor for the convergence study is the
-convergence of the LUMO band at Γ. This band is not the lowest in energy (the
-convergence of the LUMO band at Γ. This band is not the lowest in energy (the
-lowest is on the line between Γ and X) and therefore this band is rather
+convergence of the LUMO band at $\Gamma$. This band is not the lowest in energy (the
+lowest is on the line between $\Gamma$ and X) and therefore this band is rather
 unstable. This can also be seen by the fact that it has a large electronic
 broadening, meaning that this state will decay quickly into another state.
 
