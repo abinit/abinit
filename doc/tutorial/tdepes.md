@@ -213,7 +213,7 @@ This script compute the static/dynamic zero-point motion
 
 Enter the number of cpu on which you want to multi-thread
 Define the type of calculation you want to perform. Type:
-                        1 if you want to run a non-adiabatic AHC calculation
+                         1 if you want to run a non-adiabatic AHC calculation
                          2 if you want to run a static AHC calculation
                          3 if you want to run a static AHC calculation without control on active space (not recommended !)
    Note that for 1 & 2 you need _EIGR2D.nc and _GKK.nc files obtained through ABINIT option "ieig2rf 5"
@@ -238,13 +238,13 @@ Runtime: 0 seconds (or 0.0 minutes)
 The python code has generated the following files:
 
 **temperature_1.txt** 
-: This text file contains the zero-point motion (ZPM) correction at each k-point for each band. 
+: This text file contains the zero-point motion renormalization (ZPR) at each k-point for each band. 
   It also contain the evolution of each band with temperature at k=$\Gamma$.
   At the end of the file, the Fan/DDW contribution is also reported. 
 
 **temperature_1_EP.nc** 
 : This netcdf file contains a number for each k-point, 
-  for each band and each temperature. The real part of this number is the ZPM correction 
+  for each band and each temperature. The real part of this number is the ZPR correction 
   and the imaginary part is the lifetime. 
 
 <!--
@@ -273,7 +273,7 @@ ZPR correction as well as their temperature dependence usually closes the gap
 of semiconductors. 
 
 As usual, checking whether the input parameters give converged values is of course important.
-The run used [[ecut]]=10. With [[ecut]]=5, the HOMO correction goes down with temperature.
+The run used [[ecut]]=10. With the severely underestimated [[ecut]]=5, the HOMO correction goes down with temperature.
 
 
 
@@ -389,6 +389,7 @@ How this different behaviour of k-grids and q-grids can be handled by ABINIT ?
 By convention, in such case, with [[nsym]]=1 the k-point grid will be generated in the Full Brillouin zone,
 without use of symmetries, while the q-point grid with [[qptopt]]=1 with be generated in the irreducible Brillouin Zone,
 despite [[nsym]]=1. In order to generate q-point grids that are not folded in the irreducible Brillouin Zone, use another value of [[qptopt]].
+Especially [[qptopt]]=3 has to be used to generate q points in the full Brillouin zone.
 
 Second, the number of ABINIT datasets is expected to be given in the input file, by the user,
 but not determined on-the-flight by ABINIT. Still, this number of datasets is determined by the number of q points...
@@ -450,17 +451,17 @@ We are now ready to launch the determination of the
 _EIG.nc, _DDB, EIGR2D.nc and EIGI2D.nc files, with 8 q-points.
 As for the $\Gamma$ calculation of the previous section, we will rely on three
 datasets for each q-point. This permits a well-structured set of calculations,
-although there is some redundancy. Indeed, the first of these dataset will correspond
+although there is some redundancy. Indeed, the first of these datasets will correspond
 to an unperturbed ground-state calculation identical for all q. It is done very quickly because
 the converged wavefunctions are already available. The second dataset will correspond to
 a non-self-consistent ground-state calculation at k+q (it is also quick thanks to previously available wavefunctions), 
 and the third dataset will correspond to the DFPT calculations at k+q (this is the CPU intensive part) .
 
-So, compared to the first run in this lesson, we have replaced  
+So, compared to the first run in this lesson, we have to replace   
 
-    ndtset 3  ==>  ndtset 24 udtset 8 3
+    ndtset 3     by      ndtset 24 udtset 8 3
 
-in the input file [[tests/tutorespfn/Input/tdepes_3.in]], and adjusted accordinagly all input variables that were dataset-dependent. 
+in the input file [[tests/tutorespfn/Input/tdepes_3.in]], and adjusted accordingly all input variables that were dataset-dependent. 
 
 {% dialog tests/tutorespfn/Input/tdepes_3.in %}
 
@@ -489,10 +490,10 @@ After possibly modifying [[tests/tutorespfn/Input/tdepes_3.files]] to account fo
 
     abinit < tdepes_3.files > tdepes_3.stdout
 
-This is a significantly longer ABINIT run, also producing many files.
+This is a significantly longer ABINIT run (still less than one minute), also producing many files.
 
 When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3_temperature.in]] in the 
-working directory and launch the python script with:
+working directory (if not yet done) and launch the python script with:
     
     ./temperature_final.py < tdepes_3_temperature.in
 
@@ -520,7 +521,7 @@ As a matter of fact, diamond requires an extremely dense q-point grid (40x40x40)
 On the bright side, each q-point calculation is independent and thus the parallel scaling is ideal...
 Running separate jobs for different q-points is quite easy thanks to the dtset approach.
 
-## 3 Calculation of the eigenenergies correction along high-symmetry lines
+## 3 Calculation of the eigenenergy corrections along high-symmetry lines
   
 The calculation of the electronic eigenvalue correction due to electron-phonon
 coupling along high-symmetry lines requires the use of 6 datasets per q-point.
@@ -551,13 +552,14 @@ We will use the [[tests/tutorespfn/Input/tdepes_4.in]] input file
 
 Note the use of the usual input variables to define a path in the Brillouin Zone to build an electronic band structure:
 [[kptbounds]], [[kptopt]], and [[ndivsm]]. Note also that we have defined [[qptopt]]=3. The number of q-points
-is thus very easy to determine, as being the product of [[ngqpt]] values times [[nshiftq]]. Here a very rough 2*2*2 grid has been chosen.
+is thus very easy to determine, as being the product of [[ngqpt]] values times [[nshiftq]]. Here a very rough 2*2*2 grid has been chosen,
+even less dense than the one for section 2.
 
 After possibly modifying [[tests/tutorespfn/Input/tdepes_4.files]] to account for the location of the pseudopotential file, as above, issue:
 
     abinit < tdepes_4.files > tdepes_4.stdout
 
-This is a significantly longer ABINIT run, also producing many files.
+This is a significantly longer ABINIT run (2-3 minutes), also producing many files.
 
 
 then use [[tests/tutorespfn/Input/tdepes_4_temperature.in]] for the python script. 
@@ -604,7 +606,7 @@ dashed lines are the electronic eigenenergies with electron-phonon
 renormalization at a defined temperature (here 0K). Finally the area around
 the dashed line is the lifetime of the electronic eigenstates.
 
-Notice all the spiky jumps in the renormalization. This
+Notice all the spikes in the electron-phonon case. This
 is because we did a completely under-converged calculation
 with respect to the q-point sampling.
 
@@ -636,17 +638,16 @@ Here we show the renormalization at a very high temperature of 1900K in order
 to highlight more the broadening and renormalization that occurs. If you want
 accurate values of the ZPR at 0K you can look at the table above.
 
-### Possible issue while converging your calculations
+**Additional consideration : possible issue while converging your calculations**
 
 If you use an extremely fine q-point grid, the acoustic phonon frequencies for
 q-points close to $\Gamma$ will be wrongly determined by Abinit. Indeed in order to
-have correct phonon frequencies, you have to impose the acousting sum rule
+have correct phonon frequencies close to $\Gamma$, one has to impose the acousting sum rule
 with anaddb and [[asr@anaddb]]. 
-Since this feature is not available in the python script, we have to reject the
-contribution of the acoustic phonon close to Γ if their phonon frequency is
-lower than 1E-6 Ha. Otherwise you get unphysically large contribution. 
+However, this feature is not available in the python script. Instead, the script reject the
+contribution of the acoustic phonon close to $\Gamma$ if their phonon frequency is
+lower than 1E-6 Ha. Otherwise one gets unphysically large contribution. 
 
-You can tune this parameter by editing the variable "tol6 = 1E-6" in the beginning of the script.
-
+One can tune this parameter by editing the variable "tol6 = 1E-6" in the beginning of the script.
 
 For example, for the last 43x43x43 calculation, it was set to 1E-4.

@@ -3,7 +3,7 @@
 ndtset 1
 nstep 0    
 prtebands 0            # This is to avoid trying to write eigenenergies that have not been computed.
-ngkpt 4 4 4            # Underconverged : k-grid should be at least 4x4x4 for diamond to be converged.
+ngkpt 4 4 4            
 nshiftk 1
 shiftk 0.0 0.0 0.0
 nsym 0
