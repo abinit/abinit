@@ -14906,7 +14906,9 @@ These values are only relevant to phonon response function calculations.
 May take values from 1 to [[natom]], with [[rfatpol]](1)<=[[rfatpol]](2).
 The atoms to be moved will be defined by the
 do-loop variable iatpol:
-do iatpol=[[rfatpol]](1),[[rfatpol]](2)
+
+  - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
+
 For the calculation of a full dynamical matrix, use [[rfatpol]](1)=1 and
 [[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1. For selected
 elements of the dynamical matrix, use different values of [[rfatpol]] and/or

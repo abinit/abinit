@@ -391,7 +391,7 @@ Output from the code goes to several places listed below.
 **6.1. The log file**
 
 This file is the same as the log file of the abinit code when computing ground
-state (GS) results. Eventually, the output of datasets related to response
+state (GS) results. Possibly, the output of datasets related to response
 functions will be intertwined with those concerned with ground-state case. The
 purpose of this file is the same as in the GS case, and the use of error messages is unchanged.
 
@@ -399,12 +399,12 @@ purpose of this file is the same as in the GS case, and the use of error message
 **6.2. The main output file**
 
 This file is the same as the main output file of the abinit code when
-computing ground state (GS) results. Eventually, the output of datasets
+computing ground state (GS) results. Possibly, the output of datasets
 related to response functions will be intertwined with those concerned with
 ground-state case. We explain here the parts related to the RF computation.
 
 The initialisation part is the same as for the GS. So, the reader is advised
-to read [[help:abinit#outputfile|section 6.2]] the abinit help file,
+to read the [[help:abinit#outputfile|section 6.2]] of the abinit help file,
 as well as the first paragraph of the section [[help:abinit#6.3|6.3]] of
 this file. Afterwards, the content of the main output file differs a bit...
 
@@ -508,7 +508,7 @@ the run that has generated the DDB, while the second part contains the 2DTE,
 grouped by blocks of data.
 
 Note that the DDB output of the ABINIT code can be merged with other DDBs as
-described in the Mrgddb help file.
+described in the [[help:mrgddb|Mrgddb help file]].
 
 The first part contains:
 
@@ -517,7 +517,8 @@ The first part contains:
     ([[natom]], [[nkpt]], [[nsppol]], [[nsym]], [[ntypat]], [[occopt]], and [[nband]] - 
     or the array [[nband]] ([[nkpt]]* [[nsppol]]) if [[occopt]]=2)
   * different information on the run that generated the 2DTE 
-    (acell,amu,ecut,iscf,ixc,kpt,kptnrm, ngfft,occ,rprim,sciss,symrel,xred,tnons,typat,tolwfr,wtk,zion, 
+    ([[acell]],[[amu]],[[ecut]],[[iscf]],[[ixc]],[[kpt]],[[kptnrm]], 
+     [[ngfft]],[[occ]],[[rprim]],[[dfpt_sciss]],[[symrel]],[[xred]],[[tnons]],[[typat]],[[tolwfr]],[[wtk]],[[ziontypat]], 
     as well as information on the pseudopotentials by means of their Kleinman-Bylander energies). 
     These values are simply a transcription of the input data, or other simple internal parameters.
 
@@ -545,7 +546,7 @@ _If you follow the tutorial, you should go back to the tutorial window now._
   
 It is possible to get from the RF calculations essentially EXACT derivatives
 of the total energy with respect to perturbations. There is a published
-account of this fact in Phys. Rev. A 52, 1096 (1995). An agreement of 8 digits
+account of this fact in [[cite:Gonze1995]]. An agreement of 8 digits
 or more was obtained in the comparison with finite-difference derivatives of GS data.
 
 The accuracy of these calculations are thus entirely determined by the input
@@ -567,7 +568,7 @@ k-wavevectors, as well as the related variables have to be the SAME in the
 ground-state calculations that go before a RF run and this RF run.
 
 Namely: do not try to use ground-state wavefunction files produced with
-ecut=10Ha for a RF run with ecut=20Ha. In some cases, the code will complain
+[[ecut]]=10Ha for a RF run with [[ecut]]=20Ha. In some cases, the code will complain
 and stop, but in other cases, it might simply produce garbage !
 
 If the value of [[ngfft]] is input by hand, its value must also be equal in
@@ -577,7 +578,7 @@ small as 1.5 could be allowed in some cases. It is not allowed with RF
 calculations, because they are more sensitive to that error.
 
 The convergence tests with respect to [[ecut]], and the k-point grid should be
-done carefully. This was already emphasized in the abinit help file and is re-
+done carefully. This was already emphasized in the [[help:abinit]] and is re-
 emphasized here. The user should test the convergence DIRECTLY on the property
 he or she is interested in. For example, if the user wants a phonon frequency
 accurate to 10 cm^-1, he/she could be lead to do a full calculation (GS+RF) of

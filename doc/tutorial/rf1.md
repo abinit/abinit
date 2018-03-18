@@ -133,7 +133,9 @@ This is your input file. You should edit it and briefly look at the two
 changes with respect to the file ~abinit/tests/tutorespfn/Input/trf1_1.in:
 the change of [[xred]], and the reading of the wavefunction file, using the
 [[irdwfk]] input variable. 
-Then, you can make the run. The symmetry is lowered
+
+Then, you can make the run, following the same command as before, with a different files file, referring to trf1_2.in. 
+The symmetry is lowered
 with respect to the ground-state geometry, so that the number of k-points
 increases a lot, and of course, the CPU time.
 
@@ -149,7 +151,7 @@ reduced coordinate (dt):
      ...
         >>>>>>>>> Etotal= -9.76268124105767E+00
 
-The change of reduced coordinate of the Al atom along the first axis was
+The change of reduced coordinate ([[xred]]) of the Al atom along the first axis was
 rather small (1/1000), and we can make an estimate of the second derivative of
 the total energy with respect to the reduced coordinate thanks to finite-difference formulas.
 
@@ -221,7 +223,7 @@ output file for the small displacement:
     
 This effect will be seen also at the level of 2DTE. The so-called "acoustic
 sum rule", imposing that the frequency of three modes (called acoustic modes)
-tend to zero with vanishing wavevector, will also be slightly broken. In this
+tends to zero with vanishing wavevector, will also be slightly broken. In this
 case also, it will be rather easy to reimpose the acoustic sum rule. In any
 case, taking a finer XC grid will allow one to reduce this effect.
 
@@ -247,18 +249,20 @@ the [[kptopt]] input variable. It will be explained in more detail later.
 {% dialog tests/tutorespfn/Input/trf1_3.in %}
 
 When you have understood the purpose of the input variable values specified
-before the "Common input variables" section, you can make the code run.
+before the "Common input variables" section, you can make the code run, as usual.
 
 Then, we need to analyze the different output files. For that purpose, you should read 
 the content of the [[help:respfn#output|section 6]] of the respfn_help file.
 Read it quickly, as we will come back to the most important points hereafter.
 
-ABINIT has created four different files:
+ABINIT has created several different files:
 
   * trf1_3.log (the log file) 
-  * trf1_3.out (the output file) 
+  * trf1_3.out (the output file), possibly also trf1_3o_OUT.nc, an abridged netCDF version 
   * trf1_3o_1WF1 (the 1st-order wavefunction file) 
-  * trf1_3o_DDB (the derivative database) 
+  * trf1_3o_DEN1 (the 1st-order density file) 
+  * trf1_3o_POT1 (the 1st-order potential file) 
+  * trf1_3o_DDB (the derivative database), possibly also trf1_3o_DDB.nc, its netCDF version 
 
 Let us have a look at the output file. You can follow the description provided
 in the [[help:respfn#output|section 6.2]] of the respfn_help file. 
@@ -284,7 +288,7 @@ differences, and 5.007852 hartree from the force differences.
 
 Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn_help file. 
 Then, you should also edit the trf1_3o_DDB file, and read the
-corresponding [help:respfn#ddb|section 6.5]] of the respfn_help file.
+corresponding [[help:respfn#ddb|section 6.5]] of the respfn_help file.
 
 Finally, the excellent agreement between the finite-difference formula and the
 DFPT approach calls for some accuracy considerations. These can be found in 
@@ -292,7 +296,7 @@ DFPT approach calls for some accuracy considerations. These can be found in
 
 ## 4 DFPT calculation of the dynamical matrix at Gamma
   
-We are now in the position to compute the full dynamical matrix at Gamma (q=0). 
+We are now in the position to compute the full dynamical matrix at $\Gamma$ (q=0). 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_4.in in
 Work_rf1. This is your input file. You should edit it. 
 
@@ -333,11 +337,11 @@ the atomic masses have been taken into account, see [[amu]]), are given as follo
 !!! tip
 
     You might wonder about the dash sign present in the first column of the two
-    lines giving the frequencies in cm-1. The first column of the main ABINIT
+    lines giving the frequencies in $cm^{-1}$. The first column of the main ABINIT
     output files is always dedicated to signs needed to automatically treat the
     comparison with respect to reference files. Except if you become a ABINIT
     developer, you should ignore these signs. In the present case, they should not
-    be interpreted as a minus sign for the floating numbers that follow them._
+    be interpreted as a minus sign for the floating numbers that follow them... 
 
 There is a good news about this result, and a bad news. The good news is that
 there are indeed three acoustic modes, with frequency rather close to zero
@@ -345,8 +349,8 @@ there are indeed three acoustic modes, with frequency rather close to zero
 other frequencies are compared with experimental results, or other theoretical
 results. Indeed, in the present run, one obtains three degenerate modes, while
 there should be a (2+1) splitting. This can be seen in the paper  Ab initio
-calculation of phonon dispersions in semiconductors, by P. Giannozzi, S. de
-Gironcoli, P. Pavone and S. Baroni, Phys. Rev. B 43, 7231 (1991) , especially Fig. 2.
+calculation of phonon dispersions in semiconductors [[cite:Giannozzi1991]]
+, especially Fig. 2.
 
 Actually, we have forgotten to take into account the coupling between atomic
 displacements and the homogeneous electric field, that exists in the case of
@@ -367,12 +371,11 @@ This is primarily because the change of potential associated with an homogeneous
 is not periodic, and thus does not satisfy the Born-von Karman periodic boundary conditions.
 
 For the purpose of the present tutorial, one should read the section II.C of
-the above-mentioned paper P. Giannozzi, S. de Gironcoli, P. Pavone and S.
-Baroni, Phys. Rev. B 43, 7231 (1991).
-The reader will find in  X. Gonze, Phys. Rev. B 55, 10337 (1997) and  X. Gonze and C. Lee, Phys. Rev. B 55, 10355
-(1997) more detailed information of this perturbation, closely related to the ABINIT implementation. 
+the above-mentioned paper [[cite:Giannozzi1991]].
+The reader will find in  [[cite:Gonze1997]] and [[cite:Gonze1997a]]
+more detailed information about this perturbation, closely related to the ABINIT implementation. 
 There is also an extensive discussion of the Born
-effective charges by  Ph. Ghosez, J.-P. Michenaud and X. Gonze, Phys. Rev. B 58, 6224 (1998).
+effective charges by [[cite:Ghosez1998]].
 
 In order to compute the response of solids to an homogeneous electric field,
 as implemented in ABINIT, the remaining sections of the respfn_help file
@@ -456,7 +459,7 @@ It is diagonal and isotropic, and corresponds to a dielectric constant of 9.7606
 Then, the Born effective charges are given, either computed from the
 derivative of the wavefunctions with respect to the electric field, or
 computed from the derivative of the wavefunctions with respect to an atomic
-displacement, as explained in section II of X. Gonze, Phys. Rev. B55, 10355 (1997):
+displacement, as explained in section II of [[cite:Gonze1997a]]: 
     
       Effective charges, in cartesian coordinates,
       (from electric field response)
@@ -516,15 +519,15 @@ The first few lines discard any effect of the homogeneous electric field,
 while the next sections consider it along the three cartesian coordinates.
 
 In the present material, the directionality of the electric field has no
-influence. We note that there are still three acoustic mode, below 1cm^-1,
+influence. We note that there are still three acoustic mode, below 1$cm^{-1}$,
 while the optic modes have the correct degeneracies: two TO modes at 344.3
-cm^-1, and one LO mode at 379.6 cm^-1 .
+$cm^{-1}$, and one LO mode at 379.6 $cm^{-1}$.
 
-These values can be compared to experimental (361 cm^-1 , 402 cm^-1) as well
-as theoretical (363 cm^-1 , 400 cm^-1) values (again the Gianozzi et al paper
-mentioned above). Most of the discrepancy comes from the too low value of
-[[ecut]]. Using ABINIT with [[ecut]]=6 hartree gives (358.8 cm^-1 , 389.8
-cm^-1). The remaining of the discrepancy may come partly from the
+These values can be compared to experimental (361 $cm^{-1}$, 402 $cm^{-1}$) as well
+as theoretical (363 $cm^{-1}$, 400 $cm^{-1}$) values (again [[cite:Giannozzi1991]]). 
+Most of the discrepancy comes from the too low value of
+[[ecut]]. Using ABINIT with [[ecut]]=6 hartree gives (358.8 $cm^{-1}$, 389.8 $cm^{-1}$). 
+The remaining of the discrepancy may come partly from the
 pseudopotentials, that are particularly soft.
 
 The comparison of Born effective charges is also interesting. After imposition
@@ -534,8 +537,8 @@ Increasing [[ecut]] to 6 hartree in ABINIT gives 2.168.
 
 For the dielectric tensor, it is more delicate. The value from Gianozzi et al
 is 9.2, while the experimental value is 8.2 . The agreement is not very good,
-a fact that can be attributed to the LDA lack of polarization-dependence ( X.
-Gonze, Ph. Ghosez and R. Godby, Phys. Rev. Lett. (1995)). Still, the agreement
+a fact that can be attributed to the LDA lack of polarization-dependence [[cite:Gonze1995a]].
+Still, the agreement
 of our calculation with the theoretical result is not very good. With
 [[ecut]]=3 hartree, we have 9.76. Changing it to 6 hartree gives 10.40 . A
 better k point sampling (8x8x8), with [[ecut]]=6 hartree, reduces the value to
@@ -552,8 +555,7 @@ One must distinguish two cases. Either the q wavevector connects k points that b
 to the same grid, or the wavevector q is general. 
 In any case, the computation within the DFPT formalism is more
 efficient than using the frozen-phonon technique: the use of supercell is
-completely avoided. For an explanation of this fact, see for example section IV 
-of X. Gonze, Phys. Rev. B55, 10337 (1997).
+completely avoided. For an explanation of this fact, see for example section IV of [[cite:Gonze1997]].
 
 You can copy the file ~abinit/tests/tutorespfn/Input/trf1_6.in in Work_rf1.
 This is your input file. You should edit it. 
@@ -571,17 +573,17 @@ So, you would better leave your computer running, and either read more of the AB
 The results of this simulation can be compared to those provided in the Gianozzi et al paper. 
 The agreement is rather good, despite the low cut-off energy, and different pseudopotentials.
 
-At X, they get 95cm^-1, 216cm^-1, 337cm^-1 and 393cm^-1, while we get
-92.5cm^-1, 204.6cm^-1, 313.9cm^-1 and 375.9cm^-1. 
-With [[ecut]]=6 hartree, we get 89.7cm^-1, 212.3cm^-1, 328.5cm^-1 and 385.8cm^-1.
+At X, they get 95$cm^{-1}$, 216$cm^{-1}$, 337$cm^{-1}$ and 393$cm^{-1}$, while we get
+92.5$cm^{-1}$, 204.6$cm^{-1}$, 313.9$cm^{-1}$ and 375.9$cm^{-1}$. 
+With [[ecut]]=6 hartree, we get 89.7$cm^{-1}$, 212.3$cm^{-1}$, 328.5$cm^{-1}$ and 385.8$cm^{-1}$.
 
-At L, they get 71cm^-1, 212cm^-1, 352cm^-1 and 372cm^-1, while we get
-69.0cm^-1, 202.5cm^-1, 332.6cm^-1 and 352.3cm^-1. With [[ecut]]=6 hartree, we
-get 68.1cm^-1, 208.5cm^-1, 346.7cm^-1 and 362.6cm^-1.
+At L, they get 71$cm^{-1}$, 212$cm^{-1}$, 352$cm^{-1}$ and 372$cm^{-1}$, while we get
+69.0$cm^{-1}$, 202.5$cm^{-1}$, 332.6$cm^{-1}$ and 352.3$cm^{-1}$. With [[ecut]]=6 hartree, we
+get 68.1$cm^{-1}$, 208.5$cm^{-1}$, 346.7$cm^{-1}$ and 362.6$cm^{-1}$.
 
-At q=(0.1 0 0), we get 31.6cm^-1, 63.6cm^-1, 342.0cm^-1 and 379.7cm^-1. The
+At q=(0.1 0 0), we get 31.6$cm^{-1}$, 63.6$cm^{-1}$, 342.0$cm^{-1}$ and 379.7$cm^{-1}$. The
 acoustic modes tends (nearly-)linearly to zero, while the optic modes are
-close to their values at Gamma : 344.3 cm^-1 and 379.6 cm^-1.
+close to their values at Gamma : 344.3 $cm^{-1}$ and 379.6 $cm^{-1}$.
 
 * * *
 
