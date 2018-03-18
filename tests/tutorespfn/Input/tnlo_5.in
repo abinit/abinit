@@ -44,7 +44,7 @@
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = Marek Veithen, Philippe Ghosez
 #%% keywords = 
 #%% description = anaddb input file.
 #%%<END TEST_INFO>

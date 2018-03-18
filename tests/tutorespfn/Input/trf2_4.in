@@ -31,7 +31,7 @@
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = Xavier Gonze
 #%% keywords = 
 #%% description = !Input file for the anaddb code. Analysis of the AlAs DDB
 #%%<END TEST_INFO>

@@ -96,7 +96,7 @@
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = Sangeeta Sharma, Xavier Gonze
 #%% keywords = NC, DFPT
 #%% description = 
 #%%  Prepare the computation of linear and non-linear optic properties

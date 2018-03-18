@@ -17,7 +17,7 @@ tnlo_2o_DS5_DDB
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = Marek Veithen, Philippe Ghosez
 #%% keywords = 
 #%% description = Anaddb Input file
 #%%<END TEST_INFO>

@@ -17,7 +17,7 @@ This lesson aims at showing how to get the following physical properties, for an
 You will learn to use of density-functional perturbation theory (DFPT) features of ABINIT. 
 In order to learn the use of the associated codes Mrgddb
 and Anaddb, to produce efficiently phonon band structures and the associated
-thermodynamical properties, please see the [[lesson:rf2|tutorial DFPT 2]]
+thermodynamical properties, please see the [[lesson:rf2|tutorial DFPT 2 (labelled RF2)]]
 
 This lesson should take about 2 hours.
 
@@ -34,7 +34,11 @@ for the other lessons. Why not create "Work_rf1" in ~abinit/tests/tutorespfn/Inp
     This will be the case for all the DFPT based part of the tutorial.
 
 The file ~abinit/tests/tutorespfn/Input/trf1_x.files lists the file names and root names. 
-You can copy it in the Work_rf1 directory (and change it, as usual). 
+
+{% dialog tests/tutorespfn/Input/trf1_x.files %}
+
+You can copy it in the Work_rf1 directory and, as usual, change its name to trf1_1.files 
+and replace the occurences of trf1_x by trf1_1. 
 Note that two pseudopotentials are mentioned in this "files" file: one
 for the Aluminum atom, and one for the Arsenic atom. 
 The first to be mentioned, for Al, will define the first type of atom. 
@@ -43,9 +47,11 @@ It might the first time that you encounter this situation (more than one type of
 tutorials, at variance with the four "basic" lessons.
 
 You can also copy the file ~abinit/tests/tutorespfn/Input/trf1_1.in in Work_rf1. 
+
+    cp ../trf1_1.in .
 This is your input file. You should edit it, and read it carefully.
 
-{% dialog tests/tutorespfn/Input/trf1_x.files tests/tutorespfn/Input/trf1_1.in tests/tutorespfn/Refs/trf1_1.out %}
+{% dialog tests/tutorespfn/Input/trf1_1.in %}
 
 Because of the use of two types of atoms, have a look at the following input variables:
 
@@ -70,7 +76,16 @@ We postpone the discussion of the accuracy of these choices and
 the choice of pseudopotential to the end of the fifth section of this tutorial. 
 They give acceptable results, not very accurate, but, more important, the speed is reasonable for a tutorial.  
 
-You should make the run (a few seconds), and obtain the following value for
+You should make the run (a few seconds). 
+
+    ./abinit < trf1_1.files > trf1_1.stdout
+
+where ./abinit has to be replaced by the path to the abinit executable.
+
+{% dialog tests/tutorespfn/Refs/trf1_1.out %}
+
+obtain the following value for
+
 the energy, in the final echo section:
     
      etotal   -9.7626837450E+00
