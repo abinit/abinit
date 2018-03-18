@@ -479,27 +479,27 @@ Variable(
     dimensions=[2, '[[nkptgw]]', '[[nsppol]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="BanDs for GW calculation",
-    requires="[[optdriver]]==4",
+    requires="[[optdriver]] in [4, 7]",
     text="""
-For each k-point with number ikptgw in the range (1:[[nkptgw]]) and each spin
+For each k-point with number *ikptgw* in the range (1:[[nkptgw]]) and each spin
 index isppol, **bdgw(1,ikptgw,isppol)** is the number of the lowest band for
-which the GW computation must be done, and **bdgw(2,ikptgw,isppol)** is the
-number of the highest band for which the GW computation must be done.
+which the self-energy computation must be done.
+**bdgw(2,ikptgw,isppol)** gives the index of the highest band for which the self-energy computation must be done.
 
-When [[gwcalctyp]]  >= 20, the quasiparticle wavefunctions are computed and
+!!! note
+
+    Tthe initial values given in the input file might be changed inside
+    the code so that all the degenerate states at a given k-point and spin are
+    included. This might happen when [[symsigma]]=1 is used or in the case of
+    self-consistent GW calculations.
+    When [[symsigma]] == 1, indeed, the diagonal matrix elements of the self-energy are
+    obtained by averaging the unsymmetrized results in the subspace spanned by the degenerate states.
+
+When [[gwcalctyp]] >= 20, the quasiparticle wavefunctions are computed and
 represented as linear combination of Kohn-Sham wavefunctions. In this case
 [[bdgw]] designates the range of KS wavefunctions used as basis set. For each
 k-point, indeed, the quasiparticle wavefunctions are expanded considering only
 the KS states between **bdgw(1,ikptgw,isppol)** and **bdgw(2,ikptgw,isppol)**.
-
-Note that the initial values given in the input file might be changed inside
-the code so that all the degenerate states at a given k-point and spin are
-included. This might happen when [[symsigma]]=1 is used or in the case of
-self-consistent GW calculations.
-
-When [[symsigma]]=1, the diagonal matrix elements of the self-energy are
-obtained by averaging the unsymmetrized results in the subspace spanned by the
-degenerate states.
 
 For self-consistent calculations, on the other hand, the basis set used to
 expand the GW wavefunctions should include all the degenerate states belonging
@@ -971,7 +971,7 @@ Variable(
     dimensions="scalar",
     defaultval=1.0,
     mnemonics="Bethe-Salpeter INTERPolation Method3 WIDTH",
-    requires="[[bs_interp_mode]]==3 and [[bs_algorithm]]==2 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] ==3 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
 Defines the width of the region where divergence treatment is applied for BSE interpolation
 """,
@@ -1002,7 +1002,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Bethe-Salpeter INTERPolation MODE",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
 [[bs_interp_mode]] selects the mode of interpolation:
 
@@ -1021,7 +1021,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Bethe-Salpeter INTERPolation PREParation",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]] == 2 and [[bs_coupling]] == 0",
     text="""
 [[bs_interp_prep]] allows to trigger the preparation of the interpolation with
 method 2 or method 3. It generates the decomposition of BSR in a,b,c
@@ -1037,7 +1037,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour",
-    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_interp_method]] == 1 and [[bs_coupling]]==0",
+    requires="[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_interp_method]] == 1 and [[bs_coupling]] == 0",
     text="""
 Gives the index of the neighbour that is used for Rohlfing & Louie method
 """,
@@ -1068,7 +1068,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Bethe-Salpeter Number of STATES",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]] in [2,3]",
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] in [2, 3]",
     text="""
 [[bs_nstates]] defines the maximum number of excitonic states calculated in
 the direct diagonalization of the excitonic matrix or in the conjugate-
@@ -1105,7 +1105,7 @@ Variable(
     dimensions="scalar",
     defaultval=2.0,
     mnemonics="BoX CuT-off MINimum for the Double Grid (PAW)",
-    requires="[[usepaw]]==1",
+    requires="[[usepaw]] == 1",
     text="""
 The box cut-off ratio is the ratio between the wavefunction plane wave sphere
 radius, and the radius of the sphere that can be inserted in the FFT box, in
@@ -1133,7 +1133,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Contour Deformation CUSTOM IMaginary FReQuencieS",
-    requires="([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]",
+    requires="([[optdriver]] ==3 or [[optdriver]] ==4) and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
 [[cd_customnimfrqs]] lets the user define the grid points along the imaginary
 axis by hand. Set this to the number of frequencies you want. The frequencies
@@ -1149,7 +1149,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Contour Deformation FReQuency integration on IMaginary axis Method",
-    requires="[[optdriver]]==4  and [[gwcalctyp]] in [2,9,12,19,22,29]",
+    requires="[[optdriver]] ==4 and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text=r"""
 [[cd_frqim_method]] defines the choice of integration method along the
 imaginary frequency axis for Contour Deformation calculations. The default
@@ -1245,7 +1245,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Contour Deformation FULL GRID in complex plane",
-    requires="[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29]",
+    requires="[[optdriver]] == 3 and [[gwcalctyp]] in [2, 9, 12, 19, 22, 29]",
     text="""
 [[cd_full_grid]] enables the calculation of the screening [both chi0 and
 epsilon^(-1)] on a grid in the first quadrant of the complex plane. The grid
@@ -1275,7 +1275,7 @@ Variable(
     defaultval=ValueWithUnit(units='eV', value=100.0),
     mnemonics="Contour Deformation tangent grid HALFWAY FREQuency",
     characteristics=['[[ENERGY]]'],
-    requires="([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]",
+    requires="([[optdriver]] == 3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]",
     text="""
 [[cd_halfway_freq]] determines the frequency where half of the number of
 points defined in [[nfreqre]] are used up. The tangent transformed grid is
@@ -1380,7 +1380,7 @@ Variable(
     dimensions=[3, '[[nzchempot]]', '[[ntypat]]'],
     defaultval=0.0,
     mnemonics="spatially varying CHEMical POTential",
-    requires="[[nzchempot]]/=0",
+    requires="[[nzchempot]] /= 0",
     text="""
 For each type of atoms, from 1 to [[ntypat]], specifies the spatially varying
 chemical potential, through the specification of [[nzchempot]] triplets of
@@ -1540,7 +1540,7 @@ Variable(
     dimensions="scalar",
     defaultval=7,
     mnemonics="Climbing-Image Nudged Elastic Band: STARTing iteration",
-    requires="[[imgmov]]== 5 and [[neb_algo]]==2",
+    requires="[[imgmov]] == 5 and [[neb_algo]] == 2",
     text="""
 Gives the index of the first CI-NEB iteration.
 The CI-NEB method constitutes a small modification to the NEB method allowing
@@ -1622,7 +1622,7 @@ Variable(
     dimensions=[2],
     defaultval=[1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Controls the range of atoms for which displacements will be considered in non-
 linear computations (using the 2n+1 theorem), for the 1st perturbation.
@@ -1639,7 +1639,7 @@ Variable(
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: DIRections",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Gives the directions to be considered in non-linear computations (using the
 2n+1 theorem), for the 1st perturbation.
@@ -1657,7 +1657,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Turns on electric field perturbation in non-linear computation, as 1st
 perturbation. Actually, such calculations requires first the non-self-
@@ -1674,7 +1674,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: PHONons",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Turns on atomic displacement perturbation in non-linear computation, as 1st perturbation.
 See [[rfphon]] for additional details.
@@ -1689,7 +1689,7 @@ Variable(
     dimensions=[2],
     defaultval=[1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Controls the range of atoms for which displacements will be considered in non-
 linear computations (using the 2n+1 theorem), for the 2nd perturbation.
@@ -1706,7 +1706,7 @@ Variable(
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: DIRections",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Gives the directions to be considered in non-linear computations (using the
 2n+1 theorem), for the 2nd perturbation.
@@ -1724,7 +1724,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Turns on electric field perturbation in non-linear computation, as 2nd
 perturbation. Actually, such calculations requires first the non-self-
@@ -1741,7 +1741,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: PHONons",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Turns on atomic displacement perturbation in non-linear computation, as 2nd perturbation.
 See [[rfphon]] for additional details.
@@ -1756,7 +1756,7 @@ Variable(
     dimensions=[2],
     defaultval=[1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Controls the range of atoms for which displacements will be considered in non-
 linear computations (using the 2n+1 theorem), for the 3rd perturbation.
@@ -1773,7 +1773,7 @@ Variable(
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 3: DIRections",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Gives the directions to be considered in non-linear computations (using the
 2n+1 theorem), for the 3rd perturbation.
@@ -1791,7 +1791,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Turns on electric field perturbation in non-linear computation, as 3rd
 perturbation. Actually, such calculations requires first the non-self-
@@ -1809,7 +1809,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 3: PHONons",
-    requires="[[optdriver]]==5 (non-linear response computations)",
+    requires="[[optdriver]] == 5 (non-linear response computations)",
     text="""
 Turns on atomic displacement perturbation in non-linear computation, as 3rd perturbation.
 See [[rfphon]] for additional details.
@@ -1824,7 +1824,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.1,
     mnemonics="electric Displacement field DAMPing parameter",
-    requires="[[berryopt]] = 6 or 16",
+    requires="[[berryopt]] in [6, 16]",
     text="""
 In case [[berryopt]]=6, the electric field is updated after each SCF iteration
 according to E_{n+1}= [[ddamp]]*(D - 4*pi*P_{n}) + (1-[[ddamp]])*E_{n} where
@@ -1892,7 +1892,7 @@ Variable(
     defaultval=ValueWithConditions({'[[paral_kgb]]==1': '6', 'defaultval': 2}),
     mnemonics="DENSity and FORces PREDictor",
     characteristics=['[[DEVELOP]]'],
-    requires="[[iscf]] >0",
+    requires="[[iscf]] > 0",
     text=r"""
 Used when [[iscf]]>0, to define:
 
@@ -1975,7 +1975,7 @@ Variable(
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="Displacement FIELD",
-    requires="[[berryopt]] = 6, [[efield]]",
+    requires="[[berryopt]] == 6 and [[efield]]",
     text="""
 In case [[berryopt]]=6, [[dfield]] specifies the (unreduced) finite electric
 displacement field vector, in atomic units, that is to be imposed as a
@@ -2146,7 +2146,7 @@ Variable(
  '[[usepaw]]==1 or [[iprcel]]==0': 0.7,
  'defaultval': None}),
     mnemonics="model DIElectric MIXing factor",
-    requires="[[diemix]] &gt;= 0.0 and [[diemix]] &lt;=  1.0",
+    requires="[[diemix]] >= 0.0 and [[diemix]] <=  1.0",
     text="""
 Gives overall factor of the preconditioned residual density/potential to be
 transferred in the SCF cycle.
@@ -2272,7 +2272,7 @@ Variable(
  '[[natpawu]]'],
     defaultval=MultipleValue(number=None, value=-10.0),
     mnemonics="initial Density MATrix for PAW+U",
-    requires="[[usepaw]]==1 and [[usepawu]]==1 and [[usedmatpu]]!=0",
+    requires="[[usepaw]] == 1 and [[usepawu]] == 1 and [[usedmatpu]] != 0",
     text="""
 For Ground state calculations only.
 Gives the value of an initial density matrix used in LDA+U and kept fixed
@@ -2845,7 +2845,7 @@ Variable(
     defaultval=30,
     mnemonics="Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo perturbation of TRIQS, Number of LEGendre polynomials",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]]==6 or 7",
+    requires="[[dmft_solv]] in [6, 7]",
     text="""
 Specify the number of Legendre polynomials used for the calculation of Green's
 function in CTQMC code from the library TRIQS. Default is 30. The value of
@@ -2864,7 +2864,7 @@ Variable(
     defaultval=0,
     mnemonics="Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]]>=4",
+    requires="[[dmft_solv]] >= 4",
     text="""
 Number of time slices used to represent the time green function. This value
 should be carefully chosen according to Niquist frequency and the [[tsmear]] value.
@@ -2880,7 +2880,7 @@ Variable(
     defaultval=0.0,
     mnemonics="Dynamical Mean Fied Theory: Quantum Monte Carlo Number of sweeps",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]]>=4",
+    requires="[[dmft_solv]] >= 4",
     text="""
 Number of Monte Carlo sweeps. Should be at least 10^6.
 """,
@@ -2895,7 +2895,7 @@ Variable(
     defaultval="[[jdtset]]",
     mnemonics="Dynamical Mean Fied Theory: Quantum Monte Carlo SEED",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]]>=4",
+    requires="[[dmft_solv]] >= 4",
     text="""
 Seed to initilize the random number generator.
 Should not be relevant except for testing purpose.
@@ -2914,7 +2914,7 @@ Variable(
     defaultval=1000,
     mnemonics="Dynamical Mean Fied Theory: Quantum Monte Carlo THERMalization",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]]==5",
+    requires="[[dmft_solv]] == 5",
     text="""
 Number of Monte Carlo sweeps for the thermalization
 """,
@@ -3037,7 +3037,7 @@ Variable(
     defaultval=0.0,
     mnemonics="Energy CUT-off for EPSilon (the dielectric matrix)",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]]==3 or [[optdriver]]==4",
+    requires="[[optdriver]] in [3, 4]",
     text=r"""
 [[ecuteps]] determines the cut-off energy of the planewave set used to
 represent the independent-particle susceptibility $\chi^{0}_{KS}$, the
@@ -3060,7 +3060,7 @@ Variable(
     defaultval=0.0,
     mnemonics="Energy CUT-off for SIGma eXchange",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]]==4",
+    requires="[[optdriver]] == 4",
     text="""
 [[ecutsigx]] determines the cut-off energy of the planewave set used to
 generate the exchange part of the self-energy operator. For norm-conserving
@@ -3118,7 +3118,7 @@ Variable(
     defaultval=ValueWithConditions({'[[optdriver]] in [3, 4]': '[[ecut]]', 'defaultval': 0.0}),
     mnemonics="Energy CUT-off for WaveFunctioNs",
     characteristics=['[[ENERGY]]'],
-    requires=" [[optdriver]]==3 or [[optdriver]]==4",
+    requires=" [[optdriver]] in [3, 4]",
     text=r"""
 [[ecutwfn]] determines the cut-off energy of the planewave set used to
 represent the wavefunctions in the formula that generates the independent-
@@ -3158,7 +3158,7 @@ Variable(
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="Electric FIELD",
-    requires="[[berryopt]] = 4 or 6",
+    requires="[[berryopt]] in [4, 6]",
     text="""
 In case [[berryopt]]=4, a finite electric field calculation is performed. The
 value of this electric field, and its direction is determined by [[efield]].
@@ -3213,7 +3213,7 @@ Variable(
     dimensions=[2, '[[nkpt]]'],
     defaultval="The full range of band available in the calculation for each k-point.",
     mnemonics="EFfective MASs, BANDS to be treated.",
-    requires="[[efmas]]==1",
+    requires="[[efmas]] == 1",
     text="""
 This variable controls the range of bands for which the effective mass is to
 be calculated. If a band is degenerate, all other bands of the degenerate
@@ -3229,7 +3229,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EFfective MASs, CALCulate along DIRectionS",
-    requires="[[efmas]]==1",
+    requires="[[efmas]] == 1",
     text="""
 Allows the user to calculate the scalar effective mass of all bands specified
 by [[efmas_bands]] along specific directions in reciprocal space. This is
@@ -3257,7 +3257,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="EFfective MASs, activate DEGenerate formalism",
-    requires="[[efmas]]>0",
+    requires="[[efmas]] > 0",
     text="""
 Activate (==1) or not (==0) the treatment of degenerate bands (within a
 criterion [[efmas_deg_tol]]) using the transport equivalent effective mass
@@ -3273,7 +3273,7 @@ Variable(
     dimensions="scalar",
     defaultval=1e-05,
     mnemonics="EFfective MASs, DEGeneracy TOLerance",
-    requires="[[efmas_deg]]==1",
+    requires="[[efmas_deg]] == 1",
     text="""
 Energy difference below which 2 bands are considered degenerate (and treated
 using the formalism activated with [[efmas_deg]]==1). [[efmas_deg_tol]] has
@@ -3289,7 +3289,7 @@ Variable(
     dimensions="scalar",
     defaultval=3,
     mnemonics="EFfective MASs, DIMension of the effective mass tensor",
-    requires="[[efmas]]==1",
+    requires="[[efmas]] == 1",
     text="""
 For 2D or 1D systems, the band dispersion goes to 0 perpendicular to the
 system, which causes the inverse effective mass to be singular, i.e. the
@@ -3315,7 +3315,7 @@ Variable(
     dimensions=['3 or 2', '[[efmas_n_dirs]]'],
     defaultval=0,
     mnemonics="EFfective MASs, DIRectionS to be calculated",
-    requires="[[efmas_calc_dirs]]>0",
+    requires="[[efmas_calc_dirs]] > 0",
     text="""
 List of [[efmas_n_dirs]] directions to be considered according to the value of
 [[efmas_calc_dirs]]. The directions are specified by 3 real values if
@@ -3331,7 +3331,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EFfective MASs, Number of DIRectionS",
-    requires="[[efmas_calc_dirs]]>0",
+    requires="[[efmas_calc_dirs]] > 0",
     text="""
 Number of directions in [[efmas_dirs]], to be considered according to [[efmas_calc_dirs]].
 """,
@@ -3345,7 +3345,7 @@ Variable(
     dimensions="scalar",
     defaultval=1000,
     mnemonics="EFfective MASs, Number of points for integration w/r to THETA",
-    requires="[[efmas]]==1 and [[efmas_bands]]==(degenerate band index)",
+    requires="[[efmas]] == 1 and [[efmas_bands]] == (degenerate band index)",
     text="""
 When a band is degenerate, the usual definition of effective mass becomes
 invalid. However, it is still possible to define a 'transport equivalent mass
@@ -3578,7 +3578,7 @@ The choice is among:
     2 --> Compute electron-phonon matrix elements
     3 --> Compute phonon self-energy.
     4 --> Compute EPH self-energy (Fan-Migdal + Debye-Waller)
-    5 --> Interpolate the DFPT potentials.
+    5 --> Interpolate DFPT potentials.
 """,
 ),
 
@@ -3606,7 +3606,7 @@ Variable(
     defaultval=0,
     mnemonics="Energy SHIFT",
     characteristics=['[[DEVELOP]]', '[[ENERGY]]'],
-    requires="[[wfoptalg]]==3",
+    requires="[[wfoptalg]] == 3",
     text="""
 [[eshift]] gives the shift of the energy used in the shifted Hamiltonian
 squared. The algorithm will determine eigenvalues and eigenvectors centered on [[eshift]].
@@ -3680,7 +3680,7 @@ Variable(
     defaultval=0,
     mnemonics="flag - EXTRAPolation of the Wave-Functions",
     characteristics=['[[DEVELOP]]'],
-    requires="[[densfor_pred]]==5 or [[densfor_pred]]==6",
+    requires="[[densfor_pred]] in [5, 6]",
     text="""
 This flag activates the extrapolation of wave-functions from one Molecular
 Dynamics (or Structural Relaxation) step to another. The wave functions are
@@ -3845,7 +3845,7 @@ Variable(
     dimensions="scalar",
     defaultval=21,
     mnemonics="FFT for GW calculation",
-    requires=" [[optdriver]]==3 or [[optdriver]]==4",
+    requires=" [[optdriver]] in [3, 4]",
     text="""
 The basic ingredients needed to perform both a screening and a sigma
 calculation are the so-called oscillator matrix elements defined as
@@ -3893,7 +3893,7 @@ Variable(
     dimensions=[3],
     defaultval="3*1",
     mnemonics="FOCK operator, k-grid DOWNSAMPLING",
-    requires="[[usefock]]==1",
+    requires="[[usefock]] == 1",
     text="""
 The k wavevector grid used to compute the Fock operator in the full Brillouin
 Zone might be a subset of the full Brillouin Zone of the k point grid used for
@@ -3937,7 +3937,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="FOCK operator: OPTions for MIXing",
-    requires="[[usefock]]==1",
+    requires="[[usefock]] == 1",
     text="""
 Governs the mixing algorithm at the level of the Fock operator, i.e. how to
 mix it, and how the underlying SCF calculation is to be performed. It is the
@@ -3970,7 +3970,7 @@ Variable(
     dimensions="scalar",
     defaultval=5.0,
     mnemonics="FREQuencies along the IMaginary axis ALPHA parameter",
-    requires="[[optdriver]]==4",
+    requires="[[optdriver]] == 4",
     text="""
 [[freqim_alpha]] is used only for numerical integration of the GW self-energy
 ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
@@ -3993,7 +3993,7 @@ Variable(
     defaultval=0.0,
     mnemonics="FREQuencies along the Real axis MAXimum",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]]==3",
+    requires="[[optdriver]] == 3",
     text="""
 [[freqremax]] is used only for numerical integration of the GW self-energy
 ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
@@ -4013,7 +4013,7 @@ Variable(
     defaultval=0.0,
     mnemonics="FREQuencies along the Real axis MINimum",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]]==3",
+    requires="[[optdriver]] == 3",
     text="""
 [[freqremin]] is used only for numerical integration of the GW self-energy
 ([[gwcalctyp]]= 2, 12, 22, 9, 19, 29).
@@ -4037,7 +4037,7 @@ Variable(
     defaultval=0.0,
     mnemonics="FREQuencies for the SPectral function MAXimum",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]]==4",
+    requires="[[optdriver]] == 4",
     text="""
 [[freqspmax]] sets the maximum real frequency used to calculate the spectral
 function from the GW Green's function. [[freqspmin]], [[freqspmax]] and
@@ -4056,7 +4056,7 @@ Variable(
     defaultval="-[[freqspmax]]",
     mnemonics="FREQuencies for the SPectral function MINimum",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]]==4",
+    requires="[[optdriver]] == 4",
     text="""
 [[freqspmin]] sets the minimum real frequency used to calculate the spectral
 function from the GW Green's function. [[freqspmin]] is set to -[[freqspmax]]
@@ -4544,7 +4544,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GET the GAMma phonon data EIG2NKQ from dataset",
-    requires="[[ieig2rf]] != 0 and [[qpt]] != (0.0,0.0,0.0)",
+    requires="[[ieig2rf]] != 0 and [[qpt]] != (0.0, 0.0, 0.0)",
     text="""
 Relevant for second-order eigenvalue calculations using response-functions
 ([[ieig2rf]] != 0), and only for non-zero wavevectors [[qpt]].
@@ -5003,7 +5003,7 @@ Variable(
     dimensions=[5],
     defaultval=[-1, -1, -1, -1, -1],
     mnemonics="GPU: choice of DEVICES on one node",
-    requires="[[use_gpu_cuda]]==1 (CUDA functionality)",
+    requires="[[use_gpu_cuda]] == 1 (CUDA functionality)",
     text="""
 To be used when several GPU devices are present on each node, assuming the
 same number of devices on all nodes.
@@ -5038,7 +5038,7 @@ Variable(
     dimensions="scalar",
     defaultval=2000000,
     mnemonics="GPU (Cuda): LINear ALGebra LIMIT",
-    requires="[[use_gpu_cuda]]==1 (CUDA functionality)",
+    requires="[[use_gpu_cuda]] == 1 (CUDA functionality)",
     text="""
 Use of linear algebra and matrix algebra on GPU is only efficient if the size
 of the involved matrices is large enough. The [[gpu_linalg_limit]] parameter
@@ -8011,10 +8011,10 @@ Variable(
     dimensions=[3, '[[nkptgw]]'],
     defaultval=MultipleValue(number=None, value=0.0),
     mnemonics="K-PoinTs for GW calculations",
-    requires="[[optdriver]]==4",
+    requires="[[optdriver]] in [4, 7]",
     text="""
 For each k-point with number igwpt in the range (1:[[nkptgw]]),
-[[kptgw]](1,igwpt) is the reduced coordinate of the k-point where GW
+[[kptgw]](1,igwpt) is the reduced coordinate of the k-point where the self-energy
 corrections are required while [[bdgw]] (1:2,igwpt) specifies the range of
 bands to be considered.
 
@@ -16057,23 +16057,24 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="SYMmetrization of SIGMA matrix elements",
-    requires="[[optdriver]]==4",
+    requires="[[optdriver]] in [4, 7]",
     text="""
-This option is used to switch on the symmetrization of the self-energy matrix
-elements ([[symsigma]]=1). In this case the BZ integration defining the self-
-energy matrix elements is reduced to an appropriate irreducible wedge defined
+This option activates the symmetrization of the self-energy matrix elements (*symsigma=1*).
+In this case the BZ integration defining the self-energy
+matrix elements is reduced to an appropriate irreducible wedge defined
 by the point group of the wave-vector k specified in the [[kptgw]] list.
 
-The symmetrized expression leads to a considerable speedup of the run but,
-unfortunately, this option is not yet compatible with self-consistent GW
+The symmetrized expression leads to a considerable speedup of the run, especially
+for high-symmetry k-points e.g. $\Gamma$.
+Unfortunately, this option is not yet compatible with self-consistent GW
 calculations (see [[gwcalctyp]]).
 
-The algorithm implemented in [[symsigma]]=1 constructs a symmetric invariant
-for the diagonal matrix elements of the self-energy by simply averaging the GW
-results within the degenerate subspace. Therefore particular care has to be
-taken in the presence of accidental degeneracies. since GW calculations
-performed with [[symsigma]]=1 will not be able to remove the initial
-accidental degeneracy.
+The code constructs a symmetric invariant
+for the diagonal matrix elements of the self-energy by averaging the self-energy matrix
+elements within the degenerate subspace. Therefore particular care has to be
+taken in the presence of accidental degeneracies. since calculations
+performed with *symsigma=1* won't be able to remove the initial
+accidental degeneracy. This is the reason why this option is not activated by default.
 """,
 ),
 

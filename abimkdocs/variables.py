@@ -425,8 +425,23 @@ class Variable(object):
 
     def _repr_html_(self):
         """Integration with jupyter notebooks."""
-        html = "<h2>Default value:</h2>" + my_unicode(self.defaultval) + "<br/><h2>Description</h2>" + self.text
-        return html.replace("[[", "<b>").replace("]]", "</b>")
+        try:
+            import markdown
+        except ImportError:
+            markdown = None
+
+        if markdown is None:
+            html = "<h2>Default value:</h2>" + my_unicode(self.defaultval) + "<br/><h2>Description</h2>" + self.text
+            return html.replace("[[", "<b>").replace("]]", "</b>")
+        else:
+            md = self.text.replace("[[", "<b>").replace("]]", "</b>")
+            return markdown.markdown("""
+## Default value:
+{defaultval}
+
+## Description:
+{md}
+""".format(defaultval=my_unicode(self.defaultval), md=my_unicode(md)))
 
     def browse(self):
         """Open variable documentation in browser."""

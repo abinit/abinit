@@ -1481,8 +1481,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
  ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
- ABI_CHECK(dtset%tmesh(2) >= dtset%tmesh(1), "tmesh(2) < tmesh(1)")
  ABI_MALLOC(new%kTmesh, (new%ntemp))
+ !write(std_out, *)"dtset%tmesh", dtset%tmesh
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
  ! Number of bands included in self-energy summation.
@@ -2118,8 +2118,8 @@ end subroutine sigmaph_setup_kcalc
 !! FUNCTION
 !!  Gather results from the MPI processes. Then master:
 !!
-!!      1. Compute QP energies, Z factor and spectral function (if required).
-!!      2. Save results to file.
+!!      1. Computes QP energies, Z factor and spectral function (if required).
+!!      2. Saves results to file.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=KS band energies.
@@ -2440,7 +2440,6 @@ subroutine sigmaph_print(self, dtset, unt)
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
  write(unt,"(a)")sjoin("Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
  write(unt,"(a)")sjoin("Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
- !write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
  write(unt,"(a)")sjoin("Number of q-points in the IBZ:", itoa(self%nqibz))
  write(unt,"(a)")"List of K-points for self-energy corrections:"
  do ikc=1,self%nkcalc
