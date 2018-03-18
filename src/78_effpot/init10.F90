@@ -102,7 +102,7 @@ subroutine init10(filnam,comm)
 &                  ' (netcdf file or enter no): '
    read(std_in, '(a)',IOSTAT=io) filnam(5)
    write(std_out,'(a,a)' )'-   ',trim(filnam(5))
-! TODO hexu: shift ii, add possible file format for spin
+! TODO hexu: shift ii, add possible file format for spin when needed
    ii = 6
    !TODO hexu: shift ii
    do while (io>=0 .and. ii<18)

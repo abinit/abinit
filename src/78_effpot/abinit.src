@@ -22,16 +22,26 @@ sources = [
     "effpot_xml.c",
     "init10.F90",
     "m_anharmonics_terms.F90",
+    "m_dynarray.F90",
     "m_effective_potential.F90",
     "m_effective_potential_file.F90",
     "m_effpot_mpi.F90",
     "m_fit_data.F90",
     "m_fit_polynomial_coeff.F90",
     "m_harmonics_terms.F90",
+    "m_mathfuncs.F90",
     "m_multibinit_dataset.F90",
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
     "m_polynomial_term.F90",
+    "m_sparse_matrix.F90",
+    "m_spin_hist.F90",
+    "m_spin_model.F90",
+    "m_spin_model_primitive.F90",
+    "m_spin_mover.F90",
+    "m_spin_terms.F90",
+    "m_spin_terms_funcs.F90", # TODO hexu: to be merged with m_spin_terms
+    "ziggurat.F90"
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

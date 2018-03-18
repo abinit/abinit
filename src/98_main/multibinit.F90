@@ -96,6 +96,7 @@ program multibinit
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
  type(args_t) :: args
+!TODO hexu: add types for spin here.
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -218,8 +219,11 @@ program multibinit
 !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
+   ! TODO hexu: filetype==(33?) 
    if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+   ! TODO hexu else if (filetype==33) then
+   !  call spin_file_read(...)
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     ' There is no specific file for the coefficients from polynomial fitting'
@@ -373,6 +377,7 @@ program multibinit
  
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)
+! TODO hexu: add print spin model.
  if(iam_master) then
    if (inp%prt_model >= 1) then
      write(message, '(a,(80a),a)' ) ch10,&
@@ -419,6 +424,7 @@ program multibinit
 !****************************************************************************************
  if(inp%dynamics>=1) then
    call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
+   ! TODO hexu: add mover_spin...
  end if
 !****************************************************************************************    
 
@@ -428,6 +434,7 @@ program multibinit
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
  call abihist_free(hist)
+ ! TODO hexu: free spin part.
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
