@@ -2,8 +2,8 @@
 # This is the set of values that have been changed compared to the previous ABINIT run.
 ndtset 1
 nstep 0    
-prtebands 0            # This is to avoid trying to write eigenenergies that have not been computed.
-ngkpt 4 4 4            
+prtvol -1              # This is to stop immediately after computation of the set of k points
+ngkpt 4 4 4            # The grid for which we try to compute the number of k points
 nshiftk 1
 shiftk 0.0 0.0 0.0
 nsym 0
@@ -60,7 +60,6 @@ nsym 0
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% test_chain =  tdepes_1.in, tdepes_2.in,  tdepes_3.in, tdepes_4.in
 #%% [files]
 #%% files_to_test = 
 #%%   tdepes_2.out,  tolnlines= 20, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
