@@ -137,6 +137,7 @@ Make sure you are in the directory containing the output files produced by the c
 
     cp ~abinit/scripts/post_processing/temperature-dependence/temperature_final.py .
     cp ~abinit/scripts/post_processing/temperature-dependence/rf_final.py .
+    cp ~abinit/scripts/post_processing/temperature-dependence/plot_bs.py .
 
 
 <!--
@@ -536,26 +537,39 @@ $\Psi^{(0)}_{kBS+q}$
 Reading the previous quantity we obtain the el-ph matrix elements along the BS with all physical 
 quantities integrated over a homogeneous grid. 
 
-Run the calculation using the [[tests/tutorespfn/Input/tdepes_4.in]] input file
+We will use the [[tests/tutorespfn/Input/tdepes_4.in]] input file
 
 {% dialog tests/tutorespfn/Input/tdepes_4.in %}
 
-then use [[tests/tutorespfn/Input/tdepes_4.files]] for the python script. 
+Note the use of the usual input variables to define a path in the Brillouin Zone to build an electronic band structure:
+[[kptbounds]], [[kptopt]], and [[ndivsm]].
 
-{% dialog tests/tutorespfn/Input/tdepes_4.files %}
+After possibly modifying [[tests/tutorespfn/Input/tdepes_4.files]] to account for the location of the pseudopotential file, as above, issue:
+
+    abinit < tdepes_4.files > tdepes_4.stdout
+
+This is a significantly longer ABINIT run, also producing many files.
+
+
+then use [[tests/tutorespfn/Input/tdepes_4_temperature.in]] for the python script. 
+
+{% dialog tests/tutorespfn/Input/tdepes_4_temperature.in %}
 
 with the usual syntax:
 
-    ./temperature_final.py < tdepes_4.files 
+    ./temperature_final.py < tdepes_4_temperature.in
 
+<!-- THIS SECTION DOES NOT SEEM CORRECT : there is no other k point computed in section 2 ...
 Of course, the high symmetry points computed in section 2 have the same value here. 
 It is a good idea to check it by running the script with the file [[tests/tutorespfn/Input/tdepes_3bis.files]].
 
 {% dialog tests/tutorespfn/Input/tdepes_3bis.files %}
 
+-->
+
 You can now copy the plotting script (Plot-EP-BS) python file from
 ~abinit/scripts/post_processing/plot_bs.py into the directory where you did all the calculations.  
-Now row the script:
+Now run the script:
 
     ./plot_bs.py < bs.input
 

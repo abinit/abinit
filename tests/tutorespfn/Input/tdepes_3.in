@@ -41,7 +41,7 @@
  tolwfr?3  1.0d-8       # Underconverged : tolwfr 1.0d-22 should be used for converged results
  kptopt?3  3
 
-# Cell dependant parameters
+# Cell dependent parameters
  acell 3*6.675
  rprim 0 .5 .5 .5 0 .5 .5 .5 0
  nsym 1                # Disable symmetries. Symmetries are not yet in production.

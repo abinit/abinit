@@ -116,7 +116,7 @@
     3/8 3/8 3/4  # K
     0.0 0.0 0.0  # Gamma
 
-# Cell dependant parameters
+# Cell dependent parameters
  acell 3*6.675
  rprim 0 .5 .5 .5 0 .5 .5 .5 0
  nsym 1                # Disable symmetries. Symmetries are not yet in production.
