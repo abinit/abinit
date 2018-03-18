@@ -11292,19 +11292,20 @@ For each dataset, choose the task to be done, at the level of the "driver"
 routine.
 
 The choice is among:
-[[optdriver]]=0: ground-state calculation (GS), routine "gstate"
-[[optdriver]]=1: response-function calculation (RF), routine "respfn"
-[[optdriver]]=2: susceptibility calculation (SUS), routine "suscep"
-[[optdriver]]=3: susceptibility and dielectric matrix calculation (SCR), routine "screening"
-(see the input variables [[ecutwfn]], [[ecuteps]], [[ppmfrq]], [[getwfk]], as
-well as [[nbandkss]] and [[nband]])
-[[optdriver]]=4: self-energy calculation (SIG), routine "sigma"
-[[optdriver]]=5: non-linear response functions (NONLINEAR), using the 2n+1
-theorem, routine "nonlinear"
-[[optdriver]] =7: electron-phonon coupling (EPH)
-[[optdriver]] =66: GW using Lanczos-Sternheimer, see input variables whose
-name start with gwls_*.
-[[optdriver]]=99: Bethe-Salpeter calculation (BSE), routine "bethe_salpeter"
+
+  * [[optdriver]]=0: ground-state calculation (GS), routine "gstate"
+  * [[optdriver]]=1: response-function calculation (RF), routine "respfn"
+  * [[optdriver]]=2: susceptibility calculation (SUS), routine "suscep"
+  * [[optdriver]]=3: susceptibility and dielectric matrix calculation (SCR), routine "screening"
+    (see the input variables [[ecutwfn]], [[ecuteps]], [[ppmfrq]], [[getwfk]], as
+    well as [[nbandkss]] and [[nband]])
+  * [[optdriver]]=4: self-energy calculation (SIG), routine "sigma"
+  * [[optdriver]]=5: non-linear response functions (NONLINEAR), using the 2n+1
+    theorem, routine "nonlinear"
+  * [[optdriver]] =7: electron-phonon coupling (EPH)
+  * [[optdriver]] =66: GW using Lanczos-Sternheimer, see input variables whose
+    name start with gwls_*.
+  * [[optdriver]]=99: Bethe-Salpeter calculation (BSE), routine "bethe_salpeter"
 
 If one of [[rfphon]], [[rfddk]], [[rfelfd]], or [[rfstrs]] is non-zero, while
 [[optdriver]] is not defined in the input file, ABINIT will set [[optdriver]]

@@ -34,7 +34,7 @@ blue 0 0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = Xavier Gonze
+#%% authors = X. Gonze
 #%% keywords = 
 #%% description = Input file for 'band2eps.' This data layout must be used, line-by-line.
 #%%<END TEST_INFO>

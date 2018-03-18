@@ -95,7 +95,7 @@
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Sangeeta Sharma, Xavier Gonze
+#%% authors = S. Sharma, X. Gonze
 #%% keywords = NC, DFPT
 #%% description = 
 #%%  Prepare the computation of linear optic properties (for the imaginary spectrum only)

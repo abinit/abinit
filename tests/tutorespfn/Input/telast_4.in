@@ -102,7 +102,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Don Hamann
+#%% authors = D. Hamann
 #%% keywords = NC, DFPT 
 #%% description = 
 #%%    AlAs in hypothetical wurzite (hexagonal) structure

@@ -68,7 +68,7 @@
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Xavier Gonze
+#%% authors = X. Gonze
 #%% keywords = 
 #%% description = 
 #%%   Crystalline AlAs : computation of the set of q point needed 

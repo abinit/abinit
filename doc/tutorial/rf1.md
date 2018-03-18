@@ -49,10 +49,13 @@ tutorials, at variance with the four "basic" lessons.
 You can also copy the file ~abinit/tests/tutorespfn/Input/trf1_1.in in Work_rf1. 
 
     cp ../trf1_1.in .
-This is your input file. You should edit it, and read it carefully.
+
+This is your input file. You should read it carefully.
 
 {% dialog tests/tutorespfn/Input/trf1_1.in %}
 
+It drives a single self-consistent calculation of the total energy of AlAs, also generating the corresponding
+self-consistent charge density and wavefunctions, that will be used for later DFPT calculations.
 Because of the use of two types of atoms, have a look at the following input variables:
 
 * [[ntypat]] 
@@ -67,13 +70,13 @@ In production runs, you should choose a larger value of [[nstep]], sufficient  t
 In the present tutorial, due to portability concerns related to automatic testing, we could
 not allow a larger [[nstep]] value. 
 This minor problem with some tutorial examples was mentioned briefly in 
-[a side note to the answer to question 1 of lesson 1](base1#aq1). 
+a side note to the answer to question 1 of lesson 1 - just before [this section](base1#computation-of-the-interatomic-distance-method-1). 
 So, do not follow blindly all examples in the tutorials: check by yourself the convergence of your runs!
 
 You will work at fixed [[ecut]] (3Ha) and k-point grid, defined by [[kptrlatt]] (the 8x8x8 Monkhorst-Pack grid). 
 It is implicit that in *real life*, you should do a convergence test with respect to both parameters. 
 We postpone the discussion of the accuracy of these choices and
-the choice of pseudopotential to the end of the fifth section of this tutorial. 
+the choice of pseudopotential to the end of the [fifth section of this tutorial](#5-dfpt-calculation-of-the-effect-of-an-homogeneous-electric-field). 
 They give acceptable results, not very accurate, but, more important, the speed is reasonable for a tutorial.  
 
 You should make the run (a few seconds). 
@@ -81,16 +84,17 @@ You should make the run (a few seconds).
     ./abinit < trf1_1.files > trf1_1.stdout
 
 where ./abinit has to be replaced by the path to the abinit executable.
+The resulting main output file, trf1_1.out, should be similar to the one below.
 
 {% dialog tests/tutorespfn/Refs/trf1_1.out %}
 
-obtain the following value for
+This output file is not very long, so you can quickly read it entirely.
 
-the energy, in the final echo section:
+Note that one obtains the following value for the energy, in the final echo section:
     
      etotal   -9.7626837450E+00
 
-However, we will rely later on a more accurate (more digits) value of this
+However, we will rely later, for the purpose of doing finite differences, on a more accurate (more digits) value of this
 total energy, that can be found about a dozen of lines before this final echo:
     
     >>>>>>>>> Etotal= -9.76268374500280E+00
@@ -106,8 +110,9 @@ next runs, as an input file.
 !!! warning
 
     So, in the corresponding "files" file for all the following runs, at third line, 
-    pay attention **to keep** "trf1_1i", even if you change the root name for output files (fourth line) 
-    to "trf1_2o" or "trf1_3o", as well as the first, second and fifth lines of this file.
+    pay attention **to keep** "trf1_1i". By contrast, for the second run, you 
+    should change the first line from "trf1_1"  
+    to "trf1_2", and do similarly for the second, fourth and fifth lines of this file.
 
 ## 2 Frozen-phonon calculation of a second derivative of the total energy
 

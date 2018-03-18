@@ -105,7 +105,7 @@ nshiftk   4              # Use one copy of grid only (default)
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Don Hamann
+#%% authors = D. Hamann
 #%% keywords = NC, DFPT
 #%% description =  Al fcc metal - elastic constant calculation
 #%%<END TEST_INFO>
