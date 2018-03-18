@@ -96,9 +96,7 @@ This induces the creation of the Derivative DataBase file tdepes_1o_DS3_DDB.
 The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
 this option generating the needed netCDF files tdepes_1o_DS3_EIGR2D.nc and tdepes_1o_DS3_GKK.nc .
 
-We will use [[tests/tutorespfn/Input/tdepes_1.files]] to execute abinit
-(it will be the same file for the other Abinit calculations -runs 3 and 4- of this tutorial,
-except that the last digit of the names will have to be changed to 3 or 4 in this file).
+We will use [[tests/tutorespfn/Input/tdepes_1.files]] to execute abinit.
 
 {% dialog tests/tutorespfn/Input/tdepes_1.files %}
 
@@ -111,7 +109,8 @@ copy/modify the relevant files. Explicitly:
     cp ../tdepes*in ../tdepes*files .
 
 Then, edit the [[tests/tutorespfn/Input/tdepes_1.files]] to modify location of the pseudopotential file
-(from the Work subdirectory, the location is ../../../Psps_for_tests/6c.pspnc) or copy it inside the Work directory.
+(from the Work subdirectory, the location is ../../../Psps_for_tests/6c.pspnc, although you might as well copy the
+file 6c.pspnc in the Work directory, in which case the location is simply 6c.pspnc). 
 Finally, issue    
 
     abinit < tdepes_1.files > tdepes_1.stdout
@@ -169,9 +168,9 @@ tdepes_1o_DS1_EIG.nc       # Name of the unperturbed EIG.nc file with Eigenvalue
 
 Alternatively, copy this example, **remove** all the comments after `#`  and then run
 
-    ./temperature_final.py < tdepes_temperature_final.in
+    ./temperature_final.py < tdepes_1_temperature.in
 
-{% dialog tests/tutorespfn/Input/tdepes_temperature_final.in %}
+{% dialog tests/tutorespfn/Input/tdepes_1_temperature.in %}
 
 !!! warning
 
@@ -270,7 +269,12 @@ of semiconductors.
 As usual, checking whether the input parameters give converged values is of course important.
 The run used [[ecut]]=10. With [[ecut]]=5, the HOMO correction goes down with temperature.
 
-<!--
+
+
+
+
+<!--   OBSOLETE
+
 ### If Abinit is **not** compiled with Netcdf ...
 
 In this case, we should first use [[help:mrgddb|mrgddb]] to merge the _DDB and _EIGR2D/_EIGI2D
@@ -328,27 +332,68 @@ The run will generate 3 files:
    as the temperature dependence one. 
    You can check that the results are the same as with the python script approach here above. 
 
+
+END OF OBSOLETE
+
 -->
 
-## 2 Converging the calculation with the q-point grid
+
+
+
+
+
+## 2 Converging the calculation with respect to the grid of phonon wavevectors
+
+Convergence studies with respect to most of the parameters will rely on obvious modifications
+of the input file detailed in the previous section. However, using more than one 
+q-point phonon wavevector needs a non-trivial generalisation of this procedure.
+This is because each q-point needs to be treated in a different dataset.
 
 <!--
 From now on we will only describe the approach with Abinit **compiled with Netcdf support**. 
 The approach with Anaddb is similar to what we described in the previous sections.
 Note, however, that Anaddb only supports integration with homogenous q-point grids. 
 -->
-The netcdf version can perform the q-wavevector integration either with random q-points or
+The netCDF version can perform the q-wavevector integration either with random q-points or
 homogenous Monkhorst-Pack meshes. 
+Both grids have been used in the Ref. [[cite:Ponce2014]], see e.g. Fig. 3 of this paper.
 
 For the random integration method you
-should create a script that generates random q-point, perform the Abinit
-calculations at these points and finally analyze them 
+should create a script that generates random q-points, perform the Abinit
+calculations at these points, gather the results and analyze them.
 The script will detect that you used random
 integration thanks to the weight of the q-point stored in the _EIGR2D.nc file
 and perform the integration accordingly.
 The random integration converges slowly but in a consistent manner. 
 
 Since this methods is a little bit less user-friendly, we will focus on the homogenous integration. 
+In this case, the user must specify the overall q-point grid, using input variables like
+[[ngqpt]], [[qptopt]], [[shiftq]], [[nshiftq]], i.e. variables whose names
+are similar to those used to specify the k-point grid (for electrons). 
+
+However, there are several difficulties here. 
+First, the symmetry operations of the crystal will be used
+to decrease the number of q-wavevectors, but they cannot be used as well to decrease the k-point grid.
+By convention, in ABINIT, in such case, with [[nsym]]=1 the k-point grid will be generated in the Full Brillouin zone,
+without use of symmetries, while the q-point grid with [[qptopt]]=1 with be generated in the irreducible Brillouin Zone,
+despite [[nsym]]=1. In order to generate q-point grids that are not folded in the irreducible Brillouin Zone, use another value of [[qptopt]].
+
+This yields another problem. Indeed, the number of ABINIT datasets is expected to be given in the input file, by the user,
+but not determined on-the-flight by ABINIT. Still, this number of datasets is determined by the number of q points...
+Thus, the user will have to compute it before being able to launch the real q-point calculations, since it determines [[ndtset]].
+
+How to determine the number of irreducible q points ?
+
+Well, the easiest procedure is to compute it for an equivalent k-point grid, by a quick run.
+
+An example will clarify this.
+Suppose that one is looking for the number of q-points determined by 
+
+    ngqpt 4 4 4          
+    qptopt 1
+    nshiftq 1
+    shiftq 0.0 0.0 0.0
+
 The first thing we need to do is to determine the number of q-point in the IBZ for a given
 q-point grid. We choose here a 4x4x4 q-point grid. 
 
