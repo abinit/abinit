@@ -27,7 +27,7 @@
 module m_supercell
 
  use defs_basis
- use m_errors
+! use m_errors
  use m_profiling_abi
 
  use m_copy,     only : alloc_copy
@@ -64,6 +64,8 @@ module m_supercell
    integer, allocatable :: uc_indexing(:,:)         ! (3, natom) indexes unit cell atom is in:
    integer, allocatable :: typat(:)                 ! (3, natom) positions of atoms
    real(dp), allocatable :: znucl(:)                ! (ntypat) nuclear charges of species
+   ! TODO hexu: merge this to abinit
+   integer, allocatable :: rvecs(:,:)
  end type supercell_type
 
  public :: init_supercell_for_qpt
@@ -91,7 +93,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! natom_primcell = number of atoms in primitive cell
 !! qphon(3) = phonon wavevector
-!!      find smallest supercell which will accomodate phonon qphon = (1/2,1/2,1/2) 
+!!      find smallest supercell which will accomodate phonon qphon = (1/2,1/2,1/2)
 !! rprimd_primcell(3,3) = real space lattice vectors (bohr)
 !! typat_primcell = types of atoms
 !! xcart_primcell(3,natom) = cartesian positions of atoms in primitive cell
@@ -163,7 +165,7 @@ subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
      write(msg,'(a,I4,a,I7,2a,3E20.10)')' No supercell found with less than ', &
 &           maxsc,' unit cells in direction ', &
 &           ii, ch10, ' qphon = ', qphon
-     MSG_ERROR(msg)
+!     MSG_ERROR(msg)
    end if
  end do
 
@@ -231,7 +233,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
 !local
 !scalars
- integer :: iatom_supercell, i1,i2,i3, iatom
+ integer :: iatom_supercell, i1,i2,i3, iatom, icell
 
 !arrays
 
@@ -254,10 +256,17 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  ABI_ALLOCATE(scell%atom_indexing,(scell%natom))
  ABI_ALLOCATE(scell%uc_indexing,(3,scell%natom))
 
+! TODO hexu: add to abinit
+ABI_ALLOCATE(scell%rvecs, (3, scell%ncells))
  iatom_supercell = 0
+ icell =0
  do i1 = 1, rlatt(1,1)
    do i2 = 1, rlatt(2,2)
      do i3 = 1, rlatt(3,3)
+       ! TODO hexu: add to abinit
+       icell=icell+1
+       scell%rvecs(:,icell)=(/i1-1, i2-1, i3-1/)
+
        do iatom = 1, natom_primcell
          iatom_supercell = iatom_supercell + 1
          scell%uc_indexing(:,iatom_supercell) = (/i1-1,i2-1,i3-1/)
@@ -270,7 +279,11 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
    end do
  end do
 
- ABI_CHECK(iatom_supercell == scell%natom, "iatom_supercell /= scell%natom")
+ !ABI_CHECK(iatom_supercell == scell%natom, "iatom_supercell /= scell%natom")
+ if(iatom_supercell /= scell%natom) then
+    print *, "iatom_supercell /= scell%natom"
+ endif
+
 
  scell%xcart = scell%xcart_ref
  scell%qphon = zero
@@ -280,7 +293,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
      call order_supercell_typat(scell)
    end if
  end if
- 
+
 end subroutine init_supercell
 !!***
 
@@ -296,7 +309,7 @@ end subroutine init_supercell
 !! scell = supercell structure with reference atomic positions etc...
 !!
 !! OUTPUT
-!! scell = supercell structure: typat, xcart and so on will be updated 
+!! scell = supercell structure: typat, xcart and so on will be updated
 !!
 !! PARENTS
 !!      m_supercell
@@ -324,7 +337,7 @@ subroutine order_supercell_typat (scell)
 ! local tmp variables
  integer :: itypat, iatom_supercell, iatom
  type(supercell_type) :: scell_tmp
-  
+
  call copy_supercell (scell,scell_tmp)
 
  iatom_supercell = 0
@@ -399,7 +412,7 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 
  zdispl = reshape(cmplx(displ), (/3,scell%natom_primcell/))
 
- ! fix gauge by imposing real displacement for first atom in first direction 
+ ! fix gauge by imposing real displacement for first atom in first direction
  ! multiply by normalized complex conjugate of first element
  phase = cmplx(one,zero)
  if (abs(zdispl(1,1)) > tol10) then
@@ -451,49 +464,49 @@ end subroutine freeze_displ_supercell
 !!
 !! SOURCE
 
-subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
+! subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
 
-  use defs_basis
+!   use defs_basis
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_supercell_for_qpt'
-!End of the abilint section
+! !This section has been created automatically by the script Abilint (TD).
+! !Do not modify the following lines by hand.
+! #undef ABI_FUNC
+! #define ABI_FUNC 'prt_supercell_for_qpt'
+! !End of the abilint section
 
-  implicit none
+!   implicit none
 
-!Arguments ------------------------------------
-!scalars
-  real(dp), intent(in) :: freq
-  type(supercell_type), intent(in) :: scell
-  integer, intent(in) :: jmode
-  character(len=fnlen), intent(in) :: outfile_radix
+! !Arguments ------------------------------------
+! !scalars
+!   real(dp), intent(in) :: freq
+!   type(supercell_type), intent(in) :: scell
+!   integer, intent(in) :: jmode
+!   character(len=fnlen), intent(in) :: outfile_radix
 
-!Local variables-------------------------------
-!scalar
-  character(len=fnlen) :: filename
-  character(len=10) :: jmodestring
-  character(len=80) :: title1, title2
-  character(len=5) :: qphonstring1, qphonstring2, qphonstring3
+! !Local variables-------------------------------
+! !scalar
+!   character(len=fnlen) :: filename
+!   character(len=10) :: jmodestring
+!   character(len=80) :: title1, title2
+!   character(len=5) :: qphonstring1, qphonstring2, qphonstring3
 
-! add suffix with mode and qpoint
-  call int2char4(jmode, jmodestring)
-  ABI_CHECK((jmodestring(1:1)/='#'),'Bug: string length too short!')
-! qphonstring should be like 0.000_0.000_0.000
-  call write_num(scell%qphon(1),qphonstring1,'(F5.3)')
-  call write_num(scell%qphon(2),qphonstring2,'(F5.3)')
-  call write_num(scell%qphon(3),qphonstring3,'(F5.3)')
-  filename = trim(outfile_radix) // "_qpt_" // qphonstring1 // "_" // qphonstring2 // &
-&              "_" // qphonstring3 // "_mode_" // trim(jmodestring)
+! ! add suffix with mode and qpoint
+!   call int2char4(jmode, jmodestring)
+!   ABI_CHECK((jmodestring(1:1)/='#'),'Bug: string length too short!')
+! ! qphonstring should be like 0.000_0.000_0.000
+!   call write_num(scell%qphon(1),qphonstring1,'(F5.3)')
+!   call write_num(scell%qphon(2),qphonstring2,'(F5.3)')
+!   call write_num(scell%qphon(3),qphonstring3,'(F5.3)')
+!   filename = trim(outfile_radix) // "_qpt_" // qphonstring1 // "_" // qphonstring2 // &
+! &              "_" // qphonstring3 // "_mode_" // trim(jmodestring)
 
-  write (title1, '(a,3E20.10)') '# phonon q point : ', scell%qphon
-  write (title2, '(a,I7,a,E20.10)') '# phonon mode number : ', jmode, ' frequency ', freq
+!   write (title1, '(a,3E20.10)') '# phonon q point : ', scell%qphon
+!   write (title2, '(a,I7,a,E20.10)') '# phonon mode number : ', jmode, ' frequency ', freq
 
-  call prt_supercell(filename, scell, title1, title2)
+!   call prt_supercell(filename, scell, title1, title2)
 
-end subroutine prt_supercell_for_qpt
-!!***
+! end subroutine prt_supercell_for_qpt
+! !!***
 
 
 !****f* m_supercell/prt_supercell
@@ -520,92 +533,92 @@ end subroutine prt_supercell_for_qpt
 !!
 !! SOURCE
 
-subroutine prt_supercell (filename, scell, title1, title2)
+! subroutine prt_supercell (filename, scell, title1, title2)
 
-  use defs_basis
+!   use defs_basis
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_supercell'
- use interfaces_32_util
-!End of the abilint section
+! !This section has been created automatically by the script Abilint (TD).
+! !Do not modify the following lines by hand.
+! #undef ABI_FUNC
+! #define ABI_FUNC 'prt_supercell'
+!  use interfaces_32_util
+! !End of the abilint section
 
-  implicit none
+!   implicit none
 
-!Arguments ------------------------------------
-!scalars
-  type(supercell_type), intent(in) :: scell
-  character(len=fnlen), intent(in) :: filename
-  character(len=80), intent(in) :: title1
-  character(len=80), intent(in) :: title2
+! !Arguments ------------------------------------
+! !scalars
+!   type(supercell_type), intent(in) :: scell
+!   character(len=fnlen), intent(in) :: filename
+!   character(len=80), intent(in) :: title1
+!   character(len=80), intent(in) :: title2
 
 
-!Local variables-------------------------------
-!scalar
-  integer :: scunit, iatom
-  character(len=500) :: msg
-  real(dp) :: xred(3), gprimd(3,3)
+! !Local variables-------------------------------
+! !scalar
+!   integer :: scunit, iatom
+!   character(len=500) :: msg
+!   real(dp) :: xred(3), gprimd(3,3)
 
-! *************************************************************************
+! ! *************************************************************************
 
-  if (open_file(filename, msg, newunit=scunit) /= 0) then
-    MSG_ERROR(msg)
-  end if
+!   if (open_file(filename, msg, newunit=scunit) /= 0) then
+! !    MSG_ERROR(msg)
+!   end if
 
-! print header
-  write (scunit, '(a)') '#'
-  write (scunit, '(a)') '# anaddb file with frozen phonon mode in supercell'
-  write (scunit, '(a)') '# !!!   Do not forget to adjust nband   !!! '
-  write (scunit, '(a)') '#'
-  write (scunit, '(a)') title1
-  write (scunit, '(a)') title2
-  write (scunit, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt 
-  write (scunit, '(a,I7,a)') '# and has ', scell%ncells, ' primitive unit cells '
-  write (scunit, '(a)') '#'
-  write (scunit, '(a)') '# lattice vectors for supercell :'
-  write (scunit, '(a,I7)') 'natom ', scell%natom
-  write (scunit, *)
-  write (scunit, '(a)') 'znucl '
-  do iatom = 1, size(scell%znucl)
-    write (scunit, '(I5)', ADVANCE="NO") int(scell%znucl(iatom))
-    if (mod(iatom,6) == 0) write (scunit, *)
-  end do
-  write (scunit, *)
-  write (scunit, *)
-  write (scunit, '(a,I7)') 'ntypat', scell%ntypat
-  write (scunit, '(a)') 'typat '
-  do iatom = 1, scell%natom
-    write (scunit, '(I5)', ADVANCE="NO") scell%typat(iatom)
-    if (mod(iatom,6) == 0) write (scunit, *)
-  end do
-  write (scunit, *)
-  write (scunit, '(a)') 'acell 1.0 1.0 1.0'
-  write (scunit, '(a)') 'rprim'
-  write (scunit, '(3E20.10)') scell%rprimd(:,1)
-  write (scunit, '(3E20.10)') scell%rprimd(:,2)
-  write (scunit, '(3E20.10)') scell%rprimd(:,3)
-  write (scunit, *)
-  write (scunit, '(a)') 'xcart'
-  do iatom = 1, scell%natom
-    write (scunit, '(3E20.10)') scell%xcart(:,iatom)
-  end do
-  ! for information, also print xred for atoms inside full supercell
-  call matr3inv(scell%rprimd, gprimd)
-  ! TODO: check this transpose is correct in some asymetric case
-  gprimd = transpose(gprimd)
-  write (scunit, '(a)') '# for information, add xred as well'
-  write (scunit, '(a)') '# xred'
-  do iatom = 1, scell%natom
-    xred = matmul (gprimd, scell%xcart(:,iatom))
-    write (scunit, '(a, 3E20.10)') '#  ', xred
-  end do
+! ! print header
+!   write (scunit, '(a)') '#'
+!   write (scunit, '(a)') '# anaddb file with frozen phonon mode in supercell'
+!   write (scunit, '(a)') '# !!!   Do not forget to adjust nband   !!! '
+!   write (scunit, '(a)') '#'
+!   write (scunit, '(a)') title1
+!   write (scunit, '(a)') title2
+!   write (scunit, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt
+!   write (scunit, '(a,I7,a)') '# and has ', scell%ncells, ' primitive unit cells '
+!   write (scunit, '(a)') '#'
+!   write (scunit, '(a)') '# lattice vectors for supercell :'
+!   write (scunit, '(a,I7)') 'natom ', scell%natom
+!   write (scunit, *)
+!   write (scunit, '(a)') 'znucl '
+!   do iatom = 1, size(scell%znucl)
+!     write (scunit, '(I5)', ADVANCE="NO") int(scell%znucl(iatom))
+!     if (mod(iatom,6) == 0) write (scunit, *)
+!   end do
+!   write (scunit, *)
+!   write (scunit, *)
+!   write (scunit, '(a,I7)') 'ntypat', scell%ntypat
+!   write (scunit, '(a)') 'typat '
+!   do iatom = 1, scell%natom
+!     write (scunit, '(I5)', ADVANCE="NO") scell%typat(iatom)
+!     if (mod(iatom,6) == 0) write (scunit, *)
+!   end do
+!   write (scunit, *)
+!   write (scunit, '(a)') 'acell 1.0 1.0 1.0'
+!   write (scunit, '(a)') 'rprim'
+!   write (scunit, '(3E20.10)') scell%rprimd(:,1)
+!   write (scunit, '(3E20.10)') scell%rprimd(:,2)
+!   write (scunit, '(3E20.10)') scell%rprimd(:,3)
+!   write (scunit, *)
+!   write (scunit, '(a)') 'xcart'
+!   do iatom = 1, scell%natom
+!     write (scunit, '(3E20.10)') scell%xcart(:,iatom)
+!   end do
+!   ! for information, also print xred for atoms inside full supercell
+!   call matr3inv(scell%rprimd, gprimd)
+!   ! TODO: check this transpose is correct in some asymetric case
+!   gprimd = transpose(gprimd)
+!   write (scunit, '(a)') '# for information, add xred as well'
+!   write (scunit, '(a)') '# xred'
+!   do iatom = 1, scell%natom
+!     xred = matmul (gprimd, scell%xcart(:,iatom))
+!     write (scunit, '(a, 3E20.10)') '#  ', xred
+!   end do
 
-! close file
-  close(scunit)
+! ! close file
+!   close(scunit)
 
-end subroutine prt_supercell
-!!***
+! end subroutine prt_supercell
+! !!***
 
 !****f* m_supercell/copy_supercell
 !!
@@ -637,7 +650,7 @@ subroutine copy_supercell (scell_in,scell_copy)
 #define ABI_FUNC 'copy_supercell'
 !End of the abilint section
 
-  implicit none
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -680,8 +693,6 @@ end subroutine copy_supercell
 !! SOURCE
 
 subroutine getPBCIndexes_supercell(index,n_cell)
-
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -705,7 +716,6 @@ subroutine getPBCIndexes_supercell(index,n_cell)
       index(ii) = index(ii) + n_cell(ii)
     end do
   end do
-
 end subroutine getPBCIndexes_supercell
 !!***
 
@@ -717,9 +727,9 @@ end subroutine getPBCIndexes_supercell
 !!  compute the bound of the supercell by considering the 0 0 0 (reference)
 !!  in the center of the supercell.
 !!  for example: (4 4 4) => min = -1 and max = 2
-!! 
+!!
 !! INPUTS
-!! n_cell(3) = size of the supercell (for example 3 3 3)   
+!! n_cell(3) = size of the supercell (for example 3 3 3)
 !!
 !! OUTPUT
 !! min = minimun of the range
@@ -764,17 +774,18 @@ end subroutine findBound_supercell
 !! compute the distance_supercell betwen 2 atoms in different cell
 !!
 !! INPUTS
-!! xcart1(3) = cartesian coordinates of the first atom 
+!! xcart1(3) = cartesian coordinates of the first atom
 !! xcart1(3) = cartesian coordinates of the second atom
 !! rprimd(3,3) = primitive lattice vectors
 !! cell1(3) = index of the cell of the first atom (for example -1 0 2)
 !! cell2(3) = index of the cell of the second atom (for example  0 0 2)
 !!
 !! OUTPUT
-!! distance_supercell = distance_supercell between the 2 atoms 
+!! distance_supercell = distance_supercell between the 2 atoms
 !!
 !! SOURCE
 !!
+
 
 function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
 
@@ -863,6 +874,11 @@ subroutine destroy_supercell (scell)
   end if
   if(allocated(scell%znucl))  then
     ABI_DEALLOCATE(scell%znucl)
+  end if
+
+  ! TODO hexu: add to abinit
+  if(allocated(scell%rvecs))  then
+    ABI_DEALLOCATE(scell%rvecs)
   end if
 
 end subroutine destroy_supercell
