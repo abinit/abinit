@@ -23,7 +23,7 @@ There are two ways to compute the temperature dependence with Abinit:
 
   * **Using post-processing python scripts**: this is the recommended approach as it provides more options 
     and is more efficient (less disk space, less memory demanding). This option 
-    **requires Netcdf** (both in Abinit and python). 
+    **requires Netcdf** (both in Abinit and python). In this tutorial, we only focus on the netCDF-based approach.
 
 !!! important
 
@@ -52,7 +52,7 @@ There are two ways to compute the temperature dependence with Abinit:
 
     If you have a prebuilt abinit executable, use:
         
-        abinit -b 
+        ./abinit -b 
 
     to get the list of libraries/options activated in the build.
     You should see netcdf in the `TRIO flavor` section:
@@ -74,33 +74,53 @@ This lesson should take about 1 hour to be done.
 The reference input files for this lesson are located in
 ~abinit/tests/tutorespfn/Input and the corresponding reference output files
 are in ~abinit/tests/tutorespfn/Refs.
-The prefix for files is **tdepes**.
+The prefix for files is **tdepes**. As usual, we use the shorthand `~abinit` to indicate
+the root directory where the abinit package has been deployed.
 
-First, examine the [[tests/tutorespfn/Input/tdepes_1.in]] input file
-(note the use of the [[ieig2rf]] = 5 input variable required by the python script).
+First, examine the [[tests/tutorespfn/Input/tdepes_1.in]] input file.
 {% dialog tests/tutorespfn/Input/tdepes_1.in %}
 
+Note that there are three datasets ([[ndtset]]=3). The first dataset corresponds to a standard
+self-consistent calculation, with an unshifted eight k-point grid, 
+producing e.g. the ground-state eigenvalue file tdepes_1o_DS1_EIG.nc ,
+as well as the density file tdepes_1o_DS1_DEN. The latter is read ([[getden]]2=1) 
+to initiate the second dataset calculation,
+which is a non-self-consistent run, specifically at the Gamma point only (there is no real recomputation
+with respect to the dataset 1, it only extract a subset of the eight k-point grid).
+This second dataset produces the wavefunction file tdepes_1o_DS2_WFQ, that is read by the third dataset ([[getwfq]]3=2),
+as well as the tdepes_1o_DS1_WFK file from the first dataset ([[getwfk]]3=1).
+
+The third dataset corresponds to a DFPT phonon calculation ([[rfphon]]3=1) 
+with perturbation of all atoms ([[rfatpol]]3= 1 2) in all directions ([[rfdir]]3= 1 1 1).
+This induces the creation of the Derivative DataBase file tdepes_1o_DS3_DDB.
+The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
+this option generating the needed netCDF files tdepes_1o_DS3_EIGR2D.nc and tdepes_1o_DS3_GKK.nc .
+
 We will use [[tests/tutorespfn/Input/tdepes_1.files]] to execute abinit
-(it will be the same file for the other Abinit calculations of this tutorial,
-except that the last digit of the names have to be changed in this file ...
+(it will be the same file for the other Abinit calculations -runs 3 and 4- of this tutorial,
+except that the last digit of the names will have to be changed to 3 or 4 in this file).
 
 {% dialog tests/tutorespfn/Input/tdepes_1.files %}
 
 In order to run abinit, we suggest that you create a working directory as subdirectory of ~abinit/tests/tutorespfn/Input, then
-copy/modify the relevant files. In detail :
+copy/modify the relevant files. Explicitly:
 
+    cd ~abinit/tests/tutorespfn/Input
     mkdir Work 
     cd Work
-    cp ../*in ../*files .
+    cp ../tdepes*in ../tdepes*files .
 
-Then edit the [[tests/tutorespfn/Input/tdepes_1.files]] to give the proper location of the pseudopotential file.
+Then, edit the [[tests/tutorespfn/Input/tdepes_1.files]] to modify location of the pseudopotential file
+(from the Work subdirectory, the location is ../../../Psps_for_tests/6c.pspnc) or copy it inside the Work directory.
 Finally, issue    
 
-    abinit < tdepes_1.files > tdepes_1.out
+    abinit < tdepes_1.files > tdepes_1.stdout
 
-(where `abinit`might have to be replaced by the proper location of the abinit executable).
+(where `abinit` might have to be replaced by the proper location of the abinit executable).
 
+<!--
 ### If Abinit is compiled with Netcdf...
+-->
 
 If you have compiled the code with Netcdf, the calculation will produce _EIG.nc,
 _DDB, EIGR2D.nc and EIGI2D.nc that contain respectively the eigenvalues (GS or
@@ -125,11 +145,11 @@ into the directory where you did the calculations.
 
 You can then simply run the python script with the following command:
     
-    temperature_para.py
+    ./temperature_final.py
 
 and enter the information asked by the script
 
-A typical example of input file for the script is:
+A typical example of input file (contained in ~abinit/tests/tutorespfn/Input/temperature_final_example.in) for the script is:
 
 ```
 1                          # Number of cpus 
@@ -149,9 +169,9 @@ tdepes_1o_DS1_EIG.nc       # Name of the unperturbed EIG.nc file with Eigenvalue
 
 Alternatively, copy this example, **remove** all the comments after `#`  and then run
 
-    ./temperature_final_example < temperature_final_example.in
+    ./temperature_final.py < tdepes_temperature_final.in
 
-{% dialog tests/tutorespfn/Input/temperature_final_example.in %}
+{% dialog tests/tutorespfn/Input/tdepes_temperature_final.in %}
 
 !!! warning
 
@@ -229,7 +249,7 @@ The python code has generated the following files:
 -->
 
 We can for example visualize the temperature dependence at k=Γ of the HOMO bands 
-(`Band: 3` dataset in the **temperature.txt** file, that you can examine) 
+(`Band: 3` section in the **temperature.txt** file, that you can examine) 
 with the contribution of only the q=Γ .
 
 <!--
@@ -250,15 +270,47 @@ of semiconductors.
 As usual, checking whether the input parameters give converged values is of course important.
 The run used [[ecut]]=10. With [[ecut]]=5, the HOMO correction goes down with temperature.
 
+<!--
 ### If Abinit is **not** compiled with Netcdf ...
 
-In this case, we should first use mrgddb to merge the _DDB and _EIGR2D/_EIGI2D
+In this case, we should first use [[help:mrgddb|mrgddb]] to merge the _DDB and _EIGR2D/_EIGI2D
 but since we only have one q-point we do not have to perform this step. 
 The static temperature dependence and the G2F can be computed thanks to anaddb
 with the files file [[tests/tutorespfn/Input/tdepes_2.files]] and the input
 file [[tests/tutorespfn/Input/tdepes_2.in]].
 
-{% dialog tests/tutorespfn/Input/tdepes_2.files tests/tutorespfn/Input/tdepes_2.in %}
+{% dialog tests/tutorespfn/Input/tdepes_2.files %}
+
+The information contained in the files file can be understood by looking at the echo
+if its reading in the standard output:
+
+```
+  Give name for formatted input file:
+-   tdepes_2.in
+  Give name for formatted output file:
+-   tdepes_2.out
+  Give name for input derivative database:
+-   tdepes_1o_DS3_DDB
+  Give name for output molecular dynamics:
+-   dummyo.md
+  Give name for input elphon matrix elements (GKK file):
+-   tdepes_1o_DS3_EIGR2D
+  Give root name for elphon output files:
+-   tdepes_1_ana
+  Give name for file containing ddk filenames for elphon/transport:
+-   dummy.ddk
+```
+
+{% dialog tests/tutorespfn/Input/tdepes_2.in %}
+
+As concern the anaddb input file, note that the electron-phonon analysis is triggered by
+[[anaddb:thmflag]] 3, as well as [[anaddb:telphint]] 1 .
+
+Launch anaddb by the command
+
+    anaddb < tdepes_2.files > tdepes_2.stdout
+
+(where `anaddb` might have to be replaced by the proper location of the anaddb executable).
 
 The run will generate 3 files:
 
@@ -276,12 +328,16 @@ The run will generate 3 files:
    as the temperature dependence one. 
    You can check that the results are the same as with the python script approach here above. 
 
+-->
+
 ## 2 Converging the calculation with the q-point grid
 
+<!--
 From now on we will only describe the approach with Abinit **compiled with Netcdf support**. 
 The approach with Anaddb is similar to what we described in the previous sections.
 Note, however, that Anaddb only supports integration with homogenous q-point grids. 
-while the netcdf version can perform the integration either with random q-points or
+-->
+The netcdf version can perform the q-wavevector integration either with random q-points or
 homogenous Monkhorst-Pack meshes. 
 
 For the random integration method you
