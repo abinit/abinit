@@ -17085,7 +17085,7 @@ If LDA+U is activated ([[usepawu]]=1 or 2), the [[lpawu]], [[upawu]] and
 The implementation is done inside PAW augmentation regions only (cf Ref [4]).
 The initial density matrix can be given in the input file (see [[usedmatpu]]).
 The expression of the density matrix is chosen thanks to [[dmatpuopt]]. See
-also [How_to_use_LDA_plus_U.txt](../../users/How_to_use_LDA_plus_U.txt). for further information.
+also [How_to_use_LDA_plus_U.txt](../../guide/legacy/How_to_use_LDA_plus_U.txt). for further information.
 In the case of a GW calculation on top of a DFT+U, the absence of definition
 of a U value in the self-energy will LEAVE the underlying U from the DFT
 calculation. Thus, the code will actually do a GW+U @ DFT+U calculation. Note

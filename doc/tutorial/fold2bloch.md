@@ -52,7 +52,7 @@ in Y and Z directions. Accordingly, the reciprocal space shrinks along the
 same directions. We select those directions for the band structure plot as
 they will be affected by the zone folding.
 
-![](fold2nloch_assets/Fig2.png)
+![](fold2bloch_assets/Fig2.png)
 
 Fig. 2: Brillouin zone of the supercell.
 

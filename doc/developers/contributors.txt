@@ -12,11 +12,10 @@ For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 *******************************************************************
 
 The ABINIT project has been initiated by the Universite Catholique
-de Louvain (X. Gonze) and Corning Incorporated (D.C. Allan),
-see ~abinit/doc/users/context .
+de Louvain (X. Gonze) and Corning Incorporated (D.C. Allan).
 
 Seven other institutions have also clearly shown their implication
-in the ABINIT project :
+in the ABINIT project in the past or currently :
 - l'Universite de Liege (Ph. Ghosez, M. Verstraete),
 - le Commissariat a l'Energie Atomique, Bruyeres-le-chatel (F. Jollet, M. Torrent, B. Amadon),
 - Mitsubishi Chemical Corp (M. Mikami).
@@ -24,7 +23,7 @@ in the ABINIT project :
 - Rutgers University (D. Hamann, D. Vanderbilt)
 - U. de Montr\'{e}al (M. Cot\'{e})
 - le Commissariat a l'Energie Atomique, Grenoble (T. Deutsch, D. Caliste),
-- CINVESTAV, Queretaro, Mexico (A. Romero),
+- University of West Virginia (A. Romero),
 
 Coming now to individuals,
 
