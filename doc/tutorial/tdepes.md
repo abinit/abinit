@@ -76,7 +76,7 @@ The reference input files for this lesson are located in
 are in ~abinit/tests/tutorespfn/Refs.
 The prefix for files is **tdepes**. As usual, we use the shorthand `~abinit` to indicate
 the root directory where the abinit package has been deployed, but most often
-consider the paths are relative this that directory.
+consider the paths relative to this directory.
 
 First, examine the [[tests/tutorespfn/Input/tdepes_1.in]] input file.
 {% dialog tests/tutorespfn/Input/tdepes_1.in %}
