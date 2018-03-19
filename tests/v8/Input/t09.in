@@ -30,7 +30,7 @@ ntime  = 50
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% test_chain = t07.in,t08.in,t09.in,t10.in,t11.in
+#%% exclude_builders = graphene_gnu_6.4_macports
 #%% input_ddb = t09.ddb.in
 #%% [files]
 #%% files_to_test = 
