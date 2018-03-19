@@ -8,6 +8,14 @@ contains
 
   ! vector cross production
   function cross(a, b) result(c)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cross'
+!End of the abilint section
+
     real(dp), intent(in) :: a(3), b(3)
     real(dp)  :: c(3)
     c(1) = a(2)*b(3) - a(3)*b(2)
@@ -19,6 +27,13 @@ contains
 
   ! defines outer product of two vectors.
   function outer_product(a, b) result (c)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'outer_product'
+!End of the abilint section
     real(dp), intent(in) :: a(:), b(:)
     real(dp)  :: c(size(a, dim=1), size(b, dim=1))
     integer:: i, j
@@ -31,6 +46,13 @@ contains
 
   subroutine set_random_seed(seed)
       ! FIXME Not sure how does this work. One number for each thread?
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'set_random_seed'
+!End of the abilint section
+
       integer , intent(in) :: seed(:)
       print*, "Warning! Currently I'm not sure about how this function  &
       &(set_random_seed,which calls RANDOM_SEED) works. Do test it!"
@@ -40,6 +62,14 @@ contains
   ! Random number generator; Normal (Gaussian) dist.
   ! a is a array.
   subroutine rand_normal(a)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rand_normal'
+!End of the abilint section
+
     real(dp), intent(out)::a(:,:)
     real(dp), allocatable, save :: b(:,:)
     if (.not. allocated(b)) then
@@ -61,6 +91,14 @@ contains
   ! TODO hexu: implement a random number generator module which contains 
   ! all the related subroutines. & Move this one there.
   subroutine rand_normal_ziggurat(a)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rand_normal_ziggurat'
+!End of the abilint section
+
     real(dp), intent(out)::a(:,:)
     integer :: i, j
     do i=1, size(a, dim=2)
@@ -68,6 +106,6 @@ contains
         a(j, i)=rnor()
       end do
     end do
-    end subroutine rand_normal2
+    end subroutine rand_normal_ziggurat
   
 end module

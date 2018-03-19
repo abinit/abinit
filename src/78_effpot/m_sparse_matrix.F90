@@ -35,9 +35,9 @@ module m_sparse_matrix
   ! used for constructing sparse matrix. Not to do calculations.
   type LIL_mat
      integer :: nrow=0, ncol=0
-     type (llist), allocatable :: rows(:)
-   contains
-     procedure :: print => LIL_mat_print
+     type(llist), allocatable :: rows(:)
+   !contains
+   !  procedure :: print => LIL_mat_print
   end type LIL_mat
 
   ! dense matrix
@@ -65,13 +65,21 @@ module m_sparse_matrix
      integer :: nnz,  nrow, ncol
      integer, allocatable :: icol(:), row_shift(:)
      real(dp), allocatable:: val(:)
-   contains
-     procedure :: print=> CSR_mat_print
+   !contains
+   !  procedure :: print=> CSR_mat_print
   end type CSR_mat
 
   ! linked list format sparse matrix
 contains
   subroutine dense_mat_initialize(self,  nrow, ncol)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dense_mat_initialize'
+!End of the abilint section
+
     type(dense_mat), intent(inout) :: self
     integer, intent(in):: nrow, ncol
     integer:: err
@@ -82,6 +90,14 @@ contains
   end subroutine dense_mat_initialize
 
   subroutine dense_mat_finalize(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dense_mat_finalize'
+!End of the abilint section
+
     type(dense_mat), intent(inout) :: self
     integer :: err
     if (allocated(self%mat)) deallocate(self%mat, stat=err)
@@ -90,6 +106,14 @@ contains
   end subroutine dense_mat_finalize
 
   subroutine dense_mat_insert(self, irow, icol, val)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dense_mat_insert'
+!End of the abilint section
+
     type(dense_mat), intent(inout) :: self
     integer, intent(inout) :: irow, icol
     real(dp), intent(in) :: val
@@ -98,6 +122,14 @@ contains
 
   ! dense matrix-vector multiplication, using blas DGEMV
   subroutine dense_mat_mv(self, x, b)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dense_mat_mv'
+!End of the abilint section
+
     type(dense_mat) :: self
     real(dp), intent(in) :: x
     real(dp), intent(inout) :: b
@@ -106,6 +138,14 @@ contains
 
   ! dense symmetric matrix-vector multiplication, using blas DSPMV
   subroutine dense_mat_spmv(self, x, b)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dense_mat_spmv'
+!End of the abilint section
+
     type(dense_mat) :: self
     real(dp), intent(in) :: x
     real(dp), intent(inout) :: b
@@ -115,6 +155,14 @@ contains
 
   ! COO matrix
   subroutine COO_mat_initialize(A, nrow, ncol, nnz, i, j, val)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'COO_mat_initialize'
+!End of the abilint section
+
     type(COO_mat), intent(inout) :: A
     integer, intent(in) :: nnz, nrow, ncol
     integer , intent(in), optional :: i(:), j(:)
@@ -140,6 +188,14 @@ endif
 
   ! COO sparse matrix-vector multiplication. naive implementation.
   subroutine COO_mat_mv(A, x, b)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'COO_mat_mv'
+!End of the abilint section
+
     type(COO_mat), intent(in) :: A
     real(dp), intent(in):: x(:)
     real(dp), intent(inout):: b(:)
@@ -153,7 +209,15 @@ endif
   end subroutine  COO_mat_mv
 
   subroutine LIL_mat_initialize(self, nrow, ncol)
-    type (LIL_mat) , intent(inout):: self
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_initialize'
+!End of the abilint section
+
+    type(LIL_mat) , intent(inout):: self
     integer, intent(in):: nrow, ncol
     self%nrow=nrow
     self%ncol=ncol
@@ -161,7 +225,15 @@ endif
   end subroutine LIL_mat_initialize
 
   subroutine LIL_mat_finalalize(self)
-    type (LIL_mat) , intent(inout):: self
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_finalalize'
+!End of the abilint section
+
+    type(LIL_mat) , intent(inout):: self
     integer :: i, err
     do i=1, self%nrow, 1
        call llist_finalize(self%rows(i))
@@ -172,7 +244,15 @@ endif
   end subroutine LIL_mat_finalalize
 
   subroutine LIL_mat_insert(self, irow, icol, val, mode)
-    type (LIL_mat) , intent(inout):: self
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_insert'
+!End of the abilint section
+
+    type(LIL_mat) , intent(inout):: self
     integer, intent(in):: irow, icol, mode
     real(dp), intent(in):: val
     if(abs(val)>tiny(0.0d0)) then
@@ -182,6 +262,13 @@ endif
 
   subroutine mat_to_LIL_mat(mat, ll)
     ! check shape
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mat_to_LIL_mat'
+!End of the abilint section
+
     real(dp), intent(in):: mat(:, :)
     type(LIL_mat), intent(inout) :: ll
     integer :: s(2), irow, icol
@@ -197,7 +284,15 @@ endif
   end subroutine mat_to_LIL_mat
 
   subroutine LIL_mat_print(self, mat)
-    class (LIL_mat) , intent(inout)::self 
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_print'
+!End of the abilint section
+
+    class(LIL_mat) , intent(inout)::self 
     real(dp), intent(out):: mat(self%nrow,self%ncol)
     integer:: irow, icol
     real(dp):: val
@@ -213,7 +308,15 @@ endif
 
   
   subroutine LIL_mat_to_mat(ll, mat)
-    type (LIL_mat) , intent(inout):: ll
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_to_mat'
+!End of the abilint section
+
+    type(LIL_mat) , intent(inout):: ll
     real(dp), intent(out):: mat(ll%nrow,ll%ncol)
     integer:: irow, icol
     real(dp):: val
@@ -229,7 +332,15 @@ endif
 
 
   function LIL_mat_get_nnz(ll) result(nnz)
-    type (LIL_mat), intent(in)::ll
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_get_nnz'
+!End of the abilint section
+
+    type(LIL_mat), intent(in)::ll
     integer ::nnz, irow
     nnz=0
     do irow=1, ll%nrow
@@ -238,7 +349,15 @@ endif
   end function LIL_mat_get_nnz
 
   subroutine LIL_mat_to_COO(ll, COO)
-    type (LIL_mat) , intent(inout):: ll
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_to_COO'
+!End of the abilint section
+
+    type(LIL_mat) , intent(inout):: ll
     type(COO_mat), intent(out):: COO
     integer :: nnz, counter, irow
     
@@ -264,7 +383,15 @@ endif
   end subroutine LIL_mat_to_COO
 
   subroutine LIL_mat_to_CSR(ll, csrmat)
-    type (LIL_mat) , intent(inout):: ll
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'LIL_mat_to_CSR'
+!End of the abilint section
+
+    type(LIL_mat) , intent(inout):: ll
     type(CSR_mat), intent(out):: csrmat
     integer:: irow, icol, i, nzrow, nnz
     real(dp):: val
@@ -290,6 +417,14 @@ endif
   end subroutine LIL_mat_to_CSR
 
   subroutine CSR_mat_print(csr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'CSR_mat_print'
+!End of the abilint section
+
     class(CSR_mat), intent(in) :: csr
     print *, "Val: ", csr%val
     print *, "iCol: ", csr%icol
@@ -298,6 +433,14 @@ endif
 
 
   recursive subroutine llist_finalize(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_finalize'
+!End of the abilint section
+
     type(llist), intent(inout) ::self
     type(lnode), pointer :: iter, tmp
     iter=>self%first
@@ -315,6 +458,13 @@ endif
 
   subroutine llist_append(self, i, val)
     ! append a element at the end of list
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_append'
+!End of the abilint section
+
     type(llist), intent(inout) ::self
     integer, intent(in)::i
     real(dp), intent(in)::val
@@ -332,6 +482,14 @@ endif
   end subroutine llist_append
 
   subroutine llist_iter_restart(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_iter_restart'
+!End of the abilint section
+
     type(llist):: self
     self%iter=>self%first
   end subroutine llist_iter_restart
@@ -340,6 +498,13 @@ endif
     !insert a element so i is sorted.
     ! if mode=0: if i already exist, substitute i, val
     ! if mode=1: val+=val
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_insert_after'
+!End of the abilint section
+
     type(llist):: self
     integer, intent(in) :: i
     real(dp), intent(in):: val
@@ -359,6 +524,14 @@ endif
 
 
   subroutine llist_insert_head(self, i, val)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_insert_head'
+!End of the abilint section
+
     type(llist):: self
     integer, intent(in) :: i
     real(dp), intent(in):: val
@@ -378,6 +551,13 @@ endif
     !insert a element so i is sorted.
     ! if mode=0: if i already exist, substitute i, val
     ! if mode=1: val+=val
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_sorted_insert'
+!End of the abilint section
+
     type(llist):: self
     integer, intent(in) :: i, mode
     real(dp), intent(in):: val
@@ -422,6 +602,14 @@ endif
   end subroutine llist_sorted_insert
 
   subroutine llist_print_all(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_print_all'
+!End of the abilint section
+
     type(llist), intent(inout)::self
     call llist_iter_restart(self)
     print*, "linkedlist of length ", self%length
@@ -433,6 +621,14 @@ endif
 
 
   subroutine llist_get_data(self, ilist, vallist)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'llist_get_data'
+!End of the abilint section
+
     type(llist), intent(inout)::self
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
@@ -449,6 +645,14 @@ endif
   end subroutine llist_get_data
 
   subroutine CSR_mat_finalize(A)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'CSR_mat_finalize'
+!End of the abilint section
+
     type(CSR_mat), intent(inout) :: A
     A%ncol=0
     A%nrow=0
@@ -467,6 +671,14 @@ endif
 
   ! COO matrix
   subroutine CSR_mat_initialize(A, nrow, ncol, nnz, icol, row_shift, val)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'CSR_mat_initialize'
+!End of the abilint section
+
     type(CSR_mat), intent(inout) :: A
     integer, intent(in) :: nnz, nrow, ncol
     ! i: col number of each entry
@@ -502,7 +714,15 @@ endif
   end subroutine CSR_mat_initialize
 
   subroutine CSR_mat_mv(A, x, y)
-    type (CSR_mat), intent(in):: A
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'CSR_mat_mv'
+!End of the abilint section
+
+    type(CSR_mat), intent(in):: A
     real(dp), intent(in) :: x(A%ncol)
     real(dp), intent(out) :: y(A%nrow)
     real(dp)::ddot
@@ -547,7 +767,15 @@ endif
 
 #ifdef DMKL
   subroutine CSR_mat_mv_mkl(A, x, y)
-    type (CSR_mat), intent(in):: A
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'CSR_mat_mv_mkl'
+!End of the abilint section
+
+    type(CSR_mat), intent(in):: A
     real(dp), intent(in) :: x(A%ncol)
     real(dp), intent(out) :: y(A%nrow)
     !call mkl_dcsrgemv(transa, m, a, ia, ja, x, y)

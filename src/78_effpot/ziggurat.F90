@@ -38,6 +38,13 @@ CONTAINS
 
 SUBROUTINE zigset( jsrseed )
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'zigset'
+!End of the abilint section
+
    INTEGER, INTENT(IN)  :: jsrseed
 
    INTEGER  :: i
@@ -83,7 +90,15 @@ END SUBROUTINE zigset
 
 
 !  Generate random 32-bit integers
-FUNCTION shr3( ) RESULT( ival )
+FUNCTION shr3() RESULT( ival )
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'shr3'
+!End of the abilint section
+
    INTEGER  ::  ival
 
    jz = jsr
@@ -97,7 +112,15 @@ END FUNCTION shr3
 
 
 !  Generate uniformly distributed random numbers
-FUNCTION uni( ) RESULT( fn_val )
+FUNCTION uni()  RESULT( fn_val )
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'uni'
+!End of the abilint section
+
    REAL(DP)  ::  fn_val
 
    fn_val = half + 0.2328306e-9_DP * shr3( )
@@ -107,7 +130,15 @@ END FUNCTION uni
 
 
 !  Generate random normals
-FUNCTION rnor( ) RESULT( fn_val )
+FUNCTION rnor() RESULT( fn_val )
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rnor'
+!End of the abilint section
+
    REAL(DP)             ::  fn_val
 
    REAL(DP), PARAMETER  ::  r = 3.442620_DP
@@ -149,7 +180,15 @@ END FUNCTION rnor
 
 
 !  Generate random exponentials
-FUNCTION rexp( ) RESULT( fn_val )
+FUNCTION rexp() RESULT( fn_val )
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rexp'
+!End of the abilint section
+
    REAL(DP)  ::  fn_val
 
    REAL(DP)  ::  x

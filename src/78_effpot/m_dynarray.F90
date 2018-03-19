@@ -3,7 +3,7 @@
 ! they have push (but no pop) and finalize methods.
 
 ! TODO hexu: Is this already implemented somewhere in abinit. 
-! If not so, this file should be moved to the place it should be?
+! If not, should this file  be moved to the place to make it more general usable?
 
 #include "abi_common.h"
 module m_dynmaic_array
@@ -13,21 +13,29 @@ module m_dynmaic_array
   type real_array_type
     integer:: size=0, capacity=0
     real(dp), allocatable :: data(:)
-  CONTAINS
-    procedure :: push => real_array_type_push
-    procedure :: finalize => real_array_type_finalize
+  !CONTAINS
+  !  procedure :: push => real_array_type_push
+  !  procedure :: finalize => real_array_type_finalize
   end type real_array_type
 
   type int_array_type
     integer:: size=0, capacity=0
     integer, allocatable :: data(:)
-  CONTAINS
-    procedure :: push => int_array_type_push
-    procedure :: finalize => int_array_type_finalize
+  !CONTAINS
+  !  procedure :: push => int_array_type_push
+  !  procedure :: finalize => int_array_type_finalize
   end type int_array_type
 
 CONTAINS
 subroutine real_array_type_push(self, val)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'real_array_type_push'
+!End of the abilint section
+
     class(real_array_type), intent(inout):: self
     real(dp) :: val
     real(dp), allocatable :: temp(:)
@@ -45,6 +53,14 @@ subroutine real_array_type_push(self, val)
 end subroutine
 
 subroutine real_array_type_finalize(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'real_array_type_finalize'
+!End of the abilint section
+
   class(real_array_type), intent(inout):: self
   if ( allocated(self%data) ) then
       ABI_DEALLOCATE(self%data)
@@ -54,6 +70,14 @@ subroutine real_array_type_finalize(self)
 end subroutine
 
 subroutine int_array_type_push(self, val)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'int_array_type_push'
+!End of the abilint section
+
     class(int_array_type), intent(inout):: self
     integer :: val
     integer, allocatable :: temp(:)
@@ -71,6 +95,14 @@ subroutine int_array_type_push(self, val)
 end subroutine int_array_type_push
 
 subroutine int_array_type_finalize(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'int_array_type_finalize'
+!End of the abilint section
+
   class(int_array_type), intent(inout):: self
   if ( allocated(self%data) ) then
       ABI_DEALLOCATE(self%data)

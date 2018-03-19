@@ -427,20 +427,20 @@ subroutine multibinit_dtset_free(multibinit_dtset)
    ABI_DEALLOCATE(multibinit_dtset%qph2l)
  end if
 
- if (allocated(multibinit_dtset%gilbert_damping))  then
-   ABI_DEALLOCATE(multibinit_dtset%gilbert_damping)
- end if
+ !if (allocated(multibinit_dtset%gilbert_damping))  then
+ !  ABI_DEALLOCATE(multibinit_dtset%gilbert_damping)
+ !end if
 
- if (allocated(multibinit_dtset%gyro_ratio))  then
-   ABI_DEALLOCATE(multibinit_dtset%gyro_ratio
- end if
+ !if (allocated(multibinit_dtset%gyro_ratio))  then
+ !  ABI_DEALLOCATE(multibinit_dtset%gyro_ratio)
+ !end if
 
- if (allocated(multibinit_dtset%qph1l_spin))  then
-   ABI_DEALLOCATE(multibinit_dtset%qph1l_spin)
- end if
- if (allocated(multibinit_dtset%qph2l_spin))  then
-   ABI_DEALLOCATE(multibinit_dtset%qph2l_spin)
- end if
+ !if (allocated(multibinit_dtset%qph1l_spin))  then
+ !  ABI_DEALLOCATE(multibinit_dtset%qph1l_spin)
+ !end if
+ !if (allocated(multibinit_dtset%qph2l_spin))  then
+ !  ABI_DEALLOCATE(multibinit_dtset%qph2l_spin)
+ !end if
 
 
 end subroutine multibinit_dtset_free

@@ -9,16 +9,24 @@ module m_spin_hist
           & saved_S(:,:,:), saved_time(:)
      real(dp), allocatable :: average_S(:,:), average_S_per_site(:,:,:)
      real(dp) :: current_time, last_time, dt, current_average_S
-   CONTAINS
-     procedure :: initialize => spin_hist_initialize
-     procedure :: finalize => spin_hist_finalize
-     procedure :: insert => spin_hist_insert
-     procedure :: save_file => spin_hist_save_file
-     procedure :: calc_observables => spin_hist_calc_observables
+  !  CONTAINS
+  !    procedure :: initialize => spin_hist_t_initialize
+  !    procedure :: finalize => spin_hist_t_finalize
+  !    procedure :: insert => spin_hist_t_insert
+  !    procedure :: save_file => spin_hist_t_save_file
+  !    procedure :: calc_observables => spin_hist_t_calc_observables
   end type spin_hist_t
 CONTAINS
-  subroutine spin_hist_initialize(self, nmatoms, max_save, step_save, dt)
-    class (spin_hist_t), intent(inout) :: self
+  subroutine spin_hist_t_initialize(self, nmatoms, max_save, step_save, dt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_initialize'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: self
     integer, intent(in) :: nmatoms, max_save, step_save
     real(dp), intent(in) :: dt
 
@@ -57,10 +65,18 @@ CONTAINS
        ABI_ALLOCATE(self%average_S_per_site, (3, self%nmatoms, self%max_save))
     endif
 
-  end subroutine spin_hist_initialize
+  end subroutine spin_hist_t_initialize
 
-  subroutine spin_hist_finalize(self)
-    class (spin_hist_t), intent(inout) :: self
+  subroutine spin_hist_t_finalize(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_finalize'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: self
     self%nmatoms=0
     self%max_save=0
     self%step_save=0
@@ -94,10 +110,18 @@ CONTAINS
        ABI_DEALLOCATE(self%average_S_per_site)
     endif
 
-  end subroutine spin_hist_finalize
+  end subroutine spin_hist_t_finalize
 
-  subroutine spin_hist_insert(self, S)
-    class (spin_hist_t), intent(inout) :: self
+  subroutine spin_hist_t_insert(self, S)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_insert'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: self
     real(dp), intent(in) :: S(3, self%nmatoms)
     real(dp), save:: avg_S, total_S
     !print *, "Spin hist: insert new S. current_step= ", self%current_step, mod( self%current_step, self%step_save)
@@ -112,7 +136,8 @@ CONTAINS
           self%n_saved_step=self%n_saved_step+1
           self%saved_S(:,:,self%n_saved_step)=S(:,:)
           self%saved_time(self%n_saved_step)=self%current_time
-          call self%calc_observables()
+          !call self%calc_observables()
+          call spin_hist_t_calc_observables(self)
           if(self%n_saved_step>100) then
              total_S=total_S+self%current_average_S
              print *, "average: ", total_S/(self%n_saved_step-100)
@@ -122,28 +147,52 @@ CONTAINS
           print *, "Warning: the steps to save exceeded the maximum number of spin in the hist."
        endif
     end if
-  end subroutine spin_hist_insert
+  end subroutine spin_hist_t_insert
 
-  subroutine spin_hist_calc_observables(self)
-    class (spin_hist_t), intent(inout) :: self
-    call spin_hist_calc_average_S(self)
-  end subroutine spin_hist_calc_observables
+  subroutine spin_hist_t_calc_observables(self)
 
-  subroutine spin_hist_calc_average_S(self)
-    class (spin_hist_t), intent(inout) :: self
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_calc_observables'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: self
+    call spin_hist_t_calc_average_S(self)
+  end subroutine spin_hist_t_calc_observables
+
+  subroutine spin_hist_t_calc_average_S(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_calc_average_S'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: self
     real(dp) :: a(3), anorm
     a(:)=sum(self%current_S(:,:), dim=2)/self%nmatoms
     anorm=sqrt(sum(a(:)**2))
     self%current_average_S=anorm
     print *, "average S_total, Sx, Sy, Sz: ", anorm,  a(:)
 
-  end subroutine spin_hist_calc_average_S
+  end subroutine spin_hist_t_calc_average_S
 
 
-  subroutine spin_hist_save_file(self, filename)
-    class (spin_hist_t), intent(inout) :: self
+  subroutine spin_hist_t_save_file(self, filename)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_save_file'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: self
     character (len=40), intent(in) :: filename
     !TODO
-  end subroutine spin_hist_save_file
+  end subroutine spin_hist_t_save_file
 
 end module m_spin_hist
