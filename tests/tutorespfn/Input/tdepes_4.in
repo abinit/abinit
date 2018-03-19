@@ -52,7 +52,8 @@
  getwfk?4 -3
  getwfq?4 -1
  nqpt?4    1
- ieig2rf?4 1            # Static eigenvalues corrections using DFPT (Sternheimer)
+ #ieig2rf?4 1            # Static eigenvalues corrections using DFPT (Sternheimer)
+ ieig2rf?4 5            # Static eigenvalues corrections using DFPT (Sternheimer)
  smdelta?4 1            # Flag required to produce the _EIGI2D used to 
                         # compute the lifetime of electronic levels.
                         # smdelta = 1 ==> Fermi-Dirac smearing.
@@ -95,7 +96,8 @@
  getwfq?6  -1
  tolwfr?6   1.0d-8  # tolwfr 1.0d-22 should be used for converged results
  nbdbuf?6   2       # 2 buffer bands. RF converges much faster.
- ieig2rf?6  1
+ #ieig2rf?6  1
+ ieig2rf?6  5
  smdelta?6  1
  rfphon?6   1
  rfatpol?6  1 2
@@ -136,6 +138,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain =  tdepes_1.in, tdepes_2.in,  tdepes_3.in, tdepes_4.in
 #%% [files]
 #%% files_to_test = 

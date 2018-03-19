@@ -7,7 +7,7 @@
 !! module for excitonic hamiltonian for Haydock
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2018 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1793,7 +1793,6 @@ end subroutine hexc_matmul_tda
 !!
 !! INPUTS
 !! hexc<hexc_t> = Excitonic hamiltonian
-!! hexc_i<hexc_interp_t> = Interpolated excitonic hamiltonian
 !! phi = Input ket
 !! ep_renorm = vector with electron-phonon renorms
 !! op = 'N' for H | psi >, 'C' for H^\dagger | psi >
@@ -1809,7 +1808,7 @@ end subroutine hexc_matmul_tda
 !!
 !! SOURCE
 
-subroutine hexc_matmul_elphon(hexc, hexc_i, phi, hphi, op, ep_renorm)
+subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1823,7 +1822,6 @@ subroutine hexc_matmul_elphon(hexc, hexc_i, phi, hphi, op, ep_renorm)
 
 !Arguments ---------------------------
  type(hexc_t),intent(in) :: hexc
- type(hexc_interp_t),intent(in) :: hexc_i
  character,intent(in) :: op
  complex(dpc),intent(in) :: phi(hexc%my_nt)
  complex(dpc),intent(out) :: hphi(hexc%hsize)

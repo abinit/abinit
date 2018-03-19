@@ -16,7 +16,7 @@
 !! 3) Generate the symmetry operations of the holohedral group
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG)
+!! Copyright (C) 2000-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,8 +58,8 @@
 !! center=3        C-face centered
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_use_ga,symanal
-!!      symbrav,thmeig
+!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_tdep_sym
+!!      m_use_ga,symanal,symbrav,thmeig
 !!
 !! CHILDREN
 !!      holocell,matr3inv,smallprim,symrelrot,wrtout

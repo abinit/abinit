@@ -11,7 +11,7 @@
 !!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,6 +52,7 @@ MODULE m_ioarr
  use m_time,          only : cwtime
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
  use m_fstrings,      only : sjoin, itoa, endswith
+ use m_numeric_tools, only : interpolate_denpot
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
  use m_distribfft,    only : init_distribfft_seq
 
@@ -98,7 +99,7 @@ CONTAINS  !=====================================================================
 !!    4 for MPI_IO
 !! cplex=1 for real array, 2 for complex
 !! nfft=Number of FFT points treated by this node.
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! dtset <type(dataset_type)>=all input variables for this dataset
 !! fform=integer specification for data type:
 !!   2 for wf; 52 for density; 102 for potential
@@ -157,7 +158,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
- type(wvl_denspot_type), intent(in) :: wvl_den
+ type(wvl_denspot_type),optional, intent(in) :: wvl_den
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout),target :: arr(cplex*nfft,dtset%nspden)
@@ -540,6 +541,9 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
 #else
      BIGDFT_NOTENABLED_ERROR()
+     if(.false. .and. present(wvl_den))then
+       write(std_out,*)' One should not be here'
+     endif
 #endif
    end if
 
@@ -674,7 +678,7 @@ end subroutine ioarr
 !! iomode=
 !! hdr <type(hdr_type)>=the header of wf, den and pot files
 !! crystal<crystal_t>= data type gathering info on symmetries and unit cell (used if etsf_io)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! cplex=1 for real array, 2 for complex
 !! nfft=Number of FFT points treated by this node.
 !! nspden=Number of spin-density components.
@@ -998,6 +1002,9 @@ end subroutine fftdatar_write_from_hdr
 !! comm=MPI communicator. See notes
 !! [check_hdr] <type(hdr_type)>=Optional. Used to compare with the hdr read from disk file
 !!   The routine will abort if restart cannot be performed.
+!! [allow_interp]=If True, the density read from file will be interpolated if the mesh differs from the one
+!!   expected by the caller. This option is usually used in **self-consistent** calculations.
+!!   If False (default), the code stops if the two meshes are different.
 !!
 !! OUTPUT
 !! orhor(cplex*nfft,nspden)=The density on the real space mesh.
@@ -1027,7 +1034,7 @@ end subroutine fftdatar_write_from_hdr
 !! SOURCE
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
-  check_hdr) ! Optional
+  check_hdr, allow_interp) ! Optional
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1048,6 +1055,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(out) :: ohdr
  type(hdr_type),optional,intent(in) :: check_hdr
+ logical,optional,intent(in) :: allow_interp
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(out) :: orhor(cplex*nfft,nspden)
@@ -1056,26 +1064,34 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0
- integer :: unt,fform,iomode,optin,optout,my_rank,mybase,globase,cplex_file
+ integer :: unt,fform,iomode,my_rank,mybase,globase,cplex_file
+!integer :: optin,optout
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
+ integer,parameter :: fform_den=52
+ integer :: restart, restartpaw
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
  real(dp) :: ratio,ucvol
  real(dp) :: cputime,walltime,gflops
- logical :: need_interp,have_mpifft
+ logical :: need_interp,have_mpifft,allow_interp__
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: my_fname
  character(len=nctk_slen) :: varname
  !type(mpi_type) :: mpi_enreg_seq
 !arrays
- integer :: ngfft_file(18)
+!integer :: ngfft_file(18)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rhogdum(1)
- real(dp),allocatable :: rhor_file(:,:)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+!real(dp) :: rhogdum(1)
+ real(dp),allocatable :: rhor_file(:,:),rhor_tmp(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_file(:)
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); have_mpifft = (nfft /= product(ngfft(1:3)))
+ allow_interp__ = .False.; if (present(allow_interp)) allow_interp__ = allow_interp
 
  call wrtout(std_out, sjoin(" About to read data(r) from:", fname), 'COLL')
  call cwtime(cputime, walltime, gflops, "start")
@@ -1097,18 +1113,18 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      end if
 
      call hdr_fort_read(ohdr, unt, fform)
-     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     call validate_hdr_den()
 
-     ! Read PAW Rhoij
-     if (ohdr%usepaw == 1) then
-       ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
-       call pawrhoij_nullify(pawrhoij_file)
-       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
-&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
-       call pawrhoij_copy(ohdr%pawrhoij, pawrhoij_file)
-       !call pawrhoij_io(pawrhoij_file, unt, ohdr%pawrhoij(1)%nsppol, ohdr%pawrhoij(1)%nspinor, ohdr%pawrhoij(1)%nspden, & !& ohdr%lmn_size, ohdr%typat, ohdr%headform, "Read")
+     ! Check important dimensions.
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
+     if (fform /= fform_den) then
+       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
+       MSG_WARNING(msg)
      end if
+     cplex_file = 1
+     if (ohdr%pertcase /= 0) then
+       cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1
+     end if
+     ABI_CHECK(cplex_file == cplex, "cplex_file != cplex")
 
      ! Read FFT array (full box)
      nfftot_file = product(ohdr%ngfft(:3))
@@ -1116,34 +1132,34 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      do ispden=1,ohdr%nspden
        read(unt, err=10, iomsg=errmsg) (rhor_file(ifft,ispden), ifft=1,cplex*nfftot_file)
      end do
-
      close(unt)
 
 #ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      NCF_CHECK(nctk_open_read(unt, my_fname, xmpi_comm_self))
-
      call hdr_ncread(ohdr, unt, fform)
-     call validate_hdr_den()
+
+     ! Check important dimensions.
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
+     if (fform /= fform_den) then
+       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
+       MSG_WARNING(msg)
+     end if
+
+     cplex_file = 1
+     if (ohdr%pertcase /= 0) then
+       cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1
+     end if
+     ABI_CHECK(cplex_file == cplex, "cplex_file != cplex")
 
      ! Read FFT array (full box)
      nfftot_file = product(ohdr%ngfft(:3))
      ABI_MALLOC(rhor_file, (cplex*nfftot_file, ohdr%nspden))
 
      varname = varname_from_fname(my_fname)
-     NCF_CHECK(nf90_get_var(unt, nctk_idname(unt, varname), rhor_file, count=[cplex,n1,n2,n3,ohdr%nspden]))
-
-     ! Read PAW Rhoij
-     if (ohdr%usepaw == 1) then
-       ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
-       call pawrhoij_nullify(pawrhoij_file)
-       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
-&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
-       call pawrhoij_copy(ohdr%pawrhoij, pawrhoij_file)
-       !call pawrhoij_io(pawrhoij_file, unt, ohdr%pawrhoij(1)%nsppol, ohdr%pawrhoij(1)%nspinor, ohdr%pawrhoij(1)%nspden, &
-       !& ohdr%lmn_size, ohdr%typat, ohdr%headform, "Read", form="netcdf")
-     end if
-
+     ncerr= nf90_get_var(unt, nctk_idname(unt, varname), rhor_file, &
+                        count=[cplex, ohdr%ngfft(1), ohdr%ngfft(2), ohdr%ngfft(3), ohdr%nspden])
+     NCF_CHECK(ncerr)
      NCF_CHECK(nf90_close(unt))
 #endif
    case default
@@ -1151,19 +1167,16 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    end select
 
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
-   if (need_interp) then
-     ABI_CHECK(cplex == 1, "cplex != 1 not coded!") ! TODO complex densities are not treated.
-     ABI_CHECK(ohdr%nspden == nspden, "Change of nspden not coded!") ! TODO complex densities are not treated.
-     MSG_ERROR("Density interpolation has been disabled")
-     ! The renormalization of the charge is not done in case of PAW since the onsite
-     ! contributions have to be added. This is left to the caller.
-     call wrtout(std_out," read_rhor: FFT meshes differ, performing Fourier interpolation.","COLL")
+   if (need_interp .and. allow_interp__) then
+     MSG_COMMENT("Real space meshes (DEN file, input rhor) are different. Will interpolate rhor(r).")
+
+#if 0
+     ABI_CHECK(cplex == 1, "cplex != 1 not coded!")
      ngfft_file(1:3) = ohdr%ngfft(1:3)
      ngfft_file(4) = 2*(ngfft_file(1)/2)+1 ! 4:18 are used in fourdp
      ngfft_file(5) = 2*(ngfft_file(2)/2)+1
      ngfft_file(6) = ngfft_file(3)
      ngfft_file(7:18) = ngfft(7:18)
-
      optin  = 0 ! Input is taken from rhor
      optout = 0 ! Output is only in real space
 
@@ -1175,20 +1188,48 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      call fourier_interpol(cplex,ohdr%nspden,optin,optout,nfftot_file,ngfft_file,nfft,ngfft,&
        paral_kgb0,mpi_enreg,rhor_file,orhor,rhogdum,rhogdum)
 
-     !interpol3d(r,nr1,nr2,nr3,grid)
-
      !call destroy_mpi_enreg(MPI_enreg_seq)
+#endif
 
-     ! Renormalize charge to avoid errors due to the interpolation ===
+     ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))
+     call interpolate_denpot(cplex, ohdr%ngfft(1:3), ohdr%nspden, rhor_file, ngfft(1:3), rhor_tmp)
+
+     ohdr%ngfft(1:3) = ngfft(1:3)
+     nfftot_file = product(ohdr%ngfft(:3))
+     ABI_FREE(rhor_file)
+     ABI_MALLOC(rhor_file, (cplex*nfftot_file, ohdr%nspden))
+     rhor_file = rhor_tmp
+     ABI_FREE(rhor_tmp)
+
+     ! Renormalize charge to avoid errors due to the interpolation.
      ! Do this only for NC since for PAW we should add the onsite contribution.
+     ! This is left to the caller.
      if (ohdr%usepaw == 0) then
        call metric(gmet, gprimd, -1, rmet, ohdr%rprimd, ucvol)
-       ratio = ohdr%nelect / (sum(orhor(:,1))*ucvol/ product(ngfft(1:3)) )
-       orhor = orhor * ratio
+       ratio = ohdr%nelect / (sum(rhor_file(:,1))*ucvol/ product(ngfft(1:3)))
+       rhor_file = rhor_file * ratio
        write(msg,'(a,f8.2,a,f8.4)')' Expected nelect: ',ohdr%nelect,' renormalization ratio: ',ratio
        call wrtout(std_out,msg,'COLL')
      end if
    end if ! need_interp
+
+   ! Read PAW Rhoij
+   if (ohdr%usepaw == 1) then
+     ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
+     call pawrhoij_nullify(pawrhoij_file)
+     call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+         ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
+     call pawrhoij_copy(ohdr%pawrhoij, pawrhoij_file)
+   end if
+
+  ! Check that restart is possible !
+  ! This check must be done here because we may have changed hdr% if need_interp
+  if (present(check_hdr)) then
+    ! FIXME: Temporary hack: fform_den to make hdr_check happy!
+    call hdr_check(fform_den, fform_den, check_hdr, ohdr, "COLL", restart, restartpaw)
+    !call hdr_check(fform_den, fform, check_hdr, ohdr, "COLL", restart, restartpaw)
+  end if
+
 
  end if ! master
 
@@ -1212,28 +1253,12 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
        call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
 &           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
      end if
-#if 0
-     ! FIXME: This code segfaults, likely due to pawrhoij_bcast
-     !MSG_ERROR("Before bcast")
-     ! WARNING: aliasing!!
-     !call pawrhoij_bcast(pawrhoij_file, pawrhoij_file, master, comm) !,comm_atom)
-     !call pawrhoij_bcast(ohdr%pawrhoij, pawrhoij_file, master, comm) !,comm_atom)
-     MSG_ERROR("After bcast")
-     if (size(pawrhoij) /= size(pawrhoij_file)) then
-       call pawrhoij_copy(pawrhoij_file, pawrhoij, comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, &
-&                         nfftkeep_nspden=.true.)
-     else
-       call pawrhoij_copy(pawrhoij_file, pawrhoij, keep_nspden=.true.)
-     end if
-#else
-     ! This one is ok but cannot be used once I remove hdr%pawrhoij!!
      if (size(ohdr%pawrhoij) /= size(pawrhoij)) then
        call pawrhoij_copy(ohdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
 &                         keep_nspden=.true.)
      else
        call pawrhoij_copy(ohdr%pawrhoij,pawrhoij, keep_nspden=.true.)
      end if
-#endif
    end if
 
    if (my_rank /= master) then
@@ -1307,52 +1332,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  ! Handle Fortran IO error
 10 continue
  MSG_ERROR(errmsg)
-
-contains
-
-subroutine validate_hdr_den()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'validate_hdr_den'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'validate_hdr_den'
-!End of the abilint section
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: fform_den=52
- integer :: restart, restartpaw
-! *************************************************************************
-
-  !ABI_CHECK((ohdr%nspden == nspden), 'Mismatch in nspden') !MT aug. 2017: can now convert spin-component when reading
-  if (fform /= fform_den) then
-    write(msg,'(3a,i0)')' File: ',trim(my_fname),' is not a density file: fform= ',fform
-    MSG_WARNING(msg)
-  end if
-
-  cplex_file = 1
-  if (ohdr%pertcase /= 0) then
-    cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1
-  end if
-  ABI_CHECK(cplex_file == cplex, "cplex_file != cplex")
-
-  ! check that restart is possible !!
-  if (present(check_hdr)) then
-    !call hdr_check(fform_den, fform, check_hdr, ohdr, "COLL", restart, restartpaw)
-    ! FIXME: Temporary hack to make hdr_check happy!
-    call hdr_check(fform_den, fform_den, check_hdr, ohdr, "COLL", restart, restartpaw)
-  end if
-
-end subroutine validate_hdr_den
 
 end subroutine read_rhor
 !!***

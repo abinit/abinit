@@ -7,7 +7,7 @@
 !!  Compute the matrix elements of the Fan-Migdal self-energy in the KS basis set.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -778,7 +778,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
              !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
              !&mpi_spintab=mpi_enreg%my_isppoltab)
-         call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+         call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&  ! In
@@ -2061,50 +2061,15 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm)
+ ABI_UNUSED(ikcalc)
+ ABI_UNUSED(spin)
+ ABI_UNUSED(ebands%mband)
 
- call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
- call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
- call xmpi_sum_master(self%dw_vals, master, comm, ierr)
- if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- if (self%gfw_nomega > 0) call xmpi_sum_master(self%gfw_vals, master, comm, ierr)
- if (self%has_nuq_terms) call xmpi_sum_master(self%vals_nuq, master, comm, ierr)
-
- ! Only master writes
- if (my_rank /= master) return
-
- ik_ibz = self%kcalc2ibz(ikcalc, 1)
-
- if (self%symsigma == +1) then
-   ! Average self-energy matrix elements in the degenerate subspace.
-   do ideg=1,size(self%degtab(ikcalc, spin)%bids)
-     bids => self%degtab(ikcalc, spin)%bids(ideg)%vals
-     nstates = size(bids)
-
-     do it=1,self%ntemp
-       ! Average QP(T) and Z(T).
-       cavg1 = sum(self%vals_e0ks(it, bids(:))) / nstates
-       cavg2 = sum(self%dvals_de0ks(it, bids(:))) / nstates
-       ravg = sum(self%dw_vals(it, bids(:))) / nstates
-       do ii=1,nstates
-         self%vals_e0ks(it, bids(ii)) = cavg1
-         self%dvals_de0ks(it, bids(ii)) = cavg2
-         self%dw_vals(it, bids(ii)) = ravg
-       end do
-
-       if (self%nwr > 0) then
-         ! Average Sigma(omega, T)
-         do iw=1,self%nwr
-           cavg1 = sum(self%vals_wr(iw, it, bids(:))) / nstates
-           do ii=1,nstates
-             self%vals_wr(iw, it, bids(ii)) = cavg1
-           end do
-         end do
-       end if
-
-       !if (self%has_nuq_terms) then
-       !  self%vals_nuq(it, bids(:), :, :, :) = sum(self%vals_nuq(it, bids(:), :, :, :)) / nstates
-       !end if
+ ! Compute QP corrections.
+ ! Symmetrize self-energy matrix elements (symsigma == 1).
+ !if (self%symsigma == 1) then
+ !  NOT_IMPLEMENTED_ERROR()
+ !end if
 
      end do ! it
    end do ! ideg

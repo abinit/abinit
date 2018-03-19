@@ -9,7 +9,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2018 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,9 +102,6 @@ module m_fock
   integer :: ntypat
    ! Number of type of atoms
 
-  integer :: cg_typ
-    ! Option to control the application of Vx in cgwf.F90
-
   integer :: nnsclo_hf
     ! Number of iterations with fixed occupied states when calculating the exact exchange contribution.
 
@@ -140,14 +137,18 @@ module m_fock
     !  cutoff value on G**2 for sphere inside fft box.
     !   (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2)). Used in hartre
 
-  real(dp) :: hybrid_mixing
+  real(dp) :: hyb_mixing
     ! hybrid mixing coefficient for the Fock contribution
 
-  real(dp) :: hybrid_mixing_sr
+  real(dp) :: hyb_mixing_sr
     ! hybrid mixing coefficient for the short-range Fock contribution
 
-  real(dp) :: hybrid_range
-    ! hybrid range for separation
+  real(dp) :: hyb_range_dft
+    ! hybrid range for separation, used in the DFT functional 
+    ! (should be equal to hyb_range_fock, but this is not true for HSE03)
+
+  real(dp) :: hyb_range_fock
+    ! hybrid range for separation, used in the fock contribution 
 
   integer, allocatable :: atindx(:)
     !  atindx(natom)=index table for atoms (see gstate.f)
@@ -178,10 +179,6 @@ module m_fock
   real(dp), allocatable :: forces(:,:)
     ! forces(3,natom))
     ! contribution of the fock term to forces
-
-  real(dp), allocatable  :: ffnl_str(:,:,:,:)
-    ! ffnl_str(npw,dimffnl,lmnmax,ntypat)
-    ! nonlocal form factors for stresses calculation
 
   real(dp), allocatable :: eigen_ikpt(:)
     ! eigen_ikpt,(nband))
@@ -351,7 +348,7 @@ contains
 !!
 !! SOURCE
 
-subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
+subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -364,7 +361,7 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
  type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
@@ -519,7 +516,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ibg,icg,icp,ier,ik,ikg,ikpt,isppol,isym,itypat,jkpt,jpw,jsym,mband,mgfft,mkpt,mkptband
- integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
+ integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
  integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
  character(len=500) :: msg
@@ -624,16 +621,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      fockcommon%nband(ikpt)=dtset%nband(ikpt)
    end do
 
-! mpi_enreg settings
-  
-   call copy_mpi_enreg(mpi_enreg,fockbz%mpi_enreg)
-   fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
-   if (allocated(fockbz%mpi_enreg%proc_distrb)) then
-     ABI_DEALLOCATE(fockbz%mpi_enreg%proc_distrb)
-   end if
-   ABI_ALLOCATE(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
-   fockbz%mpi_enreg%proc_distrb=mpi_enreg%distrb_hf
-
    nband=dtset%mband
    fockcommon%ikpt= 0
 !* Will contain the k-point ikpt of the current state
@@ -671,6 +658,20 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        mkpt=1
      end if
    end if
+
+! mpi_enreg settings
+   call copy_mpi_enreg(mpi_enreg,fockbz%mpi_enreg)
+   fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
+   fockbz%mpi_enreg%comm_kpt=mpi_enreg%comm_hf
+   fockbz%mpi_enreg%nproc_kpt=mpi_enreg%nproc_hf
+   if (allocated(fockbz%mpi_enreg%proc_distrb)) then
+     ABI_DEALLOCATE(fockbz%mpi_enreg%proc_distrb)
+   end if
+   ABI_ALLOCATE(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
+   do jkpt=1,nkpt_bz
+     fockbz%mpi_enreg%proc_distrb(jkpt,:,1)=fockbz%mpi_enreg%me_kpt
+   end do
+ 
    mgfft=dtset%mgfft
    fockcommon%usepaw=dtset%usepaw
    if (fockcommon%usepaw==1)then
@@ -688,7 +689,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
    fockcommon%use_ACE=use_ACE
-   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,use_ACE)
+   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -741,24 +742,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    write(msg,'(2a)') ch10,'Fock_init: initialization of Fock operator parameters:'
    call wrtout(std_out,msg,'COLL')
 
-!* Type of conjugate gradient algorithm used for exact exchange calculation
-   if ((dtset%cgtyphf<0).or.(dtset%cgtyphf>2)) then
-     msg=' - The parameter cgtyp must have an integer value between 0 and 2.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%cgtyphf==0) then 
-     fockcommon%cg_typ=2
-     msg=' - The parameter cgtyphf is set to its default value 2.'
-     call wrtout(std_out,msg,'COLL')
-!* Default value is set to 2 (calculation of exact exchange each time the function getghc is called in cgwf)
-!* May be useful to put default to 1 (calculation of exact exchange only for the first call to getghc in cgwf)
-   else 
-     fockcommon%cg_typ=dtset%cgtyphf
-     write(msg,'(a,i3)') ' - The parameter cgtyphf is set to the value:', dtset%cgtyphf
-     call wrtout(std_out,msg,'COLL')
-!* value chosen by the user : 1 or 2.
-   end if
-  
    fockcommon%fock_converged=.false.
    fockcommon%scf_converged=.false.
 
@@ -784,40 +767,26 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! === Initialize the hybrid coefficient ===
 ! =========================================
    fockcommon%ixc = dtset%ixc
+!  By convention, positive values are the default values for the ixc, 
+!  while negative values have been set by the user (and stored as negative numbers)
+   fockcommon%hyb_mixing=abs(dtset%hyb_mixing)
+   fockcommon%hyb_mixing_sr=abs(dtset%hyb_mixing_sr)
+   fockcommon%hyb_range_dft=abs(dtset%hyb_range_dft)
+   fockcommon%hyb_range_fock=abs(dtset%hyb_range_fock)
 
-   fockcommon%hybrid_mixing=zero
-   fockcommon%hybrid_mixing_sr=zero
-   fockcommon%hybrid_range=zero
-
-   if (dtset%ixc==40) then
-     fockcommon%hybrid_mixing=one
-     fockcommon%hybrid_mixing_sr=zero
-     fockcommon%hybrid_range=zero
-     msg=' - This is an Hartree-Fock calculation. The mixing coefficient alpha is set to 1.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc==41) then
-     fockcommon%hybrid_mixing=one/four
-     fockcommon%hybrid_mixing_sr=zero
-     fockcommon%hybrid_range=zero
-     msg=' - This is a standard PBE0 calculation. The mixing coefficient alpha is set to 0.25.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc==42) then
-     fockcommon%hybrid_mixing=one/three
-     fockcommon%hybrid_mixing_sr=zero
-     fockcommon%hybrid_range=zero
-     msg=' - This is a modified PBE0 calculation. The mixing coefficient alpha is set to 0.33.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc<0) then
-     call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hybrid_mixing,hyb_mixing_sr=fockcommon%hybrid_mixing_sr,&
-&                                            hyb_range=fockcommon%hybrid_range)
-     if (abs(fockcommon%hybrid_mixing)>tol8.or.abs(fockcommon%hybrid_mixing_sr)>tol8) then
-       msg=' - This is a hybrid XC functional from LibXC. The mixing and range coeffs are set accordingly.'
-       call wrtout(std_out,msg,'COLL')
+!  Set the hybrid parameters if functional from libxc for which parameters can be changed, or if the user asked to do so. 
+!  Usually, these parameters were obtained from libxc,
+!  but the user might have possibly modified them. By the way, must define them here for the usual changeable fonctionals, 
+!  since otherwise might inherit them from the previous dataset !
+   if(dtset%ixc<0)then
+     if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
+&      min(dtset%hyb_mixing,dtset%hyb_mixing_sr,dtset%hyb_range_dft,dtset%hyb_range_fock)<-tol8)then
+       call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,&
+&                                              hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
+&                                              hyb_range=fockcommon%hyb_range_dft)
      end if
    end if
+
 
 ! ======================================================
 ! === Initialize the data relative to Poisson solver ===
@@ -836,73 +805,41 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 
    if (dtset%kptopt>=1 .and. dtset%kptopt<=4) then
-     if (dtset%kptopt/=3) then
 ! ============================================
 ! === Initialize the set of k-points in BZ ===
 ! ============================================
-!* Generate all the k-points in BZ (Monkhorst-Pack grid)
-!* brav=1 to treat all Bravais lattices ; iout=0 since we do not want any output ; option=0 since we consider k-points
-       call smpbz(1,0,dtset%kptrlatt,nkpt_bz,nkpt,dtset%nshiftk,0,dtset%shiftk,kptns_hf)
+     kptns_hf(:,1:nkpt_bz)=dtset%kptns_hf(:,1:nkpt_bz)
 !* kptns_hf contains the special k points obtained by the Monkhorst & Pack method, in reduced coordinates. (output)
-       if (nkpt_bz/=nkpt) then
-          msg='The value of nkpt_bz and the result of smpbz should be equal!'
-          MSG_ERROR(msg)
-       end if
 
 ! =======================================================
 ! === Compute the transformation to go from IBZ to BZ ===
 ! =======================================================
 !* Compute the reciprocal space metric.
-       call matr3inv(rprimd,gprimd)
-       gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+     call matr3inv(rprimd,gprimd)
+     gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
 !* Calculate the array indkk which describes how to get IBZ from BZ
 !* dksqmax=maximal value of the norm**2 of the difference between a kpt2 vector and the closest k-point found from the kptns1 set, using symmetries. (output)
 !* sppoldbl=1, no spin-polarisation doubling is required.
-       timrev=1 ; if (dtset%kptopt==4) timrev=0
+     timrev=1 ; if (dtset%kptopt==3 .or. dtset%kptopt==4) timrev=0
 !* timrev=1 if the use of time-reversal is allowed ; 0 otherwise
-       if (dtset%kptopt==2) then
-!* Only time reversal symmetry is used.
-         symm=0 ; symm(1,1)=1 ; symm(2,2)=1 ; symm(3,3)=1
-         call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&            nkpt_bz,1,1,indx,symm,timrev)
-       else
+     if (dtset%kptopt==2 .or. dtset%kptopt==3) then
+!* No space symmetry is used, if kptopt==2 time reversal symmetry is used.
+       symm=0 ; symm(1,1)=1 ; symm(2,2)=1 ; symm(3,3)=1
+       call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
+&          nkpt_bz,1,1,indx,symm,timrev)
+     else
 !* As in getkgrid, no use of antiferromagnetic symmetries thans to the option sppoldbl=1
-         call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&            nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
-       end if
-!* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
-!*      indkk(:,1)   = k point of IBZ, kpt_ibz
-!*      indkk(:,2)   = symmetry operation to apply to kpt_ibz to give the k point of BZ
-!*                     (if 0, means no symmetry operation, equivalent to identity )
-!*      indkk(:,3:5) = Umklapp vectors to apply to remain in BZ
-!*      indkk(:,6)   = 1 if time-reversal was used to generate the k point of BZ, 0 otherwise
-!* No use of symafm to generate spin down wfs from spin up wfs for the moment
-
-     else ! In this case, dtset%kptopt=3, one deals with BZ directly.
-! ============================================
-! === Initialize the set of k-points in BZ ===
-! ============================================
-       if (nkpt_bz/=dtset%nkpt) then
-         msg='In this version, the value of nkpt_bz and nkpt should be equal!'
-         MSG_ERROR(msg)
-       end if
-
-       kptns_hf=dtset%kptns
-
-! ==========================================================
-! === Initialize the transformation to go from IBZ to BZ ===
-! ==========================================================
-!* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
-       do ikpt=1,nkpt_bz
-         indkk(ikpt,1)=ikpt
-         indkk(ikpt,2)=1
-       end do
-!* indkk(:,1)   = k point of BZ and kpt=kpt_hf
-!* all the other field are zero because the Identity is the only symmetry operation.
-
-!* In the most general case, use of listkk is certainly possible.
+       call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
+&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
      end if
+!* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
+!*    indkk(:,1)   = k point of IBZ, kpt_ibz
+!*    indkk(:,2)   = symmetry operation to apply to kpt_ibz to give the k point of BZ
+!*                   (if 0, means no symmetry operation, equivalent to identity )
+!*    indkk(:,3:5) = Umklapp vectors to apply to remain in BZ
+!*    indkk(:,6)   = 1 if time-reversal was used to generate the k point of BZ, 0 otherwise
+!* No use of symafm to generate spin down wfs from spin up wfs for the moment
 
    else
      if (dtset%kptopt==0) then
@@ -1425,9 +1362,7 @@ subroutine fock_common_destroy(fock)
     call pawfgrtab_free(fock%pawfgrtab)
     ABI_DATATYPE_DEALLOCATE(fock%pawfgrtab)
  endif
- if (allocated(fock%ffnl_str)) then
-    ABI_DEALLOCATE(fock%ffnl_str)
- endif
+ 
  ! Put the integer to 0
  fock%ieigen=0
  fock%ikpt=0
@@ -1440,9 +1375,10 @@ subroutine fock_common_destroy(fock)
 !* [description of divergence in |q+G|=0]
 !* Put the real (dp) to 0
  fock%gsqcut=zero
- fock%hybrid_mixing=zero
- fock%hybrid_mixing_sr=zero
- fock%hybrid_range=zero
+ fock%hyb_mixing=zero
+ fock%hyb_mixing_sr=zero
+ fock%hyb_range_dft=zero
+ fock%hyb_range_fock=zero
 
  DBG_EXIT("COLL")
 end subroutine fock_common_destroy
@@ -1656,6 +1592,7 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 
    ! Select only the occupied states (such that fock%occ_bz > 10^-8)
    if (abs(occ(iband))>tol8) then
+      fock_energy=fock_energy
 !     fock_energy=fock_energy + half*fock%eigen_ikpt(iband)*occ(iband)*dtset%wtk(ikpt)
      !* Sum the contribution of each occupied states at point k_i
      !* No need to multiply %wtk by ucvol since there is no factor 1/ucvol in the definition of %wtk
@@ -1713,8 +1650,8 @@ subroutine fock_update_exc(fock_energy,xc_energy,xcdc_energy)
 
 ! *************************************************************************
 
-!xc_energy = fock%hybrid_mixing*fock_energy
-!xcdc_energy = two*fock%hybrid_mixing*fock_energy
+!xc_energy = fock%hyb_mixing*fock_energy
+!xcdc_energy = two*fock%hyb_mixing*fock_energy
  xc_energy =  fock_energy
  xcdc_energy = two*fock_energy
 !CMartins : For an atom, ewald should be set to zero (at the beginning of the loop) and
@@ -1740,7 +1677,6 @@ end subroutine fock_update_exc
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange
 !!  indsym(4,nsym,natom) :: 1:3 shift, and 4 final atom, of symmetry isym operating on iatom
 !!                            (S^{-1}(R - t) = r0 + L, see symatm.F90
-!!  istep=index of the number of steps in the routine scfcv
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
@@ -1770,7 +1706,7 @@ end subroutine fock_update_exc
 !!
 !! SOURCE
 
-subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
+subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
 
 
@@ -1786,7 +1722,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  implicit none
 
 !scalars
- integer, intent(in) :: istep,mcg,mcprj
+ integer, intent(in) :: mcg,mcprj
  real(dp), intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(fock_type),intent(inout),pointer :: fock
@@ -1815,10 +1751,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! *************************************************************************
-
-! DEBUG
-! write (std_out,*) ' fock_updatecwaveocc : enter'
-! ENDDEBUG
 
  call timab(1502,1,tsec)
 
@@ -2069,7 +2001,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
                call pawcprj_symkn(fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1),cprj_tmp(:,1:nspinor),&
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fockbz%tab_symkpt(my_jkpt),fockbz%timerev(my_jkpt),dtset%kptns(:,ikpt),fockbz%pawang%l_max-1,lmnmax,&
-&               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot,atindx=fockcommon%atindx)
+&               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot)
 
                if(dtset%optforces==1) then
                  do iatom=1,dtset%natom
@@ -2137,10 +2069,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  end if
 
  call timab(1502,2,tsec)
-
-! DEBUG
-!write (std_out,*) ' fock_updatecwaveocc : exit'
-! ENDDEBUG
 
 end subroutine fock_updatecwaveocc
 !!***
@@ -2283,12 +2211,12 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,sjoin(" nkpt_bz .....",itoa(fockbz%nkpt_bz)),my_mode)
 
  ! Options
- call wrtout(my_unt,sjoin(" cg_typ .........",itoa(fockcommon%cg_typ)),my_mode)
- call wrtout(my_unt,sjoin(" nnsclo_hf ......",itoa(fockcommon%nnsclo_hf)),my_mode)
- call wrtout(my_unt,sjoin(" ixc ............",itoa(fockcommon%ixc)),my_mode)
- call wrtout(my_unt,sjoin(" hybrid mixing...",ftoa(fockcommon%hybrid_mixing)),my_mode)
- call wrtout(my_unt,sjoin(" hybrid SR mixing",ftoa(fockcommon%hybrid_mixing_sr)),my_mode)
- call wrtout(my_unt,sjoin(" hybrid range....",ftoa(fockcommon%hybrid_range)),my_mode)
+ call wrtout(my_unt,sjoin(" nnsclo_hf .......",itoa(fockcommon%nnsclo_hf)),my_mode)
+ call wrtout(my_unt,sjoin(" ixc .............",itoa(fockcommon%ixc)),my_mode)
+ call wrtout(my_unt,sjoin(" hybrid mixing....",ftoa(fockcommon%hyb_mixing)),my_mode)
+ call wrtout(my_unt,sjoin(" hybrid SR mixing ",ftoa(fockcommon%hyb_mixing_sr)),my_mode)
+ call wrtout(my_unt,sjoin(" hybrid range DFT ",ftoa(fockcommon%hyb_range_dft)),my_mode)
+ call wrtout(my_unt,sjoin(" hybrid range Fock",ftoa(fockcommon%hyb_range_fock)),my_mode)
 
 ! write(msg,"(a,f12.1,a)")" Memory required for HF u(r) states: ",product(shape(fockbz%cwaveocc_bz)) * dp * b2Mb, " [Mb]"
 ! call wrtout(my_unt,msg,my_mode)
@@ -2318,11 +2246,11 @@ end subroutine fock_print
 !!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  izero=if 1, unbalanced components of V(q,g) are set to zero
-!!  hybrid_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hybrid_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
-!!  hybrid_range=hybrid range for separation
+!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
+!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
+!!  hyb_range_fock=hybrid range for separation
 !!  nfft=Total number of FFT grid points.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
@@ -2340,7 +2268,7 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybrid_range,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2355,7 +2283,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: izero,nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hybrid_mixing,hybrid_mixing_sr,hybrid_range,ucvol
+ real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gmet(3,3),qphon(3)
@@ -2376,7 +2304,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
 
 ! *************************************************************************
 
- if (abs(hybrid_mixing_sr)>tol8.and.abs(hybrid_range)<tol8) then
+ if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
    msg='SR mixing<>0 while range separation=0!'
    MSG_BUG(msg)
  end if
@@ -2434,8 +2362,16 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-       vqg(1+i23)=hybrid_mixing*divgq0
-       if (abs(hybrid_range)>tol8) vqg(1+i23)=vqg(1+i23)+hybrid_mixing_sr*pi/(hybrid_range**2)
+       vqg(1+i23)=hyb_mixing*divgq0
+
+!      Note the combination of Spencer-Alavi and Erfc screening
+       if (abs(hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+!        This would give a combination of Spencer-Alavi and Erfc screening,
+!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
+!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+       endif
+
      end if
 
      ! Final inner loop on the first dimension (note the lower limit)
@@ -2456,12 +2392,19 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
          den=piinv/gs
 
 !        Spencer-Alavi screening
-         if (abs(hybrid_mixing)>tol8) &
-&          vqg(ii)=vqg(ii)+hybrid_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&          vqg(ii)=vqg(ii)+hybrid_mixing*den
+         if (abs(hyb_mixing)>tol8)then
+           vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!&         vqg(ii)=vqg(ii)+hyb_mixing*den
+         endif
 !        Erfc screening
-         if (abs(hybrid_mixing_sr)>tol8) &
-&          vqg(ii)=vqg(ii)+hybrid_mixing_sr*den*(one-exp(-pi/(den*hybrid_range**2)))
+         if (abs(hyb_mixing_sr)>tol8) then
+           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
+!          if(divgq0<pi/(hyb_range_fock**2))then
+!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
+!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
+!          endif
+         endif
 
        end if ! Cut-off
      end do ! End loop on i1
@@ -2507,7 +2450,7 @@ end subroutine bare_vqg
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ)
+!! Copyright (C) 1998-2018 ABINIT group (FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2517,12 +2460,12 @@ end subroutine bare_vqg
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
-!!  hybrid_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hybrid_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
-!!  hybrid_range=hybrid range for separation
+!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
+!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
+!!  hyb_range_fock=hybrid range for separation
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_bz= number of k points in the BZ
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)
@@ -2551,7 +2494,7 @@ end subroutine bare_vqg
 #include "abi_common.h"
 
 
-subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_range,mpi_enreg,nfft,ngfft,&
+subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
 
@@ -2568,7 +2511,7 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_r
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hybrid_mixing,hybrid_mixing_sr,hybrid_range,ucvol
+ real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2591,7 +2534,7 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_r
 
  call timab(568,1,tsec)
 
- if (abs(hybrid_mixing_sr)>tol8.and.abs(hybrid_range)<tol8) then
+ if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
    msg='strfock: SR mixing<>0 while range separation=0!'
    MSG_BUG(msg)
  end if
@@ -2640,26 +2583,26 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_r
          end if
 !        Case G=0:
          if(gsquar<tol10) then
-           if (abs(hybrid_mixing_sr)>tol8) cycle
-           if (abs(hybrid_mixing)>tol8) then
-             fockstr(1)=fockstr(1)+hybrid_mixing*divgq0*rhogsq
-             fockstr(2)=fockstr(2)+hybrid_mixing*divgq0*rhogsq
-             fockstr(3)=fockstr(3)+hybrid_mixing*divgq0*rhogsq
+           if (abs(hyb_mixing_sr)>tol8) cycle
+           if (abs(hyb_mixing)>tol8) then
+             fockstr(1)=fockstr(1)+hyb_mixing*divgq0*rhogsq
+             fockstr(2)=fockstr(2)+hyb_mixing*divgq0*rhogsq
+             fockstr(3)=fockstr(3)+hyb_mixing*divgq0*rhogsq
              cycle
            end if
          end if
 
 !        Spencer-Alavi screening
-         if (abs(hybrid_mixing)>tol8) then
+         if (abs(hyb_mixing)>tol8) then
            arg=two_pi*rcut*sqrt(gsquar)
-           tot=hybrid_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-           tot1=hybrid_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+           tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
          end if
 
 !        Erfc screening
-         if (abs(hybrid_mixing_sr)>tol8) then
-           arg=-gsquar*pi**2/(hybrid_range**2)
-           tot=tot+hybrid_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+         if (abs(hyb_mixing_sr)>tol8) then
+           arg=-gsquar*pi**2/(hyb_range_fock**2)
+           tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
          end if
          fockstr(1)=fockstr(1)+tot*gcart(1)*gcart(1)+tot1
          fockstr(2)=fockstr(2)+tot*gcart(2)*gcart(2)+tot1

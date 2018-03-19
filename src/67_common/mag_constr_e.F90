@@ -7,7 +7,7 @@
 !! This routine is called to compute the energy corresponding to constrained magnetic moments.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (ILuk)
+!! Copyright (C) 1998-2018 ABINIT group (ILuk)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,6 +67,7 @@ use defs_abitypes
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii
+ integer :: cplex1=1    ! dummy argument for calcdensphere
  real(dp) :: intgden_proj, Epen,Econstr,lVp, norm
 !arrays
  real(dp) :: intmm(3), mag_1atom(3)
@@ -83,8 +84,9 @@ use defs_abitypes
  ABI_ALLOCATE (intgden, (nspden,natom))
 
 !We need the integrated magnetic moments
+ cplex1=1
  call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,&
-& 1,intgden)
+& 1,cplex1,intgden=intgden)
 
  Epen=0
  Econstr=0

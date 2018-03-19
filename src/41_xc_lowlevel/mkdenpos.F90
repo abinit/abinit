@@ -9,7 +9,7 @@
 !! set it to the value of xc_denpos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@
 !!
 !! PARENTS
 !!      bethe_salpeter,m_pawxc,mkcore_wvl,posdoppler,poslifetime,posratecore
-!!      psolver_rhohxc,rhotoxc,rhohxcpositron,wvl_initro
+!!      psolver_rhohxc,rhohxcpositron,rhotoxc,wvl_initro
 !!
 !! CHILDREN
 !!

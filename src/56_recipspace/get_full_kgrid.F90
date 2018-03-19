@@ -9,7 +9,7 @@
 !! of kpt_fullbz, and indkpt
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVer,XG)
+!! Copyright (C) 2002-2018 ABINIT group (MVer,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -18,7 +18,7 @@
 !! The real spherical harmonics are given in table 3.1 of Wannier90 user guide.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2017 ABINIT group (T. Rangel, DRH)
+!!  Copyright (C) 2009-2018 ABINIT group (T. Rangel, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

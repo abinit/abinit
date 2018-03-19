@@ -8,7 +8,7 @@
 !!  of PAW data over atomic sites
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MT, MD)
+!! Copyright (C) 2012-2018 ABINIT group (MT, MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -369,7 +369,7 @@ end subroutine get_proc_atmtab
 !!  containing the corresponding processor indexes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MD)
+!! Copyright (C) 2012-2018 ABINIT group (MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

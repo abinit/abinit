@@ -10,7 +10,7 @@
 !! Perform some preliminary checks and echo these dimensions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MKV)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MKV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@
 !!   initialized, while some others will still be initialized later.
 !!   The list of records of dtset initialized in the present routine is:
 !!   acell_orig,densty,iatfix,kptopt,kptrlatt,
-!!   mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkptgw,nkpt,
+!!   mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkpt,nkptgw,nkpthf,
 !!   nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
 !!   rprim_orig,rprimd_orig,shiftk,
 !!   spgroup,spinat,typat,vel_orig,vel_cell_orig,xred_orig
@@ -111,7 +111,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !scalars
  integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natom,nkpt,npsp,npspalch
+ integer :: natom,nkpt,nkpthf,npsp,npspalch
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt
@@ -124,7 +124,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
 !real(dp) :: field(3)
- real(dp),allocatable :: amu(:),dprarr(:),kpt(:,:),mixalch(:,:),nucdipmom(:,:)
+ real(dp),allocatable :: amu(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
@@ -571,6 +571,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call chkint_ge(1,1,cond_string,cond_values,ierr,'nkpt',nkpt,1,iout)
  end if
 
+ nkpthf=nkpt
+ dtset%nkpthf=nkpt
+
 !Will compute the actual value of nkpt, if needed. Otherwise,
 !test that the value of nkpt is OK, if kptopt/=0
 !Set up dummy arrays istwfk, kpt, wtk
@@ -578,6 +581,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_ALLOCATE(istwfk,(nkpt))
    ABI_ALLOCATE(kpt,(3,nkpt))
+   ABI_ALLOCATE(kpthf,(3,nkpthf))
    ABI_ALLOCATE(wtk,(nkpt))
 !  Here, occopt is also a dummy argument
    occopt=1 ; dtset%nshiftk=1 ; dtset%kptrlatt(:,:)=0
@@ -606,17 +610,19 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
 
 !  Find the k point grid
-   call inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
-&   kpt,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
-&   nkpt,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
+   call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
+&   kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
+&   nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
 &   occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
 &   string,symafm,symrel,vacuum,wtk)
 
    ABI_DEALLOCATE(istwfk)
    ABI_DEALLOCATE(kpt)
+   ABI_DEALLOCATE(kpthf)
    ABI_DEALLOCATE(wtk)
-!  nkpt has been computed, as well as the k point grid, if needed
+!  nkpt and nkpthf have been computed, as well as the k point grid, if needed
    dtset%nkpt=nkpt
+   dtset%nkpthf=nkpthf
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')
@@ -946,7 +952,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lexexch',tread,'INT')
    if(tread==1) dtset%lexexch(1:dtset%ntypat)=intarr(1:dtset%ntypat)
  end if
-
+! LDA minus half keyword
+ call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'ldaminushalf',tread,'INT')
+ if(tread==1) dtset%ldaminushalf(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 !Some plowan data
  dtset%plowan_natom=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_natom',tread,'INT')

@@ -9,7 +9,7 @@
 !! Container type is defined
 !! 
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -206,7 +206,7 @@ end subroutine strain_free
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential,m_fit_polynomial_coeff
+!!      compute_anharmonics,m_effective_potential,m_fit_data
 !!
 !! CHILDREN
 !!      wrtout

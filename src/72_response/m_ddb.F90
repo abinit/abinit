@@ -10,7 +10,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,9 @@
 MODULE m_ddb
 
  use defs_basis
- use m_profiling_abi
+ use m_profiling_abi 
+ use defs_abitypes
+ use defs_datatypes
  use m_errors
  use m_xmpi
 
@@ -41,7 +43,10 @@ MODULE m_ddb
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
 &                             dfpt_phfrq, sytens
-
+ use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
+ use m_psps,           only : psps_copy, psps_free
+ use m_dtset
+ 
  implicit none
 
  private
@@ -141,6 +146,7 @@ MODULE m_ddb
                                     ! a direct diagonalizatin of the dynamical matrix.
  public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
                                     ! from the Dynamical matrix at Gamma. Used in ddb_diagoq.
+ public :: ddb_to_dtset        ! Transfer ddb_hdr to dtset datatype
 
  ! TODO: Add option to change amu.
  !public :: ddb_change_amu
@@ -221,6 +227,7 @@ CONTAINS  !===========================================================
 !!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -277,6 +284,7 @@ end subroutine ddb_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -338,6 +346,7 @@ end subroutine ddb_copy
 !!      ddb_interpolate,dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -402,6 +411,7 @@ end subroutine ddb_malloc
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -508,6 +518,7 @@ end subroutine ddb_bcast
 !!      thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -775,6 +786,7 @@ end subroutine gtblk9
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -856,6 +868,7 @@ end subroutine gamma9
 !!      m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1097,7 +1110,6 @@ end subroutine read_blok8
 !! indsym(4,msym,natom)=indirect indexing array for symmetries
 !! natom=number of atoms in cell
 !! nsym=number of space group symmetries
-!! occopt=occupation option
 !! rmet(3,3)=metric tensor in real space (bohr^2)
 !! rprim(3,3)= primitive translation vectors
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
@@ -1106,7 +1118,6 @@ end subroutine read_blok8
 !! tnons(3,nsym)=fractional nonsymmorphic translations
 !! typat(natom)=type integer for each atom in cell
 !! ucvol=unit cell volume in bohr**3
-!! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! xcart(3,natom)=atomic cartesian coordinates
 !! xred(3,natom)=fractional dimensionless atomic coordinates
 !! zion(ntypat)=charge on each type of atom (real number)
@@ -1116,15 +1127,16 @@ end subroutine read_blok8
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
 subroutine rdddb9(acell,atifc,amu,ddb,&
-& ddbun,dimekb,filnam,gmet,gprim,indsym,iout,&
-& lmnmax,mband,mpert,msize,msym,&
+& ddbun,filnam,gmet,gprim,indsym,iout,&
+& mband,mpert,msize,msym,&
 & natifc,natom,nkpt,nsym,ntypat,&
-& occopt,rmet,rprim,symrec,symrel,symafm,&
-& tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+& rmet,rprim,symrec,symrel,symafm,&
+& tnons,typat,ucvol,xcart,xred,zion,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1145,8 +1157,8 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !   and
 !    the allocation allocate(kpt(3,nkpt)) is strange
 !scalars
- integer,intent(in) :: ddbun,dimekb,iout,lmnmax,mband,mpert,msize,msym,natifc
- integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,usepaw
+ integer,intent(in) :: ddbun,iout,mband,mpert,msize,msym,natifc
+ integer,intent(inout) :: natom,nkpt,nsym,ntypat
  real(dp),intent(out) :: ucvol
  character(len=*),intent(in) :: filnam
  type(ddb_type),intent(inout) :: ddb
@@ -1368,6 +1380,7 @@ end subroutine rdddb9
 !!      m_ddb,thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1463,6 +1476,7 @@ end subroutine chkin9
 !!      m_ddb,nonlinear
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1600,7 +1614,7 @@ end subroutine nlopt
 !!
 !! INPUTS
 !!  filename=DDB filename.
-!!  brav = 1 -> simple lattice; 2 -> face-centered cubic;
+!!  brav = 1 or -1 -> simple lattice; 2 -> face-centered cubic;
 !!         3 -> body-centered lattice; 4 -> hexagonal lattice (D6h)
 !!  natom=Number of atoms in the unit cell
 !!  atifc(natom)=list of the atom ifc to be analysed
@@ -1622,6 +1636,7 @@ end subroutine nlopt
 !!      anaddb,dfpt_looppert,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1715,11 +1730,11 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    call ddb_malloc(ddb,msize,nblok,natom,ntypat)
 
    call rdddb9(acell,atifc,amu,ddb,&
-&   ddbun,dimekb,filename,gmet,gprim,indsym,ab_out,&
-&   lmnmax,mband,mpert,msize,msym,&
+&   ddbun,filename,gmet,gprim,indsym,ab_out,&
+&   mband,mpert,msize,msym,&
 &   natifc,ddb_natom,nkpt,nsym,ntypat,&
-&   occopt,rmet,rprim,symrec,symrel,symafm,&
-&   tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+&   rmet,rprim,symrec,symrel,symafm,&
+&   tnons,typat,ucvol,xcart,xred,zion,znucl)
 
    close(ddbun)
 
@@ -1727,9 +1742,9 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    ABI_FREE(indsym)
    ABI_FREE(xcart)
 
-   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when brav/=1
+   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
    ! This section is needed to preserver the behaviour of the old implementation.
-   if (brav/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
+   if (abs(brav)/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
      if(abs(rprim(1,2))<tol6)then
        write(message, '(a,i0,7a)' )&
 &       'The input DDB value of brav is ',brav,',',ch10,&
@@ -1848,6 +1863,7 @@ end subroutine ddb_from_file
 !!      thmeig
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -1967,6 +1983,7 @@ end subroutine carttransf
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2078,6 +2095,7 @@ end subroutine carteig2d
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2178,6 +2196,7 @@ end subroutine dtech9
 !!      m_ddb
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2768,18 +2787,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
  asrq0%d2asr = zero
 
- ! TODO: Tests with asr = 3,4  [v5][t83] and [v5][t84]
- ! fail if I don't allocated these arrays because the code
- ! is accessing the data without checking if the correction has been computed....
- dims = 3*ddb%natom*(3*ddb%natom-1) / 2
- ABI_CALLOC(asrq0%uinvers, (dims, dims))
- ABI_CALLOC(asrq0%vtinvers,(dims, dims))
- ABI_CALLOC(asrq0%singular, (dims))
-
  if (asrq0%iblok == 0) return
  iblok = asrq0%iblok
 
- select case (asr)
+ select case (asrq0%asr)
  case (0)
    continue
 
@@ -2789,10 +2800,10 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  case (3,4)
    ! Rotational invariance for 1D and 0D systems
    ! Compute uinvers, vtinvers and singular matrices.
-   !dims = 3*ddb%natom*(3*ddb%natom-1) / 2
-   !ABI_CALLOC(asrq0%uinvers, (dims, dims))
-   !ABI_CALLOC(asrq0%vtinvers,(dims, dims))
-   !ABI_CALLOC(asrq0%singular, (dims))
+   dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+   ABI_CALLOC(asrq0%uinvers, (dims, dims))
+   ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+   ABI_CALLOC(asrq0%singular, (dims))
 
    call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
      ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
@@ -2853,6 +2864,7 @@ end function ddb_get_asrq0
 !! PARENTS
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -2953,6 +2965,7 @@ end subroutine ddb_diagoq
 !!      anaddb,m_ddb,m_phonons
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3010,6 +3023,7 @@ end subroutine asrq0_apply
 !!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3098,6 +3112,7 @@ end subroutine asrq0_free
 !!      ddb_interpolate,dfptnl_doutput,gstate,mblktyp1,mblktyp5
 !!
 !! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
 !!
 !! SOURCE
 
@@ -3276,6 +3291,208 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  end if !ddb%typ(iblok)
 
 end subroutine ddb_write_blok
+!!***
+
+
+!----------------------------------------------------------------------
+
+
+!!****f* m_ddb/ddb_to_dtset
+!! NAME
+!! ddb_to_dtset
+!!
+!! FUNCTION
+!!   Initialize a dataset object from ddb.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      ddb_hdr_free,ddb_hdr_open_read
+!!
+!! SOURCE
+
+
+subroutine ddb_to_dtset(comm,dtset,filename,psps)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_to_dtset'
+!End of the abilint section
+
+ implicit none
+
+ !Arguments ------------------------------------
+ integer,intent(in) :: comm
+ type(dataset_type),intent(inout) :: dtset
+ type(pseudopotential_type),intent(inout) :: psps
+ ! type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ character(len=*),intent(in) :: filename
+ !Local variables -------------------------
+ integer :: mxnimage,ddbun
+!integer :: ii, nn
+ type(ddb_hdr_type) :: ddb_hdr
+
+! ************************************************************************
+
+ ABI_UNUSED(psps%usepaw)
+
+!Set variables
+ mxnimage = 1 ! Only 1 image in the DDB
+ 
+! Must read natom from the DDB before being able to allocate some arrays needed for invars9
+ ddbun = get_unit()
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm)
+!close ddb file, just want to read the headers
+ close(ddbun)
+ dtset%ngfft = ddb_hdr%ngfft
+ 
+! call psps_copy(psps, ddb_hdr%psps)
+
+! Copy scalars from ddb
+ dtset%natom = ddb_hdr%natom
+ dtset%mband = ddb_hdr%mband
+ dtset%nkpt = ddb_hdr%nkpt
+ dtset%nsym = ddb_hdr%msym
+ dtset%ntypat = ddb_hdr%ntypat
+ dtset%nspden = ddb_hdr%nspden
+ dtset%nspinor = ddb_hdr%nspinor
+ dtset%nsppol = ddb_hdr%nsppol
+ dtset%occopt = ddb_hdr%occopt
+ dtset%usepaw = ddb_hdr%usepaw
+ dtset%intxc = ddb_hdr%intxc
+ dtset%ixc = ddb_hdr%ixc
+ dtset%iscf = ddb_hdr%iscf
+ dtset%dilatmx = ddb_hdr%dilatmx
+ dtset%ecut = ddb_hdr%ecut
+ dtset%ecutsm = ddb_hdr%ecutsm
+ dtset%pawecutdg = ddb_hdr%pawecutdg
+ dtset%kptnrm = ddb_hdr%kptnrm
+ dtset%dfpt_sciss = ddb_hdr%dfpt_sciss
+ dtset%tolwfr = 1.0_dp  ! dummy
+ dtset%tphysel = ddb_hdr%tphysel
+ dtset%tsmear = ddb_hdr%tsmear
+
+ ! Copy arrays from ddb
+ if (allocated(dtset%acell_orig)) then
+   ABI_DEALLOCATE(dtset%acell_orig)
+ end if
+ ABI_ALLOCATE(dtset%acell_orig,(3,mxnimage))
+ dtset%acell_orig(1:3,1) = ddb_hdr%acell(:)
+ 
+ if (allocated(dtset%rprim_orig)) then
+   ABI_DEALLOCATE(dtset%rprim_orig)
+ end if
+ ABI_ALLOCATE(dtset%rprim_orig,(3,3,mxnimage))
+ dtset%rprim_orig(1:3,1:3,1) = ddb_hdr%rprim(:,:)
+
+ if (allocated(dtset%rprimd_orig)) then
+   ABI_DEALLOCATE(dtset%rprimd_orig)
+ end if
+ ABI_ALLOCATE(dtset%rprimd_orig,(3,3,mxnimage))
+ dtset%rprimd_orig(:,1,1) = ddb_hdr%rprim(:,1) * dtset%acell_orig(1,1)
+ dtset%rprimd_orig(:,2,1) = ddb_hdr%rprim(:,2) * dtset%acell_orig(2,1)
+ dtset%rprimd_orig(:,3,1) = ddb_hdr%rprim(:,3) * dtset%acell_orig(3,1)
+
+ if (allocated(dtset%amu_orig)) then
+   ABI_DEALLOCATE(dtset%amu_orig)
+ end if
+ ABI_ALLOCATE(dtset%amu_orig,(dtset%ntypat,mxnimage))
+ dtset%amu_orig(:,1) = ddb_hdr%amu(:)
+ 
+ if (allocated(dtset%typat)) then
+   ABI_DEALLOCATE(dtset%typat)
+ end if
+ ABI_ALLOCATE(dtset%typat,(dtset%natom))
+ dtset%typat(:) = ddb_hdr%typat(1:ddb_hdr%matom)
+ 
+ if (allocated(dtset%spinat)) then
+   ABI_DEALLOCATE(dtset%spinat)
+ end if
+ ABI_ALLOCATE(dtset%spinat,(3,dtset%natom))
+ dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
+ 
+ if (allocated(dtset%xred_orig)) then
+   ABI_DEALLOCATE(dtset%xred_orig)
+ end if
+ ABI_ALLOCATE(dtset%xred_orig,(3,dtset%natom,mxnimage))
+ dtset%xred_orig(:,:,1) = ddb_hdr%xred(1:3,1:ddb_hdr%matom)
+
+ if (allocated(dtset%ziontypat)) then
+   ABI_DEALLOCATE(dtset%ziontypat)
+ end if
+ ABI_ALLOCATE(dtset%ziontypat,(dtset%ntypat))
+ dtset%ziontypat(1:ddb_hdr%mtypat) = ddb_hdr%zion(1:ddb_hdr%mtypat)
+ 
+ if (allocated(dtset%znucl)) then
+   ABI_DEALLOCATE(dtset%znucl)
+ end if
+ ABI_ALLOCATE(dtset%znucl,(dtset%ntypat))
+ dtset%znucl(:) = ddb_hdr%znucl(1:ddb_hdr%mtypat)   
+ 
+ if (allocated(dtset%nband)) then
+   ABI_DEALLOCATE(dtset%nband)
+ end if
+ ABI_ALLOCATE(dtset%nband,(dtset%nkpt)) 
+ dtset%nband(:) = ddb_hdr%nband(1:ddb_hdr%mkpt*ddb_hdr%nsppol)
+ 
+ if (allocated(dtset%symafm)) then
+   ABI_DEALLOCATE(dtset%symafm)
+ end if
+ ABI_ALLOCATE(dtset%symafm,(dtset%nsym))
+ dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
+ 
+ if (allocated(dtset%symrel)) then
+   ABI_DEALLOCATE(dtset%symrel)
+ end if
+ ABI_ALLOCATE(dtset%symrel,(3,3,dtset%nsym))
+ dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
+ 
+ if (allocated(dtset%tnons)) then
+   ABI_DEALLOCATE(dtset%tnons)
+ end if
+ ABI_ALLOCATE(dtset%tnons,(3,dtset%nsym))
+ dtset%tnons(:,:) = ddb_hdr%tnons(1:3,1:ddb_hdr%msym)
+ 
+ if (allocated(dtset%kpt)) then
+   ABI_DEALLOCATE(dtset%kpt)
+ end if
+ ABI_ALLOCATE(dtset%kpt,(3,dtset%nkpt))
+ dtset%kpt(:,:) = ddb_hdr%kpt(1:3,1:ddb_hdr%mkpt)
+ 
+ if (allocated(dtset%wtk)) then
+   ABI_DEALLOCATE(dtset%wtk)
+ end if
+ ABI_ALLOCATE(dtset%wtk,(dtset%nkpt))
+ dtset%wtk(:) = ddb_hdr%wtk(1:ddb_hdr%mkpt)
+ 
+ ! GA: I had way too much problems implementing pawtab_copy.
+ !     The script check-libpaw would report all sorts of errors.
+ !     Therefore, I do a cheap copy here, copying only the relevant info.
+ !call pawtab_copy(pawtab, ddb_hdr%pawtab)
+ ! nn=size(pawtab)
+ ! if (nn.gt.0) then
+ !   do ii=1,nn
+ !     pawtab(ii)%basis_size =ddb_hdr%pawtab(ii)%basis_size
+ !     pawtab(ii)%lmn_size =ddb_hdr%pawtab(ii)%lmn_size
+ !     pawtab(ii)%lmn2_size =ddb_hdr%pawtab(ii)%lmn2_size
+ !     pawtab(ii)%rpaw =ddb_hdr%pawtab(ii)%rpaw
+ !     pawtab(ii)%rshp =ddb_hdr%pawtab(ii)%rshp
+ !     pawtab(ii)%shape_type =ddb_hdr%pawtab(ii)%shape_type
+ !    if (allocated(pawtab(ii)%dij0)) then
+ !      call alloc_copy(ddb_hdr%pawtab(ii)%dij0,  pawtab(ii)%dij0)
+ !    end if
+ !   end do
+ ! end if
+ 
+ call ddb_hdr_free(ddb_hdr)
+
+end subroutine ddb_to_dtset
 !!***
 
 !----------------------------------------------------------------------

@@ -6,14 +6,14 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (Y. Gillet)
+!! Copyright (C) 2009-2018 ABINIT group (Y. Gillet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! ngfft_gw(18)=Information about 3D FFT for density and potentials, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft_gw(18)=Information about 3D FFT for density and potentials, see ~abinit/doc/variables/vargs.htm#ngfft
 !! acell(3)=Length scales of primitive translations (bohr)
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! Dtset<dataset_type>=All input variables for this dataset.
@@ -30,7 +30,7 @@
 !! Vcp<vcoul_t>=Structure gathering information on the Coulomb interaction in reciprocal space,
 !!   including a possible cutoff in real space.
 !! ngfft_osc(18)=Contain all needed information about the 3D FFT for the oscillator matrix elements.
-!!   See ~abinit/doc/input_variables/vargs.htm#ngfft
+!!   See ~abinit/doc/variables/vargs.htm#ngfft
 !! Bsp<excparam>=Basic parameters defining the Bethe-Salpeter run. Completely initialed in output.
 !! Hdr_wfk<Hdr_type>=The header of the WFK file.
 !! Hdr_bse<Hdr_type>=Local header initialized from the parameters used for the Bethe-Salpeter calculation.

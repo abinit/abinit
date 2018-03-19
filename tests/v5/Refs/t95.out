@@ -1,8 +1,8 @@
 
-.Version 8.1.7 of ANADDB 
+.Version 8.7.6 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 13 Dec 2016.
-- ( at 21h20 )
+.Starting date : Thu  8 Mar 2018.
+- ( at 06h29 )
   
 
 ================================================================================
@@ -90,6 +90,7 @@
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.022  and twall      0.023 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -121,75 +122,75 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.626313E-06    0.000000E+00
-       2        0.000000E+00    6.626711E-06    0.000000E+00
-       3        0.000000E+00    6.626471E-06    0.000000E+00
+       1        0.000000E+00    3.161391E-10    0.000000E+00
+       2        0.000000E+00    3.161391E-10    0.000000E+00
+       3        0.000000E+00    3.161391E-10    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -8.985878E-04    1.866717E-05    2.585048E-01
-       2       -8.228458E-04    1.280669E-05    2.115004E-01
-       3        1.625938E-03    9.167980E-05    3.877724E-01
+       1       -9.501404E-04    9.725237E-06    1.204581E-01
+       2       -9.501404E-04    9.725237E-06    1.204581E-01
+       3        1.830588E-03    1.182494E-04    3.945743E-01
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.626313E-06    0.000000E+00
-       2        0.000000E+00    6.626711E-06    0.000000E+00
-       3        0.000000E+00    6.626471E-06    0.000000E+00
+       1        0.000000E+00    3.161391E-10    0.000000E+00
+       2        0.000000E+00    3.161391E-10    0.000000E+00
+       3        0.000000E+00    3.161391E-10    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -1.045554E-03    3.251174E-05    3.325513E-01
-       2       -1.045554E-03    3.251174E-05    3.325513E-01
-       3        1.303270E-03    2.249022E-05    1.480595E-01
+       1       -1.129682E-03    2.303906E-05    2.018661E-01
+       2       -1.129682E-03    2.303906E-05    2.018661E-01
+       3        1.231062E-03    9.677035E-06    7.139932E-02
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -8.985878E-04    1.866717E-05    2.585048E-01
-       2       -8.228458E-04    1.280669E-05    2.115004E-01
-       3        1.625938E-03    9.167980E-05    3.877724E-01
+       1       -9.501404E-04    9.725237E-06    1.204581E-01
+       2       -9.501404E-04    9.725237E-06    1.204581E-01
+       3        1.830588E-03    1.182494E-04    3.945743E-01
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -9.546376E-04    1.089824E-05    1.337182E-01
-       2        5.194475E-04    5.177024E-05    2.145400E+00
-       3        1.118771E-03    4.860519E-05    4.342216E-01
+       1       -1.070872E-03    4.445242E-06    4.334429E-02
+       2        9.900223E-04    5.870730E-05    6.697512E-01
+       3        9.900223E-04    5.870730E-05    6.697512E-01
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -1.045554E-03    3.251174E-05    3.325513E-01
-       2       -1.045554E-03    3.251174E-05    3.325513E-01
-       3        1.303270E-03    2.249022E-05    1.480595E-01
+       1       -1.129682E-03    2.303906E-05    2.018661E-01
+       2       -1.129682E-03    2.303906E-05    2.018661E-01
+       3        1.231062E-03    9.677035E-06    7.139932E-02
 
 
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
- mka2f: lambda <omega^2> =     8.856479E-07
- mka2f: lambda <omega^3> =     8.453748E-10
- mka2f: lambda <omega^4> =     8.845477E-13
- mka2f: lambda <omega^5> =     9.985853E-16
- mka2f: isotropic lambda =     1.368532E+00
- mka2f: omegalog  =     7.090213E-04 (Ha)     2.238909E+02 (Kelvin)
+ mka2f: lambda <omega^2> =     8.891212E-07
+ mka2f: lambda <omega^3> =     9.635865E-10
+ mka2f: lambda <omega^4> =     1.146377E-12
+ mka2f: lambda <omega^5> =     1.461090E-15
+ mka2f: isotropic lambda =     1.312134E+00
+ mka2f: omegalog  =     6.231060E-04 (Ha)     1.967611E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     6.514252E-05 (Ha)     2.057036E+01 (Kelvin)
+-mka2f: MacMillan Tc =     5.435762E-05 (Ha)     1.716476E+01 (Kelvin)
 
 ================================================================================
 
  Calculation of phonon density of states 
 
- Average speed of sound partial sums:    -0.5828742794E-03 (at units)
--                                   =       -1275.1490 (m/s)
+ Average speed of sound partial sums:    -0.6590764448E-03 (at units)
+-                                   =          -1.4419 [km/s]
 
- Debye frequency from partial sums:    -0.4808584897E-03 (Ha)
--                                 =    -0.3163896873E+01 (THz)
--Debye temperature from partial sums:    -0.1518429213E+03 (K)
+ Debye frequency from partial sums:    -0.5437236040E-03 (Ha)
+-                                 =    -0.3577529454E+01 (THz)
+-Debye temperature from partial sums:    -0.1716941307E+03 (K)
 
- Average speed of sound:     0.2707241185E-03 (at units)
--                      =         592.2608 (m/s)
+ Average speed of sound:     0.1317063571E-03 (at units) 
+-                      =           0.2881 [km/s]
 
- Debye frequency from DOS:     0.2233414569E-03 (Ha)
--                        =     0.1469516193E+01 (THz)
--Debye temperature from DOS:     0.7052557038E+02 (K)
+ Debye frequency from DOS:     0.1086548544E-03 (Ha) 
+-                        =     0.7149145984E+00 (THz)
+-Debye temperature from DOS:     0.3431044862E+02 (K)
 
 
 ================================================================================
@@ -210,12 +211,12 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -3.80487900E-07  4.50906597E-03
+-  1  0.00000000E+00  0.00000000E+00 -4.50906598E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906597E-03  3.80487839E-07
+-  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -227,181 +228,181 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.094506E-03 -9.313920E-04  1.091422E-03
+  -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
-- -2.402164E+02 -2.044169E+02  2.395394E+02
+- -2.479366E+02 -2.479366E+02  2.701868E+02
 
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy   -1.094506E-03
+  Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  4.31861226E-03  9.16859916E-04  9.16859916E-04
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy   -9.313920E-04
+-  1  3.32815584E-04 -3.00892894E-03  3.34174452E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  0.00000000E+00  3.18839113E-03 -3.18839113E-03
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    1.091422E-03
-;  1  1.29663573E-03 -3.05372001E-03 -3.05372001E-03
+-  1  3.66656303E-03  2.12150827E-03  1.54505477E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    1.231062E-03
+;  1  2.60331046E-03 -2.60331046E-03 -2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.00000
  Phonon energies in Hartree :
-  -1.094506E-03 -9.313920E-04  1.091422E-03
+  -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
-- -2.402164E+02 -2.044169E+02  2.395394E+02
+- -2.479366E+02 -2.479366E+02  2.701868E+02
 
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy   -1.094506E-03
+  Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  9.16859916E-04  4.31861226E-03  9.16859916E-04
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy   -9.313920E-04
+-  1  3.31738994E-04 -3.00955173E-03 -3.34129072E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  3.18839113E-03  0.00000000E+00 -3.18839113E-03
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    1.091422E-03
-;  1  3.05372001E-03 -1.29663573E-03  3.05372001E-03
+-  1  3.66666060E-03  2.12062469E-03 -1.54603590E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    1.231062E-03
+;  1  2.60331046E-03 -2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
-  -8.985878E-04 -8.228458E-04  1.625938E-03
+  -9.501404E-04 -9.501404E-04  1.830588E-03
  Phonon frequencies in cm-1    :
-- -1.972172E+02 -1.805938E+02  3.568522E+02
+- -2.085317E+02 -2.085317E+02  4.017677E+02
 
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy   -8.985878E-04
+  Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  3.12758210E-03  3.12758210E-03 -8.76433970E-04
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy   -8.228458E-04
+-  1  6.88675331E-07  4.50906593E-03  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  3.18839113E-03 -3.18839113E-03  0.00000000E+00
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    1.625938E-03
-;  1  6.19732404E-04  6.19732404E-04  4.42306902E-03
+-  1  4.50906593E-03 -6.88675331E-07  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    1.830588E-03
+;  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
-  -1.094506E-03 -9.313920E-04  1.091422E-03
+  -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
-- -2.402164E+02 -2.044169E+02  2.395394E+02
+- -2.479366E+02 -2.479366E+02  2.701868E+02
 
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy   -1.094506E-03
+  Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  9.16859916E-04  9.16859916E-04  4.31861226E-03
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy   -9.313920E-04
+-  1  3.32796991E-04  3.00893970E-03  3.34173669E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  3.18839113E-03 -3.18839113E-03  0.00000000E+00
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    1.091422E-03
-;  1  3.05372001E-03  3.05372001E-03 -1.29663573E-03
+-  1  3.66656472E-03 -2.12149301E-03  1.54507171E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    1.231062E-03
+;  1  2.60331046E-03  2.60331046E-03 -2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
-  -8.985878E-04 -8.228458E-04  1.625938E-03
+  -9.501404E-04 -9.501404E-04  1.830588E-03
  Phonon frequencies in cm-1    :
-- -1.972172E+02 -1.805938E+02  3.568522E+02
+- -2.085317E+02 -2.085317E+02  4.017677E+02
 
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy   -8.985878E-04
+  Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  3.12758210E-03 -8.76433970E-04  3.12758210E-03
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy   -8.228458E-04
+-  1  1.15970058E-06  0.00000000E+00 -4.50906583E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  3.18839113E-03  0.00000000E+00 -3.18839113E-03
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    1.625938E-03
-;  1  6.19732404E-04  4.42306902E-03  6.19732404E-04
+-  1  4.50906583E-03  0.00000000E+00  1.15970058E-06
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    1.830588E-03
+;  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
-  -8.985878E-04 -8.228458E-04  1.625938E-03
+  -9.501404E-04 -9.501404E-04  1.830588E-03
  Phonon frequencies in cm-1    :
-- -1.972172E+02 -1.805938E+02  3.568522E+02
+- -2.085317E+02 -2.085317E+02  4.017677E+02
 
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy   -8.985878E-04
+  Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  8.76433970E-04 -3.12758210E-03 -3.12758210E-03
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy   -8.228458E-04
+-  1  0.00000000E+00  1.79448723E-04  4.50549378E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
-;  1  0.00000000E+00  3.18839113E-03 -3.18839113E-03
-;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    1.625938E-03
-;  1  4.42306902E-03  6.19732404E-04  6.19732404E-04
+-  1  0.00000000E+00  4.50549378E-03 -1.79448723E-04
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    1.830588E-03
+;  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
-  -1.045554E-03 -1.045554E-03  1.303270E-03
+  -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
-- -2.294725E+02 -2.294725E+02  2.860346E+02
+- -2.479366E+02 -2.479366E+02  2.701868E+02
 
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy   -1.045554E-03
+  Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.97327087E-04  2.97110560E-03 -3.36843268E-03
+-  1  3.33778876E-04  3.00837146E-03 -3.34215033E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy   -1.045554E-03
+  Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66013413E-03 -2.17416242E-03 -1.48597172E-03
+-  1  3.66647547E-03 -2.12229872E-03 -1.54417675E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    1.303270E-03
+  Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03  2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=          9.0  wall=          9.0
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
 
 ================================================================================
 
-+Total cpu time      9.036  and wall time      9.050 sec
++Total cpu time      1.700  and wall time      1.701 sec
 
  anaddb : the run completed succesfully.

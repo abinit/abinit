@@ -7,7 +7,7 @@
 !! Default declarations, and interfaces for the aim.f utility.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (PCasek,FF,XG,TD)
+!! Copyright (C) 2002-2018 ABINIT group (PCasek,FF,XG,TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,7 +87,7 @@ end function vnorm
 !! Vector product
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group ( ).
+!! Copyright (C) 2007-2018 ABINIT group ( ).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

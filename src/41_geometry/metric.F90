@@ -14,7 +14,7 @@
 !! Also computes unit cell volume ucvol in $\textrm{bohr}^3$
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,18 +34,19 @@
 !!      conducti_paw_core,cut3d,d2frnl,dfpt_eltfrhar,dfpt_eltfrkin,dfpt_eltfrxc
 !!      dfpt_looppert,dfpt_newvtr,dfpt_scfcv,dist2,elpolariz,emispec_paw,energy
 !!      extrapwf,fftprof,finddistrproc,forces,forstr,get_npert_rbz,getkgrid
-!!      ingeo,initaim,initberry,inkpts,inqpt,invacuum,invars2m,ks_ddiago
-!!      linear_optics_paw,m_ab7_symmetry,m_crystal,m_cut3d,m_ddb,m_dens
-!!      m_effective_potential,m_effective_potential_file,m_fft,m_fft_prof
-!!      m_fit_polynomial_coeff,m_hamiltonian,m_io_kss,m_ioarr,m_mep,m_pawpwij
-!!      m_screening,m_use_ga,m_vcoul,m_wfk,mag_constr,mag_constr_e,memory_eval
-!!      mkcore_wvl,mlwfovlp_qp,moddiel,mpi_setup,mrgscr,newrho,newvtr,nres2vres
-!!      odamix,optic,pawgrnl,prcref,prcref_PMA,pred_bfgs,pred_delocint
-!!      pred_isothermal,pred_langevin,pred_lbfgs,pred_nose,pred_srkna14
-!!      pred_verlet,prt_cif,prtefield,prtimg,psolver_rhohxc,rhotoxc,scfcv
-!!      screening,setup1,setup_bse,setup_screening,setup_sigma,sigma,smallprim
-!!      stress,symmetrize_rprimd,testkgrid,thmeig,vdw_dftd2,vdw_dftd3
-!!      wrt_moldyn_netcdf,wvl_initro,xchybrid_ncpp_cc,xfpack_vin2x,xfpack_x2vin
+!!      hartre,hartrestr,ingeo,initaim,initberry,inkpts,inqpt,invacuum,invars2m
+!!      ks_ddiago,linear_optics_paw,m_ab7_symmetry,m_crystal,m_cut3d,m_ddb
+!!      m_dens,m_effective_potential,m_effective_potential_file,m_fft
+!!      m_fft_prof,m_fit_data,m_hamiltonian,m_io_kss,m_ioarr,m_mep,m_pawpwij
+!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_constr,mag_constr_e
+!!      memory_eval,mkcore_wvl,mlwfovlp_qp,moddiel,mpi_setup,mrgscr,newrho
+!!      newvtr,nres2vres,odamix,optic,pawgrnl,prcref,prcref_PMA,pred_bfgs
+!!      pred_delocint,pred_isothermal,pred_langevin,pred_lbfgs,pred_nose
+!!      pred_srkna14,pred_verlet,prt_cif,prtefield,prtimg,psolver_rhohxc
+!!      rhotoxc,scfcv,screening,setup1,setup_bse,setup_screening,setup_sigma
+!!      sigma,smallprim,stress,strhar,symmetrize_rprimd,testkgrid,thmeig
+!!      vdw_dftd2,vdw_dftd3,wrt_moldyn_netcdf,wvl_initro,xchybrid_ncpp_cc
+!!      xfpack_vin2x,xfpack_x2vin
 !!
 !! CHILDREN
 !!      matr3inv,wrtout

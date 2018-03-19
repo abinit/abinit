@@ -4,7 +4,7 @@
 # Script to create an corrected electronic bandstructure with lifetime broadening
 
 try:
-  from rf_mods import system
+  from rf_final import system
 except ImportError:
   import warnings
   warnings.warn("The system module is missing!")

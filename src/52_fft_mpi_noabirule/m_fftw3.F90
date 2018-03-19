@@ -7,7 +7,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2018 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,8 +135,10 @@ MODULE m_fftw3
  ! It should be at least integer*@SIZEOF_INT_P@
  ! MKL wrappers requires it to be integer*8, so do _not_ use C_INTPTR_T.
 
+#ifdef HAVE_FFT_FFTW3_THREADS
  integer,private,save :: THREADS_INITED = 0
  ! 1 if treads have been initialized. 0 otherwise.
+#endif
 
  logical,private,save :: USE_LIB_THREADS = .FALSE.
 !!***
@@ -385,7 +387,7 @@ end subroutine fftw3_seqfourdp
 !! kg_kout(3,npwout)=reduced planewave coordinates, output
 !! mgfft=maximum size of 1D FFTs
 !! ndat=number of FFT to do in //
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !! npwout=number of elements in fofgout array (for option 2 and 3)
 !! ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -771,7 +773,7 @@ end subroutine fftw3_seqfourwf
 !!  kg_kin(3,npwin)=reduced planewave coordinates, input
 !!  kg_kout(3,npwout)=reduced planewave coordinates, output
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -901,7 +903,7 @@ end subroutine fftw3_fftrisc_sp
 !!  kg_kin(3,npwin)=reduced planewave coordinates, input
 !!  kg_kout(3,npwout)=reduced planewave coordinates, output
 !!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !!  npwout=number of elements in fofgout array (for option 2 and 3)
 !!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
@@ -2532,9 +2534,11 @@ subroutine fftw3_init_threads()
 !scalars
 #ifdef HAVE_FFT_FFTW3_THREADS
  integer :: iret
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_FFT_FFTW3_THREADS
  if (THREADS_INITED==0) then
    !call wrtout(std_out,"Calling dfftw_init_threads()","COLL")
    call dfftw_init_threads(iret)
@@ -2605,9 +2609,11 @@ subroutine fftw3_set_nthreads(nthreads)
  integer :: istat,nt
  integer,parameter :: enough=1
  integer,save :: nwarns=0
+#endif
 
 ! *************************************************************************
 
+#ifdef HAVE_FFT_FFTW3_THREADS
  if (THREADS_INITED==0) then
    MSG_WARNING("Threads are not initialized")
  end if
@@ -5857,7 +5863,7 @@ end subroutine fftw3_mpiforw
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ndat=Numbre of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r 

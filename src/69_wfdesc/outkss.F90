@@ -21,7 +21,7 @@
 !!  - Writing out eigenvalues and eigenvectors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (MT, VO, AR, MG)
+!! Copyright (C) 2000-2018 ABINIT group (MT, VO, AR, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -878,7 +878,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !      =================================================================
 !      ==== Write wavefunctions, KB and PAW matrix elements on disk ====
 !      =================================================================
-       call write_kss_wfgk(untkss,ikpt,isppol,kpoint,dtset%nspinor,npwkss,npw_k,kg_k,&
+       call write_kss_wfgk(untkss,ikpt,isppol,kpoint,dtset%nspinor,npwkss,&
 &           nbandksseff,natom,Psps,ene,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
        ABI_DEALLOCATE(occ_k)
@@ -983,7 +983,7 @@ contains
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpw=maximum dimensioned size of npw.
 !!  natom=number of atoms in cell.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points.
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsym=number of symmetries in space group

@@ -10,7 +10,7 @@
 !! Note: only one processor writes the DDB.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MT)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@
 !! natom=number of atoms in the unit cell
 !! nband(mkpt)=number of bands at each k point, for each polarization
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!        see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!        see ~abinit/doc/variables/vargs.htm#ngfft
 !! nkpt=number of k points
 !! nspden=number of spin-density components
 !! nspinor=number of spinorial components of the wavefunctions

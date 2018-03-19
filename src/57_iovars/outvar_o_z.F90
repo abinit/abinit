@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -236,6 +236,9 @@
 
  intarr(1,:)=dtsets(:)%optstress
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optstress','INT',0)
+
+ intarr(1,:)=dtsets(:)%orbmag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'orbmag','INT',0)
 
  intarr(1,:)=dtsets(:)%ortalg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ortalg','INT',0,firstchar=firstchar_gpu)
@@ -988,6 +991,10 @@
  dprarr(1,:)=dtsets(:)%tfw_toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tfw_toldfe','ENE',0)
 
+ intarr(1,:)=dtsets(:)%tim1rev
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'tim1rev','INT',0)
+
+
 !timopt
  timopt_default=1
 !MPI parallel case
@@ -1104,6 +1111,9 @@
 
  intarr(1,:)=dtsets(:)%useexexch
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useexexch','INT',0)
+
+ intarr(1,:)=dtsets(:)%usefock
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usefock','INT',0)
 
  intarr(1,:)=dtsets(:)%usepotzero
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepotzero','INT',0)
@@ -1273,6 +1283,9 @@
 !###########################################################
 !### 03. Print all the input variables (W)
 !##
+
+ dprarr(1,:)=dtsets(:)%wfmix
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfmix','DPR',0)
 
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%wfk_task
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wfk_task','INT',0)

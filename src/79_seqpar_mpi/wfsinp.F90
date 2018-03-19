@@ -17,7 +17,7 @@
 !!        eigenvectors with 0 s, hermitian matrix of eigenvalues)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,7 +54,7 @@
 !!  mpw0=maximum number of planewaves on disk file
 !!  nban_dp_rd(nkpt0*nsppol0)=number of bands to be read at each k point
 !!  nband(nkpt*nsppol)=number of bands at each k point
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkassoc=dimension of indkk0 array
 !!  nkpt=number of k points expected
 !!  nkpt0=number of k points on disk

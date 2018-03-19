@@ -8,7 +8,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MT)
+!! Copyright (C) 2012-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@
 !!  xclevel= XC functional level
 !!  === Optional input arguments ===
 !!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
-!!  [exexch]=choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA)
+!!  [exexch]=choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
 !!  [grho2(npts,ngr2)]=the square of the gradients of
 !!    spin-up, spin-down, and total density
 !!    If nspden=1, only the square of the gradient of the spin-up density
@@ -53,6 +53,7 @@
 !!     gradient of the spin-up and spin-down densities,
 !!     because the gradients are not usually aligned.
 !!     This is not the case when nspden=1.
+!!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
 !!  [lrho(npts,nspden)]=the Laplacian of spin-up and spin-down densities
 !!    If nspden=1, only the spin-up Laplacian density must be given.
 !!    In the calling routine, the spin-down Laplacian density must
@@ -65,7 +66,8 @@
 !!    be equal to the spin-up kinetic energy density,
 !!    and both are half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
-!!  [xc_tb09_c]=c parameter for the TB09 functional
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals. 
+!!  [xc_tb09_c]=c parameter for the mgga TB09 functional, within libxc
 
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
@@ -129,7 +131,8 @@
 #include "abi_common.h"
 
 subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel, &
-&                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,lrho,tau,vxcgrho,vxclrho,vxctau,xc_tb09_c) ! Optional arguments
+&                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
+&                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs,xc_tb09_c) ! Optional arguments
 
  use defs_basis
  use m_profiling_abi
@@ -149,17 +152,19 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 !scalars
  integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,xclevel
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,xc_tb09_c
+ real(dp),intent(in),optional :: el_temp,hyb_mixing,xc_tb09_c
 !arrays
  real(dp),intent(in) :: rho(npts,nspden)
  real(dp),intent(in),optional :: grho2(npts,ngr2),lrho(npts,nspden*mgga),tau(npts,nspden*mgga)
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
  real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:),vxcgrho(npts,nvxcgrho)
  real(dp),intent(out),optional :: vxclrho(npts,nspden*mgga),vxctau(npts,nspden*mgga)
+ type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: xc_tb09_c_
+ real(dp) :: hyb_mixing_,xc_tb09_c_
+ logical :: is_gga
 
 !  *************************************************************************
 
@@ -186,14 +191,26 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 
  xc_tb09_c_=99.99_dp;if (present(xc_tb09_c)) xc_tb09_c_=xc_tb09_c
 
+ if(ixc==41)hyb_mixing_=quarter
+ if(ixc==42)hyb_mixing_=third
+ if (present(hyb_mixing)) hyb_mixing_=hyb_mixing
+
+!>>>>> All libXC functionals
+
  if (ixc<0) then
+
+   if (present(xc_funcs))then
+     is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+   else
+     is_gga=libxc_functionals_isgga()
+   end if
+
    if (mgga==1) then
      if (abs(xc_tb09_c_-99.99_dp)>tol12) then
-       if (present(exexch)) then
+       if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho, &
 &         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau, &
-&         exexch=exexch,xc_tb09_c=xc_tb09_c_)
+&         xc_funcs=xc_funcs,xc_tb09_c=xc_tb09_c_)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         grho2_updn=grho2,vxcgrho=vxcgrho, &
@@ -201,30 +218,30 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 &         xc_tb09_c=xc_tb09_c_)
        end if
      else
-       if (present(exexch)) then
+       if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         grho2_updn=grho2,vxcgrho=vxcgrho, &
 &         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau, &
-&         exexch=exexch)
+&         xc_funcs=xc_funcs)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         grho2_updn=grho2,vxcgrho=vxcgrho, &
 &         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau)
        end if
      end if
-   else if (libxc_functionals_isgga()) then
+   else if (is_gga) then
      if (order**2<=1) then
-       if (present(exexch)) then
+       if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,exexch=exexch)
+&         grho2_updn=grho2,vxcgrho=vxcgrho,xc_funcs=xc_funcs)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         grho2_updn=grho2,vxcgrho=vxcgrho)
        end if
      else
-       if (present(exexch)) then
+       if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,exexch=exexch)
+&         grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,xc_funcs=xc_funcs)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc)
@@ -232,30 +249,31 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
      end if
    else
      if (order**2<=1) then
-       if (present(exexch)) then
+       if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-         exexch=exexch)
+         xc_funcs=xc_funcs)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho)
        end if
      else if (order**2<=4) then
-       if (present(exexch)) then
+       if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc, exexch=exexch)
+&         dvxc=dvxc, xc_funcs=xc_funcs)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         dvxc=dvxc)
        end if
      else
-       if (present(exexch)) then
+       if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc,d2vxc=d2vxc, exexch=exexch)
+&         dvxc=dvxc,d2vxc=d2vxc, xc_funcs=xc_funcs)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         dvxc=dvxc,d2vxc=d2vxc)
        end if
      end if
    end if
+
  else
 
 !  Cases with gradient
@@ -264,11 +282,11 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
        if (ixc/=13) then
          if (present(exexch)) then
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           grho2_updn=grho2,vxcgrho=vxcgrho, &
+&           hyb_mixing=hyb_mixing_,grho2_updn=grho2,vxcgrho=vxcgrho, &
 &           exexch=exexch)
          else
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           grho2_updn=grho2,vxcgrho=vxcgrho)
+&           hyb_mixing=hyb_mixing_,grho2_updn=grho2,vxcgrho=vxcgrho)
          end if
        else
          if (present(exexch)) then
@@ -284,11 +302,11 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
        if (ixc/=13) then
          if (present(exexch)) then
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
+&           hyb_mixing=hyb_mixing_,dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
 &           exexch=exexch)
          else
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho)
+&           hyb_mixing=hyb_mixing_,dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho)
          end if
        else
          if (present(exexch)) then
@@ -305,10 +323,10 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
          if (present(exexch)) then
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &           dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
-&           exexch=exexch)
+&           hyb_mixing=hyb_mixing_,exexch=exexch)
          else
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho)
+&           hyb_mixing=hyb_mixing_,dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho)
          end if
        else
          if (present(exexch)) then

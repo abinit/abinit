@@ -1,0 +1,63 @@
+
+Rules_paral
+
+(Was valid before the band-by-band parallelism. Should be heavily
+ updated !! In v4.2, see FFT_in_parallel )
+
+This file is still under development. It should describe the rules
+followed in the abinit code specifically related with the features
+that make the MPI parallel execution possible.
+
+Copyright (C) 1998-2018 ABINIT group (GMR,XG,DCA)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+
+*************************************************************************
+
+In the following, we will distinguish 2 different modes for the processes:
+   - they are doing the same things:  COLLECTIVE mode
+     (i.e. same instructions and same data)
+   - they are doing different things: PERSONAL mode
+     (i.e. different instructions or different data)
+
+-------------------------------------------------------------------------
+Dealing with I/O:
+subroutine wrtout(unit,message,mode)
+
+In the case of a COLLECTIVE mode, the 0-process will write the message in the
+unit file, while the other processes will do nothing.
+
+In the case of PERSONAL mode, we distinguish writing to the log file (standard
+output) from writing to other files.
+
+  1) In the case of a writing to the log file, the process will simply
+     write the message preceeded by is proc-number.
+
+  2) The case of writing to other files should be avoided if possible.
+     If not, the problem is still to be addressed.
+
+
+-------------------------------------------------------------------------
+Dealing with stop:
+subroutine leave_new(unit,message,mode) + subroutine test_leave
+
+In the case of a COLLECTIVE mode, the 0-process will write the message in the
+unit file, while the other processes will do nothing. Then all processes will
+stop.
+
+In the case of PERSONAL mode, a synchronisation is needed before doing
+anything. This will be done by inserting a call to a subroutine test_leave
+at the moment where the mode is about to change from PERSONAL to COLLECTIVE.
+
+   subroutine leave                               subroutine test_leave
+ *    barrier         <-- synchronisation -->   *    barrier
+ *    my-check-bit=1                            *    my-check-bit=0
+ *    gathering of check-bit by 0-process in SUM mode of MPI_GATHER
+ *    broadcasting of the SUM to all processes:
+        gl-check-bit=0 if all processes go through test_leave
+        gl-check-bit>0 if one slave at least goes through leave
+ *    write message                             *    if gl-check-bit>0 stop
+ *    stop                                      *    return

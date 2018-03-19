@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,8 +54,8 @@ save
 private
 !!***
 
-real(dp),allocatable :: epsilon_eigenvalues_complement(:)
-real(dp),allocatable :: lanczos_basis_complement(:,:,:)
+!real(dp),allocatable :: epsilon_eigenvalues_complement(:)
+!real(dp),allocatable :: lanczos_basis_complement(:,:,:)
 
 
 complex(dpc),public, allocatable :: A_array(:,:)

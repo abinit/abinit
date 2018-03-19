@@ -6,7 +6,7 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2018 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,7 +149,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr1=0,master=0
  integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
- integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,onpw
+ integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band
  integer :: ik,ikq,timerev_q
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
@@ -395,7 +395,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
                ! paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,&
                !&mpi_atmtab=mpi_enreg%my_atmtab,my_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+     call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
      do ik=1,nkpt
 

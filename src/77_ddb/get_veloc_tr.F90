@@ -8,7 +8,7 @@
 !!  calculate the (in) and (out) velocity factors for transport
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (JPC)
+!! Copyright (C) 2004-2018 ABINIT group (JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

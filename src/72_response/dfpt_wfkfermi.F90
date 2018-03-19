@@ -8,7 +8,7 @@
 !! and the fixed contribution to the 1st-order Fermi energy (nonlocal and kinetic)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (DRH, XG, MT)
+!! Copyright (C) 1999-2018 ABINIT group (DRH, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -195,7 +195,9 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Arguments of getgh1c routine (want only (NL+kin) frozen H(1))
  berryopt=0;usevnl=0;sij_opt=-gs_hamkq%usepaw;tim_getgh1c=3
  optlocal=0;optnl=1;opt_gvnl1=0
- if(ipert==gs_hamkq%natom+5) optnl=0; ! no 1st order NL in H(1), also no kin, but this will be taken into account later
+ if(ipert==gs_hamkq%natom+5) optnl=0;    ! no 1st order NL in H(1), also no kin, but this will be taken into account later
+!if(ipert==gs_hamkq%natom+5) optlocal=0; ! 1st order LOCAL potential present
+
 !Arguments of the dfpt_accrho routine
  tim_fourwf=5 ; opt_accrho=1 ; opt_corr=0
 !Null potentially unassigned output variables
@@ -205,6 +207,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  call status(0,dtfil%filstat,iexit,level,'before WffRead')
 
  call timab(139,1,tsec)
+
 
 !Loop over bands
  do iband=1,nband_k
@@ -265,6 +268,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
      fe1norm_k(iband) =two*wtband
      
 !    Accumulate contribution to density and PAW occupation matrix
+     
      call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
 &     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
 &     npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,prtvol,rhoaug,tim_fourwf,&

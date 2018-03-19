@@ -11,7 +11,7 @@
 !!         P. L. Silvestrelli in J.Chem.Phys. 139:054106 (2013) vdw_xc=14.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2017 ABINIT group (CE, TR and AR)
+!!  Copyright (C) 2010-2018 ABINIT group (CE, TR and AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1036,7 +1036,7 @@ end subroutine evdw_wannier
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2017 ABINIT group (CE and TR)
+!!  Copyright (C) 2010-2018 ABINIT group (CE and TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1128,7 +1128,7 @@ end subroutine getFu
 !!  from each MLWF center to the unit cell atoms. MLWFs belong to the 
 !!  same fragment as their nearest atom.    
 !! COPYRIGHT
-!!  Copyright (C) 2010-2017 ABINIT group (CE and TR)
+!!  Copyright (C) 2010-2018 ABINIT group (CE and TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1206,7 +1206,7 @@ end subroutine getFu
 !!  due to intrafragment overlapping 
 !!  
 !! COPYRIGHT
-!!  Copyright (C) 2011-2017 ABINIT group (CE)
+!!  Copyright (C) 2011-2018 ABINIT group (CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1378,7 +1378,7 @@ end subroutine getFu
 !!  as expressed in terms of MLWFs.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (CE)
+!!  Copyright (C) 2012-2018 ABINIT group (CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1488,7 +1488,7 @@ end subroutine vv10limit
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (CE)
+!!  Copyright (C) 2012-2018 ABINIT group (CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

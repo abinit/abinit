@@ -142,9 +142,9 @@ contains
   type(Symetries_Variables_type), intent(inout) :: Sym
   double precision, intent(in) :: xred_ideal(3,InVar%natom)
 
-  integer :: iout,ptgroupma,option,isym,jatom,ii,jj,ncoeff,mu
+  integer :: ptgroupma,isym,jatom,ii,jj,mu
   integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
-  integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,jatcell,counter,nzchempot
+  integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,counter,nzchempot
   integer :: bravais(11)
   integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
   integer, allocatable :: symrel(:,:,:),symrel_tmp(:,:,:)
@@ -448,7 +448,7 @@ contains
   
   integer :: isym,ee,ff,gg,ii
   integer :: iatom_unitcell,jatom_unitcell,katom_unitcell
-  integer :: vecti(3),vectj(3),vectk(3),latte(3),lattf(3),lattg(3),indsym2(8)
+  integer :: vecti(3),vectj(3),vectk(3),indsym2(8)
   integer :: lattef(3),lattfg(3),lattge(3),lattfe(3),lattgf(3),latteg(3)
   double precision :: temp(3),tmp_store(3,InVar%natom_unitcell)
   double precision :: tmp(3,InVar%natom)

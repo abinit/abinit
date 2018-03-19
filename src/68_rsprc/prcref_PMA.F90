@@ -23,7 +23,7 @@
 !! from two different sources at the same time which resulted in a splitting.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA,XG,MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,7 +73,7 @@
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=number of fft grid points
 !!  nfftprc=size of FFT grid on which the potential residual will be preconditionned
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftprc(18)=contain all needed information about 3D FFT for the grid corresponding to nfftprc
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npawmix=-PAW only- number of spherical part elements to be mixed
@@ -120,9 +120,10 @@
 !!      newvtr
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,indirect_parallel_fourier
-!!      kgindex,mean_fftr,metric,mkcore,mklocl,moddiel,prcrskerker1
-!!      prcrskerker2,rhotoxc,testsusmat,xcart2xred,xmpi_sum,zerosym
+!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
+!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
+!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
+!!      xcdata_init,xmpi_sum,zerosym
 !!
 !! SOURCE
 
@@ -594,12 +595,11 @@
    call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
 
 !  Prepare the call to rhotoxc
-   call xcdata_init(dtset%intxc,dtset%ixc,&
-&    dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+   call xcdata_init(xcdata,dtset=dtset)
    nk3xc=1
    ABI_ALLOCATE(work,(0))
    call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)

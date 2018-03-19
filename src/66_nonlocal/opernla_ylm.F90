@@ -10,7 +10,7 @@
 !!   <p_lmn|c>=4pi/sqrt(vol) (i)^l Sum_g[c(g).f_nl(g).Y_lm(g).exp(2pi.i.g.R)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

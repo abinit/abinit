@@ -10,7 +10,7 @@
 !! dispersion coefficients C6, the supporting points of the interpolation
 !! and the cut-off radii (R0) for the dispersion correction  
 !! COPYRIGHT
-!! Copyright (C) 2015-2017 ABINIT group (BVT)
+!! Copyright (C) 2015-2018 ABINIT group (BVT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

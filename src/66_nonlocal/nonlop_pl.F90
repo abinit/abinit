@@ -18,7 +18,7 @@
 !! * This routine uses Legendre polynomials Pl to express Vnl.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpgin,nkpgout=second sizes of arrays kpgin/kpgout
 !!  nloalg(3)=governs the choice of the algorithm for nonlocal operator
 !!  nnlout=dimension of enlout: choice=1=>nnlout=1   choice=2=>nnlout=3*natom
@@ -143,7 +143,7 @@
 subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,kgin,kgout,kpgin,kpgout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
-&                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,npwin,npwout,nspinor,nspinortot,&
+&                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
 &                     ucvol,vectin,vectout)
 
@@ -172,7 +172,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !scalars
  integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k
  integer,intent(in) :: lmnmax,matblk,mgfft,mpsang,mpssoang,natom,nkpgin,nkpgout
- integer,intent(in) :: nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs
+ integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -237,7 +237,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  real(dp),allocatable :: gxa_s(:,:,:,:),gxafac(:,:,:,:),pauli(:,:,:,:)
  real(dp),allocatable :: temp(:,:),tmpfac(:,:),vectin_s(:,:),vectout_s(:,:)
  real(dp),allocatable :: wt(:,:)
-  
+
 ! **********************************************************************
 
  ABI_UNUSED(mgfft)
@@ -373,7 +373,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
    isft = npwin;if (mpi_enreg%nproc_spinor>1) isft=0
 
 !  Initialize it
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
    do ig=1,npwin
      vectin_s(1,ig)=vectin(1,ig+isft)
      vectin_s(2,ig)=vectin(2,ig+isft)
@@ -434,10 +434,10 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
        ispinor_index=ispinor
        if (mpi_enreg%paral_spinor==1) ispinor_index=mpi_enreg%me_spinor+1
 
-!      
+!
 !      mjv 25 6 2008: if only_SO == 1 or 2 skip the scalar relativistic terms
 !      only output the spin orbit ones
-!      
+!
        if (ispinor==1 .and. only_SO>0) cycle
 
 !      Select scalar-relativistic or spin-orbit KB-energies:
@@ -460,9 +460,9 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !          if (ispinor==2) ipsang=indlmn(1,ilmn,itypat)-mpsang+2
            ekb_s(ipsang,iproj)=ekb(iln,itypat,ispinor)
            wt(ipsang,iproj)=4.d0*pi/ucvol*dble(2*ipsang-1)*ekb_s(ipsang,iproj)
-!          
+!
 !          mjv 27 6 2008: if only_SO == 2 remove the factor of l in the operator
-!          
+!
            if (only_SO == 2) then
              wt(ipsang,iproj)=4.d0*pi/ucvol*ekb_s(ipsang,iproj)
            end if
@@ -1072,7 +1072,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                       dgxdis(:,jjs1:jjs1-1+((rank+2)*(rank+3))/2,ia,iproj,isp))
                        enlout(iest:iest+2)= enlout(iest:iest+2)&
 &                       +wt(ilang,iproj)*eisnl(1:3)
-!                      
+!
 !                      DEBUG
 !                      rank+1->rank
 !                      call contistr10(istr2,rank,gmet,gprimd,eisnl,&
@@ -1193,7 +1193,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  ABI_DEALLOCATE(d2gxdis)
  ABI_DEALLOCATE(d2gxds2)
  !end if
- !if(nspinor==2) then 
+ !if(nspinor==2) then
  ABI_DEALLOCATE(dgxds_s)
  ABI_DEALLOCATE(dgxdt_s)
  ABI_DEALLOCATE(gxa_s)

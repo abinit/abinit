@@ -7,7 +7,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG)
+!!  Copyright (C) 2014-2018 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,7 +78,7 @@ module m_dynmat
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
                                 ! build (nearly) all the other matrix elements that can be build using symmetries.
- public :: sytens               ! Determines the set of irreductible elements of the non-linear optical susceptibility 
+ public :: sytens               ! Determines the set of irreductible elements of the non-linear optical susceptibility
                                 ! and Raman tensors
  public :: symdm9               ! Generate the dynamical matrix in the full BZ from the irreducible q-points.
  public :: axial9               ! Generates the local coordinates system from the  knowledge of the first vector (longitudinal) and
@@ -2442,16 +2442,16 @@ end subroutine wings3
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces
 !!
 !! OUTPUT
-!! atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
+!! atmfrc(3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
 !! TODO
 !! List of ouput should be included.
 !!
 !! PARENTS
-!!      ddb_hybrid,m_ifc
+!!      ddb_hybrid,m_ifc,m_tdep_abitypes
 !!
 !! CHILDREN
 !!
@@ -2473,7 +2473,7 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
  integer,intent(in) :: asr,natom,nrpt
 !arrays
  real(dp),intent(in) :: rpt(3,nrpt),wghatm(natom,natom,nrpt)
- real(dp),intent(inout) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(inout) :: atmfrc(3,natom,3,natom,nrpt)
 
 !Local variables -------------------------
 !scalars
@@ -2511,21 +2511,21 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
 !          either in a symmetrical manner, or an unsymmetrical one.
            if(asr==1)then
              do irpt=1,nrpt
-               sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)
+               sumifc=sumifc+wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)
              end do
            else if(asr==2)then
              do irpt=1,nrpt
                sumifc=sumifc+&
-&               (wghatm(ia,ib,irpt)*atmfrc(1,mu,ia,nu,ib,irpt)+&
-&               wghatm(ia,ib,irpt)*atmfrc(1,nu,ia,mu,ib,irpt))/2
+&               (wghatm(ia,ib,irpt)*atmfrc(mu,ia,nu,ib,irpt)+&
+&               wghatm(ia,ib,irpt)*atmfrc(nu,ia,mu,ib,irpt))/2
              end do
            end if
          end do
 
 !        Correct the self-interaction in order to fulfill the ASR
-         atmfrc(1,mu,ia,nu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)-sumifc
+         atmfrc(mu,ia,nu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)-sumifc
          if(asr==2)then
-           atmfrc(1,nu,ia,mu,ia,izero)=atmfrc(1,mu,ia,nu,ia,izero)
+           atmfrc(nu,ia,mu,ia,izero)=atmfrc(mu,ia,nu,ia,izero)
          end if
 
        end do
@@ -2551,7 +2551,7 @@ end subroutine asrif9
 !! See bigbx9 for the algorithm.
 !!
 !! INPUTS
-!! brav= Bravais Lattice (1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
 !! ngqpt(3)= Numbers used to generate the q points to sample the
 !!   Brillouin zone using an homogeneous grid
 !! nqshft= number of q-points in the repeated cell for the Brillouin zone sampling
@@ -2631,7 +2631,7 @@ end subroutine make_bigbox
 !! matrix into its corresponding interatomic force.
 !!
 !! INPUTS
-!! brav= Bravais Lattice (1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
 !! choice= if 0, simply count nrpt ; if 1, checks that the input mrpt
 !!   is the same as nrpt, and generate rpt(3,mrpt)
 !! mrpt=dimension of rpt
@@ -2693,7 +2693,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 
 !Simple Cubic Lattice
- if (brav==1) then
+ if (abs(brav)==1) then
    lim1=((ngqpt(1))+1)*lqshft+buffer
    lim2=((ngqpt(2))+1)*lqshft+buffer
    lim3=((ngqpt(3))+1)*lqshft+buffer
@@ -2809,7 +2809,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    end if
 
  else
-   write(msg,'(a,i0,a)')' The value of brav= ',brav,' is not allowed (should be 1, 2 or 4).'
+   write(msg,'(a,i0,a)')' The value of brav= ',brav,' is not allowed (should be -1, 1, 2 or 4).'
    MSG_BUG(msg)
  end if
 
@@ -2828,7 +2828,7 @@ end subroutine bigbx9
 !! to its correspondent (rcan) in canonical coordinates.
 !!
 !! INPUTS
-!! brav= Bravais Lattice (1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
 !! natom= Number of atoms in the unit cell
 !! rprim(3,3)= Normalized coordinates  of primitive vectors
 !!
@@ -2885,7 +2885,7 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
 !Study of the different cases for the Bravais lattice:
 
 !Simple Cubic Lattice
- if (brav==1) then
+ if (abs(brav)==1) then
 
    do iatom=1,natom
 
@@ -3028,12 +3028,12 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
      trans(:,iatom)=tt(:)-rcan(:,iatom)
    end do
 
-!  End of the possible cases for brav : 1, 2, 4.
+!  End of the possible cases for brav : -1, 1, 2, 4.
  else
 
    write(message, '(a,i0,a,a,a)' )&
 &   'The required value of brav=',brav,' is not available.',ch10,&
-&   'It should be 1,2 or 4 .'
+&   'It should be -1, 1,2 or 4 .'
    MSG_BUG(message)
  end if
 
@@ -3142,7 +3142,7 @@ end subroutine canct9
 !! the Big Box needed to generate the interatomic forces.
 !!
 !! INPUTS
-!! brav=bravais lattice (1=simple lattice,2=face centered lattice,
+!! brav=bravais lattice (1 or -1=simple lattice,2=face centered lattice,
 !!  3=centered lattice,4=hexagonal lattice)
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
@@ -3180,7 +3180,7 @@ subroutine chkrp9(brav,rprim)
 
 ! *********************************************************************
 
- if (brav==1) then
+ if (abs(brav)==1) then
 !  Simple Cubic Lattice No condition in this case !
    continue
 
@@ -3245,7 +3245,7 @@ subroutine chkrp9(brav,rprim)
 
    write(message, '(a,i4,a,a,a,a,a)' )&
 &   'The value of brav=',brav,' is not allowed.',ch10,&
-&   'Only  1,2,3 or 4 are allowed.',ch10,&
+&   'Only  -1, 1,2,3 or 4 are allowed.',ch10,&
 &   'Action: change the value of brav in your input file.'
    MSG_ERROR(message)
  end if
@@ -3377,7 +3377,7 @@ end subroutine dist9
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
 !!
 !! OUTPUT
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
 !!  We used the imaginary part just for debugging !
 !!
 !! PARENTS
@@ -3403,7 +3403,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
  integer,intent(in) :: natom,nqpt,nrpt
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
- real(dp),intent(out) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(out) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
@@ -3442,7 +3442,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
          do ia=1,natom
            do mu=1,3
 !            Real and imaginary part of the interatomic forces
-             atmfrc(1,mu,ia,nu,ib,irpt)=atmfrc(1,mu,ia,nu,ib,irpt)&
+             atmfrc(mu,ia,nu,ib,irpt)=atmfrc(mu,ia,nu,ib,irpt)&
 &             +re*dynmat(1,mu,ia,nu,ib,iqpt)&
 &             +im*dynmat(2,mu,ia,nu,ib,iqpt)
 !            The imaginary part should be equal to zero !!!!!!
@@ -3478,8 +3478,7 @@ end subroutine ftifc_q2r
 !!   to obtain dynamical matrices (reciprocal space).
 !!
 !! INPUTS
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!  We use the imaginary part just for debugging!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
 !! gprim(3,3)= Normalized coordinates in reciprocal space
 !! natom= Number of atoms in the unit cell
 !! nqpt= Number of q points in the Brillouin zone
@@ -3516,7 +3515,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
@@ -3555,11 +3554,11 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
              do mu=1,3
 !              Real and imaginary part of the dynamical matrices
                dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-&               +factr*atmfrc(1,mu,ia,nu,ib,irpt)
+&               +factr*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
 !              &       -im*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
                dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-&               +facti*atmfrc(1,mu,ia,nu,ib,irpt)
+&               +facti*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
 !              &        +re*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
              end do
@@ -3591,8 +3590,7 @@ end subroutine ftifc_r2q
 !! nrpt= Number of R points in the Big Box
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!   These coordinates are normalized (=> * acell(3)!!)
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!  We use the imaginary part just for debugging!
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !!
 !! OUTPUT
@@ -3624,7 +3622,7 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt(3)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(out) :: dddq(2,3,natom,3,natom,3)
 
 !Local variables -------------------------
@@ -3662,8 +3660,8 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
              ! Real and imaginary part of the dynamical matrices
              ! Atmfrc should be real
              do ii=1,3
-               dddq(1,mu,ia,nu,ib,ii) = dddq(1,mu,ia,nu,ib,ii) + fact(1,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
-               dddq(2,mu,ia,nu,ib,ii) = dddq(2,mu,ia,nu,ib,ii) + fact(2,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
+               dddq(1,mu,ia,nu,ib,ii) = dddq(1,mu,ia,nu,ib,ii) + fact(1,ii) * atmfrc(mu,ia,nu,ib,irpt)
+               dddq(2,mu,ia,nu,ib,ii) = dddq(2,mu,ia,nu,ib,ii) + fact(2,ii) * atmfrc(mu,ia,nu,ib,irpt)
              end do
            end do
          end do
@@ -3765,7 +3763,7 @@ end subroutine ifclo9
 !! The R points outside the chosen space will have a 0 weight.
 !!
 !! INPUTS
-!! brav = Bravais lattice (1=S.C.;2=F.C.C.;4=Hex.)
+!! brav = Bravais lattice (1 or -1=S.C.;2=F.C.C.;4=Hex. -1 is for old algo to find weights, =1 is for Wigner-Seitz algo)
 !! gprim(3,3)= Normalized coordinates in reciprocal space
 !! natom= Number of atoms in the unit cell
 !! ngqpt(6)= Numbers used to sample the Brillouin zone
@@ -3779,7 +3777,6 @@ end subroutine ifclo9
 !! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3))
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!! new_wght=Activates new weights for brav=1 (0=old version, 1=new version)
 !!
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
@@ -3793,7 +3790,7 @@ end subroutine ifclo9
 !!
 !! SOURCE
 
-subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,new_wght,wghatm)
+subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,wghatm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3806,7 +3803,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt,new_wght
+ integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt
  real(dp),intent(out) :: r_inscribed_sphere
 !arrays
  integer,intent(inout) :: ngqpt(9)
@@ -3815,7 +3812,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,nptws,nreq
+ integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,new_wght,nptws,nreq
  integer :: idir
  real(dp) :: factor,sumwght,normsq,proj
  character(len=500) :: message
@@ -3888,7 +3885,8 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
  end if
  if(nqshft/=1)factor=factor*2
 
- if (new_wght==1) then
+ if (brav==1) then
+
    ! Does not support multiple shifts
    if (nqshft/=1) then
      write(message, '(a)' ) 'This version of the weights does not support nqshft/=1.'
@@ -3899,9 +3897,9 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
    ! a Wigner-Seitz cell around the origin. The origin is excluded from the list.
    ! TODO : in principle this should be only -1 to +1 for ii jj kk!
    nptws=0
-   do ii=-4,4
-     do jj=-4,4
-       do kk=-4,4
+   do ii=-2,2
+     do jj=-2,2
+       do kk=-2,2
          do idir=1,3
            pp(idir)=ii*ngqpt(1)*rprimd(idir,1)+ jj*ngqpt(2)*rprimd(idir,2)+ kk*ngqpt(3)*rprimd(idir,3)
          end do
@@ -3919,7 +3917,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !DEBUG
 !write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
 !ENDDEBUG
- 
+
  r_inscribed_sphere = sum((matmul(rprimd(:,:),ngqpt(1:3)))**2)
  do ii=-1,1
    do jj=-1,1
@@ -3941,7 +3939,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
    do ib=1,natom
 
 !    Simple Lattice
-     if (brav==1) then
+     if (abs(brav)==1) then
 !      In this case, it is better to work in reduced coordinates
 !      As rcan is in canonical coordinates, => multiplication by gprim
        do ii=1,3
@@ -3958,13 +3956,13 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !      Compute the difference vector
 
 !      Simple Cubic Lattice
-       if (brav==1) then
+       if (abs(brav)==1) then
 !        Change of rpt to reduced coordinates
          do ii=1,3
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
            rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
          end do
-         if (new_wght==1) then
+         if (brav==1) then
            ! rdiff in cartesian coordinates
            do ii=1,3
              rdiff_tmp(ii)=rdiff(1)*rprimd(ii,1)+rdiff(2)*rprimd(ii,2)+rdiff(3)*rprimd(ii,3)
@@ -3984,7 +3982,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 
        if(nqshft==1 .and. brav/=4)then
 
-         if (brav/=1 .or. new_wght==0) then
+         if (brav/=1) then
            do ii=1,3
 !            If the rpt vector is greater than
 !            the allowed space => weight = 0.0
@@ -4181,7 +4179,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 &       'The number of q points is : ',nqpt,ch10,&
 &       'You might increase "buffer" in bigbx9.f, and recompile.',ch10,&
 &       'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
-&       'if brav/=1, in which case you should change brav to 1.'
+&       'if abs(brav)/=1, in which case you should change brav to 1.'
        MSG_BUG(message)
      end if
    end do
@@ -5305,7 +5303,7 @@ end subroutine nanal9
 !!
 !! INPUTS
 !! acell(3)=length scales by which rprim is to be multiplied
-!! atmfrc(2,3,natom,3,natom,nrpt) = Interatomic Forces in real space
+!! atmfrc(3,natom,3,natom,nrpt) = Interatomic Forces in real space
 !!  (imaginary part only for debugging)
 !! dielt(3,3) = dielectric tensor
 !! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
@@ -5361,7 +5359,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),rpt(3,nrpt)
  real(dp),intent(in) :: trans(3,natom),wghatm(natom,natom,nrpt),xred(3,natom)
  real(dp),intent(in) :: zeff(3,3,natom)
- real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
 
@@ -5449,8 +5447,7 @@ end subroutine gtdyn9
 !!
 !! INPUTS
 !!  amu(ntypat)=mass of the atoms (atomic mass unit) matrix (diagonal in the atoms)
-!!  d2cart(2,3,mpert,3,mpert)=
-!!   dynamical matrix, effective charges, dielectric tensor,.... all in cartesian coordinates
+!!  d2cart(2,3,mpert,3,mpert)=dynamical matrix, effective charges, dielectric tensor,.... all in cartesian coordinates
 !!  indsym(4,msym*natom)=indirect indexing array : for each
 !!   isym,iatom, fourth element is label of atom into which iatom is sent by
 !!   INVERSE of symmetry operation isym; first three elements are the primitive
@@ -5477,7 +5474,7 @@ end subroutine gtdyn9
 !!    The second index runs on the direction and the atoms displaced
 !!    The third index runs on the modes.
 !!  eigval(3*natom)=contains the eigenvalues of the dynamical matrix
-!!  eigvec(2*3*natom*3*natom)= at the end, contains the eigenvectors of the dynamical matrix.
+!!  eigvec(2*3*natom*3*natom)= at the end, contains the eigenvectors of the dynamical matrix in cartesian coordinates.
 !!  phfrq(3*natom)=phonon frequencies (square root of the dynamical matrix eigenvalues,
 !!    except if these are negative, and in this case, give minus the square root of the absolute value
 !!    of the matrix eigenvalues). Hartree units.

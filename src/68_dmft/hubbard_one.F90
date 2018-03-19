@@ -7,7 +7,7 @@
 !! Solve the hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -336,7 +336,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -755,7 +755,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
