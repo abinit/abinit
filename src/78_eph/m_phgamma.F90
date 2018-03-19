@@ -2660,7 +2660,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    ABI_ALLOCATE (a2feew_partial_int, (a2f%nene))
    ABI_ALLOCATE (a2feew_w, (nomega))
    ABI_ALLOCATE (a2feew_w_int, (nomega))
-   print *, "temp_el, spin, G_0(T_e) in W/m^3/K"
+   print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
    do spin=1,nsppol
      do itemp = 1, ntemp
        temp_el = min_temp + (itemp-1)*delta_temp
@@ -2685,9 +2685,9 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
          a2feew_w(iw) = a2feew_partial_int(a2f%nene)
        end do
        call simpson_int(nomega,wstep,a2feew_w,a2feew_w_int)
-       G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) * kb_HaK / cryst%ucvol 
+       G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) / cryst%ucvol 
        ! conversion factor for G0 to SI units =  Ha_J / Time_Sec / (Bohr_meter)**3 ~ 1.2163049915755545e+30
-       print *, temp_el, spin, G0 * Ha_J / Time_Sec / (Bohr_meter)**3
+       print *, temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
      end do
    end do
    ABI_DEALLOCATE (a2feew_partial)
