@@ -366,13 +366,13 @@ class Variable(object):
 
     @lazy_property
     def topic2relevances(self):
-        """topic --> list of tribes"""
+        """topic --> list of relevances"""
         assert self.topics is not None
         od = OrderedDict()
         for tok in self.topics:
-            topic, tribe = [s.strip() for s in tok.split("_")]
+            topic, relevance = [s.strip() for s in tok.split("_")]
             if topic not in od: od[topic] = []
-            od[topic].append(tribe)
+            od[topic].append(relevance)
         return od
 
     @lazy_property

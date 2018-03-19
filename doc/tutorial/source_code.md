@@ -158,13 +158,12 @@ _tests/_ , and have a look at their content. Examine one of the input files,
 contained in the v7 (8, 9 ...) subdirectory. Note content of the bottom of the
 file. Each test is identified by an index, attributed after consulting the
 ABINIT coordinator. He decided that your contribution will be checked by test
-#999. Read [ the Web documentation that describes how to add a new
-test](http://dev.abinit.org/environment/buildbot/howto-add-a-new-test-in-the-
-test-suite)
+99. Read [ the Web documentation that describes how to add a new
+test](https://wiki.abinit.org/doku.php?id=developers:addnewtest)
 
 Q10. What do you need to do in order to have a new test added?
 
-Implement your test and issue `./runtests.py v7[999]` in the _tests/_
+Implement your test and issue `./runtests.py v7[99]` in the _tests/_
 subdirectory, to check that it works fine.
 
 #### Create a patch for the project leader

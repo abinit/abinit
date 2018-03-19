@@ -183,7 +183,7 @@ In addition to the resources that the ABINIT developer provide to the
 community through the ABINIT packages, portal and Github, many ABINIT-independent 
 commercial or free applications can be used to visualize ABINIT
 outputs or interact with ABINIT. We provide a (not very well maintained) list
-of links in <https://www.abinit.org/community/links>. 
+of links in [the last section of http://www.abinit.org/sponsors](http://www.abinit.org/sponsors).
 Of course, you might get more by browsing the Web.
 
 ## Input variables to abinit

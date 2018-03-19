@@ -353,7 +353,7 @@ encouraged to use bandpp=2... or more if you need to improve the convergence wha
 Up to now, we only performed a GB parallelization. This implies
 parallelization over 2 levels of PWs or over 2 levels of bands and FFTs, for
 different sections of the code (see the [paper](https://arxiv.org/abs/0707.3405) or
-[presentation](https://www.abinit.org/community/events/program3rd)). 
+[presentation](https://www.abinit.org/sites/default/files/oldsites/workshop_07/home.html)). 
 If the system has more than 1 k-point, one can add a third level of parallelization
 and perform a real KBG parallelization. There is no additional difficulty in
 adding processors on this level. In order to explain the procedure, we restart

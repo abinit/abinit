@@ -11306,19 +11306,20 @@ For each dataset, choose the task to be done, at the level of the "driver"
 routine.
 
 The choice is among:
-[[optdriver]]=0: ground-state calculation (GS), routine "gstate"
-[[optdriver]]=1: response-function calculation (RF), routine "respfn"
-[[optdriver]]=2: susceptibility calculation (SUS), routine "suscep"
-[[optdriver]]=3: susceptibility and dielectric matrix calculation (SCR), routine "screening"
-(see the input variables [[ecutwfn]], [[ecuteps]], [[ppmfrq]], [[getwfk]], as
-well as [[nbandkss]] and [[nband]])
-[[optdriver]]=4: self-energy calculation (SIG), routine "sigma"
-[[optdriver]]=5: non-linear response functions (NONLINEAR), using the 2n+1
-theorem, routine "nonlinear"
-[[optdriver]] =7: electron-phonon coupling (EPH)
-[[optdriver]] =66: GW using Lanczos-Sternheimer, see input variables whose
-name start with gwls_*.
-[[optdriver]]=99: Bethe-Salpeter calculation (BSE), routine "bethe_salpeter"
+
+  * [[optdriver]]=0: ground-state calculation (GS), routine "gstate"
+  * [[optdriver]]=1: response-function calculation (RF), routine "respfn"
+  * [[optdriver]]=2: susceptibility calculation (SUS), routine "suscep"
+  * [[optdriver]]=3: susceptibility and dielectric matrix calculation (SCR), routine "screening"
+    (see the input variables [[ecutwfn]], [[ecuteps]], [[ppmfrq]], [[getwfk]], as
+    well as [[nbandkss]] and [[nband]])
+  * [[optdriver]]=4: self-energy calculation (SIG), routine "sigma"
+  * [[optdriver]]=5: non-linear response functions (NONLINEAR), using the 2n+1
+    theorem, routine "nonlinear"
+  * [[optdriver]] =7: electron-phonon coupling (EPH)
+  * [[optdriver]] =66: GW using Lanczos-Sternheimer, see input variables whose
+    name start with gwls_*.
+  * [[optdriver]]=99: Bethe-Salpeter calculation (BSE), routine "bethe_salpeter"
 
 If one of [[rfphon]], [[rfddk]], [[rfelfd]], or [[rfstrs]] is non-zero, while
 [[optdriver]] is not defined in the input file, ABINIT will set [[optdriver]]
@@ -14919,7 +14920,9 @@ These values are only relevant to phonon response function calculations.
 May take values from 1 to [[natom]], with [[rfatpol]](1)<=[[rfatpol]](2).
 The atoms to be moved will be defined by the
 do-loop variable iatpol:
-do iatpol=[[rfatpol]](1),[[rfatpol]](2)
+
+  - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
+
 For the calculation of a full dynamical matrix, use [[rfatpol]](1)=1 and
 [[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1. For selected
 elements of the dynamical matrix, use different values of [[rfatpol]] and/or
@@ -17100,7 +17103,7 @@ If LDA+U is activated ([[usepawu]]=1 or 2), the [[lpawu]], [[upawu]] and
 The implementation is done inside PAW augmentation regions only (cf Ref [4]).
 The initial density matrix can be given in the input file (see [[usedmatpu]]).
 The expression of the density matrix is chosen thanks to [[dmatpuopt]]. See
-also [How_to_use_LDA_plus_U.txt](../../users/How_to_use_LDA_plus_U.txt). for further information.
+also [How_to_use_LDA_plus_U.txt](../../guide/legacy/How_to_use_LDA_plus_U.txt). for further information.
 In the case of a GW calculation on top of a DFT+U, the absence of definition
 of a U value in the self-energy will LEAVE the underlying U from the DFT
 calculation. Thus, the code will actually do a GW+U @ DFT+U calculation. Note
