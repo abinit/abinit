@@ -255,7 +255,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  ABI_ALLOCATE(scell%typat,(scell%natom))
  ABI_ALLOCATE(scell%atom_indexing,(scell%natom))
  ABI_ALLOCATE(scell%uc_indexing,(3,scell%natom))
-ABI_ALLOCATE(scell%rvecs, (3, scell%ncells))
+ ABI_ALLOCATE(scell%rvecs, (3, scell%ncells))
 
  iatom_supercell = 0
  icell =0

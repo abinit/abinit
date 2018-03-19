@@ -1163,7 +1163,6 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
         (*nmatoms)++;
       }
       insertIntArray(&index_spin_array, ind_spin);
-      xmlFree(key);
 
       cur2 = cur->xmlChildrenNode;
 
