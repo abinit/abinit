@@ -4,7 +4,7 @@
 !!  m_sigmaph
 !!
 !! FUNCTION
-!!  Compute the matrix elements of the Fan-Migdal self-energy in the KS basis set.
+!!  Compute the matrix elements of the Fan-Migdal Debye-Waller self-energy in the KS basis set.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2018 ABINIT group (MG)
@@ -261,6 +261,7 @@ module m_sigmaph
 
   type(degtab_t),allocatable :: degtab(:,:)
    ! (nkcalc, nsppol)
+   ! Table used to average QP results in the degenerate subspace if symsigma == 1
 
  end type sigmaph_t
 !!***
@@ -396,7 +397,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in
+ integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in,ndeg !,ib,nstates
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
@@ -405,6 +406,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
+ real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,my_ieta,cplx_ediff
@@ -420,7 +422,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: lf(2),rg(2),res(2)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
@@ -483,6 +485,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  ! Initialize the wave function descriptor (read up to mband states where mband is defined by dtset%nband)
  ! For the time being, no memory distribution, each node has the full set of states.
+ ! TODO: Distribute memory
  mband = dtset%mband
  my_minb = 1; my_maxb = mband
  ABI_MALLOC(nband, (nkpt, nsppol))
@@ -554,7 +557,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! Open the DVDB file
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
  if (dtset%prtvol > 10) dvdb%debug = .True.
- ! This one to symmetrize the potentials.
+ ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
@@ -564,7 +567,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_MALLOC(dt_weights, (sigma%gfw_nomega, 2))
  end if
 
- ! Loop over k-points for Sigma_nk.
+ ! Loop over k-points in Sigma_nk.
  do ikcalc=1,sigma%nkcalc
    kk = sigma%kcalc(:, ikcalc)
 
@@ -736,7 +739,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ABI_FREE(gtmp)
        end if
 
-       ! This array will store H1 |psi_nk> for all 3*natom perturbations
+       ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
        ABI_STAT_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nbcalc_ks, natom3), ierr)
        ABI_CHECK(ierr==0, "oom in h1kets_kq")
 
@@ -966,7 +969,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call cwtime(cpu,wall,gflops,"stop")
        write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",sigma%nqibz_k,"] completed. cpu:",cpu,", wall:",wall
        call wrtout(std_out, msg, do_flush=.True.)
-     end do ! iq_ibz
+     end do ! iq_ibz (sum over q-points)
 
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
@@ -978,6 +981,52 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! =========================
      call xmpi_sum(dbwl_nu, comm, ierr)
      call xmpi_sum(gkk0_atm, comm, ierr)
+
+     ABI_MALLOC(deg_ibk, (nbcalc_ks))
+     deg_ibk = 1
+     ndeg = 1
+#if 0
+     ! Count number of degeneracies.
+     do ib_k=2,nbcalc_ks
+       ib = ib_k + bstart_ks - 1
+       if ( abs(ebands%eig(ib,ik_ibz,spin) - ebands%eig(ib-1,ik_ibz,spin) ) > tol_enediff) ndeg = ndeg + 1
+     end do
+
+     ! Build degblock table.
+     ABI_MALLOC(degblock, (2, ndeg))
+     ndeg = 1; degblock(1, 1) = 1
+     do ib_k=2,nbcalc_ks
+       ib = ib_k + bstart_ks - 1
+       if ( abs(ebands%eig(ib,ik_ibz,spin) - ebands%eig(ib-1,ik_ibz,spin) ) > tol_enediff) then
+         degblock(2, ndeg) = ib_k - 1
+         ndeg = ndeg + 1
+         degblock(1, ndeg) = ib_k
+       end if
+     end do
+     degblock(2, ndeg) = nbcalc_ks
+
+     !ABI_MALLOC(gkk0_atm, (2, nbcalc_ks, nbsum, natom3))
+     do ii=1,ndeg
+       !write(std_out,*)"ideg, ", ii, ", degblock", degblock(:,ii)
+       nstates = degblock(2, ii) - degblock(1, ii) + 1
+       do ib_k=degblock(1, ii), degblock(2, ii)
+         deg_ibk(ib_k) = nstates
+       end do
+       if (nstates == 1) continue
+       ! Use dbwl_nu as workspace
+       dbwl_nu(:, 1, :, :) = zero
+       do ib_k=degblock(1, ii), degblock(2, ii)
+         dbwl_nu(:, 1, :, :) = dbwl_nu(:, 1, :, :) + gkk0_atm(:, ib_k, :, :)
+       end do
+       !dbwl_nu(:, 1, :, :) = dbwl_nu(:, 1, :, :) / nstates
+       do ib_k=degblock(1, ii), degblock(2, ii)
+         gkk0_atm(:, ib_k, :, :) = dbwl_nu(:, 1, :, :)
+       end do
+     end do
+     ABI_FREE(degblock)
+     deg_ibk(:) = 1
+#endif
+
      ABI_MALLOC(gdw2_mn, (nbsum, nbcalc_ks))
      ABI_MALLOC(tpp, (natom3, natom3))
      ABI_MALLOC(hka_mn, (natom3, nbsum, nbcalc_ks))
@@ -1009,10 +1058,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      if (sigma%symsigma == 0) nq = sigma%nqbz
      !if (sigma%symsigma == 0) nq = sigma%nqibz_k
      !do iq_ibz=1,sigma%nqibz
-     nq = sigma%nqbz
+     !nq = sigma%nqbz
      do iq_ibz=1,nq
        if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
-#if 1
+#if 0
        qpt = sigma%qbz(:,iq_ibz); weigth_q = one / sigma%nqbz
 #else
        if (abs(sigma%symsigma) == 1) then
@@ -1024,7 +1073,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        end if
 #endif
 
-       ! Get ph for this q-point.
+       ! Get phonons for this q-point.
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
 
        ! Compute hka_mn matrix with shape: (natom3, nbsum, nbcalc_ks))
@@ -1098,8 +1147,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              eig0nk = ebands%eig(band, ik_ibz, spin)
              ! Handle n == m and degenerate states (either ignore or add broadening)
              cplx_ediff = (eig0nk - eig0mk)
-             if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
-             !if (abs(cplx_ediff) < tol6) cycle
+             !if (abs(cplx_ediff) < tol6) cplx_ediff = cplx_ediff + sigma%ieta
+             if (abs(cplx_ediff) < tol6) cycle
 
 #if 1
              ! Compute DW term following XG paper. Check prefactor.
@@ -1127,7 +1176,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                !end do
 
              end do
-             gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
+             !gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
+             gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two / deg_ibk(ib_k)
              !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
 #endif
              ! dbwl_nu(2, nbcalc_ks, nbsum, natom3), gkk_nu(2, nbcalc_ks, natom3)
@@ -1159,6 +1209,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        end do ! nu
      end do ! iq_ibz
 
+     ABI_FREE(deg_ibk)
      ABI_FREE(gdw2_mn)
      ABI_FREE(tpp)
      ABI_FREE(hka_mn)
@@ -1220,7 +1271,7 @@ end subroutine sigmaph
 !!  natom=Number of atoms.
 !!  gkk_atm(2,nb1,nb2,3*natom)=EPH matrix elements in the atomic basis.
 !!  phfrq(3*natom)=Phonon frequencies in Ha
-!!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
+!!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduced coordinates.
 !!
 !! OUTPUT
 !!  gkk_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
@@ -1529,12 +1580,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz)
 
  ! Select k-point and bands where corrections are wanted
- ! These parameters will be passed via the input file (similar to kptgw, bdgw)
  ! if symsigma == 1, we have to include all degenerate states in the set
  ! because the final QP corrections will be obtained by averaging the results in the degenerate subspace.
  ! k-point and bands where corrections are wanted
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
- ! to distribuite the calculations among the processors.
+ ! to distribuite the calculations among processors.
  new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  ! TODO: debug gw_qprange > 0. Rename variable
@@ -1784,7 +1834,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_CALLOC(new%vals_nuq, (new%ntemp, new%max_nbcalc, 3*cryst%natom, new%nqbz, 2))
  end if
 
- ! Open netcdf file within MPI communicator comm.
+ ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
+ ! This could create problems if MPI parallelism over (spin, nkptgw) ...
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
@@ -2047,7 +2098,7 @@ end subroutine sigmaph_free
 !!  sigmaph_setup_kcalc
 !!
 !! FUNCTION
-!!  Prepare calculations of self-energy matrix elements for index ikcalc.
+!!  Prepare calculations of self-energy matrix elements for ikcalc index.
 !!
 !! INPUTS
 !!  crystal<crystal_t> = Crystal structure.
@@ -2325,8 +2376,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    end if
  end do ! it
 
- ! Write data to netcdf file
- ! :**Only master writes**
+ ! Write data to netcdf file **Only master writes**
  ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
 
 #ifdef HAVE_NETCDF
@@ -2432,7 +2482,7 @@ subroutine sigmaph_print(self, dtset, unt)
 ! *************************************************************************
 
  ! Write dimensions
- write(unt,"(a)")sjoin("Number of bands in self-energy:", itoa(self%nbsum))
+ write(unt,"(a)")sjoin("Number of bands in e-ph self-energy:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
