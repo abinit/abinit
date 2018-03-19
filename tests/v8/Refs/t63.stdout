@@ -38,7 +38,7 @@ File path: t63o_DVDB
 Number of v1scf potentials: 4
 Number of q-points in DVDB: 3
 Activate symmetrization of v1scf(r): no
-List of q-points:
+List of q-points: min(10, nqpt)
 [ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 [ 2 ] [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
 [ 3 ] [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
