@@ -176,8 +176,13 @@ generate a grid of special q points.
   * 3 --> specific for Body Centered lattices
   * 4 --> specific for the Hexagonal lattice
 
-Note that in the latter case, the rprim of the unit cell have to be 1.0 0.0
-0.0 -.5 sqrt(3)/2 0.0 0.0 0.0 1.0 in order for the code to work properly.
+Note that in the latter case, the rprim of the unit cell have to be 
+```
+  1.0 0.0
+  0.0 -.5 sqrt(3)/2 0.0 
+  0.0 0.0 1.0 
+```
+in order for the code to work properly.
 
 Warning: the generation of q-points in anaddb is rather old-fashioned, and
 should be replaced by routines used by the main abinit code.
