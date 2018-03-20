@@ -3,19 +3,19 @@ authors: MG, XG
 ---
 
 This page describes the details of the documentation system of Abinit and how to contribute to it. 
-A *Proof of concept* website is available at <https://gmatteo.github.io/test_abidocs>.
 
 Most of the documentation is written in [Markdown](https://en.wikipedia.org/wiki/Markdown)
 a lightweight markup language with plain text 
 [formatting syntax](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 The documentation includes the User Guide, the Abinit lessons, the topics, the release notes
 as well as the pages with the [input variables](../variables/) and the [bibliographic references](../theory/bibliography.md)
-that are generated *automatically* in python from the information reported in `abinit_vars.yml` and the bibtex 
-entries given in the `abiref.bib` file.
+that are generated *automatically* in python from the information reported in 
+`~abinit/mkdocs/variables_abinit.py` (and similar files in the same directory for other main executables) and the bibtex 
+entries given in the `~abinit/doc/abiref.bib` file.
 
 The website is automatically generated with [MkDocs](http://www.mkdocs.org/)
 a static site generator geared towards project documentation.
-MkDocs employs [Python-Markdown](https://pythonhosted.org/Markdown) to parse the Markdown documentation
+MkDocs employs [Python-Markdown](https://pypi.python.org/pypi/Markdown) to parse the Markdown documentation
 and use a single [YAML](http://en.wikipedia.org/wiki/YAML) configuration file (`mkdocs.yml`) 
 defining the organization of the pages on the website.
 Navigation bars, header and footer are generated *automatically* by the framework
@@ -50,10 +50,10 @@ and finally regenerate the website with MkDocs.
 
 ## Getting started
 
+Make sure you are in the top ABINIT directory.
 Install the python packages required to build the website with:
 
 ```sh
-cd ~abinit/docs
 pip install -r requirements.txt
 ```
 
@@ -62,11 +62,10 @@ pip install -r requirements.txt
     The entire documentation supports Unicode so feel free to use unicode symbols in the docs.
 
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
-Make sure you are in `~abinit/docs`, and then start *our customized* server 
+Then start *our customized* server 
 by running the `mksite.py serve` command:
 
 ```sh
-cd ~abinit/docs
 ./mksite.py serve
 
 Regenerating database...
@@ -121,12 +120,12 @@ The script:
 
 * Starts by creating python objects using the information reported in 
     - the python files in abimkdocs with the input variables,
-    - the `abiref.bib` for the list of Bibliographic references,
-    - the input files contained in `tests/*/Input`. 
+    - the `~abinit/doc/abiref.bib` for the list of Bibliographic references,
+    - the input files contained in `~abinit/tests/*/Input`. 
 * Performs initial consistency checks.
 * Generate the markdown files for variables, citations, etc.  
 * Invoke `mkdocs` to parse the markdown files declared in `mkdocs.yml`
-* Expands special strings, of the form `[[namespace:name#section|text]]` to create HTML links.
+* Expands special strings, of the form <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [namespace:name#section|text] &#93; </span> to create HTML links.
 * Creates the needed HMTL files 
 
 The expansion of special strings is documented in the [links section](markdown.md#links). 
@@ -245,7 +244,7 @@ to the HTML meta section.
   Writing in all caps is like shouting so use all caps sparingly.
 
 
-## How to add/modify an nput variables
+## How to add/modify an input variable 
 
 The yaml database has been replaced by python modules.
 The variables are now declared in `~abinit/abimkdocs/variables_CODENAME.py`.
@@ -360,14 +359,14 @@ Then, build the HTML using `mksite.py serve` and start to enjoy the Markdown syn
 
 The structuration for help files and theory documents is very similar to the one for the lessons of the tutorial.
 
-### Topics and tribes
+### Topics and relevances
 
 Since the beginning of the ABINIT HTML documentation, every input variable 
 has been required to belong to a **varset** (set of variables, e.g. `varbas`, `varfil`).
 However, starting in Summer 2017, we require every input variable to be also mentioned in at least one of the
-documentation "topics" and, for such topic, to be characterized by a "tribe".
+documentation "topics" and, for such topic, to be characterized by a "relevance".
 
-The allowed list of tribes (a generic list, irrespective of the topic) is declared in
+The allowed list of relevances (a generic list, irrespective of the topic) is declared in
 `~abinit/abimkdocs/variables.py`. 
 Standard names are:
 
@@ -376,12 +375,12 @@ Standard names are:
 - `useful` (when the default value is used most of the time)
 - `expert` (when only expert users should use other values than the default)
 
-Other tribe names have been allowed for specific topics, in which such a classification 
+Other relevance names have been allowed for specific topics, in which such a classification 
 (compulsory/basic/useful/expert) is not a relevant one.
 
-In order to specify the (possibly several) combinations of topic+tribe to which an input variable is attached,
-the field "topics" is used inside the `~abinit/doc/input_variables/generated_doc/abinit_vars.yml` file
-(and can be filled thanks to the use of the Abivars.jar GUI).
+In order to specify the (possibly several) combinations of topic+relevance to which an input variable is attached,
+the field "topics" is used inside the `~abinit/abimkdocs/variables_abinit.py` file
+(and similar files in the same directory for the other executables).
 
 Some examples:
 
@@ -389,7 +388,7 @@ Some examples:
 * for mdwall: "MolecularDynamics_expert"
 * for gwpara: "parallelism_useful, GW_basic"
 
-The latter is a case where one input variable is associated to two topics, with a different tribe 
+The latter is a case where one input variable is associated to two topics, with a different relevance
 for topic "parallelism" and topic "GW".
 
 
@@ -479,7 +478,7 @@ text
 : Free text describing the input variable
 
 topics
-: A string, specified in [topics_and_tribes](#topics-and-tribes)
+: A string, specified in [topics_and_relevances](#topics-and-relevances)
 
 varset
 : a unique "set of variables" to which the variable belong. 
@@ -537,7 +536,7 @@ As condition, please use strings with the most basic expressions,
 containing <, < =, >, >=, ==, !=, +, -, *, /, etc to allow for further simple parsing !
 
 As a convention, we use "pythonic" way for expressions, so you can use "or", "and" and "in" 
-also as `[[varname]] in [1,2,5]` for example ...
+also as <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [varname] &#93; in [1,2,5]</span> for example ...
 
 
 ### ValueWithUnit object
@@ -565,5 +564,5 @@ the CONDITION to be fulfilled.
 
 Pay attention to strings. If it is recognized as string directly, you don't need ticks (' ').
 Otherwise, you need to put ticks. 
-For example, if you want to use a link as a value, use a link shortcut like `[[abivarname]]`. 
+For example, if you want to use a link as a value, use a link shortcut like <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [abivarname] &#93; </span>. 
 See the doc about link shortcuts at [links shortcuts](markdown.md#links). 

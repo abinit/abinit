@@ -352,18 +352,27 @@ class Variable(object):
         """
         The absolute URL associated to this variable on the Abinit website.
         """
+        # This is gonna be the official API on the server
         #docs.abinit.org/vardocs/CODENAME/VARNAME?version=8.6.2
-        return "https://www.docs.abinit.org/vardoc/%s/%s" % (self.executable, self.name)
+        #return "https://docs.abinit.org/vardocs/%s/%s" % (self.executable, self.name)
+
+        # For the time being, we have to use:
+        # variables/eph/#asr
+        # variables/anaddb#asr
+        if self.executable == "abinit":
+            return "https://docs.abinit.org/variables/%s#%s" % (self.varset, self.name)
+        else:
+            return "https://docs.abinit.org/variables/%s#%s" % (self.executable, self.name)
 
     @lazy_property
     def topic2relevances(self):
-        """topic --> list of tribes"""
+        """topic --> list of relevances"""
         assert self.topics is not None
         od = OrderedDict()
         for tok in self.topics:
-            topic, tribe = [s.strip() for s in tok.split("_")]
+            topic, relevance = [s.strip() for s in tok.split("_")]
             if topic not in od: od[topic] = []
-            od[topic].append(tribe)
+            od[topic].append(relevance)
         return od
 
     @lazy_property
@@ -416,8 +425,23 @@ class Variable(object):
 
     def _repr_html_(self):
         """Integration with jupyter notebooks."""
-        html = "<h2>Default value:</h2>" + my_unicode(self.defaultval) + "<br/><h2>Description</h2>" + self.text
-        return html.replace("[[", "<b>").replace("]]", "</b>")
+        try:
+            import markdown
+        except ImportError:
+            markdown = None
+
+        if markdown is None:
+            html = "<h2>Default value:</h2>" + my_unicode(self.defaultval) + "<br/><h2>Description</h2>" + self.text
+            return html.replace("[[", "<b>").replace("]]", "</b>")
+        else:
+            md = self.text.replace("[[", "<b>").replace("]]", "</b>")
+            return markdown.markdown("""
+## Default value:
+{defaultval}
+
+## Description:
+{md}
+""".format(defaultval=my_unicode(self.defaultval), md=my_unicode(md)))
 
     def browse(self):
         """Open variable documentation in browser."""
@@ -768,16 +792,19 @@ class VarDatabase(OrderedDict):
 
     def get_version_endpoints(self):
         """
-        docs.abinit.org/vardocs/abinit/asr?version=8.6.2
+        API used by the webser to serve the documentation of a variable given codename, varname, [version]:
+
+            docs.abinit.org/vardocs/abinit/asr?version=8.6.2
+
+        # asr@anaddb at /variables/anaddb#asr
+        # asr@abinit at /variables/eph#asr
+        # asr@abinit at /variables/abinit/eph#asr
         """
-	# Webiste will serve
-	# asr@anaddb at /variables/anaddb#asr
-	# asr@abinit at /variables/eph#asr
-	# asr@abinit at /variables/abinit/eph#asr
         code_urls = {}
         for codename, vard in self.items():
             code_urls[codename] = d = {}
             for vname, var in var.items():
+                # This is the internal convention used to build the mkdocs site.
                 d[vname] = "/variables/%s/%s#%s" % (codename, var.varset, var.name)
 	# TODO: version and change mkdocs.yml
         return version, code_urls
@@ -785,10 +812,11 @@ class VarDatabase(OrderedDict):
     def update_json_endpoints(self, json_path, indent=4):
         """
         Update the json file with the mapping varname --> relative url
-        used on the serve to implement the REST API.
+        used by the webserve to implement the `vardocs` API.
         """
         with open(json_path, "rt") as fh:
             oldd = json.load(fh)
+
         new_version, newd = self.get_version_endpoints()
         assert new_version not in oldd
         oldd[new_version] = newd

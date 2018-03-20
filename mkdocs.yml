@@ -2,11 +2,12 @@ site_name: abinit
 site_url: https://www.abinit.org
 site_description: Abinit documentation
 site_author: The Abinit group
-#edit_uri: edit/master/doc/
 docs_dir: doc
 
 repo_name: github-abinit
 repo_url: https://github.com/abinit/abinit/
+# mkdocs default is edit/master/docs/
+edit_uri: edit/master/doc/
 
 # If `True`, use `<page_name>/index.hmtl` style files with hyperlinks to
 # the directory. If `False`, use `<page_name>.html style file with hyperlinks to the file.
@@ -20,11 +21,6 @@ pages:
 - User Guide:
     #- NewUser: guide/new_user.md
     - NewUser: index.md
-    - Installation: 
-        - HowTo: installation.md
-        - MacOSX: README_MacOSX.md
-        - GPUs: README_gpu.md
-        - Xlf: README_xlf.md
     - Abinit: guide/abinit.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
@@ -35,6 +31,11 @@ pages:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
+    - Installation:
+        - HowTo: installation.md
+        - MacOSX: README_MacOSX.md
+        - GPUs: README_gpu.md
+        - Xlf: README_xlf.md
 
 - Topics:
     - Features: topics/features.md

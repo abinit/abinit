@@ -7,8 +7,7 @@ This page gives hints on how to compute the matrix elements of the electron-phon
 
 ## Introduction
 
-The theory and details of the implementation are described in
-[[cite:Gonze2009]] and [[cite:Gonze2016]].
+The theory and details of the implementation are described in [[cite:Gonze2009]] and [[cite:Gonze2016]].
 
 Basic calculations of electron-phonon interaction in ABINIT: one performs a
 normal ground state, then DFPT phonon calculations (using [[rfphon]], with
@@ -16,8 +15,7 @@ added keywords [[prepgkk]] and [[prtgkk]], which saves the matrix elements to
 files suffixed GKK. The main change in this respect is that [[prtgkk]] now
 disables the use of symmetry in reducing q-points and perturbations. This
 avoids ambiguities in wave function phases due to band degeneracies. The
-resulting GKK files are merged using the mrggkk utility, and processed by
-anaddb.
+resulting GKK files are merged using the mrggkk utility, and processed by anaddb.
 
 With the implementation of phonons in PAW DFPT, the electron phonon coupling
 is also available in PAW, though this has not yet been tested extensively. The
@@ -33,9 +31,7 @@ Subsequently, the GKK file is used to compute many quantities, as explained in
 A brand new ABINIT driver, focusing on the treatment of electron-phonon
 interaction is under development. Most of the input variables for experts,
 with [[optdriver]]==7 are related to this development, that is not yet
-operational as of v8.5 .
-
-
+operational as of v8.5.
 
 ## Related Input Variables
 

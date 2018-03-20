@@ -56,7 +56,7 @@ see the [installation notes](https://www.abinit.org/installation).
 
     We will use the name "~abinit" to refer to the directory that contains the
     ABINIT package after download. In practice, a version number is appended to
-    this name, to give for example: abinit-8.4.0. The ABINIT package versioning
+    this name, to give for example: abinit-8.8.0. The ABINIT package versioning
     scheme is explained later in this file.
 
 ~abinit contains different subdirectories. For example, the present file, as
@@ -183,7 +183,7 @@ In addition to the resources that the ABINIT developer provide to the
 community through the ABINIT packages, portal and Github, many ABINIT-independent 
 commercial or free applications can be used to visualize ABINIT
 outputs or interact with ABINIT. We provide a (not very well maintained) list
-of links in <https://www.abinit.org/community/links>. 
+of links in [the last section of http://www.abinit.org/sponsors](http://www.abinit.org/sponsors).
 Of course, you might get more by browsing the Web.
 
 ## Input variables to abinit

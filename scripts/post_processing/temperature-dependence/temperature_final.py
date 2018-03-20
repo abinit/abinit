@@ -57,7 +57,7 @@ def main():
   """
 
   header +=  '\nThis script compute the static/dynamic zero-point motion \n\
-  and the temperature dependance of eigenenergies due to electron-phonon interaction.\n\
+  and the temperature dependence of eigenenergies due to electron-phonon interaction.\n\
   The electronic lifetime can also be computed. \n\n\
   WARNING: The first Q-point MUST be the Gamma point.\n'
    
@@ -73,7 +73,7 @@ def main():
   
   # Type of calculation the user want to perform
   user_input = raw_input('Define the type of calculation you want to perform. Type:\n\
-                        1 if you want to run a non-adiabatic AHC calculation\n \
+                         1 if you want to run a non-adiabatic AHC calculation\n \
                         2 if you want to run a static AHC calculation\n \
                         3 if you want to run a static AHC calculation without control on active space (not recommended !)\n \
   Note that for 1 & 2 you need _EIGR2D.nc and _GKK.nc files obtained through ABINIT option "ieig2rf 5"\n')

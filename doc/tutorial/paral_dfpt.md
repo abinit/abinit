@@ -256,8 +256,8 @@ into the detail of each routine, for the present purpose, the most significant
 information is that among all the timed sections of the code, only "inwffil"
 and "vtorho3:synchro" will not benefit from parallelism.  
 "inwffil" is a subroutine whose job is to read the ground-state wavefunctions
-(you can find the source of the "inwffil" routine in 
-[the latest ABINIT sources](https://www.abinit.org/robodoc)). 
+(you can find the source of the "inwffil" routine on [GitHub](https://github.com/abinit/abinit/tree/master/src/79_seqpar_mpi) or 
+[on the ABINIT Web site](https://www.abinit.org/sites/default/files/robodoc-html/masterindex.html)). 
 As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case
 of the DFPT computations (note that the reading is actually parallelized for
 e.g. ground-state calculations). In the output file provided as a reference

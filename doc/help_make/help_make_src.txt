@@ -17,3 +17,4 @@ abirules       enforce ABINIT style in each *.F90 routines (not all yet)
 abiauty        enforce correct indentation (+...) in each *.F90 routine (all)
 clean          clean all the compiled objects and executables inside src
 ==============================================================================
+[This file can be found at doc/help_make/help_make_src.txt]

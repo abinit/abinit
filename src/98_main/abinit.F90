@@ -195,10 +195,6 @@ program abinit
 #ifdef HAVE_GPU_CUDA
  integer :: gpu_devices(5)
 #endif
-#if defined HAVE_MPI
- real(dp) :: tsec_s(2)
-#endif
-
 
 !******************************************************************
 
@@ -583,8 +579,7 @@ program abinit
  if(me==0)then
    write(ab_out,'(3a,i4,a,f13.1,a,f13.1)')'-',ch10,'- Proc.',me,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  end if
- call MPI_ALLREDUCE(tsec,tsec_s,2,MPI_DOUBLE_PRECISION,MPI_SUM,xmpi_world,ierr)
- tsec=tsec_s
+ call xmpi_sum(tsec, xmpi_world, ierr)
 #else
  write(ab_out, '(a,a,a,f13.1,a,f13.1)' )'-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
 #endif

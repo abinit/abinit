@@ -8,3 +8,4 @@ tests_abirules     Launch the abirules tests
 tests_buildsys     Launch the buildsys tests
 
 ==============================================================================
+[This file can be found at doc/help_make/help_make_abichecks.txt]
