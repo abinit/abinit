@@ -1026,6 +1026,7 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,gamma
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor0=0
+ integer, save :: icall=0
  integer :: natom3,nu1,nu2
  real(dp) :: diagerr,spinfact
  character(len=500) :: msg
@@ -1042,8 +1043,12 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,gamma
  ! Compute internal tables used for Fourier interpolation.
  if (.not.allocated(gams%vals_bz)) call phgamma_interp_setup(gams,cryst,"INIT")
 
- if (present(gamma_ph_ee)) then
+ if (present(gamma_ph_ee) .and. icall == 0) then
    gamma_ph_ee = zero
+   write (msg,'(2a)') "For the moment gams_ee matrix elements are not FT interpolated wrt q,',&
+&       ' only evaluated on the electron k grid. The resulting a2feew will be 0"
+   MSG_WARNING(msg)
+   icall = 1
  end if
 
  !@phgamma_t
@@ -2472,6 +2477,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 
  call cwtime(cpu,wall,gflops,"start")
 
+ write (900,*) 'do_qintp ', do_qintp
  ! Loop over spins and qpoints in the IBZ
  cnt = 0
  do spin=1,nsppol
@@ -2519,6 +2525,13 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
            end do
 
            a2f%vals_ee(jene, iene, :, spin) = a2f%vals_ee(jene, iene, :, spin) + tmp_a2f(:) * wtq(iq_ibz)
+if (iene == gams%nene/2 .and. jene == gams%nene/2) then
+  write (900, '(a,E20.10,2x,3E20.10,2x,I6,3E20.10)') '#', wtq(iq_ibz), tmp_gaussian(iw,:), iq_ibz, invphfrq(:)
+  do iw=1,nomega
+    write (900, '(i6,2x,E20.10,2x,3E20.10)') iw, a2f%vals_ee(jene, iene, iw, spin), gamma_ph_ee(jene,iene,:,spin)
+  end do
+  write (900,*)
+end if
          end do
        end do
        ABI_DEALLOCATE(tmp_gaussian)
@@ -3212,7 +3225,7 @@ subroutine a2fw_ee_write(a2f,basename)
      ene1 = a2f%enemin + (iene-1)*a2f%deltaene
      do jene=1,a2f%nene
        ene2 = a2f%enemin + (jene-1)*a2f%deltaene
-       write(unt,*) ene2, ene1, a2f%omega(iw), sum(a2f%vals_ee(jene,iene,iw,:))   ! TOT
+       write(unt,'(3E20.10,2x,E20.10)') ene2, ene1, a2f%omega(iw), sum(a2f%vals_ee(jene,iene,iw,:))   ! TOT
      end do
    end do
  end do
@@ -3231,7 +3244,7 @@ subroutine a2fw_ee_write(a2f,basename)
  iene = int(a2f%nene/2)
  jene = int(a2f%nene/2)
  do iw=1,a2f%nomega
-   write(unt,*) a2f%omega(iw), sum(a2f%vals_ee(jene,iene,iw,:))   ! TOT
+   write(unt,'(E20.10,2x,E20.10)') a2f%omega(iw), sum(a2f%vals_ee(jene,iene,iw,:))   ! TOT
  end do
 
  close(unt)
@@ -4618,6 +4631,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
    ABI_CHECK(ierr==0, "oom vlocal1")
 
+   gams%vals_ee = zero
    do spin=1,nsppol
      fs => fstab(spin)
 
@@ -4875,6 +4889,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          call fstab_weights_ibz(fs, ebands, ikq_ibz, spin, sigmas, wt_kq_en(:,:,jene), iene=jene)
        end do
 
+write (800,*) wt_kq_en
+write (801,*) wt_k_en
        do ib2=1,nband_k
          do ib1=1,nband_kq
            do ipc2=1,natom3
@@ -4883,6 +4899,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
                rg = gkk_atm(:, ib1, ib2, ipc2)
                res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                res(2) = lf(1) * rg(2) - lf(2) * rg(1)
+if (sum(abs(res)) < tol6) then
+  write (802,*) 'res small ib2,ib1,ipc2,ipc1, res ', ib2,ib1,ipc2,ipc1, res
+end if
                do jene = 1, gams%nene
                  do iene = 1, gams%nene
                    gams%vals_ee(:,iene,jene,ipc1,ipc2,iq_ibz,spin) = &
