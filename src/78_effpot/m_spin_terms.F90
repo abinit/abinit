@@ -1,9 +1,9 @@
 ! Self file implement the spin_terms_t class.
 #include "abi_common.h"
-module  m_spin_model_supercell
+module  m_spin_terms
   use defs_basis
   use m_mathfuncs
-  use m_spindyfunc
+  use m_spin_terms_funcs
   use m_sparse_matrix
   implicit none
   real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
@@ -205,21 +205,21 @@ contains
     self%ms = ms
 
     if(present(external_hfield)) then
-       call set_external_hfield(self, external_hfield)
+       call spin_terms_t_set_external_hfield(self, external_hfield)
     end if
 
     if (present(bilinear_i) .and. present(bilinear_j) &
          & .and. present(bilinear_val)) then
-       call set_bilinear_term(self, bilinear_i, bilinear_j, bilinear_val)
+       call spin_terms_t_set_bilinear_term(self, bilinear_i, bilinear_j, bilinear_val)
     endif
 
     if (present(exchange_i) .and. present(exchange_j) .and. present(exchange_val) ) then
-       call set_exchange(self, exchange_i, exchange_j, exchange_val)
+       call spin_terms_t_set_exchange(self, exchange_i, exchange_j, exchange_val)
     end if
 
 
     if ( present(DMI_i) .and. present(DMI_j) .and. present(DMI_val) ) then
-       call set_DMI(self, DMI_i, DMI_j, DMI_val)
+       call spin_terms_t_set_DMI(self, DMI_i, DMI_j, DMI_val)
     end if
 
     if ( present(gyro_ratio) ) then
@@ -228,7 +228,7 @@ contains
     self%gyro_ratio=gyro_ratio
 
     if ( present(k1) .and. present( k1dir) ) then
-       call set_uniaxial_MCA(self, k1, k1dir)
+       call spin_terms_t_set_uniaxial_MCA(self, k1, k1dir)
     endif
 
     if (present(gilbert_damping)) then
@@ -317,7 +317,7 @@ contains
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(:,:)
-    call spin_terms_t_uniaxial_MCA_Heff(self%nmatoms,self%k1,self%k1dir,self%ms,S,Heff)
+    call uniaxial_MCA_Heff(self%nmatoms,self%k1,self%k1dir,self%ms,S,Heff)
   end subroutine spin_terms_t_calc_uniaxial_MCA_Heff
 
   subroutine spin_terms_t_set_bilinear_term_single(self, i, j, val)
@@ -450,7 +450,7 @@ contains
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(:,:)
-    call spin_terms_t_exchange_Heff(self%exchange_nint,self%nmatoms,self%exchange_i, &
+    call exchange_Heff(self%exchange_nint,self%nmatoms,self%exchange_i, &
          self%exchange_j,self%exchange_val,S,self%ms,Heff)
   end subroutine spin_terms_t_calc_exchange_Heff
 
@@ -491,7 +491,7 @@ contains
     real(dp), intent(out) :: Heff(:,:)
     integer :: nij
     nij=size(self%DMI_i)
-    call spin_terms_t_DMI_Heff(nij,self%nmatoms,self%DMI_i,self%DMI_j,self%DMI_val,S,self%ms,Heff)
+    call DMI_Heff(nij,self%nmatoms,self%DMI_i,self%DMI_j,self%DMI_val,S,self%ms,Heff)
   end subroutine spin_terms_t_calc_DMI_Heff
 
 
@@ -673,4 +673,4 @@ contains
 
   end subroutine spin_terms_t_finalize
 
-end module m_spin_model_supercell
+end module m_spin_terms

@@ -6,7 +6,7 @@
 !TODO hexu: merge this file with m_spin_terms.F90
 ! this file exists only for historical reasons.
 
-module m_spindyfunc
+module m_spin_terms_funcs
   use defs_basis
   use m_mathfuncs, only: cross, outer_product, rand_normal, rand_normal_ziggurat
   implicit none
@@ -159,7 +159,7 @@ CONTAINS
     !print *, "gyro:", gyro_ratio(1)
     !print *, "T", T
     if (T .gt. 1e-15_dp) then
-       call rand_normal2(x)
+       call rand_normal(x)
        !x(:,:)=1.0d0
        !call r8vec_normal_01(3*n, seed, x)
        do i = 1,n
@@ -173,4 +173,4 @@ CONTAINS
     end if
   end subroutine langevin_term
 
-end module m_spindyfunc
+end module m_spin_terms_funcs

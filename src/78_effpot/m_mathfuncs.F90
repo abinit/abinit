@@ -26,7 +26,7 @@ contains
 
 
   ! defines outer product of two vectors.
-  function outer_product(a, b) result (c)
+  function outer_product(a,b) ! result (c)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -34,14 +34,16 @@ contains
 #undef ABI_FUNC
 #define ABI_FUNC 'outer_product'
 !End of the abilint section
+
     real(dp), intent(in) :: a(:), b(:)
-    real(dp)  :: c(size(a, dim=1), size(b, dim=1))
+    real(dp)  :: outer_product(size(b, dim=1), size(a, dim=1))
     integer:: i, j
       do i=1, size(a, dim=1)
         do j=1, size(b, dim=1)
-        c(i,j) = a(i)*b(j)
+          outer_product(j,i) = a(i)*b(j)
       enddo
     enddo
+    return
   end function outer_product
 
   subroutine set_random_seed(seed)

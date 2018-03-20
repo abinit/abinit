@@ -1,6 +1,6 @@
 module m_spin_mover
   use defs_basis
-  use m_spin_model_supercell
+  use m_spin_terms
   use m_mathfuncs
   use m_spin_hist
   implicit none

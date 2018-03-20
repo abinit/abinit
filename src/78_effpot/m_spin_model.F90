@@ -1,6 +1,12 @@
 module m_spin_model
-  use m_spin_model_primitive
-  use m_spin_model_supercell
+  use m_spin_terms
+  use m_spin_model_primitive, only: spin_model_primitive_t, &
+         & spin_model_primitive_t_initialize, &
+         & spin_model_primitive_t_print_terms, &
+         & spin_model_primitive_t_finalize, &
+         & spin_model_primitive_t_read_xml, & 
+         & spin_model_primitive_t_make_supercell
+
   use m_spin_mover
   use m_spin_hist
   use m_multibinit_dataset
@@ -30,11 +36,11 @@ contains
   subroutine spin_model_t_run(self)
     !TODO add input as parameters.
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_run'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
   end subroutine spin_model_t_run
@@ -43,11 +49,11 @@ contains
   subroutine spin_model_t_initialize(self, xml_fname,  params)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_initialize'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     character(len=40), intent(in) :: xml_fname
@@ -56,7 +62,7 @@ contains
 
     ! read input
     !call self%spin_primitive%initialize()
-    call spin_model_t_primitive_t_initialize(self%spin_primitive)
+    call spin_model_primitive_t_initialize(self%spin_primitive)
     self%params=params
     !call self%read_xml(xml_fname)
     call spin_model_t_read_xml(self, xml_fname)
@@ -89,15 +95,15 @@ contains
   subroutine spin_model_t_finalize(self)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_finalize'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     !call self%spin_primitive%finalize()
-    call spin_primitive_t_finalize(self%spin_primitive)
+    call spin_model_primitive_t_finalize(self%spin_primitive)
     ! TODO: finalize others
   end subroutine spin_model_t_finalize
 
@@ -105,42 +111,42 @@ contains
   subroutine spin_model_t_read_xml(self, xml_fname)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_read_xml'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     character(len=40), intent(in) :: xml_fname
     !call self%spin_primitive%read_xml(xml_fname)
-    call spin_primitive_t_read_xml(self%spin_primitive, xml_fname)
+    call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname)
   end subroutine spin_model_t_read_xml
 
   ! from primitive cell parameter make supercell and prepare calculator
   subroutine spin_model_t_make_supercell(self, sc_mat)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_make_supercell'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     integer , intent(in):: sc_mat(3, 3)
     !call self%spin_primitive%make_supercell(sc_mat, self%spin_calculator)
-    call spin_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
+    call spin_model_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
   end subroutine spin_model_t_make_supercell
 
   subroutine spin_model_t_set_initial_spin(self, mode)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_set_initial_spin'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     integer, intent(in) :: mode
@@ -170,11 +176,11 @@ contains
   subroutine spin_model_t_run_one_step(self)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_run_one_step'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     real(dp) :: S_tmp(3,self%nmatoms)
@@ -191,11 +197,11 @@ contains
   subroutine spin_model_t_run_time(self)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_run_time'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     real(dp) :: t
@@ -216,11 +222,11 @@ contains
   subroutine spin_model_t_run_MvT(self)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_run_MvT'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     !TODO
@@ -230,11 +236,11 @@ contains
   subroutine spin_model_t_run_MvH(self)
 
 
-    !This section has been created automatically by the script Abilint (TD).
-    !Do not modify the following lines by hand.
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_run_MvH'
-    !End of the abilint section
+!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     !TODO
