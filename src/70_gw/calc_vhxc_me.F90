@@ -187,20 +187,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ! Usually FFT meshes for wavefunctions and potentials are not equal. Two approaches are possible:
  ! Either we Fourier interpolate potentials on the coarse WF mesh or we FFT the wfs on the dense mesh.
  ! The later approach is used, more CPU demanding but more accurate.
-<<<<<<< HEAD
- if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
- end if
-
  non_magnetic_xc=(Dtset%usepawu==4).or.(Dtset%usepawu==14)
 
- comm   = Wfd%comm
- rank   = Wfd%my_rank
- master = Wfd%master
- nprocs = Wfd%nproc
-=======
  if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
->>>>>>> remotes/trunk/develop
 
  ! Fake MPI_type for sequential part
  rank = Wfd%my_rank
@@ -259,11 +248,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call xcdata_init(xcdata,dtset=Dtset)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-<<<<<<< HEAD
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
-=======
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
->>>>>>> remotes/trunk/develop
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  ! FABIEN's development
@@ -298,24 +283,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
    if(ixc_sigma<0)then
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-<<<<<<< HEAD
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,nspden,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
-&     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
-
-     ! Fix the libxc module with the original settings
-     call libxc_functionals_end()
-     if(Dtset%ixc<0) then
-       call libxc_functionals_init(Dtset%ixc,Dtset%nspden)
-     end if
-
-=======
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
->>>>>>> remotes/trunk/develop
    else
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
    end if
 

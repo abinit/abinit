@@ -213,7 +213,7 @@
 #include "abi_common.h"
 
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,,n3xccc,option,paral_kgb, &
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,paral_kgb, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 

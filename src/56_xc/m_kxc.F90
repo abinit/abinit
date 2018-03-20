@@ -588,7 +588,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
-&   dtset%usepawu==4.or.dtset%usepawu==14,nspden,n3xccc,&
+&   dtset%usepawu==4.or.dtset%usepawu==14,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
