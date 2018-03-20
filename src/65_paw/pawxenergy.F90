@@ -7,7 +7,7 @@
 !! Compute contributions to energy for PAW+ local exact exchange calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (BA,FJ)
+!! Copyright (C) 1998-2018 ABINIT group (BA,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,7 +68,7 @@
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  nfftdiel=number of fft grid points for the computation of the diel matrix
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!                see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!                see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  npwdiel=size of the susmat array.
@@ -341,6 +341,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
+ complex(dpc),allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(oper_type) :: lda_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
@@ -687,9 +688,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if ( .not.berryflag ) then
          ikpt_loc = ikpt_loc + 1
          ikpt = ikpt_loc
+         my_ikpt = mpi_enreg%my_kpttab(ikpt)
        else
          if (ikpt_loc < dtset%mkmem) ikpt = ikpt + 1
          if ((ikpt > dtset%nkpt).and.(ikpt_loc < dtset%mkmem)) exit
+         my_ikpt=ikpt
        end if
 
        dphase_k(:) = zero
@@ -742,12 +745,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(984,1,tsec)
 
-       my_ikpt = ikpt
-       if (mpi_enreg%paral_kgb==1) then
-         my_ikpt = mpi_enreg%my_kpttab(ikpt)
-         my_bandfft_kpt => bandfft_kpt(my_ikpt)
-         call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
-       end if
+       if (mpi_enreg%paral_kgb==1) my_bandfft_kpt => bandfft_kpt(my_ikpt)
+       call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
+!      my_ikpt = ikpt
+!       if (mpi_enreg%paral_kgb==1) then
+!        my_ikpt = mpi_enreg%my_kpttab(ikpt)
+!         my_bandfft_kpt => bandfft_kpt(my_ikpt)
+!         call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
+!       end if
 
        ABI_ALLOCATE(eig_k,(nband_k))
        ABI_ALLOCATE(ek_k,(nband_k))
@@ -802,12 +807,23 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
        end if
 
+!     compute and load nuclear dipole Hamiltonian at current k point
+       if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+         if(allocated(nucdipmom_k)) then
+           ABI_DEALLOCATE(nucdipmom_k)
+         end if
+         ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+         call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
+         call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+       end if
+       
+
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
 !       - Prepare various tabs in case of band-FFT parallelism
 !       - Load k-dependent quantities in the Hamiltonian
        ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-       
+
        if(usefock_ACE/=0) then
          call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
 &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
@@ -890,6 +906,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(kinpw)
        ABI_DEALLOCATE(kg_k)
        ABI_DEALLOCATE(kpg_k)
+       if(allocated(nucdipmom_k)) then
+         ABI_DEALLOCATE(nucdipmom_k)
+       end if
        ABI_DEALLOCATE(ylm_k)
        ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(cgq)
@@ -1613,7 +1632,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,mcprj_tmp))
        call pawcprj_alloc(cprj_tmp,0,gs_hamk%dimcprj)
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
-&       dtset%mband,mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
+&       mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &       dtset%natom,nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,&
 &       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
 &       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
@@ -1752,7 +1771,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!  See also "wvl_nscf_loop_bigdft"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1880,7 +1899,7 @@ subroutine wvl_nscf_loop()
 !!  See also "wvl_nscf_loop"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel, D. Caliste)
+!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel, D. Caliste)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1998,7 +2017,7 @@ subroutine wvl_nscf_loop_bigdft()
 !!  Computes eigenvalues energy from eigen, occ, kpt, wtk
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2082,7 +2101,7 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !!  Computes occupations for the wavelet case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2153,7 +2172,7 @@ subroutine wvl_occ()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2222,7 +2241,7 @@ subroutine wvl_occ_bigdft()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,6 +8,7 @@ prt_model = 2
 #Generation of the IFC
 #---------------------------------------------------------------
 dipdip = 0
+dipdip_prt = 1
 
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients

@@ -9,7 +9,7 @@
 !! When cplex=2, q must be taken into account, and vhartr will be COMPLEX
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR).
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@
 !!  izero=if 1, unbalanced components of Vhartree(g) are set to zero
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
@@ -40,11 +40,11 @@
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
 !!
 !! PARENTS
-!!      dfpt_rhotov,dfptnl_loop,fock_getghc,nres2vres,rhotoxc,setup_positron
-!!      tddft
+!!      dfpt_rhotov,dfptnl_loop,energy,fock_getghc,m_kxc,nonlinear,nres2vres
+!!      odamix,prcref,prcref_PMA,respfn,rhotov,setup_positron,setvtr,tddft
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,timab,zerosym
+!!      fourdp,metric,ptabs_fourdp,timab,zerosym
 !!
 !! SOURCE
 
@@ -130,7 +130,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
    qpt_=qpt
  else 
    qpt_=zero
- endif
+ end if
  qeq0=0 
  if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0

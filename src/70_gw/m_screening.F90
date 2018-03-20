@@ -8,7 +8,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1005,8 +1005,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      end if
    else
      ! Out-of-core solution ===
-     msg = " mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory)."
-     MSG_COMMENT(msg)
+     MSG_COMMENT("mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory).")
      continue
    end if
 
@@ -1960,7 +1959,6 @@ CASE(6)
  ABI_FREE(epsm_lf)
  ABI_FREE(epsm_nlf)
  ABI_FREE(eelf)
-
  ABI_FREE(tmp_lf)
  ABI_FREE(tmp_nlf)
  ABI_FREE(tmp_eelf)

@@ -1,8 +1,8 @@
 
-.Version 8.1.7 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin15.6.0_gnu6.0 computer) 
+.Version 8.7.6 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 10 Dec 2016.
-- ( at 22h08 )
+.Starting date : Fri  9 Mar 2018.
+- ( at 06h52 )
   
 - input  file    -> t44.in
 - output file    -> t44.out
@@ -34,7 +34,7 @@
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.174 Mbytes of memory.
+P This job should need less than                       5.134 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.174 Mbytes of memory.
+P This job should need less than                       5.134 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -61,7 +61,7 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -78,7 +78,7 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
         ddb_ngqpt        2    2    2
         ph_nqpath           3
          ph_ngqpt       16   16   16
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
            istwfk        1    0    1    0    0    0    1    0
@@ -227,7 +227,7 @@ Values initialized with zeros
 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =       12473.4865 (m/s)
+-                                   =          12.4735 [km/s]
 
  Debye frequency from partial sums:     0.5262667706E-02 (Ha)
 -                                 =     0.3462669009E+02 (THz)
@@ -264,8 +264,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__henrique/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__henrique/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -274,7 +274,7 @@ All the independent perturbations are available
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -366,7 +366,7 @@ Values initialized with zeros
 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.5701666765E-02 (at units)
--                                   =       12473.4865 (m/s)
+-                                   =          12.4735 [km/s]
 
  Debye frequency from partial sums:     0.5262667706E-02 (Ha)
 -                                 =     0.3462669009E+02 (THz)
@@ -467,7 +467,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
            istwfk        1    0    1    0    0    0    1    0
@@ -644,10 +644,10 @@ P           mkmem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          8.9  wall=          8.9
+- Proc.   0 individual time (sec): cpu=         10.4  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.9  wall=          8.9
+.Delivered   2 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.4  wall=         10.5

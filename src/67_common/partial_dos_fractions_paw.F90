@@ -7,7 +7,7 @@
 !!  Calculate PAW contributions to the partial DOS fractions (tetrahedron method)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (SM,MT)
+!! Copyright (C) 1998-2018 ABINIT group (SM,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

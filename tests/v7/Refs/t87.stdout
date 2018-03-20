@@ -1,8 +1,8 @@
 
-.Version 8.1.1 of MRGDV 
+.Version 8.5.3 of MRGDV 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  MRGDV comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  1 Jul 2016.
-- ( at 11h02 )
+.Starting date : Mon 25 Sep 2017.
+- ( at 16h33 )
   
 >>> Enter name of output file: 
 >>> Enter total number of DFPT POT files: 
@@ -34,19 +34,33 @@
 >>> Enter name of POT file 13 : 
 >>> Enter name of POT file 14 : 
 - Reading header of file [1]: t85o_DS2_POT1
+- Merging file [1]: t85o_DS2_POT1
 - Reading header of file [2]: t85o_DS3_POT1
+- Merging file [2]: t85o_DS3_POT1
 - Reading header of file [3]: t85o_DS3_POT2
+- Merging file [3]: t85o_DS3_POT2
 - Reading header of file [4]: t85o_DS4_POT1
+- Merging file [4]: t85o_DS4_POT1
 - Reading header of file [5]: t85o_DS4_POT2
+- Merging file [5]: t85o_DS4_POT2
 - Reading header of file [6]: t85o_DS5_POT1
+- Merging file [6]: t85o_DS5_POT1
 - Reading header of file [7]: t85o_DS6_POT1
+- Merging file [7]: t85o_DS6_POT1
 - Reading header of file [8]: t85o_DS6_POT2
+- Merging file [8]: t85o_DS6_POT2
 - Reading header of file [9]: t85o_DS6_POT3
+- Merging file [9]: t85o_DS6_POT3
 - Reading header of file [10]: t85o_DS7_POT1
+- Merging file [10]: t85o_DS7_POT1
 - Reading header of file [11]: t85o_DS7_POT3
+- Merging file [11]: t85o_DS7_POT3
 - Reading header of file [12]: t85o_DS8_POT1
+- Merging file [12]: t85o_DS8_POT1
 - Reading header of file [13]: t85o_DS9_POT1
+- Merging file [13]: t85o_DS9_POT1
 - Reading header of file [14]: t85o_DS9_POT2
+- Merging file [14]: t85o_DS9_POT2
 Merged successfully 14 files
  ==== Info on the dvdb% object ====
 DVDB version: 2

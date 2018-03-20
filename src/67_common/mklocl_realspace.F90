@@ -14,7 +14,7 @@
 !!  option=2 : contribution of local ionic potential to E gradient wrt xred
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR,TRangel)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms.
 !!  option= (see above)
@@ -877,7 +877,7 @@ implicit none
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (TRangel)
+!! Copyright (C) 2013-2018 ABINIT group (TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -932,7 +932,7 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !!  Use a quadratic interpolation to get limit of Vloc(x) at x->0
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (TRangel,MT)
+!! Copyright (C) 2013-2018 ABINIT group (TRangel,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1229,7 +1229,7 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !!  Compute 1st-derivative of long-range HGH local ionic potential (derf)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2016 ABINIT group (MT)
+!! Copyright (C) 2016-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1284,7 +1284,7 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !!  Use a quadratic interpolation to get limit of (1/x).dVloc(x)/dx at x->0
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (TRangel,MT)
+!! Copyright (C) 2013-2018 ABINIT group (TRangel,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

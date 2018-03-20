@@ -10,7 +10,7 @@
 !!  - PS atomic valence density from psp file (PAW or NC psps with valence change in the pp file) 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA,XG,MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 !! natom=number of atoms in cell.
 !! nattyp(ntypat)=number of atoms of each type in cell.
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ntypat=number of types of atoms in cell.
 !! nspden=number of spin-density components
 !! psps<type(pseudopotential_type)>=variables related to pseudopotentials

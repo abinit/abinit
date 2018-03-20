@@ -9,7 +9,7 @@
 !! to the product of two wavefunctions n_{12}(r) = \Psi_1* \Psi_2. Based on pawmknhat.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MG, FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (MG, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
 !!  nfft=number of point on the rectangular fft grid
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat12_grdim= 0 if grnhat12 array is not used ; 1 otherwise
 !!  ntypat=number of types of atoms in unit cell.
 !!  paral_kgb=--optional-- 1 if "band-FFT" parallelism is activated (only needed when comm_fft is present)

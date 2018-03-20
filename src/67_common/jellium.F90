@@ -11,7 +11,7 @@
 !!                the jellium slab
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group (SC)
+!! Copyright (C) 2007-2018 ABINIT group (SC)
 !! This file is distributed under the terms of the 
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential)
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  option=
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)

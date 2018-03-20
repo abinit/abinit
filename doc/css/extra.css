@@ -1,0 +1,587 @@
+/* Page background */
+body {
+    background-image: url("../images/pw_maze_white.png");
+}
+
+/* A better looking default horizontal rule */
+.md-typeset hr {
+    border-bottom: .1rem solid rgba(0,0,0,.26);
+} 
+
+/* Increase logo width because mkdocs material enforces 48 x 48 */
+.md-logo img {
+    width: 48px;
+    height: auto;
+}
+
+/* Add vertical rhythm
+ * Based on example 5 of https://tympanus.net/codrops/2012/11/02/heading-set-styling-with-css/ 
+.md-main {counter-reset: section-1, section-2, section-3, section-4;}
+*/
+
+.md-main h1 {
+    margin: 0.8em 0 0.5em 0;
+    color: #333;
+    font-weight: normal;
+    font-size: 36px;
+    line-height: 40px;
+    /*
+    counter-increment: section-1;
+    counter-reset: section-2 section-3 section-4;
+    */
+}
+
+.md-main h2 {
+    margin: 0.8em 0 0.5em 0;
+    color: #333;
+    font-weight: normal;
+    font-size: 28px;
+    line-height: 40px;
+    border-bottom: 1px solid #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+    padding-bottom: 10px;
+    /*
+    counter-increment: section-2;
+    counter-reset: section-3 section-4;
+    */
+}
+
+.md-main h3 {
+    margin: 0.8em 0 0.5em 0;
+    color: #333;
+    font-weight: normal;
+    font-size: 22px;
+    line-height: 40px;
+    /*
+    counter-increment: section-3;
+    counter-reset: section-4;
+    */
+}
+
+.md-main h4 {
+    margin: 0.8em 0 0.5em 0;
+    color: #333;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 20px;
+    /* counter-increment: section-4; */
+}
+
+/*
+a {
+  outline: none;
+  text-decoration: none;
+  padding: 2px 1px 0;
+}
+
+a:link {
+  color: blue;
+}
+
+a:visited {
+  color: purple;
+}
+
+a:focus, a:hover {
+  border-bottom: 1px solid;
+}
+
+a:active {
+  color: red;
+} 
+*/
+
+/* https://codemyui.com/expand-on-hover-link-style/ 
+a.wikilink {
+  text-decoration: none;
+  margin: 0 2px;
+  color: #3f51b5 !important;
+  position: relative;
+}
+
+a.wikilink:before {
+  position: absolute;
+  margin: 0 auto;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #E65100;
+  content: '';
+  opacity: .3;
+  -webkit-transform: scaleX(.9);
+  transition-property: opacity, -webkit-transform;
+  transition-duration: .3s;
+}
+
+a.wikilink:hover:before {
+  opacity: 1;
+  -webkit-transform: scaleX(1);
+}
+*/
+
+a.codevar-wikilink, 
+a.abifile-wikilink {
+    font-family: "Inconsolata", "Consolas", "Menlo", Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace, serif;
+/*
+    text-decoration: underline !important;
+    color: #279fcd !important;
+    color: black !important;
+    color: #DA621E !important;
+    color: #EF6C00 ! important;
+    color: #FF6600 !important;
+    color: #E65100 !important;
+*/
+}
+
+a.citation-wikilink {
+    font-style: italic;
+}
+
+/*
+font-family: 'Ubuntu Mono', monospace;
+*/
+
+/* Add fa icon to external links a la wikipedia.
+ * See http://astronautweb.co/snippet/font-awesome/ */
+a[href^="http://"]:after, 
+a[href^="https://"]:after {
+    content: "\f08e";  /* font-awesome fa-external-link */
+    /* content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png); */
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    text-decoration: inherit;
+    margin: 0 0 0 -3px;
+    font-size: 7px;
+    padding-bottom: 0.5em;
+    position: absolute;
+    display: inline-block;
+    padding-left: 3px;
+    /*--adjust as necessary-- 
+    padding-right: 0.5em;
+    top: 10px;
+    left: 0;
+    */
+}
+
+/* Strip from links to own domain */
+a[href*="abinit.org"]:after,
+a[href="https://github.com/abinit/abinit/"]:after {
+  content:"" !important;
+  padding-left: 0;
+}
+
+/* Center figure and img elements */
+figure {
+    text-align: center;
+}
+
+img {
+    display: block;
+    margin: auto;
+}
+
+/* Table style */
+table {
+    background-color: #eee;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Change color background of code examples and admonitions */
+.md-typeset .codehilite code, 
+.md-typeset .codehilite pre, 
+.md-typeset .highlight code, 
+.md-typeset .highlight pre {
+    background-color: #dfe2f1;
+}
+
+.md-typeset .admonition, 
+.md-typeset details {
+    background-color: #eee;
+}
+
+/* Change color background of `monospace` elements used in markdown pages */
+.md-typeset .codehilite, .md-typeset .highlight {
+    background-color: rgba(144, 144, 144, 0.10);
+}
+
+/* This for bootstrap buttons with labels. See https://bootsnipp.com/snippets/featured/buttons-with-labels */
+.btn-label {
+    position: relative;
+    left: -12px;
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 3px 0 0 3px;
+    z-index: 0;
+}
+
+.btn-labeled {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+/* .btn { margin-bottom:10px; } */
+
+/* Decrease font-size e.g in <pre class="small-text"> elements */
+.small-text {
+    font-size: 10px !important;
+}
+
+pre.small-text {
+    font-size: 10px !important;
+}
+
+/* This to solve the conflict between bootstrap and jquery-ui close button.
+ * https://stackoverflow.com/questions/17367736/jquery-ui-dialog-missing-close-icon
+.ui-dialog-titlebar-close {}
+ * */
+
+.ui-dialog-titlebar-close:after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(../images/ui-icons_555555_256x240.png);
+    background-position: -96px -128px;
+    background-repeat: no-repeat;
+}
+
+/*
+.ui-dialog { position: fixed; padding: .1em; width: 50px; overflow: hidden; }
+*/
+
+.ui-dialog-titlebar .PinDialog, .ui-dialog-titlebar .DialogPinned {
+    float: left;
+    height: 20px;
+    margin: 0 5px 0 -10px;
+    padding: 1px;
+    top: 50%;
+    width: 20px;
+}
+
+/* Set z-index to 0 to elements that otherwise would appear above the menu bar upon scrolling. */
+.custom-search-form {
+    z-index: 0;
+}
+
+/* Setting height is also important, otherwise editor wont showup 
+http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.html */
+.editor { 
+    height: 480px; 
+    z-index: 0;
+    /*
+    height: 520px; 
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    */
+}
+
+/* CSS for https://bootsnipp.com/snippets/featured/inbox-by-gmail */
+.fab {
+    cursor: pointer;
+}
+
+.fab-backdrop {
+    color: rgba(255, 255, 255, 0);
+}
+
+.fab-primary, 
+.fab-secondary {
+    transition: all 0.35s ease-in-out;
+}
+
+.fab.active .fab-primary {
+    opacity: 0;
+    transform: rotate(225deg);
+}
+
+.fab-secondary {
+    opacity: 0;
+    transform: rotate(-225deg);
+}
+
+.fab.active .fab-secondary {
+    opacity: 1;
+    transform: rotate(0);
+    margin-top: -2px;
+}
+
+#inbox .show-on-hover:hover > ul.dropdown-menu {
+    display: block;    
+}
+
+#inbox .show-on-hover {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+#inbox .btn-io {
+    border-radius: 50%;
+    height: 54px;
+    width: 54px;
+    padding: 0 !important;
+    box-shadow: 0px 3px 7px 0px rgba(202, 124, 124, 0.72);
+}
+
+#inbox .dropup .dropdown-menu, 
+.navbar-fixed-bottom .dropdown .dropdown-menu {
+    top: auto;
+    bottom: 100%;
+    margin-bottom: 1px;
+    margin-bottom: -5px;
+    padding-bottom: 30px;
+}
+
+#inbox .dropdown-menu-right {
+    right: 0 !Important;
+    left: auto !Important;
+}
+
+#inbox .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 65px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: center;
+    list-style: none;
+    background-color: rgba(255, 255, 255, 0) !Important;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: none;
+    border-radius: 0px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0) !Important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0) !Important;
+}
+
+#inbox .fa-iox{
+    font-size: 22px;
+}
+
+#inbox .dropdown-menu > li > a {
+    display: block;
+    padding: 0;
+    padding-top: 4px;
+    margin-top: 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857143;
+    color: #333 !important;
+    background: #fff;
+    white-space: nowrap;
+    width: 40px;
+    height: 40px;
+    border: solid 1px #ccc;
+    border-radius: 50px;
+    font-size: 21px;
+    box-shadow: 0px 3px 7px 0px rgba(203, 203, 203, 0.72);
+}
+
+#inbox .dropdown-menu > li:first-child>a {
+    background: black;
+    color: #fff !important;
+}
+
+#inbox .dropdown-menu > li:last-child>a {
+    background: #D3A516;
+    color: #fff !important; 
+}
+
+#inbox .dropdown-menu > li:nth-child(6)>a {
+    background: magenta;
+    color: #fff !important; 
+}
+
+#inbox .dropdown-menu > li:nth-child(5)>a {
+    background: #3C80F6;
+    color: #fff !important; 
+}
+
+#inbox .dropdown-menu > li:nth-child(4)>a {
+    background: DARKTURQUOISE;
+    color: #fff !important; 
+}
+
+#inbox .dropdown-menu > li:nth-child(3)>a {
+    background: DARKORANGE;
+    color: #fff !important;
+}
+
+#inbox .dropdown-menu > li:nth-child(2)>a {
+    background: #2CAC26;
+    color: #fff !important;
+}
+
+#inbox .fa-iosm{
+    margin-top: 7px;
+}
+
+/* This for the table of variables implemented by Jordan */
+/* Style the tab */
+div.TabsLetter {
+    overflow: hidden !important;
+    border: 1px solid #ccc !important;
+    background-color: #f1f1f1 !important;
+}
+
+/* Style the buttons inside the tab */
+div.TabsLetter a {
+    background-color: inherit !important;
+    float: left !important;
+    border: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+    padding: 14px 16px !important;
+    transition: 0.3s !important;
+    text-decoration: none !important; /* Remove default text underline */
+    color: #999 !important;
+}
+
+/* Change background color of buttons on hover */
+div.TabsLetter a:hover {
+    background-color: #ddd !important;
+    color: #111 !important;
+}
+
+/* Create an active/current tablink class */
+div.TabsLetter a.active {
+    background-color: #ccc !important;
+    color: #111 !important;
+}
+
+/* Style the tab content */
+.TabContentLetter {
+    display: none;
+    padding: 6px 12px !important;
+    /* border: 1px solid #ccc; */
+    border-top: none !important;
+} 
+
+ul#Letters, ul.TabContentLetter {
+    list-style: none !important;
+    overflow: hidden !important;
+}
+
+ul#Letters {
+    padding: 0px !important;
+    margin: 0px !important;
+    border: 1px solid #ccc !important;
+    border-top: none !important;
+}
+
+.TabContentLetter li {
+    /* display: inline; */
+    float: left !important;
+}
+
+a.small-grey-link {
+    text-decoration: none; /* Remove default text underline */
+    font-size: 16px; 
+    color: #666 !important; 
+    /* display: block; Make it into a block element to fill the whole list */
+}
+
+a.small-grey-link:hover {
+    color: #111; /* Add a hover effect to all links, except for headers */
+    background-color: #ccc; 
+}
+
+li.HeaderLetter {
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+
+/* This for introjs based on introjs-modern.css */
+.introjs-helperLayer {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.introjs-tooltip {
+  font-size: 16px;
+}
+
+/*
+.introjs-tooltip {
+  background-color: rgba(000, 0, 0, 0.5);
+  color: #fff;
+}
+
+.introjs-button,
+.introjs-button:hover, .introjs-button:focus, .introjs-button:active,
+.introjs-disabled, .introjs-disabled:focus, .introjs-disabled:hover {
+  outline: none;
+  background-image: none;
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: 50px;
+  box-shadow: none;
+  border-shadow: none;
+  text-shadow: none;
+}
+
+.introjs-button:hover, .introjs-button:focus, .introjs-button:active {
+  border: 1px solid #fff
+}
+.introjs-disabled, .introjs-disabled:focus, .introjs-disabled:hover {
+  color: #ccc;
+  border: 1px solid transparent;
+}
+
+.introjs-arrow {
+  border: 10px solid #fff;
+}
+.introjs-arrow.top, .introjs-arrow.top-middle, .introjs-arrow.top-right {
+  border-color: transparent transparent rgba(000, 0, 0, 0.5);
+  top: -20px;
+  left: 20px;
+}
+.introjs-arrow.bottom, .introjs-arrow.bottom-middle, .introjs-arrow.bottom-right {
+  border-color: rgba(000, 0, 0, 0.5) transparent transparent;
+  bottom: -20px;
+  left: 20px;
+}
+.introjs-arrow.left, .introjs-arrow.right {
+    top: 20px;
+}
+.introjs-arrow.left-bottom, .introjs-arrow.right-bottom {
+    bottom: 20px;
+}
+
+.introjs-arrow.left, .introjs-arrow.left-bottom {
+  left: -20px;
+  border-color: rgba(000, 0, 0, 0.5) transparent transparent transparent;
+}
+.introjs-arrow.right, .introjs-arrow.right-bottom {
+  right: -20px;
+  border-color: transparent transparent transparent rgba(000, 0, 0, 0.5);
+}
+*/
+
+
+/* glow effect */
+.glow{
+  display: inline-block;
+  animation: glow  0.8s 5;
+}
+
+@keyframes glow{
+  50% {
+     color: red;
+     transform: scale(1.2);
+  }
+}

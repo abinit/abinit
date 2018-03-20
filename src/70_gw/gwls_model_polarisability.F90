@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,7 @@ private
 !!***
 
 real(dp), public :: model_polarizability_epsilon_0  ! model parameter
-integer          :: model_polarizability_model_type ! how is epsilon_0 used to model?
+!integer          :: model_polarizability_model_type ! how is epsilon_0 used to model?
 
 
 real(dp), allocatable, private :: psir_model(:,:,:,:), psir_ext_model(:,:,:,:)

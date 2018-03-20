@@ -54,8 +54,8 @@ qpath
 #%% [files]
 #%% files_to_test = 
 #%%   t45.out, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
-#%%   t45.out_GRUNS_DOS, tolnlines = 200, tolabs = 6.0e-02, tolrel = 5.0e-2, fld_options= -ridiculous;
-#%%   t45.out_GRUNS_QPATH, tolnlines = 200, tolabs = 6.0e-02, tolrel = 5.0e-2, fld_options= -ridiculous;
+#%%   t45.out_GRUNS_DOS, tolnlines = 33, tolabs = 5.0e-02, tolrel = 7.0e-2, fld_options= -ridiculous;
+#%%   t45.out_GRUNS_QPATH, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% [extra_info]

@@ -12,7 +12,7 @@
 !!  used in ks_ddiago for performing the direct diagonalization of the KS Hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2018 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -333,6 +333,11 @@ module m_hamiltonian
    ! kpg_kp(3,npw_fft_kp)
    ! k^prime+G vector coordinates at k^prime
 
+  ! real(dp), ABI_CONTIGUOUS pointer :: nucdipmom_k(:,:) => null()
+  !  ! nucdipmom_k(2,npw_k*(npw_k+1)/2)
+  !  ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
+  !  ! lower triangular part of Hermitian matrix
+
   real(dp), ABI_CONTIGUOUS pointer :: phkpxred(:,:) => null()
    ! phkpxred(2,natom)
    ! phase factors exp(2 pi k^prime.xred) at k^prime
@@ -357,6 +362,13 @@ module m_hamiltonian
   real(dp), ABI_CONTIGUOUS pointer :: xred(:,:) => null()
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
+
+! ===== Complex array points
+
+  complex(dpc), ABI_CONTIGUOUS pointer :: nucdipmom_k(:) => null()
+   ! nucdipmom_k(npw_k*(npw_k+1)/2)
+   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
+   ! lower triangular part of Hermitian matrix
 
  
 ! ===== Structured datatype pointers
@@ -681,10 +693,14 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%kg_kp)) nullify(Ham%kg_kp)
  if (associated(Ham%kpg_k)) nullify(Ham%kpg_k)
  if (associated(Ham%kpg_kp)) nullify(Ham%kpg_kp)
+ ! if (associated(Ham%nucdipmom_k)) nullify(Ham%nucdipmom_k)
  if (associated(Ham%ffnl_k)) nullify(Ham%ffnl_k)
  if (associated(Ham%ffnl_kp)) nullify(Ham%ffnl_kp)
  if (associated(Ham%ph3d_k)) nullify(Ham%ph3d_k)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
+
+! Complex pointers
+ if (associated(Ham%nucdipmom_k)) nullify(Ham%nucdipmom_k)
 
 ! Real arrays
  if (allocated(Ham%ekb_spin))   then
@@ -771,9 +787,9 @@ end subroutine destroy_hamiltonian
 !! SOURCE
 
 subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
-&                           xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d,usecprj,&
-&                           comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&
-&                           electronpositron,fock,nucdipmom,use_gpu_cuda)
+&                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
+&                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
+&                           electronpositron,fock,nucdipmom,use_gpu_cuda)           ! optional
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1020,8 +1036,8 @@ end subroutine init_hamiltonian
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfptnl_resp
-!!      energy,fock2ACE,fock_getghc,forstrnps,getgh1c,gwls_hamiltonian
-!!      ks_ddiago,m_io_kss,m_shirley,nonlop_test,vtorho,wfd_vnlpsi
+!!      energy,fock2ACE,forstrnps,getgh1c,gwls_hamiltonian,ks_ddiago,m_io_kss
+!!      m_shirley,nonlop_test,vtorho,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -1029,7 +1045,7 @@ end subroutine init_hamiltonian
 !! SOURCE
 
 subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
-&                             kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
+&                             kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
 &                             compute_gbound,compute_ph3d)
 
 
@@ -1052,6 +1068,8 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
+ ! real(dp),intent(in),optional,target :: nucdipmom_k(:,:)
+ complex(dpc),intent(in),optional,target :: nucdipmom_k(:)
  type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------
@@ -1104,6 +1122,9 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  if (present(ffnl_k)) then
    ham%ffnl_k  => ffnl_k
    ham%ffnl_kp => ffnl_k
+ end if
+ if (present(nucdipmom_k)) then
+   ham%nucdipmom_k => nucdipmom_k
  end if
  if (present(ph3d_k)) then
    ham%ph3d_k  => ph3d_k
@@ -1850,7 +1871,6 @@ end subroutine init_rf_hamiltonian
 !!  Setup of the spin-dependent part of the 1st- and 2nd- order Hamiltonian.
 !!
 !! INPUTS
-!!  gs_Ham<gs_hamiltonian_type>=structured datatype containing data for ground-state Hamiltonian
 !!  isppol=index of current spin
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
 !!  [with_nonlocal]=optional, true if non-local factors have to be loaded
@@ -1867,7 +1887,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
+subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1882,7 +1902,6 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
 !scalars
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- type(gs_hamiltonian_type),intent(in) :: gs_Ham
  type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)

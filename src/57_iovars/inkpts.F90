@@ -11,7 +11,7 @@
 !! input value of nkpt=0, provided kptopt/=0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,7 @@
 !! vacuum(3)=for each direction, 0 if no vacuum, 1 if vacuum
 !!
 !! OUTPUT
+!! fockdownsampling(3)=echo of input variable fockdownsampling(3)
 !! kptnrm=normalisation of k points
 !! kptrlatt_orig(3,3)=Original value of kptrlatt as specified in the input file (if kptopt/=0)
 !! kptrlatt(3,3)=k-point lattice specification (if kptopt/=0)
@@ -90,7 +91,7 @@
 
 #include "abi_common.h"
 
-subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
+subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 & kpt,kpthf,kptopt,kptnrm,kptrlatt_orig,kptrlatt,kptrlen,lenstr,msym,&
 & nkpt,nkpthf,nqpt,ngkpt,nshiftk,nshiftk_orig,shiftk_orig,nsym,&
 & occopt,qptn,response,rprimd,shiftk,string,symafm,symrel,vacuum,wtk,&
@@ -123,6 +124,7 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
  integer,intent(in),optional :: impose_istwf_1
  integer,intent(inout) :: nkpt,nkpthf
  integer,intent(out) :: nshiftk,nshiftk_orig
+ integer,intent(out) :: fockdownsampling(3)
  real(dp),intent(out) :: kptnrm,kptrlen
  character(len=*),intent(in) :: string
 !arrays
@@ -138,7 +140,6 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
  real(dp) :: fraction,norm,ucvol,wtksum
  character(len=500) :: message
 !arrays
- integer :: fockdownsampling(3)
  integer,allocatable :: ndivk(:),intarr(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rmet(3,3),tsec(2)
  real(dp),allocatable :: kptbounds(:,:),dprarr(:)

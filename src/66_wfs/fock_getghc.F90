@@ -7,7 +7,7 @@
 !!  Compute the matrix elements <G|Vx|psi> of the Fock operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (CMartins,FJ,MT)
+!!  Copyright (C) 2013-2018 ABINIT group (CMartins,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,9 +33,9 @@
 !!      fock2ACE,forstrnps,getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,
-!!      load_kprime_hamiltonian,matr3inv,nonlop,pawdijhat,pawmknhat_psipsi
-!!      sphereboundary,strfock,timab,xmpi_sum
+!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_kprime_hamiltonian
+!!      matr3inv,nonlop,pawdijhat,pawmknhat_psipsi,sphereboundary,strfock,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -111,7 +111,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
- real(dp) :: dummy(0),rprimd(3,3),for12(3)
+ real(dp) :: rprimd(3,3),for12(3)
 
 ! *************************************************************************
 !return
@@ -281,14 +281,15 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* the vector qvec is expressed in reduced coordinates.
 !     qvec(:)=kpoint_i(:)-kpoint_j(:)
    qvec_j(:)=gs_ham%kpt_k(:)-fockbz%kptns_bz(:,jkpt)
-   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hybrid_mixing,&
-&   fockcommon%hybrid_mixing_sr,fockcommon%hybrid_range,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
+   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
+&   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
- 
+   
 
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
 ! =================================================
+
    do jband=1,nband_k
 
 !*   occ = occupancy of jband at this k point
@@ -356,8 +357,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      call timab(1509,2,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-       call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hybrid_mixing,fockcommon%hybrid_mixing_sr,&
-&       fockcommon%hybrid_range,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
+       call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hyb_mixing,fockcommon%hyb_mixing_sr,&
+&       fockcommon%hyb_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
        fockcommon%stress_ikpt(:,fockcommon%ieigen)=fockcommon%stress_ikpt(:,fockcommon%ieigen)+fockstr(:)*occ*wtk
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then

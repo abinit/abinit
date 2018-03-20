@@ -8,7 +8,7 @@
 !! (some are initialized earlier, see indefo1 routine)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MM,FF)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -273,7 +273,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%fftgw=21
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
-   dtsets(idtset)%fockdownsampling(:)=0
+   dtsets(idtset)%fockdownsampling(:)=1
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%freqremin=zero
    dtsets(idtset)%freqremax=zero
@@ -339,7 +339,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwmem=11
    dtsets(idtset)%gwpara=2
    dtsets(idtset)%gwrpacorr=0
-   dtsets(idtset)%gwfockmix=0.25_dp
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
@@ -356,7 +355,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwls_exchange=1
    dtsets(idtset)%gwls_correlation=3
    dtsets(idtset)%gwls_first_seed=0
-
+!  H
+   dtsets(idtset)%hyb_mixing=-999.0_dp
+   dtsets(idtset)%hyb_mixing_sr=-999.0_dp
+   dtsets(idtset)%hyb_range_dft=-999.0_dp
+   dtsets(idtset)%hyb_range_fock=-999.0_dp
 !  I
    if(dtsets(idtset)%natsph/=0) then
 !    do not use iatsph(:) but explicit boundaries
@@ -412,7 +415,9 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%istatimg = 1
    dtsets(idtset)%istwfk(:)=0
    dtsets(idtset)%ixc=1
+   dtsets(idtset)%ixc_sigma=1
    dtsets(idtset)%ixcpositron=1
+   dtsets(idtset)%ixcrot=3
 !  J
    dtsets(idtset)%f4of2_sla(:)=-one
    dtsets(idtset)%f6of2_sla(:)=-one
@@ -429,6 +434,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kssform=1
 !  L
    dtsets(idtset)%localrdwf=1
+
 #if defined HAVE_LOTF
    dtsets(idtset)%lotf_classic=5
    dtsets(idtset)%lotf_nitex=10
@@ -437,7 +443,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 #endif
 !  M
    dtsets(idtset)%magconon = 0
-   dtsets(idtset)%magcon_lambda = 10.0_dp
+   dtsets(idtset)%magcon_lambda = 0.01_dp
    dtsets(idtset)%max_ncpus = 0
    dtsets(idtset)%mbpt_sciss=zero
    dtsets(idtset)%mband = -1
@@ -536,6 +542,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
+   dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
 !    dtsets(idtset)%ortalg=999
@@ -702,6 +709,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
    dtsets(idtset)%tfw_toldfe=0.000001_dp
+   dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
    dtsets(idtset)%tl_radius = zero
    dtsets(idtset)%tphysel=zero
@@ -763,6 +771,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%vprtrb(1:2)=zero
 !  W
    dtsets(idtset)%wtatcon(:,:,:)=zero
+   dtsets(idtset)%wfmix=one
    dtsets(idtset)%wfk_task=0
    dtsets(idtset)%wtk=one
    dtsets(idtset)%wvl_crmult  = 6._dp

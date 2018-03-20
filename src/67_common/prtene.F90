@@ -8,7 +8,7 @@
 !! Print components of total energy in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -234,8 +234,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     eneName            ,enevalue,ch10,&
 &     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
 &     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc+&
-&                               energies%e_fock-energies%e_fockdc+&
-&                               energies%e_hybcomp_E0-energies%e_hybcomp_v0  
+&     energies%e_fock-energies%e_fockdc+&
+&     energies%e_hybcomp_E0-energies%e_hybcomp_v0  
      call wrtout(iout,message,'COLL')
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &

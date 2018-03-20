@@ -5,7 +5,7 @@
 <body>
 
 <hr>
-<h5>Copyright (C) 2010-2017 ABINIT group (XG)
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -17,9 +17,8 @@ Many thanks to the contributors to the ABINIT project between
 May 2017 and October 2017. These release notes
 are relative to modifications/improvements of ABINITv8.6 with respect to v8.4.
 
-<TO BE UPDATED>
 The list of contributors includes :
-B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet,
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet,
 M. Giantomassi, O. Gingras, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, J. Junquera, A. Martin, 
 F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, M. Torrent , M. Verstraete, J. Wiktor, J. Zwanziger
 
@@ -54,6 +53,11 @@ A.2 Some changes of names :
      - input variable effmass has become erffmass_free;            
      - lesson tlda has become tdftu;
     Also, the input variable gwls_second_model_parameter, not used, has been suppressed.
+
+A.3 The definition of Hund's coupling J as computed within cRPA has changed: it now uses the same convention as
+    the convention used (for the variable jpawu) in DFT+U and DFT+DMFT in ABINIT (automatic tests, and tutorial
+    are accordingly changed).
+    By B. Amadon
 
 __________________________________________________________________
 
@@ -120,7 +124,7 @@ B.9 The new input variable chkdilatmx has been introduced, to allow expert users
     By X. Gonze.
 
 B.10 Implementation of the LDA-1/2 methodology.
-     (Input variable ? Test ?)
+     Tests to be provided.
      By F. Jollet.
     
 __________________________________________________________________
@@ -169,16 +173,15 @@ D.6 On-going work on hybrid functionals : speed-up of the SCF loop, computation 
 D.7 On-going work on the implementation of the TDEP algorithm (temperature dependent sampling).
     By J. Bieder, F. Bottin and Y. Bouchet.
     
-D.8 Replacements of http:// by https:// in many files.
+D.8 Replacements of http:// by https:// in many documentation files.
     By J.M. Beuken.
 
 D.9 Test of non-magnetic LDA+U and LDA+U+SO.
     See the new test v5#16 
     By M. Torrent.
 
-D.10 Tests of the computation of U in cRPA for SrVO3
-     See the new test v7#78,79
-     By B. Amadon.
+D.10 Make LDA+U and local EX-exchange compatible with nspden=1/nspinor=2
+     By M. Torrent.
 
 D.11 Test of the Velocity Verlet algorithm ionmov=24 
      See the new test v8#13
@@ -186,7 +189,7 @@ D.11 Test of the Velocity Verlet algorithm ionmov=24
 
 D.12 Make thermally occupied supercell of a given size, with input variable thermal_supercell.
      See test v8#46
-     By M. Giantomassi (?)
+     By M. Giantomassi 
 
 D.13 Write dielectric tensor to anaddb.nc when only perturbations w.r.t. electric field are present; Test for nlflag=2,3
      Test the computation of the nonlinear coefficients and first change of dielectric tensor.
@@ -214,8 +217,8 @@ D.18 Begin transport epc calculations within the eph part of the code.
 D.19 Improvements for the reading and initialization of density (esp. nspden=4).
      By M. Torrent.
 
-D.20 Make LDA+U and local EX-exchange compatible with nspden=1/nspinor=2
-     By M. Torrent.
+D.20 New interface to the build system and new ac8 config file format.
+     By Y. Pouillon.
 
 D.21 Store fold2bloch results in NetCDF format.
      Add new option to cut3d to convert DEN/POT from Fortran to netcdf
@@ -225,7 +228,7 @@ D.22 Add mdtemp in the _HIST file. This can be useful (mandatory) for post proce
      Add imgmov in the _HIST file. Convenient to know if it is PIMD or NEB/string for postprocessing
      By J. Bieder.
 
-D.23 Use inversion if nspden == 4 and NC
+D.23 Use inversion symmetry if nspden == 4 and NC
      By M. Giantomassi.
 
 D.24 Update elastic tutorial
@@ -234,10 +237,7 @@ D.24 Update elastic tutorial
 D.25 Add LO-TO terms to netcdf files
      By M. Giantomassi.
 
-D.26 New interface to the build system and new ac8 config file format.
-     By Y. Pouillon.
-
-D.27 Numerous miscellaneous additional bug fixes and improvements of documentation by :
+D.26 Numerous miscellaneous additional bug fixes and improvements of documentation by :
      G. Antonius, J. Bieder, M. Giantomassi, F. Jollet,
      G. Petretto, N. Pike, Y. Pouillon, M. Verstraete, M. Torrent.
 

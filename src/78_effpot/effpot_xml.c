@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 ABINIT group (AM)
+ * Copyright (C) 2015-2018 ABINIT group (AM)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,6 @@ void freeArray(Array *a) {
 void effpot_xml_checkXML(char *filename,char *name_xml){  
   xmlDocPtr doc;
   xmlNodePtr cur;
-  xmlNodeSetPtr nodeset;
 
   doc = xmlParseFile(filename);
   if (doc == NULL) printf(" error: could not parse file file.xml\n");
@@ -90,9 +89,9 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
   Array typat;
 
   initArray(&typat, 1);
-  *natom  = 0;  *nqpt   = iqpt; *loc_nrpt   = irpt1; *tot_nrpt   = irpt2;  *ntypat = itypat;
-  iatom    = 0; irpt1     = 0; irpt2     = 0;  iqpt    = 0;  itypat   = 0;
-  present  = 0;
+  *natom  = 0;  *nqpt  = 0; *loc_nrpt = 0; *tot_nrpt = 0;  *ntypat = 0;
+  iatom   = 0; irpt1   = 0; irpt2  = 0;  iqpt  = 0;  itypat = 0;
+  present = 0;
   typat.array[0] = 0;
 
   doc = xmlParseFile(filename);
@@ -146,25 +145,25 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
 }
 
 void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *nqpt,
-                           double amu[*ntypat],double atmfrc[*nrpt][*natom][3][*natom][3][2],
+                           double amu[*ntypat],double atmfrc[*nrpt][*natom][3][*natom][3],
                            int cell[*nrpt][3],double dynmat[*nqpt][*natom][3][*natom][3][2],
                            double elastic_constants[6][6],
                            double *energy,double epsilon_inf[3][3],
-                           double ewald_atmfrc[*nrpt][*natom][3][*natom][3][2],
+                           double ewald_atmfrc[*nrpt][*natom][3][*natom][3],
                            double phfrq[*nqpt][3* *natom],
                            double rprimd[3][3],double qph1l[*nqpt][3],
-                           double short_atmfrc[*nrpt][*natom][3][*natom][3][2],
+                           double short_atmfrc[*nrpt][*natom][3][*natom][3],
                            int typat[*natom],double xcart[*natom][3],double zeff[*natom][3][3]){
   xmlDocPtr doc;
   char *pch;
-  double total_atmfrc[*nrpt][*natom][3][*natom][3][2];
-  double local_atmfrc[*nrpt][*natom][3][*natom][3][2];
+  double total_atmfrc[*nrpt][*natom][3][*natom][3];
+  double local_atmfrc[*nrpt][*natom][3][*natom][3];
   int cell_local[*nrpt][3];
   int cell_total[*nrpt][3];
   int iatom,iamu,irpt1,irpt2,irpt3,iqpt,present;
   int ia,ib,mu,nu,voigt;
   int i,j;
-  xmlNodePtr cur,cur2,cur3;
+  xmlNodePtr cur,cur2;
   xmlChar *key,*uri;
 
   if (*natom <= 0){ 
@@ -305,7 +304,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
                 for(ib=0;ib<*natom;ib++){
                   for(nu=0;nu<3;nu++){
                     if (pch != NULL){
-                      local_atmfrc[irpt1][ib][nu][ia][mu][0]=strtod(pch,NULL);
+                      local_atmfrc[irpt1][ib][nu][ia][mu]=strtod(pch,NULL);
                       pch = strtok(NULL,"\t \n");
                     }
                   }
@@ -342,7 +341,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
                 for(ib=0;ib<*natom;ib++){
                   for(nu=0;nu<3;nu++){
                     if (pch != NULL){
-                      total_atmfrc[irpt2][ib][nu][ia][mu][0]=strtod(pch,NULL);
+                      total_atmfrc[irpt2][ib][nu][ia][mu]=strtod(pch,NULL);
                       pch = strtok(NULL,"\t \n");
                     }
                   }
@@ -433,13 +432,9 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         for(mu=0;mu<3;mu++){
           for(ib=0;ib<*natom;ib++){
             for(nu=0;nu<3;nu++){
-              atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
-              short_atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
-              ewald_atmfrc[i][ib][nu][ia][mu][0]=0.0;
-              //Set imaginary part to 0
-              short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
-              atmfrc[i][ib][nu][ia][mu][1] = 0.0;      
-              ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+              atmfrc[i][ib][nu][ia][mu]=local_atmfrc[i][ib][nu][ia][mu];
+              short_atmfrc[i][ib][nu][ia][mu]=local_atmfrc[i][ib][nu][ia][mu];
+              ewald_atmfrc[i][ib][nu][ia][mu]=0.0;
             }
           }
         }    
@@ -457,14 +452,9 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         for(mu=0;mu<3;mu++){
           for(ib=0;ib<*natom;ib++){
             for(nu=0;nu<3;nu++){
-              atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
-              short_atmfrc[i][ib][nu][ia][mu][0]=0.0;
-              ewald_atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
-              //Set imaginary part to 0
-              short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
-              atmfrc[i][ib][nu][ia][mu][1] = 0.0;      
-              ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
-
+              atmfrc[i][ib][nu][ia][mu]=total_atmfrc[i][ib][nu][ia][mu];
+              short_atmfrc[i][ib][nu][ia][mu]=0.0;
+              ewald_atmfrc[i][ib][nu][ia][mu]=total_atmfrc[i][ib][nu][ia][mu];
             }
           }
         }    
@@ -483,19 +473,15 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
           for(mu=0;mu<3;mu++){
             for(ib=0;ib<*natom;ib++){
               for(nu=0;nu<3;nu++){
-                atmfrc[i][ib][nu][ia][mu][0] = total_atmfrc[i][ib][nu][ia][mu][0];
-                ewald_atmfrc[i][ib][nu][ia][mu][0]= atmfrc[i][ib][nu][ia][mu][0]-
-                                                    short_atmfrc[i][ib][nu][ia][mu][0];
-                //Set imaginary part to 0
-                atmfrc[i][ib][nu][ia][mu][1] = 0.0; 
-                ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+                atmfrc[i][ib][nu][ia][mu] = total_atmfrc[i][ib][nu][ia][mu];
+                ewald_atmfrc[i][ib][nu][ia][mu]= atmfrc[i][ib][nu][ia][mu];
                 for(j=0;j<irpt1;j++){
                   if(cell_local[j][0] == cell[i][0] && 
                      cell_local[j][1] == cell[i][1] &&
                      cell_local[j][2] == cell[i][2] ){
                     if(ia==0 && ib==0 && mu==0 && nu==0){irpt3++;}
-                    short_atmfrc[i][ib][nu][ia][mu][0]= local_atmfrc[j][ib][nu][ia][mu][0];
-                    short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+                    short_atmfrc[i][ib][nu][ia][mu]= local_atmfrc[j][ib][nu][ia][mu];
+                    ewald_atmfrc[i][ib][nu][ia][mu] -=  short_atmfrc[i][ib][nu][ia][mu];
                   }
                 }
               }    
@@ -505,7 +491,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       }
       if(irpt3 != irpt1){
         fprintf(stdout,"\n WARNING: The number of local and total rpt are not equivalent\n");
-        fprintf(stdout,"          in the XML file :%d %d\n",irpt1,irpt3);
+        fprintf(stdout,"          in the XML file :%d and %d\n",irpt1,irpt3);
         fprintf(stdout,"          The missing local IFC will be set to zero\n");        
       }
     }
@@ -521,12 +507,11 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   }
 }
 
-
 void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
   xmlDocPtr doc;
-  int i,irpt;
+  int irpt;
   xmlNodePtr cur,cur2,cur3;
-  xmlChar *key,*uri;
+  xmlChar *uri;
 
   doc = xmlParseFile(filename);
   if (doc == NULL) printf(" error: could not parse file file.xml\n");
@@ -700,8 +685,12 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
                           int atindx[*ndisp][2][*nterm][*ncoeff],
                           int cell[*ndisp][2][3][*nterm][*ncoeff],
                           int direction[*ndisp][*nterm][*ncoeff],
-                          int power[*ndisp][*nterm][*ncoeff],double weight[*nterm][*ncoeff]){
-  int i,idisp,j,iterm,jterm,icoeff;
+                          int power_disp[*ndisp][*nterm][*ncoeff],
+                          int power_strain[*ndisp][*nterm][*ncoeff],
+                          int strain[*ndisp][*nterm][*ncoeff],
+                          double weight[*nterm][*ncoeff]){
+  
+  int i,idisp,istrain,j,iterm,icoeff;
   xmlDocPtr doc;
   char * pch;
   xmlNodePtr cur,cur2,cur3,cur4;
@@ -729,7 +718,9 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
       weight[iterm][icoeff]=0;
       for (idisp=0; idisp < *ndisp ;idisp++){
         direction[idisp][iterm][icoeff] = 0;
-        power[idisp][iterm][icoeff] = 0;
+        power_disp[idisp][iterm][icoeff] = 0;
+        strain[idisp][iterm][icoeff] = 0;
+        power_strain[idisp][iterm][icoeff] = 0;
         for (i=0;i<2;i++){
           atindx[idisp][i][iterm][icoeff] = 0;
           for (j=0;j<3;j++){
@@ -740,7 +731,6 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
     }
   }
 
-  jterm = 0;
   idisp = 0;
 
   doc = xmlParseFile(filename);
@@ -754,7 +744,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
   }
 
   //Reset counter
-  icoeff = 0; iterm = 0; idisp = 0;
+  icoeff = 0; iterm = 0; idisp = 0; istrain = 0;
   cur = cur ->xmlChildrenNode;
   while (cur != NULL) {
     if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition") ||
@@ -785,6 +775,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
           //Get the children of the term
           cur3 = cur2->xmlChildrenNode;
           idisp = 0;
+          istrain = 0;
           while (cur3 != NULL){
             if (!xmlStrcmp(cur3->name, (const  xmlChar *) "displacement_diff")){
               // Get the index of the atom a
@@ -805,7 +796,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
               
               //Get the power
               uri2 = xmlGetProp(cur3, (const  xmlChar *) "power");
-              power[idisp][iterm][icoeff] = strtod(uri2,NULL);
+              power_disp[idisp][iterm][icoeff] = strtod(uri2,NULL);
               
               //Get the children of the displacement
               cur4 = cur3->xmlChildrenNode;
@@ -836,19 +827,12 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
             }
             if (!xmlStrcmp(cur3->name, (const  xmlChar *) "strain")){
               uri2 = xmlGetProp(cur3, (const  xmlChar *) "power");
-              power[idisp][iterm][icoeff] = strtod(uri2,NULL);
+              power_strain[istrain][iterm][icoeff] = strtod(uri2,NULL);
               xmlFree(uri2); 
               uri2 = xmlGetProp(cur3, (const  xmlChar *) "voigt");
-              direction[idisp][iterm][icoeff] = -1 *  strtod(uri2,NULL); 
+              strain[istrain][iterm][icoeff] = strtod(uri2,NULL); 
               xmlFree(uri2); 
-              //Set to -1 the useless quantitiers for strain                       
-              for(i=0;i<2;i++){
-                atindx[idisp][i][iterm][icoeff]  = -1 ;
-                for(j=0;j<3;j++){
-                  cell[idisp][i][j][iterm][icoeff]= -1;
-                }
-              }
-              idisp++;
+              istrain++;
             }
             cur3 = cur3->next;
           }
@@ -867,7 +851,6 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   int icoeff,idisp,iterm;
   int count1,count2;
   xmlDocPtr doc;
-  char * pch;
   xmlNodePtr cur,cur2,cur3;
 
   icoeff = 0;
@@ -972,7 +955,7 @@ void effpot_xml_getValue(char *filename,char*name_key,char*result){
 void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,char*result){  
   xmlDocPtr doc;
   xmlNodePtr cur;
-  xmlChar *key, *uri;
+  xmlChar *uri;
 
   doc = xmlParseFile(filename);
   if (doc == NULL) printf(" error: could not parse file file.xml\n");

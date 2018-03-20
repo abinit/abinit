@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2017 ABINIT group (XG, MG)
+!! Copyright (C) 1992-2018 ABINIT group (XG, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -355,8 +355,7 @@ end subroutine dtset_chkneu
 !!  dtout <type(dataset_type)>
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian
-!!      m_io_kss,m_kxc,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_io_kss
 !!
 !! CHILDREN
 !!
@@ -558,7 +557,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
- dtout%gwfockmix          = dtin%gwfockmix
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -585,6 +583,10 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwls_correlation     = dtin%gwls_correlation
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
+ dtout%hyb_mixing      = dtin%hyb_mixing
+ dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
+ dtout%hyb_range_dft   = dtin%hyb_range_dft
+ dtout%hyb_range_fock  = dtin%hyb_range_fock
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -620,7 +622,9 @@ subroutine dtset_copy(dtout, dtin)
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
  dtout%ixc                = dtin%ixc
+ dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
+ dtout%ixcrot             = dtin%ixcrot
  dtout%jdtset             = dtin%jdtset
  dtout%jellslab           = dtin%jellslab
  dtout%kptopt             = dtin%kptopt
@@ -719,6 +723,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%optforces          = dtin%optforces
  dtout%optnlxccc          = dtin%optnlxccc
  dtout%optstress          = dtin%optstress
+ dtout%orbmag             = dtin%orbmag
  dtout%ortalg             = dtin%ortalg
  dtout%paral_atom         = dtin%paral_atom
  dtout%paral_kgb          = dtin%paral_kgb
@@ -843,6 +848,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%symsigma           = dtin%symsigma
  dtout%td_mexcit          = dtin%td_mexcit
  dtout%tfkinfunc          = dtin%tfkinfunc
+ dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
@@ -1020,6 +1026,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%vdw_tol            = dtin%vdw_tol
  dtout%vdw_tol_3bt        = dtin%vdw_tol_3bt
  dtout%vis                = dtin%vis
+ dtout%wfmix              = dtin%wfmix
  dtout%wfk_task           = dtin%wfk_task
  dtout%wtq                = dtin%wtq
  dtout%wvl_hgrid          = dtin%wvl_hgrid
@@ -1074,6 +1081,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%lexexch, dtout%lexexch)
 
+ call alloc_copy( dtin%ldaminushalf, dtout%ldaminushalf)
+ 
  call alloc_copy( dtin%lpawu, dtout%lpawu)
 
  call alloc_copy( dtin%nband, dtout%nband)
@@ -1206,8 +1215,8 @@ end subroutine dtset_copy
 !!  dtset <type(dataset_type)>=free all allocated allocatable.
 !!
 !! PARENTS
-!!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian
-!!      m_ab7_invars_f90,m_io_kss,m_kxc,mover_effpot,xchybrid_ncpp_cc
+!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_ab7_invars_f90,m_io_kss
+!!      mover_effpot
 !!
 !! CHILDREN
 !!
@@ -1264,6 +1273,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%lexexch))     then
    ABI_DEALLOCATE(dtset%lexexch)
+ end if
+ if (allocated(dtset%ldaminushalf))     then
+   ABI_DEALLOCATE(dtset%ldaminushalf)
  end if
  if (allocated(dtset%lpawu))       then
    ABI_DEALLOCATE(dtset%lpawu)

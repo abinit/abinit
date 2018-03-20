@@ -9,7 +9,7 @@
 !! symmetric tensor in cartesian coordinates "cart".
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,8 @@
 !! in cartesian coordinates to reduced coordinates
 !!
 !! PARENTS
-!!      d2frnl,mkcore,mkcore_paw,mkcore_wvl,nonlop_pl,nonlop_ylm,stresssym
+!!      ctocprj,d2frnl,mkcore,mkcore_paw,mkcore_wvl,nonlop_pl,nonlop_ylm
+!!      stresssym
 !!
 !! CHILDREN
 !!

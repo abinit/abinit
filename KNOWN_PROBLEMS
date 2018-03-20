@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.6.0 is for production
+The present release ABINITv8.7.6 is for development
 0. List of platforms
 1. Batteries of tests
 2. List of known problems
@@ -13,38 +13,40 @@ The present release ABINITv8.6.0 is for production
 ================================================================
 0. Platforms
 
-For ABINITv8.6.0, list closed on 2017 10 15
+For ABINITv8.7.6, list closed on 2018 03 15
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
 and
-http://dev.abinit.org/environment/buildbot/buildbot-builder-matrix
+https://wiki.abinit.org/doku.php?id=bb:builder
 Corresponding configuration files are to be found in doc/build/config-examples
 
 Supported compilers : gfortran, intel fortran, NAG, IBM XLF.
 The following compilers are either obsolete, or considered too unstable/buggy for ABINIT :
-g95, pathscale, open64, PGI . This does not mean that ABINIT will not work, but there is no guarantee for ABINIT to run correctly.
+g95, pathscale, open64, PGI . This does not mean that ABINIT will not work, 
+but there is no check on the ABINIT testfarm that ABINIT should run correctly.
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v4.7, v4.9, v5.3, v5.4, v6.1, v6.3)
-With gnu 4.7, it has been observed that the option fast-math causes troubles : it gives numerically
+GNU Fortran compiler (presently tested : v4.7, v4.9, v5.3, v5.4, v6.3, v6.4, v7.2)
+All are mostly OK
+With gnu 4.7 (+GPU), it has been observed that the option fast-math causes troubles : it gives numerically
 erroneous results for the test v67mbpt#16. Disactivating it for directory 71_bse (especially routine m_exc_itdiago.F90)
 allows to get correct results. 
-For all gnu versions, v67mbpt#11 is disactivated on shiva.
-For all gnu versions, bigdft#14 is disactivated on abiref.
-Version gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi
+gnu 4.9 and 5.4: libxc#82 is disactivated on tikal
+gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi, and abiref_gnu_5.3_XX
 
-Intel ifort compiler (presently tested : 13.1, 14.0, 15.0, 16.0, 17.0)
-Ifort 13.1 might show some problem with parallelisation (MPI IO, KGB, or calculations with exact exchange)
-Ifort 14.0 is OK.
+Intel ifort compiler (presently tested : 13.1, 14.0, 15.0, 16.0, 17.0, 18.0)
+Ifort 13.1, mpiio#25, mpiio#26, paral#25, paral#29i, paral#93, paral#94 are disactivated (MPI IO, KGB, or calculations with exact exchange)
+Ifort 14.0 is mostly OK, except for paral#93 and paral#94.
 Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
-Ifort 17.0 is mostly OK, except for Multibinit, for some tests with BigDFT, and for the strain perturbation with PAW.
+Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07.
+There seems to be a bug in Ifort 18.0 : the ADVANCE='NO' specification for the write instruction does not work apparently.
+ In ABINIT, there are a few occurences of this command, in particular for mrgscr and mrgdv... So we are waiting for Ifort 18.1 ... 
 
 NAG Compilo
-Nag 5.3 is mostly OK (Tv6#67 is excluded)
-Nag 6.1, there are some problems with paral tests. Not yet in the nightly pool.
+Nag 6.2, mostly OK, except for test etsf_io#4, mpiio#28, v7#80, paral#25, paral#30
 
 IBM
 IBM 15.1 is mostly OK, except for the computation of U in cRPA (tests v7#23,24,25).
@@ -803,3 +805,8 @@ So, for the time being, keep coba2_intel13 .
 P811.3 (XG160701)
 With abiref_nag_6.1_openmpi, erratically, one test fail with a timeout (900 secs). Likely due to the execution with -j .
 Still, this was not the case with petrus_nag. So, for the time being, keep the latter.
+
+P871.1 (XG171106)
+Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correcty, because the difference 
+with the reference for this quantity can be very large, while the difference for the total energy and other quantities
+is very small.

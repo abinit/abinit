@@ -9,7 +9,7 @@
 !! from input wavefunctions, eigenenergies, and band occupations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
+!! Copyright (C) 1999-2018 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!       WARNING about parallelization: see below
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!                see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!                see ~abinit/doc/variables/vargs.htm#ngfft
 
 !!  nkpt=number of k points
 !!  nkxc=second dimension of the array kxc (see rhotoxc for a description)
