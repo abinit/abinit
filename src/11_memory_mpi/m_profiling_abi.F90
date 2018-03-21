@@ -432,6 +432,9 @@ end subroutine abimem_get_info
 !!    == .false. compact format
 !!
 !! PARENTS
+!!      abinit,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
+!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr
+!!      multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      date_and_time,mpi_abort

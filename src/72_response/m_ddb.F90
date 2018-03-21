@@ -1110,7 +1110,6 @@ end subroutine read_blok8
 !! indsym(4,msym,natom)=indirect indexing array for symmetries
 !! natom=number of atoms in cell
 !! nsym=number of space group symmetries
-!! occopt=occupation option
 !! rmet(3,3)=metric tensor in real space (bohr^2)
 !! rprim(3,3)= primitive translation vectors
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
@@ -1119,7 +1118,6 @@ end subroutine read_blok8
 !! tnons(3,nsym)=fractional nonsymmorphic translations
 !! typat(natom)=type integer for each atom in cell
 !! ucvol=unit cell volume in bohr**3
-!! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! xcart(3,natom)=atomic cartesian coordinates
 !! xred(3,natom)=fractional dimensionless atomic coordinates
 !! zion(ntypat)=charge on each type of atom (real number)
@@ -1134,11 +1132,11 @@ end subroutine read_blok8
 !! SOURCE
 
 subroutine rdddb9(acell,atifc,amu,ddb,&
-& ddbun,dimekb,filnam,gmet,gprim,indsym,iout,&
-& lmnmax,mband,mpert,msize,msym,&
+& ddbun,filnam,gmet,gprim,indsym,iout,&
+& mband,mpert,msize,msym,&
 & natifc,natom,nkpt,nsym,ntypat,&
-& occopt,rmet,rprim,symrec,symrel,symafm,&
-& tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+& rmet,rprim,symrec,symrel,symafm,&
+& tnons,typat,ucvol,xcart,xred,zion,znucl)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1159,8 +1157,8 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !   and
 !    the allocation allocate(kpt(3,nkpt)) is strange
 !scalars
- integer,intent(in) :: ddbun,dimekb,iout,lmnmax,mband,mpert,msize,msym,natifc
- integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,usepaw
+ integer,intent(in) :: ddbun,iout,mband,mpert,msize,msym,natifc
+ integer,intent(inout) :: natom,nkpt,nsym,ntypat
  real(dp),intent(out) :: ucvol
  character(len=*),intent(in) :: filnam
  type(ddb_type),intent(inout) :: ddb
@@ -1616,7 +1614,7 @@ end subroutine nlopt
 !!
 !! INPUTS
 !!  filename=DDB filename.
-!!  brav = 1 -> simple lattice; 2 -> face-centered cubic;
+!!  brav = 1 or -1 -> simple lattice; 2 -> face-centered cubic;
 !!         3 -> body-centered lattice; 4 -> hexagonal lattice (D6h)
 !!  natom=Number of atoms in the unit cell
 !!  atifc(natom)=list of the atom ifc to be analysed
@@ -1732,11 +1730,11 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    call ddb_malloc(ddb,msize,nblok,natom,ntypat)
 
    call rdddb9(acell,atifc,amu,ddb,&
-&   ddbun,dimekb,filename,gmet,gprim,indsym,ab_out,&
-&   lmnmax,mband,mpert,msize,msym,&
+&   ddbun,filename,gmet,gprim,indsym,ab_out,&
+&   mband,mpert,msize,msym,&
 &   natifc,ddb_natom,nkpt,nsym,ntypat,&
-&   occopt,rmet,rprim,symrec,symrel,symafm,&
-&   tnons,typat,ucvol,usepaw,xcart,xred,zion,znucl)
+&   rmet,rprim,symrec,symrel,symafm,&
+&   tnons,typat,ucvol,xcart,xred,zion,znucl)
 
    close(ddbun)
 
@@ -1744,9 +1742,9 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    ABI_FREE(indsym)
    ABI_FREE(xcart)
 
-   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when brav/=1
+   ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
    ! This section is needed to preserver the behaviour of the old implementation.
-   if (brav/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
+   if (abs(brav)/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
      if(abs(rprim(1,2))<tol6)then
        write(message, '(a,i0,7a)' )&
 &       'The input DDB value of brav is ',brav,',',ch10,&
@@ -3341,6 +3339,8 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  type(ddb_hdr_type) :: ddb_hdr
 
 ! ************************************************************************
+
+ ABI_UNUSED(psps%usepaw)
 
 !Set variables
  mxnimage = 1 ! Only 1 image in the DDB

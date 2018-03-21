@@ -2086,8 +2086,8 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
      phi_nm1=phi_nm1/norm
      phit_nm1=phit_nm1/norm
 
-     call hexc_matmul_elphon(hexc,hexc_i,phi_nm1,hphi_n,'N',ep_renorms)
-     call hexc_matmul_elphon(hexc,hexc_i,phit_nm1,hphit_n,'C',ep_renorms)
+     call hexc_matmul_elphon(hexc,phi_nm1,hphi_n,'N',ep_renorms)
+     call hexc_matmul_elphon(hexc,phit_nm1,hphit_n,'C',ep_renorms)
      
      aa(1)=xdotc(my_nt,phit_nm1,1,hphi_n(my_t1:),1)
      call xmpi_sum(aa(1:1),comm,ierr)
@@ -2314,6 +2314,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
+ ABI_UNUSED(hexc_i%hsize_dense)
 
  my_nt = my_t2-my_t1+1
 
@@ -2340,8 +2341,8 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  do inn=niter_done+1,niter_tot
    
    !|n+1> = H |n> using all eh components.
-   call hexc_matmul_elphon(hexc, hexc_i, phi_n, hphi_np1, 'N', ep_renorms)
-   call hexc_matmul_elphon(hexc, hexc_i, phit_n, hphit_np1, 'C', ep_renorms)
+   call hexc_matmul_elphon(hexc, phi_n, hphi_np1, 'N', ep_renorms)
+   call hexc_matmul_elphon(hexc, phit_n, hphit_np1, 'C', ep_renorms)
 
    ! a(n) = < phit_n | H  | phi_n >
    aa(inn)=xdotc(my_nt,phit_n,1,hphi_np1(my_t1:),1)

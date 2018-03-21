@@ -76,7 +76,7 @@ berryopt35  4       efield35  -0.0005 -0.0005 -0.0005    getwfk35  34
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = M. Veithen, P. Ghosez
 #%% keywords = NC, DFPT 
 #%% description = 
 #%%<END TEST_INFO>

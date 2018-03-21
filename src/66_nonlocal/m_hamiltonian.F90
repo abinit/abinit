@@ -1871,7 +1871,6 @@ end subroutine init_rf_hamiltonian
 !!  Setup of the spin-dependent part of the 1st- and 2nd- order Hamiltonian.
 !!
 !! INPUTS
-!!  gs_Ham<gs_hamiltonian_type>=structured datatype containing data for ground-state Hamiltonian
 !!  isppol=index of current spin
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
 !!  [with_nonlocal]=optional, true if non-local factors have to be loaded
@@ -1888,7 +1887,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
+subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1903,7 +1902,6 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
 !scalars
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- type(gs_hamiltonian_type),intent(in) :: gs_Ham
  type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)

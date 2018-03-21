@@ -394,10 +394,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%brav=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
  if(tread==1) anaddb_dtset%brav=intarr(1)
- if(anaddb_dtset%brav<=0.or.anaddb_dtset%brav>=5)then
+ if(anaddb_dtset%brav<=-2.or.anaddb_dtset%brav>=5 .or. anaddb_dtset%brav==0)then
    write(message, '(a,i0,a5)' )&
 &   'brav is ',anaddb_dtset%brav,', but the only allowed values',ch10,&
-&   'are 1,2,3 or 4 .',ch10,'Action: correct brav in your input file.'
+&   'are -1, 1,2,3 or 4 .',ch10,'Action: correct brav in your input file.'
    MSG_ERROR(message)
  end if
 

@@ -56,7 +56,7 @@ module defs_basis
                                                   ! except for use of libraries
 
 !nb of bytes related to GW arrays, that can be tuned from sp to dp independently
-!of other variables in ABINIT. Presently double-precision is the default.
+!of other variables in ABINIT. Presently single-precision is the default (see config/specs/options.conf)..
 #if defined HAVE_GW_DPC
  integer, parameter :: gwp=kind(1.0d0)
  integer, parameter :: gwpc=kind((1.0_dp,1.0_dp))

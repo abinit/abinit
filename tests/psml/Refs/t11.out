@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.7.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 17 Sep 2017.
-- ( at 06h07 )
+.Starting date : Wed 21 Feb 2018.
+- ( at 17h01 )
   
 - input  file    -> t11.in
 - output file    -> t11.out
 - root for input  files -> t11i
 - root for output files -> t11o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/13_Al_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     4
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     0
 - psxml2ab: ps_Projector_L     0
@@ -37,11 +37,11 @@
 - psxml2ab: Atomic Label:                      Al
 - psxml2ab: Atomic Number:                         13.00000
 - psxml2ab: Valence charge:                         3.00000
-- psxml2ab: Pseudopotential generator code :    psop-1.1
-- psxml2ab: Date of pseudopotential generation: 2017-07-31
+- psxml2ab: Pseudopotential generator code :    ATM4.2.6
+- psxml2ab: Date of pseudopotential generation:        0
 - psxml2ab: Pseudopotential flavor:             Troullier-Martins
-- psxml2ab: Exchange-correlation functional    1 :    XC_LDA_X
-- psxml2ab: Exchange-correlation functional    2 :    XC_LDA_C_PZ
+- psxml2ab: Exchange-correlation functional    1 :    XC_LDA_X (   1)
+- psxml2ab: Exchange-correlation functional    2 :    XC_LDA_C_PZ (   9)
 - psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   no
 - psxml2ab: Spin-polarized pseudopotential:     no
 - psxml2ab: No core corrections.
@@ -96,23 +96,6 @@ P This job should need less than                       5.781 Mbytes of memory.
 _ WF disk file :      3.191 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
- DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
-================================================================================
- Values of the parameters that define the memory need for DATASET  4.
-     intxc =       0    ionmov =       0      iscf =       5    lmnmax =       4
-     lnmax =       4     mgfft =      18  mpssoang =       4    mqgrid =    3001
-     natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       3   xclevel =       2
--    mband =          10        mffmem =           1         mkmem =         110
-       mpw =         219          nfft =        5832          nkpt =         110
-================================================================================
-P This job should need less than                       6.746 Mbytes of memory.
-  Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      3.678 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
-================================================================================
-
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -130,13 +113,12 @@ _ WF disk file :      3.678 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
              ecut1     7.00000000E+00 Hartree
              ecut2     8.00000000E+00 Hartree
              ecut3     9.00000000E+00 Hartree
-             ecut4     1.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
 -          fftalg         312
            iatfix        1
              iscf           5
               ixc     -101130
-           jdtset        1    2    3    4
+           jdtset        1    2    3
               kpt     -5.00000000E-02 -1.00000000E-01  0.00000000E+00
                       -5.00000000E-02 -2.00000000E-01  0.00000000E+00
                       -1.00000000E-01 -1.50000000E-01  0.00000000E+00
@@ -194,11 +176,10 @@ P           mkmem         110
            natfix           1
             natom           1
             nband          10
-           ndtset           4
+           ndtset           3
             ngfft1         15      15      15
             ngfft2         16      16      16
             ngfft3         16      16      16
-            ngfft4         18      18      18
              nkpt         110
              nsym          48
             ntime           0
@@ -357,8 +338,6 @@ P           mkmem         110
 
  chkinp: Checking input parameters for consistency, jdtset=   3.
 
- chkinp: Checking input parameters for consistency, jdtset=   4.
-
 ================================================================================
 == DATASET  1 ==================================================================
 -   nproc =    1
@@ -374,10 +353,10 @@ P           mkmem         110
          ecut(hartree)=      8.470   => boxcut(ratio)=   2.02466
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- Al    psop-1.1
-- 13.00000   3.00000    170731                znucl, zion, pspdat
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/13_Al_atom.psml
+- Al    ATM4.2.6
+- 13.00000   3.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
@@ -497,10 +476,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     124.454     124.404
          ecut(hartree)=      9.680   => boxcut(ratio)=   2.15349
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- Al    psop-1.1
-- 13.00000   3.00000    170731                znucl, zion, pspdat
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/13_Al_atom.psml
+- Al    ATM4.2.6
+- 13.00000   3.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
@@ -619,10 +598,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.746     151.731
          ecut(hartree)=     10.890   => boxcut(ratio)=   2.03033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- Al    psop-1.1
-- 13.00000   3.00000    170731                znucl, zion, pspdat
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/13_Al_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_15-new-psml-api-is-not-supported/tests/Psps_for_tests/13_Al_atom.psml
+- Al    ATM4.2.6
+- 13.00000   3.00000         0                znucl, zion, pspdat
     9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     1     1     1     1
@@ -726,128 +705,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     181.378     181.338
 - sigma(2 2)=  2.44275161E-01  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)=  2.44275161E-01  sigma(2 1)=  0.00000000E+00
 
-================================================================================
-== DATASET  4 ==================================================================
--   nproc =    1
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  3.7511064  3.7511064  G(1)= -0.1332940  0.1332940  0.1332940
- R(2)=  3.7511064  0.0000000  3.7511064  G(2)=  0.1332940 -0.1332940  0.1332940
- R(3)=  3.7511064  3.7511064  0.0000000  G(3)=  0.1332940  0.1332940 -0.1332940
- Unit cell volume ucvol=  1.0556213E+02 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
-         ecut(hartree)=     12.100   => boxcut(ratio)=   2.17358
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/pouillon_psml-new/tests/Psps_for_tests/13_Al_atom.psml
-- Al    psop-1.1
-- 13.00000   3.00000    170731                znucl, zion, pspdat
-    9   -1009    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
-    0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
-     nproj     1     1     1     1
-  psp9in : mmax, amesh, rad(mmax) =   600    1.000000E-02    5.990000E+00
-  pspatm : epsatm=   10.72055779
-         --- l  ekb(1:nproj) -->
-             0    1.556933
-             1    0.439408
-             2   -0.891463
-             3   -0.308287
- pspatm: atomic psp has been read  and splines computed
-
---------------------------------------------------------------------------------
-
-_setup2: Arith. and geom. avg. npw (full set) are     212.162     212.143
-
-================================================================================
-
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.1008522363933    -2.101E+00 4.172E-02 1.165E+00
- ETOT  2  -2.1013911266877    -5.389E-04 1.227E-03 1.550E-02
- ETOT  3  -2.1013919859947    -8.593E-07 4.410E-04 6.504E-04
- ETOT  4  -2.1013914762353     5.098E-07 8.777E-05 6.809E-03
- ETOT  5  -2.1013917900219    -3.138E-07 3.893E-05 6.436E-03
- ETOT  6  -2.1013920490538    -2.590E-07 8.929E-06 2.386E-04
- ETOT  7  -2.1013920578038    -8.750E-09 3.498E-06 1.363E-05
- ETOT  8  -2.1013920579097    -1.059E-10 7.699E-07 5.367E-07
-
- At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  1.059E-10 < toldfe=  1.000E-08
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  9.80629986E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  9.80629986E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  9.80629986E-06  sigma(2 1)=  0.00000000E+00
-
- Integrated electronic density in atomic spheres:
- ------------------------------------------------
- Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.93200153
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   7.0700E-10; max=  7.6991E-07
- reduced coordinates (array xred) for    1 atoms
-       0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-
- cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  7.502212747556  7.502212747556  7.502212747556 bohr
-              =  3.970000000000  3.970000000000  3.970000000000 angstroms
- prteigrs : about to open file t11o_DS4_EIG
- Fermi (or HOMO) energy (hartree) =   0.20197   Average Vxc (hartree)=  -0.34893
- Eigenvalues (hartree) for nkpt= 110  k points:
- kpt#   1, nband= 10, wtk=  0.00600, kpt= -0.0500 -0.1000  0.0000 (reduced coord)
-  -0.21027    0.57735    0.62002    0.65269    0.72845    0.78491    0.79895    0.84710
-   0.90642    0.92160
-      occupation numbers for kpt#   1
-   2.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
-   0.00000    0.00000
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.74305061837866E-01
-    Hartree energy  =  3.97966514437811E-03
-    XC energy       = -8.15438865584647E-01
-    Ewald energy    = -2.75010587246188E+00
-    PspCore energy  =  3.04670567212862E-01
-    Loc. psp. energy=  6.21430178609694E-02
-    NL   psp  energy=  2.22459282129491E-01
-    >>>>> Internal E= -2.09798714386096E+00
-
-    -kT*entropy     = -3.40491404873291E-03
-    >>>>>>>>> Etotal= -2.10139205790969E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.71817859281359E+01 ; Band energy (Ha)=   1.0467785619E-01
---------------------------------------------------------------------------------
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  9.80629986E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  9.80629986E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  9.80629986E-06  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure= -2.8851E-01 GPa]
-- sigma(1 1)=  2.88511254E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.88511254E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.88511254E-01  sigma(2 1)=  0.00000000E+00
-
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -858,21 +715,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     212.162     212.143
              ecut1     7.00000000E+00 Hartree
              ecut2     8.00000000E+00 Hartree
              ecut3     9.00000000E+00 Hartree
-             ecut4     1.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
            etotal1    -2.1005062463E+00
            etotal2    -2.1007714235E+00
            etotal3    -2.1010282874E+00
-           etotal4    -2.1013920579E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
            iatfix        1
              iscf           5
               ixc     -101130
-           jdtset        1    2    3    4
+           jdtset        1    2    3
               kpt     -5.00000000E-02 -1.00000000E-01  0.00000000E+00
                       -5.00000000E-02 -2.00000000E-01  0.00000000E+00
                       -1.00000000E-01 -1.50000000E-01  0.00000000E+00
@@ -930,11 +784,10 @@ P           mkmem         110
            natfix           1
             natom           1
             nband          10
-           ndtset           4
+           ndtset           3
             ngfft1         15      15      15
             ngfft2         16      16      16
             ngfft3         16      16      16
-            ngfft4         18      18      18
              nkpt         110
              nsym          48
             ntime           0
@@ -1242,107 +1095,6 @@ P           mkmem         110
                        2.000000  0.000002  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000
                        prtocc : prtvol=0, do not print more k-points.
-              occ4     2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000377  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000003  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.965956  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.016435  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.810948  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000001  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000121  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.009664  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000001  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000067  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999999  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.998612  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999971  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.332040  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.886877  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.997427  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000021  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.002856  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.208109  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.679953  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000019  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.001562  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.066474  0.000010  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999265  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999999  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999894  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999998  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.440128  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.990862  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999803  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999992  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000268  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.035914  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.198207  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.970952  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  1.998787  0.000006  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000002  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
-                       prtocc : prtvol=0, do not print more k-points.
            occopt           3
            prtden           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -1355,8 +1107,6 @@ P           mkmem         110
            strten2     1.7919561832E-05  1.7919561832E-05  1.7919561832E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     8.3027453655E-06  8.3027453655E-06  8.3027453655E-06
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     9.8062998557E-06  9.8062998557E-06  9.8062998557E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1472,10 +1222,10 @@ P           mkmem         110
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         43.2  wall=         43.7
+- Proc.   0 individual time (sec): cpu=         25.8  wall=         26.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         43.2  wall=         43.7
+.Delivered   3 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         25.8  wall=         26.1

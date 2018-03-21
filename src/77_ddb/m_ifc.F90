@@ -351,7 +351,7 @@ end subroutine ifc_free
 !! INPUTS
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
 !! ddb<type(ddb_type)> = Database with derivatives.
-!! brav=bravais lattice (1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
+!! brav=bravais lattice (1 or -1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
 !! asr= Option for the imposition of the ASR
 !!   0 => no ASR,
 !!   1 => modify "asymmetrically" the diagonal element
@@ -613,9 +613,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- new_wght = 0
  call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
-&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
+&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
@@ -2292,6 +2291,7 @@ end subroutine ifc_getiaf
 !----------------------------------------------------------------------
 
 !!****f* m_ifc/omega_decomp
+!!
 !! NAME
 !!  omega_decomp
 !!

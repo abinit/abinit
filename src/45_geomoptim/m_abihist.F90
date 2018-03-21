@@ -1105,8 +1105,8 @@ end subroutine abihist_copy
 !! INPUTS
 !!  hist_in <type(abihist)>
 !!  tolerance
-!!  store_all = flag to known if we need to increment ihist (store all the history)
-!!              or just call shift (store just le last step)
+!!  store_all = flag to know if we need to increment ihist (store all the history)
+!!              or just call shift (store just the last step)
 !!
 !! OUTPUT
 !!  similar= 1 the records are consistent
@@ -1150,6 +1150,8 @@ real(dp) :: x,y
 !array
 character(len= 500) :: msg
 ! ***************************************************************
+
+ ABI_UNUSED(store_all)
 
  similar=1
 
@@ -1314,7 +1316,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
    NCF_CHECK_MSG(ncerr," create netcdf history file")
 
 !  Define all dims and vars
-   call def_file_hist(ncid,filename,natom,1,ntypat,npsp,has_nimage)
+   call def_file_hist(ncid,natom,1,ntypat,npsp,has_nimage)
 
 !  Write variables that do not change
 !  (they are not read in a hist structure).
@@ -1480,7 +1482,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
        ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=ncid)
        NCF_CHECK_MSG(ncerr," create netcdf history file")
 !      Define all dims and vars
-       call def_file_hist(ncid,filename,natom,nimage_,ntypat,npsp,has_nimage)
+       call def_file_hist(ncid,natom,nimage_,ntypat,npsp,has_nimage)
 !      Write variables that do not change
 !      (they are not read in a hist structure).
        call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu,mdtemp)
@@ -1779,7 +1781,7 @@ end subroutine read_md_hist_img
 !!
 !! SOURCE
 
-subroutine def_file_hist(ncid,filename,natom,nimage,ntypat,npsp,has_nimage)
+subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1795,7 +1797,6 @@ implicit none
  integer,intent(in) :: ncid
  integer,intent(in) :: natom,nimage,ntypat,npsp
  logical,intent(in) :: has_nimage
- character(len=*),intent(in) :: filename
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
