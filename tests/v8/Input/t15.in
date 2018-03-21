@@ -48,5 +48,5 @@ bound_step = 100
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and HIST, fit the anharmonic part and generate effective potential 
+#%%   read ddb and HIST, fit and try to bound the anharmonic part
 #%%<END TEST_INFO>
