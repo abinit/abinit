@@ -5108,16 +5108,6 @@ end if
    ABI_FREE(gvvvals_out_qibz)
  end if
 
- ncid = nctk_noid
-#ifdef HAVE_NETCDF
- ! Open the netcdf file used to store the results of the calculation.
- if (my_rank == master) then
-   NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_EPH.nc"), xmpi_comm_self))
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
- end if
-#endif
-
  ! This call is not executed in elphon!
  if (gams%symgamma == 1) then
    do spin=1,gams%nsppol
