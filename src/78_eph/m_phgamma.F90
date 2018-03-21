@@ -4919,7 +4919,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
              end do
            end do
          end do
-       end if
+       end do
 
 !TODO: put a flag around this, in case it takes a lot of time
        do jene = 1, gams%nene
@@ -5100,10 +5100,6 @@ end if
  gams%vals_qibz = gvals_qibz(:,:,:,1,:,:)
  !write(std_out,*)gvals_qibz
  ABI_FREE(gvals_qibz)
-
-
- ! NB: this does nothing to the transport quantities
- call phgamma_finalize(gams,cryst,ifc)
 
  if (dtset%eph_transport > 0) then
    gams%vals_in_qibz  = gvvvals_in_qibz(:,:,:,:,1,:,:)
