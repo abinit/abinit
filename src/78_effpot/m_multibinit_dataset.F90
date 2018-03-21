@@ -317,7 +317,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%temperature=325
  
  multibinit_dtset%dipdip_spin=0
- multibinit_dtset%dynamics_spin=-1
+ multibinit_dtset%dynamics_spin=1
  multibinit_dtset%ntime_spin=10000
  multibinit_dtset%nmatom=0
  multibinit_dtset%nspin1l=1
@@ -1127,7 +1127,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 
  multibinit_dtset%temperature_spin=325
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature_spin',tread,'DPR')
  if(tread==1) multibinit_dtset%temperature_spin=dprarr(1)
  if(multibinit_dtset%temperature_spin<=0)then
    write(message, '(a,f10.1,a,a,a,a,a)' )&

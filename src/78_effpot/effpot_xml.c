@@ -56,10 +56,12 @@ void freeArray(Array *a) {
   a->used = a->size = 0;
 }
 
-void copyArraytoCArray(Array *l, double **a){
+void copyArraytoCArray(Array *l, double **a, size_t* size){
+  *size=0;
   *a=(double *) malloc(sizeof(double)*l->used);
   for(size_t i=0;i<l->used;i++){
     (*a)[i]=l->array[i];
+    (*size)++;
   }
 }
 
@@ -90,10 +92,12 @@ void freeIntArray(IntArray *a) {
   a->used = a->size = 0;
 }
 
-void copyIntArrayToCIntArray(IntArray *l, int **a){
+void copyIntArrayToCIntArray(IntArray *l, int **a, size_t *size){
+  *size=0;
   *a=(int *) malloc(sizeof(int)*l->used);
   for(size_t i=0;i<l->used;i++){
     (*a)[i]=l->array[i];
+    (*size)++;
   }
 }
 
@@ -568,11 +572,13 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
               irpt1,irpt2);
       exit(0);
     }
-  }else{
-    fprintf(stderr,"error: Number of local and total rpt doesn't match with the XML file:%d %d\n",\
-            irpt1,irpt2);
-    exit(0);
-  }
+  } 
+  // TODO: hexu Temporarily disabled by hexu to make the spin only model work
+  //else{
+  //  fprintf(stderr,"error: Number of local and total rpt doesn't match with the XML file:%d %d\n",\
+  //          irpt1,irpt2);
+  //  exit(0);
+  //}
 }
 
 void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
@@ -1099,10 +1105,10 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     }
 
     // read unit cell
-    if (!xmlStrcmp(cur->name, (const xmlChar *)("unitcell"))) {
+    if (!xmlStrcmp(cur->name, (const xmlChar *)("unit_cell"))) {
       printf("%s\n", cur->name);
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      printf("unitcell: %s\n", key);
+      printf("unit_cell: %s\n", key);
       string2Array((char *)key, unitcell, &size);
       xmlFree(key);
       key = xmlGetProp(cur, BAD_CAST "units");

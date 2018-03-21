@@ -190,6 +190,7 @@ program multibinit
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
+ ! TODO hexu: remove the (nrpt cannot be read warning) if lattice part is not required.
  call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
  
 !Read the input file, and store the information in a long string of characters
@@ -215,22 +216,25 @@ program multibinit
 
 ! Read and treat the reference structure 
 !****************************************************************************************
-
-!Read the model (from DDB or XML)
- call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
- 
+if (inp%dynamics_spin>0) then
  if (iam_master) then
+
+    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+     & 'reading spin terms.'
    call spin_model_t_initialize(spin_model, filnam(3), inp )
  endif
+endif
 
-!Read the coefficient from fit
+!Read the model (from DDB or XML)
+if (inp%dynamics/=0) then
+ call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+ 
+ !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
    ! TODO hexu: filetype==(33?) 
    if(filetype==3.or.filetype==23) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
-   ! TODO hexu else if (filetype==33) then
-   !  call spin_file_read(...)
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     ' There is no specific file for the coefficients from polynomial fitting'
@@ -252,6 +256,8 @@ program multibinit
      call wrtout(std_out,message,'COLL')
    end if
  end if
+
+ endif
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences
@@ -438,8 +444,8 @@ program multibinit
 
 ! Run spin dynamics
 !****************************************************************************************    
- if(inp%dynamics_spin>=1) then
-  ! no mpi yet.
+ if(inp%dynamics_spin>0) then
+  ! TODO hexu: no mpi yet.
    if(iam_master) then
       call spin_model_t_run(spin_model)
    endif

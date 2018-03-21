@@ -117,6 +117,12 @@ contains
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
          spinat(3,nmatoms), gyroratios(nmatoms), damping_factors(nmatoms)
 
+    print *, "natoms",natoms
+    print *, "nmatoms", nmatoms
+    print *, "positions", positions
+    print *, "spinat", spinat
+    print *, "gyroratios", gyroratios
+    print *, "damping_factors", damping_factors
     ABI_ALLOCATE(self%positions, (3, natoms))
     ABI_ALLOCATE(self%index_spin, (natoms))
     ABI_ALLOCATE(self%spinat, (3, nmatoms))
@@ -312,8 +318,15 @@ contains
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
     print *, "Spin model: setting structure."
-    call spin_model_primitive_t_set_atoms(self,natoms,unitcell,positions,nmatoms, &
-         index_spin,spinat,gyroratios,damping_factors)
+    print *, "unitcell: ", unitcell
+    print *, "positions", positions
+    print *, "spinat", spinat
+    call spin_model_primitive_t_set_atoms(self,natoms,reshape(unitcell, [3,3]), & 
+            & reshape(positions, [3, natoms]), &
+            & nmatoms, &
+            & index_spin, &
+            & reshape(spinat, [3, nmatoms]), &
+            & gyroratios,damping_factors)
 
     print *, "Spin model: setting exchange terms."
     ! call self%set_exchange(exc_nnz,exc_ilist,exc_jlist,&

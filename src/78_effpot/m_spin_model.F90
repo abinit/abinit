@@ -10,7 +10,6 @@ module m_spin_model
   use m_spin_mover
   use m_spin_hist
   use m_multibinit_dataset
-  !use m_spin_params
   implicit none
   type spin_model_t
      type(spin_model_primitive_t) :: spin_primitive
@@ -43,6 +42,10 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
+    integer :: i
+    do i=1, self%params%ntime_spin
+        call spin_model_t_run_one_step(self)
+    enddo
   end subroutine spin_model_t_run
 
   ! initialize
@@ -81,10 +84,10 @@ contains
     self%nmatoms= self%spin_calculator%nmatoms
     ! TODO hexu: max_save, step_save should be defined in input file and params
     !call self%spin_hist%initialize(self%nmatoms, max_save=40000, step_save=1000, dt=self%params%dtspin)
-    call spin_hist_t_initialize(self%spin_hist, self%nmatoms, max_save=40000, step_save=1000, dt=self%params%dtspin)
+    call spin_hist_t_initialize(self%spin_hist, self%nmatoms, max_save=40000, step_save=100, dt=self%params%dtspin)
 
     !call self%set_initial_spin(mode=1)
-    call spin_model_t_set_initial_spin(self, mode=1)
+    call spin_model_t_set_initial_spin(self, mode=0)
 
     !call self%spin_mover%initialize(self%nmatoms, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nmatoms, dt=params%dtspin, &
