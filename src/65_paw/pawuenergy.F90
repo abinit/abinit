@@ -99,8 +99,8 @@
 &     " dmft_dc is an argument of pawuenergy",pawtab%usepawu
      call wrtout(std_out,message,'COLL')
    end if
- else
-   dmftdc=pawtab%usepawu
+ else 
+   dmftdc=0
  end if
 
  DBG_ENTER("COLL")
@@ -268,7 +268,7 @@
  edcdctemp=zero;edctemp=zero
 
 !Full localized limit
- if(pawtab%usepawu==1.or.(dmftdc==1.or.dmftdc==4.or.dmftdc==5)) then
+ if((pawtab%usepawu==1.or.pawtab%usepawu==4).or.(dmftdc==1.or.dmftdc==4.or.dmftdc==5)) then
    jpawu_dc=jpawu
    if(dmftdc==4)  then
      jpawu_dc=zero
