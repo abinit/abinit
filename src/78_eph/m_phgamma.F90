@@ -655,6 +655,7 @@ subroutine phgamma_print(gams,cryst,ifc,ncid)
    ! Write data to netcdf file
    if (ncid /= nctk_noid) then
      !NCF_CHECK(nctk_set_datamode(ncid))
+     ! TODO: why does this depend on spin?????
      if (spin == 1) then
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreq_qibz"), phfrq, start=[1, iq_ibz]))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qibz'), displ_cart, start=[1, 1, 1, iq_ibz]))
@@ -2463,9 +2464,9 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 
            a2f%vals_ee(jene, iene, :, spin) = a2f%vals_ee(jene, iene, :, spin) + tmp_a2f(:) * wtq(iq_ibz)
 if (iene == gams%nene/2 .and. jene == gams%nene/2) then
-  write (900, '(a,E20.10,2x,3E20.10,2x,I6,3E20.10)') '#', wtq(iq_ibz), tmp_gaussian(iw,:), iq_ibz, invphfrq(:)
+  write (900, '(a,E20.10,2x,2x,I6,3E20.10)') '#', wtq(iq_ibz), iq_ibz, invphfrq(1:3)
   do iw=1,nomega
-    write (900, '(i6,2x,E20.10,2x,3E20.10)') iw, a2f%vals_ee(jene, iene, iw, spin), gamma_ph_ee(jene,iene,:,spin)
+    write (900, '(i6,2x,E20.10,2x,3E20.10,2x,3E20.10)') iw, a2f%vals_ee(jene, iene, iw, spin), gamma_ph_ee(jene,iene,:,spin), tmp_gaussian(iw,1:3)
   end do
   write (900,*)
 end if
