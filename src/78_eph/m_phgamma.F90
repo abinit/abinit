@@ -2466,7 +2466,8 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 if (iene == gams%nene/2 .and. jene == gams%nene/2) then
   write (900, '(a,E20.10,2x,2x,I6,3E20.10)') '#', wtq(iq_ibz), iq_ibz, invphfrq(1:3)
   do iw=1,nomega
-    write (900, '(i6,2x,E20.10,2x,3E20.10,2x,3E20.10)') iw, a2f%vals_ee(jene, iene, iw, spin), gamma_ph_ee(jene,iene,:,spin), tmp_gaussian(iw,1:3)
+    write (900, '(i6,2x,E20.10,2x,3E20.10,2x,3E20.10)') iw, a2f%vals_ee(jene, iene, iw, spin), &
+&        gamma_ph_ee(jene,iene,:,spin), tmp_gaussian(iw,1:3)
   end do
   write (900,*)
 end if
