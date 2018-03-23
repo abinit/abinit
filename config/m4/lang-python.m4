@@ -56,31 +56,6 @@ AC_DEFUN([ABI_CHECK_PYTHON],
   dnl Init
   abi_python_ok="no"
   abi_save_CPPFLAGS="${CPPFLAGS}"
-
-  dnl Look for Python interpreter
-  AC_CHECK_PROGS(PYTHON,
-    [python python3 python3.5 python3.4 python2 python2.7 python2.6])
-
-  dnl Get Python CPPFLAGS
-  AC_MSG_CHECKING([for Python CPPFLAGS])
-  if test "${PYTHON}" != "" -a "${PYTHON_CPPFLAGS}" = ""; then
-    PYTHON_CPPFLAGS=`${PYTHON} -c "\
-try:
-    import distutils.sysconfig
-    print '-I' + distutils.sysconfig.get_python_inc(),
-except:
-    pass
-try:
-    import numpy
-    print '-I' + numpy.get_include(),
-except:
-    pass"`
-  fi
-  if test "${PYTHON_CPPFLAGS}" = ""; then
-    AC_MSG_RESULT([none found])
-  else
-    AC_MSG_RESULT([${PYTHON_CPPFLAGS}])
-  fi
   CPPFLAGS="${PYTHON_CPPFLAGS} ${CPPFLAGS}"
 
   dnl Preliminary Pyton tests

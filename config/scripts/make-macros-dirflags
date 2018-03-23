@@ -147,7 +147,10 @@ for main_bin in bin_cnf.sections():
 ext_libs = sorted(list(set(ext_libs)))
 ext_libs.remove("fft")
 ext_libs.remove("gpu")
+ext_libs.remove("math")
 ext_libs.remove("mpi")
+ext_libs.remove("timer")
+ext_libs = ["atompaw"] + ext_libs
 
 # Init
 mac = ""

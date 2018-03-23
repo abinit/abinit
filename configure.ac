@@ -23,30 +23,12 @@
 # Autoconf & Automake startup
 #
 
-# Enhance help message
-m4_divert_text([HELP_END],[
-In order to facilitate the configuration of Abinit, you can save the options
-you regularly use into a file. For full instructions, please consult the
-doc/build/config-template.ac file.
-
-A lot more documentation on how to build and run Abinit is available on the
-Abinit Wiki. Please consult it at https://wiki.abinit.org/ whenever needed.])
-
 # Initialize Autoconf
 AC_INIT([ABINIT],[8.7.7],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
 AC_CONFIG_SRCDIR([src/98_main/abinit.F90])
-AC_CONFIG_HEADERS([config.h])
-
-# Initial setup
-AC_CANONICAL_TARGET
-
-# Disable pax to initialize Automake because it causes 'make dist' to fail
-alias pax='/bin/false'
-AM_INIT_AUTOMAKE([1.10 tar-ustar])
-unalias pax
 
 # ---------------------------------------------------------------------------- #
 
@@ -54,7 +36,15 @@ unalias pax
 # Startup
 #
 
-ABI_MSG_SECTION([Basic initialization])
+ABI_MSG_SECTION([Overall startup])
+
+# Initial setup
+AC_CANONICAL_TARGET
+# Disable pax
+alias pax='/bin/false'
+AM_INIT_AUTOMAKE([1.10 tar-ustar])
+unalias pax
+AC_CONFIG_HEADERS([config.h])
 
 # Early Abinit setup - the order is important!
 ABI_INIT_DIRS
@@ -109,6 +99,9 @@ AC_SUBST(FC_LIBS)
 # Initialize install dirs (requires version and config options to be set)
 ABI_INIT_INSTALL_DIRS
 
+# Translate optimization level
+abi_optflags_mode="${enable_optim}"
+
 # Disable wrapping of Fortran compiler by default
 abi_fc_wrap="no"
 
@@ -135,9 +128,6 @@ ABI_INFO_AUTOTOOLS
 # Display UI changes
 ABI_OPTIONS_CHANGED
 
-# Display changes in feature triggers
-ABI_TRIGGERS_CHANGED
-
 # ---------------------------------------------------------------------------- #
 
 #
@@ -154,22 +144,51 @@ ABI_MSG_SECTION([Option consistency checking])
 
 abi_optchk_ok="yes"
 
-AC_MSG_NOTICE([checking consistency of command-line options])
+AC_MSG_NOTICE([checking consistency of library-related options])
 
-# C-CLOCK requires the building of 02_clib
-if test "${enable_cclock}" = "yes"; then
-  if test "${enable_clib}" = "" -o "${enable_clib}" = "no"; then
-    AC_MSG_NOTICE([ |---> enabling CLib (required by CClock, experimental!)])
-    enable_clib="yes"
+# Closing remarks
+if test "${abi_optchk_ok}" = "yes"; then
+  AC_MSG_NOTICE([ |---> all OK])
+fi
+AC_MSG_NOTICE([])
+
+# -------------------- #
+# Experimental options #
+# -------------------- #
+
+abi_optchk_ok="yes"
+
+AC_MSG_NOTICE([checking consistency of experimental options])
+
+# Bindings require exports
+if test "${enable_bindings}" = "yes"; then
+  if test "${enable_exports}" != "yes"; then
+    enable_exports="yes"
+    AC_MSG_NOTICE([|---> enabling exports (required for bindings])
     abi_optchk_ok="no"
   fi
 fi
 
-# LibPAW must always be on for now
-if test "${enable_libpaw}" != "yes"; then
-  AC_MSG_NOTICE([ |---> forcing internal LibPAW support to 'yes'])
-  enable_libpaw="yes"
-  abi_optchk_ok="no"
+# Closing remarks
+if test "${abi_optchk_ok}" = "yes"; then
+  AC_MSG_NOTICE([ |---> all OK])
+fi
+AC_MSG_NOTICE([])
+
+# ------------------ #
+# Maintainer options #
+# ------------------ #
+
+abi_optchk_ok="yes"
+
+AC_MSG_NOTICE([checking consistency of maintainer options])
+
+# Fast check conflicts with package check
+if test "${enable_fast_check}" = "yes"; then
+  if test "${enable_pkg_check}" = "yes"; then
+    AC_MSG_ERROR([--enable-fast-check conflicts with --enable-pkg-check])
+    abi_optchk_ok="no"
+  fi
 fi
 
 # Closing remarks
@@ -187,22 +206,16 @@ ABI_OPTIONS_PARSE
 # ---------------------------------------------------------------------------- #
 
 #
-# Feature triggers startup
+# Multicore architecture startup
 #
 
-ABI_MSG_SECTION([Feature triggers startup])
-
-# Will we be able to use fallbacks?
-ABI_FALLBACKS_INIT
-
-# Init triggers parameters (must be call after we know about fallbacks)
-ABI_TRIGGERS_INIT
+ABI_MSG_SECTION([Multicore architecture startup])
 
 # Prepare MPI support
 ABI_MPI_INIT
 
 # GPU support requires MPI
-if test "${abi_gpu_enable}" = "yes" -a "${abi_mpi_enable}" != "yes"; then
+if test "${enable_gpu}" = "yes" -a "${enable_mpi}" != "yes"; then
   AC_MSG_ERROR([GPU support requires MPI])
 fi
 
@@ -210,7 +223,7 @@ fi
 ABI_GPU_INIT
 
 # ScaLAPACK support requires MPI
-if test "${abi_scalapack_enable}" = "yes" -a "${abi_mpi_enable}" != "yes"; then
+if test "${enable_scalapack}" = "yes" -a "${enable_mpi}" != "yes"; then
   AC_MSG_ERROR([ScaLAPACK support requires MPI])
 fi
 
@@ -387,7 +400,7 @@ AC_FC_WRAPPERS
 
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
-if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
+if test "${abi_fc_vendor}" = "ibm" -a "${enable_mpi}" = "yes"; then
   AC_MSG_NOTICE([activating MPI workaround for the IBM Fortran compiler])
   AC_DEFINE([HAVE_MPI_INCLUDED_ONCE],1,[Define to 1 if you are using XLF.])
 fi
@@ -400,8 +413,51 @@ fi
 
 ABI_MSG_SECTION([Python support])
 
-# Look for a working Python environment
+# Look for programs
+AC_CHECK_PROGS(PYTHON,[python python2.6 python2.5 python2.4])
+
+# Get Python preprocessing options
+AC_MSG_CHECKING([for Python CPPFLAGS])
+if test "${PYTHON}" != "" -a "${PYTHON_CPPFLAGS}" = ""; then
+  PYTHON_CPPFLAGS=`${PYTHON} -c "\
+try:
+    import distutils.sysconfig
+    print '-I' + distutils.sysconfig.get_python_inc(),
+except:
+    pass
+try:
+    import numpy
+    print '-I' + numpy.get_include(),
+except:
+    pass"`
+fi
+AC_MSG_RESULT([${PYTHON_CPPFLAGS}])
+
+# Check whether Bazaar is installed
+if test "${PYTHON}" != ""; then
+  AC_CHECK_PROGS(BAZAAR,[bzr])
+fi
+
 ABI_CHECK_PYTHON
+
+# Set Bazaar variables
+bzr_branch=""
+bzr_revno=""
+bzr_clean=""
+if test "${BAZAAR}" != "" -a -d "${abinit_srcdir}/.bzr"; then
+    AC_MSG_NOTICE([retrieving Bazaar branch information])
+    eval `bzr version-info \
+      --check-clean \
+      --custom \
+      --template='bzr_branch="{revision_id}"\nbzr_revno="{revno}"\nbzr_clean="{clean}"\n' \
+      ${abinit_srcdir}`
+    AC_DEFINE([HAVE_BZR_BRANCH],1,[Define to 1 if you are working in a Bazaar branch.])
+fi
+
+# Substitute Python-related variables
+AC_SUBST(bzr_branch)
+AC_SUBST(bzr_revno)
+AC_SUBST(bzr_clean)
 
 # ---------------------------------------------------------------------------- #
 
@@ -453,7 +509,7 @@ AC_SUBST(with_gnu_ld)
 # Hints
 #
 
-ABI_MSG_SECTION([Hints for the build flags])
+ABI_MSG_SECTION([Hints])
 
 # Look for a true C preprocessor
 if test "${TRUE_CPP}" = ""; then
@@ -476,7 +532,6 @@ fi
 
 # Set Fortran preprocessor when needed
 if test "${abi_fc_wrap}" = "yes"; then
-  AC_MSG_CHECKING([for a Fortran-compatible C preprocessor])
   if test "${FPP}" = ""; then
     if test "${abi_cpp_user}" != ""; then
       FPP="${abi_cpp_user}"
@@ -488,7 +543,6 @@ if test "${abi_fc_wrap}" = "yes"; then
       fi
     fi
   fi
-  AC_MSG_RESULT([${FPP}])
 fi
 
 # FIXME: set CPP vendor
@@ -509,9 +563,6 @@ case "${abi_fc_vendor}" in
     abi_fpp_vendor="ibm"
     ;;
 esac
-AC_MSG_NOTICE([setting C preprocessor vendor to '${abi_cpp_vendor}'])
-AC_MSG_NOTICE([setting C++ preprocessor vendor to '${abi_xpp_vendor}'])
-AC_MSG_NOTICE([setting Fortran preprocessor vendor to '${abi_fpp_vendor}'])
 
 # Preset flags to have the source building properly
 if test "${enable_hints}" = "yes"; then
@@ -533,7 +584,7 @@ if test "${enable_hints}" = "yes"; then
 
 fi
 
-# Adjust OpenMP flags if not used
+# Adjust OpenMP flags
 if test "${enable_openmp}" != "yes"; then
   FCFLAGS_OPENMP=""
 fi
@@ -583,17 +634,44 @@ AC_SUBST(CPPFLAGS_HINTS_EXT)
 ABI_MSG_SECTION([Debugging])
 
 # Init debug flags
-ABI_DEBUG_INIT([${with_debug_flavor}])
+ABI_DEBUG_INIT([${enable_debug}],[${enable_optim}])
+
+# Get debug flags from database when in profile mode
+if test "${enable_debug}" != "no" -a "${enable_debug}" != "yes"; then
+  if test "${CFLAGS}" = ""; then
+    ABI_CC_DBGFLAGS
+  else
+    AC_MSG_NOTICE([debugging profile overriden by user-defined CFLAGS])
+  fi
+  if test "${CXXFLAGS}" = ""; then
+    ABI_CXX_DBGFLAGS
+  else
+    AC_MSG_NOTICE([debugging profile overriden by user-defined CXXFLAGS])
+  fi
+  if test "${FCFLAGS}" = ""; then
+    ABI_FC_DBGFLAGS
+  else
+    AC_MSG_NOTICE([debugging profile overriden by user-defined FCFLAGS])
+  fi
+fi
+
+# Disable optimizations if debug mode is activated in source files
+if test "${src_debug_mode}" = "yes"; then
+  if test "${enable_optim}" != "no"; then
+    AC_MSG_WARN([disabling optimizations])
+  fi
+  enable_optim="no"
+fi
 
 # Activate "design-by-contract" debugging tests when paranoid
 AC_MSG_CHECKING([whether to activate design-by-contract debugging])
-if test "${with_debug_flavor}" = "paranoid"; then
+if test "${enable_debug}" = "paranoid"; then
   AC_DEFINE([DEBUG_CONTRACT],1,[Define to 1 if you want to activate design-by-contract debugging tests.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
 fi
-AM_CONDITIONAL(DO_BUILD_32_CONTRACT,[test "${with_debug_flavor}" = "paranoid"])
+AM_CONDITIONAL(DO_BUILD_32_CONTRACT,[test "${enable_debug}" = "paranoid"])
 
 # ---------------------------------------------------------------------------- #
 
@@ -601,34 +679,161 @@ AM_CONDITIONAL(DO_BUILD_32_CONTRACT,[test "${with_debug_flavor}" = "paranoid"])
 # Optimizations
 #
 # NOTE: The optimizations will be taken from *FLAGS_OPTIM environment
-# variables if with_optim_flavor is set to yes, or set to predefined values
+# variables if enable_optim is set to yes, or set to predefined values
 # for other optimization profiles.
 #
 
 ABI_MSG_SECTION([Optimizations])
 
-# Disable optimizations if debug mode is activated in source files
-abi_optim_flavor="${with_optim_flavor}"
-if test "${abi_debug_source}" = "yes"; then
-  if test "${abi_optim_flavor}" != "none"; then
-    AC_MSG_WARN([disabling optimizations])
-  fi
-  abi_optim_flavor="none"
-fi
-
 # Init optimization flags
 # Note: must be done only once debugging is configured
-ABI_OPTIM_INIT([${abi_optim_flavor}])
+ABI_OPTIM_INIT([${enable_optim}])
+
+# Get optimization flags from database when in profile mode
+if test "${enable_optim}" != "no" -a "${enable_optim}" != "yes"; then
+  if test "${CFLAGS}" = ""; then
+    ABI_CC_OPTFLAGS
+  else
+    AC_MSG_NOTICE([optimization profile overriden by user-defined CFLAGS])
+  fi
+  if test "${CXXFLAGS}" = ""; then
+    ABI_CXX_OPTFLAGS
+  else
+    AC_MSG_NOTICE([optimization profile overriden by user-defined CXXFLAGS])
+  fi
+  if test "${FCFLAGS}" = ""; then
+    ABI_FC_OPTFLAGS
+  else
+    AC_MSG_NOTICE([optimization profile overriden by user-defined FCFLAGS])
+  fi
+fi
 
 # FIXME: 20_datashare does not support optimizations
-if test "${abi_optim_flavor}" != "none"; then
-  AC_MSG_NOTICE([disabling optimizations for src/20_datashare/])
-  fcflags_opt_20_datashare="-O0"
-fi
+fcflags_opt_20_datashare="-O0"
 
 # Set per-directory Fortran optimizations
 # Note: must be done only once FCFLAGS_OPTIM is set
 ABI_OPTFLAGS_DIRS([${FCFLAGS_OPTIM}])
+
+# ---------------------------------------------------------------------------- #
+
+#
+# 64-bit support
+#
+# NOTES: 
+#
+#   * This step requires that the hints have been looked for.
+#
+#   * Please do not try to set-up the *_64BITS variables manually, as they
+#     will systematically be overwritten.
+#
+
+ABI_MSG_SECTION([64-bit support])
+
+# Display status
+AC_MSG_CHECKING([for a 64-bit architecture])
+AC_MSG_RESULT([${abi_cpu_64bits}])
+AC_MSG_CHECKING([whether to use 64-bit flags])
+AC_MSG_RESULT([${enable_64bit_flags}])
+AC_MSG_CHECKING([for user-defined 64-bit flags])
+AC_MSG_RESULT([${with_64bit_flags}])
+
+# C preprocessing
+if test "${enable_64bit_flags}" = "yes"; then
+  AC_MSG_CHECKING([for 64-bit C preprocessor flags])
+  if test "${CPPFLAGS_64BITS}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${CPPFLAGS_64BITS}])
+    CPP="${CPP} ${CPPFLAGS_64BITS}"
+  fi
+else
+  CPPFLAGS_64BITS=""
+fi
+
+# C compilation
+if test "${enable_64bit_flags}" = "yes"; then
+  AC_MSG_CHECKING([for 64-bit C flags])
+  if test "${CFLAGS_64BITS}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${CFLAGS_64BITS}])
+    CC="${CC} ${CFLAGS_64BITS}"
+  fi
+else
+  CFLAGS_64BITS=""
+fi
+
+# C++ preprocessing
+if test "${XPP}" != ""; then
+  if test "${enable_64bit_flags}" = "yes"; then
+    AC_MSG_CHECKING([for 64-bit C++ preprocessor flags])
+    if test "${XPPFLAGS_64BITS}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${XPPFLAGS_64BITS}])
+      XPP="${XPP} ${XPPFLAGS_64BITS}"
+    fi
+  else
+    XPPFLAGS_64BITS=""
+  fi
+fi
+
+# C++ compilation
+if test "${CXX}" != ""; then
+  if test "${enable_64bit_flags}" = "yes"; then
+    AC_MSG_CHECKING([for 64-bit C++ flags])
+    if test "${CXXFLAGS_64BITS}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${CXXFLAGS_64BITS}])
+      CXX="${CXX} ${CXXFLAGS_64BITS}"
+    fi
+  else
+    CXXFLAGS_64BITS=""
+  fi
+fi
+
+# Fortran preprocessing
+if test "${FPP}" != ""; then
+  if test "${enable_64bit_flags}" = "yes"; then
+    AC_MSG_CHECKING([for 64-bit Fortran preprocessor flags])
+    if test "${FPPFLAGS_64BITS}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${FPPFLAGS_64BITS}])
+      FPP="${FPP} ${FPPFLAGS_64BITS}"
+    fi
+  else
+    FPPFLAGS_64BITS=""
+  fi
+fi
+
+# Fortran compilation
+if test "${enable_64bit_flags}" = "yes"; then
+  AC_MSG_CHECKING([for 64-bit Fortran flags])
+  if test "${FCFLAGS_64BITS}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${FCFLAGS_64BITS}])
+    FC="${FC} ${FCFLAGS_64BITS}"
+  fi
+else
+  FCFLAGS_64BITS=""
+fi
+
+# Archiver
+if test "${enable_64bit_flags}" = "yes"; then
+  AC_MSG_CHECKING([for 64-bit archiver flags])
+  if test "${ARFLAGS_64BITS}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${ARFLAGS_64BITS}])
+    AR="${AR} ${ARFLAGS_64BITS}"
+  fi
+else
+  ARFLAGS_64BITS=""
+fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -710,29 +915,6 @@ ABI_FC_FEATURES
 # ---------------------------------------------------------------------------- #
 
 #
-# Platform-specific libraries
-#
-
-# Note: these tests have to be performed after the flags have been
-#       saved.
-
-ABI_MSG_SECTION([Platform-specific libraries])
-
-AC_MSG_CHECKING([which operating system we have])
-AC_MSG_RESULT([${target_os}])
-
-# Basic mathematical functions
-AC_LANG_PUSH([C])
-AC_SEARCH_LIBS([expl], [m ml],
-  [abi_math_expl_ok="yes"], [abi_math_expl_ok="no"])
-AC_SEARCH_LIBS([logl], [m ml],
-  [abi_math_logl_ok="yes"], [abi_math_logl_ok="no"])
-AC_LANG_POP([C])
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
 # Multicore architecture support
 
 # Note: the following settings will be used by the connectors.
@@ -751,7 +933,9 @@ fi
 
 # MPI support
 ABI_MPI_DETECT
-ABI_MPI_DUMP
+if test "${enable_maintainer_checks}" = "yes"; then
+  ABI_MPI_DUMP
+fi
 
 # GPU support
 ABI_GPU_DETECT
@@ -760,243 +944,155 @@ ABI_GPU_DETECT
 # ---------------------------------------------------------------------------- #
 
 #
-# Linear algebra support
-#
-
-ABI_MSG_SECTION([Linear algebra support])
-
-ABI_LINALG_INIT
-ABI_LINALG_DETECT
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Optimized FFT support
-#
-
-ABI_MSG_SECTION([Optimized FFT support])
-
-# The best-suited FFT flavor is compiler-dependent
-if test "${with_fft_flavor}" = "" -o "${with_fft_flavor}" = "auto"; then
-  AC_MSG_NOTICE([(DEBUG) FFT FLAVOR AUTO SETUP])
-  ABI_FFT_SET_FLAVOR([${abi_linalg_flavor}])
-else
-  abi_fft_flavor="${with_fft_flavor}"
-fi
-
-ABI_FFT_DETECT([${abi_fft_flavor}])
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Profiling and performance analysis
-#
-
-ABI_MSG_SECTION([Profiling and performance analysis])
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Feature triggers (optional features)
+# Feature triggers
 #
 
 ABI_MSG_SECTION([Feature triggers])
 
-# VERY IMPORTANT: THE ORDER IS CRITICAL - DO NOT CHANGE IT!
+# Init
+abi_fallbacks=""
 
-# Note: some of the following packages are mandatory to run Abinit with
-#       full capabilities, although internal implementations may provide
-#       limited functionality in some cases
-
-                       # ------------------------------ #
-
-# PAPI library support
-AC_MSG_CHECKING([whether to enable PAPI support])
-AC_MSG_RESULT([${abi_papi_enable}])
-if test "${abi_papi_enable}" = "yes"; then
-  AC_MSG_NOTICE([disabling Abinit internal timer])
-  ABI_PERF_CHECK_PAPI
+# Make sure ~/.abinit/tarballs exists
+if test "${with_tardir}" = ""; then
+  abinit_tardir="${HOME}/.abinit/tarballs"
 else
-  AC_MSG_CHECKING([whether to enable the internal Abinit timer])
-  AC_MSG_RESULT([${enable_timer}])
-  if test "${enable_timer}" = "yes"; then
-    AC_DEFINE([HAVE_TIMER_ABINIT],1,[Define to 1 if you want to use the Abinit timer.])
+  abinit_tardir="${with_tardir}"
+fi
+if test ! -e "${abinit_tardir}"; then
+  AC_MSG_NOTICE([creating ${abinit_tardir}])
+  ${INSTALL} -d -m 755 "${abinit_tardir}"
+fi
+AC_MSG_NOTICE([using tarball repository ${abinit_tardir}])
+AC_SUBST(abinit_tardir)
+
+# Make fallbacks usable by Abinit
+fallbacks_instdir="${abinit_builddir}/fallbacks/exports"
+fallbacks_incs='-I$(fallbacks_instdir)/include'
+AC_SUBST(fallbacks_instdir)
+AC_SUBST(fallbacks_incs)
+
+# Linear algebra support
+ABI_LINALG_DETECT
+
+# FIXME: copying linear algebra tarball for now
+tmp_linalg_tarball="lapack-abinit_6.10.tar.gz"
+if test ! -s "${abinit_tardir}/${tmp_linalg_tarball}"; then
+  AC_MSG_NOTICE([copying linear algebra tarball to tarball repository])
+  cp "${abinit_srcdir}/fallbacks/transient/${tmp_linalg_tarball}" \
+    "${abinit_tardir}"
+fi
+
+# External FFT support
+ABI_CONNECT_FFT
+
+# Parallel I/O support
+# TODO
+
+# LibXC support
+# TODO
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+#
+# Connectors to external packages
+#
+
+# Note: the order is critical!
+#       level 1 ---> LINALG, IO, TIMER (require MPI and GPU)
+#       level 2 ---> FFT, MATH (require MPI, GPU, and LINALG)
+#       level 3 ---> DFT (may require MPI, GPU, LINALG, IO, FFT and MATH)
+#
+# Further note: MATH libraries may even depend on LINALG and FFT
+#               (wait and see...)
+
+ABI_MSG_SECTION([Connectors / Fallbacks])
+
+# Transferable file I/O support
+if test "${enable_connectors}" = "yes" -a \
+        "${enable_fallbacks}" != "force"; then
+  ABI_CONNECT_TRIO
+else
+  abi_fallbacks="${abi_fallbacks} `echo ${with_trio_flavor} | sed -e 's/+/ /g;s/none//g'`"
+  if test "${with_trio_flavor}" = "none"; then
+    lib_trio_flavor="none"
+  else
+    lib_trio_flavor=`echo "${with_trio_flavor}" | sed -e 's/+/-fallback+/g;s/$/-fallback/'`
   fi
+  lib_trio_flavor="${lib_trio_flavor} (libs: ignored)"
 fi
 abi_psml_wanted=`echo "${with_trio_flavor}" | grep "psml"`
 AM_CONDITIONAL([DO_BUILD_PSML], [test "${abi_psml_wanted}" != "" ])
 
-                       # ------------------------------ #
-
-# PSML library support
-AC_MSG_CHECKING([whether to enable PSML support])
-AC_MSG_RESULT([${abi_psml_enable}])
-if test "${abi_psml_enable}" = "yes"; then
-  ABI_TRIGGER_PSML
+# External timing library support
+if test "${enable_connectors}" = "yes"; then
+  ABI_CONNECT_TIMER
 fi
 
-# YAML library support
-AC_MSG_CHECKING([whether to enable YAML support])
-AC_MSG_RESULT([${abi_yaml_enable}])
-if test "${abi_yaml_enable}" = "yes"; then
-  ABI_TRIGGER_YAML
+# External algorithmic library support
+if test "${enable_connectors}" = "yes"; then
+  ABI_CONNECT_ALGO
 fi
 
-# NetCDF library support
-AC_MSG_CHECKING([whether to enable NetCDF support])
-AC_MSG_RESULT([${abi_netcdf_enable}])
-if test "${abi_netcdf_enable}" = "yes"; then
-  ABI_TRIGGER_NETCDF
+# External math library support
+if test "${enable_connectors}" = "yes"; then
+  ABI_CONNECT_MATH
 fi
 
-# ETSF_IO library support
-AC_MSG_CHECKING([whether to enable ETSF_IO support])
-AC_MSG_RESULT([${abi_etsf_io_enable}])
-if test "${abi_etsf_io_enable}" = "yes"; then
-  ABI_TRIGGER_ETSF_IO
-fi
-
-                       # ------------------------------ #
-
-# GSL library support
-AC_MSG_CHECKING([whether to enable GSL support])
-AC_MSG_RESULT([${abi_gsl_enable}])
-if test "${abi_gsl_enable}" = "yes"; then
-  ABI_TRIGGER_GSL
-fi
-AM_CONDITIONAL([DO_BUILD_01_GSL_EXT],[test "${abi_gsl_enable}" = "yes"])
-
-# Levmar library support
-AC_MSG_CHECKING([whether to enable Levmar support])
-AC_MSG_RESULT([${abi_levmar_enable}])
-if test "${abi_levmar_enable}" = "yes"; then
-  ABI_TRIGGER_LEVMAR
-fi
-
-                       # ------------------------------ #
-
-# LibXC library support
-ABI_LIBXC_DETECT(2,2)
-AM_CONDITIONAL([DO_BUILD_01_LIBXC_EXT],[test "${abi_libxc_ok}" = "yes"])
-
-# TRIQS support
-AC_MSG_CHECKING([whether to enable TRIQS support])
-AC_MSG_RESULT([${abi_triqs_enable}])
-if test "${abi_triqs_enable}" = "yes"; then
-  ABI_TRIGGER_TRIQS
-fi
-AM_CONDITIONAL([DO_BUILD_01_TRIQS_EXT], [test "${abi_triqs_enable}" = "yes"])
-
-# Wannier90 library support
-AC_MSG_CHECKING([whether to enable Wannier90 support])
-AC_MSG_RESULT([${abi_wannier90_enable}])
-if test "${abi_wannier90_enable}" = "yes"; then
-  ABI_TRIGGER_WANNIER90
-fi
-
-                       # ------------------------------ #
-
-# BigDFT library support (requires linear algebra and LibXC)
-AC_MSG_CHECKING([whether to enable BigDFT support])
-AC_MSG_RESULT([${abi_bigdft_enable}])
-if test "${abi_bigdft_enable}" = "yes"; then
-  ABI_BIGDFT_DETECT
-fi
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Fallbacks
-#
-
-ABI_MSG_SECTION([Fallbacks])
-
-# Always generate a build script for required fallbacks
-AC_OUTPUT([transient/build-abinit-fallbacks.sh])
-
-# Check that we have all required fallbacks
-ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
-
-# Report situation
-if test "${abi_fbk_required}" = ""; then
-  AC_MSG_NOTICE([no fallback required - you may run production calculations])
+# External DFT support
+if test "${enable_connectors}" = "yes" -a \
+        "${enable_fallbacks}" != "force"; then
+  ABI_CONNECT_DFT
 else
-  AC_MSG_NOTICE([fallbacks required - you should not run production calculations])
+  abi_fallbacks="${abi_fallbacks} `echo ${with_dft_flavor} | sed -e 's/+/ /g;s/none//g'`"
+  if test "${with_dft_flavor}" = "none"; then
+    lib_dft_flavor="none"
+  else
+    lib_dft_flavor=`echo "${with_dft_flavor}" | sed -e 's/+/-fallback+/g;s/$/-fallback/'`
+  fi
+  lib_dft_flavor="${lib_dft_flavor} (libs: ignored)"
 fi
 
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Final check of feature triggers
-#
-
-ABI_MSG_SECTION([Feature triggers summary])
-
-# Display summary table
-ABI_TRIGGERS_SUMMARY
-
-# FIXME: copying linear algebra tarball for now,
-#        ensuring ~/.abinit/tarballs/ exists
-if test "${abi_fbk_linalg}" = "yes"; then
-  tmp_abinit_tardir="${HOME}/.abinit/tarballs"
-  tmp_linalg_tarball="lapack-abinit_6.10.tar.gz"
-  if test ! -s "${tmp_abinit_tardir}/${tmp_linalg_tarball}"; then
-    AC_MSG_NOTICE([using tarball repository ${tmp_abinit_tardir}])
-    if test ! -e "${tmp_abinit_tardir}"; then
-      AC_MSG_NOTICE([creating '${tmp_abinit_tardir}'])
-      ${INSTALL} -d -m 755 "${tmp_abinit_tardir}"
-    elif test ! -d "${tmp_abinit_tardir}"; then
-      AC_MSG_ERROR(['${tmp_abinit_tardir}' is not a directory
-        please move away the current file and reconfigure Abinit])
-    fi
-
-    AC_MSG_NOTICE([installing linear algebra fallback tarball to '${tmp_abinit_tardir}'])
-    ${INSTALL} -m 644 "${abinit_srcdir}/transient/${tmp_linalg_tarball}" \
-      "${tmp_abinit_tardir}"
-  fi
-fi
-
-# Check that all triggers or their fallbacks are working
-# FIXME: triggers must not fall back if with_* options are provided
-for pkg in ${abi_trig_packages}; do
-  tmp_trig_errors=""
-  eval tmp_pkg_ok=\"\$\{abi_${pkg}_ok\}\"
-  eval tmp_fbk_ok=\"\$\{abi_fbk_${pkg}_ok\}\"
-  if test "${tmp_pkg_ok}" = "no" -a "${tmp_fbk_ok}" != "yes"; then
-    tmp_trig_errors="${tmp_trig_errors} ${pkg}"
-  fi
-done
-if test "${tmp_trig_errors}" != ""; then
-  for pkg in ${tmp_trig_errors}; do
-    tmp_fbk_error=`echo "${abi_fbk_packages}" | grep "${pkg}"`
-    AC_MSG_WARN([${pkg} support is unavailable or broken])
-    if test "${tmp_fbk_error}" != ""; then
-      AC_MSG_WARN([${pkg} fallback is unavailable])
-    fi
+# Check consistency of current status
+abi_fallbacks=`echo "${abi_fallbacks}" | tr ' ' '\n' | sort -u | \
+  awk '{printf " %s",[$]1}' | sed -e 's/^[ ]*//'`
+if test "${enable_fallbacks}" = "no" -a "${abi_fallbacks}" != ""; then
+  AC_MSG_NOTICE([fallbacks are disabled but the following ones have to be built:])
+  AC_MSG_NOTICE([])
+  for pkg in ${abi_fallbacks}; do
+    AC_MSG_NOTICE([  * ${pkg}])
   done
-  AC_MSG_ERROR([some optional features were not found on this system
-                  (see messages above)
-                  Please correct the options of configure to match your
-                  actual situation])
+  AC_MSG_NOTICE([])
+  AC_MSG_ERROR([cannot build Abinit])
 fi
 
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
+# Init options for the fallbacks subsystem
+enable_atompaw="no"
+enable_bigdft="no"
+enable_etsf_io="no"
+enable_libxc="no"
+enable_linalg="no"
+enable_netcdf="no"
+enable_wannier90="no"
 
-#
-# Optional source code
-#
+# display status of fallbacks
+AC_MSG_NOTICE([fallbacks to enable => ${abi_fallbacks}])
+for pkg in ${abi_fallbacks}; do
+  eval enable_${pkg}="yes"
+done
+for pkg in atompaw bigdft etsf_io libxc linalg netcdf wannier90; do
+  tmp_pkg_enabled=`eval echo \$\{enable_${pkg}\}`
+  AC_MSG_CHECKING([whether to build ${pkg}])
+  AC_MSG_RESULT([${tmp_pkg_enabled}])
+done
 
-ABI_MSG_SECTION([Optional source code])
-
-# Defines and conditionals for CPP options
-# (see config/specs/options.conf for details)
-ABI_OPTIONS_DEFINES
-
+# Inform Automake
+AM_CONDITIONAL([DO_BUILD_01_GSL_EXT],[test "${lib_math_flavor}" = "gsl"])
+##############################################
+if test "${enable_connectors}" = "yes"; then
+  ABI_CONNECT_TRIQS
+fi
+##############################################
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
@@ -1005,6 +1101,9 @@ ABI_OPTIONS_DEFINES
 #
 
 # NOTE: must be done at the end because the wrapper is built by configure
+
+# Correct include flags to allow for the build of incompatible Fortran modules
+ABI_INCFLAGS_CORRECT
 
 # Wrap buggy Fortran compilers
 FC_NOWRAP="${FC}"
@@ -1023,6 +1122,55 @@ F90FLAGS="${FCFLAGS}"
 AC_SUBST(F77)
 AC_SUBST(FFLAGS)
 
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+#
+# Experimental developments
+#
+
+ABI_MSG_SECTION([Experimental developments and option triggers])
+
+# Determine Fortran module name mangling for bindings
+if test "${enable_bindings}" = "yes"; then
+  ABI_FC_MODULE_MANGLING
+fi
+
+# Fast checking
+AC_MSG_CHECKING([whether to accelerate 'make check'])
+AC_MSG_RESULT([${enable_fast_check}])
+
+# Reduced checking for packages
+AC_MSG_CHECKING([whether to reduce 'make check' for packaging])
+AC_MSG_RESULT([${enable_pkg_check}])
+
+# Maintainer checks
+AC_MSG_CHECKING([whether to activate maintainer checks])
+AC_MSG_RESULT([${enable_maintainer_checks}])
+# Triggers (see config/specs/options.conf for details)
+ABI_OPTIONS_TRIGGERS
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+#
+# Configure subsystems
+#
+
+# Note: options must have been processed, in order to take proper
+# decisions
+
+ABI_MSG_SECTION([Subsystems])
+
+# Init all subsystems
+ABI_SUBSYSTEMS_INIT
+
+# Grab fallbacks parameters
+ABI_FALLBACKS_PARAMS
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
 # Void CPPFLAGS to allow for C/Fortran mixing
 ABI_CPPFLAGS="${CPPFLAGS}"
 CPPFLAGS=""
@@ -1036,16 +1184,17 @@ CPPFLAGS=""
 
 ABI_MSG_SECTION([Output])
 
+ac_configure_args="${ac_configure_args} --enable-atompaw=${enable_atompaw} --enable-bigdft=${enable_bigdft} --enable-etsf-io=${enable_etsf_io} --enable-libxc=${enable_libxc} --enable-linalg=${enable_linalg} --enable-netcdf=${enable_netcdf} --enable-wannier90=${enable_wannier90} --with-fc-vendor=${abi_fc_vendor} --with-fc-version=${abi_fc_version} --with-tardir='${abinit_tardir}'"
+
 # Output files
 # Note: later, add tests/atconfig and tests/atlocal for test suite
 ABI_OUTPUT
 
-# FIXME: fake makefile until the test farm is upgraded
-${INSTALL} -d -m 755 ${PWD}/fallbacks
-cat >fallbacks/Makefile <<EOF
-all_targets all check mostlyclean clean dist distclean maintainer-clean:
-	@echo "WARNING: this is a soon-to-be-removed fake makefile that does nothing."
-EOF
+# FIXME: transient symlink until plugins are fully replaced by fallbacks
+#        in the test farm
+if test ! -e "./config.mk"; then
+  ${LN_S} ./fallbacks/config.mk ./config.mk
+fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -1053,14 +1202,15 @@ EOF
 ABI_MSG_SECTION([Final remarks])
 
 # The end
-if test "${abi_linalg_flavor}" = "netlib-fallback"; then
+if test "${lib_linalg_flavor}" = "netlib-fallback"; then
   ABI_MSG_NOTICE([linalg-abinit],[Suboptimal linear algebra configuration])
 fi
-if test "${abi_gpu_enable}" = "yes" -a "${abi_linalg_chk_gpu}" != "magma"; then
+if test "${enable_gpu}" = "yes" -a "${abi_linalg_chk_gpu}" != "magma"; then
   ABI_MSG_NOTICE([gpu-without-magma],[Suboptimal GPU configuration])
 fi
-if test "${abi_etsf_enable}" = "yes"; then
+ABI_MSG_FC_BUGGY(${abi_fc_vendor})
+tmp_etsf_io_in_use=`echo "${lib_trio_flavor}" | grep 'etsf_io'`
+if test "${tmp_etsf_io_in_use}" != ""; then
   ABI_MSG_NOTICE([etsf_io-deprecated],[Upcoming end of ETSF_IO library support])
 fi
-ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END

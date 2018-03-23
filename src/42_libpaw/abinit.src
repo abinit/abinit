@@ -20,8 +20,8 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "libpaw_libxc.c",
  "m_libpaw_mpi.F90",
- "m_libpaw_libxc.F90",
  "m_libpaw_tools.F90",
+ "m_libpaw_libxc.F90",
  "m_paral_atom.F90",
  "m_paw_numeric.F90",
  "m_paw_sphharm.F90",

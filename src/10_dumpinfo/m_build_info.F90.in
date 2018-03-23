@@ -30,7 +30,7 @@ module m_build_info
 ! Parameters set-up by Autoconf
   character(len=8),parameter :: abinit_version = &
 &   "@VERSION@"
-  character(len=*),parameter :: build_target = &
+  character(len=*),parameter :: build_target   = &
 &   "@ABINIT_TARGET@"
 
 ! More info on current version
@@ -45,106 +45,78 @@ module m_build_info
 
 ! Info on compilers. Try to prevent problems with the length of the argument 
 ! (should not exceed the line length of 132 character).
-  character(len=*),parameter :: cc_info = &
+  character(len=*),parameter :: cc_info    = &
 &   "@abi_cc_vendor@@abi_cc_version@"
-  character(len=*),parameter :: cxx_info = &
+  character(len=*),parameter :: cxx_info   = &
 &   "@abi_cxx_vendor@@abi_cxx_version@"
-  character(len=*),parameter :: fc_info = &
+  character(len=*),parameter :: fc_info    = &
 &   "@abi_fc_vendor@@abi_fc_version@"
-  character(len=*),parameter :: cc_flags = &
+  character(len=*),parameter :: cc_flags   = &
 &   "@CFLAGS@"
-  character(len=*),parameter :: cxx_flags = &
+  character(len=*),parameter :: cxx_flags  = &
 &   "@CXXFLAGS@"
-  character(len=*),parameter :: fc_flags = &
+  character(len=*),parameter :: fc_flags   = &
 &   "@FCFLAGS@"
   character(len=*),parameter :: fc_ldflags = &
 &   "@FC_LDFLAGS@"
 
 ! Info on optimizations
-  character(len=*),parameter :: debug_flavor = &
-&   "@with_debug_flavor@"
-  character(len=*),parameter :: optim_flavor = &
-&   "@with_optim_flavor@"
+  character(len=*),parameter :: enable_debug    = &
+&   "@enable_debug@"
+  character(len=*),parameter :: enable_optim = &
+&   "@enable_optim@"
   character(len=*),parameter :: cpu_info = &
 &   "@abi_cpu_vendor@_@abi_cpu_model@"
+
+! Info on MPI
+  character(len=*),parameter :: enable_mpi       = &
+&   "@enable_mpi@"
+  character(len=*),parameter :: enable_mpi_io    = &
+&   "@enable_mpi_io@"
 
 ! Info on openMP
   character(len=*),parameter :: enable_openmp = &
 &   "@enable_openmp@"
 
-! Info on MPI
-  character(len=*),parameter :: enable_mpi = &
-&   "@enable_mpi@"
-  character(len=*),parameter :: enable_mpi_inplace = &
-&   "@enable_mpi_inplace@"
-  character(len=*),parameter :: enable_mpi_io = &
-&   "@enable_mpi_io@"
-  character(len=*),parameter :: enable_mpi_io_default = &
-&   "@enable_mpi_io_default@"
-
 ! Info on GPU
-  character(len=*),parameter :: enable_gpu = &
+  character(len=*),parameter :: enable_gpu    = &
 &   "@enable_gpu@"
 
-! Info on High-Performance I/O
-  character(len=*),parameter :: hpio_flavor = &
-&   "@abi_hpio_flavor@"
-  character(len=*),parameter :: enable_netcdf_default = &
-&   "@enable_netcdf_default@"
+! Info on connectors / fallbacks
+  character(len=*),parameter :: enable_connectors = &
+&   "@enable_connectors@"
+  character(len=*),parameter :: enable_fallbacks  = &
+&   "@enable_fallbacks@"
+  character(len=*),parameter :: dft_flavor        = &
+&   "@lib_dft_flavor@"
+  character(len=*),parameter :: fft_flavor        = &
+&   "@lib_fft_flavor@"
+  character(len=*),parameter :: linalg_flavor     = &
+&   "@lib_linalg_flavor@"
+  character(len=*),parameter :: math_flavor       = &
+&   "@lib_math_flavor@"
+  character(len=*),parameter :: timer_flavor      = &
+&   "@lib_timer_flavor@"
+  character(len=*),parameter :: trio_flavor       = &
+&   "@lib_trio_flavor@"
 
-! Info on linear algebra
-  character(len=*),parameter :: linalg_flavor = &
-&   "@abi_linalg_flavor@"
-
-! Info on FFT
-  character(len=*),parameter :: fft_flavor = &
-&   "@abi_fft_flavor@"
-
-! Info on time profiling
-  character(len=*),parameter :: enable_papi = &
-&   "@enable_papi@"
-  character(len=*),parameter :: enable_timer = &
-&   "@enable_timer@"
-
-! Info on feature triggers
-  character(len=*),parameter :: enable_avx_safe_mode = &
-&   "@enable_avx_safe_mode@"
-  character(len=*),parameter :: enable_bigdft = &
-&   "@enable_bigdft@"
-  character(len=*),parameter :: enable_bse_unpacked = &
-&   "@enable_bse_unpacked@"
-  character(len=*),parameter :: enable_cclock = &
-&   "@enable_cclock@"
-  character(len=*),parameter :: enable_clib = &
-&   "@enable_clib@"
-  character(len=*),parameter :: enable_expert = &
-&   "@enable_expert@"
-  character(len=*),parameter :: enable_fc_wrapper = &
-&   "@enable_fc_wrapper@"
-  character(len=*),parameter :: enable_fox = &
-&   "@enable_fox@"
-  character(len=*),parameter :: enable_gsl = &
-&   "@enable_gsl@"
+! Info on experimental features
+  character(len=*),parameter :: enable_bindings = &
+&   "@enable_bindings@"
+  character(len=*),parameter :: enable_exports = &
+&   "@enable_exports@"
   character(len=*),parameter :: enable_gw_dpc = &
 &   "@enable_gw_dpc@"
-  character(len=*),parameter :: enable_levmar = &
-&   "@enable_levmar@"
-  character(len=*),parameter :: enable_libtetra = &
-&   "@enable_libtetra@"
-  character(len=*),parameter :: enable_lotf = &
-&   "@enable_lotf@"
-  character(len=*),parameter :: enable_memory_profiling = &
-&   "@enable_memory_profiling@"
-  character(len=*),parameter :: enable_psml = &
-&   "@enable_psml@"
-  character(len=*),parameter :: enable_triqs = &
-&   "@enable_triqs@"
-  character(len=*),parameter :: enable_wannier90 = &
-&   "@enable_wannier90@"
-  character(len=*),parameter :: enable_yaml = &
-&   "@enable_yaml@"
-  character(len=*),parameter :: enable_zdot_bugfix = &
-&   "@enable_zdot_bugfix@"
+ 
+#if defined HAVE_BZR_BRANCH
+! Info on Bazaar branch (if applies)
+  character(len=*),parameter :: bzr_branch = &
+&   "@bzr_branch@"
+  character(len=*),parameter :: bzr_revno  = &
+&   "@bzr_revno@"
+  character(len=*),parameter :: bzr_clean  = &
+&   "@bzr_clean@"
+#endif
 
 contains  !===========================================================
 !!***
@@ -203,52 +175,38 @@ subroutine dump_config(my_unit)
   write(my_unit,'(2a)')'  FC_LDFLAGS       : ',trim(fc_ldflags)
   write(my_unit,*)
   write(my_unit,'(a) ')' === Optimizations === '
-  write(my_unit,'(2a)')'  Debug level        : ',trim(debug_flavor)
-  write(my_unit,'(2a)')'  Optimization level : ',trim(optim_flavor)
+  write(my_unit,'(2a)')'  Debug level        : ',trim(enable_debug)
+  write(my_unit,'(2a)')'  Optimization level : ',trim(enable_optim)
   write(my_unit,'(2a)')'  Architecture       : ',trim(cpu_info)
   write(my_unit,*)
   write(my_unit,'(a) ')' === Multicore === '
-  write(my_unit,'(2a)')'  OpenMP support  : ',trim(enable_openmp)
-  write(my_unit,'(2a)')'  MPI support     : ',trim(enable_mpi)
-  write(my_unit,'(2a)')'  MPI in place    : ',trim(enable_mpi_inplace)
-  write(my_unit,'(2a)')'  MPI I/O         : ',trim(enable_mpi_io)
-  write(my_unit,'(2a)')'  MPI I/O default : ',trim(enable_mpi_io_default)
-  write(my_unit,'(2a)')'  GPU support     : ',trim(enable_gpu)
+  write(my_unit,'(2a)')'  Parallel build : ',trim(enable_mpi)
+  write(my_unit,'(2a)')'  Parallel I/O   : ',trim(enable_mpi_io)
+  write(my_unit,'(2a)')'  openMP support : ',trim(enable_openmp)
+  write(my_unit,'(2a)')'  GPU support    : ',trim(enable_gpu)
   write(my_unit,*)
-  write(my_unit,'(a) ')' === Time profiling === '
-  write(my_unit,'(2a)')'  PAPI timer   : ',trim(enable_papi)
-  write(my_unit,'(2a)')'  Abinit timer : ',trim(enable_timer)
-  write(my_unit,*)
-  write(my_unit,'(a) ')' === High-Performance I/O === '
-  write(my_unit,'(2a)')'  HPIO flavor   : ',trim(hpio_flavor)
-  write(my_unit,*)
-  write(my_unit,'(a) ')' === Linear algebra === '
-  write(my_unit,'(2a)')'  LINALG flavor : ',trim(linalg_flavor)
-  write(my_unit,*)
-  write(my_unit,'(a) ')' === FFT === '
+  write(my_unit,'(a) ')' === Connectors / Fallbacks === '
+  write(my_unit,'(2a)')'  Connectors on : ',trim(enable_connectors)
+  write(my_unit,'(2a)')'  Fallbacks on  : ',trim(enable_fallbacks)
+  write(my_unit,'(2a)')'  DFT flavor    : ',trim(dft_flavor)
   write(my_unit,'(2a)')'  FFT flavor    : ',trim(fft_flavor)
+  write(my_unit,'(2a)')'  LINALG flavor : ',trim(linalg_flavor)
+  write(my_unit,'(2a)')'  MATH flavor   : ',trim(math_flavor)
+  write(my_unit,'(2a)')'  TIMER flavor  : ',trim(timer_flavor)
+  write(my_unit,'(2a)')'  TRIO flavor   : ',trim(trio_flavor)
   write(my_unit,*)
-  write(my_unit,'(a) ')' === Feature triggers === '
-  write(my_unit,'(2a)')'  Safe AVX            : ',trim(enable_avx_safe_mode)
-  write(my_unit,'(2a)')'  BigDFT              : ',trim(enable_bigdft)
-  write(my_unit,'(2a)')'  BSE unpacked        : ',trim(enable_bse_unpacked)
-  write(my_unit,'(2a)')'  C clock             : ',trim(enable_cclock)
-  write(my_unit,'(2a)')'  C library           : ',trim(enable_clib)
-  write(my_unit,'(2a)')'  Expert mode         : ',trim(enable_expert)
-  write(my_unit,'(2a)')'  Fortran wrapper     : ',trim(enable_fc_wrapper)
-  write(my_unit,'(2a)')'  FoX                 : ',trim(enable_fox)
-  write(my_unit,'(2a)')'  GSL                 : ',trim(enable_gsl)
+  write(my_unit,'(a)' )' === Experimental features === '
+  write(my_unit,'(2a)')'  Bindings            : ',trim(enable_bindings)
+  write(my_unit,'(2a)')'  Exports             : ',trim(enable_exports)
   write(my_unit,'(2a)')'  GW double-precision : ',trim(enable_gw_dpc)
-  write(my_unit,'(2a)')'  Levmar              : ',trim(enable_levmar)
-  write(my_unit,'(2a)')'  Tetrahedron library : ',trim(enable_libtetra)
-  write(my_unit,'(2a)')'  LOTF                : ',trim(enable_lotf)
-  write(my_unit,'(2a)')'  Memory profiling    : ',trim(enable_memory_profiling)
-  write(my_unit,'(2a)')'  PSML                : ',trim(enable_psml)
-  write(my_unit,'(2a)')'  TRIQS               : ',trim(enable_triqs)
-  write(my_unit,'(2a)')'  Wannier90           : ',trim(enable_wannier90)
-  write(my_unit,'(2a)')'  YAML                : ',trim(enable_yaml)
-  write(my_unit,'(2a)')'  ZDOT bugfix         : ',trim(enable_zdot_bugfix)
   write(my_unit,*)
+#if defined HAVE_BZR_BRANCH
+  write(my_unit,'(a)' )' === Bazaar branch information === '
+  write(my_unit,'(2a)')'  Branch ID : ',trim(bzr_branch)
+  write(my_unit,'(2a)')'  Revision  : ',trim(bzr_revno)
+  write(my_unit,'(2a)')'  Committed : ',trim(bzr_clean)
+  write(my_unit,*)
+#endif
   write(my_unit,'(1x,a)') repeat('+',78)
   write(my_unit,*)
 

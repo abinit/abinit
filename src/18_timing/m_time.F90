@@ -519,10 +519,10 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
  character(len=*),intent(in) :: start_or_stop
 
 !Local variables-------------------------------
-#ifdef HAVE_PAPI
- logical,parameter :: use_papi=.TRUE.
-#else
+#ifndef HAVE_PAPI
  logical,parameter :: use_papi=.FALSE.
+#else
+ logical,parameter :: use_papi=.TRUE.
 #endif
  integer(C_INT)  :: check 
  integer(C_LONG_LONG) :: flops

@@ -148,7 +148,6 @@ _tsuite_dirs = [
     "psml",
     "gpu",
     "libxc",
-    "macroave",
     "mpiio",
     "paral",
     #"hpc",

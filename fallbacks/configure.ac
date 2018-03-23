@@ -24,9 +24,9 @@
 #
 
 # Initialize Autoconf
-AC_PREREQ(2.68)
-AC_INIT([ABINIT-Fallbacks],[8.5.0],
-  [https://bugs.launchpad.net/abinit-fallbacks/],[abinit-fallbacks])
+AC_PREREQ(2.62)
+AC_INIT([ABINIT-Fallbacks],[1.0],
+  [https://bugs.launchpad.net/abinit/],[abinit-fallbacks])
 AC_REVISION([Autotools support for the ABINIT Fallbacks])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_SRCDIR([.])
@@ -40,7 +40,7 @@ _AC_SRCDIRS(["."])
 
 # Initial setup
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE(1.12)
+AM_INIT_AUTOMAKE(1.10)
 
 # Check for common programs
 AC_PROG_MAKE_SET
@@ -57,7 +57,7 @@ AC_PROG_EGREP
 AX_PROG_MKDIR_P
 
 # Make sure the source tree is complete
-${MKDIR_P} sources stamps
+${MKDIR_P} exports/include sources stamps
 
 # ---------------------------------------------------------------------------- #
 
@@ -65,38 +65,52 @@ ${MKDIR_P} sources stamps
 # Define global options
 #
 
-# Manage environment variables and command-line options
-AFB_ENV_BACKUP
-AFB_OPTIONS_DEFINE
-AFB_OPTIONS_BACKUP
-AFB_OPTIONS_SETUP
-AFB_OPTIONS_CHANGED
-AFB_OPTIONS_PARSE
-AFB_ENV_INIT
+# FIXME: properly manage compiler vendors
+AC_ARG_WITH([fc-vendor],
+  AC_HELP_STRING([--with-fc-vendor],[Fortran compiler vendor]))
+if test "${with_fc_vendor}" = ""; then
+  fc_vendor="gnu"
+else
+  AC_MSG_NOTICE([setting Fortran compiler vendor to ${with_fc_vendor}])
+  fc_vendor="${with_fc_vendor}"
+fi
+AC_SUBST(fc_vendor)
 
-# set-up tarball directory
+AC_ARG_WITH([fc-version],
+  AC_HELP_STRING([--with-fc-version],[Fortran compiler version]))
+if test "${with_fc_version}" = ""; then
+  fc_version="4.4"
+else
+  AC_MSG_NOTICE([setting Fortran compiler version to ${with_fc_version}])
+  fc_version="${with_fc_version}"
+fi
+AC_SUBST(fc_version)
+
+AC_ARG_WITH([tardir],
+  AC_HELP_STRING([--with-tardir],[Repository containing source tarballs]))
 if test "${with_tardir}" = ""; then
   abinit_tardir="${HOME}/.abinit/tarballs"
 else
+  AC_MSG_NOTICE([setting tarball repository to ${with_tardir}])
   abinit_tardir="${with_tardir}"
 fi
-AC_MSG_NOTICE([setting tarball repository to ${abinit_tardir}])
-
-# Make sure the tarball directory exists
-if test ! -e "${abinit_tardir}"; then
-  AC_MSG_NOTICE([creating tarball repository ${abinit_tardir}])
-  ${INSTALL} -d -m 755 "${abinit_tardir}"
-fi
-AC_MSG_NOTICE([using tarball repository ${abinit_tardir}])
-
-# Set-up installation directory
-if test "${enable_local_build}" = "yes"; then
-  AC_MSG_NOTICE([tuning install parameters for local build])
-  prefix="${ac_abs_top_builddir}/exports"
-fi
-
-# Substitutions
 AC_SUBST(abinit_tardir)
+
+AC_ARG_VAR([RANLIB],[Archive indexer])
+AC_SUBST(RANLIB)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Check option consistency
+#
+
+AC_MSG_NOTICE([checking consistency of fallback options])
+
+# The ETSF I/O library requires NetCDF support
+if test "${enable_etsf_io}" = "yes" -a "${enable_netcdf}" != "yes"; then
+  AC_MSG_WARN([ETSF I/O requires NetCDF])
+fi
 
 # ---------------------------------------------------------------------------- #
 
@@ -129,14 +143,43 @@ elif test "${CURL}" != ""; then
   afb_dlopts="--connect-time 15 --retry 1 -s -S -o"
 fi
 
+# Make sure ~/.abinit/tarballs exists
+if test "${with_tardir}" != ""; then
+  abinit_tardir="${with_tardir}"
+fi
+if test "${abinit_tardir}" = ""; then
+  abinit_tardir="${HOME}/.abinit/tarballs"
+  if test ! -e "${abinit_tardir}"; then
+    AC_MSG_NOTICE([creating ${abinit_tardir}])
+    ${INSTALL} -d -m 755 "${abinit_tardir}"
+  fi
+fi
+AC_MSG_NOTICE([using tarball repository ${abinit_tardir}])
+AC_SUBST(abinit_tardir)
+
 # ---------------------------------------------------------------------------- #
 
 #
 # Source code management
 #
 
-# Make sure required patches can be applied
-AFB_PATCHES_SETUP
+# Init installation directory
+fallbacks_instdir="${ac_abs_top_builddir}/exports"
+AC_SUBST(fallbacks_instdir)
+
+# Check for patch
+AC_CHECK_PROGS([PATCH],[patch])
+
+# Stop if patch is not available
+if test "${PATCH}" = ""; then
+  AC_MSG_WARN([no 'patch' command available])
+  if test "${enable_bigdft}" = "yes"; then
+    AC_MSG_ERROR([BigDFT requires patch - disable BigDFT or install patch])
+  fi
+  if test "${enable_wannier90}" = "yes"; then
+    AC_MSG_ERROR([Wannier90 requires patch - disable Wannier90 or install patch])
+  fi
+fi
 
 # ---------------------------------------------------------------------------- #
 
@@ -145,24 +188,13 @@ AFB_PATCHES_SETUP
 #
 
 AC_PROG_CC
-AC_PROG_CPP
 
 # LibXC sometimes requires C99
-# Note: if problem, set ac_cv_prog_cc_c99="no"
-AC_PROG_CC_C99
-
-# Store information on C compiler
-AFB_PROG_CC(${CC})
-ref_cc_vendor="${afb_cc_vendor}"
-ref_cc_version="${afb_cc_version}"
-
-# ---------------------------------------------------------------------------- #
-
-#
-# C++ support
-#
-
-AC_PROG_CXX
+if test "${with_fc_vendor}" = "ibm"; then
+  AC_PROG_CC_C99
+else
+  ac_cv_prog_cc_c99="no"
+fi
 
 # ---------------------------------------------------------------------------- #
 
@@ -171,99 +203,68 @@ AC_PROG_CXX
 #
 
 AC_PROG_FC
-AFB_PROG_FC
 
 # ---------------------------------------------------------------------------- #
 
 #
-# Archiver support
+# Linear algebra support
 #
 
-AC_CHECK_PROGS([AR],[ar xiar])
-AC_PROG_RANLIB
+ABI_FALLBACK_LINALG
 
 # ---------------------------------------------------------------------------- #
 
 #
-# Final build parameters configuration
+# NetCDF support
 #
 
-# Make use of *_EXTRA flags
-ARFLAGS="${ARFLAGS} ${ARFLAGS_EXTRA}"
-CC_LDFLAGS="${CC_LDFLAGS} ${CC_LDFLAGS_EXTRA}"
-CFLAGS="${CFLAGS} ${CFLAGS_EXTRA}"
-CFGFLAGS="${CFGFLAGS} ${CFGFLAGS_EXTRA}"
-CPPFLAGS="${CPPFLAGS} ${CPPFLAGS_EXTRA}"
-CXX_LDFLAGS="${CXX_LDFLAGS} ${CXX_LDFLAGS_EXTRA}"
-CXXFLAGS="${CXXFLAGS} ${CXXFLAGS_EXTRA}"
-FC_LDFLAGS="${FC_LDFLAGS} ${FC_LDFLAGS_EXTRA}"
-FCFLAGS="${FCFLAGS} ${FCFLAGS_EXTRA}"
-FPPFLAGS="${FPPFLAGS} ${FPPFLAGS_EXTRA}"
-XPPFLAGS="${XPPFLAGS} ${XPPFLAGS_EXTRA}"
-
-# Merge-in *LIBS flags
-CC_LIBS="${CC_LIBS} ${LIBS}"
-CXX_LIBS="${CXX_LIBS} ${LIBS}"
-FC_LIBS="${FC_LIBS} ${LIBS}"
+ABI_FALLBACK_NETCDF
 
 # ---------------------------------------------------------------------------- #
 
 #
-# Configure fallbacks and their dependencies in the correct order
+# ETSF I/O library support
 #
 
-# HDF5 significantly enhances NetCDF4
-AFB_CHECK_HDF5
-if test "${afb_hdf5_ok}" = "yes" -a "${enable_hdf5}" = "yes"; then
-  AC_MSG_NOTICE([enabling advanced NetCDF4 I/O features])
-  AC_MSG_NOTICE([please note that HDF5 must be compiled with
-           the same compiler as now for this to work])
-  CC_NETCDF4="${HDF5_CC}"
-  test -z "${CPPFLAGS_NETCDF4}" && \
-    CPPFLAGS_NETCDF4="${CPPFLAGS} ${HDF5_CPPFLAGS}"
-  test -z "${CFLAGS_NETCDF4}" && \
-    CFLAGS_NETCDF4="${CFLAGS} ${HDF5_CFLAGS}"
-  test -z "${LDFLAGS_NETCDF4}" && \
-    LDFLAGS_NETCDF4="${LDFLAGS} ${HDF5_LDFLAGS}"
-  test -z "${LIBS_NETCDF4}" && \
-    LIBS_NETCDF4="${LIBS} ${HDF5_LIBS}"
-else
-  AC_MSG_NOTICE([enabling minimal NetCDF4 features only])
-fi
-
-# Check that the NetCDF4 compiler wrapper is the same as our current compiler
-if test "${CC_NETCDF4}" = ""; then
-  CC_NETCDF4="${CC}"
-fi
-AFB_PROG_CC(${CC_NETCDF4})
-if test "${afb_cc_vendor}" != "${ref_cc_vendor}"; then
-  AC_MSG_WARN([NetCDF4 will be built with a different C compiler
-                    The build of Abinit might fail])
-else
-  if test "${afb_cc_version}" != "${ref_cc_version}"; then
-    AC_MSG_WARN([NetCDF4 will be built with a different compiler version])
-  fi
-fi
-
-# Configure all fallbacks
-AFB_SETUP_PACKAGES
+ABI_FALLBACK_ETSF_IO
 
 # ---------------------------------------------------------------------------- #
 
 #
-# Output configuration and report
+# TDDFT.org exchange-correlation library support
 #
 
-AC_CONFIG_COMMANDS([script-perms],[chmod u+x src/abinit-fallbacks-config])
+ABI_FALLBACK_LIBXC
 
-AFB_CONFIG_FILES
+# ---------------------------------------------------------------------------- #
 
-AC_CONFIG_FILES([
-  fallbacks.dump
-  config/siesta/libxc.mk
-  src/abinit-fallbacks-config
-  Makefile
-  src/Makefile])
-AC_OUTPUT
+#
+# AtomPAW support
+#
 
-AFB_INFO_DISPLAY
+ABI_FALLBACK_ATOMPAW
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Wavelets support - BigDFT project
+#
+
+ABI_FALLBACK_BIGDFT
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Wannier90 support
+#
+
+ABI_FALLBACK_WANNIER90
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Output configuration
+#
+
+AC_OUTPUT([Makefile])
+
