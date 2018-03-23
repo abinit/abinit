@@ -138,7 +138,7 @@ Make sure you are in the directory containing the output files produced by the c
 
     cp ~abinit/scripts/post_processing/temperature-dependence/temperature_final.py .
     cp ~abinit/scripts/post_processing/temperature-dependence/rf_final.py .
-    cp ~abinit/scripts/post_processing/plot_bs.py .
+    cp ~abinit/scripts/post_processing/temperature-dependence/plot_bs.py .
 
 in which ~abinit has been replaced by the proper path.
 

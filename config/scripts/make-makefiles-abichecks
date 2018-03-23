@@ -138,7 +138,7 @@ mf_data += "\n# Clean-up temporary directories\nclean-local:\n%s" % mf_cln
 
 # Generate EXTRA_DIST information
 mf_extra = "EXTRA_DIST ="
-xd_data = open("config/dist/abichecks.lst", "rt").read().strip().split("\n")
+xd_data = open("config/dist/auto-abichecks.lst", "rt").read().strip().split("\n")
 for src in xd_data:
   mf_extra += " \\\n  %s" % re.sub("^abichecks/","",src)
 mf_data += "\n%s\n" % mf_extra

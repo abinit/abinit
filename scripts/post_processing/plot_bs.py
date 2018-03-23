@@ -180,16 +180,16 @@ if EP.ntemp > 0:
   for iband in N.arange(EP.nband):
     if iband < cond:
       #renormalization = real part of zpr
-      renorm = (EP.eigenvalues[0,:,iband]-fermi + EP.zpm[temp_index,0,:,iband,0])*csts.hartree2ev
-      bandwith = EP.zpm[temp_index,0,:,iband,1]*csts.hartree2ev
+      renorm = (EP.eigenvalues[0,:,iband]-fermi + EP.zpm[0,temp_index,:,iband,0])*csts.hartree2ev
+      bandwith = EP.zpm[0,temp_index,:,iband,1]*csts.hartree2ev
       renorm_fine = spline(xspan,renorm,xfine)
       bandwith_fine = spline(xspan,bandwith,xfine)
       P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3,color='b')
       P.plot(xfine,renorm_fine,color='b',linestyle='--',linewidth=2)
     else:
       #renormalization = real part of zpr
-      renorm = (EP.eigenvalues[0,:,iband]-fermi + EP.zpm[temp_index,0,:,iband,0])*csts.hartree2ev
-      bandwith = EP.zpm[temp_index,0,:,iband,1]*csts.hartree2ev
+      renorm = (EP.eigenvalues[0,:,iband]-fermi + EP.zpm[0,temp_index,:,iband,0])*csts.hartree2ev
+      bandwith = EP.zpm[0,temp_index,:,iband,1]*csts.hartree2ev
       renorm_fine = spline(xspan,renorm,xfine)
       bandwith_fine = spline(xspan,bandwith,xfine)
       P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3, color='r')

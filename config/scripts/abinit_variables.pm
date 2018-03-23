@@ -38,23 +38,18 @@ sub extract_variables
 		else
 		{
 			chomp();
+			s/!.*//;
+			s/,\s+allocatable//;
+			s/,\s+pointer//;
 
 			if ( $cont == 0 )
 			{
 				$type = "";
 			}
 
-			if ( /pointer/ )
-			{
-				s/,\s+pointer.*!/ ::/;
-			}
-			else
-			{
-				s/!.*//;
-			}
 			if ( /::/ )
 			{
-				@tmp1 = split(/ :: /,$_);
+				@tmp1 = split(/::/,$_);
 				$type =  $tmp1[0];
 				$type =~ s/ //g;
 				$_ = $tmp1[1];

@@ -13,20 +13,21 @@
 
 
 
-# ABI_DEBUG_INIT(DBG_MODE,OPT_MODE)
-# ---------------------------------
+# ABI_DEBUG_INIT(DBG_MODE)
+# ------------------------
 #
 # Sets debugging parameters according to the requested mode.
 #
 AC_DEFUN([ABI_DEBUG_INIT],[
   dnl Init
-  abi_debug_mode="$1"
-  abi_optim_mode="$2"
+  abi_debug_flavor="$1"
+  abi_debug_source="${enable_source_debug}"
+  abi_debug_verbose="no"
 
   dnl Display debugging status
   AC_MSG_CHECKING([debugging status])
-  case "${abi_debug_mode}" in
-    no)
+  case "${abi_debug_flavor}" in
+    none)
       AC_MSG_RESULT([disabled])
       CPPFLAGS_DEBUG=""
       CFLAGS_DEBUG=""
@@ -40,11 +41,11 @@ AC_DEFUN([ABI_DEBUG_INIT],[
       FC_LIBS_DEBUG=""
       ARFLAGS_DEBUG=""
       ;;
-    yes)
+    custom)
       AC_MSG_RESULT([enabled (using user-specified debug flags)])
       ;;
     *)
-      AC_MSG_RESULT([enabled (profile mode: ${abi_debug_mode})])
+      AC_MSG_RESULT([enabled (profile: ${abi_debug_flavor})])
       CPPFLAGS_DEBUG=""
       CFLAGS_DEBUG=""
       CC_LDFLAGS_DEBUG=""
@@ -59,53 +60,69 @@ AC_DEFUN([ABI_DEBUG_INIT],[
       ;;
   esac
 
-  dnl Init debug flags
-  if test "${abi_debug_mode}" != "no" -a "${abi_debug_mode}" != "yes"; then
+  dnl Get debug flags from database for all profiles
+  if test "${abi_debug_flavor}" != "none" -a \
+          "${abi_debug_flavor}" != "custom"; then
 
-    dnl Init debug flags for the C compiler
+    dnl Set debug flags for the C compiler
     if test "${CFLAGS}" = ""; then
       if test "${ac_cv_prog_cc_g}" = "yes"; then
         CFLAGS_DEBUG="-g"
         AC_MSG_NOTICE([setting C debug flags to '-g'])
       fi
+      ABI_CC_DBGFLAGS
+    else
+      AC_MSG_NOTICE([debugging profile overriden by user-defined CFLAGS])
     fi
 
-    dnl Init debug flags for the C++ compiler
+    dnl Set debug flags for the C++ compiler
     if test "${CXXFLAGS}" = ""; then
       if test "${ac_cv_prog_cxx_g}" = "yes"; then
         CXXFLAGS_DEBUG="-g"
         AC_MSG_NOTICE([setting C++ debug flags to '-g'])
       fi
+      ABI_CXX_DBGFLAGS
+    else
+      AC_MSG_NOTICE([debugging profile overriden by user-defined CXXFLAGS])
     fi
 
-    dnl Init debug flags for the Fortran compiler
+    dnl Set debug flags for the Fortran compiler
     if test "${FCFLAGS}" = ""; then
       if test "${ac_cv_prog_fc_g}" = "yes"; then
         FCFLAGS_DEBUG="-g"
         AC_MSG_NOTICE([setting Fortran debug flags to '-g'])
       fi
+      ABI_FC_DBGFLAGS
+    else
+      AC_MSG_NOTICE([debugging profile overriden by user-defined FCFLAGS])
     fi
+
   fi
+
+  dnl Enable source and/or verbose debugging for selected profiles
+  case "${abi_debug_flavor}" in
+    verbose|enhanced)
+      abi_debug_verbose="yes"
+      ;;
+    paranoid|naughty)
+      abi_debug_source="yes"
+      abi_debug_verbose="yes"
+      ;;
+  esac
 
   dnl Define DEBUG_MODE preprocessing option
   AC_MSG_CHECKING([whether to activate debug mode in source files])
-  src_debug_mode="no"
-  if test \( "${abi_debug_mode}" != "no" -a "${abi_debug_mode}" != "yes" -a \
-             "${abi_debug_mode}" != "basic" -a \
-             "${abi_debug_mode}" != "verbose" \) \
-       -o \( "${abi_debug_mode}" = "yes" -a "${abi_optim_mode}" = "no" \); then
-    AC_DEFINE([DEBUG_MODE],1,[Define to 1 to turn on debug mode.])
-    src_debug_mode="yes"
+  if test "${abi_debug_source}" = "yes"; then
+    AC_DEFINE([DEBUG_MODE],1,
+      [Define to 1 to build debugging instructions in the source code.])
   fi
-  AC_MSG_RESULT([${src_debug_mode}])
+  AC_MSG_RESULT([${abi_debug_source}])
 
   dnl Define DEBUG_VERBOSE preprocessing option
-  AC_MSG_CHECKING([whether to activate debug verbosity in source files])
-  src_debug_verbose="no"
-  if test "${src_debug_mode}" = "yes" -o \
-          "${abi_debug_mode}" = "verbose"; then
-    AC_DEFINE([DEBUG_VERBOSE],1,[Define to 1 to turn on verbose debug messages.])
-    src_debug_verbose="yes"
+  AC_MSG_CHECKING([whether to activate verbose debug messages in source files])
+  if test "${abi_debug_verbose}" = "yes"; then
+    AC_DEFINE([DEBUG_VERBOSE],1,
+      [Define to 1 to turn on verbose debug messages in the source code.])
   fi
-  AC_MSG_RESULT([${src_debug_verbose}])
+  AC_MSG_RESULT([${abi_debug_verbose}])
 ]) # ABI_DEBUG_INIT

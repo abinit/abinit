@@ -29,9 +29,9 @@ AC_DEFUN([_ABI_MPI_CHECK_CC],[
   ABI_ENV_BACKUP
 
   dnl Prepare build environment
-  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
   LDFLAGS="${CC_LDFLAGS}"
-  LIBS="${CC_LIBS} ${lib_mpi_libs}"
+  LIBS="${CC_LIBS} ${abi_mpi_libs}"
 
   AC_LANG_PUSH([C])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
@@ -73,9 +73,9 @@ AC_DEFUN([_ABI_MPI_CHECK_CXX],[
   ABI_ENV_BACKUP
 
   dnl Prepare build environment
-  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
   LDFLAGS="${CXX_LDFLAGS}"
-  LIBS="${CXX_LIBS} ${lib_mpi_libs}"
+  LIBS="${CXX_LIBS} ${abi_mpi_libs}"
 
   AC_LANG_PUSH([C++])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
@@ -114,13 +114,13 @@ AC_DEFUN([_ABI_MPI_CHECK_FC],[
   ABI_ENV_BACKUP
 
   dnl Prepare build environment
-  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
-  LIBS="${FC_LIBS} ${lib_mpi_libs}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       include "mpif.h"
       integer :: ierr
       call mpi_init(ierr)
@@ -155,13 +155,13 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL],[
     ABI_ENV_BACKUP
 
     dnl Prepare build environment
-    CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
     LDFLAGS="${FC_LDFLAGS}"
-    LIBS="${FC_LIBS} ${lib_mpi_libs}"
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
 
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[  
+      [[
               use mpi
               integer :: ierr
               call mpi_init(ierr)
@@ -171,17 +171,20 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL],[
 
     dnl Restore build environment
     ABI_ENV_RESTORE
-  fi
+
+  fi dnl abi_mpi_fc_ok = yes
 
   AC_MSG_RESULT([${abi_mpi_fc_level}])
 ]) # _ABI_MPI_CHECK_FC_LEVEL
 
 
+
                     ########################################
 
 
+
 # _ABI_MPI_CHECK_INTEGER16()
-# -----------------------------------
+# --------------------------
 #
 # Checks whether the MPI library supports MPI_INTEGER16
 #
@@ -222,16 +225,66 @@ AC_DEFUN([_ABI_MPI_CHECK_INTEGER16],[
       [Define to 1 if your MPI library supports MPI_INTEGER16.])
   fi
 
-]) # _ABI_MPI_CHECK_INTEGER16     
+]) # _ABI_MPI_CHECK_INTEGER16
+
 
 
                     ########################################
 
 
+
+# _ABI_MPI_CHECK_GET_LIBRARY_VERSION()
+# ------------------------------------
+#
+# Checks whether the MPI library provides MPI_Get_library_version.
+#
+AC_DEFUN([_ABI_MPI_CHECK_GET_LIBRARY_VERSION],[
+  dnl Set default values
+  abi_mpi_get_library_version="unknown"
+
+  AC_MSG_CHECKING([whether MPI provides MPI_Get_library_version])
+
+  if test "${abi_mpi_fc_ok}" = "yes"; then
+
+    dnl Back-up build environment
+    ABI_ENV_BACKUP
+
+    dnl Prepare build environment
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+    LDFLAGS="${FC_LDFLAGS}"
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+              use mpi
+              character(len=MPI_MAX_LIBRARY_VERSION_STRING) :: info
+              integer :: ilen,ierr
+              call mpi_init(ierr)
+              call mpi_get_library_version(info, ilen, ierr)
+              call mpi_finalize(ierr)
+      ]])],
+      [abi_mpi_get_library_version="yes"], [abi_mpi_get_library_version="no"])
+    AC_LANG_POP([Fortran])
+
+    dnl Restore build environment
+    ABI_ENV_RESTORE
+
+  fi
+
+  AC_MSG_RESULT([${abi_mpi_get_library_version}])
+]) # _ABI_MPI_CHECK_GET_LIBRARY_VERSION
+
+
+
+                    ########################################
+
+
+
 # _ABI_MPI_CHECK_CREATE_TYPE_STRUCT()
 # -----------------------------------
 #
-# Checks whether the MPI library supports MPI_CREATE_TYPE_STRUCT (MPI2)
+# Checks whether the MPI library supports MPI_CREATE_TYPE_STRUCT (MPI2).
 #
 AC_DEFUN([_ABI_MPI_CHECK_CREATE_TYPE_STRUCT],[
   dnl Set default values
@@ -240,34 +293,33 @@ AC_DEFUN([_ABI_MPI_CHECK_CREATE_TYPE_STRUCT],[
   dnl Try to compile a Fortran MPI program
   AC_MSG_CHECKING([whether the MPI library supports MPI_CREATE_TYPE_STRUCT])
 
-  if test "${abi_mpi_fc_level}" = "2"; then
+  if test "${abi_mpi_fc_level}" -ge "2"; then
 
-    dnl No problem should appear for MPI2 but we test it anyway.
+    dnl No problem should appear for MPI2 or MPI3 but we test it anyway.
 
     dnl Back-up build environment
     ABI_ENV_BACKUP
-                                                                                              
+
     dnl Prepare build environment
-    CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
     LDFLAGS="${FC_LDFLAGS}"
-    LIBS="${FC_LIBS} ${lib_mpi_libs}"
-                                                                                              
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+    dnl Check MPI routine
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[  
-        use mpi 
+      [[
+        use mpi
         integer,parameter :: ncount=10
         integer :: ierr,new_type
         integer :: block_length(ncount),block_type(ncount)
         integer(MPI_ADDRESS_KIND) :: block_displ(ncount)
-                                                                                              
         call mpi_init(ierr)
         call MPI_TYPE_CREATE_STRUCT(ncount,block_length,block_displ,block_type,new_type,ierr)
         call mpi_finalize(ierr)
-                                                                                              
       ]])], [abi_mpi_type_create_struct_ok="yes"], [abi_mpi_type_create_struct_ok="no"])
     AC_LANG_POP
-                                                                                              
+
     dnl Restore build environment
     ABI_ENV_RESTORE
 
@@ -277,23 +329,21 @@ AC_DEFUN([_ABI_MPI_CHECK_CREATE_TYPE_STRUCT],[
     ABI_ENV_BACKUP
 
     dnl Prepare build environment
-    CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
     LDFLAGS="${FC_LDFLAGS}"
-    LIBS="${FC_LIBS} ${lib_mpi_libs}"
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
 
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[  
+      [[
         include "mpif.h"
         integer,parameter :: ncount=10
         integer :: ierr,new_type
         integer :: block_length(ncount),block_type(ncount)
         integer(MPI_ADDRESS_KIND) :: block_displ(ncount)
-
         call mpi_init(ierr)
         call MPI_TYPE_CREATE_STRUCT(ncount,block_length,block_displ,block_type,new_type,ierr)
         call mpi_finalize(ierr)
-
       ]])], [abi_mpi_type_create_struct_ok="yes"], [abi_mpi_type_create_struct_ok="no"])
     AC_LANG_POP
 
@@ -309,7 +359,9 @@ AC_DEFUN([_ABI_MPI_CHECK_CREATE_TYPE_STRUCT],[
       [Define to 1 if your MPI library supports MPI_TYPE_CREATE_STRUCT.])
   fi
 
-]) # _ABI_MPI_CHECK_CREATE_TYPE_STRUCT     
+]) # _ABI_MPI_CHECK_CREATE_TYPE_STRUCT
+
+
 
                     ########################################
 
@@ -332,9 +384,9 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL],[
   ABI_ENV_BACKUP
                                                                                             
   dnl Prepare build environment
-  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
-  LIBS="${FC_LIBS} ${lib_mpi_libs}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -391,9 +443,9 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV],[
   ABI_ENV_BACKUP
                                                                                             
   dnl Prepare build environment
-  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
-  LIBS="${FC_LIBS} ${lib_mpi_libs}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -450,9 +502,9 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE],[
   ABI_ENV_BACKUP
                                                                                             
   dnl Prepare build environment
-  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
-  LIBS="${FC_LIBS} ${lib_mpi_libs}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -528,49 +580,6 @@ EOF
 
 
 
-# ABI_MPI_DUMP()
-# --------------
-#
-# Dumps all MPI parameters, which is useful to diagnose faulty MPI
-# environments.
-#
-AC_DEFUN([ABI_MPI_DUMP],[
-  AC_MSG_NOTICE([])
-  AC_MSG_NOTICE([dumping all MPI parameters for diagnostics])
-  AC_MSG_NOTICE([------------------------------------------])
-  AC_MSG_NOTICE([])
-  AC_MSG_NOTICE([Configure options:])
-  AC_MSG_NOTICE([])
-  AC_MSG_NOTICE([  * enable_mpi         = ${abi_mpi_enabled}])
-  AC_MSG_NOTICE([  * enable_mpi_inplace = ${enable_mpi_inplace}])
-  AC_MSG_NOTICE([  * enable_mpi_io      = ${enable_mpi_io}])
-  AC_MSG_NOTICE([  * with_mpi_incs      = ${with_mpi_incs}])
-  AC_MSG_NOTICE([  * with_mpi_level     = ${with_mpi_level}])
-  AC_MSG_NOTICE([  * with_mpi_libs      = ${with_mpi_libs}])
-  AC_MSG_NOTICE([  * with_mpi_prefix    = ${with_mpi_prefix}])
-  AC_MSG_NOTICE([  * MPI_RUNNER         = ${MPI_RUNNER}])
-  AC_MSG_NOTICE([  * MPI_2PROCS         = ${MPI_2PROCS}])
-  AC_MSG_NOTICE([])
-  AC_MSG_NOTICE([Internal parameters])
-  AC_MSG_NOTICE([])
-  AC_MSG_NOTICE([  * MPI C compiler present (required)       : ${abi_mpi_has_cc}])
-  AC_MSG_NOTICE([  * MPI C compiler works (required)         : ${abi_mpi_cc_ok}])
-  AC_MSG_NOTICE([  * MPI C++ compiler present (optional)     : ${abi_mpi_has_cxx}])
-  AC_MSG_NOTICE([  * MPI C++ compiler works (optional)       : ${abi_mpi_cxx_ok}])
-  AC_MSG_NOTICE([  * MPI Fortran compiler present (required) : ${abi_mpi_has_fc}])
-  AC_MSG_NOTICE([  * MPI Fortran compiler works (required)   : ${abi_mpi_fc_ok}])
-  AC_MSG_NOTICE([  * MPI Fortran level supported (1 or 2)    : ${abi_mpi_fc_level}])
-  AC_MSG_NOTICE([  * MPI environment complete (required)     : ${abi_mpi_complete}])
-  AC_MSG_NOTICE([  * MPI environment usable (required)       : ${abi_mpi_usable}])
-  AC_MSG_NOTICE([])
-  AC_MSG_NOTICE([All required parameters must be set to 'yes'.])
-  AC_MSG_NOTICE([If not, the configuration and/or the build will])
-  AC_MSG_NOTICE([very likely fail.])
-  AC_MSG_NOTICE([])
-]) # ABI_MPI_DUMP
-
-
-
 # ABI_MPI_INIT()
 # --------------
 #
@@ -586,13 +595,14 @@ AC_DEFUN([ABI_MPI_INIT],[
   abi_mpi_enabled="${enable_mpi}"
   abi_mpi_fc_level="none"
   abi_mpi_fc_ok="unknown"
+  abi_mpi_get_library_version="unknown"
   abi_mpi_has_cc="no"
   abi_mpi_has_cxx="no"
   abi_mpi_has_fc="no"
   abi_mpi_level="${with_mpi_level}"
   abi_mpi_usable="no"
-  lib_mpi_incs="${with_mpi_incs}"
-  lib_mpi_libs="${with_mpi_libs}"
+  abi_mpi_incs="${with_mpi_incs}"
+  abi_mpi_libs="${with_mpi_libs}"
   test "${MPI_RUNNER}" = "" && MPI_RUNNER="${with_mpi_runner}"
   test "${MPI_2PROCS}" = "" && MPI_2PROCS="-np 2"
   MPI_CC=""
@@ -746,7 +756,7 @@ AC_DEFUN([ABI_MPI_INIT],[
 
       dnl Inform about compiler checks
       AC_MSG_NOTICE([compiler checks deferred])
-  
+
     fi dnl with_mpi_prefix
 
   else dnl enable_mpi
@@ -756,8 +766,8 @@ AC_DEFUN([ABI_MPI_INIT],[
     enable_mpi_io="no"
     with_mpi_level=""
     with_mpi_prefix=""
-    lib_mpi_incs=""
-    lib_mpi_libs=""
+    abi_mpi_incs=""
+    abi_mpi_libs=""
     MPI_RUNNER=""
     MPI_2PROCS=""
 
@@ -766,10 +776,10 @@ AC_DEFUN([ABI_MPI_INIT],[
   dnl Enable substitution
   AC_SUBST(MPI_RUNNER)
   AC_SUBST(MPI_2PROCS)
-  AC_SUBST(lib_mpi_fcflags)
-  AC_SUBST(lib_mpi_ldflags)
-  AC_SUBST(lib_mpi_incs)
-  AC_SUBST(lib_mpi_libs)
+  AC_SUBST(abi_mpi_fcflags)
+  AC_SUBST(abi_mpi_ldflags)
+  AC_SUBST(abi_mpi_incs)
+  AC_SUBST(abi_mpi_libs)
 ]) # ABI_MPI_INIT
 
 
@@ -787,10 +797,10 @@ AC_DEFUN([ABI_MPI_INIT],[
 AC_DEFUN([ABI_MPI_DETECT],[
   dnl Init
   AC_REQUIRE([ABI_MPI_INIT])
-  lib_mpi_fcflags=""
-  lib_mpi_ldflags=""
-  lib_mpi_incs=""
-  lib_mpi_libs=""
+  abi_mpi_fcflags=""
+  abi_mpi_ldflags=""
+  abi_mpi_incs=""
+  abi_mpi_libs=""
 
   dnl Report status
   AC_MSG_CHECKING([whether to build MPI code])
@@ -799,11 +809,20 @@ AC_DEFUN([ABI_MPI_DETECT],[
   if test "${enable_mpi}" = "yes" -o "${enable_mpi}" = "auto"; then
 
     dnl Check whether MPI is usable
-    if test "${abi_mpi_complete}" != "no"; then
+    if test "${abi_mpi_complete}" = "yes"; then
       _ABI_MPI_CHECK_CC
       _ABI_MPI_CHECK_CXX
       _ABI_MPI_CHECK_FC
 
+      if test "${abi_mpi_cc_ok}" = "yes"; then
+        abi_mpi_has_cc="yes"
+      fi
+      if test "${abi_mpi_cxx_ok}" = "yes"; then
+        abi_mpi_has_cxx="yes"
+      fi
+      if test "${abi_mpi_fc_ok}" = "yes"; then
+        abi_mpi_has_fc="yes"
+      fi
       if test "${abi_mpi_cc_ok}" = "yes" -a \
               "${abi_mpi_fc_ok}" = "yes"; then
         abi_mpi_usable="yes"
@@ -869,12 +888,21 @@ AC_DEFUN([ABI_MPI_DETECT],[
         2)
           AC_DEFINE([HAVE_MPI2],1,[Define to 1 if you have a MPI-2 implementation.])
           ;;
+        3)
+          AC_DEFINE([HAVE_MPI3],1,[Define to 1 if you have a MPI-3 implementation.])
+          ;;
       esac
 
-      dnl Test the availability of problematic MPI constants 
+      dnl Test the availability of problematic MPI constants
       _ABI_MPI_CHECK_INTEGER16()
 
-      dnl Test the availability of problematic MPI primitives
+      dnl Check the availability of useful MPI primitives
+      _ABI_MPI_CHECK_GET_LIBRARY_VERSION()
+      if test "${abi_mpi_get_library_version}" = "yes"; then
+        AC_DEFINE([HAVE_MPI_GET_LIBRARY_VERSION],1,[Define to 1 if your MPI implementation provides MPI_Get_library_version.])
+      fi
+
+      dnl Check the availability of problematic MPI primitives
       _ABI_MPI_CHECK_CREATE_TYPE_STRUCT()
 
       dnl Check MPI3 extensions (very) important for HPC.
@@ -888,3 +916,51 @@ AC_DEFUN([ABI_MPI_DETECT],[
 
   AM_CONDITIONAL(DO_TEST_MPI,[test "${enable_mpi}" = "yes"])
 ]) # ABI_MPI_DETECT
+
+
+
+                    ########################################
+
+
+
+# ABI_MPI_DUMP()
+# --------------
+#
+# Dumps all MPI parameters, which is useful to diagnose faulty MPI
+# environments.
+#
+AC_DEFUN([ABI_MPI_DUMP],[
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([dumping all MPI parameters for diagnostics])
+  AC_MSG_NOTICE([------------------------------------------])
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([Configure options:])
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([  * enable_mpi         = ${abi_mpi_enabled}])
+  AC_MSG_NOTICE([  * enable_mpi_inplace = ${enable_mpi_inplace}])
+  AC_MSG_NOTICE([  * enable_mpi_io      = ${enable_mpi_io}])
+  AC_MSG_NOTICE([  * with_mpi_incs      = ${with_mpi_incs}])
+  AC_MSG_NOTICE([  * with_mpi_level     = ${with_mpi_level}])
+  AC_MSG_NOTICE([  * with_mpi_libs      = ${with_mpi_libs}])
+  AC_MSG_NOTICE([  * with_mpi_prefix    = ${with_mpi_prefix}])
+  AC_MSG_NOTICE([  * MPI_RUNNER         = ${MPI_RUNNER}])
+  AC_MSG_NOTICE([  * MPI_2PROCS         = ${MPI_2PROCS}])
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([Internal parameters])
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([  * MPI C compiler present (required)       : ${abi_mpi_has_cc}])
+  AC_MSG_NOTICE([  * MPI C compiler works (required)         : ${abi_mpi_cc_ok}])
+  AC_MSG_NOTICE([  * MPI C++ compiler present (optional)     : ${abi_mpi_has_cxx}])
+  AC_MSG_NOTICE([  * MPI C++ compiler works (optional)       : ${abi_mpi_cxx_ok}])
+  AC_MSG_NOTICE([  * MPI Fortran compiler present (required) : ${abi_mpi_has_fc}])
+  AC_MSG_NOTICE([  * MPI Fortran compiler works (required)   : ${abi_mpi_fc_ok}])
+  AC_MSG_NOTICE([  * MPI Fortran level supported             : ${abi_mpi_fc_level}])
+  AC_MSG_NOTICE([  * MPI_Get_library_version available       : ${abi_mpi_get_library_version}])
+  AC_MSG_NOTICE([  * MPI environment complete (required)     : ${abi_mpi_complete}])
+  AC_MSG_NOTICE([  * MPI environment usable (required)       : ${abi_mpi_usable}])
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([All required parameters must be set to 'yes'.])
+  AC_MSG_NOTICE([If not, the configuration and/or the build will])
+  AC_MSG_NOTICE([very likely fail.])
+  AC_MSG_NOTICE([])
+]) # ABI_MPI_DUMP

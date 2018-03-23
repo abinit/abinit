@@ -1006,10 +1006,16 @@ class BuildEnvironment(object):
             self._cygwin_instdir = cygwin_instdir
 
         # Binaries that are not located in src/98_main
+        # FIXME: fallbacks are now fully external
         self._external_bins = {
             "atompaw": os.path.join(self.build_dir, "fallbacks", "exports", "bin", "atompaw-abinit"),
             "timeout": os.path.join(self.build_dir, "tests", "Timeout", "timeout"),
         }
+
+        # FIXME: Adjust paths of binaries on the Abinit Test Farm
+        fbk_prefix = os.environ.get("ABINIT_FALLBACKS_PREFIX")
+        if ( not fbk_prefix is None ):
+            self._external_bins["atompaw"] = os.path.join(fbk_prefix, "bin", "atompaw")
 
         # Check if this is a valid ABINIT build tree.
         if not (os.path.isfile(self.configh_path) and os.path.isfile(self.path_of_bin("abinit"))):

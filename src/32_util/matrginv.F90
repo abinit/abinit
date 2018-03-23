@@ -71,8 +71,6 @@ subroutine matrginv(a,lda,n)
  integer,allocatable :: ipvt(:)
 #if defined HAVE_LINALG_ESSL
  real(dp) :: det(2)
-#elif defined HAVE_LINALG_ASL
- real(dp) :: det(2)
 #endif
  real(dp),allocatable :: work(:)
 
@@ -97,29 +95,6 @@ subroutine matrginv(a,lda,n)
 &   '  The matrix that has been passed in argument of this subroutine',ch10,&
 &   '  is probably either singular or nearly singular.',ch10,&
 &   '  The ESSL routine dgeicd failed.',ch10,&
-&   '  Action : Contact ABINIT group '
-   MSG_ERROR(message)
- end if
-
-#elif defined HAVE_LINALG_ASL
-
- call dbgmlu(a,lda,n,ipvt,ierr)
- if(ierr /= 0) then
-   write(message, '(10a)' ) ch10,&
-&   ' matrginv : BUG -',ch10,&
-&   '  The matrix that has been passed in argument of this subroutine',ch10,&
-&   '  is probably either singular or nearly singular.',ch10,&
-&   '  The ASL routine dbgmlu failed.',ch10,&
-&   '  Action : Contact ABINIT group '
-   MSG_ERROR(message)
- end if
- call dbgmdi(a,lda,n,ipvt,det,-1,work,ierr)
- if(ierr /= 0) then
-   write(message, '(10a)' ) ch10,&
-&   ' matrginv : BUG -',ch10,&
-&   '  The matrix that has been passed in argument of this subroutine',ch10,&
-&   '  is probably either singular or nearly singular.',ch10,&
-&   '  The ASL routine dbgmdi failed.',ch10,&
 &   '  Action : Contact ABINIT group '
    MSG_ERROR(message)
  end if

@@ -5,7 +5,7 @@ import re
 import os
 import sys
 
-re_markers = re.compile("^(<<<<<<< TREE|=======|>>>>>>> MERGE-SOURCE)$")
+re_markers = re.compile("^(<<<<<<< |=======$|>>>>>>> )")
 re_fbktop  = re.compile("fallbacks$")
 re_fbkdir  = re.compile("(exports|sources|stamps)")
 re_tmpdir  = re.compile("^tmp")
@@ -49,8 +49,9 @@ def main(top):
     # Ignore Autotools subdirs
     if "autom4te.cache" in dirs: dirs.remove("autom4te.cache")
 
-    # Ignore Bazaar subdirs
+    # Ignore Bazaar and Git subdirs
     if ".bzr" in dirs: dirs.remove(".bzr")
+    if ".git" in dirs: dirs.remove(".git")
 
     # Ignore temporary dirs
     garb_dirs = [item for item in dirs if re_tmpdir.match(item)]
@@ -64,7 +65,8 @@ def main(top):
     # Display conflict markers found
     for item in files:
       path = os.path.join(root, item)
-      if not check_item(item): continue
+      if not check_item(item):
+          continue
 
       try:
 
@@ -85,11 +87,11 @@ def main(top):
               break
 
           if chk_stat:
-            sys.stderr.write("Found conflict markers in:\n" % path)
+            sys.stderr.write("Found conflict markers in: %s\n" % path)
 
       except Exception as exc:
         retval += 1
-        sys.stderr.write("Exception while testing: %s\n%s\n" % (path, str(exc)))
+        sys.stderr.write("Exception while testing: %s\n    %s\n" % (path, str(exc)))
 
   return retval
 

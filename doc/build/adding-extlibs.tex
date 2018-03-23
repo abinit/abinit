@@ -57,9 +57,6 @@ directory.
 \item Edit \textit{config/specs/options.cf}: add the \texttt{-{}-enable-{*}}
 and \texttt{-{}-with-{*}} options for your library, with short and
 precise info strings. Use \textit{netcdf} as a typical example. 
-\item Edit \textit{config.mk.in}: add the build flags of the library at
-the end of the file. You may copy/paste from another external library,
-yet be careful to change \textbf{ALL} the references. 
 \item Edit \textit{config/m4/tricks.m4}: add a \textquotedbl{}tricky\textquotedbl{}
 macro at the end of the file. You may leave it empty, just as many
 of them already are. 
@@ -82,8 +79,6 @@ error message.
 The build system expects a few things from the makefile \textit{$<$lib\_name$>$.mk}
 managing the package stored in \textit{$<$package\_name$>$.tar.gz}: 
 \begin{itemize}
-\item it should include \textit{config.mk}, in order to transmit the build
-parameters to the package's own build system; 
 \item it should uncompress in \textit{lib/$<$lib\_name$>$/$<$package\_name$>$},
 and thus move the uncompressed directory afterwards if it not the
 case (see \textit{lib/fox/fox.mk} for an example); 
