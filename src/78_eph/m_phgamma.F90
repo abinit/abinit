@@ -2485,6 +2485,8 @@ end if
    end do ! iq_ibz
  end do ! spin
 
+ close(900)
+
  if (intmeth == 2) then
    ! Collect results on each node.
    call xmpi_sum(lambda_tetra, comm, ierr)
@@ -5053,6 +5055,12 @@ end if
    write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",gams%nqibz,"] completed. cpu:",cpu,", wall:",wall
    call wrtout(std_out, msg, do_flush=.True.)
  end do ! iq_ibz
+
+!DEBUG
+close(800)
+close(801)
+close(802)
+!ENDDEBUG
 
  ! Collect gvals_qibz on each node and divide by the total number of k-points in the full mesh.
  do spin=1,nsppol
