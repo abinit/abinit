@@ -1,20 +1,13 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/outqmc
+!!****m* ABINIT/m_outqmc
 !! NAME
-!! outqmc
+!! m_outqmc
 !!
 !! FUNCTION
-!! Write the wave function to a file in 'pwfn.data' format. This file can be
-!! read by the Cambridge quantum Monte Carlo program 'CASINO' and used as
-!! trial wave function input for a variational or diffusion Monte Carlo
-!! calculation.
-!!
-!! See www.tcm.phy.cam.ac.uk/~mdt26/casino.html for more details.
-!!
-!! M.D.Towler (mdt26 at cam.ac.uk)
-!! November 2003
-!! N.D.M.Hine (nicholas.hine at imperial.ac.uk)
-!! November 2004
+!!   Interface with Cambridge quantum Monte Carlo program 'CASINO'
+!!   See www.tcm.phy.cam.ac.uk/~mdt26/casino.html for more details.
+!!   M.D.Towler (mdt26 at cam.ac.uk) November 2003
+!!   N.D.M.Hine (nicholas.hine at imperial.ac.uk) November 2004
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ)
@@ -22,6 +15,48 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_outqmc
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+
+ use m_io_tools,    only : get_unit
+ use m_results_gs , only : results_gs_type
+
+ implicit none
+
+ private
+ public ::  outqmc
+
+contains
+!!***
+
+!!****f* m_outqmc/outqmc
+!! NAME
+!! outqmc
+!!
+!! FUNCTION
+!! Write the wave function to a file in 'pwfn.data' format. This file can be
+!! read by the Cambridge quantum Monte Carlo program 'CASINO' and used as
+!! trial wave function input for a variational or diffusion Monte Carlo calculation.
+!! See www.tcm.phy.cam.ac.uk/~mdt26/casino.html for more details.
 !!
 !! INPUTS
 !!  cg(2,mcg)=wavefunction coefficients
@@ -56,16 +91,6 @@
 #include "abi_common.h"
 
 subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_xmpi
-
- use m_io_tools,    only : get_unit
- use m_results_gs , only : results_gs_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -499,34 +524,25 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 end subroutine outqmc
 !!***
 
-!!****f* ABINIT/i2s
+!!****f* m_outqmc/i2s
 !! NAME
 !! i2s
 !!
 !! FUNCTION
+!! Convert integers to left justified strings that can be printed in the
+!! middle of a sentence without introducing large amounts of white space.
+!! Calling routine is intended to include something like:
+!! integer i
+!! i=12
+!! write(std_out,*)'Integer number ',trim(i2s(i)),' with words at the end.'
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
  function i2s(n)
-!----------------------------------------------------------------------- !
-!I2S                                                                   !
-!===                                                                   !
-!Convert integers to left justified strings that can be printed in the !
-!middle of a sentence without introducing large amounts of white space. !
-!!
-!Calling routine is intended to include something like:                !
-!integer i                                                             !
-!i=12                                                                  !
-!write(std_out,*)'Integer number ',trim(i2s(i)),' with words at the end.'    !
-!!
-!MDT 2002                                                              !
-!----------------------------------------------------------------------- !
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -582,6 +598,24 @@ end function i2s
 !! r2s
 !!
 !! FUNCTION
+!! Converts real variable with arbitrary format to string that can be
+!! trimmed and printed in the middle of a sentence without introducing
+!! large amounts of white space, as you would if you did
+!! write(std_out,'(f12.6)')12.0 or similar. Note you need to pass through the
+!! format string e.g. f12.6.
+!!
+!! Calling routine is intended to include something like:
+!! USE utilities
+!! REAL(dp) r
+!! r=12._dp
+!! tmpr=r2s(r,'(f12.6)')
+!! write(std_out,*)'Real number ',trim(tmpr),' with words at the end.'
+!!
+!! Note : DON'T USE R2S IN A WRITE STATEMENT SINCE THIS IS ILLEGAL
+!! IN FORTRAN90 (ALTHOUGH NOT IN FORTRAN200X). IF ANYONE HAS TIME, FEEL
+!! FREE TO WRITE A VERSION OF THIS WHICH ISN'T ILLEGAL - SIMILAR TO
+!! I2S ABOVE - SO THAT PEOPLE WHO HAVEN'T READ THIS NOTE DON'T FEEL
+!! TEMPTED TO CALL R2S IN A WRITE STATEMENT.
 !!
 !! INPUTS
 !!
@@ -590,31 +624,8 @@ end function i2s
 !! SIDE EFFECTS
 !!
 !! SOURCE
- function r2s(r,real_format)
-!------------------------------------------------------------------------- !
-!Converts real variable with arbitrary format to string that can be      !
-!trimmed and printed in the middle of a sentence without introducing     !
-!large amounts of white space, as you would if you did                   !
-!write(std_out,'(f12.6)')12.0 or similar. Note you need to pass through the    !
-!format string e.g. f12.6 .                                              !
-!!
-!Calling routine is intended to include something like:                  !
-!USE utilities                                                           !
-!REAL(dp) r                                                              !
-!r=12._dp                                                                 !
-!tmpr=r2s(r,'(f12.6)')                                                   !
-!write(std_out,*)'Real number ',trim(tmpr),' with words at the end.'           !
-!!
-!Note : DON'T USE R2S IN A WRITE STATEMENT SINCE THIS IS ILLEGAL         !
-!IN FORTRAN90 (ALTHOUGH NOT IN FORTRAN200X). IF ANYONE HAS TIME, FEEL    !
-!FREE TO WRITE A VERSION OF THIS WHICH ISN'T ILLEGAL - SIMILAR TO        !
-!I2S ABOVE - SO THAT PEOPLE WHO HAVEN'T READ THIS NOTE DON'T FEEL        !
-!TEMPTED TO CALL R2S IN A WRITE STATEMENT.                               !
-!!
-!MDT 2002                                                                !
-!------------------------------------------------------------------------- !
 
- use defs_basis
+ function r2s(r,real_format)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -629,10 +640,7 @@ end function i2s
  character(len=*),intent(in) :: real_format
  character(len=80) :: r2s
 
-!Local variables -------------------
-
 ! *********************************************************************
-
 
  if(len(r2s)>0)then
    write(r2s,real_format)r
@@ -640,4 +648,7 @@ end function i2s
  end if
 
 end function r2s
+!!***
+
+end module m_outqmc
 !!***

@@ -301,7 +301,7 @@ contains
        if(iflag==1 .and. L.ge.1 ) then
          routdata(1) = -One/Two+routdata(1)
        endif
-       END
+       END SUBROUTINE invfourier
 
 END MODULE m_lib_four
 !!***

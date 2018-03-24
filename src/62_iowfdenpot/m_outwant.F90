@@ -1,5 +1,49 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/outwant
+!!****m* ABINIT/m_outwant
+!! NAME
+!! m_outwant
+!!
+!! FUNCTION
+!! Interface with want code.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2018 ABINIT group (CMorari)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_outwant
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_hdr
+
+ use m_io_tools, only : open_file
+
+ implicit none
+
+ private
+ public ::  outwwant
+
+contains
+!!***
+
+!!****f* m_outwant/outwant
 !! NAME
 !! outwant
 !!
@@ -9,6 +53,7 @@
 !! The resulting file is 'launch.dat'.
 !!
 !! The routine writes to the disk (unformatted file unitwnt) the following informations:
+!!
 !!     alat - lattice parameter
 !!     rprim - primitive translation vectors
 !!     ntypat - nr of atom types in elementary cell
@@ -25,13 +70,6 @@
 !!     eig(mband, nkp_tot) - eigenvalues/band/K_point
 !!     ngfft(3) - nr of points used for FFT in each direction
 !!     wfc(i)- cmplx(cg(1,i),cg(2,i)) - wavefunction
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (CMorari)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -51,8 +89,6 @@
 !! OUTPUT
 !!  (only writing)
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      outscfcv
 !!
@@ -61,21 +97,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_hdr
-
- use m_io_tools, only : open_file
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -377,7 +399,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 
  if (open_file('band.gpl',message,newunit=iunit,status='unknown') /=0) then
    MSG_ERROR(message)
- end if 
+ end if
 
  index=1
  do i=1,mband
@@ -452,4 +474,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
  close(unit=unitwnt)
 
 end subroutine outwant
+!!***
+
+end module m_outwant
 !!***

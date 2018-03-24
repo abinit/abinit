@@ -161,6 +161,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                               electronpositron_calctype
  use m_scfcv,            only : scfcv_t,scfcv_init, scfcv_destroy, scfcv_run
  use m_iowf,             only : outwf
+ use m_outqmc,           only : outqmc
  use m_ioarr,            only : ioarr,read_rhor
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
@@ -1172,7 +1173,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &   rprimd,symrec,xred)
  end if
- 
+
 
  fatvshift=one
 

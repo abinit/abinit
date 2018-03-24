@@ -1,14 +1,10 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/outxml_open
-!!
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_outxml
 !! NAME
-!! outxml_open
+!! m_outxml
 !!
 !! FUNCTION
-!! Open the XML log file, and write the header inside.
-!! (see extras/post_processing/abinitRun.dtd)
-!! Warning : this method is not thread safe and should be called
-!! only by one thread.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
@@ -17,16 +13,9 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! INPUTS
-!!  filename=the name of the file to write to.
-!!
-!! NOTES
-!!
 !! PARENTS
-!!      abinit
 !!
 !! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -36,13 +25,49 @@
 
 #include "abi_common.h"
 
-subroutine outxml_open(filename)
+module m_outxml
 
  use defs_basis
+ use defs_abitypes
  use m_profiling_abi
  use m_errors
 
  use m_io_tools,   only: open_file
+ use m_results_gs , only : results_gs_type
+
+ implicit none
+
+ private
+
+ public :: outxml_open
+ public :: outxml_finalise
+ public :: out_resultsgs_XML
+ public :: out_geometry_XML
+!!***
+
+contains
+
+!!****f* m_outxml/outxml_open
+!! NAME
+!! outxml_open
+!!
+!! FUNCTION
+!! Open the XML log file, and write the header inside.
+!! (see extras/post_processing/abinitRun.dtd)
+!! Warning: this method is not thread safe and should be called only by one thread.
+!!
+!! INPUTS
+!!  filename=the name of the file to write to.
+!!
+!! PARENTS
+!!      abinit
+!!
+!! CHILDREN
+!!      xred2xcart
+!!
+!! SOURCE
+
+subroutine outxml_open(filename)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -77,7 +102,7 @@ subroutine outxml_open(filename)
 end subroutine outxml_open
 !!***
 
-!!****f* ABINIT/outxml_finalise
+!!****f* m_outxml/outxml_finalise
 !!
 !! NAME
 !! outxml_finalise
@@ -88,18 +113,9 @@ end subroutine outxml_open
 !! Warning : this method is not thread safe and should be called
 !! only by one thread.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  tsec=the cpu time and the wall time in seconds.
 !!  values=the date values returned by date_and_time() intrinsic Fortran routine.
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      abinit
@@ -108,10 +124,8 @@ end subroutine outxml_open
 !!      xred2xcart
 !!
 !! SOURCE
-subroutine outxml_finalise(tsec, values)
 
- use defs_basis
- use m_profiling_abi
+subroutine outxml_finalise(tsec, values)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -122,12 +136,10 @@ subroutine outxml_finalise(tsec, values)
   implicit none
 
 !Arguments -------------------------------
-
   integer, intent(in) :: values(8)
   real(dp), intent(in) :: tsec(2)
 
 !Local variables -------------------------
-
   character(len=500) :: message
 
 ! *********************************************************************
@@ -141,15 +153,13 @@ subroutine outxml_finalise(tsec, values)
  write(message, *) tsec(2)
  write(ab_xml_out, "(A,A,A)") ' wall="', trim(message) ,'" />'
  write(ab_xml_out, "(A)") "</abinitRun>"
-!ABINIT has been compiled with XML output support, then we close the
-!channel of the XML output file.
+!ABINIT has been compiled with XML output support, then we close the channel of the XML output file.
  close(unit = ab_xml_out)
 
 end subroutine outxml_finalise
 !!***
 
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/out_resultsgs_xml
+!!****f* m_outxml/out_resultsgs_xml
 !!
 !! NAME
 !! out_resultsgs_xml
@@ -158,15 +168,7 @@ end subroutine outxml_finalise
 !! Output in the XML file, the decomposition of the energy and
 !! the forces after a scfcv loop.
 !! (see extras/post_processing/abinitRun.dtd)
-!! Warning : this method is not thread safe and should be called
-!! only by one thread.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!! Warning : this method is not thread safe and should be called only by one thread.
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -175,8 +177,6 @@ end subroutine outxml_finalise
 !!   forces and its components, the stress tensor) of a ground-state computation.
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      scfcv
 !!
@@ -184,13 +184,8 @@ end subroutine outxml_finalise
 !!      xred2xcart
 !!
 !! SOURCE
+
 subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
-
- use m_results_gs , only : results_gs_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -288,7 +283,7 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
 end subroutine out_resultsgs_XML
 !!***
 
-!!****f* ABINIT/out_geometry_xml
+!!****f* m_outxml/out_geometry_xml
 !!
 !! NAME
 !! out_geometry_xml
@@ -297,21 +292,12 @@ end subroutine out_resultsgs_XML
 !! Output in the XML file, the box size and the atomic position.
 !! (see extras/post_processing/abinitRun.dtd)
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  level=use for indentation of the XML, two spaces are added by level.
 !!  natom=number of atoms.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      scfcv
@@ -321,15 +307,7 @@ end subroutine out_resultsgs_XML
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -387,4 +365,7 @@ subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
  write(ab_xml_out, "("//trim(spacer)//",A)") " ", '</geometry>'
 
 end subroutine out_geometry_XML
+!!***
+
+end module m_outxml
 !!***

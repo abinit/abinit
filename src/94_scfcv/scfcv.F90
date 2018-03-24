@@ -215,7 +215,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif
- use m_io_kss,             only : gshgg_mkncwrite
+ use m_io_kss,           only : gshgg_mkncwrite
+ use m_outxmlm           only : out_resultsgs_XML, out_geometry_XML
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -598,7 +599,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
 
  wfmixalg=dtset%fockoptmix/100
- use_hybcomp=0 
+ use_hybcomp=0
  if(mod(dtset%fockoptmix,100)==11)use_hybcomp=1
  ABI_ALLOCATE(vxc_hybcomp,(nfftf,dtset%nspden*use_hybcomp))
 
@@ -1134,7 +1135,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
              ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
              ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
 !          write(std_out,*) "mkrhogstate"
-           !From this call, rho does not include the compensation density 
+           !From this call, rho does not include the compensation density
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
              call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
@@ -1176,7 +1177,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
        ! Update data relative to the occupied states in fock
        call fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
-       ! Possibly (re)compute the ACE operator 
+       ! Possibly (re)compute the ACE operator
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
 &         dtset%mkmem,mpi_enreg,psps%mpsang,&
@@ -1185,11 +1186,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &         dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
        end if
 
-       !Should place a test on whether there should be the final exit of the istep loop. 
-       !This test should use focktoldfe. 
-       !This should update the info in fock%fock_common%fock_converged. 
+       !Should place a test on whether there should be the final exit of the istep loop.
+       !This test should use focktoldfe.
+       !This should update the info in fock%fock_common%fock_converged.
        !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
-       !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc) 
+       !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc)
        !work fine.
        !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
        if(fock%fock_common%nnsclo_hf==1)then
@@ -2206,7 +2207,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
-   if (fock%fock_common%use_ACE/=0) then     
+   if (fock%fock_common%use_ACE/=0) then
      call fock_ACE_destroy(fock%fockACE)
    end if
    call fock_common_destroy(fock%fock_common)

@@ -190,4 +190,3 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
 
 end subroutine append_xyz
 !!***
-

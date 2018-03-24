@@ -22,7 +22,7 @@ sources = [
  "m_io_screening.F90",
  "m_wfk.F90",
  "out1dm.F90",
- "outwant.F90",
+ "m_outwant.F90",
  "randac.F90",
  "rdnpw.F90",
  "WffReadEigK.F90",

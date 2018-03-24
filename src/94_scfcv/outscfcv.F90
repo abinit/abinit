@@ -161,6 +161,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_crystal_io,       only : crystal_ncwrite
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
+ use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
  use m_pawtab,           only : pawtab_type
