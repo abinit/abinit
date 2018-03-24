@@ -47,7 +47,6 @@ sources = [
  "proc_distrb_cycle.F90",
  "radsintr.F90",
  "radsmear.F90",
- "sbf8.F90",
  "smatrix.F90",
  "status.F90",
 ]

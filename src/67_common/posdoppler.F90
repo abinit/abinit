@@ -108,6 +108,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_wffile
  use m_electronpositron
 
+ use m_special_funcs,  only : sbf8
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
 &                      pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
  use m_pawang,  only : pawang_type, realgaunt

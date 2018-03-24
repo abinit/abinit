@@ -77,6 +77,8 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,&
  use m_splines
  use m_profiling_abi
 
+ use m_special_funcs,  only : sbf8
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
