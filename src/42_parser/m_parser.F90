@@ -7,7 +7,7 @@
 !! This module contains routines and functions used to
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (XG)
+!! Copyright (C) 2008-2018 ABINIT group (XG, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +25,7 @@ module m_parser
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_atomdata
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, itoa, inupper
@@ -35,10 +36,9 @@ module m_parser
 
  public :: inread
  public :: instrng
- !public :: inreplsp
  public :: incomprs
  public :: intagm
- !public :: inarray
+ public :: append_xyz
 
 CONTAINS  !===========================================================
 !!***
@@ -1632,6 +1632,315 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !ENDDEBUG
 
 end subroutine inarray
+!!***
+
+!!****f* m_parser/importxyz
+!! NAME
+!! importxyz
+!!
+!! FUNCTION
+!! Examine the input string, to see whether data from xyz
+!! file(s) has to be incorporated.
+!! For each such xyz file, translate the relevant
+!! information into intermediate input variables compatible
+!! with the usual ABINIT formatting, then append it
+!! to the input string.
+!!
+!! INPUTS
+!!  string_raw*(strln)=raw string of character from input file (with original case)
+!!  strln=maximal number of character of string, as declared in the calling routine
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  lenstr=actual number of character in string
+!!  string_upper*(strln)=string of character
+!!   the string (with upper case) from the input file, to which the xyz data are appended to it
+!!
+!! PARENTS
+!!      m_ab7_invars_f90,parsefile
+!!
+!! CHILDREN
+!!      append_xyz,incomprs,wrtout
+!!
+!! SOURCE
+
+subroutine importxyz(lenstr,string_raw,string_upper,strln)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'importxyz'
+ use interfaces_14_hidewrite
+ use interfaces_42_parser
+ use interfaces_57_iovars, except_this_one => importxyz
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: strln
+ integer,intent(inout) :: lenstr
+ character(len=*),intent(in) :: string_raw
+ character(len=*),intent(inout) :: string_upper
+
+!Local variables-------------------------------
+ character :: blank=' '
+!scalars
+ integer :: dtset_len,ixyz,ii,index_already_done,index_xyz_fname
+ integer :: index_xyz_fname_end,index_xyz_token,kk
+ character(len=2) :: dtset_char
+ character(len=500) :: message
+ character(len=fnlen) :: xyz_fname
+
+!************************************************************************
+
+ index_already_done=1
+ ixyz=0
+
+ do    ! Infinite do-loop, to identify the presence of the xyzFILE token
+
+   index_xyz_token=index(string_upper(index_already_done:lenstr),"XYZFILE")
+   if(index_xyz_token==0)exit
+
+   ixyz=ixyz+1
+   if(ixyz==1)then
+     write(message,'(80a)')('=',ii=1,80)
+     call wrtout(ab_out,message,'COLL')
+   end if
+
+!  The xyzFILE token has been identified
+   index_xyz_token=index_already_done+index_xyz_token-1
+
+!  Find the related dataset tag, and length
+   dtset_char=string_upper(index_xyz_token+7:index_xyz_token+8)
+   if(dtset_char(1:1)==blank)dtset_char(2:2)=blank
+   dtset_len=len_trim(dtset_char)
+
+!  Find the name of the xyz file
+   index_xyz_fname=index_xyz_token+8+dtset_len
+   index_xyz_fname_end=index(string_upper(index_xyz_fname:lenstr),blank)
+
+   if(index_xyz_fname_end ==0 )then
+     write(message, '(5a,i4,2a)' )&
+&     'Could not find the name of the xyz file.',ch10,&
+&     'index_xyz_fname_end should be non-zero, while it is :',ch10,&
+&     'index_xyz_fname_end=',index_xyz_fname_end,ch10,&
+&     'Action: check the filename that was provided after the XYZFILE input variable keyword.'
+     MSG_ERROR(message)
+   end if
+
+   index_xyz_fname_end=index_xyz_fname_end+index_xyz_fname-1
+
+   index_already_done=index_xyz_fname_end
+
+   xyz_fname=repeat(blank,fnlen)                  ! Initialize xyz_fname to a blank line
+   xyz_fname=string_raw(index_xyz_fname:index_xyz_fname_end-1)
+
+   write(message, '(3a)') ch10,&
+&   ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+
+!  Append the data from the xyz file to the string, and update the length of the string
+   call append_xyz(dtset_char,lenstr,string_upper,xyz_fname,strln)
+
+!  erase the file name from string_upper
+   string_upper(index_xyz_fname:index_xyz_fname_end-1) = blank
+
+ end do
+
+ if (index_already_done > 1) then
+   xyz_fname=repeat(blank,fnlen) ! Initialize xyz_fname to a blank line
+   call append_xyz("-1",lenstr,string_upper,xyz_fname,strln)
+ end if
+
+ if(ixyz/=0)then
+   call incomprs(string_upper,lenstr)
+!  A blank is needed at the beginning of the string
+   do kk=lenstr,1,-1
+     string_upper(kk+1:kk+1)=string_upper(kk:kk)
+   end do
+   string_upper(1:1)=blank
+   lenstr=lenstr+1
+   write(message,'(a,80a,a)')ch10,('=',ii=1,80),ch10
+   call wrtout(ab_out,message,'COLL')
+ end if
+
+end subroutine importxyz
+!!***
+
+!!****f* m_parser/append_xyz
+!! NAME
+!! append_xyz
+!!
+!! FUNCTION
+!! Translate the data from a xyz file (xyz_fname),
+!! and add it at the end of the usual ABINIT input data string (string),
+!! taking into account the dtset (dtset_char)
+!!
+!! INPUTS
+!!  dtset_char*2=possible dtset label
+!!  xyz_fname = name of the xyz file
+!!  strln=maximal number of characters of string, as declared in the calling routine
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  lenstr=actual number of characters in string
+!!  string*(strln)=string of characters  (upper case) to which the xyz data are appended
+!!
+!! PARENTS
+!!      importxyz
+!!
+!! CHILDREN
+!!      atomdata_from_symbol,wrtout
+!!
+!! SOURCE
+
+subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'append_xyz'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: strln
+ integer,intent(inout) :: lenstr
+ character(len=2),intent(in) :: dtset_char
+ character(len=fnlen),intent(in) :: xyz_fname
+ character(len=strln),intent(inout) :: string
+
+!Local variables-------------------------------
+ character :: blank=' '
+!scalars
+ integer :: unitxyz, iatom, natom, mu
+ integer :: lenstr_new
+ integer :: lenstr_old
+ integer :: ntypat
+ real(dp) :: znucl
+ character(len=5) :: string5
+ character(len=20) :: string20
+ character(len=500) :: message
+ type(atomdata_t) :: atom
+!arrays
+ real(dp),allocatable :: xangst(:,:)
+ integer, save :: atomspecies(200) = 0
+ character(len=500), save :: znuclstring = ""
+ character(len=2),allocatable :: elementtype(:)
+
+!************************************************************************
+
+ lenstr_new=lenstr
+
+ if (dtset_char == "-1") then
+!  write znucl
+   lenstr_old=lenstr_new
+   lenstr_new=lenstr_new+7+len_trim(znuclstring)+1
+   string(lenstr_old+1:lenstr_new)=" ZNUCL"//blank//trim(znuclstring)//blank
+
+!  write ntypat
+   ntypat = sum(atomspecies)
+   write(string20,'(i10)') ntypat
+   lenstr_old=lenstr_new
+   lenstr_new=lenstr_new+8+len_trim(string20)+1
+   string(lenstr_old+1:lenstr_new)=" NTYPAT"//blank//trim(string20)//blank
+
+   return
+ end if
+
+!open file with xyz data
+ if (open_file(xyz_fname, message, newunit=unitxyz, status="unknown") /= 0) then
+   MSG_ERROR(message)
+ end if
+ write(message, '(3a)')' importxyz : Opened file ',trim(xyz_fname),'; content stored in string_xyz'
+ call wrtout(std_out,message,'COLL')
+
+!check number of atoms is correct
+ read(unitxyz,*) natom
+
+ write(string5,'(i5)')natom
+ lenstr_old=lenstr_new
+ lenstr_new=lenstr_new+7+len_trim(dtset_char)+1+5
+ string(lenstr_old+1:lenstr_new)=" _NATOM"//trim(dtset_char)//blank//string5
+
+ ABI_ALLOCATE(xangst,(3,natom))
+ ABI_ALLOCATE(elementtype,(natom))
+
+!read dummy line
+ read(unitxyz,*)
+
+!read atomic types and positions
+ do iatom = 1, natom
+   read(unitxyz,*) elementtype(iatom), xangst(:,iatom)
+!  extract znucl for each atom type
+   call atomdata_from_symbol(atom,elementtype(iatom))
+   znucl = atom%znucl
+   if (znucl > 200) then
+     write (message,'(5a)')&
+&     'Error: found element beyond Z=200 ', ch10,&
+&     'Solution: increase size of atomspecies in append_xyz', ch10
+     MSG_ERROR(message)
+   end if
+!  found a new atom type
+   if (atomspecies(int(znucl)) == 0) then
+     write(string20,'(f10.2)') znucl
+     znuclstring = trim(znuclstring) // " " // trim(string20) // " "
+   end if
+   atomspecies(int(znucl)) = 1
+ end do
+ close (unitxyz)
+
+
+!Write the element types
+ lenstr_old=lenstr_new
+ lenstr_new=lenstr_new+7+len_trim(dtset_char)+1
+ string(lenstr_old+1:lenstr_new)=" _TYPAX"//trim(dtset_char)//blank
+ do iatom=1,natom
+   lenstr_old=lenstr_new
+   lenstr_new=lenstr_new+3
+   string(lenstr_old+1:lenstr_new)=elementtype(iatom)//blank
+ end do
+ lenstr_old=lenstr_new
+ lenstr_new=lenstr_new+3
+ string(lenstr_old+1:lenstr_new)="XX " ! end card for TYPAX
+
+!Write the coordinates
+ lenstr_old=lenstr_new
+ lenstr_new=lenstr_new+8+len_trim(dtset_char)+1
+ string(lenstr_old+1:lenstr_new)=" _XANGST"//trim(dtset_char)//blank
+
+ do iatom=1,natom
+   do mu=1,3
+     write(string20,'(f20.12)')xangst(mu,iatom)
+     lenstr_old=lenstr_new
+     lenstr_new=lenstr_new+20
+     string(lenstr_old+1:lenstr_new)=string20
+   end do
+ end do
+
+ ABI_DEALLOCATE(elementtype)
+ ABI_DEALLOCATE(xangst)
+
+!Check the length of the string
+ if(lenstr_new>strln)then
+   write(message,'(3a)')&
+&   'The maximal size of the input variable string has been exceeded.',ch10,&
+&   'The use of a xyz file is more character-consuming than the usual input file. Sorry.'
+   MSG_BUG(message)
+ end if
+
+!Update the length of the string
+ lenstr=lenstr_new
+
+end subroutine append_xyz
 !!***
 
 end module m_parser

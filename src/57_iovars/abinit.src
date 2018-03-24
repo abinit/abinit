@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "append_xyz.F90",
  "chkdpr.F90",
  "chkinp.F90",
  "chkint.F90",
@@ -32,7 +31,6 @@ sources = [
  "create_nc_file.F90",
  "getdim_nloc.F90",
  "finddistrproc.F90",
- "importxyz.F90",
  "indefo.F90",
  "indefo1.F90",
  "ingeo.F90",

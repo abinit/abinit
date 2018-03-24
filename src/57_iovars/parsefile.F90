@@ -40,7 +40,7 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
  use m_xmpi
 
  use m_fstrings, only : inupper
- use m_parser,   only : instrng
+ use m_parser,   only : instrng, intagm, importxyz
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
