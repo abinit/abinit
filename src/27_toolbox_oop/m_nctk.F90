@@ -228,6 +228,8 @@ MODULE m_nctk
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
 #endif
+ public :: create_nc_file              ! FIXME: Deprecated
+ public :: write_var_netcdf            ! FIXME: Deprecated
 
  !integer,save ABI_PROTECTED, public :: nctk_cache_size = 32000000
  ! If the cache_size is provided when opening a netCDF-4/HDF5 file, it will be used instead
@@ -2897,6 +2899,161 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
 end subroutine nctk_defwrite_nonana_terms
 
 #endif
+
+!!****f* m_nctk/create_nc_file
+!! NAME
+!! create_nc_file
+!!
+!! FUNCTION
+!! Create an NetCDF file including a dimension one definition
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! TODO:
+!!  Remove
+!!
+!! PARENTS
+!!      outvars
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine create_nc_file (filename,ncid)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'create_nc_file'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: ncid
+!arrays
+character(len=*),intent(in) :: filename
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+integer :: one_id
+integer :: ncerr
+#endif
+
+! *************************************************************************
+
+ ncid = 0
+#if defined HAVE_NETCDF
+!Create the NetCDF file
+ ncerr=nf90_create(path=filename,cmode=NF90_CLOBBER,ncid=ncid)
+ NCF_CHECK_MSG(ncerr, sjoin('Error while creating:', filename))
+ ncerr=nf90_def_dim(ncid,'one',1,one_id)
+ NCF_CHECK_MSG(ncerr,'nf90_def_dim')
+#endif
+
+ end subroutine create_nc_file
+!!***
+
+!!****f* m_nctk/write_var_netcdf
+!!
+!! NAME
+!! write_var_netcdf
+!!
+!! FUNCTION
+!! Write variable into a netcdf dataset
+!!
+!! TODO:
+!!  Remove!
+!!
+!! INPUTS
+!! arr_int
+!! arr_real
+!! marr
+!! narr
+!! typevar
+!! varname
+!!
+!! OUTPUT
+!!  (only writing)
+!!
+!! PARENTS
+!!      prttagm,prttagm_images
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine write_var_netcdf(arr_int,arr_real,marr,narr,ncid,typevar,varname)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'write_var_netcdf'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: narr,marr,ncid
+ character(len=*),intent(in) :: varname
+ character(len=3),intent(in) :: typevar
+!arrays
+ integer,intent(in) :: arr_int(marr)
+ real(dp),intent(in) :: arr_real(marr)
+
+!Local variables-------------------------------
+!scalars
+ integer :: var_id,var_type,vardim_id,ncerr
+ !character(len=500) :: msg
+
+! *************************************************************************
+
+ !write(std_out,*)"about to write varname: ",trim(varname)
+
+#if defined HAVE_NETCDF
+ if (ncid>0) then
+!  ### Put the file in definition mode
+   ncerr=nf90_redef(ncid)
+   if (ncerr/=NF90_NOERR.and.ncerr/=NF90_EINDEFINE) then
+     NCF_CHECK_MSG(ncerr,'nf90_redef')
+   end if
+!  ### Define the dimensions
+   if (narr==1)then
+     ncerr=nf90_inq_dimid(ncid,'one',vardim_id)
+     NCF_CHECK_MSG(ncerr,'nf90_inq_varid')
+   else
+     ncerr=nf90_def_dim(ncid,trim(varname),narr,vardim_id)
+     NCF_CHECK_MSG(ncerr,'nf90_def_dim')
+   end if
+!  ### Define the variables
+   if (typevar=='INT') then
+     var_type=NF90_INT
+   else if (typevar=='DPR') then
+     var_type=NF90_DOUBLE
+   end if
+   ncerr=nf90_def_var(ncid, trim(varname), var_type, vardim_id, var_id)
+   NCF_CHECK_MSG(ncerr,'nf90_def_var')
+!  ### Put the file in data mode
+   ncerr=nf90_enddef(ncid)
+   if (ncerr/=NF90_NOERR.and.ncerr/=NF90_ENOTINDEFINE) then
+     NCF_CHECK_MSG(ncerr,'nf90_enddef')
+   end if
+!  ### Write variables into the dataset
+   if (typevar=='INT') then
+     ncerr=nf90_put_var(ncid,var_id,arr_int,start=(/1/),count=(/narr/))
+   else if (typevar=='DPR') then
+     ncerr=nf90_put_var(ncid,var_id,arr_real,start=(/1/),count=(/narr/))
+   end if
+   NCF_CHECK_MSG(ncerr,'nf90_put_var')
+ end if
+#endif
+
+end subroutine write_var_netcdf
+!!***
 
 END MODULE m_nctk
 !!***

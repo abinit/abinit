@@ -87,11 +87,13 @@
 
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 & marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
-  firstchar,forceprint)  ! optional 
+  firstchar,forceprint)  ! optional
 
  use defs_basis
  use m_errors
  use m_profiling_abi
+
+ use m_nctk,   only : write_var_netcdf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -216,7 +218,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
      if (present(forceprint)) then
        if (forceprint==1.or.forceprint==3) print_out=.true.
        if (forceprint==1.or.forceprint==2) print_netcdf=.true.
-     end if 
+     end if
 
 !    Print only if the values differ from the default
      if (print_out.or.print_netcdf.or.(ncid<0))then
@@ -295,7 +297,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
        do idtset=1,ndtset_alloc
          if(narrm(idtset)>narrm(0))then
            print_out=.true.
-         else 
+         else
            do iarr=1,narrm(idtset)
              diff=abs( dprarr(iarr,idtset)-dprarr(iarr,0) )
              if(length>0)then
