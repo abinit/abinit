@@ -400,7 +400,6 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
 #define ABI_FUNC 'exit_check'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

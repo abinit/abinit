@@ -58,7 +58,6 @@ program band2eps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'band2eps'
- use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
 

@@ -443,7 +443,6 @@ end subroutine get_token
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_new_from_string'
- use interfaces_32_util
  use interfaces_42_parser
  use interfaces_57_iovars
 !End of the abilint section

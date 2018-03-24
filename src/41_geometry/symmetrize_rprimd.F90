@@ -64,8 +64,6 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 !scalars
  integer,intent(in) :: nsym
  real(dp),intent(in) :: tolsym
- real(dp),intent(out) :: reldiff
- character(len=500),intent(out) :: msg
 !arrays
  integer,intent(in) :: bravais(11),symrel(3,3,nsym)
  real(dp),intent(inout) :: rprimd(3,3)
@@ -73,7 +71,8 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 !Local variables-------------------------------
 !scalars
  integer :: foundc,iexit,ii,jj
- real(dp):: ucvol
+ real(dp):: ucvol,reldiff
+ character(len=500) :: msg
 !arrays
  real(dp):: aa(3,3),ait(3,3),cell_base(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd_new(3,3)
 

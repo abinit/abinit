@@ -43,7 +43,6 @@ subroutine chkvars (string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkvars'
- use interfaces_32_util
  use interfaces_57_iovars, except_this_one => chkvars
 !End of the abilint section
 
