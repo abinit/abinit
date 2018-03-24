@@ -128,6 +128,7 @@ program abinit
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
  use m_outxml,      only : outxml_open, outxml_finalise
+ use m_parser,      only : parsefile
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

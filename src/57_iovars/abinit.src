@@ -58,7 +58,6 @@ sources = [
  "outvar_o_z.F90",
  "m_outxml.F90",
  "out_acknowl.F90",
- "parsefile.F90",
  "prtocc.F90",
  "prttagm.F90",
  "prttagm_images.F90",

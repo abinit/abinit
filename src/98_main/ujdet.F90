@@ -45,7 +45,7 @@ program ujdet
  use m_errors
 
  use m_io_tools,  only : open_file
- use m_parser,    only : intagm
+ use m_parser,    only : intagm, parsefile
  use m_mpinfo,    only : destroy_mpi_enreg
 
 !This section has been created automatically by the script Abilint (TD).
