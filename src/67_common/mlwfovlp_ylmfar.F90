@@ -64,6 +64,7 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
  use m_profiling_abi
 
  use m_geometry,    only : rotmat
+ use m_numeric_tools, only : uniformrandom
  use m_abilasi,     only : matrginv
  use m_paw_sphharm, only : initylmr
 

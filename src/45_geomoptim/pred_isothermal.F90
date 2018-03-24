@@ -68,6 +68,8 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  use m_abihist
  use m_linalg_interfaces
 
+ use m_numeric_tools,  only : uniformrandom
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

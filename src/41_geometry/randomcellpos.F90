@@ -18,7 +18,7 @@
 !! natom=number of atoms
 !! npsp=number of pseudopotentials (needed for the dimension of znucl)
 !! ntypat=number of type of atoms
-!! random_atpos=input variable  
+!! random_atpos=input variable
 !!   0 no generation of random atomic potision
 !!   1 completely random atomic potisions
 !!   2 random atomic positions, avoiding too close atoms (prevent coming closer than a fraction of the sum of covalent radii)
@@ -57,6 +57,8 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
  use m_errors
  use m_atomdata
 
+ use m_numeric_tools,  only : uniformrandom
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -83,11 +85,11 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
  integer ::   iatom=0,ii,idum=-20
  real(dp) ::  rij(3), rijd(3), radiuscovi, radiuscovj, dist, rati, ratj, angdeg(3)
  real(dp) ::  cosang,aa,cc,a2
- character(len=500) :: message            
+ character(len=500) :: message
  type(atomdata_t) :: atom
- 
+
 ! *************************************************************************
- 
+
 !DEBUG
 !For the time being, print rprimd to keep it as an argument, in spite of abirule checking.
 !write (std_out,*) ' randomcellpos : enter'
@@ -108,33 +110,33 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
 
 !random_atpos = 0   Default value, no random initialisation
 !random_atpos = 1   Fully random (Is it really useful ???)
-!random_atpos = 2   Random, but the sum of the two covalent radii is  
+!random_atpos = 2   Random, but the sum of the two covalent radii is
 !less than the interatomic distance
-!random_atpos = 3   Random, but the sum of the two (other type of)  
+!random_atpos = 3   Random, but the sum of the two (other type of)
 !radii is less than the interatomic distance
-!random_atpos = 4   Random, but the sum of the two pseudopotential  
+!random_atpos = 4   Random, but the sum of the two pseudopotential
 !radii is less than the interatomic distance
-!random_atpos = 5   Random, but the interatomic distance must be bigger  
+!random_atpos = 5   Random, but the interatomic distance must be bigger
 !than the sum of
-!some input variable (well, instead of defining a new variable, why  
+!some input variable (well, instead of defining a new variable, why
 !not use ratsph ?)
 !Right now we are not using a factor for the tested distance.. something to be done, after a new variable has been defined
 
  if (random_atpos /= 0) then
    select case (random_atpos)
    case (1)
-     do ii=1,natom 
-       xred(1,ii)=uniformrandom(idum) 
-       xred(2,ii)=uniformrandom(idum) 
-       xred(3,ii)=uniformrandom(idum) 
+     do ii=1,natom
+       xred(1,ii)=uniformrandom(idum)
+       xred(2,ii)=uniformrandom(idum)
+       xred(3,ii)=uniformrandom(idum)
      end do
    case (2)
      iatom=0
      do
        iatom=iatom+1
-       xred(1,iatom)=uniformrandom(idum) 
-       xred(2,iatom)=uniformrandom(idum) 
-       xred(3,iatom)=uniformrandom(idum) 
+       xred(1,iatom)=uniformrandom(idum)
+       xred(2,iatom)=uniformrandom(idum)
+       xred(3,iatom)=uniformrandom(idum)
        call atomdata_from_znucl(atom,znucl(typat(iatom)))
        radiuscovi = atom%rcov
        do ii=1,iatom-1
@@ -155,14 +157,14 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
          end if
        end do
        if (iatom>=natom) EXIT
-     end do 
+     end do
    case(3)
      iatom=0
      do
        iatom=iatom+1
-       xred(1,iatom)=uniformrandom(idum) 
-       xred(2,iatom)=uniformrandom(idum) 
-       xred(3,iatom)=uniformrandom(idum) 
+       xred(1,iatom)=uniformrandom(idum)
+       xred(2,iatom)=uniformrandom(idum)
+       xred(3,iatom)=uniformrandom(idum)
        call atomdata_from_znucl(atom,znucl(typat(iatom)))
        radiuscovi = atom%rcov
        do ii=1,iatom-1
@@ -183,7 +185,7 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
          end if
        end do
        if (iatom>=natom) EXIT
-     end do 
+     end do
      do ii=1,3
 !        generates cells with angles between 60 and 120 degrees
        angdeg(ii)=60_dp+uniformrandom(idum)*60.0_dp
@@ -225,7 +227,7 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
      end do
      do ii=1,3
        acell(ii)=aa+uniformrandom(idum)*4.0
-     end do 
+     end do
      call mkrdim(acell,rprim,rprimd)
    case(4)
      write(std_out,*) 'Not implemented yet'
@@ -233,9 +235,9 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
      iatom=0
      do
        iatom=iatom+1
-       xred(1,iatom)=uniformrandom(idum) 
-       xred(2,iatom)=uniformrandom(idum) 
-       xred(3,iatom)=uniformrandom(idum) 
+       xred(1,iatom)=uniformrandom(idum)
+       xred(2,iatom)=uniformrandom(idum)
+       xred(3,iatom)=uniformrandom(idum)
        rati=ratsph(typat(iatom))
        do ii=1,iatom-1
          ratj=ratsph(typat(ii))
@@ -249,9 +251,9 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
        end do
        if (iatom==natom) EXIT
        if (ii<(iatom-1)) iatom=iatom-1
-     end do 
+     end do
    end select
- end if 
+ end if
 
 end subroutine randomcellpos
 !!***

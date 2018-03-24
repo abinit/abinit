@@ -56,6 +56,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  use m_abimover
  use m_abihist
 
+ use m_numeric_tools,  only : uniformrandom
  use m_results_gs , only : results_gs_type
 
 !This section has been created automatically by the script Abilint (TD).

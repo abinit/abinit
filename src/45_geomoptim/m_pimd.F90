@@ -34,6 +34,8 @@ MODULE m_pimd
  use m_io_tools
  use m_random_zbq
 
+ use m_numeric_tools,  only : uniformrandom
+
  implicit none
 
  private

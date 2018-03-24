@@ -70,12 +70,14 @@ MODULE m_use_ga
  use m_sort
 
  use m_results_img, only : results_img_type,gather_array_img
+ use m_numeric_tools,  only : uniformrandom
+
  use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 
  implicit none
 
- private 
+ private
 
  public :: predict_ga
 

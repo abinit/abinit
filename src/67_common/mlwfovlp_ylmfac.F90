@@ -63,6 +63,7 @@ subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
  use m_errors
 
  use m_geometry,    only : rotmat
+ use m_numeric_tools, only : uniformrandom
  use m_paw_sphharm, only : ylm_cmplx
 
 !This section has been created automatically by the script Abilint (TD).

@@ -69,6 +69,8 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
+ use m_numeric_tools,  only : uniformrandom
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
