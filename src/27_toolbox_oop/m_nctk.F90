@@ -2923,6 +2923,7 @@ end subroutine nctk_defwrite_nonana_terms
 
 subroutine create_nc_file (filename,ncid)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2987,6 +2988,7 @@ integer :: ncerr
 !! SOURCE
 
 subroutine write_var_netcdf(arr_int,arr_real,marr,narr,ncid,typevar,varname)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

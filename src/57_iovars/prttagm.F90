@@ -100,7 +100,6 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 #undef ABI_FUNC
 #define ABI_FUNC 'prttagm'
  use interfaces_32_util
- use interfaces_57_iovars, except_this_one => prttagm
 !End of the abilint section
 
  implicit none

@@ -60,7 +60,6 @@ sources = [
  "prtocc.F90",
  "prttagm.F90",
  "prttagm_images.F90",
- "write_var_netcdf.F90",
  "wvl_memory.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
