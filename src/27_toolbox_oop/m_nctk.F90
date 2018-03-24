@@ -2169,7 +2169,7 @@ end function nctk_get_dim
 
 !----------------------------------------------------------------------
 
-!!****f* n_nctk/nctk_write_datar
+!!****f* m_nctk/nctk_write_datar
 !! NAME
 !! nctk_write_datar
 !!
@@ -2385,7 +2385,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
 end function nctk_write_datar
 !!***
 
-!!****f* n_nctk/nctk_read_datar
+!!****f* m_nctk/nctk_read_datar
 !! NAME
 !! nctk_read_datar
 !!
@@ -2813,7 +2813,7 @@ subroutine var_from_name(ncid, name, var)
 end subroutine var_from_name
 !!***
 
-!!****f* n_nctk/nctk_defwrite_nonana_terms
+!!****f* m_nctk/nctk_defwrite_nonana_terms
 !! NAME
 !! nctk_defwrite_nonana_terms
 !!
@@ -2897,6 +2897,7 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
  end select
 
 end subroutine nctk_defwrite_nonana_terms
+!!***
 
 #endif
 
