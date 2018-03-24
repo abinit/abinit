@@ -64,7 +64,6 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 #undef ABI_FUNC
 #define ABI_FUNC 'inqpt'
  use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_56_recipspace
 !End of the abilint section
 

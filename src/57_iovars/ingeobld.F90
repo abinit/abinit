@@ -60,7 +60,6 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeobld'
  use interfaces_14_hidewrite
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

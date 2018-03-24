@@ -188,7 +188,6 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars11'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

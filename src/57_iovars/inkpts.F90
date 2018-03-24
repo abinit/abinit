@@ -112,7 +112,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_56_recipspace
 !End of the abilint section
 

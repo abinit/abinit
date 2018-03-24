@@ -73,7 +73,6 @@ program anaddb
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -81,7 +80,6 @@ program anaddb
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_42_parser
  use interfaces_51_manage_mpi
  use interfaces_72_response
  use interfaces_77_ddb

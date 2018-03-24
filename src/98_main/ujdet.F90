@@ -54,9 +54,7 @@ program ujdet
 #define ABI_FUNC 'ujdet'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_42_parser
  use interfaces_51_manage_mpi
- use interfaces_57_iovars
  use interfaces_65_paw
 !End of the abilint section
 

@@ -444,8 +444,6 @@ end subroutine get_token
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_new_from_string'
- use interfaces_42_parser
- use interfaces_57_iovars
 !End of the abilint section
 
  integer, intent(out) :: dtsetsId
@@ -529,7 +527,6 @@ subroutine ab7_invars_new_from_file(dtsetsId, filename, n, pspfiles, npsp, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_new_from_file'
- use interfaces_57_iovars
 !End of the abilint section
 
  integer, intent(out) :: dtsetsId

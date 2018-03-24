@@ -91,7 +91,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 #define ABI_FUNC 'invars1'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_57_iovars, except_this_one => invars1
 !End of the abilint section
 

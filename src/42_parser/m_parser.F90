@@ -74,12 +74,11 @@ CONTAINS  !===========================================================
 
 subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'parsefile'
- use interfaces_42_parser
- use interfaces_57_iovars, except_this_one => parsefile
 !End of the abilint section
 
  implicit none
@@ -181,6 +180,7 @@ end subroutine parsefile
 !! SOURCE
 
 subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -368,12 +368,12 @@ end subroutine inread
 
 recursive subroutine instrng(filnam,lenstr,option,strln,string)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'instrng'
  use interfaces_14_hidewrite
- use interfaces_42_parser, except_this_one => instrng
 !End of the abilint section
 
  implicit none
@@ -656,6 +656,7 @@ end subroutine instrng
 
 subroutine inreplsp(string)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -737,11 +738,11 @@ end subroutine inreplsp
 
 subroutine incomprs(string,length)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'incomprs'
- use interfaces_42_parser, except_this_one => incomprs
 !End of the abilint section
 
  implicit none
@@ -943,13 +944,13 @@ end subroutine incomprs
 
 subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,ds_input,key_value)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'intagm'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_42_parser, except_this_one => intagm
 !End of the abilint section
 
  implicit none
@@ -1554,12 +1555,12 @@ end subroutine intagm
 
 subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inarray'
  use interfaces_14_hidewrite
- use interfaces_42_parser, except_this_one => inarray
 !End of the abilint section
 
  implicit none
@@ -1769,13 +1770,12 @@ end subroutine inarray
 
 subroutine importxyz(lenstr,string_raw,string_upper,strln)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'importxyz'
  use interfaces_14_hidewrite
- use interfaces_42_parser
- use interfaces_57_iovars, except_this_one => importxyz
 !End of the abilint section
 
  implicit none
@@ -1902,6 +1902,7 @@ end subroutine importxyz
 !! SOURCE
 
 subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

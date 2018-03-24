@@ -70,7 +70,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
  use interfaces_56_recipspace

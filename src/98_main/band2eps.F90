@@ -48,17 +48,18 @@ program band2eps
  use m_effective_potential
  use m_multibinit_dataset
  use m_effective_potential_file
-
- use m_io_tools,       only : open_file
- use m_fstrings,       only : int2char4, tolower, inupper
- use m_time ,          only : asctime
  use m_band2eps_dataset
+
+ use m_io_tools,      only : open_file
+ use m_fstrings,      only : int2char4, tolower, inupper
+ use m_time,          only : asctime
+ use m_parser,        only : instrng
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'band2eps'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

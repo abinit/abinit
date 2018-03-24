@@ -52,7 +52,6 @@ subroutine adini(aim_dtset,inpstr,lenstr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'adini'
- use interfaces_42_parser
  use interfaces_63_bader, except_this_one => adini
 !End of the abilint section
 

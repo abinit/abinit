@@ -67,7 +67,6 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars0'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

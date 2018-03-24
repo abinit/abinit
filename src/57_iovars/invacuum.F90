@@ -54,7 +54,6 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
 #undef ABI_FUNC
 #define ABI_FUNC 'invacuum'
  use interfaces_41_geometry
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

@@ -57,9 +57,11 @@ program multibinit
  use m_effective_potential_file
  use m_abihist
  use m_ab7_invars
+
  use m_io_tools,   only : flush_unit, open_file
  use m_fstrings,   only : replace, inupper
- use m_time ,      only : asctime
+ use m_time,       only : asctime
+ use m_parser,     only : instrng
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -68,7 +70,6 @@ program multibinit
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_42_parser
  use interfaces_51_manage_mpi
  use interfaces_78_effpot
  use interfaces_95_drive

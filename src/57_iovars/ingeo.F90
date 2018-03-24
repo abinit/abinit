@@ -123,7 +123,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_57_iovars, except_this_one => ingeo
 !End of the abilint section
 
