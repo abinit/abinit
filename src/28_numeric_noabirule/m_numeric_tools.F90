@@ -3076,6 +3076,7 @@ end subroutine quadrature
 
 subroutine ctrap(imax,ff,hh,ans)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3616,6 +3617,7 @@ end subroutine mkherm
 !! SOURCE
 
 subroutine hermit(chmin,chmout,ierr,ndim)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -6167,6 +6169,7 @@ end function central_finite_diff
 
 function uniformrandom(seed)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -6287,6 +6290,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 & d2edv2_1,d2edv2_2,d2edv2_predict,&
 & etotal_1,etotal_2,etotal_predict,&
 & lambda_1,lambda_2,lambda_predict,status)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

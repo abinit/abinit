@@ -92,7 +92,6 @@ CONTAINS !===========================================================
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_lotf'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 !End of the abilint section
 

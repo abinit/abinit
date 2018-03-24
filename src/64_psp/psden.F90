@@ -56,7 +56,6 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psden'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

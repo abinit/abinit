@@ -62,7 +62,6 @@ subroutine psp11lo(drdi,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp11lo'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

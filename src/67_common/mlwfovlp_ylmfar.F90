@@ -72,7 +72,6 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_ylmfar'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

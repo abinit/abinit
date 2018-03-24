@@ -94,7 +94,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_proj'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_67_common, except_this_one => mlwfovlp_proj
 !End of the abilint section
 

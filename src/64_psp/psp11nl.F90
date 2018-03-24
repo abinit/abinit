@@ -65,7 +65,6 @@ subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp11nl'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

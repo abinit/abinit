@@ -386,7 +386,6 @@ subroutine brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'brdene'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

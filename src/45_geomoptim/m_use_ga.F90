@@ -92,7 +92,6 @@ subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'predict_ga'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -493,12 +492,12 @@ INTEGER FUNCTION choosefather(fitf,n,idum)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'choosefather'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
 
- integer,intent(in) :: n,idum
+ integer,intent(in) :: n
+ integer,intent(inout) :: idum
  real(dp), dimension(:), intent(in) :: fitf
 
  real(dp) :: x1
@@ -576,12 +575,12 @@ SUBROUTINE randomize_parent(parent,natom,idum)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'randomize_parent'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
 implicit none
 
-integer,intent(in)     :: natom,idum
+integer,intent(in)     :: natom
+integer,intent(inout)     :: idum
 real(dp),intent(inout) :: parent(3,natom)
 
 real(dp)               :: tmp(3),rot(3,3)
@@ -797,12 +796,11 @@ DOUBLE PRECISION FUNCTION gaussian_random(idum,sigma)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaussian_random'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
   implicit none
 
-  integer,intent(in) :: idum
+  integer,intent(inout) :: idum
   real(dp), intent(in) :: sigma
 
   real(dp) :: r1,r2,w

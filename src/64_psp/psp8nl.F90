@@ -84,7 +84,6 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp8nl'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

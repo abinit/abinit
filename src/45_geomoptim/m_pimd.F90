@@ -959,7 +959,6 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtat
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_initvel'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1092,7 +1091,6 @@ subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zer
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_random'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1313,7 +1311,6 @@ subroutine pimd_langevin_random_bar(alea_bar,irandom,iseed)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_random_bar'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

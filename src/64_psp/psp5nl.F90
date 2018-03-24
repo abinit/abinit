@@ -76,7 +76,6 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp5nl'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

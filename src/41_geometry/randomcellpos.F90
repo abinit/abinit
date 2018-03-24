@@ -63,7 +63,6 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'randomcellpos'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry, except_this_one => randomcellpos
 !End of the abilint section
 

@@ -29,6 +29,8 @@ MODULE m_lib_four
  use m_errors
  use m_profiling_abi
 
+contains
+
 ! This routine contains direct and inverse fourier transformation
 ! It is a modification of a routine of the GNU GPL
 ! code available on http://dmft.rutgers.edu/ and

@@ -70,7 +70,6 @@ subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_ylmfac'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

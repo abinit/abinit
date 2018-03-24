@@ -69,7 +69,6 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'subdiago'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
