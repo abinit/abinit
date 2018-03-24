@@ -82,6 +82,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  use m_xmpi
  use m_atomdata
 
+ use m_fstrings, only : inupper
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -913,7 +915,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
    MSG_WARNING(message)
  end if
- 
+
 !Some PAW+U keywords
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')

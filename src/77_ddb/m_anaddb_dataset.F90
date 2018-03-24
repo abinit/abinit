@@ -29,7 +29,7 @@ module m_anaddb_dataset
  use m_profiling_abi
  use m_errors
 
- use m_fstrings,  only : next_token, rmquotes, sjoin
+ use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
  use m_ddb,       only : DDB_QTOL
 
  implicit none

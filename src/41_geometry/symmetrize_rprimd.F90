@@ -4,8 +4,9 @@
 !! symmetrize_rprimd
 !!
 !! FUNCTION
-!! Supposing the input rprimd does not preserve the length and angles following the symmetries,
-!! will generates a new set rprimd, on the basis of the expected characteristics of the conventional cell,
+!! Supposing the input rprimd does not preserve the length and angles 
+!! following the symmetries, will generates a new set rprimd, 
+!! on the basis of the expected characteristics of the conventional cell,
 !! as specified in bravais(:) 
 !!
 !! COPYRIGHT
@@ -62,8 +63,9 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
- real(dp) :: reldiff,tolsym
- character(len=500):: msg
+ real(dp),intent(in) :: tolsym
+ real(dp),intent(out) :: reldiff
+ character(len=500),intent(out) :: msg
 !arrays
  integer,intent(in) :: bravais(11),symrel(3,3,nsym)
  real(dp),intent(inout) :: rprimd(3,3)

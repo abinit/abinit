@@ -39,6 +39,7 @@ module m_ab7_invars
   use interfaces_32_util
   use interfaces_57_iovars
 
+  use m_fstrings, only : inupper
   use m_dtset,  only : dtset_free
 
   implicit none

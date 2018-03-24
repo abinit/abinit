@@ -39,6 +39,8 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
  use m_errors
  use m_xmpi
 
+ use m_fstrings, only : inupper
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -86,7 +88,7 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    ! Need string_raw to deal properly with xyz filenames
    lenstr_noxyz = lenstr
    call importxyz(lenstr,string_raw,string,strlen)
-   
+
    !6) Take ndtset from the input string
    ndtset=0; marr=1
    call intagm(dprarr,intarr,0,marr,1,string(1:lenstr),"ndtset",tread,'INT')
@@ -99,14 +101,14 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 &     'Action : modify ndtset in the input file.'
      MSG_ERROR(message)
    end if
- end if ! master 
+ end if ! master
 
  if (xmpi_comm_size(comm) > 1) then
    ! Broadcast data.
    call xmpi_bcast(lenstr,master,comm,ierr)
    call xmpi_bcast(ndtset,master,comm,ierr)
    call xmpi_bcast(string,master,comm,ierr)
- end if 
+ end if
 
 end subroutine parsefile
 !!***

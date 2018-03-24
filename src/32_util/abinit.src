@@ -23,7 +23,6 @@ sources = [
  "create_mlms2jmj.F90",
  "create_slm2ylm.F90",
  "fappnd.F90",
- "inupper.F90",
  "isfile.F90",
  "kramerskronig.F90",
  "littlegroup_q.F90",
