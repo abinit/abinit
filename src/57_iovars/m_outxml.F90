@@ -1,5 +1,4 @@
 !{\src2tex{textfont=tt}}
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outxml
 !! NAME
 !! m_outxml
@@ -10,8 +9,8 @@
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!! or http://www.gnu.org/copyleft/gpl.txt.
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! PARENTS
 !!
@@ -78,9 +77,7 @@ subroutine outxml_open(filename)
   implicit none
 
 !Arguments -------------------------------
-
   character(len = *), intent(in) :: filename
-
 !Local variables -------------------------
  character(len=500) :: msg
 
@@ -138,7 +135,6 @@ subroutine outxml_finalise(tsec, values)
 !Arguments -------------------------------
   integer, intent(in) :: values(8)
   real(dp), intent(in) :: tsec(2)
-
 !Local variables -------------------------
   character(len=500) :: message
 

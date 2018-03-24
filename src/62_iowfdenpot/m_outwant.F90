@@ -38,7 +38,7 @@ module m_outwant
  implicit none
 
  private
- public ::  outwwant
+ public ::  outwant
 
 contains
 !!***
