@@ -145,6 +145,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_fstrings,         only : strcat, sjoin
+ use m_geometry,         only : fixsym
  use m_kpts,             only : tetra_from_kptrlatt
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
