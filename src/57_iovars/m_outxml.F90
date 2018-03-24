@@ -31,7 +31,7 @@ module m_outxml
  use m_profiling_abi
  use m_errors
 
- use m_io_tools,   only: open_file
+ use m_io_tools,    only : open_file
  use m_results_gs , only : results_gs_type
 
  implicit none

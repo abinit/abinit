@@ -216,7 +216,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif
  use m_io_kss,           only : gshgg_mkncwrite
- use m_outxmlm           only : out_resultsgs_XML, out_geometry_XML
+ use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

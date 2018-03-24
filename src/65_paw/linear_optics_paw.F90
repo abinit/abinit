@@ -64,7 +64,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linear_optics_paw'
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
 !End of the abilint section

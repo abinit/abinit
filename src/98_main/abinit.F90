@@ -127,7 +127,7 @@ program abinit
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
- use m_outxml,      only : outxml_open, outxml_finalize
+ use m_outxml,      only : outxml_open, outxml_finalise
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

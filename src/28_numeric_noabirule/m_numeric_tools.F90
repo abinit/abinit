@@ -91,7 +91,7 @@ MODULE m_numeric_tools
  public :: central_finite_diff   ! Coefficients of the central differences, for several orders of accuracy.
  public :: uniformrandom         ! Returns a uniform random deviate between 0.0 and 1.0.
  public :: findmin               ! Compute the minimum of a function whose value and derivative are known at two points.
- public ::
+ public :: kramerskronig         ! check or apply the Kramers Kronig relation
 
  interface arth
    module procedure arth_int
@@ -6484,6 +6484,7 @@ end subroutine findmin
 !! SOURCE
 
 subroutine kramerskronig(nomega,omega,eps,method,only_check)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
