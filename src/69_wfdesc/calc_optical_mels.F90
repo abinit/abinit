@@ -73,7 +73,6 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_optical_mels'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

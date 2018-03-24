@@ -64,7 +64,6 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 #undef ABI_FUNC
 #define ABI_FUNC 'get_tau_k'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_77_ddb, except_this_one => get_tau_k
 !End of the abilint section
 

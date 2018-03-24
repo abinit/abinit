@@ -1249,7 +1249,6 @@ subroutine haydock_mdf_to_tensor(BSp,Cryst,eps,tensor_cart,tensor_red,ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'haydock_mdf_to_tensor'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

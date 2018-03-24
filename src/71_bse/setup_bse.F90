@@ -106,7 +106,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_io_mpi
 !End of the abilint section

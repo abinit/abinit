@@ -266,7 +266,6 @@ subroutine dang_d1(r1,r2,r3,bb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dang_d1'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -345,7 +344,6 @@ subroutine dang_d2(r1,r2,r3,bb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dang_d2'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -418,15 +416,13 @@ subroutine ddihedral_d1(r1,r2,r3,r4,bb)
 
  use defs_basis
  use m_profiling_abi
+ use m_geometry,  only : acrossb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddihedral_d1'
- use interfaces_32_util
 !End of the abilint section
-
- use m_geometry,  only : acrossb
 
  implicit none
 
@@ -545,7 +541,6 @@ subroutine ddihedral_d2(r1,r2,r3,r4,bb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddihedral_d2'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -71,7 +71,6 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_piezo'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

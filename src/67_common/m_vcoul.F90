@@ -212,7 +212,6 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 #undef ABI_FUNC
 #define ABI_FUNC 'vcoul_init'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

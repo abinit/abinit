@@ -433,6 +433,7 @@ end function vdotw_rc_vector
 
 subroutine acrossb(a,b,c)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -809,6 +810,7 @@ end function spinrot_cmat
 !! SOURCE
 
 subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

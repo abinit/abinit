@@ -81,7 +81,6 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 #undef ABI_FUNC
 #define ABI_FUNC 'mka2f_tr'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_77_ddb, except_this_one => mka2f_tr
 !End of the abilint section
 

@@ -79,7 +79,6 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_elast'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

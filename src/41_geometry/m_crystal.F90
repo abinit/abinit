@@ -1104,11 +1104,12 @@ end subroutine crystal_point_group
 subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 &   spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prt_cif'
- use interfaces_41_geometry, except_this_one => prt_cif
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1262,6 +1263,7 @@ end subroutine prt_cif
 
 subroutine symrel2string(symrel1, tnon, string)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1348,6 +1350,7 @@ end subroutine symrel2string
 !! SOURCE
 
 subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
