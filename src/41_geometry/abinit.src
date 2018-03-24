@@ -51,8 +51,6 @@ sources = [
  "m_ewald.F90",
  "m_supercell.F90",
  "polcart.F90",
- "prt_cif.F90",
- "prtposcar.F90",
  "prtspgroup.F90",
  "ptgmadata.F90",
  "randomcellpos.F90",

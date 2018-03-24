@@ -157,7 +157,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_fstrings,         only : strcat, endswith
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
- use m_crystal,          only : crystal_init, crystal_free, crystal_t
+ use m_crystal,          only : crystal_init, crystal_free, crystal_t, prt_cif
  use m_crystal_io,       only : crystal_ncwrite
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
@@ -592,7 +592,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    nradint = 1000 ! radial integration grid density
    ABI_ALLOCATE(vpaw,(nfft,nspden))
    vpaw(:,:)=zero
-   if (me == master .and. my_natom > 0) then  
+   if (me == master .and. my_natom > 0) then
      if (paw_an(1)%cplex > 1) then
        MSG_WARNING('cplex = 2 : complex hartree potential in PAW spheres. This is not coded yet. Imag part ignored')
      end if
@@ -611,7 +611,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
        ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
        ! vh1 vht1 contain the spherical first moments of the Hartree potentials, so re-divide by Y_00 = sqrt(four_pi)
-       vh1_corrector(:) = (paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)) / sqrt(four_pi) 
+       vh1_corrector(:) = (paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)) / sqrt(four_pi)
 
        ! get end point derivatives
        call bound_deriv(vh1_corrector, pawrad(itypat), pawrad(itypat)%mesh_size, yp1, ypn)
@@ -827,7 +827,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
 &     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1). 
+!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1).
 !      For the moment comment it out. Only DS2 of mpiio test 27 fails
 !     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
 !&         rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)

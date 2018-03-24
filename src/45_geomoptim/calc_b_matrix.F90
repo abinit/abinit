@@ -426,6 +426,8 @@ subroutine ddihedral_d1(r1,r2,r3,r4,bb)
  use interfaces_32_util
 !End of the abilint section
 
+ use m_geometry,  only : acrossb
+
  implicit none
 
 !Arguments ------------------------------------
@@ -536,6 +538,8 @@ subroutine ddihedral_d2(r1,r2,r3,r4,bb)
 
  use defs_basis
  use m_profiling_abi
+
+ use m_geometry,  only : acrossb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
