@@ -24,7 +24,6 @@ sources = [
  "create_slm2ylm.F90",
  "fappnd.F90",
  "isfile.F90",
- "kramerskronig.F90",
  "littlegroup_q.F90",
  "m_atomdata.F90",
  "m_dummy.F90",
