@@ -187,14 +187,6 @@ end subroutine prt_cif
 !!
 !! FUNCTION
 !!
-!!
-!! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!
 !! OUTPUT

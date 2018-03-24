@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "acrossb.F90",
  "appdig.F90",
  "blow_pawuj.F90",
  "create_mlms2jmj.F90",
@@ -50,7 +49,6 @@ sources = [
  "proc_distrb_cycle.F90",
  "radsintr.F90",
  "radsmear.F90",
- "rotmat.F90",
  "sbf8.F90",
  "smatrix.F90",
  "status.F90",

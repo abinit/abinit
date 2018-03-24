@@ -22,8 +22,6 @@
 !! OUTPUT
 !!  fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!    Unlike fred, fcart has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force

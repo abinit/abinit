@@ -27,8 +27,6 @@
 !! OUTPUT
 !!  xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      afterscfloop,berryphase,berryphase_new,bonds_lgth_angles,constrf,cut3d
 !!      denfgr,driver,evdw_wannier,forstr,ingeo,ionion_realspace,ionion_surface

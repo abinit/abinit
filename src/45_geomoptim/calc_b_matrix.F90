@@ -260,6 +260,8 @@ subroutine dang_d1(r1,r2,r3,bb)
  use m_profiling_abi
  use m_abimover
 
+ use m_geometry,  only : acrossb
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -336,6 +338,8 @@ subroutine dang_d2(r1,r2,r3,bb)
  use defs_basis
  use m_profiling_abi
  use m_abimover
+
+ use m_geometry,  only : acrossb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

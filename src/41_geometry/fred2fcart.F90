@@ -24,8 +24,6 @@
 !! OUTPUT
 !!  fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!    Unlike fred, fcart has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force

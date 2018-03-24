@@ -8,13 +8,13 @@
 !! guess of functions will be multiplied for the Wannier90 interface.
 !! It is just used if there are rotations, or if the functions required
 !! are linear combinations of the ylm real functions.
-!! 
+!!
 !! Example,
 !! For a function G(r)= 1/2 s + 1/3 px - 1/2 pz
 !!   it would produce a matrix of the following form:
 !!   [1/2,-1/2,1/3,0,0...0]
 !!
-!! The real spherical harmonics are given as factors of complex spherical harmonics 
+!! The real spherical harmonics are given as factors of complex spherical harmonics
 !! The real spherical harmonics are given in table 3.1 of Wannier90 user guide.
 !!
 !! COPYRIGHT
@@ -57,10 +57,12 @@
 
 
 subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-    
+
  use defs_basis
  use m_profiling_abi
  use m_errors
+
+ use m_geometry,    only : rotmat
  use m_paw_sphharm, only : ylm_cmplx
 
 !This section has been created automatically by the script Abilint (TD).
@@ -96,9 +98,9 @@ subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
  complex(dp):: ylmc_rrinv(lmax2,lmax2),ylmc_rp(lmax2,lmax2)
  complex(dp),parameter :: c0=(0._dp,0._dp),c1=(1._dp,0._dp),ci=(0._dp,1._dp)
  character(len=500) :: message                   ! to be uncommented, if needed
- 
+
 ! *************************************************************************
- 
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !DEBUG

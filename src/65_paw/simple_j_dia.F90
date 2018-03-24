@@ -38,6 +38,7 @@ subroutine simple_j_dia(jdia,natom,nfft,pawfgrtab)
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,  only : acrossb
  use m_pawfgrtab, only : pawfgrtab_type
 
 !This section has been created automatically by the script Abilint (TD).

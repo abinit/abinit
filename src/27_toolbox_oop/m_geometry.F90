@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FJ, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,9 +32,11 @@ MODULE m_geometry
 
  public :: normv              ! Norm of vector(s) in reduced coordinates either in real or reciprocal space.
  public :: vdotw              ! Scalar product between two reduced vectors either in real or reciprocal space.
+ public :: acrossb            ! Cross product of two 3-vectors.
  public :: wigner_seitz       ! Find the grid of points falling inside the Wigner-Seitz cell.
  public :: phdispl_cart2red   ! Calculate the displacement vectors for all branches in reduced coordinates.
  public :: spinrot_cmat       ! Construct 2x2 complex matrix representing rotation operator in spin-space.
+ public :: rotmat
 
  interface normv
   module procedure normv_rdp_vector
@@ -408,6 +410,51 @@ end function vdotw_rc_vector
 
 !----------------------------------------------------------------------
 
+!!****f* m_geometry/acrossb
+!! NAME
+!! acrossb
+!!
+!! FUNCTION
+!! Calculates the cross product of two 3-vectors
+!!
+!! INPUTS
+!!   a(3): real(dp) vector
+!!   b(3): real(dp) vector
+!!
+!! OUTPUT
+!!   c(3): real(dp) vector = a X b
+!!
+!! PARENTS
+!!      calc_b_matrix,m_abimover,simple_j_dia
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine acrossb(a,b,c)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'acrossb'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!arrays
+ real(dp),intent(in) :: a(3),b(3)
+ real(dp),intent(out) :: c(3)
+
+! *********************************************************************
+
+ c(1) =  a(2)*b(3) - a(3)*b(2)
+ c(2) = -a(1)*b(3) + a(3)*b(1)
+ c(3) =  a(1)*b(2) - b(1)*a(2)
+
+end subroutine acrossb
+!!***
+
 !!****f* m_geometry/wigner_seitz
 !! NAME
 !! wigner_seitz
@@ -729,6 +776,118 @@ end function spinrot_cmat
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_geometry/rotmat
+!! NAME
+!! rotmat
+!!
+!! FUNCTION
+!! Finds the rotation matrix.
+!!
+!! INPUTS
+!!  xaxis(3)= vectors defining the x axis
+!!  zaxis(3)= vectors defining the z axis
+
+!! OUTPUT
+!!  inversion_flag = flag that indicates that an inversion operation
+!!   on the coordinate system should be done
+!!  umat(3,3)= matrix that rotates the x=(1 0 0) and z=(0 0 1) to the new
+!!   values defined in xaxis and zaxis
+!!
+!! NOTES
+!! Here I set that the axe x is originally at the 1 0 0 direction and z is originally 0 0 1.
+!! So calling rotmat(x',z') will find the rotation
+!! matrix for the case in which we rotate the x and z
+!! axes from their default values to x' and z'.
+!!
+!! PARENTS
+!!      mlwfovlp_ylmfac,mlwfovlp_ylmfar
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rotmat'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: inversion_flag
+!arrays
+ real(dp),intent(in) :: xaxis(3),zaxis(3)
+ real(dp),intent(out) :: umat(3,3)
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: cosine,xmod,zmod
+ character(len=500) :: message
+!arrays
+ real(dp) :: yaxis(3)
+
+! *************************************************************************
+
+ xmod = sqrt(xaxis(1)**2 + xaxis(2)**2 + xaxis(3)**2)
+ zmod = sqrt(zaxis(1)**2 + zaxis(2)**2 + zaxis(3)**2)
+
+ if(xmod < 1.d-8)then
+   write(message,'(a,a,a,i6)')&
+&   'The module of the xaxis should be greater than 1.d-8,',ch10,&
+&   'however, |xaxis|=',xmod
+   MSG_BUG(message)
+ end if
+
+
+ if(zmod < 1.d-8)then
+   write(message,'(a,a,a,i6)')&
+&   'The module of the zaxis should be greater than 1.d-8,',ch10,&
+&   'however, |zaxis|=',zmod
+   MSG_ERROR(message)
+ end if
+
+!verify that both axis are perpendicular
+ cosine = (xaxis(1)*zaxis(1) + xaxis(2)*zaxis(2) &
+& + xaxis(3)*zaxis(3))/(xmod*zmod)
+
+ if(abs(cosine) > 1.d-8)then
+   write(message,'(a,a,a,i6)')&
+&   'xaxis and zaxis should be perpendicular,',ch10,&
+&   'however, cosine=',cosine
+   MSG_BUG(message)
+ end if
+
+!new y axis as cross product
+ yaxis(1) = (zaxis(2)*xaxis(3) - xaxis(2)*zaxis(3))/(xmod*zmod)
+ yaxis(2) = (zaxis(3)*xaxis(1) - xaxis(3)*zaxis(1))/(xmod*zmod)
+ yaxis(3) = (zaxis(1)*xaxis(2) - xaxis(1)*zaxis(2))/(xmod*zmod)
+
+!hack to allow inversion operation on coordinate transformation
+!uses unlikely large but legal values of proj_x and/or proj_z
+!to flag inversion
+ inversion_flag=0
+ if(xmod>10._dp .or. zmod>10._dp) then
+   inversion_flag=1
+   write(message, '(4a)' )&
+&   'inversion operation will be appended to axis transformation',ch10,&
+&   'Action : If you did not intend this, make |z|<10 and |x|<10 ',ch10
+   call wrtout(std_out,message,'COLL')
+ end if
+
+
+ umat(1,:) = xaxis(:)/xmod
+ umat(2,:) = yaxis(:)
+ umat(3,:) = zaxis(:)/zmod
+
+end subroutine rotmat
+!!***
 
 end module  m_geometry
 !!***

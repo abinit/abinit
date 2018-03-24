@@ -28,6 +28,8 @@ module m_abimover
  use m_atomdata
  use m_errors
 
+ use m_geometry,  only : acrossb
+
  implicit none
 
  private
@@ -778,7 +780,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !  Name of specs%method
    specs%method = 'Conjugate gradient algorithm'
 !  Number of history
-   specs%nhist = 3   
+   specs%nhist = 3
 !  This is the initialization for ionmov==12
 !  -------------------------------------------
  case (12)

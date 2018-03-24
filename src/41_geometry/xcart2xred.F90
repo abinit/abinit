@@ -27,8 +27,6 @@
 !! OUTPUT
 !!  xred(3,natom)=dimensionless reduced coordinates of atoms
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      driver,evdw_wannier,ingeo,m_cut3d,m_dens,m_effective_potential
 !!      m_effective_potential_file,m_mep,m_paw_pwaves_lmn,m_pred_lotf
