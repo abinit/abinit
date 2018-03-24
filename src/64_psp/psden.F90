@@ -50,6 +50,8 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
  use m_profiling_abi
  use m_errors
 
+ use m_numeric_tools, only : ctrap
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -107,7 +109,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
    call ctrap(nc1,ff(1:nc1),step,norm1)
    if (ilog==1) norm1=norm1+half*ff(1)
  end do
- if (ii==100) then 
+ if (ii==100) then
    MSG_ERROR('Big pb 1 in psden !')
  end if
 
@@ -120,7 +122,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
    call ctrap(nc1,ff(1:nc1),step,norm2)
    if (ilog==1) norm2=norm2+half*ff(1)
  end do
- if (ii==100) then 
+ if (ii==100) then
    MSG_ERROR('Big pb 2 in psden !')
  end if
 

@@ -55,6 +55,8 @@ subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
  use defs_basis
  use m_profiling_abi
 
+ use m_numeric_tools, only : ctrap
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -11,14 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -31,9 +23,14 @@
 
 #include "abi_common.h"
 
+MODULE m_lib_four
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
 
 ! This routine contains direct and inverse fourier transformation
-! It is a modification of a routine of the GNU GPL 
+! It is a modification of a routine of the GNU GPL
 ! code available on http://dmft.rutgers.edu/ and
 ! described in the RMP 2006 paper written by
 ! G.Kotliar, S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti
@@ -41,11 +38,11 @@
 !       TYPE   : SUBROUTINE
 !       PROGRAM: nfourier
 !       PURPOSE: fourier-transform the natural-spline interpolation
-!                of function Green(tau) 
+!                of function Green(tau)
 !                calculate function Green(omega)
 !       I/O    :
 !       VERSION: 2-16-92
-!                29-Nov-95 removal of minimal bug concerning 
+!                29-Nov-95 removal of minimal bug concerning
 !                          DIMENSION of rindata
 !       COMMENT: cf J. Stoer R. Bulirsch, Introduction to numerical
 !                analysis (Springer, New York, 1980)
@@ -53,9 +50,7 @@
 !
       SUBROUTINE nfourier(rindata,coutdata,iflag,Iwmax,L,Beta)
 
- use m_profiling_abi
 !include 'param.dat'
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -77,12 +72,12 @@
        ENDDO
        if(iflag==1) then
          rincopy(L+1) = -1-rindata(1)
-       else 
+       else
          rincopy(L+1) = -rindata(1)
        endif
 !       Three = Two+One
 !       six = Two*Three
-     
+
 !c
 !c     spline interpolation:  the spline is given by
 !c     G(tau) = a(i) + b(i) (tau-tau_i) + c(i) ( )^2 + d(i) ( )^3
@@ -132,7 +127,7 @@
      &         ( b(j)+ Two*delta*c(j)+ three*delta**2*d(j) )/om**2 +&
      &         (- j_dpc*a(j) - delta*j_dpc*b(j) - delta**2*j_dpc*c(j) -&
      &         delta**3*j_dpc*d(j))/om)
- 
+
               coutdata(i+1) = coutdata(i+1) + ex*(&
      &        six*d(j)/om**4 - Two*j_dpc*c(j)/om**3 &
      &        -b(j)/om**2 + j_dpc*a(j)/om)
@@ -142,7 +137,7 @@
 !!***
 
 ! This routine contains direct and inverse fourier transformation
-! It is a modification of a routine of the GNU GPL 
+! It is a modification of a routine of the GNU GPL
 ! code available on http://dmft.rutgers.edu/ and
 ! described in the RMP 2006 paper written by
 ! G.Kotliar, S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti
@@ -150,11 +145,11 @@
 !       TYPE   : SUBROUTINE
 !       PROGRAM: nfourier
 !       PURPOSE: fourier-transform the natural-spline interpolation
-!                of function Green(tau) 
+!                of function Green(tau)
 !                calculate function Green(omega)
 !       I/O    :
 !       VERSION: 2-16-92
-!                29-Nov-95 removal of minimal bug concerning 
+!                29-Nov-95 removal of minimal bug concerning
 !                          DIMENSION of rindata
 !       COMMENT: cf J. Stoer R. Bulirsch, Introduction to numerical
 !                analysis (Springer, New York, 1980)
@@ -162,7 +157,6 @@
 !
       SUBROUTINE nfourier2(rindata,coutdata,iflag,om,L,Beta)
 !       include 'param.dat'
-       use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -185,14 +179,14 @@
        ENDDO
        if(iflag==1 .and. L.ge.1) then
          rincopy(L+1) = -1-rindata(1)
-       elseif(iflag==0 .and. L.ge.1) then 
+       elseif(iflag==0 .and. L.ge.1) then
          rincopy(L+1) = -rindata(1)
        else
          write(std_out,*) "Warning : Check nfourier2"
        endif
 !       Three = Two+One
 !       six = Two*Three
-     
+
 !c
 !c     spline interpolation:  the spline is given by
 !c     G(tau) = a(i) + b(i) (tau-tau_i) + c(i) ( )^2 + d(i) ( )^3
@@ -254,19 +248,17 @@
 !                Greent(i) = G((i-1)*deltau) for i = 1,...,L
 !                Greenw(n) = G(i w_n), for n = 0,L/2-1
 !                       w_n = (2*n+1)pi/beta
-!                Symmetry property: 
+!                Symmetry property:
 !                G(iw_(-n) = G(iw_(n-1))*
 !                coupled to the impurity
 !       I/O    :
 !       VERSION: 6-16-92
-!       COMMENT: 
+!       COMMENT:
 !=======+=========+=========+=========+=========+=========+=========+=$
 !
        SUBROUTINE invfourier(cindata,routdata,Iwmax,L,iflag,beta)
 
- use m_profiling_abi
 !       include 'param.dat'
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -288,7 +280,7 @@
        complex*16 :: cdummy,dummy
        integer :: i,j
 
-       xpi = ACOS(-One) 
+       xpi = ACOS(-One)
        DO 1 i = 1,L
        routdata(i) = Zero
           tau = (i-1)*beta/real(L)
@@ -309,5 +301,5 @@
        endif
        END
 
-
-
+END MODULE m_lib_four
+!!***

@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, Frd)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,6 +59,7 @@ MODULE m_numeric_tools
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
+ public :: ctrap                 ! Corrected trapezoidal integral on uniform grid of spacing hh.
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
@@ -89,6 +90,7 @@ MODULE m_numeric_tools
  public :: nderiv                ! Compute first or second derivative of input function y(x) on a regular grid.
  public :: central_finite_diff   ! Coefficients of the central differences, for several orders of accuracy.
  public :: uniformrandom         ! Returns a uniform random deviate between 0.0 and 1.0.
+ public :: findmin               ! Compute the minimum of a function whose value and derivative are known at two points.
 
  interface arth
    module procedure arth_int
@@ -3046,6 +3048,116 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  ierr = -1
 
 end subroutine quadrature
+!!***
+
+!!****f* m_numeric_tools/ctrap
+!! NAME
+!! ctrap
+!!
+!! FUNCTION
+!! Do corrected trapezoidal integral on uniform grid of spacing hh.
+!!
+!! INPUTS
+!!  imax=highest index of grid=grid point number of upper limit
+!!  ff(imax)=integrand values
+!!  hh=spacing between x points
+!!
+!! OUTPUT
+!!  ans=resulting integral by corrected trapezoid
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      psden,psp11lo,psp11nl,psp5lo,psp5nl,psp8lo,psp8nl,vhtnzc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ctrap(imax,ff,hh,ans)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ctrap'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: imax
+ real(dp),intent(in) :: hh
+ real(dp),intent(out) :: ans
+!arrays
+ real(dp),intent(in) :: ff(imax)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ir,ir2
+ real(dp) :: endpt,sum
+
+! *************************************************************************
+
+ if (imax>=10)then
+
+!  endpt=end point correction terms (low and high ends)
+   endpt  = (23.75d0*(ff(1)+ff(imax  )) &
+&   + 95.10d0*(ff(2)+ff(imax-1)) &
+&   + 55.20d0*(ff(3)+ff(imax-2)) &
+&   + 79.30d0*(ff(4)+ff(imax-3)) &
+&   + 70.65d0*(ff(5)+ff(imax-4)))/ 72.d0
+   ir2 = imax - 5
+   sum=0.00d0
+   if (ir2 > 5) then
+     do ir=6,ir2
+       sum = sum + ff(ir)
+     end do
+   end if
+   ans = (sum + endpt ) * hh
+
+ else if (imax>=8)then
+   endpt  = (17.0d0*(ff(1)+ff(imax  )) &
+&   + 59.0d0*(ff(2)+ff(imax-1)) &
+&   + 43.0d0*(ff(3)+ff(imax-2)) &
+&   + 49.0d0*(ff(4)+ff(imax-3)) )/ 48.d0
+   sum=0.0d0
+   if(imax==9)sum=ff(5)
+   ans = (sum + endpt ) * hh
+
+ else if (imax==7)then
+   ans = (17.0d0*(ff(1)+ff(imax  )) &
+&   + 59.0d0*(ff(2)+ff(imax-1)) &
+&   + 43.0d0*(ff(3)+ff(imax-2)) &
+&   + 50.0d0* ff(4)                )/ 48.d0  *hh
+
+ else if (imax==6)then
+   ans = (17.0d0*(ff(1)+ff(imax  )) &
+&   + 59.0d0*(ff(2)+ff(imax-1)) &
+&   + 44.0d0*(ff(3)+ff(imax-2)) )/ 48.d0  *hh
+
+ else if (imax==5)then
+   ans = (     (ff(1)+ff(5)) &
+&   + four*(ff(2)+ff(4)) &
+&   + two * ff(3)         )/ three  *hh
+
+ else if (imax==4)then
+   ans = (three*(ff(1)+ff(4)) &
+&   + nine *(ff(2)+ff(3))  )/ eight  *hh
+
+ else if (imax==3)then
+   ans = (     (ff(1)+ff(3)) &
+&   + four* ff(2)         )/ three *hh
+
+ else if (imax==2)then
+   ans = (ff(1)+ff(2))/ two  *hh
+
+ else if (imax==1)then
+   ans = ff(1)*hh
+
+ end if
+
+end subroutine ctrap
 !!***
 
 !!****f* m_numeric_tools/coeffs_gausslegint
@@ -6121,6 +6233,214 @@ function uniformrandom(seed)
  table(kk)=(dble(ii1)+dble(ii2)*im2inv)*im1inv
 
 end function uniformrandom
+!!***
+
+!!****f* m_numeric_tools/findmin
+!!
+!! NAME
+!! findmin
+!!
+!! FUNCTION
+!! Compute the minimum of a function whose value and derivative are known at two points.
+!! Also deduce different quantities at this predicted point, and at the two other points
+!! It uses a quartic interpolation, with the supplementary
+!! condition that the second derivative vanishes at one and
+!! only one point (See Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! For this option, lambda_1 must be 1 (new point),
+!! and lambda_2 must be 0 (old point).
+!! Also, if the derivative at the new point is more negative
+!! than the derivative at the old point, the predicted
+!! point cannot correspond to a minimum, but will be lambda=2.5_dp,
+!! if the energy of the second point is lower than the energy
+!! of the first point.
+!!
+!! INPUTS
+!! etotal_1=first value of the function
+!! etotal_2=second value of the function
+!! dedv_1=first value of the derivative
+!! dedv_2=second value of the derivative
+!! lambda_1=first value of the argument
+!! lambda_2=second value of the argument
+!!
+!! OUTPUT
+!! dedv_predict=predicted value of the derivative (usually zero,
+!!  except if choice=4, if it happens that a minimum cannot be located,
+!!  and a trial step is taken)
+!! d2edv2_predict=predicted value of the second derivative (not if choice=4)
+!! d2edv2_1=first value of the second derivative (not if choice=4)
+!! d2edv2_2=second value of the second derivative (not if choice=4)
+!! etotal_predict=predicted value of the function
+!! lambda_predict=predicted value of the argument
+!! status= 0 if everything went normally ;
+!!         1 if negative second derivative
+!!         2 if some other problem
+!!
+!! PARENTS
+!!      m_bfgs
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine findmin(dedv_1,dedv_2,dedv_predict,&
+& d2edv2_1,d2edv2_2,d2edv2_predict,&
+& etotal_1,etotal_2,etotal_predict,&
+& lambda_1,lambda_2,lambda_predict,status)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'findmin'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: status
+ real(dp),intent(in) :: dedv_1,dedv_2,etotal_1,etotal_2,lambda_1,lambda_2
+ real(dp),intent(out) :: d2edv2_1,d2edv2_2,d2edv2_predict,dedv_predict
+ real(dp),intent(out) :: etotal_predict,lambda_predict
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: aa,bb,bbp,cc,ccp,d_lambda,dd
+ real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
+ real(dp) :: uu3,vv,vv3
+ character(len=500) :: message
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,*)' findmin : enter'
+!write(std_out,*)' choice,lambda_1,lambda_2=',choice,lambda_1,lambda_2
+!ENDDEBUG
+
+ status=0
+ d_lambda=lambda_1-lambda_2
+
+!DEBUG
+!do choice=3,1,-1
+!ENDDEBUG
+
+ if(abs(lambda_1-1.0_dp)>tol12 .or. abs(lambda_2)>tol12) then
+   message = '  For choice=4, lambda_1 must be 1 and lambda_2 must be 0.'
+   MSG_BUG(message)
+ end if
+
+!Evaluate quartic interpolation
+!etotal = aa + bb * lambda + cc * lambda**2 + dd * lambda**3 + ee * lambda**4
+!Impose positive second derivative everywhere, with
+!one point where it vanishes :  3*dd**2=8*cc*ee
+ aa=etotal_2
+ bb=dedv_2
+ sum1=etotal_1-aa-bb
+ sum2=dedv_1-bb
+ sum3=sum2-2.0_dp*sum1
+
+!Build the discriminant of the associated 2nd degree equation
+ discr=sum2**2-3.0_dp*sum3**2
+ if(discr<0.0_dp .or. sum2<0.0_dp)then
+
+! jmb init
+   d2edv2_2=0.0
+   d2edv2_1=0.0
+   d2edv2_predict=0.0
+
+!  Even if there is a problem, try to keep going ...
+   message = 'The 2nd degree equation has no positive root (choice=4).'
+   MSG_WARNING(message)
+   status=2
+   if(etotal_1<etotal_2)then
+     write(message, '(a,a,a)' )&
+&     'Will continue, since the new total energy is lower',ch10,&
+&     'than the old. Take a larger step in the same direction.'
+     MSG_COMMENT(message)
+     lambda_predict=2.5_dp
+   else
+     write(message, '(a,a,a,a,a)' )&
+&     'There is a problem, since the new total energy is larger',ch10,&
+&     'than the old (choice=4).',ch10,&
+&     'I take a point between the old and new, close to the old .'
+     MSG_COMMENT(message)
+     lambda_predict=0.25_dp
+   end if
+!  Mimick a zero-gradient lambda, in order to avoid spurious
+!  action of the inverse hessian (the next line would be a realistic estimation)
+   dedv_predict=0.0_dp
+!  dedv_predict=dedv_2+lambda_predict*(dedv_1-dedv_2)
+!  Uses the energies, and the gradient at lambda_2
+   etotal_predict=etotal_2+dedv_2*lambda_predict&
+&   +(etotal_1-etotal_2-dedv_2)*lambda_predict**2
+
+ else
+
+!  Here, there is an acceptable solution to the 2nd degree equation
+   discr=sqrt(discr)
+!  The root that gives the smallest ee corresponds to  -discr
+!  This is the one to be used: one aims at modelling the
+!  behaviour of the function as much as possible with the
+!  lowest orders of the polynomial, not the quartic term.
+   ee=(sum2-discr)*0.5_dp
+   dd=sum3-2.0_dp*ee
+   cc=sum1-dd-ee
+
+!  DEBUG
+!  write(std_out,*)'aa,bb,cc,dd,ee',aa,bb,cc,dd,ee
+!  ENDDEBUG
+
+!  Now, must find the unique root of
+!$0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3$
+!  This root is unique because it was imposed that the second derivative
+!  of the quartic polynomial is everywhere positive.
+!  First, remove the quadratic term, by a shift of lambda
+!  lambdap=lambda-lambda_shift
+!$0 = bbp + ccp * lambdap + eep * lambdap^3$
+   eep=4.0_dp*ee
+   lambda_shift=-dd/(4.0_dp*ee)
+   ccp=2.0_dp*cc-12.0_dp*ee*lambda_shift**2
+   bbp=bb+ccp*lambda_shift+eep*lambda_shift**3
+
+!  DEBUG
+!  write(std_out,*)'bbp,ccp,eep,lambda_shift',bbp,ccp,eep,lambda_shift
+!  ENDDEBUG
+
+!  The solution of a cubic polynomial equation is as follows :
+   discr=(bbp/eep)**2+(4.0_dp/27.0_dp)*(ccp/eep)**3
+!  In the present case, discr will always be positive
+   discr=sqrt(discr)
+   uu3=0.5_dp*(-bbp/eep+discr) ; uu=sign((abs(uu3))**(1.0_dp/3.0_dp),uu3)
+   vv3=0.5_dp*(-bbp/eep-discr) ; vv=sign((abs(vv3))**(1.0_dp/3.0_dp),vv3)
+   lambda_predict=uu+vv
+
+!  Restore the shift
+   lambda_predict=lambda_predict+lambda_shift
+   etotal_predict=aa+bb*lambda_predict+cc*lambda_predict**2+&
+&   dd*lambda_predict**3+ee*lambda_predict**4
+   dedv_predict=bb+2.0_dp*cc*lambda_predict+3.0_dp*dd*lambda_predict**2+&
+&   4.0_dp*ee*lambda_predict**3
+   d2edv2_1=2*cc+6*dd*lambda_1+12*ee*lambda_1**2
+   d2edv2_2=2*cc+6*dd*lambda_2+12*ee*lambda_2**2
+   d2edv2_predict=2*cc+6*dd*lambda_predict+12*ee*lambda_predict**2
+
+ end if
+
+ write(message, '(a,i3)' )'   line minimization, algorithm ',4
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a)' ) ' '
+ call wrtout(std_out,message,'COLL')
+
+end subroutine findmin
 !!***
 
 END MODULE m_numeric_tools

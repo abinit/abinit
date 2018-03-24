@@ -33,13 +33,14 @@ MODULE m_bfgs
  use m_abimover
 
  use m_io_tools,  only : open_file
+ use m_numeric_tools,  only : findmin
 
  implicit none
 
  private
 
 !public procedures
- public :: hessinit   ! Initialize Hessian matrix 
+ public :: hessinit   ! Initialize Hessian matrix
  public :: hessupdt   ! Update the hessian matrix
  public :: brdene
 !!***

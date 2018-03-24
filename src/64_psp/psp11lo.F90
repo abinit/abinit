@@ -18,7 +18,7 @@
 !!
 !! INPUTS
 !!  drdi=derivative of radial grid wrt index
-!!  mmax=number of radial r grid points 
+!!  mmax=number of radial r grid points
 !!  mqgrid=number of grid points in q from 0 to qmax.
 !!  qgrid(mqgrid)=q grid values (bohr**-1).
 !!  rad(mmax)=r grid values (bohr).
@@ -55,6 +55,8 @@ subroutine psp11lo(drdi,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 
  use defs_basis
  use m_profiling_abi
+
+ use m_numeric_tools, only : ctrap
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -29,7 +29,7 @@ sources = [
  "jacobi.F90",
  "k0.F90",
  "k1.F90",
- "lib_four.F90",
+ "m_lib_four.F90",
  "ludcmp.F90",
  "m_abilasi.F90",
  "m_abi_linalg.F90",
