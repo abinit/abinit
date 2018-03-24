@@ -92,13 +92,13 @@ contains
 
 subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outqmc'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_57_iovars, except_this_one => outqmc
 !End of the abilint section
 
  implicit none
@@ -544,6 +544,7 @@ end subroutine outqmc
 
  function i2s(n)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -626,6 +627,7 @@ end function i2s
 !! SOURCE
 
  function r2s(r,real_format)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

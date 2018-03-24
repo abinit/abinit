@@ -191,7 +191,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_53_ffts
  use interfaces_56_io_mpi
  use interfaces_56_recipspace
- use interfaces_57_iovars
  use interfaces_61_occeig
  use interfaces_62_poisson
  use interfaces_64_psp

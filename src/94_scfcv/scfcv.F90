@@ -233,7 +233,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
- use interfaces_57_iovars
  use interfaces_62_poisson
  use interfaces_65_paw
  use interfaces_66_nonlocal

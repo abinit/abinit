@@ -99,6 +99,7 @@ contains
 
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
