@@ -30,11 +30,11 @@
 !!
 !!            Client code should handle a possible problem with the following test:
 !!
-!!              if (LEN_TRIM(dilatmx_errmsg) then 
+!!              if (LEN_TRIM(dilatmx_errmsg) then
 !!                dump dilatmx_errmsg to the main output file.
 !!                handle_error
-!!              end if 
-!!    
+!!              end if
+!!
 !!
 !! PARENTS
 !!      driver,mover
@@ -56,6 +56,8 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
  use defs_basis
  use m_errors
  use m_profiling_abi
+
+ use m_abilasi,  only : matr3eigval
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

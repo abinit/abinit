@@ -41,7 +41,7 @@
 !!
 !! OUTPUT
 !!  elph_ds
-!!    
+!!
 !! PARENTS
 !!      elphon
 !!
@@ -71,6 +71,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int
+ use m_abilasi,         only : matrginv
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_dynmat,          only : ftgam_init, ftgam
@@ -286,7 +287,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
                    do kdir=1,3
                      k1 = kdir+3*(iatom-1)
                      displ_red(1,ibranch,jbranch) = displ_red(1,ibranch,jbranch) + &
-&                     gprimd(kdir,idir)*displ(1,k1,jbranch,iFSqpt) 
+&                     gprimd(kdir,idir)*displ(1,k1,jbranch,iFSqpt)
                      displ_red(2,ibranch,jbranch) = displ_red(2,ibranch,jbranch) + &
 &                     gprimd(kdir,idir)*displ(2,k1,jbranch,iFSqpt)
                    end do
@@ -302,9 +303,9 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
            else if (elph_ds%ep_scalprod == 1) then
 
-             
+
 !            NOTE: in these calls gam_now and pheigvec do not have the right rank, but blas usually does not care
-             
+
              call ZGEMM ( 'N', 'N', 3*natom, 3*natom, 3*natom, c1, gam_now, 3*natom,&
 &             pheigvec(:,iFSqpt), 3*natom, c0, tmpgam1, 3*natom)
              call ZGEMM ( 'C', 'N', 3*natom, 3*natom, 3*natom, c1, pheigvec(:,iFSqpt), 3*natom,&
@@ -344,10 +345,10 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
                xx = (omega-phfrq(ibranch,iFSqpt))*gaussfactor
                omega = omega+domega
                if (abs(xx) > gaussmaxarg) cycle
-               
+
                gaussval = gaussprefactor*exp(-xx*xx)
                gtemp = gaussval*a2fprefactor
-               
+
                if (dabs(gtemp) < 1.0d-50) gtemp = zero
                tmpa2f(iomega) = tmpa2f(iomega) + gtemp
              end do
@@ -358,10 +359,10 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 !            if (dabs(gtemp) < 1.0d-50) gtemp = zero
 !            tmpa2f(iomega) = tmpa2f(iomega) + gtemp
 !            end do
-             
+
              tmp_a2f_1d_tr (:,itrtensor,isppol,ssp,ie) = tmp_a2f_1d_tr (:,itrtensor,isppol,ssp,ie) + tmpa2f(:)
-             
-           end do ! end ibranch 
+
+           end do ! end ibranch
          end do ! end itrtensor
        end do ! end iFSqpt  - loop done in parallel
      end do ! end isppol
@@ -537,7 +538,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  chsu=8.617343101*1.0d-5 ! au to J/C/K
  chwu=9.270955772*1.0d-5 ! au to mK/W
 
-!change the fermi level to zero, as required for q01 to vanish. 
+!change the fermi level to zero, as required for q01 to vanish.
  tmp_fermie = elph_ds%fermie
 !Get Q00, Q01, Q11, and derive rho, tau
  q00 = zero
@@ -593,7 +594,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
              if (e2 .gt. elph_tr_ds%en_all(isppol,elph_ds%nenergy)) then
                ie2 = 0
                cycle
-             else 
+             else
                ie_tmp = 1
                diff = dabs(e2-elph_tr_ds%en_all(isppol,1))
                do ie2 = 2, elph_ds%nenergy
@@ -607,7 +608,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
                if (e2 < elph_tr_ds%en_all(isppol,ie2)) then
                  ie2_right = ie2
                  ie2_left  = ie2-1
-               else 
+               else
                  ie2_right = ie2+1
                  ie2_left  = ie2
                end if
@@ -987,7 +988,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ABI_DEALLOCATE(elph_ds%k_phon%wtq)
 
  ABI_DEALLOCATE(elph_tr_ds%a2f_1d_tr)
- 
+
  ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_tr)
  ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_tr)
  write(std_out,*) ' mka2f_tr : end '

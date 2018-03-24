@@ -41,8 +41,6 @@ sources = [
  "m_wfutils.F90",
  "mati3det.F90",
  "mati3inv.F90",
- "matrginv.F90",
- "matr3eigval.F90",
  "matr3inv.F90",
  "mknormpath.F90",
  "overlap_g.F90",
