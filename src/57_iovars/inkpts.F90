@@ -102,6 +102,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use m_errors
 
  use m_cgtools,  only : set_istwfk
+ use m_parser,  only : intagm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

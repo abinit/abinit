@@ -82,6 +82,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 #endif
 
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel

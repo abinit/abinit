@@ -50,6 +50,8 @@ subroutine importxyz (lenstr,string_raw,string_upper,strln)
  use m_profiling_abi
  use m_errors
 
+ use m_parser,  only : incomprs
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -134,7 +136,7 @@ subroutine importxyz (lenstr,string_raw,string_upper,strln)
 
  end do
 
- if (index_already_done > 1) then 
+ if (index_already_done > 1) then
    xyz_fname=repeat(blank,fnlen) ! Initialize xyz_fname to a blank line
    call append_xyz("-1",lenstr,string_upper,xyz_fname,strln)
  end if

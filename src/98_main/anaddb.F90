@@ -56,6 +56,7 @@ program anaddb
  use m_ddb_hdr
  use m_phonons
  use m_gruneisen
+ use m_supercell
  use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -66,11 +67,12 @@ program anaddb
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
  use m_time,           only : asctime
+ use m_parser,         only : instrng
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
- use m_supercell
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

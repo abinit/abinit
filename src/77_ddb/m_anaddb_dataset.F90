@@ -30,6 +30,7 @@ module m_anaddb_dataset
  use m_errors
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
+ use m_parser,    only : intagm
  use m_ddb,       only : DDB_QTOL
 
  implicit none

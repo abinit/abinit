@@ -40,7 +40,8 @@ module m_ab7_invars
   use interfaces_57_iovars
 
   use m_fstrings, only : inupper
-  use m_dtset,  only : dtset_free
+  use m_parser,   only : intagm
+  use m_dtset,    only : dtset_free
 
   implicit none
 

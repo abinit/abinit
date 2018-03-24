@@ -83,6 +83,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  use m_atomdata
 
  use m_fstrings, only : inupper
+ use m_parser,  only : intagm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -58,6 +58,8 @@ MODULE m_ingeo_img
  use m_profiling_abi
  use m_errors
 
+ use m_parser,    only : intagm
+
  implicit none
 
  private
