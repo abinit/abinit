@@ -73,6 +73,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
  use m_errors
  use m_cgtools
 
+ use m_numeric_tools,   only : hermit
  use defs_datatypes, only : pseudopotential_type
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &

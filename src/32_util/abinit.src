@@ -25,7 +25,6 @@ sources = [
  "ctrap.F90",
  "fappnd.F90",
  "findmin.F90",
- "hermit.F90",
  "inupper.F90",
  "isfile.F90",
  "kramerskronig.F90",

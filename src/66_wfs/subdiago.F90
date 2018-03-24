@@ -63,6 +63,8 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
  use m_abi_linalg
  use m_xmpi
 
+ use m_numeric_tools,   only : hermit
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -94,7 +96,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
  end if
 
  ! 1 if Scalapack version is used.
- use_slk = paral_kgb 
+ use_slk = paral_kgb
 
  rvectsize=npw_k*nspinor
  vectsize=2*rvectsize;if (me_g0==1) vectsize=vectsize-1
@@ -150,7 +152,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
      end do
    end do
  end if
- 
+
 !=====================================================
 !Carry out rotation of bands C(G,n) according to evecs
 ! ZGEMM if istwfk==1, DGEMM if istwfk==2
@@ -165,7 +167,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
    ABI_CHECK(ierr==0, "out-of-memory in blockvectorc")
 
    do iband=1,nband_k
-     if (me_g0 == 1) then       
+     if (me_g0 == 1) then
        call abi_xcopy(1,cg(1,cgindex_subd(iband)),1,blockvectora(1,iband),1)
        call abi_xcopy(rvectsize-1,cg(1,cgindex_subd(iband)+1),2,blockvectora(2,iband),1)
        call abi_xcopy(rvectsize-1,cg(2,cgindex_subd(iband)+1),2,blockvectora(rvectsize+1,iband),1)
@@ -239,13 +241,13 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &   evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
 
    call abi_xcopy(npw_k*nspinor*nband_k,work(1,1),1,cg(1,1+icg),1,x_cplx=2)
-   
+
 !  If paw, must also rotate S.C(G,n):
    if (usepaw==1) then
      call abi_xgemm('N','N',npw_k*nspinor,nband_k,nband_k,cone, &
 &     gsc(:,1+igsc:npw_k*nspinor*nband_k+igsc),npw_k*nspinor, &
 &     evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
-     call abi_xcopy(npw_k*nspinor*nband_k, work(1,1),1,gsc(1,1+igsc),1,x_cplx=2)   
+     call abi_xcopy(npw_k*nspinor*nband_k, work(1,1),1,gsc(1,1+igsc),1,x_cplx=2)
    end if
 
    ABI_DEALLOCATE(work)
