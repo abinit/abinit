@@ -42,6 +42,7 @@ MODULE m_vcoul
  use m_gwdefs,          only : GW_TOLQ0
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : arth, geop, imin_loc, llsfit_svd, l2norm, OPERATOR(.x.), quadrature, isdiagmat
+ use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
  use m_abilasi,         only : matrginv
  use m_geometry,        only : normv
  use m_crystal,         only : crystal_t
@@ -1680,7 +1681,6 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
 #undef ABI_FUNC
 #define ABI_FUNC 'cutoff_cylinder'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -2344,7 +2344,6 @@ function K0cos(yy)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'K0cos'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  real(dp),intent(in) :: yy
@@ -2444,7 +2443,6 @@ function K0cos_dth_r0(rho)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'K0cos_dth_r0'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  real(dp),intent(in) :: rho
