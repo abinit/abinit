@@ -25,9 +25,9 @@
 !!
 !! NOTES
 !!     this program calculates the imaginary part of the conductivity (principal value)
-!!     +derived optical properties. 
+!!     +derived optical properties.
 !!     the calculation is performed on the same grid as the initial input
-!!     to calculate the principal value, a trapezoidale integration +taylor expansion to 
+!!     to calculate the principal value, a trapezoidale integration +taylor expansion to
 !!     third order is used (W.J. Thomson computer in physics vol 12 p94 1998)
 !!    two input files are needed inppv.dat (parameters) and sigma.dat (energy,sigma_1)
 !!     two output files ppsigma.dat (energy,sigma_1,sigma_2,epsilon_1,epsilon_2)
@@ -55,6 +55,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  use m_errors
 
  use m_io_tools, only : open_file
+ use m_splines,  only : intrpl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -125,7 +126,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
    MSG_ERROR("Aborting now")
  end if
 
-!loop on the initial energy grid      
+!loop on the initial energy grid
  do ip=1,npti
 
 !  adjust the interval before and after the pole to reflect range/npt interval
@@ -193,7 +194,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 
    end if
 
-!  calculate the derivated optical quantities and output the value 
+!  calculate the derivated optical quantities and output the value
    sigma2=(-two/pi)*xsum
    eps1=one-(four_pi*sigma2/(pole))
    eps2=four*fcti(ip)*pi/(pole)
@@ -217,12 +218,12 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 &   ((one+nomega(ip))**2 + komega**2)
 
    write(eps_unt,'(5e18.10)') Ha_eV*pole,fcti(ip)*Ohmcm,sigma2*Ohmcm,eps1,eps2
-   write(abs_unt,'(5e18.10)') Ha_eV*pole,nomega(ip),komega,refl,abso(ip) 
+   write(abs_unt,'(5e18.10)') Ha_eV*pole,nomega(ip),komega,refl,abso(ip)
 
  end do
 
  close(eps_unt)
- close(abs_unt) 
+ close(abs_unt)
 
  ABI_DEALLOCATE(fct)
  ABI_DEALLOCATE(x1)
