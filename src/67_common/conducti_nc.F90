@@ -95,6 +95,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
  use m_io_tools,     only : open_file, get_unit
  use m_fstrings,     only : sjoin
+ use m_abilasi,      only : jacobi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -188,7 +189,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  if (wfk_compare(ddk1, ddk3) /= 0) then
    MSG_ERROR("ddk1 and ddk3 are not consistent. see above messages")
  end if
- 
+
 !Extract params from the header of the first ddk file (might have been the GS file ?)
 
 !Extract info from the header
@@ -341,18 +342,18 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
 !LOOP OVER SPINS
  do isppol=1,nsppol
-!  
+!
    bdtot_index = 0
    bd2tot_index = 0
-!  
+!
    deltae  = 0.0d0
-!  
+!
 !  BIG FAT k POINT LOOP
-!  
+!
    do ikpt=1,nkpt
-!    
+!
      nband_k=nband(ikpt+(isppol-1)*nkpt)
-!    
+!
      ABI_ALLOCATE(eig0_k,(nband_k))
      ABI_ALLOCATE(eig1_k,(2*nband_k**2,3))
      ABI_ALLOCATE(occ_k,(nband_k))
@@ -370,7 +371,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
      socc_k    = 0.0d0
      dhdk2_r   = 0.0d0
      dhdk2_g   = 0.0d0
-!    
+!
 !    eigenvalue for k-point
      eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
 !    first derivative eigenvalues for k-point
@@ -381,7 +382,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
 !    derivative of occupation number for k-point
      doccde_k(:)=doccde(1+bdtot_index:nband_k+bdtot_index)
-!    
+!
 !    DEBUG
 !    write(16,*)
 !    write(16,*)' conducti : ikpt=',ikpt
@@ -391,11 +392,11 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !    end do
 !    write(16,*)
 !    ENDDEBUG
-!    
+!
 !    LOOP OVER BAND
      do iband=1,nband_k
        do jband=1,nband_k
-!        
+!
          do l1=1,3
            do l2=1,3
              do ii=1,3
@@ -415,7 +416,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
              dhdk2_r(iband,jband,l1,l2)=dhdk2_r(iband,jband,l1,l2)/two_pi/two_pi
            end do
          end do
-!        
+!
          do l1=1,3
            do l2=1,3
              dhdk2_g(iband,jband)=dhdk2_g(iband,jband)+gmet_inv(l1,l2)*( &
@@ -426,10 +427,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
            end do
          end do
          dhdk2_g(iband,jband)=dhdk2_g(iband,jband)/two_pi/two_pi
-!        
+!
          diff_occ = occ_k(iband)-occ_k(jband)
 !        if (dabs(diff_occ)>=tol8) then
-!        
+!
 !        Conductivity for each omega
          omin = 0.0d0
          do iom=1,mom
@@ -452,7 +453,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
            end do
 
          end do
-!        
+!
 !        Sumrule start
          if (dabs(eig0_k(iband)-eig0_k(jband))>=tol10) then
            np_sum_k1=np_sum_k1 -dhdk2_g(iband,jband)&
@@ -460,14 +461,14 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
          else
            np_sum_k2=np_sum_k2 - doccde_k(iband)*dhdk2_g(iband,jband)
          end if
-!        
+!
 
 !        end loop over band
 !        end if
        end do
        socc_k=socc_k+occ_k(iband)
      end do
-!    
+!
      do iom=1,mom
        kin11(iom)=kin11(iom)+wtk(ikpt)*kin11_k(iom)
        kin12(iom)=kin12(iom)+wtk(ikpt)*kin12_k(iom)
@@ -482,7 +483,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
      np_sum=np_sum + wtk(ikpt)*(np_sum_k1+np_sum_k2)
      socc=socc+wtk(ikpt)*socc_k
-!    
+!
 !    validity limit
      deltae=deltae+(eig0_k(nband_k)-fermie)
 
@@ -526,7 +527,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
  if (open_file(trim(filnam_out)//'_Kth',msg,newunit=kth_unt,form='formatted',action="write") /= 0) then
    MSG_ERROR(msg)
- end if 
+ end if
  write(kth_unt,'(a)')&
 & ' #omega(ua) hbar*omega(eV)  thermal cond(ua)   Kth(W/m/K)   thermopower(ua)   Stp(microohm/K)'
 
@@ -656,7 +657,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
  call msig (kin11,mom,oml1,filnam_out)
 
- close(tens_unt) 
+ close(tens_unt)
  close(lij_unt)
  close(sig_unt)
  close(kth_unt)

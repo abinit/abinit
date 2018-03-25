@@ -67,6 +67,8 @@ subroutine initaim(aim_dtset,znucl_batom)
 #endif
  use m_hdr
 
+ use m_abilasi,  only : lubksb
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -392,7 +394,7 @@ subroutine initaim(aim_dtset,znucl_batom)
    ptp(1)=ptc(1)
    do jj=2,ngfft(ii)-1
      ptd(jj)=aa(ii)-ptc(jj-1)**2
-     if(ptd(jj)<zero) then 
+     if(ptd(jj)<zero) then
        MSG_ERROR('Matrix is not positive definite !')
      end if
      ptd(jj)=sqrt(ptd(jj))
@@ -409,7 +411,7 @@ subroutine initaim(aim_dtset,znucl_batom)
      ss=ss+ptp(jj)**2
    end do
    ss=aa(ii)-ss
-   if(ss<zero) then 
+   if(ss<zero) then
      MSG_ERROR('Matrix is not positive definite !')
    end if
    ptd(ngfft(ii))=sqrt(ss)

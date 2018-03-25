@@ -53,6 +53,8 @@ subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
  use m_errors
  use m_profiling_abi
 
+ use m_abilasi,  only : jacobi, lubksb
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
