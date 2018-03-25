@@ -69,7 +69,6 @@ subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,mu
-!arrays
 
 ! *************************************************************************
 

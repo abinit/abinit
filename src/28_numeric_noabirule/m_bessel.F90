@@ -945,6 +945,7 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
       RETURN
 !---------- Last card of BESY1 ----------
       END function besy1
+!!***
 
 !!****f* ABINIT/CALCK0
 !! NAME
@@ -1207,6 +1208,7 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
       RETURN
 !---------- Last line of CALCK0 ----------
       END subroutine calck0
+!!***
 
 !S    REAL
       DOUBLE PRECISION FUNCTION BESK0(X)
@@ -1240,6 +1242,7 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
       RETURN
 !---------- Last line of BESK0 ----------
       END function besk0
+!!***
 
 !S    REAL
       DOUBLE PRECISION FUNCTION BESEK0(X)
@@ -1273,6 +1276,7 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
       RETURN
 !---------- Last line of BESEK0 ----------
       END function BESEK0
+!!***
 
 !!****f* ABINIT/CALCK1
 !! NAME
@@ -1534,6 +1538,7 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
       RETURN
 !---------- Last line of CALCK1 ----------
       END subroutine calck1
+!!***
 
 !CS    REAL
       DOUBLE PRECISION FUNCTION BESK1(X)
@@ -1563,6 +1568,8 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
       RETURN
 !---------- Last line of BESK1 ----------
       END function besk1
+!!***
+
 !CS    REAL
       DOUBLE PRECISION  FUNCTION BESEK1(X)
 !--------------------------------------------------------------------
@@ -1595,3 +1602,4 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
 !!***
 
 end module m_bessel
+!!***

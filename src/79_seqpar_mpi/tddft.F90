@@ -1,6 +1,5 @@
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/tddft
-!!
 !! NAME
 !! tddft
 !!
@@ -35,7 +34,6 @@
 !!       WARNING about parallelization: see below
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
 !!                see ~abinit/doc/variables/vargs.htm#ngfft
-
 !!  nkpt=number of k points
 !!  nkxc=second dimension of the array kxc (see rhotoxc for a description)
 !!  npwarr(nkpt)=number of planewaves at each k point
@@ -194,7 +192,6 @@
  me_loc    = xmpi_comm_rank(spaceComm) !Define who i am
 
 #if defined HAVE_MPI
-
  if (me_loc/=0) then
    am_master=.FALSE.
  end if
@@ -1047,7 +1044,7 @@
 
 !      For the singlet correction, must compute the hartre potential created
 !      by the product of wavefunctions
-       cplex=1 
+       cplex=1
 
 !      DEBUG
 !      write(message,'(a,i3)')'Before Fourdp, on proc ',me_loc
