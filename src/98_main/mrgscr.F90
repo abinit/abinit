@@ -97,7 +97,6 @@ program mrgscr
 #define ABI_FUNC 'mrgscr'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule

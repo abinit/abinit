@@ -381,6 +381,7 @@ end function tetra_from_kptrlatt
 
 integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

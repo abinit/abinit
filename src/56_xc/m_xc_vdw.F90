@@ -2622,7 +2622,6 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_df_kernel_value'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
   implicit none
