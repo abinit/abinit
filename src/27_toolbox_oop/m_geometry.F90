@@ -466,7 +466,7 @@ end subroutine acrossb
 !! the Wigner-Seitz supercell centered on the origin of the B lattice with primitive
 !! translations nmonkh(1)*a_1+nmonkh(2)*a_2+nmonkh(3)*a_3.
 !! Subroutine taken from the Wannier90 code. Modified by MG to fulfil abinit coding rules.
-!! API slightly changed the wrt wannier90 version.
+!! API slightly changed wrt the wannier90 version.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2007 Jonathan Yates, Arash Mostofi,
@@ -848,7 +848,6 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
    MSG_BUG(message)
  end if
 
-
  if(zmod < 1.d-8)then
    write(message,'(a,a,a,i6)')&
 &   'The module of the zaxis should be greater than 1.d-8,',ch10,&
@@ -883,7 +882,6 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 &   'Action : If you did not intend this, make |z|<10 and |x|<10 ',ch10
    call wrtout(std_out,message,'COLL')
  end if
-
 
  umat(1,:) = xaxis(:)/xmod
  umat(2,:) = yaxis(:)

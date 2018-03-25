@@ -36,9 +36,9 @@
 
 subroutine graph(unts,untg)
 
- use m_profiling_abi
 
  use defs_basis
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

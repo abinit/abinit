@@ -86,22 +86,11 @@ end function vnorm
 !! FUNCTION
 !! Vector product
 !!
-!! COPYRIGHT
-!! Copyright (C) 2007-2018 ABINIT group ( ).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  vv,uu = vectors to compute vector product
 !! OUTPUT
 !!  (return the value of the vector product)
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 function vec_prod(uu,vv)
 
@@ -147,15 +136,11 @@ end function vec_prod
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 subroutine mprod(aa,bb,cc)
 
- use m_profiling_abi
 
  use defs_basis
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -184,6 +169,7 @@ subroutine mprod(aa,bb,cc)
      end do
    end do
  end do
+
 end subroutine mprod
 !!***
 
@@ -203,10 +189,6 @@ end subroutine mprod
 !!
 !! SOURCE
 !!
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 subroutine bschg1(vv,dir)
 
@@ -253,6 +235,7 @@ subroutine bschg1(vv,dir)
    MSG_ERROR('Transformation of coordinates')
  end if
  vv(:)=vt(:)
+
 end subroutine bschg1
 !!***
 
@@ -271,13 +254,6 @@ end subroutine bschg1
 !!
 !! SOURCE
 !!
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine bschg2(aa,dir)
 

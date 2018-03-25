@@ -46,7 +46,6 @@ sources = [
  "setmqgrid.F90",
  "setsym.F90",
  "smpbz.F90",
- "symkchk.F90",
  "symg.F90",
  "testkgrid.F90",
 ]

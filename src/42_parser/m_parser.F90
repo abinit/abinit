@@ -4,7 +4,7 @@
 !! m_parser
 !!
 !! FUNCTION
-!! This module contains routines and functions used to
+!! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2008-2018 ABINIT group (XG, MJV)

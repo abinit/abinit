@@ -42,10 +42,9 @@
 
 subroutine plint()
 
- use m_profiling_abi
-
  use defs_basis
  use defs_aimprom
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -121,5 +120,6 @@ subroutine plint()
    write(untp,'(2E16.8)') vv(3), igr
  end do
  ABI_DEALLOCATE(uu)
+
 end subroutine plint
 !!***

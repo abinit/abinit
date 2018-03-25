@@ -368,13 +368,6 @@ end subroutine critic
 !!
 !! FUNCTION
 !!
-!! COPYRIGHT
-!! Copyright (C) 2007-2018 ABINIT group ( ).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  (to be filled)
 !!
@@ -389,15 +382,10 @@ end subroutine critic
 !! SOURCE
 !!
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 subroutine ordr(aa,dd,nn,cff)
 
- use m_profiling_abi
-
  use defs_basis
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

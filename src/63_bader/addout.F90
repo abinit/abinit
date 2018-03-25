@@ -40,11 +40,10 @@
 
 subroutine addout(aim_dtset)
 
- use m_profiling_abi
-
  use defs_basis
  use defs_aimprom
  use defs_abitypes
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
