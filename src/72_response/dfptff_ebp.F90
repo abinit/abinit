@@ -65,6 +65,8 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
  use m_profiling_abi
  use m_efield
 
+ use m_cgtools,   only : overlap_g
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -250,7 +252,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
        do jband=1,dtefield%mband_occ
          e0 = e0 + 4_dp*(umat(1,iband,jband,1)*qmat(2,jband,iband,ikpt,1,idir)&
 &         +       umat(2,iband,jband,1)*qmat(1,jband,iband,ikpt,1,idir))
-         
+
        end do
      end do
 

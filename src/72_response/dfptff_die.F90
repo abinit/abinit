@@ -4,7 +4,7 @@
 !! dfptff_die
 !!
 !! FUNCTION
-!! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007). 
+!! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007).
 !!
 !! COPYRIGHT
 !! Copyright (C) 2004-2018 ABINIT group (XW).
@@ -39,10 +39,10 @@
 !! pwindall(:,6,:) <- <u^(1)_i|u^(0)_i+n-1>
 !! pwindall(:,7,:) <- <u^(0)_i|u^(1)_i-n+1>
 !! pwindall(:,8,:) <- <u^(0)_i|u^(1)_i-n-1>
-!! rprimd(3,3)=dimensional primitive translations in real space (bohr) 
+!! rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!
 !! OUTPUT
-!! diet = electric susceptibility tensor 
+!! diet = electric susceptibility tensor
 !!
 !! PARENTS
 !!      dfpt_scfcv
@@ -64,6 +64,8 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
  use defs_basis
  use m_profiling_abi
  use m_efield
+
+ use m_cgtools,   only : overlap_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -175,7 +177,7 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
        do jband=1,dtefield%mband_occ
          e0 = e0 + (s1mat(1,iband,jband)*qmat(2,jband,iband,ikpt,1,idir)&
 &         +    s1mat(2,iband,jband)*qmat(1,jband,iband,ikpt,1,idir))
-         
+
        end do
      end do
 

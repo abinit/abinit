@@ -18,7 +18,7 @@
 !! cg1(2,mpw1*nspinor*mband*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to finite electric field calculation
-!! ikpt = the index of the current k point 
+!! ikpt = the index of the current k point
 !! isppol=1 for unpolarized, 2 for spin-polarized
 !! mband =  maximum number of bands
 !! mkmem = maximum number of k-points in core memory
@@ -29,7 +29,7 @@
 !! npwar1(nkpt) = number of planewaves in basis and boundary for response wfs
 !! nspinor = 1 for scalar wfs, 2 for spinor wfs
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
-!! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) = 
+!! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
 !! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
@@ -39,7 +39,7 @@
 !! pwindall(:,5,:) <- <u^(1)_i|u^(0)_i+n+1>
 !! pwindall(:,6,:) <- <u^(1)_i|u^(0)_i+n-1>
 !! pwindall(:,7,:) <- <u^(0)_i|u^(1)_i-n+1>
-!! pwindall(:,8,:) <- <u^(0)_i|u^(1)_i-n-1>  
+!! pwindall(:,8,:) <- <u^(0)_i|u^(1)_i-n-1>
 !!
 !! OUTPUT
 !! grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
@@ -66,6 +66,8 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
  use defs_basis
  use m_profiling_abi
  use m_efield
+
+ use m_cgtools,   only : overlap_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -142,7 +144,7 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
            grad_berry(2,ipw,jband) = &
 &           grad_berry(2,ipw,jband) + &
 &           fac*qmat(1,iband,jband,ikpt,1,idir)*wfi + fac*qmat(2,iband,jband,ikpt,1,idir)*wfr
-           
+
          end do
        end do
      end if

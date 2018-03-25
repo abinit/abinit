@@ -68,6 +68,8 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
  use m_profiling_abi
  use m_efield
 
+ use m_cgtools,   only : overlap_g
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
