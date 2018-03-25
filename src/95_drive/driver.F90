@@ -106,7 +106,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
  use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
- use m_dtset,        only : dtset_copy, dtset_free
+ use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
  use m_xgScalapack
 
@@ -271,7 +271,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call xgScalapack_config(SLK_AUTO)
    else if ( dtset%np_slk > 1 ) then
      call xgScalapack_config(dtset%np_slk)
-   else 
+   else
      call xgScalapack_config(SLK_AUTO)
    end if
 
