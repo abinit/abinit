@@ -464,7 +464,6 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_interp_init'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -857,7 +856,6 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_compute_hinterp'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1417,7 +1415,6 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_interp_matmul'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

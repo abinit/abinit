@@ -1852,7 +1852,6 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_linwid'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -2145,7 +2144,6 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_init'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -3262,7 +3260,6 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_tr_init'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

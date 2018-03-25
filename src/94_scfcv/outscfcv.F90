@@ -183,7 +183,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #define ABI_FUNC 'outscfcv'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_54_abiutil
  use interfaces_62_iowfdenpot

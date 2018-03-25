@@ -21,7 +21,6 @@ sources = [
  "dzgedi.F90",
  "dzgefa.F90",
  "gamma_function.F90",
- "interp.F90",
  "j0y0.F90",
  "j1y1.F90",
  "k0.F90",
