@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "cspint.F90",
  "dzgedi.F90",
  "dzgefa.F90",
  "gamma_function.F90",
