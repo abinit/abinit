@@ -4,9 +4,9 @@
 !!  randomcellpos
 !!
 !! FUNCTION
-!!  FIXME: This subroutine creates a unit cell with random atomic positions. It is
-!!         assumed that the cell parameters are given and fixed. Several methods are
-!!        used to generate the cell.
+!!  This subroutine creates a unit cell with random atomic positions. It is
+!!  assumed that the cell parameters are given and fixed. Several methods are
+!!  used to generate the cell.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2010-2018 ABINIT group (AHR)
@@ -21,8 +21,10 @@
 !! random_atpos=input variable
 !!   0 no generation of random atomic potision
 !!   1 completely random atomic potisions
-!!   2 random atomic positions, avoiding too close atoms (prevent coming closer than a fraction of the sum of covalent radii)
-!!   3 same than 2 but also generates the rprim and acell randomly within some given ranges (angles between 50 and 130)
+!!   2 random atomic positions, avoiding too close atoms 
+!!     (prevent coming closer than a fraction of the sum of covalent radii)
+!!   3 same than 2 but also generates the rprim and acell randomly 
+!!    within some given ranges (angles between 50 and 130)
 !! ratsph(1:ntypat)=radius of the atomic sphere
 !! rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !! typat(1:natom)= input variable giving the type of each atom

@@ -20,7 +20,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "bldgrp.F90",
  "bonds_lgth_angles.F90",
- "chiscwrt.F90",
  "chkdilatmx.F90",
  "chkgrp.F90",
  "chkorthsy.F90",

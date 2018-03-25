@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "appdig.F90",
- "blow_pawuj.F90",
  "create_mlms2jmj.F90",
  "create_slm2ylm.F90",
  "fappnd.F90",
