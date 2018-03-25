@@ -445,7 +445,7 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
       END IF
  2000 RETURN
 !C---------- Last line of CALJY0 ----------
-      END
+      END subroutine caljy0
 
       DOUBLE PRECISION FUNCTION BESJ0(X)
 !CS    REAL FUNCTION BESJ0(X)
@@ -473,7 +473,7 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
       BESJ0 = RESULT
       RETURN
 !---------- Last line of BESJ0 ----------
-      END
+      END function besj0
       DOUBLE PRECISION FUNCTION BESY0(X)
 !CS    REAL FUNCTION BESY0(X)
 !C--------------------------------------------------------------------
@@ -500,7 +500,7 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
       BESY0 = RESULT
       RETURN
 !---------- Last line of BESY0 ----------
-      END subroutine calcjy0
+      END function besy0
 
 SUBROUTINE CALJY1(ARG,RESULT,JINT)
 
@@ -887,7 +887,7 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
       IF ((JINT .EQ. 0) .AND. (ARG .LT. ZERO)) RESULT = -RESULT
  2000 RETURN
 !---------- Last card of CALJY1 ----------
-      END
+      END subroutine caljy1
 
       DOUBLE PRECISION FUNCTION BESJ1(X)
 !--------------------------------------------------------------------
@@ -915,7 +915,7 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
       BESJ1 = RESULT
       RETURN
 !---------- Last card of BESJ1 ----------
-      END
+      END function besj1
 
 
       DOUBLE PRECISION FUNCTION BESY1(X)
@@ -944,7 +944,7 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
       BESY1 = RESULT
       RETURN
 !---------- Last card of BESY1 ----------
-      END subroutine calcjy1
+      END function besy1
 
 !!****f* ABINIT/CALCK0
 !! NAME
