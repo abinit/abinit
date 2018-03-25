@@ -59,6 +59,7 @@ MODULE m_numeric_tools
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
+ public :: cspint                ! Estimates the integral of a tabulated function.
  public :: ctrap                 ! Corrected trapezoidal integral on uniform grid of spacing hh.
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
@@ -3167,7 +3168,7 @@ end subroutine ctrap
 !!  cspint
 !!
 !! FUNCTION
-!!  CSPINT estimates the integral of a tabulated function.
+!!  Estimates the integral of a tabulated function.
 !!
 !! INPUTS
 !!
