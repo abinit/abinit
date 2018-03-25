@@ -25,8 +25,8 @@
 !!  singam= sin(gamma) with gamma=Euler angle 3
 !!
 !! NOTES
-!!  - This file comes from the file crystal_symmetry.f
-!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  This file comes from the file crystal_symmetry.f
+!!  by N.A.W. Holzwarth and A. Tackett for the code pwpaw
 !!
 !! PARENTS
 !!      setsymrhoij

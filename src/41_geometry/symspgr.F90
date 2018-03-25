@@ -102,7 +102,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  character(len=15) :: intsb,ptintsb,ptschsb,schsb
  character(len=35) :: intsbl
  character(len=500) :: message
- character(len = 128) :: label
+ character(len=128) :: label
 !arrays
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
  integer :: uniaxis(3),uniaxis_try(3)

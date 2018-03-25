@@ -22,8 +22,6 @@
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      pawuj_utils,shellstruct
 !!

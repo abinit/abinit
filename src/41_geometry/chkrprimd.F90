@@ -6,8 +6,7 @@
 !!
 !! FUNCTION
 !! Test if {rprim,acell,rprimd}
-!! It means that rprimd can be reconstructed
-!! from the rprim and acell
+!! It means that rprimd can be reconstructed from the rprim and acell
 !! Output a message if is not the case
 !!
 !! COPYRIGHT

@@ -27,8 +27,6 @@
 !!
 !! OUTPUT
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      memory_eval
 !!

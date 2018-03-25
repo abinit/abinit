@@ -34,8 +34,6 @@
 !!  without magnetic operations at input,
 !!  and with magnetic operations at output
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      ingeo
 !!

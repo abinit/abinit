@@ -3,7 +3,8 @@
 !! NAME
 !!  shellstruct 
 !!
-!! FUNCTION calculates shell structure (multiplicities, radii) of an atomic configuration 
+!! FUNCTION 
+!!  calculates shell structure (multiplicities, radii) of an atomic configuration 
 !!  
 !! INPUTS
 !!  natom=number of atoms in unit cell
@@ -14,10 +15,8 @@
 !!
 !! OUTPUT
 !!  sdisv(nat)= distance of each shell to central atom (only the first nsh entries are relevant)
-!!  nsh    = number of shells
-!!  mult(nat) = number of atoms on shell      (only the first nsh entries are relevant)
-!!
-!! SIDE EFFECTS
+!!  nsh= number of shells
+!!  mult(nat) = number of atoms on shell (only the first nsh entries are relevant)
 !!
 !! PARENTS
 !!      pawuj_det

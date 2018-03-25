@@ -23,9 +23,9 @@
 !!  fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!
 !! NOTES
-!!    Unlike fred, fcart has been corrected by enforcing
-!!    the translational symmetry, namely that the sum of force
-!!    on all atoms is zero.
+!!  Unlike fred, fcart has been corrected by enforcing
+!!  the translational symmetry, namely that the sum of force
+!!  on all atoms is zero.
 !!
 !! PARENTS
 !!      gstateimg,m_abihist,m_effective_potential,m_mep,mover,prec_simple
