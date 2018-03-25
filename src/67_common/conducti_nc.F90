@@ -101,7 +101,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_nc'
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_61_occeig

@@ -53,13 +53,12 @@ subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
  use m_errors
  use m_profiling_abi
 
- use m_abilasi,  only : jacobi, lubksb
+ use m_abilasi,  only : jacobi, lubksb, ludcmp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'critic'
- use interfaces_28_numeric_noabirule
  use interfaces_63_bader, except_this_one => critic
 !End of the abilint section
 

@@ -67,13 +67,12 @@ subroutine initaim(aim_dtset,znucl_batom)
 #endif
  use m_hdr
 
- use m_abilasi,  only : lubksb
+ use m_abilasi,  only : lubksb, ludcmp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initaim'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_63_bader, except_this_one => initaim
 !End of the abilint section

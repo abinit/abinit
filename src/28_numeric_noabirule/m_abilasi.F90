@@ -139,6 +139,7 @@ MODULE m_abilasi
 
  !FIXME This procedures are deprecated, use lapack API
  public :: jacobi        ! Computes all eigenvalues and eigenvectors of a real symmetric matrix a,
+ public :: ludcmp
  public :: lubksb
 
 !----------------------------------------------------------------------
@@ -3851,6 +3852,7 @@ END SUBROUTINE ludcmp
 !! SOURCE
 
 SUBROUTINE lubksb(a,n,np,indx,b)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

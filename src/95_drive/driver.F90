@@ -125,7 +125,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_54_abiutil
  use interfaces_95_drive, except_this_one => driver
 !End of the abilint section
 
