@@ -72,7 +72,6 @@ CONTAINS  !===========================================================
  subroutine exp_mat_cx(mat_a,mat_a_size,factor)
 
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -73,7 +73,6 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_gradberry'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

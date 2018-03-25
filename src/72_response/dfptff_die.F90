@@ -71,7 +71,6 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_die'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

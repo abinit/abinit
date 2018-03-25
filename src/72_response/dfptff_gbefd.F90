@@ -74,7 +74,6 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_gbefd'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

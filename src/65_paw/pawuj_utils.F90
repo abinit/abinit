@@ -51,7 +51,6 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'linvmat'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw, except_this_one => linvmat
 !End of the abilint section
 

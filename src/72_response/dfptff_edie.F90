@@ -74,7 +74,6 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_edie'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
