@@ -39,8 +39,6 @@ The volume of the primitive unit cell (ucvol) is
 \Omega &=& {\bf R}_1 \cdot ({\bf R}_2 \times {\bf R}_3)
 \end{eqnarray*}
 
-Computed in {metric.f}
-
 The scalar products in the reduced representation are valuated thanks to
 
 $$ 
@@ -74,14 +72,12 @@ $$ {\bf r} \cdot {\bf r'} = \sum_{ij} r^{red}_{i} {\bf R}^{met}_{ij} r^{red \pri
 
 where ${\bf R}^{met}_{ij}$ is the metric tensor in real space:
 
-\[{\bf R}^{met}_{ij} \rightarrow {rmet(i,j)}\]
-
-Computed in metric.f.
+$$ {\bf R}^{met}_{ij} \rightarrow {rmet(i,j)} $$
 
 ## Reciprocal space
 
 The three primitive translation vectors in reciprocal space are
-${\bf G}_{1p}$,${\bf G}_{2p}$,${\bf G}_{3p}$ (computed in metric.f)
+${\bf G}_{1p}$,${\bf G}_{2p}$,${\bf G}_{3p}$
 
 \begin{eqnarray*}
 {\bf G}_{1p}&=&\frac{1}{\Omega}({\bf R}_{2p}\times{\bf R}_{3p}) \rightarrow {gprimd(1:3,1)} \\
@@ -142,8 +138,6 @@ $$ {\bf K} \cdot {\bf K'} = \sum_{ij} K^{red}_{i}{\bf G}^{met}_{ij}K^{red \prime
 where ${\bf G}^{met}_{ij}$ is the metric tensor in reciprocal space:
 
 $$ {\bf G}^{met}_{ij} \rightarrow {gmet(i,j)} $$
-
-(computed in metric.f).
 
 ## Symmetries
 
