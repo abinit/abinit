@@ -44,9 +44,6 @@ sources = [
  "invars2m.F90",
  "macroin.F90",
  "macroin2.F90",
- "memana.F90",
- "memorf.F90",
- "memory.F90",
  "memory_eval.F90",
  "mpi_setup.F90",
  "m_ab7_invars_f90.F90",
@@ -60,7 +57,6 @@ sources = [
  "prtocc.F90",
  "prttagm.F90",
  "prttagm_images.F90",
- "wvl_memory.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

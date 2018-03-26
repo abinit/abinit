@@ -121,6 +121,7 @@ program abinit
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_pawxmlps,    only : paw_setup, paw_setup_free, npsp_pawxml,ipsp2xml
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
+ use m_memeval,     only : memory_eval
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
 #endif
