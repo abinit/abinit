@@ -50,7 +50,7 @@ We suppose that you have downloaded the ABINIT package from the Web site,
 unpacked it and installed it. If not, you might nevertheless continue reading
 the present Web page, just to get an overview, but it might prove more
 fruitful to have first downloaded the ABINIT package and at least unpacked it,
-see the [installation notes](https://www.abinit.org/installation).
+see the [installation notes](https://www.abinit.org/sites/default/files/last/install_notes/install.html).
 
 !!! note
 

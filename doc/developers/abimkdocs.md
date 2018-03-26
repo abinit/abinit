@@ -27,7 +27,7 @@ MkDocs includes a couple built-in themes as well as various third party themes,
 all of which can easily be customized with extra CSS or JavaScript or overridden from the theme directory. 
 The Abinit website uses [Mkdocs-Material](http://squidfunk.github.io/mkdocs-material/), a theme
 built using Google's [Material Design](https://www.google.com/design/spec/material-design) guidelines.
-We also use [fontawesome icons](http://fontawesome.io/) and
+We also use [fontawesome icons](https://fontawesome.com/) and
 [Bootstrap](http://getbootstrap.com/) a popular HTML, CSS, and Javascript framework 
 for developing responsive, mobile first projects on the web 
 (shrink the browser window to see how the menu and the navigation bars react).
@@ -39,7 +39,7 @@ In addition to the basic markdown syntax, the Abinit documentation supports exte
 to ease the writing of hyperlinks and the inclusion of bibliographic citations.
 A detailed description of *our markdown dialect* is given in [our markdown page](markdown).
 Also [MathJax](https://www.mathjax.org/) for equations in LaTeX is activated, 
-and the (few) specificities of its usage in the Abinit docs are explained [in this section](markdown.md#MathJax).
+and the (few) specificities of its usage in the Abinit docs are explained [in this section](markdown.md#mathjax).
 
 As a net result, Abinit developers can write nice-looking documentation and release notes without having to use 
 HTML explicitly while working in an environment that is well-integrated with the Abinit ecosystem 
@@ -423,7 +423,7 @@ B.1
 Implementation of algorithms to interpolate the electronic band structure.
 See the new input variables [[einterp]], [[nkpath]], and [[prtebands]], 
 and the new tests [[test:v8_04]], [[test:libxc_41]].
-Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
+Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
 
 C.2  
 New versions of Fortran compilers have been integrated in the test farm:
@@ -433,7 +433,7 @@ New versions of Fortran compilers have been integrated in the test farm:
 - IBM xlf compiler 14.1
 - NAG 5.3
 
-Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]]
+Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]].
 
 !!! important
     We are already using Markdown on gitlab to document our merge requests.

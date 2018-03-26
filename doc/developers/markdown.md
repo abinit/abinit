@@ -517,7 +517,7 @@ Markdown       | Result
 
 ### Definition Lists
 
-The [Definition Lists](https://pythonhosted.org/Markdown/extensions/definition_lists.html) extension 
+The [Definition Lists](https://python-markdown.github.io/extensions/definition_lists) extension 
 adds the ability to create definition lists in Markdown documents.
 This extension is included in the standard Markdown library.
 The following text:
@@ -543,7 +543,8 @@ Orange
 
 ### Admonitions
 
-[Admonitions](https://pythonhosted.org/Markdown/extensions/admonition.html) are useful
+[Admonitions](
+https://python-markdown.github.io/extensions/admonition) are useful
 to stress important sections (useful e.g. in the Abinit lessons).
 Admonition are created using the Markdown syntax:
 
