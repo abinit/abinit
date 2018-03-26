@@ -24,13 +24,14 @@
 
 #include "abi_common.h"
 
-MODULE m_crystal
+MODULE m_memeval
 
  use defs_basis
  use defs_datatypes
  use defs_abitypes
  use m_profiling_abi
  use m_xmpi
+ use m_errors
 
  use m_libpaw_tools,  only : libpaw_write_comm_set
 
@@ -78,6 +79,7 @@ contains
 
 subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -86,7 +88,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_56_recipspace
- use interfaces_57_iovars, except_this_one => memory_eval
+ use interfaces_57_iovars
 !End of the abilint section
 
  implicit none
@@ -499,12 +501,12 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
 & prtvol,pspheads,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memory'
  use interfaces_14_hidewrite
- use interfaces_57_iovars, except_this_one => memory
 !End of the abilint section
 
  implicit none
@@ -1389,6 +1391,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 & marrays,mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm,mffmem,&
 & mpw,natom,nchain,nfft,nfftf,occopt,option,prtvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1971,12 +1974,12 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & nkpt,nloalg,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optddk,optphon,option,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memorf'
  use interfaces_14_hidewrite
- use interfaces_57_iovars, except_this_one => memorf
 !End of the abilint section
 
  implicit none
@@ -2508,5 +2511,5 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 end subroutine wvl_memory
 !!***
 
-end module memeval
+end module m_memeval
 !!***
