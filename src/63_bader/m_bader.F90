@@ -2379,7 +2379,7 @@ subroutine ordr(aa,dd,nn,cff)
    end if
  end do
 end subroutine ordr
-!!**
+!!***
 
 !!****f* m_bader/critics
 !! NAME
