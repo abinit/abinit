@@ -84,6 +84,7 @@ contains
 
 subroutine adini(aim_dtset,inpstr,lenstr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -589,6 +590,7 @@ end subroutine adini
 
 subroutine addout(aim_dtset)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -761,6 +763,7 @@ end subroutine addout
 !! SOURCE
 
 subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1117,6 +1120,7 @@ end subroutine aim_follow
 
 subroutine consist(aim_dtset,tstngr,tstvpt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1207,6 +1211,7 @@ end subroutine consist
 !! SOURCE
 
 subroutine cpdrv(aim_dtset)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1997,6 +2002,7 @@ end subroutine cpdrv
 
 subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2324,6 +2330,7 @@ end subroutine critic
 
 subroutine ordr(aa,dd,nn,cff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2408,6 +2415,7 @@ end subroutine ordr
 !! SOURCE
 
 subroutine  critics(aim_dtset,inxat,stwo,sthree,sfour,dstmax)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2759,6 +2767,7 @@ end subroutine critics
 
 subroutine defad(aim_dtset)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2857,6 +2866,7 @@ end subroutine defad
 !! SOURCE
 
 subroutine drvaim(aim_dtset,tcpui,twalli)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3088,6 +3098,7 @@ end subroutine drvaim
 
 subroutine graph(unts,untg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3186,6 +3197,7 @@ end subroutine graph
 !! SOURCE
 
 subroutine initaim(aim_dtset,znucl_batom)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3588,6 +3600,7 @@ end subroutine initaim
 
 subroutine inpar(instr,lenstr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3708,6 +3721,7 @@ end subroutine inpar
 
 subroutine inspln(idir,snn,tnn)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3817,6 +3831,7 @@ end subroutine inspln
 !! SOURCE
 
 subroutine integrho(aim_dtset,znucl_batom)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4142,6 +4157,7 @@ end subroutine integrho
 
 subroutine integvol()
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -4265,6 +4281,7 @@ end subroutine integvol
 
 subroutine onestep(vv,chg,grho,hh,np,npmax,deltar)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -4361,6 +4378,7 @@ end subroutine onestep
 !! SOURCE
 
 subroutine plint()
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4475,6 +4493,7 @@ end subroutine plint
 !! SOURCE
 
 subroutine rsurf(aim_dtset,rr,grho,theta,phi,rr0,iatinit,npmax,srch)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4660,6 +4679,7 @@ end subroutine rsurf
 !! SOURCE
 
 subroutine surf(aim_dtset)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5262,6 +5282,7 @@ end subroutine surf
 
 subroutine vgh_rho(vv,rho,grho,hrho,rdmin,iat,ipos,chs)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -5808,6 +5829,7 @@ end subroutine vgh_rho
 
 function vnorm(vv,dir)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -5865,6 +5887,7 @@ end function vnorm
 
 function vec_prod(uu,vv)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -5905,6 +5928,7 @@ end function vec_prod
 !! SOURCE
 
 subroutine mprod(aa,bb,cc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5953,6 +5977,7 @@ end subroutine mprod
 !! SOURCE
 
 subroutine bschg1(vv,dir)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -6012,6 +6037,7 @@ end subroutine bschg1
 !! SOURCE
 
 subroutine bschg2(aa,dir)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
