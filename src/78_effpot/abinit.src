@@ -20,6 +20,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
     "compute_anharmonics.F90",
     "effpot_xml.c",
+    "generate_training_set.F90",
     "init10.F90",
     "m_anharmonics_terms.F90",
     "m_effective_potential.F90",

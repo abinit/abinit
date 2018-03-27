@@ -161,6 +161,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use interfaces_56_recipspace
  use interfaces_59_ionetcdf
  use interfaces_67_common
+ use interfaces_78_effpot
  use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => mover
 !End of the abilint section
@@ -199,7 +200,7 @@ character(len=500) :: message
 character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
-character(len=fnlen) :: filename
+character(len=fnlen) :: filename,filename_ddb
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
@@ -305,6 +306,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 & scfcv_args%dtset%vis,&
 & scfcv_args%dtset%iatfix,&
 & scfcv_args%dtset%symrel,&
+& scfcv_args%dtset%ph_ngqpt,&
+& scfcv_args%dtset%ph_nqshift,&
+& scfcv_args%dtset%ph_qshift,&
 & scfcv_args%dtset%typat,&
 & scfcv_args%dtset%prtatlist,&
 & amass,&
@@ -442,13 +446,24 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    end do
  end do
 
-!Fill history with the values of xred, acell and rprimd
- call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
-!Fill velocities and ionic kinetic energy
- call vel2hist(ab_mover%amass,hist,vel,vel_cell)
- hist%time(hist%ihist)=zero
+ if (ab_mover%ionmov==26)then
+!Tdep call need to merge 
+ else if (ab_mover%ionmov==27)then
+   !GET THE PATH  OF THE DDB FILE 
+   filename_ddb = trim("ddb_full.out")
+   call generate_training_set(acell,filename_ddb,hist,ab_mover%natom,ntime,ab_mover%ph_ngqpt,&
+&                             ab_mover%ph_nqshift,ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
+&                             rprimd,ab_mover%mdtemp(2),xred,DEBUG)
+ else
+   !Fill history with the values of xred, acell and rprimd
+   call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
+   !Fill velocities and ionic kinetic energy
+   call vel2hist(ab_mover%amass,hist,vel,vel_cell)
+   hist%time(hist%ihist)=zero
+
+ end if
 !Decide if prtxfase will be called
  useprtxfase=.FALSE.
  do ii=1,ab_mover%natom
@@ -817,6 +832,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (25)
          call pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,DEBUG,iexit)
+       case (27)
+         !In case of ionmov 27, all the atomic configurations have been computed at the
+         !begining of the routine in generate_training_set, thus we just need to increase the indexes
+         !in the hist
+         hist%ihist = abihist_findIndex(hist,+1)
+
 
        case default
          write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
@@ -882,7 +903,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ###     acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
-
+     
      if(ab_mover%optcell/=0)then
 
        call matr3inv(rprimd,gprimd)
@@ -908,7 +929,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
 
      end if
-
+     
      vel(:,:)=hist%vel(:,:,hist%ihist)
 
 !    vel_cell(3,3)= velocities of cell parameters

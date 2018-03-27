@@ -141,7 +141,6 @@ module m_multibinit_dataset
   real(dp) :: strtarget(6)
   real(dp) :: conf_cutoff_strain(6)
   real(dp) :: rprim(3,3)
-  real(dp) :: q1shft(3,4)
 
 ! Integer arrays
   integer, allocatable :: atifc(:)
@@ -161,6 +160,9 @@ module m_multibinit_dataset
 
   real(dp), allocatable :: conf_cutoff_disp(:) 
   ! conf_cuttoff(natom)
+  
+  real(dp),allocatable  :: q1shft(:,:)
+  !q1shft(3,nqshft)  SHIFT for Q point
 
   real(dp), allocatable :: qnrml1(:) 
   ! qnrml1(nph1l)
@@ -315,7 +317,9 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%atifc(:)=0
  ABI_ALLOCATE(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
  multibinit_dtset%conf_cutoff_disp(:)=zero
-
+ ABI_ALLOCATE(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
+ multibinit_dtset%q1shft(:,:) = zero
+ 
 end subroutine multibinit_dtset_init
 !!***
   
@@ -386,6 +390,9 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  end if
  if (allocated(multibinit_dtset%qph2l))  then
    ABI_DEALLOCATE(multibinit_dtset%qph2l)
+ end if
+ if(allocated(multibinit_dtset%q1shft))then
+   ABI_DEALLOCATE(multibinit_dtset%q1shft)
  end if
 
 end subroutine multibinit_dtset_free
@@ -742,8 +749,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%dynamics=intarr(1)
  if(multibinit_dtset%dynamics/=0.and.multibinit_dtset%dynamics/=6.and.&
-&   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13&
-&   .and.multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25) then
+&   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13.and.&
+&   multibinit_dtset%dynamics/=27.and.&
+&   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
 &   'are 6,12,24,25 or  13 (see ionmov in abinit documentation).',ch10,&
@@ -1485,6 +1493,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      ABI_ALLOCATE(intarr,(marr))
      ABI_ALLOCATE(dprarr,(marr))
    end if
+   ABI_ALLOCATE(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
    multibinit_dtset%q1shft(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*multibinit_dtset%nqshft, string(1:lenstr),'q1shft',tread,'DPR')
    if(tread==1) multibinit_dtset%q1shft(1:3,1:multibinit_dtset%nqshft)=&

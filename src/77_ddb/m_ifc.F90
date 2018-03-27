@@ -49,13 +49,14 @@ MODULE m_ifc
  use m_copy,        only : alloc_copy
  use m_pptools,     only : printbxsf
  use m_ewald,       only : ewald9
- use m_crystal,     only : crystal_t
+ use m_crystal,     only : crystal_t,crystal_free
  use m_geometry,    only : phdispl_cart2red, normv
  use m_kpts,        only : kpts_ibz_from_kptrlatt
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, &
 &                          massmult_and_breaksym, dfpt_phfrq
- use m_ddb,         only : ddb_type
+ use m_ddb
+ use m_ddb_hdr
 
  implicit none
 
@@ -194,7 +195,8 @@ MODULE m_ifc
 
  end type ifc_type
 
- public :: ifc_init          ! Constructor
+ public :: ifc_init          ! Constructor from DDB datatype
+ public :: ifc_init_fromFile ! Constructor from filename
  public :: ifc_free          ! Release memory
  public :: ifc_print         ! Print info on the object.
  public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
@@ -732,6 +734,113 @@ end subroutine ifc_init
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_init_fromFile
+!! NAME
+!!  ifc_init_fromFile
+!!
+!! FUNCTION
+!!  Need to be updated
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      anaddb,eph,m_effective_potential_file,m_gruneisen,m_tdep_abitypes
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_init_fromFile'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: nqshift
+ integer,intent(in) :: natom
+ !arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: qshift(3,nqshift)
+ character(len=*),intent(in) :: filename
+ type(ifc_type),intent(out) :: Ifc
+ real(dp),intent(inout) :: dielt(3,3)
+ real(dp),intent(inout) :: zeff(3,3,natom)
+ type(crystal_t),intent(out) :: ucell_ddb
+!Local variables -------------------------
+ !scalars
+ integer :: comm,dipdip,i,iblok,iblok_tmp
+ logical :: file_exists
+ !arrays
+ integer,allocatable :: atifc(:)
+ type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
+ character(len=500) :: msg
+ 
+!******************************************************************
+
+ !check if ddb file exists
+ inquire(file=filename, exist=file_exists)
+ comm=0
+ if (file_exists .eqv. .true.)then
+   !Reading the ddb
+   call ddb_hdr_open_read(ddb_hdr,filename,2,DDB_VERSION,comm,dimonly=1)
+   
+   ABI_ALLOCATE(atifc,(ddb_hdr%natom))
+   do i=1,ddb_hdr%natom
+     atifc(i)=i
+   end do
+   
+   call ddb_from_file(ddb,filename,1,ddb_hdr%natom,ddb_hdr%natom,atifc,ucell_ddb,comm)
+
+   else
+     write (msg, "(a,a,a)") "File ", filename , " is not present in the directory"
+     MSG_ERROR(msg)
+   end if
+
+   ! Get Dielectric Tensor and Effective Charges
+   iblok = ddb_get_dielt_zeff(ddb,ucell_ddb,1,1,0,dielt,zeff)
+
+   ! Try to get dielt, in case just the DDE are present
+   if (iblok == 0) then
+     iblok_tmp = ddb_get_dielt(ddb,1,dielt)
+   end if
+   
+   ! ifc to be calculated for interpolation
+   write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,&
+     &   ' Calculation of the interatomic forces ',ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   if ((maxval(abs(zeff)) .lt. tol10) .OR. (maxval(dielt) .gt. 100000.0)) then
+     dipdip=0
+   else
+     dipdip=1
+   end if
+   call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,&
+&                qshift,dielt,zeff,0,0.0_dp,0,1,comm)
+
+
+!  Free them all
+   ABI_DEALLOCATE(atifc)
+   call ddb_free(ddb)
+   call ddb_hdr_free(ddb_hdr)
+   
+ end subroutine ifc_init_fromFile
+!!***
+ 
+!----------------------------------------------------------------------
+
 
 !!****f* m_ifc/ifc_print
 !! NAME

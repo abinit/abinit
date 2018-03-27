@@ -65,6 +65,8 @@ module m_phonons
  public :: phonons_write_gnuplot         ! Write phonons bands in gnuplot format.
  public :: ifc_mkphbs                    ! Compute the phonon band structure from the IFC and write data to file(s)
 
+ public :: zacharias_supercell_make
+ public :: zacharias_supercell_print
  public :: thermal_supercell_make
  public :: thermal_supercell_free
  public :: thermal_supercell_print
@@ -1294,9 +1296,9 @@ end subroutine mkphdos
 
 !----------------------------------------------------------------------
 
-!!****f* m_phonons/thermal_supercell_make
+!!****f* m_phonons/zacharias_supercell_make
 !! NAME
-!! thermal_supercell_make
+!! zacharias_supercell_make
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
@@ -1317,14 +1319,14 @@ end subroutine mkphdos
 !!
 !! SOURCE
 
-subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
+subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
 &    rlatt, tempermin, temperinc, thm_scells)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_make'
+#define ABI_FUNC 'zacharias_supercell_make'
 !End of the abilint section
 
  implicit none
@@ -1463,6 +1465,192 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  ABI_FREE(qbz)
  ABI_FREE(wtqibz)
 
+end subroutine zacharias_supercell_make
+!!***
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/thermal_supercell_make
+!! NAME
+!! thermal_supercell_make
+!!
+!! FUNCTION
+!!  Construct an random thermalized supercell configuration, as in TDEP
+!!  main function is for training set generation in multibinit
+!!
+!! INPUTS
+!!   Crystal = crystal object with rprim etc...
+!!   Ifc = interatomic force constants object from anaddb
+!!   nconfig = numer of requested configurations
+!!   rlatt = matrix of conversion for supercell (3 0 0   0 3 0   0 0 3 for example)
+!!   temperature_K =  temperature in Kelvin
+!!
+!! OUTPUT
+!!   thm_scells = array of configurations with thermalized supercells
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
+&    rlatt, temperature_K, thm_scells)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'thermal_supercell_make'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: nconfig
+ integer, intent(in) :: rlatt(3,3)
+ real(dp), intent(in) :: temperature_K
+ type(crystal_t),intent(in) :: Crystal
+ type(ifc_type),intent(in) :: Ifc
+ type(supercell_type), intent(out) :: thm_scells(nconfig)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq, nqibz, nqbz, qptopt1, imode, ierr, iconfig
+ real(dp) :: temperature, sigma, freeze_displ
+ real(dp) :: rand, rand1, rand2
+
+ !arrays
+ real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
+ real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
+ real(dp), allocatable :: phfrq_allq(:,:), phdispl_allq(:,:,:,:,:)
+ real(dp), allocatable :: phfrq(:), phdispl(:,:,:,:),pheigvec(:,:,:,:)
+ real(dp), allocatable :: phdispl1(:,:,:)
+ character (len=500) :: msg
+
+! *************************************************************************
+
+ ! check inputs
+! TODO: add check that all rlatt are the same on input
+
+ if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
+&    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
+   write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
+&    ' non diagonal supercells.',ch10,' rlatt for temp 1 = ', rlatt, ' Returning '
+   MSG_WARNING(msg)
+   return
+ end if
+
+ temperature = temperature_K /  Ha_K 
+
+ ! build qpoint grid used for the Fourier interpolation.
+ !(use no syms for the moment!)
+ qptopt1 = 3
+
+ ! for the moment do not allow shifted q grids.
+ ! We are interpolating anyway, so it will always work
+ ABI_MALLOC(qshft,(3,1))
+ qshft(:,1)=zero
+
+ ! This call will set nqibz, IBZ and BZ arrays
+ call kpts_ibz_from_kptrlatt(crystal, rlatt, qptopt1, 1, qshft, &
+&   nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+ ABI_FREE(qshft)
+
+ ! allocate arrays wzith all of the q, omega, and displacement vectors
+ ABI_STAT_MALLOC(phfrq_allq, (3*Crystal%natom, nqibz), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
+ ABI_STAT_MALLOC(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+
+ ABI_STAT_MALLOC(phfrq, (3*Crystal%natom), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
+ ABI_STAT_MALLOC(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_STAT_MALLOC(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+
+ ! loop over q to get all frequencies and displacement vectors
+ imode = 0
+ do iq = 1, nqibz
+   ! Fourier interpolation.
+   call ifc_fourq(Ifc, Crystal, qibz(:,iq), phfrq, phdispl, out_eigvec=pheigvec)
+   phfrq_allq(1:3*Crystal%natom, iq) = phfrq
+   phdispl_allq(1:2, 1:3, 1:Crystal%natom, 1:3*Crystal%natom, iq) = phdispl
+ end do
+ ABI_FREE(phfrq)
+ ABI_FREE(pheigvec)
+ ABI_FREE(phdispl)
+
+ ! only diagonal supercell case for the moment
+ do iconfig = 1, nconfig
+   call init_supercell(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, Crystal%znucl, thm_scells(iconfig))
+ end do
+
+ ! precalculate phase factors???
+
+ ABI_STAT_MALLOC(phdispl1, (2, 3, Crystal%natom), ierr)
+
+ ! for all modes at all q in whole list, sorted
+ do iq = 1, nqibz
+   write(std_out,*) iq , qibz(:,iq)
+   do imode = 1, 3*Crystal%natom
+     
+     ! skip modes with too low or negative frequency -> Bose factor explodes (eg acoustic at Gamma)
+     ! TODO: check the convergence wrt the tolerance
+     ! several philosophies to be implemented for the unstable modes:
+     ! 1) ignore
+     ! 2) populate them according to a default amplitude
+     ! 3) populate according to their modulus squared
+     if (phfrq_allq(imode, iq) < tol6) cycle
+   
+     phdispl1 = phdispl_allq(:,:,:,imode,iq)
+
+     ! loop over configurations
+     do iconfig = 1, nconfig
+   
+       ! trick supercell object into using present q point
+       thm_scells(iconfig)%qphon(:) = qibz(:,iq)
+   
+       ! find thermal displacement amplitude eq 4 of Zacharias
+       !   combined with l_nu,q expression in paragraph before
+       sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq) )
+       !sigma = 200._dp
+       
+       ! add displacement for this mode to supercell positions eq 5 of Zacharias
+       call RANDOM_NUMBER(rand)
+       rand = two * rand - one
+       !rand = one
+
+       ! from TDEP documentation for gaussian distribution of displacements 
+       !call RANDOM_NUMBER(rand1)
+       !call RANDOM_NUMBER(rand2)
+       ! rand = sqrt(-two*rand1) * sin(twopi*rand2)
+
+       ! if (rand > half) then
+       !   rand = one
+       ! else
+       !   rand = -one
+       ! end if
+
+       freeze_displ =  rand * sigma
+       
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))
+     end do !iconfig
+   end do !imode
+ end do !iq
+
+ ABI_FREE(phfrq_allq)
+ ABI_FREE(phdispl_allq)
+ ABI_FREE(phdispl1)
+ ABI_FREE(qibz)
+ ABI_FREE(qbz)
+ ABI_FREE(wtqibz)
+
 end subroutine thermal_supercell_make
 !!***
 
@@ -1490,7 +1678,7 @@ end subroutine thermal_supercell_make
 !!
 !! SOURCE
 
-subroutine thermal_supercell_free(ntemper, thm_scells)
+subroutine thermal_supercell_free(nscells, thm_scells)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1503,26 +1691,25 @@ subroutine thermal_supercell_free(ntemper, thm_scells)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: ntemper
+ integer, intent(in) :: nscells
  type(supercell_type), allocatable, intent(inout) :: thm_scells(:)
 
 ! local
- integer :: itemp
+ integer :: icell
 
  if(allocated(thm_scells)) then
-   do itemp = 1, ntemper
-     call destroy_supercell(thm_scells(itemp))
+   do icell = 1, nscells
+     call destroy_supercell(thm_scells(icell))
    end do
-   ABI_FREE(thm_scells)
  end if
 end subroutine thermal_supercell_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_phonons/thermal_supercell_print
+!!****f* m_phonons/zacharias_supercell_print
 !! NAME
-!! thermal_supercell_print
+!! zacharias_supercell_print
 !!
 !! FUNCTION
 !!  print files with thermal array of supercells
@@ -1542,13 +1729,13 @@ end subroutine thermal_supercell_free
 !!
 !! SOURCE
 
-subroutine thermal_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
+subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_print'
+#define ABI_FUNC 'zacharias_supercell_print'
 !End of the abilint section
 
  implicit none
@@ -1572,8 +1759,65 @@ subroutine thermal_supercell_print(fname, ntemper, tempermin, temperinc, thm_sce
    temper = dble(itemp-1)*temperinc+tempermin
    write (temper_str,'(I8)') int(temper)
    write (filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
-   write (title1, '(3a)') "#  thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
+   write (title1, '(3a)') "#  Zacharias thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
    title2 = "#  generated with alternating thermal displacements of all phonons"
+   call prt_supercell (filename, thm_scells(itemp), title1, title2)
+ end do
+
+end subroutine zacharias_supercell_print
+!!***
+
+!!****f* m_phonons/thermal_supercell_print
+!! NAME
+!! thermal_supercell_print
+!!
+!! FUNCTION
+!!  print files with thermalized array of random supercell configurations
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'thermal_supercell_print'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: nconfig
+ type(supercell_type), intent(in) :: thm_scells(nconfig)
+ character(len=fnlen), intent(in) :: fname
+ real(dp), intent(in) :: temperature_K
+ 
+! local
+ integer :: iconfig,itemp
+ character(len=80) :: title1, title2
+ character(len=fnlen) :: filename
+ character(len=10) :: config_str
+
+ do iconfig = 1, nconfig
+   write (config_str,'(I8)') iconfig
+   write (filename, '(3a)') trim(fname), "_cf_", trim(adjustl(config_str))
+   write (title1, '(a,I6,a)') "#  thermalized supercell at temperature T= ", temperature_K, " Kelvin"
+   title2 = "#  generated with random thermal displacements of all phonons"
    call prt_supercell (filename, thm_scells(itemp), title1, title2)
  end do
 

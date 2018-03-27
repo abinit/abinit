@@ -623,6 +623,7 @@ type dataset_type
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
  integer :: supercell(3)
+ integer :: supercell_latt(3,3)
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
  integer :: vdw_typfrag(100)

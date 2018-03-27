@@ -469,7 +469,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
 &   dtset%pawspnorb,dtset%ptgroupma,ratsph,&
 &   rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
-&   string,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,typat,vel,vel_cell,xred,znucl)
+&   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
+&   typat,vel,vel_cell,xred,znucl)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)

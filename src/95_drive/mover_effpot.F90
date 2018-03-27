@@ -115,7 +115,7 @@ implicit none
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
- real(dp):: cutoff,freq_q,freq_b,qmass,bmass
+ real(dp):: cutoff,freq_q,freq_b,qmass,bmass,time_q,time_b
  logical :: iam_master
  integer, parameter:: master=0
  logical :: verbose,writeHIST
@@ -194,7 +194,8 @@ implicit none
  end if
 
  if(option/=0)then
-   
+
+!  acell is always set to one, only rprimd is used for the effective potential
    acell = one
    rprimd = effective_potential%crystal%rprimd
    
@@ -244,10 +245,19 @@ implicit none
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
    dtset%nnos = inp%nnos   ! Number of nose masses Characteristic
+   do ii=1,3 ! Only copy the diagonal part
+             ! might be adapt with ngqpt(9) instead of ngqpt(3) because is needed in wght9.f
+     dtset%ph_ngqpt(ii) = inp%ngqpt((ii))
+   end do   
+   dtset%ph_nqshift = inp%nqshft
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
+   dtset%supercell_latt(:,:) = zero
+   do ii=1,3
+     dtset%supercell_latt(ii,ii) = sc_size(ii)
+   end do
    dtset%tolmxf = 2.0d-5
    dtset%tsmear = 0.009500446 !
    dtset%vis = 100      ! VIScosity
@@ -294,6 +304,8 @@ implicit none
    dtset%prtatlist(:) = 0
    ABI_ALLOCATE(dtset%mixalch_orig,(dtset%npspalch,dtset%ntypalch,1))
    dtset%mixalch_orig(:,:,:)=zero
+   ABI_ALLOCATE(dtset%ph_qshift,(3,dtset%ph_nqshift))
+   dtset%ph_qshift = inp%q1shft
    if(option  > 0)then
      verbose = .TRUE.
      writeHIST = .TRUE.
@@ -342,15 +354,23 @@ implicit none
      freq_q = 0.1
      freq_b = 0.01
      !TEST_AM
-     
      qmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_q**2)
      bmass = dtset%natom* kb_THzK * dtset%mdtemp(1) / (freq_b**2)
-
+     
+     ! freq_q = 300
+     ! freq_b = 300
+     
+     ! time_q = (33.35641 / freq_q) / 2.418884 *1E5
+     ! time_b = (33.35641 / freq_b) / 2.418884 *1E6
+     
+     ! qmass = dtset%natom * kb_HaK * dtset%mdtemp(1) * (time_q**2) 
+     ! bmass = dtset%natom * kb_HaK * dtset%mdtemp(1) * (time_b**2)
+     
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
-       write(message,'(3a,F20.1,a)')&
+       write(message,'(3a,F30.10,a)')&
 &       ' WARNING: nnos is set to zero in the input',ch10,&
 &       '          value by default for qmass: ',dtset%qmass(:),ch10
        if(verbose)call wrtout(std_out,message,"COLL")
@@ -360,7 +380,7 @@ implicit none
      end if
      if (abs(inp%bmass) < tol10) then
        dtset%bmass = bmass
-       write(message,'(3a,F20.4,a)')&
+       write(message,'(3a,F30.10,a)')&
 &       ' WARNING: bmass is set to zero in the input',ch10,&
 &       '          value by default for bmass: ',dtset%bmass,ch10
        if(verbose)call wrtout(std_out,message,"COLL")
@@ -463,10 +483,7 @@ implicit none
    ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
    
-   acell(1) = dtset%rprimd_orig(1,1,1)
-   acell(2) = dtset%rprimd_orig(2,2,1)
-   acell(3) = dtset%rprimd_orig(3,3,1)
-
+   
    ABI_ALLOCATE(xred,(3,dtset%natom))
    ABI_ALLOCATE(xred_old,(3,dtset%natom))
    ABI_ALLOCATE(vel,(3,dtset%natom))
@@ -587,9 +604,7 @@ implicit none
 &           -1,1,comm,verbose=.true.,positive=.false.) 
            call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
-           acell(1) = dtset%rprimd_orig(1,1,1)
-           acell(2) = dtset%rprimd_orig(2,2,1)
-           acell(3) = dtset%rprimd_orig(3,3,1)
+           acell(:) = one
            call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
 &           effective_potential%supercell%xcart,xred)
            xred_old = xred
@@ -774,9 +789,7 @@ implicit none
 &                 -1,1,comm,verbose=.false.,positive=.false.) 
                  call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
-                 acell(1) = dtset%rprimd_orig(1,1,1)
-                 acell(2) = dtset%rprimd_orig(2,2,1)
-                 acell(3) = dtset%rprimd_orig(3,3,1)
+                 acell(:) = one
                  call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
 &                 effective_potential%supercell%xcart,xred)
                  xred_old = xred

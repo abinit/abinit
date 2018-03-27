@@ -129,7 +129,7 @@ subroutine strain_init(strain,delta,direction,name)
  if (present(direction)) then
    strain%direction = direction
  else
-   strain%direction = zero
+   strain%direction = 0
  end if
  
  call strain_strain2def(strain%strain,strain)
@@ -182,7 +182,7 @@ subroutine strain_free(strain)
 
  strain%name = ''
  strain%delta = zero
- strain%direction = zero
+ strain%direction = 0
  strain%strain = zero
 
 end subroutine strain_free
@@ -261,7 +261,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
    forall(i=1:3)identity(i,i)=1
    
    call matr3inv(rprim,rprim_inv)
-   mat_delta_tmp =  matmul(transpose(rprim_inv),rprim_def)-identity
+   mat_delta_tmp =  matmul(rprim_def,transpose(rprim_inv))-identity
    identity = zero
    do i=1,3
      do j=1,3
@@ -397,13 +397,13 @@ subroutine strain_def2strain(mat_strain,strain)
 ! *************************************************************************
  strain%name = ""
  strain%delta = zero
- strain%direction = zero
+ strain%direction = 0
  strain%strain = mat_strain
  
  if (all(abs(mat_strain)<tol10)) then 
    strain%name = "reference"
    strain%delta = zero
-   strain%direction = zero
+   strain%direction = 0
    strain%strain = zero
  else
    if(abs(mat_strain(1,1))>tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&

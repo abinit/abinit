@@ -65,6 +65,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars0'
+ use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
 
@@ -81,11 +82,12 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,tjdtset,tread,treadh,treadm
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
  integer :: treads,use_gpu_cuda
  real(dp) :: cpus
  character(len=500) :: message
 !arrays
+ integer :: supercell_latt(3,3)
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
 
@@ -94,7 +96,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !Set ii to avoid warning of uninitialised variable
  ii = 0
 
- marr=max(ndtset_alloc,2)
+ marr=max(9,ndtset_alloc,2)
  ABI_ALLOCATE(dprarr,(marr))
  ABI_ALLOCATE(intarr,(marr))
 
@@ -105,7 +107,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    dtsets(0)%jdtset = -1 ! unused value
    dtsets(1:ndtset_alloc)%jdtset=(/ (ii,ii=1,ndtset_alloc) /)
 
-!  Read explicitely the jdtset array
+!  Read explicitly the jdtset array
    call intagm(dprarr,intarr,0,marr,ndtset,string(1:lenstr),'jdtset',tjdtset,'INT')
    if(tjdtset==1) dtsets(1:ndtset)%jdtset=intarr(1:ndtset)
 
@@ -227,6 +229,36 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
 
+! proposal: supercell generation in input string before it is read in
+! call expand_supercell_input(jdtset, lenstr, string)
+!  find supercell, else exit
+!  determinant = ncells
+!  copy rprim,    acell,    xred,    xcart,    xangst,    vel,    typat,   to
+!       rprim_uc, acell_uc, xred_uc, xcart_uc, xangst_uc, vel_uc, typat_uc
+!     NB: also rprim and angdeg need to be updated in non diagonal case!!!
+!  generate supercell info for each of these copying out with translation vectors etc...
+!  set chkprim to 0
+!  done!
+
+!  Generate the supercell if supercell_latt is specified and update string
+   supercell_latt(:,:) = 0
+   do ii=1,3
+     supercell_latt(ii,ii) = 1
+   end do
+   call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),"supercell_latt",tread,'INT')
+   if (tread==1) dtsets(idtset)%supercell_latt(:,:)=reshape(intarr(1:marr),(/3,3/))
+   !This test should be update if in the future we allow non-diagonal supercell
+   if (any(supercell_latt(:,:) < zero) .or. ( supercell_latt(1,1) < tol10 .or.&
+&          supercell_latt(2,2) <tol10 .or. supercell_latt(3,3) < tol10 )) then
+     write(message, '(5a)' )&
+&     'supercell_latt must have positif parameters and diagonal part',ch10,&
+&     'This is not allowed.  ',ch10,&
+&     'Action : modify supercell_lat in the input file.'
+     MSG_ERROR(message)     
+   end if
+!  Compute the multiplicity of the supercell   
+   call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
+
 !  Read natom from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
 !  Might initialize natom from XYZ file
@@ -251,6 +283,10 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      MSG_ERROR(message)
    end if
 
+   if(multiplicity > 1)then
+     dtsets(idtset)%natom = dtsets(idtset)%natom * multiplicity
+   end if
+   
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nimage',tread,'INT')
    if(tread==1) dtsets(idtset)%nimage=intarr(1)
 

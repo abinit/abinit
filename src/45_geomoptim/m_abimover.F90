@@ -139,6 +139,8 @@ integer,pointer  :: jellslab
 integer,pointer  :: natom
 ! Number of CONstraint EQuations
 integer,pointer  :: nconeq
+! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
+integer,pointer  :: ph_nqshift
 ! Use by pred_isothermal only
 integer,pointer  :: nnos
 ! Number of SYMmetry operations
@@ -178,7 +180,10 @@ integer,pointer  :: symrel(:,:,:)       ! symrel(3,3,nsym)
 integer,pointer  :: typat(:)            ! typat(natom)
 ! PRTint ATom LIST
 integer,pointer  :: prtatlist(:)        ! prtatlist(natom)
-
+! Qpoint grid (used for ionmov 26 and 27)
+integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
+! shift of the Qpoint Grid (used for ionmov 26 and 27)
+real(dp),pointer :: ph_qshift(:,:)       ! symrel(3,nsym)
 ! Mass of each atom (NOT IN DTSET)
 real(dp),pointer :: amass(:)            ! amass(natom)
 ! Geometry Optimization Preconditioner PaRaMeters
@@ -452,7 +457,7 @@ subroutine abimover_ini(ab_mover,specs,&
 & natom,nconeq,nnos,nsym,ntypat,&
 & optcell,restartxf,signperm,ionmov,&
 & bmass,dtion,friction,mdwall,noseinert,strprecon,vis,&
-& iatfix,symrel,typat,prtatlist,amass,goprecprm,mdtemp,strtarget,&
+& iatfix,symrel,ph_ngqpt,ph_nqshift,ph_qshift,typat,prtatlist,amass,goprecprm,mdtemp,strtarget,&
 & qmass,znucl,fnameabi_hes,filnam_ds)
 
 !Arguments ------------------------------------
@@ -480,6 +485,8 @@ integer,target, intent(in)  :: natom
 integer,target, intent(in)  :: nconeq
 ! Use by pred_isothermal only
 integer,target, intent(in)  :: nnos
+! Number of SYMmetry operations
+integer,target, intent(in)  :: ph_nqshift
 ! Number of SYMmetry operations
 integer,target, intent(in)  :: nsym
 ! Number of Types of atoms
@@ -511,6 +518,8 @@ real(dp),target, intent(in) :: vis
 ! arrays
 ! Indices of AToms that are FIXed
 integer,target, intent(in)  :: iatfix(:,:)         ! iatfix(3,natom)
+! Qpoint grid
+integer,target,intent(in)  :: ph_ngqpt(:)         !  ph_ngqpt(3)
 ! SYMmetry in REaL space
 integer,target, intent(in)  :: symrel(:,:,:)       ! symrel(3,3,nsym)
 ! TYPe of ATom
@@ -524,6 +533,8 @@ real(dp),target, intent(in) :: amass(:)            ! amass(natom)
 real(dp),target, intent(in) :: goprecprm(:)
 ! Molecular Dynamics Initial and Final Temperature
 real(dp),target, intent(in) :: mdtemp(:)           ! mdtemp(2) (initial,final)
+! shift of the Qpoint Grid
+real(dp),target, intent(in)  :: ph_qshift(:,:)     ! ph_qshift(3,nqshift)
 ! STRess TARGET
 real(dp),target, intent(in) :: strtarget(:)        ! strtarget(6)
 ! Use by pred_isothermal only
@@ -598,6 +609,10 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
  ab_mover%iatfix=>iatfix(:,1:natom)
 !SYMmetry in REaL space
  ab_mover%symrel=>symrel
+!Phonon q grid in the DDB (ionmov 26 and 27) 
+ ab_mover%ph_ngqpt=>ph_ngqpt
+ ab_mover%ph_nqshift=>ph_nqshift
+ ab_mover%ph_qshift=>ph_qshift
 !TYPe of ATom
  ab_mover%typat => typat(1:natom)
 !PRTint QTom LIST
@@ -898,7 +913,19 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='none'
 !  Name of specs%method
    specs%method = 'Hybrid Monte Carlo'
-
+!  This is the initialization for ionmov==27
+!  -------------------------------------------
+ case (27)                ! Generation of the training set for effective potential
+   specs%ncycle = 1       ! Number of internal cycles 
+   specs%isFconv=.FALSE.  ! Convergence is not used
+   specs%isVused=.FALSE.   ! Velocities are not used for update of atomic positions
+!  Values use in XML Output
+   specs%type4xml='TS'
+   specs%crit4xml='none'
+!  Name of specs%method
+   specs%method = 'training set generator'
+!  Number of history
+   specs%nhist = -1
 case default
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
  end select
@@ -1070,7 +1097,12 @@ subroutine abimover_nullify(ab_mover)
  nullify(ab_mover%znucl)
 ! Geometry Optimization Preconditioner PaRaMeters
  nullify(ab_mover%goprecprm)
-
+! Qpoint Grid
+ nullify(ab_mover%ph_ngqpt)
+! Shift of the Qpoint Grid
+ nullify(ab_mover%ph_qshift)
+! number of Shift of the Qpoint Grid
+ nullify(ab_mover%ph_nqshift)
 ! Filename for Hessian matrix
  nullify(ab_mover%fnameabi_hes)
 ! Filename for _HIST file
