@@ -254,6 +254,8 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
  use defs_parameters
  use m_profiling_abi
 
+ use m_geometry, only : ioniondist
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

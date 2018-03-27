@@ -26,9 +26,11 @@ MODULE m_geometry
  use m_profiling_abi
  use m_errors
  use m_atomdata
+ use m_sort
 
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : uniformrandom
+ use m_pptools,        only : prmat
 
  implicit none
 
@@ -50,6 +52,8 @@ MODULE m_geometry
  public :: fcart2fred         ! Convert cartesian forces into reduced forces
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
+ public :: ioniondist         ! Compute ion-ion distances
+ public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
 
  interface normv
   module procedure normv_rdp_vector
@@ -1989,6 +1993,299 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
  end if
 
 end subroutine randomcellpos
+!!***
+
+!!****f* m_geometry/shellstruct
+!! NAME
+!!  shellstruct
+!!
+!! FUNCTION
+!!  Calculates shell structure (multiplicities, radii) of an atomic configuration
+!!
+!! INPUTS
+!!  natom=number of atoms in unit cell
+!!  xred=reduced coordinates of atoms
+!!  rprimd=unit cell vectors
+!!  magv = magnetic ordering of atoms given as 1 and -1, if not given fm is assumed
+!!  atp = atom on which the perturbation was done
+!!
+!! OUTPUT
+!!  sdisv(nat)= distance of each shell to central atom (only the first nsh entries are relevant)
+!!  nsh= number of shells
+!!  mult(nat) = number of atoms on shell (only the first nsh entries are relevant)
+!!
+!! PARENTS
+!!      pawuj_det
+!!
+!! CHILDREN
+!!      ioniondist,prmat,sort_dp,sort_int,wrtout
+!!
+!! SOURCE
+
+subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'shellstruct'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry, except_this_one => shellstruct
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)              :: natom
+ integer,intent(in),optional     :: atp
+ integer,intent(in),optional     :: prtvol
+ integer,intent(out)             :: nsh
+!arrays
+ real(dp),intent(in)             :: rprimd(3,3)
+ real(dp),intent(in)             :: xred(3,natom)
+ integer,intent(out)             :: smult(natom)
+ integer,intent(in),optional     :: magv(natom)
+ real(dp),intent(out)            :: sdisv(natom)
+ real(dp),intent(out)            :: distv(natom)
+
+!Local variables-------------------------------
+!scalars
+ integer                      :: iatom,atpp,ish,prtvoll
+ character(len=500)           :: message
+ real(dp),parameter           :: rndfact=10000_dp
+!arrays
+ integer                      :: iperm(natom),jperm(natom)
+ real(dp)                     :: distvh(natom,natom)
+ real(dp)                     :: magvv(natom)
+
+! *************************************************************************
+
+ if (present(magv)) then
+   magvv=magv
+ else
+   magvv=(/ (1, iatom=1,natom)  /)
+ end if
+
+ if (present(atp)) then
+   atpp=atp
+ else
+   atpp=1
+ end if
+
+ if (present(prtvol)) then
+   prtvoll=prtvol
+ else
+   prtvoll=1
+ end if
+
+!DEBUB
+ write(std_out,*)'shellstruct start'
+!END DEBUG
+
+!Calculate ionic distances
+ call ioniondist(natom,rprimd,xred,distvh,1,magv=int(magvv),atp=atpp)
+ distv=distvh(1,:)
+
+ if (prtvol>2) then
+   write(std_out,'(a)')' shellstruct ionic distances in cell (distv) : '
+   call prmat(distv(1:natom),1,natom,1,std_out)
+ end if
+
+ iperm=(/ (iatom, iatom=1,natom ) /)
+ jperm=iperm
+ distv=anint(distv*rndfact)/rndfact
+!Sort distances
+ call sort_dp(natom,distv,iperm,10d-5)
+ call sort_int(natom,iperm,jperm)
+
+ smult=0
+ sdisv=dot_product(rprimd(1,:),rprimd(1,:))+dot_product(rprimd(2,:),rprimd(2,:))+dot_product(rprimd(3,:),rprimd(3,:))
+
+ nsh=1
+ smult(1)=1
+ sdisv(1)=distv(1)
+
+ do iatom=2,natom
+   do ish=1,natom
+     if (distv(iatom)>sdisv(ish)) then
+       cycle
+     else if (distv(iatom)==sdisv(ish)) then
+       smult(ish)=smult(ish)+1
+       exit
+     else if (distv(iatom)<sdisv(ish)) then
+       smult(ish+1:natom)=smult(ish:natom-1)
+       sdisv(ish+1:natom)=sdisv(ish:natom-1)
+       smult(ish)=1
+       sdisv(ish)=distv(iatom)
+       nsh=nsh+1
+       exit
+     end if
+   end do
+ end do
+
+ distv=(/ ( distv(jperm(iatom)),iatom=1,natom ) /)
+
+ if (prtvoll>2) then
+   write(message,'(a,i4,a)')' shellstruct found ',nsh,' shells at distances (sdisv) '
+   call wrtout(std_out,message,'COLL')
+   call prmat(sdisv(1:nsh),1,nsh,1,std_out)
+   write(message,fmt='(a,150i4)')' and multiplicities (smult) ', smult(1:nsh)
+   call wrtout(std_out,message,'COLL')
+ end if
+
+!DEBUB
+ write(std_out,*)'shellstruct leave'
+!END DEBUG
+
+end subroutine shellstruct
+!!***
+
+!!****f* m_geometry/ioniondist
+!! NAME
+!! ioniondist
+!!
+!! FUNCTION
+!!  Compute ion-ion distances
+!!
+!! INPUTS
+!!  natom= number of atoms in unit cell
+!!  rprimd(3,3)=dimensional real space primitive translations (bohr)
+!!  xred(3,natom)=dimensionless reduced coordinates of atoms
+!!  inm(natom,natom)=index (m,n) of the atom
+!!  option= 1 output ion-ion distances / 2 output ordering of ion-ion
+!!          distances / 3 output variables in varlist
+!!          according to ion-ion distances * magnetic ordering
+!!          magv magnetic ordering of atoms given als 1 and -1, if not
+!!          given fm is assumed
+!!  varlist=List of variables
+!!  magv(natom)= magnetic ordering of atoms
+!!  atp=atom on which the perturbation was done
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      pawuj_utils,shellstruct
+!!
+!! CHILDREN
+!!      prmat,wrtout
+!!
+!! SOURCE
+
+subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ioniondist'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry, except_this_one => ioniondist
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)              :: natom,option
+ integer,intent(in),optional     :: atp                   !atom on which the perturbation was done
+!arrays
+ real(dp),intent(in)             :: rprimd(3,3)
+ real(dp),intent(in)             :: xred(3,natom)
+ real(dp),intent(out)            :: inm(natom,natom)
+ integer,intent(in),optional     :: magv(natom)
+ real(dp),intent(in),optional    :: varlist(natom)
+ integer,intent(in),optional     :: prtvol
+
+!Local variables-------------------------------
+!scalars
+ integer                      :: iatom,jatom,katom,kdum,atpp,prtvoll
+ !character(len=500)           :: message
+!arrays
+ integer                      :: interq(natom)
+ real(dp)                     :: hxcart(3,natom),distm(natom,natom)
+ real(dp)                     :: magvv(natom)
+
+! *************************************************************************
+
+ hxcart=matmul(rprimd,xred)
+ interq=(/(iatom,iatom=1,natom)/)
+ inm=0
+
+ if (present(magv)) then
+   magvv=magv
+ else
+   magvv=(/ (1, iatom=1,natom)  /)
+ end if
+
+ if (present(atp)) then
+   atpp=atp
+ else
+   atpp=1
+ end if
+
+ if (present(prtvol)) then
+   prtvoll=prtvol
+ else
+   prtvoll=1
+ end if
+
+ if (option==3.and.(.not.present(varlist))) then
+   call  wrtout(std_out,'ioniondist error: option=3 but no variable list provided for symmetrization','COLL')
+   return
+ end if
+
+
+!DEBUG
+!write(message, '(a,a)' ) ch10,' ioniondist start '
+!call wrtout(std_out,message,'COLL')
+!END DEBUG
+
+ distm=0
+ katom=atpp-1
+ do iatom=1,natom
+   katom=katom+1
+   if (katom > natom) katom=1
+   distm(iatom,iatom)=0
+   do jatom=iatom,natom
+     distm(iatom,jatom)=dist2(xred(:,katom),xred(:,jatom),rprimd,1)*magvv(katom)*magvv(jatom)
+     distm(jatom,iatom)=distm(iatom,jatom)
+   end do
+ end do
+
+ if (prtvoll>=3) then
+   call  wrtout(std_out,'ioniondist: ionic distances:','COLL')
+   call prmat(distm,natom,natom,natom,std_out)
+ end if
+
+ distm=anint(distm*10000_dp)/10000_dp           ! rounding needed else distm(iatom,jatom)/= distm(1,kdum) sometimes fails
+
+ do iatom=1,natom
+   if (option==1) then
+     inm(iatom,:)=distm(iatom,:)
+   else
+     do jatom=iatom,natom
+       kdum=1
+       do while ( (kdum <= natom) .and. (distm(iatom,jatom)/= distm(1,kdum)) )
+         kdum=kdum+1
+       end do
+       if (option==2) then
+         inm(iatom,jatom)=interq(kdum)
+       else if (option==3) then
+         inm(iatom,jatom)=varlist(kdum)
+       end if
+       inm(jatom,iatom)=inm(iatom,jatom)
+     end do
+   end if
+ end do
+
+ if (prtvoll==2) then
+   call wrtout(std_out,'ioniondist: symmetrized matrix:','COLL')
+   call prmat(distm,1,natom,natom,std_out)
+ else if (prtvoll>=3) then
+   call wrtout(std_out,'ioniondist: symmetrized matrix:','COLL')
+   call prmat(distm,natom,natom,natom,std_out)
+ end if
+
+end subroutine ioniondist
 !!***
 
 end module  m_geometry

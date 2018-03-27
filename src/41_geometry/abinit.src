@@ -33,7 +33,6 @@ sources = [
  "getptgroupma.F90",
  "getspinrot.F90",
  "holocell.F90",
- "ioniondist.F90",
  "irreducible_set_pert.F90",
  "littlegroup_pert.F90",
  "metric.F90",
@@ -49,10 +48,8 @@ sources = [
  "prtspgroup.F90",
  "ptgmadata.F90",
  "remove_inversion.F90",
- "shellstruct.F90",
  "smallprim.F90",
  "spgdata.F90",
- "strconv.F90",
  "stresssym.F90",
  "symanal.F90",
  "symatm.F90",
@@ -79,7 +76,6 @@ sources = [
  "symsgtetra.F90",
  "symspgr.F90",
  "symmetrize_rprimd.F90",
- "symmetrize_xred.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
