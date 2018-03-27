@@ -89,6 +89,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 
  use m_io_tools,     only : open_file
  use m_geometry,     only : metric
+ use m_occ,          only : getnel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -148,6 +148,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_wfk
 
  use m_io_tools,    only : get_unit, iomode_from_fname
+ use m_occ,         only : occeig
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
  use m_pawtab,      only : pawtab_type
@@ -612,7 +613,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end do
 
    call timab(125,2,tsec)
-   
+
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Also take into account the spin.
    if (nspden/=4) then
@@ -630,7 +631,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end if
 
  end do ! End loop over spins
- 
+
  !if(xmpi_paral==1)then
  !  call timab(166,1,tsec)
  !  call wrtout(std_out,'dfpt_rhofermi: loop on k-points and spins done in parallel','COLL')

@@ -153,6 +153,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  use m_xmpi
 
  use m_pptools,    only : prmat
+ use m_occ,        only : pareigocc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -542,7 +543,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    write(std_out,*)' newkpt: mkmem2=',mkmem2
 !    stop
 !    ENDDEBUG
-     
+
      call timab(783,2,tsec)
      call timab(784,1,tsec)
 
@@ -610,7 +611,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  end do ! isppol2
 
  call timab(786,1,tsec)
- 
+
  if(xmpi_paral==1)then
 !  Transmit eigenvalues (not yet occupation numbers)
 !  newkpt.F90 is not yet suited for RF format

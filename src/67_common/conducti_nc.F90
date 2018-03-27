@@ -97,6 +97,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  use m_geometry,     only : metric
  use m_fstrings,     only : sjoin
  use m_abilasi,      only : jacobi
+ use m_occ,          only : getnel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

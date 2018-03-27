@@ -57,6 +57,7 @@ MODULE m_ebands
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
  use m_pptools,        only : printbxsf
+ use m_occ,            only : getnel, newocc
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print

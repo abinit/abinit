@@ -175,6 +175,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_io_tools, only : file_exists
  use m_mpinfo,   only : destroy_mpi_enreg
  use m_hdr,      only : hdr_skip
+ use m_occ,      only : occeig
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type

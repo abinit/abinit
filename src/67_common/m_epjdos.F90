@@ -43,6 +43,7 @@ module m_epjdos
  use m_hdr
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use m_occ,            only : dos_hdr_write
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : simpson, simpson_int
