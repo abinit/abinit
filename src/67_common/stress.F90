@@ -144,6 +144,7 @@
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_fft,              only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

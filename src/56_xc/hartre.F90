@@ -64,6 +64,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
 
  use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
+ use m_fft,      only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

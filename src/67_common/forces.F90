@@ -140,6 +140,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,  only : libxc_functionals_is_hybrid
+ use m_fft,              only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

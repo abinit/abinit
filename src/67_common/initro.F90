@@ -72,6 +72,8 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  use m_atomdata,     only : atom_length
  use m_mpinfo,       only : ptabs_fourdp
  use m_pawtab,       only : pawtab_type
+ use m_fft,          only : zerosym
+    
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

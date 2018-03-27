@@ -43,11 +43,13 @@ module m_fock
  use m_pawfgr
  use m_pawfgrtab
  use m_pawcprj
- use m_paw_ij,          only : paw_ij_type
+ use m_cgtools         
 
  use m_mpinfo,          only : ptabs_fourdp
  use m_fstrings,        only : itoa, ftoa, sjoin
- use m_cgtools         
+ use m_fft,             only : zerosym
+ use m_paw_ij,          only : paw_ij_type
+
 
  implicit none
 
