@@ -112,7 +112,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_blas,          only : xdotc
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_mpinfo,        only : destroy_mpi_enreg
- use m_geometry,      only : normv
+ use m_geometry,      only : normv, mkrdim
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt
  use m_ioarr,         only : fftdatar_write, read_rhor
@@ -2200,7 +2200,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ABI_DEALLOCATE(sigcme_k) 
+       ABI_DEALLOCATE(sigcme_k)
 
      end do
    end if
@@ -2228,7 +2228,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
      call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_k,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
-     ABI_DEALLOCATE(sigcme_k) 
+     ABI_DEALLOCATE(sigcme_k)
      !
      ! Calculate direct gap for each spin and print out final results.
      ! We use the valence index of the KS system because we still do not know

@@ -32,6 +32,7 @@ module m_outxml
  use m_errors
 
  use m_io_tools,    only : open_file
+ use m_geometry,    only : xcart2xred, xred2xcart
  use m_results_gs , only : results_gs_type
 
  implicit none
@@ -313,7 +314,6 @@ subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'out_geometry_XML'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

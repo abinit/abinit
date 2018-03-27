@@ -76,7 +76,8 @@
  use m_hdr
  use m_sort
 
- use m_fftcore, only : kpgcount
+ use m_geometry,     only : mkrdim
+ use m_fftcore,      only : kpgcount
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

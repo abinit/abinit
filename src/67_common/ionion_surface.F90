@@ -51,11 +51,12 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
  use BigDFT_API, only: IonicEnergyandForces
 #endif
 
+ use m_geometry,    only : xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ionion_surface'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

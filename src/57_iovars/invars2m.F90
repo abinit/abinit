@@ -65,6 +65,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
  use defs_abitypes
  use m_profiling_abi
 
+ use m_geometry,   only : mkrdim
  use m_gsphere,    only : setshells
 
 !This section has been created automatically by the script Abilint (TD).

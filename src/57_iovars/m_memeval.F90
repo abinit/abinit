@@ -34,6 +34,7 @@ MODULE m_memeval
  use m_errors
 
  use m_libpaw_tools,  only : libpaw_write_comm_set
+ use m_geometry,      only : mkradim, mkrdim, xred2xcart
 
  implicit none
 
@@ -2354,6 +2355,7 @@ end subroutine memorf
 subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 
  use defs_wvltypes
+
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
       & atomic_info, memory_estimation
@@ -2364,7 +2366,6 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_memory'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_43_wvl_wrappers
 !End of the abilint section
 

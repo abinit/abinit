@@ -73,7 +73,8 @@ subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
- use m_bfgs, only : hessinit, hessupdt, brdene
+ use m_geometry,    only : mkrdim, fcart2fred
+ use m_bfgs,        only : hessinit, hessupdt, brdene
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

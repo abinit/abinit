@@ -208,6 +208,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_efield
  use m_cgtools
 
+ use m_geometry,           only : xred2xcart
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -241,7 +242,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_16_hideleave
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_61_occeig
@@ -384,7 +384,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  usefock = (dtset%usefock==1 .and. associated(fock))
  usefock_ACE=0
  if (usefock) usefock_ACE=fock%fock_common%use_ACE
- 
+
 
 !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
@@ -817,7 +817,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
          call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
        end if
-       
+
 
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
@@ -1289,7 +1289,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
      energies%e_nonlocalpsp = zero
-     if (usefock) then 
+     if (usefock) then
        energies%e_fock     = zero
        if (optforces>0) fock%fock_common%forces=zero
      end if

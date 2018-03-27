@@ -74,6 +74,8 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  use m_profiling_abi
  use m_numeric_tools, only : OPERATOR(.x.)
 
+ use m_geometry,   only : xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -392,7 +394,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
    found=0
    do isym=1,nsym
 !    Proper rotations
-     if( minval( abs( t_axes(isym)-(/10,12,14,22,23,24,25,26,27,28,29,30,31/) ))==0) then 
+     if( minval( abs( t_axes(isym)-(/10,12,14,22,23,24,25,26,27,28,29,30,31/) ))==0) then
        found=1 ; exit
 !   Improper symmetry operations
      else if( minval( abs( t_axes(isym)-(/1,2,3/) ))==0) then

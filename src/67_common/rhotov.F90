@@ -130,6 +130,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  use m_cgtools
  use m_xcdata
 
+ use m_geometry,         only : xred2xcart
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,  only : libxc_functionals_is_hybrid
@@ -139,7 +140,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotov'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_62_poisson
@@ -375,7 +375,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !                                     v(1)    => v_upup
 !                                     v(2)    => v_dndn
 !         verified by comparing collinear and non-collinear calculations
-     
+
      vzeeman(1) =-half*dtset%zeemanfield(3)  ! v_upup
      vzeeman(2) = half*dtset%zeemanfield(3)  ! v_dndn
 

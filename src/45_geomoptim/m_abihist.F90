@@ -46,6 +46,8 @@ module m_abihist
  use netcdf
 #endif
 
+ use m_geometry,  only : fcart2fred, xred2xcart
+
  implicit none
 
  private
@@ -839,10 +841,10 @@ function abihist_findIndex(hist,step) result(index)
  if ((mxhist ==1.and.step/=+1).or.&
 &    (mxhist /=1.and.abs(step) >=mxhist)) then
    write(msg,'(a,I0,2a)')' The requested step must be lass than ',mxhist,ch10,&
-&                     'Action: increase the number of history store in the hist' 
+&                     'Action: increase the number of history store in the hist'
    MSG_BUG(msg)
  end if
- 
+
  ii = hist%ihist + step
 
  do while (ii > mxhist)
@@ -851,9 +853,9 @@ function abihist_findIndex(hist,step) result(index)
  do while (ii <= 0)
    ii = ii + mxhist
  end do
- 
+
  index = ii
- 
+
 end function abihist_findIndex
 !!***
 
@@ -1156,7 +1158,7 @@ character(len= 500) :: msg
  similar=1
 
  write(msg,'(a,I0,4a)')  'Using values from history, iteration:',hist_in%ihist,ch10,&
-&                     'Differences between present history and values stored',ch10,&    
+&                     'Differences between present history and values stored',ch10,&
 &                     'on the previous history.(Relative difference)'
  call wrtout(std_out,msg,'COLL')
 
@@ -1241,7 +1243,7 @@ end subroutine abihist_compare_and_copy
 !!  ifirst=1 if first access to the file
 !!  itime = index of the step in the hist file
 !!  natom=Number of atoms.
-!!  nctime=NetCdf TIME between output of molecular dynamics informations 
+!!  nctime=NetCdf TIME between output of molecular dynamics informations
 !!  ntypat=Number of type of atoms.
 !!  typat(natom)=Type of each natom
 !!   amu(ntypat)=mass of the atoms (atomic mass unit)
@@ -1304,10 +1306,10 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
  if(nctime==0 .or. ifirst==1 .or. (itime > nctime .and.mod(itime,nctime) == 0)) need_to_write = .TRUE.
 !Return if we don't need to write the HIST file at this step
  if (.not. need_to_write) return
- 
+
  if (ifirst==1) then
 !##### First access: Create NetCDF file and write defs
-   
+
    write(std_out,*) 'Write iteration in HIST netCDF file'
    npsp=size(znucl)
 
@@ -1328,14 +1330,14 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 !##### itime>2 access: just open NetCDF file
 
    if(need_to_write) then
-    
+
      write(std_out,*) 'Write iteration in HIST netCDF file'
-   
+
 !    Open netCDF file
      ncerr = nf90_open(path=trim(filename),mode=NF90_WRITE, ncid=ncid)
      NCF_CHECK_MSG(ncerr," open netcdf history file")
 
-!    Compute the itime for the hist file     
+!    Compute the itime for the hist file
      itime_file = itime
      if(nctime > 0) itime_file = int(anint(real(itime / nctime,sp)))
 
@@ -2363,7 +2365,6 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'write_vars_hist'
- use interfaces_41_geometry
 !End of the abilint section
 
 implicit none

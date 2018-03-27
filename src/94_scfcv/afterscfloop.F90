@@ -228,6 +228,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_hdr
 
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
+ use m_geometry,         only : xred2xcart
  use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,exchange_electronpositron

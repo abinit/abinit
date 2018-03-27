@@ -65,7 +65,6 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfs_set'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

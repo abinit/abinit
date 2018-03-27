@@ -105,7 +105,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa
  use m_energies,      only : energies_type, energies_init
  use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
- use m_geometry,      only : normv, vdotw
+ use m_geometry,      only : normv, vdotw, mkrdim
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_crystal,       only : crystal_free, crystal_t

@@ -150,8 +150,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use m_results_img
  use m_scf_history
  use m_io_redirect
- use m_specialmsg, only : specialmsg_mpisum
 
+ use m_geometry,     only : mkradim, mkrdim, fcart2fred
+ use m_specialmsg,   only : specialmsg_mpisum
  use m_libpaw_tools, only : libpaw_spmsg_mpisum
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
@@ -168,7 +169,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_45_geomoptim
  use interfaces_67_common
  use interfaces_95_drive, except_this_one => gstateimg

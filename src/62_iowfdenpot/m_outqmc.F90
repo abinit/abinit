@@ -38,6 +38,7 @@ module m_outqmc
  use m_xmpi
 
  use m_io_tools,    only : get_unit
+ use m_geometry,    only : xred2xcart
  use m_results_gs , only : results_gs_type
 
  implicit none
@@ -98,7 +99,6 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 #undef ABI_FUNC
 #define ABI_FUNC 'outqmc'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

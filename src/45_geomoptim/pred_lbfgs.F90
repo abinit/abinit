@@ -64,8 +64,9 @@ subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_profiling_abi
  use m_abimover
  use m_abihist
-
  use m_lbfgs
+
+ use m_geometry,       only : mkrdim, fcart2fred
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -141,7 +142,7 @@ real(dp) :: strten(6)
      ABI_DEALLOCATE(vin1)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin) 
+     ABI_DEALLOCATE(hessin)
    end if
    return
  end if

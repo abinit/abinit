@@ -48,6 +48,8 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,  only : xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -28,25 +28,25 @@
 MODULE m_ddb
 
  use defs_basis
- use m_profiling_abi 
+ use m_profiling_abi
  use defs_abitypes
  use defs_datatypes
  use m_errors
  use m_xmpi
-
  use m_ddb_hdr
+ use m_dtset
+
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
- use m_geometry,       only : phdispl_cart2red
+ use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
 &                             dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
  use m_psps,           only : psps_copy, psps_free
- use m_dtset
- 
+
  implicit none
 
  private
@@ -1647,7 +1647,6 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_from_file'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2621,7 +2620,7 @@ integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
 &   dielt(3,1),dielt(3,2),dielt(3,3)
 
    call wrtout(std_out,message,'COLL')
-   
+
    ABI_FREE(tmpval)
  end if ! iblok not found
 
@@ -3151,7 +3150,7 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  integer :: nelmts
 
 ! *********************************************************************
- 
+
 
 !Count the number of elements
  nelmts=0
@@ -3344,14 +3343,14 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
 
 !Set variables
  mxnimage = 1 ! Only 1 image in the DDB
- 
+
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  ddbun = get_unit()
  call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm)
 !close ddb file, just want to read the headers
  close(ddbun)
  dtset%ngfft = ddb_hdr%ngfft
- 
+
 ! call psps_copy(psps, ddb_hdr%psps)
 
 ! Copy scalars from ddb
@@ -3384,7 +3383,7 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  end if
  ABI_ALLOCATE(dtset%acell_orig,(3,mxnimage))
  dtset%acell_orig(1:3,1) = ddb_hdr%acell(:)
- 
+
  if (allocated(dtset%rprim_orig)) then
    ABI_DEALLOCATE(dtset%rprim_orig)
  end if
@@ -3404,19 +3403,19 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  end if
  ABI_ALLOCATE(dtset%amu_orig,(dtset%ntypat,mxnimage))
  dtset%amu_orig(:,1) = ddb_hdr%amu(:)
- 
+
  if (allocated(dtset%typat)) then
    ABI_DEALLOCATE(dtset%typat)
  end if
  ABI_ALLOCATE(dtset%typat,(dtset%natom))
  dtset%typat(:) = ddb_hdr%typat(1:ddb_hdr%matom)
- 
+
  if (allocated(dtset%spinat)) then
    ABI_DEALLOCATE(dtset%spinat)
  end if
  ABI_ALLOCATE(dtset%spinat,(3,dtset%natom))
  dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
- 
+
  if (allocated(dtset%xred_orig)) then
    ABI_DEALLOCATE(dtset%xred_orig)
  end if
@@ -3428,49 +3427,49 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  end if
  ABI_ALLOCATE(dtset%ziontypat,(dtset%ntypat))
  dtset%ziontypat(1:ddb_hdr%mtypat) = ddb_hdr%zion(1:ddb_hdr%mtypat)
- 
+
  if (allocated(dtset%znucl)) then
    ABI_DEALLOCATE(dtset%znucl)
  end if
  ABI_ALLOCATE(dtset%znucl,(dtset%ntypat))
- dtset%znucl(:) = ddb_hdr%znucl(1:ddb_hdr%mtypat)   
- 
+ dtset%znucl(:) = ddb_hdr%znucl(1:ddb_hdr%mtypat)
+
  if (allocated(dtset%nband)) then
    ABI_DEALLOCATE(dtset%nband)
  end if
- ABI_ALLOCATE(dtset%nband,(dtset%nkpt)) 
+ ABI_ALLOCATE(dtset%nband,(dtset%nkpt))
  dtset%nband(:) = ddb_hdr%nband(1:ddb_hdr%mkpt*ddb_hdr%nsppol)
- 
+
  if (allocated(dtset%symafm)) then
    ABI_DEALLOCATE(dtset%symafm)
  end if
  ABI_ALLOCATE(dtset%symafm,(dtset%nsym))
  dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
- 
+
  if (allocated(dtset%symrel)) then
    ABI_DEALLOCATE(dtset%symrel)
  end if
  ABI_ALLOCATE(dtset%symrel,(3,3,dtset%nsym))
  dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
- 
+
  if (allocated(dtset%tnons)) then
    ABI_DEALLOCATE(dtset%tnons)
  end if
  ABI_ALLOCATE(dtset%tnons,(3,dtset%nsym))
  dtset%tnons(:,:) = ddb_hdr%tnons(1:3,1:ddb_hdr%msym)
- 
+
  if (allocated(dtset%kpt)) then
    ABI_DEALLOCATE(dtset%kpt)
  end if
  ABI_ALLOCATE(dtset%kpt,(3,dtset%nkpt))
  dtset%kpt(:,:) = ddb_hdr%kpt(1:3,1:ddb_hdr%mkpt)
- 
+
  if (allocated(dtset%wtk)) then
    ABI_DEALLOCATE(dtset%wtk)
  end if
  ABI_ALLOCATE(dtset%wtk,(dtset%nkpt))
  dtset%wtk(:) = ddb_hdr%wtk(1:ddb_hdr%mkpt)
- 
+
  ! GA: I had way too much problems implementing pawtab_copy.
  !     The script check-libpaw would report all sorts of errors.
  !     Therefore, I do a cheap copy here, copying only the relevant info.
@@ -3489,7 +3488,7 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  !    end if
  !   end do
  ! end if
- 
+
  call ddb_hdr_free(ddb_hdr)
 
 end subroutine ddb_to_dtset

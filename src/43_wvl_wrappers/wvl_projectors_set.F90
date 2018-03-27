@@ -53,6 +53,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
  use m_errors
  use m_profiling_abi
  use m_atomdata
+ use m_geometry,     only : xred2xcart
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: createProjectorsArrays, wvl_timing => timing
 #endif
@@ -62,7 +63,6 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_projectors_set'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

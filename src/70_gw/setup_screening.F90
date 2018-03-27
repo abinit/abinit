@@ -75,7 +75,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, GW_Q0_DEFAULT, czero_gw, em1params_t
  use m_fstrings,      only : strcat, sjoin, ltoa, itoa
  use m_io_tools,      only : file_exists
- use m_geometry,      only : normv
+ use m_geometry,      only : normv, mkrdim
  use m_crystal,       only : crystal_print, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_bz_mesh,       only : kmesh_t, kmesh_init, get_ng0sh, kmesh_print, find_qmesh, get_BZ_item,&

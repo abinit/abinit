@@ -133,6 +133,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  use m_profiling_abi
  use m_efield
  use m_errors
+
+ use m_geometry,         only : fred2fcart
  use m_fock,             only : fock_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
@@ -191,7 +193,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  logical :: is_hybrid_ncpp
 !arrays
  integer :: qprtrb_dum(3)
- real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3) 
+ real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3)
  real(dp) :: rmet(3,3),strn_dummy6(6),strv_dummy6(6),tsec(2),vprtrb_dum(2)
  real(dp),allocatable :: atmrho_dum(:),atmvloc_dum(:),dyfrlo_dum(:,:,:)
  real(dp),allocatable :: dyfrn_dum(:,:,:),dyfrv_dum(:,:,:)
@@ -253,7 +255,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
-   else 
+   else
      ABI_ALLOCATE(vxctotg,(0,0))
    end if
 !  Allocate (unused) dummy variables, otherwise some compilers complain
@@ -393,15 +395,15 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  efield_flag = (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or. &
 & dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17)
  calc_epaw3_forces = (efield_flag .and. dtset%optforces /= 0 .and. psps%usepaw == 1)
- if ( efield_flag ) then 
+ if ( efield_flag ) then
    ABI_ALLOCATE(fionred,(3,dtset%natom))
    fionred(:,:)=zero
    do iatom=1,dtset%natom
      itypat=dtset%typat(iatom)
 ! force on ion due to electric field, cartesian representation
      fioncart(:)=psps%ziontypat(itypat)*dtset%efield(:)
-! form fionred = rprimd^T * fioncart, note that forces transform 
-! oppositely to coordinates, because they are derivative with respect to 
+! form fionred = rprimd^T * fioncart, note that forces transform
+! oppositely to coordinates, because they are derivative with respect to
 ! coordinates
      call dgemv('T',3,3,one,rprimd,3,fioncart,1,zero,fionred(1:3,iatom),1)
 !     do mu=1,3
@@ -413,9 +415,9 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  end if
 
 !(compute additional F3-type force due to projectors for electric field with PAW)
- if ( efield_flag .and. calc_epaw3_forces ) then  
+ if ( efield_flag .and. calc_epaw3_forces ) then
    ABI_ALLOCATE(epawf3red,(3,dtset%natom))
-! dtefield%epawf3(iatom,idir,fdir) contains 
+! dtefield%epawf3(iatom,idir,fdir) contains
    epawf3red(:,:)=zero
    do iatom=1,dtset%natom
      do fdir = 1, 3
@@ -464,7 +466,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 ! note that fionred is subtracted, because it really is a force and we need to
 ! turn it back into a gradient. The fred2fcart routine below includes the minus
 ! sign to convert gradients back to forces
- if ( efield_flag ) grtn(:,:)=grtn(:,:)-fionred(:,:)  
+ if ( efield_flag ) grtn(:,:)=grtn(:,:)-fionred(:,:)
 ! epawf3red is added, because it actually is a gradient, not a force
  if ( efield_flag .and. calc_epaw3_forces ) grtn(:,:) = grtn(:,:) + epawf3red(:,:)
 
@@ -513,7 +515,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Conversion to cartesian coordinates (bohr) AND
 !Subtract off average force from each force component
 !to avoid spurious drifting of atoms across cell.
-! notice that fred2fcart multiplies fred by -1 to convert it 
+! notice that fred2fcart multiplies fred by -1 to convert it
 ! from a gradient (input) to a force (output)
 
  call fred2fcart(favg,(dtset%jellslab==0 .and. dtset%nzchempot==0),fcart,fred,gprimd,dtset%natom)
@@ -543,9 +545,9 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  ABI_DEALLOCATE(grl)
  ABI_DEALLOCATE(grtn)
  ABI_DEALLOCATE(fin)
- if ( efield_flag )  then   
+ if ( efield_flag )  then
    ABI_DEALLOCATE(fionred)
-   if ( calc_epaw3_forces ) then 
+   if ( calc_epaw3_forces ) then
      ABI_DEALLOCATE(epawf3red)
    end if
  end if

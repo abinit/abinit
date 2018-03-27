@@ -31,13 +31,14 @@
 
 MODULE m_mep
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
+ use m_profiling_abi
  use m_errors
- use m_xmpi, only : xmpi_sum
- use m_bfgs, only : hessupdt
+ use m_xmpi
+
+ use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart
+ use m_bfgs,        only : hessupdt
  use m_results_img, only : results_img_type,gather_array_img
 
  implicit none
@@ -290,7 +291,6 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rpr
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_steepest'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -399,7 +399,6 @@ subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,r
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_qmin'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1066,7 +1065,6 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_rk4'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

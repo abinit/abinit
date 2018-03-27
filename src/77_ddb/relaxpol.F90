@@ -80,6 +80,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
  use m_errors
 
  use m_fstrings,  only : sjoin, itoa
+ use m_geometry,  only : xcart2xred
  use m_dynmat,    only : symdyma
  use m_crystal,   only : crystal_t
 

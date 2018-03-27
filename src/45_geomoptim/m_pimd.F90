@@ -35,6 +35,7 @@ MODULE m_pimd
  use m_random_zbq
 
  use m_numeric_tools,  only : uniformrandom
+ use m_geometry,       only : mkradim
 
  implicit none
 
@@ -685,7 +686,6 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_print'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

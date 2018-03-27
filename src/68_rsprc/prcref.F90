@@ -150,6 +150,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  use m_cgtools
  use m_xcdata
 
+ use m_geometry,  only : xcart2xred
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
 

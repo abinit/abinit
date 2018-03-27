@@ -98,9 +98,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
- use m_xg, only : xg_finalize
+ use m_xgScalapack
 
+ use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
+ use m_geometry,     only : mkrdim, xcart2xred, xred2xcart
  use m_pawang,       only : pawang_type, pawang_free
  use m_pawrad,       only : pawrad_type, pawrad_free
  use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
@@ -108,7 +110,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
  use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
- use m_xgScalapack
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&

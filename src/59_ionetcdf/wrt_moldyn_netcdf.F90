@@ -63,6 +63,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 #endif
 
  use m_io_tools,   only : open_file
+ use m_geometry,   only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -369,7 +370,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !    Open file for writing
      if (open_file('POSABIN',message,unit=unpos,status='replace',form='formatted') /= 0 ) then
        MSG_ERROR(message)
-     end if 
+     end if
 
 !    Write Positions
      if (dtset%natom>=1) write(unpos,'(a7,3d18.5)') 'xred  ',(xred(ii,1),ii=1,3)

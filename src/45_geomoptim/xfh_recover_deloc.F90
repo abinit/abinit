@@ -47,6 +47,7 @@ subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
  use defs_basis
  use m_abimover
 
+ use m_geometry,    only : xred2xcart
  use m_results_gs , only : results_gs_type
  use m_bfgs,        only : hessupdt
 
@@ -54,7 +55,6 @@ subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xfh_recover_deloc'
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => xfh_recover_deloc
 !End of the abilint section
 

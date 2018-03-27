@@ -69,7 +69,8 @@ MODULE m_use_ga
  use m_ga
  use m_sort
 
- use m_results_img, only : results_img_type,gather_array_img
+ use m_geometry,       only : mkradim, mkrdim
+ use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
 
  use interfaces_28_numeric_noabirule

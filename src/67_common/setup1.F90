@@ -70,6 +70,8 @@ subroutine setup1(acell,amass,amu,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,       only : mkrdim
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

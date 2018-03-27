@@ -39,6 +39,7 @@ MODULE m_cut3d
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
+ use m_geometry,         only : xcart2xred
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
@@ -1732,7 +1733,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
        end if
 
      end do ! resoll
-     write(unt, * ) 
+     write(unt, * )
    end do ! resolw
 
    if (fileformattype==3) then

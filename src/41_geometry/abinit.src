@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "bldgrp.F90",
- "bonds_lgth_angles.F90",
  "chkdilatmx.F90",
  "chkgrp.F90",
  "chkorthsy.F90",
@@ -27,9 +26,7 @@ sources = [
  "chkrprimd.F90",
  "dbeta.F90",
  "dist2.F90",
- "fcart2fred.F90",
  "fillcell.F90",
- "fred2fcart.F90",
  "gensymshub.F90",
  "gensymshub4.F90",
  "gensymspgr.F90",
@@ -41,8 +38,6 @@ sources = [
  "littlegroup_pert.F90",
  "metric.F90",
  "mkeuler.F90",
- "mkradim.F90",
- "mkrdim.F90",
  "mksupercell.F90",
  "m_ab7_symmetry.F90",
  "m_crystal.F90",
@@ -53,7 +48,6 @@ sources = [
  "polcart.F90",
  "prtspgroup.F90",
  "ptgmadata.F90",
- "randomcellpos.F90",
  "remove_inversion.F90",
  "shellstruct.F90",
  "smallprim.F90",
@@ -86,8 +80,6 @@ sources = [
  "symspgr.F90",
  "symmetrize_rprimd.F90",
  "symmetrize_xred.F90",
- "xred2xcart.F90",
- "xcart2xred.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

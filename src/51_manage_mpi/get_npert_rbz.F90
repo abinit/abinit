@@ -43,6 +43,8 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,     only : mkrdim
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -117,7 +119,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
  if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
  if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
- if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1 
+ if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
 
  ABI_ALLOCATE(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)

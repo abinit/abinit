@@ -59,6 +59,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use m_profiling_abi
 
  use m_parser,       only : intagm
+ use m_geometry,     only : mkrdim
  use m_fftcore,      only : fftalg_for_npfft
  use m_mpinfo,       only : init_mpi_enreg,mpi_distrib_is_ok
  use m_libpaw_tools, only : libpaw_write_comm_set

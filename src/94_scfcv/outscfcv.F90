@@ -155,6 +155,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith
+ use m_geometry,         only : bonds_lgth_angles
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
  use m_crystal,          only : crystal_init, crystal_free, crystal_t, prt_cif
@@ -183,7 +184,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #define ABI_FUNC 'outscfcv'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_54_abiutil
  use interfaces_62_iowfdenpot
  use interfaces_65_paw

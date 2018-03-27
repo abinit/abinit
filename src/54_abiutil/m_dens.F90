@@ -30,6 +30,8 @@ MODULE m_dens
  use m_profiling_abi
  use m_splines
 
+ use m_geometry,         only : xcart2xred
+
  implicit none
 
  private

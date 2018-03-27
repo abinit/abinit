@@ -152,6 +152,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use m_xmpi
  use m_xcdata
 
+ use m_geometry,          only : xred2xcart
  use m_ewald,             only : ewald
  use m_energies,          only : energies_type
  use m_electronpositron,  only : electronpositron_type,electronpositron_calctype
@@ -168,7 +169,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 #undef ABI_FUNC
 #define ABI_FUNC 'setvtr'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_62_poisson
@@ -484,15 +484,15 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
-!        Setup the auxiliary xc functional information 
-         call xcdata_init(xcdata,dtset=dtset,auxc_ixc=0,ixc=dtset%auxc_ixc) 
+!        Setup the auxiliary xc functional information
+         call xcdata_init(xcdata,dtset=dtset,auxc_ixc=0,ixc=dtset%auxc_ixc)
        end if
 !      Use the periodic solver to compute Hxc
        nk3xc=1
        if (ipositron==0) then
 
 !        Compute energies%e_xc and associated quantities
-         if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
+         if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
 !          Not yet able to deal fully with the full XC kernel in case of GGA + spin
            option_eff=option
            if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
@@ -508,7 +508,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !        Possibly compute energies%e_hybcomp_E0
          if(mod(dtset%fockoptmix,100)==11)then
-!          This call to rhotoxc uses the hybrid xc functional 
+!          This call to rhotoxc uses the hybrid xc functional
            if(.not.is_hybrid_ncpp)then
 !            Not yet able to deal fully with the full XC kernel in case of GGA + spin
              option_eff=option
@@ -639,7 +639,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    vzeeman(:) = zero                            ! vzeeman_ij = -1/2*sigma_ij^alpha*B_alpha
    if(dtset%nspden==2)then
-     vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z  
+     vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z
      vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
      do ifft=1,nfft
        vtrial(ifft,1) = vtrial(ifft,1) + vzeeman(1) !SPr: added 1st component
@@ -647,7 +647,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      end do !ifft
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)     ! v_dwndwn                  => v_11 
+     vzeeman(1)=-half*dtset%zeemanfield(3)     ! v_dwndwn                  => v_11
      vzeeman(2)= half*dtset%zeemanfield(3)     ! v_upup                    => v_22
      vzeeman(3)=-half*dtset%zeemanfield(1)     ! Re(v_dwnup) = Re(v_updwn) => Re(v_12)
      vzeeman(4)= half*dtset%zeemanfield(2)     ! Im(v_dwnup) =-Im(v_dwnup) => Im(v_12)
@@ -708,8 +708,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      call dotprod_vn(1,rhor,energies%e_hybcomp_v0,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
 &     mpi_comm_sphgrid=mpi_comm_sphgrid)
      energies%e_hybcomp_v=energies%e_hybcomp_v0
-   end if 
- end if 
+   end if
+ end if
 
  if (optene==2.or.optene==4 .and. .not. wvlbigdft) then
 !  Compute local psp energy eei

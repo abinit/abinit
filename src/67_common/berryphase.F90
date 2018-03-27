@@ -137,6 +137,8 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
  use m_profiling_abi
  use m_hdr
 
+ use m_geometry,         only : xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -144,7 +146,6 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
  use interfaces_14_hidewrite
  use interfaces_28_numeric_noabirule
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

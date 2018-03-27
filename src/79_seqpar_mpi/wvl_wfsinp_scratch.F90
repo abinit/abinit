@@ -75,7 +75,6 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfsinp_scratch'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_67_common
 !End of the abilint section
 

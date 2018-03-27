@@ -66,6 +66,8 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
  use m_abimover
  use m_abihist
 
+ use m_geometry,    only : xcart2xred, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

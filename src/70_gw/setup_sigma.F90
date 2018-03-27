@@ -67,6 +67,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : basename, sjoin, ktoa, ltoa
+ use m_geometry,      only : mkrdim
  use m_crystal,       only : crystal_print, idx_spatial_inversion, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_bz_mesh,       only : kmesh_t, kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print,&
@@ -835,9 +836,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
-!The Coulomb interaction used here might have two terms : 
+!The Coulomb interaction used here might have two terms :
 !the first term generates the usual sigma self-energy, but possibly, one should subtract
-!from it the Coulomb interaction already present in the Kohn-Sham basis, 
+!from it the Coulomb interaction already present in the Kohn-Sham basis,
 !if the usefock associated to ixc is one.
 !The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
  nvcoul_init=1
