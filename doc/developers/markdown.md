@@ -252,7 +252,7 @@ links within our documentation, in particular links to:
 * Input files or pseudopotentials used in the Abinit test suite.
 * Website pages commonly mentioned such as e.g. the [[topic:index|topics page]].
 
-For this reason, we use the [extentions API](https://pythonhosted.org/Markdown/extensions/api.html)
+For this reason, we use the [extentions API](https://python-markdown.github.io/extensions/api)
 provided by python Markdown to extend the syntax of the parser.
 Typical cases are discussed in the next sections.
 
@@ -434,7 +434,7 @@ It's also possible to specify the name of the link with the `|` separator:
 
 ### Permalinks
 
-Permalinks are a feature of the [Table of Contents extension](https://pythonhosted.org/Markdown/extensions/toc.html),
+Permalinks are a feature of the [Table of Contents extension](https://python-markdown.github.io/extensions/toc),
 which is part of the standard Markdown library.
 The extension inserts an anchor at the end of each headline, which makes it possible to directly link to a subpart of the document.
 
