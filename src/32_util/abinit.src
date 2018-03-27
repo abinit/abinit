@@ -19,11 +19,10 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "appdig.F90",
- "create_mlms2jmj.F90",
- "create_slm2ylm.F90",
  "fappnd.F90",
  "isfile.F90",
  "littlegroup_q.F90",
+ "m_angles.F90",
  "m_atomdata.F90",
  "m_dummy.F90",
  "m_exp_mat.F90",

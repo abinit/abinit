@@ -69,6 +69,7 @@ subroutine setsymrhoij(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
  use m_profiling_abi
 
  use m_special_funcs, only : phim
+ use m_angles,        only : mkeuler, dbeta
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
