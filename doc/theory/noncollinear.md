@@ -13,9 +13,9 @@ $$ \rho^{\alpha\beta}(\rr) = \sum_n f_n \la \rr|\Psi_n^\alpha\ra \la\Psi_n^\beta
 
 where the sum runs over all states and $f_n$ is the occupation of state $n$.
 
-With $\rho^{\alpha,\beta}(\rr)$, we can express the scalar density by
+With $\rho^{\alpha\beta}(\rr)$, we can express the scalar density by
 
-$$ \rho(\rr)=\sum_{\alpha\alpha} \rho^{\alpha\alpha}(\rr) $$
+$$ \rho(\rr)=\sum_{\alpha} \rho^{\alpha\alpha}(\rr) $$
 
 and the magnetization density $\vec m(\rr)$ (in units of $\hbar /2$) whose components are:
 
@@ -24,7 +24,7 @@ $$ m_i(\rr) = \sum_{\alpha\beta} \rho^{\alpha\beta}(\rr) \sigma_i^{\alpha\beta} 
 where the $\sigma_i$ are the Pauli matrices.
 
 In general, $E_{xc}$ is a functional of $\rho^{\alpha\beta}(\rr)$, or equivalently of $\vec m(\rr)$ and $\rho(\rr)$. 
-It is therefore denoted as $E_{xc}(n(\rr), \vec m(\rr))$
+It is therefore denoted as $E_{xc}[n(\rr), \vec m(\rr)]$.
 
 The expression of $V_{xc}$ taking into account the above expression of $E_{xc}$ is:
 
@@ -34,12 +34,12 @@ V_{xc}^{\alpha\beta}(\rr)={\delta E_{xc} \over \delta \rho (\rr)} \delta_{\alpha
 $$
 
 In the LDA approximation, due to its rotational invariance, $E_{xc}$ is indeed a functional of $n(\rr)$ and $|m(\rr)|$ only.
-In the GGA approximation, we **assume** that it is a functional of $n(\rr)$ and $|m(\rr)|$ and their gradients.
+In the GGA approximation, on the contrary, we **assume** that it is a functional of $n(\rr)$ and $|m(\rr)|$ and their gradients.
 (This is not the most general functional of $\vec m(\rr)$ dependent upon first order derivatives, and rotationally invariant.)
 We therefore use exactly the same functional as in the spin polarized situation, using the local direction
 of $\vec m(\rr)$ as polarization direction.
 
-We the have 
+We then have 
 
 $$ {\delta E_{xc} \over \delta m_i (\rr) }={\delta E_{xc} \over \delta |m_i (\rr)| } \widehat {m(\rr)}$$, 
 
@@ -76,31 +76,30 @@ $$
 
 Computation of $\rho^{\alpha\beta}(\rr) = \sum_n f_n \la \rr|\Psi^\alpha\ra \la\Psi^\beta|\rr\ra$
 
-One would like to use the routine {\tt mkrho.f} which does precisely this
+One would like to use the routine *mkrho* which does precisely this
 but this routine transforms only real quantities, whereas
 $\rho^{\alpha\beta}(\rr)$ is hermitian and can have complex elements.
-The ``trick'' is to use only the real quantities:
+The *trick* is to use only the real quantities:
 
 \begin{eqnarray*}
-\rho^{1,1}(\rr)& = &\sum_n f_n \la \rr|\Psi^1\ra \la\Psi^1\ra \\
-\rho^{2,2}(\rr)&=&\sum_n f_n \la \rr|\Psi^2\ra \la\Psi^2\ra \\
+\rho^{11}(\rr)& = &\sum_n f_n \la \rr|\Psi^1\ra \la\Psi^1\ra \\
+\rho^{22}(\rr)&=&\sum_n f_n \la \rr|\Psi^2\ra \la\Psi^2\ra \\
 \rho(\rr)+m_x(\rr)&=&\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n \\
 \rho(\rr)+m_y(\rr)&=&\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n
 \end{eqnarray*}
 
-and compute $(\rho(\rr), \vec m(\rr))$ with the help of the additional:
+and compute $\rho(\rr)$ and $\vec m(\rr)$ with the help of:
 
 \begin{eqnarray*}
-\rho(\rr)&=&\rho^{1,1}(\rr)+\rho^{2,2}(\rr) \\
-m_z(\rr)&=&\rho^{1,1}(\rr) - \rho^{2,2}(\rr)
+\rho(\rr)&=&\rho^{11}(\rr)+\rho^{22}(\rr) \\
+m_z(\rr)&=&\rho^{11}(\rr) - \rho^{22}(\rr)
 \end{eqnarray*}
 
-Note that only the forurier transform are performed in {\tt mkrho.f} the final transformation to
-$(\rho(\rr), \vec m(\rr))$ is performed in {\tt symrhg.f}.
+Note that only the forurier transform are performed in *mkrho.f*, while the final transformation to
+$\rho(\rr)$, $\vec m(\rr)$ is performed in *symrhg.f*.
 
-The computation of $V_{xc}$ is performed in {\tt rhohxc.f}. The only transformation to this routine, is
+The computation of $V_{xc}$ is performed in *rhohxc.f*. The only transformation to this routine, is
 to compute $|\vec m(\rr)|$ as input of the usual (i.e spin polarized)  {\tt rhohxc.f} and yield back
 the four component $V_{xc}$, from the expression of ${\delta E_{xc} \over \delta |m (\rr)| }$.
 
-For more information, see: Hobbs et al., PRB, 62, 11556 ; Perdew et al. PRB, 46, 6671
-(for the xc functional)
+For more information, see: Hobbs et al., PRB, 62, 11556; Perdew et al. PRB, 46, 6671 (for the xc functional)

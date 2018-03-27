@@ -6,12 +6,12 @@ authors: X. Gonze, Y. Suzukawa, M. Mikami
 
 ## Real space
 
-The three primitive translation vectors are ${\bf R}_{1p}$, ${\bf R}_{2p}$, ${\bf R}_{3p}$.
+The three primitive translation vectors are ${\bf R}_1$, ${\bf R}_2$, ${\bf R}_3$.
 Their representation in Cartesian coordinates (atomic units) is:
 
-$$ {\bf R}_{1p} \rightarrow {rprimd(1:3, 1)} $$
-$$ {\bf R}_{2p} \rightarrow {rprimd(1:3, 2)} $$
-$$ {\bf R}_{3p} \rightarrow {rprimd(1:3, 3)} $$
+$$ {\bf R}_1 \rightarrow {rprimd(:, 1)} $$
+$$ {\bf R}_2 \rightarrow {rprimd(:, 2)} $$
+$$ {\bf R}_3 \rightarrow {rprimd(:, 3)} $$
 
 Related input variables: [[acell]], [[rprim]], [[angdeg]].
 
@@ -21,9 +21,9 @@ for $\tau=1 \dots N_{atom}$ where $N_{atom}$ is the number of atoms [[natom]].
 Representation in reduced coordinates:
 
 \begin{eqnarray*}
-{\bf x}_{\tau} &=& x^{red}_{1\tau} \cdot {\bf R}_{1p}
- + x^{red}_{2\tau} \cdot {\bf R}_{2p}
- + x^{red}_{3\tau} \cdot {\bf R}_{3p} \\
+{\bf x}_{\tau} &=& x^{red}_{1\tau} \cdot {\bf R}_{1}
+ + x^{red}_{2\tau} \cdot {\bf R}_{2}
+ + x^{red}_{3\tau} \cdot {\bf R}_{3} \\
  \tau &\rightarrow& {iatom} \\
  N_{atom} &\rightarrow& {natom} \\
  x^{red}_{1\tau} &\rightarrow& {xred(1,iatom)} \\
@@ -49,12 +49,12 @@ r^{red}_{1} & r^{red}_{2} & r^{red}_{1}
 \right)
 \left(
 \begin{array}{ccc}
-{\bf R}_{1p} \cdot {\bf R}_{1p} & {\bf R}_{1p} \cdot {\bf R}_{2p} &
-{\bf R}_{1p} \cdot {\bf R}_{3p} \\
-{\bf R}_{2p} \cdot {\bf R}_{1p} & {\bf R}_{2p} \cdot {\bf R}_{2p} &
-{\bf R}_{2p} \cdot {\bf R}_{3p} \\
-{\bf R}_{3p} \cdot {\bf R}_{1p} & {\bf R}_{3p} \cdot {\bf R}_{2p} &
-{\bf R}_{3p} \cdot {\bf R}_{3p}
+{\bf R}_{1} \cdot {\bf R}_{1} & {\bf R}_{1} \cdot {\bf R}_{2} &
+{\bf R}_{1} \cdot {\bf R}_{3} \\
+{\bf R}_{2} \cdot {\bf R}_{1} & {\bf R}_{2} \cdot {\bf R}_{2} &
+{\bf R}_{2} \cdot {\bf R}_{3} \\
+{\bf R}_{3} \cdot {\bf R}_{1} & {\bf R}_{3} \cdot {\bf R}_{2} &
+{\bf R}_{3} \cdot {\bf R}_{3}
 \end{array}
 \right)
 \left(
@@ -77,32 +77,34 @@ $$ {\bf R}^{met}_{ij} \rightarrow {rmet(i,j)} $$
 ## Reciprocal space
 
 The three primitive translation vectors in reciprocal space are
-${\bf G}_{1p}$,${\bf G}_{2p}$,${\bf G}_{3p}$
+${\bf G}_{1}$,${\bf G}_{2}$,${\bf G}_{3}$
 
 \begin{eqnarray*}
-{\bf G}_{1p}&=&\frac{1}{\Omega}({\bf R}_{2p}\times{\bf R}_{3p}) \rightarrow {gprimd(1:3,1)} \\
-{\bf G}_{2p}&=&\frac{1}{\Omega}({\bf R}_{3p}\times{\bf R}_{1p}) \rightarrow {gprimd(1:3,2)} \\
-{\bf G}_{3p}&=&\frac{1}{\Omega}({\bf R}_{1p}\times{\bf R}_{2p}) \rightarrow {gprimd(1:3,3)}
+{\bf G}_{1}&=&\frac{1}{\Omega}({\bf R}_{2}\times{\bf R}_{3}) \rightarrow {gprimd(:,1)} \\
+{\bf G}_{2}&=&\frac{1}{\Omega}({\bf R}_{3}\times{\bf R}_{1}) \rightarrow {gprimd(:,2)} \\
+{\bf G}_{3}&=&\frac{1}{\Omega}({\bf R}_{1}\times{\bf R}_{2}) \rightarrow {gprimd(:,3)}
 \end{eqnarray*}
 
-This definition is such that ${\bf G}_{ip}\cdot{\bf R}_{jp}=\delta_{ij}$
+This definition is such that ${\bf G}_{i}\cdot{\bf R}_{j}=\delta_{ij}$
 
 !!! warning
     Often, a factor of $2\pi$ is present in definition of
-    ${\bf G}_{ip}$, but not here, for historical reasons.
+    ${\bf G}_{i}$, but not here, for historical reasons.
 
 Reduced representation of vectors (K) in reciprocal space
 
 $$
-{\bf K}=K^{red}_{1}{\bf G}_{1p}+K^{red}_{2}{\bf G}_{2p}
-+K^{red}_{3}{\bf G}^{red}_{3p} \rightarrow
+{\bf K}=K^{red}_{1}{\bf G}_{1}+K^{red}_{2}{\bf G}_{2}
++K^{red}_{3}{\bf G}^{red}_{3} \rightarrow
 (K^{red}_{1},K^{red}_{2},K^{red}_{3}) 
 $$
 
-e.g. the reduced representation of ${\bf G}_{1p}$ is (1,0,0).
+e.g. the reduced representation of ${\bf G}_{1}$ is (1, 0, 0).
 
-The reduced representation of the vectors of the reciprocal space
-lattice is made of triplets of integers.
+!!! important
+
+    The reduced representation of the vectors of the reciprocal space
+    lattice is made of triplets of integers.
 
 The scalar products in the reduced representation are evaluated thanks to
 
@@ -114,12 +116,12 @@ K^{red}_{1} & K^{red}_{2} & K^{red}_{1}
 \right)
 \left(
 \begin{array}{ccc}
-{\bf G}_{1p} \cdot {\bf G}_{1p} & {\bf G}_{1p} \cdot {\bf G}_{2p}
-& {\bf G}_{1p} \cdot {\bf G}_{3p} \\
-{\bf G}_{2p} \cdot {\bf G}_{1p} & {\bf G}_{2p} \cdot {\bf G}_{2p}
-& {\bf G}_{2p} \cdot {\bf G}_{3p} \\
-{\bf G}_{3p} \cdot {\bf G}_{1p} & {\bf G}_{3p} \cdot {\bf G}_{2p}
-& {\bf G}_{3p} \cdot {\bf G}_{3p}
+{\bf G}_{1} \cdot {\bf G}_{1} & {\bf G}_{1} \cdot {\bf G}_{2}
+& {\bf G}_{1} \cdot {\bf G}_{3} \\
+{\bf G}_{2} \cdot {\bf G}_{1} & {\bf G}_{2} \cdot {\bf G}_{2}
+& {\bf G}_{2} \cdot {\bf G}_{3} \\
+{\bf G}_{3} \cdot {\bf G}_{1} & {\bf G}_{3} \cdot {\bf G}_{2}
+& {\bf G}_{3} \cdot {\bf G}_{3}
 \end{array}
 \right)
 \left(

@@ -9,7 +9,7 @@ ABINIT data structures and their theoretical justifications
 
 A Bloch wavefunction characterized by a wavevector ${\kk}$ is such that
 
-$$ \psi_{\bf k}({\bf r})=u_{\bf k}({\bf r}) e^{i2\pi {\bf k}\cdot{\bf r}} $$
+$$ \psi_{\bf k}({\bf r}) = u_{\bf k}({\bf r}) e^{i2\pi {\bf k}\cdot{\bf r}} $$
 
 where $u_{\bf k}({\bf r})$ is periodic, that is
 
@@ -29,8 +29,8 @@ Normalisation
 
 $$ \sum_{\bf G}|c_{\bf k}({\bf G})|^2 = 1 $$
 
-For a **spinor** wavefunction, there is an additional variable, t
-he spin $\sigma$ that can take two values, that is $\sigma=\uparrow$ (spin up) 
+For a **spinor** wavefunction, there is an additional variable, 
+the spin $\sigma$ that can take two values, that is $\sigma=\uparrow$ (spin up) 
 or $\sigma=\downarrow$ (spin down).
 The following relations hold:
 
@@ -124,25 +124,21 @@ This corresponds to [[nspinor ]] = 2.
 
 These two classes are mutually exclusive. The possibilities are thus:
 
-\begin{table}[h]
-\begin{center}
-\begin{tabular}[h]{|cc|c|}
-\hline
- nsppol &  nspinor &    \\
-\hline
-   1   &     1    &  scalar wavefunctions    \\
-   2   &     1    &  spin-polarized wavefunctions  \\
-   1   &     2    &  spinor wavefunctions  \\
-\hline
-\end{tabular}
-\end{center}
-\end{table}
+ nsppol      | nspinor     | wavefunction type
+------------ | ----------- | -----------------
+   1         |     1       |   scalar wavefunctions
+   2         |     1       |   spin-polarized wavefunctions
+   1         |     2       |   spinor wavefunctions
+
+
+The inclusion of spin-orbit coupling in the Hamiltonian requires [[nspinor]] = 2
+
 
 ## Plane wave basis set sphere
 
 In order to avoid dealing with an infinite number of plane waves
 $e^{i2\pi({\bf k}+{\bf G})r}$ to represent Bloch wavefunctions,
-one selects those with a kinetic energy lower than some cut-off $E_{\rm kin-cut}$.
+one selects those with a kinetic energy lower than some cutoff $E_{\rm kin-cut}$.
 The set of allowed ${\bf G}$ vectors will be noted by ${\bf G}_{{\bf k},E_{\rm kin-cut}}$
 
 $$
@@ -184,6 +180,16 @@ $c_{n{\bf k}}({\bf G})$ can be recovered from those that are treated, thanks to
 
 $$ c_{n{\bf k}}({\bf G}) = c^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{latt}) $$
 
+The value of [[istwfk]] is automatically computed by the code 
+on the basis of the k-point coordinates and the treatment of time-reversal symmetry
+as specified by [[kptopt]].
+One can disable the time-reversal tricks in the input file by setting explicitly the value of [[istwfk]]
+with the syntax:
+
+```
+istwfk *1
+```
+
 The number of plane waves is {\text npw}
 For ${\text ipw}=1\cdots {\text npw}$, the reduced coordinates of ${\bf G}$
 are contained in the array {\text kg}:
@@ -198,6 +204,7 @@ $$
 $$
 
 This list of ${\bf G}$ vectors is computed in the routine {\text kpgsph.f}.
+The maximum number of $\GG$-vectors over all k-points is called [[mpw]] inside the code. 
 
 [To be continued: explain the time reversed $k$-point structure]
 
@@ -284,8 +291,7 @@ Then:
 e^{i2\pi(\frac{j_{1}l_{1}}{N_{1}}+\frac{j_{2}l_{2}}{N_{2}}+\frac{j_{3}l_{3}}{N_{3}})}
 \end{eqnarray*}
 
-This is, up to the array indexing convention, precisely the operation
-done by the FFT algorithm.
+This is, up to the array indexing convention, precisely the operation done by the FFT algorithm.
 
 For FFT efficiency (minimisation of cache conflicts), the arrays
 {\tt wf\_real} and {\tt wf\_reciprocal} are not dimensioned
@@ -293,6 +299,10 @@ For FFT efficiency (minimisation of cache conflicts), the arrays
 \hspace{15ex}if $N_{1}$ even, $N_{4}=N_{1}+1$; if $N_{1}$ odd, $N_{4}=N_{1}$ \\
 \hspace{15ex}if $N_{2}$ even, $N_{5}=N_{2}+1$; if $N_{2}$ odd, $N_{5}=N_{2}$ \\
 \hspace{15ex}if $N_{3}$ even, $N_{6}=N_{3}+1$; if $N_{3}$ odd, $N_{6}=N_{3}$ \\
+
+The FFT mesh is given by [[ngfft]]. 
+PAW requires an additional **dense** FFT mesh for densities and potentials called [[ngfftdg]].
+
 
 ## Wavefunctions and spatial symmetries
 
@@ -368,7 +378,7 @@ t_{\beta}} c_{n{\bf k}}({\bf G}') \\
 This formula allows to derive coefficients $c_{n}$ at one ${\bf k}$ point
 from these at a symmetric ${\bf k}$ point.
 
-## Conversion of wavefunctions [routine {\tt wfconv.f}]
+## Conversion of wavefunctions
 
 The aim is to derive the wavefunction corresponding to a set of
 parameters, from the wavefunction corresponding to another set of parameters.
@@ -500,14 +510,23 @@ As ${npw\_k}$ and ${nband\_k}$ can vary with the ${\bf k}$-point
 ### Eigenvalues and occupation numbers
 
 At each ${\bf k}$-point and spin-polarization, there is also a set of
-eigenvalues and a set of occupation numbers, in the Ground-State case
-({formeig} = 0); \\
-\hspace*{15ex} {\tt eig\_k(1:nband\_k)} \\
-\hspace*{15ex} {\tt occ\_k(1:nband\_k)} \\
-and, in the Response-Function case ({formeig} = 1), a complex matrix of eigenvalues \\
-\hspace*{15ex} {eig\_k(1:2*nband\_k**2)}
+eigenvalues and a set of occupation numbers, in the Ground-State case we have
 
-### Storage of wavefunctions: disk file}
+```fortran
+formeig = 0 
+eig_k(1:nband_k) 
+occ_k(1:nband_k)
+```
+
+and, in the Response-Function case: 
+
+```fortran
+formeig = 1
+! a complex matrix of eigenvalues
+eig_k(1:2*nband_k**2)
+```
+
+### Storage of wavefunctions: disk file
 
 The disk files are made of a header, followed by the blocks of
 wavefunctions, eigenvalues (and occupation numbers, in the ground-state
