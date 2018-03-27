@@ -147,7 +147,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_61_occeig
  use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section

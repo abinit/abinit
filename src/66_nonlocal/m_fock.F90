@@ -2277,7 +2277,6 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bare_vqg'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

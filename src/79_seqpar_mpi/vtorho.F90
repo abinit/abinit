@@ -245,7 +245,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -2134,7 +2133,6 @@ subroutine wvl_occ()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_occ'
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none

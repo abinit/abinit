@@ -169,7 +169,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common

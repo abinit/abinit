@@ -2219,7 +2219,6 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_update_occ'
  use interfaces_14_hidewrite
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -2475,7 +2474,6 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_set_fermie'
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none

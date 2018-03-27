@@ -362,7 +362,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'dos_calcnwrite'
  use interfaces_14_hidewrite
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none

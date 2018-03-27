@@ -114,7 +114,6 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 #undef ABI_FUNC
 #define ABI_FUNC 'chi0q0_intraband'
  use interfaces_14_hidewrite
- use interfaces_61_occeig
  use interfaces_65_paw
 !End of the abilint section
 

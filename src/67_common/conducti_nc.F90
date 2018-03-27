@@ -104,7 +104,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_nc'
  use interfaces_32_util
- use interfaces_61_occeig
  use interfaces_67_common, except_this_one => conducti_nc
 !End of the abilint section
 

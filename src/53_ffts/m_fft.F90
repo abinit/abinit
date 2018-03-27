@@ -3085,6 +3085,7 @@ end subroutine fftmpi_u
 subroutine zerosym(array,cplex,n1,n2,n3,&
 &                  ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

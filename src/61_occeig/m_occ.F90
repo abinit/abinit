@@ -33,7 +33,7 @@ module m_occ
  use m_xmpi
 
  use m_fstrings,     only : sjoin, itoa
- use defs_abitypes,  only : mpi_enreg
+ use defs_abitypes,  only : MPI_type
 
  implicit none
 
@@ -114,12 +114,12 @@ contains
 subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 &  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getnel'
  use interfaces_14_hidewrite
- use interfaces_61_occeig, except_this_one => getnel
 !End of the abilint section
 
  implicit none
@@ -401,13 +401,13 @@ end subroutine getnel
 subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newocc'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_61_occeig, except_this_one => newocc
 !End of the abilint section
 
  implicit none
@@ -778,6 +778,7 @@ end subroutine newocc
 !! SOURCE
 
 subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphysel,tsmear,tsmearinv,xgrid)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1342,6 +1343,7 @@ end subroutine init_occ_ent
 
 subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,rocceig)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1465,6 +1467,7 @@ end subroutine occeig
 subroutine dos_hdr_write(deltaene,&
 &  eigen,enemax,enemin,fermie,mband,nband,nene,&
 &  nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1613,6 +1616,7 @@ end subroutine dos_hdr_write
 !! SOURCE
 
 subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,occ,transmit_occ)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

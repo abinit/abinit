@@ -164,7 +164,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
- use interfaces_61_occeig
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
