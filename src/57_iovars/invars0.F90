@@ -87,7 +87,6 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  real(dp) :: cpus
  character(len=500) :: message
 !arrays
- integer :: supercell_latt(3,3)
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
 
@@ -241,15 +240,17 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !  done!
 
 !  Generate the supercell if supercell_latt is specified and update string
-   supercell_latt(:,:) = 0
+   dtsets(idtset)%supercell_latt(:,:) = 0
    do ii=1,3
-     supercell_latt(ii,ii) = 1
+     dtsets(idtset)%supercell_latt(ii,ii) = 1
    end do
    call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),"supercell_latt",tread,'INT')
    if (tread==1) dtsets(idtset)%supercell_latt(:,:)=reshape(intarr(1:marr),(/3,3/))
    !This test should be update if in the future we allow non-diagonal supercell
-   if (any(supercell_latt(:,:) < zero) .or. ( supercell_latt(1,1) < tol10 .or.&
-&          supercell_latt(2,2) <tol10 .or. supercell_latt(3,3) < tol10 )) then
+   if (any(dtsets(idtset)%supercell_latt(:,:) < zero).or.&
+&         (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
+&          dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
+&          dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
      write(message, '(5a)' )&
 &     'supercell_latt must have positif parameters and diagonal part',ch10,&
 &     'This is not allowed.  ',ch10,&

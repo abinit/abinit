@@ -614,8 +614,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
      end do
      call xcart2xred(natom,rprimd,xcart,xred)
    else
-!    No supercell     
-     typat(:)=typat_read(:)
+!    No supercell
      call xcart2xred(natrd,rprimd,xcart_read,xred)
    end if
    
@@ -825,7 +824,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !    positions must be known, so the number
 !    of atoms to be read must equal the total number of atoms.
      if(natrd/=natom .and. multiplicity== 1)then
-
        write(message, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a,a)' )&
 &       'The number of atoms to be read (natrd)= ',natrd,ch10,&
 &       'differs from the total number of atoms (natom)= ',natom,ch10,&
@@ -836,6 +834,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 &       '(either natrd, or natom, or spgroup, or nsym)'
        MSG_ERROR(message)
      else
+
+       if (multiplicity==1) typat(:)=typat_read(:)
 !      Find the symmetry operations : nsym, symafm, symrel and tnons.
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
