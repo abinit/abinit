@@ -76,7 +76,6 @@ subroutine setsymrhoij(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
 #undef ABI_FUNC
 #define ABI_FUNC 'setsymrhoij'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
