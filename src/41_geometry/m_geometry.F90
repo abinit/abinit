@@ -58,6 +58,7 @@ MODULE m_geometry
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
  public :: ioniondist         ! Compute ion-ion distances
+ public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
 
  interface normv
@@ -1213,6 +1214,7 @@ end subroutine mkradim
 
 subroutine chkrprimd(acell,rprim,rprimd,iout)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1308,6 +1310,7 @@ end subroutine chkrprimd
 !! SOURCE
 
 subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2532,7 +2535,6 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'ioniondist'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2647,8 +2649,7 @@ end subroutine ioniondist
 !!  dist2
 !!
 !! FUNCTION
-!!  dist2(v1,v2,rprimd,option) calculates the distance of v1 and v2 in a crystal by
-!!  repeating the unit cell
+!!  Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
 !!
 !! INPUTS
 !!  v1,v2
@@ -2666,6 +2667,7 @@ end subroutine ioniondist
 !! SOURCE
 
 function dist2(v1,v2,rprimd,option)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
