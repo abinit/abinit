@@ -1,5 +1,6 @@
 site_name: abinit
-site_url: https://www.abinit.org
+#site_url: https://www.abinit.org
+site_url: https://docs.abinit.org
 site_description: Abinit documentation
 site_author: The Abinit group
 docs_dir: doc
