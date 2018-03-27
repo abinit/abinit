@@ -32,7 +32,7 @@ MODULE m_geometry
  use m_numeric_tools,  only : uniformrandom
  use m_abilasi,        only : matr3eigval
  use m_pptools,        only : prmat
- use m_numeric_tools,   only : wrap2_pmhalf
+ use m_numeric_tools,  only : wrap2_pmhalf
 
  implicit none
 
@@ -2679,11 +2679,11 @@ function dist2(v1,v2,rprimd,option)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional                      :: option
- real(dp)                                         :: dist2
+ integer,intent(in),optional :: option
+ real(dp) :: dist2
 !arrays
- real(dp),intent(in),optional      :: rprimd(3,3)
- real(dp),intent(in)                  :: v1(3),v2(3)
+ real(dp),intent(in),optional :: rprimd(3,3)
+ real(dp),intent(in) :: v1(3),v2(3)
 
 !Local variables-------------------------------
 !scalars
