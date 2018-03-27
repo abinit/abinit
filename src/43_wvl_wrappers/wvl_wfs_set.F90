@@ -53,6 +53,8 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
  use defs_wvltypes
  use m_profiling_abi
  use m_errors
+
+ use m_geometry, only : xred2xcart
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: createWavefunctionsDescriptors, orbitals_descriptors, &
        & orbitals_communicators, allocate_diis_objects, &
@@ -166,7 +168,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 & wvl_crmult, wvl_frmult, wfs%ks%lzd%Glr)
 !The memory is not allocated there for memory occupation optimisation reasons.
 
- call orbitals_communicators(me,nproc,wfs%ks%lzd%Glr,wfs%ks%orbs,wfs%ks%comms)  
+ call orbitals_communicators(me,nproc,wfs%ks%lzd%Glr,wfs%ks%orbs,wfs%ks%comms)
 
  write(message, '(a,2I8)' ) &
 & '  | all orbitals have coarse segments, elements:', &

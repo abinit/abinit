@@ -553,6 +553,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
  use m_errors
  use m_splines
 
+ use m_geometry, only : xred2xcart, xcart2xred
  use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,  only : pawtab_type
  use m_xmpi,    only : xmpi_comm_size,xmpi_sum
