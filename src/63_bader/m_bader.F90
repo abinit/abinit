@@ -42,9 +42,10 @@ module m_bader
  use netcdf
 #endif
 
- use m_parser,   only : inread
+ use m_geometry,      only : metric
+ use m_parser,        only : inread
  use m_numeric_tools, only : coeffs_gausslegint
- use m_abilasi,  only : jacobi, lubksb, ludcmp
+ use m_abilasi,       only : jacobi, lubksb, ludcmp
 
  implicit none
 
@@ -3203,7 +3204,6 @@ subroutine initaim(aim_dtset,znucl_batom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initaim'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

@@ -187,6 +187,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_xcdata
 
  use m_fstrings,         only : int2char4, sjoin
+ use m_geometry,         only : metric
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_abi_etsf,         only : abi_etsf_init

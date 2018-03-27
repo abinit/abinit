@@ -88,13 +88,13 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  use m_errors
 
  use m_io_tools,     only : open_file
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'clnup1'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_59_ionetcdf
  use interfaces_61_occeig
  use interfaces_67_common, except_this_one => clnup1

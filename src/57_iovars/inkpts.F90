@@ -101,6 +101,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,     only : metric
  use m_cgtools,  only : set_istwfk
  use m_parser,  only : intagm
 
@@ -111,7 +112,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_56_recipspace
 !End of the abilint section
 

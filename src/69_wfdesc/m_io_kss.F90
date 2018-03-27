@@ -43,6 +43,7 @@ MODULE m_io_kss
 
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa
+ use m_geometry,         only : metric
  use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_fftcore,          only : get_kg, sphere
@@ -1102,7 +1103,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 #define ABI_FUNC 'gshgg_mkncwrite'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_65_paw
@@ -1552,7 +1552,6 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kss_calc_vkb'
- use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section

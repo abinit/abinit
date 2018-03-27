@@ -42,12 +42,12 @@ function dist2(v1,v2,rprimd,option)
  use defs_basis
 
  use m_numeric_tools,   only : wrap2_pmhalf
+ use m_geometry,        only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dist2'
- use interfaces_41_geometry, except_this_one => dist2
 !End of the abilint section
 
  implicit none

@@ -66,13 +66,12 @@ subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_abihist
  use m_lbfgs
 
- use m_geometry,       only : mkrdim, fcart2fred
+ use m_geometry,       only : mkrdim, fcart2fred, metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_lbfgs'
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_lbfgs
 !End of the abilint section
 

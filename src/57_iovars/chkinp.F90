@@ -59,6 +59,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use libxc_functionals
 
  use m_numeric_tools,  only : iseven
+ use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_dtset,          only : dtset_copy, dtset_free
  use m_exit,           only : get_timelimit

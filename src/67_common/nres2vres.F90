@@ -82,6 +82,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use m_xmpi
  use m_xcdata
 
+ use m_geometry, only : metric
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
  use m_pawfgrtab,only : pawfgrtab_type
@@ -91,7 +92,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nres2vres'
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_62_poisson

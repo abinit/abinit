@@ -134,7 +134,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  use m_efield
  use m_errors
 
- use m_geometry,         only : fred2fcart
+ use m_geometry,         only : fred2fcart, metric
  use m_fock,             only : fock_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
@@ -146,7 +146,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 #undef ABI_FUNC
 #define ABI_FUNC 'forces'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_64_psp

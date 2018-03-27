@@ -94,6 +94,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  use m_hdr
 
  use m_io_tools,     only : open_file, get_unit
+ use m_geometry,     only : metric
  use m_fstrings,     only : sjoin
  use m_abilasi,      only : jacobi
 
@@ -102,7 +103,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_nc'
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_61_occeig
  use interfaces_67_common, except_this_one => conducti_nc
 !End of the abilint section

@@ -145,6 +145,10 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  use defs_abitypes
  use m_profiling_abi
  use m_errors
+ use m_xmpi
+ use m_xcdata
+
+ use m_geometry,     only : metric
  use m_pawang, only : pawang_type
  use m_pawrad, only : pawrad_type
  use m_pawtab, only : pawtab_type
@@ -153,15 +157,12 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  use m_pawfgrtab, only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_energies, only : energies_type
- use m_xmpi, only : xmpi_sum
- use m_xcdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'odamix'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_53_spacepar
  use interfaces_56_xc

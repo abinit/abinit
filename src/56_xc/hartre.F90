@@ -62,6 +62,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  use m_errors
  use m_profiling_abi
 
+ use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
@@ -69,7 +70,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
 #undef ABI_FUNC
 #define ABI_FUNC 'hartre'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -121,17 +121,17 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
- ! Get the distrib associated with this fft_grid 
+ ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
  ! Initialize a few quantities
  cutoff=gsqcut*tolfix
  if(present(qpt))then
    qpt_=qpt
- else 
+ else
    qpt_=zero
  end if
- qeq0=0 
+ qeq0=0
  if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0
  if (qeq0==0) then
@@ -219,7 +219,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
            den=piinv/gs
            work1(re,ii)=rhog(re,ii)*den
            work1(im,ii)=rhog(im,ii)*den
-         else 
+         else
            ! gs>cutoff
            work1(re,ii)=zero
            work1(im,ii)=zero
@@ -238,7 +238,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
    if (qeq0==1) then !q=0
      call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
 
-   else if (qeq05==1) then 
+   else if (qeq05==1) then
      !q=1/2; this doesn't work in parallel
      ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
      ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2

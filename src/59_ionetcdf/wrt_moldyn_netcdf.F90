@@ -63,14 +63,13 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 #endif
 
  use m_io_tools,   only : open_file
- use m_geometry,   only : xcart2xred, xred2xcart
+ use m_geometry,   only : xcart2xred, xred2xcart, metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrt_moldyn_netcdf'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

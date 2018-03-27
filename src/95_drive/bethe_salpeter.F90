@@ -109,7 +109,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  use m_fstrings,        only : strcat, sjoin, endswith
  use m_io_tools,        only : file_exists, iomode_from_fname
- use m_geometry,        only : mkrdim
+ use m_geometry,        only : mkrdim, metric
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt
@@ -147,7 +147,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 #define ABI_FUNC 'bethe_salpeter'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_51_manage_mpi
  use interfaces_53_ffts

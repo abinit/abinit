@@ -45,6 +45,7 @@ MODULE m_fft
  use m_time,          only : cwtime
  use m_numeric_tools, only : r2c
  use m_fstrings,      only : sjoin, itoa
+ use m_geometry,      only : metric
  use m_blas,          only : xscal
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft1, sphere, change_istwfk,&
 &                            fftalg_info, fftalg_has_mpi, print_ngfft
@@ -63,6 +64,8 @@ MODULE m_fft
 
  public :: fft_use_lib_threads
  public :: fft_allow_ialltoall  ! Allow the use of non-blocking IALLOTOALL in MPI-FFTs algorithms
+ !public :: zerosym              ! Symmetrize an array on the FFT grid by vanishing some term on the boundaries.
+ !public :: fftpac              ! Copy data and modify stride for more efficient three dimensional fft.
 
 ! Driver routines for MPI version.
  public :: fourdp_mpi           ! MPI FFT of densities/potentials on the full box.
@@ -1540,7 +1543,6 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_utests'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
@@ -1982,7 +1984,6 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_mpi_utests'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 

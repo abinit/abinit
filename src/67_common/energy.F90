@@ -169,6 +169,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_gemm_nonlop
  use m_xcdata
 
+ use m_geometry,         only : metric
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
@@ -189,7 +190,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 #define ABI_FUNC 'energy'
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_53_spacepar
  use interfaces_56_recipspace

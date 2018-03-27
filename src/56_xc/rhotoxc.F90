@@ -226,6 +226,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  use m_xc_vdw
  use libxc_functionals
 
+ use m_geometry,         only : metric
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
 !This section has been created automatically by the script Abilint (TD).
@@ -233,7 +234,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotoxc'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_53_spacepar
  use interfaces_56_xc, except_this_one => rhotoxc

@@ -66,7 +66,7 @@ program cut3d
  use m_crystal_io
 
  use m_fstrings,        only : endswith, sjoin, itoa
- use m_geometry,        only : xred2xcart
+ use m_geometry,        only : xred2xcart, metric
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_fftcore,         only : ngfft_seq
  use m_distribfft,      only : init_distribfft_seq
@@ -79,7 +79,6 @@ program cut3d
 #define ABI_FUNC 'cut3d'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
 !End of the abilint section
 

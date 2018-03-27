@@ -40,7 +40,7 @@ module m_effective_potential_file
 #endif
 
  use m_io_tools,   only : open_file
- use m_geometry,   only : xcart2xred
+ use m_geometry,   only : xcart2xred, metric
  use m_crystal,    only : crystal_t, crystal_init, crystal_free
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
 

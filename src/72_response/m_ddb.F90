@@ -40,7 +40,7 @@ MODULE m_ddb
  use m_numeric_tools,  only : mkherm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
- use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart
+ use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
 &                             dfpt_phfrq, sytens

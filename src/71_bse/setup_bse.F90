@@ -82,7 +82,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  use m_gwdefs,        only : GW_Q0_DEFAULT
  use m_fstrings,      only : toupper, sjoin
  use m_io_tools,      only : file_exists, open_file
- use m_geometry,      only : normv, mkrdim
+ use m_geometry,      only : normv, mkrdim, metric
  use m_abilasi,       only : matrginv
  use m_crystal,       only : crystal_print, idx_spatial_inversion, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
@@ -106,7 +106,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_56_io_mpi
 !End of the abilint section
 

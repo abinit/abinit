@@ -150,7 +150,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  use m_cgtools
  use m_xcdata
 
- use m_geometry,  only : xcart2xred
+ use m_geometry, only : xcart2xred, metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
 
@@ -158,7 +158,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref'
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace

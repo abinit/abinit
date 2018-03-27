@@ -46,7 +46,7 @@ module m_effective_potential
  use m_abihist,        only : abihist
  use m_special_funcs,  only : factorial
  use m_copy,           only : alloc_copy
- use m_geometry,       only : fcart2fred, xcart2xred, xred2xcart
+ use m_geometry,       only : fcart2fred, xcart2xred, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
@@ -650,7 +650,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 #define ABI_FUNC 'effective_potential_generateDipDip'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2354,7 +2353,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_evaluate'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -3530,7 +3528,6 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_checkDEV'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

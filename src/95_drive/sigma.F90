@@ -112,7 +112,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_blas,          only : xdotc
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_mpinfo,        only : destroy_mpi_enreg
- use m_geometry,      only : normv, mkrdim
+ use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt
  use m_ioarr,         only : fftdatar_write, read_rhor
@@ -153,7 +153,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_recipspace

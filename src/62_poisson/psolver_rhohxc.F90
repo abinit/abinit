@@ -82,7 +82,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_rhohxc'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_62_poisson, except_this_one => psolver_rhohxc
 !End of the abilint section

@@ -69,7 +69,7 @@ MODULE m_use_ga
  use m_ga
  use m_sort
 
- use m_geometry,       only : mkradim, mkrdim
+ use m_geometry,       only : mkradim, mkrdim, metric
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
 
@@ -93,7 +93,6 @@ subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'predict_ga'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

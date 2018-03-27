@@ -74,14 +74,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
- use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2fred
+ use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2fred, metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_verlet'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_verlet
 !End of the abilint section
 

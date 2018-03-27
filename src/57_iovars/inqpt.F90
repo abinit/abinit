@@ -57,6 +57,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,     only : metric
  use m_parser,  only : intagm
 
 !This section has been created automatically by the script Abilint (TD).

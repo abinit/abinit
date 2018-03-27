@@ -35,7 +35,6 @@ sources = [
  "holocell.F90",
  "irreducible_set_pert.F90",
  "littlegroup_pert.F90",
- "metric.F90",
  "mkeuler.F90",
  "mksupercell.F90",
  "m_ab7_symmetry.F90",

@@ -65,14 +65,13 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
  use defs_abitypes
  use m_profiling_abi
 
- use m_geometry,   only : mkrdim
+ use m_geometry,   only : mkrdim, metric
  use m_gsphere,    only : setshells
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2m'
- use interfaces_41_geometry
  use interfaces_57_iovars, except_this_one => invars2m
 !End of the abilint section
 

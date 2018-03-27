@@ -42,6 +42,7 @@ module m_hamiltonian
 
  use m_copy,              only : addr_copy
  use m_fstrings,          only : toupper
+ use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
  use m_fftcore,           only : kpgsph
  use m_cgtools,           only : set_istwfk
@@ -796,7 +797,6 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_hamiltonian'
- use interfaces_41_geometry
  use interfaces_56_recipspace
 !End of the abilint section
 

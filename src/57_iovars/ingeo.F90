@@ -114,7 +114,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  use m_errors
  use m_atomdata
 
- use m_geometry, only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos
+ use m_geometry, only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
  use m_parser,   only : intagm
 
 !This section has been created automatically by the script Abilint (TD).

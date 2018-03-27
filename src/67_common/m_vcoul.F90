@@ -44,7 +44,7 @@ MODULE m_vcoul
  use m_numeric_tools,   only : arth, geop, imin_loc, llsfit_svd, l2norm, OPERATOR(.x.), quadrature, isdiagmat
  use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
  use m_abilasi,         only : matrginv
- use m_geometry,        only : normv
+ use m_geometry,        only : normv, metric
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item
  use m_gsphere,         only : gsphere_t
@@ -213,7 +213,6 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 #undef ABI_FUNC
 #define ABI_FUNC 'vcoul_init'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1681,7 +1680,6 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
 #undef ABI_FUNC
 #define ABI_FUNC 'cutoff_cylinder'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

@@ -103,6 +103,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  use m_xmpi
  use m_errors
 
+ use m_geometry,     only : metric
  use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type

@@ -52,7 +52,7 @@ subroutine wvl_initro(&
  use defs_wvltypes
  use m_sort
 
- use m_geometry,   only : xred2xcart
+ use m_geometry,   only : xred2xcart, metric
  use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab, only : pawtab_type
 #if defined HAVE_BIGDFT
@@ -64,7 +64,6 @@ subroutine wvl_initro(&
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_initro'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
 !End of the abilint section
 

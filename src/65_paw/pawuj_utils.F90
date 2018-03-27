@@ -260,7 +260,6 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lcalcu'
- use interfaces_41_geometry
  use interfaces_65_paw, except_this_one => lcalcu
 !End of the abilint section
 

@@ -45,11 +45,12 @@ subroutine initmpi_pert(dtset,mpi_enreg)
  use m_profiling_abi
  use m_xmpi
 
+ use m_dtset,        only : get_npert_rbz
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initmpi_pert'
- use interfaces_51_manage_mpi, except_this_one => initmpi_pert
 !End of the abilint section
 
  implicit none

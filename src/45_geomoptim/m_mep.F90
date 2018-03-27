@@ -37,7 +37,7 @@ MODULE m_mep
  use m_errors
  use m_xmpi
 
- use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart
+ use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart, metric
  use m_bfgs,        only : hessupdt
  use m_results_img, only : results_img_type,gather_array_img
 
@@ -537,7 +537,6 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_lbfgs'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -732,7 +731,6 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mep_gbfgs'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

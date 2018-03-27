@@ -75,7 +75,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
- use m_geometry,  only : fcart2fred, xcart2xred, xred2xcart
+ use m_geometry,  only : fcart2fred, xcart2xred, xred2xcart, metric
  use m_bfgs,      only : hessinit, hessupdt, brdene
 
 !This section has been created automatically by the script Abilint (TD).
@@ -83,7 +83,6 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_delocint'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_delocint
 !End of the abilint section
 

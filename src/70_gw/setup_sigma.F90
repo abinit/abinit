@@ -67,7 +67,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : basename, sjoin, ktoa, ltoa
- use m_geometry,      only : mkrdim
+ use m_geometry,      only : mkrdim, metric
  use m_crystal,       only : crystal_print, idx_spatial_inversion, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_bz_mesh,       only : kmesh_t, kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print,&
@@ -89,7 +89,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_sigma'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_56_io_mpi
  use interfaces_70_gw, except_this_one => setup_sigma
 !End of the abilint section

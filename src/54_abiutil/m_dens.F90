@@ -30,7 +30,7 @@ MODULE m_dens
  use m_profiling_abi
  use m_splines
 
- use m_geometry,         only : xcart2xred
+ use m_geometry,         only : xcart2xred, metric
 
  implicit none
 
@@ -86,7 +86,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dens_hirsh'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

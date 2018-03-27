@@ -39,7 +39,7 @@ MODULE m_cut3d
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
- use m_geometry,         only : xcart2xred
+ use m_geometry,         only : xcart2xred, metric
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
@@ -1812,7 +1812,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts

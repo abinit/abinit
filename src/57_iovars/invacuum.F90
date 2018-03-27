@@ -47,13 +47,13 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
  use m_profiling_abi
  use m_sort
 
+ use m_geometry,     only : metric
  use m_parser,  only : intagm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invacuum'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

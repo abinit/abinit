@@ -114,6 +114,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  use m_errors
  use m_hamiltonian
 
+ use m_geometry,          only : metric
  use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
  use m_electronpositron,  only : electronpositron_type
  use m_fftcore,           only : kpgsph
@@ -129,7 +130,6 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ks_ddiago'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_recipspace

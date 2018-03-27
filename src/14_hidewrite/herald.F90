@@ -43,13 +43,12 @@ subroutine herald(code_name,code_version,iout)
 
  use defs_basis
  use m_build_info
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'herald'
- use interfaces_14_hidewrite
+ use interfaces_14_hidewrite, except_this_one => herald
 !End of the abilint section
 
  implicit none
@@ -135,7 +134,7 @@ subroutine herald(code_name,code_version,iout)
  write(iout,*)' '
 
 !Impose a maximal life cycle of 3 years
- if(year>year_rel+3 .or. (year==year_rel+3 .and. mm>mm_rel) ) then 
+ if(year>year_rel+3 .or. (year==year_rel+3 .and. mm>mm_rel) ) then
    write(message, '(5a,i4,5a)' )&
 &   '- The starting date is more than 3 years after the initial release',ch10,&
 &   '- of this version of ABINIT, namely ',month_names(mm_rel),' ',year_rel,'.',ch10,&
