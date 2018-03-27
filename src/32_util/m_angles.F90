@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-MODULE m_crystal
+module m_angles
 
  use defs_basis
  use m_errors
@@ -75,6 +75,7 @@ contains
 !! SOURCE
 
 subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -183,6 +184,7 @@ end subroutine mkeuler
 
 function dbeta(cosbeta,ll,mp,mm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -267,6 +269,7 @@ end function dbeta
 
 subroutine create_slm2ylm(lcor,slmtwoylm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -331,6 +334,7 @@ end subroutine create_slm2ylm
 !! SOURCE
 
 subroutine create_mlms2jmj(lcor,mlmstwojmj)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -407,5 +411,5 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
 end subroutine create_mlms2jmj
 !!***
 
-end module angles
+end module m_angles
 !!***
