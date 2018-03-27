@@ -102,7 +102,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
- use m_geometry,     only : mkrdim, xcart2xred, xred2xcart
+ use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
  use m_pawang,       only : pawang_type, pawang_free
  use m_pawrad,       only : pawrad_type, pawrad_free
  use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free

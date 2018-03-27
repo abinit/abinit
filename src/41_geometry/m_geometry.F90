@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR)
+!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,9 @@ MODULE m_geometry
 
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : uniformrandom
+ use m_abilasi,        only : matr3eigval
  use m_pptools,        only : prmat
+ use m_numeric_tools,   only : wrap2_pmhalf
 
  implicit none
 
@@ -47,6 +49,8 @@ MODULE m_geometry
  public :: metric             ! Compute metric matrices.
  public :: mkradim            ! Make rprim and acell from rprimd
  public :: mkrdim             ! Make rprimd from acell from rprim
+ public :: chkrprimd          ! Test if {rprim,acell,rprimd} are consistent
+ public :: chkdilatmx         ! check if dilatation of unit cell is consistent with initial G-sphere
  public :: xcart2xred         ! From cart coords to reduced
  public :: xred2xcart         ! From reduced coords to cart.
  public :: fred2fcart         ! Convert reduced forces into cartesian forces
@@ -1184,6 +1188,211 @@ subroutine mkradim(acell,rprim,rprimd)
  end do
 
 end subroutine mkradim
+!!***
+
+!!****f* m_geometry/chkrprimd
+!!
+!! NAME
+!! chkrprimd
+!!
+!! FUNCTION
+!! Test if {rprim,acell,rprimd} are consistent
+!! It means that rprimd can be reconstructed from the rprim and acell
+!! Output a message if is not the case
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  (only writing)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine chkrprimd(acell,rprim,rprimd,iout)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'chkrprimd'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+integer,intent(in) :: iout
+!arrays
+real(dp),intent(in) :: rprim(3,3)
+real(dp),intent(in) :: rprimd(3,3)
+real(dp),intent(in) :: acell(3)
+
+!Local variables-------------------------------
+!scalars
+integer :: ii,jj
+!arrays
+real(dp) :: rprimd_test(3,3)
+logical :: equal
+
+! ***********************************************************
+
+!###########################################################
+!### 1. Compute rprimd from rprim and acell
+ do ii=1,3
+   do jj=1,3
+     rprimd_test(ii,jj)=rprim(ii,jj)*acell(jj)
+   end do
+ end do
+
+
+!###########################################################
+!### 2. Compare rprimd and rprimd_test
+
+ equal=.TRUE.
+ do ii=1,3
+   do jj=1,3
+     if (abs(rprimd_test(ii,jj)-rprimd(ii,jj))>1.E-12) then
+       equal=.FALSE.
+     end if
+   end do
+ end do
+
+ if (equal)then
+   write(iout,*) 'chkrprimd: rprimd is consistent'
+ else
+   write(iout,*) 'chkrprimd: rprimd is NOT consistent ERROR'
+ end if
+
+end subroutine chkrprimd
+!!***
+
+!!****f* m_geometry/chkdilatmx
+!! NAME
+!! chkdilatmx
+!!
+!! FUNCTION
+!! Check whether the new rprimd does not give a too large number
+!! of plane waves, compared to the one booked for rprimd, taking
+!! into account the maximal dilatation dilatmx. Actually check whether
+!! the new Fermi sphere is inside the old one, dilated.
+!!
+!! INPUTS
+!!  chkdilatmx_ = if 1, will prevent to have any vector outside the Fermi sphere, possibly
+!!       by rescaling (three times at most), and then stopping the execution
+!!                if 0, simply send a warning, but continues execution
+!!  dilatmx     = maximal dilatation factor (usually the input variable)
+!!  rprimd      = new primitive vectors
+!!  rprimd_orig = original primitive vectors (usually the input variable)
+!!
+!! OUTPUT
+!!  dilatmx_errmsg=Emptry string if calculation can continue.
+!!            If the calculation cannot continue, dilatmx_errmsg will contain
+!!            the message that should be reported in the output file.
+!!
+!!            Client code should handle a possible problem with the following test:
+!!
+!!              if (LEN_TRIM(dilatmx_errmsg) then
+!!                dump dilatmx_errmsg to the main output file.
+!!                handle_error
+!!              end if
+!!
+!!
+!! PARENTS
+!!      driver,mover
+!!
+!! CHILDREN
+!!      matr3eigval,matr3inv
+!!
+!! SOURCE
+
+subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'chkdilatmx'
+ use interfaces_32_util
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: chkdilatmx_
+ real(dp),intent(in) :: dilatmx
+ character(len=500),intent(out) :: dilatmx_errmsg
+!arrays
+ real(dp),intent(inout) :: rprimd(3,3)
+ real(dp),intent(in) :: rprimd_orig(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj,mu
+ real(dp) :: alpha,dilatmx_new
+!arrays
+ real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)
+ character(len=500) :: message
+
+! *************************************************************************
+
+!Generates gprimd
+ call matr3inv(rprimd_orig,gprimd_orig)
+
+!Find the matrix that transform an original xcart to xred, then to the new xcart
+ do mu=1,3
+   old_to_new(mu,:)=rprimd(mu,1)*gprimd_orig(:,1)+&
+&   rprimd(mu,2)*gprimd_orig(:,2)+&
+&   rprimd(mu,3)*gprimd_orig(:,3)
+ end do
+
+!The largest increase in length will be obtained thanks
+!to the diagonalization of the corresponding metric matrix :
+!it is the square root of its largest eigenvalue.
+ do ii=1,3
+   do jj=1,3
+     met(ii,jj)=old_to_new(1,ii)*old_to_new(1,jj)+&
+&     old_to_new(2,ii)*old_to_new(2,jj)+&
+&     old_to_new(3,ii)*old_to_new(3,jj)
+   end do
+ end do
+
+ call matr3eigval(eigval,met)
+
+ dilatmx_new=sqrt(maxval(eigval(:)))
+
+ dilatmx_errmsg = ""
+ if(dilatmx_new>dilatmx+tol6)then
+
+! MJV 2014 07 22: correct rprim to maximum jump allowed by dilatmx
+! XG 20171011 : eigenvalues of "old_to_old" tensor are of course the unity !
+
+   if(chkdilatmx_/=0)then
+     alpha = (dilatmx - one) / (dilatmx_new - one)
+!    for safety, only 90 percent of max jump
+     alpha = 0.9_dp * alpha
+
+     rprimd = alpha * rprimd + (one - alpha) * rprimd_orig
+
+     write(dilatmx_errmsg,'(3a,es16.6,4a,es16.6,2a,es16.6,a)')&
+&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+&     'are too large with respect to the old rprimd and the accompanying dilatmx:',dilatmx,ch10,&
+&     'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
+&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
+&     'Calculation continues with limited jump, by rescaling the projected move by the factor',alpha,'.'
+   else
+     write(message, '(3a,es16.6,2a,es16.6,2a)' )&
+&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+&     'are too large, given the initial rprimd and the accompanying dilatmx:',dilatmx,ch10,&
+&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
+&     'As chkdilatmx=0, assume experienced user. Execution will continue.'
+     MSG_WARNING(message)
+   end if
+
+ end if
+
+end subroutine chkdilatmx
 !!***
 
 !!****f* m_geometry/mkrdim
@@ -2431,6 +2640,119 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  end if
 
 end subroutine ioniondist
+!!***
+
+!!****f* m_geometry/dist2
+!! NAME
+!!  dist2
+!!
+!! FUNCTION
+!!  dist2(v1,v2,rprimd,option) calculates the distance of v1 and v2 in a crystal by
+!!  repeating the unit cell
+!!
+!! INPUTS
+!!  v1,v2
+!!  rprimd: dimensions of the unit cell. if not given 1,0,0/0,1,0/0,0,1 is assumed
+!!  option: 0 v1, v2 given in cartesian coordinates (default) / 1 v1,v2 given in reduced coordinates
+!!
+!! OUTPUT
+!!  dist2
+!!
+!! PARENTS
+!!  ioniondist
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function dist2(v1,v2,rprimd,option)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dist2'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in),optional                      :: option
+ real(dp)                                         :: dist2
+!arrays
+ real(dp),intent(in),optional      :: rprimd(3,3)
+ real(dp),intent(in)                  :: v1(3),v2(3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,i3,opt,s1,s2,s3
+ real(dp):: min2,norm2,ucvol
+!arrays
+ integer :: limits(3)
+ real(dp) :: corner(3),dred(3),dtot(3),dv(3),dwrap(3),sh(3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp) :: vprimd(3,3)
+
+! *************************************************************************
+
+ if (.not.PRESENT(rprimd)) then
+   vprimd=reshape((/1,0,0,  0,1,0,  0,0,1/),(/3,3/))
+ else
+   vprimd=rprimd
+ end if
+
+ call metric(gmet,gprimd,-1,rmet,vprimd,ucvol)
+
+ dv(:)=v2(:)-v1(:)
+
+!If in cartesian coordinates, need to be transformed to reduced coordinates.
+ opt=0
+ if(present(option))then
+   opt=option
+ end if
+ if(opt==0)then
+   dred(:)=gprimd(1,:)*dv(1)+gprimd(2,:)*dv(2)+gprimd(3,:)*dv(3)
+ else
+   dred(:)=dv(:)
+ end if
+
+!Wrap in the ]-1/2,1/2] interval
+ call wrap2_pmhalf(dred(1),dwrap(1),sh(1))
+ call wrap2_pmhalf(dred(2),dwrap(2),sh(2))
+ call wrap2_pmhalf(dred(3),dwrap(3),sh(3))
+
+!Compute the limits of the parallelipipedic box that contains the Wigner-Seitz cell
+!The reduced coordinates of the corners of the Wigner-Seitz cell are computed (multiplied by two)
+!Then, the maximal values of these reduced coordinates are stored.
+ limits(:)=0
+ do s1=-1,1,2
+   do s2=-1,1,2
+     do s3=-1,1,2
+       corner(:)=gmet(:,1)*s1*rmet(1,1)+gmet(:,2)*s2*rmet(2,2)+gmet(:,3)*s3*rmet(3,3)
+       limits(1)=max(limits(1),ceiling(abs(corner(1))+tol14))
+       limits(2)=max(limits(2),ceiling(abs(corner(2))+tol14))
+       limits(3)=max(limits(3),ceiling(abs(corner(3))+tol14))
+     end do
+   end do
+ end do
+
+!Use all relevant primitive real space lattice vectors to find the minimal difference vector
+ min2=huge(zero)
+ do i1=-limits(1),limits(1)
+   do i2=-limits(2),limits(2)
+     do i3=-limits(3),limits(3)
+       dtot(1)=dwrap(1)+i1
+       dtot(2)=dwrap(2)+i2
+       dtot(3)=dwrap(3)+i3
+       norm2=dtot(1)*rmet(1,1)*dtot(1)+dtot(2)*rmet(2,2)*dtot(2)+dtot(3)*rmet(3,3)*dtot(3)+&
+&       2*(dtot(1)*rmet(1,2)*dtot(2)+dtot(2)*rmet(2,3)*dtot(3)+dtot(3)*rmet(3,1)*dtot(1))
+       min2=min(norm2,min2)
+     end do
+   end do
+ end do
+ dist2=sqrt(min2)
+
+end function dist2
 !!***
 
 end module  m_geometry
