@@ -1,11 +1,10 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/tddft
+!!****m* ABINIT/m_tddft
 !! NAME
-!! tddft
+!!  m_tddft
 !!
 !! FUNCTION
-!! Compute the excitation energies within TDLDA
-!! from input wavefunctions, eigenenergies, and band occupations.
+!!  Routines for computing excitation energies within TDDFT
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2018 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
@@ -13,6 +12,57 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! NOTES
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_tddft
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_errors
+ use m_wffile
+ use m_sort
+#if defined HAVE_MPI2
+ use mpi
+#endif
+
+ use m_io_tools, only : get_unit
+
+ implicit none
+
+ private
+!!***
+
+#if defined HAVE_MPI1
+ include 'mpif.h'
+#endif
+
+ public :: tddft
+!!***
+
+contains
+
+!!****f* m_tddft/tddft
+!! NAME
+!! tddft
+!!
+!! FUNCTION
+!! Compute the excitation energies within TDLDA
+!! from input wavefunctions, eigenenergies, and band occupations.
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=wf in G space
@@ -73,28 +123,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine tddft(cg,dtfil,dtset,eigen,etotal,gmet,gprimd,gsqcut,&
 &  kg,kxc,mband,mgfftdiel,mkmem,mpi_enreg,mpw,nfft,ngfftdiel,nkpt,nkxc,&
 &  npwarr,nspinor,nsppol,occ,ucvol,wffnew)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_wffile
- use m_sort
-#if defined HAVE_MPI2
- use mpi
-#endif
-
- use m_io_tools, only : get_unit
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -109,10 +140,6 @@
 !End of the abilint section
 
  implicit none
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 !Arguments ------------------------------------
  integer, intent(in) :: mband,mgfftdiel,mkmem,mpw,nfft,nkpt,nkxc,nsppol
@@ -1666,4 +1693,7 @@
  ABI_DEALLOCATE(done_sexc2)
 
 end subroutine tddft
+!!***
+
+end module m_tddft
 !!***
