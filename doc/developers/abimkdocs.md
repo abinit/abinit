@@ -94,8 +94,11 @@ so that one can easily change the documentation and inspect the changes in the c
 !!! warning
     The server re-builds automatically the pages generated from changed `.md` files, 
     but not the ones from changed `~abinit/doc/abiref.bib`
-    neither from changed `~abinit/abimkdocs/\*.py` . This means that inspecting the upgrade of the description of an input variable 
-    or a bibtex reference needs to close the server and reissue the adequate `mksite.py` command.
+    neither from changed `~abinit/abimkdocs/\*.py` . This means that the upgrade of the description of an input variable 
+    or a bibtex reference is done by closing the server and reissue the adequate `mksite.py` command.
+    Also, the case of the `.md` files in the `~abinit/doc/topics` directory is similar, as the `.md` source files, 
+    prepended with an underscore, must be preprocessed by `mksite.py` to deliver the `.md` files, without underscore, 
+    that are live reloaded.
 
 `mksite serve` builds the website in a temporary directory. If you need to inspect the HTML files produced 
 by the script, use:
@@ -268,7 +271,7 @@ After having edited the python modules you **must rerun** `mksite serve` to see 
 
 !!! important
 
-    Use ```pytest abimkdocs-tests/test_variables.py``` to validate your changes
+    Use ```pytest abimkdocs_tests/test_variables.py``` to validate your changes
     before rebuilding the documentation.
 
 ## How to add a bibliographic reference
@@ -315,7 +318,7 @@ Then, build the HTML pages using `mksite.py serve`.
 
 Run the tests with:
 
-    pytest ./tests/test_bibtex.py
+    pytest abimkdocs_tests/test_bibtex.py
 
 with pytest to validate your changes.
 
