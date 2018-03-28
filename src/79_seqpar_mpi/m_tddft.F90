@@ -127,6 +127,7 @@ contains
 &  kg,kxc,mband,mgfftdiel,mkmem,mpi_enreg,mpw,nfft,ngfftdiel,nkpt,nkxc,&
 &  npwarr,nspinor,nsppol,occ,ucvol,wffnew)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

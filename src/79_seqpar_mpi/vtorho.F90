@@ -207,6 +207,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_wffile
  use m_efield
  use m_cgtools
+ use m_gemm_nonlop
 
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
@@ -230,7 +231,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_abi2big,            only : wvl_occ_abi2big,wvl_rho_abi2big,wvl_occopt_abi2big
  use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
- use m_gemm_nonlop
+ use m_tddft,              only : tddft
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
 #endif
