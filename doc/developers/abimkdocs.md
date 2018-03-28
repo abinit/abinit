@@ -27,7 +27,7 @@ MkDocs includes a couple built-in themes as well as various third party themes,
 all of which can easily be customized with extra CSS or JavaScript or overridden from the theme directory. 
 The Abinit website uses [Mkdocs-Material](http://squidfunk.github.io/mkdocs-material/), a theme
 built using Google's [Material Design](https://www.google.com/design/spec/material-design) guidelines.
-We also use [fontawesome icons](http://fontawesome.io/) and
+We also use [fontawesome icons](https://fontawesome.com/) and
 [Bootstrap](http://getbootstrap.com/) a popular HTML, CSS, and Javascript framework 
 for developing responsive, mobile first projects on the web 
 (shrink the browser window to see how the menu and the navigation bars react).
@@ -39,7 +39,7 @@ In addition to the basic markdown syntax, the Abinit documentation supports exte
 to ease the writing of hyperlinks and the inclusion of bibliographic citations.
 A detailed description of *our markdown dialect* is given in [our markdown page](markdown).
 Also [MathJax](https://www.mathjax.org/) for equations in LaTeX is activated, 
-and the (few) specificities of its usage in the Abinit docs are explained [in this section](markdown.md#MathJax).
+and the (few) specificities of its usage in the Abinit docs are explained [in this section](markdown.md#mathjax).
 
 As a net result, Abinit developers can write nice-looking documentation and release notes without having to use 
 HTML explicitly while working in an environment that is well-integrated with the Abinit ecosystem 
@@ -91,6 +91,14 @@ so that one can easily change the documentation and inspect the changes in the c
     but only re-build files that have changed. 
     This option is designed for site development purposes and is **much faster** than the default live reloading.
 
+!!! warning
+    The server re-builds automatically the pages generated from changed `.md` files, 
+    but not the ones from changed `~abinit/doc/abiref.bib`
+    neither from changed `~abinit/abimkdocs/\*.py` . This means that the upgrade of the description of an input variable 
+    or a bibtex reference is done by closing the server and reissue the adequate `mksite.py` command.
+    Also, the case of the `.md` files in the `~abinit/doc/topics` directory is similar, as the `.md` source files, 
+    prepended with an underscore, must be preprocessed by `mksite.py` to deliver the `.md` files, without underscore, 
+    that are live reloaded.
 
 `mksite serve` builds the website in a temporary directory. If you need to inspect the HTML files produced 
 by the script, use:
@@ -263,7 +271,7 @@ After having edited the python modules you **must rerun** `mksite serve` to see 
 
 !!! important
 
-    Use ```pytest abimkdocs-tests/test_variables.py``` to validate your changes
+    Use ```pytest abimkdocs_tests/test_variables.py``` to validate your changes
     before rebuilding the documentation.
 
 ## How to add a bibliographic reference
@@ -273,29 +281,6 @@ can generate appropriated links in the website.
 For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` from your bibtex files
 (there are units tests to enforce the presence of particular entries in the bibtex document and
 your bibtex may not fullfill these requirements).
-
-A much better solution is to use BetterBib and the DOI of the article to fetch data 
-from Crossref and produce the bibtex entry. 
-BetterBib is available from the Python Package Index, so simply type:
-
-    pip install betterbib
-
-and then use doi2bibtex from the command line:
-
-    doi2bibtex 10.1103/PhysRevLett.96.066402
-
-Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key 
-(make sure it's not a duplicated entry).
-Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008" 
-(start with an uppercase letter, then lower case, then four-digit year). 
-Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
-Then, build the HTML pages using `mksite.py serve`.
-
-Run the tests with:
-
-    pytest ./tests/test_bibtex.py
-    
-with pytest to validate your changes.
 
 If you know the DOI of the article, it's possible to use [BetterBib](https://github.com/nschloe/betterbib)
 to fetch data from [Crossref](http://www.crossref.org/) and produce the bibtex entry.
@@ -324,6 +309,19 @@ doi2bibtex 10.1103/PhysRevLett.96.066402
 }
 ```
 
+Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key
+(make sure it's not a duplicated entry).
+Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008"
+(start with an uppercase letter, then lower case, then four-digit year).
+Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
+Then, build the HTML pages using `mksite.py serve`.
+
+Run the tests with:
+
+    pytest abimkdocs_tests/test_bibtex.py
+
+with pytest to validate your changes.
+
 ## Topics
 
 The topic files are written in Markdown and can be found in ~abinit/doc/topics.
@@ -347,8 +345,8 @@ A new Markdown file without underscore will be generated and included in `mkdocs
 
     You are supposed to edit the version with the underscore and provide enough
     information in the declaration of the variable and in the `TEST_INFO` section
-    so that `mksite.py` can fill the complete the templated.
-    Remmber to restart `mksite.py` to see the changes.
+    so that `mksite.py` can fill the template.
+    Remember to restart `mksite.py` to see the changes.
 
 ## How to a add a new document
 
@@ -423,7 +421,7 @@ B.1
 Implementation of algorithms to interpolate the electronic band structure.
 See the new input variables [[einterp]], [[nkpath]], and [[prtebands]], 
 and the new tests [[test:v8_04]], [[test:libxc_41]].
-Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
+Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
 
 C.2  
 New versions of Fortran compilers have been integrated in the test farm:
@@ -433,7 +431,7 @@ New versions of Fortran compilers have been integrated in the test farm:
 - IBM xlf compiler 14.1
 - NAG 5.3
 
-Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]]
+Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]].
 
 !!! important
     We are already using Markdown on gitlab to document our merge requests.

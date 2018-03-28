@@ -255,11 +255,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    opt_nondiag = 0 ! use fast ctqmc in ABINIT without non diagonal terms.
  end if
 
+ useylm=0
  if(nspinor==2) then
    useylm=1      ! to avoid complex G(tau)
  end if
- useylm=0
 
+ !write(6,*) "nspinor,useylm",nspinor,useylm
  if(useylm==0) then
    write(std_out,*) " Slm basis is used (before rotation)"
    rot_type_vee=1 ! for rotatevee_hu
@@ -292,7 +293,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! dmftctqmc_basis)
  ! ------------------------------------------------
  if(paw_dmft%dmftctqmc_basis==1) then
-   if(nondiaglevels) then
+   if(nondiaglevels.or.useylm==1) then
      opt_diag=1
      write(message,'(3a)') ch10, "   == Hamiltonian in local basis is non diagonal: diagonalise it",ch10
    else
@@ -301,7 +302,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &     ,"      CTQMC will use this basis",ch10
    end if
  else if (paw_dmft%dmftctqmc_basis==2) then
-   if(nondiaglevels) then
+   if(nondiaglevels.or.useylm==1) then
      write(message,'(7a)') ch10, "   == Hamiltonian in local basis is non diagonal",ch10, &
 &     "   == According to dmftctqmc_basis: diagonalise density matrix",ch10, &
 &     "   == Warning : Check that the Hamiltonian is diagonal !",ch10

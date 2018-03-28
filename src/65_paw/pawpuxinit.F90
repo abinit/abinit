@@ -138,16 +138,18 @@
  end if
 
 !Print title
- if((usepawu>=1.and.usepawu<=3).or.useexexch>0) write(message, '(3a)' ) ch10,ch10," ******************************************"
+ if((usepawu>=1.and.usepawu<=4).or.useexexch>0) write(message, '(3a)' ) ch10,ch10," ******************************************"
  if(usepawu==1) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL"
  else if(usepawu==2) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF"
  else if(usepawu==3) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (alternative)"
+ else if(usepawu==4) then
+   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL with no spin polarization in the xc functional"
  end if
  if(useexexch>0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
- if((usepawu>=1.and.usepawu<=3).or.useexexch>0) &
+ if((usepawu>=1.and.usepawu<=4).or.useexexch>0) &
  write(message, '(3a)' ) trim(message),ch10," ******************************************"
  if(use_dmft==0) then
    call wrtout(ab_out,message,'COLL')
@@ -486,7 +488,32 @@
          end do
        end do
        ABI_DEALLOCATE(fk)
-
+     !  testu=0
+     !  write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
+     !  do m1=1,2*lpawu+1
+     !    write(std_out,'(2x,14(f12.6,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2),m2=1,2*lpawu+1)
+     !    do m2=1,2*lpawu+1
+     !      testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
+     !   enddo
+     !  enddo
+     !  testu=testu/((two*lpawu+one)**2)
+     !  write(std_out,*) "------------------------"
+     !  write(std_out,'(a,f12.6)') " U=", testu
+     !  write(std_out,*) "------------------------"
+     !  write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)-vee(m1,m2,m2,m1)"
+     !  do m1=1,2*lpawu+1
+     !    write(std_out,'(2x,14(f12.6,2x))') ((pawtab(itypat)%vee(m1,m2,m1,m2)-pawtab(itypat)%vee(m1,m2,m2,m1)),m2=1,2*lpawu+1)
+     !    do m2=1,2*lpawu+1
+     !    if(m1/=m2) testumj=testumj+ pawtab(itypat)%vee(m1,m2,m1,m2)-pawtab(itypat)%vee(m1,m2,m2,m1)
+     !   enddo
+     !  enddo
+     !  testumj=testumj/((two*lpawu)*(two*lpawu+one))
+     !  write(std_out,*) "------------------------"
+     !  write(std_out,'(a,f12.6)') " U-J=", testumj
+     !  write(std_out,*) "------------------------"
+     !  write(std_out,*) "------------------------"
+     !  write(std_out,'(a,f12.6)')  " J=", testu-testumj
+     !  write(std_out,*) "------------------------"
      end if ! usepawu
 
 !    ======================================================================
