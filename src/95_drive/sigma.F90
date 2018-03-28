@@ -123,6 +123,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free
  use m_gsphere,       only : gsphere_t, gsph_free
+ use m_kg,            only : getph
  use m_vcoul,         only : vcoul_t, vcoul_free
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_lda_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results

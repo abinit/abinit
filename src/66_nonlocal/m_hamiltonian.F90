@@ -48,6 +48,7 @@ module m_hamiltonian
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
+ use m_kg,                only : ph1d3d, getph
  use m_mpinfo,            only : destroy_mpi_enreg
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
 

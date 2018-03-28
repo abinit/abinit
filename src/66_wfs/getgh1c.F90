@@ -88,6 +88,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
+ use m_kg,          only : kpgstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -136,6 +136,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, &
 &                      pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
  use m_mpinfo,  only : destroy_mpi_enreg
+ use m_kg,      only : ph1d3d
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

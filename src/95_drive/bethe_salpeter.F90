@@ -138,8 +138,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
- use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
+ use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_dmft,        only : paw_dmft_type
+ use m_kg,              only : getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

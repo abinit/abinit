@@ -50,6 +50,7 @@ module m_epjdos
  use m_fstrings,       only : int2char4, strcat
  use m_pawtab,         only : pawtab_type
  use m_kpts,           only : tetra_from_kptrlatt
+ use m_kg,             only : ph1d3d
 
  implicit none
 

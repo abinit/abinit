@@ -65,6 +65,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use m_mpinfo,       only : init_mpi_enreg,mpi_distrib_is_ok
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_dtset,        only : get_npert_rbz
+ use m_kg,           only : getmpw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -46,6 +46,7 @@ MODULE m_pawfgr
  use m_xmpi
 
  use defs_abitypes, only : dataset_type
+ use m_kg,       only : getcut
 
  implicit none
 

@@ -56,6 +56,7 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere
+ use m_kg,        only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

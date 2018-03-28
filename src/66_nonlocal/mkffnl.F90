@@ -158,6 +158,8 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  use m_errors
  use m_splines
 
+ use m_kg,            only : mkkin
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

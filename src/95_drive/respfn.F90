@@ -148,6 +148,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft,    only : paw_dmft_type
+ use m_kg,          only : getcut, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

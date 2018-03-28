@@ -295,6 +295,7 @@
  use m_profiling_abi
  use m_errors
 
+ use m_kg,      only : ph1d3d
  use m_pawcprj, only : pawcprj_type
 
 !This section has been created automatically by the script Abilint (TD).

@@ -92,6 +92,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_profiling_abi
  use m_errors
  use m_xcdata
+ use libxc_functionals
 
  use m_pawang,      only : pawang_type
  use m_pawtab,      only : pawtab_type
@@ -105,7 +106,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
  use m_dtset,       only : dtset_copy, dtset_free
  use m_mpinfo,      only : destroy_mpi_enreg
- use libxc_functionals
+ use m_kg,          only : mkkin
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

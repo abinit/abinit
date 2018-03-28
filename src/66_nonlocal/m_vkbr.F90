@@ -35,6 +35,7 @@ MODULE m_vkbr
  use m_paw_sphharm,   only : ylmc, ylmcd
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
+ use m_kg,            only : mkkin
 
  implicit none
 

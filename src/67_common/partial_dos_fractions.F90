@@ -85,6 +85,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  use m_cgtools,       only : cg_getspin
  use m_epjdos,        only : recip_ylm, epjdos_t
  use m_gpshere,       only : getkpgnorm
+ use m_kg,            only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

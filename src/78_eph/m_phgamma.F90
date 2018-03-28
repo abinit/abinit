@@ -48,6 +48,7 @@ module m_phgamma
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
  !use m_cgtools,        only : set_istwfk
+ use m_kg,             only : getph
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam, asrif9
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t

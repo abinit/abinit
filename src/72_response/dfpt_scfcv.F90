@@ -233,6 +233,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_io_tools, only : open_file
  use m_exit,     only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_mpinfo,   only : iwrite_fftdatar
+ use m_kg,       only : getcut
  use m_ioarr,    only : ioarr, fftdatar_write_from_hdr, fort_denpot_skip
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type

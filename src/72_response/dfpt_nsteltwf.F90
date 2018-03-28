@@ -82,8 +82,9 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  use m_profiling_abi
  use m_cgtools
 
- use m_pawcprj, only : pawcprj_type
+ use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type,load_k_hamiltonian
+ use m_kg,          only : mkkin, kpgstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

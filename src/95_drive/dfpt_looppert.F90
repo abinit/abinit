@@ -164,6 +164,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main
+ use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
  use m_ioarr,      only : read_rhor
@@ -177,7 +178,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &                         pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
- use m_rf2,       only : rf2_getidirs
+ use m_rf2,        only : rf2_getidirs
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -152,6 +152,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
  use m_fftcore,  only : kpgsph, sphere
  use m_cgtools,  only : cg_envlop
+ use m_kg,       only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

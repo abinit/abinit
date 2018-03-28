@@ -85,6 +85,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_kg,       only : getcut
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

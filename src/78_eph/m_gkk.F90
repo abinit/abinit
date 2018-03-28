@@ -51,6 +51,7 @@ module m_gkk
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : findqg0
  use m_cgtools,        only : dotprod_g
+ use m_kg,             only : getph
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
