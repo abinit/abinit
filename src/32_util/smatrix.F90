@@ -116,6 +116,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
  use m_errors
 
  use m_cgtools,   only : overlap_g
+ use m_abilasi,   only : dzgedi, dzgefa
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

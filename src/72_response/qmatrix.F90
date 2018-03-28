@@ -54,6 +54,7 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
  use m_efield
 
  use m_cgtools,   only : overlap_g
+ use m_abilasi,   only : dzgedi, dzgefa
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
