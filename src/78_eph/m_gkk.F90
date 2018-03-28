@@ -120,7 +120,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 #define ABI_FUNC 'eph_gkk'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_66_wfs
 !End of the abilint section
 

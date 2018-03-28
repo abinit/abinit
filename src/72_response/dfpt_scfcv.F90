@@ -256,7 +256,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_54_abiutil
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_scfcv

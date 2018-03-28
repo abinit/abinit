@@ -122,7 +122,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 #undef ABI_FUNC
 #define ABI_FUNC 'update_e_field_vars'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => update_e_field_vars
 !End of the abilint section

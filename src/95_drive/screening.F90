@@ -115,6 +115,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
 &                            ebands_free, ebands_has_metal_scheme, ebands_ncwrite
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_free
+ use m_kg,            only : getph
  use m_gsphere,       only : gsph_free, gsphere_t
  use m_vcoul,         only : vcoul_t, vcoul_free
  use m_qparticles,    only : rdqps, rdgw, show_QP
@@ -147,7 +148,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common

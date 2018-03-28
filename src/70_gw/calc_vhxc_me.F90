@@ -108,14 +108,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_mpinfo,      only : destroy_mpi_enreg
  use m_kg,          only : mkkin
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vhxc_me'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section

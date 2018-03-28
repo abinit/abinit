@@ -30,7 +30,7 @@ sources = [
  "m_bz_mesh.F90",
  "m_double_grid.F90",
  "m_gsphere.F90",
- "m_kg.f90",
+ "m_kg.F90",
  "m_kpts.F90",
  "m_nesting.F90",
  "m_skw.F90",

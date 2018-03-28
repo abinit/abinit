@@ -170,6 +170,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_xcdata
 
  use m_geometry,         only : metric
+ use m_kg,               only : mkkin 
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
@@ -192,7 +193,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_53_spacepar
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_65_paw
@@ -613,7 +613,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !    Compute kinetic energy
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !    Compute kinetic energy of each band

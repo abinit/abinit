@@ -458,7 +458,6 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vkb'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

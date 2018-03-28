@@ -218,7 +218,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 #endif
  use m_io_kss,           only : gshgg_mkncwrite
  use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
- use m_kg,               only : getcut, getmpw, kpgio
+ use m_kg,               only : getcut, getmpw, kpgio, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

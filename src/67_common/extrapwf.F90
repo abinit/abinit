@@ -75,6 +75,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 
  use m_numeric_tools,   only : hermit
  use m_geometry, only : metric
+ use m_kg, only : getph 
  use defs_datatypes, only : pseudopotential_type
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
@@ -85,7 +86,6 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'extrapwf'
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

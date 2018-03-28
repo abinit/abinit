@@ -140,7 +140,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal
 !End of the abilint section

@@ -156,7 +156,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common

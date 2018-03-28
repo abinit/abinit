@@ -82,7 +82,6 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 #undef ABI_FUNC
 #define ABI_FUNC 'initmv'
  use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

@@ -63,7 +63,6 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_rotate'
  use interfaces_32_util
- use interfaces_56_recipspace, except_this_one => cg_rotate
 !End of the abilint section
 
  implicit none

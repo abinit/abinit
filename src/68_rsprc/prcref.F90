@@ -162,7 +162,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 #define ABI_FUNC 'prcref'
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_67_common

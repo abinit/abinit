@@ -1105,7 +1105,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
@@ -1553,7 +1552,6 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kss_calc_vkb'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

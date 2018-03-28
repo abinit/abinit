@@ -33,6 +33,7 @@ MODULE m_kg
  use m_xmpi
 
  use m_fftcore, only : kpgsph
+ use defs_abitypes, only : MPI_type
 
  implicit none
 
@@ -100,6 +101,7 @@ contains
 !! SOURCE
 
 subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -254,6 +256,7 @@ end subroutine getcut
 
 subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -364,6 +367,7 @@ end subroutine getmpw
 !! SOURCE
 
 subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -529,6 +533,7 @@ end subroutine mkkin
 
 subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 & mode_paral,mpi_enreg,mpw,npwarr,npwtot,nsppol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -696,6 +701,7 @@ end subroutine kpgio
 
 subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -814,6 +820,7 @@ end subroutine ph1d3d
 
 subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -914,6 +921,7 @@ end subroutine getph
 
 subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1003,5 +1011,5 @@ subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
 end subroutine kpgstr
 !!***
 
-end module kg
+end module m_kg
 !!***

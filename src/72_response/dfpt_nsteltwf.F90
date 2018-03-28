@@ -90,7 +90,6 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nsteltwf'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

@@ -77,7 +77,6 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 #define ABI_FUNC 'dfptff_initberry'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

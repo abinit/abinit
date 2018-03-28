@@ -165,7 +165,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mkffnl'
  use interfaces_18_timing
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

@@ -2512,6 +2512,7 @@ end subroutine gsph_extend
 
 subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2600,6 +2601,7 @@ end subroutine getkpgnorm
 !! SOURCE
 
 subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

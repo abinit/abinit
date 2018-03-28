@@ -303,7 +303,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_ylm'
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => nonlop_ylm
 !End of the abilint section
 

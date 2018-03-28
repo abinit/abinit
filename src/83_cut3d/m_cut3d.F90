@@ -44,7 +44,7 @@ MODULE m_cut3d
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
- use m_gpshere,          only : getkpgnorm
+ use m_gsphere,          only : getkpgnorm
  use m_epjdos,           only : recip_ylm, dens_in_sph
  use m_dens,             only : dens_hirsh
  use m_kg,               only : kpgio, ph1d3d, getph
