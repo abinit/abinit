@@ -21,7 +21,6 @@ sources = [
  "cg_rotate.F90",
  "getcut.F90",
  "getkgrid.F90",
- "getkpgnorm.F90",
  "getmpw.F90",
  "getph.F90",
  "get_full_kgrid.F90",
@@ -46,7 +45,6 @@ sources = [
  "setmqgrid.F90",
  "setsym.F90",
  "smpbz.F90",
- "symg.F90",
  "testkgrid.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

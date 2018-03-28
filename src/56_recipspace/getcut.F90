@@ -98,7 +98,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 ! *************************************************************************
 
 !This is to treat the case where ecut has not been initialized,
-!for wavelet computations. The default for ecut is -1.0 , allowed 
+!for wavelet computations. The default for ecut is -1.0 , allowed
 !only for wavelets calculations
  ecut_pw=ecut
  if(ecut<-tol8)ecut_pw=ten
@@ -169,7 +169,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
        end if
        call wrtout(std_out,message,'COLL')
      end if
-     
+
      if (boxcut<1.5_dp) then
        write(message, '(a,a,a,a,a,a,a,a,a,a)' ) ch10,&
 &       ' getcut : WARNING -',ch10,&
