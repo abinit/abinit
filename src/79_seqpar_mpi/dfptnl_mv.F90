@@ -107,7 +107,6 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_mv'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
 !End of the abilint section
 

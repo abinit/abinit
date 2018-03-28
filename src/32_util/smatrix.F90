@@ -122,7 +122,6 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'smatrix'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

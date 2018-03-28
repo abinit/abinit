@@ -60,7 +60,6 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'qmatrix'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

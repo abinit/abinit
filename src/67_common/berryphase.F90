@@ -145,7 +145,6 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 #undef ABI_FUNC
 #define ABI_FUNC 'berryphase'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
 !End of the abilint section
 
