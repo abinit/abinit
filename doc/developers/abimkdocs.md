@@ -91,6 +91,11 @@ so that one can easily change the documentation and inspect the changes in the c
     but only re-build files that have changed. 
     This option is designed for site development purposes and is **much faster** than the default live reloading.
 
+!!! warning
+    The server re-builds automatically the pages generated from changed `.md` files, 
+    but not the ones from changed `~abinit/doc/abiref.bib`
+    neither from changed `~abinit/abimkdocs/\*.py` . This means that inspecting the upgrade of the description of an input variable 
+    or a bibtex reference needs to close the server and reissue the adequate `mksite.py` command.
 
 `mksite serve` builds the website in a temporary directory. If you need to inspect the HTML files produced 
 by the script, use:
@@ -274,29 +279,6 @@ For published work with a DOI, we strongly recommend *avoiding* a `cut&paste` fr
 (there are units tests to enforce the presence of particular entries in the bibtex document and
 your bibtex may not fullfill these requirements).
 
-A much better solution is to use BetterBib and the DOI of the article to fetch data 
-from Crossref and produce the bibtex entry. 
-BetterBib is available from the Python Package Index, so simply type:
-
-    pip install betterbib
-
-and then use doi2bibtex from the command line:
-
-    doi2bibtex 10.1103/PhysRevLett.96.066402
-
-Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key 
-(make sure it's not a duplicated entry).
-Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008" 
-(start with an uppercase letter, then lower case, then four-digit year). 
-Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
-Then, build the HTML pages using `mksite.py serve`.
-
-Run the tests with:
-
-    pytest ./tests/test_bibtex.py
-    
-with pytest to validate your changes.
-
 If you know the DOI of the article, it's possible to use [BetterBib](https://github.com/nschloe/betterbib)
 to fetch data from [Crossref](http://www.crossref.org/) and produce the bibtex entry.
 BetterBib is available from the Python Package Index, so simply type:
@@ -324,6 +306,19 @@ doi2bibtex 10.1103/PhysRevLett.96.066402
 }
 ```
 
+Add the entry to the bibtex file and use the `FirstAuthorYear` convention for the key
+(make sure it's not a duplicated entry).
+Note that the bibtex ID must be of the form "FirstauthornameYEAR", e.g. "Amadon2008"
+(start with an uppercase letter, then lower case, then four-digit year).
+Possibly, a letter might be added in case of ambiguity: e.g. there exists also `Amadon2008a`
+Then, build the HTML pages using `mksite.py serve`.
+
+Run the tests with:
+
+    pytest ./tests/test_bibtex.py
+
+with pytest to validate your changes.
+
 ## Topics
 
 The topic files are written in Markdown and can be found in ~abinit/doc/topics.
@@ -347,8 +342,8 @@ A new Markdown file without underscore will be generated and included in `mkdocs
 
     You are supposed to edit the version with the underscore and provide enough
     information in the declaration of the variable and in the `TEST_INFO` section
-    so that `mksite.py` can fill the complete the templated.
-    Remmber to restart `mksite.py` to see the changes.
+    so that `mksite.py` can fill the template.
+    Remember to restart `mksite.py` to see the changes.
 
 ## How to a add a new document
 
