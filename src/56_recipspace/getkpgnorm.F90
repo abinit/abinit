@@ -38,7 +38,6 @@
 
 #include "abi_common.h"
 
-
 subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
 
  use defs_basis
@@ -61,7 +60,6 @@ subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
  real(dp),intent(out) :: kpgnorm(npw_k)
 
 !Local variables-------------------------------
-!character(len=500) :: message
 !scalars
  integer :: ipw
  real(dp) :: g11,g12,g13,g21,g22,g23,g31,g32,g33,k1,k2,k3,kpg1,kpg2,kpg3,rr,xx

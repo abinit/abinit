@@ -27,8 +27,6 @@
 #include "config.h"
 #endif
 
-!#define DEBUG_MODE
-
 #include "abi_common.h"
 
 module m_hamiltonian
@@ -371,7 +369,7 @@ module m_hamiltonian
    ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
    ! lower triangular part of Hermitian matrix
 
- 
+
 ! ===== Structured datatype pointers
 
   type(fock_common_type), pointer :: fockcommon => null()

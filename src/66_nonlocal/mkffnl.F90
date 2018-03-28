@@ -293,7 +293,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    if (nkpg<3) then
      ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass_free=one
 !    Note that with ecutsm=0, the right kinetic energy is computed
-!     call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw)
      call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw,0,0)
 !$OMP PARALLEL DO
      do ig=1,npw
@@ -648,7 +647,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
  ABI_DEALLOCATE(kpgnorm_inv)
  ABI_DEALLOCATE(kpgnorm)
-
  ABI_DEALLOCATE(wk_ffnl1)
  ABI_DEALLOCATE(wk_ffnl2)
  ABI_DEALLOCATE(wk_ffnl3)

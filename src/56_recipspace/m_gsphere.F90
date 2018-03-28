@@ -55,6 +55,7 @@ MODULE m_gsphere
  public :: setshells           ! Set consistently the number of shells, the number of plane-waves,  and the energy cut-off
  public :: kg_map              ! Compute the mapping between two lists of g-vectors.
  public :: make_istwfk_table
+ !public :: getkpgnorm          ! Compute the norms of the k+G vectors
 !!***
 
 !----------------------------------------------------------------------
