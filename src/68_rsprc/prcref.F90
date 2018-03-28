@@ -205,6 +205,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel
+ logical :: non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -225,6 +226,9 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -603,7 +607,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_DEALLOCATE(xccc3d)
 

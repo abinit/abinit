@@ -1607,7 +1607,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 .and. dtset%nbandkss==0) dtset%usepawu = 10
+ if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
+  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1757,6 +1760,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
+   if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
+     write(message, '(a,a,a)' )&
+&     'usepawu==4 and usedmft=1, dmft_dc should be equal to 5  ',ch10,&
+&     'impose dmft_dc = 5'
+     MSG_WARNING(message)
+     dtset%dmft_dc=5
+   endif
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')

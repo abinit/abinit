@@ -122,6 +122,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !scalars
  integer :: cplex,ider,idir,ipert,ispden,nhatgrdim,nkxc_cur,option,me,nproc,comm,usexcnhat
  logical :: has_nkxc_gga
+ logical :: non_magnetic_xc
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
@@ -135,6 +136,9 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !Compatibility tests:
  has_nkxc_gga=(nkxc==7.or.nkxc==19)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
@@ -257,7 +261,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !  To be adjusted for the call to rhotoxc
    nk3xc=1
    call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
-&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,n3xccc,option,dtset%paral_kgb,&
+&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,&
 &   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_DEALLOCATE(rhor0)

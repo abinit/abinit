@@ -220,7 +220,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,option_eff,optn,optn2,optstr,optv,vloc_method
  real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
- logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
+ logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
  type(xcdata_type) :: xcdata,xcdatahyb
@@ -239,6 +239,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 ! *********************************************************************
 
  call timab(91,1,tsec)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
@@ -497,7 +500,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            option_eff=option
            if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &           option_eff,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &           taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          else
@@ -514,7 +517,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
              option_eff=option
              if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
              call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
-&             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &             option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &             taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
@@ -535,7 +538,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          option_eff=option
          if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)

@@ -208,6 +208,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  integer :: cplex,iatom,ider,idir,ierr,ifft,ipert,irhoij,ispden,itypat,izero,iir,jjr,kkr
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nselect,nzlmopt,nk3xc,option,optxc
  logical :: with_vxctau
+ logical :: non_magnetic_xc
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
  real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
  character(len=500) :: message
@@ -224,6 +225,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !ENDDEBUG
 
  call timab(80,1,tsec)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
@@ -339,7 +343,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
 !------Compute parts of total energy depending on potentials--------
@@ -602,7 +606,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then
