@@ -880,7 +880,10 @@ program anaddb
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
- ABI_DEALLOCATE(thm_scells)
+
+ if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
+   ABI_DEALLOCATE(thm_scells)
+ end if
  
  ! Close files
  if (iam_master) then
