@@ -155,6 +155,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  use m_pawrhoij, only : pawrhoij_type
  use m_fft,      only : zerosym
  use m_kg,       only : getph
+ use m_dtset,    only : testsusmat
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

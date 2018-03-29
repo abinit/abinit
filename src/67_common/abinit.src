@@ -119,7 +119,6 @@ sources = [
  "strhar.F90",
  "sygrad.F90",
  "symrhg.F90",
- "testsusmat.F90",
  "uderiv.F90",
  "update_e_field_vars.F90",
  "vdw_dftd2.F90",
