@@ -279,6 +279,7 @@ end subroutine destroy_orbmag
  use m_pawrad, only : pawrad_type, simp_gen
  use m_pawtab, only : pawtab_type
  use m_paw_sphharm, only : initylmr
+ use m_special_funcs, only : sbf8
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
