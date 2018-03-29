@@ -170,7 +170,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 #undef ABI_FUNC
 #define ABI_FUNC 'setvtr'
  use interfaces_18_timing
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs

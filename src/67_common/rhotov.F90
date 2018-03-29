@@ -140,7 +140,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotov'
  use interfaces_18_timing
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs

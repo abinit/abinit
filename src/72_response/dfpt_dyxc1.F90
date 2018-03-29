@@ -100,7 +100,6 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyxc1'
  use interfaces_18_timing
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_72_response, except_this_one => dfpt_dyxc1

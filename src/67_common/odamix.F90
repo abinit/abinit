@@ -165,7 +165,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 #define ABI_FUNC 'odamix'
  use interfaces_18_timing
  use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section

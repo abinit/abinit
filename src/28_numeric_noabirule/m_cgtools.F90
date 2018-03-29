@@ -1680,6 +1680,7 @@ end subroutine dotprod_v
 subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,ucvol, &
     mpi_comm_sphgrid)  ! Optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -123,7 +123,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_72_response, except_this_one => dfpt_nstdy
 !End of the abilint section

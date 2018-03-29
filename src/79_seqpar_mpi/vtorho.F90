@@ -254,7 +254,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_77_suscep
  use interfaces_79_seqpar_mpi, except_this_one => vtorho
 !End of the abilint section
 
