@@ -188,6 +188,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
  use m_kg,       only : mkkin, kpgstr
+ use m_cgtools,  only : dotprod_vn
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

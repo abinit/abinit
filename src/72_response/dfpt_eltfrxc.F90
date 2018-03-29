@@ -91,6 +91,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  use m_xmpi
 
  use m_geometry,    only : metric
+ use m_cgtools,     only : dotprod_vn
  use m_pawtab,      only : pawtab_type,pawtab_free,pawtab_nullify
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawpsp,      only : pawpsp_cg

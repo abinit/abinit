@@ -149,6 +149,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  use m_xcdata
 
  use m_geometry,     only : metric
+ use m_cgtools,    only : dotprod_vn
  use m_pawang, only : pawang_type
  use m_pawrad, only : pawrad_type
  use m_pawtab, only : pawtab_type

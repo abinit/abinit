@@ -153,6 +153,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use m_xcdata
 
  use m_geometry,          only : xred2xcart
+ use m_cgtools,           only : dotprod_vn
  use m_ewald,             only : ewald
  use m_energies,          only : energies_type
  use m_electronpositron,  only : electronpositron_type,electronpositron_calctype

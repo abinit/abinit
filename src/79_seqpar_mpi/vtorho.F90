@@ -233,6 +233,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_invovl,             only : make_invovl
  use m_tddft,              only : tddft
  use m_kg,                 only : mkkin
+ use m_suscep_stat,        only : suscep_stat
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
