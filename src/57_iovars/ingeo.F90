@@ -336,11 +336,18 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
  if(natrd<1 .or. natrd>natom)then
    if(natrd>1 .and. multiplicity > 1) then
-     write(message,'(3a,I0,a,I0,a,I0,2a)')&
+     if(natrd < natom)then
+       write(message, '(3a)' )&
+&       'The number of atoms to be read (natrd) can not be used with supercell_latt.',ch10,&
+&       'Action: Remove natrd or supercell_latt in your input file.'
+       MSG_ERROR(message)
+     else
+       write(message,'(3a,I0,a,I0,a,I0,2a)')&
        ' The input variable supercell_latt is present',ch10,&
 &      ' thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
 &      ' ',supercell_lattice(3,3),' is generated',ch10     
-         MSG_WARNING(message)
+       MSG_WARNING(message)
+     end if
    else
      write(message, '(3a,i0,a,i0,2a,a)' )&
 &   'The number of atoms to be read (natrd) must be positive and not bigger than natom.',ch10,&
@@ -537,7 +544,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  nobj=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nobj',tread,'INT')
  if(tread==1) nobj=intarr(1)
-
+ if(nobj /= 0 .and. multiplicity > 1)then
+   write(message, '(3a)' )&
+&       'nobj can not be used with supercell_latt.',ch10,&
+&       'Action: Remove nobj or supercell_latt in your input file.'
+   MSG_ERROR(message)
+ end if
 !If there are objects, chkprim will not be used immediately
 !But, if there are no objects, but a space group, it will be used directly.
  chkprim=1
@@ -807,7 +819,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
      end if
 
-     if(natom/=natrd)then
+     if(natom/=natrd.and.multiplicity == 1)then
 !      Generate the full set of atoms from its knowledge in the irreducible part.
        call fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
      end if

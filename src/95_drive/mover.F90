@@ -210,6 +210,7 @@ integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
 type(crystal_t) :: crystal
+logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
 real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
@@ -450,8 +451,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  if (ab_mover%ionmov==26)then
 !Tdep call need to merge 
  else if (ab_mover%ionmov==27)then
-   !GET THE PATH  OF THE DDB FILE 
-   filename_ddb = trim("ddb_full.out")
+   !GET THE PATH  OF THE DDB FILE
+   filename_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
+   INQUIRE(FILE=filename, EXIST=file_exists)
    call generate_training_set(acell,filename_ddb,hist,ab_mover%natom,ntime,ab_mover%ph_ngqpt,&
 &                             ab_mover%ph_nqshift,ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
 &                             rprimd,ab_mover%mdtemp(2),xred,DEBUG)

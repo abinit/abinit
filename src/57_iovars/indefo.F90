@@ -578,6 +578,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
+   dtsets(idtset)%ph_ngqpt(:) = 1
+   dtsets(idtset)%ph_nqshift = 0
+   if(dtsets(idtset)%ph_nqshift > 0)then
+     dtsets(idtset)%ph_qshift = zero
+   end if
    dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
@@ -702,7 +707,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%string_algo=1
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
-   dtsets(idtset)%supercell(:)=1
    dtsets(idtset)%symchi=1
    dtsets(idtset)%symsigma=0
 !  T

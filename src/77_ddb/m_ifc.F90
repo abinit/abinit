@@ -769,14 +769,14 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: nqshift
- integer,intent(in) :: natom
+ integer,intent(inout) :: natom
  !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: qshift(3,nqshift)
  character(len=*),intent(in) :: filename
  type(ifc_type),intent(out) :: Ifc
  real(dp),intent(inout) :: dielt(3,3)
- real(dp),intent(inout) :: zeff(3,3,natom)
+ real(dp),allocatable,intent(inout) :: zeff(:,:,:)
  type(crystal_t),intent(out) :: ucell_ddb
 !Local variables -------------------------
  !scalars
@@ -796,7 +796,8 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  if (file_exists .eqv. .true.)then
    !Reading the ddb
    call ddb_hdr_open_read(ddb_hdr,filename,2,DDB_VERSION,comm,dimonly=1)
-   
+
+   natom = ddb_hdr%natom
    ABI_ALLOCATE(atifc,(ddb_hdr%natom))
    do i=1,ddb_hdr%natom
      atifc(i)=i
@@ -810,6 +811,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    end if
 
    ! Get Dielectric Tensor and Effective Charges
+   ABI_ALLOCATE(zeff,(3,3,natom))
    iblok = ddb_get_dielt_zeff(ddb,ucell_ddb,1,1,0,dielt,zeff)
 
    ! Try to get dielt, in case just the DDE are present

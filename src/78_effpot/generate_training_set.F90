@@ -84,10 +84,6 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  !First fill natom_uc with natom  
-  natom_uc = 20
-  
-  ABI_ALLOCATE(zeff,(3,3,natom_uc))  
   call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff)
 
   write(message, '(a,I0,a,f10.2,02a)' )' Generation of ',nconfig,' at the temperature ',&
@@ -97,7 +93,6 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   call wrtout(ab_out,message,'COLL')
 
   ABI_DATATYPE_ALLOCATE(thm_scells,(nconfig))
-
   call thermal_supercell_make(crystal, Ifc, nconfig,int(rlatt), temperature_K, thm_scells)
   
   do iconfig = 1,nconfig
