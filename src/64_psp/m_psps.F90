@@ -837,7 +837,6 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
 #undef ABI_FUNC
 #define ABI_FUNC 'psps_print'
  use interfaces_14_hidewrite
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none

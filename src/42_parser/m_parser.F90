@@ -2100,6 +2100,7 @@ end subroutine append_xyz
 subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minimal_flag,reference_value,unit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2265,11 +2266,11 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkint'
- use interfaces_57_iovars, except_this_one => chkint
 !End of the abilint section
 
  implicit none
@@ -2360,11 +2361,11 @@ end subroutine chkint
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,list_number,list_values,unit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkint_eq'
- use interfaces_57_iovars, except_this_one => chkint_eq
 !End of the abilint section
 
  implicit none
@@ -2454,11 +2455,11 @@ end subroutine chkint_eq
 subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minmax_value,unit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkint_ge'
- use interfaces_57_iovars, except_this_one => chkint_ge
 !End of the abilint section
 
  implicit none
@@ -2550,11 +2551,11 @@ subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  minmax_value,unit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkint_le'
- use interfaces_57_iovars, except_this_one => chkint_le
 !End of the abilint section
 
  implicit none
@@ -2649,11 +2650,11 @@ subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,unit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkint_ne'
- use interfaces_57_iovars, except_this_one => chkint_ne
 !End of the abilint section
 
  implicit none
@@ -2769,6 +2770,7 @@ end subroutine chkint_ne
 subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

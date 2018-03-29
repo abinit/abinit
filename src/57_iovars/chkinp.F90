@@ -71,7 +71,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 #define ABI_FUNC 'chkinp'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_57_iovars, except_this_one => chkinp
 !End of the abilint section
 
  implicit none
