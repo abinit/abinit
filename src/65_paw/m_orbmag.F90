@@ -284,7 +284,6 @@ end subroutine destroy_orbmag
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawtwdij_2b'
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 
