@@ -39,12 +39,15 @@ MODULE m_cut3d
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
+ use m_geometry,         only : xcart2xred, metric
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
+ use m_gsphere,          only : getkpgnorm
  use m_epjdos,           only : recip_ylm, dens_in_sph
  use m_dens,             only : dens_hirsh
+ use m_kg,               only : kpgio, ph1d3d, getph
 
  implicit none
 
@@ -172,7 +175,7 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
  ABI_MALLOC(hweight,(natom))
 
  call dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
-  natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl,prtcharge1,hcharge,hden,hweight)
+  natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,prtcharge1,hcharge,hden,hweight)
 
  ABI_FREE(hweight)
  ABI_FREE(aeden)
@@ -1732,7 +1735,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
        end if
 
      end do ! resoll
-     write(unt, * ) 
+     write(unt, * )
    end do ! resolw
 
    if (fileformattype==3) then
@@ -1811,7 +1814,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts

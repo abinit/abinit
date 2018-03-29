@@ -70,7 +70,6 @@ program mrgddb
 #define ABI_FUNC 'mrgddb'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_51_manage_mpi
  use interfaces_77_ddb
 !End of the abilint section
 

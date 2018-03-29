@@ -43,6 +43,7 @@ MODULE m_ddk
  use m_fstrings,      only : sjoin, itoa, endswith
  use m_io_tools,      only : iomode_from_fname
  use defs_abitypes,   only : hdr_type
+ use m_geometry,      only : mkradim
  use m_crystal,       only : crystal_t, crystal_free
  use m_crystal_io,    only : crystal_from_hdr
  use defs_datatypes,  only : ebands_t
@@ -180,7 +181,6 @@ subroutine ddk_init(ddk, paths, comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'ddk_init'
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -398,7 +398,7 @@ end subroutine ddk_read_fsvelocities
 !!
 !! SOURCE
 
-subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
+subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -411,7 +411,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm  ! could distribute this over k in the future
+!integer,intent(in) :: comm  ! could distribute this over k in the future
  real(dp),intent(in) :: sigmas(:)
  type(ebands_t),intent(in) :: ebands
  type(ddk_t),intent(inout) :: ddk

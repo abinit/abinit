@@ -59,7 +59,7 @@ program mrgscr
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF
- use netcdf 
+ use netcdf
 #endif
  use m_hdr
  use m_crystal
@@ -70,9 +70,9 @@ program mrgscr
  use m_fstrings,            only : int2char4, endswith, itoa, sjoin, strcat
  use m_fft_mesh,            only : g2ifft
  use m_fftcore,             only : get_cache_kb
- use m_numeric_tools,       only : iseven
+ use m_numeric_tools,       only : iseven, cspint
  use m_mpinfo,              only : destroy_mpi_enreg
- use m_geometry,            only : normv
+ use m_geometry,            only : normv, metric
  use m_crystal_io,          only : crystal_from_hdr
  use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
  use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
@@ -97,8 +97,6 @@ program mrgscr
 #define ABI_FUNC 'mrgscr'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
@@ -129,7 +127,7 @@ program mrgscr
  character(len=nctk_slen) :: varname
  character(len=fnlen) :: fname_out,fname,fname_dump,fname_rho,prefix,fname_eigen,fname_dump2
  type(hdr_type) :: hdr_rhor
- type(abifile_t) :: abifile 
+ type(abifile_t) :: abifile
  type(hscr_t),pointer :: Hscr0
  type(hscr_t),target :: Hscr_merge
  type(MPI_type) :: MPI_enreg
@@ -141,7 +139,7 @@ program mrgscr
  type(vcoul_t),target :: Vcp
  type(Dataset_type) :: Dtset
 !arrays
- integer :: ngfft(18) 
+ integer :: ngfft(18)
  integer,allocatable :: foundq(:),freq_indx(:,:)
  real(dp),parameter :: k0(3) = [zero,zero,zero]
  real(dp) :: gmet(3,3),gprimd(3,3),qdiff(3),rmet(3,3),qtmp(3),tsec(2)
@@ -168,7 +166,7 @@ program mrgscr
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
-#endif 
+#endif
 
  call timein(tcpui,twalli)
 
@@ -206,7 +204,7 @@ program mrgscr
      MSG_ERROR(msg)
    end if
 
- else if (nfiles > 1) then 
+ else if (nfiles > 1) then
    ! Read name of files to be merged and check for existence.
    call prompt(' Enter the prefix for the final output file: ',fname_out)
 
@@ -269,7 +267,7 @@ program mrgscr
      write(std_out,'(3a)') ch10,' 1 => merging q-points',ch10
      call ioscr_qmerge(nfiles, filenames, hscr_file, fname_out, hscr_merge)
 
-   case (2) 
+   case (2)
      ! Merge frequencies
      write(std_out,'(3a)') ch10,' 2 => merging frequency grids',ch10
      !MSG_WARNING("Advanced user option, consistency in fform etc. will not be checked.")
@@ -373,7 +371,7 @@ program mrgscr
    read(std_in,*)choice
 
    select case(choice)
-   case(1) 
+   case(1)
        ! Recover subset of q-points --------------------------------------------------
      write(std_out,'(a)') ' 1 => Recovering subset of q-points'
      call prompt(' Enter the number of q-points to be extracted: ',nq_selected)
@@ -386,12 +384,12 @@ program mrgscr
 
      call ioscr_qrecover(filenames(1), nq_selected, fname_out)
 
-   case(2) 
+   case(2)
        ! Analyse file ----------------------------------------------------------------
      ABI_CHECK(iomode==IO_MODE_FORTRAN, "netcdf output not coded")
-     
-     write(std_out,'(a)') ' 2 => Extraction of file contents' 
-     
+
+     write(std_out,'(a)') ' 2 => Extraction of file contents'
+
      ! Initialize the G-sphere.
      call gsph_init(Gsphere,Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
 
@@ -502,9 +500,9 @@ program mrgscr
        nfreqre=0; nfreqim=0; nfreqc=0;
        do iomega=1,Hscr0%nomega
          if (ABS(REAL(Hscr0%omega(iomega)))<tol8.AND.&
-&         ABS(AIMAG(Hscr0%omega(iomega)))<tol8) nfreqre = nfreqre + 1 
+&         ABS(AIMAG(Hscr0%omega(iomega)))<tol8) nfreqre = nfreqre + 1
          if (ABS(REAL(Hscr0%omega(iomega)))>tol8.AND.&
-&         ABS(AIMAG(Hscr0%omega(iomega)))<tol8) nfreqre = nfreqre + 1 
+&         ABS(AIMAG(Hscr0%omega(iomega)))<tol8) nfreqre = nfreqre + 1
          if (ABS(REAL(Hscr0%omega(iomega)))<tol8.AND.&
 &         ABS(AIMAG(Hscr0%omega(iomega)))>tol8) nfreqim = nfreqim + 1
        end do
@@ -625,7 +623,7 @@ program mrgscr
              write(unt_dump,*)
            end do !ig2
          end do !ig1
-         close(unt_dump) 
+         close(unt_dump)
        end if ! Check for complex plane freqs
 
      end do !iqibz
@@ -633,7 +631,7 @@ program mrgscr
      ABI_FREE(epsm1)
      call gsph_free(Gsphere)
 
-   case(3) 
+   case(3)
        ! Extract dielectric function and plasmon-pole stuff --------------------------
      ABI_CHECK(iomode==IO_MODE_FORTRAN, "netcdf output not coded")
      write(std_out,'(a)') ' 3 => Calculation of dielectric function and plasmon-pole model'
@@ -653,7 +651,7 @@ program mrgscr
 !      I am using standard valued, it would be better to call indefo
 !      ngfft(1:3)=Er%Hscr%Hdr%ngfft(1:3)
      ngfft(7)=112
-     ngfft(8)=get_cache_kb()     
+     ngfft(8)=get_cache_kb()
      nfft = PRODUCT(ngfft(1:3))
 
      Dtset%icutcoul=3; Dtset%rcut=zero
@@ -898,7 +896,7 @@ program mrgscr
 
              if (open_file(fname_dump2,msg,newunit=unt_dump2,status='replace',form='formatted') /= 0) then
                MSG_ERROR(msg)
-             end if 
+             end if
 
              ABI_MALLOC(em1_ppm,(nfreq_tot))
 
@@ -919,7 +917,7 @@ program mrgscr
 !                Generate the PPM representation of epsilon^-1
                call getem1_from_PPm_one_ggp(PPm,iqibz,Er%Hscr%zcut,nfreq_tot,omega,Vcp,em1_ppm,ig1,ig2)
 
-               write(unt_dump,'(a,I1)') '# epsilon^-1_GG''(omega) from ppmodel = ',ppmodel 
+               write(unt_dump,'(a,I1)') '# epsilon^-1_GG''(omega) from ppmodel = ',ppmodel
                write(unt_dump,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,&
 &               /,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
 &               '# ig1= ',ig1,'    ig2= ',ig2,&
@@ -930,7 +928,7 @@ program mrgscr
 &               '# 1/2|G|^2 =',half*normv(Er%gvec(:,ig1),Cryst%gmet,'G')**2,&
 &               ' Ha 1/2|G''|^2 =',half*normv(Er%gvec(:,ig2),Cryst%gmet,'G')**2,' Ha',&
 &               '#   omega [eV]           Re             Im '
-               write(unt_dump2,'(a,I1)') '# epsilon^-1_GG''(iomega) from ppmodel = ',ppmodel 
+               write(unt_dump2,'(a,I1)') '# epsilon^-1_GG''(iomega) from ppmodel = ',ppmodel
                write(unt_dump2,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,&
 &               /,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
 &               '# ig1= ',ig1,'    ig2= ',ig2,&
@@ -964,7 +962,7 @@ program mrgscr
                write(unt_dump2,*)
              end do ! Empty
              ABI_FREE(em1_ppm)
-             close(unt_dump) 
+             close(unt_dump)
              close(unt_dump2)
 
            end do ! ppmodel
@@ -1089,7 +1087,7 @@ program mrgscr
 &                 eps_norm,eps_ppm_norm,Er%gvec(:,ig1),Er%gvec(:,ig2)
 
                  ! Evaluate the f-sum rule
-                 if (ig1==ig2) then 
+                 if (ig1==ig2) then
                    ftab(1:nfreqre) = real_omega(1:nfreqre)*AIMAG(Er%epsm1(ig1,ig2,1:nfreqre,iqibz))
                  else ! Dephase first - HERE epsm1 is changed!
                    call remove_phase(epsm1(ig1,ig2,:,1),Hscr_file(1)%nomega,phase)
@@ -1098,7 +1096,7 @@ program mrgscr
 
                  call cspint(ftab,real_omega,nfreqre,real_omega(1),&
 &                 real_omega(nfreqre),ysp,eint,work,eps_diff)
-                 
+
                  if (ig1==ig2) then
                    factor = -two*pi*pi*REAL(rhoggp(ig1,ig2))*qratio(ig1,ig2)
                  else
@@ -1159,7 +1157,7 @@ program mrgscr
      call em1results_free(Er)
      call gsph_free(Gsphere)
 
-   case(4) 
+   case(4)
      ! Remove real frequencies ----------------------------------------------------------
      write(std_out,'(2(a))') ch10,' Do you want to remove every other real frequency  (= 1) ?'
      write(std_out,'(a)')         '  or specify for each real frequency individually  (= 2) ?'
@@ -1183,7 +1181,7 @@ program mrgscr
      freq_indx = 0
 
      select case(choice)
-     case(1) 
+     case(1)
        ! Remove every other frequency
        write(std_out,'(2(a))') ch10,' Removing every other real frequency, i.e. every even one.'
        write(std_out,'(a)')         ' If the total number of frequencies is odd, the first and last one will be kept.'
@@ -1197,10 +1195,10 @@ program mrgscr
          if (.not. iseven(ifrq)) then
            nfreqre = nfreqre + 1; freq_indx(nfreqre,1) = ifrq
          end if
-       end do 
+       end do
        write(std_out,'(2a,I0,a)') ch10,' ',nfreqre,' real frequencies will be kept.'
 
-     case(2) 
+     case(2)
          ! Specify freq. individually
        ii = nfreqre; nfreqre = 0
        do ifrq=1,ii
@@ -1209,14 +1207,14 @@ program mrgscr
          if (ans=='Y'.or.ans=='y') then
            nfreqre = nfreqre + 1; freq_indx(nfreqre,1) = ifrq
          end if
-       end do 
+       end do
        write(std_out,'(2a,I0,a)') ch10,' ',nfreqre,' real frequencies will be kept.'
 
-     case(3) 
+     case(3)
        ! Remove all real freq.
        nfreqre = 0
 
-     case default 
+     case default
        MSG_ERROR("Invalid choice!")
      end select
 
@@ -1243,7 +1241,7 @@ program mrgscr
      call ioscr_wremove(filenames(1), hscr_file(1), fname_out, nfreq_tot, freq_indx, hscr_merge)
      ABI_FREE(freq_indx)
 
-   case(5) 
+   case(5)
      ! Remove imaginary frequencies ------------------------------------------------
 
      ! Calculate the total number of freq
@@ -1303,22 +1301,22 @@ program mrgscr
 
      ABI_FREE(freq_indx)
 
-   case(6) 
+   case(6)
      ! Model screening -------------------------------------------------------------
      MSG_ERROR("Model screening has been removed")
 
-   case (7) 
+   case (7)
      ! Interpolation for real frequency -------------------------------------
      MSG_ERROR("Still under development")
 
-   !case(9) 
+   !case(9)
    !  TODO
    !  ! netcdf --> Fortran converter -------------------------------------------------------------
    !  call prompt(' Enter the name of the final output Fortran file: ',fname_out)
    !  ! fname_out extension should be consistent with filenames(1)
    !  call ioscr_nc2fort(filenames(1), fname_out)
 
-   case default 
+   case default
        ! Bail if choice is wrong
      write(std_out,*) ' Invalid choice! Exiting...'
      goto 100

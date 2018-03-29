@@ -32,7 +32,7 @@
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
 !!                   value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
-!!  use_symrec :: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
+!!  use_symrec: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
 !!  dksqmax=maximal value of the norm**2 of the difference between
@@ -57,8 +57,8 @@
 !!  of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago,m_fock
-!!      m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
+!!      initberry,initorbmag,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago
+!!      m_fock,m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
 !!
 !! CHILDREN
 !!      sort_dp,timab

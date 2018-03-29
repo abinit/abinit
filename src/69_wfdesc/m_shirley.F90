@@ -1733,6 +1733,8 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
 
  DBG_ENTER("COLL")
 
+ ABI_UNUSED(Paw_ij%cplex)
+
  ABI_CHECK(Wsh%nspinor==1,"nspinor==2 not coded")
  ABI_CHECK(Wsh%nsppol==1,"Wsh%nsppol must be 1")
  ABI_CHECK(Wsh%paral_kgb/=1,"paral_kgb not coded")
@@ -2503,7 +2505,6 @@ subroutine shirley_bands(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawra
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shirley_bands'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -2635,7 +2636,6 @@ subroutine shirley_window(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shirley_window'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

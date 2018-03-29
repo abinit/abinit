@@ -114,6 +114,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  use m_errors
  use m_hamiltonian
 
+ use m_geometry,          only : metric
  use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
  use m_electronpositron,  only : electronpositron_type
  use m_fftcore,           only : kpgsph
@@ -123,13 +124,13 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
 &                                pawcprj_reorder
  use m_pawfgr,            only : pawfgr_type
+ use m_kg,                only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ks_ddiago'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_recipspace

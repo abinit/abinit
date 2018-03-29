@@ -4,7 +4,7 @@
 !!  m_double_grid
 !!
 !! FUNCTION
-!! This module defines the double grid object. This object contains the coarse mesh 
+!! This module defines the double grid object. This object contains the coarse mesh
 !! and the dense mesh used for the interpolation of the BSE Hamiltonian,
 !! and contains the mapping between the two meshes.
 !!
@@ -27,14 +27,14 @@
 MODULE m_double_grid
 
  use defs_basis
- use m_errors 
+ use m_errors
  use m_profiling_abi
  use m_bz_mesh
  use m_blas
 
  implicit none
 
- private 
+ private
 !!***
 
 !!****t* m_double_grid/double_grid_t
@@ -70,23 +70,23 @@ MODULE m_double_grid
   ! Number of k-point inside the dense BZ (open mesh)
   ! = PROD(maxcomp_coarse.*kmult)
 
-  integer, allocatable :: inttoik_coarse(:) 
-  ! inttoik_coarse(nbz_closedcoarse)  
+  integer, allocatable :: inttoik_coarse(:)
+  ! inttoik_coarse(nbz_closedcoarse)
   ! Index of the kpoint in the coarse BZ.
 
-  integer, allocatable :: iktoint_coarse(:) 
+  integer, allocatable :: iktoint_coarse(:)
   ! iktoint_coarse(nbz_coarse)
   ! Index of int by kpoint
 
-  integer, allocatable :: inttoik_dense(:) 
+  integer, allocatable :: inttoik_dense(:)
 
-  integer, allocatable :: iktoint_dense(:) 
+  integer, allocatable :: iktoint_dense(:)
 
-  integer,allocatable :: indices_coarse(:,:) 
+  integer,allocatable :: indices_coarse(:,:)
   ! indices_coarse(3,nbz_closedcoarse)
   ! Indices (i1,i2,i3) for each point, ordinated by the integer coord
 
-  integer,allocatable :: indices_dense(:,:) 
+  integer,allocatable :: indices_dense(:,:)
   ! indices_dense(6,nbz_dense)
   ! Indices (i1,i2,i3);(j1,j2,j3) for each point, ordinated by integer coord
 
@@ -116,17 +116,17 @@ MODULE m_double_grid
   ! Shifts of the coarse mesh.
 
   ! Coarse lattice
-  integer, allocatable :: g0_coarse(:,:)   
-  integer, allocatable :: g0_dense(:,:)   
-  ! g0_dense/coarse(3,nkpt_closedcoarse/dense) 
+  integer, allocatable :: g0_coarse(:,:)
+  integer, allocatable :: g0_dense(:,:)
+  ! g0_dense/coarse(3,nkpt_closedcoarse/dense)
   ! G0 vector between the kpt obtained with indices
   ! and the kpt obtained insize bz
 
-  integer, allocatable :: dense_to_coarse(:) 
+  integer, allocatable :: dense_to_coarse(:)
   ! dense_to_coarse(nbz_dense)
   ! Give the ibz_coarse corresponding to the dense mesh (the (0,0,0) point)
 
-  integer, allocatable :: coarse_to_dense(:,:) 
+  integer, allocatable :: coarse_to_dense(:,:)
   ! coarse_to_dense(nbz_coarse,ndiv)
   ! Give all the ibz_dense corresponding to the (0,0,0) coarse point
 
@@ -150,7 +150,7 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !! Initialize the double_grid datatype "grid" from coarse and dense mesh
-!! 
+!!
 !! INPUTS
 !!  Kmesh_coarse = descriptor of the coarse BZ sampling
 !!  Kmesh_dense = descriptor of the dense BZ sampling
@@ -191,7 +191,7 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
  integer :: ii, info
 !arrays
  integer :: ipiv(3)
- real(dp) :: rlatt_coarse(3,3),klatt_coarse(3,3),curmat(3,3)    
+ real(dp) :: rlatt_coarse(3,3),klatt_coarse(3,3),curmat(3,3)
 
 !*********************************************
 
@@ -277,7 +277,7 @@ end subroutine double_grid_init
 !!  bz(3,nbz) = k-points in the Brillouin Zone
 !!  nbz = number of k-points
 !!  klatt(3,3) = reciprocal space vectors defining the reciprocal cell
-!!  nshiftk = Number of shifts 
+!!  nshiftk = Number of shifts
 !!  shiftk(3,nshiftk) = Shiftks of the Brillouin Zone
 !!  maxcomp(3) = Maximum int along each direction
 !!  nbz_closed = Number of k-points inside the closed Brillouin Zone (adding periodic images)
@@ -374,7 +374,7 @@ end subroutine create_indices_coarse
 !!  inttoik(nkpt) = mapping between int indices and k-points in the bz
 !!  allg0(3,nkpt) = g vectors between k-point inside bz and k-point given by indices
 !!  nkpt = number of k-points
-!!  
+!!
 !! OUTPUT
 !!  ikpt = index of k-point we search
 !!  g0(3) = g-vector obtained
@@ -433,7 +433,7 @@ end subroutine get_kpt_from_indices_coarse
 !!  maxcomp(3) = Maximum int along each direction
 !!  bz_dense(3,nbz_dense) = k-points in the dense BZ
 !!  nbz_dense = number of k-points in the dense BZ
-!!  nshiftk = Number of shifts 
+!!  nshiftk = Number of shifts
 !!  shiftk(3,nshiftk) = Shiftks of the Brillouin Zone
 !!  kmult(3) = multiplication factors
 !!  nbz_coarse = number of k-points in the coarse BZ
@@ -650,7 +650,7 @@ subroutine compute_neighbours(nbz_dense, iktoint_dense, indices_dense, maxcomp_c
 !scalars
  integer :: ik_dense, iorder, ik_coarse
 !arrays
- integer :: curindex(nbz_coarse) 
+ integer :: curindex(nbz_coarse)
  integer :: curindices_dense(6), curindices_coarse(3)
  integer :: g0(3)
 
@@ -739,7 +739,7 @@ subroutine compute_corresp(double_grid, div2kdense, kdense2div)
  curindex = 1
 
  do ik_dense = 1,double_grid%nbz_dense
-   
+
    ! From ik_ibz in the dense mesh -> indices_dense
    iorder = double_grid%iktoint_dense(ik_dense)
    !g01 = double_grid%g0_dense(:,iorder)
@@ -773,7 +773,7 @@ end subroutine compute_corresp
 !! grid<double_grid>=The datatype to be freed.
 !!
 !! SIDE EFFECTS
-!! All allocated memory is released. 
+!! All allocated memory is released.
 !!
 !! PARENTS
 !!      bethe_salpeter

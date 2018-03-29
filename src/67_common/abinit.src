@@ -42,7 +42,6 @@ sources = [
  "extraprho.F90",
  "extrapwf.F90",
  "fconv.F90",
- "fixsym.F90",
  "forces.F90",
  "forstr.F90",
  "forstrnps.F90",

@@ -203,34 +203,34 @@
 --------------------------------------------------------------------------------
 
  The coefficients for the fit must  will be generate
- 555 coefficients generated 
+ 825 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
    Energy          :   3.7052089149349636E+00
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5063894344026072E-03
+   Forces+Stresses :   7.5066662460724822E-03
    Forces          :   7.3678367059228245E-03
-   Stresses        :   1.3855272847978226E-04
+   Stresses        :   1.3882954014965735E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 1     464         2.5609676625E+00  5.3488566325E-03  5.2003039954E-03  1.4855263709E-04
- 2     348         1.9431984606E+00  4.4884626204E-03  4.3332759913E-03  1.5518662913E-04
- 3     66          1.9687719605E+00  4.0002877311E-03  3.8455541872E-03  1.5473354390E-04
- 4     480         2.0033067192E+00  3.7875227245E-03  3.6336183034E-03  1.5390442116E-04
+ 1     714         2.5608738429E+00  5.3489136413E-03  5.2003031238E-03  1.4861051745E-04
+ 2     539         1.9430177706E+00  4.4883865099E-03  4.3332741067E-03  1.5511240321E-04
+ 3     95          1.9685975251E+00  4.0003838705E-03  3.8455523719E-03  1.5483149867E-04
+ 4     734         2.0031282148E+00  3.7876180836E-03  3.6336164702E-03  1.5400161341E-04
 
  Fitted coefficients at the end of the fit process:
- 464 =>   1.8766945024E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 348 =>   1.2507790341E-01 (Sr_x-Ru_x)^4
- 66 =>  -5.8319599031E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 480 =>   9.0370877270E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 714 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 539 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
+ 95 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 734 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/f.u.):
-   Energy          :   2.0033067191838985E+00
+   Energy          :   2.0031282148077416E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7875227245094760E-03
-   Forces          :   3.6336183033506722E-03
-   Stresses        :   1.5390442115880394E-04
+   Forces+Stresses :   3.7876180836299233E-03
+   Forces          :   3.6336164702165481E-03
+   Stresses        :   1.5400161341337475E-04
 
 
 ================================================================================

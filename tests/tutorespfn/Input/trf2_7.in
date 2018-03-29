@@ -42,7 +42,7 @@
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = X. Gonze
 #%% keywords = 
 #%% description = Input file for the anaddb code. Analysis of the SiO2 DDB
 #%%<END TEST_INFO>

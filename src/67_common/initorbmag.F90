@@ -38,8 +38,10 @@
 !! NOTES
 !!
 !! PARENTS
+!!      gstate
 !!
 !! CHILDREN
+!!      kpgsph,listkk,setsymrhoij,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -204,8 +206,8 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  ABI_ALLOCATE(dtorbmag%lmn_size,(dtset%ntypat))
  ABI_ALLOCATE(dtorbmag%lmn2_size,(dtset%ntypat))
  do itypat = 1, dtset%ntypat
-    dtorbmag%lmn_size(itypat) = pawtab(itypat)%lmn_size
-    dtorbmag%lmn2_size(itypat) = pawtab(itypat)%lmn2_size
+   dtorbmag%lmn_size(itypat) = pawtab(itypat)%lmn_size
+   dtorbmag%lmn2_size(itypat) = pawtab(itypat)%lmn2_size
  end do
 
  lmn2_size_max = psps%lmnmax*(psps%lmnmax+1)/2
@@ -215,14 +217,14 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  dtorbmag%cprjindex(:,:) = 0
 
  if (dtset%kptopt /= 3) then
-    ABI_ALLOCATE(dtorbmag%atom_indsym,(4,dtset%nsym,dtorbmag%natom))
-    call symatm(dtorbmag%atom_indsym,dtorbmag%natom,dtset%nsym,symrec,dtset%tnons,tol8,dtset%typat,xred)
-    lmax = psps%mpsang - 1
-    ABI_ALLOCATE(dtorbmag%zarot,(2*lmax+1,2*lmax+1,lmax+1,dtset%nsym))
-    call setsymrhoij(gprimd,lmax,dtset%nsym,1,rprimd,symrec,dtorbmag%zarot)
-    dtorbmag%nsym = dtset%nsym
-    dtorbmag%lmax = lmax
-    dtorbmag%lmnmax = psps%lmnmax
+   ABI_ALLOCATE(dtorbmag%atom_indsym,(4,dtset%nsym,dtorbmag%natom))
+   call symatm(dtorbmag%atom_indsym,dtorbmag%natom,dtset%nsym,symrec,dtset%tnons,tol8,dtset%typat,xred)
+   lmax = psps%mpsang - 1
+   ABI_ALLOCATE(dtorbmag%zarot,(2*lmax+1,2*lmax+1,lmax+1,dtset%nsym))
+   call setsymrhoij(gprimd,lmax,dtset%nsym,1,rprimd,symrec,dtorbmag%zarot)
+   dtorbmag%nsym = dtset%nsym
+   dtorbmag%lmax = lmax
+   dtorbmag%lmnmax = psps%lmnmax
  end if
 
 ! !------------------------------------------------------------------------------
@@ -367,14 +369,14 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
     !    Compute dk(:), the vector between a k-point and its nearest
     !    neighbour along the direction idir
 
-    dk(:) = zero
-    dk(idir) = 1._dp   ! 1 mean there is no other k-point un the direction idir
-    do ikpt = 2, dtorbmag%fnkpt
-       diffk(:) = abs(dtorbmag%fkptns(:,ikpt) - dtorbmag%fkptns(:,1))
-       if ((diffk(1) < dk(1)+tol8).and.(diffk(2) < dk(2)+tol8).and.&
-&          (diffk(3) < dk(3)+tol8)) dk(:) = diffk(:)
-    end do
-    dtorbmag%dkvecs(:,idir) = dk(:)
+   dk(:) = zero
+   dk(idir) = 1._dp   ! 1 mean there is no other k-point un the direction idir
+   do ikpt = 2, dtorbmag%fnkpt
+     diffk(:) = abs(dtorbmag%fkptns(:,ikpt) - dtorbmag%fkptns(:,1))
+     if ((diffk(1) < dk(1)+tol8).and.(diffk(2) < dk(2)+tol8).and.&
+&     (diffk(3) < dk(3)+tol8)) dk(:) = diffk(:)
+   end do
+   dtorbmag%dkvecs(:,idir) = dk(:)
     !    DEBUG
     !    write(std_out,*)' initorbmag : idir, dk', idir, dk
     !    ENDDEBUG
@@ -382,28 +384,28 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
     !    For each k point, find k_prim such that k_prim= k + dk mod(G)
     !    where G is a vector of the reciprocal lattice
 
-    do ikpt = 1, dtorbmag%fnkpt
+   do ikpt = 1, dtorbmag%fnkpt
 
        !      First k+dk, then k-dk
-       do isign=-1,1,2
-          kpt_shifted1=dtorbmag%fkptns(1,ikpt)- isign*dk(1)
-          kpt_shifted2=dtorbmag%fkptns(2,ikpt)- isign*dk(2)
-          kpt_shifted3=dtorbmag%fkptns(3,ikpt)- isign*dk(3)
+     do isign=-1,1,2
+       kpt_shifted1=dtorbmag%fkptns(1,ikpt)- isign*dk(1)
+       kpt_shifted2=dtorbmag%fkptns(2,ikpt)- isign*dk(2)
+       kpt_shifted3=dtorbmag%fkptns(3,ikpt)- isign*dk(3)
           !        Note that this is still a order fnkpt**2 algorithm.
           !        It is possible to implement a order fnkpt algorithm, see listkk.F90.
-          do ikpt1 = 1, dtorbmag%fnkpt
-             diffk1=dtorbmag%fkptns(1,ikpt1) - kpt_shifted1
-             if(abs(diffk1-nint(diffk1))>tol8)cycle
-             diffk2=dtorbmag%fkptns(2,ikpt1) - kpt_shifted2
-             if(abs(diffk2-nint(diffk2))>tol8)cycle
-             diffk3=dtorbmag%fkptns(3,ikpt1) - kpt_shifted3
-             if(abs(diffk3-nint(diffk3))>tol8)cycle
-             dtorbmag%ikpt_dk(ikpt,(isign+3)/2,idir) = ikpt1
-             exit
-          end do   ! ikpt1
-       end do     ! isign
+       do ikpt1 = 1, dtorbmag%fnkpt
+         diffk1=dtorbmag%fkptns(1,ikpt1) - kpt_shifted1
+         if(abs(diffk1-nint(diffk1))>tol8)cycle
+         diffk2=dtorbmag%fkptns(2,ikpt1) - kpt_shifted2
+         if(abs(diffk2-nint(diffk2))>tol8)cycle
+         diffk3=dtorbmag%fkptns(3,ikpt1) - kpt_shifted3
+         if(abs(diffk3-nint(diffk3))>tol8)cycle
+         dtorbmag%ikpt_dk(ikpt,(isign+3)/2,idir) = ikpt1
+         exit
+       end do   ! ikpt1
+     end do     ! isign
 
-    end do     ! ikpt
+   end do     ! ikpt
 
  end do     ! close loop over idir
 
@@ -426,11 +428,11 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  do idir = 1, 3
 
-    dk(:) = dtorbmag%dkvecs(:,idir)
+   dk(:) = dtorbmag%dkvecs(:,idir)
 
-    do ifor = 1, 2
+   do ifor = 1, 2
 
-       if (ifor == 2) dk(:) = -1._dp*dk(:)
+     if (ifor == 2) dk(:) = -1._dp*dk(:)
 
        !      Build pwind and kgindex
        !      NOTE: The array kgindex is important for parallel execution.
@@ -438,32 +440,32 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
        !      treats k-points at different spin polarizations.
        !      In this case, it is not possible to address the elements of
        !      pwind correctly without making use of the kgindex array.
-       
-       ikg = 0 ; ikpt_loc = 0 ; isppol = 1
-       do ikpt = 1, dtorbmag%fnkpt
+     
+     ikg = 0 ; ikpt_loc = 0 ; isppol = 1
+     do ikpt = 1, dtorbmag%fnkpt
 
-          ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
-          nband_k = dtset%nband(ikpti)
-          ikpt1f = dtorbmag%ikpt_dk(ikpt,ifor,idir)
-          ikpt1i = dtorbmag%indkk_f2ibz(ikpt1f,1)
+       ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
+       nband_k = dtset%nband(ikpti)
+       ikpt1f = dtorbmag%ikpt_dk(ikpt,ifor,idir)
+       ikpt1i = dtorbmag%indkk_f2ibz(ikpt1f,1)
 
-          if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,1,me)).and.&
-&             (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,dtset%nsppol,me))) cycle
+       if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,1,me)).and.&
+&       (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,dtset%nsppol,me))) cycle
 
-          ikpt_loc = ikpt_loc + 1
+       ikpt_loc = ikpt_loc + 1
 
           !        Build basis sphere of plane waves for the nearest neighbour of
           !        the k-point (important for MPI //)
 
-          kg1_k(:,:) = 0
-          kpt1(:) = dtset%kptns(:,ikpt1i)
-          call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,&
-&                     1,mpi_enreg,dtset%mpw,npw_k1)
-          me_g0=mpi_enreg%me_g0
+       kg1_k(:,:) = 0
+       kpt1(:) = dtset%kptns(:,ikpt1i)
+       call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,&
+&       1,mpi_enreg,dtset%mpw,npw_k1)
+       me_g0=mpi_enreg%me_g0
 
 
           !        ji: fkgindex is defined here !
-          dtorbmag%fkgindex(ikpt) = ikg
+       dtorbmag%fkgindex(ikpt) = ikg
 
           !        
           !        Deal with symmetry transformations
@@ -478,90 +480,90 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
           !        where GBZ(k) takes k(k) to the BZ
           !        
 
-          isym  = dtorbmag%indkk_f2ibz(ikpt,2)
-          isym1 = dtorbmag%indkk_f2ibz(ikpt1f,2)
+       isym  = dtorbmag%indkk_f2ibz(ikpt,2)
+       isym1 = dtorbmag%indkk_f2ibz(ikpt1f,2)
 
           !        Construct transformed G vector that enters the matching condition:
           !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
 
-          dg(:) = -dtorbmag%indkk_f2ibz(ikpt,3:5) &
-&                 -nint(-dtorbmag%fkptns(:,ikpt) - dk(:) - tol10 &
-&                 +dtorbmag%fkptns(:,ikpt1f)) &
-&                 +dtorbmag%indkk_f2ibz(ikpt1f,3:5)
+       dg(:) = -dtorbmag%indkk_f2ibz(ikpt,3:5) &
+&       -nint(-dtorbmag%fkptns(:,ikpt) - dk(:) - tol10 &
+&       +dtorbmag%fkptns(:,ikpt1f)) &
+&       +dtorbmag%indkk_f2ibz(ikpt1f,3:5)
 
-          iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
+       iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
 
-          dg(:) = iadum(:)
+       dg(:) = iadum(:)
 
-          if ( dtorbmag%indkk_f2ibz(ikpt1f,6) == 1 ) dg(:) = -dg(:)
+       if ( dtorbmag%indkk_f2ibz(ikpt1f,6) == 1 ) dg(:) = -dg(:)
 
           !        Construct S(k)^{t,-1} S(b)^{t}
 
-          dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
+       dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
 
           !        Construct alpha(k) alpha(b)
 
-          if (dtorbmag%indkk_f2ibz(ikpt,6) == dtorbmag%indkk_f2ibz(ikpt1f,6)) then
-             itrs=0
-          else
-             itrs=1
-          end if
+       if (dtorbmag%indkk_f2ibz(ikpt,6) == dtorbmag%indkk_f2ibz(ikpt1f,6)) then
+         itrs=0
+       else
+         itrs=1
+       end if
 
 
-          npw_k  = npwarr(ikpti)
+       npw_k  = npwarr(ikpti)
           !        npw_k1 = npwarr(ikpt1i)
 
           !        loop over bra G vectors
-          do ipw = 1, npw_k
+       do ipw = 1, npw_k
 
              !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
              !          not for the FBZ k point
-             iadum(:) = kg(:,dtorbmag%kgindex(ikpti) + ipw)
+         iadum(:) = kg(:,dtorbmag%kgindex(ikpti) + ipw)
 
              !          Store non-symmorphic operation phase factor exp[i2\pi \alpha G \cdot t]
 
-             if ( ipwnsfac == 0 ) then
-                rdum=0.0_dp
-                do idum=1,3
-                   rdum=rdum+dble(iadum(idum))*dtset%tnons(idum,isym)
-                end do
-                rdum=two_pi*rdum
-                if ( dtorbmag%indkk_f2ibz(ikpt,6) == 1 ) rdum=-rdum
-                pwnsfac(1,ikg+ipw) = cos(rdum)
-                pwnsfac(2,ikg+ipw) = sin(rdum)
-             end if
+         if ( ipwnsfac == 0 ) then
+           rdum=0.0_dp
+           do idum=1,3
+             rdum=rdum+dble(iadum(idum))*dtset%tnons(idum,isym)
+           end do
+           rdum=two_pi*rdum
+           if ( dtorbmag%indkk_f2ibz(ikpt,6) == 1 ) rdum=-rdum
+           pwnsfac(1,ikg+ipw) = cos(rdum)
+           pwnsfac(2,ikg+ipw) = sin(rdum)
+         end if
 
              !          to determine r.l.v. matchings, we transformed the bra vector
              !          Rotation
-             iadum1(:)=0
-             do idum1=1,3
-                iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
-             end do
-             iadum(:)=iadum1(:)
+         iadum1(:)=0
+         do idum1=1,3
+           iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
+         end do
+         iadum(:)=iadum1(:)
              !          Time reversal
-             if (itrs==1) iadum(:)=-iadum(:)
+         if (itrs==1) iadum(:)=-iadum(:)
              !          Translation
-             iadum(:) = iadum(:) + dg(:)
+         iadum(:) = iadum(:) + dg(:)
 
-             do jpw = 1, npw_k1
-                iadum1(1:3) = kg1_k(1:3,jpw)
-                if ( (iadum(1) == iadum1(1)).and. &
-&                    (iadum(2) == iadum1(2)).and. &
-&                    (iadum(3) == iadum1(3)) ) then
-                   pwind(ikg + ipw,ifor,idir) = jpw
+         do jpw = 1, npw_k1
+           iadum1(1:3) = kg1_k(1:3,jpw)
+           if ( (iadum(1) == iadum1(1)).and. &
+&           (iadum(2) == iadum1(2)).and. &
+&           (iadum(3) == iadum1(3)) ) then
+             pwind(ikg + ipw,ifor,idir) = jpw
                    !              write(std_out,'(a,2x,3i4,2x,i4)') 'Found !:',iadum1(:),jpw
-                   exit
-                end if
-             end do
-          end do
+             exit
+           end if
+         end do
+       end do
 
-          ikg  = ikg + npw_k
+       ikg  = ikg + npw_k
 
-       end do    ! close loop over ikpt
+     end do    ! close loop over ikpt
 
-       ipwnsfac = 1
+     ipwnsfac = 1
 
-    end do    ! close loop over ifor
+   end do    ! close loop over ifor
 
  end do        ! close loop over idir
 
@@ -573,50 +575,50 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 !array required to communicate the WFs between cpus
 !(MPI // over k-points)
  if (nproc>1) then
-    do idir = 1, 3
-       do ifor = 1, 2
+   do idir = 1, 3
+     do ifor = 1, 2
 
-          ikpt_loc = 0
-          do isppol = 1, dtset%nsppol
+       ikpt_loc = 0
+       do isppol = 1, dtset%nsppol
 
-             do ikpt = 1, dtorbmag%fnkpt
+         do ikpt = 1, dtorbmag%fnkpt
 
-                ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
-                nband_k = dtset%nband(ikpti)
-                ikpt1f = dtorbmag%ikpt_dk(ikpt,ifor,idir)
-                ikpt1i = dtorbmag%indkk_f2ibz(ikpt1f,1)
+           ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
+           nband_k = dtset%nband(ikpti)
+           ikpt1f = dtorbmag%ikpt_dk(ikpt,ifor,idir)
+           ikpt1i = dtorbmag%indkk_f2ibz(ikpt1f,1)
 
-                if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
-             
-                ikpt_loc = ikpt_loc + 1
-                mpi_enreg%kptdstrb(me + 1,ifor+2*(idir-1),ikpt_loc) = &
-&                 ikpt1i + (isppol - 1)*dtset%nkpt
+           if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
+           
+           ikpt_loc = ikpt_loc + 1
+           mpi_enreg%kptdstrb(me + 1,ifor+2*(idir-1),ikpt_loc) = &
+&           ikpt1i + (isppol - 1)*dtset%nkpt
 
-                mpi_enreg%kptdstrb(me+1,ifor+2*(idir-1),ikpt_loc+dtorbmag%fmkmem_max*dtset%nsppol) = &
-&                 ikpt1f + (isppol - 1)*dtorbmag%fnkpt
+           mpi_enreg%kptdstrb(me+1,ifor+2*(idir-1),ikpt_loc+dtorbmag%fmkmem_max*dtset%nsppol) = &
+&           ikpt1f + (isppol - 1)*dtorbmag%fnkpt
 
-             end do   ! ikpt
-          end do     ! isppol
-       end do       ! ifor
-    end do           ! idir
+         end do   ! ikpt
+       end do     ! isppol
+     end do       ! ifor
+   end do           ! idir
  end if             ! nproc>1
 
 !build mpi_enreg%kpt_loc2fbz_sp 
  ikpt_loc = 0
  do isppol = 1, dtset%nsppol
-    do ikpt = 1, dtorbmag%fnkpt
+   do ikpt = 1, dtorbmag%fnkpt
 
-       ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
-       nband_k = dtset%nband(ikpti)
+     ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
+     nband_k = dtset%nband(ikpti)
 
-       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
      
-       ikpt_loc = ikpt_loc + 1
+     ikpt_loc = ikpt_loc + 1
 
-       mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 1) = ikpt
-       mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 2) = isppol
+     mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 1) = ikpt
+     mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 2) = isppol
 
-    end do
+   end do
  end do
 
 !should be temporary

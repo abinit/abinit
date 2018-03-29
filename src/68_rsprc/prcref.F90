@@ -150,17 +150,18 @@ subroutine prcref(atindx,dielar,dielinv,&
  use m_cgtools
  use m_xcdata
 
+ use m_geometry, only : xcart2xred, metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_fft,      only : zerosym
+ use m_kg,       only : getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref'
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_67_common
@@ -205,6 +206,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel
+ logical :: non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -225,6 +227,9 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -603,7 +608,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_DEALLOCATE(xccc3d)
 

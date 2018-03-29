@@ -27,11 +27,13 @@ module m_fit_data
  use defs_basis
  use m_errors
  use m_profiling_abi
+
+ use m_geometry,     only : metric
  
  implicit none
 !!***
 
-!!****t* defs_abitypes/training_set_type
+!!****t* m_fit_data/training_set_type
 !! NAME
 !! training_set_type
 !!
@@ -85,7 +87,7 @@ module m_fit_data
 
 !----------------------------------------------------------------------
  
-!!****t* defs_abitypes/fit_data_type
+!!****t* m_fit_data/fit_data_type
 !! NAME
 !! fit_data_type
 !!
@@ -316,8 +318,6 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_data_compute'
- use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -334,7 +334,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !scalar
  integer :: ii,itime,natom,ntime
  real(dp):: energy
- logical :: found,need_verbose
+ logical :: need_verbose
 !arrays
  character(len=500) :: message
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
@@ -425,47 +425,6 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
  end do
    
-!Check if the initial stresses of the reference is set to the potential
- if(all(abs(eff_pot%strten(:))<tol16))then
-   ii = 0
-!  Try to find if any snapshot corresponding to the reference, 
-!  in order to fill the initial stresses...
-   found = .FALSE.
-   do itime=1,ntime
-     if(all(abs(strain(:,itime)) < tol15) .and. all(abs(displacement(:,:,itime)) < tol15)) then
-       write(message, '(6a,I0,6a)' )ch10,&
-&          ' --- !WARNING',ch10,&
-&          '     The initial stress tensor is not included in the effective potential.',ch10,&
-&          '     The iteration ',itime,' corresponding to the reference,',ch10,&
-&          '     thus the stress tensor for the reference will be set with this iteration',ch10,&
-&          ' ---',ch10       
-       ii = itime
-       found = .TRUE.
-     else
-       write(message, '(11a)' )ch10,&
-&          ' --- !WARNING',ch10,&
-&          '     The initial stress tensor is not included in the effective potential.',ch10,&
-&          '     No iteration of the hist file corresponds to the reference,',ch10,&
-&          '     Please make sure than the stress tensor of the reference is 0.0 Ha/bohr**3',ch10,&
-&          ' ---',ch10
-     end if
-     exit
-   end do
-   if(need_verbose) then
-     call wrtout(std_out,message,"COLL")
-   end if
-   if (found) then
-     if( ii < zero .and. ii > ntime)then
-       write(message,'(a)') 'ii is not correct'
-       MSG_BUG(message)
-     else 
-       do itime=1,ntime
-         strten_diff(:,itime)  = strten_diff(:,itime)  - hist%strten(:,ii)
-       end do
-     end if
-   end if
- end if
-
 !Set the training set
  call training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
 !Set the fit_data

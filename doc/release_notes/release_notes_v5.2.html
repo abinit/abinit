@@ -97,8 +97,7 @@ B.  Most noticeable achievements
 B1. The computation of phonon band structure in the presence of
     a finite electric field is now possible
     (contribution by Xinjie Wang, with help by David Vanderbilt and Don Hamann)
-    See Test_v4#80 , as well as the description of the input variable
-    <a href="varff.html#berryopt">berryopt</a>.
+    See Test_v4#80 , as well as the description of the input variable berryopt
     1. Run a scf ground-state calculation at zero electric field
        to get wave functions for the ground-state calculation in finite electric fields.
     2. Run a scf ground-state calculation in finite electric field. The
@@ -122,8 +121,7 @@ B2. The treatment of Hartree potential with open boundary
     in real space (when GTH pseudo-potentials are involved) and the Ewald
     energy has been replaced by a simple Coulombian ion-ion interaction.
     The treatment in real space is control by the input variable
-    <a href="vargs.html#icoultrtmt">icoultrtmt</a>. An other input variable
-    (<a href="vargs.html#nscforder">nscforder</a>) is used to tune the scaling
+    icoultrtmt. An other input variable nscforder) is used to tune the scaling
     functions basis used by the Poisson solver. See Test_v5#07 which tests these
     two variables for the hydrogen atom. The forces can also be computed with
     this real space computation but is still in an early stage of
@@ -214,7 +212,7 @@ D5. Improvements of the PAW implementation, by Marc Torrent.
 D6. Debugging and bug fixes of the build system by Yann Pouillon, as well as Damien Caliste.
 
 D7. Some output values are exported into XML files when the input variable
-    <a href="vardev.html#outputxml">outputxml</a> is set. The corresponding
+    outputxml is set. The corresponding
     DTD is distributed as extras/post_processing/abinitRun.dtd. All the DTD is not
     yet implemented and this one is currently restricted to ground computations
     (and derivative such as geometry optimisation). Development by Damien Caliste.

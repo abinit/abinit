@@ -87,6 +87,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,     only : metric
+ use m_kg,               only : mkkin 
+
  use m_orbmag
 
  use m_hamiltonian,        only : init_hamiltonian,destroy_hamiltonian,&
@@ -107,7 +110,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 #define ABI_FUNC 'orbmag'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_65_paw

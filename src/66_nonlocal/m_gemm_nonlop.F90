@@ -43,11 +43,10 @@
 
 module m_gemm_nonlop
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
  use m_errors
+ use m_profiling_abi
  use m_xmpi
 
  implicit none
@@ -111,7 +110,7 @@ contains
 !!
 !! SOURCE
  subroutine init_gemm_nonlop(nkpt)
-  use m_profiling_abi
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -121,9 +120,9 @@ contains
 
   integer,intent(in) :: nkpt
   integer :: ikpt
-  
+
 ! *************************************************************************
-  
+
   ! TODO only allocate the number of kpt treated by this proc
   ABI_DATATYPE_ALLOCATE(gemm_nonlop_kpt, (nkpt))
   do ikpt=1,nkpt
@@ -160,12 +159,12 @@ contains
 !End of the abilint section
 
   implicit none
-  
+
   integer,intent(in) :: nkpt
   integer :: ikpt
 
 ! *************************************************************************
-  
+
   ! TODO add cycling if kpt parallelism
   do ikpt = 1,nkpt
     if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
@@ -199,10 +198,7 @@ contains
 !!
 !! SOURCE
  subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k)
-  use defs_basis
-  use m_profiling_abi
-  use defs_abitypes
-  use m_xmpi
+
   use m_abi_linalg
 
 !This section has been created automatically by the script Abilint (TD).
@@ -232,7 +228,7 @@ contains
   logical :: parity
 
 ! *************************************************************************
-  
+
   iaph3d = 1
 
   if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
@@ -327,7 +323,7 @@ contains
 !!
 !! FUNCTION
 !! Replacement of nonlop
-!! 
+!!
 !! same prototype as nonlop
 !!
 !! INPUTS
@@ -347,13 +343,9 @@ contains
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
 &                 use_gpu_cuda)
-  use defs_basis
-  use defs_abitypes
-  use m_profiling_abi
-  use defs_abitypes
-  use m_xmpi
+
   use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
-  use m_time,          only : cwtime
+  use m_time,    only : cwtime
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -399,9 +391,9 @@ contains
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: sij_typ(:)
   real(dp), allocatable :: projections(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:)
-  real(dp), allocatable :: temp_realvec(:)  
+  real(dp), allocatable :: temp_realvec(:)
 
-! *************************************************************************  
+! *************************************************************************
 
   ! We keep the same interface as nonlop, but we don't use many of those
   ABI_UNUSED((/ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout/))
@@ -498,7 +490,7 @@ contains
       nd2gxdt = 0
       nd2gxdtfac = 0
       optder = 0
-      
+
       shift = 0
       ABI_ALLOCATE(sij_typ,(((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2))
       do itypat=1, ntypat

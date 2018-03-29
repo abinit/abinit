@@ -23,7 +23,7 @@
 !!  ngfft(1:3)= integer fft box dimensions, see getng for ngfft(4:8).
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
-!!  optstr= calculate corrected vxc if optstr=1 
+!!  optstr= calculate corrected vxc if optstr=1
 !!  rhor(nfft,nspden)= electron density in real space in electrons/bohr**3
 !!  rprimd(3,3)= dimensional primitive translations for real space in Bohr.
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
@@ -35,7 +35,7 @@
 !!
 !! SIDE EFFECTS
 !!  enxc= exchange correlation energy
-!!  grxc= correction to the forces 
+!!  grxc= correction to the forces
 !!  strsxc(6)= exchange correlation contribution to stress tensor
 !!  vxc= exchange correlation potential
 !!  vxcavg= unit cell average of Vxc
@@ -73,6 +73,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  use m_xcdata
  use libxc_functionals
 
+ use m_geometry,    only : metric
  use defs_abitypes, only : MPI_type, dataset_type
  use m_dtset,       only : dtset_copy, dtset_free
 
@@ -80,7 +81,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xchybrid_ncpp_cc'
- use interfaces_41_geometry
  use interfaces_56_xc, except_this_one => xchybrid_ncpp_cc
 !End of the abilint section
 
@@ -106,7 +106,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  real(dp) :: enxc_corr,ucvol,vxcavg_corr
  character(len=500) :: msg
  type(xcdata_type) :: xcdata_gga,xcdata_hybrid 
- logical :: calcgrxc
+ logical :: calcgrxc,nmxc
 !arrays
  integer :: gga_id(2)
  real(dp) :: nhat(1,0),nhatgr(1,1,0),strsxc_corr(6),gmet(3,3),gprimd(3,3),rmet(3,3)
@@ -117,10 +117,13 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
  DBG_ENTER("COLL")
 
+
+ nmxc=(dtset%usepawu==4).or.(dtset%usepawu==14)
+
 !Not relevant for PAW
  if (dtset%usepaw==1) return
  if(n3xccc==0) return
- calcgrxc=(present(grxc).and.present(n1xccc).and.present(xcccrc).and.present(xred).and.present(xccc1d)) 
+ calcgrxc=(present(grxc).and.present(n1xccc).and.present(xcccrc).and.present(xred).and.present(xccc1d))
  optstr_loc=0
  if(present(optstr)) optstr_loc=1
 !Not applicable for electron-positron
@@ -157,8 +160,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=0 ! XC only
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
-
-   call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+   call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
 &   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
 
@@ -170,11 +172,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga)
    end if
@@ -185,11 +187,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Substract Vxc^GGA(rho_val)
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
@@ -197,7 +199,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    vxc(:,:)=vxc(:,:)-vxc_corr(:,:)
    vxcavg=vxcavg-vxcavg_corr
    strsxc(:)=strsxc(:)-strsxc_corr(:)
-   
+
 !Release memory
    ABI_DEALLOCATE(xccc3d_null)
  end if
@@ -218,11 +220,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,dtset%paral_kgb,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,dtset%paral_kgb,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
@@ -242,15 +244,15 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !calculate Vxc^GGA(rho_core+rho_val)
    option=0
    if (ixc_gga<0) then
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
-     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+     call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga)
    end if
- end if 
+ end if
 
 ! Suppress the temporary used xc functional
  if(libxc_gga_initialized==1) then

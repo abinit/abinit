@@ -52,7 +52,7 @@ module m_fstab
 !!
 !! FUNCTION
 !!  Tables with the correspondence between points of the Fermi surface (FS) and the k-points in the
-!!  IBZ (k-points found in ebands_t). We used `nsppol` fstab_t objects to account for spin polarization.
+!!  IBZ (k-points found in ebands_t). We use `nsppol` fstab_t objects to account for spin polarization.
 !!
 !! SOURCE
 

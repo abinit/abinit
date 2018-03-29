@@ -75,12 +75,13 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
  use m_errors
  use m_profiling_abi
 
+ use m_kg,               only : kpgio
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initmv'
  use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

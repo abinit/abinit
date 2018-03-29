@@ -40,8 +40,6 @@
 !! SIDE EFFECTS
 !! brvltt = input variable giving Bravais lattice
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      ingeo
 !!
