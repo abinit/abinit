@@ -53,12 +53,13 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
  use m_efield
 ! use m_profiling_abi
 
+ use m_geometry,     only : metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtefield'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

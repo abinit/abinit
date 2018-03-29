@@ -53,6 +53,7 @@ MODULE m_ioarr
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
  use m_fstrings,      only : sjoin, itoa, endswith
  use m_numeric_tools, only : interpolate_denpot
+ use m_geometry,      only : metric
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
  use m_distribfft,    only : init_distribfft_seq
 
@@ -158,7 +159,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
- type(wvl_denspot_type), intent(in) :: wvl_den
+ type(wvl_denspot_type),optional, intent(in) :: wvl_den
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout),target :: arr(cplex*nfft,dtset%nspden)
@@ -541,6 +542,9 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
 #else
      BIGDFT_NOTENABLED_ERROR()
+     if(.false. .and. present(wvl_den))then
+       write(std_out,*)' One should not be here'
+     endif
 #endif
    end if
 
@@ -1039,7 +1043,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 #undef ABI_FUNC
 #define ABI_FUNC 'read_rhor'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_65_paw
 !End of the abilint section
 

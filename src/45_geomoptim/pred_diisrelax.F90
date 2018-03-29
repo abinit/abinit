@@ -61,13 +61,13 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  use m_abihist
  use m_linalg_interfaces
 
+ use m_geometry,  only : xcart2xred, xred2xcart
  use m_bfgs, only : hessinit, hessupdt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_diisrelax'
- use interfaces_41_geometry
 !End of the abilint section
 
 implicit none

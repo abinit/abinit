@@ -34,10 +34,10 @@
 !!
 !! NOTES
 !! this function computes the on-site data for the PAW version of
-!! <u_nk|u_mk+b>, that is, two Bloch vectors at two different k points. 
+!! <u_nk|u_mk+b>, that is, two Bloch vectors at two different k points.
 !!
 !! PARENTS
-!!      initberry
+!!      initberry,overlap_k1k2_paw
 !!
 !! CHILDREN
 !!      initylmr,sbf8,simp_gen
@@ -57,7 +57,9 @@
 
  use defs_basis
  use m_errors
+
  use m_xmpi, only : xmpi_sum
+ use m_special_funcs, only : sbf8
  use m_pawang, only : pawang_type
  use m_pawrad, only : pawrad_type, simp_gen
  use m_pawtab, only : pawtab_type
@@ -67,7 +69,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'qijb_kk'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -90,14 +91,14 @@
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  real(dp) :: arg,bessg,bnorm,intg,rterm
  complex(dpc) :: cterm,etb,ifac
-!arrays 
+!arrays
  real(dp) :: bb(3),bbn(3),bcart(3),ylmgr(1,1,0),ylmr_nrm(1)
  real(dp),allocatable :: ff(:),j_bessel(:,:),ylmb(:),sb_out(:)
 ! the following is (i)^L mod 4.
  complex(dpc),dimension(0:3) :: il(0:3)=(/cone,j_dpc,-cone,-j_dpc/)
 
 ! *************************************************************************
- 
+
  calc_qijb(:,:,:) = zero
 
  ylmr_normchoice = 0 ! input to initylmr are normalized
@@ -128,48 +129,48 @@
    !    reference bb to cartesian axes
    bcart(1:3)=MATMUL(gprimd(1:3,1:3),bb(1:3))
 
-   !    bbn is b-hat (the unit vector in the b direction) 
+   !    bbn is b-hat (the unit vector in the b direction)
    bnorm=dsqrt(dot_product(bcart,bcart))
    bbn(:) = bcart(:)/bnorm
 
    !    as an argument to the bessel function, need 2pi*b*r = 1 so b is re-normed to two_pi
    bnorm = two_pi*bnorm
    do ir=1,mesh_size
-      arg=bnorm*pawrad(itypat)%rad(ir)
-      call sbf8(pawang%l_size_max,arg,sb_out) ! spherical bessel functions at each mesh point
-      j_bessel(ir,:) = sb_out
+     arg=bnorm*pawrad(itypat)%rad(ir)
+     call sbf8(pawang%l_size_max,arg,sb_out) ! spherical bessel functions at each mesh point
+     j_bessel(ir,:) = sb_out
    end do ! end loop over mesh
 
    !    compute Y_LM(b) here
    call initylmr(pawang%l_size_max,ylmr_normchoice,ylmr_npts,ylmr_nrm,ylmr_option,bbn,ylmb(:),ylmgr)
-     
+
    do klmn = 1, pawtab(itypat)%lmn2_size
-      klm =pawtab(itypat)%indklmn(1,klmn)
-      kln =pawtab(itypat)%indklmn(2,klmn)
-      lmin=pawtab(itypat)%indklmn(3,klmn)
-      lmax=pawtab(itypat)%indklmn(4,klmn)
-      do lbess = lmin, lmax, 2    ! only possible choices for L s.t. Gaunt integrals
+     klm =pawtab(itypat)%indklmn(1,klmn)
+     kln =pawtab(itypat)%indklmn(2,klmn)
+     lmin=pawtab(itypat)%indklmn(3,klmn)
+     lmax=pawtab(itypat)%indklmn(4,klmn)
+     do lbess = lmin, lmax, 2    ! only possible choices for L s.t. Gaunt integrals
                                   !        will be non-zero
-         ifac = il(mod(lbess,4))
-         do mbess = -lbess, lbess
-            lbesslm = lbess*lbess+lbess+mbess+1
-            isel=pawang%gntselect(lbesslm,klm)
-            if (isel > 0) then
-               bessg = pawang%realgnt(isel)
-               ff(1:mesh_size)=(pawtab(itypat)%phiphj(1:mesh_size,kln)&
-&               -pawtab(itypat)%tphitphj(1:mesh_size,kln))&
-&               *j_bessel(1:mesh_size,lbess+1)
-               call simp_gen(intg,ff,pawrad(itypat))
-               rterm = four_pi*bessg*intg*ylmb(lbesslm)
-               cterm = etb*ifac*rterm
-               calc_qijb(1,klmn,iatom) = &
-&               calc_qijb(1,klmn,iatom) + dreal(cterm)
-               calc_qijb(2,klmn,iatom) = &
-&               calc_qijb(2,klmn,iatom) + dimag(cterm)
-             
-            end if ! end selection on non-zero Gaunt factors
-         end do ! end loop on mbess = -lbess, lbess
-      end do ! end loop on lmin-lmax bessel l values
+       ifac = il(mod(lbess,4))
+       do mbess = -lbess, lbess
+         lbesslm = lbess*lbess+lbess+mbess+1
+         isel=pawang%gntselect(lbesslm,klm)
+         if (isel > 0) then
+           bessg = pawang%realgnt(isel)
+           ff(1:mesh_size)=(pawtab(itypat)%phiphj(1:mesh_size,kln)&
+&           -pawtab(itypat)%tphitphj(1:mesh_size,kln))&
+&           *j_bessel(1:mesh_size,lbess+1)
+           call simp_gen(intg,ff,pawrad(itypat))
+           rterm = four_pi*bessg*intg*ylmb(lbesslm)
+           cterm = etb*ifac*rterm
+           calc_qijb(1,klmn,iatom) = &
+&           calc_qijb(1,klmn,iatom) + dreal(cterm)
+           calc_qijb(2,klmn,iatom) = &
+&           calc_qijb(2,klmn,iatom) + dimag(cterm)
+
+         end if ! end selection on non-zero Gaunt factors
+       end do ! end loop on mbess = -lbess, lbess
+     end do ! end loop on lmin-lmax bessel l values
    end do ! end loop on lmn2_size klmn basis pairs
 
    ABI_DEALLOCATE(j_bessel)

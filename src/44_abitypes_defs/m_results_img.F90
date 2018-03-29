@@ -39,6 +39,9 @@ MODULE m_results_img
  use m_errors
  use m_xmpi
 
+ use m_geometry,   only : mkrdim, xred2xcart
+
+
  implicit none
 
  private
@@ -194,7 +197,7 @@ subroutine init_results_img(natom,npspalch,nsppol,ntypalch,ntypat,results_img)
 
      results_img(ii)%natom  =natom
      results_img(ii)%npspalch  =npspalch
-     results_img(ii)%nsppol    =nsppol  
+     results_img(ii)%nsppol    =nsppol
      results_img(ii)%ntypalch  =ntypalch
      results_img(ii)%ntypat    =ntypat
 
@@ -603,7 +606,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
        results_img_all(jj)%npspalch =npspalch
        results_img_all(jj)%nsppol =nsppol
        results_img_all(jj)%ntypalch =ntypalch
-       results_img_all(jj)%ntypat   =ntypat  
+       results_img_all(jj)%ntypat   =ntypat
        results_img_all(jj)%results_gs%ngrvdw=ngrvdw
      enddo
    end if
@@ -1246,7 +1249,7 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
      ABI_DEALLOCATE(rbuffer_all)
      ABI_DEALLOCATE(rbufshft)
      ABI_DEALLOCATE(rsize_img_all)
-     
+
 !    Transfered distributed buffers into array_img (master proc only)
      ibufr=0
      do jj=1,nimage
@@ -1307,7 +1310,6 @@ subroutine get_geometry_img(etotal,natom,nimage,results_img,fcart,rprimd,xcart,x
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_geometry_img'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

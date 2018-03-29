@@ -9,7 +9,7 @@
 !! - initialize several other input variables for a set of datasets.
 !! Note that the treatment of these different types of macro input variables is different.
 !! Documentation of such input variables is very important, including the
-!! proper echo, in the output file, of what such input variables have done. 
+!! proper echo, in the output file, of what such input variables have done.
 !!
 !! Important information : all the "macro" input variables should be properly
 !! identifiable to be so, and it is proposed to make them start with the string "macro".
@@ -54,11 +54,12 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
  use m_xmpi
  use m_errors
 
+ use m_parser,    only : intagm
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'macroin'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -82,14 +83,14 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 !******************************************************************
 
  do idtset=1,ndtset_alloc
-   jdtset=dtsets(idtset)%jdtset 
+   jdtset=dtsets(idtset)%jdtset
    if (dtsets(idtset)%macro_uj>0) then
-     dtsets(idtset)%irdwfk   = 1        ! preconverged wave function compulsory 
+     dtsets(idtset)%irdwfk   = 1        ! preconverged wave function compulsory
 !    dtsets(idtset)%nline    = maxval((/ int(dtsets(idtset)%natom/2) , 6 /))   ! using default value: \DeltaU< 1%
-!    dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1% 
-     dtsets(idtset)%tolvrs   = 10d-8    ! convergence on the potential; 10d-8^= 10d-5 on occupation 
+!    dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1%
+     dtsets(idtset)%tolvrs   = 10d-8    ! convergence on the potential; 10d-8^= 10d-5 on occupation
      dtsets(idtset)%diemix   = 0.45_dp  ! fastest convergence: dn= E^(-istep * 0.229 )
-     dtsets(idtset)%dmatpuopt= 3        ! normalization of the occupation operator 
+     dtsets(idtset)%dmatpuopt= 3        ! normalization of the occupation operator
 !    dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally suficient
 !    dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
    end if ! macro_uj
@@ -99,7 +100,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
    marr=max(marr,dtsets(idtset)%nimage)
    ABI_ALLOCATE(intarr,(marr))
    ABI_ALLOCATE(dprarr,(marr))
-   
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"accuracy",tread,'INT')
 
    ecutmax=-one
@@ -156,7 +157,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%npulayit=7
        dtsets(idtset)%nstep=30
        dtsets(idtset)%prteig=0
-       dtsets(idtset)%prtden=0 
+       dtsets(idtset)%prtden=0
      else if (dtsets(idtset)%accuracy==3) then
        if (ecutmax(2)>zero) dtsets(idtset)%ecut=ecutmax(2)
        if (ecutdgmax(2)>zero.and.dtsets(idtset)%usepaw==1) dtsets(idtset)%pawecutdg=ecutdgmax(2)

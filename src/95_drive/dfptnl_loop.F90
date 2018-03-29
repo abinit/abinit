@@ -106,6 +106,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_hdr
 
  use m_ioarr,    only : read_rhor
+ use m_kg,       only : getph
  use m_pawrhoij, only : pawrhoij_type
 
 !This section has been created automatically by the script Abilint (TD).

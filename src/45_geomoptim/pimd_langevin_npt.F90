@@ -73,18 +73,19 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
 &          volume,xred,xred_next,xred_prev)
 
- use m_profiling_abi
 
  use defs_basis
+ use m_profiling_abi
  use m_pimd
  use m_random_zbq
+
+ use m_geometry,  only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_npt'
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

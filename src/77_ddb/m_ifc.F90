@@ -50,7 +50,7 @@ MODULE m_ifc
  use m_pptools,     only : printbxsf
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
- use m_geometry,    only : phdispl_cart2red, normv
+ use m_geometry,    only : phdispl_cart2red, normv, mkrdim
  use m_kpts,        only : kpts_ibz_from_kptrlatt
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, &
@@ -351,7 +351,7 @@ end subroutine ifc_free
 !! INPUTS
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
 !! ddb<type(ddb_type)> = Database with derivatives.
-!! brav=bravais lattice (1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
+!! brav=bravais lattice (1 or -1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
 !! asr= Option for the imposition of the ASR
 !!   0 => no ASR,
 !!   1 => modify "asymmetrically" the diagonal element
@@ -613,9 +613,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- new_wght = 0
  call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
-&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
+&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
@@ -1641,7 +1640,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_write'
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2292,6 +2290,7 @@ end subroutine ifc_getiaf
 !----------------------------------------------------------------------
 
 !!****f* m_ifc/omega_decomp
+!!
 !! NAME
 !!  omega_decomp
 !!

@@ -228,10 +228,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  use m_cgtools,  only : mean_fftr
  use m_fstrings, only : int2char4, sjoin
+ use m_geometry, only : metric
  use m_time,     only : abi_wtime, sec2str
  use m_io_tools, only : open_file
  use m_exit,     only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_mpinfo,   only : iwrite_fftdatar
+ use m_kg,       only : getcut
  use m_ioarr,    only : ioarr, fftdatar_write_from_hdr, fort_denpot_skip
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
@@ -252,10 +254,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_54_abiutil
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_scfcv
@@ -731,7 +731,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    ----------------------------------------------------------------------
      call status(istep,dtfil%filstat,iexit,level,'get vtrial1   ')
      option=1;optene=0;if (iscf_mod==-2) optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
 &     nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
@@ -742,17 +742,17 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        !rhor1_mq=rhor1
        !rhog1_mq=rhog1
        !get initial guess for vtrial1 at -q
-        do ifft=1,nfftf
-           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-           vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
-           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-           vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-           vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case 
-           vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-           vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-        end do
-     endif
+       do ifft=1,nfftf
+         vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+         vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+         vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+         vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+         vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+         vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case 
+         vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+         vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+       end do
+     end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
 !    compute the first-order Fermi energy
@@ -1001,7 +1001,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (ipert<dtset%natom+10) then
      optene=1
      call status(istep,dtfil%filstat,iexit,level,'call dfpt_rhotov   ')
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)

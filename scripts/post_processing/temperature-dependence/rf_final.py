@@ -250,7 +250,7 @@ def compute_dynmat(DDB):
 # Retrive the amu for each atom
   amu = zeros(DDB.natom)
   for ii in N.arange(DDB.natom):
-    jj = DDB.typat[ii]
+    jj = DDB.typat[ii].astype(int)
     amu[ii] = DDB.amu[jj-1]
 # Calcul of gprimd from rprimd
   rprimd = DDB.rprim*DDB.acell

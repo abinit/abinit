@@ -6,7 +6,7 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (GKA)
+!!  Copyright (C) 2008-2018 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,18 +31,40 @@ module m_gkk
  use m_errors
  use m_ifc
  use m_ebands
+ use m_ddb
+ use m_dvdb
+ use m_fft
+ use m_hamiltonian
+ use m_pawcprj
+ use m_wfk
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_time,           only : cwtime
+ use m_time,           only : cwtime, sec2str
+ use m_io_tools,       only : iomode_from_fname
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
- use m_fftcore,        only : ngfft_seq
- use defs_datatypes,   only : ebands_t
+ use m_fftcore,        only : ngfft_seq, get_kg, kpgsph, sphere
+ use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : findqg0
+ use m_cgtools,        only : dotprod_g
+ use m_kg,             only : getph
+ use m_pawang,         only : pawang_type
+ use m_pawrad,         only : pawrad_type
+ use m_pawtab,         only : pawtab_type
+ use m_pawfgr,         only : pawfgr_type
+ use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
+ use m_wfd,            only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
+                              wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
+! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
+! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+! use m_pawdij,          only : pawdij, symdij
+! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
  implicit none
 
@@ -50,9 +72,9 @@ module m_gkk
 !!***
 
  public :: eph_gkk
+ public :: ncwrite_v1qnu          ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
 
-
-contains  !=========================================================================================================================
+contains  !===========================================================================
 !!***
 
 !!****f* m_gkk/eph_gkk
@@ -91,39 +113,6 @@ contains  !=====================================================================
 subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_wfk
- use m_ddb
- use m_dvdb
- use m_ifc
- use m_fft
- use m_hamiltonian
- use m_pawcprj
-
- use m_time,            only : sec2str
- use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
- use m_io_tools,        only : iomode_from_fname
- use m_cgtools,         only : dotprod_g
- use m_fftcore,         only : get_kg, kpgsph, sphere
- use m_crystal,         only : crystal_t
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_pawang,          only : pawang_type
- use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type
- use m_pawfgr,          only : pawfgr_type
- use m_eig2d,           only : gkk_t, gkk_init, gkk_ncwrite,gkk_free
-! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
-! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
-! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
-! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
-! use m_pawdij,          only : pawdij, symdij
-! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -131,7 +120,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 #define ABI_FUNC 'eph_gkk'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -407,7 +395,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
                ! paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,&
                !&mpi_atmtab=mpi_enreg%my_atmtab,my_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+     call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
      do ik=1,nkpt
 
@@ -556,6 +544,181 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_DT_FREE(cwaveprj0)
 
 end subroutine eph_gkk
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gkk/ncwrite_v1qnu
+!! NAME
+!!  ncwrite_v1qnu
+!!
+!! FUNCTION
+!!  Compute \delta V_{q,nu)(r) and dump results to netcdf file.
+!!  This routine should be called by a single processor.
+!!
+!! INPUT
+!!  dvdb<dbdb_type>=Database with the DFPT SCF potentials.
+!!  cryst(crystal_t)=Crystalline structure
+!!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
+!!  nqlist=Number of q-points
+!!  qlist(3,nqlist)=List of q-points where \delta V_{q,nu)(r) is wanted.
+!!    Potentials will be Fourier interpolated if qpt is not in DVDB.
+!!  prtvol=Verbosity level
+!!  path=Name of the netcdf file.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ncwrite_v1qnu'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqlist,prtvol
+ type(dvdb_t),intent(inout) :: dvdb
+ type(crystal_t),intent(in) :: cryst
+ type(ifc_type),intent(in) :: ifc
+ character(len=*),intent(in) :: path
+!arrays
+ real(dp),intent(in) :: qlist(3,nqlist)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ip,nu,iq,db_iqpt,do_ftv1q,cplex,ispden,nfftf,comm
+#ifdef HAVE_NETCDF
+ integer :: ncid,ncerr
+#endif
+ character(len=500) :: msg
+!arrays
+ integer :: ngfftf(18)
+ real(dp) :: phfrq(3*cryst%natom),qpt(3)
+ real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom),displ_red(2,3*cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: v1scf(:,:,:,:),v1qnu(:,:,:,:)
+
+!************************************************************************
+
+ call wrtout(std_out, sjoin("Writing \delta V_{q,nu)(r) potentials to file:", path), do_flush=.True.)
+
+ comm = xmpi_comm_self
+ call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:,1)); nfftf = product(ngfftf(1:3))
+
+ call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+
+ ! Create netcdf file.
+#ifdef HAVE_NETCDF
+ NCF_CHECK(nctk_open_create(ncid, path, comm))
+ NCF_CHECK(crystal_ncwrite(cryst, ncid))
+
+ ! Add other dimensions.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("nfftf", nfftf), nctkdim_t("nspden", dvdb%nspden), &
+   nctkdim_t("natom3", 3 * cryst%natom), nctkdim_t("nqlist", nqlist)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Define arrays
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("ngfftf", "int", "three"), &
+   nctkarr_t("qlist", "dp", "three, nqlist"), &
+   nctkarr_t("wqlist", "dp", "natom3, nqlist"), &
+   nctkarr_t("displ_cart", "dp", "two, natom3, natom3, nqlist"), &
+   nctkarr_t("v1qnu", "dp", "two, nfftf, nspden, natom3, nqlist")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfftf"), ngfftf(1:3)))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qlist"), qlist))
+#endif
+
+ ! Activate Fourier interpolation if q-points are not in the DVDB file.
+ ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
+ ! without performing FT interpolation.
+ do_ftv1q = 0
+ do iq=1,nqlist
+   if (dvdb_findq(dvdb, qlist(:,iq)) == -1) do_ftv1q = do_ftv1q + 1
+ end do
+ if (do_ftv1q /= 0) then
+   write(msg, "(2(a,i0),a)")"Will use Fourier interpolation of DFPT potentials [",do_ftv1q,"/",nqlist,"]"
+   call wrtout(std_out, msg)
+   call dvdb_ftinterp_setup(dvdb, ifc%ngqpt, 1, [zero,zero,zero], nfftf, ngfftf, comm)
+ end if
+
+ ABI_MALLOC(v1qnu, (2, nfftf, dvdb%nspden, dvdb%natom3))
+
+ do iq=1,nqlist
+   qpt = qlist(:,iq)
+   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+
+   ! Find the index of the q-point in the DVDB.
+   db_iqpt = dvdb_findq(dvdb, qpt)
+
+   ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
+   if (db_iqpt /= -1) then
+     if (prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
+     ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
+     ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
+     call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
+   else
+     if (prtvol > 0) call wrtout(std_out, sjoin("Could not find:", ktoa(qpt), "in DVDB - interpolating"))
+     ! Fourier interpolation of the potential
+     ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
+     cplex = 2
+     ABI_MALLOC(v1scf, (cplex,nfftf, dvdb%nspden, dvdb%natom3))
+     call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
+   end if
+
+   do nu=1,dvdb%natom3
+     ! v1qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
+     ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
+     !v1qnu(2, nfftf, nspden, natom3), v1scf(cplex, nfftf, nspden, natom3)
+     v1qnu(:, :, :, nu) = zero
+     do ip=1,dvdb%natom3
+       do ispden=1,dvdb%nspden
+         if (cplex == 2) then
+           v1qnu(1, :, ispden, nu) = v1qnu(1, :, ispden, nu) + &
+             displ_red(1,ip,nu) * v1scf(1,:,ispden,ip) - displ_red(2,ip,nu) * v1scf(2,:,ispden,ip)
+           v1qnu(2, :, ispden, nu) = v1qnu(2, :, ispden, nu) + &
+             displ_red(2,ip,nu) * v1scf(1,:,ispden,ip) + displ_red(1,ip,nu) * v1scf(2,:,ispden,ip)
+         else
+           ! Gamma point. d(q) = d(-q)* --> d is real.
+           v1qnu(1, :, ispden, nu) = v1qnu(1, :, ispden, nu) + &
+             displ_red(1,ip,nu) * v1scf(1,:,ispden,ip)
+         end if
+       end do
+     end do
+   end do
+   ! Save results to file.
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wqlist"), phfrq, start=[1,iq]))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "displ_cart"), displ_cart, start=[1,1,1,iq]))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1qnu"), v1qnu, start=[1,1,1,1,iq]))
+#endif
+   ABI_FREE(v1scf)
+ end do
+
+ ABI_FREE(v1qnu)
+#ifdef HAVE_NETCDF
+ NCF_CHECK(nf90_close(ncid))
+#endif
+ call dvdb_close(dvdb)
+
+ call wrtout(std_out, "dvqnu file written", do_flush=.True.)
+
+end subroutine ncwrite_v1qnu
 !!***
 
 !----------------------------------------------------------------------

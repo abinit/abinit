@@ -38,6 +38,7 @@ MODULE m_exc_diago
 
  use defs_abitypes,     only : hdr_type
  use m_io_tools,        only : open_file
+ use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t
@@ -52,7 +53,6 @@ MODULE m_exc_diago
  use m_bse_io,          only : exc_fullh_from_blocks, offset_in_file, rrs_of_glob, ccs_of_glob, &
 &                              exc_read_bshdr, exc_skip_bshdr_mpio, exc_read_rblock_fio
  use m_exc_spectra,     only : build_spectra
- use m_fstrings,        only : int2char4
 
  implicit none
 

@@ -142,6 +142,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #endif
 
  use m_fstrings,           only : strcat, sjoin
+ use m_geometry,           only : fcart2fred, chkdilatmx
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
  use m_time,               only : abi_wtime, sec2str
@@ -219,7 +220,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
  need_writeHIST=.TRUE.
  if(present(writeHIST)) need_writeHIST = writeHIST
- 
+
  call status(0,dtfil%filstat,iexit,level,'init          ')
 
  if ( size(amass) /= scfcv_args%dtset%natom ) then
@@ -372,11 +373,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then     
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)  
-     call abihist_free(hist_prev)     
+     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     call abihist_free(hist_prev)
    end if
 
  end if !if (ab_mover%restartxf<=0)
@@ -480,7 +481,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (have_timelimit_in(ABI_FUNC)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
-         if (quitsum_async > 0) then 
+         if (quitsum_async > 0) then
            write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
 &           ". Will exit itime loop in mover."
            if(need_verbose)MSG_COMMENT(message)
@@ -504,7 +505,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ### 09. Loop for icycle (From 1 to ncycles)
    do icycle=1,ncycle
      itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
-     
+
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
@@ -591,7 +592,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          if (need_scfcv_cycle) then
            call dtfil_init_time(dtfil,iapp)
-           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)   
+           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
            if (conv_retcode == -1) then
              message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
              MSG_WARNING(message)
@@ -607,7 +608,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !          Check if the simulation does not diverged...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E4)then
-!            We set to false the flag corresponding to the bound 
+!            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
                message = "The simulation is diverging, please check your effective potential"
@@ -617,7 +618,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
              iexit=1
              stat4xml="Failed"
            else
-!            We set to true the flag corresponding to the bound 
+!            We set to true the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .TRUE.
            end if
          end if
@@ -708,8 +709,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
-       call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,ab_mover%ntypat,&
-&       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
+       call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
+&       ab_mover%ntypat,ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
 
@@ -860,7 +861,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
-     if(ab_mover%ionmov/=23 .or. icycle==1)then
+!    This file is not created for multibinit run
+     if(need_scfcv_cycle .and. (ab_mover%ionmov/=23 .or. icycle==1))then
        if (scfcv_args%dtset%nctime>0) then
          jj=itime; if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1) jj=jj-hist_prev%mxhist
          if (jj>0) then

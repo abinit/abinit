@@ -58,13 +58,13 @@ subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
  use m_profiling_abi
  use m_errors
 
+ use m_numeric_tools, only : ctrap
  use m_paw_numeric, only: jbessel=>paw_jbessel
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp11nl'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -101,9 +101,9 @@ subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
  iproj_1l = 1
 !big loop over all projectors
  do iproj = 1, n_proj
-   
+
    if (iproj > lmnmax) then
-     write(message,'(a,2i0)') ' Too many projectors found. n_proj, lmnmax =  ',n_proj, lmnmax 
+     write(message,'(a,2i0)') ' Too many projectors found. n_proj, lmnmax =  ',n_proj, lmnmax
      MSG_ERROR(message)
    end if
 

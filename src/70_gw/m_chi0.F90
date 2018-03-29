@@ -149,6 +149,8 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 
 ! *************************************************************************
 
+ ABI_UNUSED(nspinor)
+
  nthreads = xomp_get_max_threads()
 
  SELECT CASE (Ep%symchi)

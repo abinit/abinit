@@ -1,0 +1,6 @@
+language: node_js
+node_js:
+  - 0.10
+before_install:
+  - travis_retry npm install grunt-cli -g
+  - travis_retry npm install

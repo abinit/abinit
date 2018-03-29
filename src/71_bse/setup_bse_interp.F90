@@ -82,7 +82,6 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse_interp'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

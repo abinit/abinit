@@ -103,12 +103,13 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
  use m_profiling_abi
  use m_hdr
 
+ use m_abilasi,   only : dzgedi, dzgefa
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'uderiv'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
  use interfaces_56_io_mpi
  use interfaces_67_common, except_this_one => uderiv
@@ -513,7 +514,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 &       mband,mcg_disk,mpi_enreg,nband_diff,nband_diff,&
 &       npw_k,nspinor,occ_dum_2,2,1,tim_rwwf,wffddk)
 
-       !call wfk_read_band_block(wfk, band_block, ikpt, isppol, sc_mode, 
+       !call wfk_read_band_block(wfk, band_block, ikpt, isppol, sc_mode,
        !  kg_k=kg_kpt(:,:,ikpt), cg_k=dudk, eig_k=eig_dum, occ_k=occ_dum)
 
        ABI_DEALLOCATE(u_tilde)

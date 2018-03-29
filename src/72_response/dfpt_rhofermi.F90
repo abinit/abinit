@@ -148,6 +148,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_wfk
 
  use m_io_tools,    only : get_unit, iomode_from_fname
+ use m_occ,         only : occeig
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
  use m_pawtab,      only : pawtab_type
@@ -159,6 +160,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawdij,      only : pawdijfr
  use m_pawfgr,      only : pawfgr_type
+ use m_kg,          only : mkkin, kpgstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -167,8 +169,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common
@@ -354,9 +354,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    ikg=0;ikg1=0
 !  Continue to initialize the Hamiltonian at k+q
    call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
-!  call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+!  call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
 
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
 
 
 !  Nullify contribution to density at EFermi from this k-point
@@ -612,7 +612,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end do
 
    call timab(125,2,tsec)
-   
+
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Also take into account the spin.
    if (nspden/=4) then
@@ -630,7 +630,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end if
 
  end do ! End loop over spins
- 
+
  !if(xmpi_paral==1)then
  !  call timab(166,1,tsec)
  !  call wrtout(std_out,'dfpt_rhofermi: loop on k-points and spins done in parallel','COLL')

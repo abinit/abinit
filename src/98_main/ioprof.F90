@@ -55,7 +55,6 @@ program ioprof
 #undef ABI_FUNC
 #define ABI_FUNC 'ioprof'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

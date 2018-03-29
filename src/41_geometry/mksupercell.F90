@@ -27,8 +27,6 @@
 !!  xred_sc relative position of atoms in supercell 
 !!  rprimd_sc unit cell dimensions of supercell
 !!  
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      pawuj_det
 !!

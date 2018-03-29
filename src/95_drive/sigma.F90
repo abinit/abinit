@@ -112,7 +112,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_blas,          only : xdotc
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_mpinfo,        only : destroy_mpi_enreg
- use m_geometry,      only : normv
+ use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt
  use m_ioarr,         only : fftdatar_write, read_rhor
@@ -123,6 +123,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free
  use m_gsphere,       only : gsphere_t, gsph_free
+ use m_kg,            only : getph
  use m_vcoul,         only : vcoul_t, vcoul_free
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_lda_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results
@@ -153,10 +154,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
@@ -1036,7 +1035,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&
 & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
-& ks_rhor,ks_rhog,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taug=ks_taug,taur=ks_taur)
+& ks_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taug=ks_taug,taur=ks_taur)
  ABI_FREE(tmp_kstab)
 
 !#ifdef DEV_HAVE_SCGW_SYM
@@ -1533,7 +1532,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call calc_vhxc_me(Wfd,QP_mflags,QP_me,Cryst,Dtset,nfftf,ngfftf,&
 &   qp_vtrial,qp_vhartr,qp_vxc,Psps,Pawtab,QP_paw_an,Pawang,Pawfgrtab,QP_paw_ij,dijexc_core,&
-&   qp_rhor,qp_rhog,usexcnhat,qp_nhat,qp_nhatgr,nhatgrdim,tmp_kstab,taug=qp_taug,taur=qp_taur)
+&   qp_rhor,usexcnhat,qp_nhat,qp_nhatgr,nhatgrdim,tmp_kstab,taug=qp_taug,taur=qp_taur)
    ABI_FREE(tmp_kstab)
 
 !  #ifdef DEV_HAVE_SCGW_SYM
@@ -2200,7 +2199,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ABI_DEALLOCATE(sigcme_k) 
+       ABI_DEALLOCATE(sigcme_k)
 
      end do
    end if
@@ -2228,7 +2227,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
      call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_k,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
-     ABI_DEALLOCATE(sigcme_k) 
+     ABI_DEALLOCATE(sigcme_k)
      !
      ! Calculate direct gap for each spin and print out final results.
      ! We use the valence index of the KS system because we still do not know

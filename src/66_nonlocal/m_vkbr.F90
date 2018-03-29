@@ -35,6 +35,7 @@ MODULE m_vkbr
  use m_paw_sphharm,   only : ylmc, ylmcd
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
+ use m_kg,            only : mkkin
 
  implicit none
 
@@ -457,7 +458,6 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vkb'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

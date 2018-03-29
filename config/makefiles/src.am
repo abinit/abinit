@@ -1,6 +1,6 @@
 # Help
 help:
-	@cat $(top_srcdir)/doc/help_make/help_make_src
+	@cat $(top_srcdir)/doc/help_make/help_make_src.txt
 
 # ---------------------------------------------------------------------------- #
 

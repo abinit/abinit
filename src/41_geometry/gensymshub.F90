@@ -5,8 +5,7 @@
 !!
 !! FUNCTION
 !! Analyse the Shubnikov space group, from the input of the
-!! the Fedorov space group number, and the Shubnikov
-!! space group number :
+!! the Fedorov space group number, and the Shubnikov space group number:
 !! 1) determine the type (III or IV)
 !! 2) for type (IV), determine the translation generating
 !!   the anti-ferromagnetic operations

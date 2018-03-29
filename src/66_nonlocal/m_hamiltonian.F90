@@ -27,8 +27,6 @@
 #include "config.h"
 #endif
 
-!#define DEBUG_MODE
-
 #include "abi_common.h"
 
 module m_hamiltonian
@@ -42,6 +40,7 @@ module m_hamiltonian
 
  use m_copy,              only : addr_copy
  use m_fstrings,          only : toupper
+ use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
  use m_fftcore,           only : kpgsph
  use m_cgtools,           only : set_istwfk
@@ -49,6 +48,7 @@ module m_hamiltonian
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
+ use m_kg,                only : ph1d3d, getph
  use m_mpinfo,            only : destroy_mpi_enreg
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
 
@@ -370,7 +370,7 @@ module m_hamiltonian
    ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
    ! lower triangular part of Hermitian matrix
 
- 
+
 ! ===== Structured datatype pointers
 
   type(fock_common_type), pointer :: fockcommon => null()
@@ -796,8 +796,6 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_hamiltonian'
- use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1054,7 +1052,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 #undef ABI_FUNC
 #define ABI_FUNC 'load_k_hamiltonian'
  use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1248,7 +1245,6 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 #undef ABI_FUNC
 #define ABI_FUNC 'load_kprime_hamiltonian'
  use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1871,7 +1867,6 @@ end subroutine init_rf_hamiltonian
 !!  Setup of the spin-dependent part of the 1st- and 2nd- order Hamiltonian.
 !!
 !! INPUTS
-!!  gs_Ham<gs_hamiltonian_type>=structured datatype containing data for ground-state Hamiltonian
 !!  isppol=index of current spin
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
 !!  [with_nonlocal]=optional, true if non-local factors have to be loaded
@@ -1888,7 +1883,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
+subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1903,7 +1898,6 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
 !scalars
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- type(gs_hamiltonian_type),intent(in) :: gs_Ham
  type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
