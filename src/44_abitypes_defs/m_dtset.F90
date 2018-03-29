@@ -1893,7 +1893,7 @@ end subroutine get_npert_rbz
 !! dielop: option for the computation of the dielectric matrix
 !! dtset:
 !! istep: number of the current SCF cycle
-i!!
+!!
 !! OUTPUT
 !! compute:
 !!  * if dielop >= 1 and istep == 1 => TRUE
@@ -1909,6 +1909,7 @@ i!!
 !! SOURCE
 
 subroutine testsusmat(compute,dielop,dielstrt,dtset,istep)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
