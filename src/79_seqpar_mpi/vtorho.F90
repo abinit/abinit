@@ -211,6 +211,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
+ use m_dtset,              only : testsusmat
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type

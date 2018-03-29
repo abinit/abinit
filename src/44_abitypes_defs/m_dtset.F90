@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2018 ABINIT group (XG, MG, FJ)
+!! Copyright (C) 1992-2018 ABINIT group (XG, MG, FJ, DCA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,6 +39,7 @@ MODULE m_dtset
  public :: dtset_free
  public :: find_getdtset     ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
  public :: get_npert_rbz     ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+ public :: testsusmat        ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
 CONTAINS  !==============================================================================
 !!***
@@ -1878,6 +1879,89 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
  ABI_DEALLOCATE(pert_calc)
 
 end subroutine get_npert_rbz
+!!***
+
+!!****f* m_dtset/testsusmat
+!! NAME
+!! testsusmat
+!!
+!! FUNCTION
+!! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+!! and return the logical result
+!!
+!! INPUTS
+!! dielop: option for the computation of the dielectric matrix
+!! dtset:
+!! istep: number of the current SCF cycle
+i!!
+!! OUTPUT
+!! compute:
+!!  * if dielop >= 1 and istep == 1 => TRUE
+!!  * if dielop >= 2 and istep == dtset%dielstrt => TRUE
+!!  * if (dtset%iprcel >= 140 and <=170) depends on the periodicity modulo 10 of istep and iprcel
+!!  * otherwise FALSE
+!!
+!! PARENTS
+!!      prcref,prcref_PMA,vtorho
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine testsusmat(compute,dielop,dielstrt,dtset,istep)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'testsusmat'
+!End of the abilint section
+
+ implicit none
+
+!Arguments-------------------------------
+!scalars
+ integer,intent(in) :: dielop,dielstrt,istep
+ logical,intent(out) :: compute
+ type(dataset_type),intent(in) :: dtset
+
+! *********************************************************************
+
+ compute=.FALSE.
+ if((dtset%iprcel >= 140).and.(dtset%iprcel<=170)) then
+   if(modulo(dtset%iprcel,10).ne.0) then
+     compute=(modulo(istep,modulo(dtset%iprcel,10))==0)
+   else
+     compute=(modulo(istep,10)==0)
+   end if
+ end if
+ if (istep==1 .and. dielop>=2) compute=.TRUE.
+ if (istep==dielstrt .and. dielop>=1) compute=.TRUE.
+!DEBUG
+!if (compute) then
+!write(std_err,*) 'testsusmat : TRUE'
+!else
+!write(std_err,*) 'testsusmat : FALSE',dielop,dielstrt,istep,dtset%iprcel,modulo(istep,10),&
+!&modulo(dtset%iprcel,10),modulo(dtset%iprcel,modulo(dtset%iprcel,10))
+!end if
+!ENDDEBUG
+
+!if( (istep==1        .and. dielop>=2) .or. &
+!&     (istep==dielstrt .and. dielop>=1) .or. &
+!&       computesusmat       )then
+
+!if((iprcel >= 140) .and. (iprcel <= 170)) then
+!if(modulo(iprcel,10).ne.0) then
+!computediel=(modulo(istep,10)==modulo(iprcel,modulo(iprcel,10)))
+!else
+!computediel=(modulo(istep,10)==0)
+!end if
+!end if
+!
+!if( (istep==1        .and. dielop>=2) &
+!&     .or. (istep==dielstrt .and. dielop>=1) &
+!&     .or. computediel          )then
+
+end subroutine testsusmat
 !!***
 
 END MODULE m_dtset
