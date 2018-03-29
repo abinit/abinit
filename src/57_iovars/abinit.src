@@ -18,14 +18,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "chkdpr.F90",
  "chkinp.F90",
- "chkint.F90",
- "chkint_eq.F90",
- "chkint_ge.F90",
- "chkint_le.F90",
- "chkint_ne.F90",
- "chkint_prt.F90",
  "chkvars.F90",
  "compute_kgb_indicator.F90",
  "getdim_nloc.F90",

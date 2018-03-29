@@ -44,6 +44,7 @@ module m_psps
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_pawpsp,        only : pawpsp_cg
+ use m_parser,        only : chkint_eq
 
  implicit none
 
@@ -1644,7 +1645,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: amesh,yp1,ypn 
+ real(dp) :: amesh,yp1,ypn
  type(pawrad_type) :: core_mesh
 
 ! *************************************************************************
