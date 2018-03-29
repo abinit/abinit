@@ -494,6 +494,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 &   'Action: correct nsym in your input file.'
    MSG_ERROR(message)
  end if
+ if (multiplicity>1) then
+   nsym = 1
+   write(message, '(a)' )&
+&   'Input nsym is now set to one due to the supercell_latt input'
+   MSG_WARNING(message)
+ end if
 
 !Read symmorphi
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symmorphi',tread,'INT')

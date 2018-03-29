@@ -880,7 +880,8 @@ program anaddb
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
-
+ ABI_DEALLOCATE(thm_scells)
+ 
  ! Close files
  if (iam_master) then
 #ifdef HAVE_NETCDF
