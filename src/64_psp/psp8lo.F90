@@ -10,7 +10,7 @@
 !! wavevector using corrected trapezoidal integration.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, FrD)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, FrD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,11 +56,12 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
  use m_splines
  use m_profiling_abi
 
+ use m_numeric_tools, only : ctrap
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp8lo'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

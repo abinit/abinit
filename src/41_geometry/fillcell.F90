@@ -8,7 +8,7 @@
 !! with the symmetry operations and the atoms from the asymetric unit cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (RC,XG)
+!! Copyright (C) 1999-2018 ABINIT group (RC,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,8 +39,6 @@
 !!  spinat(3,1:natom)=spin-magnetization of the atoms
 !!  typat(1:natom)=type integer for each atom in cell
 !!  xred(3,1:natom)=reduced dimensionless atomic coordinates
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      ingeo

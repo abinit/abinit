@@ -8,7 +8,7 @@
 !! elastic tensor
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,13 +69,14 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  use m_xmpi
  use m_profiling_abi
 
+ use m_geometry,     only : metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrkin'
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_72_response, except_this_one => dfpt_eltfrkin
 !End of the abilint section

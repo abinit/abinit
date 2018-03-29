@@ -9,7 +9,7 @@
 !!  Can also compute derivatives of <Proj_i|Cnk> wrt to several parameters
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,6 @@
 !!  istwfk(nkpt)=option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  kpt(3,nkpt)=reduced coordinates of k points.
-!!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
@@ -93,7 +92,7 @@
 #include "abi_common.h"
 
  subroutine ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
-& iorder_cprj,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
+& iorder_cprj,istwfk,kg,kpt,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
 & nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
 
@@ -105,6 +104,7 @@
  use m_errors
  use m_hdr
 
+ use m_kg,       only : ph1d3d
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
 &                       pawcprj_set_zero, pawcprj_mpi_sum
 
@@ -114,7 +114,6 @@
 #define ABI_FUNC 'ctocprj'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => ctocprj
 !End of the abilint section
 
@@ -122,7 +121,7 @@
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: choice,iatom,idir,iorder_cprj,mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw
+ integer,intent(in) :: choice,iatom,idir,iorder_cprj,mcg,mcprj,mgfft,mkmem,mpsang,mpw
  integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg

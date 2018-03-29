@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +31,7 @@
  use m_xmpi
  use m_profiling_abi
  use m_errors
+ use m_lib_four
  
  use m_io_tools, only : flush_unit, open_file
  use m_oper, only : oper_type
@@ -2478,7 +2479,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2578,7 +2579,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2716,7 +2717,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2749,7 +2750,6 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 #undef ABI_FUNC
 #define ABI_FUNC 'fourier_fct'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -2868,7 +2868,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3192,7 +3192,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

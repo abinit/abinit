@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (TRangel)
+!!  Copyright (C) 2012-2018 ABINIT group (TRangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,10 +44,11 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
  use defs_abitypes
  use m_profiling_abi
  use m_errors
+ use m_xmpi
 
+ use m_geometry, only : xcart2xred, xred2xcart
  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,   only : pawtab_type
- use m_xmpi,     only : xmpi_comm_size,xmpi_sum,xmpi_comm_rank
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
@@ -122,7 +123,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
    rmet(:,nu)=rprimd(1,:)*rprimd(1,nu)+rprimd(2,:)*rprimd(2,nu)+&
 &   rprimd(3,:)*rprimd(3,nu)
  end do
- 
+
 !MPI
  nproc =xmpi_comm_size(mpi_enreg%comm_fft); nproc_fft= ngfft(10)
  me    =xmpi_comm_rank(mpi_enreg%comm_fft);    me_fft= ngfft(11)
@@ -134,7 +135,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
  n1 = ngfft(1)
  n2 = ngfft(2)
  n3 = ngfft(3)
- n3d = ngfft(13) 
+ n3d = ngfft(13)
  if(nproc==1) n3d=n3
 
 !Get the distrib associated with this fft_grid
@@ -147,7 +148,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
  ABI_ALLOCATE(gridcart,(3, nfft))
  call mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 
-!definition of the grid spacings 
+!definition of the grid spacings
  hh(1) = rprimd(1,1)/(ngfft(1))
  hh(2) = rprimd(2,2)/(ngfft(2))
  hh(3) = rprimd(3,3)/(ngfft(3))
@@ -215,12 +216,12 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
    end if
 
 !  Create mesh_core object
-!  since core_mesh_size can be bigger than pawrad%mesh_size, 
+!  since core_mesh_size can be bigger than pawrad%mesh_size,
    msz=pawtab(itypat)%core_mesh_size
    call pawrad_init(core_mesh,mesh_size=msz,mesh_type=pawrad(itypat)%mesh_type,&
 &   rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
 
-!  Big loop on atoms  
+!  Big loop on atoms
    do iat=1,nattyp(itypat)
      iatm=iatm+1;iatom=atindx1(iatm)
      iatom_tot=iatom; !if (mpi_enreg%nproc_atom>1) iatom_tot=mpi_enreg%atom_indx(iatom)
@@ -247,7 +248,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
        call ind_positions_(perz,i3,n3,j3,goz)
 
        if(fftn3_distrib(j3)==me_fft) then
-         i3loc=ffti3_local(j3) 
+         i3loc=ffti3_local(j3)
 
 !        Initialize counters
          nfgd=0
@@ -267,14 +268,14 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
                    nfgd=nfgd+1
                    rr(nfgd)=sqrt(rr2)
                    ifftsph_tmp(nfgd)=ind
-                   if(option>1) then 
+                   if(option>1) then
                      call xcart2xred(1,rprimd,gridcart(:,ind),rred(:,nfgd))
                    end if
                  elseif (option==4) then
 !                  We save r=0 vectors only for option==4:
 !                  for other options this is ignored
 
-!                  We reuse the same variable "ifftshp_tmp", 
+!                  We reuse the same variable "ifftshp_tmp",
 !                  but we start from the higher index
                    nfgd_r0=nfgd_r0+1
                    ifftsph_tmp(ncmax-nfgd_r0+1)=ind
@@ -294,7 +295,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
          call mkcore_inner(corfra,core_mesh,dyfrx2,&
 &         grxc1,grxc2,grxc3,ifftsph_tmp,msz,&
 &         natom,ncmax,nfft,nfgd,nfgd_r0,nspden,n3xccc,option,pawtab(itypat),&
-&         rmet,rprimd,rr,strdia,vxc,xccc3d,rred=rred)
+&         rmet,rr,strdia,vxc,xccc3d,rred=rred)
 
        end if !parallel fftn3
      end do !i3

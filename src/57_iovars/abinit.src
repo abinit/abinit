@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "append_xyz.F90",
  "chkdpr.F90",
  "chkinp.F90",
  "chkint.F90",
@@ -29,10 +28,8 @@ sources = [
  "chkint_prt.F90",
  "chkvars.F90",
  "compute_kgb_indicator.F90",
- "create_nc_file.F90",
  "getdim_nloc.F90",
  "finddistrproc.F90",
- "importxyz.F90",
  "indefo.F90",
  "indefo1.F90",
  "ingeo.F90",
@@ -47,26 +44,19 @@ sources = [
  "invars2m.F90",
  "macroin.F90",
  "macroin2.F90",
- "memana.F90",
- "memorf.F90",
- "memory.F90",
- "memory_eval.F90",
+ "m_memeval.F90",
  "mpi_setup.F90",
  "m_ab7_invars_f90.F90",
  "m_ingeo_img.F90",
- "outqmc.F90",
  "outvars.F90",
  "outvar_a_h.F90",
  "outvar_i_n.F90",
  "outvar_o_z.F90",
- "outxml.F90",
+ "m_outxml.F90",
  "out_acknowl.F90",
- "parsefile.F90",
  "prtocc.F90",
  "prttagm.F90",
  "prttagm_images.F90",
- "write_var_netcdf.F90",
- "wvl_memory.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

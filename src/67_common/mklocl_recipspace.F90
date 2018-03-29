@@ -12,7 +12,7 @@
 !!                second derivative of E wrt xred
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,6 +85,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  use m_errors
  use m_xmpi
 
+ use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
@@ -191,7 +192,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
      ig3=i3-(i3/id3)*n3-1
      do i2=1,n2
        ig2=i2-(i2/id2)*n2-1
-       if(fftn2_distrib(i2) == me_fft ) then 
+       if(fftn2_distrib(i2) == me_fft ) then
          do i1=1,n1
            ig1=i1-(i1/id1)*n1-1
 

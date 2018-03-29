@@ -7,7 +7,7 @@
 !!  This module contains procedures to calculate the oscillator matrix elements used in the GW code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,7 +128,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 
 !Local variables-------------------------------
 !scalars
- integer :: ig,ir,igfft,iab,spad1,spad2,spad0,ispinor,nx,ny,nz,ldx,ldy,ldz,mgfft
+ integer :: ig,igfft,iab,spad1,spad2,spad0,nx,ny,nz,ldx,ldy,ldz,mgfft
  type(fftbox_plan3_t) :: plan
 !arrays
  integer :: spinor_pad(2,4)
@@ -918,7 +918,7 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
 
 !Local variables ------------------------------
 !scalars
- integer :: ig,ir,ir1,spad0,ispinor
+ integer :: ir,ir1,spad0,ispinor
  complex(gwpc) :: u1a,u1b
 !arrays
  complex(dpc) :: spinrot_cmat1(2,2)

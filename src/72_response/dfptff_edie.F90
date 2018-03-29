@@ -8,7 +8,7 @@
 !! term, Eq.(6) in PRB 75, 115116(2007).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (XW).
+!! Copyright (C) 2004-2018 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,11 +68,12 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
  use m_profiling_abi
  use m_efield
 
+ use m_cgtools,   only : overlap_g
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_edie'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

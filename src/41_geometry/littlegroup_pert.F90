@@ -10,10 +10,11 @@
 !! of k-points for all perturbations. Unfortunately, one has to take into account the sign reversal of the
 !! perturbation under the symmetry operations, which makes GS routines not usable for the respfn code.
 !! The intermediate choice was to select only those that keep also the perturbation invariant.
-!! Note that the wavevector of the perturbation must also be invariant, a translation vector in real space is NOT allowed ).
+!! Note that the wavevector of the perturbation must also be invariant, 
+!! a translation vector in real space is NOT allowed ).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

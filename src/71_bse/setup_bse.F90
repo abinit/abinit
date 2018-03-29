@@ -10,7 +10,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,7 +82,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  use m_gwdefs,        only : GW_Q0_DEFAULT
  use m_fstrings,      only : toupper, sjoin
  use m_io_tools,      only : file_exists, open_file
- use m_geometry,      only : normv
+ use m_geometry,      only : normv, mkrdim, metric
+ use m_abilasi,       only : matrginv
  use m_crystal,       only : crystal_print, idx_spatial_inversion, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_bz_mesh,       only : kmesh_t, kmesh_init, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
@@ -105,8 +106,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_bse'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_56_io_mpi
 !End of the abilint section
 
@@ -188,8 +187,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- ! Read energies and header from the WFK file. 
- wfk_fname = dtfil%fnamewffk 
+ ! Read energies and header from the WFK file.
+ wfk_fname = dtfil%fnamewffk
  if (.not. file_exists(wfk_fname)) then
    wfk_fname = nctk_ncify(wfk_fname)
    MSG_COMMENT(sjoin("File not found. Will try netcdf file: ", wfk_fname))
@@ -239,10 +238,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
      MSG_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
    end if
 
-   if (my_rank==master) then 
+   if (my_rank==master) then
      ! Master reads npw and nqlwl from SCR file.
      call wrtout(std_out,sjoin('Testing file: ', w_fname),"COLL")
-     
+
      call hscr_from_file(hscr,w_fname,fform,xmpi_comm_self)
      ! Echo the header.
      if (Dtset%prtvol>0) call hscr_print(Hscr)
@@ -286,7 +285,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
    ! The G-sphere for W and Sigma_c is initialized from ecuteps.
    call gsph_init(Gsph_c,Cryst,0,ecut=Dtset%ecuteps)
-   Dtset%npweps = Gsph_c%ng 
+   Dtset%npweps = Gsph_c%ng
  end if
 
  BSp%npweps = Dtset%npweps
@@ -417,7 +416,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  end if
 
  !TODO move the initialization of the parameters for the interpolation in setup_bse_interp
- 
+
  BSp%use_interp = .FALSE.
  BSp%interp_mode = BSE_INTERP_YG
  BSp%interp_kmult(1:3) = 0
@@ -465,10 +464,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  !BSp%npwwfn=Dtset%npwwfn
 
  ABI_MALLOC(Bsp%lomo_spin, (Bsp%nsppol))
- ABI_MALLOC(Bsp%homo_spin, (Bsp%nsppol)) 
- ABI_MALLOC(Bsp%lumo_spin, (Bsp%nsppol)) 
- ABI_MALLOC(Bsp%humo_spin, (Bsp%nsppol)) 
- ABI_MALLOC(Bsp%nbndv_spin, (Bsp%nsppol)) 
+ ABI_MALLOC(Bsp%homo_spin, (Bsp%nsppol))
+ ABI_MALLOC(Bsp%lumo_spin, (Bsp%nsppol))
+ ABI_MALLOC(Bsp%humo_spin, (Bsp%nsppol))
+ ABI_MALLOC(Bsp%nbndv_spin, (Bsp%nsppol))
  ABI_MALLOC(Bsp%nbndc_spin, (Bsp%nsppol))
 
  ! FIXME use bs_loband(nsppol)
@@ -477,7 +476,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  !if (Bsp%nsppol == 2) Bsp%lomo_spin(2) = Dtset%bs_loband
 
  ! Check lomo correct only for unpolarized semiconductors
- !if (Dtset%nsppol == 1 .and. Bsp%lomo > Dtset%nelect/2) then 
+ !if (Dtset%nsppol == 1 .and. Bsp%lomo > Dtset%nelect/2) then
  !  write(msg,'(a,i0,a,f8.3)') " Bsp%lomo = ",Bsp%lomo," cannot be greater than nelect/2 = ",Dtset%nelect/2
  !  MSG_ERROR(msg)
  !end if
@@ -556,10 +555,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&  
+   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
 &    nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&  
+   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
 &    nqlwl,qlwl,ngfftf,comm)
  end if
 
@@ -572,7 +571,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  doccde=zero; eigen=zero; occfact=zero
 
  ! Get occupation from input if occopt == 2
- occ_from_dtset = (Dtset%occopt == 2) 
+ occ_from_dtset = (Dtset%occopt == 2)
 
  jj=0; ibtot=0
  do isppol=1,Dtset%nsppol
@@ -697,7 +696,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  call print_ngfft(ngfft_osc,"FFT mesh for oscillator matrix elements",std_out,"COLL",prtvol=Dtset%prtvol)
  !
- ! BSp%homo gives the 
+ ! BSp%homo gives the
  !BSp%homo  = val_idx(1)
  ! highest occupied band for each spin
  BSp%homo_spin = val_idx
@@ -804,12 +803,12 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  if (ABS(Dtset%bs_freq_mesh(2)) < tol6) then
     Dtset%bs_freq_mesh(2) = minmax_tene(2) + minmax_tene(2) * 0.1
  end if
-                                                                                        
+
  Bsp%omegai = Dtset%bs_freq_mesh(1)
  Bsp%omegae = Dtset%bs_freq_mesh(2)
  Bsp%domega = Dtset%bs_freq_mesh(3)
  BSp%broad  = Dtset%zcut
-                                                                                        
+
  ! The frequency mesh (including the complex imaginary shift)
  BSp%nomega = (BSp%omegae - BSp%omegai)/BSp%domega + 1
  ABI_MALLOC(BSp%omega,(BSp%nomega))
@@ -922,7 +921,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
      call eprenorms_from_epnc(Epren,ep_nc_fname)
    end if
    call eprenorms_bcast(Epren,master,comm)
- end if 
+ end if
 
 
  !
@@ -966,28 +965,28 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    write(ount,"(a,i0)")"    tot_nreh: ",tot_nreh
    !write(ount,"(a,i0)")"    nbnds: ",Ep%nbnds
 
-   ! Wavefunctions are not distributed. We read all the bands 
-   ! from 1 up to Bsp%nbnds because we have to recompute rhor 
-   ! but then we deallocate all the states that are not used for the construction of the e-h 
+   ! Wavefunctions are not distributed. We read all the bands
+   ! from 1 up to Bsp%nbnds because we have to recompute rhor
+   ! but then we deallocate all the states that are not used for the construction of the e-h
    ! before allocating the EXC hamiltonian. Hence we can safely use  (humo - lomo + 1) instead of Bsp%nbnds.
    !my_nbks = (Bsp%humo - Bsp%lomo +1) * Bsp%nkibz * Dtset%nsppol
- 
+
    ! This one overestimates the memory but it seems to be safer.
    my_nbks = Bsp%nbnds * Dtset%nkpt * Dtset%nsppol
 
    ! Memory needed for Fourier components ug.
    ug_mem = two*gwpc*Dtset%nspinor*Bsp%npwwfn*my_nbks*b2Mb
-                                                                               
+
    ! Memory needed for real space ur.
    ur_mem = zero
    if (MODULO(Dtset%gwmem,10)==1) then
      ur_mem = two*gwpc*Dtset%nspinor*nfftot_osc*my_nbks*b2Mb
    end if
-                                                                               
-   ! Memory needed for PAW projections Cprj 
+
+   ! Memory needed for PAW projections Cprj
    cprj_mem = zero
    if (Dtset%usepaw==1) cprj_mem = dp*Dtset%nspinor*SUM(nlmn_atm)*my_nbks*b2Mb
-                                                                               
+
    wfsmem_mb = ug_mem + ur_mem + cprj_mem
 
    ! Non-scalable memory in Mb i.e. memory that is not distributed with MPI:  wavefunctions + W
@@ -1008,7 +1007,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
      write(ount,"(a,i0)")"      mpi_ncpus: ",il
      !write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus
      write(ount,"(a,f12.9)")"      efficiency: ",eff
-     write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+     write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
    end do
 
    write(ount,'(a)')"..."

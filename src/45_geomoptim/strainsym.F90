@@ -8,7 +8,7 @@
 !! then produce primitive vectors based on the symmetrized strain.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group (XG)
+!! Copyright (C) 2007-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,9 +43,10 @@
 subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 
  use m_profiling_abi
-
  use defs_basis
  use m_linalg_interfaces
+
+ use m_abilasi,     only : matrginv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

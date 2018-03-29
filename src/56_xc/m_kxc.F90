@@ -9,7 +9,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2017 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -449,7 +449,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: strsxc(6)
- real(dp) :: dum(0),qphon(3)
+ real(dp) :: dum(0)
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 
@@ -531,7 +531,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
+&   dtset%usepawu==4.or.dtset%usepawu==14,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
@@ -586,7 +587,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
+&   dtset%usepawu==4.or.dtset%usepawu==14,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -1176,7 +1178,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
@@ -1502,7 +1505,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values

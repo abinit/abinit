@@ -8,7 +8,7 @@
 !! The output is this quantity for the input k point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (PB, XG, GA)
+!! Copyright (C) 1999-2018 ABINIT group (PB, XG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,6 +48,7 @@ subroutine thmeig(inp, ddb, crystal, &
  use m_xmpi
  use m_sort
 
+ use m_geometry,       only : mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq
@@ -166,14 +167,14 @@ subroutine thmeig(inp, ddb, crystal, &
 !0) Initializations
 !=========================================================================
 
- 
+
  g2fsmear = inp%a2fsmear
- 
+
  telphint = inp%telphint
  temperinc = inp%temperinc
  tempermin = inp%tempermin
  thmflag = inp%thmflag
- 
+
  ntemper = inp%ntemper
  natifc = inp%natifc
 
@@ -185,9 +186,9 @@ subroutine thmeig(inp, ddb, crystal, &
  call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION)
 
  mband = ddb_hdr%mband
- nkpt = ddb_hdr%nkpt  
- ntypat = ddb_hdr%ntypat  
- 
+ nkpt = ddb_hdr%nkpt
+ ntypat = ddb_hdr%ntypat
+
  msym = ddb_hdr%msym
  nblok2 = ddb_hdr%nblok
  nsym = ddb_hdr%nsym
@@ -250,7 +251,7 @@ subroutine thmeig(inp, ddb, crystal, &
  !tnons = ddb_hdr%tnons  ! out
 
  !acell = ddb%acell
- !natom = ddb_hdr%natom  
+ !natom = ddb_hdr%natom
  acell = ddb_hdr%acell
  rprim = ddb_hdr%rprim
 
@@ -388,8 +389,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
    brav=inp%brav
 
-   if(brav/=1)then
-     message = ' The possibility to have brav/=1 for thmeig was disabled.'
+   if(abs(brav)/=1)then
+     message = ' The possibility to have abs(brav)/=1 for thmeig was disabled.'
      MSG_ERROR(message)
    end if
 

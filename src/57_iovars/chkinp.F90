@@ -9,7 +9,7 @@
 !! Please: use the routines chkint_eq, chkint_ne, chkint_ge, chkint_le, and chkdpr
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,6 +59,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use libxc_functionals
 
  use m_numeric_tools,  only : iseven
+ use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_dtset,          only : dtset_copy, dtset_free
  use m_exit,           only : get_timelimit
@@ -440,13 +441,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkdpr(0,0,cond_string,cond_values,ierr,'diemac',dt%diemac,1,0.01_dp,iout)
 
 !  dmatpuopt
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==10) then
+   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10.or.dt%usepawu==14) then
      cond_string(1)='usepawu' ; cond_values(1)=1
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatpuopt',dt%dmatpuopt,10,(/1,2,3,4,5,6,7,8,9,10/),iout)
    end if
 
 !  dmatudiag
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==10) then
+   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10.or.dt%usepawu==14) then
      cond_string(1)='usepawu' ; cond_values(1)=1
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatudiag',dt%dmatudiag,3,(/0,1,2/),iout)
    end if
@@ -490,8 +491,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tolfreq',dt%dmft_tolfreq,-1,0.01_dp,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tollc',dt%dmft_tollc,-1,tol5,iout)
+       if(dt%usepawu==14) then
+         cond_string(1)='usepawu' ; cond_values(1)=14
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/5/),iout)
+       endif
        cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,3,(/0,1,2/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,4,(/0,1,2,5/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(message,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
 &         'When usedmft==1, A WFC file or a DEN file have to be read. In the current calculation:',ch10, &
@@ -794,7 +799,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
 
 !  fockoptmix
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,5,(/0,1,11,201,211/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',&
+&   dt%fockoptmix,12,(/0,1,11,201,211,301,401,501,601,701,801,901/),iout)
    if(dt%paral_kgb/=0)then
      cond_string(1)='paral_kgb' ; cond_values(1)=dt%paral_kgb
 !    Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)
@@ -1189,7 +1195,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  tim1rev
    call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)
- 
+   
 !  kptnrm and kpt
 !  Coordinates components must be between -1 and 1.
    if(dt%kptnrm<1.0-1.0d-10)then
@@ -1820,14 +1826,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP(message,ierr)
      end if
 
-!!    nucdipmom requires kptopt > 2
-!     if(dt%kptopt<=2) then
-!       write(message, '(a,i4,a,a,a)' )&
-!&       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
-!&       ' => stop ',ch10,&
-!&       'Action: re-run with kptopt greater than 2 '
-!       MSG_ERROR_NOSTOP(message,ierr)
-!     end if
+!    nucdipmom requires kptopt > 2
+     if(dt%kptopt<=2) then
+       write(message, '(a,i4,a,a,a)' )&
+&       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
+&       ' => stop ',ch10,&
+&       'Action: re-run with kptopt greater than 2 '
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
 
    end if
 
@@ -1994,6 +2000,26 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='optcell' ; cond_values(1)=dt%optcell
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optstress',dt%optstress,1,(/1/),iout)
    end if
+
+  !  orbmag
+  ! only values of 0 (default) and 1 are allowed
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,2,(/0,1/),iout)
+  ! when orbmag /= 0, symmorphi must be 0 (no tnons)
+   if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
+   end if
+  ! only kptopt 4 and 3 are allowed
+   if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
+   end if
+  ! only nproc 1 for now
+   if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nproc',nproc,1,(/1/),iout)
+   end if
+   
 
 !  paral_atom
    call chkint_eq(0,0,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,2,(/0,1/),iout)
@@ -2904,7 +2930,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,5,(/0,1,2,3,10/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,7,(/0,1,2,3,4,10,14/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)

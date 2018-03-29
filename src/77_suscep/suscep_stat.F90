@@ -12,7 +12,7 @@
 !! states, thanks to the closure relation (referred to as an extrapolation).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG,AR,MB)
+!! Copyright (C) 1998-2018 ABINIT group (XG,AR,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,6 +136,8 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, &
 &                      pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
  use m_mpinfo,  only : destroy_mpi_enreg
+ use m_kg,      only : ph1d3d
+ use m_gsphere, only : symg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -146,7 +148,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_77_suscep, except_this_one => suscep_stat

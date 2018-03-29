@@ -10,7 +10,7 @@
 !! and internal strain tensors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@
 !!  nkxc=2nd dimension of kxc
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
 !!  n3xccc=dimension of xccc3d (0 if no core charge, nfft otherwise)
-!!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density 
+!!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim phase (structure factor) information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
@@ -89,7 +89,8 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  use defs_abitypes
  use m_profiling_abi
  use m_xmpi
- 
+
+ use m_geometry,    only : metric
  use m_pawtab,      only : pawtab_type,pawtab_free,pawtab_nullify
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawpsp,      only : pawpsp_cg
@@ -100,7 +101,6 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrxc'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_53_spacepar
  use interfaces_64_psp
@@ -172,7 +172,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    xccc1d = psps%xccc1d
  end if
 
- if (usexcnhat==0.and.dtset%usepaw==1) then     
+ if (usexcnhat==0.and.dtset%usepaw==1) then
    ABI_ALLOCATE(rhor_,(nfft,dtset%nspden))
    rhor_(:,:) = rhor(:,:)-nhat(:,:)
  else
@@ -207,7 +207,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 
 !Compute gmet, gprimd and ucvol from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- 
+
 !For GGA case, prepare quantities needed to evaluate contributions
 !arising from the strain dependence of the gradient operator itself
 
@@ -487,7 +487,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 
        vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
 
-!      Fourier transform of Vxc_core/vxc10_core to use in atm2fft (reciprocal space calculation) 
+!      Fourier transform of Vxc_core/vxc10_core to use in atm2fft (reciprocal space calculation)
        call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
        call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
        call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
@@ -544,14 +544,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !            do ii=1,n1xccc;write(100+jj,*) (ii-1)*rstep,xccc1d(ii,1,jj);enddo
 !            do ii=1,psps%mqgrid_vl;write(200+jj,*) psps%qgrid_vl(ii),pawtab_test(jj)%tcorespl(ii,1);enddo
 !          end if
-         end do    
+         end do
          ABI_ALLOCATE(vxc10_coreg,(2,nfft))
          ABI_ALLOCATE(vxc_coreg,(2,nfft))
          ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
          vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
          call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
          call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)   
+         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
          optatm=0;optdyfr=0;optgr=0;optstr=0;optv=0;optn=1;optn2=1;opteltfr=1;corstr=zero
          call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_test2,dummy_in,gmet,gprimd,&
 &         dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
@@ -600,7 +600,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    ABI_DEALLOCATE(xccc1d)
    ABI_DEALLOCATE(xcccrc)
  end if
- if (usexcnhat==0.and.dtset%usepaw==1) then     
+ if (usexcnhat==0.and.dtset%usepaw==1) then
    ABI_DEALLOCATE(rhor_)
  end if
 

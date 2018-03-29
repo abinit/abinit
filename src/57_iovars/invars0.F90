@@ -11,7 +11,7 @@
 !! of input path for the atomic orbital file (if required).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,11 +61,12 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  use m_initcuda, only : Get_ndevice
 #endif
 
+ use m_parser,  only : intagm
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars0'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

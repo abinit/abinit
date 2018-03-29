@@ -17,7 +17,7 @@
 !!        eigenvectors with 0 s, hermitian matrix of eigenvalues)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,10 +134,11 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  use m_profiling_abi
  use m_wffile
  use m_xmpi
-
 #if defined HAVE_MPI2
  use mpi
 #endif
+
+ use m_occ,        only : pareigocc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -146,7 +147,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_61_occeig
  use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section
@@ -402,7 +402,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
 !    If the wavefunction block to be read is interesting ...
      if (ikpt/=0)then
-       
+
        call timab(723,3,tsec)
        sender = me
        nband_k=nband(ikpt+(isppol-1)*nkpt)

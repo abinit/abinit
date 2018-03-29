@@ -7,7 +7,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,DCA,JCC,CL,XW,GA)
+!! Copyright (C) 1999-2018 ABINIT group (XG,DCA,JCC,CL,XW,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,6 +56,7 @@ program anaddb
  use m_ddb_hdr
  use m_phonons
  use m_gruneisen
+ use m_supercell
  use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -64,13 +65,13 @@ program anaddb
 
  use m_dfpt_io,        only : elast_ncwrite
  use m_io_tools,       only : open_file, flush_unit
- use m_fstrings,       only : int2char4, itoa, sjoin, strcat
+ use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
  use m_time,           only : asctime
+ use m_parser,         only : instrng
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
- use m_supercell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -79,8 +80,6 @@ program anaddb
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_42_parser
- use interfaces_51_manage_mpi
  use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
@@ -92,7 +91,7 @@ program anaddb
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
- integer :: dimekb,comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
+ integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master
@@ -250,7 +249,10 @@ program anaddb
  ! In the new version asrq0%d2asr is always computed if the Gamma block is present
  ! and this causes changes in [v5][t28]
  if (.not. (inp%ifcflag==0 .or. inp%instrflag/=0 .or. inp%elaflag/=0)) then
-   asrq0%d2asr = zero; asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
+   asrq0%d2asr = zero
+   if (asrq0%asr==3.or.asrq0%asr==4) then
+     asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
+   end if
  end if
 
  ! Open the netcdf file that will contain the anaddb results
@@ -556,11 +558,11 @@ program anaddb
 
    close(ddbun)
 
-   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,filnam(2),comm)
 
    call ddb_hdr_free(ddb_hdr)
 
- end if 
+ end if
 
 !***********************************************************************
 
@@ -569,7 +571,7 @@ program anaddb
     ! DEBUG
     !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
     ! &                     dimonly=1)
-   
+
     !mband = ddb_hdr%mband
     !msym = ddb_hdr%msym
     !natom = ddb_hdr%natom
@@ -577,7 +579,7 @@ program anaddb
     !nkpt = ddb_hdr%nkpt
     !ntypat = ddb_hdr%ntypat
     !usepaw = ddb_hdr%usepaw
-   
+
     !call ddb_hdr_free(ddb_hdr)
     ! END DEBUG
 
@@ -785,7 +787,7 @@ program anaddb
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      ! then print the internal stain tensor
-     call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,asrq0%d2asr,iblok,instrain,ab_out,mpert,msize,natom,ddb%nblok)
+     call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
    end if
  end if !end the part for internal strain
 
@@ -818,7 +820,7 @@ program anaddb
      ! print the elastic tensor
      call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&     instrain,ab_out,mpert,msize,natom,ddb%nblok)
+&     instrain,ab_out,mpert,natom,ddb%nblok)
 
 #ifdef HAVE_NETCDF
      if (iam_master) then

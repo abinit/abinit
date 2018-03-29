@@ -8,7 +8,7 @@
 !!  on derivation from Grmvall's book or OD Restrepo's paper (PRB 94 212103 (2009))
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (BXu)
+!!  Copyright (C) 2013-2018 ABINIT group (BXu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@
 #include "abi_common.h"
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
-    
+
  use defs_basis
  use defs_elphon
  use defs_datatypes
@@ -54,6 +54,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  use m_ebands
 
  use m_io_tools,   only : open_file
+ use m_abilasi,    only : matrginv
  use m_geometry,   only : phdispl_cart2red
  use m_dynmat,     only : ftgam_init, ftgam
  use m_crystal,    only : crystal_t
@@ -63,7 +64,6 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 #undef ABI_FUNC
 #define ABI_FUNC 'get_tau_k'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_77_ddb, except_this_one => get_tau_k
 !End of the abilint section
 
@@ -124,9 +124,9 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  real(dp),allocatable :: coskr1(:,:),sinkr1(:,:)
  real(dp),allocatable :: coskr2(:,:),sinkr2(:,:)
  real(dp),allocatable :: cond_e(:,:,:,:),cond(:,:,:,:),sbk(:,:,:,:),seebeck(:,:,:,:),cth(:,:,:,:)
- 
+
 ! *************************************************************************
- 
+
  write(std_out,*) 'get_tau_k : enter '
 
  nrpt = ifc%nrpt
@@ -175,11 +175,11 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    MSG_BUG(message)
  end if
 
-!=========================================================    
+!=========================================================
 !Get equivalence between a kpt_phon pair and a qpt in qpt_full
 !only works if the qpt grid is complete (identical to
 !the kpt one, with a basic shift of (0,0,0)
-!=========================================================    
+!=========================================================
 
 !mapping of k + q onto k' for k and k' in full BZ
 !for dense k grid
@@ -193,8 +193,8 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  call mkqptequiv (FSfullpktofull,Cryst,elph_ds%k_phon%kpt,nkpt,nkpt,kpttokpt,elph_ds%k_phon%kpt,mqtofull)
 
-!=========================================================    
-!=========================================================    
+!=========================================================
+!=========================================================
 
  omega_max       = elph_ds%omega_max
  omega_min       = elph_ds%omega_min
@@ -266,7 +266,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  end do
  ABI_DEALLOCATE(tmp_wtq)
 
-! electron 
+! electron
  tmp_wtk =zero
  dos_e = zero
  call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS(elph_ds%minFSband:elph_ds%minFSband+nband-1,:,:), &
@@ -298,7 +298,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    call ebands_update_occ(Bst,-99.99_dp)
    write(message,'(a,f12.6,a,E20.12)')'At T=',Temp,' Fermi level is:',Bst%fermie
    call wrtout(std_out,message,'COLL')
-   
+
    if (abs(elph_ds%fermie) < tol10) then
      fermie(itemp) = Bst%fermie
    end if
@@ -472,7 +472,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
            call splint(nene_all,ene_pt,tmp2_wtk,ff2,nene_all*nspline,ene_ptfine,tmp_wtk2)
 
            tmp2_wtq(:,:) = wtq(:,iFSqpt,:)
-           do iene=1,nene 
+           do iene=1,nene
              e_k = eigenGS(elph_ds%minFSband+jband-1,iFSkpt,isppol)
              ene = e_k - omega_max + (iene-1)*deltaene
              if (ene<enemin .or. ene>enemax) cycle
@@ -481,7 +481,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
              tmp_wtkmq = tmp_wtk2(iene_fine) * elph_ds%k_phon%wtkirr(iFSqpt)
 
              if (tmp_wtkpq+tmp_wtkmq < tol_wtk ) then
-               nskip = nskip +1 
+               nskip = nskip +1
                cycle
              end if
 
@@ -509,7 +509,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
                end if
 
              end do ! ibranch 3
-           end do ! nene  800 
+           end do ! nene  800
          end do ! kptirr 216
        end do ! j' band 3
 !      print *, ' skipped ',  nskip, ' energy points out of ', nene*nband*nkptirr
@@ -517,7 +517,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 ! get inv_tau_k
        do itemp=1,ntemper  ! runs over termperature in K
          Temp=elph_ds%tempermin+elph_ds%temperinc*dble(itemp)
-         do iene=1,nene 
+         do iene=1,nene
            e_k = eigenGS(elph_ds%minFSband+jband-1,iFSkpt,isppol)
            ene = e_k - omega_max + (iene-1)*deltaene
            if (ene<enemin .or. ene>enemax) cycle
@@ -656,14 +656,14 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  if (elph_ds%prtbltztrp == 1) then
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
-&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,natom,nband,elph_ds%nelect,new_nkptirr, &
+&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &
 &   elph_ds%nspinor,nsppol,Cryst%nsym,Cryst%rprimd,Cryst%symrel,tmp_tau_k)
  end if !prtbltztrp
  ABI_DEALLOCATE(tmp_eigenGS)
  ABI_DEALLOCATE(tmp_tau_k)
 
-!Get the energy dependence of tau. 
-!Eq. (6) in  Restrepo et al. Appl. Phys. Lett. 94, 212103 (2009)  
+!Get the energy dependence of tau.
+!Eq. (6) in  Restrepo et al. Appl. Phys. Lett. 94, 212103 (2009)
 
  fname = trim(elph_ds%elph_base_name) // '_TAUE'
  if (open_file(fname,message,newunit=unit_taue,status='unknown') /= 0) then
@@ -703,7 +703,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
          rate_e = zero
        else
          rate_e = rate_e/nkpt/dos_e(isppol,iene)
-       end if 
+       end if
        write(unit_taue,"(3D16.8)") enemin+(iene-1)*deltaene*nspline, rate_e*femto/chu_tau, dos_e(isppol,iene)
      end do ! number of energies
      write(unit_taue,*) ' '
@@ -732,7 +732,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
            mfp_e = zero
          else
            mfp_e = mfp_e/nkptirr/dos_e(isppol,iene)
-         end if 
+         end if
          write(unit_mfp,"(2D16.8)") enemin+(iene-1)*deltaene*nspline, mfp_e*chu_mfp/femto
        end do ! number of energies
        write(unit_mfp,*) ' '
@@ -857,7 +857,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
      call matrginv(cond_inv,3,3)
      call DGEMM('N','N',3,3,3,one,sbk(itemp,isppol,:,:),3,cond_inv,&
 &     3,zero,seebeck(itemp,isppol,:,:),3)
-   end do 
+   end do
  end do
 
  do isppol=1,nsppol

@@ -9,7 +9,7 @@
 !! from the Kubo-Greenwood formula for PAW formalism
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (VRecoules, PGhosh)
+!! Copyright (C) 2002-2018 ABINIT group (VRecoules, PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,12 +88,12 @@
  use m_hdr
 
  use m_io_tools,     only : open_file, get_unit
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_paw'
- use interfaces_41_geometry
  use interfaces_67_common, except_this_one => conducti_paw
 !End of the abilint section
 
@@ -237,7 +237,7 @@
  ABI_ALLOCATE(kin22_k,(mom))
  ABI_ALLOCATE(Kth,(mom))
  ABI_ALLOCATE(Stp,(mom))
- 
+
 !---------------------------------------------------------------------------------
 !Conductivity -------
 !
@@ -280,11 +280,11 @@
      psinablapsi=zero
      read(opt_unt)((psinablapsi(1:2,1,iband,jband),iband=1,nband_k),jband=1,nband_k)
      read(opt_unt)((psinablapsi(1:2,2,iband,jband),iband=1,nband_k),jband=1,nband_k)
-     read(opt_unt)((psinablapsi(1:2,3,iband,jband),iband=1,nband_k),jband=1,nband_k) 
+     read(opt_unt)((psinablapsi(1:2,3,iband,jband),iband=1,nband_k),jband=1,nband_k)
 !    DEBUG
 !    write(963,*)isppol,ikpt,((psinablapsi(1:2,1,iband,jband),iband=1,nband_k),jband=1,nband_k)
 !    write(963,*)isppol,ikpt,((psinablapsi(1:2,2,iband,jband),iband=1,nband_k),jband=1,nband_k)
-!    write(963,*)isppol,ikpt,((psinablapsi(1:2,3,iband,jband),iband=1,nband_k),jband=1,nband_k) 
+!    write(963,*)isppol,ikpt,((psinablapsi(1:2,3,iband,jband),iband=1,nband_k),jband=1,nband_k)
 !    ENDDEBUG
 
 !    occupation numbers for k-point
@@ -391,13 +391,13 @@
 
  if (open_file(trim(filnam_out)//'_Kth', msg, newunit=kth_unt, form='formatted', action="write") /=0) then
    MSG_ERROR(msg)
- end if 
+ end if
  write(kth_unt,'(a)')&
 & ' #omega(ua) hbar*omega(eV)  thermal cond(ua)   Kth(W/m/K)   thermopower(ua)   Stp(microohm/K)'
 
  if (open_file(trim(filnam_out)//'.out', msg, newunit=ocond_unt, form='formatted', action="write") /= 0) then
    MSG_ERROR(msg)
- end if 
+ end if
  write(ocond_unt,'(a)' )' #Conducti output file:'
  write(ocond_unt,'(a)' )' #Contains all results produced by conducti utility'
  write(ocond_unt,'(a)' )' '
@@ -447,7 +447,7 @@
 
  close(lij_unt)
  close(sig_unt)
- close(kth_unt) 
+ close(kth_unt)
  close(ocond_unt)
 
  write(std_out,'(2a)')ch10,'OUTPUT'

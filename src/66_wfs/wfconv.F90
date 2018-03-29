@@ -8,7 +8,7 @@
 !! and converts them to other parameters.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG,TD)
+!! Copyright (C) 2000-2018 ABINIT group (XG,TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,6 +152,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
  use m_fftcore,  only : kpgsph, sphere
  use m_cgtools,  only : cg_envlop
+ use m_kg,       only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -162,7 +163,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
  use interfaces_66_wfs, except_this_one => wfconv
 !End of the abilint section
 

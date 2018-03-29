@@ -7,7 +7,7 @@
 !!  This module contains basic tools for periodic conditions traitement.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (??)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -359,12 +359,6 @@ function per_dist_int3(initA,initB,dim_grid)
 
 end function per_dist_int3
 !!***
-
-
-
-
-
-
 
 END MODULE m_per_cond
 !!***

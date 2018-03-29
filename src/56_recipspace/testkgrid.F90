@@ -11,7 +11,7 @@
 !! symmetry axes, and not primitive axes) is always tested.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_xmpi,      only : xmpi_abort
+ use m_xmpi
+
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -8,7 +8,7 @@
 !!  as well as basic objects describing the BZ sampling .... TODO list to be completed
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, GW_Q0_DEFAULT, czero_gw, em1params_t
  use m_fstrings,      only : strcat, sjoin, ltoa, itoa
  use m_io_tools,      only : file_exists
- use m_geometry,      only : normv
+ use m_geometry,      only : normv, mkrdim, metric
  use m_crystal,       only : crystal_print, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_bz_mesh,       only : kmesh_t, kmesh_init, get_ng0sh, kmesh_print, find_qmesh, get_BZ_item,&
@@ -94,7 +94,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_screening'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_56_io_mpi
 !End of the abilint section
 

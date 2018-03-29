@@ -8,7 +8,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,13 +94,13 @@
 
  if(present(dmft_dc))  then
    dmftdc=dmft_dc
-   if(pawtab%usepawu/=10) then
+   if(pawtab%usepawu<10) then
      write(message,'(4x,2a,i5)') "Error, usepawu should be equal to 10 if", &
 &     " dmft_dc is an argument of pawuenergy",pawtab%usepawu
      call wrtout(std_out,message,'COLL')
    end if
- else
-   dmftdc=pawtab%usepawu
+ else 
+   dmftdc=0
  end if
 
  DBG_ENTER("COLL")
@@ -268,7 +268,7 @@
  edcdctemp=zero;edctemp=zero
 
 !Full localized limit
- if(pawtab%usepawu==1.or.(dmftdc==1.or.dmftdc==4.or.dmftdc==5)) then
+ if((pawtab%usepawu==1.or.pawtab%usepawu==4).or.(dmftdc==1.or.dmftdc==4.or.dmftdc==5)) then
    jpawu_dc=jpawu
    if(dmftdc==4)  then
      jpawu_dc=zero

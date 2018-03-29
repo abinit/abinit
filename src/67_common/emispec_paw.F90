@@ -9,7 +9,7 @@
 !! largely inspired from the conducti_core_paw routine
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (SM, SVinko)
+!! Copyright (C) 2002-2018 ABINIT group (SM, SVinko)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,12 +71,12 @@
  use m_hdr
 
  use m_io_tools,     only : open_file, get_unit
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'emispec_paw'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

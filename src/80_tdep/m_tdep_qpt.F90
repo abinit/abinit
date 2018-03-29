@@ -332,7 +332,7 @@ contains
 !End of the abilint section
 
   implicit none
-  integer :: ii,jj,kk,brav,nqpt,iqpt,qpt_tot,tmp_int
+  integer :: ii,jj,kk,nqpt,iqpt,qpt_tot,tmp_int
   logical :: IsThisAllowed
   type(Input_Variables_type),intent(in) :: InVar
   type(Lattice_Variables_type),intent(in) :: Lattice

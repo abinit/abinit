@@ -10,7 +10,7 @@
 !! Use algorithm proposed by T. A.  Arias et al. in PRB 45, 1538 (1992)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT,FJ)
+!! Copyright (C) 1998-2018 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,6 +73,9 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
  use m_errors
  use m_cgtools
 
+ use m_numeric_tools,   only : hermit
+ use m_geometry, only : metric
+ use m_kg, only : getph 
  use defs_datatypes, only : pseudopotential_type
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
@@ -83,8 +86,6 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'extrapwf'
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 
@@ -154,7 +155,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
      call pawcprj_alloc(scf_history%cprj(:,:,ind2),0,dimcprj)
      ABI_ALLOCATE(ylmgr_k,(dtset%mpw,3,0))
      call ctocprj(atindx,cg,1,scf_history%cprj(:,:,ind1),gmet,gprimd,&
-&     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,&
+&     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,scf_history%mcprj,&
 &     dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &     dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,&
 &     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
@@ -202,7 +203,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
      iatom=0 ; iorder_cprj=0
      ABI_ALLOCATE(ylmgr_k,(dtset%mpw,3,0))
      call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,iorder_cprj,&
-&     dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,dtset%mgfft,&
+&     dtset%istwfk,kg,dtset%kptns,mcg,scf_history%mcprj,dtset%mgfft,&
 &     dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,&
 &     nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,&
 &     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,&

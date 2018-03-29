@@ -5,11 +5,10 @@
 !!
 !! FUNCTION
 !! Generate all the symmetry operations starting from the space group symbol
-!! for the cubic groups
-!! (according to the International Tables of Crystallography, 1983)
+!! for the cubic groups (according to the International Tables of Crystallography, 1983)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (RC,XG)
+!! Copyright (C) 1999-2018 ABINIT group (RC,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +27,6 @@
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
-!!
-!! TODO
 !!
 !! PARENTS
 !!      gensymspgr

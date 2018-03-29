@@ -12,7 +12,7 @@
 !! a buffer used to be multiple of 2, 3 or 5.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DC)
+!! Copyright (C) 1998-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,6 +53,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,      only : mkrdim, xcart2xred, xred2xcart
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: system_size,nullify_locreg_descriptors
 #endif
@@ -62,7 +63,6 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_setBoxGeometry'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -104,7 +104,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
  call system_size(wvl%atoms, xcart, radii, wvl_crmult, &
 & wvl_frmult, wvl%h(1), wvl%h(2), wvl%h(3), OCLconv, wvl%Glr, wvl%shift)
 
- acell(:) = wvl%atoms%astruct%cell_dim(:) 
+ acell(:) = wvl%atoms%astruct%cell_dim(:)
 
  if (prtvol == 0) then
    write(message, '(a,3F12.6)' ) &
@@ -136,7 +136,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 &   '  | box size for wavelets:', wvl%Glr%d%n1, wvl%Glr%d%n2, wvl%Glr%d%n3
    call wrtout(std_out,message,'COLL')
  end if
- 
+
 #else
  BIGDFT_NOTENABLED_ERROR()
  if (.false.) write(std_out,*)  prtvol,wvl_crmult,wvl_frmult,wvl%h(1),&

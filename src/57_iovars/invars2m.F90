@@ -13,7 +13,7 @@
 !! - compute the memory needs for this data set.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,13 +65,13 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
  use defs_abitypes
  use m_profiling_abi
 
+ use m_geometry,   only : mkrdim, metric
  use m_gsphere,    only : setshells
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2m'
- use interfaces_41_geometry
  use interfaces_57_iovars, except_this_one => invars2m
 !End of the abilint section
 

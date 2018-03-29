@@ -7,7 +7,7 @@
 !! Compute VHartree(tild[n_Z+n_core]) from input ncore
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GJ, FJ)
+!! Copyright (C) 1998-2018 ABINIT group (GJ, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,11 +42,12 @@ subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
  use defs_basis
  use m_profiling_abi
 
+ use m_numeric_tools, only : ctrap
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vhtnzc'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

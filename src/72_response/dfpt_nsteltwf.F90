@@ -8,7 +8,7 @@
 !! 2DTE matrix elements, in the non-stationary formulation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (DRH,XG,AR,MB,MVer)
+!! Copyright (C) 1999-2018 ABINIT group (DRH,XG,AR,MB,MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,14 +82,14 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  use m_profiling_abi
  use m_cgtools
 
- use m_pawcprj, only : pawcprj_type
+ use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type,load_k_hamiltonian
+ use m_kg,          only : mkkin, kpgstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nsteltwf'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

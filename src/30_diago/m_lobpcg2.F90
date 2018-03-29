@@ -6,6 +6,7 @@
 
 module m_lobpcg2
   use m_xg
+  use m_xgScalapack
   use defs_basis, only : std_err, std_out
   use m_profiling_abi
   use m_errors
@@ -34,11 +35,12 @@ module m_lobpcg2
   integer, parameter :: EIGENEV = 8
   integer, parameter :: EIGENPEVD = 9 
   integer, parameter :: EIGENPEV = 10
-  logical, parameter :: EIGPACK(10) = &
+  integer, parameter :: EIGENSLK = 11
+  logical, parameter :: EIGPACK(11) = &
     (/ .false.,.false.,.false., &
        .true. ,.true. ,.true. ,&
        .false.,.false.,&
-       .true. ,.true.  /)
+       .true. ,.true., .false.  /)
 
   integer, parameter :: tim_init     = 1651
   integer, parameter :: tim_free     = 1652
@@ -478,19 +480,20 @@ module m_lobpcg2
         call timab(tim_ax_bx,2,tsec)
 
         ! B-orthonormalize W, BW
-        !call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.) ! Do rotate AW
+        !call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
+        !call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.,ierr) ! Do rotate AW
 
         ! DO RR in the correct subspace
         ! if residu starts to be too small, there is an accumulation error in
         ! P with values such as 1e-29 that make the eigenvectors diverge
-        if ( iline == 1 .or. minResidu <= 1e-28) then 
+        if ( iline == 1 .or. minResidu < 1e-27) then 
           ! Do RR on XW to get the eigen vectors
           call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
           RR_var = VAR_XW
           call xgBlock_zero(lobpcg%P)
           call xgBlock_zero(lobpcg%AP)
           call xgBlock_zero(lobpcg%BP)
-          !RR_eig = eigenvalues2N
+          RR_eig = eigenvalues2N
           if ( ierr /= 0 ) then
             MSG_COMMENT("This is embarrasing. Let's pray")
           end if
@@ -500,18 +503,19 @@ module m_lobpcg2
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
             RR_var = VAR_XWP
-            !RR_eig = eigenvalues3N%self
+            RR_eig = eigenvalues3N%self
           else 
             call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
             RR_var = VAR_XW
-            !RR_eig = eigenvalues2N
+            RR_eig = eigenvalues2N
             call xgBlock_zero(lobpcg%P)
             call xgBlock_zero(lobpcg%AP)
             call xgBlock_zero(lobpcg%BP)
             nrestart = nrestart + 1
           end if
+          !RR_eig = eigenvalues3N%self 
         end if
-        RR_eig = eigenvalues3N%self 
+        !RR_eig = eigenvalues3N%self 
         call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
           MSG_ERROR_NOSTOP("I'm so so sorry I could not make it, I did my best but I failed. Sorry. I'm gonna suicide",ierr)
@@ -765,6 +769,9 @@ module m_lobpcg2
     integer :: subdim
     !integer :: neigen
     double precision :: abstol
+#ifdef HAVE_LINALG_SCALAPACK
+    logical :: use_slk
+#endif
     type(xg_t) :: vec
     type(xg_t) :: subA
     type(xg_t) :: subB
@@ -776,6 +783,7 @@ module m_lobpcg2
     type(xgBlock_t) :: WP 
     type(xgBlock_t) :: AWP 
     type(xgBlock_t) :: BWP 
+    type(xgScalapack_t) :: scalapack
     double precision :: tsec(2)
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
@@ -829,6 +837,7 @@ module m_lobpcg2
       AWP = lobpcg%AWP
       BWP = lobpcg%BWP
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
+
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) then
         eigenSolver = EIGENVD
@@ -842,12 +851,24 @@ module m_lobpcg2
       MSG_ERROR("RR")
     end select
 
+#ifdef HAVE_LINALG_SCALAPACK
+    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim,lobpcg%prtvol-2,use_slk)
+    if ( use_slk) then
+      eigenSolver = EIGENSLK
+    end if
+#endif
+
     ! Select diago algorithm
 
     abstol = 0d0 ; if ( present(tolerance) ) abstol = tolerance
 
     call xg_init(subA,space(X),subdim,subdim,lobpcg%spacecom)
-    if ( var /= VAR_X ) call xg_init(subB,space(X),subdim,subdim,lobpcg%spacecom)
+    !call xgBlock_zero(subA%self)
+    if ( var /= VAR_X ) then
+      call xg_init(subB,space(X),subdim,subdim,lobpcg%spacecom)
+      !call xgBlock_zero(subB%self)
+      !call xgBlock_one(subB%self)
+    end if
 
     if ( eigenSolver == EIGENVX .or. eigenSolver == EIGENPVX ) then
       call xg_init(vec,space(x),subdim,blockdim)
@@ -898,13 +919,11 @@ module m_lobpcg2
       end if
     end if
 
-!    ! Compute X*AX subspace matrix
-!    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subA%self)
-!    ! Sum all MPI contribution
-!
-!    ! Compute X*BX subspace matrix
-!    call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
-!    ! Sum all MPI contribution
+    ! Compute X*AX subspace matrix
+    !call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subA%self)
+
+    ! Compute X*BX subspace matrix
+    !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
     !---end 
 
     call timab(tim_hegv,1,tsec)
@@ -924,6 +943,10 @@ module m_lobpcg2
       case (EIGENPEV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpev"
         call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info) 
+      case (EIGENSLK)
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using pheev"
+        call xgScalapack_heev(scalapack,subA%self,eigenvalues)
+        info = 0 ! No error code returned for the moment
       case default
         MSG_ERROR("Error for Eigen Solver HEEV")
       end select
@@ -950,9 +973,16 @@ module m_lobpcg2
       case (EIGENPV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgv"
         call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info) 
+      case (EIGENSLK)
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using phegv"
+        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues)
+        info = 0 ! No error code returned for the moment
       case default
         MSG_ERROR("Error for Eigen Solver HEGV")
       end select
+    end if
+    if ( eigenSolver == EIGENSLK ) then
+      call xgScalapack_free(scalapack)
     end if
     tsec(2) = abi_wtime() - tsec(2)
 !    if ( var /= VAR_XW ) then
@@ -986,7 +1016,7 @@ module m_lobpcg2
       call xgBlock_gemm(lobpcg%BX%normal,Cwp%normal,1.0d0,lobpcg%BX,Cwp,0.d0,subB%self)
       call xgBlock_copy(subB%self,lobpcg%BX) 
   
-      if ( var /= VAR_X .and. ( var == VAR_XW .or. var == VAR_XWP ) ) then
+      if ( var /= VAR_X ) then
         ! Cost to pay to avoid temporary array in xgemm
         call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)

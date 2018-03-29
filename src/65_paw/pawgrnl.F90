@@ -11,7 +11,7 @@
 !! Remember: Vnl=Sum_ij[|p_i>Dij<p_j|]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT, AM)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,6 +103,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  use m_xmpi
  use m_errors
 
+ use m_geometry,     only : metric
  use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type

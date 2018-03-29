@@ -11,7 +11,7 @@
 !! input value of nkpt=0, provided kptopt/=0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -101,7 +101,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,     only : metric
  use m_cgtools,  only : set_istwfk
+ use m_parser,  only : intagm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -110,8 +112,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_56_recipspace
 !End of the abilint section
 

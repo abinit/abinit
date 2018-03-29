@@ -8,8 +8,10 @@ module m_tdep_latt
 
  use defs_basis
  use m_profiling_abi
- use m_tdep_readwrite,   only : Input_Variables_type
  use m_errors
+
+ use m_geometry,  only : metric
+ use m_tdep_readwrite,   only : Input_Variables_type
 
  implicit none
 
@@ -45,7 +47,7 @@ module m_tdep_latt
   public :: tdep_make_inbox
   public :: tdep_make_latt
 
-contains 
+contains
 
 !=====================================================================================================
 subroutine tdep_make_inbox(tab,natom,tol,&
@@ -61,7 +63,7 @@ subroutine tdep_make_inbox(tab,natom,tol,&
   implicit none
   integer :: natom,ii,jj,iatom
   double precision :: tol
-  double precision :: tab(3,natom) !Input (and ouput if temp is not present) 
+  double precision :: tab(3,natom) !Input (and ouput if temp is not present)
   double precision,optional :: temp(3,natom) !Input/Output (if present)
 
   do iatom=1,natom
@@ -70,14 +72,14 @@ subroutine tdep_make_inbox(tab,natom,tol,&
         jj=int(tab(ii,iatom)-0.5+tol)
       else if (tab(ii,iatom).ge.0.d0) then
         jj=int(tab(ii,iatom)+0.5+tol)
-      end if  
+      end if
       if (present(temp)) then
         temp(ii,iatom)=temp(ii,iatom)-real(jj)
       else
         tab(ii,iatom)=tab(ii,iatom)-real(jj)
-      end if        
-    end do  
-  end do  
+      end if
+    end do
+  end do
 
 end subroutine
 
@@ -90,7 +92,6 @@ end subroutine
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_make_latt'
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -131,7 +132,7 @@ end subroutine
   rprimd(:,:)=zero; rprimdm1(:,:)=zero; rprimdt(:,:)=zero; rprimd_MD(:,:)=zero; rprim_tmp(:,:)=zero
   rprim(:,:)=zero; temp(:,:)=zero; rprimm1(:,:)=zero; rprimt(:,:)=zero; rprimdtm1(:,:)=zero
 
-! Echo some (re)computed quantities 
+! Echo some (re)computed quantities
   write(InVar%stdout,*) ' '
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,*) '########################## Computed quantities ##############################'
@@ -148,9 +149,9 @@ end subroutine
 
   do ii=1,3
     do jj=1,3
-      do kk=1,3 
+      do kk=1,3
         temp(ii,jj)=temp(ii,jj)+multiplicitym1(ii,kk)*InVar%rprimd_MD(kk,jj)
-      end do  
+      end do
     end do
 !FB    write(InVar%stdout,'(a,x,3(f16.10,x))') 'temp=',(temp(ii,jj),jj=1,3)
   end do
@@ -158,13 +159,13 @@ end subroutine
 !=============================================================================================
 ! Here, rprim define a Primitive Lattice and NOT a Conventional lattice
 ! The lattice parameters have to multiply rprim on:
-! 0/ line or column         --> line 0 
+! 0/ line or column         --> line 0
 !                               Cubic, Fcc, Bcc, Ortho, Tetra, Rhombo, Hexa
-! 1/ line only              --> line=1 (see rprim using acell in ABINIT) : 
+! 1/ line only              --> line=1 (see rprim using acell in ABINIT) :
 !                               Mono, Tri
-! 2/ column only            --> line=2 (see rprim using scalecart in ABINIT) : 
+! 2/ column only            --> line=2 (see rprim using scalecart in ABINIT) :
 !                               Bct, Face-centered-Ortho, Base-centered-Ortho, C-centered-Ortho
-! 3/ neither line or column --> line=3 (rprim has to be directly dimensioned in ABINIT) : 
+! 3/ neither line or column --> line=3 (rprim has to be directly dimensioned in ABINIT) :
 !                               C-centered-Mono
 !=============================================================================================
   line=0
@@ -173,10 +174,10 @@ end subroutine
     brav=1
     line=1
 !FB See the m_tdep_qpt.F90 routine for the other modifications
-!FB    rprim(1,1)= 1.0d0 ; rprim(1,2)= 0.0d0                             ; rprim(1,3)= 0.0d0 
+!FB    rprim(1,1)= 1.0d0 ; rprim(1,2)= 0.0d0                             ; rprim(1,3)= 0.0d0
 !FB    rprim(2,1)= 0.0d0 ; rprim(2,2)= 1.0d0                             ; rprim(2,3)= 0.0d0
 !FB    rprim(3,1)= 0.0d0 ; rprim(3,2)= dcos(InVar%angle_alpha*pi/180.d0) ; rprim(3,3)= dsin(InVar%angle_alpha*pi/180.d0)
-    rprim(1,1)= 1.0d0                             ; rprim(1,2)= 0.0d0 ; rprim(1,3)= 0.0d0 
+    rprim(1,1)= 1.0d0                             ; rprim(1,2)= 0.0d0 ; rprim(1,3)= 0.0d0
     rprim(2,1)= 0.0d0                             ; rprim(2,2)= 1.0d0 ; rprim(2,3)= 0.0d0
     rprim(3,1)= dcos(InVar%angle_alpha*pi/180.d0) ; rprim(3,2)= 0.0d0 ; rprim(3,3)= dsin(InVar%angle_alpha*pi/180.d0)
 ! For orthorhombic: bravais(1)=3
@@ -200,7 +201,7 @@ end subroutine
     rprim(2,1)= 0.5d0 ; rprim(2,2)=-0.5d0 ; rprim(2,3)= 0.5d0
     rprim(3,1)= 0.5d0 ; rprim(3,2)= 0.5d0 ; rprim(3,3)=-0.5d0
 ! For hexagonal: bravais(1)=6
-  else if (InVar%bravais(1).eq.6.and.InVar%bravais(2).eq.0) then !hexagonal 
+  else if (InVar%bravais(1).eq.6.and.InVar%bravais(2).eq.0) then !hexagonal
     brav=4
     line=0
     rprim(1,1)= 1.0d0 ; rprim(1,2)= 0.0d0 ; rprim(1,3)= 0.0d0
@@ -233,8 +234,8 @@ end subroutine
     rprim(3,1)= 0.5d0 ; rprim(3,2)= 0.5d0 ; rprim(3,3)=-0.5d0
   else
     MSG_ERROR('THIS BRAVAIS IS NOT DEFINED')
-  end if  
-! Compute gprim and (transpose of gprim) gprimt  
+  end if
+! Compute gprim and (transpose of gprim) gprimt
   call matr3inv(rprim,Lattice%gprimt)
   do ii=1,3
     do jj=1,3
@@ -259,9 +260,9 @@ end subroutine
 ! the unitcell and multiplicity
   do ii=1,3
     do jj=1,3
-      do kk=1,3 
+      do kk=1,3
         temp2(ii,jj)=temp2(ii,jj)+rprimm1(ii,kk)*temp(kk,jj)
-      end do  
+      end do
     end do
     acell_unitcell(ii)=temp2(ii,ii)
   end do
@@ -282,7 +283,7 @@ end subroutine
     if (acell_unitcell(1).ge.acell_unitcell(2)) then
       MSG_ERROR('You must set a < b in the conventional lattice')
     end if
-  else if (InVar%bravais(1).eq.6) then !hexagonal 
+  else if (InVar%bravais(1).eq.6) then !hexagonal
     if(abs(acell_unitcell(1)-acell_unitcell(2)).gt.tol8) then
       MSG_ERROR(' STOP: THE PRECISION ON THE LATTICE PARAMETERS IS NOT SUFFICIENT')
     end if
@@ -296,16 +297,16 @@ end subroutine
     acell_unitcell(3)=acell_unitcell(1)
   end if
   write(InVar%stdout,'(a,1x,3(f16.10,1x))') ' acell_unitcell=',acell_unitcell(:)
-! TODO: Check also the off-diagonal elements  
+! TODO: Check also the off-diagonal elements
 
 ! Redefine rprimd_MD (in order to have a precision higher than 1.d-8)
   rprimd_MD(:,:)=0.d0
   rprim_tmp(:,:)=rprim(:,:)
   do ii=1,3
     do jj=1,3
-      do kk=1,3 
+      do kk=1,3
         rprimd_MD(ii,jj)=rprimd_MD(ii,jj)+acell_unitcell(ii)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
-      end do  
+      end do
     end do
     write(InVar%stdout,'(a,1x,3(f16.10,1x))') ' rprimd_MD=',(rprimd_MD(ii,jj),jj=1,3)
   end do
@@ -321,9 +322,9 @@ end subroutine
     rprimd(3,1)=rprim(3,1)*acell_unitcell(3) ; rprimd(3,2)=rprim(3,2)*acell_unitcell(3) ; rprimd(3,3)=rprim(3,3)*acell_unitcell(3)
   else
     write(InVar%stdout,'(a)') ' STOP : CALCULATION OF RPRIMD NOT IMPLEMENTED'
-  end if  
+  end if
 
-! Starting from rprimd, compute gmet, rmet, gprimd  
+! Starting from rprimd, compute gmet, rmet, gprimd
 !FB  call metric(Lattice%gmet,Lattice%gprimd,iout,Lattice%rmet,rprimd,Lattice%ucvol)
 
 ! Define transpose and inverse of rprimd
@@ -331,7 +332,7 @@ end subroutine
     do jj=1,3
       rprimdt(ii,jj)=rprimd(jj,ii)
     end do
-  end do  
+  end do
   call metric(Lattice%gmet,Lattice%gprimd,iout,Lattice%rmet,rprimdt,Lattice%ucvol)
   ABI_MALLOC(IPIV,(3))
   ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0

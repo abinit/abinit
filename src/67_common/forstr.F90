@@ -7,7 +7,7 @@
 !! Drives the computation of forces and/or stress tensor
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -189,6 +189,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_efield
  use m_errors
 
+ use m_geometry,         only : xred2xcart, metric
  use m_electronpositron, only : electronpositron_type
  use m_energies,         only : energies_type
  use m_pawang,           only : pawang_type
@@ -207,7 +208,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
@@ -315,7 +315,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
    if(dtset%usefock==1 .and. associated(fock)) then
 !     if((dtset%optstress/=0).and.(psps%usepaw==1)) then
      if((psps%usepaw==1).and.((dtset%optstress/=0).or.(dtset%optforces==2))) then
-       if(dtset%optstress==0) then 
+       if(dtset%optstress==0) then
          ctocprj_choice=2
          ncpgr=3
        end if
@@ -342,7 +342,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         psps%mpsang,dtset%mpw,fock%fock_BZ%nbandocc_bz,fock%fock_BZ%mkpt,&
 &         fock%fock_BZ%npwarr,dtset%nsppol,option,rprimd,ylmbz,ylmgrbz)
          call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
-&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcgbz,&
+&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,mcgbz,&
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
@@ -352,7 +352,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
          ABI_DEALLOCATE(ylmgrbz)
        else
          call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
-&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_common%mband,mcg,&
+&         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,mcg,&
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
@@ -477,7 +477,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  if (allocated(vxc_hf)) then
    ABI_DEALLOCATE(vxc_hf)
  end if
- 
+
 
  call timab(914,2,tsec)
  call timab(910,2,tsec)

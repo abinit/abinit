@@ -7,7 +7,7 @@
 !! driver for the parser
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,9 @@ module m_ab7_invars
   use interfaces_32_util
   use interfaces_57_iovars
 
-  use m_dtset,  only : dtset_free
+  use m_fstrings, only : inupper
+  use m_parser,   only : intagm, importxyz, parsefile
+  use m_dtset,    only : dtset_free
 
   implicit none
 
@@ -442,9 +444,6 @@ end subroutine get_token
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_new_from_string'
- use interfaces_32_util
- use interfaces_42_parser
- use interfaces_57_iovars
 !End of the abilint section
 
  integer, intent(out) :: dtsetsId
@@ -528,7 +527,6 @@ subroutine ab7_invars_new_from_file(dtsetsId, filename, n, pspfiles, npsp, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_new_from_file'
- use interfaces_57_iovars
 !End of the abilint section
 
  integer, intent(out) :: dtsetsId

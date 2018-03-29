@@ -11,7 +11,7 @@
 !! considers the sress correction.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XW)
+!! Copyright (C) 1999-2018 ABINIT group (XW)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,9 @@
 
 subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&            instrain,iout,mpert,msize,natom,nblok)
+&            instrain,iout,mpert,&
+! &msize,&
+&            natom,nblok)
 
  use defs_basis
  use m_profiling_abi
@@ -68,6 +70,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  use m_ddb
 
  use m_fstrings,       only : itoa, sjoin
+ use m_abilasi,        only : matrginv
  use m_dynmat,         only : asria_corr
  use m_anaddb_dataset, only : anaddb_dataset_type
 
@@ -76,14 +79,14 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_elast'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
 
 !Arguments -------------------------------------------
 !scalars
- integer,intent(in) :: iblok,iblok_stress,iout,mpert,msize,natom,nblok
+ integer,intent(in) :: iblok,iblok_stress,iout,mpert,natom,nblok
+!integer,intent(in) :: msize
  type(crystal_t),intent(in) :: crystal
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays

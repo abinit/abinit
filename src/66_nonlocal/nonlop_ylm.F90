@@ -23,7 +23,7 @@
 !! * This routine uses spherical harmonics Ylm to express Vnl.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -295,6 +295,7 @@
  use m_profiling_abi
  use m_errors
 
+ use m_kg,      only : ph1d3d
  use m_pawcprj, only : pawcprj_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -302,7 +303,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_ylm'
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => nonlop_ylm
 !End of the abilint section
 

@@ -7,7 +7,7 @@
 !! FUNCTION
 !! Extension to prttagm to include the printing of
 !! images information, in those cases the same variable
-!! is printed several times for each dataset 
+!! is printed several times for each dataset
 !!
 !! Cases where images information are relevant includes
 !! xcart, xred, acell, fcart.
@@ -39,6 +39,8 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 
  use defs_basis
  use m_profiling_abi
+
+ use m_nctk,   only : write_var_netcdf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -173,7 +175,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 &           -dprarr_images(1:narrm(idtset),iimage,0)))<tol12) print_out=.false.
          end if
          print_netcdf=print_out
-         
+
          if (present(forceprint)) then
            if (forceprint==1.or.forceprint==3) print_out=.true.
            if (forceprint==1.or.forceprint==2) print_netcdf=.true.
@@ -190,7 +192,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 &               first_column//trim(format_2)//trim(long_dpr)//")"
                write(iout,full_format) &
 &               trim(keywd),appen,dprarr_images(1:narrm(idtset),iimage,idtset)
-             end if        
+             end if
 #ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
@@ -213,7 +215,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 &               marr,narrm(idtset),abs(ncid),'DPR',trim(keywd))
              end if
 #endif
-             
+
            end if
          end if
        end do

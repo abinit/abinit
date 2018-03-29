@@ -70,7 +70,7 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t40.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous;
-#%%   t40o_DOS_AT0001, tolnlines = 35, tolabs = 3.000e+01, tolrel = 9.500e-02, fld_options = -ridiculous
+#%%   t40o_DOS_AT0001, tolnlines = 40, tolabs = 3.000e+01, tolrel = 9.500e-02, fld_options = -ridiculous
 #%% psp_files = 26fe.paw 
 #%% [paral_info]
 #%% max_nprocs = 4

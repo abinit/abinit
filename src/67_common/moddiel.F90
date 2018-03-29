@@ -9,7 +9,7 @@
 !! When cplex=2, q must be taken into account, and vresid and vrespc will be COMPLEX
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG)
+!! Copyright (C) 2000-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,13 +61,13 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,     only : metric
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'moddiel'
- use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 

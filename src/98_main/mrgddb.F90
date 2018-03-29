@@ -6,7 +6,7 @@
 !! This code merges the derivative databases.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SP)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +70,6 @@ program mrgddb
 #define ABI_FUNC 'mrgddb'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_51_manage_mpi
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -79,8 +78,8 @@ program mrgddb
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
- integer :: chkopt,dummy,dummy1,dummy2,dummy3,dummy4,dummy5,dummy6,dummy7,ios
- integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank,fcnt
+ integer :: chkopt,ios
+ integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename

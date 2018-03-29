@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.7.6 of ANADDB 
+.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h06 )
+.Starting date : Fri  9 Mar 2018.
+- ( at 06h21 )
   
 
 ================================================================================
@@ -82,6 +82,7 @@ Phonon band structure files, with atomic projections, will be output
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.012  and twall      0.012 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -113,9 +114,9 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.767797E-20    0.000000E+00
-       2        0.000000E+00    3.702848E-20    0.000000E+00
-       3        0.000000E+00    2.465113E-20    0.000000E+00
+       1        0.000000E+00    3.358566E-20    0.000000E+00
+       2        0.000000E+00    3.444683E-20    0.000000E+00
+       3        0.000000E+00    2.454337E-20    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -125,15 +126,15 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    2.500000E-01    2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -1.426132E-03    1.134670E-04    7.618302E-01
-       2       -1.426132E-03    1.134670E-04    7.618302E-01
-       3       -1.426132E-03    1.134670E-04    7.618302E-01
+       1       -2.282396E-03    1.342939E-04    3.520320E-01
+       2       -2.282396E-03    1.342939E-04    3.520320E-01
+       3       -2.282396E-03    1.342939E-04    3.520320E-01
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.767797E-20    0.000000E+00
-       2        0.000000E+00    3.702848E-20    0.000000E+00
-       3        0.000000E+00    2.465113E-20    0.000000E+00
+       1        0.000000E+00    3.358566E-20    0.000000E+00
+       2        0.000000E+00    3.444683E-20    0.000000E+00
+       3        0.000000E+00    2.454337E-20    0.000000E+00
 
  Q point =    5.000000E-01    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -145,19 +146,19 @@ Phonon band structure files, with atomic projections, will be output
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
  mka2f: lambda <omega^2> =     4.648349E-06
- mka2f: lambda <omega^3> =     6.629053E-09
- mka2f: lambda <omega^4> =     1.043115E-11
- mka2f: lambda <omega^5> =     1.787147E-14
- mka2f: isotropic lambda =     3.205166E+00
- mka2f: omegalog  =     1.072455E-03 (Ha)     3.386541E+02 (Kelvin)
+ mka2f: lambda <omega^3> =     6.982389E-09
+ mka2f: lambda <omega^4> =     1.193103E-11
+ mka2f: lambda <omega^5> =     2.230141E-14
+ mka2f: isotropic lambda =     3.363616E+00
+ mka2f: omegalog  =     1.003728E-03 (Ha)     3.169517E+02 (Kelvin)
  mka2f: input mustar =     1.000000E-02
--mka2f: MacMillan Tc =     2.254440E-04 (Ha)     7.118948E+01 (Kelvin)
+-mka2f: MacMillan Tc =     2.143205E-04 (Ha)     6.767698E+01 (Kelvin)
 
 ================================================================================
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
@@ -171,12 +172,12 @@ Phonon band structure files, with atomic projections, will be output
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.16659706E-07  8.89014668E-03
+-  1  0.00000000E+00  0.00000000E+00  8.89014669E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -8.89014668E-03  4.16659706E-07
+-  1  0.00000000E+00  8.89014669E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -189,8 +190,8 @@ Phonon band structure files, with atomic projections, will be output
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
   0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
- 
+ -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.530419E-03 -1.939164E-03  9.414580E-04
@@ -215,10 +216,10 @@ Phonon band structure files, with atomic projections, will be output
 ;  1  0.00000000E+00  6.28628301E-03  6.28628301E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=         40.9  wall=         40.9
+- Proc.   0 individual time (sec): cpu=         37.6  wall=         37.6
 
 ================================================================================
 
-+Total cpu time     40.862  and wall time     40.851 sec
++Total cpu time     37.603  and wall time     37.619 sec
 
  anaddb : the run completed succesfully.

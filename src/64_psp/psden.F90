@@ -7,7 +7,7 @@
 !! Calculate a pseudo-density from an original density on a radial grid (regular or logarithmic)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GJ,FJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (GJ,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,11 +50,12 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
  use m_profiling_abi
  use m_errors
 
+ use m_numeric_tools, only : ctrap
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psden'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -107,7 +108,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
    call ctrap(nc1,ff(1:nc1),step,norm1)
    if (ilog==1) norm1=norm1+half*ff(1)
  end do
- if (ii==100) then 
+ if (ii==100) then
    MSG_ERROR('Big pb 1 in psden !')
  end if
 
@@ -120,7 +121,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
    call ctrap(nc1,ff(1:nc1),step,norm2)
    if (ilog==1) norm2=norm2+half*ff(1)
  end do
- if (ii==100) then 
+ if (ii==100) then
    MSG_ERROR('Big pb 2 in psden !')
  end if
 

@@ -11,7 +11,7 @@
 !! S is the overlap operator between |Cnk> (used for PAW).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,7 +82,6 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  implicit none
 
 !Arguments ------------------------------------
-!This type is defined in defs_mpi
 !scalars
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
  integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
@@ -98,7 +97,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !scalars
  integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,ierr,index_cg,index_cprj
  integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: enlout_dum(1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),scwavef(:,:)
@@ -111,12 +110,10 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Compatibility tests
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
  if(gs_ham%usepaw==0) then
-   msg='Only compatible with PAW (usepaw=1) !'
-   MSG_BUG(msg)
+   MSG_BUG('Only compatible with PAW (usepaw=1) !')
  end if
  if(nband<0.and.(mcg<npw_k*my_nspinor.or.mgsc<npw_k*my_nspinor.or.mcprj<my_nspinor)) then
-   msg='Invalid value for mcg, mgsc or mcprj !'
-   MSG_BUG(msg)
+   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
  end if
 
 !Keep track of total time spent in getgsc:

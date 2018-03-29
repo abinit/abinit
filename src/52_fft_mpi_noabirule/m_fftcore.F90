@@ -9,7 +9,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2018 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3371,8 +3371,8 @@ end subroutine indfftrisc
 !!  Must take into account the time-reversal symmetry when istwf_k is not 1.
 !!
 !! PARENTS
-!!      getmpw,initberry,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
-!!      m_hamiltonian,m_wfd,wfconv
+!!      getmpw,initberry,initorbmag,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
+!!      m_hamiltonian,m_wfd,mkpwind_k,wfconv
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master

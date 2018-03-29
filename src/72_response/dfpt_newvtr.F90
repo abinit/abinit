@@ -9,7 +9,7 @@
 !! Then, call one of the self-consistency drivers, and  update vtrial.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,6 +108,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  use m_ab7_mixing
  use m_errors
 
+ use m_geometry, only : metric
  use m_pawrhoij, only : pawrhoij_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -115,7 +116,6 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_newvtr'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_67_common
 !End of the abilint section

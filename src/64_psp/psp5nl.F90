@@ -8,7 +8,7 @@
 !! 0 to lmax; Vloc is assumed local potential.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, FrD, GZ)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, FrD, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,11 +70,12 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
  use m_splines
  use m_errors
 
+ use m_numeric_tools, only : ctrap
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp5nl'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -515,7 +516,7 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
  ABI_DEALLOCATE(work4)
 
  contains
- 
+
    function  bes0_psp5(arg)
 
 

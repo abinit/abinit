@@ -19,7 +19,7 @@
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !! Compute Hartree energy contribution to stress tensor (Cartesian coordinates).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +55,7 @@ subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_geometry,     only : metric
  use m_mpinfo,     only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
@@ -62,7 +63,6 @@ subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 #undef ABI_FUNC
 #define ABI_FUNC 'strhar'
  use interfaces_18_timing
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

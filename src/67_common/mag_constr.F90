@@ -7,7 +7,7 @@
 !! This routine is called to compute the potential corresponding to constrained magnetic moments.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (ILuk, MVer)
+!! Copyright (C) 1998-2018 ABINIT group (ILuk, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@
 !!      calcdensph,metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! NOTES
-!!  based on html notes for the VASP implementation at 
+!!  based on html notes for the VASP implementation at
 !!  http://cms.mpi.univie.ac.at/vasp/vasp/Constraining_direction_magnetic_moments.html
 !!
 !! SOURCE
@@ -58,8 +58,9 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  use defs_abitypes
  use m_xmpi
  use m_errors
- 
- use m_mpinfo,  only : ptabs_fourdp
+
+ use m_geometry,  only : metric
+ use m_mpinfo,    only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -67,7 +68,6 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 #define ABI_FUNC 'mag_constr'
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_54_abiutil
 !End of the abilint section
 
@@ -133,16 +133,16 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 !Loop over atoms
 !-------------------------------------------
  do iatom=1,natom
-   
+
    norm = sqrt(sum(spinat(:,iatom)**2))
    spinat_norm(:,iatom) = zero
    if (norm > tol10) then
      spinat_norm(:,iatom) = spinat(:,iatom) / norm
    else if (magconon == 1) then
 !    if spinat = 0 and we are imposing the direction only, skip this atom
-     cycle 
+     cycle
    end if
-   
+
 !  Define a "box" around the atom
    r2atsph=1.0000001_dp*ratsph(typat(iatom))**2
    rr1=sqrt(r2atsph*gmet(1,1))
@@ -243,7 +243,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                ! intgden(1)=rho_up=n+m
                ! intgden(2)=rho_dn=n-m
                ! Then, is the following line be
-               ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom) 
+               ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom)
                ! ??
                cmm_z=intgden(1,iatom)-intgden(2,iatom) - spinat(3,iatom)
              end if
@@ -255,7 +255,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 !          end do loop on spirals
 
          end do  ! i1
-       end do  ! i2 
+       end do  ! i2
      end if  ! if this is my fft slice
    end do ! i3
 

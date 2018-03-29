@@ -8,7 +8,7 @@
 !! point symmetry of the input atom
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group (JWZ)
+!! Copyright (C) 2007-2018 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,6 +48,8 @@ subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
  use defs_basis
  use m_profiling_abi
  use m_linalg_interfaces
+
+ use m_abilasi,         only : matrginv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -111,7 +113,7 @@ subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
      if(xred(ii,iatom) < zero) cell_index = cell_index - 1
      cell_indexp = int(xredp(ii))
      if(xredp(ii) < zero) cell_indexp = cell_indexp - 1
-     
+
      do while (cell_indexp < cell_index)
        xredp(ii) = xredp(ii)+one
        cell_indexp = cell_indexp + 1

@@ -7,7 +7,7 @@
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVeithen,MB)
+!! Copyright (C) 2002-2018 ABINIT group (MVeithen,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,6 +106,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_hdr
 
  use m_ioarr,    only : read_rhor
+ use m_kg,       only : getph
  use m_pawrhoij, only : pawrhoij_type
 
 !This section has been created automatically by the script Abilint (TD).

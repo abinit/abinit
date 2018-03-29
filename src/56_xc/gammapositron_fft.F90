@@ -7,7 +7,7 @@
 !! Compute positron electron-positron enhancement factor on a real space FFT grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (MT)
+!! Copyright (C) 2013-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

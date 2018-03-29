@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,19 +18,11 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "acrossb.F90",
  "appdig.F90",
- "blow_pawuj.F90",
- "create_mlms2jmj.F90",
- "create_slm2ylm.F90",
- "ctrap.F90",
  "fappnd.F90",
- "findmin.F90",
- "hermit.F90",
- "inupper.F90",
  "isfile.F90",
- "kramerskronig.F90",
  "littlegroup_q.F90",
+ "m_angles.F90",
  "m_atomdata.F90",
  "m_dummy.F90",
  "m_exp_mat.F90",
@@ -42,16 +34,11 @@ sources = [
  "m_wfutils.F90",
  "mati3det.F90",
  "mati3inv.F90",
- "matrginv.F90",
- "matr3eigval.F90",
  "matr3inv.F90",
  "mknormpath.F90",
- "overlap_g.F90",
  "proc_distrb_cycle.F90",
  "radsintr.F90",
  "radsmear.F90",
- "rotmat.F90",
- "sbf8.F90",
  "smatrix.F90",
  "status.F90",
 ]

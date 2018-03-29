@@ -8,7 +8,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2018 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,6 +66,7 @@ program cut3d
  use m_crystal_io
 
  use m_fstrings,        only : endswith, sjoin, itoa
+ use m_geometry,        only : xred2xcart, metric
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_fftcore,         only : ngfft_seq
  use m_distribfft,      only : init_distribfft_seq
@@ -78,7 +79,6 @@ program cut3d
 #define ABI_FUNC 'cut3d'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -765,7 +765,7 @@ program cut3d
            exit
 
          case (15)
-            ! Write netcdf file.
+           ! Write netcdf file.
            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
            call crystal_from_hdr(cryst, hdr, timrev)
            call ngfft_seq(ngfft, [nr1, nr2, nr3])

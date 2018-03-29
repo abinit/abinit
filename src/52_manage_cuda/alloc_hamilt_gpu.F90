@@ -8,7 +8,7 @@
 !! of Hamiltonian using a GPU
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (MT, FDahm)
+!! Copyright (C) 2000-2018 ABINIT group (MT, FDahm)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,7 +146,7 @@ end subroutine alloc_hamilt_gpu
 !! of Hamiltonian using a GPU
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (MT, FDahm)
+!! Copyright (C) 2000-2018 ABINIT group (MT, FDahm)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

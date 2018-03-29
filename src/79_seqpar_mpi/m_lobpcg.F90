@@ -8,15 +8,11 @@
 !!  They permit to hide the complex/real form of the WFs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (FBottin,CS,FDahm,MT)
+!! Copyright (C) 2009-2018 ABINIT group (FBottin,CS,FDahm,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! PARENTS
 !!
@@ -62,7 +58,7 @@ CONTAINS
 !!  for a block of band (band-FFT parallelisation)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FBottin,CS)
+!! Copyright (C) 1998-2018 ABINIT group (FBottin,CS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

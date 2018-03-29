@@ -4,12 +4,12 @@
 !!  pawuj_det
 !!
 !! FUNCTION
-!!  From the complete dtpawuj-dataset determines U (or J) parameter for 
+!!  From the complete dtpawuj-dataset determines U (or J) parameter for
 !!  PAW+U calculations
 !!  Relevant only for automatic determination of U in PAW+U context
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DJA)
+!! Copyright (C) 1998-2018 ABINIT group (DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,6 +47,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
  use m_special_funcs,  only : iradfnh
  use m_pptools,        only : prmat
+ use m_geometry,       only : shellstruct
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -65,11 +66,11 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !arrays
  integer                        :: ndtpawuj
  type(macro_uj_type),intent(in) :: dtpawuj(0:ndtpawuj)
- real(dp),intent(out)           :: ures 
+ real(dp),intent(out)           :: ures
  character(len=*),intent(in)    :: ujdet_filename
 
 !Local variables-------------------------------
-!scalars 
+!scalars
  integer,parameter           :: natmax=2,nwfchr=6
  integer                     :: ii,jj,nat_org,jdtset,nspden,macro_uj,kdtset,marr
  integer                     :: im1,ndtuj,idtset, nsh_org, nsh_sc,nat_sc,maxnat
@@ -80,7 +81,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  character(len=500)          :: message
  character(len=2)            :: hstr
 !arrays
- integer                     :: ext(3) 
+ integer                     :: ext(3)
  real(dp)                    :: rprimd_sc(3,3),vsh(ndtpawuj),a(5),b(5)
  integer,allocatable         :: narrm(:)
  integer,allocatable         :: idum2(:,:),jdtset_(:),smult_org(:),smult_sc(:)
@@ -119,7 +120,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  ph0phiint=dtpawuj(jdtset)%ph0phiint
  dmatpuopt=dtpawuj(jdtset)%dmatpuopt
  marr=maxval((/ 9, nspden*nat_org ,nat_org*3 /))
- eyp=2.5_dp ! for dmatpuopt==2 and 3 
+ eyp=2.5_dp ! for dmatpuopt==2 and 3
  if (dmatpuopt==1) eyp=eyp+3.0_dp
  if (dmatpuopt>=3) eyp=(eyp+3.0_dp-dmatpuopt)
 
@@ -142,7 +143,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !call wrtout(std_out,message,'COLL')
 !END DEBUG
  idum2=1 ; drarr=one
- chih=zero 
+ chih=zero
 
 !write(std_out,*) 'pawuj 02'
 !###########################################################
@@ -183,7 +184,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawujga'//trim(hstr),'DPR',0)
 
  dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawujrad,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawujrad'//trim(hstr),'DPR',0) 
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawujrad'//trim(hstr),'DPR',0)
 
  dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawrad,dtpawuj(:)%iuj/=-1)
  call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawrad'//trim(hstr),'DPR',0)
@@ -200,7 +201,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%dmatpuopt,dtpawuj(:)%iuj/=-1)
  call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'dmatpuopt'//trim(hstr),'INT',0)
 
- kdtset=0 
+ kdtset=0
 
  do idtset=0,ndtpawuj
 !  DEBUG
@@ -232,7 +233,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  end do
 
 !DEBUG
-!write(message,fmt='((a,i3,a))')'pawuj_det m5' 
+!write(message,fmt='((a,i3,a))')'pawuj_det m5'
 !call wrtout(std_out,message,'COLL')
 !END DEBUG
  call prttagm(dparr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid,ndtuj,'vsh'//trim(hstr),'DPR',0)
@@ -307,12 +308,12 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    return
  end if
 
-!Calculation of response matrix 
+!Calculation of response matrix
 
  do jdtset=1,4
    if (nspden==1) then
-     chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)  
-   else if (macro_uj==1.and.nspden==2) then 
+     chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)
+   else if (macro_uj==1.and.nspden==2) then
      chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)+dtpawuj(jdtset)%occ(2,:)
    else if (macro_uj==2.and.nspden==2) then
      chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)
@@ -323,7 +324,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    if (pawprtvol==3) then
      write(message,fmt='(2a,i3,a,f15.12)') ch10,' Potential shift vsh(',jdtset,') =',vsh(jdtset)
      call wrtout(std_out,message,'COLL')
-     write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',chih(jdtset,1:nat_org) 
+     write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',chih(jdtset,1:nat_org)
      call wrtout(std_out,message,'COLL')
    end if
  end do
@@ -348,16 +349,16 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    write(message,fmt='(a, 150f15.10)') ' Chi_n ',chi_org
    call wrtout(std_out,message,'COLL')
  end if
- 
+
  write(message,fmt='(a)')': '
  if (nspden==2) then
-   magv_org=dtpawuj(1)%occ(1,:)-dtpawuj(1)%occ(2,:) 
-   if (all(abs(magv_org)<0.001)) then 
+   magv_org=dtpawuj(1)%occ(1,:)-dtpawuj(1)%occ(2,:)
+   if (all(abs(magv_org)<0.001)) then
      magv_org=(/(1,im1=1,nat_org)/)
    else
      magv_org=abs(magv_org)/magv_org
      if (magv_org(1).lt.0) magv_org=magv_org*(-1_dp)
-     if (all(magv_org(2:nat_org).lt.0)) then 
+     if (all(magv_org(2:nat_org).lt.0)) then
        magv_org=abs(magv_org)
        write(message,'(a)')', (reset to fm): '
      end if
@@ -372,7 +373,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  end if
 
 !Case of extrapolation to larger r_paw: calculate intg
- 
+
  if (all(dtpawuj(1)%wfchr(:)/=0).and.ph0phiint/=1) then
    if (dtpawuj(1)%pawujrad<20.and.dtpawuj(1)%pawujrad>dtpawuj(1)%pawrad) then
      fcorr=(1-ph0phiint)/(IRadFnH(dtpawuj(1)%pawrad,20.0_dp,nint(dtpawuj(1)%wfchr(2)),&
@@ -393,15 +394,15 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
      intg=one
      write(message, fmt='(a,2i7,3f12.5)') ' pawuj_det: no extrapolation (pawujrad=pawrad)'
      call wrtout(std_out,message,'COLL')
-   else  
+   else
      intg=ph0phiint
      write(message, fmt='(a,3f12.5)') ' pawuj_det: extrapolation to r->\inf using factor ',intg
      call wrtout(std_out,message,'COLL')
    end if
- else 
+ else
    write(message, fmt='(a,2i7,3f12.5)') ' pawuj_det: no extrapolation (ph0phiint=1 or wfchr=0)'
    call wrtout(std_out,message,'COLL')
-   intg=one 
+   intg=one
  end if
 
 
@@ -415,11 +416,11 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !Begin calculate U in supercell
 
 !Analize shell structure of primitive cell
-!and atomic distances in primitive cell 
+!and atomic distances in primitive cell
  ABI_ALLOCATE(smult_org,(nat_org))
  ABI_ALLOCATE(sdistv_org,(nat_org))
  call shellstruct(dtpawuj(1)%xred,dtpawuj(1)%rprimd,nat_org,&
-& int(magv_org),distv_org,smult_org,sdistv_org,nsh_org,pawujat,pawprtvol) 
+& int(magv_org),distv_org,smult_org,sdistv_org,nsh_org,pawujat,pawprtvol)
 
  ii=1
  write(message, fmt='(8a)') ' URES ','     ii','    nat','       r_max','    U(J)[eV]','   U_ASA[eV]','   U_inf[eV]',ch10
@@ -427,16 +428,16 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 & ures*exp(log(ph0phiint)*eyp)
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- 
+
  if (pawprtvol>1) then
    write(message,fmt='(a, 150f10.5)')' pawuj_det: ionic distances in original cell (distv_org) ', distv_org
    call wrtout(std_out,message,'COLL')
- end if 
+ end if
 
 !Construct supercell, calculate limit dimensions of supercell
  ii=1
  maxnat=product(dtpawuj(1)%scdim(:))*nat_org
- if (maxnat==0) then 
+ if (maxnat==0) then
    maxnat=dtpawuj(1)%scdim(1)
    ext=(/ii, ii, ii/)
  else
@@ -448,16 +449,16 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  end if
  ext=ext+(/ 1,1,1 /)
  ii=ii+1
- 
- 
+
+
  nat_sc=product(ext)*nat_org
 
 !DEBUG
 !write(message,fmt='(a,3i4)')'pawuj_det: ext ',ext
 !call wrtout(std_out,message,'COLL')
 !END DEBUG
- 
- do while (nat_sc<=maxnat)  
+
+ do while (nat_sc<=maxnat)
    ABI_ALLOCATE(chi0_sc,(nat_sc))
    ABI_ALLOCATE(chi_sc,(nat_sc))
    ABI_ALLOCATE(distv_sc,(nat_sc))
@@ -466,11 +467,11 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    ABI_ALLOCATE(smult_sc,(nat_sc))
    ABI_ALLOCATE(xred_sc,(3,nat_sc))
 
-!  Determine positions=xred_sc and supercell dimensions=rpimd_sc  
+!  Determine positions=xred_sc and supercell dimensions=rpimd_sc
    call mksupercell(dtpawuj(1)%xred,int(magv_org),dtpawuj(1)%rprimd,nat_org,&
-&   nat_sc,xred_sc,magv_sc,rprimd_sc,ext,pawprtvol) 
+&   nat_sc,xred_sc,magv_sc,rprimd_sc,ext,pawprtvol)
 
-!  Determine shell structure of supercell: multiplicities (smult_sc), radii of shells (sdistv_sc) 
+!  Determine shell structure of supercell: multiplicities (smult_sc), radii of shells (sdistv_sc)
 !  number of shells (nsh_sc) and atomic distances in supercell (distv_sc)
 
    write(message,fmt='(a,3i3,a)')' pawuj_det: determine shell structure of ',ext(1:3),' supercell'
@@ -484,7 +485,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
      call prmat(distv_sc,1,nat_sc,1,std_out)
    end if
 
-!  Determine chi and chi0 in supercell (chi0_sc, chi_sc) 
+!  Determine chi and chi0 in supercell (chi0_sc, chi_sc)
 !  DEBUG
 !  write(message,fmt='(a)')'pawuj_det:  chi and chi0 in supercell'
 !  call wrtout(std_out,message,'COLL')
@@ -492,14 +493,14 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
    if (pawujoption>2) then
      invopt=2
-   else 
+   else
      invopt=1
    end if
 
    call chiscwrt(chi0_org,distv_org,nat_org,sdistv_org,smult_org,nsh_org,&
 &   chi0_sc,distv_sc,nat_sc,smult_sc,nsh_sc,invopt,pawprtvol)
    call chiscwrt(chi_org,distv_org,nat_org,sdistv_org,smult_org,nsh_org,&
-&   chi_sc,distv_sc,nat_sc,smult_sc,nsh_sc,invopt,pawprtvol) 
+&   chi_sc,distv_sc,nat_sc,smult_sc,nsh_sc,invopt,pawprtvol)
 
 !  Calculate U in supercell
 !  DEBUG
@@ -512,7 +513,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 &   ures*exp(log(ph0phiint)*eyp)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
-   
+
    ABI_DEALLOCATE(chi0_sc)
    ABI_DEALLOCATE(chi_sc)
    ABI_DEALLOCATE(distv_sc)
@@ -520,7 +521,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    ABI_DEALLOCATE(sdistv_sc)
    ABI_DEALLOCATE(smult_sc)
    ABI_DEALLOCATE(xred_sc)
-   
+
    if (product(dtpawuj(1)%scdim(:))==0) then
      ext=(/ii, ii, ii/)
    else
@@ -534,12 +535,12 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    ii=ii+1
 
    nat_sc=product(ext)*nat_org
-   
+
  end do
- 
+
  write(message, '(3a)' )ch10,' ---------- calculate U, (J) end -------------- ',ch10
  call wrtout(ab_out,message,'COLL')
- 
+
  ABI_DEALLOCATE(dparrr)
  ABI_DEALLOCATE(dqarr)
  ABI_DEALLOCATE(dqarrr)
@@ -559,4 +560,130 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  DBG_EXIT("COLL")
 
 end subroutine pawuj_det
+!!***
+
+!!****f* ABINIT/chiscwrt
+!! NAME
+!!  chiscwrt
+!!
+!! FUNCTION
+!!  Distributes values of chi_org on chi_sc according to ion-ion distances and multiplicities in shells
+!!
+!! INPUTS
+!!  chi_org  = response matrix in original unit cell
+!!  disv_org = distances (multiplied by magntization) in original unit cell
+!!  nat_org = number of atoms in original unit cell
+!!  sdisv_org = radii of shells in original unit cell
+!!  smult_org = multiplicities of shells in original unit cell
+!!  nsh_org   = number of shells in original unit cell
+!!  disv_sc   = distances (multiplied by magntization) in super-cell
+!!  nat_sc  = number of atoms in super-cell
+!!  sdisv_sc = radii of shells in super-cell (was unused, so suppressed)
+!!  smult_sc = multiplicities of shells in super-cell
+!!  nsh_sc = number of shells in super-cell
+!!  opt =
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DJA)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!  For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! OUTPUT
+!!  chi_sc = first line of reponse matrix in super-cell
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      pawuj_det
+!!
+!! CHILDREN
+!!      prmat,wrtout
+!!
+!! SOURCE
+
+subroutine chiscwrt(chi_org,disv_org,nat_org,sdisv_org,smult_org,nsh_org,chi_sc,&
+& disv_sc,nat_sc,smult_sc,nsh_sc,opt,prtvol)
+
+ use defs_basis
+ use m_profiling_abi
+
+ use m_pptools,    only : prmat
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'chiscwrt'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)              :: nat_org,nsh_org,nsh_sc
+ integer,intent(in)              :: nat_sc
+ integer,intent(in),optional     :: prtvol
+ integer,intent(in),optional     :: opt
+!arrays
+ real(dp),intent(in)             :: chi_org(nat_org),disv_org(nat_org),sdisv_org(nsh_org)
+ integer,intent(in)              :: smult_org(nsh_org), smult_sc(nsh_sc)
+ real(dp),intent(in)             :: disv_sc(nat_sc)
+ real(dp),intent(out)            :: chi_sc(nat_sc)
+
+!Local variables-------------------------------
+!scalars
+ integer                      :: iatom,jatom,jsh,optt
+ character(len=500)           :: message
+!arrays
+ real(dp)                     :: chi_orgl(nat_org)
+
+! *************************************************************************
+
+ if (present(opt)) then
+   optt=opt
+ else
+   optt=1
+ end if
+
+
+ do iatom=1,nat_org
+   do jsh=1,nsh_org
+     if (disv_org(iatom)==sdisv_org(jsh)) then
+       if (opt==2) then
+         chi_orgl(iatom)=chi_org(iatom)
+       else if (opt==1) then
+         chi_orgl(iatom)=chi_org(iatom)*smult_org(jsh)/smult_sc(jsh)
+       end if
+       exit
+     end if
+   end do !iatom
+ end do  !jsh
+
+ if (prtvol>1) then
+   write(message,fmt='(a,150f10.5)')' chiscwrt: chi at input ',chi_org
+   call wrtout(std_out,message,'COLL')
+   write(message,fmt='(a,150f10.5)')' chiscwrt: chi after division ',chi_orgl
+   call wrtout(std_out,message,'COLL')
+ end if
+
+ do iatom=1,nat_sc
+   do jatom=1,nat_org
+     if (disv_org(jatom)==disv_sc(iatom)) then
+       chi_sc(iatom)=chi_orgl(jatom)
+       exit
+     else if (jatom==nat_org) then
+       chi_sc(iatom)=0_dp
+     end if
+   end do
+ end do
+
+ if (prtvol>1) then
+   write(message,'(a)')' chiscwrt, chi_sc '
+   call wrtout(std_out,message,'COLL')
+   call prmat(chi_sc,1,nat_sc,1,std_out)
+ end if
+
+end subroutine chiscwrt
 !!***

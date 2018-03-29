@@ -7,7 +7,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
+!! Copyright (C) 2001-2018 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,7 +105,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa
  use m_energies,      only : energies_type, energies_init
  use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
- use m_geometry,      only : normv, vdotw
+ use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_crystal,       only : crystal_free, crystal_t
@@ -115,6 +115,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
 &                            ebands_free, ebands_has_metal_scheme, ebands_ncwrite
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_free
+ use m_kg,            only : getph
  use m_gsphere,       only : gsph_free, gsphere_t
  use m_vcoul,         only : vcoul_t, vcoul_free
  use m_qparticles,    only : rdqps, rdgw, show_QP
@@ -145,10 +146,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #define ABI_FUNC 'screening'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
@@ -316,7 +315,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !=============================================
 !==== Open and read pseudopotential files ====
 !=============================================
- call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level30,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
+ call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
 !=== Initialize dimensions and basic objects ===
  call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&

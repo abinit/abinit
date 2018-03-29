@@ -8,7 +8,7 @@
 !! Can use either FoX or pure Fortran routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (MT, FJ)
+!! Copyright (C) 2005-2018 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1151,7 +1151,7 @@ end subroutine pawdata_chunk
 !!  paw_setup<paw_setup_type>=Datatype gathering information on XML paw setup.
 !!
 !! PARENTS
-!!      abinit,inpspheads,mover_effpot
+!!      abinit,inpspheads
 !!
 !! CHILDREN
 !!      paw_rdfromline

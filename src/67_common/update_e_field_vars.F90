@@ -7,7 +7,7 @@
 !! This routine updates E field variables 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group 
+!! Copyright (C) 2003-2018 ABINIT  group 
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,13 +115,13 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_kg,       only : getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'update_e_field_vars'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => update_e_field_vars
 !End of the abilint section
@@ -200,7 +200,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
    ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
    call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
    call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,iorder_cprj,&
-&   dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
+&   dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,nattyp,dtset%nband,&
 &   dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&

@@ -6,7 +6,7 @@
 !! Loop over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB, XW, MT,SPr)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MB, XW, MT,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,9 +152,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_hdr
  use m_ebands
 
+ use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
  use m_fstrings,   only : strcat
+ use m_geometry,   only : mkrdim, metric
  use m_exit,       only : exit_check, disable_timelimit
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
@@ -162,6 +164,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main
+ use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
  use m_ioarr,      only : read_rhor
@@ -175,7 +178,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &                         pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
- use m_rf2,       only : rf2_getidirs
+ use m_rf2,        only : rf2_getidirs
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -188,7 +191,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -315,9 +317,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: rhor1_save(:,:,:)
  real(dp),allocatable :: rhor1(:,:),rho1wfg(:,:),rho1wfr(:,:),tnons1(:,:),tnons1_tmp(:,:)
  real(dp),allocatable :: rhor1_pq(:,:),rhor1_mq(:,:),rhog1_pq(:,:),rhog1_mq(:,:)          !+q/-q duplicates
- real(dp),allocatable :: cg_mq(:,:),cg1_pq(:,:),cg1_mq(:,:),resid_mq(:)                   ! 
- real(dp),allocatable :: cg1_active_pq(:,:),cg1_active_mq(:,:),occk_mq(:)                 !
- real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_pq(:,:),gh0c1_set_mq(:,:)        !
+ real(dp),allocatable :: cg_mq(:,:),cg1_mq(:,:),resid_mq(:)                   !
+ real(dp),allocatable :: cg1_active_mq(:,:),occk_mq(:)                 !
+ real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_mq(:,:)        !
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
  real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
@@ -1096,7 +1098,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          choice=1; iorder_cprj=0; idir0=0
        end if
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
-&       kg,kpt_rbz,dtset%mband,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
+&       kg,kpt_rbz,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
 &       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
 &       rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
@@ -1207,7 +1209,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      !ABI_STAT_ALLOCATE(cg_pq,(2,mcgq), ierr)
      !ABI_CHECK(ierr==0, "out-of-memory in cgmq")
      !ABI_ALLOCATE(eigen_pq,(dtset%mband*nkpt_rbz*dtset%nsppol))
-     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol 
+     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
      ABI_STAT_ALLOCATE(cg_mq,(2,mcgmq), ierr)
      ABI_CHECK(ierr==0, "out-of-memory in cgmq")
      ABI_ALLOCATE(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
@@ -1269,7 +1271,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (ipert<=dtset%natom.and.(sum(dtset%qptn(1:3)**2)>=1.d-14)) then ! phonons at non-zero q
          choice=1 ; iorder_cprj=0 ; idir0=0
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
-&         kg1,kpq_rbz,dtset%mband,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
+&         kg1,kpq_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
 &         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
@@ -1408,7 +1410,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
      ABI_STAT_ALLOCATE(cg1_mq,(2,mcg1mq), ierr)
      ABI_CHECK(ierr==0, "out of memory in cg1_mq")
-   end if   
+   end if
 
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
@@ -1715,12 +1717,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          !Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
-         
-         call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-         
+
+         call dfpt_init_mag1(idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
+
          if(.not.kramers_deg) then
            rhor1_pq=rhor1
-           call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
+           call dfpt_init_mag1(idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
          end if
        end if
 

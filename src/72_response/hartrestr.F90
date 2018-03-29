@@ -13,7 +13,7 @@
 !!          - delta(diagonal strain)*(1/G**2)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR).
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,12 +68,12 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
  use m_profiling_abi
 
  use m_mpinfo,     only : ptabs_fourdp
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartrestr'
- use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 

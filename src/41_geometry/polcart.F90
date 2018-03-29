@@ -8,7 +8,7 @@
 !! divide by ucvol and write the result to an output file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT  group (MVeithen)
+!! Copyright (C) 2000-2018 ABINIT  group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,10 +39,6 @@
 !! The sum of the electronic and ionic Berry phase is folded into
 !! [-1,1] before it is transformed to cartesian coordinates.
 !! This means that in some cases, ptot_cart /= pel_cart + pion_cart
-!!
-!!
-!! SIDE EFFECTS
-!!
 !!
 !! NOTES
 !! - pel and pion do not take into account the factor 1/ucvol.

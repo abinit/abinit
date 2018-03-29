@@ -22,7 +22,7 @@
 !! Could see MinPack on netlib.org
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,14 +64,14 @@ subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_profiling_abi
  use m_abimover
  use m_abihist
-
  use m_lbfgs
+
+ use m_geometry,       only : mkrdim, fcart2fred, metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_lbfgs'
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_lbfgs
 !End of the abilint section
 
@@ -141,7 +141,7 @@ real(dp) :: strten(6)
      ABI_DEALLOCATE(vin1)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin) 
+     ABI_DEALLOCATE(hessin)
    end if
    return
  end if

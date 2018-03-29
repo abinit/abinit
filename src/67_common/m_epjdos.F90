@@ -7,7 +7,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,12 +43,14 @@ module m_epjdos
  use m_hdr
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use m_occ,            only : dos_hdr_write
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : simpson, simpson_int
  use m_fstrings,       only : int2char4, strcat
  use m_pawtab,         only : pawtab_type
  use m_kpts,           only : tetra_from_kptrlatt
+ use m_kg,             only : ph1d3d
 
  implicit none
 
@@ -361,7 +363,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'dos_calcnwrite'
  use interfaces_14_hidewrite
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -503,12 +504,12 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
-     call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+     call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
      dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
      dtset%tphysel,dtset%tsmear,unitdos)
    else if (dtset%prtdos == 3) then
      do iat=0,natsph+natsph_extra
-       call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+       call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
        dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
        dtset%tphysel,dtset%tsmear,unt_atsph(iat))
      end do
@@ -1233,7 +1234,6 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 #define ABI_FUNC 'dens_in_sph'
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1537,7 +1537,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  character(len=1) :: tag_l,tag_1m,tag_is
  character(len=2) :: tag_2m
  character(len=10) :: tag_il,tag_at,tag_grace
- character(len=500) :: message
+ character(len=1500) :: message
  character(len=fnlen) :: tmpfil
  type(atomdata_t) :: atom
 !arrays
