@@ -1520,9 +1520,9 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iq, nqibz, nqbz, qptopt1, imode, ierr, iconfig
+ integer :: iq, nqibz, nqbz, qptopt1, imode, ierr, iconfig,option
  real(dp) :: temperature, sigma, freeze_displ
- real(dp) :: rand, rand1, rand2
+ real(dp) :: rand !, rand1, rand2
 
  !arrays
  real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
@@ -1606,7 +1606,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
      ! 1) ignore
      ! 2) populate them according to a default amplitude
      ! 3) populate according to their modulus squared
-     if (abs(phfrq_allq(imode, iq))< tol6) cycle
+     if (abs(phfrq_allq(imode, iq))<tol6) cycle
    
      phdispl1 = phdispl_allq(:,:,:,imode,iq)
 
@@ -1619,9 +1619,25 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
        ! find thermal displacement amplitude eq 4 of Zacharias
        !   combined with l_nu,q expression in paragraph before
        if (phfrq_allq(imode, iq) > tol6) then
-         sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq) )
+         sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq))
        else
-         sigma = 50._dp
+         !Treat negative frequencies
+         !AM_2018 To do: move this option in argument
+         option = 1
+         select case (option)
+         case(1)
+           !Do not populate
+           sigma = 0._dp
+         case(2)
+           !Default amplitude for all the frequencies
+           sigma = 100._dp
+         case(3)
+           !absolute value of the frequencie 
+           sigma=sqrt((bose_einstein(abs(phfrq_allq(imode,iq)),temperature)+half)/&
+&                abs(phfrq_allq(imode,iq)))
+         case(4)
+           !USER defined value(s)
+         end select
        end if
        ! add displacement for this mode to supercell positions eq 5 of Zacharias
        call RANDOM_NUMBER(rand)
