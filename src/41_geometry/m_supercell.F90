@@ -397,7 +397,8 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
  complex(dpc) :: zdispl(3,scell%natom_primcell)
 ! *************************************************************************
 
- zdispl = reshape(cmplx(displ), (/3,scell%natom_primcell/))
+ zdispl = (cmplx(reshape(displ(1,:), (/3,scell%natom_primcell/)),&
+&                reshape(displ(2,:), (/3,scell%natom_primcell/))))
 
  ! fix gauge by imposing real displacement for first atom in first direction 
  ! multiply by normalized complex conjugate of first element

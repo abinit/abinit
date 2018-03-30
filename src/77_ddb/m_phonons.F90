@@ -1606,7 +1606,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
      ! 1) ignore
      ! 2) populate them according to a default amplitude
      ! 3) populate according to their modulus squared
-     if (phfrq_allq(imode, iq) < tol6) cycle
+     if (abs(phfrq_allq(imode, iq))< tol6) cycle
    
      phdispl1 = phdispl_allq(:,:,:,imode,iq)
 
@@ -1618,9 +1618,11 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
    
        ! find thermal displacement amplitude eq 4 of Zacharias
        !   combined with l_nu,q expression in paragraph before
-       sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq) )
-       !sigma = 200._dp
-       
+       if (phfrq_allq(imode, iq) > tol6) then
+         sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq) )
+       else
+         sigma = 50._dp
+       end if
        ! add displacement for this mode to supercell positions eq 5 of Zacharias
        call RANDOM_NUMBER(rand)
        rand = two * rand - one

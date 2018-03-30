@@ -7,9 +7,23 @@
 !! FUNCTION
 !!
 !! INPUTS
-!! need to be update
-!! OUTPUT
+!! acell(3)=length scales by which rprim is to be multiplied
+!! natom= Number of atoms in the supercell
+!! nconfig = Number of configuration to generate
 !! hist<type(abihist)> = The history of the MD
+!! ngqpt(3)= Grid of qpoint in the DDB
+!! nqshft=number of shift vectors in the repeated cell
+!! qshft(3,nqshft)=vectors that will be used to determine
+!! rlatt(3,3)= size of the supercell
+!! rprimd(3,3)=dimensional primitive translations (bohr)
+!! temperature_K =  temperature in Kelvin
+!! xred(3,natom) = reduced dimensionless atomic coordinates in the supercell
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! hist<type abihist>=Historical record of positions
+!!
 !!
 !! PARENTS
 !!      multibinit
