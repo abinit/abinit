@@ -945,31 +945,31 @@ The bibtex file is available [here](../abiref.bib).
                 url = ""
                 if a.text is None: a.text = fragment
             else:
-                if name.startswith("lesson_"):
-                    self.warn("lesson_NAME is DEPRECATED, use lesson:name. %s in %s is deprecated" % (token, page_rpath))
-                    # Handle [[lesson_gw1|text]]
-                    url = "/tutorials/%s" % name.replace("lesson_" , " ", 1).strip()
-                    if a.text is None: a.text = name
-                    html_classes.append("lesson-wikilink")
+                #if name.startswith("lesson_"):
+                #    self.warn("lesson_NAME is DEPRECATED, use lesson:name. %s in %s is deprecated" % (token, page_rpath))
+                #    # Handle [[lesson_gw1|text]]
+                #    url = "/tutorials/%s" % name.replace("lesson_" , " ", 1).strip()
+                #    if a.text is None: a.text = name
+                #    html_classes.append("lesson-wikilink")
 
-                elif name.startswith("topic_"):
-                    # Handle [[topic_SelfEnergy|text]]
-                    self.warn("topic_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
-                    name = name.replace("topic_" , " ", 1).strip()
-                    url = "/topics/%s" % name
-                    if a.text is None: a.text = "%s topic" % name
-                    html_classes.append("topic-wikilink")
-                    add_popover(a, content=self.howto_topic[name])
+                #elif name.startswith("topic_"):
+                #    # Handle [[topic_SelfEnergy|text]]
+                #    self.warn("topic_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
+                #    name = name.replace("topic_" , " ", 1).strip()
+                #    url = "/topics/%s" % name
+                #    if a.text is None: a.text = "%s topic" % name
+                #    html_classes.append("topic-wikilink")
+                #    add_popover(a, content=self.howto_topic[name])
 
-                elif name.startswith("help_"):
-                    self.warn("help_NAME is DEPRECATED, use help:name. %s in %s is deprecated" % (token, page_rpath))
-                    # Handle [[help_abinit|text]]
-                    code = name.replace("help_" , " ", 1).strip()
-                    url = "/guide/%s" % code
-                    if a.text is None: a.text = "%s help file" % code
-                    html_classes.append("user-guide-wikilink")
+                #elif name.startswith("help_"):
+                #    self.warn("help_NAME is DEPRECATED, use help:name. %s in %s is deprecated" % (token, page_rpath))
+                #    # Handle [[help_abinit|text]]
+                #    code = name.replace("help_" , " ", 1).strip()
+                #    url = "/guide/%s" % code
+                #    if a.text is None: a.text = "%s help file" % code
+                #    html_classes.append("user-guide-wikilink")
 
-                elif "@" in name:
+                if "@" in name:
                     # Handle [[dipdip@anaddb|text]]
                     vname, code = name.split("@")
                     var = self.codevars[code][vname]
@@ -985,17 +985,17 @@ The bibtex file is available [here](../abiref.bib).
                     if a.text is None:
                         a.text = var.name if not var.is_internal else "%%%s" % var.name
 
-                elif name in self.bib_data.entries:
-                    # Handle citation
-                    self.warn("DEPRECATED citation without `cite` --> %s in %s is deprecated" % (token, page_rpath))
-                    ref = self.bib_data.entries[name]
-                    url = "/theory/bibliography#%s" % self.slugify(name)
-                    content = ref.fields.get("title", "Unknown")
-                    if content == "Unknown":
-                        self.warn("Entry for %s does not provide title" % name)
-                    add_popover(a, content=content) #+ "\n\n" + ref.authors
-                    if a.text is None: a.text = "[%s]" % name
-                    html_classes.append("citation-wikilink")
+                #elif name in self.bib_data.entries:
+                #    # Handle citation
+                #    self.warn("DEPRECATED citation without `cite` --> %s in %s is deprecated" % (token, page_rpath))
+                #    ref = self.bib_data.entries[name]
+                #    url = "/theory/bibliography#%s" % self.slugify(name)
+                #    content = ref.fields.get("title", "Unknown")
+                #    if content == "Unknown":
+                #        self.warn("Entry for %s does not provide title" % name)
+                #    add_popover(a, content=content) #+ "\n\n" + ref.authors
+                #    if a.text is None: a.text = "[%s]" % name
+                #    html_classes.append("citation-wikilink")
 
                 elif name.startswith("tests/") or name.startswith("~abinit/tests/"):
                     assert fragment is None
@@ -1079,9 +1079,9 @@ The bibtex file is available [here](../abiref.bib).
                     if a.text is None: a.text = "%s_%s" % (namespace, name)
                     add_popover(a, content=self.howto_topic[name])
 
-            elif namespace in ("bib", "cite"):
-                if namespace == "bib":
-                    self.warn("%s in %s is deprecated" % (token, page_rpath))
+            elif namespace == "cite":
+                #if namespace == "bib":
+                #    self.warn("%s in %s is deprecated" % (token, page_rpath))
                 # Handle [[bib:biblio|bibliography]]
                 if name == "biblio":
                     url = "/theory/bibliography/"
@@ -1101,9 +1101,9 @@ The bibtex file is available [here](../abiref.bib).
                                 (exc.__class__, str(exc), token, page_rpath))
                         url, a.text = "FAKE_URL", "FAKE_URL"
 
-            elif namespace in ("theorydoc", "theory"):
-                if namespace == "theorydoc":
-                    self.warn("%s in %s is deprecated" % (token, page_rpath))
+            elif namespace == "theory":
+                #if namespace == "theorydoc":
+                #    self.warn("%s in %s is deprecated" % (token, page_rpath))
                 # TODO theorydoc --> theory
                 # Handle [[theorydoc:mbpt|text]]
                 url = "/theory/%s" % name
@@ -1140,7 +1140,7 @@ The bibtex file is available [here](../abiref.bib).
                 html_classes.append("abifile-wikilink")
 
             elif namespace == "ac":
-                # Handle [[ac:abiref_gnu_5.3_debug.ac]] 
+                # Handle [[ac:abiref_gnu_5.3_debug.ac]]
                 # The following is incorrect : files in /build/config-examples are generated when */*/makemake is issued.
                 # url = "/build/config-examples/%s" % name
                 # By contrast, the following is a permanent reference

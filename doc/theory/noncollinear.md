@@ -19,7 +19,7 @@ $$ \rho(\rr)=\sum_{\alpha} \rho^{\alpha\alpha}(\rr) $$
 
 and the magnetization density $\vec m(\rr)$ (in units of $\hbar /2$) whose components are:
 
-$$ m_i(\rr) = \sum_{\alpha\beta} \rho^{\alpha\beta}(\rr) \sigma_i^{\alpha\beta} $$, 
+$$ m_i(\rr) = \sum_{\alpha\beta} \rho^{\alpha\beta}(\rr) \sigma_i^{\alpha\beta}, $$
 
 where the $\sigma_i$ are the Pauli matrices.
 
@@ -99,7 +99,8 @@ Note that only the forurier transform are performed in *mkrho.f*, while the fina
 $\rho(\rr)$, $\vec m(\rr)$ is performed in *symrhg.f*.
 
 The computation of $V_{xc}$ is performed in *rhohxc.f*. The only transformation to this routine, is
-to compute $|\vec m(\rr)|$ as input of the usual (i.e spin polarized)  {\tt rhohxc.f} and yield back
-the four component $V_{xc}$, from the expression of ${\delta E_{xc} \over \delta |m (\rr)| }$.
+to compute $|\vec m(\rr)|$ and yield back the four component $V_{xc}$, from the expression 
+of ${\delta E_{xc} \over \delta |m (\rr)| }$.
 
-For more information, see: Hobbs et al., PRB, 62, 11556; Perdew et al. PRB, 46, 6671 (for the xc functional)
+For more information about noncollinear magnetism see [[cite:Hobbs2000]] 
+and [[cite:Perdew1992]] for the xc functional.

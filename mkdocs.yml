@@ -199,8 +199,10 @@ pages:
     - tutorial/wannier90.md
 - Theory:
     - Geometry: theory/geometry.md
+    - Spherical Harmonics: theory/spherical_harmonics.md
     - Wavefunctions: theory/wavefunctions.md
     - Noncollinear: theory/noncollinear.md
+    - Pseudopotentials: theory/pseudopotentials.md
     - Many-Body Perturbation Theory: theory/mbt.md
     - Bethe-Salpeter: theory/bse.md
     - Documents: theory/documents.md
