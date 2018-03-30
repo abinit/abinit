@@ -78,7 +78,6 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
 !Local variables-------------------------------
 !scalar
   integer :: ii,ia,iconfig,mu,nu,natom_uc
-  real(dp):: rand
   character(len=500) :: message
 !arrays
   real(dp) :: dielt(3,3)

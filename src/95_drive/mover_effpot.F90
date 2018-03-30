@@ -109,13 +109,14 @@ implicit none
  type(abihist),optional,intent(inout):: hist
 !Local variables-------------------------------
 !scalar
- integer :: icoeff_bound,ii
+ integer :: filetype,icoeff_bound,ii
 !integer :: iexit,initialized
  integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
- real(dp):: cutoff,freq_q,freq_b,qmass,bmass,time_q,time_b
+ real(dp):: cutoff,freq_q,freq_b,qmass,bmass
+! real(dp):: time_q,time_b
  logical :: iam_master
  integer, parameter:: master=0
  logical :: verbose,writeHIST
@@ -254,7 +255,7 @@ implicit none
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
-   dtset%supercell_latt(:,:) = zero
+   dtset%supercell_latt(:,:) = 0
    do ii=1,3
      dtset%supercell_latt(ii,ii) = sc_size(ii)
    end do
@@ -389,6 +390,17 @@ implicit none
      end if
    end if
    
+!  Do a check
+   if(dtset%ionmov == 27)then
+     call effective_potential_file_getType(filnam(3),filetype)
+     if(filetype /= 1)then
+          write(message, '(5a)' )&
+&           ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
+&           ' It is not compatible with ionmov 27'           
+          MSG_ERROR(message)
+     end if
+     
+   end if
 
 !  set psps
    psps%useylm = dtset%useylm
@@ -511,7 +523,8 @@ implicit none
      call wrtout(std_out,message,'COLL')
      call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
+&     effective_potential=effective_potential,filename_ddb=filnam(3),&
+&     verbose=verbose,writeHIST=writeHIST)
 
    else if(option== -1.or.option==-2)then
      !*************************************************************
