@@ -1,5 +1,5 @@
 ---
-authors: X. Gonze, Y. Suzukawa, M. Mikami
+authors: X. Gonze, Y. Suzukawa, M. Mikami, MG
 ---
 
 $$
