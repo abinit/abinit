@@ -19,27 +19,32 @@ $
 \newcommand{\rrhat}{{\widehat\rr}}
 $
 
-## Norm-conserving Pseudopotentials in the Kleynman Bylander form
+## Pseudopotentials in the Kleynman Bylander form
 
 This page reports basic definitions and equations needed 
-to evalute the matrix elements of the commutator between the position operator, $\rr$,
-and the nonlocal part of the Hamiltonian in the particular case in which norm-conserving pseudopotentials are used.
+to evalute the nonlocal part of the Hamiltonian. We mainly focus on norm-conserving pseudopotentials.
 Providing a consistent introduction to the theory of pseudopotentials is beyond the purposes of this section,
 a more complete discussion of the topic can be found in specialized 
-articles available in the literature ~\cite{Hamann1979,Bachelet1982,Kleinman1982,Hamann1989,Troullier1991,Gonze1991,Fuchs1999}.
+articles available in the literature 
+[[cite:Hamann1979]], [[cite:Bachelet1982]], [[cite:Kleinman1982]], [[cite:Hamann1989]], [[cite:Troullier1991]]
+[[cite:Gonze1991]], [[cite:Fuchs1999]].
+For the generalization of norm conservation to multiple projectors (Optimized norm-conserving Vanderbilt pseudopotentials)
+we refer the reader to [[cite:Hamann2013]]. 
+The generation and validation of ONCVPSP pseudopotentials is described in the 
+[PseudoDojo](http://www.pseudo-dojo.org/) paper [[cite:Setten2018]].
 
 For our purposes, we can summarize by saying that a pseudopotential in constructed in order to 
 replace the atomic all-electron potential such that core states are eliminated 
-and valence electrons are described by nodeless pseudo wavefunctions whose 
+and valence electrons are described by pseudo wavefunctions whose 
 representation in the Fourier space decays rapidly.
 
 Modern norm-conserving pseudopotentials are constructed following the procedure
-described in~\cite{Hamann1979,Hamann1989,Troullier1991} such that the scattering properties of the 
+described in [[cite:Hamann1979]], [[cite:Hamann1989]], [[cite:Troullier1991]] such that the scattering properties of the 
 all-electron atom are reproduced around the reference energy configuration, up to first order in energy.
 In modern ab initio codes, the fully separable form proposed by Kleynman and Bylander 
 is usually employed as it drastically reduces the number of operations 
 required for the application of the nonlocal part of the Hamiltonian 
-as well as the memory required to store the operator~\cite{ Kleinman1982}.
+as well as the memory required to store the operator [[cite:Kleinman1982]].
 In the KB form, the interaction between a valence electron and an ion
 of type $\aa$ is described by means of the operator:
 
@@ -54,7 +59,7 @@ where $\vloc^\aa(r)$ is a purely local potential with a Coulomb tail $\gamma/r$.
 !!! note
 
     For simplicity, the discussion is limited to pseudopotentials with a single projector per angular channel.
-    The generalization to multi-projector pseudopotentials requirens introducing an additional $n$ index
+    The generalization to multi-projector pseudopotentials requires introducing an additional $n$ index
     in the KB energies i.e. $E_{nl}^\aa$ and in the projectors $\chi_{n\lm}^\aa(\rr)$.
 
 The so-called Kleinman-Bylander energies, $E_l^\aa$,
@@ -135,3 +140,10 @@ Finally, the expression for the total nonlocal operator in reciprocal space is:
  \,e^{-i(\KK-\KKp)\cdot\tt_\aa}\,
  \Ylm(\KKhat)\Ylm^\*(\KKphat)\, E_l^\aa F_l^\aa(K) F_l^\aa(K').
 \end{equation}
+
+!!! note
+
+    Abinit employs iterative eigenvalue solvers to solve the KS equations.
+    This means that we only need to compute $\Vnl |\Psi\ra$ i.e. we only
+    need to **apply** the Hamiltonian onto a set of trial eigenvectors.
+    Therefore the full $\Vnl(\KK,\KKp)$ matrix is never constructed explicitly.

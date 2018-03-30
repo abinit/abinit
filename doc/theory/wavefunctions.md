@@ -30,7 +30,7 @@ ABINIT data structures and their theoretical justifications
 
 A Bloch wavefunction characterized by a wavevector $\kk$ is such that
 
-$$ \psi_{\bf k}({\bf r}) = u_{\bf k}({\bf r}) e^{i{\bf k}\cdot{\bf r}} $$
+$$ \psi_{\bf k}({\bf r}) = e^{i{\bf k}\cdot{\bf r}} u_{\bf k}({\bf r}) $$
 
 where $u_{\bf k}({\bf r})$ is periodic, that is
 
@@ -42,7 +42,7 @@ Representation by plane waves
 
 \begin{eqnarray*}
 u_{\bf k}({\bf r})&=&\sum_{\bf G}u_{\bf k}({\bf G})e^{i{\bf G}\cdot{\bf r}} \\
-\psi_{\bf k}({\bf r})&=&\sum_{\bf G}c_{\bf k}({\bf G})
+\psi_{\bf k}({\bf r})&=&\sum_{\bf G}u_{\bf k}({\bf G})
 e^{i ({\bf k}+{\bf G})\cdot{\bf r}}
 \end{eqnarray*}
 
@@ -83,7 +83,7 @@ in which $\kk$ can be replaced by $\kk + \GG$ where $\GG$ is any reciprocal spac
 *choose* the wavefunctions at $\kk$ and $\kk + \GG$
 to be equal, or to make a linear combination of wavefunctions with the same energy. 
 This is a choice of **gauge** that does not affect the value of physical observables.
-We prefer to work with the gauge 
+In what follows we prefer to work with the gauge 
 
 $$ \psi_{\kk + \GG}(\rr) = \psi_\kk(\rr) $$
 
@@ -96,18 +96,20 @@ $$
 $$
 
 For the ${\bf k}$ wavevectors that are half a reciprocal lattice vector
-$(2{\bf k}={\bf G}_{o})$, there is a special relationship between coefficients of the wavefunction:
+$(2{\bf k}={\bf G}_{0})$, there is a special relationship between 
+the Fourier coefficients of the wavefunction:
 
 $$
-c_{n{\bf k}}({\bf G}) \stackrel{\rm L.C.}{=} c_{n({\bf k}-{\bf G}_{o})}
-({\bf G}+{\bf G}_{o})
-\stackrel{\rm L.C.}{=} c_{n(-{\bf k})}({\bf G}+{\bf G}_{o})
-\stackrel{\rm L.C.}{=} c^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{o})
+u_{n{\bf k}}({\bf G}) =
+u_{n{\bf k}-{\bf G}_{0}}({\bf G}+{\bf G}_{0}) = 
+u_{n-{\bf k}}({\bf G}+{\bf G}_{0}) =
+u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{0})
 $$
 
-That is, coefficients at ${\bf G}$ and $-{\bf G}-{\bf G}_{o}$ are related.
+That is, coefficients at $\GG$ and $-{\bf G}-{\bf G}_{0}$ are related.
 This will allow to decrease by a factor of 2 the storage space for these
-specific ${\bf k}$ points.
+specific ${\bf k}$ points and accelerate CPU-intensive parts such as the 
+application of the non-local part and the Fourier transform.
 
 ## Properties of the wavefunctions (spinor case)
 
@@ -142,13 +144,12 @@ The inclusion of spin-orbit coupling in the Hamiltonian requires [[nspinor]] = 2
 
 ## Plane wave basis set sphere
 
-In order to avoid dealing with an infinite number of plane waves
-$e^{i2\pi({\bf k}+{\bf G})r}$ to represent Bloch wavefunctions,
+In order to avoid dealing with an infinite number of plane waves to represent Bloch wavefunctions,
 one selects those with a kinetic energy lower than some cutoff energy $E_{\rm cut}$.
 The set of allowed ${\bf G}$ vectors will be noted by $\mcS_{\kk}(E_{\rm cut})$
 
 $$
-\GG\,\in \mcS_{\kk}(E_{\rm cut}) \;\mbox{if}\; \dfrac{(2\pi)^{2}({\bf G} +{\bf k})^{2}}{2} < E_{\rm cut}
+\GG\,\in \mcS_{\kk}(E_{\rm cut}) \;\mbox{if}\; \dfrac{\lvert{\bf k + G}\rvert^{2}}{2} \leq E_{\rm cut}
 $$
 
 The kinetic energy cutoff is computed from the input variables [[ecut]] and [[dilatmx]]
@@ -173,9 +174,9 @@ $$
 
 For these points, the number of $\GG$ vectors to be taken into account, is decreased by about a factor of 2.
 For the $\GG$'s that are not treated, the coefficients
-$c_{n{\bf k}}({\bf G})$ can be recovered from those that are treated, thanks to 
+$u_{n{\bf k}}({\bf G})$ can be recovered from those that are treated, thanks to 
 
-$$ c_{n{\bf k}}({\bf G}) = c^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_0) $$
+$$ u_{n{\bf k}}({\bf G}) = u^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_0) $$
 
 The value of [[istwfk]] is automatically computed by the code 
 on the basis of the k-point coordinates and the treatment of time-reversal symmetry as specified by [[kptopt]].
@@ -186,6 +187,7 @@ with the syntax:
 istwfk *1
 ```
 
+<!--
 The number of plane waves is {\text npw}
 For ${\text ipw}=1\cdots {\text npw}$, the reduced coordinates of ${\bf G}$
 are contained in the array {\text kg}:
@@ -198,8 +200,9 @@ $$
   {\bf G}^{red}_{3}=& {\text kg}(3,{\text ipw}) \cr
 }
 $$
-
 This list of $\GG$ vectors is computed in the routine {\text kpgsph.f}.
+-->
+
 The maximum number of $\GG$-vectors over all k-points is called [[mpw]] inside the code. 
 
 ## FFT grid and FFT box
@@ -207,7 +210,7 @@ The maximum number of $\GG$-vectors over all k-points is called [[mpw]] inside t
 For the generation of the density from wavefunctions, as well as for
 the application of the local part of the potential, one needs to be
 able to compute $u_{n\kk}(\rr)$
-for a 3D-mesh of $\rr$-points, extremely fast, from the values $c_{n\kk}(\GG)$.
+for a 3D-mesh of $\rr$-points, extremely fast, from the values $u_{n\kk}(\GG)$.
 
 !!! note
 
@@ -235,7 +238,7 @@ $$
 e^{i2\pi\left(\frac{j_{1}l_{1}}{N_{1}}+\frac{j_{2}l_{2}}{N_{2}}+\frac{j_{3}l_{3}}{N_{3}}\right)}
 $$
 
-We want, on a FFT grid, the values of $u_{\bf k}({\bf r})$ for
+We want the values of $u_{\bf k}({\bf r})$ on a FFT grid with: 
 
 \begin{eqnarray*}
 r^{red}_{1}&=&\frac{0}{N_{1}},\frac{1}{N_{1}},\cdots
@@ -246,19 +249,22 @@ r^{red}_{3}&=&\frac{0}{N_{3}},\frac{1}{N_{3}},\cdots
 \frac{N_{3}-1}{N_{3}}\left(=\frac{l_{3}}{N_{3}}\right)
 \end{eqnarray*}
 
-Note that we do not want $u_\kk(\rr)$ *everywhere*: 
-these specific values allow to use the FFT algorithm. 
+The FFT algorithm has a computational cost that scales as $N\log(N)$ where $N$ is the 
+total number of points in the mesh.
+Note, however, that we cannot obtain $u_\kk(\rr)$ *everywhere* but only
+on the discrete set of FFT points given in the above equations.
 The choice of $N_{1},N_{2},N_{3}$ is not discussed here.
+
+<!--
 The effect of $G^{red}_{1}$ or $G^{red}_{1}+N_{1}$ (or any value of $G^{red}_{1}$ modulo $N$) will be similar.
 
 \begin{eqnarray*}
-u_{{\bf k}}({\bf r})&=&\sum_{\bf G} c_{\bf k}({\bf G})
+u_{{\bf k}}({\bf r})&=&\sum_{\bf G} u_{\bf k}({\bf G})
 e^{i2\pi {\bf G} \cdot {\bf r}} \\
- &=&\sum_{\bf G} c_{\bf k}({\bf G}) e^{i2\pi(G^{red}_{1}r^{red}_{1} +
+ &=&\sum_{\bf G} u_{\bf k}({\bf G}) e^{i2\pi(G^{red}_{1}r^{red}_{1} +
 G^{red}_{2}r^{red}_{2} + G^{red}_{3}r^{red}_{3})}
 \end{eqnarray*}
 
-<!--
 Let us represent $u_{\kk}(\rr)$ by the segment
 
 ```fortran
@@ -399,7 +405,7 @@ a proper or improper rotation while $\tt$ is the corresponding fractional transl
 If all the fractional translations are zero the space group is said to be *symmorphic*.
 In Abinit, the rotations in real space are called [[symrel]], while the corresponding 
 fractional translation are stored in the [[tnons]] array.
-Note that both symrel and tnons are given in reduced coordinates. 
+Note that both *symrel* and *tnons* are given in reduced coordinates. 
 
 The application of a symmetry operation $\hat\mcR_\tt$ to a vector $\Atm_i$ 
 defining the position of an atom in the unit cell gives:

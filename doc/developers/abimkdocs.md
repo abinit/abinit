@@ -291,7 +291,7 @@ BetterBib is available from the Python Package Index, so simply type:
 and then use `doi2bibtex` from the command line:
 
 ```text
-doi2bibtex 10.1103/PhysRevLett.96.066402
+betterbib-doi2bibtex 10.1103/PhysRevLett.96.066402
 
 @article{bibtex,
   author = {Amadon, B. and Biermann, S. and Georges, A. and Aryasetiawan, F.},
