@@ -42,6 +42,7 @@ module m_ab7_invars
   use m_fstrings, only : inupper
   use m_parser,   only : intagm, importxyz, parsefile
   use m_dtset,    only : dtset_free
+  use m_pspheads, only : inpspheads
 
   implicit none
 

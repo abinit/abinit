@@ -72,8 +72,9 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  use m_atomdata
  use pseudo_pwscf ! pwscf module with all data explicit!
 
- use m_io_tools,  only : open_file
+ use m_io_tools,      only : open_file
  use m_numeric_tools, only : smooth, nderiv
+ use m_pspheads,      only : upfxc2abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -119,7 +120,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
   logical, allocatable :: found_l(:)
   real(dp), allocatable :: work_space(:),work_spl(:)
   real(dp), allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
-  
+
   ! ######### in module pseudo: ############
   !
   !  only npsx = 1 is used here
@@ -142,8 +143,8 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
   !  lll(nbrx,npsx) = angular momentum channel for each projector
   !  ikk2(nbrx,npsx) = maximum index for each projector function
   !  dion(nbrx,nbrx,npsx) = dij or Kleinman Bylander energies
-  !  
-  !  ########  end description of pseudo module contents ##########  
+  !
+  !  ########  end description of pseudo module contents ##########
 
 ! *********************************************************************
 
@@ -207,7 +208,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  vlspl(:,2)=work_spl(:)
  ABI_DEALLOCATE(work_space)
  ABI_DEALLOCATE(work_spl)
- 
+
 !this has to do the FT of the projectors to reciprocal space
 ! allocate proj to avoid temporary copy.
  ABI_ALLOCATE(proj, (mmax,1:nbeta(1)))
@@ -269,5 +270,5 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
  end if !if nlcc present
 
-end subroutine upf2abinit 
+end subroutine upf2abinit
 !!***
