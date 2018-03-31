@@ -116,6 +116,7 @@ To validate a given list of HTML files use:
 
     mksite.py validate site/index.html site/variables/index.html
 
+At present (v8.7.7), many html files are not compliant with the strict html syntax, so this procedure is ==not yet operational==.
 
 Note that the HTML files are produced in a temporary directory, thus they **are not under revision control**.
 The real source is represented by the `.md` files and the other `.yml` files, these are the files that can be 
@@ -273,6 +274,9 @@ After having edited the python modules you **must rerun** `mksite serve` to see 
 
     Use ```pytest abimkdocs_tests/test_variables.py``` to validate your changes
     before rebuilding the documentation.
+
+    Well, at present (v8.7.7) this script detect too many problems for this procedure to be useful. So this is (==not yet operational==).
+
 
 ## How to add a bibliographic reference
 
