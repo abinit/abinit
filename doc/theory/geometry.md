@@ -1,17 +1,17 @@
 ---
-authors: X. Gonze, Y. Suzukawa, M. Mikami
+authors: M. Giantomassi, X. Gonze, Y. Suzukawa, M. Mikami
 ---
 
 # Geometric considerations
 
 ## Real space
 
-The three primitive translation vectors are ${\bf R}_1$, ${\bf R}_2$, ${\bf R}_3$.
+The three primitive translation vectors are $\RR_1$, $\RR_2$, $\RR_3$.
 Their representation in Cartesian coordinates (atomic units) is:
 
-$$ {\bf R}_1 \rightarrow {rprimd(:, 1)} $$
-$$ {\bf R}_2 \rightarrow {rprimd(:, 2)} $$
-$$ {\bf R}_3 \rightarrow {rprimd(:, 3)} $$
+$$ \RR_1 \rightarrow {rprimd(:, 1)} $$
+$$ \RR_2 \rightarrow {rprimd(:, 2)} $$
+$$ \RR_3 \rightarrow {rprimd(:, 3)} $$
 
 Related input variables: [[acell]], [[rprim]], [[angdeg]].
 
@@ -33,7 +33,7 @@ Representation in reduced coordinates:
 
 Related input variables: [[xangst]], [[xcart]], [[xred]]
 
-The volume of the primitive unit cell (ucvol) is
+The volume of the primitive unit cell (called *ucvol* in the code) is
 
 \begin{eqnarray*}
 \Omega &=& {\bf R}_1 \cdot ({\bf R}_2 \times {\bf R}_3)
@@ -70,26 +70,28 @@ that is
 
 $$ {\bf r} \cdot {\bf r'} = \sum_{ij} r^{red}_{i} {\bf R}^{met}_{ij} r^{red \prime}_{j} $$
 
-where ${\bf R}^{met}_{ij}$ is the metric tensor in real space:
+where ${\bf R}^{met}_{ij}$ is the metric tensor in real space stored in `rmet` array:
 
 $$ {\bf R}^{met}_{ij} \rightarrow {rmet(i,j)} $$
 
 ## Reciprocal space
 
 The three primitive translation vectors in reciprocal space are
-${\bf G}_{1}$,${\bf G}_{2}$,${\bf G}_{3}$
+$\GG_1$, $\GG_2$,$\GG_3$
 
 \begin{eqnarray*}
-{\bf G}_{1}&=&\frac{1}{\Omega}({\bf R}_{2}\times{\bf R}_{3}) \rightarrow {gprimd(:,1)} \\
-{\bf G}_{2}&=&\frac{1}{\Omega}({\bf R}_{3}\times{\bf R}_{1}) \rightarrow {gprimd(:,2)} \\
-{\bf G}_{3}&=&\frac{1}{\Omega}({\bf R}_{1}\times{\bf R}_{2}) \rightarrow {gprimd(:,3)}
+{\bf G}_{1}&=&\frac{2\pi}{\Omega}({\bf R}_{2}\times{\bf R}_{3}) \rightarrow {2\pi\, gprimd(:,1)} \\
+{\bf G}_{2}&=&\frac{2\pi}{\Omega}({\bf R}_{3}\times{\bf R}_{1}) \rightarrow {2\pi\, gprimd(:,2)} \\
+{\bf G}_{3}&=&\frac{2\pi}{\Omega}({\bf R}_{1}\times{\bf R}_{2}) \rightarrow {2\pi\, gprimd(:,3)}
 \end{eqnarray*}
 
-This definition is such that ${\bf G}_{i}\cdot{\bf R}_{j}=\delta_{ij}$
+This definition is such that $\GG_i \cdot \RR_j = 2\pi\delta_{ij}$
 
 !!! warning
-    Often, a factor of $2\pi$ is present in definition of
-    ${\bf G}_{i}$, but not here, for historical reasons.
+    For historical reasons, the internal implementation uses the convention 
+    $\GG_i \cdot \RR_j = \delta_{ij}$. This means that a factor $2\pi$ must be taken into account 
+    in the Fortran code.
+    We don't use this convention in the theory notes to keep the equations as simple as possible.
 
 Reduced representation of vectors (K) in reciprocal space
 
@@ -137,57 +139,38 @@ that is
 
 $$ {\bf K} \cdot {\bf K'} = \sum_{ij} K^{red}_{i}{\bf G}^{met}_{ij}K^{red \prime}_{j} $$
 
-where ${\bf G}^{met}_{ij}$ is the metric tensor in reciprocal space:
+where ${\bf G}^{met}_{ij}$ is the metric tensor in reciprocal space called `gmet` inside the code.
+Taking into account the internal conventions used by the code, we have the correspondence:
 
-$$ {\bf G}^{met}_{ij} \rightarrow {gmet(i,j)} $$
+$$ {\bf G}^{met}_{ij} \rightarrow {2\pi\,gmet(i,j)} $$
 
-## Symmetries
+## Fourier series for periodic lattice quantities
 
-A symmetry operation in real space sends the point ${\bf r}$ to the point
-${\bf r'}={\bf S_t}\{{\bf r}\}$ whose coordinates are
-$({\bf r'})_{\alpha}=\sum_{\beta}S_{\alpha \beta}r_{\beta} + t_{\alpha}$ (Cartesian coordinates).
+Any function with the periodicity of the lattice i.e any function fullfilling the property:
 
-The symmetry operations that preserves the crystalline structure are
-those that send every atom location on an atom location with the same atomic type.
+$$ u(\rr + \RR) = u(\rr) $$
 
-The application of a symmetry operation to a function of spatial coordinates $f$ is such that:
+can be represented with the discrete Fourier series:
 
-$$
-({\bf S_t}f)({\bf r}) = f(({\bf S_t})^{-1}{\bf r})
-$$
+$$  u(\rr)= \sum_\GG u(\GG)e^{i\GG\cdot\rr} $$ 
 
-$$
-({\bf S_t})^{-1}({\bf r}) =
-\sum_{\beta} S^{-1}_{\alpha \beta}(r_{\beta}-t_{\beta})
-$$
+where the Fourier coefficient, $u(\GG)$, is given by:
 
-For each symmetry operation,$isym=1 \dots nsym$, the $3\times3$
-${\bf S}^{red}$ matrix is stored in {symrel(:,:,isym)}.
+$$ u(\GG) = \frac{1}{\Omega} \int_\Omega u(\rr)e^{-i\GG\cdot\rr}\dd\rr $$
 
-[in reduced coordinates:
- $r'^{red}_{\alpha}=\sum_{\beta}S^{red}_{\alpha \beta}
- r^{red}_{\beta}+t^{red}_{\beta}$ ]
+<!--
+This appendix reports the conventions used in this work for the Fourier 
+representation in frequency- and momentum-space. 
+The volume of the unit cell is denoted with $\Omega$, while $V$ is the
+total volume of the crystal simulated employing Born-von K\'arman periodic boundary condition~\cite{Ashcroft1976}.
 
-and the vector ${\bf t}^{red}$ is stored in {tnons(:,isym)}.
+\begin{equation}\label{eq:IFT_2points_convention}
+ f(\rr_1,\rr_2)= \frac{1}{V} \sum_{\substack{\qq \\ \GG_1 \GG_2}}  
+ e^{i (\qq +\GG_1) \cdot \rr_1}\,f_{\GG_1 \GG_2}(\qq)\,e^{-i (\qq+\GG_2) \cdot \rr_2} 
+\end{equation}
 
-The conversion between reduced coordinates and Cartesian coordinates is
-
-$$
-r'_{\gamma}=\sum_{\alpha \beta}(R_{\alpha p})_{\gamma}
-[S^{red}_{\alpha \beta} r^{red}_{\beta}+t^{red}_{\alpha}]
-$$
-
-with $[{\rm as} \ G_{ip} \cdot R_{jp}=\delta_{ij}]$
-
-$$
-r_{\delta}=\sum_{\alpha}(R_{\alpha p})_\delta
-r^{red}_{\alpha} \rightarrow
-\sum_{\beta}(G_{\beta p})_{\delta} r_{\delta}=r^{red}_{\beta}
-$$.
-
-So 
-
-$$
-S_{\gamma \delta}=\sum_{\alpha \beta}(R_{\alpha p})_{\gamma}
-S^{red}_{\alpha \beta}(G_{\beta p})_{\gamma}
-$$
+\begin{equation}\label{eq:FT_2points_convention}
+ f_{\GG_1\GG_2}(\qq) = \frac{1}{V} \iint_V 
+ e^{-i(\qq+\GG_1) \cdot \rr_1}\,f(\rr_1, \rr_2)\,e^{i (\qq+\GG_2) \cdot \rr_2}\dd\rr_1\dd\rr_2 
+\end{equation}
+-->
