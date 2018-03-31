@@ -2006,6 +2006,7 @@ end subroutine testsusmat
 
 subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2252,6 +2253,7 @@ end subroutine macroin
 !! SOURCE
 
 subroutine macroin2(dtsets,ndtset_alloc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

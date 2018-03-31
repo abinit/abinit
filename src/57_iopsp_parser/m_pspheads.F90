@@ -91,7 +91,6 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 #undef ABI_FUNC
 #define ABI_FUNC 'inpspheads'
  use interfaces_14_hidewrite
- use interfaces_57_iopsp_parser, except_this_one => inpspheads
 !End of the abilint section
 
  implicit none
@@ -588,6 +587,7 @@ end subroutine inpspheads
 
 subroutine pawpsxml2ab( psxml, pspheads,option )
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -761,12 +761,12 @@ end subroutine pawpsxml2ab
 
 subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'upfheader2abi'
  use interfaces_11_qespresso_ext
- use interfaces_57_iopsp_parser, except_this_one => upfheader2abi
 !End of the abilint section
 
   implicit none
@@ -848,6 +848,7 @@ end subroutine upfheader2abi
 !! SOURCE
 
 subroutine upfxc2abi(dft, pspxc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

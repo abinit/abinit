@@ -593,7 +593,6 @@ end subroutine ab7_invars_new_from_file
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_57_iopsp_parser
  use interfaces_57_iovars
 !End of the abilint section
 
