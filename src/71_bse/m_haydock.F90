@@ -113,7 +113,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 #define ABI_FUNC 'exc_haydock_driver'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_56_recipspace
  use interfaces_69_wfdesc
 !End of the abilint section
 

@@ -93,7 +93,6 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 #define ABI_FUNC 'mlwfovlp_qp'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
  use interfaces_70_gw, except_this_one => mlwfovlp_qp
 !End of the abilint section
 

@@ -285,8 +285,6 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 #undef ABI_FUNC
 #define ABI_FUNC 'psps_init_from_dtset'
  use interfaces_32_util
- use interfaces_56_recipspace
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none

@@ -398,7 +398,6 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'renorm_bst'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

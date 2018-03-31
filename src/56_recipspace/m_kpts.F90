@@ -240,7 +240,6 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tetra_from_kptrlatt'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -569,6 +568,7 @@ end function symkchk
 
 subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 & sppoldbl,symafm,symmat,timrev,use_symrec)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -2747,7 +2747,6 @@ type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ord
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_build_phbspl'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -3095,7 +3094,6 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_build_skw'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

@@ -49,6 +49,7 @@ module m_fock
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_fft,             only : zerosym
  use m_kg,              only : ph1d3d, getph
+ use m_kpts,            only : listkk
  use m_paw_ij,          only : paw_ij_type
 
 
@@ -497,7 +498,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

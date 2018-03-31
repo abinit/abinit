@@ -91,8 +91,6 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none
@@ -2351,6 +2349,7 @@ end subroutine memorf
 subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
 & ntypat,ntypalch,pspheads)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2504,6 +2503,7 @@ end subroutine getdim_nloc
 !! SOURCE
 
 subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
