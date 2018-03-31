@@ -45,7 +45,7 @@ module m_psps
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_pawpsp,        only : pawpsp_cg
  use m_parser,        only : chkint_eq
- use m_memeval,       only : getdim_nloc
+ use m_memeval,       only : getdim_nloc, setmqgrid
 
  implicit none
 
