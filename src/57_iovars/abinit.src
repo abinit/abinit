@@ -21,7 +21,6 @@ sources = [
  "chkinp.F90",
  "chkvars.F90",
  "compute_kgb_indicator.F90",
- "getdim_nloc.F90",
  "finddistrproc.F90",
  "indefo.F90",
  "indefo1.F90",
