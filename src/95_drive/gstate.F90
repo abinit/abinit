@@ -1854,7 +1854,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 #define ABI_FUNC 'clnup1'
  use interfaces_14_hidewrite
  use interfaces_59_ionetcdf
- use interfaces_67_common, except_this_one => clnup1
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -2044,6 +2044,7 @@ end subroutine clnup1
 
 subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
 &                 prtfor,prtstr,prtvol,start,strten,synlgr,xred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

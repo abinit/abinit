@@ -11,7 +11,7 @@
 !!  overlap matrix (not used for norm conserving psps).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,6 +120,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  use m_cgtools
  use m_efield
 
+ use m_numeric_tools, only : rhophi
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
 &                          pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
  use m_hamiltonian, only : gs_hamiltonian_type
@@ -1316,6 +1317,704 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  call timab(22,2,tsec)
 
  DBG_EXIT("COLL")
+
+contains
+!!***
+
+!!****f* ABINIT/linemin
+!! NAME
+!! linemin
+!!
+!! FUNCTION
+!! Performs the "line minimization" w.r.t. the angle theta on a unit circle
+!! to update the wavefunction associated with the current k-point and
+!! band label.
+!! This routine is used only when the electric field is on (otherwise it could
+!! in principle also be used, but there is a simpler procedure, as originally
+!! coded in abinit).
+!!
+!! INPUTS
+!! chc = <C|H_0|C> where |C> is the wavefunction of the current band
+!! detovc = determinant of the overlap matrix S
+!! detovd = determinant of the overlap matrix where for the band
+!!          that is being updated <C| is replaced by <D| (search direction)
+!! dhc = Re[<D|H_0|C>]
+!! dhd = <D|H_0|D>
+!! efield_dot = reciprocal lattice coordinates of the electric field
+!! iline = index of the current line minimization
+!! nkpt = number of k-points
+!! nstr(idir) = number of strings along the idir-th direction
+!! sdeg = spin degeneracy
+!!
+!! OUTPUT
+!! bcut(ifor,idir) = branch cut of the ellipse associated with (ifor,idir)
+!! costh = cos(thetam)
+!! hel(ifor,idir) = helicity of the ellipse associated with (ifor,idir)
+!! phase_end = total change in Zak phase, must be equal to
+!!             dphase_aux1 + n*two_pi
+!! sinth = sin(thetam)
+!! thetam = optimal angle theta in line_minimization
+!!
+!!
+!! SIDE EFFECTS
+!! Input/Output
+!! dphase_aux1 = change in Zak phase accumulated during the loop over iline
+!!               (can be used for debugging in cgwf.f)
+!! phase_init = initial Zak phase (before doing the first line minimization)
+!!
+!! NOTES
+!! We are making the "frozen Hamiltonian approximation", i.e., the
+!! Hamiltonian does not change with theta (we are neglecting the dependence
+!! of the Hartree and exchange-correlation terms on theta; the original
+!! abinit routine does the same)
+!!
+!! PARENTS
+!!      cgwf
+!!
+!! CHILDREN
+!!      etheta,rhophi,wrtout
+!!
+!! SOURCE
+
+subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
+&  efield_dot,iline,nkpt,nstr,hel,phase_end,phase_init,sdeg,sinth,thetam)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'linemin'
+ use interfaces_14_hidewrite
+ use interfaces_67_common, except_this_one => linemin
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iline,nkpt
+ real(dp),intent(in) :: chc,dhc,dhd,sdeg
+ real(dp),intent(out) :: costh,sinth,thetam
+!arrays
+ integer,intent(in) :: nstr(3)
+ integer,intent(out) :: hel(2,3)
+ real(dp),intent(in) :: detovc(2,2,3),detovd(2,2,3),efield_dot(3)
+ real(dp),intent(inout) :: dphase_aux1(3),phase_init(3)
+ real(dp),intent(out) :: bcut(2,3),phase_end(3)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir,ifor,igrid,iter,maxiter,ngrid
+ real(dp) :: aa,angle,bb,big_axis,cc,cphi_0,delta_theta,e0,e1
+ real(dp) :: excentr,iab,phase0,phase_min,phi_0,rdum,sgn,small_axis,sphi_0
+ real(dp) :: theta,theta_0,val
+ logical :: flag_neg
+ character(len=500) :: message
+!arrays
+ real(dp) :: g_theta(2),theta_min(2),theta_try(2)
+ real(dp) :: esave(251),e1save(251)   !!REC
+
+! ***********************************************************************
+
+!Compute the helicity and the branch cut of the ellipse in the complex
+!plane associated with the overlap between a k-point and one of its neighbours
+
+ do idir = 1, 3
+
+   if (abs(efield_dot(idir)) < tol12) cycle
+
+   do ifor = 1, 2
+
+     aa = half*(detovc(1,ifor,idir)*detovc(1,ifor,idir) + &
+&     detovc(2,ifor,idir)*detovc(2,ifor,idir) + &
+&     detovd(1,ifor,idir)*detovd(1,ifor,idir) + &
+&     detovd(2,ifor,idir)*detovd(2,ifor,idir))
+
+     bb = half*(detovc(1,ifor,idir)*detovc(1,ifor,idir) + &
+&     detovc(2,ifor,idir)*detovc(2,ifor,idir) - &
+&     detovd(1,ifor,idir)*detovd(1,ifor,idir) - &
+&     detovd(2,ifor,idir)*detovd(2,ifor,idir))
+
+     cc = detovc(1,ifor,idir)*detovd(1,ifor,idir) + &
+&     detovc(2,ifor,idir)*detovd(2,ifor,idir)
+
+     iab = detovc(1,ifor,idir)*detovd(2,ifor,idir) - &
+&     detovc(2,ifor,idir)*detovd(1,ifor,idir)
+
+     if (iab >= zero) then
+       hel(ifor,idir) = 1
+     else
+       hel(ifor,idir) = -1
+     end if
+
+     if (abs(bb) > tol8) then
+       theta_0 = half*atan(cc/bb)
+     else
+       theta_0 = quarter*pi
+     end if
+
+     if (bb < zero) theta_0 = theta_0 + pi*half
+
+     g_theta(:) = cos(theta_0)*detovc(:,ifor,idir) + &
+&     sin(theta_0)*detovd(:,ifor,idir)
+!    DEBUG
+!    write(std_out,*)'before rhophi, g_theta =',g_theta
+!    ENDDEBUG
+     call rhophi(g_theta,phi_0,rdum)
+!    DEBUG
+!    write(std_out,*)'after rhophi, phi_0 = ',phi_0
+!    ENDDEBUG
+
+     cphi_0 = cos(phi_0)
+     sphi_0 = sin(phi_0)
+
+     rdum = aa - sqrt(bb*bb + cc*cc)
+     if (rdum < zero) rdum = zero
+     small_axis = sqrt(rdum)
+     big_axis = sqrt(aa + sqrt(bb*bb + cc*cc))
+     excentr = hel(ifor,idir)*small_axis/big_axis
+
+!    Find angle for which phi = pi
+     if (abs(excentr) > tol8) then
+       angle = atan(tan(pi-phi_0)/excentr)
+     else
+       if (tan(pi-phi_0)*hel(ifor,idir) > zero) then
+         angle = half*pi
+       else
+         angle = -0.5_dp*pi
+       end if
+     end if
+     bcut(ifor,idir) = angle + theta_0
+
+
+!    Compute the branch-cut angle
+     if (hel(ifor,idir) == 1) then
+       if ((sphi_0 > 0).and.(cphi_0 > 0)) bcut(ifor,idir) = bcut(ifor,idir) + pi
+       if ((sphi_0 < 0).and.(cphi_0 > 0)) bcut(ifor,idir) = bcut(ifor,idir) - pi
+     else
+       if ((sphi_0 > 0).and.(cphi_0 > 0)) bcut(ifor,idir) = bcut(ifor,idir) - pi
+       if ((sphi_0 < 0).and.(cphi_0 > 0)) bcut(ifor,idir) = bcut(ifor,idir) + pi
+     end if
+
+     if (bcut(ifor,idir) > pi) bcut(ifor,idir) = bcut(ifor,idir) - two_pi
+     if (bcut(ifor,idir) < -1_dp*pi) bcut(ifor,idir) = bcut(ifor,idir) + two_pi
+
+!    DEBUG
+!    write(std_out,'(a,2x,i3,2x,i3,5x,f16.9,5x,i2)')'linemin: ifor,idir,bcut,hel',&
+!    &   ifor,idir,bcut(ifor,idir),hel(ifor,idir)
+!    write(std_out,'(a,5x,f16.9,5x,f16.9)')'linemin: big_axis,small_axis ',&
+!    &     big_axis,small_axis
+!    ENDDEBUG
+
+   end do   ! ifor
+ end do   ! idir
+
+!---------------------------------------------------------------------------
+
+!Perform the "line minimization" w.r.t. the angle theta on a unit circle
+!to update the wavefunction associated with the current k-point and band label.
+
+ ngrid = 250   ! initial number of subdivisions in [-pi/2,pi/2]
+!for finding extrema
+ maxiter = 100
+ delta_theta = pi/ngrid
+
+!DEBUG
+!write(std_out,*)'linemin: theta, e0, e1, e1fdiff'
+!ENDDEBUG
+
+
+!Get the interval where the absolute minimum of E(theta) is located
+
+ val = huge(one)             ! large number
+ flag_neg=.false.
+ theta_min(:) = ten
+ do igrid = 1, ngrid+1
+
+   theta = (igrid - 1)*delta_theta - pi*half
+   call etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
+&   hel,nkpt,nstr,sdeg,theta)
+
+   esave(igrid)=e0      !!REC
+   e1save(igrid)=e1     !!REC
+
+!  It is important to detect when the slope changes from negative to positive
+!  Moreover, a slope being extremely close to zero must be ignored
+
+!  DEBUG
+!  write(std_out,*)' igrid,e0,e1,val,theta_min(:)=',igrid,theta,e0,e1,val,theta_min(:)
+!  ENDDEBUG
+
+!  Store e1 and theta if negative ...
+   if(e1 < -tol10)then
+     theta_try(1)=theta
+     flag_neg=.true.
+   end if
+!  A change of sign is just happening
+   if(e1 > tol10 .and. flag_neg)then
+     theta_try(2)=theta
+     flag_neg=.false.
+!    Still, must be better than the previous minimum in order to succeed
+     if (e0 < val-tol10) then
+       val=e0
+       theta_min(:)=theta_try(:)
+     end if
+   end if
+ end do
+
+!In case the minimum was not found
+
+ if (abs(theta_min(1) - ten) < tol10) then
+!  REC start
+   write(message,'(a,a)')ch10,&
+&   ' linemin: ERROR- cannot find theta_min.'
+   call wrtout(std_out,message,'COLL')
+   write(message,'(a,a)')ch10,&
+&   ' igrid      theta          esave(igrid)    e1save(igrid) '
+   call wrtout(std_out,message,'COLL')
+   do igrid = 1, ngrid+1
+     theta = (igrid - 1)*delta_theta - pi*half
+     write(std_out,'(i6,3f16.9)')igrid,theta,esave(igrid),e1save(igrid)
+     !write(101,'(i6,3f16.9)')igrid,theta,esave(igrid),e1save(igrid)
+   end do
+   write(message,'(6a)')ch10,&
+&   ' linemin : ERROR - ',ch10,&
+&   '  Cannot find theta_min. No minimum exists : the field is too strong ! ',ch10,&
+&   '  Try decreasing difference between D and 4 Pi P by changing structure or D (only for fixed D calculation)'
+   call wrtout(std_out,message,'COLL')
+   message = ' linemin cannot find theta_min'
+   MSG_ERROR(message)
+ end if
+
+!Compute the mimum of E(theta)
+
+
+ iter = 0
+ do while ((delta_theta > tol8).and.(iter < maxiter))
+   delta_theta = half*(theta_min(2) - theta_min(1))
+   theta = theta_min(1) + delta_theta
+   call etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
+&   hel,nkpt,nstr,sdeg,theta)
+   if (e1 > zero) then
+     theta_min(2) = theta
+   else
+     theta_min(1) = theta
+   end if
+   iter = iter + 1
+
+!  DEBUG
+!  write(std_out,'(a,2x,i3,2(2x,f16.9))')'iter,e0,e1 = ',iter,e0,e1
+!  ENDDEBUG
+
+ end do
+
+ costh = cos(theta)
+ sinth = sin(theta)
+
+ thetam = theta
+
+!DEBUG
+!write(std_out,*)'linemin : thetam = ',thetam
+!ENDDEBUG
+
+
+!---------------------------------------------------------------------------
+
+!Compute and store the change in electronic polarization
+
+ sgn = one
+ do idir = 1, 3
+
+   if (abs(efield_dot(idir)) < tol12) cycle
+
+   phase_end(idir) = zero
+   do ifor = 1, 2
+
+     g_theta(:) = detovc(:,ifor,idir)
+!    DEBUG
+!    write(std_out,*)'before rhophi (2nd call), g_theta =',g_theta
+!    ENDDEBUG
+     call rhophi(g_theta,phase0,rdum)
+!    DEBUG
+!    write(std_out,*)'after rhophi, phase0 = ',phase0
+!    ENDDEBUG
+
+     if(iline == 1) phase_init(idir) = phase_init(idir) + sgn*phase0
+
+     g_theta(:) = costh*detovc(:,ifor,idir) + sinth*detovd(:,ifor,idir)
+     call rhophi(g_theta,phase_min,rdum)
+
+     phase_end(idir) = phase_end(idir) + sgn*phase_min
+
+!    Correct for branch cuts (remove jumps)
+     if (bcut(ifor,idir) <= zero) phase0 = phase0 + hel(ifor,idir)*two_pi
+     if(thetam >= bcut(ifor,idir)) phase_min = phase_min + hel(ifor,idir)*two_pi
+
+     dphase_aux1(idir) = dphase_aux1(idir) + sgn*(phase_min - phase0)
+
+     sgn = -1_dp*sgn
+
+   end do   ! idir
+ end do    ! ifor
+
+!DEBUG
+!write(std_out,'(a,3(2x,f16.9))')'dphase_aux1 = ',(dphase_aux1(idir),idir = 1, 3)
+!write(std_out,*)' linemin: debug, exit.'
+!ENDDEBUG
+
+end subroutine linemin
+!!***
+
+!!****f* ABINIT/etheta
+!! NAME
+!! etheta
+!!
+!! FUNCTION
+!! Computes the energy per unit cell and its first derivative
+!! for a given angle theta. More precisely, computes only the part of
+!! the energy that changes with theta.
+!!
+!! INPUTS
+!! bcut(ifor,idir) = branch cut of the ellipse associated with (ifor,idir)
+!! chc = <C|H_0|C> where |C> is the wavefunction of the current band
+!! detovc = determinant of the overlap matrix S
+!! detovd = determinant of the overlap matrix where for the band
+!!          that is being updated <C| is replaced by <D| (search direction)
+!! dhc = Re[<D|H_0|C>]
+!! dhd = <D|H_0|D>
+!! efield_dot = reciprocal lattice coordinates of the electric field
+!! hel(ifor,idir) = helicity of the ellipse associated with (ifor,idir)
+!! nkpt = number of k-points
+!! nsppol = 1 for unpolarized, 2 for spin-polarized
+!! nstr(idir) = number of strings along the idir-th direction
+!! sdeg = spin degeneracy
+!! theta = value of the angle for which the energy (e0) and its
+!!         derivative (e1) are computed
+!!
+!! OUTPUT
+!! e0 = energy for the given value of theta
+!! e1 = derivative of the energy with respect to theta
+!!
+!! PARENTS
+!!      cgwf,linemin
+!!
+!! CHILDREN
+!!      rhophi
+!!
+!! SOURCE
+
+subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
+&    hel,nkpt,nstr,sdeg,theta)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'etheta'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt
+ real(dp),intent(in) :: chc,dhc,dhd,sdeg,theta
+ real(dp),intent(out) :: e0,e1
+!arrays
+ integer,intent(in) :: hel(2,3),nstr(3)
+ real(dp),intent(in) :: bcut(2,3),detovc(2,2,3),detovd(2,2,3),efield_dot(3)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir,ifor
+ real(dp) :: c2theta,ctheta,dphase,gnorm,phase,rho,s2theta,sgn,stheta
+!arrays
+ real(dp) :: dg_theta(2),g_theta(2)
+
+! ***********************************************************************
+
+ e0 = zero ; e1 = zero
+
+ ctheta = cos(theta)
+ stheta = sin(theta)
+ c2theta = ctheta*ctheta - stheta*stheta   ! cos(2*theta)
+ s2theta = two*ctheta*stheta               ! sin(2*theta)
+
+ e0 = chc*ctheta*ctheta + dhd*stheta*stheta + dhc*s2theta
+ e0 = e0*sdeg/nkpt
+
+!DEBUG
+!e0 = zero
+!ENDDEBUG
+
+ e1 = (dhd - chc)*s2theta + two*dhc*c2theta
+ e1 = e1*sdeg/nkpt
+
+ sgn = -1_dp
+ do idir = 1, 3
+
+   if (abs(efield_dot(idir)) < tol12) cycle
+
+   do ifor = 1, 2
+
+     g_theta(:)  = ctheta*detovc(:,ifor,idir) + &
+&     stheta*detovd(:,ifor,idir)
+     dg_theta(:) = -1_dp*stheta*detovc(:,ifor,idir) + &
+&     ctheta*detovd(:,ifor,idir)
+
+!    Compute E(theta)
+
+     call rhophi(g_theta,phase,rho)
+     if (theta >= bcut(ifor,idir)) phase = phase + hel(ifor,idir)*two_pi
+
+!    DEBUG
+!    unit = 100 + 10*idir + ifor
+!    write(unit,'(4(f16.9))')theta,g_theta(:),phase
+!    ENDDEBUG
+
+     e0 = e0 + sgn*sdeg*efield_dot(idir)*phase/(two_pi*nstr(idir))
+
+
+!    Compute dE/dtheta
+
+!    imaginary part of the derivative of ln(g_theta)
+     gnorm = g_theta(1)*g_theta(1) + g_theta(2)*g_theta(2)
+     dphase = (dg_theta(2)*g_theta(1) - dg_theta(1)*g_theta(2))/gnorm
+
+     e1 = e1 + sgn*sdeg*efield_dot(idir)*dphase/(two_pi*nstr(idir))
+
+     sgn = -1_dp*sgn
+
+   end do
+ end do
+
+end subroutine etheta
+!!***
+
+!!****f* ABINIT/mksubham
+!! NAME
+!! mksubham
+!!
+!! FUNCTION
+!! Build the Hamiltonian matrix in the eigenfunctions subspace,
+!! for one given band (or for one given block of bands)
+!!
+!! INPUTS
+!!  cg(2,mcg)=wavefunctions
+!!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
+!!  iblock=index of block of bands
+!!  icg=shift to be applied on the location of data in the array cg
+!!  igsc=shift to be applied on the location of data in the array cg
+!!  istwf_k=input parameter that describes the storage of wfs
+!!  mcg=second dimension of the cg array
+!!  mgsc=second dimension of the gsc array
+!!  nband_k=number of bands at this k point for that spin polarization
+!!  nbdblock=number of bands in a block
+!!  npw_k=number of plane waves at this k point
+!!  nspinor=number of spinorial components of the wavefunctions
+!!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
+!!  use_vnl= 1 if <C band,k|H|C band_prime,k> has to be computed
+!!  me_g0=1 if this processors has G=0, 0 otherwise
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  ghc(2,npw_k*nspinor)=<G|H|C band,k> for the current state
+!!                       This is an input in non-blocked algorithm
+!!                               an output in blocked algorithm
+!!  gvnlc(2,npw_k*nspinor)=<G|Vnl|C band,k> for the current state
+!!                       This is an input in non-blocked algorithm
+!!                               an output in blocked algorithm
+!!  isubh=index of current state in array subham
+!!  isubo=index of current state in array subovl
+!!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
+!!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
+!!  subvnl(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian expressed in the WFs subspace
+!!
+!! PARENTS
+!!      cgwf
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
+&                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
+&                    nspinor,subham,subovl,subvnl,use_subovl,use_vnl,me_g0)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mksubham'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iblock,icg,igsc,istwf_k,mcg,mgsc,nband_k
+ integer,intent(in) :: nbdblock,npw_k,nspinor,use_subovl,use_vnl,me_g0
+ integer,intent(inout) :: isubh,isubo
+!arrays
+ real(dp),intent(in) :: cg(2,mcg)
+ real(dp),intent(in) :: gsc(2,mgsc)
+ real(dp),intent(inout) :: ghc(2,npw_k*nspinor),gvnlc(2,npw_k*nspinor)
+ real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
+ real(dp),intent(inout) :: subovl(nband_k*(nband_k+1)*use_subovl)
+ real(dp),intent(inout) :: subvnl(nband_k*(nband_k+1)*use_vnl)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iband,ibdblock,ii,ipw,ipw1,isp,iwavef,jwavef
+ real(dp) :: cgimipw,cgreipw,chcim,chcre,cscim,cscre,cvcim,cvcre
+!real(dp) :: chc(2),cvc(2),csc(2)
+
+! *********************************************************************
+
+!Loop over bands in a block This loop can be parallelized
+ do iband=1+(iblock-1)*nbdblock,min(iblock*nbdblock,nband_k)
+   ibdblock=iband-(iblock-1)*nbdblock
+
+!  Compute elements of subspace Hamiltonian <C(i)|H|C(n)> and <C(i)|Vnl|C(n)>
+   if(istwf_k==1)then
+
+     do ii=1,iband
+       iwavef=(ii-1)*npw_k*nspinor+icg
+       chcre=zero ; chcim=zero
+       if (use_vnl==0) then
+         do ipw=1,npw_k*nspinor
+           cgreipw=cg(1,ipw+iwavef)
+           cgimipw=cg(2,ipw+iwavef)
+           chcre=chcre+cgreipw*ghc(1,ipw)+cgimipw*ghc(2,ipw)
+           chcim=chcim+cgreipw*ghc(2,ipw)-cgimipw*ghc(1,ipw)
+         end do
+!        chc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),ghc)
+       else
+#if 1
+         do ipw=1,npw_k*nspinor
+           cgreipw=cg(1,ipw+iwavef)
+           cgimipw=cg(2,ipw+iwavef)
+           chcre=chcre+cgreipw*ghc(1,ipw)+cgimipw*ghc(2,ipw)
+           chcim=chcim+cgreipw*ghc(2,ipw)-cgimipw*ghc(1,ipw)
+         end do
+         cvcre=zero ; cvcim=zero
+         do ipw=1,npw_k*nspinor
+           cgreipw=cg(1,ipw+iwavef)
+           cgimipw=cg(2,ipw+iwavef)
+           cvcre=cvcre+cgreipw*gvnlc(1,ipw)+cgimipw*gvnlc(2,ipw)
+           cvcim=cvcim+cgreipw*gvnlc(2,ipw)-cgimipw*gvnlc(1,ipw)
+         end do
+         subvnl(isubh  )=cvcre
+         subvnl(isubh+1)=cvcim
+#else
+!        New version with BLAS1, will require some update of the refs.
+         cvc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),gvnlc)
+         subvnl(isubh  )=cvc(1)
+         subvnl(isubh+1)=cvc(2)
+         chc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),ghc)
+         chcre = chc(1)
+         chcim = chc(2)
+#endif
+!        Store real and imag parts in Hermitian storage mode:
+       end if
+       subham(isubh  )=chcre
+       subham(isubh+1)=chcim
+!      subham(isubh  )=chc(1)
+!      subham(isubh+1)=chc(2)
+       isubh=isubh+2
+     end do
+
+   else if(istwf_k>=2)then
+     do ii=1,iband
+       iwavef=(ii-1)*npw_k+icg
+!      Use the time-reversal symmetry, but should not double-count G=0
+       if(istwf_k==2 .and. me_g0==1) then
+         chcre = half*cg(1,1+iwavef)*ghc(1,1)
+         if (use_vnl==1) cvcre=half*cg(1,1+iwavef)*gvnlc(1,1)
+         ipw1=2
+       else
+         chcre=zero; ipw1=1
+         if (use_vnl==1) cvcre=zero
+       end if
+       if (use_vnl==0) then
+         do isp=1,nspinor
+           do ipw=ipw1+(isp-1)*npw_k,npw_k*isp
+             cgreipw=cg(1,ipw+iwavef)
+             cgimipw=cg(2,ipw+iwavef)
+             chcre=chcre+cgreipw*ghc(1,ipw)+cgimipw*ghc(2,ipw)
+           end do
+         end do
+         chcre=two*chcre
+       else
+         do isp=1,nspinor
+           do ipw=ipw1+(isp-1)*npw_k,npw_k*isp
+             cgreipw=cg(1,ipw+iwavef)
+             cgimipw=cg(2,ipw+iwavef)
+             chcre=chcre+cgreipw*ghc(1,ipw)+cgimipw*ghc(2,ipw)
+             cvcre=cvcre+cgreipw*gvnlc(1,ipw)+cgimipw*gvnlc(2,ipw)
+           end do
+         end do
+         chcre=two*chcre
+         cvcre=two*cvcre
+!        Store real and imag parts in Hermitian storage mode:
+         subvnl(isubh  )=cvcre
+         subvnl(isubh+1)=zero
+       end if
+       subham(isubh  )=chcre
+       subham(isubh+1)=zero
+       isubh=isubh+2
+     end do
+   end if
+
+!  Compute elements of subspace <C(i)|S|C(n)> (S=overlap matrix)
+!  <C(i)|S|C(n)> should be closed to Identity.
+   if (use_subovl==1) then
+     jwavef=(iband-1)*npw_k*nspinor+igsc
+     if(istwf_k==1)then
+       do ii=1,iband
+         iwavef=(ii-1)*npw_k*nspinor+icg
+         cscre=zero ; cscim=zero
+         do ipw=1,npw_k*nspinor
+           cgreipw=cg(1,ipw+iwavef)
+           cgimipw=cg(2,ipw+iwavef)
+           cscre=cscre+cgreipw*gsc(1,ipw+jwavef)+cgimipw*gsc(2,ipw+jwavef)
+           cscim=cscim+cgreipw*gsc(2,ipw+jwavef)-cgimipw*gsc(1,ipw+jwavef)
+         end do
+!        csc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),gsc)
+!        subovl(isubo  )=csc(1)
+!        subovl(isubo+1)=csc(2)
+!        Store real and imag parts in Hermitian storage mode:
+         subovl(isubo  )=cscre
+         subovl(isubo+1)=cscim
+         isubo=isubo+2
+       end do
+     else if(istwf_k>=2)then
+       do ii=1,iband
+         iwavef=(ii-1)*npw_k*nspinor+icg
+         if(istwf_k==2 .and. me_g0==1)then
+           cscre=half*cg(1,1+iwavef)*gsc(1,1+jwavef)
+           ipw1=2
+         else
+           cscre=zero; ipw1=1
+         end if
+         do isp=1,nspinor
+           do ipw=ipw1+(isp-1)*npw_k,npw_k*isp
+             cgreipw=cg(1,ipw+iwavef)
+             cgimipw=cg(2,ipw+iwavef)
+             cscre=cscre+cg(1,ipw+iwavef)*gsc(1,ipw+jwavef)+cg(2,ipw+iwavef)*gsc(2,ipw+jwavef)
+           end do
+         end do
+         cscre=two*cscre
+!        Store real and imag parts in Hermitian storage mode:
+         subovl(isubo  )=cscre
+         subovl(isubo+1)=zero
+         isubo=isubo+2
+       end do
+     end if
+   end if
+
+ end do ! iband in a block
+
+end subroutine mksubham
+!!***
 
 end subroutine cgwf
 !!***

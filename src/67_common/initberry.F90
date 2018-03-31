@@ -70,10 +70,6 @@
 !!           nproc = number of cpus
 !!           nneighbour = number of neighbours for each k-point (= 6)
 !!
-!! TO DO
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      init_e_field_vars
 !!
