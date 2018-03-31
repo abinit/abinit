@@ -1379,12 +1379,12 @@ contains
 subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &  efield_dot,iline,nkpt,nstr,hel,phase_end,phase_init,sdeg,sinth,thetam)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linemin'
  use interfaces_14_hidewrite
- use interfaces_67_common, except_this_one => linemin
 !End of the abilint section
 
  implicit none
@@ -1705,6 +1705,7 @@ end subroutine linemin
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
 &    hel,nkpt,nstr,sdeg,theta)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1839,6 +1840,7 @@ end subroutine etheta
 subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
 &                    nspinor,subham,subovl,subvnl,use_subovl,use_vnl,me_g0)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
