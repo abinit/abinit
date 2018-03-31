@@ -35,8 +35,6 @@ sources = [
  "invars1m.F90",
  "invars2.F90",
  "invars2m.F90",
- "macroin.F90",
- "macroin2.F90",
  "m_memeval.F90",
  "mpi_setup.F90",
  "m_ab7_invars_f90.F90",
