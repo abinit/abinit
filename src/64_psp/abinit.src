@@ -34,8 +34,6 @@ sources = [
  "psp5lo.F90",
  "psp5nl.F90",
  "psp6in.F90",
- "psp6cc.F90",
- "psp6cc_drh.F90",
  "psp8cc.F90",
  "psp8in.F90",
  "psp8lo.F90",
@@ -46,7 +44,6 @@ sources = [
  "psp11lo.F90",
  "psp11nl.F90",
  "psp_dump_outputs.F90",
- "sincos.F90",
  "upf2abinit.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
