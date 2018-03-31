@@ -37,9 +37,11 @@ module m_eprenorms
 #endif
  use m_nctk
 
- use m_crystal, only :       crystal_t
+ use m_crystal,  only : crystal_t
+ use m_kpts,     only : listkk
 
  implicit none
+
  private
 !!***
 

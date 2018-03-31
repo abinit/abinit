@@ -39,7 +39,7 @@ module m_fstab
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_special_funcs,  only : dirac_delta
- use m_kpts,           only : kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_timrev_from_kptopt, listkk
 
  implicit none
 

@@ -81,6 +81,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  use m_geometry,       only : metric
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_from_hdr
+ use m_kpts,           only : listkk
  use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
  use m_ebands,         only : ebands_init, ebands_free
  use m_qparticles,     only : rdqps, rdgw
