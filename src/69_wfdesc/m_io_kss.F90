@@ -39,11 +39,17 @@ MODULE m_io_kss
 #endif
  use m_hdr
  use m_wfk
- use m_pawcprj
  use m_cgtools
+ use m_hamiltonian
+ use m_electronpositron
+ use m_pawtab
+ use m_paw_ij
+ use m_pawcprj
+ use m_pawfgr
 
  use m_io_tools,         only : open_file
- use m_fstrings,         only : sjoin, itoa
+ use m_fstrings,         only : sjoin, itoa, strcat
+ use m_abilasi,          only : xheevx, xhegvx
  use m_geometry,         only : metric
  use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg
@@ -806,74 +812,6 @@ end subroutine k2gamma_centered
 
 !----------------------------------------------------------------------
 
-!!****f* m_io_kss/skip_kss_record
-!! NAME
-!!  skip_kss_record
-!!
-!! FUNCTION
-!!  Skip one or more wavefunction records of the KSS file.
-!!
-!! INPUTS
-!!  kss_unt=Unit of the KSS file.
-!!  nrec=Number of records to be skipped.
-!!  usepaw=1 if PAW
-!!  nspinor=Number of spinor components.
-!!  natom=Nuber of atom
-!!
-!!  OUTPUT
-!!   Error status reported by Fortran read statement.
-!!
-!! SIDE EFFECTS
-!!  See description.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-function skip_kss_record(kss_unt,nrec,usepaw,nspinor,natom) result(ios)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skip_kss_record'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: kss_unt,usepaw,nspinor,natom,nrec
- integer :: ios
-
-!Local variables-------------------------------
- integer :: ispinor,iatom,irec
-
-! *************************************************************************
-
- ios=0
- do irec=1,nrec
-   read(kss_unt,err=10) ! kss_ugd(1:kss_npw*nspinor)
-   if (usepaw==1) then
-     do ispinor=1,nspinor
-       do iatom=1,natom
-         read(kss_unt,err=10) !(Cprj_ibz(iatom,ibsp)%cp
-       end do
-     end do
-   end if
- end do
-
- RETURN
-
- 10 ios=-1
-
-end function skip_kss_record
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_io_kss/make_gvec_kss
 !! NAME
 !! make_gvec_kss
@@ -1081,24 +1019,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
   rprimd, xred, eigen, npwarr, kg, ylm, ngfftc, nfftc, ngfftf, nfftf, vtrial,&
   electronpositron) ! Optional arguments
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_hamiltonian
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
- use m_electronpositron
- use m_pawtab
- use m_paw_ij
- use m_pawcprj
- use m_pawfgr
-
- use m_fstrings,    only : strcat
- use m_abilasi,     only : xheevx, xhegvx
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1798,12 +1718,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 & prtvol,Psps,rprimd,vtrial,xred,cg,usecprj,Cprj,eigen,ierr)
 
  use m_linalg_interfaces
- !use m_hamiltonian,      only : ddiago_ctl_type, init_ddiago_ctl
- !use m_pawtab,           only : pawtab_type
- !use m_paw_ij,           only : paw_ij_type, paw_ij_gather
- !use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_mpi_exch, pawcprj_free,&
- !                                pawcprj_getdim, paw_overlap
- !use m_pawfgr,           only : pawfgr_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

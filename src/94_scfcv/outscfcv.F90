@@ -190,7 +190,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_69_wfdesc
  use interfaces_70_gw
 !End of the abilint section
 
