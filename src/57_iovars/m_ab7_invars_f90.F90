@@ -31,7 +31,6 @@ module m_ab7_invars
   use defs_basis
   use defs_datatypes
   use defs_abitypes
-  !use defs_time
   use m_errors
   use m_profiling_abi
   use m_xmpi

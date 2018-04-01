@@ -112,7 +112,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  use m_profiling_abi
  use m_xomp
 
- use m_time,       only : time_accu, mtim, timab
+ use m_time,       only : time_accu, timab, TIMER_SIZE
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -140,11 +140,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  real(dp) :: cpunm,lflops,other_cpu,other_wal,percent_limit,subcpu,subwal,timab_cpu,timab_wall,wallnm
  character(len=500) :: message
 !arrays
- integer(i8b) :: basic(mtim),ndata(mtim),tslots(mtim)
- integer :: ncount(mtim)
+ integer(i8b) :: basic(TIMER_SIZE),ndata(TIMER_SIZE),tslots(TIMER_SIZE)
+ integer :: ncount(TIMER_SIZE)
  integer,allocatable :: list(:)
- real(dp) :: ftimes(2,mtim),ftsec(2),mflops(mtim),nflops(mtim),times(2,mtim),tsec(2),my_tsec(2)
- character(len=32) :: names(-1:mtim),entry_name
+ real(dp) :: ftimes(2,TIMER_SIZE),ftsec(2),mflops(TIMER_SIZE),nflops(TIMER_SIZE),times(2,TIMER_SIZE),tsec(2),my_tsec(2)
+ character(len=32) :: names(-1:TIMER_SIZE),entry_name
  character(len=*),parameter :: format01040 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,16x,f7.2,1x,f10.2)"
  character(len=*),parameter :: format01041 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
  character(len=*),parameter :: format01042 ="('- ',a24,f12.3,f6.1,f11.3,g12.3,i15)"
@@ -192,10 +192,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Channels 1700 to 1747 are for GWLS.
 !Channels 1520 and beyond are not yet attributed.
 
- names(1:mtim)='***                             '
+ names(1:TIMER_SIZE)='***                             '
 !Basic slots are not overlapping. Their sum should cover most of the code.
 !WARNING : the slots from 1 to 99 should be avoided in the future ... They are hard to track.
- basic(1:mtim)=0
+ basic(1:TIMER_SIZE)=0
  names(1)='abinit                          '
  names(5)='ewald                           ' ; basic(5)=1
  names(6)='setsym                          ' ; basic(6)=1
@@ -960,7 +960,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1747)='inv eps_m and subtract 1        '
 
 
- names(mtim)='(other)                         ' ! This is a generic slot, to compute a complement
+ names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================
 
@@ -1034,7 +1034,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
 !Get separate time reports from all timed sections
  totcount=0
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    call time_accu(itim,return_ncount,times(:,itim),nflops(itim),ftimes(:,itim))
    ncount(itim)=return_ncount
    totcount=totcount+return_ncount
@@ -1050,7 +1050,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Gather the different parts of selected time slots
 !Or, alternatively, deduce the value of the complement of some time slots.
 !This loop is finished when the default case is hit (see below)
- do ii=1,mtim
+ do ii=1,TIMER_SIZE
 
    tslots(:)=0
 
@@ -1200,7 +1200,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    nflops(    aslot)=zero
    ftimes(1:2,aslot)=zero
    flag_count=1
-   do islot=2,mtim
+   do islot=2,TIMER_SIZE
      bslot=tslots(islot)
      cslot=abs(bslot)
      if(bslot>0)then
@@ -1239,7 +1239,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
 
 !Calculating Gigaflops for all cases
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    mflops(itim)=-2
    if(abs(ftimes(1,itim)) > tol10) then ! VALGRIND complains that here there is a jump on uninitialized values
      mflops(itim)=nflops(itim)*1.e-9/ftimes(1,itim)
@@ -1249,7 +1249,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end do
 
 !Warning if the time is negative
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    if(times(1,itim)<-tol6 .or. times(2,itim)<-tol6 .or. ncount(itim)<-1 )then
      write(message, '(6a,i4,4a,es16.6,a,es16.6,a,i6,a,es16.6)' ) ch10,&
 &     ' timana : WARNING -',ch10,&
@@ -1261,10 +1261,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end do
 
 !List of major independent code sections
- ABI_ALLOCATE(list,(mtim))
+ ABI_ALLOCATE(list,(TIMER_SIZE))
  list(:)=0
  nlist=0
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    if(basic(itim)/=0)then
      nlist=nlist+1
      list(nlist)=itim
@@ -1357,7 +1357,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    wallnm=100._dp/tsec(2)
 
 !  Calculating Gigaflops for all process
-   do itim=1,mtim
+   do itim=1,TIMER_SIZE
      mflops(itim)=-2
      if(abs(ftimes(1,itim)) > tol10) then ! VALGRIND complains that here there is a jump on uninitialized values
        mflops(itim)=nflops(itim)*1.e-9/ftimes(1,itim)
@@ -1437,20 +1437,20 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        select case(ipart)
 
        case(1)
-         list(:11)=(/1,41,42,43,44,45,640,46,49,50,mtim/)      ; message='abinit '
+         list(:11)=(/1,41,42,43,44,45,640,46,49,50,TIMER_SIZE/)      ; message='abinit '
        case(2)
-         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,mtim/)  ; message='driver '
+         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)  ; message='driver '
        case(3)
          list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; message='gstateimg+gstate '
        case(4)
-         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,mtim/); message='scfcv '
+         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); message='scfcv '
        case(5)
-         list(:7)=(/940,941,942,943,944,945,mtim/)             ; message= 'rhotov '
+         list(:7)=(/940,941,942,943,944,945,TIMER_SIZE/)             ; message= 'rhotov '
        case(6)
-         list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,mtim/)
+         list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
          message= 'vtorho '
        case(7)
-         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,mtim/) ; message='vtowfk '
+         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,TIMER_SIZE/) ; message='vtowfk '
        case(8)
          if(abs(timopt)==3)then
            list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; message='lobpcgwf (abs(timopt)==3)'
@@ -1465,7 +1465,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(10)
          list(:8)=(/132,133,134,135,136,137,138,141/)          ; message='respfn '
        case(11)
-         list(:8)=(/141,142,143,144,120,146,147,mtim/)         ; message='dfpt_looppert '
+         list(:8)=(/141,142,143,144,120,146,147,TIMER_SIZE/)         ; message='dfpt_looppert '
        case(12)
          list(:9)=(/120,154,121,157,152,158,160,150,564/) ; message='dfpt_scfcv '
        case(13)
@@ -1489,11 +1489,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(21)
          list(:9)=(/431,432,433,434,435,445,440,441,442/)     ; message='calc_sigc_me '
        case(23)
-         list(:11)=(/630,631,632,633,634,545,635,636,637,638,mtim/)         ; message='prep_getghc '
+         list(:11)=(/630,631,632,633,634,545,635,636,637,638,TIMER_SIZE/)         ; message='prep_getghc '
        case(24)
          list(:4)=(/539,856,547,548/)                          ; message='prep_fourwf '
        case(25)
-         list(:5)=(/570,231,232,581,mtim/)                     ; message='prep_nonlop '
+         list(:5)=(/570,231,232,581,TIMER_SIZE/)                     ; message='prep_nonlop '
        case(26)
          list(:6)=(/790,791,792,793,794,795/)                  ; message='mkrho (upwards partitioning)'
 !          Disabled (temporarily ?) because the partitioning was not correct
@@ -1511,13 +1511,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(32)
          list(:8)=(/710,711,712,713,714,715,716,717/)          ; message='inwffil '
        case(33)
-         list(:10)=(/720,721,722,723,724,725,726,727,67,mtim/)  ; message='wfsinp '
+         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/)  ; message='wfsinp '
        case(34)
          list(:5)=(/770,771,772,272,290/)                      ; message='initwf '
        case(35)
          list(:9)=(/780,781,782,783,784,785,786,291,292/)      ; message='newkpt '
        case(36)
-         list(:8)=(/93,901,902,903,904,905,268,mtim/)          ; message='newvtr '
+         list(:8)=(/93,901,902,903,904,905,268,TIMER_SIZE/)          ; message='newvtr '
        case(37)
          list(:2)=(/94,269/)                                   ; message='newrho '
        case(38)
@@ -1527,7 +1527,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(40)
          list(:5)=(/910,911,912,913,914/)                      ; message='forstr '
        case(41)
-         list(:10)=(/920,921,927,922,923,926,924,65,925,mtim/) ; message='forstrnps '
+         list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; message='forstrnps '
        case(42)
          list(:4)=(/670,671,672,673/)                          ; message='exc_build_ham '
        case(43)
@@ -1580,7 +1580,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end select
 
        nlist=0
-       do itim=1,mtim
+       do itim=1,TIMER_SIZE
          if(list(itim)/=0)then
            nlist=nlist+1
          else
@@ -1598,25 +1598,25 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          subwal=zero
          do ilist=1,nlist
            isort = list(ilist)
-!          When the LAST item is mtim, a complement is evaluated (count number set to -1)
-           if(ilist==nlist .and. list(nlist)==mtim)then
-             times(1,mtim)=times(1,list(1))-subcpu
-             times(2,mtim)=times(2,list(1))-subwal
-             ncount(mtim)=-1
-             ftimes(1,mtim)=zero
-             mflops(mtim)=0
+!          When the LAST item is TIMER_SIZE, a complement is evaluated (count number set to -1)
+           if(ilist==nlist .and. list(nlist)==TIMER_SIZE)then
+             times(1,TIMER_SIZE)=times(1,list(1))-subcpu
+             times(2,TIMER_SIZE)=times(2,list(1))-subwal
+             ncount(TIMER_SIZE)=-1
+             ftimes(1,TIMER_SIZE)=zero
+             mflops(TIMER_SIZE)=0
 #if defined HAVE_TEST_TIME_PARTITIONING
-             if(times(2,mtim)>1.2d0 .and. wallnm*times(2,mtim)>3.d0)then
+             if(times(2,TIMER_SIZE)>1.2d0 .and. wallnm*times(2,TIMER_SIZE)>3.d0)then
                write(ount, '(3a,es16.6,4a,es16.6,2a)')&
 &               ' Note : the partitioning does not work well for this routine.',ch10,&
-&               '   The (other) Wall time            ',times(2,mtim),ch10,&
+&               '   The (other) Wall time            ',times(2,TIMER_SIZE),ch10,&
 &               '   is bigger than 1.2 secs. ',ch10,&
-&               '   The (other) Wall time percentage ',wallnm*times(2,mtim),ch10,&
+&               '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
 &               '   is bigger than 3% '
-             else if (times(2,mtim)<0.2d0 .and. wallnm*times(2,mtim)<-0.2d0)then
+             else if (times(2,TIMER_SIZE)<0.2d0 .and. wallnm*times(2,TIMER_SIZE)<-0.2d0)then
                write(ount, '(3a,es16.6,2a)')&
 &               ' Note : the partitioning does not work well for this routine.',ch10,&
-&               '   The (other) Wall time percentage ',wallnm*times(2,mtim),ch10,&
+&               '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
 &               '   is negative '
              end if
 #endif

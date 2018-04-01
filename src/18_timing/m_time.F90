@@ -56,36 +56,36 @@ MODULE m_time
 
 !!***
 
-! papiopt is a flag which indicates if there is or not an analysis of speed execution is made.
-! By defaut the analysis is not done
+ ! papiopt is a flag which indicates if there is or not an analysis of speed execution is made.
+ ! By defaut the analysis is not done
  integer,private,save :: papiopt=0
 
-! Counter variables
+ !==================
+ ! Counter variables
+ !==================
 
-! mtim determines the maximum number of "timing slots" available
- integer,public,parameter :: mtim=1999
+ ! TIMER_SIZE determines the maximum number of "timing slots" available
+ integer,public,parameter :: TIMER_SIZE=1999
 
-! timeopt is a flag which indicates the suppression or not of the timing.
+ ! timeopt is a flag which indicates the suppression or not of the timing.
  integer,private,save :: timopt=1
 
  ! Number of times that the routine has been called
- integer,private,save :: ncount(mtim)=0
+ integer,private,save :: ncount(TIMER_SIZE)=0
 
  ! Accumulating cpu time (1) and wall to wall time (2) for each "timing slots"
- real(dp),private,save  :: acctim(2,mtim)=zero,tzero(2,mtim)=zero
+ real(dp),private,save  :: acctim(2,TIMER_SIZE)=zero,tzero(2,TIMER_SIZE)=zero
 
  ! Accumulating number of floating point operation and cpu time (1) and wall time (2) for each "performance slot"
- real(dp),private,save :: papi_accflops(mtim)=zero, papi_acctim(2,mtim)=zero
+ real(dp),private,save :: papi_accflops(TIMER_SIZE)=zero, papi_acctim(2,TIMER_SIZE)=zero
 
  ! Reference value for number of floating point operation and time (cpu and wall) for each performance slot
- real(dp),private,save :: papi_flops(mtim)=zero , papi_tzero(2,mtim)=zero
+ real(dp),private,save :: papi_flops(TIMER_SIZE)=zero , papi_tzero(2,TIMER_SIZE)=zero
 
  ! Elapsed time and elapsed number of floating point operation since a reference
- real(dp),private,save :: papi_tottim(2,mtim)=zero, papi_totflops(mtim)=zero
+ real(dp),private,save :: papi_tottim(2,TIMER_SIZE)=zero, papi_totflops(TIMER_SIZE)=zero
 
-!----------------------------------------------------------------------
-
-CONTAINS  !===========================================================
+CONTAINS
 !!***
 
 !!****f* m_time/asctime
@@ -694,8 +694,8 @@ subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
 ! *************************************************************************
 
 !Check that nn lies in sensible bounds
- if (nn<0.or.nn>mtim) then
-   write(message,'(a,i6,a,i8,a)')' dim mtim=',mtim,' but input nn=',nn,'.'
+ if (nn<0.or.nn>TIMER_SIZE) then
+   write(message,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
    MSG_BUG(message)
  end if
 
@@ -896,15 +896,14 @@ subroutine timab(nn,option,tottim)
 !If timopt was set to zero by a call with option=5, suppress
 !all action of this routine (might as well return at this point !)
  if(timopt/=0 .and. option/=5)then
-!
-!  Check that nn lies in sensible bounds
-   if (nn<1.or.nn>mtim) then
-     write(message,'(a,i0,a,i0)')'  mtim = ',mtim,' but input nn = ',nn
+   ! Check that nn lies in sensible bounds
+   if (nn<1.or.nn>TIMER_SIZE) then
+     write(message,'(a,i0,a,i0)')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
      MSG_BUG(message)
    end if
 
 #ifdef HAVE_PAPI
-!  for all active options for time if papi analysis has been selected.
+   ! for all active options for time if papi analysis has been selected.
    if (option/=3.and.time_get_papiopt()==1) then
      call PAPIf_flops(real_time, proc_time, flops1, mflops1, check)
      if (check /= PAPI_OK) then
@@ -921,7 +920,7 @@ subroutine timab(nn,option,tottim)
 
    select case (option)
    case (0)
-       ! Zero out all accumulators of time and init timers
+     ! Zero out all accumulators of time and init timers
      acctim(:,:)      = 0.0d0
      tzero(:,:)       = 0.0d0
      ncount(:)        = 0
@@ -931,7 +930,7 @@ subroutine timab(nn,option,tottim)
      papi_tzero(:,:)  = 0.
 
    case (1)
-       ! Initialize timab for nn
+     ! Initialize timab for nn
      call timein(cpu,wall)
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
@@ -942,20 +941,20 @@ subroutine timab(nn,option,tottim)
 #endif
 
    case (2)
-       ! Accumulate time for nn (also keep the values of cpu, wall, proc_time, real_time, flops1)
+     ! Accumulate time for nn (also keep the values of cpu, wall, proc_time, real_time, flops1)
      call timein(cpu,wall)
      acctim(1,nn)=acctim(1,nn)+cpu -tzero(1,nn)
      acctim(2,nn)=acctim(2,nn)+wall-tzero(2,nn)
      ncount(nn)=ncount(nn)+1
 #ifdef HAVE_PAPI
-!      accumulate time and flops for nn Difference between 2 calls to Papif_flops
+     ! accumulate time and flops for nn Difference between 2 calls to Papif_flops
      papi_acctim(1,nn)=papi_acctim(1,nn)+ proc_time - papi_tzero(1,nn)
      papi_acctim(2,nn)=papi_acctim(2,nn)+ real_time - papi_tzero(2,nn)
      papi_accflops(nn)=papi_accflops(nn)+ flops1- papi_flops(nn)
 #endif
 
    case (3)
-       ! Use previously obtained values to initialize timab for nn
+     ! Use previously obtained values to initialize timab for nn
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
 #ifdef HAVE_PAPI
@@ -965,12 +964,12 @@ subroutine timab(nn,option,tottim)
 #endif
 
    case (4)
-       ! Return elapsed time for nn (do not accumulate)
+     ! Return elapsed time for nn (do not accumulate)
      call timein(cpu,wall)
      tottim(1)=cpu-tzero(1,nn)
      tottim(2)=wall-tzero(2,nn)
 #ifdef HAVE_PAPI
-!      return elapsed floating point operationfor nn (do not accumulate)
+     ! return elapsed floating point operationfor nn (do not accumulate)
      papi_tottim(1,nn)= proc_time - papi_tzero(1,nn)
      papi_tottim(2,nn)= real_time - papi_tzero(2,nn)
      papi_totflops(nn)= flops1 - papi_flops(nn)
