@@ -704,7 +704,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 #define ABI_FUNC 'mkphdos'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

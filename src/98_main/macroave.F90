@@ -73,7 +73,6 @@ program macroave
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'macroave'
- use interfaces_01_macroavnew_ext
 !End of the abilint section
 
  implicit none

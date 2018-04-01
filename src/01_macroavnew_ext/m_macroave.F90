@@ -500,5 +500,5 @@ DOUBLE PRECISION FUNCTION VOLCEL( C )
       VOLCEL = ABS( VOLCEL )
 END FUNCTION VOLCEL
 
-end module macroave
+end module m_macroave
 !!***

@@ -72,7 +72,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section
 

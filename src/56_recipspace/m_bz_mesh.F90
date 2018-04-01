@@ -1465,7 +1465,6 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_mesh'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

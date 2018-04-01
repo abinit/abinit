@@ -188,7 +188,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_init_ddb'
- use interfaces_56_recipspace
 !End of the abilint section
 
   implicit none

@@ -59,7 +59,6 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 #define ABI_FUNC 'ep_setupqpt'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

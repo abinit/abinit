@@ -148,7 +148,6 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpts_ibz_from_kptrlatt'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -966,13 +965,13 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 & msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk,&
 & fullbz,nkpthf,kpthf,downsampling) ! optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getkgrid'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace, except_this_one => getkgrid
 !End of the abilint section
 
  implicit none
@@ -1434,12 +1433,12 @@ end subroutine getkgrid
 subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
 & nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_full_kgrid'
  use interfaces_32_util
- use interfaces_56_recipspace, except_this_one => get_full_kgrid
 !End of the abilint section
 
  implicit none
@@ -1532,6 +1531,7 @@ end subroutine get_full_kgrid
 !! SOURCE
 
 subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1713,6 +1713,7 @@ end subroutine get_kpt_fullbz
 !! SOURCE
 
 subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2300,6 +2301,7 @@ end subroutine smpbz
 subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 & msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2308,7 +2310,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
  use interfaces_16_hideleave
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace, except_this_one => testkgrid
 !End of the abilint section
 
  implicit none
