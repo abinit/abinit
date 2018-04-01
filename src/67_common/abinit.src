@@ -80,7 +80,6 @@ sources = [
  "mlwfovlp_ylmfac.F90",
  "mlwfovlp_ylmfar.F90",
  "moddiel.F90",
- "msig.F90",
  "multipoles_out.F90",
  "m_eprenorms.F90",
  "m_plowannier.F90",

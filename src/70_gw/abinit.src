@@ -31,7 +31,6 @@ sources = [
  "cchi0q0.F90",
  "cchi0q0_intraband.F90",
  "cohsex_me.F90",
- "debug_tools.F90",
  "dotproductqrc.F90",
  "gwls_hamiltonian.F90",
  "gwls_wf.F90",
