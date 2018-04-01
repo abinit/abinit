@@ -83,6 +83,7 @@
  use m_xmpi
 
  use m_io_tools, only : delete_file, get_unit
+ use m_fftcore,  only : sphereboundary
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type

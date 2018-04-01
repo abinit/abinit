@@ -70,6 +70,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart
+ use m_fftcore,    only : sphereboundary
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

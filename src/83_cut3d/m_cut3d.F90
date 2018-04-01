@@ -48,6 +48,7 @@ MODULE m_cut3d
  use m_epjdos,           only : recip_ylm, dens_in_sph
  use m_dens,             only : dens_hirsh
  use m_kg,               only : kpgio, ph1d3d, getph
+ use m_fftcore,          only : sphereboundary
 
  implicit none
 

@@ -35,6 +35,7 @@ MODULE m_memeval
 
  use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
+ use m_fftcore,       only : getng
  use m_kg,            only : getmpw
 
  implicit none

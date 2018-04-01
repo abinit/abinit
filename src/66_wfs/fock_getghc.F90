@@ -51,13 +51,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_cgtools, only :dotprod_g
  use m_fock
- use m_hamiltonian, only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian
-
  use m_pawcprj
- use m_pawdij, only : pawdijhat
 
+ use m_cgtools, only :dotprod_g
+ use m_fftcore,   only : sphereboundary
+ use m_hamiltonian, only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian
+ use m_pawdij, only : pawdijhat
  use defs_datatypes, only: pseudopotential_type
  use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_alloc
 

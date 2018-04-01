@@ -33,7 +33,7 @@ MODULE m_FFT_prof
  use m_geometry,       only : metric
  use m_blas,           only : xcopy
  use m_cgtools,        only : set_istwfk
- use m_fftcore,        only : get_kg, print_ngfft, fftalg_info, kgindex
+ use m_fftcore,        only : get_kg, print_ngfft, fftalg_info, kgindex, getng, sphereboundary
  use m_fft_mesh,       only : calc_eigr, calc_ceigr
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
  use m_oscillators,    only : rho_tw_g

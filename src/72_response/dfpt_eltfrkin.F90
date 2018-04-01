@@ -70,6 +70,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  use m_profiling_abi
 
  use m_geometry,     only : metric
+ use m_fftcore,      only : sphereboundary
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

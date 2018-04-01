@@ -51,6 +51,7 @@ module m_epjdos
  use m_pawtab,         only : pawtab_type
  use m_kpts,           only : tetra_from_kptrlatt
  use m_kg,             only : ph1d3d
+ use m_fftcore,        only : sphereboundary
 
  implicit none
 

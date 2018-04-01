@@ -86,6 +86,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  use m_xmpi
 
  use m_io_tools,  only : get_unit, iomode_from_fname
+ use m_fftcore,   only : sphereboundary
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

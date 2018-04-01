@@ -39,6 +39,7 @@ MODULE m_suscep_stat
  use m_mpinfo,  only : destroy_mpi_enreg
  use m_kg,      only : ph1d3d
  use m_gsphere, only : symg
+ use m_fftcore, only : sphereboundary
 
  implicit none
 

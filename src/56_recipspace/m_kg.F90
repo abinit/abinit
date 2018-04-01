@@ -32,7 +32,7 @@ MODULE m_kg
  use m_errors
  use m_xmpi
 
- use m_fftcore, only : kpgsph
+ use m_fftcore,     only : kpgsph, bound
  use defs_abitypes, only : MPI_type
 
  implicit none

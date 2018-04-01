@@ -33,6 +33,8 @@ MODULE m_bandfft_kpt
  use m_errors
  use m_xmpi
 
+ use m_fftcore,   only : sphereboundary
+
  implicit none
 
  private

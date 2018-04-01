@@ -26,8 +26,8 @@
 !! Description of the input file (Fortran NAMELIST):
 !!
 !!   &CONTROL
-!!     tasks = string specifying the tasks to perform i.e. the routines that should be tested or profiled. 
-!!             allowed values: 
+!!     tasks = string specifying the tasks to perform i.e. the routines that should be tested or profiled.
+!!             allowed values:
 !!                 fourdp --> Test FFT transforms of density and potentials on the full box.
 !!                 fourwf --> Test FFT transforms of wavefunctions using the zero-padded algorithm.
 !!                 gw_fft --> Test the FFT transforms used in the GW code.
@@ -39,14 +39,14 @@
 !!                    uses threaded external libraries or OpenMP parallelization)
 !!     ndat   = integer specifying how many FFT transforms should be executed for each call to the FFT routine
 !!              (same meaning as the ndat input variable passed to fourwf)
-!!     necut  = Used if tasks = "bench". Specifies the number of cutoff energies to profile (see also ecut_arth) 
-!!     ecut_arth = Used if tasks = "bench". Used to generate an arithmetic progression of cutoff energies 
+!!     necut  = Used if tasks = "bench". Specifies the number of cutoff energies to profile (see also ecut_arth)
+!!     ecut_arth = Used if tasks = "bench". Used to generate an arithmetic progression of cutoff energies
 !!                 whose starting value is ecut_arth(1) and whose step is ecut_arth(2)
 !!
-!!  &SYSTEM 
+!!  &SYSTEM
 !!     ecut = cutoff energy for wavefunctions (real, Hartree units)
 !!     rprimd = Direct lattice vectors in Bohr. (3,3) matrix in Fortran column-major order
-!!     kpoint = real(3) vector specifying the reduced coordinates of the k-point of the wavefunction (used if tasks = "fourwf"). 
+!!     kpoint = real(3) vector specifying the reduced coordinates of the k-point of the wavefunction (used if tasks = "fourwf").
 !!               The value of the k-point defines the storage scheme (istwfk) of the u(G) coefficients and therefore
 !!               the FFT algorithm used to perform the transform u(G) <--> u(R) in fourwf.
 !!     osc_ecut  = cutoff energy (Hartree) for the oscillator matrix elements computed in the GW code
@@ -88,7 +88,7 @@ program fftprof
  use m_fstrings,   only : lower
  use m_io_tools,   only : flush_unit
  use m_geometry,   only : metric
- use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi
+ use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng
  use m_fft,        only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
  use m_fftw3,      only : fftw3_init_threads
  use m_mpinfo,     only : destroy_mpi_enreg
@@ -124,7 +124,7 @@ program fftprof
 !arrays
  integer :: ut_ngfft(18)
  real(dp),parameter :: gamma_point(3)=(/zero,zero,zero/)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3) 
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  type(FFT_test_t),allocatable :: Ftest(:)
  type(FFT_prof_t),allocatable :: Ftprof(:)
  integer,allocatable :: osc_gvec(:,:)
@@ -237,7 +237,7 @@ program fftprof
  call fft_use_lib_threads(use_lib_threads)
  !write(std_out,*)"use_lib_threads: ",use_lib_threads
 
- if (do_mpi_utests) then 
+ if (do_mpi_utests) then
    ! Execute unit tests for MPI FFTs and terminate execution.
    call wrtout(std_out,"=== MPI FFT Unit Tests ===","COLL")
 
@@ -265,7 +265,7 @@ program fftprof
      do cplex=1,2
        write(msg,"(4(a,i0))")"MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
        call wrtout(std_out,msg,"COLL")
-       nfailed = nfailed + fftbox_mpi_utests(fftalg=fftalg,cplex=cplex,ndat=ndat,nthreads=nthreads,comm_fft=comm) 
+       nfailed = nfailed + fftbox_mpi_utests(fftalg=fftalg,cplex=cplex,ndat=ndat,nthreads=nthreads,comm_fft=comm)
      end do
    end do
 
@@ -285,7 +285,7 @@ program fftprof
    symrel(:,:,1) = RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/))
  end if
 
- ! Set the number of calls for test. 
+ ! Set the number of calls for test.
  ncalls=ABS(ncalls); if (ncalls==0) ncalls=10
  call fftprof_ncalls_per_test(ncalls)
 
@@ -308,13 +308,13 @@ program fftprof
    avail = 1
    if (.not.fftalg_isavailable(fftalg)) avail = 0
    do ith=1,max_nthreads
-     !fftcache is machine-dependent. 
+     !fftcache is machine-dependent.
      fftcache = get_cache_kb()
      idx = idx + 1
      fft_setups(:,idx) = (/fftalg,fftcache,ndat,ith,avail/)
    end do
  end do
- 
+
  ! Compute FFT box.
  ABI_DT_MALLOC(Ftest,(ntests))
  ABI_DT_MALLOC(Ftprof,(ntests))
@@ -330,9 +330,9 @@ program fftprof
      MSG_ERROR("Consistency check assumes equal FFT meshes. Cannot continue")
    end if
    if (it == 1) then
-     call fft_test_print(Ftest(it)) !,header) 
+     call fft_test_print(Ftest(it)) !,header)
    else if (fft_setups(1,it) /= fft_setups(1,it-1)) then
-     call fft_test_print(Ftest(it)) !,header) 
+     call fft_test_print(Ftest(it)) !,header)
    end if
  end do
  !
@@ -383,7 +383,7 @@ program fftprof
  ! These routines are used in the GW part, FFTW3 is expected to
  ! be more efficient as the conversion complex(:) <--> real(2,:) is not needed.
  if (test_gw) then
-   !  
+   !
    ! ==== fourdp timing with complex arrays ====
    do isign=-1,1,2
      do inplace=0,1
@@ -394,7 +394,7 @@ program fftprof
        call fftprof_free(Ftprof)
      end do
    end do
-   !  
+   !
    ! ==== zero padded with complex arrays ====
    do isign=-1,1,2
      do it=1,ntests
@@ -403,7 +403,7 @@ program fftprof
      call fftprof_print(Ftprof,header)
      call fftprof_free(Ftprof)
    end do
-   !  
+   !
    ! ==== rho_tw_g timing ====
    ABI_CHECK(osc_ecut > zero,"osc_ecut <= zero!")
 
@@ -430,7 +430,7 @@ program fftprof
    nfailed = 0
    do idx=1,ntests
      ! fft_setups(:,idx) = (/fftalg,fftcache,ndat,ith,avail/)
-     fftalg   = fft_setups(1,idx) 
+     fftalg   = fft_setups(1,idx)
      fftcache = fft_setups(2,idx)
      ndat     = fft_setups(3,idx)
      nthreads = fft_setups(4,idx)

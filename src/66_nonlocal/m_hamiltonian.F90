@@ -42,7 +42,7 @@ module m_hamiltonian
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
- use m_fftcore,           only : kpgsph
+ use m_fftcore,           only : kpgsph, sphereboundary
  use m_cgtools,           only : set_istwfk
  use m_pawcprj,           only : pawcprj_getdim
  use m_paw_ij,            only : paw_ij_type

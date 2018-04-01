@@ -47,6 +47,7 @@ module m_fock
 
  use m_mpinfo,          only : ptabs_fourdp
  use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_fftcore,         only : sphereboundary
  use m_fft,             only : zerosym
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
