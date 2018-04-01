@@ -931,7 +931,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  use m_profiling_abi
  use m_errors
 
- use m_kg,     only : mkkin, kpgstr
+ use m_kg,          only : mkkin, kpgstr, mkkpg
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
 &                          load_k_hamiltonian,load_kprime_hamiltonian,&
 &                          load_k_rf_hamiltonian

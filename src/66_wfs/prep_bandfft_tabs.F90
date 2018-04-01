@@ -54,7 +54,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_bandfft_tabs'
  use interfaces_18_timing
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
