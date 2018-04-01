@@ -365,8 +365,9 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          kg2_k(:,1:npw2)=kg2(:,1+ikg2:npw2+ikg2)
        else if(mkmem2==0)then
 !        Read the first line of a block and performs some checks on the unkg file.
+         MSG_ERROR("mkmem2 == 0 and rdnpw are not supported anymore.")
          nsp=nspinor2
-         call rdnpw(ikpt2,isppol2,nbd2,npw2,nsp,0,unkg2)
+         !call rdnpw(ikpt2,isppol2,nbd2,npw2,nsp,0,unkg2)
 !        Read k+g data
          read (unkg2) kg2_k(1:3,1:npw2)
        end if
@@ -417,16 +418,17 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    Prepare the reading of the wavefunctions: the correct record is selected
 !    WARNING : works only for GS - for RF the number of record differs
      if(restart==2 .and. mkmem1==0)then
+       MSG_ERROR("mkmem1 == 0 has been removed.")
 
        if(debug>0)then
          write(message, '(a,a,a,a,i5,a,i5,a,a,i5,a,i5)' ) ch10,&
-&         ' newkpt : about to call randac',ch10,&
-&         '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
-&         '  and isppol1=',isppol1,', isppol2=',isppol2
+         ' newkpt : about to call randac',ch10,&
+         '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
+         '  and isppol1=',isppol1,', isppol2=',isppol2
          call wrtout(std_out,message,'PERS')
        end if
 
-       call randac(debug,headform1,ikptsp_prev,ikpt1,isppol1,nband1,nkpt1,nsppol1,wffinp)
+       !call randac(debug,headform1,ikptsp_prev,ikpt1,isppol1,nband1,nkpt1,nsppol1,wffinp)
      end if
 
 !    Read the data for nbd2 bands at this k point
