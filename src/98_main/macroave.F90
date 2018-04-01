@@ -64,6 +64,7 @@ program macroave
  use netcdf
 #endif
  use m_hdr
+ use m_macroave
 
  use m_fstrings,        only : sjoin, strcat, endswith
  use m_io_tools,        only : file_exists, open_file
