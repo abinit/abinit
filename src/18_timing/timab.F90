@@ -86,7 +86,7 @@
 subroutine timab(nn,option,tottim)
 
  use defs_basis
- use defs_time
+ !use defs_time
  use m_profiling_abi
  use m_errors
  use iso_c_binding
@@ -117,7 +117,7 @@ subroutine timab(nn,option,tottim)
  real(dp),save :: cpu,wall
  character(len=500) :: message
 #ifdef HAVE_PAPI
- integer(C_INT) :: check 
+ integer(C_INT) :: check
  integer(C_LONG_LONG),save :: flops1
  real(C_FLOAT),save :: real_time,proc_time
  real(C_FLOAT) :: mflops1
@@ -130,7 +130,7 @@ subroutine timab(nn,option,tottim)
 !If timopt was set to zero by a call with option=5, suppress
 !all action of this routine (might as well return at this point !)
  if(timopt/=0 .and. option/=5)then
-!  
+!
 !  Check that nn lies in sensible bounds
    if (nn<1.or.nn>mtim) then
      write(message,'(a,i0,a,i0)')'  mtim = ',mtim,' but input nn = ',nn
@@ -139,32 +139,32 @@ subroutine timab(nn,option,tottim)
 
 #ifdef HAVE_PAPI
 !  for all active options for time if papi analysis has been selected.
-   if (option/=3.and.time_get_papiopt()==1) then 
+   if (option/=3.and.time_get_papiopt()==1) then
      call PAPIf_flops(real_time, proc_time, flops1, mflops1, check)
      if (check /= PAPI_OK) then
        call papif_perror(check,papi_errstr,check)
        write(std_out,*) 'Problem to initialize papi high level inteface'
        write(std_out,*) 'Error code', papi_errstr
      end if
-     if (flops1 < 0) then  
+     if (flops1 < 0) then
        MSG_WARNING("Number of floating point instruction Overflow")
-       papi_flops(:)=-1            
+       papi_flops(:)=-1
      end if
    end if
 #endif
-   
+
    select case (option)
-   case (0)  
+   case (0)
        ! Zero out all accumulators of time and init timers
      acctim(:,:)      = 0.0d0
      tzero(:,:)       = 0.0d0
      ncount(:)        = 0
      papi_flops(:)    = 0
-     papi_acctim(:,:) = 0. 
-     papi_accflops(:) = 0. 
-     papi_tzero(:,:)  = 0. 
+     papi_acctim(:,:) = 0.
+     papi_accflops(:) = 0.
+     papi_tzero(:,:)  = 0.
 
-   case (1)  
+   case (1)
        ! Initialize timab for nn
      call timein(cpu,wall)
      tzero(1,nn)=cpu
@@ -175,20 +175,20 @@ subroutine timab(nn,option,tottim)
      papi_tzero(2,nn) = real_time
 #endif
 
-   case (2)  
+   case (2)
        ! Accumulate time for nn (also keep the values of cpu, wall, proc_time, real_time, flops1)
      call timein(cpu,wall)
      acctim(1,nn)=acctim(1,nn)+cpu -tzero(1,nn)
      acctim(2,nn)=acctim(2,nn)+wall-tzero(2,nn)
      ncount(nn)=ncount(nn)+1
 #ifdef HAVE_PAPI
-!      accumulate time and flops for nn Difference between 2 calls to Papif_flops 
+!      accumulate time and flops for nn Difference between 2 calls to Papif_flops
      papi_acctim(1,nn)=papi_acctim(1,nn)+ proc_time - papi_tzero(1,nn)
      papi_acctim(2,nn)=papi_acctim(2,nn)+ real_time - papi_tzero(2,nn)
-     papi_accflops(nn)=papi_accflops(nn)+ flops1- papi_flops(nn) 
+     papi_accflops(nn)=papi_accflops(nn)+ flops1- papi_flops(nn)
 #endif
 
-   case (3) 
+   case (3)
        ! Use previously obtained values to initialize timab for nn
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
@@ -198,7 +198,7 @@ subroutine timab(nn,option,tottim)
      papi_tzero(2,nn) = real_time
 #endif
 
-   case (4) 
+   case (4)
        ! Return elapsed time for nn (do not accumulate)
      call timein(cpu,wall)
      tottim(1)=cpu-tzero(1,nn)
@@ -207,13 +207,13 @@ subroutine timab(nn,option,tottim)
 !      return elapsed floating point operationfor nn (do not accumulate)
      papi_tottim(1,nn)= proc_time - papi_tzero(1,nn)
      papi_tottim(2,nn)= real_time - papi_tzero(2,nn)
-     papi_totflops(nn)= flops1 - papi_flops(nn) 
+     papi_totflops(nn)= flops1 - papi_flops(nn)
 #endif
 
    case default
      write(message,'(a,i10,a)')'  Input option not valid, =',option,'.'
      MSG_BUG(message)
-   end select 
+   end select
  end if
 
 end subroutine timab
