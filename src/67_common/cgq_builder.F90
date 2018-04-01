@@ -72,6 +72,8 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  use m_efield
  use m_profiling_abi
 
+ use m_time, only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

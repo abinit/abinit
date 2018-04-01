@@ -39,6 +39,8 @@ use m_errors
 use m_profiling_abi
 use m_bandfft_kpt
 
+use m_time,      only : timab
+
 implicit none
 save
 private

@@ -112,7 +112,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  use m_profiling_abi
  use m_xomp
 
- use m_time,       only : time_accu, mtim
+ use m_time,       only : time_accu, mtim, timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

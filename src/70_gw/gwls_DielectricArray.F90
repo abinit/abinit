@@ -55,6 +55,7 @@ use m_profiling_abi
 use m_xmpi
 use m_cgtools
 
+use m_time,                only : timab
 use m_io_tools,            only: get_unit
 use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 

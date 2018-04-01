@@ -127,6 +127,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_crystal
  use m_xcdata
 
+ use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_kpts,        only : symkchk
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens

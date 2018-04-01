@@ -47,6 +47,7 @@ MODULE m_fftw3
  use m_fftcore
  use iso_c_binding
 
+ use m_time,           only : timab
  use m_numeric_tools,  only : imax_loc
  use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : ptabs_fourwf

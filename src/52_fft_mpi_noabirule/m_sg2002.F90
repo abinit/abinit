@@ -34,6 +34,7 @@ module m_sg2002
  use m_errors
  use m_xmpi
 
+ use m_time,         only : timab
  use m_fstrings,     only : itoa
  use m_fftcore,      only : sphere_fft1, fill, scramble, switchreal, switch, mpiswitch,&
 &                           unfill, unscramble, unswitchreal, unswitch, unmpiswitch,&

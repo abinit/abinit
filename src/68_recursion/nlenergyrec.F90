@@ -48,14 +48,14 @@
 subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,&
  &                      tsmear,trotter,tol)
 
- use m_profiling_abi
-    
  use defs_basis
  use defs_rectypes
+ use m_profiling_abi
  use m_xmpi
  use m_per_cond
 
- use m_rec_tools,only         : reshape_pot
+ use m_time,       only : timab
+ use m_rec_tools,  only : reshape_pot
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

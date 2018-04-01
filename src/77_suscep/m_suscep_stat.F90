@@ -32,6 +32,7 @@ MODULE m_suscep_stat
  use m_errors
  use m_profiling_abi
 
+ use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, &

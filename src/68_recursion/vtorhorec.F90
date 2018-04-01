@@ -82,6 +82,7 @@ subroutine vtorhorec(dtset,&
  use m_errors
  use m_profiling_abi
 
+ use m_time,           only : timab
  use m_rec,            only : Calcnrec
  use m_rec_tools,      only : reshape_pot
 #ifdef HAVE_GPU_CUDA

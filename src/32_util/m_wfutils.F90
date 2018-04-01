@@ -27,6 +27,7 @@ module m_wfutils
  use m_errors
 
  use m_cgtools,  only : cg_to_reim, cg_from_reim
+ use m_time,     only : timab
 
  implicit none
 

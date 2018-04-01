@@ -45,6 +45,7 @@ module m_fock
  use m_pawcprj
  use m_cgtools
 
+ use m_time,            only : timab
  use m_mpinfo,          only : ptabs_fourdp
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_fftcore,         only : sphereboundary

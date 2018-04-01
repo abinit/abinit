@@ -38,7 +38,7 @@ MODULE m_iowf
  use m_hdr
  use m_ebands
 
- use m_time,           only : cwtime
+ use m_time,           only : cwtime, timab
  use m_io_tools,       only : get_unit, flush_unit, iomode2str
  use m_fstrings,       only : endswith, sjoin
  use m_numeric_tools,  only : mask2blocks

@@ -169,6 +169,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_gemm_nonlop
  use m_xcdata
 
+ use m_time,             only : timab
  use m_geometry,         only : metric
  use m_kg,               only : mkkin 
  use m_energies,         only : energies_type

@@ -64,6 +64,7 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
  use m_profiling_abi
  use m_errors
 
+ use m_time,     only : timab
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).

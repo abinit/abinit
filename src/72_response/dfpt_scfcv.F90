@@ -229,7 +229,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_cgtools,  only : mean_fftr
  use m_fstrings, only : int2char4, sjoin
  use m_geometry, only : metric
- use m_time,     only : abi_wtime, sec2str
+ use m_time,     only : abi_wtime, sec2str, timab
  use m_io_tools, only : open_file
  use m_exit,     only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_mpinfo,   only : iwrite_fftdatar

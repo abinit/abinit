@@ -153,6 +153,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_splines
  use m_ebands
 
+ use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith
  use m_geometry,         only : bonds_lgth_angles

@@ -62,6 +62,7 @@
  use m_wffile
  use m_hdr
 
+ use m_time,      only : timab
  use m_io_tools,  only : get_unit
  use m_pawpsp,    only : pawpsp_read_corewf
  use m_pawtab,    only : pawtab_type

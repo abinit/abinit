@@ -64,6 +64,8 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  use m_errors
  use m_xmpi
 
+ use m_time,           only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

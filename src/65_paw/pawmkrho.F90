@@ -97,6 +97,7 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,     only : timab
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
  use m_pawfgrtab,only : pawfgrtab_type

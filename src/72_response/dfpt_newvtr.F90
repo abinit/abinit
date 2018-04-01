@@ -108,6 +108,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  use m_ab7_mixing
  use m_errors
 
+ use m_time,     only : timab
  use m_geometry, only : metric
  use m_pawrhoij, only : pawrhoij_type
 

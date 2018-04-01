@@ -37,10 +37,15 @@
 #include "abi_common.h"
 
 module m_xg
-  use defs_basis, only : std_err, std_out
-  use m_profiling_abi
-  use m_xmpi, only : xmpi_sum
+
   use m_errors
+  use m_profiling_abi
+
+  use defs_basis, only : std_err, std_out
+  use m_time,     only: timab
+  use m_xmpi,     only : xmpi_sum
+
+
   implicit none
 
   private

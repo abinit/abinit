@@ -143,6 +143,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
+ use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
  use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write

@@ -53,6 +53,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  use m_xmpi
  use m_cgtools
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type
 

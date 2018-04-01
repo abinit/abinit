@@ -209,6 +209,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_cgtools
  use m_gemm_nonlop
 
+ use m_time,               only : timab
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
  use m_dtset,              only : testsusmat

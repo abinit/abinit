@@ -105,6 +105,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  use m_errors
  use m_xmpi
 
+ use m_time,    only : timab
  use m_pawang,  only: pawang_type
  use m_pawrad,  only: pawrad_type, pawrad_deducer0, poisson, simp_gen
  use m_pawtab,  only: pawtab_type

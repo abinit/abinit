@@ -71,6 +71,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  use m_profiling_abi
  use m_errors
 
+ use m_time,        only : timab
  use m_geometry,    only : xred2xcart
  use m_mpinfo,      only : ptabs_fourdp
  use m_pawtab,      only : pawtab_type

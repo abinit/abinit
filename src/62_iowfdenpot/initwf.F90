@@ -72,7 +72,8 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
  use m_wfk
  use m_wffile
 
- use m_io_tools,     only : get_unit
+ use m_time,      only : timab
+ use m_io_tools,  only : get_unit
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

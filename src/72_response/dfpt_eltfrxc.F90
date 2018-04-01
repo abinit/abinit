@@ -90,6 +90,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,        only : timab
  use m_geometry,    only : metric
  use m_cgtools,     only : dotprod_vn
  use m_pawtab,      only : pawtab_type,pawtab_free,pawtab_nullify

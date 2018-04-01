@@ -40,6 +40,7 @@ module m_fftcore
  use m_xmpi
  use m_sort
 
+ use m_time,         only : timab
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : destroy_mpi_enreg
 

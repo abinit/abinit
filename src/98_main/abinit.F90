@@ -111,7 +111,7 @@ program abinit
  use mpi
 #endif
 
- use m_time ,       only : asctime, sec2str, timein, time_set_papiopt
+ use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
  use m_io_tools,    only : open_file, flush_unit, delete_file, num_opened_units, show_units
  use m_specialmsg,  only : specialmsg_getcount

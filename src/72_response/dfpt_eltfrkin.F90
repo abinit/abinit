@@ -69,6 +69,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  use m_xmpi
  use m_profiling_abi
 
+ use m_time,         only : timab
  use m_geometry,     only : metric
  use m_fftcore,      only : sphereboundary
 

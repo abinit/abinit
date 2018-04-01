@@ -93,6 +93,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_fock
  use m_cgtools
 
+ use m_time,             only : timab
  use m_kg,               only : mkkpg
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
 &                               load_k_hamiltonian,gs_hamiltonian_type

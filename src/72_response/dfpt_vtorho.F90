@@ -180,6 +180,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use m_wfk
  use m_cgtools
 
+ use m_time,     only : timab
  use m_occ,      only : occeig
  use m_hdr,      only : hdr_skip, hdr_io
  use m_pawang,   only : pawang_type

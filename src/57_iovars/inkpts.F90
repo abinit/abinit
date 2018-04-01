@@ -101,6 +101,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,      only : timab
  use m_geometry,  only : metric
  use m_cgtools,   only : set_istwfk
  use m_parser,    only : intagm

@@ -20,12 +20,15 @@
 #include "abi_common.h"
 
 module m_xgScalapack
+
   use defs_basis, only : std_err, std_out, dp
   use m_profiling_abi
   use m_xmpi 
   use m_errors
   use m_slk
   use m_xg
+
+  use m_time,     only: timab
 
 #ifdef HAVE_MPI2
  use mpi

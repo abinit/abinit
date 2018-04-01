@@ -62,6 +62,7 @@
  use m_xmpi
  use m_hdr
 
+ use m_time,         only : timab
  use m_io_tools,     only : get_unit
 
 !This section has been created automatically by the script Abilint (TD).

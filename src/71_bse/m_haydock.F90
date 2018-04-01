@@ -38,6 +38,7 @@ MODULE m_haydock
  use netcdf
 #endif
 
+ use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
  use defs_abitypes,       only : Hdr_type

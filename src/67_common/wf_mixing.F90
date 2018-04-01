@@ -62,7 +62,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  use m_errors
  use m_cgtools
 
- use m_pawtab, only : pawtab_type
+ use m_time,    only : timab
+ use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
 &                      pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim
 

@@ -100,6 +100,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 #endif
  use m_ebands
 
+ use m_time,       only : timab
  use m_fstrings,   only : strcat
  use m_eig2d,      only : eigr2d_init,eigr2d_t,eigr2d_ncwrite,eigr2d_free,fan_t,&
                           & fan_init,fan_ncwrite,fan_free, gkk_t, gkk_init, &

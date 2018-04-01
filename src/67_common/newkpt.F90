@@ -152,6 +152,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  use m_wffile
  use m_xmpi
 
+ use m_time,       only : timab
  use m_pptools,    only : prmat
  use m_occ,        only : pareigocc
 

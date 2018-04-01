@@ -55,9 +55,11 @@
 subroutine dielmt(dielinv,gmet,kg_diel,&
 &  npwdiel,nspden,occopt,prtvol,susmat)
 
- use m_profiling_abi
 
  use defs_basis
+ use m_profiling_abi
+
+ use m_time,     only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

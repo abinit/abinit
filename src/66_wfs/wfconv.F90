@@ -150,6 +150,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,     only : timab
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_cgtools,  only : cg_envlop
  use m_kg,       only : ph1d3d, getph

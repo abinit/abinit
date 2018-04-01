@@ -62,6 +62,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
  use m_errors
  use m_xmpi
 
+ use m_time,           only : timab
  use m_special_funcs,  only : abi_derfc
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
 

@@ -77,6 +77,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
  use m_profiling_abi
  use m_cgtools
 
+ use m_time,    only : timab
  use m_pawcprj, only : pawcprj_type, pawcprj_copy, pawcprj_zaxpby
 
 !This section has been created automatically by the script Abilint (TD).

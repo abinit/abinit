@@ -189,6 +189,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use m_efield
  use m_errors
 
+ use m_time,             only : timab
  use m_geometry,         only : xred2xcart, metric
  use m_electronpositron, only : electronpositron_type
  use m_energies,         only : energies_type

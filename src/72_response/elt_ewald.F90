@@ -56,6 +56,7 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,           only : timab
  use m_special_funcs,  only : abi_derfc
  use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
 

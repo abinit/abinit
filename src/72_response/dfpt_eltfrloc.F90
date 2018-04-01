@@ -63,6 +63,7 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,    only : timab
  use m_mpinfo,  only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).

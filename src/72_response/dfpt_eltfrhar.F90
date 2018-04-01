@@ -54,6 +54,7 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
  use m_errors
  use m_xmpi
 
+ use m_time,     only : timab
  use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
 

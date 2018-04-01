@@ -107,6 +107,8 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  use m_errors
  use m_profiling_abi
 
+ use m_time,      only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

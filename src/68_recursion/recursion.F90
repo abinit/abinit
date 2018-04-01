@@ -73,13 +73,15 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 &                    nfft,ngfft,metrec,&
 &                    tim_fourdp,natom,projec,tim)
 
- use m_profiling_abi
- 
+
  use defs_basis
  use defs_abitypes
  use defs_rectypes
- use m_rec_tools,only :       trottersum
+ use m_profiling_abi
  use m_linalg_interfaces
+
+ use m_time,       only : timab
+ use m_rec_tools,  only : trottersum
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

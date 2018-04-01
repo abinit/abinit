@@ -75,6 +75,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  use m_errors
  use m_linalg_interfaces
 
+ use m_time,       only : timab
  use m_mpinfo,     only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).

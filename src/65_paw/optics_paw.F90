@@ -72,6 +72,7 @@
  use m_profiling_abi
  use m_hdr
 
+ use m_time,      only : timab
  use m_io_tools,  only : get_unit
  use m_pawrad,    only : pawrad_type, pawrad_deducer0, simp_gen, nderiv_gen
  use m_pawtab,    only : pawtab_type

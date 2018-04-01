@@ -32,6 +32,7 @@ module m_occ
  use m_splines
  use m_xmpi
 
+ use m_time,         only : timab
  use m_fstrings,     only : sjoin, itoa
  use defs_abitypes,  only : MPI_type
 

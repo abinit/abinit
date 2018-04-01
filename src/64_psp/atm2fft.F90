@@ -161,6 +161,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  use m_errors
  use m_xmpi
 
+ use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
  use m_pawtab,      only : pawtab_type
  use m_distribfft,  only : distribfft_type

@@ -85,6 +85,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  use m_cgtools
  use m_xmpi
 
+ use m_time,      only : timab
  use m_io_tools,  only : get_unit, iomode_from_fname
  use m_fftcore,   only : sphereboundary
 

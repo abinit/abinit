@@ -46,6 +46,7 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
  use m_errors
 
  use m_xmpi, only : xmpi_sum
+ use m_time,     only : timab
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
 

@@ -152,6 +152,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use m_xmpi
  use m_xcdata
 
+ use m_time,              only : timab
  use m_geometry,          only : xred2xcart
  use m_cgtools,           only : dotprod_vn
  use m_ewald,             only : ewald

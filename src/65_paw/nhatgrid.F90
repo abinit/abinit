@@ -79,6 +79,7 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,         only : timab
  use m_xmpi,         only : xmpi_comm_self,xmpi_comm_rank,xmpi_comm_size
  use m_pawtab,       only : pawtab_type
  use m_pawfgrtab,    only : pawfgrtab_type

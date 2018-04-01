@@ -55,10 +55,12 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 &                     fermie,tsmear,rtrotter, &
 &                     dim_trott,tol,inf_ucvol)
 
- use m_profiling_abi
- 
  use defs_basis
- use m_rec_tools,only :       trottersum
+ use m_profiling_abi
+
+
+ use m_time,     only : timab
+ use m_rec_tools,only : trottersum
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

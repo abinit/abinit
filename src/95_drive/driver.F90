@@ -100,6 +100,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #endif
  use m_xgScalapack
 
+ use m_time,         only : timab
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx

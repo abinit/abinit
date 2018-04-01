@@ -34,6 +34,7 @@
  use m_lib_four
  
  use m_io_tools, only : flush_unit, open_file
+ use m_time,     only : timab
  use m_oper, only : oper_type
  use m_matlu, only : matlu_type
  

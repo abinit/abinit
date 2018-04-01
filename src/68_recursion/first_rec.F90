@@ -64,7 +64,7 @@ subroutine first_rec(dtset,psps,rset)
  use m_profiling_abi
  use m_errors
 
- use m_time,       only : timein
+ use m_time,       only : timein, timab
  use m_rec,        only : init_nlpsprec,cpu_distribution
  use m_rec_tools,  only : get_pt0_pt1,reshape_pot
  use m_xmpi,       only:  xmpi_sum

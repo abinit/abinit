@@ -86,6 +86,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
  use m_kg,          only : kpgstr, mkkin, mkkpg

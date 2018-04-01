@@ -39,6 +39,7 @@ MODULE m_hexc
  use netcdf
 #endif
 
+ use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_blas,              only : xdotc, xgemv

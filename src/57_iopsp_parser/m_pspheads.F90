@@ -43,6 +43,7 @@ MODULE m_pspheads
  use funct_pwscf  ! pwscf module for naming xc functionals
  use m_xmpi
 
+ use m_time,     only : timab
  use m_io_tools, only : open_file
  use m_fstrings, only : basename, lstrip, sjoin, startswith
  use m_pawpsp,   only : pawpsp_read_header_xml,pawpsp_read_pawheader

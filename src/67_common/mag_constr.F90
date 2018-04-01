@@ -59,6 +59,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  use m_xmpi
  use m_errors
 
+ use m_time,      only: timab
  use m_geometry,  only : metric
  use m_mpinfo,    only : ptabs_fourdp
 

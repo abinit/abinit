@@ -151,6 +151,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use m_scf_history
  use m_io_redirect
 
+ use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred
  use m_specialmsg,   only : specialmsg_mpisum
  use m_libpaw_tools, only : libpaw_spmsg_mpisum

@@ -148,6 +148,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  use m_xmpi
  use m_xcdata
 
+ use m_time,        only : timab
  use m_geometry,     only : metric
  use m_cgtools,    only : dotprod_vn
  use m_pawang, only : pawang_type

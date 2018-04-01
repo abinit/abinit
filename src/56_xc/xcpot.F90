@@ -93,6 +93,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
  use m_profiling_abi
  use m_errors
 
+ use m_time,    only : timab
  use m_mpinfo,  only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).

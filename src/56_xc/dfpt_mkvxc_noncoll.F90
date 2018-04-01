@@ -77,8 +77,9 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  use defs_abitypes
  use m_errors
  use m_profiling_abi
-
  use m_xc_noncoll
+
+ use m_time,      only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

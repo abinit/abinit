@@ -62,6 +62,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  use m_errors
  use m_profiling_abi
 
+ use m_time,     only : timab
  use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
  use m_fft,      only : zerosym

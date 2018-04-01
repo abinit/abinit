@@ -74,6 +74,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  use m_errors
  use m_xmpi
 
+ use m_time,           only : timab
  use defs_abitypes,    only : mpi_type
  use m_mpinfo,         only : set_mpi_enreg_fft,unset_mpi_enreg_fft
  use m_lmn_indices,    only : klmn2ijlmn

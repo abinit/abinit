@@ -147,6 +147,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_errors
  use m_wfk
 
+ use m_time,        only : timab
  use m_io_tools,    only : get_unit, iomode_from_fname
  use m_occ,         only : occeig
  use m_pawang,      only : pawang_type

@@ -63,6 +63,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
  use m_errors
  use m_profiling_abi
 
+ use m_time,           only : timab
  use m_mpinfo,         only : destroy_mpi_enreg
  use m_distribfft,     only : init_distribfft_seq
 

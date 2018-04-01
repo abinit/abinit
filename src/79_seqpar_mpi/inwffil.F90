@@ -135,6 +135,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  use m_nctk
  use m_hdr
 
+ use m_time,     only : timab
  use m_io_tools, only : file_exists
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
  use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg

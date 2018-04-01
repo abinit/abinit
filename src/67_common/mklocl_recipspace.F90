@@ -85,6 +85,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  use m_errors
  use m_xmpi
 
+ use m_time,     only : timab
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
 

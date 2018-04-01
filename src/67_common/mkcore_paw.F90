@@ -46,6 +46,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
  use m_errors
  use m_xmpi
 
+ use m_time,     only : timab
  use m_geometry, only : xcart2xred, xred2xcart
  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,   only : pawtab_type

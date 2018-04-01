@@ -103,6 +103,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
  use m_errors
  use m_xmpi, only : xmpi_comm_self,xmpi_sum
 
+ use m_time,       only : timab
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type

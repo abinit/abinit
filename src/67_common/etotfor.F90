@@ -167,6 +167,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  use defs_wvltypes
  use m_efield
  use m_profiling_abi
+
+ use m_time,             only : timab
  use m_fock,             only : fock_type
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type

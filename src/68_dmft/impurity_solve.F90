@@ -51,6 +51,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
  use m_errors
  use m_profiling_abi
 
+ use m_time,    only : timab
  use m_crystal, only : crystal_t
  use m_green, only : green_type, fourier_green&
 & ,init_green_tau,destroy_green_tau,print_green,printocc_green,integrate_green,copy_green

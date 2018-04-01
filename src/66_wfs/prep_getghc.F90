@@ -60,8 +60,9 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
  use m_profiling_abi
  use m_errors
  use m_xmpi
- use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
 
+ use m_time,        only : timab
+ use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
  use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type
 

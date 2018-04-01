@@ -113,6 +113,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  use m_errors
  use m_profiling_abi
 
+ use m_time,          only : timab
  use m_blas,          only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize, imin_loc
  use m_geometry,      only : normv

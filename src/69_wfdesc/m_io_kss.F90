@@ -47,6 +47,7 @@ MODULE m_io_kss
  use m_pawcprj
  use m_pawfgr
 
+ use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
  use m_abilasi,          only : xheevx, xhegvx

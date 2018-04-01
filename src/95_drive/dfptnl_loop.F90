@@ -105,6 +105,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_profiling_abi
  use m_hdr
 
+ use m_time,     only : timab
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getph
  use m_cgtools,  only : dotprod_vn 

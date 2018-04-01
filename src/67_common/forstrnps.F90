@@ -107,6 +107,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_fock
  use m_cgtools
 
+ use m_time,             only : timab
  use m_kg,               only : mkkpg
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
 &                               load_k_hamiltonian,gs_hamiltonian_type,load_kprime_hamiltonian!,K_H_KPRIME

@@ -51,6 +51,7 @@ use m_xmpi
 use m_bandfft_kpt
 use m_cgtools
 
+use m_time,      only : timab
 use m_io_tools,  only : get_unit
 
 implicit none

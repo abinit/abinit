@@ -46,6 +46,7 @@ MODULE m_cgtools
  use m_xmpi
 
  use m_fstrings,   only : toupper
+ use m_time,       only : timab
 
  implicit none
 

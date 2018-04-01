@@ -130,6 +130,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  use m_cgtools
  use m_xcdata
 
+ use m_time,             only : timab
  use m_geometry,         only : xred2xcart
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype

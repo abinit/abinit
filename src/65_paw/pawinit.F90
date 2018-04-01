@@ -129,6 +129,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  use m_profiling_abi
  use m_splines
 
+ use m_time,    only : timab
  use m_pawpsp,  only : pawpsp_nl
  use m_paw_atom,only : atompaw_shpfun
  use m_pawang,  only : pawang_type, pawang_init, pawang_free

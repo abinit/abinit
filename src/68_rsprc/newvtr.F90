@@ -172,9 +172,10 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  use m_ab7_mixing
  use m_cgtools
 
+ use m_time,     only : timab
  use m_geometry, only : metric
- use m_pawtab,  only : pawtab_type
- use m_pawrhoij,only : pawrhoij_type
+ use m_pawtab,   only : pawtab_type
+ use m_pawrhoij, only : pawrhoij_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

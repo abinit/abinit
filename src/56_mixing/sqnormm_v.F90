@@ -59,6 +59,8 @@ subroutine sqnormm_v(cplex,index,mpicomm, mpi_summarize,mult,nfft,norm2,npot,nsp
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,              only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

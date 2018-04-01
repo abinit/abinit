@@ -45,6 +45,7 @@
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,        only : timab
  use m_kg,          only : mkkpg
  use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_set_ikpt,bandfft_kpt_init2
  use m_hamiltonian, only : gs_hamiltonian_type

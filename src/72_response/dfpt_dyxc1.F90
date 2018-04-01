@@ -91,6 +91,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  use m_profiling_abi
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_time,          only : timab
  use m_cgtools,       only : dotprod_vn
  use m_pawtab,        only : pawtab_type
  use m_xmpi,          only : xmpi_sum

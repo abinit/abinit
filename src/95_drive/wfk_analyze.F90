@@ -84,7 +84,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_wfk
  use m_wfd
 
- !use m_time,            only : cwtime
+ use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
  use m_kpts,            only : tetra_from_kptrlatt

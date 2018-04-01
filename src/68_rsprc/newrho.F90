@@ -141,6 +141,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  use m_ab7_mixing
  use m_abi2big
 
+ use m_time,     only : timab
  use m_geometry, only : metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type

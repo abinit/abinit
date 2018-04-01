@@ -40,12 +40,12 @@ module m_lobpcgwf
  use m_time
  use m_xomp
  use m_fstrings
-
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_pawcprj,     only : pawcprj_type
-
  use m_xg
  use m_lobpcg2
+
+ use m_time,        only : timab
+ use m_hamiltonian, only : gs_hamiltonian_type
+ use m_pawcprj,     only : pawcprj_type
 
  private
 

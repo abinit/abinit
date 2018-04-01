@@ -107,6 +107,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 #endif
  use m_hdr
 
+ use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, endswith
  use m_io_tools,        only : file_exists, iomode_from_fname
  use m_geometry,        only : mkrdim, metric

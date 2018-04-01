@@ -84,6 +84,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  use m_xmpi
  use m_cgtools
 
+ use m_time,         only : timab
  use defs_abitypes,  only : mpi_type
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type

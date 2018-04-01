@@ -101,6 +101,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use libxc_functionals
  use m_hdr
 
+ use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa
  use m_energies,      only : energies_type, energies_init

@@ -117,7 +117,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  use m_hdr
 
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
- use m_time,         only : cwtime
+ use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file
  use m_blas,         only : xdotc, xgemv
  use m_geometry,     only : normv
