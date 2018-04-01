@@ -112,7 +112,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 #define ABI_FUNC 'build_spectra'
  use interfaces_14_hidewrite
  use interfaces_69_wfdesc
- use interfaces_71_bse
 !End of the abilint section
 
  implicit none
@@ -1414,6 +1413,7 @@ end subroutine mdfs_ncwrite
 
 subroutine check_kramerskronig(n,o,eps)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1554,6 +1554,7 @@ end subroutine check_kramerskronig
 !! SOURCE
 
 subroutine check_fsumrule(n,o,e2,omegaplasma)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
