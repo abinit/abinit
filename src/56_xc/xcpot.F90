@@ -8,7 +8,7 @@
 !! The derivative of Exc with respect to the density, gradient of density
 !! in case of GGAs, and Laplacian of density in case of meta-GGA
 !! are contained in depsxc(:,:).
-!! In case of GGAs (and meta-GGAs) the gradient of the density contained 
+!! In case of GGAs (and meta-GGAs) the gradient of the density contained
 !! in rhonow(:,:,2:4) is already multiplied by the local partial derivative
 !! of the XC functional.
 !! Can take into account a shift of the grid, for purpose of better accuracy
@@ -95,6 +95,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 
  use m_time,    only : timab
  use m_mpinfo,  only : ptabs_fourdp
+ use m_fft_mesh, only : phase
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -150,7 +151,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 !Initialize computation of G in cartesian coordinates
  id1=n1/2+2  ; id2=n2/2+2  ; id3=n3/2+2
 
- !Get the distrib associated with this fft_grid 
+ !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Check whether q=0
@@ -295,7 +296,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
                  if(present(vxctau))then
                    wkcmpxtau(1,ifft)= gcart_idir*worktau(2,ifft)
                    wkcmpxtau(2,ifft)=-gcart_idir*worktau(1,ifft)
-                 end if 
+                 end if
                end do
              end if
            end do
