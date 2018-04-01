@@ -82,7 +82,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
 
  use defs_basis
- use defs_parameters
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes

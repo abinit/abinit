@@ -52,7 +52,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_distribfft
  use m_xmpi
  use m_errors

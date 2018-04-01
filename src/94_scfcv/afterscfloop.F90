@@ -217,7 +217,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use defs_wvltypes
  use m_energies
  use m_errors

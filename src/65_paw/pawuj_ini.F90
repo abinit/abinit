@@ -1,13 +1,13 @@
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/pawuj_ini
 !! NAME
-!! pawuj_ini 
+!! pawuj_ini
 !!
 !! FUNCTION
 !!  Initialize dtpawuj datastructure for one SCF run
 !!  Relevant only for automatic determination of U in PAW+U context
-!! 
-!! COPYRIGHT 
+!!
+!! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
@@ -38,7 +38,6 @@ subroutine pawuj_ini(dtpawuj,ndtset)
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_errors
 
@@ -53,15 +52,15 @@ subroutine pawuj_ini(dtpawuj,ndtset)
 !Arguments ------------------------------------
 !scalars
  integer                           :: ndtset
- type(macro_uj_type),intent(inout) :: dtpawuj(0:ndtset) 
+ type(macro_uj_type),intent(inout) :: dtpawuj(0:ndtset)
 
 !Local variables -------------------------
 !Variables for partial dos calculation
 !scalars
  integer, parameter :: nwfchr=6
- integer            :: iuj,im1 
+ integer            :: iuj,im1
 ! *********************************************************************
- 
+
  DBG_ENTER("COLL")
 
  do iuj=0,ndtset
@@ -73,13 +72,13 @@ subroutine pawuj_ini(dtpawuj,ndtset)
    dtpawuj(iuj)%nspden=1
    dtpawuj(iuj)%macro_uj=0
    dtpawuj(iuj)%option=1
-   dtpawuj(iuj)%pawujat=1 
-   dtpawuj(iuj)%pawujga=one 
+   dtpawuj(iuj)%pawujat=1
+   dtpawuj(iuj)%pawujga=one
    dtpawuj(iuj)%pawprtvol=1
    dtpawuj(iuj)%ph0phiint=one
    dtpawuj(iuj)%dmatpuopt=3
    dtpawuj(iuj)%pawujrad=3.0_dp
-   dtpawuj(iuj)%pawrad=20.0_dp 
+   dtpawuj(iuj)%pawrad=20.0_dp
    !Allocate arrays
    !write(std_out,*)'pawuj_ini before arrays'
    ABI_ALLOCATE(dtpawuj(iuj)%rprimd,(3,3))
@@ -88,12 +87,12 @@ subroutine pawuj_ini(dtpawuj,ndtset)
    dtpawuj(iuj)%rprimd=reshape((/ 1,0,0,0,1,0,0,0,1/),(/ 3,3 /))
    dtpawuj(iuj)%scdim=reshape((/ 250,0,0 /),(/3 /))
    dtpawuj(iuj)%wfchr=(/ (0,im1=1,nwfchr) /)
-   if (iuj>0) then 
+   if (iuj>0) then
      dtpawuj(iuj)%iuj=-1
    end if
  end do
 
  DBG_EXIT("COLL")
 
-end subroutine pawuj_ini 
+end subroutine pawuj_ini
 !!***

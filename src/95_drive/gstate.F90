@@ -118,7 +118,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use defs_rectypes
  use m_errors
  use m_xmpi

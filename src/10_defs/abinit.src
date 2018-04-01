@@ -18,12 +18,9 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "defs_aimfields.F90",
- "defs_aimprom.F90",
  "defs_basis.F90",
  "defs_datatypes.F90",
  "defs_fftdata.F90", 
- "defs_parameters.F90",
  "defs_suscep.F90",
  "defs_wannier90.F90",
  ]

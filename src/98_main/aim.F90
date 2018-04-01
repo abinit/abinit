@@ -53,7 +53,7 @@ program aim
  use m_time,     only : timein
  use m_io_tools, only : open_file, file_exists
  use m_fstrings, only : int2char4
- use m_bader,    only : adini, drvaim, inpar, defad
+ use m_bader,    only : adini, drvaim, inpar, defad, aim_shutdown
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

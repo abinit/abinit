@@ -94,7 +94,6 @@ program abinit
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use m_ab7_invars
  use m_build_info
  use m_cppopts_dumper

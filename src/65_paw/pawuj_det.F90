@@ -41,7 +41,6 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_errors
 
