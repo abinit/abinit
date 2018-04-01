@@ -29,7 +29,7 @@ MODULE m_time
 #endif
 
  use m_xpapi,    only: xpapi_flops
- use m_fstrings, only: char_count 
+ use m_fstrings, only: char_count
 
  implicit none
 
@@ -45,6 +45,8 @@ MODULE m_time
  public :: abi_wtime     ! Returns wall clock time in seconds since some arbitrary start.
  public :: abi_cpu_time  ! Returns cpu time in seconds since some arbitrary start.
  public :: cwtime        ! Returns cpu, wall clock time and gflops
+ ! FIXME: Deprecated Should be replaced by cwtime
+ public :: timein
 !!***
 
 !----------------------------------------------------------------------
@@ -161,7 +163,7 @@ pure function sec2str(time_s) result(str)
 
 ! *************************************************************************
 
- days    = time_s / 86400 
+ days    = time_s / 86400
  hours   = MOD(time_s,86400._dp) / 3600
  minutes = MOD(time_s,3600._dp) / 60
  seconds = MOD(time_s,60._dp)
@@ -186,7 +188,7 @@ end function sec2str
 !!  str2sec
 !!
 !! FUNCTION
-!!  Convert a string to time data in seconds. Return negative value if not valid string 
+!!  Convert a string to time data in seconds. Return negative value if not valid string
 !!  Accepts a string in one the following (SLURM) forms:
 !!
 !!     # "days-hours",
@@ -228,7 +230,7 @@ real(dp) pure function str2sec(str) result(time)
      read(str(dash+1:),*,err=1)hours
    else
      read(str(dash+1:),*,err=1)minutes
-   end if 
+   end if
 
  case (1)
    i = index(str, ":")
@@ -238,7 +240,7 @@ real(dp) pure function str2sec(str) result(time)
    else
      read(str(:i-1),*,err=1)minutes
      read(str(i+1:),*,err=1)seconds
-   end if 
+   end if
 
  case(2)
    i = index(str, ":")
@@ -248,13 +250,13 @@ real(dp) pure function str2sec(str) result(time)
    read(str(j+1:),*,err=1)seconds
 
  case default
-   time = -one; return 
+   time = -one; return
  end select
 
  time = 24 * 3600 * days + hours * 3600 + minutes * 60 + seconds
  return
 
-1 time = -one 
+1 time = -one
 
 end function str2sec
 !!***
@@ -320,7 +322,7 @@ function abi_cpu_time() result(cpu)
 #elif defined FC_SUN
  real :: tmp(2)
  real :: etime
-#elif defined FC_COMPAQ || defined HAVE_OS_MACOSX 
+#elif defined FC_COMPAQ || defined HAVE_OS_MACOSX
  real :: tmp(2) !real array only needed by etime
  real(dp) :: etime
 #else
@@ -472,7 +474,7 @@ end function abi_wtime
 !! INPUTS
 !!  start_or_stop=
 !!    "start" to start the timers
-!!    "stop" to stop the timers and return the final cpu_time and wall_time 
+!!    "stop" to stop the timers and return the final cpu_time and wall_time
 !!
 !! OUTPUT
 !!  cpu= cpu time in seconds
@@ -483,7 +485,7 @@ end function abi_wtime
 !!  Example:
 !!  ! Init cpu and wall
 !!  call cwtime(cpu,wall,gflops,"start")
-!! 
+!!
 !!  do_stuff()
 !!
 !!  ! stop the counters, return cpu- and wall-time spent in do_stuff()
@@ -524,7 +526,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
 #else
  logical,parameter :: use_papi=.TRUE.
 #endif
- integer(C_INT)  :: check 
+ integer(C_INT)  :: check
  integer(C_LONG_LONG) :: flops
  real(C_FLOAT) :: real_time,proc_time,mflops
 
@@ -539,7 +541,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
    cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
  end if
 
- CASE ("stop") 
+ CASE ("stop")
  if (use_papi) then
    call xpapi_flops(real_time,proc_time,flops,mflops,check)
    cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
@@ -552,6 +554,131 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
  END SELECT
 
 end subroutine cwtime
+!!***
+
+!!****f* m_time/timein
+!! NAME
+!!  timein
+!!
+!! FUNCTION
+!!  Timing routine. Returns cpu and wall clock time in seconds since some arbitrary start.
+!!  For wall clock time, call the F90 intrinsic date_and_time.
+!!
+!! INPUTS
+!!  (no inputs)
+!!
+!! OUTPUT
+!!  cpu= cpu time in seconds
+!!  wall= wall clock time in seconds
+!!
+!! NOTES
+!!  For CPU time, contains machine-dependent code (choice will be selected
+!!  by C preprocessor, see abi_cpu_time).
+!!
+!! TODO
+!!  Should be replaced by cwtime
+!!
+!! PARENTS
+!!      abinit,aim,aim_follow,anaddb,bsepostproc,conducti,cpdrv,cut3d,drvaim
+!!      elphon,first_rec,m_exit,mrgddb,mrgscr,multibinit,optic,rsurf,surf,timab
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine timein(cpu,wall)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'timein'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(out) :: cpu,wall
+! *************************************************************************
+
+ ! CPU time
+ cpu = abi_cpu_time()
+ ! Wall time
+ wall = abi_wtime()
+
+end subroutine timein
+!!***
+
+!!****f* m_time/time_accu
+!! NAME
+!!  time_accu
+!!
+!! FUNCTION
+!!  Timing subroutine. Calls machine-dependent "timein" which
+!!  returns elapsed cpu and wall clock times in sec.
+!!  Also return the number of times the counter has been called
+!!
+!! INPUTS
+!!  nn=index of accumulator (distinguish what is being timed);
+!!
+!! OUTPUT
+!!  tottim(2)=accumulated time for accumulator nn
+!!  totftimes(2)=accumulated time for accumulator nn evaluated by papi
+!!  totffops =accumulated number of flops for accumulator nn evaluated by papi
+!!  return_ncount gives the number of times that the accumulator has been incremented
+!!
+!! PARENTS
+!!      timana
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
+
+ use defs_time
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'time_accu'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ integer,intent(out) :: return_ncount
+ real(dp),intent(out) :: totflops
+!arrays
+ real(dp),intent(out) :: totftimes(2),tottim(2)
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: message
+
+! *************************************************************************
+
+!Check that nn lies in sensible bounds
+ if (nn<0.or.nn>mtim) then
+   write(message,'(a,i6,a,i8,a)')' dim mtim=',mtim,' but input nn=',nn,'.'
+   MSG_BUG(message)
+ end if
+
+!return accumulated time for nn
+ tottim(1)=acctim(1,nn)
+ tottim(2)=acctim(2,nn)
+
+!return accumulated number flops for nn
+ totflops = papi_accflops(nn)
+
+!return accumulated time for nn evaluated by papi
+ totftimes(1) = papi_acctim(1,nn)
+ totftimes(2) = papi_acctim(2,nn)
+ return_ncount=ncount(nn)
+
+end subroutine time_accu
 !!***
 
 END MODULE m_time

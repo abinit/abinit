@@ -50,6 +50,7 @@ program aim
  use netcdf
 #endif
 
+ use m_time,     only : timein
  use m_io_tools, only : open_file, file_exists
  use m_fstrings, only : int2char4
  use m_bader,    only : adini, drvaim, inpar, defad

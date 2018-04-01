@@ -19,8 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "timab.F90",
- "time_accu.F90",
- "timein.F90",
  "m_xpapi.F90",
  "m_time.F90",
  ]

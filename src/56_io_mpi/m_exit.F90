@@ -27,7 +27,7 @@ MODULE m_exit
  use m_xmpi
  use m_errors
 
- use m_time,      only : abi_wtime, sec2str
+ use m_time,      only : abi_wtime, sec2str, timein
  use m_fstrings,  only : inupper
  use m_io_tools,  only : open_file
 

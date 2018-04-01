@@ -57,8 +57,8 @@ module defs_time
  public :: time_set_papiopt
  public :: time_get_papiopt
 
-! papiopt is a flag which indicates if there is or not an analysis of speed execution is made. 
-! By defaut the analysis is not done 
+! papiopt is a flag which indicates if there is or not an analysis of speed execution is made.
+! By defaut the analysis is not done
  integer,private,save :: papiopt=0
 
 CONTAINS  !=========================================================================================================================
@@ -81,8 +81,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine time_set_papiopt(opt)
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -118,9 +116,7 @@ end subroutine time_set_papiopt
 !!
 !! SOURCE
 
-function time_get_papiopt() 
-
- use defs_basis
+function time_get_papiopt()
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

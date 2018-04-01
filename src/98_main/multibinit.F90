@@ -60,7 +60,7 @@ program multibinit
 
  use m_io_tools,   only : flush_unit, open_file
  use m_fstrings,   only : replace, inupper
- use m_time,       only : asctime
+ use m_time,       only : asctime, timein
  use m_parser,     only : instrng
 
 !This section has been created automatically by the script Abilint (TD).

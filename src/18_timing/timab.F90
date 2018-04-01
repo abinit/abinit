@@ -91,6 +91,8 @@ subroutine timab(nn,option,tottim)
  use m_errors
  use iso_c_binding
 
+ use m_time,  only : timein
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

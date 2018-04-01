@@ -41,6 +41,7 @@
  use m_haydock_io
  use m_numeric_tools
 
+ use m_time,      only : timein
  use m_io_tools,  only : get_unit, flush_unit
  use m_mpinfo,    only : destroy_mpi_enreg, nullify_mpi_enreg
 

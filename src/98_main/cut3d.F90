@@ -66,6 +66,7 @@ program cut3d
  use m_crystal_io
 
  use m_fstrings,        only : endswith, sjoin, itoa
+ use m_time,            only : timein
  use m_geometry,        only : xred2xcart, metric
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_fftcore,         only : ngfft_seq

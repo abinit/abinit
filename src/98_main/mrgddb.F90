@@ -59,7 +59,7 @@ program mrgddb
  use m_xmpi
  use m_ddb_hdr
 
- use m_time ,        only : asctime
+ use m_time ,        only : asctime, timein
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
  use m_ddb,          only : DDB_VERSION

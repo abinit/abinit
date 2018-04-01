@@ -52,6 +52,7 @@ program conducti
 #endif
 
  use m_io_tools,  only : open_file
+ use m_time,      only : timein
  use m_fstrings,  only : sjoin, itoa
  use m_mpinfo,    only : destroy_mpi_enreg
 
