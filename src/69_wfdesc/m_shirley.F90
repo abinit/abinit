@@ -49,6 +49,7 @@ MODULE m_shirley
  use m_fft_mesh,       only : fft_check_rotrans, setmesh
  use m_geometry,       only : normv, vdotw
  use m_fftcore,        only : get_kg, kgindex
+ use m_kg,             only : mkkpg
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : kmesh_t, get_BZ_item, make_mesh, kmesh_free, kpath_t

@@ -130,7 +130,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get,&
 &                       pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
- use m_kg,       only : mkkin
+ use m_kg,       only : mkkin, mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

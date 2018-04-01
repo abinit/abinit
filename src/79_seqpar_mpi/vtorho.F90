@@ -233,7 +233,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_tddft,              only : tddft
- use m_kg,                 only : mkkin
+ use m_kg,                 only : mkkin, mkkpg
  use m_suscep_stat,        only : suscep_stat
 
 #if defined HAVE_BIGDFT

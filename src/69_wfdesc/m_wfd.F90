@@ -48,7 +48,7 @@ MODULE m_wfd
  use m_fftcore,        only : print_ngfft, kgindex, sphereboundary
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
- use m_kg,             only : getph, ph1d3d
+ use m_kg,             only : getph, ph1d3d, mkkpg
  use m_gsphere,        only : kg_map, make_istwfk_table
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg

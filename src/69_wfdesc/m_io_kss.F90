@@ -57,7 +57,7 @@ MODULE m_io_kss
  use m_crystal ,         only : crystal_t
  use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
- use m_kg,               only : mkkin
+ use m_kg,               only : mkkin, mkkpg
 
  implicit none
 

@@ -105,6 +105,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_xmpi
  use m_errors
  use m_fock
+ use m_cgtools
+
+ use m_kg,               only : mkkpg
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
 &                               load_k_hamiltonian,gs_hamiltonian_type,load_kprime_hamiltonian!,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
@@ -113,7 +116,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
-use m_cgtools
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

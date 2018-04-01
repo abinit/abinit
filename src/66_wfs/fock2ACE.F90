@@ -91,6 +91,9 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_xmpi
  use m_errors
  use m_fock
+ use m_cgtools
+
+ use m_kg,               only : mkkpg
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
 &                               load_k_hamiltonian,gs_hamiltonian_type
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
@@ -98,7 +101,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
- use m_cgtools
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
