@@ -62,7 +62,6 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrhar'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

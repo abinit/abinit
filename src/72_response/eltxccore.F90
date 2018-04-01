@@ -80,7 +80,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eltxccore'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

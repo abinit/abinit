@@ -67,7 +67,6 @@ use m_time,      only : timab
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gwls_sternheimer'
- use interfaces_18_timing
  use interfaces_95_drive, except_this_one => gwls_sternheimer
 !End of the abilint section
 

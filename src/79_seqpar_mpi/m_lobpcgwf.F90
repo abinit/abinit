@@ -79,7 +79,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcgwf2'
- use interfaces_18_timing
  use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section

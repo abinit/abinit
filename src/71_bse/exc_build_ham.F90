@@ -83,7 +83,6 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_ham'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_71_bse, except_this_one => exc_build_ham
 !End of the abilint section
 
@@ -241,7 +240,6 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_all_mgq0'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

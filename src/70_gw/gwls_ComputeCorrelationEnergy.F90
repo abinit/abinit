@@ -105,7 +105,6 @@ subroutine compute_correlations_shift_lanczos(dtset, Sigma_x,Vxc_energy,debug)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_correlations_shift_lanczos'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

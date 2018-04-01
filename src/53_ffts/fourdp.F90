@@ -88,7 +88,6 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourdp'
- use interfaces_18_timing
  use interfaces_53_ffts, except_this_one => fourdp
 !End of the abilint section
 

@@ -78,7 +78,6 @@ program anaddb
 #undef ABI_FUNC
 #define ABI_FUNC 'anaddb'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_72_response
  use interfaces_77_ddb

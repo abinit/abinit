@@ -96,7 +96,6 @@ subroutine vtorhorec(dtset,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorhorec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_68_recursion, except_this_one => vtorhorec

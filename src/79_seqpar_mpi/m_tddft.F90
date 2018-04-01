@@ -135,7 +135,6 @@ contains
 #undef ABI_FUNC
 #define ABI_FUNC 'tddft'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_56_xc

@@ -66,7 +66,6 @@ subroutine dielmt(dielinv,gmet,kg_diel,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dielmt'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -130,7 +130,6 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_back'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -422,7 +421,6 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_forw'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none 
@@ -706,7 +704,6 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_mpiback_wf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1053,7 +1050,6 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_mpiforw_wf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1499,7 +1495,6 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_applypot'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1926,7 +1921,6 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_applypot_many'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -2369,7 +2363,6 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_accrho'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

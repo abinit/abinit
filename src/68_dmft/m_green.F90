@@ -1050,7 +1050,6 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_green'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1441,7 +1440,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 #undef ABI_FUNC
 #define ABI_FUNC 'integrate_green'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

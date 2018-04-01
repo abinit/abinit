@@ -64,7 +64,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 #undef ABI_FUNC
 #define ABI_FUNC 'dyson'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

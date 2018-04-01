@@ -68,7 +68,6 @@ program multibinit
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_78_effpot
  use interfaces_95_drive

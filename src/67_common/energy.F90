@@ -191,7 +191,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'energy'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_53_spacepar

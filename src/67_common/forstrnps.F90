@@ -122,7 +122,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstrnps'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_spacepar

@@ -87,7 +87,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_64_psp, except_this_one => pspini
 !End of the abilint section
 

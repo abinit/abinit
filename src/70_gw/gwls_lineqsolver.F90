@@ -131,7 +131,6 @@ subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sqmr'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

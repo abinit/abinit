@@ -184,7 +184,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #undef ABI_FUNC
 #define ABI_FUNC 'outscfcv'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_54_abiutil
  use interfaces_62_iowfdenpot
  use interfaces_65_paw

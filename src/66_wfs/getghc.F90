@@ -103,7 +103,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => getghc

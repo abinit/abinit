@@ -79,7 +79,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_fourwf'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_66_wfs, except_this_one => prep_fourwf
 !End of the abilint section

@@ -181,7 +181,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newvtr'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_68_rsprc, except_this_one => newvtr
 !End of the abilint section

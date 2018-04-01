@@ -208,7 +208,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
- use interfaces_18_timing
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_62_wvl_wfs

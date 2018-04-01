@@ -67,7 +67,6 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 #undef ABI_FUNC
 #define ABI_FUNC 'gran_potrec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

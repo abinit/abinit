@@ -147,7 +147,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 #undef ABI_FUNC
 #define ABI_FUNC 'inwffil'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_67_common
  use interfaces_79_seqpar_mpi, except_this_one => inwffil

@@ -97,7 +97,6 @@ program mrgscr
 #undef ABI_FUNC
 #define ABI_FUNC 'mrgscr'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_69_wfdesc

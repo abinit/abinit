@@ -4586,7 +4586,6 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftw3_mpiback_wf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -4951,7 +4950,6 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftw3_mpiforw_wf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -6022,7 +6020,6 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftw3_applypot'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -6502,7 +6499,6 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftw3_accrho'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -6841,7 +6837,6 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftw3_mpiback_manywf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -7203,7 +7198,6 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftw3_mpiforw_manywf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -7556,7 +7550,6 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fftw3_applypot_many'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

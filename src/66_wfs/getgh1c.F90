@@ -95,7 +95,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgh1c'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_66_nonlocal
 !End of the abilint section

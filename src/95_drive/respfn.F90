@@ -156,7 +156,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel

@@ -146,7 +146,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #undef ABI_FUNC
 #define ABI_FUNC 'screening'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_64_psp

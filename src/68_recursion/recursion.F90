@@ -87,7 +87,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'recursion'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_68_recursion, except_this_one => recursion
 !End of the abilint section

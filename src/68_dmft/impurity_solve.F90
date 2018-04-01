@@ -70,7 +70,6 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 #undef ABI_FUNC
 #define ABI_FUNC 'impurity_solve'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_dmft, except_this_one => impurity_solve
 !End of the abilint section
 

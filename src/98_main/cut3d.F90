@@ -79,7 +79,6 @@ program cut3d
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 

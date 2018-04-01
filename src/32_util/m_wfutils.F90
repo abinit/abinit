@@ -225,7 +225,6 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfcopy'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

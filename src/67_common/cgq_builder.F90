@@ -78,7 +78,6 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cgq_builder'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

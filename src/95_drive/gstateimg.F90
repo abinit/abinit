@@ -167,7 +167,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 #undef ABI_FUNC
 #define ABI_FUNC 'gstateimg'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_45_geomoptim
  use interfaces_67_common

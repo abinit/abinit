@@ -109,7 +109,6 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkrho'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_65_paw, except_this_one => pawmkrho
 !End of the abilint section

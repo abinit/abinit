@@ -235,7 +235,6 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'set_pert_paw'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -495,7 +494,6 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'unset_pert_paw'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 

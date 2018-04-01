@@ -113,7 +113,6 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxc'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_56_xc, except_this_one => dfpt_mkvxc
 !End of the abilint section

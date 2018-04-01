@@ -124,7 +124,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_41_geometry
  use interfaces_77_ddb, except_this_one => elphon
 !End of the abilint section

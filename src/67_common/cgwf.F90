@@ -132,7 +132,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal

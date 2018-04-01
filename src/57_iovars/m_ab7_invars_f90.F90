@@ -39,6 +39,7 @@ module m_ab7_invars
   use interfaces_32_util
   use interfaces_57_iovars
 
+  use m_time,     only : timab
   use m_fstrings, only : inupper
   use m_parser,   only : intagm, importxyz, parsefile
   use m_dtset,    only : dtset_free, macroin, macroin2
@@ -590,7 +591,6 @@ end subroutine ab7_invars_new_from_file
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_load'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_57_iovars
 !End of the abilint section

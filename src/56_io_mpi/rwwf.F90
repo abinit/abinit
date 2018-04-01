@@ -109,7 +109,6 @@ subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rwwf'
- use interfaces_18_timing
  use interfaces_56_io_mpi, except_this_one => rwwf
 !End of the abilint section
 
