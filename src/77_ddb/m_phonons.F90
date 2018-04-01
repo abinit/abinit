@@ -50,7 +50,7 @@ module m_phonons
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
  use m_ifc,             only : ifc_type, ifc_fourq, ifc_calcnwrite_nana_terms
  use m_anaddb_dataset,  only : anaddb_dataset_type
- use m_kpts,            only : kpts_ibz_from_kptrlatt
+ use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
  use m_supercell

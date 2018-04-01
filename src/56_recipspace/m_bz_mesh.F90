@@ -56,6 +56,7 @@ MODULE m_bz_mesh
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
+ use m_kpts,           only : getkgrid
 
  implicit none
 

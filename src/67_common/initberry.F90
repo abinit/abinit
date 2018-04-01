@@ -100,7 +100,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_efield
 
  use m_geometry,only : metric
- use m_kpts,    only : listkk
+ use m_kpts,    only : listkk, smpbz
  use m_fftcore, only : kpgsph
  use m_pawang,  only : pawang_type
  use m_pawrad,  only : pawrad_type

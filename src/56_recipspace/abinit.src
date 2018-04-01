@@ -19,9 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "cg_rotate.F90",
- "getkgrid.F90",
- "get_full_kgrid.F90",
- "get_kpt_fullbz.F90",
  "initylmg.F90",
  "irrzg.F90",
  "laplacian.F90",
@@ -36,8 +33,6 @@ sources = [
  "mknucdipmom_k.F90",
  "mkpwind_k.F90",
  "setsym.F90",
- "smpbz.F90",
- "testkgrid.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

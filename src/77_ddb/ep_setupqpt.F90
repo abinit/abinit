@@ -51,6 +51,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_crystal,         only : crystal_t
+ use m_kpts,            only : getkgrid, smpbz
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
