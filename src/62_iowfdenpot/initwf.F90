@@ -80,7 +80,6 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 #undef ABI_FUNC
 #define ABI_FUNC 'initwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_56_io_mpi
  use interfaces_62_iowfdenpot, except_this_one => initwf
 !End of the abilint section

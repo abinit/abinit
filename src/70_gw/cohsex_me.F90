@@ -137,7 +137,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 #undef ABI_FUNC
 #define ABI_FUNC 'cohsex_me'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => cohsex_me
 !End of the abilint section

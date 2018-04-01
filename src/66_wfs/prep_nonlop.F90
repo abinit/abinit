@@ -107,7 +107,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_nonlop'
- use interfaces_18_timing
  use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => prep_nonlop
 !End of the abilint section

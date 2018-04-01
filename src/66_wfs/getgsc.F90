@@ -76,7 +76,6 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgsc'
- use interfaces_18_timing
  use interfaces_66_nonlocal
 !End of the abilint section
 

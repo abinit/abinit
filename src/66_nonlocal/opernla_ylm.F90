@@ -127,7 +127,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'opernla_ylm'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

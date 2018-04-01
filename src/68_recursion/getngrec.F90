@@ -56,7 +56,6 @@ subroutine getngrec(ngfft,rmet,ngfftrec,nfftrec,recrcut,delta,tronc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getngrec'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

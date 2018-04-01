@@ -77,7 +77,6 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 #undef ABI_FUNC
 #define ABI_FUNC 'dmft_solve'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_dmft, except_this_one => dmft_solve
 !End of the abilint section
 

@@ -555,7 +555,6 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_mixing_eval_allocate'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -648,7 +647,6 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_mixing_eval_deallocate'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

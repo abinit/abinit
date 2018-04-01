@@ -78,7 +78,6 @@ subroutine first_rec(dtset,psps,rset)
 #undef ABI_FUNC
 #define ABI_FUNC 'first_rec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_recursion, except_this_one => first_rec
 !End of the abilint section
 

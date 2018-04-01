@@ -103,7 +103,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_init'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -261,7 +260,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_heev'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -333,7 +331,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_hegv'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -411,7 +408,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_scatter'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(in   ) :: xgScalapack
@@ -465,7 +461,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_free'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack

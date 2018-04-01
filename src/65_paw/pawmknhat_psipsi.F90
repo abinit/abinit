@@ -93,7 +93,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat_psipsi'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section

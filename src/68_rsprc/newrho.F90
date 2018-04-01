@@ -150,7 +150,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newrho'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_68_rsprc, except_this_one => newrho
 !End of the abilint section

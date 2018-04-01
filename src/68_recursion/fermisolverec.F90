@@ -77,7 +77,6 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
 #undef ABI_FUNC
 #define ABI_FUNC 'fermisolverec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_recursion, except_this_one => fermisolverec
 !End of the abilint section
 

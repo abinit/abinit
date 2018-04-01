@@ -84,7 +84,6 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'corrmetalwf1'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

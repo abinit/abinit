@@ -497,7 +497,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_init'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 
@@ -1718,7 +1717,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
@@ -2506,7 +2504,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'strfock'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

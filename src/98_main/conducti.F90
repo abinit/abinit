@@ -60,7 +60,6 @@ program conducti
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti'
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section

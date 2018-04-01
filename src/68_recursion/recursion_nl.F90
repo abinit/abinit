@@ -71,7 +71,6 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 #undef ABI_FUNC
 #define ABI_FUNC 'recursion_nl'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_68_recursion, except_this_one => recursion_nl
 !End of the abilint section

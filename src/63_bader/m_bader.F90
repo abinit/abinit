@@ -771,7 +771,6 @@ subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'aim_follow'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1219,7 +1218,6 @@ subroutine cpdrv(aim_dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cpdrv'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -2874,7 +2872,6 @@ subroutine drvaim(aim_dtset,tcpui,twalli)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'drvaim'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -4500,7 +4497,6 @@ subroutine rsurf(aim_dtset,rr,grho,theta,phi,rr0,iatinit,npmax,srch)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rsurf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -4686,7 +4682,6 @@ subroutine surf(aim_dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'surf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

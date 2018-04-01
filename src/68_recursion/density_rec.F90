@@ -58,7 +58,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
  use defs_basis
  use m_profiling_abi
 
-
  use m_time,     only : timab
  use m_rec_tools,only : trottersum
 
@@ -66,7 +65,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'density_rec'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -63,7 +63,7 @@ MODULE m_time
 ! Counter variables
 
 ! mtim determines the maximum number of "timing slots" available
- integer,private,parameter :: mtim=1999
+ integer,public,parameter :: mtim=1999
 
 ! timeopt is a flag which indicates the suppression or not of the timing.
  integer,private,save :: timopt=1
@@ -622,6 +622,7 @@ end subroutine cwtime
 
 subroutine timein(cpu,wall)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -668,6 +669,7 @@ end subroutine timein
 !! SOURCE
 
 subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -728,6 +730,7 @@ end subroutine time_accu
 
 subroutine time_set_papiopt(opt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -763,6 +766,7 @@ end subroutine time_set_papiopt
 !! SOURCE
 
 function time_get_papiopt()
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -855,11 +859,11 @@ end function time_get_papiopt
 
 subroutine timab(nn,option,tottim)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'timab'
- use interfaces_18_timing, except_this_one => timab
 !End of the abilint section
 
  implicit none

@@ -164,7 +164,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'odamix'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_65_paw

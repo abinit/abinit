@@ -102,7 +102,6 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrxc'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_64_psp
  use interfaces_72_response, except_this_one => dfpt_eltfrxc

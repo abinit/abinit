@@ -65,7 +65,6 @@ subroutine sqnormm_v(cplex,index,mpicomm, mpi_summarize,mult,nfft,norm2,npot,nsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sqnormm_v'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

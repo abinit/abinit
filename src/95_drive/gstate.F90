@@ -186,7 +186,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #undef ABI_FUNC
 #define ABI_FUNC 'gstate'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_43_wvl_wrappers
 #if defined HAVE_GPU_CUDA

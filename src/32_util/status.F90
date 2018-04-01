@@ -63,7 +63,6 @@ subroutine status(counter,filstat,istat,level,routine)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'status'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

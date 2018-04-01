@@ -141,7 +141,6 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawinit'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

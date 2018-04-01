@@ -107,6 +107,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use libxc_functionals
  use m_wfd
 
+ use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa
  use m_blas,          only : xdotc
@@ -153,7 +154,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #undef ABI_FUNC
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_64_psp

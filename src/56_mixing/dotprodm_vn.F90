@@ -89,7 +89,6 @@ subroutine dotprodm_vn(cplex,cpldot,denarr,dot,id,ip,mpicomm, mpi_summarize,mult
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dotprodm_vn'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

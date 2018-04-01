@@ -72,7 +72,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dieltcel'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section

@@ -65,7 +65,6 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 #undef ABI_FUNC
 #define ABI_FUNC 'elt_ewald'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

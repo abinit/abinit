@@ -111,7 +111,6 @@ program optic
 #undef ABI_FUNC
 #define ABI_FUNC 'optic'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 

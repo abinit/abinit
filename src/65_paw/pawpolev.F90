@@ -54,7 +54,6 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpolev'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

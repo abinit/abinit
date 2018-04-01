@@ -50,7 +50,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'bsepostproc'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 

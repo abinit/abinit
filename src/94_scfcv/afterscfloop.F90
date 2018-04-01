@@ -260,7 +260,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #undef ABI_FUNC
 #define ABI_FUNC 'afterscfloop'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw

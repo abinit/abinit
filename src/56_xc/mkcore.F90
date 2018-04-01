@@ -82,7 +82,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore'
- use interfaces_18_timing
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -632,6 +631,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  use m_errors
  use m_linalg_interfaces
 
+ use m_time,        only : timab
  use m_mpinfo,      only : ptabs_fourdp
  use m_sort,        only : sort_dp
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
@@ -642,7 +642,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_alt'
- use interfaces_18_timing
  use interfaces_41_geometry
 !End of the abilint section
 

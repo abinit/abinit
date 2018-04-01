@@ -70,7 +70,6 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_ewald'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

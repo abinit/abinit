@@ -390,7 +390,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xg_set'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xg_t), intent(inout) :: xg
@@ -450,7 +449,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_set'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock
@@ -599,7 +597,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xg_get'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xg_t), intent(inout) :: xg
@@ -659,7 +656,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_get'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgBlock_t), intent(in   ) :: xgBlock
@@ -881,7 +877,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_copy'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock1
@@ -932,7 +927,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_pack'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock1
@@ -1030,7 +1024,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_gemmR'
- use interfaces_18_timing
 !End of the abilint section
 
     character, intent(in) :: transa
@@ -1092,7 +1085,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_gemmC'
- use interfaces_18_timing
 !End of the abilint section
 
     character, intent(in) :: transa
@@ -1144,7 +1136,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_potrf'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock
@@ -1186,7 +1177,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_heev'
- use interfaces_18_timing
 !End of the abilint section
 
     character       , intent(in   ) :: jobz
@@ -1246,7 +1236,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_heevd'
- use interfaces_18_timing
 !End of the abilint section
 
     character       , intent(in   ) :: jobz
@@ -1320,7 +1309,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hpev'
- use interfaces_18_timing
 !End of the abilint section
 
     character       , intent(in   ) :: jobz
@@ -1388,7 +1376,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hpevd'
- use interfaces_18_timing
 !End of the abilint section
 
     character       , intent(in   ) :: jobz
@@ -1466,7 +1453,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hegv'
- use interfaces_18_timing
 !End of the abilint section
 
     integer         , intent(in   ) :: itype
@@ -1533,7 +1519,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hegvx'
- use interfaces_18_timing
 !End of the abilint section
 
     integer         , intent(in   ) :: itype
@@ -1615,7 +1600,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hegvd'
- use interfaces_18_timing
 !End of the abilint section
 
     integer         , intent(in   ) :: itype
@@ -1695,7 +1679,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hpgv'
- use interfaces_18_timing
 !End of the abilint section
 
     integer         , intent(in   ) :: itype
@@ -1763,7 +1746,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hpgvx'
- use interfaces_18_timing
 !End of the abilint section
 
     integer         , intent(in   ) :: itype
@@ -1845,7 +1827,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_hpgvd'
- use interfaces_18_timing
 !End of the abilint section
 
     integer         , intent(in   ) :: itype
@@ -1921,7 +1902,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_trsmR'
- use interfaces_18_timing
 !End of the abilint section
 
     character       , intent(in   ) :: side
@@ -1966,7 +1946,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_trsmC'
- use interfaces_18_timing
 !End of the abilint section
 
     character      , intent(in   ) :: side
@@ -2187,7 +2166,6 @@ module m_xg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_cshift'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock

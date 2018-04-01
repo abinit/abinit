@@ -57,7 +57,6 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_paw'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_41_geometry
  use interfaces_67_common, except_this_one => mkcore_paw
 !End of the abilint section

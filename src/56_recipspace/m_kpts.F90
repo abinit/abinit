@@ -588,7 +588,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'listkk'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

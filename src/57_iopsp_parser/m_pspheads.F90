@@ -596,7 +596,6 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspheads_comm'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

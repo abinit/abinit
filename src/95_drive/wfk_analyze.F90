@@ -109,7 +109,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_analyze'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_56_io_mpi
  use interfaces_64_psp

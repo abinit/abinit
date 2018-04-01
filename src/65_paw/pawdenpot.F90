@@ -122,7 +122,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdenpot'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw, except_this_one => pawdenpot
 !End of the abilint section
 
