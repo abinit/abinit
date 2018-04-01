@@ -40,7 +40,7 @@ MODULE m_gsphere
  use m_numeric_tools, only : bisect
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
- use m_fftcore,       only : kpgsph
+ use m_fftcore,       only : kpgsph, kgindex
  use m_mpinfo,        only : destroy_mpi_enreg
 
  implicit none

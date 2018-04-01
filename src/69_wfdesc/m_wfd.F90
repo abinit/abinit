@@ -45,7 +45,7 @@ MODULE m_wfd
  use m_blas,           only : xcopy, xdotc
  use m_pptools,        only : printxsf
  use m_cgtools,        only : cg_zdotc
- use m_fftcore,        only : print_ngfft
+ use m_fftcore,        only : print_ngfft, kgindex
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
  use m_kg,             only : getph, ph1d3d

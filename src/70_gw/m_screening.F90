@@ -50,6 +50,7 @@ MODULE m_screening
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item, box_len
  use m_fft_mesh,        only : g2ifft
+ use m_fftcore,         only : kgindex
  use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
