@@ -162,7 +162,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_52_fft_mpi_noabirule
  use interfaces_66_wfs, except_this_one => wfconv
 !End of the abilint section
 

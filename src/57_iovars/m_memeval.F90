@@ -91,7 +91,6 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 #define ABI_FUNC 'memory_eval'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none

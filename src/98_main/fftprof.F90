@@ -99,7 +99,6 @@ program fftprof
 #define ABI_FUNC 'fftprof'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none

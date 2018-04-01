@@ -74,7 +74,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_57_iovars, except_this_one => mpi_setup
 !End of the abilint section
 

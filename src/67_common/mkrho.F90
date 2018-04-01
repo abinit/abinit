@@ -105,7 +105,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_66_wfs
  use interfaces_67_common, except_this_one => mkrho

@@ -76,7 +76,6 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_current'
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_67_common, except_this_one => spin_current
 !End of the abilint section

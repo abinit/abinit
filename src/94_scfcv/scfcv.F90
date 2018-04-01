@@ -232,7 +232,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc

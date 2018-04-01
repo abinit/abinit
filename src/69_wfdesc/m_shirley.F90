@@ -2807,7 +2807,6 @@ subroutine wfd_shirley_to_eh(Wsh,Cryst,Psps,Pawtab,Pawang,Pawrad,min_bsize,eh_co
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_shirley_to_eh'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

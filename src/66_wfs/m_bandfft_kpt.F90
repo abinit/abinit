@@ -204,7 +204,6 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_init1'
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none

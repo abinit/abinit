@@ -56,6 +56,7 @@ module m_fftcore
  public :: print_ngfft         ! Print the content of ngfft(18) in explicative format.
  public :: bound               ! Find distance**2 to boundary point of fft box nearest to kpt
  public :: getng               ! From ecut and metric tensor in reciprocal space, computes recommended ngfft(1:3)
+ public :: sphereboundary      ! Finds the boundary of the basis sphere of G vectors
  public :: sphere
  public :: sphere_fft      ! Insert cg inside box.
  public :: sphere_fft1     ! TODO: This one should be replaced by sphere_fft.
@@ -580,6 +581,7 @@ end subroutine print_ngfft
 
 subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -708,6 +710,7 @@ subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
 
    function dsq(i1,i2,i3,gmet,kpt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -796,7 +799,6 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 #undef ABI_FUNC
 #define ABI_FUNC 'getng'
  use interfaces_14_hidewrite
- use interfaces_52_fft_mpi_noabirule, except_this_one => getng
 !End of the abilint section
 
  implicit none
@@ -1241,6 +1243,7 @@ end subroutine getng
 !! SOURCE
 
 subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4899,6 +4902,7 @@ end subroutine get_kg
 !! SOURCE
 
 subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

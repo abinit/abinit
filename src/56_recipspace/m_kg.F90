@@ -108,7 +108,6 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 #undef ABI_FUNC
 #define ABI_FUNC 'getcut'
  use interfaces_14_hidewrite
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none

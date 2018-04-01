@@ -1816,7 +1816,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
 !End of the abilint section

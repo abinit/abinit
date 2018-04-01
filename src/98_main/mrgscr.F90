@@ -98,7 +98,6 @@ program mrgscr
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_69_wfdesc
 !End of the abilint section

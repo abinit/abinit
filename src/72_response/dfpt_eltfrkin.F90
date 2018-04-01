@@ -78,7 +78,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 #define ABI_FUNC 'dfpt_eltfrkin'
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
  use interfaces_72_response, except_this_one => dfpt_eltfrkin
 !End of the abilint section
 

@@ -171,7 +171,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_67_common
@@ -921,7 +920,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 #define ABI_FUNC 'susk'
  use interfaces_18_timing
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_65_paw
 !End of the abilint section
