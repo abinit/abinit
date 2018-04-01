@@ -48,6 +48,7 @@ MODULE m_time
  public :: cwtime        ! Returns cpu, wall clock time and gflops
  ! FIXME: Deprecated Should be replaced by cwtime
  public :: timein
+ public :: time_accu
 
  public :: time_set_papiopt
  public :: time_get_papiopt
@@ -646,9 +647,8 @@ end subroutine timein
 !!  time_accu
 !!
 !! FUNCTION
-!!  Timing subroutine. Calls machine-dependent "timein" which
-!!  returns elapsed cpu and wall clock times in sec.
-!!  Also return the number of times the counter has been called
+!!  Return the number of times the counter has been called
+!!  and corresponding data for given index
 !!
 !! INPUTS
 !!  nn=index of accumulator (distinguish what is being timed);
