@@ -280,7 +280,7 @@ plugins:
     #- search    # Deactivated
 
 extra:
-    version: 8.7.7
+    version: 8.8.0
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt
