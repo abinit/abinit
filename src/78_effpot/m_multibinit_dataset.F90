@@ -30,8 +30,8 @@ module m_multibinit_dataset
  use m_profiling_abi
  use m_errors
 
- use m_parser,    only : intagm
- use m_ddb,  only : DDB_QTOL
+ use m_parser, only : intagm
+ use m_ddb,    only : DDB_QTOL
 
  implicit none
 

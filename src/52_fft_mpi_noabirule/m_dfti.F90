@@ -13,7 +13,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  1) MPI parallelism is not supported 
+!!  1) MPI parallelism is not supported
 !!  2) For better performance the FFT divisions should contain small factors  (/2, 3, 5, 7, 11, 13/)
 !!     see http://software.intel.com/sites/products/documentation/doclib/mkl_sa/11/mkl_userguide_lnx/index.htm
 !!
@@ -79,7 +79,7 @@ MODULE m_dfti
  ! Perhaps I have to provide an interfaces for fofr(:,:,:,:)
  public :: dfti_fftpad_dp      ! Driver routines for zero-padded FFT of wavefunctions.
  public :: dfti_fftug_dp       ! Driver routines for zero-padded FFT of wavefunctions.
- public :: dfti_use_lib_threads 
+ public :: dfti_use_lib_threads
 !!***
 
  interface dfti_fftrisc
@@ -104,36 +104,36 @@ MODULE m_dfti
    module procedure dfti_r2c_op_dpc
  end interface dfti_r2c_op
 
- interface dfti_c2r_op      
+ interface dfti_c2r_op
    module procedure dfti_c2r_op_dp
-   module procedure dfti_c2r_op_dpc   
- end interface dfti_c2r_op      
+   module procedure dfti_c2r_op_dpc
+ end interface dfti_c2r_op
 
- interface dfti_c2c_op     
-   module procedure dfti_c2c_op_spc   
+ interface dfti_c2c_op
+   module procedure dfti_c2c_op_spc
    module procedure dfti_c2c_op_dpc
- end interface dfti_c2c_op      
+ end interface dfti_c2c_op
 
- interface dfti_c2c_ip      
-   module procedure dfti_c2c_ip_spc    
+ interface dfti_c2c_ip
+   module procedure dfti_c2c_ip_spc
    module procedure dfti_c2c_ip_dpc
- end interface dfti_c2c_ip      
+ end interface dfti_c2c_ip
 
- !interface dfti_many_dft_op 
- !  module procedure dfti_many_dft_op 
- !  module procedure dfti_many_dft_op 
- !end interface dfti_many_dft_op 
+ !interface dfti_many_dft_op
+ !  module procedure dfti_many_dft_op
+ !  module procedure dfti_many_dft_op
+ !end interface dfti_many_dft_op
 
- !interface dfti_many_dft_ip 
- !  module procedure dfti_many_dft_ip 
- !  module procedure dfti_many_dft_ip 
- !end interface dfti_many_dft_ip 
+ !interface dfti_many_dft_ip
+ !  module procedure dfti_many_dft_ip
+ !  module procedure dfti_many_dft_ip
+ !end interface dfti_many_dft_ip
 
- interface dfti_fftpad      
-   module procedure dfti_fftpad_dp     
-   module procedure dfti_fftpad_spc 
-   module procedure dfti_fftpad_dpc   
- end interface dfti_fftpad      
+ interface dfti_fftpad
+   module procedure dfti_fftpad_dp
+   module procedure dfti_fftpad_spc
+   module procedure dfti_fftpad_dpc
+ end interface dfti_fftpad
 
  logical,private,save :: USE_LIB_THREADS = .FALSE.
 
@@ -188,11 +188,11 @@ CONTAINS  !===========================================================
 !! nx,ny,nz=Number of point along the three directions.
 !! ldx,ldy,ldz=Leading dimensions of the array.
 !! ndat = Number of FFTS
-!! isign= +1 : fofg(G) => fofr(R); 
+!! isign= +1 : fofg(G) => fofr(R);
 !!        -1 : fofr(R) => fofg(G)
 !! fofg(2,ldx*ldy*ldz*ndat)=The array to be transformed.
 !!
-!! OUTPUT 
+!! OUTPUT
 !! fofr(cplex,ldx*ldy*ldz*ndat)=The FFT of fofg
 !!
 !! PARENTS
@@ -212,7 +212,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 #define ABI_FUNC 'dfti_seqfourdp'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -235,7 +235,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
    case default
      MSG_BUG("Wrong isign")
-   end select 
+   end select
 
  case (1) ! Real case.
 
@@ -243,16 +243,16 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
    case (+1) ! G --> R
      call dfti_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr)
 
-   case (-1) ! R --> G 
+   case (-1) ! R --> G
      call dfti_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg)
 
    case default
      MSG_BUG("Wrong isign")
    end select
 
- case default 
+ case default
    MSG_BUG(" Wrong value for cplex")
- end select 
+ end select
 
 end subroutine dfti_seqfourdp
 !!***
@@ -387,7 +387,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
 &      mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
    else
-     ! All this boilerplate code is needed because the caller might pass zero-sized arrays 
+     ! All this boilerplate code is needed because the caller might pass zero-sized arrays
      ! for the arguments that are not referenced and we don't want to have problems at run-time.
      ! Moreover option 1 requires a special treatment when threads are started at this level.
 
@@ -413,7 +413,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
        end if
 
      CASE (1)
-       !fofgin -> local ur and accumulate density in denpot 
+       !fofgin -> local ur and accumulate density in denpot
        ! TODO this is delicate part to do in parallel, as one should OMP reduce denpot.
        do dat=1,ndat
          ptg = 1 + (dat-1)*npwin
@@ -423,7 +423,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
        end do
 
      CASE (2)
-       ! <G|vloc(r)|fofgin(r)> in fofgout 
+       ! <G|vloc(r)|fofgin(r)> in fofgout
        if (.not.dfti_spawn_threads_here(ndat,nthreads)) then
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
@@ -471,7 +471,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
    SELECT CASE (option)
    CASE (0)
      !
-     ! FFT u(g) --> u(r) 
+     ! FFT u(g) --> u(r)
      if (.not.dfti_spawn_threads_here(ndat,nthreads)) then
        call dfti_fftug_dp(fftalg,fftcache,npwin,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_kin,gboundin,fofgin,fofr)
      else
@@ -509,16 +509,16 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
 &          istwf_k,mgfft,kg_kin,gboundin,fofgin(1,ptg),fofr(1,ptr))
 
          call cg_vlocpsi(nx,ny,nz,ldx,ldy,ldz,ndat1,cplex,denpot,fofr(1,ptr))
-                                                                                                                       
+
          !  The data for option==2 is now in fofr.
          call dfti_fftpad_dp(fofr(1,ptr),nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gboundout)
-                                                                                                                       
+
          ptg = 1 + (dat-1)*npwout
          call cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat1,npwout,kg_kout,fofr(1,ptr),fofgout(1,ptg))
        end do
      end if
 
-   CASE (3) 
+   CASE (3)
      !  The data for option==3 is already in fofr.
      if (.not.dfti_spawn_threads_here(ndat,nthreads)) then
        call dfti_fftpad_dp(fofr,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gboundout)
@@ -647,11 +647,11 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 #ifdef HAVE_FFT_DFTI
 
-#undef FFT_PRECISION 
-#undef MYKIND 
-#undef MYCZERO 
-#undef MYCMPLX 
-#undef MYCONJG 
+#undef FFT_PRECISION
+#undef MYKIND
+#undef MYCZERO
+#undef MYCMPLX
+#undef MYCONJG
 
 #define FFT_PRECISION DFTI_SINGLE
 #define MYKIND SPC
@@ -661,7 +661,7 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 #include "dfti_fftrisc.finc"
 
-#else 
+#else
  MSG_ERROR("DFTI support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
@@ -778,11 +778,11 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 #ifdef HAVE_FFT_DFTI
 
-#undef  FFT_PRECISION 
-#undef  MYKIND 
-#undef  MYCZERO 
-#undef  MYCMPLX 
-#undef  MYCONJG 
+#undef  FFT_PRECISION
+#undef  MYKIND
+#undef  MYCZERO
+#undef  MYCMPLX
+#undef  MYCONJG
 
 #define FFT_PRECISION DFTI_DOUBLE
 #define MYKIND DPC
@@ -792,7 +792,7 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 #include "dfti_fftrisc.finc"
 
-#else 
+#else
  MSG_ERROR("DFTI support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
@@ -809,7 +809,7 @@ end subroutine dfti_fftrisc_dp
 !! dfti_fftug_dp
 !!
 !! FUNCTION
-!! Compute ndat zero-padded FFTs from G to R space. 
+!! Compute ndat zero-padded FFTs from G to R space.
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: dp arrays with real and imaginary part
 !!
@@ -820,14 +820,14 @@ end subroutine dfti_fftrisc_dp
 !! nx,ny,nz=Number of point along the three directions.
 !! ldx,ldy,ldz=Leading dimensions of the array.
 !! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction. 
+!! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!  ug(npw_k*ndat)=wavefunctions in reciprocal space. 
+!!  ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
 !! OUTPUT
-!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space. 
+!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
 !!
 !! PARENTS
 !!      m_dfti
@@ -855,14 +855,14 @@ subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  real(dp),target,intent(in) :: ug(2*npw_k*ndat)
- real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)  
+ real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFT_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
- real(dp) :: fofgout(2,0) 
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:) 
+ real(dp) :: fofgout(2,0)
+ real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
@@ -888,7 +888,7 @@ end subroutine dfti_fftug_dp
 !! dfti_fftug_spc
 !!
 !! FUNCTION
-!! Compute ndat zero-padded FFTs from G- to R-space . 
+!! Compute ndat zero-padded FFTs from G- to R-space .
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: spc arrays
 !!
@@ -899,14 +899,14 @@ end subroutine dfti_fftug_dp
 !! nx,ny,nz=Number of point along the three directions.
 !! ldx,ldy,ldz=Leading dimensions of the array.
 !! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction. 
+!! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!  ug(npw_k*ndat)=wavefunctions in reciprocal space. 
+!!  ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
 !! OUTPUT
-!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space. 
+!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
 !!
 !! PARENTS
 !!
@@ -939,8 +939,8 @@ subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
- real(sp) :: fofgout(2,0) 
- real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:) 
+ real(sp) :: fofgout(2,0)
+ real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
@@ -966,7 +966,7 @@ end subroutine dfti_fftug_spc
 !! dfti_fftug_dpc
 !!
 !! FUNCTION
-!! Compute ndat zero-padded FFTs from G ro R. 
+!! Compute ndat zero-padded FFTs from G ro R.
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: DPC arrays
 !!
@@ -977,14 +977,14 @@ end subroutine dfti_fftug_spc
 !! nx,ny,nz=Number of point along the three directions.
 !! ldx,ldy,ldz=Leading dimensions of the array.
 !! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction. 
+!! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
 !!  ug(npw_k*ndat)=wavefunctions in reciprocal space
 !!
 !! OUTPUT
-!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space. 
+!!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
 !!
 !! PARENTS
 !!
@@ -1018,8 +1018,8 @@ subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 !scalars
  integer,parameter :: dist=1
 !arrays
- real(dp) :: fofgout(2,0) 
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:) 
+ real(dp) :: fofgout(2,0)
+ real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
@@ -1045,7 +1045,7 @@ end subroutine dfti_fftug_dpc
 !! dfti_fftur_dp
 !!
 !! FUNCTION
-!! Compute ndat zero-padded FFTs from R- to G-space . 
+!! Compute ndat zero-padded FFTs from R- to G-space .
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: dp arrays with real and imaginary part.
 !!
@@ -1056,16 +1056,16 @@ end subroutine dfti_fftug_dpc
 !! nx,ny,nz=Number of point along the three directions.
 !! ldx,ldy,ldz=Leading dimensions of the array.
 !! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction. 
+!! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
 !!
 !! SIDE EFFECT
-!! ur(2,ldx*ldy*ldz*ndat)= In input: wavefunctions in real space. 
+!! ur(2,ldx*ldy*ldz*ndat)= In input: wavefunctions in real space.
 !!                         Destroyed in output. Do not use ur anymore!
 !! OUTPUT
-!! ug(2,npw_k*ndat)=wavefunctions in reciprocal space. 
+!! ug(2,npw_k*ndat)=wavefunctions in reciprocal space.
 !!
 !! PARENTS
 !!
@@ -1091,7 +1091,7 @@ subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)  
+ real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
  real(dp),target,intent(inout) :: ug(2*npw_k*ndat)    !vz_i
 
 #ifdef HAVE_FFT_DFTI
@@ -1100,7 +1100,7 @@ subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  integer,parameter :: dist=2
 !arrays
  real(dp) :: dum_ugin(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:) 
+ real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
@@ -1127,7 +1127,7 @@ end subroutine dfti_fftur_dp
 !! dfti_fftur_spc
 !!
 !! FUNCTION
-!! Compute ndat zero-padded FFTs from R- to G-space . 
+!! Compute ndat zero-padded FFTs from R- to G-space .
 !! Mainly used for the transform of wavefunctions.
 !! TARGET: spc arrays
 !!
@@ -1138,17 +1138,17 @@ end subroutine dfti_fftur_dp
 !! nx,ny,nz=Number of point along the three directions.
 !! ldx,ldy,ldz=Leading dimensions of the array.
 !! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction. 
+!! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
 !!
 !! SIDE EFFECT
-!! ur(ldx*ldy*ldz*ndat)= In input: wavefunctions in real space. 
+!! ur(ldx*ldy*ldz*ndat)= In input: wavefunctions in real space.
 !!                       Destroyed in output. Do not use ur anymore!
 !!
 !! OUTPUT
-!! ug(npw_k*ndat)=wavefunctions in reciprocal space. 
+!! ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
 !! PARENTS
 !!
@@ -1174,7 +1174,7 @@ subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)  
+ complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(spc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
 
 #ifdef HAVE_FFT_DFTI
@@ -1183,7 +1183,7 @@ subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  integer,parameter :: dist=1
 !arrays
  real(sp) :: dum_ugin(2,0)
- real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:) 
+ real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
@@ -1221,13 +1221,13 @@ end subroutine dfti_fftur_spc
 !! nx,ny,nz=Number of point along the three directions.
 !! ldx,ldy,ldz=Leading dimensions of the array.
 !! ndat=Number of transforms
-!! istwf_k=Option describing the storage of the wavefunction. 
+!! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
 !!
 !! SIDE EFFECT
-!! ur(ldx*ldy*ldz*ndat)= In input: wavefunctions in real space. 
+!! ur(ldx*ldy*ldz*ndat)= In input: wavefunctions in real space.
 !!                       Destroyed in output. Do not use ur anymore!
 !! OUTPUT
 !! ug(npw_k*ndat)=wavefunctions in reciprocal space
@@ -1256,7 +1256,7 @@ subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)  
+ complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(dpc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
 
 #ifdef HAVE_FFT_DFTI
@@ -1265,7 +1265,7 @@ subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  integer,parameter :: dist=1
 !arrays
  real(dp) :: dum_ugin(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:) 
+ real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
 
@@ -1321,7 +1321,7 @@ subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 #define ABI_FUNC 'dfti_c2c_ip_spc'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1331,7 +1331,7 @@ subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 
 ! *************************************************************************
 
-! Include Fortran template 
+! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_SINGLE
 #include "dfti_c2c_ip.finc"
@@ -1375,7 +1375,7 @@ subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 #define ABI_FUNC 'dfti_c2c_ip_dpc'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1385,7 +1385,7 @@ subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 
 ! *************************************************************************
 
-! Include Fortran template 
+! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_DOUBLE
 #include "dfti_c2c_ip.finc"
@@ -1410,7 +1410,7 @@ end subroutine dfti_c2c_ip_dpc
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !!
-!! OUTPUT 
+!! OUTPUT
 !!   gg(ldx*ldy*ldz*ndat)=The FFT of ff.
 !!
 !! PARENTS
@@ -1429,7 +1429,7 @@ subroutine dfti_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 #define ABI_FUNC 'dfti_c2c_op_spc'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1440,7 +1440,7 @@ subroutine dfti_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 
 ! *************************************************************************
 
-! Include Fortran template 
+! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_SINGLE
 #include "dfti_c2c_op.finc"
@@ -1465,7 +1465,7 @@ end subroutine dfti_c2c_op_spc
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !!
-!! OUTPUT 
+!! OUTPUT
 !!   gg(ldx*ldy*ldz*ndat)=The FFT of ff.
 !!
 !! PARENTS
@@ -1484,7 +1484,7 @@ subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 #define ABI_FUNC 'dfti_c2c_op_dpc'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1495,7 +1495,7 @@ subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 
 ! *************************************************************************
 
-! Include Fortran template 
+! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_DOUBLE
 #include "dfti_c2c_op.finc"
@@ -1510,7 +1510,7 @@ end subroutine dfti_c2c_op_dpc
 !!  dfti_many_dft_op
 !!
 !! FUNCTION
-!! Driver routine for many out-of-place 3D complex-to-complex FFTs of lengths nx, ny, nz. 
+!! Driver routine for many out-of-place 3D complex-to-complex FFTs of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
@@ -1518,10 +1518,10 @@ end subroutine dfti_c2c_op_dpc
 !! ndat=Number of FFTs to be done.
 !! fin(2*ldx*ldy*ldz*ndat)=The complex array to be transformed.
 !! isign=sign of Fourier transform exponent: current convention uses
-!!   +1 for transforming from G to r, 
+!!   +1 for transforming from G to r,
 !!   -1 for transforming from r to G.
 !!
-!! OUTPUT 
+!! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
 !!
 !! PARENTS
@@ -1541,7 +1541,7 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
 #define ABI_FUNC 'dfti_many_dft_op'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1569,7 +1569,7 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
  ! Call complex version --> a lot of boilerplate code avoided
  call dfti_c2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin_fptr,fout_fptr)
 
-#else 
+#else
  MSG_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  ABI_UNUSED(fin(1))
@@ -1586,17 +1586,17 @@ end subroutine dfti_many_dft_op
 !!  dfti_many_dft_ip
 !!
 !! FUNCTION
-!! Driver routine for many in-place 3D complex-to-complex FFTs of lengths nx, ny, nz. 
+!! Driver routine for many in-place 3D complex-to-complex FFTs of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimension of the finout array (to avoid cache conflicts).
 !! ndat=Number of FFTs to be done.
 !! isign=sign of Fourier transform exponent: current convention uses
-!!   +1 for transforming from G to r, 
+!!   +1 for transforming from G to r,
 !!   -1 for transforming from r to G.
 !!
-!! OUTPUT 
+!! OUTPUT
 !! finout(2,ldx*ldy*ldz*ndat)=
 !!   In input: The complex array to be transformed.
 !!   In output: The FFT results.
@@ -1617,7 +1617,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
 #define ABI_FUNC 'dfti_many_dft_ip'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1641,7 +1641,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
  ! Call complex version --> a lot of boilerplate code avoided
  call dfti_c2c_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout_fptr)
 
-#else 
+#else
  MSG_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  ABI_UNUSED(finout(1))
@@ -1657,10 +1657,10 @@ end subroutine dfti_many_dft_ip
 !!  dfti_fftpad_dp
 !!
 !! FUNCTION
-!!  This routine transforms wavefunctions using 3D zero-padded FFTs with DFTI. 
+!!  This routine transforms wavefunctions using 3D zero-padded FFTs with DFTI.
 !!  The 3D ffts are computed only on lines and planes which have non zero elements (see zpad_init)
 !!  FFT transform is in-place.
-!!  
+!!
 !! INPUTS
 !!   nx,ny,nz=Logical dimensions of the FFT mesh.
 !!   ldx,ldy,ldz=Physical dimension of the f array (to avoid cache conflicts).
@@ -1724,7 +1724,7 @@ subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  ABI_UNUSED(ff(1))
 #endif
 
-end subroutine dfti_fftpad_dp     
+end subroutine dfti_fftpad_dp
 !!***
 
 !----------------------------------------------------------------------
@@ -1734,10 +1734,10 @@ end subroutine dfti_fftpad_dp
 !!  dfti_fftpad_dpc
 !!
 !! FUNCTION
-!!  This routine transforms wavefunctions using 3D zero-padded FFTs with DFTI. 
+!!  This routine transforms wavefunctions using 3D zero-padded FFTs with DFTI.
 !!  The 3D ffts are computed only on lines and planes which have non zero elements (see zpad_init)
 !!  FFT transform is in-place. Target: complex DPC arrays.
-!!  
+!!
 !! INPUTS
 !!   nx,ny,nz=Logical dimensions of the FFT mesh.
 !!   ldx,ldy,ldz=Physical dimension of the f array (to avoid cache conflicts).
@@ -1784,7 +1784,7 @@ subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
 ! *************************************************************************
 
-! Include Fortran template 
+! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_DOUBLE
 
@@ -1797,7 +1797,7 @@ subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  ABI_UNUSED(ff(1))
 #endif
 
-end subroutine dfti_fftpad_dpc     
+end subroutine dfti_fftpad_dpc
 !!***
 
 !----------------------------------------------------------------------
@@ -1807,10 +1807,10 @@ end subroutine dfti_fftpad_dpc
 !!  dfti_fftpad_spc
 !!
 !! FUNCTION
-!!  This routine transforms wavefunctions using 3D zero-padded FFTs with DFTI. 
+!!  This routine transforms wavefunctions using 3D zero-padded FFTs with DFTI.
 !!  The 3D ffts are computed only on lines and planes which have non zero elements (see zpad_init)
 !!  FFT transform is in-place. Target: complex SPC arrays.
-!!  
+!!
 !! INPUTS
 !!   nx,ny,nz=Logical dimensions of the FFT mesh.
 !!   ldx,ldy,ldz=Physical dimension of the f array (to avoid cache conflicts).
@@ -1856,7 +1856,7 @@ subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
 ! *************************************************************************
 
-! Include Fortran template 
+! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_SINGLE
 
@@ -1869,7 +1869,7 @@ subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  ABI_UNUSED(ff(1))
 #endif
 
-end subroutine dfti_fftpad_spc     
+end subroutine dfti_fftpad_spc
 !!***
 
 !----------------------------------------------------------------------
@@ -1879,7 +1879,7 @@ end subroutine dfti_fftpad_spc
 !!  dfti_r2c_op_dpc
 !!
 !! FUNCTION
-!! Driver routine for out-of-place 3D real-to-complex FFT of lengths nx, ny, nz. 
+!! Driver routine for out-of-place 3D real-to-complex FFT of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
@@ -1887,7 +1887,7 @@ end subroutine dfti_fftpad_spc
 !! ff(ldx*ldy*ldz*ndat)=The real array to be transformed.
 !! ndat=Number of FFTs to be done.
 !!
-!! OUTPUT 
+!! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The forward FFT of ff (complex valued)
 !!
 !! PARENTS
@@ -1907,7 +1907,7 @@ subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 #define ABI_FUNC 'dfti_r2c_op_dpc'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1920,7 +1920,7 @@ subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 !Local variables-------------------------------
 !scalars
  integer :: status,nhp,padx,i1,i2,i3,igp,igf,imgf,ii
- integer :: i1inv,i2inv,i3inv,idat,padatf     
+ integer :: i1inv,i2inv,i3inv,idat,padatf
  type(DFTI_DESCRIPTOR),pointer :: Desc
  type(C_PTR) :: cptr
 !arrays
@@ -2017,7 +2017,7 @@ end subroutine dfti_r2c_op_dpc
 !!  dfti_r2c_op_dp
 !!
 !! FUNCTION
-!! Driver routine for out-of-place 3D real-to-complex FFT of lengths nx, ny, nz. 
+!! Driver routine for out-of-place 3D real-to-complex FFT of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
@@ -2025,7 +2025,7 @@ end subroutine dfti_r2c_op_dpc
 !! ndat=Number of FFTs to be done.
 !! ff(ldx*ldy*ldz*ndat)=The real array to be transformed.
 !!
-!! OUTPUT 
+!! OUTPUT
 !! gg(2*ldx*ldy*ldz*ndat)=The forward FFT of ff (real valued)
 !!
 !! PARENTS
@@ -2044,7 +2044,7 @@ subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 #define ABI_FUNC 'dfti_r2c_op_dp'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2084,7 +2084,7 @@ end subroutine dfti_r2c_op_dp
 !!  dfti_c2r_op_dpc
 !!
 !! FUNCTION
-!! Driver routine for out-of-place 3D complex-to-real FFT of lengths nx, ny, nz. 
+!! Driver routine for out-of-place 3D complex-to-real FFT of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of point along the three directions.
@@ -2092,7 +2092,7 @@ end subroutine dfti_r2c_op_dp
 !! ndat=Number of FFTs to be done.
 !! ff(2,ldx*ldy*ldz*ndat)=The complex array to be transformed.
 !!
-!! OUTPUT 
+!! OUTPUT
 !! gg(2,ldx*ldy*ldz*ndat)=The backwards real FFT of ff.
 !!
 !! PARENTS
@@ -2112,7 +2112,7 @@ subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 #define ABI_FUNC 'dfti_c2r_op_dpc'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2179,7 +2179,7 @@ subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
  call dfti_free(cptr)
 
-#else 
+#else
  MSG_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff(1))
@@ -2196,7 +2196,7 @@ end subroutine dfti_c2r_op_dpc
 !!  dfti_c2r_op_dp
 !!
 !! FUNCTION
-!! Driver routine for out-of-place 3D complex-to-real FFT of lengths nx, ny, nz. 
+!! Driver routine for out-of-place 3D complex-to-real FFT of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of point along the three directions.
@@ -2204,7 +2204,7 @@ end subroutine dfti_c2r_op_dpc
 !! ndat=Number of FFTs to be done.
 !! ff(2,ldx*ldy*ldz*ndat)=The complex array to be transformed.
 !!
-!! OUTPUT 
+!! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The backwards real FFT of ff.
 !!
 !! PARENTS
@@ -2223,7 +2223,7 @@ subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 #define ABI_FUNC 'dfti_c2r_op_dp'
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2246,7 +2246,7 @@ subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
  call dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_fptr,gg)
 
-#else 
+#else
  MSG_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED((/ff(1),gg(1)/))
@@ -2263,9 +2263,9 @@ end subroutine dfti_c2r_op_dp
 !!
 !! FUNCTION
 !!  Error handler for DFTI wrappers. Print error message and abort.
-!!  
+!!
 !! INPUTS
-!!  status = status error reported by dfti. 
+!!  status = status error reported by dfti.
 !!  [file] = file name
 !!  [line] = line number
 !!
@@ -2306,12 +2306,12 @@ subroutine dfti_check_status(status,file,line)
 
  if (PRESENT(line)) then
    f90line=line
- else 
+ else
    f90line=0
  end if
  call int2char10(f90line,lnum)
 
- if (PRESENT(file)) then 
+ if (PRESENT(file)) then
    f90name = basename(file)
  else
    f90name='Subroutine Unknown'
@@ -2412,7 +2412,7 @@ subroutine dfti_use_lib_threads(logvar)
  logical,intent(in) :: logvar
 
 ! *************************************************************************
- 
+
  USE_LIB_THREADS = logvar
 
 end subroutine dfti_use_lib_threads
@@ -2522,7 +2522,7 @@ subroutine dfti_alloc_complex_spc(size,cptr,fptr)
 end subroutine dfti_alloc_complex_spc
 !!***
 
-#endif 
+#endif
 
 !----------------------------------------------------------------------
 
@@ -2575,7 +2575,7 @@ subroutine dfti_alloc_complex_dpc(size,cptr,fptr)
 end subroutine dfti_alloc_complex_dpc
 !!***
 
-#endif 
+#endif
 
 !----------------------------------------------------------------------
 
