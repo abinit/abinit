@@ -146,7 +146,7 @@ MODULE m_ddb
                                     ! a direct diagonalizatin of the dynamical matrix.
  public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
                                     ! from the Dynamical matrix at Gamma. Used in ddb_diagoq.
- public :: ddb_to_dtset        ! Transfer ddb_hdr to dtset datatype
+ public :: ddb_to_dtset             ! Transfer ddb_hdr to dtset datatype
 
  ! TODO: Add option to change amu.
  !public :: ddb_change_amu
