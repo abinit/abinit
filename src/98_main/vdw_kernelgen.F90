@@ -41,7 +41,6 @@
 program vdw_kernelgen
 
 #if defined DEV_YP_VDWXC
-
  use defs_basis
  use defs_abitypes
  use m_build_info
@@ -121,6 +120,9 @@ program vdw_kernelgen
 !* Init fake MPI type with values for sequential case.
  call initmpi_seq(MPI_enreg_seq)
 
+ write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet',&
+& ch10
+ MSG_ERROR(message)
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)
