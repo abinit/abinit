@@ -152,6 +152,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
 &                subvnl,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -161,7 +162,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common, except_this_one => cgwf
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
