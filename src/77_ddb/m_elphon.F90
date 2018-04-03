@@ -1,8 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/elphon
-!!
+!!****m* ABINIT/m_elphon
 !! NAME
-!! elphon
+!! m_elphon
 !!
 !! FUNCTION
 !! This routine extracts the electron phonon coupling matrix
@@ -14,6 +13,59 @@
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_elphon
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_elphon
+ use m_profiling_abi
+ use m_kptrank
+ use m_errors
+ use m_xmpi
+ use m_hdr
+ use m_ebands
+
+ use m_io_tools,        only : open_file, is_open
+ use m_time,            only : timein
+ use m_numeric_tools,   only : wrap2_pmhalf
+ use m_pptools,         only : printvtk
+ use m_dynmat,          only : ftgam_init, ftgam
+ use m_crystal,         only : crystal_t
+ use m_ifc,             only : ifc_type
+ use m_nesting,         only : mknesting, bfactor
+ use m_anaddb_dataset,  only : anaddb_dataset_type
+
+ implicit none
+
+ private
+!!***
+
+ public :: elphon
+
+contains
+
+!!****f* m_elphon/elphon
+!!
+!! NAME
+!! elphon
+!!
+!! FUNCTION
+!! This routine extracts the electron phonon coupling matrix
+!! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! INPUTS
 !!   anaddb_dtset=dataset with input variables
@@ -90,34 +142,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_elphon
- use m_profiling_abi
- use m_kptrank
- use m_errors
- use m_xmpi
- use m_hdr
- use m_ebands
-
- use m_io_tools,        only : open_file, is_open
- use m_time,            only : timein
- use m_numeric_tools,   only : wrap2_pmhalf
- use m_pptools,         only : printvtk
- use m_dynmat,          only : ftgam_init, ftgam
- use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type
- use m_nesting,         only : mknesting, bfactor
- use m_anaddb_dataset,  only : anaddb_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1365,9 +1390,10 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  if (is_open(elph_ds%unitgkq)) close(elph_ds%unitgkq)
 
- contains
+end subroutine elphon
+!!***
 
-!!****f* ABINIT/outelph
+!!****f* m_elphon/outelph
 !! NAME
 !! outelph
 !!
@@ -1732,5 +1758,5 @@ subroutine outelph(elph_ds,enunit,fname)
 end subroutine outelph
 !!***
 
-end subroutine elphon
+end module m_elphon
 !!***
