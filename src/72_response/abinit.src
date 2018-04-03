@@ -57,7 +57,6 @@ sources = [
  "dfpt_scfcv.F90",
  "dfpt_sydy.F90",
  "dfpt_sygra.F90",
- "dfpt_symph.F90",
  "dfpt_vlocal.F90",
  "dfpt_vtorho.F90",
  "dfpt_vtowfk.F90",
