@@ -91,7 +91,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvar_a_h'
- use interfaces_57_iovars, except_this_one => outvar_a_h
 !End of the abilint section
 
  implicit none

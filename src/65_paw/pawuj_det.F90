@@ -55,7 +55,6 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 #define ABI_FUNC 'pawuj_det'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_57_iovars
  use interfaces_65_paw, except_this_one => pawuj_det
 !End of the abilint section
 
