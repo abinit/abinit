@@ -855,7 +855,6 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
 #undef ABI_FUNC
 #define ABI_FUNC 'make_gvec_kss'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1726,7 +1725,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 #define ABI_FUNC 'outkss'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_67_common
 !End of the abilint section
 

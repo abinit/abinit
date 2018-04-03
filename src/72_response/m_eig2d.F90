@@ -66,6 +66,7 @@ MODULE m_eig2d
 
  public :: eig2tot                  ! This routine calculates the second-order eigenvalues.
  public :: outbsd                   ! output bsd file for one perturbation (used for elphon calculations in anaddb)
+ public :: eig2stern
 
 !!***
 
@@ -928,7 +929,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_72_response, except_this_one => eig2stern
 !End of the abilint section
 
  implicit none
@@ -1424,13 +1424,13 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &  elph2_imagden,esmear,ieig2rf,mband,mpert,npert,mpi_enreg,doccde,&
 &  nkpt_rbz,nsppol,smdelta,rprimd,dtset,occ_rbz,hdr0,eigbrd,eigenq_fine,hdr_fine)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2tot'
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_72_response, except_this_one => eig2tot
 !End of the abilint section
 
  implicit none
@@ -2006,6 +2006,7 @@ end subroutine eig2tot
 
 subroutine outbsd(bdeigrf,dtset,eig2nkq,mpert,nkpt_rbz,unitout)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2094,6 +2095,7 @@ end subroutine outbsd
 !! SOURCE
 
 subroutine smeared_delta(eigen0,eigenq,esmear,mband,smdelta,smdfunc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

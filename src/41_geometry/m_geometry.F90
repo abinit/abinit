@@ -2792,12 +2792,13 @@ end function dist2
 
 subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'remove_inversion'
  use interfaces_14_hidewrite
- use interfaces_41_geometry, except_this_one => remove_inversion
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
