@@ -412,7 +412,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !    of the first-order wavefunction, to give cwave1.
 !    PAW: note that dcwavef (1st-order change of WF due to overlap change)
 !         remains in the subspace orthogonal to cgq
-       if (dtset%useria>0) then
+       if (dtset%prtfull1wf>0) then
          call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1_k,fermie1,&
 &         eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
 &         0,gs_hamkq%usepaw)

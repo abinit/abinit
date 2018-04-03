@@ -780,6 +780,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
  dtout%prtfc              = dtin%prtfc
+ dtout%prtfull1wf         = dtin%prtfull1wf
  dtout%prtfsurf           = dtin%prtfsurf
  dtout%prtgsr             = dtin%prtgsr
  dtout%prtgden            = dtin%prtgden
