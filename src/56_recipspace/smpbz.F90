@@ -12,14 +12,14 @@
 !! Monkhorst-Pack set of k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (JCC,XG)
+!! Copyright (C) 1999-2018 ABINIT group (JCC,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  brav = 1 -> simple lattice; 2 -> face-centered cubic;
+!!  brav = 1 or -1 -> simple lattice; 2 -> face-centered cubic;
 !!   3 -> body-centered lattice; 4 -> hexagonal lattice (D6h)
 !!  downsampling(3) [optional, for brav=1 only]
 !!    Three integer numbers, describing the downsampling of the k grid
@@ -60,7 +60,7 @@
 !!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983)
 !!
 !! PARENTS
-!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,m_fstab,m_ifc
+!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,initorbmag,m_fstab,m_ifc
 !!      m_tdep_abitypes
 !!
 !! CHILDREN
@@ -127,13 +127,13 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    call wrtout(iout,'       Homogeneous q point set in the B.Z.  ','COLL')
  end if
 
- if(brav/=1)then
+ if(abs(brav)/=1)then
 !  Only generate Monkhorst-Pack lattices
    if(kptrlatt(1,2)/=0 .or. kptrlatt(2,1)/=0 .or. &
 &   kptrlatt(1,3)/=0 .or. kptrlatt(3,1)/=0 .or. &
 &   kptrlatt(2,3)/=0 .or. kptrlatt(3,2)/=0     ) then
      write(message, '(2a,a,3i4,a,a,3i4,a,a,3i4)' )&
-&     'When brav/=1, kptrlatt must be diagonal, while it is',ch10,&
+&     'When abs(brav)/=1, kptrlatt must be diagonal, while it is',ch10,&
 &     'kptrlatt(:,1)=',kptrlatt(:,1),ch10,&
 &     'kptrlatt(:,2)=',kptrlatt(:,2),ch10,&
 &     'kptrlatt(:,3)=',kptrlatt(:,3)
@@ -170,7 +170,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 
 !*********************************************************************
 
- if(brav==1)then
+ if(abs(brav)==1)then
 
 !  Compute the number of k points in the G-space unit cell
 !  (will be multiplied by nshiftk later).
@@ -591,7 +591,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 
    write(message, '(a,i6,a,a,a)' )&
 &   'The calling routine asks brav=',brav,'.',ch10,&
-&   'but only brav=1,2,3 or 4 are allowed.'
+&   'but only brav=1 or -1,2,3 or 4 are allowed.'
    MSG_BUG(message)
  end if
 

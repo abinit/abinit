@@ -8,7 +8,7 @@
 !!  Frequency-Reciprocal space on a transition (electron-hole) basis set.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (M.Giantomassi, L. Reining, V. Olevano, F. Sottile, S. Albrecht, G. Onida)
+!! Copyright (C) 2009-2018 ABINIT group (M.Giantomassi, L. Reining, V. Olevano, F. Sottile, S. Albrecht, G. Onida)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -313,7 +313,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
- call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
+ call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
  ! === Initialization of basic objects including the BSp structure that defines the parameters of the run ===
  call setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&

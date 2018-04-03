@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (SPr)
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -92,7 +92,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  real(dp) :: epot,ekin,ekin_tmp                                                 ! potential (electronic), kinetic (ionic) energies  
  real(dp) :: xcart(3,ab_mover%natom)                                            ! Cartesian coordinates of all ions
  real(dp) :: xred(3,ab_mover%natom)                                             ! reduced coordinates of all ions
- real(dp) :: vel(3,ab_mover%natom),vel_nexthalf(3,ab_mover%natom)               ! ionic velocities in Cartesian coordinates
+ real(dp) :: vel(3,ab_mover%natom)                                              ! ionic velocities in Cartesian coordinates
  real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! forces, Cartesian and reduced coordinates
  real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
  integer :: hmcflag_

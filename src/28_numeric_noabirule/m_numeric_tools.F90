@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,9 +45,10 @@ MODULE m_numeric_tools
  public :: get_diag              ! Return the diagonal of a matrix as a vector
  public :: isdiagmat             ! True if matrix is diagonal
  public :: r2c,c2r               ! Transfer complex data stored in a real array to a complex array and vice versa
- public :: iseven                ! Return .TRUE. if int is even
- public :: isinteger             ! Return .TRUE. if all elements of rr differ from an integer by less than tol
- public :: is_zero               ! Return .TRUE. if all elements of rr differ from zero by less than tol
+ public :: iseven                ! True if int is even
+ public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
+ public :: is_zero               ! True if all elements of rr differ from zero by less than tol
+ public :: isinside              ! True if float is inside an interval.
  public :: bisect                ! Given a monotonic array A and x find j such that A(j)>x>A(j+1) using bisection
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
  public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
@@ -110,6 +111,7 @@ MODULE m_numeric_tools
  end interface get_trace
 
  interface get_diag
+   module procedure get_diag_int
    module procedure get_diag_rdp
    module procedure get_diag_cdp
  end interface get_diag
@@ -768,6 +770,51 @@ pure function get_trace_cdp(matrix) result(trace)
 end function get_trace_cdp
 !!***
 
+!!****f* m_numeric_tools/get_diag_int
+!! NAME
+!!  get_diag_int
+!!
+!! FUNCTION
+!!  Return the diagonal of a square matrix as a vector
+!!
+!! INPUTS
+!!  matrix(:,:)
+!!
+!! OUTPUT
+!!  diag(:)=the diagonal
+!!
+!! SOURCE
+
+function get_diag_int(mat) result(diag)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_diag_int'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mat(:,:)
+ integer :: diag(SIZE(mat,1))
+
+!Local variables-------------------------------
+ integer :: ii
+! *************************************************************************
+
+ ii=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
+& __FILE__,__LINE__)
+
+ do ii=1,SIZE(mat,1)
+  diag(ii)=mat(ii,ii)
+ end do
+
+end function get_diag_int
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_numeric_tools/get_diag_rdp
@@ -775,13 +822,13 @@ end function get_trace_cdp
 !!  get_diag_rdp
 !!
 !! FUNCTION
-!!  Return the trace of a square matrix as a vector
+!!  Return the diagonal of a square matrix as a vector
 !!
 !! INPUTS
 !!  matrix(:,:)
 !!
 !! OUTPUT
-!!  diag(:)=the diagonalr
+!!  diag(:)=the diagonal
 !!
 !! SOURCE
 function get_diag_rdp(mat) result(diag)
@@ -1568,6 +1615,36 @@ end function is_zero_rdp_1d
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/isinside
+!! NAME
+!!  isinside
+!!
+!! FUNCTION
+!!  True if float `xval` is inside the interval [win(1), win(2)]
+!!
+!! SOURCE
+
+pure logical function isinside(xval, win)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'isinside'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: xval,win(2)
+! *************************************************************************
+
+ isinside = (xval >= win(1) .and. xval <= win(2))
+
+end function isinside
+!!***
 
 !!****f* m_numeric_tools/bisect_rdp
 !! NAME

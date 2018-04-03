@@ -7,7 +7,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2018 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ MODULE m_ebands
  use m_io_tools,       only : file_exists, open_file
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one,&
-                              isdiagmat
+                              isdiagmat, isinside
  use m_special_funcs,  only : dirac_delta
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -158,15 +158,13 @@ MODULE m_ebands
    ! gef(0:nsppol)
    ! DOS at the Fermi level. Total, spin up, spin down
 
-   !type(ebands_t),pointer :: ebands => null()
-   ! Reference to the bandstructure.
-
  end type edos_t
 
- public :: ebands_get_edos   ! Compute the dos from the band structure.
+ public :: ebands_get_edos   ! Compute electron DOS from band structure.
  public :: edos_free         ! Free memory
  public :: edos_write        ! Write results to file (formatted mode)
- public :: edos_print        ! Print DOS info to Fortran unit.
+ public :: edos_print        ! Print eDOS info to Fortran unit.
+ public :: edos_ncwrite      ! Write eDOS to netcdf file.
 !!***
 
 !----------------------------------------------------------------------
@@ -988,7 +986,7 @@ subroutine ebands_copy(ibands,obands)
  call alloc_copy(ibands%shiftk, obands%shiftk)
 
  if(allocated(ibands%lifetime)) then
-   call alloc_copy(ibands%lifetime, obands%lifetime)  
+   call alloc_copy(ibands%lifetime, obands%lifetime)
  end if
 
 end subroutine ebands_copy
@@ -1691,6 +1689,10 @@ end function get_occupied
 !!
 !! OUTPUT
 !!  changed=.TRUE. if ibmin or ibmax has been changed.
+!!  [degblock(2,ndeg)]=Table allocated by the routine containing the index
+!!    of the bands in the `ndeg` degenerate sub-sets
+!!    degblock(1, ii) = first band index in the ii-th degenerate subset.
+!!    degblock(2, ii) = last band index in the ii-th degenerate subset.
 !!
 !! SIDE EFFECTS
 !!  ibmin,ibmax=
@@ -1705,7 +1707,7 @@ end function get_occupied
 !!
 !! SOURCE
 
-subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
+subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,degblock)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1723,17 +1725,20 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
  real(dp),intent(in) :: tol_enedif
  logical,intent(out) :: changed
  type(ebands_t),intent(in) :: ebands
+!arrays
+ integer,allocatable,optional,intent(out) :: degblock(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: ib,ibmin_bkp,ibmax_bkp
+ integer :: ib,ibmin_bkp,ibmax_bkp,ndeg
  real(dp) :: emin,emax
+
 
 ! *************************************************************************
 
  ibmin_bkp = ibmin; ibmax_bkp = ibmax
 
- emin =  ebands%eig(ibmin,ikibz,spin)
+ emin = ebands%eig(ibmin,ikibz,spin)
  do ib=ibmin-1,1,-1
    if ( ABS(ebands%eig(ib,ikibz,spin) - emin) > tol_enedif) then
      ibmin = ib +1
@@ -1754,6 +1759,29 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
  end do
 
  changed = (ibmin /= ibmin_bkp) .or. (ibmax /= ibmax_bkp)
+
+ ! Compute degeneracy table.
+ if (present(degblock)) then
+   ! Count number of degeneracies.
+   ndeg = 1
+   do ib=ibmin+1,ibmax
+     if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) ndeg = ndeg + 1
+   end do
+   ! Build degblock table.
+   if (allocated(degblock)) then
+      ABI_FREE(degblock)
+   end if
+   ABI_MALLOC(degblock, (2, ndeg))
+   ndeg = 1; degblock(1, 1) = ibmin
+   do ib=ibmin+1,ibmax
+     if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) then
+       degblock(2, ndeg) = ib - 1
+       ndeg = ndeg + 1
+       degblock(1, ndeg) = ib
+     end if
+   end do
+   degblock(2, ndeg) = ibmax
+ end if
 
 end subroutine enclose_degbands
 !!***
@@ -2020,7 +2048,7 @@ type(stats_t) function ebands_edstats(ebands) result(stats)
 
 ! *************************************************************************
 
-! Compute energy difference between b+1 and b.
+ ! Compute energy difference between b+1 and b.
  ABI_CALLOC(ediffs, (ebands%mband-1,ebands%nkpt,ebands%nsppol))
 
  do spin=1,ebands%nsppol
@@ -2903,6 +2931,7 @@ integer function ebands_ncwrite(ebands,ncid) result(ncerr)
 contains
  integer function vid(vname)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3312,6 +3341,79 @@ subroutine edos_write(edos, path)
  close(unt)
 
 end subroutine edos_write
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/edos_ncwrite
+!! NAME
+!! edos_ncwrite
+!!
+!! FUNCTION
+!!  Write results to netcdf file.
+!!
+!! INPUTS
+!!  edos<edos_t>=DOS container
+!!  ncid=NC file handle.
+!!
+!! OUTPUT
+!!  ncerr= netcdf exit status.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function edos_ncwrite(edos, ncid) result(ncerr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'edos_ncwrite'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+ type(edos_t),intent(in) :: edos
+
+#ifdef HAVE_NETCDF
+ ! Define dimensions.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("nsppol_plus1", edos%nsppol + 1), nctkdim_t("edos_nw", edos%nw)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Define variables
+ NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "edos_intmeth", "edos_nkibz", "edos_ief"]))
+ NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "edos_broad"]))
+
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("edos_mesh", "dp", "edos_nw"), &
+   nctkarr_t("edos_dos", "dp", "edos_nw, nsppol_plus1"), &
+   nctkarr_t("edos_idos", "dp", "edos_nw, nsppol_plus1"), &
+   nctkarr_t("edos_gef", "dp", "nsppol_plus1") &
+ ])
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_intmeth"), edos%intmeth))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_nkibz"), edos%nkibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_ief"), edos%ief))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_broad"), edos%broad))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_mesh"), edos%mesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_dos"), edos%dos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_idos"), edos%idos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_gef"), edos%gef))
+
+#else
+ MSG_ERROR("netcdf library not available")
+#endif
+
+end function edos_ncwrite
 !!***
 
 !!****f* m_ebands/edos_print
@@ -4153,7 +4255,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case (2)
          call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case default
@@ -4296,7 +4398,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case (2)
          call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
        case default
@@ -4737,7 +4839,6 @@ end subroutine ebands_prtbltztrp
 !!  eigen(mband*nkpt*nsppol) = array for holding eigenvalues (hartree)
 !!  fermie = Fermi level
 !!  fname_radix = radix of file names for output
-!!  natom = number of atoms in cell.
 !!  nband = number of bands
 !!  nkpt = number of k points.
 !!  nsppol = 1 for unpolarized, 2 for spin-polarized
@@ -4760,7 +4861,7 @@ end subroutine ebands_prtbltztrp
 !! SOURCE
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
-&       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, &
+&       nband, nelec, nkpt, nspinor, nsppol, nsym, &
 &       rprimd, symrel, tau_k)
 
 
@@ -4774,7 +4875,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom, nsym, nband, nkpt, nsppol, nspinor, ntemper
+ integer, intent(in) :: nsym, nband, nkpt, nsppol, nspinor, ntemper
  real(dp), intent(in) :: tempermin, temperinc
  real(dp), intent(in) :: nelec
  character(len=fnlen), intent(in) :: fname_radix

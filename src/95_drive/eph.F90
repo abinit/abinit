@@ -9,7 +9,7 @@
 !! due to phonons and temperature effects...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG, MVer,GA)
+!! Copyright (C) 2009-2018 ABINIT group (MG, MVer,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,6 +79,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use defs_abitypes
  use m_profiling_abi
  use m_xmpi
+ use m_xomp
  use m_errors
  use m_hdr
  use m_crystal
@@ -100,7 +101,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg
- !use m_bz_mesh,         only : kpath_t, kpath_free, kpath_new
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -110,7 +110,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
- use m_gkk,             only : eph_gkk
+ use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
 
@@ -140,16 +140,19 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,level40=40,natifc0=0,brav1=1,timrev2=2,selectz0=0
+ integer,parameter :: master=0,level40=40,natifc0=0,timrev2=2,selectz0=0
+ integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
+!while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
- integer :: iblock,ddb_nqshift,ierr,edos_intmeth
+ integer :: iblock,ddb_nqshift,ierr
+ integer :: omp_ncpus, work_size, nks_per_proc
+ real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
- real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
@@ -158,7 +161,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
- type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
  type(ddk_t) :: ddk
@@ -170,7 +172,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -267,6 +269,48 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
  end if
 
+ ! autoparal section
+ ! TODO: This just to activate autoparal in abipy. Lot of things should be improved.
+ if (dtset%max_ncpus /=0) then
+   write(ab_out,'(a)')"--- !Autoparal"
+   write(ab_out,"(a)")"# Autoparal section for EPH runs"
+   write(ab_out,"(a)")   "info:"
+   write(ab_out,"(a,i0)")"    autoparal: ",dtset%autoparal
+   write(ab_out,"(a,i0)")"    max_ncpus: ",dtset%max_ncpus
+   write(ab_out,"(a,i0)")"    nkpt: ",dtset%nkpt
+   write(ab_out,"(a,i0)")"    nsppol: ",dtset%nsppol
+   write(ab_out,"(a,i0)")"    nspinor: ",dtset%nspinor
+   write(ab_out,"(a,i0)")"    mband: ",dtset%mband
+   write(ab_out,"(a,i0)")"    eph_task: ",dtset%eph_task
+
+   work_size = dtset%nkpt * dtset%nsppol
+   ! Non-scalable memory in Mb i.e. memory that is not distributed with MPI.
+   nonscal_mem = zero
+   max_wfsmem_mb = (two * dp * dtset%mpw * dtset%mband * dtset%nkpt * dtset%nsppol * dtset%nspinor * b2Mb) * 1.1_dp
+
+   ! List of configurations.
+   ! Assuming an OpenMP implementation with perfect speedup!
+   write(ab_out,"(a)")"configurations:"
+
+   do ii=1,dtset%max_ncpus
+     nks_per_proc = work_size / ii
+     nks_per_proc = nks_per_proc + mod(work_size, ii)
+     eff = (one * work_size) / (ii * nks_per_proc)
+     ! Add the non-scalable part and increase by 10% to account for other datastructures.
+     mempercpu_mb = (max_wfsmem_mb + nonscal_mem) * 1.1_dp
+
+     do omp_ncpus=1,1 !xomp_get_max_threads()
+       write(ab_out,"(a,i0)")"    - tot_ncpus: ",ii * omp_ncpus
+       write(ab_out,"(a,i0)")"      mpi_ncpus: ",ii
+       write(ab_out,"(a,i0)")"      omp_ncpus: ",omp_ncpus
+       write(ab_out,"(a,f12.9)")"      efficiency: ",eff
+       write(ab_out,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
+     end do
+   end do
+   write(ab_out,'(a)')"..."
+   MSG_ERROR_NODUMP("aborting now")
+ end if
+
  call cwtime(cpu,wall,gflops,"start")
 
  ! Construct crystal and ebands from the GS WFK file.
@@ -345,29 +389,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Compute electron DOS.
- if (dtset%kptopt>0 .and. dtset%nkpt>1 .and. use_wfk) then
-   ! TODO: Optimize this part. Really slow if tetra and lots of points
-   ! Could just do DOS around efermi
-   edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
-   !edos_intmeth = 1
-   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
-   edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
-   edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
-
-   ! Store DOS per spin channels
-   n0(:) = edos%gef(1:edos%nsppol)
-   if (my_rank == master) then
-     call edos_print(edos, unit=ab_out)
-     path = strcat(dtfil%filnam_ds(4), "_EDOS")
-     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-     call edos_write(edos, path)
-   end if
-
-   call edos_free(edos)
-
- end if
-
  ! =======================================
  ! Output useful info on electronic bands
  ! =======================================
@@ -441,6 +462,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  ! Build the inter-atomic force constants.
+ ! WARNING : brav1 has been set to -1 at the initialisation of eph.F90, see the message there. Should be turned to 1 as soon as possible.
  call ifc_init(ifc,cryst,ddb,&
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
@@ -475,8 +497,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
 ! Otherwise just leave these defaults.
+!MG: 1) Disabled for the time being because of SIGFPE in v8[41]
+!    2) I've addeded a new abinit variable (tmesh) to specifiy the list of temperatures.
+     path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
 !MG: Disabled for the time being because of SIGFPE in v8[41]
-     path = dtfil%filnam_ds(4)
      !call phdos_print_msqd(phdos, path, 1000, one, one)
      path = strcat(dtfil%filnam_ds(4), "_THERMO")
      call phdos_print_thermo(PHdos, path, 1000, zero, one)
@@ -526,7 +550,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      dvdb%has_dielt_zeff = .True.
    end if
 
-   ! TODO: Routine to compute \delta V_{q,nu)(r) and dump the results in XSF format/netcdf.
+   ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
+   if (.False. .and. my_rank == master) then
+     call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+   end if
  end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
@@ -544,7 +571,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
 & pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ====================================================
@@ -563,7 +590,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (2)
    ! Compute electron-phonon matrix elements

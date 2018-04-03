@@ -114,7 +114,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = X. Gonze
 #%% keywords = NC, DFPT
 #%% description = 
 #%%   Crystalline AlAs : computation of the response to homogeneous

@@ -9,7 +9,7 @@
 !! like the files produced by outgkk
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MVer)
+!! Copyright (C) 2009-2018 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

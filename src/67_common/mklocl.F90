@@ -16,7 +16,7 @@
 !!                second derivative of E wrt xred  (only with reciprocal space computations)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,7 +136,9 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: xcart(:,:)
+#if defined HAVE_BIGDFT
  real(dp),pointer :: rhor_ptr(:,:)
+#endif
 
 ! *************************************************************************
 

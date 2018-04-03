@@ -10,7 +10,7 @@
 !! separate wannier calculation with the wannier90 code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (BAmadon,CEspejo,FJollet,TRangel)
+!! Copyright (C) 2005-2018 ABINIT group (BAmadon,CEspejo,FJollet,TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,6 @@
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-!!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
@@ -70,7 +69,7 @@
 
 #include "abi_common.h"
 
- subroutine mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,hdr,kg,&
+ subroutine mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -113,7 +112,6 @@
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
- type(hdr_type),intent(in) :: hdr
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
 !arrays
@@ -133,16 +131,21 @@
  integer :: ig,ii,ikg,ierr
  integer :: ikpt,ikpt1,ikpt2,ilmn,intot,isppol,itypat
  integer :: iun(nsppol),iun_plot,iwan,jband,jband1,jband2,jj,jj1,jj2,jj3
- integer :: kk,lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
+ integer :: lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
+#if defined HAVE_WANNIER90
+ integer :: kk
+#endif
  integer :: n1tmp,n2,n2tmp,n3,n3tmp,n4,n5,n6,nband_k
  integer :: nntot,npw_k,num_nnmax,spacing
  integer :: tim_fourwf
  integer :: master,max_num_bands,nprocs,spaceComm,spin,rank
 !integer :: j,k,l
  integer  :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
- real(dp) :: corrvdw
  real(dp) :: weight
+#if defined HAVE_WANNIER90
+ real(dp) :: corrvdw
  complex(dpc) :: caux,caux2,caux3
+#endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
  character(len=20) :: wfnname
  character(len=500) :: message
@@ -155,13 +158,20 @@
  integer,allocatable:: iwav(:,:,:),kg_k(:,:),ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
  real(dp) :: real_lattice(3,3)
- real(dp) :: recip_lattice(3,3),spreadw(3)
- real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),csix(:,:,:,:),cwavef(:,:)
+ real(dp) :: recip_lattice(3,3)
+#if defined HAVE_WANNIER90
+ real(dp) :: spreadw(3)
+#endif
+ real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),cwavef(:,:)
+#if defined HAVE_WANNIER90
+ real(dp),allocatable :: csix(:,:,:,:)
+#endif
  real(dp),allocatable :: denpot(:,:,:)
  real(dp),allocatable :: eigenvalues_w(:,:,:),fofgout(:,:),fofr(:,:,:,:)
- real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
+#if defined HAVE_WANNIER90
+ real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:),tdocc_wan(:,:)
+#endif
  real(dp),allocatable :: proj_site(:,:,:),proj_x(:,:,:),proj_z(:,:,:),proj_zona(:,:)
- real(dp),allocatable :: tdocc_wan(:,:)
  real(dp),allocatable :: wann_centres(:,:,:),wann_spreads(:,:),xcart(:,:)
  complex(dpc),allocatable :: A_paw(:,:,:,:)
  complex(dpc),allocatable :: M_matrix(:,:,:,:,:),U_matrix(:,:,:,:)
@@ -172,8 +182,6 @@
  logical,allocatable::just_augmentation(:,:)
 
 !************************************************************************
-
- ABI_UNUSED(hdr%natom)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !1) Initialize variables and allocations
@@ -1173,7 +1181,6 @@
 !                end if
 !                if(ISNAN(dble(caux3))) then
 !                write(std_out,*) 'NaN: caux3(ikpt,iwan,iband,kk,jj):',ikpt,iwan,iband,kk,jj
-!                write(std_out,*) 'caux,caux2 and occ=',caux,caux2,occ(jj),ch10 
 !                end if
 !                END DEBUG 
                end do
@@ -1206,7 +1213,8 @@
      ABI_DEALLOCATE(occ_wan)
      ABI_DEALLOCATE(tdocc_wan)
    end if
-
+#else
+   ABI_UNUSED(occ)
 #endif
 !  FIXME: looks like there is no automatic test which goes through here: g95 bot did not catch
 !  the missing deallocations

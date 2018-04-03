@@ -8,7 +8,7 @@
 !!  on derivation from Grmvall's book or OD Restrepo's paper (PRB 94 212103 (2009))
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (BXu)
+!!  Copyright (C) 2013-2018 ABINIT group (BXu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -656,7 +656,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  if (elph_ds%prtbltztrp == 1) then
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
-&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,natom,nband,elph_ds%nelect,new_nkptirr, &
+&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &
 &   elph_ds%nspinor,nsppol,Cryst%nsym,Cryst%rprimd,Cryst%symrel,tmp_tau_k)
  end if !prtbltztrp
  ABI_DEALLOCATE(tmp_eigenGS)

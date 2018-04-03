@@ -8,7 +8,7 @@
 !! for a given spin-polarization, from a fixed potential (vlocal1).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT)
+!! Copyright (C) 1999-2018 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

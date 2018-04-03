@@ -7,7 +7,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2018 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4340,7 +4340,10 @@ implicit none
  integer,intent(out):: lloc,lmax,pspcod,pspxc
  real(dp),intent(out):: r2well,zion,znucl
 !Local variables-------------------------------
- integer :: ii,il
+ integer :: il
+#if defined LIBPAW_HAVE_LIBXC
+ integer :: ii
+#endif
  character(len=100) :: xclibxc
  character(len=500) :: msg
 !arrays

@@ -8,7 +8,7 @@
 !!  (rotation of the magnetization in order to align it)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (EB, MT, FR, SPr)
+!! Copyright (C) 2001-2018 ABINIT group (EB, MT, FR, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -460,8 +460,15 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
        u0_1r1=matmul(u0_1,rho1_updn)
        r1tmp=matmul(u0_1r1,u0)
        rho1_offdiag(1)=r1tmp(1,2) ; rho1_offdiag(2)=r1tmp(2,1)
-       v1tmp(1,2)=-(rho1_offdiag(1)/m_norm)*(vxc_diag(2)-vxc_diag(1))
-       v1tmp(2,1)= (rho1_offdiag(2)/m_norm)*(vxc_diag(1)-vxc_diag(2))
+
+       if (option==0) then ! for xccc alone
+         v1tmp(1,2)=cmplx(zero,zero)
+         v1tmp(2,1)=cmplx(zero,zero)       
+       else  
+         v1tmp(1,2)=-(rho1_offdiag(1)/m_norm)*(vxc_diag(2)-vxc_diag(1))
+         v1tmp(2,1)= (rho1_offdiag(2)/m_norm)*(vxc_diag(1)-vxc_diag(2))
+       endif
+
        !Rotate back the "diagonal" xc computing the term U^(0) Vxc1_^(1) U^(0)^-1
        u0v1=matmul(u0,v1tmp)
        vxc1tmp=matmul(u0v1,u0_1)

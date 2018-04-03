@@ -9,7 +9,7 @@
 !! Pay attention that the FFT grid must be compatible with the symmetry operations (see irrzg.f).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -10,7 +10,7 @@
 !! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -894,6 +894,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1685) = 'xgBlock_copy                   '
  names(1686) = 'xgBlock_cshift                 '
  names(1687) = 'xgBlock_pack                   '
+ names(1690) = 'xgScalapack_init               '
+ names(1691) = 'xgScalapack_free               '
+ names(1692) = 'xgScalapack_heev               '
+ names(1693) = 'xgScalapack_hegv               '
+ names(1694) = 'xgScalapack_scatter            '
 
  ! GWLS GW code
  names(1701)='gwls_sternheimer                ';basic(1701)=1
@@ -1567,6 +1572,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(76)
          list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
          message='low-level xgBlock type '
+       case(77)
+         list(:5)=(/1690,1691,1692,1693,1694/)
+         message='low-level xgScalapack type '
        case default   
          cycle ! This allows to disable temporarily some partitionings
          

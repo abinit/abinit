@@ -8,7 +8,7 @@
 !! the trial (local) potential and the residual potential.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, MT, EB)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, MT, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -180,8 +180,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid,ixc_current
- integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
- !real(dp):: rx,ry,rz                        !SPr: debug
+!integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
+!real(dp):: rx,ry,rz                        !SPr: debug
  real(dp) :: doti,e_xcdc_vxctau
  logical :: add_tfw_,calc_xcdc,with_vxctau
  logical :: is_hybrid_ncpp,wvlbigdft=.false.

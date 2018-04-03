@@ -43,7 +43,7 @@ from tests.pymods.termcolor import get_terminal_size, cprint
 from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite, BuildEnvironment
 from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 
-__version__ = "0.5.4"
+__version__ = "0.6.0"
 __author__ = "Matteo Giantomassi"
 
 _my_name = os.path.basename(__file__) + "-" + __version__
@@ -184,6 +184,8 @@ def main():
 
     parser.add_option("--force-mpirun", default=False, action="store_true",
                       help="Force execution via mpiruner even for sequential jobs, i.e. np==1, defaults to False")
+
+    parser.add_option("--mpi-args", type="string", help="Options passed to mpirun.", default="")
 
     parser.add_option("--use-mpiexec", default=False, action="store_true",
                       help="Replace mpirun with mpiexec (ignored if `-c` option is provided)")
@@ -432,7 +434,8 @@ def main():
                             "Cannot locate neither mpirun nor mpiexec in $PATH. "
                             "Please check your environment")
 
-                runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb)
+                runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb,
+                                              mpi_args=options.mpi_args)
 
         if omp_nthreads > 0:
             omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)

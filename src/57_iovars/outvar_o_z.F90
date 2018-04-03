@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -236,6 +236,9 @@
 
  intarr(1,:)=dtsets(:)%optstress
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optstress','INT',0)
+
+ intarr(1,:)=dtsets(:)%orbmag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'orbmag','INT',0)
 
  intarr(1,:)=dtsets(:)%ortalg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ortalg','INT',0,firstchar=firstchar_gpu)
@@ -946,9 +949,7 @@
 &     dtsets(idtset)%symafm(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'symafm','INT',&
-& multivals%nsym)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'symafm','INT', multivals%nsym)
 
  intarr(1,:)=dtsets(:)%symchi
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symchi','INT',0)
@@ -966,14 +967,10 @@
    narrm(idtset)=9*dtsets(idtset)%nsym
    if (narrm(idtset)>0) then
      intarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%symrel(1:3,1:3,1:dtsets(idtset)%nsym),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%symrel(1:3,1:3,1:dtsets(idtset)%nsym), [narrm(idtset)] )
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,3,marr,narr,&
-& narrm,ncid,ndtset_alloc,'symrel','INT',&
-& multivals%nsym)
-
+ call prttagm(dprarr,intarr,iout,jdtset_,3,marr,narr,narrm,ncid,ndtset_alloc,'symrel','INT', multivals%nsym)
 
  intarr(1,:)=dtsets(:)%symsigma
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symsigma','INT',0)
@@ -1022,14 +1019,10 @@
  do idtset=1,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%nsym
    if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%tnons(1:3,1:dtsets(idtset)%nsym),&
-&     (/ narrm(idtset) /) )
+     dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%tnons(1:3,1:dtsets(idtset)%nsym), [narrm(idtset)])
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,-3,marr,narr,&
-& narrm,ncid,ndtset_alloc,'tnons','DPR',&
-& multivals%nsym)
+ call prttagm(dprarr,intarr,iout,jdtset_,-3,marr,narr,narrm,ncid,ndtset_alloc,'tnons','DPR',multivals%nsym)
 
  dprarr(1,:)=dtsets(:)%toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldfe','ENE',0)
@@ -1053,9 +1046,6 @@
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolrff','DPR',0)
 
  dprarr(1,:)=dtsets(:)%tolsym
-!DEBUG
-!write(std_out,*)' tolsym=',dtsets(:)%tolsym
-!ENDDEBUG
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolsym','DPR',0)
 
  dprarr(1,:)=dtsets(:)%tolvrs
@@ -1066,6 +1056,9 @@
 
  dprarr(1,:)=dtsets(:)%tphysel
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tphysel','ENE',0)
+
+ dprarr(1,:) = dtsets(:)%tmesh(1); dprarr(2,:) = dtsets(:)%tmesh(2); dprarr(3,:) = dtsets(:)%tmesh(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'tmesh','DPR',0)
 
  dprarr(1,:)=dtsets(:)%tsmear
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tsmear','ENE',0)

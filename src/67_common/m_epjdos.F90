@@ -7,7 +7,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -503,12 +503,12 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
-     call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+     call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
      dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
      dtset%tphysel,dtset%tsmear,unitdos)
    else if (dtset%prtdos == 3) then
      do iat=0,natsph+natsph_extra
-       call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+       call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
        dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
        dtset%tphysel,dtset%tsmear,unt_atsph(iat))
      end do
@@ -1537,7 +1537,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  character(len=1) :: tag_l,tag_1m,tag_is
  character(len=2) :: tag_2m
  character(len=10) :: tag_il,tag_at,tag_grace
- character(len=500) :: message
+ character(len=1500) :: message
  character(len=fnlen) :: tmpfil
  type(atomdata_t) :: atom
 !arrays

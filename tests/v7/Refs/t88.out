@@ -2,7 +2,7 @@
 .Version 8.5.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -269,9 +269,6 @@ P           mkmem          29
 - Reading DDK x from file: t88o_DS20_1WF4
 - Reading DDK y from file: t88o_DS20_1WF5
 - Reading DDK z from file: t88o_DS20_1WF6
- Fermi level:   7.16066825E+00 [eV]
- Total electron DOS in states/eV :   3.22193685E-01
-- Writing electron DOS to file: t88o_DS1_EDOS
 - Writing Fermi surface to file: t88o_DS1_BXSF
 - Writing nesting factor to file: t88o_DS1_NEST
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -431,6 +428,9 @@ All the independent perturbations are available
    1.58563817E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ Fermi level:   7.16066825E+00 [eV]
+ Total electron DOS in states/eV :   3.22193685E-01
+- Writing electron DOS to file: t88o_DS1_EDOS
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -503,9 +503,6 @@ All the independent perturbations are available
 - Reading DDK x from file: t88o_DS20_1WF4
 - Reading DDK y from file: t88o_DS20_1WF5
 - Reading DDK z from file: t88o_DS20_1WF6
- Fermi level:   7.16066825E+00 [eV]
- Total electron DOS in states/eV :   3.22193685E-01
-- Writing electron DOS to file: t88o_DS2_EDOS
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -642,6 +639,9 @@ qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Fermi level:   7.16066825E+00 [eV]
+ Total electron DOS in states/eV :   3.22193685E-01
+- Writing electron DOS to file: t88o_DS2_EDOS
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -714,9 +714,6 @@ All the independent perturbations are available
 - Reading DDK x from file: t88o_DS20_1WF4
 - Reading DDK y from file: t88o_DS20_1WF5
 - Reading DDK z from file: t88o_DS20_1WF6
- Fermi level:   7.16066825E+00 [eV]
- Total electron DOS in states/eV :   3.22193685E-01
-- Writing electron DOS to file: t88o_DS3_EDOS
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -853,6 +850,9 @@ qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Fermi level:   7.16066825E+00 [eV]
+ Total electron DOS in states/eV :   3.22193685E-01
+- Writing electron DOS to file: t88o_DS3_EDOS
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)

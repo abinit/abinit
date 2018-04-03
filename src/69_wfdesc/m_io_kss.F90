@@ -7,7 +7,7 @@
 !!  This module contains procedured dealing with the IO of the KSS file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MG, GMR, VO, LR, RWG, MM, XG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (MG, GMR, VO, LR, RWG, MM, XG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -483,7 +483,6 @@ end subroutine write_vkb
 !!  ene_k(nbandksseff)=Energies at this k-point
 !!  occ_k(nbandksseff)=Occupation factors at this k-point.
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr).
-!!  kg_k(3,npw_k)=The G-vectors in the k-centered basis set.
 !!  gbig(3,kss_npw)=The set of G-vectors for the KSS wavefunctions (Gamma-centered)
 !!  wfg(2,kss_npw*nspinor,nbandksseff)=The wavefunction Fourier coefficients.
 !!  iomode=Input variables specifying the fileformat. (0-->Fortran,3--> netcdf with ETSF-IO format).
@@ -499,7 +498,7 @@ end subroutine write_vkb
 !!
 !! SOURCE
 
-subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,&
+subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 &          nbandksseff,natom,Psps,ene_k,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
 
@@ -514,10 +513,10 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,isppol,iomode,kss_npw,nspinor,kss_unt,nbandksseff
- integer,intent(in) :: natom,npw_k
+ integer,intent(in) :: natom
  type(pseudopotential_type),intent(in) :: Psps
 !arrays
- integer,intent(in) :: gbig(3,kss_npw),kg_k(3,npw_k)
+ integer,intent(in) :: gbig(3,kss_npw)
  real(dp),intent(in) :: kpoint(3),rprimd(3,3)
  real(dp),intent(in) :: ene_k(nbandksseff),occ_k(nbandksseff)
  real(dp),intent(in) ::  wfg(2,kss_npw*nspinor,nbandksseff)

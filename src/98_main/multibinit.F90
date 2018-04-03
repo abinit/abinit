@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (AM)
+!! Copyright (C) 1999-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -316,6 +316,10 @@ program multibinit
    end select
  end if
 
+!TEST_AM
+! call effective_potential_checkDEV(reference_effective_potential,hist,size(hist%xred,2),hist%mxhist)
+!TEST_AM
+ 
 !Fit the coeff
  if (inp%fit_coeff/=0)then
    option=inp%fit_coeff
@@ -352,13 +356,12 @@ program multibinit
    end if
  end if
 
-!TEST_AM
+
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%fit_bound==1)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1,comm,hist=hist)
+ if(inp%fit_bound>0.and.inp%fit_bound<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%fit_bound,comm,hist=hist)
  end if
-!TEST_AM
 
 !****************************************************************************************
 
@@ -369,7 +372,6 @@ program multibinit
 !TEST_AM
 
 !****************************************************************************************
-
  
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)

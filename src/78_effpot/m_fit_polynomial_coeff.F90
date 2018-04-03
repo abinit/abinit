@@ -7,7 +7,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +36,7 @@ module m_fit_polynomial_coeff
  use m_strain,only : strain_type,strain_get
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
+ use m_effective_potential,only : effective_potential_getDisp
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
  use m_io_tools,   only : open_file,get_unit
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
@@ -77,18 +78,27 @@ CONTAINS  !=====================================================================
 !!                       imposed during the fit process
 !! hist<type(abihist)> = The history of the MD (or snapshot of DFT)
 !! generateterm = term to activate the generation of the term set
+!! power_disps(2) = array with the minimal and maximal power_disp to be computed
 !! nbancoeff = number of banned coeffcients 
 !! ncycle_in = number of maximum cycle (maximum coefficient to be fitted)
 !! nfixcoeff = Number of coefficients imposed during the fit process
-!! power_disps(2) = array with the minimal and maximal power_disp to be computed
+!! option = option of the fit process : 1 - selection of the coefficient one by one
+!!                                      2 - selection of the coefficients with Monte Carlo(testversion) 
 !! comm = MPI communicator
 !! cutoff_in = optional,cut off to apply to the range of interation if 
 !!           the coefficient are genereted in this routine
-!! positive = optional, TRUE if return only positive coefficients
+!! max_power_strain = maximum power of the strain  
+!! fit_tolMSDF = optional, tolerance in eV^2/A^2 on the Forces for the fit process
+!! fit_tolMSDS = optional, tolerance in eV^2/A^2 on the Stresses for the fit process
+!! fit_tolMSDE = optional, tolerance in meV^2/A^2 on the Energy for the fit process
+!! fit_tolMSDFS= optional, tolerance in eV^2/A^2 on the Forces+stresses for the fit process
+!! positive = optional, TRUE will return only positive coefficients
 !!                      FALSE, default
 !! verbose  = optional, flag for the verbose mode
 !! anhstr = logical, optional : TRUE, the anharmonic strain are computed
-!                              FALSE, (default) the anharmonic strain are not computed
+!!                              FALSE, (default) the anharmonic strain are not computed
+!! only_odd_power = logical, optional : if TRUE generate only odd power
+!! only_even_power= logical, optional : if TRUE generate only even power
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential)> = effective potential datatype with new fitted coefficients
@@ -103,8 +113,10 @@ CONTAINS  !=====================================================================
 
 subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,power_disps,&
 &                                   nbancoeff,ncycle_in,nfixcoeff,option,comm,cutoff_in,&
+&                                   max_power_strain,&  
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&  
-&                                   positive,verbose,anharmstr,spcoupling)
+&                                   positive,verbose,anharmstr,spcoupling,&
+&                                   only_odd_power,only_even_power)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -125,18 +137,21 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
+ integer,optional,intent(in) :: max_power_strain
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
+ logical,optional,intent(in) :: only_odd_power,only_even_power
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
- integer :: master,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
+ integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi
  integer :: rank_to_send
  real(dp) :: cutoff,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients
+ logical :: need_only_odd_power,need_only_even_power
 !arrays
  real(dp) :: mingf(4)
  integer :: sc_size(3)
@@ -173,7 +188,27 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(anharmstr)) need_anharmstr = anharmstr
  need_spcoupling = .TRUE.
  if(present(spcoupling)) need_spcoupling = spcoupling
-
+ need_only_odd_power = .FALSE.
+ if(present(only_odd_power)) need_only_odd_power = only_odd_power
+ need_only_even_power = .FALSE.
+ if(present(only_even_power)) need_only_even_power = only_even_power
+ if(need_only_odd_power.and.need_only_even_power)then
+      write(message, '(3a)' )&
+&       'need_only_odd_power and need_only_even_power are both true',ch10,&
+&       'Action: contact abinit group'
+   MSG_ERROR(message)
+ end if
+ max_power_strain_in = 1
+ if(present(max_power_strain))then
+   max_power_strain_in = max_power_strain
+ end if
+ if(max_power_strain_in <= 0)then
+      write(message, '(3a)' )&
+&       'max_power_strain can not be inferior or equal to zero',ch10,&
+&       'Action: contact abinit group'
+   MSG_ERROR(message)
+ end if
+ 
 !Set the tolerance for the fit
  tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero
  if(present(fit_tolMSDF)) tolMSDF  = fit_tolMSDF
@@ -249,8 +284,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    end if
 
    call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot,power_disps,&
-&                                  0,sc_size,comm,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
-&                                  distributed=.true.)
+&                                  max_power_strain_in,0,sc_size,comm,anharmstr=need_anharmstr,&
+&                                  spcoupling=need_spcoupling,distributed=.true.,&
+&                                  only_odd_power=need_only_odd_power,&
+&                                  only_even_power=need_only_even_power)
  end if
 
 !Copy the initial coefficients from the model on the CPU 0
@@ -294,7 +331,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call polynomial_coeff_init(one,coeffs_in(jcoeff)%nterm,&
 &                             my_coeffs(icoeff),coeffs_in(jcoeff)%terms,&
 &                             coeffs_in(jcoeff)%name,&
-&                             check=.false.)
+&                             check=.true.)
    call polynomial_coeff_free(coeffs_in(jcoeff))   
  end do
 
@@ -309,10 +346,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  call xmpi_barrier(comm)
 
 !Write the XML with the coefficient before the fit process 
-if(iam_master)then
-  filename = "terms_set.xml"
-!  call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.)
-end if
+ if(iam_master)then
+   filename = "terms_set.xml"
+!   call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.)
+ end if
 
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
@@ -591,12 +628,10 @@ end if
 &                                      ncycle_max,ntime,strten_coeffs_tmp,fit_data%strten_diff,&
 &                                      fit_data%training_set%sqomega)
        if(info==0)then
-         if (need_positive)then
-           if (any(coeff_values(nfixcoeff+1:icycle) < zero)) then
-             write(message, '(a)') ' Negative values detected...'
-             gf_values(:,icoeff) = zero
-             coeff_values = zero
-           end if
+         if (need_positive.and.any(coeff_values(nfixcoeff+1:icycle) < zero)) then
+           write(message, '(a)') ' Negative value detected...'
+           gf_values(:,icoeff) = zero
+           coeff_values = zero
          else
            call fit_polynomial_coeff_computeGF(coeff_values(1:icycle),energy_coeffs_tmp,&
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
@@ -686,7 +721,8 @@ end if
      call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm) 
 
      if(need_verbose) then
-       write(message, '(a,I0)' )' Selecting the coefficient number ',list_coeffs(icycle)
+       write(message, '(a,I0,2a)' )' Selecting the coefficient number ',list_coeffs(icycle),&
+&                                   ' ===> ',trim(coeffs_tmp(icycle)%name)
        call wrtout(std_out,message,'COLL')
    
        write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
@@ -770,7 +806,7 @@ end if
    call cpu_time(time)
    call ZBQLINI(int(time*1000000/(my_rank+1)))
    if(need_verbose)then
-     write(message,'(a,I0)') " Start Monte Carlo simulations on ", nproc
+     write(message,'(a,I0,a)') " Start Monte Carlo simulations on ", nproc," CPU"
      if(nproc>1) write(message,'(2a)') trim(message)," (only print result of the master)"     
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')       
@@ -910,7 +946,7 @@ end if
      coeffs_tmp(ii)%coefficient = coeff_values(ii)
      if(need_verbose) then
        write(message, '(a,I0,a,ES19.10,2a)') " ",list_coeffs(ii)," =>",coeff_values(ii),&
-&                                " ",trim(coeffs_tmp(ii)%name)
+         &                                " ",trim(coeffs_tmp(ii)%name)
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
@@ -944,7 +980,24 @@ end if
    call fit_polynomial_coeff_computeMSD(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
 &                                       natom_sc,ntime,fit_data%training_set%sqomega,&
 &                                       compute_anharmonic=.TRUE.,print_file=.TRUE.)
-   
+
+!    if(need_verbose) then
+! !  Print the standard deviation after the fit
+!      write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+! &                    ' Mean Standard Deviation values at the end of the fit process (meV/f.u.):',&
+! &               ch10,'   Energy          : ',&
+! &               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
+! &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
+! &                    '   Forces+Stresses : ',&
+! &               (gf_values(1,1)+gf_values(2,1))*(HaBohr_meVAng)**2,ch10,&
+! &                    '   Forces          : ',&
+! &               gf_values(2,1)*(HaBohr_meVAng)**2,ch10,&
+! &                    '   Stresses        : ',&
+! &               gf_values(3,1)*(HaBohr_meVAng)**2,ch10
+!      call wrtout(ab_out,message,'COLL')
+!      call wrtout(std_out,message,'COLL')
+!    end if
+
  else
    if(need_verbose) then
      write(message, '(9a)' )ch10,&
@@ -1112,7 +1165,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  do ii = 1,ncoeff_tot
    list_coeffs(ii) = ii
  end do
- 
+
 !Get the decomposition for each coefficients of the forces and stresses for 
 !each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) 
  if(need_verbose)then
@@ -1174,8 +1227,9 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 &                                  info,list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
 &                                  ncoeff_tot,ntime,strten_coeffs,fit_data%strten_diff,&
 &                                  fit_data%training_set%sqomega)
-   
+
    if(info==0)then
+
      if (any(coeff_values(imodel,nfixcoeff+1:ncoeff) < zero))then
 !       coeff_values(imodel,:) = zero
        isPositive(imodel) = 0
@@ -1212,10 +1266,9 @@ end subroutine fit_polynomial_coeff_getPositive
 !! FUNCTION
 !! This routine fit a list of possible model.
 !! Return in the isPositive array:
-!!   0 if the model ii does not contain possive coefficients
-!!   1 if the model ii contain possive coefficients
 !!
 !! INPUTS
+!! NEED TO UPDATE
 !! eff_pot<type(effective_potential)> = effective potential
 !! hist<type(abihist)> = The history of the MD (or snapshot of DFT
 !! comm = MPI communicator
@@ -1314,7 +1367,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
  counter = 0
  ncoeff_in = ncoeff_model
  
- do while(.not.all(need_bound == 0).and.counter<20)
+ do while(.not.all(need_bound == 0).and.counter<1)
 !  Get the coefficients with odd coefficient
    odd_coeff = 0
    if(counter>0) then
@@ -1397,11 +1450,11 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
          end do
        
          call polynomial_term_init(atindx,cells,direction,ndisp,nstrain,terms(iterm),&
-&                                  power_disps,power_strain,strain,weight,check=.false.)
+&                                  power_disps,power_strain,strain,weight,check=.true.)
        end do
        
        name = ""
-       call polynomial_coeff_init(one,nterm,coeffs_test(icoeff_bound),terms,name,check=.false.)
+       call polynomial_coeff_init(one,nterm,coeffs_test(icoeff_bound),terms,name,check=.true.)
        call polynomial_coeff_getName(name,coeffs_test(icoeff_bound),symbols,recompute=.TRUE.)
        call polynomial_coeff_SetName(name,coeffs_test(icoeff_bound))
        
@@ -1421,19 +1474,25 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
 
      end if    
    end do
-
+   
 
    if(counter==0)ncoeff_model = ncoeff_model + ncoeff_bound
-   call effective_potential_setCoeffs(coeffs_test,eff_pot,ncoeff_model)
+!   call effective_potential_setCoeffs(coeffs_test,eff_pot,ncoeff_model)
    call fit_polynomial_coeff_fit(eff_pot,(/0/),(/0/),hist,0,(/0,0/),1,0,&
 &             -1,1,comm,verbose=.true.,positive=.false.)
-
+   
    coeffs_in => eff_pot%anharmonics_terms%coefficients       
    
    counter = counter + 1
  end do
 
-!  Deallocation
+ ABI_ALLOCATE(coeffs_out,(ncoeff_bound))
+ do ii=1,ncoeff_bound
+   icoeff_bound = ncoeff_in + ii
+   call polynomial_coeff_init(one,coeffs_test(icoeff_bound)%nterm,coeffs_out(ii),&
+&                    coeffs_test(icoeff_bound)%terms,coeffs_test(icoeff_bound)%name,check=.true.)   
+ end do
+!Deallocation
  do ii=ncoeff_model,ncoeff_max
    call polynomial_coeff_free(coeffs_test(ii))
  end do
@@ -1447,9 +1506,10 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
  ABI_DEALLOCATE(need_bound)
  ABI_DEALLOCATE(symbols)
 
+ 
 end subroutine fit_polynomial_coeff_getCoeffBound
 !!***
-
+ 
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_solve
 !!
@@ -2116,11 +2176,11 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ii,ia,mu,unit_ts,unit_stress
+ integer :: ii,ia,mu,unit_energy,unit_stress
 ! integer :: ifirst
  real(dp):: energy,energy_harm
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.
-!arrays
+ !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
  character(len=500) :: msg
 ! type(abihist) :: hist_out
@@ -2128,7 +2188,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 
 ! *************************************************************************
 
-!Do some checks
+ !Do some checks
  if(ntime /= hist%mxhist)then
    write(msg,'(a)')'ntime is not correct'
    MSG_BUG(msg)
@@ -2146,13 +2206,13 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  if(present(print_file))then
 !   call abihist_init(hist_out,natom,ntime,.false.,.false.)   
    need_print=print_file
-   unit_ts = get_unit()
-   unit_stress = get_unit()
-   
-   if (open_file('fit_diff_energy.dat',msg,unit=unit_ts,form="formatted",&
+   unit_energy = get_unit()
+   if (open_file('fit_diff_energy.dat',msg,unit=unit_energy,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
+   
+   unit_stress = get_unit()
    if (open_file('fit_diff_stress.dat',msg,unit=unit_stress,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
@@ -2163,7 +2223,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  mse  = zero
  msef = zero
  mses = zero
-
+ 
  do ii=1,ntime
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
@@ -2174,7 +2234,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.)
 
    if(need_print)then
-     WRITE(unit_ts ,'(I10,5(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
+     WRITE(unit_energy ,'(I10,5(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
 &                                       abs(hist%etot(ii) - energy_harm),abs(hist%etot(ii) - energy)
      WRITE(unit_stress,'(I10,12(F23.14))') ii,hist%strten(:,ii),strten(:)
    end if
@@ -2188,7 +2248,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
 !    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
 !    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
-!    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,eff_pot%crystal%ntypat,&
+!    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
 ! &                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
 ! &                    real(100,dp),(/real(100,dp),real(100,dp)/))
 
@@ -2208,7 +2268,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  mses = mses / (6*ntime)
 
  if(need_print)then
-   close(unit_ts)
+   close(unit_energy)
    close(unit_stress)
  end if
 

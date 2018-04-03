@@ -11,7 +11,7 @@
 !!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,7 +158,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
- type(wvl_denspot_type), intent(in) :: wvl_den
+ type(wvl_denspot_type),optional, intent(in) :: wvl_den
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout),target :: arr(cplex*nfft,dtset%nspden)
@@ -541,6 +541,9 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
 #else
      BIGDFT_NOTENABLED_ERROR()
+     if(.false. .and. present(wvl_den))then
+       write(std_out,*)' One should not be here'
+     endif
 #endif
    end if
 
@@ -1061,7 +1064,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0
- integer :: unt,fform,iomode,optin,optout,my_rank,mybase,globase,cplex_file
+ integer :: unt,fform,iomode,my_rank,mybase,globase,cplex_file
+!integer :: optin,optout
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
  integer,parameter :: fform_den=52
  integer :: restart, restartpaw
@@ -1076,9 +1080,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  character(len=nctk_slen) :: varname
  !type(mpi_type) :: mpi_enreg_seq
 !arrays
- integer :: ngfft_file(18)
+!integer :: ngfft_file(18)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rhogdum(1)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+!real(dp) :: rhogdum(1)
  real(dp),allocatable :: rhor_file(:,:),rhor_tmp(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_file(:)
 

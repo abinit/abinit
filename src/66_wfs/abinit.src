@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -24,6 +24,7 @@ sources = [
  "chebfi.F90",
  "cgcprj_cholesky.F90",
  "dotprod_set_cgcprj.F90",
+ "dotprodm_sumdiag_cgcprj.F90",
  "fxphas.F90",
  "getdc1.F90",
  "getghcnd.F90",

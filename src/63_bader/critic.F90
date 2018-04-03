@@ -7,7 +7,7 @@
 !!     Search for a critical point starting from point vv
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2018 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -368,7 +368,7 @@ end subroutine critic
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2017 ABINIT group ( ).
+!! Copyright (C) 2007-2018 ABINIT group ( ).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2018 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -539,7 +539,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver,m_ddb_hdr,mover_effpot
+!!      driver,m_ddb_hdr
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init

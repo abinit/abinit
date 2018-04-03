@@ -726,19 +726,16 @@ class AbinitTests(object):
         return d
 
     def select_tests(self, suite_args, regenerate=False, keys=None,
-                     authors=None, ivars=None, with_pickle=True):
+                     authors=None, ivars=None, with_pickle=True, flat_list=False):
         """
-        Main entry point for client code.
-        Return an instance of AbinitTestSuite
+        Main entry point for client code. Return an instance of AbinitTestSuite
 
         Args:
-            with_pickle:
-                Save the generated database in pickle format.
+            with_pickle: Save the generated database in pickle format.
+            flat_list: True if a flat list of tests should be returned instead
+                of a list that can contain ChainOfTests objects.
         """
-        try:
-            tests_todo = self._suite_args_parser(suite_args)
-        except:
-            raise
+        tests_todo = self._suite_args_parser(suite_args)
 
         # Load the full database.
         database = self.get_database(regenerate=regenerate, with_pickle=with_pickle)
@@ -797,7 +794,19 @@ class AbinitTests(object):
                                        exclude_authors=exclude_authors,
                                        ivars=ivars
                                        )
-        return tests
+        if not flat_list:
+            return tests
+        else:
+            # Build flat list of tests.
+            flat = []
+            for t in tests:
+                if isinstance(t, ChainOfTests):
+                # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
+                #if hasattr(t, "tests"):
+                    flat.extend(t.tests)
+                else:
+                    flat.append(t)
+            return flat
 
     def generate_html_listoftests(self):
         """Generate the ListOfTests files"""

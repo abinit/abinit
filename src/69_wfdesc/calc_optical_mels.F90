@@ -6,7 +6,7 @@
 !!  Calculate all optical matrix elements in the BZ.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

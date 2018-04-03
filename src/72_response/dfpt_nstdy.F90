@@ -10,7 +10,7 @@
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, DCA, GMR, MM, AR, MV, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (XG, DCA, GMR, MM, AR, MV, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -527,7 +527,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
            if (nspden==4.and.present(rhor).and.present(vxc)) then
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
-&             nkxc,nkxc,nspden,n3xccc,optnc,option,dtset%paral_kgb,dtset%qptn,rhodummy,rhodummy,&
+&             nkxc,nspden,n3xccc,optnc,option,dtset%paral_kgb,dtset%qptn,rhor,rhor1,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&

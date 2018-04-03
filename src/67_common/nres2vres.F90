@@ -10,7 +10,7 @@
 !!     V^res(r)=dV/dn.n^res(r)
 !!             =V_hartree(n^res)(r) + Kxc.n^res(r)
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -228,7 +228,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
        rhor0(:,:)=rhor(:,:)-nresid(:,:)
        !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
-&       nkxc,nkxc_cur,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
+&       nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
        ABI_DEALLOCATE(rhor0)  
      end if
 
@@ -274,7 +274,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
      ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
      rhor0(:,:)=rhor(:,:)-nresid(:,:)
      call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
-&     nkxc,nkxc_cur,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
+&     nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
      ABI_DEALLOCATE(rhor0)
    end if
 

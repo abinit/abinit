@@ -7,7 +7,7 @@
 !!  module with the type for the input of multibinit (should be clean)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (AM)
+!!  Copyright (C) 2014-2018 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,6 +91,7 @@ module m_multibinit_dataset
   integer :: natifc
   integer :: natom
   integer :: ncoeff
+  integer :: nctime
   integer :: ntime
   integer :: nnos
   integer :: nph1l
@@ -126,6 +127,7 @@ module m_multibinit_dataset
   real(dp) :: conf_power_fact_strain
   real(dp) :: delta_df
   real(dp) :: energy_reference
+  real(dp) :: fit_boundCutoff
   real(dp) :: fit_boundTemp
   real(dp) :: fit_cutoff
   real(dp) :: fit_tolMSDF
@@ -248,6 +250,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%enunit=0
  multibinit_dtset%fit_anhaStrain=0
  multibinit_dtset%fit_bound=0
+ multibinit_dtset%fit_boundCutoff=0 
  multibinit_dtset%fit_boundTerm=4
  multibinit_dtset%fit_boundTemp=325
  multibinit_dtset%fit_boundStep=1000
@@ -269,6 +272,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%ifcout=-1
  multibinit_dtset%prtsrlr=0
  multibinit_dtset%ntime=200
+ multibinit_dtset%nctime=1
  multibinit_dtset%natifc=natom
  multibinit_dtset%ncoeff=0
  multibinit_dtset%nph1l=1
@@ -711,6 +715,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%nctime=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
+ if(tread==1) multibinit_dtset%nctime=intarr(1)
+ if(multibinit_dtset%nctime<0)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'nctime is',multibinit_dtset%ntime,', which is lower than 0 .',ch10,&
+&   'Action: correct nctime in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ 
  multibinit_dtset%ntime=200
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) multibinit_dtset%ntime=intarr(1)
@@ -725,12 +740,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%dynamics=intarr(1)
- if(multibinit_dtset%dynamics/=0.and.&
+ if(multibinit_dtset%dynamics/=0.and.multibinit_dtset%dynamics/=6.and.&
 &   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13&
 &   .and.multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 12 or  13 (see ionmov in abinit documentation).',ch10,&
+&   'are 6,12,24,25 or  13 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
@@ -1206,6 +1221,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%fit_boundCutoff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundCutoff',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_boundCutoff=dprarr(1)
+ if(multibinit_dtset%fit_boundCutoff<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_boundCutoff is',multibinit_dtset%fit_boundCutoff,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_boundCutoff in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ 
   multibinit_dtset%fit_boundTerm=4
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_boundTerm',tread,'INT')
  if(tread==1) multibinit_dtset%fit_boundTerm=intarr(1)
@@ -1745,6 +1772,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(a)')' Molecular Dynamics :'
    write(nunit,'(3x,a9,3F10.1)')'     temp',multibinit_dtset%temperature
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
+   if (multibinit_dtset%nctime /=1)then
+     write(nunit,'(3x,a9,3I10.1)')'   nctime',multibinit_dtset%nctime
+   end if
    write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
    if (multibinit_dtset%restartxf/=0) then
@@ -1755,7 +1785,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
      write(nunit,'(3x,a9,3I10)')'     nnos',multibinit_dtset%nnos
      write(nunit,'(3x,a12)',advance='no')'    qmass  '
-     write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
+     write(nunit,'(3x,15F12.10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
    end if
  end if
 
@@ -1805,6 +1835,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%fit_bound /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
+   write(nunit,'(1x,a16,es16.8)')'fit_boundcutoff',multibinit_dtset%fit_boundCutoff
    write(nunit,'(3x,a14,3i10)') ' fit_boundCell',multibinit_dtset%fit_boundCell
    write(nunit,'(3x,a14,i10.0)')' fit_boundTerm',multibinit_dtset%fit_boundTerm
    write(nunit,'(3x,a14,F10.1)')' fit_boundTemp',multibinit_dtset%fit_boundTemp

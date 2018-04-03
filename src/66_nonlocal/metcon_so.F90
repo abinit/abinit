@@ -11,7 +11,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, GZ)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

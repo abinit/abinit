@@ -17,7 +17,7 @@
 !!  calculate the integral to evaluate an omega_plasma^eff to compare with omega_plasma
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2007-2017 ABINIT group (MG,VO,LR)
+!!  Copyright (C) 2007-2018 ABINIT group (MG,VO,LR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
