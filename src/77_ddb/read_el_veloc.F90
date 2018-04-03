@@ -55,7 +55,6 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'read_el_veloc'
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -218,6 +217,7 @@ contains
 !! SOURCE
 
 subroutine inpgkk(eigen1,filegkk,hdr1)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

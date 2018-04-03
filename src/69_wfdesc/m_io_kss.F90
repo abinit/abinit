@@ -1725,7 +1725,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 #define ABI_FUNC 'outkss'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

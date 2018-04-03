@@ -1982,7 +1982,6 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
 #undef ABI_FUNC
 #define ABI_FUNC 'shirley_interp'
  use interfaces_14_hidewrite
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

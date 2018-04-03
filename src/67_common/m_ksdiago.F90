@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-module m_foo
+module m_ksdiago
 
  use defs_basis
  use defs_datatypes
@@ -32,22 +32,28 @@ module m_foo
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_hamiltonian
 
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
- use m_pawtab,            only : pawtab_type
+ use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
+ use m_kg,                only : mkkin, mkkpg
  use m_fftcore,           only : kpgsph
  use m_cgtools,           only : set_istwfk
- use m_paw_ij,            only : paw_ij_type
  use m_electronpositron,  only : electronpositron_type
  use m_mpinfo,            only : destroy_mpi_enreg
+ use m_pawtab,            only : pawtab_type
+ use m_paw_ij,            only : paw_ij_type
+ use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder
+ use m_pawfgr,            only : pawfgr_type
+
 
  implicit none
 
  private
 !!***
 
-!!****t* m_hamiltonian/ddiago_ctl_type
+!!****t* m_ksdiago/ddiago_ctl_type
 !! NAME
 !!  ddiago_ctl_type
 !!
@@ -240,35 +246,10 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 & typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
 & Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
 & Electronpositron) ! Optional arguments
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_hamiltonian
-
- use m_geometry,          only : metric
- use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
- use m_electronpositron,  only : electronpositron_type
- use m_fftcore,           only : kpgsph
- use m_mpinfo,            only : destroy_mpi_enreg
- use m_pawtab,            only : pawtab_type
- use m_paw_ij,            only : paw_ij_type
- use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder
- use m_pawfgr,            only : pawfgr_type
- use m_kg,                only : mkkin, mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
