@@ -59,6 +59,7 @@ MODULE m_io_kss
  use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_kg,               only : mkkin, mkkpg
+ use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
 
  implicit none
 
@@ -1242,7 +1243,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ! Set up remaining of the Hamiltonian
      ! Compute (1/2) (2 Pi)**2 (k+G)**2:
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
      ! Compute (k+G) vectors (only if useylm=1)
@@ -2220,7 +2220,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
          call init_ddiago_ctl(Diago_ctl,"Vectors",isppol,dtset%nspinor,ecut_eff,Dtset%kptns(:,ikpt),Dtset%nloalg,gmet,&
 &         nband_k=nbandkssk(ikpt),effmass_free=Dtset%effmass_free,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
 
-         call ks_ddiago(Diago_ctl,nbandkssk(ikpt),Dtset%nfft,mgfft,Dtset%ngfft,natom,&
+         call ksdiago(Diago_ctl,nbandkssk(ikpt),Dtset%nfft,mgfft,Dtset%ngfft,natom,&
 &         Dtset%typat,nfft,dtset%nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij_all,&
 &         Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_diago_k,comm_self,ierr)
 

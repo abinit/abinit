@@ -382,7 +382,6 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  integer,intent(in) :: npw
  integer,intent(in) :: idir1,idir2
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
-
 !arrays
  integer,intent(in) :: kg(3,npw)
  real(dp),intent(in) :: gmet(3,3),kpt(3)
