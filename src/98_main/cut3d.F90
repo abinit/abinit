@@ -940,11 +940,8 @@ program cut3d
  write(std_out,*)
 
  call flush_unit(std_out)
-
  call destroy_mpi_enreg(mpi_enreg)
-
  call abinit_doctor("__cut3d")
-
  call xmpi_end()
 
  end program cut3d

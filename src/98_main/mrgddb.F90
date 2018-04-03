@@ -229,13 +229,10 @@ program mrgddb
  ! msym = maximum number of symmetry elements in space group
  mblktyptmp=1
  do iddb=1,nddb
-   call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,&
-&   dimonly=1)
+   call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,dimonly=1)
 
-   if(ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
-
+   if (ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
    call ddb_hdr_free(ddb_hdr)
-
  end do
 
  mblktyp = mblktyptmp
