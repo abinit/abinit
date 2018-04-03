@@ -91,7 +91,6 @@ sources = [
  "read_gkk.F90",
  "relaxpol.F90",
  "symgamma.F90",
- "test_ftgkk.F90",
  "thmeig.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
