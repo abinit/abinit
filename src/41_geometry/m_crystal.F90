@@ -32,7 +32,7 @@ MODULE m_crystal
  use m_atomdata
 
  use m_numeric_tools,  only : set2unit
- use m_geometry,       only : metric, xred2xcart
+ use m_geometry,       only : metric, xred2xcart, remove_inversion
  use m_io_tools,       only : open_file
  use m_fstrings,       only : int2char10
 

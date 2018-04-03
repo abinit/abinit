@@ -51,7 +51,7 @@ MODULE m_io_kss
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
  use m_abilasi,          only : xheevx, xhegvx
- use m_geometry,         only : metric
+ use m_geometry,         only : metric, remove_inversion
  use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_fftcore,          only : get_kg, sphere
