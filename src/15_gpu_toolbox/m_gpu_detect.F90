@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Detects the GPU associated to any cpu and associates a GPU, if
-!! possible, to any proc  
+!! possible, to any proc
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2010-2018 ABINIT group (MMancini)
@@ -29,14 +29,14 @@ module m_gpu_detect
  use defs_basis
  use m_xmpi
 #if defined HAVE_GPU_CUDA
- use m_initcuda,only     : Get_ndevice
+ use m_initcuda, only     : Get_ndevice
 #endif
 
 
  implicit none
 
- private 
-      
+ private
+
  public ::            &
   find_set_gpu,       &  !Calc. the number of point,GPU,for any proc
   get_topo               !Put the topology of machine in an integer
@@ -102,7 +102,7 @@ CONTAINS  !===========================================================
 
   !--Get the number of compatible device on this CPU
   call Get_ndevice(ndev)
-  
+
   if(nproc == 1) then
     if(ndev /= 0) gpu_map(0) = 0
     ngpu = count(gpu_map>-1)
@@ -111,13 +111,13 @@ CONTAINS  !===========================================================
 
   !--Get the name of the node
   call xmpi_name(name_ch,ierr)
-  
-  !--Array containing the number of gpu seen by any cpu  
+
+  !--Array containing the number of gpu seen by any cpu
   call  xmpi_allgather(ndev,gpu_map,commcart,ierr)
   !   write(std_out,*)' me,nedevice ',gpu_map
 
   !--Array containing the name of the cpu
-  call  xmpi_allgather(name_ch,nodes,commcart,ierr) 
+  call  xmpi_allgather(name_ch,nodes,commcart,ierr)
 
   !--Printing Nodes name
   write(msg,'(3a)')&
@@ -138,16 +138,16 @@ CONTAINS  !===========================================================
     if( trim(nodes(icpu)) == trim(name_ch)) then
       !--yes on the same node
       if(me == icpu) cpu_map_me = ndev-avail_gpu
-      avail_gpu = avail_gpu -1     
+      avail_gpu = avail_gpu -1
     endif
     icpu = icpu +1
   end do
-  
+
   !--All cpu know the cpu with associated gpu (and which gpu on the node)
-  !--Now gpu_map contains the number of the device which is associated 
+  !--Now gpu_map contains the number of the device which is associated
   !  with any cpu (-1 if not)
   call  xmpi_allgather(cpu_map_me,gpu_map,commcart,ierr)
-  
+
   !--Count the total number of gpu
   ngpu = count(gpu_map>-1)
   !write(std_out,*)'total gpu',ngpu
@@ -169,12 +169,12 @@ end subroutine find_set_gpu
 !!  ngpu = mpi communicator
 !!
 !! OUTPUT
-!!  topo= 0: 1 cpu;       
+!!  topo= 0: 1 cpu;
 !!        1: n cpu;
-!!        2: 1 cpu 1 gpu;  
+!!        2: 1 cpu 1 gpu;
 !!        3: n cpu n gpu
-!!        4: n cpu > m gpu; 
-!!        5: n cpu < m gpu 
+!!        4: n cpu > m gpu;
+!!        5: n cpu < m gpu
 !!
 !! PARENTS
 !!      m_rec
@@ -208,7 +208,7 @@ end subroutine find_set_gpu
     topo = 2             !1cpu,1gpu
     if (nproc>1)topo = 3 !ncpu,ngpu
     return
-  else 
+  else
     topo = 4               !ncpu>ngpu
     if(nproc<ngpu)topo = 5 !ncpu<ngpu
   endif

@@ -36,6 +36,8 @@ module m_abi_linalg
 #ifdef HAVE_LINALG_PLASMA
  use plasma, except_dp => dp, except_sp => sp
 #endif
+ use m_time,  only : timab
+ 
 
  implicit none
 

@@ -88,11 +88,12 @@ subroutine outvar_i_n (dtsets,iout,&
  use m_results_out
  use m_errors
 
+ use m_parser,  only : prttagm, prttagm_images
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvar_i_n'
- use interfaces_57_iovars, except_this_one => outvar_i_n
 !End of the abilint section
 
  implicit none
@@ -570,7 +571,7 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptgw','DPR',multivals%nkptgw)
 
 
-!kptns_hf 
+!kptns_hf
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
    tnkpt=0
    dprarr(:,0)=0

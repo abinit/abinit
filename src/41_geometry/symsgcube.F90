@@ -49,11 +49,12 @@ subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
  use defs_basis
  use m_profiling_abi
 
+ use m_time,     only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symsgcube'
- use interfaces_18_timing
  use interfaces_41_geometry, except_this_one => symsgcube
 !End of the abilint section
 

@@ -42,7 +42,7 @@ module m_hamiltonian
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
- use m_fftcore,           only : kpgsph
+ use m_fftcore,           only : kpgsph, sphereboundary
  use m_cgtools,           only : set_istwfk
  use m_pawcprj,           only : pawcprj_getdim
  use m_paw_ij,            only : paw_ij_type
@@ -1051,7 +1051,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'load_k_hamiltonian'
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none
@@ -1244,7 +1243,6 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'load_kprime_hamiltonian'
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none

@@ -89,6 +89,7 @@
  use m_xmpi
 
  use m_geometry,     only : mkrdim, xred2xcart
+ use m_parser,       only : prttagm, prttagm_images
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

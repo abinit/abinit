@@ -48,7 +48,8 @@ MODULE m_shirley
  use m_abilasi,        only : xheev, xhegv, xheevx, xhegvx
  use m_fft_mesh,       only : fft_check_rotrans, setmesh
  use m_geometry,       only : normv, vdotw
- use m_fftcore,        only : get_kg
+ use m_fftcore,        only : get_kg, kgindex
+ use m_kg,             only : mkkpg
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : kmesh_t, get_BZ_item, make_mesh, kmesh_free, kpath_t
@@ -2807,7 +2808,6 @@ subroutine wfd_shirley_to_eh(Wsh,Cryst,Psps,Pawtab,Pawang,Pawrad,min_bsize,eh_co
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_shirley_to_eh'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

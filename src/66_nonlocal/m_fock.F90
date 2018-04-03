@@ -45,10 +45,13 @@ module m_fock
  use m_pawcprj
  use m_cgtools
 
+ use m_time,            only : timab
  use m_mpinfo,          only : ptabs_fourdp
  use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_fftcore,         only : sphereboundary
  use m_fft,             only : zerosym
  use m_kg,              only : ph1d3d, getph
+ use m_kpts,            only : listkk
  use m_paw_ij,          only : paw_ij_type
 
 
@@ -494,10 +497,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_init'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1717,7 +1717,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
@@ -2505,7 +2504,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'strfock'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

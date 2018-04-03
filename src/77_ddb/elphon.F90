@@ -110,6 +110,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  use m_ebands
 
  use m_io_tools,        only : open_file, is_open
+ use m_time,            only : timein
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_pptools,         only : printvtk
  use m_dynmat,          only : ftgam_init, ftgam
@@ -123,7 +124,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_41_geometry
  use interfaces_77_ddb, except_this_one => elphon
 !End of the abilint section

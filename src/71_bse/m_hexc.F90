@@ -39,6 +39,7 @@ MODULE m_hexc
  use netcdf
 #endif
 
+ use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_blas,              only : xdotc, xgemv
@@ -855,7 +856,6 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_compute_hinterp'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1735,7 +1735,6 @@ subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_matmul_tda'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1812,7 +1811,6 @@ subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_matmul_elphon'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1885,7 +1883,6 @@ subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_matmul_full'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

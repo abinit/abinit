@@ -83,6 +83,7 @@
  use m_xmpi
 
  use m_io_tools, only : delete_file, get_unit
+ use m_fftcore,  only : sphereboundary
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -96,7 +97,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp'
  use interfaces_14_hidewrite
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => mlwfovlp

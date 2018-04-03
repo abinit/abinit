@@ -58,15 +58,15 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  use defs_abitypes
  use m_profiling_abi
  use m_errors
+ use m_xmpi
 
- use m_xmpi, only : xmpi_sum
+ use m_time, only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcdensph'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 

@@ -120,7 +120,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #define ABI_FUNC 'eph'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_io_mpi
  use interfaces_64_psp
 !End of the abilint section
 

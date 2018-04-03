@@ -143,6 +143,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  use m_wfk
  use m_rf2
 
+ use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get,pawcprj_copy
  use m_hamiltonian,  only : gs_hamiltonian_type,rf_hamiltonian_type,KPRIME_H_KPRIME
@@ -152,7 +153,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtowfk'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_spacepar
  use interfaces_66_wfs

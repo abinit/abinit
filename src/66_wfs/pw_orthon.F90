@@ -73,11 +73,12 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  use m_cgtools
  use m_abi_linalg
 
+ use m_time,          only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pw_orthon'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

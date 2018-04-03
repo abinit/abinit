@@ -56,6 +56,7 @@ MODULE m_bz_mesh
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
+ use m_kpts,           only : getkgrid
 
  implicit none
 
@@ -1464,7 +1465,6 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_mesh'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

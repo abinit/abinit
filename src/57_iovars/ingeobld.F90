@@ -89,8 +89,6 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  real(dp) :: objbax(6),objbro(4),objbtr(12),parall(3),perpen(3),rotated(3)
  real(dp) :: vectora(3),vectorb(3)
  real(dp),allocatable :: typat_full(:),xcart_full(:,:)
-!no_abirules
-!Dummy arguments for subroutine 'intagm' to parse input file
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
 

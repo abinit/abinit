@@ -120,6 +120,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  use m_cgtools
  use m_efield
 
+ use m_time, only : timab
  use m_numeric_tools, only : rhophi
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
 &                          pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
@@ -131,7 +132,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal

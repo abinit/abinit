@@ -28,10 +28,7 @@ module m_bader
 
  use defs_basis
  use defs_abitypes
- use defs_aimprom
- use defs_parameters
  use defs_datatypes
- use defs_aimfields
  use m_errors
  use m_profiling_abi
  use m_xmpi
@@ -42,6 +39,7 @@ module m_bader
  use netcdf
 #endif
 
+ use m_time,          only : timein
  use m_geometry,      only : metric
  use m_parser,        only : inread
  use m_numeric_tools, only : coeffs_gausslegint
@@ -49,15 +47,166 @@ module m_bader
 
  implicit none
 
- private
+ !private
+ public
 !!***
 
  public :: adini
  public :: drvaim
  public :: inpar
  public :: defad
+ public :: aim_shutdown
 
-contains
+ ! Global from defs_aimfields
+ integer, save :: ngfft(3),nmax
+ integer, allocatable, save :: ndat(:)
+ real(dp), allocatable, target, save :: dig1(:),llg1(:),dig2(:),llg2(:),dig3(:),llg3(:)
+ real(dp), allocatable, target, save :: cdig1(:),cdig2(:),cdig3(:)
+ real(dp), save :: dix(3)
+ real(dp), allocatable, target, save :: dvl(:,:,:),ddx(:,:,:),ddy(:,:,:),ddz(:,:,:),rval(:,:,:)
+ real(dp), allocatable, save :: rrad(:,:),crho(:,:),sp2(:,:),sp3(:,:),sp4(:,:),pdd(:),pd(:)
+
+ ! Global from defs_aimprom
+
+ ! UNITS
+ integer, save :: unt0,unto,unt,untc,unts,untd,untl,untg,unta,untad,untp,untout
+ integer,save :: aim_iomode
+ ! DRIVER VARIABLES
+ real(dp), save :: maxatdst,maxcpdst
+ integer, parameter :: ndif=45,ngaus=200,npos=1000
+ integer, allocatable, save :: typat(:), corlim(:)
+ integer, save :: ntypat,nnpos,natom
+ integer, save :: nsimax,batcell,npc,nbcp,nrcp,nccp
+ integer, save :: icpc(npos*ndif),npcm3,slc
+ real(dp), save :: rprimd(3,3),ivrprim(3,3),trivrp(3,3)
+ real(dp), allocatable, save :: xred(:,:),xatm(:,:),rminl(:)
+ real(dp), save :: tpi,sqfp,fpi,sqpi,sqtpi,atp(3,npos)
+ real(dp), save :: h0,hmin,r0,ttsrf,ttcp,tttot
+ real(dp), save :: cth(ngaus),th(ngaus),ph(ngaus),wcth(ngaus),wph(ngaus),rs(ngaus,ngaus)
+ real(dp), save :: pc(3,npos*ndif), evpc(3,npos*ndif),zpc(3,3,npos*ndif), pcrb(3,npos*ndif)
+ logical, save :: deb,ldeb
+!!! interface chgbas
+!!!    subroutine bschg1(vv,dir)
+!!!      implicit none
+!!!      integer, intent(in) :: dir
+!!!      real(dp),intent(inout) :: vv(3)
+!!!    end subroutine bschg1
+!!!    subroutine bschg2(aa,dir)
+!!!      implicit none
+!!!      integer, intent(in) :: dir
+!!!      real(dp),intent(inout) :: aa(3,3)
+!!!    end subroutine bschg2
+!!! end interface chgbas
+
+!- Set of parameters for the aim utility -----------------------------------
+ real(dp), parameter :: aim_rhocormin=1.d-10  ! the minimal core density
+ real(dp), parameter :: aim_epstep=0.5
+ real(dp), parameter :: aim_rhomin=1.d-5,aim_dgmin=1.d-9,aim_dmaxcrit=5.d-2
+ real(dp), parameter :: aim_dmin=1.d-3,aim_hmax=2.d7,aim_fac0=2.1_dp,aim_facmin=1.d-3
+ real(dp), parameter :: aim_hmult=15._dp,aim_tiny=1.d-4,aim_snull=1.d-6
+ real(dp), parameter :: aim_deltarmin=1.d-7
+!the minimal length of one step following the gradient line
+ real(dp), parameter :: aim_fac=1.2_dp,aim_drmin=1.d-5
+ real(dp), parameter :: aim_dlimit=1.d-4,aim_dmaxcs=3.d-1
+ real(dp), parameter :: aim_dpc0=1.d-2
+ integer, parameter :: aim_maxstep=100
+ real(dp), parameter :: aim_xymin=1.d-10
+ integer, parameter :: aim_npmaxin=17
+ real(dp), parameter :: aim_stmax=0.05
+ real(dp), parameter :: aim_dmaxc1=1.d-1, aim_dmaxcl=5.d-2
+
+!----------------------------------------------------------------------
+
+!!****t* m_bader/bcp_type
+!! NAME
+!! bcp_type
+!!
+!! FUNCTION
+!! a "bonding critical point" for aim
+!!
+!! SOURCE
+
+ type, private :: bcp_type
+
+! Integer
+  integer :: iat       ! number of the bonding atom inside a primitive cell
+  integer :: ipos      ! number of the primitive cell of the bonding atom
+
+! Real
+  real(dp) :: chg      ! charge at the critical point
+  real(dp) :: diff(3)  ! three distances : AT-CP,BAT-CP,AT-BAT
+  real(dp) :: ev(3)    ! eigenvalues of the Hessian
+  real(dp) :: pom(3)   ! position of the bonding atom
+  real(dp) :: rr(3)    ! position of the bcp
+  real(dp) :: vec(3,3) ! eigenvectors of the Hessian
+  real(dp) :: vv(3)    ! position of the bcp relative to the central atom
+
+ end type bcp_type
+!!***
+
+ contains
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* defs_aimprom/aim_shutdown
+!! NAME
+!!  aim_shutdown
+!!
+!! FUNCTION
+!!  Free memory allocated in the module. Close units. Mainly used to pass the abirules
+!!
+!! PARENTS
+!!      aim
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine aim_shutdown()
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'aim_shutdown'
+!End of the abilint section
+
+  implicit none
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'aim_shutdown'
+!End of the abilint section
+
+!Local variables-------------------------------
+ integer :: ii
+ logical :: is_open
+ integer :: all_units(12)
+
+ ! *********************************************************************
+
+ !if (allocated(typat)) then
+ !  ABI_FREE(typat)
+ !end if
+ !if (allocated(corlim)) then
+ !  ABI_FREE(corlim)
+ !end if
+ !if (allocated(xred)) then
+ !  ABI_FREE(xred)
+ !end if
+ !if (allocated(xatm)) then
+ !  ABI_FREE(rminl)
+ !end if
+
+ all_units(:) = [unt0,unto,unt,untc,unts,untd,untl,untg,unta,untad,untp,untout]
+ do ii=1,size(all_units)
+   inquire(unit=all_units(ii), opened=is_open)
+   if (is_open) close(all_units(ii))
+ end do
+
+end subroutine aim_shutdown
 !!***
 
 !!****f* m_bader/adini
@@ -770,7 +919,6 @@ subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'aim_follow'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1218,7 +1366,6 @@ subroutine cpdrv(aim_dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cpdrv'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -2873,7 +3020,6 @@ subroutine drvaim(aim_dtset,tcpui,twalli)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'drvaim'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -4499,7 +4645,6 @@ subroutine rsurf(aim_dtset,rr,grho,theta,phi,rr0,iatinit,npmax,srch)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rsurf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -4685,7 +4830,6 @@ subroutine surf(aim_dtset)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'surf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -132,6 +132,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  use m_errors
  use m_cgtools
 
+ use m_time,      only : timab
  use m_mpinfo,    only : ptabs_fourwf
  use m_fftcore,   only : sphere_fft, sphere
  use m_sgfft,     only : sg_fftpad, sg_fftrisc, sg_fftrisc_2
@@ -143,7 +144,6 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourwf'
- use interfaces_18_timing
  use interfaces_53_ffts, except_this_one => fourwf
 !End of the abilint section
 

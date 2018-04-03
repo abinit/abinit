@@ -110,6 +110,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_defs_ptgroups
  use m_errors
 
+ use m_time,          only : timab
  use m_blas,          only : xdotc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -133,7 +134,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_calc_ucrpa'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => prep_calc_ucrpa
 !End of the abilint section

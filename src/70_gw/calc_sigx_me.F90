@@ -139,7 +139,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_sigx_me'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
 !End of the abilint section
 

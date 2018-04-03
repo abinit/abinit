@@ -86,6 +86,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  use mpi
 #endif
 
+ use m_time, only : timab
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type
 
@@ -94,7 +95,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 #undef ABI_FUNC
 #define ABI_FUNC 'chebfi'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs, except_this_one => chebfi
 !End of the abilint section
 

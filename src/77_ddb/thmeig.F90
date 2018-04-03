@@ -54,6 +54,7 @@ subroutine thmeig(inp, ddb, crystal, &
  use m_dynmat,         only : asria_corr, dfpt_phfrq
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
+ use m_kpts,     only : getkgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -62,7 +63,6 @@ subroutine thmeig(inp, ddb, crystal, &
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

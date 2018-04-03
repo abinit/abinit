@@ -63,6 +63,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
  use m_errors
  use m_profiling_abi
 
+ use m_time,           only : timab
  use m_mpinfo,         only : destroy_mpi_enreg
  use m_distribfft,     only : init_distribfft_seq
 
@@ -71,7 +72,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dieltcel'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section

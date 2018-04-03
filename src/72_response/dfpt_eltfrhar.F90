@@ -54,6 +54,7 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
  use m_errors
  use m_xmpi
 
+ use m_time,     only : timab
  use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
 
@@ -61,7 +62,6 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrhar'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -84,6 +84,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  use m_xmpi
  use m_cgtools
 
+ use m_time,         only : timab
  use defs_abitypes,  only : mpi_type
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
@@ -99,7 +100,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_65_paw, except_this_one => pawmknhat

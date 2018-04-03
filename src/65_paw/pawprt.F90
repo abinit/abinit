@@ -59,7 +59,6 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_errors
  use m_xmpi

@@ -31,7 +31,6 @@ module m_ab7_invars
   use defs_basis
   use defs_datatypes
   use defs_abitypes
-  use defs_time
   use m_errors
   use m_profiling_abi
   use m_xmpi
@@ -39,9 +38,11 @@ module m_ab7_invars
   use interfaces_32_util
   use interfaces_57_iovars
 
+  use m_time,     only : timab
   use m_fstrings, only : inupper
   use m_parser,   only : intagm, importxyz, parsefile
-  use m_dtset,    only : dtset_free
+  use m_dtset,    only : dtset_free, macroin, macroin2
+  use m_pspheads, only : inpspheads, pspheads_comm
 
   implicit none
 
@@ -589,10 +590,7 @@ end subroutine ab7_invars_new_from_file
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_load'
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_51_manage_mpi
- use interfaces_57_iopsp_parser
  use interfaces_57_iovars
 !End of the abilint section
 

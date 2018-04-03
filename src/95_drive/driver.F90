@@ -82,7 +82,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
 
  use defs_basis
- use defs_parameters
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
@@ -100,6 +99,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #endif
  use m_xgScalapack
 
+ use m_time,         only : timab
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
@@ -121,7 +121,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'driver'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers

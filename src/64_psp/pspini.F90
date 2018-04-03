@@ -77,6 +77,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,          only : timab
  use m_psps,          only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch
  use m_pawrad,        only : pawrad_type
  use m_pawtab,        only : pawtab_type, pawtab_set_flags
@@ -86,7 +87,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_64_psp, except_this_one => pspini
 !End of the abilint section
 

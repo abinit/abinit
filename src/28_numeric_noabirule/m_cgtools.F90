@@ -46,6 +46,7 @@ MODULE m_cgtools
  use m_xmpi
 
  use m_fstrings,   only : toupper
+ use m_time,       only : timab
 
  implicit none
 
@@ -3533,7 +3534,6 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'projbd'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -3882,7 +3882,6 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_precon'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -4031,7 +4030,6 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_precon_block'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -4332,7 +4330,6 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_zprecon_block'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

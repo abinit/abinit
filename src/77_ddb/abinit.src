@@ -59,8 +59,6 @@ sources = [
  "interpolate_gkk.F90",
  "k_neighbors.F90",
  "lin_interpq_gam.F90",
- "mblktyp1.F90",
- "mblktyp5.F90",
  "mka2f.F90",
  "mka2fQgrid.F90",
  "mka2f_tr.F90",

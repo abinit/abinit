@@ -115,6 +115,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_efmas_defs
  use m_wfk
 
+ use m_time,     only : timab
  use m_geometry, only : metric
  use m_efmas,    only : check_degeneracies
  use m_io_tools, only : file_exists
@@ -130,14 +131,13 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get,&
 &                       pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
- use m_kg,       only : mkkin
+ use m_kg,       only : mkkin, mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'd2frnl'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_65_paw
