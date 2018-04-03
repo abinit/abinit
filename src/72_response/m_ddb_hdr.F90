@@ -37,7 +37,7 @@ MODULE m_ddb_hdr
  use m_io_tools,  only : open_file
  use m_copy,      only : alloc_copy
  use m_fstrings,  only : sjoin
- 
+
  implicit none
 
  private
@@ -71,13 +71,13 @@ MODULE m_ddb_hdr
 
    integer :: nblok         ! Number of blocks in the ddb
    integer :: mblktyp       ! Max block type
-                            ! 0 = Total energy 
+                            ! 0 = Total energy
                             ! 1 = 2nd derivatives (non-stat.)
                             ! 2 = 2nd derivatives (stationary)
                             ! 3 = 3rd derivatives
-                            ! 4 = 1st derivatives 
+                            ! 4 = 1st derivatives
                             ! 5 = 2nd eigenvalue derivatives
-                            ! 
+                            !
    integer :: fullinit      ! Whether the full info on the pseudo is present
                             ! TODO rename this variable
 
@@ -90,7 +90,7 @@ MODULE m_ddb_hdr
    real(dp) :: tolwfr
    real(dp) :: tphysel
    real(dp) :: tsmear
-   
+
    character(len=fnlen) :: dscrpt
 
    integer :: ngfft(18)
