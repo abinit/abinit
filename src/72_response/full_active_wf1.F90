@@ -103,7 +103,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 !Local variables-------------------------------
 !scalars
  integer :: ibandkq,index_cgq,index_cprjq,index_eig1,ii
- real(dp) :: facti,factr,invocc,eta,delta_E,inv_delta_E
+ real(dp) :: facti,factr,invocc,eta,delta_E,inv_delta_E,gkkr
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwcorr(:,:)
@@ -129,7 +129,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 !Loop over WF at k+q subspace
  do ibandkq=1,nband
 
-   delta_E = eig0_kq(ibandkq) - eig0nk
+   delta_E = eig0nk - eig0_kq(ibandkq)
    inv_delta_E = delta_E / ( delta_E ** 2 + eta ** 2)
 
    index_eig1=2*ibandkq-1+(iband-1)*2*nband

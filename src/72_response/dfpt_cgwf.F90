@@ -410,7 +410,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  call cg_zcopy(npw1*nspinor,gh1c,gh1c_n)
 
-!Projecting out all bands (this could be avoided)
+!Projecting out all bands
+!While we could avoid calculating all the eig1_k to obtain the perturbed density,
+!we do need all of the matrix element when outputing the full 1st-order wfn.
 !Note the subtlety:
 !-For the generalized eigenPb, S|cgq> is used in place of |cgq>,
 !in order to apply P_c+ projector (see PRB 73, 235101 (2006), Eq. (71), (72))
