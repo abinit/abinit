@@ -2823,15 +2823,14 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 
 ! *********************************************************************
 
- msg = 'Removing inversion related symmetrie from initial set'
- MSG_WARNING(msg)
-!
-!=== Find the occurence of the inversion symmetry ===
+ MSG_WARNING('Removing inversion related symmetrie from initial set')
+
+ ! Find the occurence of the inversion symmetry.
  call set2unit(inversion) ; inversion=-inversion
 
- is_inv=0 ; found=.FALSE.
+ is_inv=0; found=.FALSE.
  do while (is_inv<nsym .and. .not.found)
-   is_inv=is_inv+1 ; found=ALL(symrel(:,:,is_inv)==inversion)
+   is_inv=is_inv+1; found=ALL(symrel(:,:,is_inv)==inversion)
  end do
  if (found) then
    write(msg,'(a,i3)')' The inversion is symmetry operation no. ',is_inv
@@ -2839,8 +2838,8 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
    write(msg,'(a)')' The inversion was not found in the symmetries list.'
  end if
  call wrtout(std_out,msg,'COLL')
-!
-!=== Find the symmetries that are related through the inversion symmetry ===
+
+ ! Find the symmetries that are related through the inversion symmetry
  call symdet(determinant,nsym,symrel)
  nsym2=0
  do is=1,nsym-1
@@ -2851,7 +2850,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 
      if (found) then
        nsym2=nsym2+1
-!      * Retain symmetries with positive determinant
+       ! Retain symmetries with positive determinant
        if (ALL(tnons(:,is2)<tol8).and.ALL(tnons(:,is)<tol8)) then
          is_retained=is2 ; is_discarded=is
          if (determinant(is)==1) then
@@ -2876,8 +2875,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
  end do !is
 
  if (nsym2/=(nsym/2).or.nsym==1) then
-   write(msg,'(a)')' Program uses the original set of symmetries '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, ' Program uses the original set of symmetries ', 'COLL')
    nsym_out=nsym
    ABI_ALLOCATE(symrel_out,(3,3,nsym))
    ABI_ALLOCATE(tnons_out,(3,nsym))
