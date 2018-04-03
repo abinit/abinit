@@ -94,7 +94,6 @@ subroutine outvar_i_n (dtsets,iout,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvar_i_n'
- use interfaces_57_iovars, except_this_one => outvar_i_n
 !End of the abilint section
 
  implicit none

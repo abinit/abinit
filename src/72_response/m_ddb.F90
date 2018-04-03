@@ -3123,6 +3123,7 @@ end subroutine asrq0_free
 subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3533,6 +3534,7 @@ end subroutine ddb_to_dtset
 
 subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3882,6 +3884,7 @@ end subroutine mblktyp1
 !! SOURCE
 
 subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

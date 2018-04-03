@@ -102,7 +102,6 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 #undef ABI_FUNC
 #define ABI_FUNC 'xcpot'
  use interfaces_53_ffts
- use interfaces_56_xc, except_this_one => xcpot
 !End of the abilint section
 
  implicit none

@@ -94,7 +94,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_screening'
  use interfaces_14_hidewrite
- use interfaces_56_io_mpi
 !End of the abilint section
 
  implicit none

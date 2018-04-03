@@ -73,7 +73,6 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
 #undef ABI_FUNC
 #define ABI_FUNC 'xcden'
  use interfaces_53_ffts
- use interfaces_56_xc, except_this_one => xcden
 !End of the abilint section
 
  implicit none
