@@ -81,7 +81,6 @@ sources = [
  "nmsq_pure_gkk_sumfs.F90",
  "normsq_gkq.F90",
  "order_fs_kpts.F90",
- "outelph.F90",
  "ddb_piezo.F90",
  "prt_gkk_yambo.F90",
  "ramansus.F90",
