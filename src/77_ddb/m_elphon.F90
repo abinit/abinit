@@ -144,13 +144,14 @@ contains
 
 subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_77_ddb, except_this_one => elphon
+ use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -1418,6 +1419,7 @@ end subroutine elphon
 !! SOURCE
 
 subroutine outelph(elph_ds,enunit,fname)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

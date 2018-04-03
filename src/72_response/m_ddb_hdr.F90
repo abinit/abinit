@@ -481,7 +481,6 @@ subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_hdr_open_write'
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -3098,6 +3097,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 &  typat,usepaw,wtk,xred,zion,znucl)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
