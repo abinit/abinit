@@ -75,7 +75,6 @@ sources = [
  "getshell.F90",
  "hartrestr.F90",
  "inpgkk.F90",
- "kptfine_av.F90",
  "m_ddb.F90",
  "m_ddb_hdr.F90",
  "m_ddk.F90",

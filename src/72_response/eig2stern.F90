@@ -18,21 +18,21 @@
 !!  bdeigrf = number of bands for which to calculate the second-order eigenvalues.
 !!  clflg(3,mpert)= array on calculated perturbations for eig2rf.
 !!  dim_eig2nkq = 1 if eig2nkq is to be computed.
-!!  cg1_pert(2,mpw1*nspinor*mband*mk1mem*nsppol,3,mpert) = first-order wf in G 
+!!  cg1_pert(2,mpw1*nspinor*mband*mk1mem*nsppol,3,mpert) = first-order wf in G
 !!            space for each perturbation. The wavefunction is orthogonal to the
 !!            active space.
 !!  gh0c1_pert(2,mpw1*nspinor*mband*mk1mem*nsppol,3,mpert) = matrix containing the
 !!            vector:  <G|H(0)|psi(1)>, for each perturbation.
 !!  gh1c_pert(2,mpw1*nspinor*mband*mk1mem*nsppol,3,mpert)) = matrix containing the
-!!            vector:  <G|H(1)|n,k>, for each perturbation. The wavefunction is 
-!!            orthogonal to the active space. 
-!!  eigbrd(2,mband*nsppol,nkpt,3,natom,3,natom) = broadening factors for the 
+!!            vector:  <G|H(1)|n,k>, for each perturbation. The wavefunction is
+!!            orthogonal to the active space.
+!!  eigbrd(2,mband*nsppol,nkpt,3,natom,3,natom) = broadening factors for the
 !!            electronic eigenvalues (optional).
-!!  eigen0(nkpt_rbz*mband*nsppol) = 0-order eigenvalues at all K-points: 
+!!  eigen0(nkpt_rbz*mband*nsppol) = 0-order eigenvalues at all K-points:
 !!            <k,n'|H(0)|k,n'> (hartree).
 !!  eigenq(nkpt_rbz*mband*nsppol) = 0-order eigenvalues at all shifted K-points:
 !!            <k+Q,n'|H(0)|k+Q,n'> (hartree).
-!!  eigen1(nkpt_rbz*2*nsppol*mband**2,3,mpert) = matrix of first-order: 
+!!  eigen1(nkpt_rbz*2*nsppol*mband**2,3,mpert) = matrix of first-order:
 !!            <k+Q,n'|H(1)|k,n> (hartree) (calculated in dfpt_cgwf).
 !!  eig2nkq(2,mband*nsppol,nkpt,3,natom,3,natom*dim_eig2nkq) = second derivatives of
 !!            the electronic eigenvalues.
@@ -50,7 +50,7 @@
 !!  mpert = maximum number of perturbations.
 !!  natom = number of atoms in the unit cell.
 !!  npert = number of phonon perturbations, without taking into account directions:
-!!            natom. 
+!!            natom.
 !!  nsym = number of symmetries (not used yet).
 !!  mpi_enreg = informations about MPI parallelization.
 !!  mpw1 = maximum number of planewaves used to represent first-order wavefunctions.
@@ -64,20 +64,20 @@
 !!  symrec(3,3,nsym) = 3x3 matrices of the group symmetries (reciprocal space)
 !!            (not used yet).
 !!  symrel(3,3,nsym) = array containing the symmetries in real space (not used yet).
-!!  timrev = 1 if time-reversal preserves the q wavevector; 0 otherwise 
+!!  timrev = 1 if time-reversal preserves the q wavevector; 0 otherwise
 !!            (not in use yet).
 !!  dtset = OPTIONAL, dataset structure containing the input variable of the
 !!            calculation. This is required to use the k-interpolation routine.
 !!  eigenq_fine(mband_fine,mkpt_fine,nsppol_fine) = OPTIONAL, 0-order eigenvalues
 !!            at all shifted K-points: <k+Q,n'|H(0)|k+Q,n'> (hartree) of the
-!!            fine grid. This information is read from the WF dense k-grid file.  
+!!            fine grid. This information is read from the WF dense k-grid file.
 !!  hdr_fine = OPTIONAL, header of the WF file of the fine k-point grid. This
-!!            variable is required for the k-interpolation routine.  
+!!            variable is required for the k-interpolation routine.
 !!  hdr0     = OPTIONAL, header of the GS WF file of the corse k-point grid. This
-!!            variable is required for the k-interpolation routine.  
+!!            variable is required for the k-interpolation routine.
 !!
 !! OUTPUT
-!!  eig2nkq(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= diagonal part of the 
+!!  eig2nkq(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= diagonal part of the
 !!            second-order eigenvalues: E^{(2),diag}_{k,q,j}.
 !!  eigbrd(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= OPTIONAL, array containing the
 !!            electron lifetimes.
@@ -99,7 +99,7 @@
 subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,eigenq,&
 &  eigen1,eig2nkq,elph2_imagden,esmear,gh0c1_pert,gh1c_pert,ieig2rf,istwfk_pert,&
 &  mband,mk1mem,mpert,npert,mpi_enreg,mpw1,nkpt_rbz,npwar1,nspinor,nsppol,smdelta,&
-&  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0) 
+&  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
 
  use defs_basis
  use defs_abitypes
@@ -109,6 +109,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  use m_profiling_abi
 
  use m_time,         only : timab
+ use m_double_grid,  only : kptfine_av
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -154,7 +155,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  integer :: master,me,spaceworld,ierr
 !real(dp),parameter :: etol=1.0d-3
  real(dp),parameter :: etol=1.0d-6
-!real(dp),parameter :: etol=zero 
+!real(dp),parameter :: etol=zero
  real(dp) :: ar,ai,deltae,den,dot2i,dot2r,dot3i,dot3r,doti,dotr,eig1_i1,eig1_i2
  real(dp) :: eig1_r1,eig1_r2,eig2_diai,den_av
  real(dp) :: wgt_int
@@ -200,7 +201,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  if(nsppol==2)then
    message = 'nsppol=2 is still under development. Be careful when using it ...'
    MSG_COMMENT(message)
- end if        
+ end if
 
  band2tot_index =0
  bandtot_index=0
@@ -263,10 +264,9 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
        write(std_out,*) 'Start of the energy denominator interpolation method.'
        nkpt_sub = 0
 !      center is the k+q point around which we will average the kpt_fine
-       center = hdr0%kptns(:,ikpt)+ dtset%qptn(:) 
+       center = hdr0%kptns(:,ikpt)+ dtset%qptn(:)
 
-       call kptfine_av(center,dtset%qptrlatt,hdr_fine%kptns,hdr_fine%nkpt,&
-&       kpt_fine_sub,nkpt_sub,wgt_sub)
+       call kptfine_av(center,dtset%qptrlatt,hdr_fine%kptns,hdr_fine%nkpt,kpt_fine_sub,nkpt_sub,wgt_sub)
        write(std_out,'(a,3f8.4,a,i3)') 'Number of k-points of the fine grid &
 &       around the k+Q point ',center,' is:',nkpt_sub
        write(std_out,'(a,f10.5)') 'The sum of the weights of the k-points is: ',SUM(wgt_sub)
@@ -314,7 +314,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 !      If the k point and band belong to me, compute the contribution
        test_do_band=.true.
        if(mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me)test_do_band=.false.
-       
+
        if(test_do_band)then
 
          do ipert1=1,npert
@@ -357,7 +357,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
                        end do
                        den = den_av/wgt_int
                      else
-                       if(abs(elph2_imagden) < etol) then  
+                       if(abs(elph2_imagden) < etol) then
                          if(abs(deltae)>etol) then
                            den=-one/(deltae**2+elph2_imagden**2)
                          else
@@ -367,7 +367,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
                          den=-one/(deltae**2+elph2_imagden**2)
                        end if
                      end if
-                     
+
 !                    The following should be the most general implementation of the presence of elph2_imagden
 !                    eig2_diar=eig2_diar+(ar*deltae+ai*elph2_imagden)*den
 !                    eig2_diai=eig2_diai+(ai*deltae-ar*elph2_imagden)*den
@@ -384,7 +384,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
                      else
                        eig2_diar=eig2_diar+ar*deltae*den
                        eig2_diai=eig2_diai+ai*deltae*den
-!DBSP              
+!DBSP
 !                       if (iband+band_index==2 .and. ikpt==1 .and. idir1==1 .and. ipert1==1 .and. idir2==1 .and. ipert2==1) then
 !                         write(message2,*) 'eig2_diar1=',eig2_diar,' ar=',ar,' deltae=',deltae,' den=',den
 !                         call wrtout(std_out,message2,'PERS')
@@ -436,7 +436,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 !                Store the contribution
                  if(ieig2rf > 0) then
                    eig2nkq(1,iband+band_index,ikpt,idir1,ipert1,idir2,ipert2) = eig2_diar
-                   eig2nkq(2,iband+band_index,ikpt,idir1,ipert1,idir2,ipert2) = eig2_diai 
+                   eig2nkq(2,iband+band_index,ikpt,idir1,ipert1,idir2,ipert2) = eig2_diai
                  end if
 
                  if(present(eigbrd))then
@@ -452,7 +452,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
          end do   !ipert1
 
        end if ! Selection of processor
-       
+
      end do !iband
 
      ABI_DEALLOCATE(cwavef)
@@ -489,7 +489,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
    ABI_DEALLOCATE(nband_rbz)
    ABI_DEALLOCATE(mpi_enreg%proc_distrb)
    ABI_DEALLOCATE(mpi_enreg%my_kpttab)
- end if 
+ end if
 
  if(ieig2rf==1 .or. ieig2rf==2 ) then
    write(ab_out,'(a)')' Components of second-order derivatives of the electronic energy, EIGR2D.'
@@ -498,10 +498,10 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
      do idir2=1,3
        ar=eig2nkq(1,1,1,idir1,1,idir2,1) ; if(abs(ar)<tol10)ar=zero
        ai=eig2nkq(2,1,1,idir1,1,idir2,1) ; if(abs(ai)<tol10)ai=zero
-       write (ab_out,'(4i4,2es20.10)') idir1,1,idir2,1,ar,ai 
+       write (ab_out,'(4i4,2es20.10)') idir1,1,idir2,1,ar,ai
      end do ! idir2
    end do ! idir1
- end if 
+ end if
 
  if(present(eigbrd))then
    if(smdelta >0) then   !broadening
