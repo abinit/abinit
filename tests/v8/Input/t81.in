@@ -2,11 +2,11 @@
  ndtset 4
 
  istwfk *1
- ecut 10
+ ecut 15
  ecutsm 0.5
  #nband 50
  nband 4
- tolvrs 1.0e-10
+ tolvrs 1.0e-12
  diemac 6.0d0
 
 # Kpoints
@@ -32,7 +32,7 @@
  iscf2   -2
  nband2   24
  nbdbuf2  4
- tolwfr2  1e-16
+ tolwfr2  1e-20
  # Cancel default values
  nqpt2     0
  rfphon2   0
@@ -55,10 +55,9 @@
 # Dataset 3 NSCF calculation and printing of 1WF
 ##################################################
  iscf4          -2
- tolwfr4        1e-16
+ tolwfr4        1e-20
  get1den4       3
- nband4         24
- nbdbuf4        4
+ nband4         20
  prtfull1wf4    1
 
 
