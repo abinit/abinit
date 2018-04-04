@@ -182,9 +182,8 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  write(std_out,*)'out of read_el_veloc '
 
 contains
+!!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/inpgkk
 !! NAME
 !! inpgkk

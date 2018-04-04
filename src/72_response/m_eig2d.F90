@@ -40,6 +40,7 @@ MODULE m_eig2d
 #endif
  use m_xmpi
  use m_ebands
+ use m_cgtools
 
  use m_time,       only : timab
  use m_fstrings,   only : strcat
@@ -164,7 +165,6 @@ MODULE m_eig2d
 !!***
 
 CONTAINS
-!=====================================================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -809,8 +809,8 @@ DBG_ENTER("COLL")
  DBG_EXIT("COLL")
 
 end subroutine gkk_free
+!!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/eig2stern
 !! NAME
 !! eig2stern
@@ -818,13 +818,6 @@ end subroutine gkk_free
 !! FUNCTION
 !! This routine calculates the second-order eigenvalues.
 !! The output eig2nkq is this quantity for the input k points.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (PB, XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors .
 !!
 !! INPUTS
 !!  bdeigrf = number of bands for which to calculate the second-order eigenvalues.
@@ -902,26 +895,10 @@ end subroutine gkk_free
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,eigenq,&
 &  eigen1,eig2nkq,elph2_imagden,esmear,gh0c1_pert,gh1c_pert,ieig2rf,istwfk_pert,&
 &  mband,mk1mem,mpert,npert,mpi_enreg,mpw1,nkpt_rbz,npwar1,nspinor,nsppol,smdelta,&
 &  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_cgtools
- use m_profiling_abi
-
- use m_time,         only : timab
- use m_double_grid,  only : kptfine_av
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
