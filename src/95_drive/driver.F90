@@ -114,7 +114,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_bethe_salpeter,   only : bethe_salpeter
  use m_screening_driver, only : screening
 
-
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status

@@ -61,7 +61,7 @@ module m_bethe_salpeter
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
  use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
- use m_qparticles,      only : rdqps  !, show_QP , rdgw
+ use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho,&
                                wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj
  use m_wfk,             only : wfk_read_eigenvalues
@@ -174,6 +174,7 @@ contains
 !! SOURCE
 
 subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,xred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2071,6 +2072,7 @@ end subroutine setup_bse
 
 subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 & Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
