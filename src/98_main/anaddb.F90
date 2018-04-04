@@ -72,6 +72,7 @@ program anaddb
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_elphon,         only : elphon
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

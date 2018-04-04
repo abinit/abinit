@@ -21,7 +21,6 @@
 
 #include "abi_common.h"
 
-
 module m_gkk
 
  use defs_basis

@@ -51,7 +51,7 @@ MODULE m_io_kss
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
  use m_abilasi,          only : xheevx, xhegvx
- use m_geometry,         only : metric
+ use m_geometry,         only : metric, remove_inversion
  use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_fftcore,          only : get_kg, sphere
@@ -59,6 +59,7 @@ MODULE m_io_kss
  use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_kg,               only : mkkin, mkkpg
+ use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
 
  implicit none
 
@@ -855,7 +856,6 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
 #undef ABI_FUNC
 #define ABI_FUNC 'make_gvec_kss'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1243,7 +1243,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ! Set up remaining of the Hamiltonian
      ! Compute (1/2) (2 Pi)**2 (k+G)**2:
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
      ! Compute (k+G) vectors (only if useylm=1)
@@ -1726,8 +1725,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 #define ABI_FUNC 'outkss'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -2222,7 +2219,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
          call init_ddiago_ctl(Diago_ctl,"Vectors",isppol,dtset%nspinor,ecut_eff,Dtset%kptns(:,ikpt),Dtset%nloalg,gmet,&
 &         nband_k=nbandkssk(ikpt),effmass_free=Dtset%effmass_free,istwf_k=Dtset%istwfk(ikpt),prtvol=Dtset%prtvol)
 
-         call ks_ddiago(Diago_ctl,nbandkssk(ikpt),Dtset%nfft,mgfft,Dtset%ngfft,natom,&
+         call ksdiago(Diago_ctl,nbandkssk(ikpt),Dtset%nfft,mgfft,Dtset%ngfft,natom,&
 &         Dtset%typat,nfft,dtset%nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij_all,&
 &         Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_diago_k,comm_self,ierr)
 
