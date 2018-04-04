@@ -56,6 +56,8 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  use m_abimover
  use m_abihist
 
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,    only : xcart2xred, xred2xcart, metric
  use m_results_gs , only : results_gs_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -63,8 +65,6 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_langevin'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

@@ -61,12 +61,13 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  use m_initcuda, only : Get_ndevice
 #endif
 
+ use m_parser,  only : intagm
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars0'
  use interfaces_32_util
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

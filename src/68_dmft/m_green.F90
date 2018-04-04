@@ -31,6 +31,7 @@
  use m_xmpi
  use m_profiling_abi
  use m_errors
+ use m_lib_four
  
  use m_io_tools, only : flush_unit, open_file
  use m_oper, only : oper_type
@@ -2749,7 +2750,6 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 #undef ABI_FUNC
 #define ABI_FUNC 'fourier_fct'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

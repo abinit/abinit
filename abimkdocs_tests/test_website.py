@@ -41,7 +41,7 @@ class WebsiteTest(AbimkdocsTest):
         e = element("ecut")
         assert e.get("href") == "../variables/basic#ecut" and e.text == "ecut"
 
-        e = element("Gonze2009")
+        e = element("cite:Gonze2009")
         assert e.get("href") == "../theory/bibliography#gonze2009" and e.text == "[Gonze2009]"
 
         e = element("~abinit/tests/v1/Input/t01.in|t01.in")
@@ -80,7 +80,7 @@ class WebsiteTest(AbimkdocsTest):
         e = element("src:94_scfcv/scfcv.F90")
         assert e.get("href") == "https://github.com/abinit/abinit/blob/master/src/94_scfcv/scfcv.F90"
         e = element("ac:abiref_gnu_5.3_debug.ac")
-        assert e.get("href") == "../build/config-examples/abiref_gnu_5.3_debug.ac"
+        assert e.get("href") == "../abichecks/buildsys/Refs/abiref_gnu_5.3_debug.ac"
         e = element("pdf:howto_chebfi.pdf|chebfi")
         #assert e.get("href") == "/build/config-examples/abiref_gnu_5.3_debug.ac" and e.text == "chebfi"
         #e = element("[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]")

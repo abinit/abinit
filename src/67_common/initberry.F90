@@ -70,10 +70,6 @@
 !!           nproc = number of cpus
 !!           nneighbour = number of neighbours for each k-point (= 6)
 !!
-!! TO DO
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      init_e_field_vars
 !!
@@ -103,6 +99,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_xmpi
  use m_efield
 
+ use m_geometry,only : metric
  use m_fftcore, only : kpgsph
  use m_pawang,  only : pawang_type
  use m_pawrad,  only : pawrad_type
@@ -158,7 +155,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  real(dp) :: gprimdlc(3,3),rmetllc(3,3),gmetllc(3,3),ucvol_local
 ! gprimd(3,3) = inverse of rprimd
 ! rmetlcl(3,3)=real-space metric (same as rmet in metric.F90)
-! gmetlcl(3,3)= same as gmet in metric.F90 
+! gmetlcl(3,3)= same as gmet in metric.F90
 ! ucvol = volume of the unit cell in Bohr**3
 
  character(len=500) :: message
@@ -261,7 +258,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  end if
 
 !set flags for fields, forces, stresses
- fieldflag = ( (dtset%berryopt== 4) .or. (dtset%berryopt== 6) .or. (dtset%berryopt== 7)  & 
+ fieldflag = ( (dtset%berryopt== 4) .or. (dtset%berryopt== 6) .or. (dtset%berryopt== 7)  &
 & .or. (dtset%berryopt==14) .or. (dtset%berryopt==16) .or. (dtset%berryopt==17) )
 ! following two flags activates computation of projector gradient contributions to force and
 ! stress in finite field PAW calculations
@@ -297,7 +294,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
    dtefield%has_expibi = 1
    dtefield%has_qijb = 1
 
-   if ( fieldflag .and. dtefield%has_rij==0) then  
+   if ( fieldflag .and. dtefield%has_rij==0) then
      lmn2_size_max = psps%lmnmax*(psps%lmnmax+1)/2
      ABI_ALLOCATE(dtefield%rij,(lmn2_size_max,ntypat,3))
      dtefield%has_rij = 1
@@ -315,7 +312,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      dtefield%has_epaws3 = 1
    end if
 
-   ncpgr = 0 
+   ncpgr = 0
    if ( fieldflag .and. dtefield%usecprj == 0) then
      ABI_ALLOCATE(dimlmn,(natom))
      call pawcprj_getdim(dimlmn,natom,nattyp_dum,ntypat,typat,pawtab,'R')
@@ -484,7 +481,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      nband_k = dtset%nband(ikpt + (isppol-1)*nkpt)
 
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
-     
+
      dtefield%cgindex(ikpt,isppol) = icg
      npw_k = npwarr(ikpt)
      icg = icg + npw_k*dtefield%nspinor*nband_k
@@ -501,20 +498,20 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  do ikpt = 1, nkpt
    if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,1,me)).and.&
 &   (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,nsppol,me))) cycle
-   
+
    npw_k = npwarr(ikpt)
    dtefield%kgindex(ikpt) = ikg
    ikg = ikg + npw_k
  end do
 
 !Need to use dtset%red_efieldbar in the whole code
-!Compute the reciprocal lattice coordinates of the electric field  
+!Compute the reciprocal lattice coordinates of the electric field
  if (fieldflag) then
-   
+
    call  metric(gmetllc,gprimdlc,-1,rmetllc,rprimd,ucvol_local)
 
    if (dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7) then
-     
+
      do ii=1,3
        dtset%red_efieldbar(ii) = dot_product(dtset%efield(:),rprimd(:,ii))
        dtefield%efield_dot(ii) =  dtset%red_efieldbar(ii)
@@ -533,7 +530,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
    if (dtset%berryopt == 6 .or. dtset%berryopt ==7 ) then
 
-     do ii=1,3 
+     do ii=1,3
        dtset%red_dfield(ii)= (dot_product(dtset%dfield(:),gprimdlc(:,ii)))*ucvol_local/(4.d0*pi)
      end do
 
@@ -549,11 +546,11 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 !    transfer to unreduced electric field.
      do idir=1,3
        dtset%efield(idir)= dot_product(dtset%red_efieldbar(:),gprimdlc(:,idir))
-       dtefield%efield_dot(idir) = dtset%red_efieldbar(idir) 
-!      dtefield%efield2(idir)=dtset%red_efieldbar(idir) 
+       dtefield%efield_dot(idir) = dtset%red_efieldbar(idir)
+!      dtefield%efield2(idir)=dtset%red_efieldbar(idir)
      end do
 
-!    dtefield%efield_dot(1) = dtset%red_efieldbar(1) 
+!    dtefield%efield_dot(1) = dtset%red_efieldbar(1)
 !    dtefield%efield_dot(2) = dtset%red_efieldbar(2)
 !    dtefield%efield_dot(3) = dtset%red_efieldbar(3)
 
@@ -583,10 +580,10 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
      do idir=1,3
        dtset%red_efieldbar(idir)= (4*pi/ucvol_local)*dot_product(dtset%red_efield(:),rmetllc(:,idir))
-       dtefield%efield_dot(idir) = dtset%red_efieldbar(idir) 
+       dtefield%efield_dot(idir) = dtset%red_efieldbar(idir)
      end do
-     
-!    dtefield%efield_dot(1) = dtset%red_efieldbar(1) 
+
+!    dtefield%efield_dot(1) = dtset%red_efieldbar(1)
 !    dtefield%efield_dot(2) = dtset%red_efieldbar(2)
 !    dtefield%efield_dot(3) = dtset%red_efieldbar(3)
 
@@ -611,12 +608,12 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
    if ( dtset%berryopt ==17) then
 
 !    to calculate D
-     
+
      do idir=1,3
-       dtset%efield(idir)= dot_product(dtset%red_efieldbar(:),gprimdlc(:,idir))  ! from ebar 
+       dtset%efield(idir)= dot_product(dtset%red_efieldbar(:),gprimdlc(:,idir))  ! from ebar
        dtset%dfield(idir)  =(4*pi/ucvol_local)*dot_product(dtset%red_dfield(:),rprimd(:,idir))
 !      dtset%red_efield(idir) = (ucvol_local/(4*pi))*dot_product(dtset%red_efieldbar(:),gmetllc(:,idir))
-       dtefield%efield_dot(idir) = dtset%red_efieldbar(idir) 
+       dtefield%efield_dot(idir) = dtset%red_efieldbar(idir)
      end do
 
      write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
@@ -699,7 +696,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
        end do     ! isign
 
 !      OLD CODING
-!      First: k + dk 
+!      First: k + dk
 !      do ikpt1 = 1, dtefield%fnkpt
 !      diffk(:) = abs(dtefield%fkptns(:,ikpt1) - &
 !      &         dtefield%fkptns(:,ikpt) - dk(:))
@@ -708,7 +705,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 !      exit
 !      end if
 !      end do
-       
+
 !      Second: k - dk
 !      do ikpt1 = 1, dtefield%fnkpt
 !      diffk(:) = abs(dtefield%fkptns(:,ikpt1) - &
@@ -717,7 +714,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 !      dtefield%ikpt_dk(ikpt,2,idir) = ikpt1
 !      exit
 !      end if
-!      end do 
+!      end do
 
      end do     ! ikpt
 
@@ -988,7 +985,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
    dtefield%has_qijb = 2
    ABI_DEALLOCATE(calc_qijb)
  end if
- 
+
  if (usepaw == 1 .and. dtefield%has_rij == 1) then
    c1=sqrt(four_pi/three)
    do itypat = 1, ntypat
@@ -1061,18 +1058,18 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 !        ji: fkgindex is defined here !
          dtefield%fkgindex(ikpt) = ikg
 
-!        
+!
 !        Deal with symmetry transformations
-!        
+!
 
 !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
 !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
 !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
-!        
+!
 !        For the ket k-point:
 !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
 !        where GBZ(k) takes k(k) to the BZ
-!        
+!
 
          isym  = dtefield%indkk_f2ibz(ikpt,2)
          isym1 = dtefield%indkk_f2ibz(ikpt1f,2)
@@ -1133,7 +1130,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
              if ( dtefield%indkk_f2ibz(ikpt,6) == 1 ) rdum=-rdum
              pwnsfac(1,ikg+ipw) = cos(rdum)
              pwnsfac(2,ikg+ipw) = sin(rdum)
-!            
+!
 !            new code
 !            rdum = DOT_PRODUCT(dble(iadum(:)),dtset%tnons(:,isym))
 !            rdum= two_pi*rdum
@@ -1202,7 +1199,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
              ikpt1i = dtefield%indkk_f2ibz(ikpt1f,1)
 
              if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
-             
+
              ikpt_loc = ikpt_loc + 1
              mpi_enreg%kptdstrb(me + 1,ifor+2*(idir-1),ikpt_loc) = &
 &             ikpt1i + (isppol - 1)*nkpt
@@ -1218,7 +1215,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
    end do           ! idir
  end if             ! nproc>1
 
-!build mpi_enreg%kpt_loc2fbz_sp 
+!build mpi_enreg%kpt_loc2fbz_sp
  ikpt_loc = 0
  do isppol = 1, nsppol
    do ikpt = 1, dtefield%fnkpt
@@ -1227,7 +1224,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      nband_k = dtset%nband(ikpti)
 
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpti,1,nband_k,isppol,me)) cycle
-     
+
      ikpt_loc = ikpt_loc + 1
 
      mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc, 1) = ikpt
@@ -1388,7 +1385,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      eg_dir(idir) = abs(dtset%red_efieldbar(idir))*dtefield%nkstr(idir)
    end do
 
-   
+
    eg = maxval(eg_dir)
    eg_ev = eg*Ha_eV
 
@@ -1411,7 +1408,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
-   end if 
+   end if
 
  end if
 

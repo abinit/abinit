@@ -137,12 +137,14 @@
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,         only : metric
  use m_fock,             only : fock_type
  use m_ewald,            only : ewald2
  use defs_datatypes,     only : pseudopotential_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_fft,              only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -200,7 +202,7 @@
  real(dp) :: gprimd(3,3),harstr(6),lpsstr(6),rmet(3,3),tsec(2),uncorr(3)
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: dummy_in(0)
- real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0) 
+ real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0)
  real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
  real(dp),allocatable :: vxctotg(:,:)
  character(len=10) :: EPName(1:2)=(/"Electronic","Positronic"/)
@@ -329,7 +331,7 @@
 &   xred,znucl,str_vdw_dftd2=vdwstr)
  elseif (vdw_xc==6.or.vdw_xc==7) then
    call vdw_dftd3(e_dum,ixc,natom,ntypat,0,typat,rprimd,vdw_xc,&
-&   vdw_tol,vdw_tol_3bt,xred,znucl,str_vdw_dftd3=vdwstr) 
+&   vdw_tol,vdw_tol_3bt,xred,znucl,str_vdw_dftd3=vdwstr)
  end if
 
  call timab(38,2,tsec)
@@ -385,7 +387,7 @@
 !XC part of stress tensor has already been computed in "strsxc"
 
 !ii part of stress (diagonal) is trivial!
- strsii=-eii/ucvol 
+ strsii=-eii/ucvol
 !qvpotzero is non zero, only when usepotzero=1
  strsii=strsii+qvpotzero/ucvol
 
@@ -431,7 +433,7 @@
  end if
 
 ! compute additional F3-type stress due to projectors for electric field with PAW
- if ( efield_flag .and. calc_epaw3_stress ) then  
+ if ( efield_flag .and. calc_epaw3_stress ) then
    do sdir = 1, 6
      ep3(:) = zero
      do idir = 1, 3
@@ -470,7 +472,7 @@
 !=======================================================================
 !===== Assemble the various contributions to the stress tensor =========
 !=======================================================================
-!In cartesian coordinates (symmetric storage) 
+!In cartesian coordinates (symmetric storage)
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
 
@@ -489,7 +491,7 @@
  ipositron=0
  if (present(electronpositron)) then
    if (associated(electronpositron)) then
-     if (allocated(electronpositron%stress_ep)) ipositron=electronpositron_calctype(electronpositron) 
+     if (allocated(electronpositron%stress_ep)) ipositron=electronpositron_calctype(electronpositron)
    end if
  end if
  if (abs(ipositron)==1) then

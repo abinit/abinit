@@ -67,6 +67,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : basename, sjoin, ktoa, ltoa
+ use m_geometry,      only : mkrdim, metric
  use m_crystal,       only : crystal_print, idx_spatial_inversion, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_bz_mesh,       only : kmesh_t, kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print,&
@@ -88,7 +89,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_sigma'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_56_io_mpi
  use interfaces_70_gw, except_this_one => setup_sigma
 !End of the abilint section
@@ -835,9 +835,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
-!The Coulomb interaction used here might have two terms : 
+!The Coulomb interaction used here might have two terms :
 !the first term generates the usual sigma self-energy, but possibly, one should subtract
-!from it the Coulomb interaction already present in the Kohn-Sham basis, 
+!from it the Coulomb interaction already present in the Kohn-Sham basis,
 !if the usefock associated to ixc is one.
 !The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
  nvcoul_init=1
@@ -1329,11 +1329,16 @@ subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_
  case (1)
    ! Parallelization over transitions **without** memory distributions (Except for the spin).
    my_minb=1; my_maxb=Sigp%nbnds
-   do isp=1,my_nspins
-     spin = my_spins(isp)
-     bks_mask(my_minb:my_maxb,:,spin)=.TRUE.
-     if (store_ur) keep_ur(my_minb:my_maxb,:,spin)=.TRUE.
-   end do
+   if (dtset%ucrpa>0) then
+     bks_mask(my_minb:my_maxb,:,:)=.TRUE.
+     if (store_ur) keep_ur(my_minb:my_maxb,:,:)=.TRUE.
+   else
+     do isp=1,my_nspins
+       spin = my_spins(isp)
+       bks_mask(my_minb:my_maxb,:,spin)=.TRUE.
+       if (store_ur) keep_ur(my_minb:my_maxb,:,spin)=.TRUE.
+     end do
+   end if
 
  case (2)
    ! Distribute bands and spin (alternating planes of bands)

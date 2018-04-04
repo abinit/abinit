@@ -87,7 +87,7 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
  use defs_basis
  use m_profiling_abi
  use m_errors
- use m_xmpi, only : xmpi_comm_self
+ use m_xmpi
 
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type
@@ -96,13 +96,13 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
  use m_paw_ij,     only : paw_ij_type
  use m_pawrhoij,   only : pawrhoij_type
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
+ use m_cgtools,    only : dotprod_vn
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newfermie1'
  use interfaces_14_hidewrite
- use interfaces_53_spacepar
  use interfaces_65_paw
 !End of the abilint section
 

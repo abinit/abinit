@@ -33,10 +33,6 @@
 !! SIDE EFFECTS
 !!  mpi_enreg = information about MPI parallelization
 !!
-!! TO DO
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      gstate
 !!

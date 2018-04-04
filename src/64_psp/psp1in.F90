@@ -421,3 +421,731 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 
 end subroutine psp1in
 !!***
+
+!!****f* ABINIT/psp1lo
+!! NAME
+!! psp1lo
+!!
+!! FUNCTION
+!! Compute sine transform to transform from v(r) to q^2 v(q)
+!! using subroutines related to Teter atomic structure grid.
+!!
+!! INPUTS
+!!  drad(mmax)=inverse of r grid spacing at each point
+!!  mmax=number of radial r grid points (Teter grid)
+!!  mqgrid=number of grid points in q from 0 to qmax.
+!!  qgrid(mqgrid)=q grid values (bohr**-1).
+!!  rad(mmax)=r grid values (bohr).
+!!  vloc(mmax)=v(r) on radial grid.
+!!  wksincos(mmax,2,2)=contains sine and cosine of 2*pi*r(:)*dq and 2*pi*r(:)*q
+!!    at input :  wksincos(:,1,1)=sine of 2*pi*r(:)*dq
+!!                wksincos(:,2,1)=cosine of 2*pi*r(:)*dq
+!!    wksincos(:,:,2) is not initialized, will be used inside the routine
+!!  zion=nominal valence charge of atom.
+!!
+!! OUTPUT
+!!  epsatm= $4\pi \int[r^2 (v(r)+Zv/r) dr]$
+!!  q2vq(mqgrid)=$q^2 v(q)$
+!!  =$\displaystyle -Zv/\pi+q^2 4\pi\int(\frac{\sin(2\pi q r)}{2 \pi q r})(r^2 v(r)+r Zv)dr$.
+!!  yp1,ypn=derivative of q^2 v(q) wrt q at q=0 and q=qmax
+!!   (needed for spline fitter).
+!!
+!! PARENTS
+!!      psp1in
+!!
+!! CHILDREN
+!!      der_int,sincos
+!!
+!! SOURCE
+
+subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
+&  vloc,wksincos,yp1,ypn,zion)
+
+ use defs_basis
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'psp1lo'
+ use interfaces_64_psp, except_this_one => psp1lo
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mmax,mqgrid
+ real(dp),intent(in) :: zion
+ real(dp),intent(out) :: epsatm,yp1,ypn
+!arrays
+ real(dp),intent(in) :: drad(mmax),qgrid(mqgrid),rad(mmax),vloc(mmax)
+ real(dp),intent(inout) :: wksincos(mmax,2,2)
+ real(dp),intent(out) :: q2vq(mqgrid)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: mma0=2001
+ integer :: iq,ir,irmax
+ real(dp),parameter :: scale=10.0d0
+ real(dp) :: result,test,tpiq
+!arrays
+ real(dp) :: wk(mma0),wk1(mma0),wk2(mma0)
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,*)' psp1lo : enter '
+!if(.true.)stop
+!ENDDEBUG
+
+!Do q=0 separately (compute epsatm)
+!Set up integrand for q=0: Int[r^2 (V(r)+Zv/r) dr]
+!Treat r=0 by itself
+ wk(1)=0.0d0
+
+ do ir=2,mmax
+!  (at large r do not want prefactor of r^2 and should see
+!  V(r)+Zv/r go to 0 at large r)
+   test=vloc(ir)+zion/rad(ir)
+!  DEBUG
+!  write(std_out,'(i4,3es20.10)' )ir,rad(ir),test,rad(ir)*test
+!  ENDDEBUG
+!  In this routine, NO cut-off radius is imposed : the input
+!  vloc MUST be in real(dp) to obtain numerically
+!  accurate values. The error can be on the order of 0.001 Ha !
+   if (abs(test)<1.0d-20) then
+     wk(ir)=0.0d0
+   else
+     wk(ir)=rad(ir)*(rad(ir)*vloc(ir)+zion)
+   end if
+ end do
+!Do integral from 0 to r(max) (disregard contrib beyond r(max)
+!(need numerical derivatives to do integral)
+!Use mmax-1 to convert to Teter s dimensioning starting at 0
+ call der_int(wk,wk2,rad,drad,mmax-1,result)
+
+!DEBUG
+!write(std_out,*)' psp1lo : result ',result
+!stop
+!ENDDEBUG
+
+ epsatm=4.d0*pi*(result)
+!q=0 value of integral is -zion/Pi + q^2 * epsatm = -zion/Pi
+ q2vq(1)=-zion/pi
+
+!Prepare loop over q values
+ irmax=mmax+1
+ do ir=mmax,2,-1
+   test=vloc(ir)+zion/rad(ir)
+   wk1(ir)=test*rad(ir)
+!  Will ignore tail within decade of machine precision
+   if ((scale+abs(test))==scale .and. irmax==ir+1) then
+     irmax=ir
+   end if
+ end do
+!Increase irmax a bit : this is copied from psp1nl
+ irmax=irmax+4
+ if(irmax>mmax)irmax=mmax
+
+!Loop over q values
+ do iq=2,mqgrid
+   tpiq=two_pi*qgrid(iq)
+   call sincos(iq,irmax,mmax,wksincos,rad,tpiq)
+!  set up integrand Sin(2Pi q r)(rV(r)+Zv) for integral
+!$\displaystyle -Zv/\pi + q^2 4\pi \int[\frac{\sin(2\pi q r)}{2\pi q r}(r^2 v(r)+r Zv)dr]$.
+!  Handle r=0 separately
+   wk(1)=0.0d0
+   do ir=2,irmax
+     wk(ir)=wksincos(ir,1,2)*wk1(ir)
+   end do
+!  do integral from 0 to r(max)
+   if(irmax>mmax-1)irmax=mmax-1
+
+   call der_int(wk,wk2,rad,drad,irmax,result)
+!  store q^2 v(q)
+   q2vq(iq)=-zion/pi+2.d0*qgrid(iq)*result
+ end do
+
+!Compute derivatives of q^2 v(q) at ends of interval
+ yp1=0.0d0
+!ypn=$\displaystyle 2\int_0^\infty (\sin (2\pi qmax r)+(2\pi qmax r)\cos (2\pi qmax r)(r V(r)+Z)dr]$
+!integral from r(mmax) to infinity is overkill; ignore
+!set up integrand
+!Handle r=0 separately
+ wk(1)=0.0d0
+ tpiq=two_pi*qgrid(mqgrid)
+ do ir=2,mmax
+   test=vloc(ir)+zion/rad(ir)
+!  Ignore contributions within decade of machine precision
+   if ((scale+abs(test))==scale) then
+     wk(ir)=0.0d0
+   else
+     wk(ir)=(sin(tpiq*rad(ir))+tpiq*rad(ir)*cos(tpiq*rad(ir))) * &
+&     (rad(ir)*vloc(ir)+zion)
+   end if
+ end do
+ call der_int(wk,wk2,rad,drad,mmax-1,result)
+
+ ypn=2.0d0*result
+
+end subroutine psp1lo
+!!***
+
+!!****f* ABINIT/psp1nl
+!! NAME
+!! psp1nl
+!!
+!! FUNCTION
+!! Make Kleinman-Bylander form factors f_l(q) for each l from
+!! 0 to lmax; Vloc is assumed local potential.
+!!
+!! INPUTS
+!!  dr(mmax)=inverse of grid spacing for radial grid
+!!  lloc=angular momentum of local channel (avoid doing integrals for this l)
+!!  lmax=maximum ang momentum for which nonlocal form factor is desired.
+!!  mmax=number of radial grid points for atomic grid
+!!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
+!!  mqgrid=number of grid points for q grid
+!!  qgrid(mqgrid)=values at which form factors are returned
+!!  rad(mmax)=radial grid values
+!!  vloc(mmax)=local pseudopotential on radial grid
+!!  vpspll(mmax,lmax+1)=nonlocal pseudopotentials for each l on radial grid
+!!  wfll(mmax,lmax+1)=reference state wavefunctions on radial grid
+!!  wksincos(mmax,2,2)=contains sine and cosine of 2*pi*r(:)*dq and 2*pi*r(:)*q
+!!    at input :  wksincos(:,1,1)=sine of 2*pi*r(:)*dq
+!!                wksincos(:,2,1)=cosine of 2*pi*r(:)*dq
+!!    wksincos(:,:,2) is not initialized, will be used inside the routine
+!!
+!! OUTPUT
+!!  ekb(mpsang)=Kleinman-Bylander energy,
+!!              {{\ \begin{equation}
+!!               \frac{\int_0^\infty [Rl(r)^2 (Vl(r)-Vloc(r))^2 dr]}
+!!              {\int_0^\infty [Rl(r)^2 (Vl(r)-Vloc(r))   dr]}
+!!               \end{equation} }}
+!!              for each l
+!!  ffspl(mqgrid,2,mpsang)=Kleinman-Bylander form factor f_l(q) and
+!!   second derivative from spline fit for each angular momentum
+!!
+!! NOTES
+!! u_l(r) is reference state wavefunction (input as wfll);
+!! j_l(q) is a spherical Bessel function;
+!! dV_l(r) = vpsp_l(r)-vloc(r) for angular momentum l;
+!! f_l(q) =$ \int_0^{rmax}[j_l(2\pi q r) u_l(r) dV_l(r) r dr]/\sqrt{dvms}$
+!! where dvms=$\displaystyle \int_0^{rmax}[(u_l(r) dV_l(r))^2 dr]$ is the mean
+!! square value of the nonlocal correction for angular momentum l.
+!! E_KB = $\displaystyle \frac{dvms}{\int_0^{rmax}[(u_l(r))^2 dV_l(r) dr]}$.
+!! This is the eigenvalue of the Kleinman-Bylander operator and sets
+!! the energy scale of the nonlocal psp corrections.
+!! Bessel functions replaced by besj, which accomodates args near 0.
+!!
+!! PARENTS
+!!      psp1in
+!!
+!! CHILDREN
+!!      besjm,der_int,sincos,spline
+!!
+!! SOURCE
+
+subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
+&                  qgrid,rad,vloc,vpspll,wfll,wksincos)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+ use m_splines
+
+ use m_special_funcs,   only : besjm
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'psp1nl'
+ use interfaces_64_psp, except_this_one => psp1nl
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: lloc,lmax,mmax,mpsang,mqgrid
+!arrays
+ real(dp),intent(in) :: dr(mmax),qgrid(mqgrid),rad(mmax),vloc(mmax)
+ real(dp),intent(in) :: vpspll(mmax,mpsang),wfll(mmax,mpsang)
+ real(dp),intent(inout) :: wksincos(mmax,2,2)
+ real(dp),intent(out) :: ekb(mpsang),ffspl(mqgrid,2,mpsang)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: dpsang=5
+ integer :: iq,ir,irmax,lp1
+ real(dp) :: dvwf,result,test,tpiq,yp1,ypn
+ character(len=500) :: message
+!arrays
+ real(dp) :: ckb(dpsang),dvms(dpsang),eta(dpsang),renorm(dpsang)
+ real(dp),allocatable :: besjx(:),work1(:),work2(:),work3(:),work4(:),work5(:)
+ real(dp),allocatable :: work_spl(:)
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,*)' psp1nl : enter'
+!stop
+!ENDDEBUG
+
+!Zero out Kleinman-Bylander energies ekb
+ ekb(:)=0.0d0
+!Zero out eta and other parameters too (so 0 s show up in output later)
+ eta(:)=0.0d0
+ dvms(:)=0.0d0
+ ckb(:)=0.0d0
+
+!Allow for no nonlocal correction (lmax=-1)
+ if (lmax/=-1) then
+
+!  Check that lmax is within allowed range
+   if (lmax<0.or.lmax>3) then
+     write(message, '(a,i12,a,a,a,a,a,a,a)' )&
+&     'lmax=',lmax,' is not an allowed value.',ch10,&
+&     'Allowed values are -1 for no nonlocal correction or else',ch10,&
+&     '0, 1, 2, or 3 for maximum l nonlocal correction.',ch10,&
+&     'Action: check the input atomic psp data file for lmax.'
+     MSG_ERROR(message)
+   end if
+
+!  Compute normalizing integrals eta=<dV> and mean square
+!  nonlocal psp correction dvms=<dV^2>
+!  "dvwf" consistently refers to dV(r)*wf(r) where dV=nonlocal correction
+
+   ABI_ALLOCATE(work1,(mmax+1))
+   ABI_ALLOCATE(work2,(mmax+1))
+   ABI_ALLOCATE(work_spl,(mqgrid))
+   ABI_ALLOCATE(work5,(mmax))
+   ABI_ALLOCATE(besjx,(mmax))
+
+   do lp1=1,lmax+1
+
+!    Only do the work if nonlocal correction is nonzero
+     if (lp1 /= lloc+1) then
+
+!      integrand for 0 to r(mmax)
+       do ir=1,mmax
+         dvwf=(vpspll(ir,lp1)-vloc(ir))*wfll(ir,lp1)
+         work1(ir)=wfll(ir,lp1)*dvwf
+       end do
+
+!      do integral
+!      first need derivative of function; note use of
+!      shifted indices to accomodate Mike Teter s choice of 0:mmax-1
+       call der_int(work1,work2,rad,dr,mmax-1,result)
+       eta(lp1)=result
+
+!      DEBUG
+!      write(std_out,*)' psp1nl : write eta(lp1)'
+!      write(std_out,*)result
+!      do ir=1,mmax,61
+!      write(std_out,*)vpspll(ir,lp1),vloc(ir),wfll(ir,lp1)
+!      end do
+!      write(std_out,*)
+!      do ir=1,mmax,61
+!      write(std_out,*)work1(ir),rad(ir),dr(ir)
+!      end do
+!      ENDDEBUG
+
+       do ir=1,mmax
+         dvwf=(vpspll(ir,lp1)-vloc(ir))*wfll(ir,lp1)
+         work1(ir)=dvwf**2
+       end do
+       call der_int(work1,work2,rad,dr,mmax-1,result)
+
+       dvms(lp1)=result
+
+!      If dvms is not 0 for any given angular momentum l,
+!      compute Xavier Gonze s definition of the Kleinman-Bylander
+!      energy E_KB = dvms/eta.  In this case also renormalize
+!      the projection operator to u_KB(r)=$u_l(r) dV(r)/\sqrt{dvms}$.
+!      This means dvwf gets multiplied by the normalization factor
+!      "renorm"=$1/\sqrt{dvms}$ as seen below.
+!      With dvwf=dV(r)*wf(r) for wf(r)=``radial'' wf, the integrand
+!      for each angular momentum l is
+!      Bessel_l(2 $\pi$ q r) * wf(r) * dV(r) * r;
+!      NOTE presence of extra r in integrand.
+
+       if (dvms(lp1)/=0.0d0) then
+         ekb(lp1)=dvms(lp1)/eta(lp1)
+         renorm(lp1)=1.0d0/sqrt(dvms(lp1))
+!        ckb is Kleinman-Bylander "cosine" (Xavier Gonze)
+         ckb(lp1)=eta(lp1)/sqrt(dvms(lp1))
+       else
+         ekb(lp1)=0.0d0
+       end if
+     end if
+   end do
+
+!  Loop on angular momenta
+   do lp1=1,lmax+1
+
+!    Compute form factor if ekb(lp1) not 0
+     if (ekb(lp1)/=0.0d0) then
+
+!      do q=0 separately, non-zero if l=0
+       if(lp1==1)then
+         do ir=1,mmax
+           dvwf=(vpspll(ir,lp1)-vloc(ir))*wfll(ir,lp1)*renorm(lp1)
+           work1(ir)=rad(ir)*dvwf
+         end do
+         call der_int(work1,work2,rad,dr,mmax-1,result)
+         ffspl(1,1,lp1)=result
+       else
+!        For l non-zero, f(q=0) vanishes !
+         ffspl(1,1,lp1)=0.0d0
+       end if
+
+!      Prepare loop over q values
+       irmax=mmax+1
+       do ir=mmax,2,-1
+         test=(vpspll(ir,lp1)-vloc(ir))*wfll(ir,lp1)*renorm(lp1)*rad(ir)
+         work5(ir)=test
+         work1(ir)=0.0d0
+!        Will ignore tail within decade of machine precision
+         if ((10.0d0+abs(test))==10.0d0 .and. irmax==ir+1) then
+           irmax=ir
+         end if
+       end do
+!      Increase irmax a bit
+       irmax=irmax+4
+!      Ask irmax to be lower than mmax
+       if(irmax>mmax-1)irmax=mmax-1
+
+       ABI_ALLOCATE(work3,(irmax-1))
+       ABI_ALLOCATE(work4,(irmax-1))
+
+!      Loop over q values
+       do iq=2,mqgrid
+         tpiq=two_pi*qgrid(iq)
+         call sincos(iq,irmax,mmax,wksincos,rad,tpiq)
+         work3(:)=wksincos(2:irmax,2,2) !Temporary array (Intel compiler compatibility)
+         work4(:)=wksincos(2:irmax,1,2) !Temporary array (Intel compiler compatibility)
+
+!        Handle r=0 separately
+         work1(1)=0.0d0
+         call besjm(tpiq,besjx(2:irmax),work3,(lp1-1),irmax-1,work4,rad(2:irmax))
+         do ir=2,irmax
+           work1(ir)=besjx(ir)*work5(ir)
+         end do
+!        do integral
+         call der_int(work1,work2,rad,dr,irmax,result)
+         ffspl(iq,1,lp1)=result
+       end do
+
+!      Compute yp1=derivative of f(q) at q=0
+       if(lp1/=2)then
+!        For l/=1, yp1=0
+         yp1=0.0d0
+       else
+!        For l=1, yp1=Int [2 Pi r^2 wf(r) dV(r)]/3
+         do ir=1,irmax
+           dvwf=(vpspll(ir,lp1)-vloc(ir))*wfll(ir,lp1)*renorm(lp1)
+           work1(ir)=(two_pi*rad(ir)**2)*dvwf/3.0d0
+         end do
+         call der_int(work1,work2,rad,dr,irmax,result)
+         yp1=result
+       end if
+
+!      Compute ypn=derivative of f(q) at q=qgrid(mqgrid)
+       tpiq=two_pi*qgrid(mqgrid)
+!      Treat ir=1, r=0, separately
+       work1(1)=0.0d0
+!      Here, must distinguish l==0 from others
+       if(lp1==1)then
+!        l==0 : ypn=$\int [2\pi r (-bes1(2\pi r q)) wf(r) dV(r) r dr]$
+!        The sine and cosine of the last point were computed in the previous loop
+!        So, there is no need to call sincos. Note that the rank of besj is 1.
+         call besjm(tpiq,besjx(2:irmax),work3,1,irmax-1,work4,rad(2:irmax))
+         do ir=2,irmax
+           dvwf=(vpspll(ir,lp1)-vloc(ir))*wfll(ir,lp1)*renorm(lp1)
+           work1(ir)=-besjx(ir)*two_pi*rad(ir)*rad(ir)*dvwf
+         end do
+       else
+!        l==1 : ypn=$\int [2\pi r^2 wf(r) dV(r) (j_0(x)-(2/x)j_1(x)) dr]$
+!        l==2 : ypn=$\int [2\pi r^2 wf(r) dV(r) (j_1(x)-(3/x)j_2(x)) dr]$
+!        l==3 : ypn=$\int [2\pi r^2 wf(r) dV(r) (j_2(x)-(4/x)j_3(x)) dr]$
+!        The sine and cosine of the last point were computed in the previous loop
+!        Store first previously computed value with besj of order l, then use
+!        besj of order l-1 (=lp1-2)
+         work1(2:irmax)=besjx(2:irmax)
+         call besjm(tpiq,besjx(2:irmax),work3,(lp1-2),irmax-1,work4,rad(2:irmax))
+         do ir=2,irmax
+           dvwf=(vpspll(ir,lp1)-vloc(ir))*wfll(ir,lp1)*renorm(lp1)
+           work1(ir)=(two_pi*rad(ir)**2)*dvwf*&
+&           ( besjx(ir) - ( dble(lp1)*work1(ir)/(tpiq*rad(ir)) ) )
+         end do
+       end if
+!      work1 is ready for integration
+       call der_int(work1,work2,rad,dr,irmax,result)
+       ypn=result
+
+!      Fit spline to get second derivatives by spline fit
+       call spline(qgrid,ffspl(:,1,lp1),mqgrid,yp1,ypn,&
+&       ffspl(:,2,lp1))
+
+       ABI_DEALLOCATE(work3)
+       ABI_DEALLOCATE(work4)
+
+     else
+
+!      KB energy is zero, put nonlocal correction at l=0 to 0
+       ffspl(:,:,lp1)=0.0d0
+
+     end if
+
+!    End loop on angular momenta
+   end do
+
+   ABI_DEALLOCATE(work1)
+   ABI_DEALLOCATE(work2)
+   ABI_DEALLOCATE(work_spl)
+   ABI_DEALLOCATE(work5)
+   ABI_DEALLOCATE(besjx)
+
+!  End of lmax/=-1 condition
+ end if
+
+end subroutine psp1nl
+!!***
+
+!!****f* ABINIT/der_int
+!! NAME
+!! der_int
+!!
+!! FUNCTION
+!! Given input function f(i) on Teter radial grid, and grid spacing
+!! dr(i), compute function derivative df/dr on points from 0 to n.
+!! Integrate function f(i) on grid r(i) from r(0) to r(nlast).
+!! Note that array dimensions start at 0.
+!!
+!! INPUTS
+!!  f(0 to nlast)=function values on grid
+!!  r(0 to nlast)=radial grid points
+!!  dr(0 to nlast)=INVERSE of spacing on grid
+!!  nlast=radial grid point for upper limit
+!!
+!! OUTPUT
+!!  df(0 to n)=derivative $ \frac{df}{dr}$ on grid
+!!  smf= $ \int_{r(0)}^{r(nlast)} f(r) dr $.
+!!
+!! PARENTS
+!!      psp1lo,psp1nl
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine der_int(ff,df,rr,dr,nlast,smf)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'der_int'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!nmax sets standard number of grid points ! SHOULD BE REMOVED
+!scalars
+ integer,parameter :: nmax=2000
+ integer,intent(in) :: nlast
+ real(dp),intent(out) :: smf
+!no_abirules
+!Note that dimension here starts at 0
+ real(dp), intent(in) :: dr(0:nmax),ff(0:nmax),rr(0:nmax)
+ real(dp), intent(out) :: df(0:nmax)
+
+!Local variables-------------------------------
+!scalars
+ integer :: jj
+ real(dp),parameter :: div12=1.d0/12.d0
+ real(dp) :: hh
+ character(len=500) :: message
+
+! *************************************************************************
+
+!Check that nlast lie within 0 to nmax
+ if (nlast<0.or.nlast>nmax) then
+   write(message, '(a,i12,a,i12)' )&
+&   ' nlast=',nlast,' lies outside range [0,nmax] with dimension nmax=',nmax
+   MSG_BUG(message)
+ end if
+
+!Compute derivatives at lower end, near r=0
+ df(0)=-25.d0/12.d0*ff(0)+4.d0*ff(1)-3.d0*ff(2)+4.d0/3.d0*ff(3)&
+& -1.d0/4.d0*ff(4)
+ df(1)=-1.d0/4.d0*ff(0)-5.d0/6.d0*ff(1)+3.d0/2.d0*ff(2)&
+& -1.d0/2.d0*ff(3)+1.d0/12.d0*ff(4)
+
+!Run over range from just past r=0 to near r(n), using central differences
+ do jj=2,nlast-2
+   df(jj)=(ff(jj-2)-8.d0*(ff(jj-1)-ff(jj+1))-ff(jj+2))*div12
+ end do
+
+!Compute derivative at upper end of range
+ if (nlast < 4) then
+   message = ' der_int: ff does not have enough elements. nlast is too low'
+   MSG_ERROR(message)
+ end if
+
+ df(nlast-1)=-1.d0/12.d0*ff(nlast-4)&
+& +1.d0/2.d0*ff(nlast-3)&
+& -3.d0/2.d0*ff(nlast-2)&
+& +5.d0/6.d0*ff(nlast-1)&
+& +1.d0/4.d0*ff(nlast)
+ df(nlast)=1.d0/4.d0*ff(nlast-4)&
+& -4.d0/3.d0*ff(nlast-3)&
+& +3.d0*ff(nlast-2)&
+& -4.d0*ff(nlast-1)&
+& +25.d0/12.d0*ff(nlast)
+
+!Apply correct normalization over full range
+ do jj=0,nlast
+   df(jj)=df(jj)*dr(jj)
+ end do
+
+ smf=0.d0
+ do jj=0,nlast-1
+   hh=rr(jj+1)-rr(jj)
+   smf=smf+hh*(6.d0*(ff(jj)+ff(jj+1))+hh*(df(jj)-df(jj+1)))
+ end do
+ smf=smf/12.d0
+
+end subroutine der_int
+!!***
+
+!!****f* ABINIT/sincos
+!! NAME
+!! sincos
+!!
+!! FUNCTION
+!! Update the sine and cosine values, needed inside the
+!! pseudopotential routines psp1lo and psp1nl.
+!!
+!! INPUTS
+!!  iq  = number of current wavevector q
+!!  irmax = number of values  of r on the radial grid to be computed
+!!  mmax = dimension of pspwk and rad
+!!  pspwk(:,1,1) and pspwk(:,2,1) : sine and cosine of 2$\pi$ dq * rad
+!!  pspwk(:,1,2) and pspwk(:,2,2) : sine and cosine of 2$\pi$ previous q * rad
+!!  rad(mmax) radial grid
+!!  tpiq = 2 $\pi$ * current wavevector q
+!!
+!! OUTPUT
+!!  pspwk(*,1,2) and pspwk(*,2,2) : sine and cosine of 2$\pi$ current q * rad
+!!
+!! NOTES
+!! The speed was a special concern, so iterative computation
+!! based on addition formula is possible. Interestingly,
+!! this algorithm places strong constraints on accuracy,
+!! so this routine is machine-dependent.
+!!
+!! PARENTS
+!!      psp1lo,psp1nl
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
+
+ use defs_basis
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sincos'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iq,irmax,mmax
+ real(dp),intent(in) :: tpiq
+!arrays
+ real(dp),intent(in) :: rad(mmax)
+ real(dp),intent(inout) :: pspwk(mmax,2,2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ir,nstep
+ real(dp) :: prevcos,prevsin
+ logical :: testmipspro
+#if defined HAVE_LINALG_MLIB
+ real(dp) :: halfpi
+#endif
+
+
+! *************************************************************************
+
+#if defined HAVE_LINALG_MLIB
+ halfpi=asin(1.0d0)
+#endif
+
+ if(iq==2)then
+
+!  Here set up the sin and cos at iq=2
+   do ir=2,irmax
+     pspwk(ir,1,2)=pspwk(ir,1,1)
+     pspwk(ir,2,2)=pspwk(ir,2,1)
+   end do
+
+ else
+!
+!  The sensitivity of the algorithm to changes of nstep
+!  has been tested : for all the machines except SGI - R10000 ,
+!  either using only the hard way, or
+!  using up to nstep=40 causes changes at the level
+!  of 1.0d-16 in the total energy. Larger values of
+!  nstep might be possible, but the associated residual
+!  is already very small ! The accelerated computation of
+!  sine and cosine is essential for a good speed on IBM, but,
+!  fortunately, on the SGI - R10000 the normal computation is fast enough.
+
+   testmipspro=.false.
+#ifdef FC_MIPSPRO
+   testmipspro=.true.
+#endif
+   nstep=40
+   if(iq-(iq/nstep)*nstep == 0 .or. testmipspro)then
+
+!    Every nstep steps, uses the hard way
+     do ir=2,irmax
+#if defined HAVE_LINALG_MLIB
+!      There is a bug in the hp library !! Sine is slightly inaccurate !
+       pspwk(ir,1,2)=cos(tpiq*rad(ir)-halfpi)
+#else
+       pspwk(ir,1,2)=sin(tpiq*rad(ir))
+#endif
+       pspwk(ir,2,2)=cos(tpiq*rad(ir))
+     end do
+
+   else
+
+!    Here the fastest way, iteratively
+     do ir=2,irmax
+       prevsin=pspwk(ir,1,2)
+       prevcos=pspwk(ir,2,2)
+       pspwk(ir,1,2)=prevsin*pspwk(ir,2,1)+prevcos*pspwk(ir,1,1)
+       pspwk(ir,2,2)=prevcos*pspwk(ir,2,1)-prevsin*pspwk(ir,1,1)
+     end do
+
+   end if
+
+ end if ! iq==2
+
+end subroutine sincos
+!!***

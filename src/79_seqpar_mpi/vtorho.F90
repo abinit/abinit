@@ -207,7 +207,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_wffile
  use m_efield
  use m_cgtools
+ use m_gemm_nonlop
 
+ use m_geometry,           only : xred2xcart
+ use m_occ,                only : newocc
+ use m_dtset,              only : testsusmat
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -228,7 +232,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_abi2big,            only : wvl_occ_abi2big,wvl_rho_abi2big,wvl_occopt_abi2big
  use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
- use m_gemm_nonlop
+ use m_tddft,              only : tddft
+ use m_kg,                 only : mkkin
+ use m_suscep_stat,        only : suscep_stat
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
 #endif
@@ -238,20 +245,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
- use interfaces_16_hideleave
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_77_suscep
  use interfaces_79_seqpar_mpi, except_this_one => vtorho
 !End of the abilint section
 
@@ -384,7 +387,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  usefock = (dtset%usefock==1 .and. associated(fock))
  usefock_ACE=0
  if (usefock) usefock_ACE=fock%fock_common%use_ACE
- 
+
 
 !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
@@ -817,7 +820,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
          call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
        end if
-       
+
 
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
@@ -1191,7 +1194,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              write(message,'(a,e12.3)')&
 &             ' ERROR: Wavefunctions not converged : DFT+DMFT calculation cannot be carried out safely ',residm
              call wrtout(std_out,message,'COLL')
-             call leave_new('COLL')
+             write(message,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
+             MSG_ERROR(message)
            end if
 
          else if (paw_dmft%use_dmft>0 .and. residm>tol10.and. dtset%dmftcheck>=0) then
@@ -1289,7 +1293,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
      energies%e_nonlocalpsp = zero
-     if (usefock) then 
+     if (usefock) then
        energies%e_fock     = zero
        if (optforces>0) fock%fock_common%forces=zero
      end if
@@ -2133,7 +2137,6 @@ subroutine wvl_occ()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_occ'
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none

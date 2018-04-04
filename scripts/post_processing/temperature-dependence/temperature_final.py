@@ -237,7 +237,7 @@ def main():
             degen[ispin,ikpt,iband] = count
   
   # Create the random Q-integration (wtq=1/nqpt):
-  if (EIGR2D.wtq == 0):
+  if (abs(EIGR2D.wtq) < tol6):
     wtq = N.ones((nbQ))
     wtq = wtq*(1.0/nbQ)
   else:
@@ -264,7 +264,7 @@ def main():
                all_temp,smearing,eig0_pass,degen,energy,gaussian_smearing)
   total_corr = total.total_corr
   
-  if (EIGR2D.wtq != 0):
+  if (abs(EIGR2D.wtq) > tol6):
     total_wtq = total.total_wtq
     print("Total weigth is ",total_wtq)
     if (total_wtq < 0.9 or total_wtq > 1.1):

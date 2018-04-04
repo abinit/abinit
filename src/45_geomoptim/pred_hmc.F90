@@ -5,10 +5,10 @@
 !!
 !! FUNCTION
 !!  Hybrid Monte Carlo simulation algorithm. The routine generates a markov
-!!  chain of structural configurations (states characterized by ionic positions 
-!!  and lattice parameters) with probability of observing a certian state 
-!!  equal to Gibbs statistical weight (exp(-etotal/kT)/Z).  
-!!   
+!!  chain of structural configurations (states characterized by ionic positions
+!!  and lattice parameters) with probability of observing a certian state
+!!  equal to Gibbs statistical weight (exp(-etotal/kT)/Z).
+!!
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2017-2018 ABINIT group (SPr)
@@ -18,13 +18,13 @@
 !!
 !! INPUTS
 !!  ab_mover =  Data structure containing information about
-!!              input variables related to MD, e.g dtion, masses, etc. 
-!!  hist     =  history of ionic positions, forces, 
+!!              input variables related to MD, e.g dtion, masses, etc.
+!!  hist     =  history of ionic positions, forces,
 !!  itime    =  index of current iteration
 !!  icycle   =  index of current cycle of the iteration
 !!  ntime    =  total number of iterations
 !!  ncycle   =  total number of cycles
-!!  zDEBUG   =  flag indicating whether to print debug info 
+!!  zDEBUG   =  flag indicating whether to print debug info
 !!  iexit    =  flag indicating finilization of mover loop
 !!
 !! OUTPUT
@@ -49,19 +49,20 @@
 #include "abi_common.h"
 
 subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
-    
+
  use defs_basis
  use m_errors
  use m_profiling_abi
  use m_abimover
  use m_abihist
 
+ use m_geometry,  only : xred2xcart
+ use m_numeric_tools,  only : uniformrandom
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_hmc'
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_hmc
 !End of the abilint section
 
@@ -81,16 +82,16 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
  integer       :: seed                                                         ! seed for rnd generator
  integer       :: ii,jj,iacc                                                   ! dummy integers for loop indexes and acceptance decision flag
- real(dp)      :: etotal,epot,ekin,de                                          ! total, potential (electronic), kinetic (ionic) energies and energy difference between initial and proposed states  
+ real(dp)      :: etotal,epot,ekin,de                                          ! total, potential (electronic), kinetic (ionic) energies and energy difference between initial and proposed states
  real(dp)      :: mv2tot,factor                                                ! dummies used for rescaling of velocities
- real(dp)      :: rnd     
+ real(dp)      :: rnd
  real(dp)      :: xred(3,ab_mover%natom)                                       ! reduced coordinates of all ions
  real(dp)      :: vel(3,ab_mover%natom)                                        ! ionic velocities in Cartesian coordinates
  real(dp)      :: mvtot(3)                                                     ! total momentum of the cell used to rescale velocities
  real(dp)      :: mtot,kbtemp                                                  ! total ionic mass and target temperature in energy units
  real(dp)      :: acell(3)                                                     ! lattice parameters
  real(dp)      :: rprimd(3,3)                                                  ! lattice vectors
- 
+
  real(dp),save :: etotal_hmc_prev                                              ! total energy of the initial state
  real(dp),save :: acell_hmc_prev(3)                                            !
  real(dp),save :: rprimd_hmc_prev(3,3)                                         !
@@ -101,7 +102,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
 ! if (option/=1 .and. option/=2 ) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
@@ -210,7 +211,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
 
    call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
-   
+
   !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
   !write(std_out,*) '  xcart_after_update:'
   !write(std_out,*) '  ',xcart(1,:)
@@ -225,7 +226,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
   !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
   !vel(:,:)   = hist%vel(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
 
- else !icycle==ncycle 
+ else !icycle==ncycle
 
   !the only thing left to do, is to compute the difference of the total energies and decide whether to accept the new state
    vel(:,:)=hist%vel(:,:,hist%ihist)

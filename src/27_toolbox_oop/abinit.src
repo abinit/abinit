@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_copy.F90",
- "m_geometry.F90",
  "m_iterators.F90",
  "m_mpiotk.F90",
  "m_nctk.F90",

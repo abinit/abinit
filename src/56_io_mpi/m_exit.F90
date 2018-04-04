@@ -28,11 +28,12 @@ MODULE m_exit
  use m_errors
 
  use m_time,      only : abi_wtime, sec2str
+ use m_fstrings,  only : inupper
  use m_io_tools,  only : open_file
 
  implicit none
 
- private 
+ private
 !!***
 
  public :: exit_init                  ! Initialize the global variables of the module
@@ -44,7 +45,7 @@ MODULE m_exit
  public :: get_timelimit_string       ! Return the time limit in string form.
  public :: exit_check                 ! Test if we should try to stop the code gracefully and to create a restart point.
 
- real(dp),private,save :: WALL0          
+ real(dp),private,save :: WALL0
 ! Origin of time in seconds.
 
  real(dp),private,save :: WTIME_LIMIT=-one
@@ -52,17 +53,17 @@ MODULE m_exit
 
  character(len=fnlen),private,save :: TIMELIMIT_INABIFUNC = "__None__"
 ! Name of the abinit function in which the time limit is handled.
-! Note that there's **only one caller** in charge of the check. 
+! Note that there's **only one caller** in charge of the check.
 ! In structure relaxations, for example, only mover decides whether the itime loop must be exited
 ! and similar time limit handlers located in the children (e.g. scfcv) are automatically deactivated.
 ! This approach facilitates the treatment of nested parallelism e.g. image parallelism and reduce the number of MPI synchronizations.
 ! The drawback is that we loose the possibility of controlling the exit at a fine-grained level.
-! If, for example, mover underestimates the time needed to complete the itime step, scfcv wont' be 
+! If, for example, mover underestimates the time needed to complete the itime step, scfcv wont' be
 ! able to return if the time limit is approaching.
 
 !----------------------------------------------------------------------
 
-CONTAINS  
+CONTAINS
 !!***
 
 !!****f* m_exit/exit_init
@@ -98,7 +99,7 @@ subroutine exit_init(time_limit)
  real(dp),intent(in) :: time_limit
 
 ! *************************************************************************
- 
+
  WTIME_LIMIT = time_limit
  WALL0 = abi_wtime()
 
@@ -112,7 +113,7 @@ end subroutine exit_init
 !! disable_timelimit
 !!
 !! FUNCTION
-!!  Disable the time limit handler. This function should be called by a driver 
+!!  Disable the time limit handler. This function should be called by a driver
 !!  routine that is not able to handle time limit events and wants to prevent
 !!  its children from installing their handlers.
 !!
@@ -124,7 +125,7 @@ end subroutine exit_init
 !!
 !! SOURCE
 
-subroutine disable_timelimit() 
+subroutine disable_timelimit()
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -399,7 +400,6 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
 #define ABI_FUNC 'exit_check'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -426,7 +426,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
 
 ! *************************************************************************
 
- if (iexit_save==0) then   
+ if (iexit_save==0) then
    ! ABINIT will pass again in this routine even after exit call has been detected
 
    if (xmpi_comm_rank(comm)==master) then
@@ -477,7 +477,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
 
    call xmpi_bcast(iexit,master,comm,ierrmpi)
 
- else 
+ else
    ! In case the exit mechanism has already been activated
    iexit=iexit_save
  end if

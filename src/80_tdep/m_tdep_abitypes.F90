@@ -11,19 +11,24 @@ module m_tdep_abitypes
   use m_nctk
   use m_xmpi
   use m_errors
+#ifdef HAVE_NETCDF
+  use netcdf
+#endif
+
+  use m_geometry,         only : xred2xcart
   use m_dynmat,           only : asrif9
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_phij,        only : tdep_build_phij33
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
-  use m_ifc,              only : ifc_type, ifc_init, ifc_print 
+  use m_ifc,              only : ifc_type, ifc_init, ifc_print
   use m_crystal_io,       only : crystal_ncwrite
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
-#ifdef HAVE_NETCDF
-  use netcdf
-#endif
+
+
+
 
   implicit none
 
@@ -34,7 +39,7 @@ module m_tdep_abitypes
   public :: tdep_ifc2phij
   public :: tdep_init_ddb
 
-contains 
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_crystal(Crystal,InVar,Lattice,Sym)
@@ -105,7 +110,7 @@ contains
   double precision, allocatable :: zeff(:,:,:)
   double precision, allocatable :: q1shft(:,:)
 
-! Define matrices for LO-TO  
+! Define matrices for LO-TO
 ! =========================
   ABI_MALLOC(zeff, (3,3,InVar%natom_unitcell)); zeff (:,:,:)=zero
   dielt(:,:)=    zero
@@ -119,8 +124,8 @@ contains
         zeff(ii,ii,iatcell)=InVar%born_charge(InVar%typat_unitcell(iatcell))
         dielt(ii,ii)       =InVar%dielec_constant
       end do
-    end do  
-  else  
+    end do
+  else
     dipdip=0
   end if
 
@@ -156,9 +161,9 @@ contains
     write(InVar%stdout,*) '#############################################################################'
 !   Read IFC from ifc.in (ReadIFC=1)
     call tdep_read_ifc(Ifc,InVar,InVar%natom_unitcell)
-!   Copy Ifc%atmfrc to Phij_NN    
+!   Copy Ifc%atmfrc to Phij_NN
     call tdep_ifc2phij(Ifc%dipdip,Ifc,InVar,Lattice,InVar%natom_unitcell,1,Phij_NN,Rlatt_cart,Shell2at,Sym)
-!   Copy Phij_NN to Ifc%atmfrc 
+!   Copy Phij_NN to Ifc%atmfrc
     call tdep_ifc2phij(Ifc%dipdip,Ifc,InVar,Lattice,InVar%natom_unitcell,0,Phij_NN,Rlatt_cart,Shell2at,Sym)
 !   Write IFC in ifc.out (for check)
     call tdep_write_ifc(Crystal,Ifc,InVar,InVar%natom_unitcell,1)
@@ -169,10 +174,10 @@ contains
       open(unit=55,file='Phij_NN.dat')
       do iatom=1,3*InVar%natom
         write(55,'(10000(f10.6,1x))') Phij_NN(iatom,:)
-      end do  
+      end do
       close(55)
-    end if  
-  end if  
+    end if
+  end if
 
  end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -259,7 +264,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
 #define ABI_FUNC 'tdep_read_ifc'
 !End of the abilint section
 
-  implicit none 
+  implicit none
 
   integer,intent(in) :: natom_unitcell
   type(Input_Variables_type),intent(in) :: InVar
@@ -276,10 +281,10 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
   ifcout=          min(Ifc%nrpt,200)
   Ifc%atmfrc(:,:,:,:,:)=zero
   if (InVar%ReadIFC==1) then
-    write(InVar%stdout,'(a)') ' Read the IFC from ifc.in' 
+    write(InVar%stdout,'(a)') ' Read the IFC from ifc.in'
     open(unit=40,file='ifc.in')
-  else if (InVar%ReadIFC==2) then  
-    write(InVar%stdout,'(a)') ' Read the IFC from ifc.tdep' 
+  else if (InVar%ReadIFC==2) then
+    write(InVar%stdout,'(a)') ' Read the IFC from ifc.tdep'
     open(unit=40,file='ifc.tdep')
   end if
   Ifc%atmfrc(:,:,:,:,:)=zero
@@ -295,7 +300,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
     read(40,*) string
     read(40,*) string
     read(40,*) string
-  end if  
+  end if
   do iatcell=1,natom_unitcell
     read(40,*) string
     read(40,*) string
@@ -310,9 +315,9 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
           read(40,*) atmfrctot1,atmfrctot2,atmfrctot3,atmfrclr1,atmfrclr2,atmfrclr3,atmfrcsr1,atmfrcsr2,atmfrcsr3
         else
           read(40,*) atmfrcsr1,atmfrcsr2,atmfrcsr3
-        end if  
+        end if
         if (dist.lt.InVar%Rcut*0.99) then
-!FB       See ifc_getiaf.F90 (for wghatm)          
+!FB       See ifc_getiaf.F90 (for wghatm)
           Ifc%atmfrc(1,iatcell,mu,jatcell,irpt)=atmfrcsr1/Ifc%wghatm(iatcell,jatcell,irpt)
           Ifc%atmfrc(2,iatcell,mu,jatcell,irpt)=atmfrcsr2/Ifc%wghatm(iatcell,jatcell,irpt)
           Ifc%atmfrc(3,iatcell,mu,jatcell,irpt)=atmfrcsr3/Ifc%wghatm(iatcell,jatcell,irpt)
@@ -335,15 +340,15 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
         read(40,*) string
         read(40,*) string
         read(40,*) string
-      end if  
+      end if
     end do
   end do
   close(40)
   write(InVar%stdout,'(a)') ' ------- achieved'
-! When the IFC come from other calculations (ReadIFC=1), then impose acoustic sum rule  
+! When the IFC come from other calculations (ReadIFC=1), then impose acoustic sum rule
   call asrif9(Ifc%asr,Ifc%atmfrc,natom_unitcell,Ifc%nrpt,Ifc%rpt,Ifc%wghatm)
 
-end subroutine tdep_read_ifc 
+end subroutine tdep_read_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
@@ -355,7 +360,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
 #define ABI_FUNC 'tdep_write_ifc'
 !End of the abilint section
 
-  implicit none 
+  implicit none
 
   integer,intent(in) :: natom_unitcell,unitfile
   type(Input_Variables_type),intent(in) :: InVar
@@ -373,32 +378,32 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   prt_ifc=           1
   if (unitfile.eq.0) then
     open(unit=7,file='ifc.tdep')
-  else if (unitfile.eq.1) then 
+  else if (unitfile.eq.1) then
     open(unit=7,file='ifc.out')
-  end if  
+  end if
 #ifdef HAVE_NETCDF
   if (unitfile.eq.0) then
-    write(InVar%stdout,'(a)') ' Write the IFC of TDEP in ifc.tdep and anaddb.nc' 
-  else  
+    write(InVar%stdout,'(a)') ' Write the IFC of TDEP in ifc.tdep and anaddb.nc'
+  else
     write(InVar%stdout,'(a)') ' Write in ifc.out and anaddb.nc the IFC read previously'
-  end if  
+  end if
   NCF_CHECK_MSG(nctk_open_create(ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal_ncwrite(Crystal,ncid))
 !JB  call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
   write(InVar%stdout,'(a)') ' ------- achieved'
-#else  
+#else
   if (unitfile.eq.0) then
-    write(InVar%stdout,'(a)') ' Write the IFC of TDEP in ifc.tdep' 
-  else  
+    write(InVar%stdout,'(a)') ' Write the IFC of TDEP in ifc.tdep'
+  else
     write(InVar%stdout,'(a)') ' Write in ifc.out the IFC read previously'
-  end if  
+  end if
   call ifc_print(Ifc,"TDEP",7,prt_ifc)
 #endif
   close(7)
 
-end subroutine tdep_write_ifc 
+end subroutine tdep_write_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,Rlatt4abi,Shell2at,Sym)
@@ -408,10 +413,9 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_ifc2phij'
- use interfaces_41_geometry
 !End of the abilint section
 
-  implicit none 
+  implicit none
 
   integer,intent(in) :: dipdip,natom_unitcell,option
   type(Input_Variables_type),intent(in) :: InVar
@@ -429,7 +433,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
   double precision :: vect_ddb(3),vect_tdep(3),xcart(3,natom_unitcell)
   double precision,allocatable :: Phij_33(:,:),Phij_ref(:,:,:)
 
-! Link the atmfrc to the Phij_NN  
+! Link the atmfrc to the Phij_NN
 ! ==============================
   if (dipdip==0.and.option==0) Ifc%atmfrc(:,:,:,:,:)=zero
   if (dipdip==0.and.option==1) Phij_NN(:,:)=zero
@@ -442,15 +446,15 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
         vect_tdep(:)=Rlatt4abi(:,iatcell,jatom)+xcart(:,jatcell)-xcart(:,iatcell)
         tmp(:)=(vect_tdep(:)*Lattice%acell_unitcell(:))**2
         dist=dsqrt(sum(tmp(:)))
-        if (dist.gt.(InVar%Rcut*0.99).and.option==1) then  
+        if (dist.gt.(InVar%Rcut*0.99).and.option==1) then
           Phij_NN((iatcell-1)*3+1:(iatcell-1)*3+3,(jatom-1)*3+1:(jatom-1)*3+3)=zero
           cycle
-        end if  
+        end if
         do irpt=1,Ifc%nrpt
           vect_ddb (:)=Ifc%rpt(:,irpt)+Ifc%rcan(:,jatcell)-Ifc%rcan(:,iatcell)
           tmp(:)=(vect_ddb(:)*Lattice%acell_unitcell(:))**2
           dist=dsqrt(sum(tmp(:)))
-          if (dist.gt.(InVar%Rcut*0.99).and.option==0) then  
+          if (dist.gt.(InVar%Rcut*0.99).and.option==0) then
             Ifc%atmfrc(:,iatcell,:,jatcell,irpt)=zero
             cycle
           end if
@@ -464,7 +468,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
 &                         Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)/Ifc%wghatm(iatcell,jatcell,irpt)
                 else if (option==1) then
                   Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)=Ifc%atmfrc(ii,iatcell,jj,jatcell,irpt)*Ifc%wghatm(iatcell,jatcell,irpt)
-                  if (abs(Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)-0.000040).lt.1.d-6) then 
+                  if (abs(Phij_NN(ii+(iatcell-1)*3,(jatom-1)*3+jj)-0.000040).lt.1.d-6) then
                   end if
                 end if
               enddo
@@ -478,11 +482,11 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
   if (option==0) call asrif9(Ifc%asr,Ifc%atmfrc,natom_unitcell,Ifc%nrpt,Ifc%rpt,Ifc%wghatm)
 
   if (option==1) then
-!   Build the Phij_NN 
+!   Build the Phij_NN
     ABI_MALLOC(Phij_ref,(3,3,Shell2at%nshell)); Phij_ref(:,:,:)=zero
     ABI_MALLOC(Phij_33,(3,3)) ; Phij_33(:,:)=zero
     do ishell=1,Shell2at%nshell
-!     Build the 3x3 IFC per shell    
+!     Build the 3x3 IFC per shell
       iatref=Shell2at%iatref(ishell)
       jatref=Shell2at%jatref(ishell)
       Phij_ref(:,:,ishell)=Phij_NN((iatref-1)*3+1:(iatref-1)*3+3,(jatref-1)*3+1:(jatref-1)*3+3)
@@ -490,21 +494,21 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
     Phij_NN(:,:)=zero
     do ishell=1,Shell2at%nshell
       do eatom=1,Invar%natom
-!       Build the 3x3 IFC of an atom in this shell    
+!       Build the 3x3 IFC of an atom in this shell
         if (Shell2at%neighbours(eatom,ishell)%n_interactions.eq.0) cycle
         do iatshell=1,Shell2at%neighbours(eatom,ishell)%n_interactions
           fatom=Shell2at%neighbours(eatom,ishell)%atomj_in_shell(iatshell)
           isym =Shell2at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
           trans=Shell2at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
           if (fatom.lt.eatom) cycle
-          call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
+          call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans)
 !         Symetrization of the Phij_NN matrix
           Phij_NN((eatom-1)*3+1:(eatom-1)*3+3,3*(fatom-1)+1:3*(fatom-1)+3)=Phij_33(:,:)
           do ii=1,3
             do jj=1,3
               Phij_NN((fatom  -1)*3+ii,3*(eatom-1)+jj)=Phij_33(jj,ii)
-            end do        
-          end do  
+            end do
+          end do
         end do !iatshell
       end do !eatom
     end do !ishell
@@ -520,12 +524,12 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
           enddo !fatom
         enddo !kk
       enddo !jj
-    end do !eatom  
+    end do !eatom
     ABI_FREE(Phij_33)
     ABI_FREE(Phij_ref)
-  end if  
+  end if
 
-end subroutine tdep_ifc2phij 
+end subroutine tdep_ifc2phij
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module m_tdep_abitypes

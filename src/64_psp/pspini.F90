@@ -446,7 +446,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
        psps%vlspl(:,:,itypat)=vlspl(:,:)
        if (.not.psps%vlspl_recipSpace) psps%dvlspl(:, :, itypat) = dvlspl(:, :)
-       if (psps%usepaw==0) then 
+       if (psps%usepaw==0) then
          psps%xccc1d(:,:,itypat)=xccc1d(:,:)
        end if
        psps%xcccrc(itypat)=xcccrc
@@ -484,7 +484,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
                        psps%indlmn(6,ilmn,itypat)=ispin
                        ! The two lines below do not work for PAW
                        if (psps%usepaw==0) then
-                         psps%ekb(ilmn,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(ilmn0,ipspalch) 
+                         psps%ekb(ilmn,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(ilmn0,ipspalch)
                        end if
                        psps%ffspl(:,:,ilmn,itypat)=ffspl_alch(:,:,ilmn0,ipspalch)
                      end if ! ilang is OK
@@ -599,4 +599,71 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  DBG_EXIT("COLL")
 
 end subroutine pspini
+!!***
+
+!!****f* ABINIT/pspcor
+!! NAME
+!! pspcor
+!!
+!! FUNCTION
+!! Compute ecore pseudoion-pseudoion correction energy from epsatm for
+!! different types of atoms in unit cell.
+!!
+!! INPUTS
+!!  natom=number of atoms in cell
+!!  ntypat=number of types of atoms
+!!  typat(natom)=integer label of 'typat' for each atom in cell
+!!  epsatm(ntypat)=pseudoatom energy for each type of atom
+!!  zion(ntypat)=valence charge on each type of atom in cell
+!!
+!! OUTPUT
+!!  ecore=resulting psion-psion energy in Hartrees
+!!
+!! PARENTS
+!!      pspini
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
+
+ use defs_basis
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pspcor'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat
+ real(dp),intent(out) :: ecore
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: epsatm(ntypat),zion(ntypat)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ia
+ real(dp) :: charge,esum
+
+! *************************************************************************
+
+ charge = 0.d0
+ esum = 0.d0
+ do ia=1,natom
+!  compute pseudocharge:
+   charge=charge+zion(typat(ia))
+!  add pseudocore energies together:
+   esum = esum + epsatm(typat(ia))
+ end do
+
+ ecore=charge*esum
+
+end subroutine pspcor
 !!***

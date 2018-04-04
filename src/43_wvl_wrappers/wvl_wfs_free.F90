@@ -73,7 +73,7 @@ subroutine wvl_wfs_free(wfs)
    ABI_DEALLOCATE(wfs%ks%orbs%eval)
  end if
  ABI_DATATYPE_DEALLOCATE(wfs%ks%confdatarr)
- 
+
  if (associated(wfs%ks%psi)) then
    call f_free_ptr(wfs%ks%psi)
  end if

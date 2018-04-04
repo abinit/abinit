@@ -88,11 +88,12 @@
  use m_profiling_abi
  use m_xmpi
 
+ use m_geometry,     only : mkrdim, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvar_o_z'
- use interfaces_41_geometry
  use interfaces_57_iovars, except_this_one => outvar_o_z
 !End of the abilint section
 

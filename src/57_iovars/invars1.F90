@@ -82,14 +82,15 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  use m_xmpi
  use m_atomdata
 
+ use m_fstrings, only : inupper
+ use m_geometry, only : mkrdim
+ use m_parser,   only : intagm, chkint_ge
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars1'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_57_iovars, except_this_one => invars1
 !End of the abilint section
 
@@ -914,25 +915,26 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
    MSG_WARNING(message)
  end if
- 
+
 !Some PAW+U keywords
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
+ if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
- if (dtset%usepawu > 0 .and. dtset%usedmft > 0) then
+ if (dtset%usepawu > 0 ) then
    write(message, '(7a)' )&
 &   'usedmft and usepawu are both activated ',ch10,&
 &   'This is not an usual calculation:',ch10,&
-&   'usepawu will be put to 10:',ch10,&
+&   'usepawu will be put to a value >= 10:',ch10,&
 &   'LDA+U potential and energy will be put to zero'
    MSG_WARNING(message)
  end if
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
- if (dtset%usepawu>0) then
+ if (dtset%usepawu>0.or.dtset%usedmft>0) then
+
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 

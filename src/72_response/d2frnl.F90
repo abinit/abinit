@@ -115,6 +115,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_efmas_defs
  use m_wfk
 
+ use m_geometry, only : metric
  use m_efmas,    only : check_degeneracies
  use m_io_tools, only : file_exists
  use m_hdr,      only : hdr_skip
@@ -129,6 +130,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get,&
 &                       pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
+ use m_kg,       only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -138,7 +140,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal
 !End of the abilint section

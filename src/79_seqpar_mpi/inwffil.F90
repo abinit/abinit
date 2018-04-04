@@ -138,6 +138,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  use m_io_tools, only : file_exists
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
  use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg
+ use m_kg,       only : kpgio
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

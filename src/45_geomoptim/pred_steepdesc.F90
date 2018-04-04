@@ -67,11 +67,12 @@ subroutine pred_steepdesc(ab_mover,forstr,hist,itime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
+ use m_geometry,       only : mkradim, mkrdim, xcart2xred, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_steepdesc'
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_steepdesc
 !End of the abilint section
 

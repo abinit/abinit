@@ -90,16 +90,16 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  use defs_abitypes
  use m_profiling_abi
 
- use defs_datatypes,only : pseudopotential_type
- use m_pawtab, only : pawtab_type
- use m_xmpi,   only : xmpi_sum
+ use defs_datatypes,  only : pseudopotential_type
+ use m_cgtools,       only : dotprod_vn
+ use m_pawtab,        only : pawtab_type
+ use m_xmpi,          only : xmpi_sum
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyxc1'
  use interfaces_18_timing
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_72_response, except_this_one => dfpt_dyxc1

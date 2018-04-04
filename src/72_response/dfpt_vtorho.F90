@@ -180,6 +180,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use m_wfk
  use m_cgtools
 
+ use m_occ,      only : occeig
  use m_hdr,      only : hdr_skip, hdr_io
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
@@ -198,7 +199,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_61_occeig
  use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common

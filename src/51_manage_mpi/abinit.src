@@ -20,8 +20,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "distrb2.F90",
  "distrb2_hf.F90",
- "get_npert_rbz.F90",
- "herald.F90",
  "initmpi_atom.F90",
  "initmpi_band.F90",
  "initmpi_grid.F90",
