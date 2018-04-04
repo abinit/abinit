@@ -26,7 +26,7 @@ MODULE m_haydock_io
 
  use defs_basis
  use m_profiling_abi
- use m_errors 
+ use m_errors
 
  use m_io_tools,       only : open_file
 
@@ -48,30 +48,30 @@ MODULE m_haydock_io
 
  type,public :: haydock_type
 
-   integer :: version        
+   integer :: version
    ! Version of the file
 
-   integer :: hsize          
+   integer :: hsize
    ! Size of the hamiltonian
 
-   integer :: use_coupling   
+   integer :: use_coupling
    ! 1 if coupling is used, 0 if not
 
-   integer :: op             
+   integer :: op
    ! Type of the file
 
-   integer :: nq             
+   integer :: nq
    ! Number of q-points in the file
 
-   integer :: unt            
+   integer :: unt
    ! Fortran unit number.
 
-   real(dp) :: broad          
+   real(dp) :: broad
    ! Broadening factor
 
    complex(dpc) :: factor
 
-   real(dp),allocatable :: qpoints(:,:) 
+   real(dp),allocatable :: qpoints(:,:)
    ! qpoints(3,nq)
 
    integer,allocatable :: niter(:)
@@ -98,7 +98,7 @@ CONTAINS  !====================================================================
 !! FUNCTION
 !! Open the file and initialize haydock file descriptor that will
 !! be used for later access
-!! 
+!!
 !! INPUTS
 !!  filename = Name of the file to be opened
 !!
@@ -195,11 +195,11 @@ subroutine read_dim_haydock(haydock_file)
  ABI_CHECK(haydock_file%version == CUR_VERSION, msg)
 
  read(haydock_file%unt) haydock_file%hsize,haydock_file%use_coupling,&
-&   haydock_file%op,haydock_file%nq,haydock_file%broad 
+&   haydock_file%op,haydock_file%nq,haydock_file%broad
 
  ABI_MALLOC(haydock_file%qpoints,(3,haydock_file%nq))
  ABI_MALLOC(haydock_file%niter,(haydock_file%nq))
- 
+
  do iq = 1,haydock_file%nq
    read(haydock_file%unt) q_file(:)
    read(haydock_file%unt) niter_file
@@ -255,7 +255,7 @@ subroutine write_dim_haydock(haydock_file)
 
  write(haydock_file%unt) haydock_file%version
  write(haydock_file%unt) haydock_file%hsize,haydock_file%use_coupling, &
-&  haydock_file%op,haydock_file%nq,haydock_file%broad 
+&  haydock_file%op,haydock_file%nq,haydock_file%broad
 
 end subroutine write_dim_haydock
 !!***
@@ -327,7 +327,7 @@ end subroutine skip_dim_haydock
 !!
 !! NOTES
 !!  niter = 0 if the q-point has not been found
-!! 
+!!
 !! PARENTS
 !!      bsepostproc,m_haydock
 !!
@@ -353,8 +353,8 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
  type(haydock_type),intent(in) :: haydock_file
 !arrays
  real(dp),intent(in) :: q(3)
- real(dp),allocatable,intent(out) :: bb(:) 
- complex(dpc),allocatable,intent(out) :: aa(:),phi_n(:),phi_nm1(:) 
+ real(dp),allocatable,intent(out) :: bb(:)
+ complex(dpc),allocatable,intent(out) :: aa(:),phi_n(:),phi_nm1(:)
 
 !Local variables ------------------------------
 !scalars
@@ -384,7 +384,7 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
       read(haydock_file%unt) ! phi_nm1
       read(haydock_file%unt) ! phi_n
       read(haydock_file%unt) ! factor
-   end if 
+   end if
  end do
 
  if(found_q) then
@@ -393,7 +393,7 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
    ABI_ALLOCATE(bb,(niter))
    do inn=1,niter
      read(haydock_file%unt)it,aa(inn),bb(inn)
-     if (inn/=it) then 
+     if (inn/=it) then
        write(msg,'(2(a,i0))')" Found it_file: ",it," while it should be: ",inn
        MSG_ERROR(msg)
      end if
@@ -405,7 +405,7 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
    read(haydock_file%unt)factor
  else
    niter = 0
- end if 
+ end if
 
 end subroutine read_haydock
 !!***
@@ -454,11 +454,11 @@ subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, 
  type(haydock_type),intent(in) :: haydock_file
 !arrays
  real(dp),intent(in) :: q(3)
- real(dp),intent(in) :: bb(niter) 
- complex(dpc),intent(in) :: aa(niter),phi_n(hsize),phi_nm1(hsize) 
+ real(dp),intent(in) :: bb(niter)
+ complex(dpc),intent(in) :: aa(niter),phi_n(hsize),phi_nm1(hsize)
 
 !Local variables -----------------------------
-!scalars 
+!scalars
  integer :: it
 
 ! *************************************************************************
@@ -467,7 +467,7 @@ subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, 
  write(haydock_file%unt) niter  ! NB if the previous loop completed inn=niter_max+1
  do it=1,niter        ! if we exited then inn is not incremented by one.
    write(haydock_file%unt)it,aa(it),bb(it)
- end do 
+ end do
  write(haydock_file%unt) phi_nm1
  write(haydock_file%unt) phi_n
  write(haydock_file%unt) factor

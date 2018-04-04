@@ -60,7 +60,7 @@ module m_hamiltonian
  public ::  pawdij2ekb
  public ::  pawdij2e1kb
 
-!These constantes allow to select how H is applied in reciprocal space
+!These constants select how H is applied in reciprocal space
  integer,parameter,public :: KPRIME_H_K=1, K_H_KPRIME=2, K_H_K=3, KPRIME_H_KPRIME=4
 !!***
 
