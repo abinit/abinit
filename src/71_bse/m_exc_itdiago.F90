@@ -30,7 +30,7 @@ MODULE m_exc_itdiago
  use defs_basis
  use defs_abitypes
  use m_bs_defs
- use m_errors 
+ use m_errors
  use m_profiling_abi
  use m_linalg_interfaces
  use m_xmpi
@@ -41,12 +41,12 @@ MODULE m_exc_itdiago
  use m_io_tools,      only : open_file
  use m_time,          only : cwtime
  use m_numeric_tools, only : stats_t, stats_eval
- use m_abilasi,       only : xhpev !xheev, 
+ use m_abilasi,       only : xhpev !xheev,
  use m_bse_io,        only : exc_read_rcblock
 
  implicit none
 
- private 
+ private
 
 #ifdef HAVE_MPI1
  include 'mpif.h'
@@ -317,12 +317,12 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
      end if
 
      ! Extraction of the vector that is iteratively updated.
-     my_phi => phi_block(my_t1:my_t2,state)  
+     my_phi => phi_block(my_t1:my_t2,state)
 
      do line=1,nline_for(state)
        ! Compute etrial=<phi|H|phi> and the residual [H-etrial]|phi>.
        hphi = czero
-       hphi = MATMUL(hexc, my_phi)  
+       hphi = MATMUL(hexc, my_phi)
        call xmpi_sum(hphi,comm,ierr)
 
        etrial = DOT_PRODUCT(my_phi, hphi(my_t1:my_t2))
@@ -330,7 +330,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
        exc_energy(state) =  etrial
 
        ! Compute residual (squared) norm.
-       grad_dir(my_t1:my_t2) = hphi(my_t1:my_t2) - etrial*my_phi 
+       grad_dir(my_t1:my_t2) = hphi(my_t1:my_t2) - etrial*my_phi
        resid(state) =  DOT_PRODUCT(grad_dir(my_t1:my_t2), grad_dir(my_t1:my_t2))
        call xmpi_sum(resid(state),comm,ierr)
        convergence_of(state) = convergence_degree(resid(state))
@@ -810,7 +810,7 @@ subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
    call wrtout(std_out, msg, "COLL", do_flush=.True.)
  end if
 
- return 
+ return
 
  ! Handle IO-error
 10 continue
@@ -869,7 +869,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
 #endif
 
 !************************************************************************
- 
+
  do_ep_lifetime = .FALSE.
 
  call cwtime(cputime, walltime, gflops, "start")
@@ -907,7 +907,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
    call wrtout(std_out," Writing eigenstates on file "//TRIM(oeig_fname)//" with MPI-IO","COLL")
 
    ! Write the header.
-   if (my_rank==master) then 
+   if (my_rank==master) then
      ! Write header using Fortran primitives.
      if (open_file(oeig_fname,msg,newunit=eig_unt,form='unformatted') /= 0) then
        MSG_ERROR(msg)

@@ -65,7 +65,6 @@ sources = [
  "prep_calc_ucrpa.F90",
  "random_stopping_power.F90",
  "read_plowannier.F90",
- "setup_screening.F90",
  "setup_sigma.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

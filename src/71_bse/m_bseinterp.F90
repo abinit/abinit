@@ -41,7 +41,7 @@ MODULE m_bseinterp
  use defs_datatypes,      only : pseudopotential_type
  use m_blas,              only : xdotc
  use m_fft_mesh,          only : calc_ceigr
- use m_crystal,           only : crystal_t 
+ use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse
  use m_wfd,               only : wfd_t, wfd_sym_ur, wfd_get_ur, wfd_change_ngfft
@@ -49,7 +49,7 @@ MODULE m_bseinterp
 
  implicit none
 
- private 
+ private
 !!***
 
 !----------------------------------------------------------------------
@@ -57,13 +57,13 @@ MODULE m_bseinterp
 !!****t* m_haydock/interpolator_t
 !! NAME
 !! interpolator_t
-!! 
+!!
 !! FUNCTION
 !!  Store the overlap matrix elements needed for the interpolation of the BSE Hamiltonian
 !!
 !! TODO
 !!  Decide if we want to make the number of bands k-dependent.
-!! 
+!!
 !! SOURCE
 
  type,public :: interpolator_t
@@ -97,7 +97,7 @@ MODULE m_bseinterp
 
     ! Pointers to datatypes that are already in memory
     type(double_grid_t),pointer :: double_grid => null()
-    ! Mapping between coarse and dense mesh 
+    ! Mapping between coarse and dense mesh
 
  end type interpolator_t
 
@@ -123,9 +123,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
 !!
 !! PARENTS
 !!      m_hexc
@@ -149,7 +147,7 @@ subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
 !Arguments ---------------------------
 !scalars
  integer,intent(in) :: method
- type(interpolator_t),intent(inout) :: interpolator 
+ type(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
  type(wfd_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
@@ -176,7 +174,7 @@ subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
 
  ABI_UNUSED(Pawtab(1)%basis_size)
  !paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
- 
+
  interpolator%double_grid => double_grid
  interpolator%mband_dense = Wfd_dense%mband
  interpolator%mband_coarse = Wfd_coarse%mband
@@ -232,9 +230,7 @@ end subroutine interpolator_init
 !!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
 !!
 !! PARENTS
 !!      m_hexc
@@ -257,11 +253,7 @@ subroutine int_alloc_work(interpolator, work_size)
 !Arguments ---------------------------
 !scalars
  integer,intent(in) :: work_size
- type(interpolator_t),intent(inout) :: interpolator 
-
-!Local variables ---------------------
-!scalars
-!arrays
+ type(interpolator_t),intent(inout) :: interpolator
 
 !*****************************************************************************
 
@@ -282,9 +274,7 @@ end subroutine int_alloc_work
 !!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
 !!
 !! PARENTS
 !!      m_hexc
@@ -306,11 +296,7 @@ subroutine int_free_work(interpolator)
 
 !Arguments ---------------------------
 !scalars
- type(interpolator_t),intent(inout) :: interpolator 
-
-!Local variables ---------------------
-!scalars
-!arrays
+ type(interpolator_t),intent(inout) :: interpolator
 
 !*****************************************************************************
 
@@ -332,12 +318,10 @@ end subroutine int_free_work
 !!
 !! FUNCTION
 !! Compute the overlaps prefactors
-!! 
+!!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
 !!
 !! PARENTS
 !!      m_bseinterp
@@ -360,7 +344,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
 
 !Arguments ---------------------------
 !scalars
- type(interpolator_t),intent(inout) :: interpolator 
+ type(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
  type(wfd_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
@@ -413,14 +397,14 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
  interpolator%overlaps = czero
 
  ! TODO
- ! 1) Choose whether we want to compute only dvv, dcc or all dbb 
+ ! 1) Choose whether we want to compute only dvv, dcc or all dbb
  ! 2) Check the ordering of the loops
  ! 3) Improve vertex -> neighbour (in double_grid ?)
  do spin = 1,nsppol
    do ik_dense = 1,double_grid%nbz_dense
 
      ! MPI parallelization
-     ! We assume that each node owns in memory the full set of wavefunctions 
+     ! We assume that each node owns in memory the full set of wavefunctions
      ! both coarse and dense k-mesh and both spins.
      if (mod(ik_dense, nprocs) /= my_rank) cycle
 
@@ -447,7 +431,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
 
        ! From indices_dense -> indices_coarse
        curindices_coarse = curindices_dense(1:3) + neighbour(:)
-  
+
        ! From indices_coarse -> ik_ibz in the coarse mesh
        call get_kpt_from_indices_coarse(curindices_coarse,double_grid%maxcomp_coarse,&
 &        double_grid%inttoik_coarse,double_grid%g0_coarse,double_grid%nbz_closedcoarse,ik_coarse,g0)
@@ -464,7 +448,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
          ! ur(ib_dense, ik_dense)
          call wfd_sym_ur(Wfd_dense,Cryst,Kmesh_dense,ib_dense,ik_dense,spin,ur_dense)
 
-         if (ANY(diffg0/=0)) then 
+         if (ANY(diffg0/=0)) then
            !ur_kbz = ur_kbz*e(ig0r)
            ur_dense(:) = ur_dense(:)*ceigr(:)
          end if
@@ -486,7 +470,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
            call wfd_sym_ur(Wfd_coarse,Cryst,Kmesh_coarse,ib_coarse,ik_coarse,spin,ur_coarse)
 
            ! ovlp = < u_{ib_coarse,ik_coarse} | u_{ib_dense,ik_dense} >
-           ovlp =  xdotc(nfft,ur_coarse,1,ur_dense,1)/nfft 
+           ovlp =  xdotc(nfft,ur_coarse,1,ur_dense,1)/nfft
 
            ! Filter too low values
            if (ABS(ovlp) < threshold) ovlp = czero
@@ -569,7 +553,7 @@ subroutine int_preprocess_tables(interpolator,double_grid)
  interpolator%interp_factors = zero
 
  do ik_dense = 1,double_grid%nbz_dense
-   
+
    ! From ik_ibz in the dense mesh -> indices_dense
    iorder = double_grid%iktoint_dense(ik_dense)
    !g01 = double_grid%g0_dense(:,iorder)
@@ -602,7 +586,6 @@ subroutine int_preprocess_tables(interpolator,double_grid)
    end do
 
    curindex(ik_coarse) = curindex(ik_coarse) + 1
-
  end do
 
  ABI_FREE(curindex)
@@ -617,7 +600,7 @@ end subroutine int_preprocess_tables
 !! int_compute_corresp
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
 !! BSp<type(excparam)=The parameter for the Bethe-Salpeter run.
 !! grid <double_grid_t>=Correspondence between coarse and fine k-grid
@@ -625,9 +608,9 @@ end subroutine int_preprocess_tables
 !!
 !! OUTPUT
 !! corresp(Bsp%nreh(spin),8)= Correspondence between a transition on the
-!!   coarse mesh and its i-th neighbour for i in [1,2,..,8]. 
+!!   coarse mesh and its i-th neighbour for i in [1,2,..,8].
 !!
-!! TODO: 
+!! TODO:
 !!  Some operations are faster if we allocate with shape (8,nreh(spin))
 !!
 !! PARENTS
@@ -638,7 +621,6 @@ end subroutine int_preprocess_tables
 !! SOURCE
 
 subroutine int_compute_corresp(interpolator,BSp,double_grid)
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -653,7 +635,6 @@ subroutine int_compute_corresp(interpolator,BSp,double_grid)
  type(excparam),intent(in) :: BSp
  type(double_grid_t),intent(in) :: double_grid
  type(interpolator_t),intent(inout) :: interpolator
-!arrays
 
 !Local variables ------------------------------
 !scalars
@@ -726,9 +707,7 @@ end subroutine int_compute_corresp
 !!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
 !!
 !! PARENTS
 !!      m_hexc
@@ -751,7 +730,6 @@ subroutine interpolator_normalize(interpolator)
 !Arguments ---------------------------
 !scalars
  type(interpolator_t),intent(inout) :: interpolator
-!arrays
 
 !Local variables ---------------------
 !scalars
@@ -767,8 +745,8 @@ subroutine interpolator_normalize(interpolator)
    do ivertex = 1, interpolator%nvert
      do ib_dense = 1, interpolator%mband_dense
        do ik_dense = 1, interpolator%double_grid%nbz_dense
-         overlaps(:) = interpolator%overlaps(:,ib_dense,ivertex,ik_dense,spin)  
-         sum_ovlp = SQRT(REAL(SUM(GWPC_CONJG(overlaps(:))*overlaps(:))))       
+         overlaps(:) = interpolator%overlaps(:,ib_dense,ivertex,ik_dense,spin)
+         sum_ovlp = SQRT(REAL(SUM(GWPC_CONJG(overlaps(:))*overlaps(:))))
          if (ABS(sum_ovlp) > tol6) then
            overlaps(:) = overlaps(:)/sum_ovlp
          else
@@ -808,7 +786,6 @@ end subroutine interpolator_normalize
 
 subroutine interpolator_free(interpolator)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -819,8 +796,6 @@ subroutine interpolator_free(interpolator)
 
 !Arguments ---------------------------
  type(interpolator_t),intent(inout) :: interpolator
-
-!Local variables ---------------------
 
 !*****************************************************************************
 
@@ -845,5 +820,5 @@ end subroutine interpolator_free
 
 !-------------------------------------------------------------------
 
-end module 
+end module
 !!***
