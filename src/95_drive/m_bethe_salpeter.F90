@@ -4,7 +4,8 @@
 !!  m_bethe_salpeter
 !!
 !! FUNCTION
-!!
+!!  Main routine to calculate dielectric properties by solving the Bethe-Salpeter equation in
+!!  Frequency-Reciprocal space on a transition (electron-hole) basis set.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)

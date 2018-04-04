@@ -36,7 +36,7 @@ sources = [
  "nonlinear.F90",
  "pawuj_drive.F90",
  "respfn.F90",
- "screening.F90",
+ "m_screening_driver.F90",
  "sigma.F90",
  "testfi.F90",
  "timana.F90",
