@@ -13,6 +13,7 @@ import netCDF4 as nc
 from .mpi import MPI, comm, size, rank, mpi_watch
 
 from .constants import tol5, tol6, me_amu, kb_HaK
+from .functions import get_bose
 from . import EpcFile
 
 __all__ = ['DdbFile']
@@ -28,6 +29,16 @@ class DdbFile(EpcFile):
     def __init__(self, *args, **kwargs):
         self.asr = kwargs.pop('asr', True)
         super(DdbFile, self).__init__(*args, **kwargs)
+
+    def set_amu(self, amu):
+        """
+        Set the values for the atom masses.
+
+        Arguments:
+            amu: [ntypat]
+                Atom masses for each atom type, in atomic mass units.
+        """
+        self.amu = np.array(amu)
 
     def read_nc(self, fname=None):
         """Open the DDB.nc file and read it."""
@@ -112,16 +123,11 @@ class DdbFile(EpcFile):
     def nmode(self):
         return 3 * self.natom
 
-    def compute_dynmat(self, asr=None):
+    def get_mass_scaled_dynmat_cart(self):
         """
-        Diagonalize the dynamical matrix.
-    
-        Returns:
-          omega: the frequencies, in Ha
-          eigvect: the eigenvectors, in reduced coord
+        Format the dynamical matrix in a 3Nx3N matrix,
+        scale with masses, and transform into Cartesian coordinates.
         """
-        asr = asr if asr is not None else self.asr
-    
         # Retrive the amu for each atom
         amu = zeros(self.natom)
         for ii in np.arange(self.natom):
@@ -141,10 +147,6 @@ class DdbFile(EpcFile):
                     E2D_cart[dir1,ii,dir2,jj] += (self.E2D[ii,dir3,jj,dir4] *
                             self.gprimd[dir1,dir3] * self.gprimd[dir2,dir4])
 
-        # DEBUG
-        #print(repr(E2D_cart))
-        # END DEBUG
-    
         # Reduce the 4 dimensional E2D_cart matrice to 2 dimensional Dynamical matrice
         # with scaled masses.
         Dyn_mat = zeros((3*self.natom,3*self.natom),dtype=complex)
@@ -159,11 +161,54 @@ class DdbFile(EpcFile):
                                           me_amu / np.sqrt(amu[ii]*amu[jj]))
     
         # Hermitianize the dynamical matrix
-        dynmat = np.matrix(Dyn_mat)
+        #dynmat = np.matrix(Dyn_mat)
+        dynmat = Dyn_mat
         dynmat = 0.5 * (dynmat + dynmat.transpose().conjugate())
+
+        return dynmat
+
+
+    def get_E2D_cart(self):
+        """
+        Transform the 2nd-order matrix from non-cartesian coordinates
+        to cartesian coordinates...and also swap atom and cartesian indicies.
+        """
+        # Transform from 2nd-order matrix (non-cartesian coordinates, 
+        # masses not included, asr not included ) from self to
+        # dynamical matrix, in cartesian coordinates, asr not imposed.
+        E2D_cart = zeros((3,self.natom,3,self.natom),dtype=complex)
+        for ii in np.arange(self.natom):
+          for jj in np.arange(self.natom):
+            for dir1 in np.arange(3):
+              for dir2 in np.arange(3):
+                for dir3 in np.arange(3):
+                  for dir4 in np.arange(3):
+                    E2D_cart[dir1,ii,dir2,jj] += (self.E2D[ii,dir3,jj,dir4] *
+                            self.gprimd[dir1,dir3] * self.gprimd[dir2,dir4])
+
+        return E2D_cart
+                                        
+
+    def compute_dynmat(self, asr=None, zero_negative=True):
+        """
+        Diagonalize the dynamical matrix.
+    
+        Returns:
+          omega: the frequencies, in Ha
+          eigvect: the eigenvectors, in reduced coord
+        """
+        asr = asr if asr is not None else self.asr
+    
+        # Retrive the amu for each atom
+        amu = zeros(self.natom)
+        for ii in np.arange(self.natom):
+          jj = self.typat[ii]
+          amu[ii] = self.amu[jj-1]
+    
+        dynmat = self.get_mass_scaled_dynmat_cart()
     
         # Diagonalize the matrix
-        eigval, eigvect = np.linalg.eigh(Dyn_mat)
+        eigval, eigvect = np.linalg.eigh(dynmat)
     
         # Scale the eigenvectors 
         for ii in np.arange(self.natom):
@@ -172,10 +217,11 @@ class DdbFile(EpcFile):
             eigvect[ipert] = eigvect[ipert] * np.sqrt(me_amu / amu[ii])
 
         # Nullify imaginary frequencies
-        for i, eig in enumerate(eigval):
-          if eig < 0.0:
-            warnings.warn("An eigenvalue is negative with value: {} ... but proceed with value 0.0".format(jj))
-            eigval[i] = 0.0
+        if zero_negative:
+            for i, eig in enumerate(eigval):
+              if eig < 0.0:
+                warnings.warn("An eigenvalue is negative with value: {} ... but proceed with value 0.0".format(jj))
+                eigval[i] = 0.0
 
         # Impose the accoustic sum rule
         if asr and self.is_gamma:
@@ -184,10 +230,43 @@ class DdbFile(EpcFile):
           eigval[2] = 0.0
 
         # Frequencies
-        self.omega = np.sqrt(eigval)
+        self.omega = np.sqrt(np.abs(eigval)) * np.sign(eigval)
         self.eigvect = eigvect
     
         return self.omega, self.eigvect
+
+    def get_reduced_displ(self):
+        """
+        Compute the mode eigenvectors, scaled by the mode displacements
+        Also transform from cartesian to reduced coordinates.
+
+        Returns: polvec[nmode,3,natom]
+        """
+
+        # Minimal value for omega (Ha)
+        omega_tolerance = 1e-5
+
+        self.polvec = zeros((self.nmode,3,self.natom), dtype=complex)
+        xi_at = zeros(3, dtype=complex)
+
+        omega, eigvect = self.compute_dynmat()
+
+        for imode in range(self.nmode):
+            # Skip mode with zero frequency (leave displacements null)
+            if omega[imode].real < omega_tolerance:
+              continue
+
+            z0 = 1. / np.sqrt(2.0 * omega[imode].real)
+
+            for iatom in np.arange(self.natom):
+                for idir in range(3):
+                    xi_at[idir] = eigvect[3*iatom+idir,imode] * z0
+
+                for idir in range(3):
+                    for jdir in range(3):
+                        self.polvec[imode,idir,iatom] += xi_at[jdir] * self.gprimd[jdir,idir]
+
+        return self.polvec
     
     def get_reduced_displ_squared(self):
         """
@@ -262,22 +341,9 @@ class DdbFile(EpcFile):
 
         bose = zeros((3*self.natom, len(temperatures)))
 
+        #bose[:,:] = get_bose(self.omega, temperatures)
         for imode, omega in enumerate(self.omega):
-            omega = omega.real
-            if omega < tol6:
-                continue
-
-            for tt, T in enumerate(temperatures):
-
-                if T < tol6:
-                    continue
-
-                x = omega / (kb_HaK * T)
-
-                if x > 50.:
-                    continue
-
-                bose[imode,tt] = 1. / (np.exp(x) - 1)
+            bose[imode,:] = get_bose(omega, temperatures)
 
         return bose
 

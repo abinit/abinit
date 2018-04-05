@@ -4,11 +4,11 @@ from ..core.constants import Ha2eV
 from ..core.util import report_runtime
 from ..core import EpcAnalyzer
 
-__all__ = ['compute']
+__all__ = ['compute_cumulant']
 
 
 @report_runtime
-def compute(
+def compute_cumulant(
 
         # Options
         temperature = True,
@@ -22,6 +22,8 @@ def compute(
         double_grid = False,
         write = True,
         verbose = False,
+        cumulant = False,
+        fan_active = False,
 
         # Parameters
         nqpt = 1,
@@ -30,7 +32,6 @@ def compute(
         temp_range = [0, 600, 50],
         omega_range = [-0.1, 0.1, 0.001],
         fermi_level = None,
-        amu = None,
 
         # File names
         rootname = 'epc.out',
@@ -144,15 +145,8 @@ def compute(
     omega_range: ([0,0,1])
         Minimum, maximum and step frequency for the self-energy.
 
-    fermi_level:
-        The fermi energy, in Hartree.
-        Will be read from the files if not specified.
 
-    amu: [ntypat]
-        The atomic masses, in amu.
-        Will be read from the files if not specified.
-
-    Film names
+    File names
     ----------
 
     rootname: ('epc.out')
@@ -219,8 +213,7 @@ def compute(
         temp_range=temp_range,
         omega_range=omega_range,
         smearing=smearing_Ha,
-        fermi_level=fermi_level,
-        amu=amu,
+        fermi_level = fermi_level,
 
         write=write,
         rootname=rootname,
@@ -256,6 +249,22 @@ def compute(
             if spectral_function:
                 epca.compute_zp_spectral_function()
 
+    if cumulant:
+
+        if temperature:
+            if double_grid:
+                epca.compute_td_self_energy_static_double_grid()
+            else:
+                epca.compute_td_self_energy_static()
+
+        else:
+            if double_grid:
+                epca.compute_zp_self_energy_static_double_grid()
+            else:
+                epca.compute_zp_self_energy_static()
+                if fan_active:
+                   epca.compute_zp_self_energy_fan_active()
+
     if dynamical and split_active:
 
         if renormalization:
@@ -266,13 +275,7 @@ def compute(
                 else:
                     epca.compute_dynamical_td_renormalization()
             else:
-                if double_grid:
-
-                   if mode:
-                       epca.compute_dynamical_zp_renormalization_modes_double_grid()
-
-                else: 
-                   epca.compute_dynamical_zp_renormalization()
+                epca.compute_dynamical_zp_renormalization()
 
         if broadening:
 

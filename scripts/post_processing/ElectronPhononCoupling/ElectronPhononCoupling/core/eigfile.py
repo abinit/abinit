@@ -31,7 +31,10 @@ class EigFile(EpcFile):
 
         with nc.Dataset(fname, 'r') as root:
 
+            # nspin, nkpt, nband
             self.EIG = root.variables['Eigenvalues'][:,:,:] 
+
+            # nkpt, 3
             self.Kptns = root.variables['Kptns'][:,:]
 
     @mpi_watch

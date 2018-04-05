@@ -3,6 +3,8 @@ from . import constants
 from . import util
 from . import mathutil
 
+from .functions import *
+
 from .epcfile import *
 from .eigfile import *
 from .ddbfile import *

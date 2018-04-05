@@ -19,6 +19,10 @@ Requires
     * mpi4py >= 2.0.0
     * netCDF4 >= 1.2.1
 
+Building the netCDF4 dependency is sometimes delicate. On certain systems,
+it might be necessary to set the CC environment variable to the same compiler
+that was used to build python. E.g. CC=gcc
+
 Usage
 -----
 
