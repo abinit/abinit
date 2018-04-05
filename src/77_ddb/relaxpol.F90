@@ -11,7 +11,7 @@
 !!    of Na Sai et al., PRB 66, 104108 (2002).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MVeithen)
+!! Copyright (C) 1999-2018 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

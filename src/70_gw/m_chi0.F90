@@ -7,7 +7,7 @@
 !!  This module provides tools for the computation of the irreducible polarizability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2018 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,7 +111,6 @@ CONTAINS  !=====================================================================
 !!      cchi0,cchi0q0_intraband
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -141,7 +140,6 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 !Local variables-------------------------------
 !scalars
  integer :: itim,io,isym,ig1,ig2,nthreads
- integer :: jj,ii,s_jj,pad_jj,pad_ii
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
@@ -150,6 +148,8 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
  !complex(gwpc),allocatable :: rhotwg_I(:),rhotwg_J(:)
 
 ! *************************************************************************
+
+ ABI_UNUSED(nspinor)
 
  nthreads = xomp_get_max_threads()
 
@@ -272,10 +272,8 @@ end subroutine assemblychi0_sym
 !!  rhotwg_I(npw)=Required linear combination of the oscillator matrix elements.
 !!
 !! PARENTS
-!!      m_chi0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -381,7 +379,6 @@ end subroutine mkrhotwg_sigma
 !!      cchi0,cchi0q0,cchi0q0_intraband
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -672,7 +669,6 @@ end subroutine symmetrize_afm_chi0
 !!      cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -707,13 +703,13 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
 
 !Local variables-------------------------------
 !scalars
- integer :: itim,io,isym,idir,jdir,jj,ii,s_jj,pad_jj,pad_ii
+ integer :: itim,io,isym,idir,jdir
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
  integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
  complex(dpc) :: mir_kbz(3)
- complex(gwpc),allocatable :: rhotwg_sym(:),rhotwg_I(:),rhotwg_J(:)
+ complex(gwpc),allocatable :: rhotwg_sym(:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
 
 !************************************************************************
@@ -914,7 +910,6 @@ end subroutine accumulate_chi0_q0
 !!      cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1116,7 +1111,7 @@ end subroutine accumulate_sfchi0_q0
 !!
 !! FUNCTION
 !! Update the spectral function of the irreducible polarizability for the contribution
-!! of one pair of occupied-unoccupied states, for each frequenciy.
+!! of one pair of occupied-unoccupied states, for each frequency.
 !! If symchi==1, the symmetries of the little group of the external q-point are used
 !! to symmetrize the contribution in the full Brillouin zone. In this case, the routine computes:
 !!
@@ -1162,11 +1157,10 @@ end subroutine accumulate_sfchi0_q0
 !!      cchi0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
-subroutine assemblychi0sf(ik_bz,nspinor,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
+subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 & factocc,my_wl,iomegal,wl,my_wr,iomegar,wr,nomegasf,chi0sf)
 
 
@@ -1181,7 +1175,7 @@ subroutine assemblychi0sf(ik_bz,nspinor,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_ep
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_bz,iomegal,iomegar,my_wl,my_wr,nomegasf,npwe,npwepG0
- integer,intent(in) :: nspinor,symchi
+ integer,intent(in) :: symchi
  real(dp),intent(in) :: factocc,wl,wr
  type(gsphere_t),intent(in) :: Gsph_epsG0
  type(littlegroup_t),intent(in) :: Ltg_q
@@ -1364,7 +1358,6 @@ end subroutine assemblychi0sf
 !!      cchi0,cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1457,7 +1450,6 @@ end subroutine approxdelta
 !!      m_chi0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 !!
@@ -1567,7 +1559,6 @@ end subroutine calc_kkweight
 !!      cchi0,cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1721,7 +1712,6 @@ end subroutine setup_spectral
 !!      cchi0,cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1808,7 +1798,6 @@ end subroutine hilbert_transform
 !!      cchi0q0
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2431,7 +2420,6 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
 !scalars
  integer :: ib1,ib2
  real(dp) :: deltaeGW_b1kmq_b2k,deltaf_b1kmq_b2k,e_b1_kmq,f_b1_kmq
- character(len=500) :: msg
 !arrays
  real(dp), ABI_CONTIGUOUS pointer :: qp_energy(:,:,:),qp_occ(:,:,:)
 

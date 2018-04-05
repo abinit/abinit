@@ -9,7 +9,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2018 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -144,7 +144,8 @@ module m_fock
     ! hybrid mixing coefficient for the short-range Fock contribution
 
   real(dp) :: hyb_range_dft
-    ! hybrid range for separation, used in the DFT functional (should be equal fo hyb_range_fock, but not true for HSE03)
+    ! hybrid range for separation, used in the DFT functional 
+    ! (should be equal to hyb_range_fock, but this is not true for HSE03)
 
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution 
@@ -347,7 +348,7 @@ contains
 !!
 !! SOURCE
 
-subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
+subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -360,7 +361,7 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
  type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
@@ -515,7 +516,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ibg,icg,icp,ier,ik,ikg,ikpt,isppol,isym,itypat,jkpt,jpw,jsym,mband,mgfft,mkpt,mkptband
- integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
+ integer :: n1,n2,n3,n4,n5,n6,nband,ncpgr,nkpt_bz,nproc_hf,npwj,timrev,use_ACE,v1,v2,v3
  integer :: my_jkpt,jkg_this_proc,my_nsppol,my_nspinor
  real(dp) :: dksqmax,arg
  character(len=500) :: msg
@@ -688,7 +689,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
    fockcommon%use_ACE=use_ACE
-   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,use_ACE)
+   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -766,71 +767,23 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! === Initialize the hybrid coefficient ===
 ! =========================================
    fockcommon%ixc = dtset%ixc
+!  By convention, positive values are the default values for the ixc, 
+!  while negative values have been set by the user (and stored as negative numbers)
+   fockcommon%hyb_mixing=abs(dtset%hyb_mixing)
+   fockcommon%hyb_mixing_sr=abs(dtset%hyb_mixing_sr)
+   fockcommon%hyb_range_dft=abs(dtset%hyb_range_dft)
+   fockcommon%hyb_range_fock=abs(dtset%hyb_range_fock)
 
-!  Default values for the parameters
-   fockcommon%hyb_mixing=zero
-   fockcommon%hyb_mixing_sr=zero
-   fockcommon%hyb_range_dft=zero
-   fockcommon%hyb_range_fock=zero
-
-   if (dtset%ixc==40) then
-     fockcommon%hyb_mixing=one
-     fockcommon%hyb_mixing_sr=zero
-     fockcommon%hyb_range_dft=zero
-     fockcommon%hyb_range_fock=zero
-     msg=' - This is an Hartree-Fock calculation. The mixing coefficient alpha is set to 1.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc==41) then
-     fockcommon%hyb_mixing=one/four
-     fockcommon%hyb_mixing_sr=zero
-     fockcommon%hyb_range_dft=zero
-     fockcommon%hyb_range_fock=zero
-     msg=' - This is a standard PBE0 calculation. The mixing coefficient alpha is set to 0.25.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc==42) then
-     fockcommon%hyb_mixing=one/three
-     fockcommon%hyb_mixing_sr=zero
-     fockcommon%hyb_range_dft=zero
-     fockcommon%hyb_range_fock=zero
-     msg=' - This is a modified PBE0 calculation. The mixing coefficient alpha is set to 0.33.'
-     call wrtout(std_out,msg,'COLL')
-   end if
-   if (dtset%ixc<0) then
-     call libxc_functionals_get_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
-&                                            hyb_range=fockcommon%hyb_range_dft)
-     fockcommon%hyb_range_fock=fockcommon%hyb_range_dft
-   end if
-
-!  Take the values from the input variables
-   if(abs(dtset%hyb_mixing+one)>tol8)fockcommon%hyb_mixing=dtset%hyb_mixing
-   if(abs(dtset%hyb_mixing_sr+one)>tol8)fockcommon%hyb_mixing_sr=dtset%hyb_mixing_sr
-   if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hyb_range_fock+one)>tol8)then
-     fockcommon%hyb_range_dft=dtset%hyb_range_dft
-     fockcommon%hyb_range_fock=dtset%hyb_range_fock
-  else if(abs(dtset%hyb_range_dft+one)>tol8 .and. abs(dtset%hyb_range_fock+one)<tol8)then
-     fockcommon%hyb_range_dft=dtset%hyb_range_dft
-     fockcommon%hyb_range_fock=dtset%hyb_range_dft
-  else if(abs(dtset%hyb_range_dft+one)<tol8 .and. abs(dtset%hyb_range_fock+one)>tol8)then
-     fockcommon%hyb_range_dft=dtset%hyb_range_fock
-     fockcommon%hyb_range_fock=dtset%hyb_range_fock
-  endif
-
-!  Possibly modify the values from libxc
-   if (dtset%ixc<0) then
-!     call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
-!&                                            hyb_range=fockcommon%hyb_range_dft)
-!DEBUG
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_range=',fockcommon%hyb_range
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing=',fockcommon%hyb_mixing
-!    write(std_out,*)' m_fock.F90/fock_init.F90 : fockcommon%hyb_mixing_sr=',fockcommon%hyb_mixing_sr
-!    fockcommon%hyb_range=1.587
-!ENDDEBUG
-     if (abs(fockcommon%hyb_mixing)>tol8.or.abs(fockcommon%hyb_mixing_sr)>tol8) then
-       msg=' - This is a hybrid XC functional from LibXC.' 
-       msg=msg//' The mixing and range coeffs are set accordingly, then possibly overriden by expert user.'
-       call wrtout(std_out,msg,'COLL')
+!  Set the hybrid parameters if functional from libxc for which parameters can be changed, or if the user asked to do so. 
+!  Usually, these parameters were obtained from libxc,
+!  but the user might have possibly modified them. By the way, must define them here for the usual changeable fonctionals, 
+!  since otherwise might inherit them from the previous dataset !
+   if(dtset%ixc<0)then
+     if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
+&      min(dtset%hyb_mixing,dtset%hyb_mixing_sr,dtset%hyb_range_dft,dtset%hyb_range_fock)<-tol8)then
+       call libxc_functionals_set_hybridparams(hyb_mixing=fockcommon%hyb_mixing,&
+&                                              hyb_mixing_sr=fockcommon%hyb_mixing_sr,&
+&                                              hyb_range=fockcommon%hyb_range_dft)
      end if
    end if
 
@@ -1639,6 +1592,7 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 
    ! Select only the occupied states (such that fock%occ_bz > 10^-8)
    if (abs(occ(iband))>tol8) then
+      fock_energy=fock_energy
 !     fock_energy=fock_energy + half*fock%eigen_ikpt(iband)*occ(iband)*dtset%wtk(ikpt)
      !* Sum the contribution of each occupied states at point k_i
      !* No need to multiply %wtk by ucvol since there is no factor 1/ucvol in the definition of %wtk
@@ -1723,7 +1677,6 @@ end subroutine fock_update_exc
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange
 !!  indsym(4,nsym,natom) :: 1:3 shift, and 4 final atom, of symmetry isym operating on iatom
 !!                            (S^{-1}(R - t) = r0 + L, see symatm.F90
-!!  istep=index of the number of steps in the routine scfcv
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
@@ -1753,7 +1706,7 @@ end subroutine fock_update_exc
 !!
 !! SOURCE
 
-subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
+subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
 
 
@@ -1769,7 +1722,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  implicit none
 
 !scalars
- integer, intent(in) :: istep,mcg,mcprj
+ integer, intent(in) :: mcg,mcprj
  real(dp), intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(fock_type),intent(inout),pointer :: fock
@@ -1798,10 +1751,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! *************************************************************************
-
-! DEBUG
-! write (std_out,*) ' fock_updatecwaveocc : enter'
-! ENDDEBUG
 
  call timab(1502,1,tsec)
 
@@ -2052,7 +2001,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
                call pawcprj_symkn(fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1),cprj_tmp(:,1:nspinor),&
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fockbz%tab_symkpt(my_jkpt),fockbz%timerev(my_jkpt),dtset%kptns(:,ikpt),fockbz%pawang%l_max-1,lmnmax,&
-&               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot,atindx=fockcommon%atindx)
+&               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot)
 
                if(dtset%optforces==1) then
                  do iatom=1,dtset%natom
@@ -2120,10 +2069,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,istep,mcg,mcprj,&
  end if
 
  call timab(1502,2,tsec)
-
-! DEBUG
-!write (std_out,*) ' fock_updatecwaveocc : exit'
-! ENDDEBUG
 
 end subroutine fock_updatecwaveocc
 !!***
@@ -2305,7 +2250,7 @@ end subroutine fock_print
 !!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
 !!  nfft=Total number of FFT grid points.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
@@ -2418,7 +2363,15 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
        vqg(1+i23)=hyb_mixing*divgq0
-       if (abs(hyb_range_fock)>tol8) vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*pi/(hyb_range_fock**2)
+
+!      Note the combination of Spencer-Alavi and Erfc screening
+       if (abs(hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+!        This would give a combination of Spencer-Alavi and Erfc screening,
+!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
+!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+       endif
+
      end if
 
      ! Final inner loop on the first dimension (note the lower limit)
@@ -2439,12 +2392,19 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
          den=piinv/gs
 
 !        Spencer-Alavi screening
-         if (abs(hyb_mixing)>tol8) &
-&          vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&          vqg(ii)=vqg(ii)+hyb_mixing*den
+         if (abs(hyb_mixing)>tol8)then
+           vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!&         vqg(ii)=vqg(ii)+hyb_mixing*den
+         endif
 !        Erfc screening
-         if (abs(hyb_mixing_sr)>tol8) &
-&          vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+         if (abs(hyb_mixing_sr)>tol8) then
+           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
+!          if(divgq0<pi/(hyb_range_fock**2))then
+!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
+!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
+!          endif
+         endif
 
        end if ! Cut-off
      end do ! End loop on i1
@@ -2490,7 +2450,7 @@ end subroutine bare_vqg
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ)
+!! Copyright (C) 1998-2018 ABINIT group (FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2505,7 +2465,7 @@ end subroutine bare_vqg
 !!  hyb_range_fock=hybrid range for separation
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_bz= number of k points in the BZ
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)

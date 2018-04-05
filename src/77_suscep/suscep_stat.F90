@@ -12,7 +12,7 @@
 !! states, thanks to the closure relation (referred to as an extrapolation).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG,AR,MB)
+!! Copyright (C) 1998-2018 ABINIT group (XG,AR,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@
 !!                 suscep. matrix has to be evaluated, i.e. for SCF precondictioning)
 !!  nfftdiel=number of fft grid points for the computation of the diel matrix
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points
 !!  npwarr(nkpt)=number of planewaves and boundary planewaves
 !!   at each k, for going from the WF sphere to the medium size FFT grid.

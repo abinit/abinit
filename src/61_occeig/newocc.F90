@@ -11,7 +11,7 @@
 !! with the constraint of number of valence electrons per unit cell nelect.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG)
+!! Copyright (C) 1998-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -348,8 +348,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
  if(nsppol==1)then
    write(message, '(a,i0,a)' ) &
-&   ' newocc : computed new occ. numbers for occopt= ',occopt,&
-&   ' , spin-unpolarized case. '
+&   ' newocc : computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
    call wrtout(std_out,message,'COLL')
    do ikpt=1,nkpt_eff
      write(message,'(a,i4,a)' ) ' k-point number ',ikpt,' :'

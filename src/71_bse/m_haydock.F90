@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
+!!  Copyright (C) 2008-2018 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2086,8 +2086,8 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
      phi_nm1=phi_nm1/norm
      phit_nm1=phit_nm1/norm
 
-     call hexc_matmul_elphon(hexc,hexc_i,phi_nm1,hphi_n,'N',ep_renorms)
-     call hexc_matmul_elphon(hexc,hexc_i,phit_nm1,hphit_n,'C',ep_renorms)
+     call hexc_matmul_elphon(hexc,phi_nm1,hphi_n,'N',ep_renorms)
+     call hexc_matmul_elphon(hexc,phit_nm1,hphit_n,'C',ep_renorms)
      
      aa(1)=xdotc(my_nt,phit_nm1,1,hphi_n(my_t1:),1)
      call xmpi_sum(aa(1:1),comm,ierr)
@@ -2148,7 +2148,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
 
    call haydock_bilanczos_optalgo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,hexc,hexc_i,&
-&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
 &    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
 
 
@@ -2262,7 +2262,7 @@ end subroutine haydock_bilanczos
 !! SOURCE
 
 subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
-&  factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
+&  factor,term_type,ep_renorms,aa,bb,cc,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
 &  green,inn,is_converged,comm)
 
 
@@ -2289,7 +2289,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  complex(dpc),intent(out) :: green(nomega)
  complex(dpc),intent(in) :: omega(nomega) 
  complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
- complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
  complex(dpc),intent(in) :: ep_renorms(hsize)
  complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
  complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
@@ -2315,6 +2314,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
+ ABI_UNUSED(hexc_i%hsize_dense)
 
  my_nt = my_t2-my_t1+1
 
@@ -2341,8 +2341,8 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  do inn=niter_done+1,niter_tot
    
    !|n+1> = H |n> using all eh components.
-   call hexc_matmul_elphon(hexc, hexc_i, phi_n, hphi_np1, 'N', ep_renorms)
-   call hexc_matmul_elphon(hexc, hexc_i, phit_n, hphit_np1, 'C', ep_renorms)
+   call hexc_matmul_elphon(hexc, phi_n, hphi_np1, 'N', ep_renorms)
+   call hexc_matmul_elphon(hexc, phit_n, hphit_np1, 'C', ep_renorms)
 
    ! a(n) = < phit_n | H  | phi_n >
    aa(inn)=xdotc(my_nt,phit_n,1,hphi_np1(my_t1:),1)

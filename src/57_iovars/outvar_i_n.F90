@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -457,8 +457,17 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%ixc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixc','INT',0)
 
+!ixcpositron
  intarr(1,:)=dtsets(:)%ixcpositron
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixcpositron','INT',0)
+
+!ixcrot
+ intarr(1,:)=dtsets(:)%ixcrot
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixcrot','INT',0)
+
+!ixc_sigma
+ intarr(1,:)=dtsets(:)%ixc_sigma
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixc_sigma','INT',0)
 
 !write(ab_out,*)' outvar_i_n : J '
 !call flush(ab_out)
@@ -572,7 +581,7 @@ subroutine outvar_i_n (dtsets,iout,&
        if (narrm(idtset)>0) then
          dprarr(1:narrm(idtset),idtset)=reshape(&
 &         dtsets(idtset)%kptns_hf(1:3,1:dtsets(idtset)%nkpthf), [narrm(idtset)] )
-       endif
+       end if
      else
        narrm(idtset)=0
      end if
@@ -584,7 +593,7 @@ subroutine outvar_i_n (dtsets,iout,&
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptns_hf','DPR',multivals%nkpthf)
    if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
- endif
+ end if
 
  dprarr(1,:)=dtsets(:)%kptnrm
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'kptnrm','DPR',0)
@@ -635,6 +644,17 @@ subroutine outvar_i_n (dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
 & narrm,ncid,ndtset_alloc,'lexexch','INT',multivals%ntypat)
+
+!ldaminushalf
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%ntypat
+   if(idtset==0)narrm(idtset)=mxvals%ntypat
+   if (narrm(idtset)>0) then
+     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
+   end if
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
+& narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
 
 !localrdwf
  intarr(1,:)=dtsets(:)%localrdwf
@@ -820,7 +840,7 @@ subroutine outvar_i_n (dtsets,iout,&
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
    intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nbandhf
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nbandhf','INT',0)
- endif
+ end if
 
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nbandkss
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nbandkss','INT',0)
@@ -904,7 +924,7 @@ subroutine outvar_i_n (dtsets,iout,&
 !    endif
 !  enddo
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpthf','INT',0)
- endif
+ end if
 
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)

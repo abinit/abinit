@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group ()
+!! Copyright (C) 2008-2018 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,7 +63,6 @@ contains
 !!  typat(natom)=type of each atom
 !!  xcart(3,natom) = different positions of the atoms in the unit cell
 !!  zion=(ntypat)gives the ionic charge for each type of atom
-!!  znucl(ntypat)=gives the nuclear number for each type of atom
 !!  prtcharge=1 to write the Hirshfeld charge decomposition
 !!
 !! OUTPUT
@@ -78,7 +77,7 @@ contains
 !! SOURCE
 
 subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
-  natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl,prtcharge,hcharge,hden,hweight)
+  natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,prtcharge,hcharge,hden,hweight)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -97,7 +96,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 !arrays
  integer,intent(in) :: typat(natom),npoint(ntypat)
  real(dp),intent(in) :: grid_den(nrx,nry,nrz),rprimd(3,3),zion(ntypat)
- real(dp),intent(in) :: znucl(ntypat)
  real(dp),intent(in) :: xcart(3,natom)
  real(dp),intent(in) :: radii(mpoint,ntypat),aeden(mpoint,ntypat)
  real(dp),intent(out) :: hcharge(natom),hden(natom),hweight(natom)

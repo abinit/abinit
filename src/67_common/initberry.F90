@@ -8,7 +8,7 @@
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2018 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,7 +170,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  real(dp) :: kpt1(3)
  real(dp) :: delta_str3(2), dstr(2),dk_str(2,2,3)
  real(dp) :: tsec(2)
- real(dp),allocatable :: spkpt(:,:)
+ real(dp),allocatable :: calc_expibi(:,:),calc_qijb(:,:,:),spkpt(:,:)
 
 ! *************************************************************************
 
@@ -961,15 +961,32 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 !------------------------------------------------------------------------------
 
  if (usepaw == 1 .and. dtefield%has_expibi == 1) then
-   call expibi(dtefield%expibi,dtefield%dkvecs,natom,xred)
+   ABI_ALLOCATE(calc_expibi,(2,natom))
+   do idir = 1, 3
+     dk = dtefield%dkvecs(1:3,idir)
+     calc_expibi = zero
+     call expibi(calc_expibi,dk,natom,xred)
+     dtefield%expibi(1:2,1:natom,idir) = calc_expibi
+   end do
+!   call expibi(dtefield%expibi,dtefield%dkvecs,natom,xred)
    dtefield%has_expibi = 2
+   ABI_DEALLOCATE(calc_expibi)
  end if
 
  if (usepaw == 1 .and. dtefield%has_qijb == 1) then
+   ABI_ALLOCATE(calc_qijb,(2,dtefield%lmn2max,natom))
 
-   call qijb_kk(dtefield%qijb_kk,dtefield%dkvecs,dtefield%expibi,&
-&   gprimd,dtefield%lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
-
+   do idir = 1, 3
+     dk = dtefield%dkvecs(1:3,idir)
+     calc_qijb = zero
+     call qijb_kk(calc_qijb,dk,dtefield%expibi(1:2,1:natom,idir),&
+&     gprimd,dtefield%lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
+     dtefield%qijb_kk(1:2,1:dtefield%lmn2max,1:natom,idir) = calc_qijb
+!    call qijb_kk(dtefield%qijb_kk,dtefield%dkvecs,dtefield%expibi,&
+! &   gprimd,dtefield%lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
+   end do
+   dtefield%has_qijb = 2
+   ABI_DEALLOCATE(calc_qijb)
  end if
  
  if (usepaw == 1 .and. dtefield%has_rij == 1) then

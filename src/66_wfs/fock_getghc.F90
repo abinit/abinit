@@ -7,7 +7,7 @@
 !!  Compute the matrix elements <G|Vx|psi> of the Fock operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (CMartins,FJ,MT)
+!!  Copyright (C) 2013-2018 ABINIT group (CMartins,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,9 +33,9 @@
 !!      fock2ACE,forstrnps,getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,
-!!      load_kprime_hamiltonian,matr3inv,nonlop,pawdijhat,pawmknhat_psipsi
-!!      sphereboundary,strfock,timab,xmpi_sum
+!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_kprime_hamiltonian
+!!      matr3inv,nonlop,pawdijhat,pawmknhat_psipsi,sphereboundary,strfock,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -111,7 +111,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
- real(dp) :: dummy(0),rprimd(3,3),for12(3)
+ real(dp) :: rprimd(3,3),for12(3)
 
 ! *************************************************************************
 !return
@@ -284,11 +284,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
 &   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
- 
+   
 
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
 ! =================================================
+
    do jband=1,nband_k
 
 !*   occ = occupancy of jband at this k point

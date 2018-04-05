@@ -7,7 +7,7 @@
 !! Echo variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -254,8 +254,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  end if
 
 !DEBUG
-   write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
-   write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
+ write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
+ write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
 !ENDDEBUG
 
  nshiftk=1

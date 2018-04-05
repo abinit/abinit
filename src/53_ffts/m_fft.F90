@@ -8,7 +8,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG, MM)
+!! Copyright (C) 2009-2018 ABINIT group (MG, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -556,7 +556,7 @@ end subroutine fftbox_execute_op_dpc
 !! nspinor=number of spinorial components
 !! ndat=Numer of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
-!! ngfft(18)=information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound_k_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
@@ -618,7 +618,7 @@ end subroutine fft_ug_dp
 !! nspinor=number of spinorial components
 !! ndat=Numer of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
-!! ngfft(18)=information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound_k_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
@@ -676,7 +676,7 @@ end subroutine fft_ug_spc
 !! nspinor=number of spinorial components
 !! ndat=Numer of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
-!! ngfft(18)=information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound_k_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
@@ -736,7 +736,7 @@ end subroutine fft_ug_dpc
 !! nspinor=number of spinorial components
 !! ndat=Number of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
@@ -803,7 +803,7 @@ end subroutine fft_ur_dp
 !! nspinor=number of spinorial components
 !! ndat=Number of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
@@ -866,7 +866,7 @@ end subroutine fft_ur_spc
 !! nspinor=number of spinorial components
 !! ndat=Number of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
 !! gbound_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
@@ -2363,7 +2363,7 @@ end function fftu_mpi_utests
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ndat=Numbre of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r
@@ -2483,7 +2483,7 @@ end subroutine fourdp_mpi
 !! kg_kout(3,npwout)=reduced planewave coordinates, output
 !! me_g0=1 if this MPI node treats the Gamma, 0 otherwise
 !! mgfft=maximum size of 1D FFTs
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! distribfft<distribfft_type>=Tables needed for the FFT parallelism
 !! n1,n2,n3=1D FFT sizes
 !! npwin=number of elements in fofgin array (for option 0, 1 and 2)

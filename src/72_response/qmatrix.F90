@@ -7,7 +7,7 @@
 !! calculation of the inverse of the overlap matrix 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (XW).
+!! Copyright (C) 2004-2018 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

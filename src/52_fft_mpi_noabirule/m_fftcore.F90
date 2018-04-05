@@ -9,7 +9,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2018 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -401,7 +401,7 @@ end function get_cache_kb
 !!  n123(3)=FFT divisions.
 !!
 !! OUTPUT
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft.
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft.
 !!
 !! PARENTS
 !!      m_dvdb,m_phgamma,m_wfk,mrgdv
@@ -468,7 +468,7 @@ end subroutine ngfft_seq
 !!  Print the content of ngfft(18) in explicative format.
 !!
 !! INPUTS
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft.
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft.
 !!  [unit]=unit number for output (defaults to std_out).
 !!  [prtvol]=verbosity level (defaults to 0).
 !!  [mode_paral]=either "COLL" or "PERS" ("COLL" is default).
@@ -3222,7 +3222,7 @@ end subroutine mpifft_fr2dbox_dpc
 !! gbound(2*mgfft+4)=sphere boundary data
 !! kg_k(3,npw_k)=reduced planewave coordinates
 !! mgfft=maximum size of 1D FFTs
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npw_k=number of G vectors in basis at this k point
 !!
 !! OUTPUT
@@ -3371,8 +3371,8 @@ end subroutine indfftrisc
 !!  Must take into account the time-reversal symmetry when istwf_k is not 1.
 !!
 !! PARENTS
-!!      getmpw,initberry,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
-!!      m_hamiltonian,m_wfd,wfconv
+!!      getmpw,initberry,initorbmag,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
+!!      m_hamiltonian,m_wfd,mkpwind_k,wfconv
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master

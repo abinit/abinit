@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -418,7 +418,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
   else
 
 # Check for ELPA 2016
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
      [
      use elpa1
      logical :: success1,debug
@@ -436,7 +436,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
    else
 
 # Check for ELPA 2015
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [
       use elpa1
       logical :: success1,debug
@@ -454,7 +454,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
     else
 
 # Check for ELPA 2014
-     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
        [
        use elpa1
        logical :: success
@@ -470,7 +470,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
      else
 
 # Check for ELPA 2011-2013
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
         [
         use elpa1
         integer,parameter :: na=1,lda=1,ldq=1,nev=1,nblk=1,comm_r=1,comm_c=1

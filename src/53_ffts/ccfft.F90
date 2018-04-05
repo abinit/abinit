@@ -9,7 +9,7 @@
 !! Include machine-dependent F90 routines used with fftalg=200.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (PT, XG, FF)
+!! Copyright (C) 2000-2018 ABINIT group (PT, XG, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@
 !!  fftcache=size of the cache (kB)
 !!  isign= Integer specifying which sign to be used for the transformation.
 !!         must be either +1 or -1.
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  n1,n2,n3=Actual integer dimensions (see ngfft) for the 3D sequence.
 !!           Physical dimension of the transform.
 !!  n4,n5,n6=Leading dimensions. Generally, n6 is not different to n3.

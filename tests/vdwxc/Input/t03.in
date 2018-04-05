@@ -59,7 +59,7 @@ prtvdw               1
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Yann Pouillon, Camilo Espejo
+#%% authors = Y. Pouillon, C. Espejo
 #%% keywords = vdwxc
 #%% description =
 #%%   Fake test to ensure abirules compliance of vdW-DF input variables.

@@ -10,7 +10,7 @@
 !! the new Fermi sphere is inside the old one, dilated.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT group (XG)
+!! Copyright (C) 2003-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,10 +78,9 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,mu
- real(dp) :: dilatmx_new
+ real(dp) :: alpha,dilatmx_new
 !arrays
  real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)
- real(dp) :: eigval_orig(3), alpha
  character(len=500) :: message
 
 ! *************************************************************************
@@ -137,7 +136,7 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 &     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
 &     'As chkdilatmx=0, assume experienced user. Execution will continue.'
      MSG_WARNING(message)
-   endif
+   end if
 
  end if
 

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -266,7 +266,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
  ierr = 0
 
- ! Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
+ ! Refuse only 1 kpoint: the algorithms are no longer valid. DOH!
  if (nkibz == 1) then
    msg = 'You need at least 2 kpoints to use the tetrahedron method.'
    ierr = 1; goto 10

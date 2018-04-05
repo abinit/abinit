@@ -7,7 +7,7 @@
 !! Main calculation of the independent-particle susceptibility chi0 for qpoint!=0
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,12 +81,12 @@
 !! CHILDREN
 !!      accumulate_chi0sumrule,approxdelta,assemblychi0_sym,assemblychi0sf
 !!      calc_wfwfg,chi0_bbp_mask,completechi0_deltapart,cwtime,flush_unit
-!!      get_bz_diff,get_bz_item,get_gftt,get_uug,gsph_fft_tabs,gsph_free
-!!      gsph_in_fftbox,hilbert_transform,littlegroup_print,make_transitions
-!!      paw_cross_rho_tw_g,paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_free
-!!      pawpwij_free,pawpwij_init,read_plowannier,rho_tw_g,setup_spectral
+!!      get_bz_diff,get_bz_item,get_gftt,gsph_fft_tabs,gsph_free,gsph_in_fftbox
+!!      hilbert_transform,littlegroup_print,make_transitions,paw_cross_rho_tw_g
+!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_free,pawpwij_free
+!!      pawpwij_init,read_plowannier,rho_tw_g,setup_spectral
 !!      symmetrize_afm_chi0,timab,wfd_change_ngfft,wfd_distribute_kb_kpbp
-!!      wfd_get_cprj,wfd_get_ur,wfd_paw_get_aeur,wfd_sym_ur,wrtout,xmpi_sum
+!!      wfd_get_cprj,wfd_get_ur,wfd_paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -736,8 +736,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
 
          CASE (1, 2)
-           ! Spectral method
-           call assemblychi0sf(ik_bz,nspinor,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
+           ! Spectral method (not yet adapted for nspinor=2)
+           call assemblychi0sf(ik_bz,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
 &            deltaf_b1kmq_b2k,my_wl,iomegal,wl,my_wr,iomegar,wr,Ep%nomegasf,sf_chi0)
 
          CASE DEFAULT

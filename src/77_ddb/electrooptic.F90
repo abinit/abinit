@@ -8,7 +8,7 @@
 !! Compute the electrooptic tensor and the raman tensors of zone-center phonons
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MVeithen)
+!! Copyright (C) 1999-2018 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

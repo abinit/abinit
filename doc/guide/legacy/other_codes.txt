@@ -1,0 +1,536 @@
+
+Other_codes
+
+The ABINIT package : list of other codes.
+
+WARNING : it is difficult to keep track of what's going
+on with other electronic structure codes. The list below
+should be updated ...
+
+The person who has the most contributed to this list is Mikami-san.
+
+Copyright (C) 1998-2018 ABINIT group (MM,XG,DCA,AOganov)
+This file is distributed under the terms of the
+GNU General Public License, see ~ABINIT/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~ABINIT/Infos/contributors .
+
+*******************************************************************
+
+JEEP
+Freeware, advertised in June 1997, written by F. Gygi (Lausanne) in C,
+based on the Car-Parrinello technique, sequential
+(http://irrmawww.epfl.ch/fg/jeep/jeep.html);
+
+NB: the above URL for JEEP is obsolete, because F. Gygi moved
+to Lawrence Livemore National Laboratory
+(http://www-phys.llnl.gov/Research/qsg/index.html).
+
+---------------------------------------------------------------------------
+
+FHI96MD
+Freeware, from the Fritz-Haber-Institut der Max-Planck-Gesellshaft
+    written in F77, based on the Car-Parrinello technique,
+    parallelized
+    (http://www.fhi-berlin.mpg.de/th/fhi96md.html);
+
+FHI98MD is the latest version, now freely available :
+( http://www.fhi-berlin.mpg.de/th/fhi98md/index.html )
+
+---------------------------------------------------------------------------
+
+SFHIngX (http://www.sfhingx.de/)
+The ab-initio Simulation package of the Fritz-Haber-Institute/junior group
+called SFHIngX.
+
+Features (http://www.fhi-berlin.mpg.de/th/JG/sfhingx/features.html):
+A graphical user interface for SFHIngX, PHInaX, appears under developent:
+http://www.phinax.de/
+
+---------------------------------------------------------------------------
+
+DoD-Planewave
+Freeware, from USA Department of Defense, David Singh,
+emphasizing parallel implementation on multiple processors
+(http://cst-www.nrl.navy.mil/people/singh/planewave);
+
+---------------------------------------------------------------------------
+
+The tutorial version of a Car-Parrinello code
+Freeware    (http://www.cineca.it/~acv0/CP/carpar.html)
+
+---------------------------------------------------------------------------
+
+ACRES (Adaptive Coordinate Real-space Electronic Structure) method
+Freeware, developped by T. Kaxiras and co-workers, see :
+    http://kriti.harvard.edu/research.html
+    http://arXiv.org/abs/cond-mat/0006183
+    http://cst-www.nrl.navy.mil/~singh/acres/info.html
+
+---------------------------------------------------------------------------
+
+CP2K
+http://www.rzg.mpg.de/~abs/cp2k/index.html
+http://cp2k.berlios.de/
+    This project is led by co-workers of Prof. Parrinello (Dr. J. Hutter et al.).
+    Regarding the description about "CP2K", please visit the below URL:
+    http://www.rzg.mpg.de/~abs/cp2k/Description.html
+    The code seems under development now,
+    but distributed as alpha or beta version in the link page, under GPL.
+
+NB: Lecture notes available on Prof. Hutter's page
+( http://pciwww.unizh.ch/pci/hutter/information/information.html )
+"Introduction to Ab Initio Molecular Dynamics" might be interesting ...
+( http://pciwww.unizh.ch/pci/hutter/information/lecture_notes.pdf )
+
+---------------------------------------------------------------------------
+
+LmtART
+S.Savrasov's LMTO response-function code
+http://physics.njit.edu/~savrasov/Programs/index_lmtart.htm
+"The program LmtART is an implementation of full-potential
+ linear-muffin-tin-orbital method for electronic-structure
+ calculations. It is designed to perform band  structure, total energy
+ and force  calculations within the methods of density functional theory (DFT).
+New version, LmtART 6.20, is now available. Its main features include:
+(i) Local (spin) density approximation (LSDA) is avaiable in many
+    parametrizations together with the gradient corrected density
+    functionals (GGA91 and GGA96).
+(ii) Multiple-kappa LMTO basis sets and multi-panel technique.
+(iii) Total energy and force calculations for determining the
+      equillibrium structure and phonons.
+(iv) LDA+U method for strongly correlated systems.
+(v) Spin-orbit coupling for heavy elements.
+(vi) Finite temperatures
+(vii) Full three dimensional treatment of magnetization in
+      relativistic calculations including LDA+U.
+(viii) Non-collinear magnetizm.
+(ix) Tight-binding regime.
+(x) Hoppings integrals extraction regime.
+(xi) Optical Properties (e1,e2, reflectivity, electron energy loss
+    spectra) using LMTO-ASA, LMTO full potential and tight-binding
+    only regimes, with spin polarization, spin-orbit coupling, LDA+U included.
+    (properly functioning when connected to MStudio.)
+
+The bulk of the program has
+been developed at the Max-Planck Institute for Solid State Research
+in Stuttgart, Germany. The DMFT extension of LmtART is under
+developing in Department of Physics, Rutgers University.
+Most of the source codes for the program, as well as installation and
+operating instructions can be downloaded from this site. Refer to
+specific license agreement and copyright notice when using the LmtART code."
+
+The following URL provides general description and a manual (PDF) for LmtART.
+http://www.mpi-stuttgart.mpg.de/andersen/docs/interest.html
+
+---------------------------------------------------------------------------
+
+VASP
+http://cms.mpi.univie.ac.at/vasp/
+
+The code VASP, based on the SCF algorithm, ultra-soft pseudopotentials,
+written in F90 and parallelized using MPI has very nice features. It
+is not a freeware, but might be shared in the framework of a
+collaborative project (ftp://tph.tuwien.ac.at/vamp/doc).
+It has also no response function features.
+It seems that "VASP for Windows 9X/NT/2k" is now a commercial product.
+     The following WEB page might be interested ...
+      http://www.materialsdesign.com/ ("Materials Design")
+      http://www.materialsdesign.com/Pages/VASP.htm (VASP page)
+      http://www.materialsdesign.com/Pages/MedeA%20description.htm (General info)
+
+---------------------------------------------------------------------------
+
+CampOS (CAMP Open Software Project)
+DFT code, based on ultra-soft pseudopotentials,
+with easy-to-use X-interface, developed by the CAMP group, denmark (Norskov,
+Nielsen ....)
+(http://www.fysik.dtu.dk/CAMP/CAMPOS_welcome.html)
+The RPM packages (for Linux)
+are available at "http://www.fysik.dtu.dk/CAMP/dacapo_rpms.html" .
+(It seems that the CVS access is also available :
+http://www.fysik.dtu.dk/CAMP/CAMPOS_access.html.)
+See also
+http://www.fysik.dtu.dk/~stoltze/camp-sd.html
+
+---------------------------------------------------------------------------
+
+PWSCF + PHONON
+Plane-wave pseudopotential DFT codes that include
+response function features have been developed by Stefano Baroni and
+co-workers, and lately by A. Dal Corso (the latter version uses
+ultra-soft pseudopotentials, and is paralelized). These codes
+are based on SCF algorithms. They are available under the GNU GPL licence.
+http://www.pwscf.org
+
+---------------------------------------------------------------------------
+
+CASTEP
+http://www.cse.clrc.ac.uk/Activity/UKCP
+http://www.tcm.phy.cam.ac.uk/castep
+http://www.accelrys.com/cerius2/castep.html
+
+http://cmt.dur.ac.uk/sjc/castep.html   (Prof. Stewart Clark)
+According to that site, the CASTEP Developers' Group has
+rewritten CASTEP from scratch
+in FORTRAN 90. The design is highly modular and makes extensive use
+of many object-oriented ideas.
+
+---------------------------------------------------------------------------
+
+CRYSTAL
+http://www.chimifm.unito.it/teorica/crystal/crystal.html
+http://www.cse.clrc.ac.uk/Activity/CRYSTAL/
+http://www.tcm.phy.cam.ac.uk/~mdt26/crystal.html
+To purchase it :
+http://www.chimifm.unito.it/teorica/crystal/purchasing.html
+
+---------------------------------------------------------------------------
+
+DMol3 : DFT LCAO method
+(More general pages would be needed)
+http://www.accelrys.com/cerius2/dmol3.html
+http://people.web.psi.ch/delley/dmol3.html
+
+---------------------------------------------------------------------------
+
+WIEN
+http://www.tuwien.ac.at/theochem/wien97
+http://www.tuwien.ac.at/theochem/wien97/request.html
+The manuals (ps, PDF and HTML) version are available at
+http://www.tuwien.ac.at/theochem/wien97/wien97.10
+that you can reach by following the link in the page
+http://www.tuwien.ac.at/theochem/wien97/updates.html
+
+the latest package, "WIEN2k"
+http://www.wien2k.at/
+The program package WIEN2k allows to perform electronic structure
+calculations of solids using density functional theory (DFT).
+It is based on the full-potential (linearized) augmented plane-wave
+((L)APW) + local orbitals (lo) method, one among the most accurate
+schemes for band structure calculations. In DFT the local (spin) density
+approximation (LDA) or the improved version of the generalized gradient
+approximation (GGA) can be used. WIEN2k is an all-electron scheme
+including relativistic effects and has many features.
+
+---------------------------------------------------------------------------
+
+Tomas Arias (Cornell) and his group
+have a DFT code called "DFT++" that has some special code
+constructs to make it (supposedly) easy to code new physics
+using modules (http://dft.physics.cornell.edu/)
+This software is free for distribution and use in the academic community.
+See also
+S. Ismail-Beigi and T.A. Arias
+Comp. Phys. Comm. 128, 1 (2000).
+
+---------------------------------------------------------------------------
+
+A publicly available FFT package can be found in http://www.fftw.org .
+They claim to have the better speed (on average) of all publicly
+available packages.
+
+---------------------------------------------------------------------------
+
+The Projector Augmented Wave method (PAW) of P. Bloechl
+has been implemented by different groups. Bloechl's code
+main page is http://www.pt.tu-clausthal.de/~ptpb .
+
+---------------------------------------------------------------------------
+
+PARATEC (PARAllel Total Energy Code)
+http://www.nersc.gov/research/SCG/Andrew/
+"Material Science Total Energy Planewave Pseudopotential Code"
+It seems freely available, if the author is contacted via e-mail.
+Manual:
+http://www.nersc.gov/research/SCG/Andrew/man4/man4.html
+The origin of the code is Prof. S. Louie's lab.
+http://tiger.berkeley.edu/pfrommer/index.html
+See also,
+http://civet.berkeley.edu/paratec/ (Paratec 5.00.djr.10 Documentation)
+
+---------------------------------------------------------------------------
+
+The Stuttgart TB-LMTO-ASA program by O. Jepsen and O.K. Andersen
+http://www.mpi-stuttgart.mpg.de/andersen/LMTODOC/LMTODOC.html
+For the availability, follow the link "Section XII":
+http://www.mpi-stuttgart.mpg.de/andersen/LMTODOC/node180.html#license
+
+---------------------------------------------------------------------------
+
+ATOMPAW and PWPAW
+
+A Projector Augmented Wave (PAW) code for electronic structure calculations,
+Part I: atompaw for generating atom-centered functions
+A. R. Tackett, N. A. W. Holzwarth, and G. E. Matthews
+Computer Physics Communications 135, 329-347 (2001)
+PartII: pwpaw for periodic solids in a plane wave basis.
+A. R. Tackett, N. A. W. Holzwarth, and G. E. Matthews
+Computer Physics Communications 135, 348-376 (2001)
+
+http://www.wfu.edu/~natalie/papers/pwpaw/man.html
+
+---------------------------------------------------------------------------
+
+"Real Space Code" by Dr. Wenchang Lu
+http://nemo.physics.ncsu.edu/software/MGDFT-QMD/index.html
+(This site is traced from Prof. Friedhelm Bechstedt site:
+ http://www.ifto-jena.de/en/forsch.shtml )
+
+---------------------------------------------------------------------------
+
+EStCoMPP (http://iffwww.iff.kfa-juelich.de/icp/) and some tools
+developped by Dr. S. Blu"gel and Prof. Dr. K. Schroeder.
+(still under construction)
+
+---------------------------------------------------------------------------
+
+A real space - TDDFT code is distributed
+by Prof. Chelikowsky at Univ. of Minnesota.
+	http://jrc.cems.umn.edu/codes.htm
+
+---------------------------------------------------------------------------
+
+Prof. Kuebler (Techniche Universitaet Darmstadt)
+open his ASW code :
+http://www.fkp.physik.tu-darmstadt.de/Kuebler/ASW_new.html
+
+---------------------------------------------------------------------------
+
+Octopus : a real-time TDDFT code (A. Rubio's group)
+http://www.tddft.org/programs/octopus/
+
+---------------------------------------------------------------------------
+
+Fireball : DFT code using localised orbitals, by O. Sankey's group
+http://www.hec.utah.edu/fireball
+
+---------------------------------------------------------------------------
+
+Munich SPRKKR band structure program package
+ http://olymp.cup.uni-muenchen.de/ak/ebert/SPRKKR
+
+Systems: Arbitrary ordered/disordered three dimensionally periodic systems,
+ Surfaces in cluster or slab approximation
+
+Calculation Modes include Spin-polarised, Scalar- and Fully relativistic
+ Non-collinear spin configurations
+
+Electronic Properties include : SCF-potential,Dispersion relation,
+ Bloch spectral Function, Density of states
+
+Ground State Properties include: Spin- and Orbital Moments,
+ Hyperfine Fields, Magnetic Form Factors
+
+Response Functions include: Spin- and orbital susceptibility,
+ Knight-shift, Field-induced MCXD, Residual Resistivity of Alloys
+
+Spectroscopic Properties including magnetic dichroism,
+ Valence Band Photoemission, Core level Photoemission
+ non-relativistic Appearance Potential Spectroscopy,
+ non-relativistic Auger Electron Spectroscopy,
+ fully relativistic Auger Electron Spectroscopy,
+ X-ray absorption, X-ray emission, X-ray magneto-Optics
+ X-ray scattering, Magnetic Compton scattering
+
+And a graphical user interface for the band structure calculations "xband"
+ http://olymp.phys.chemie.uni-muenchen.de/ak/ebert/xband.html
+
+---------------------------------------------------------------------------
+
+Conquest: an O(N) density functional code by D. Bowler and Prof. Gillan
+ http://www.cmmp.ucl.ac.uk/~conquest
+
+---------------------------------------------------------------------------
+
+DensEl: an O(N) tight binding code
+ http://www.cmmp.ucl.ac.uk/~drb/DensEl.html
+ParaDens: A Parallel O(N) tight binding code
+ http://www.cmmp.ucl.ac.uk/~drb/ParaDens.html
+
+Both updated/maintained by Dr. David Bowler
+
+--------------------------------------------------------------------------
+
+FLEUR
+FLAPW-code
+http://www.flapw.de
+
+--------------------------------------------------------------------------
+
+David Vanderbilt's USPP generator code
+http://www.physics.rutgers.edu/~dhv/uspp
+
+--------------------------------------------------------------------------
+
+CPMD : CPMD Consortium Page
+http://www.cpmd.org/
+
+The CPMD consortium is a virtual organization that comprise
+all the users and developers of the CPMD code around the world.
+The organization is coordinated by Prof. Michele Parrinello
+(Director of the Swiss Center of Scientific Computations and
+Professor at the ETH Zuerich) and Dr. Wanda Andreoni
+(Manager of the Computational Material Science Group at
+ IBM Zurich Research Laboratory).
+CPMD is copyrighted by IBM Corp and MPI Stuttgart.
+CPMD (v.3.5.x) is now is distributed free of charge to
+non-profit organizations, under the licence agreement
+(http://www.cpmd.org/down.html).
+
+--------------------------------------------------------------------------
+
+First principles Molecular Dynamics code (CP) and Pseudopotential
+Generation kit by Prof. Jorge Kohanoff (Queen's University Belfast)
+http://titus.phy.qub.ac.uk/group/Jorge/Elect_struc/
+
+--------------------------------------------------------------------------
+
+PEtot code
+http://www.nersc.gov/%7Elinwang/PEtot/PEtot.html
+
+From the WEB page:
+"PEtot stands for parallel total Energy (Etot). It is a parallel plane
+wave pseudopotential program for atomistic total energy calculation based
+on density functional theory. It is designed for large system simulations
+to be run on large parallel computers like Cray T3E and IBM SP machines at
+NERSC. It is developed under U.S. Department of Energy fundings and it is a
+freely distributed public source code. It has a GNU license, which means
+that you can use it and change it for noncommercial purposes..."
+
+--------------------------------------------------------------------------
+
+SIESTA
+http://www.uam.es/departamentos/ciencias/fismateriac/siesta
+LCAO pseudopotential DFT code for large systems, has linear scaling capabilities
+
+--------------------------------------------------------------------------
+
+DeCAFT
+http://physik.uni-graz.at/~kde/decaft.html
+Plane Wave pseudopotential code with response function and many
+other capabilities
+
+--------------------------------------------------------------------------
+
+CASINO
+http://www.tcm.phy.cam.ac.uk/~mdt26/casino.html
+Quantum Monte Carlo code
+
+--------------------------------------------------------------------------
+
+FPLO: Full-potential local-orbital minimum-basis band-structure scheme
+http://www.ifw-dresden.de/agtheo/FPLO/
+(see also: http://www.ifw-dresden.de/)
+
+From the WEB page:
+The FPLO package is a full-potential local-orbital minimum-basis code
+to solve the Kohn-Sham equations on a regular lattice using the local
+spin density approximation (LSDA). The situation of a chemically
+disordered structure is covered by a CPA solver, relativistic effects
+can be treated in a related 4-component code, and the LSDA+U formalism
+is implemented...
+
+lecture notes: http://www.ifw-dresden.de/agtheo/FPLO/lectures.htm
+
+--------------------------------------------------------------------------
+
+ADF package (commercial product):
+http://www.scm.com/
+
+The periodic structure program "BAND".
+(http://www.scm.com/Products/BandInfo.html)
+From the WEB page,
+
+    * BAND is a first-principles periodic structure program for the study
+      of bulk crystals, polymers, as well as surfaces.
+    * It performs electronic structure calculations based on Density
+      Functional Theory.
+    * It uses numerical and Slater atomic orbitals.
+    * BAND avoids pseudo-potential approximations.
+    * BAND is often used in heterogeneous catalysis studies.
+    * BAND provides densities-of-states (total, partial, population)
+      analyses.
+    * It can provide the Potential Energy Surface (PES) of, for instance,
+      a chemisorption system or a chemical reaction at a metal surface
+      (see figures).
+    * BAND offers a variety of density functionals.
+    * It enables both spin-restricted or spin-unrestricted calculations.
+    * It provides an analysis of the "bonding" (cohesive) energy in
+      conceptually useful components.
+    * BAND calculates Mulliken-type population analyses and the charge
+      density Fourier analysis (form factors).
+    * A fragment analysis feature is available for decomposition of
+      Density-of-States data in terms of the molecular orbitals of
+      (molecular) fragments.
+    * BAND uses the same relativistic methods (ZORA and spin-orbit) as ADF
+      and is well suited to treat heavy nuclei.
+    * A time-dependent DFT implementation will enable the accurate
+      calculation of frequency-dependent dielectric functions.
+
+For reviews/papers/dissertations related to ADF, follow
+http://www.scm.com/Doc/publist.html
+
+--------------------------------------------------------------------------
+
+OPIUM : the Optimized Pseudopotential Interface/Unification Module
+(Prof. Rappe Group)
+Ab initio pseudopotential packages that are currently supported by OPIUM
+output formats.
+
+	Format  Package
+	*.fhi   ABINIT
+	*.ncpp  PWSCF
+	*.cpi   FHI98md
+	*.upf   Spinor
+	*.pwf   BH
+
+http://opium.sourceforge.net/
+
+--------------------------------------------------------------------------
+
+Electronic-structure codes distributed by DEMOCRITOS :
+
+From the WEB page (http://www.democritos.it/scientific.php) :
+
+"All codes are based on Density-Functional Theory and use a plane-wave
+basis sets with pseudopotentials. All codes are released under the terms
+of GNU GPL."
+
+ * PWscf package: electronic structure, structural optimization,
+   molecular dynamics, vibrational and dielectric properties.
+   Developed by S. Baroni, S. de Gironcoli, A. Dal Corso (SISSA, Trieste),
+   P. Giannozzi (Scuola Normale, Pisa) and others.
+   See http://www.pwscf.org for more information and downloads.
+
+ * CP code: Car-Parrinello variable-cell molecular dynamics.
+   Developed by A. Pasquarello (IRRMA, Lausanne), K. Laasonen (Oulu),
+   A. Trave (UCBerkeley), R. Car (Princeton), P. Giannozzi and others.
+   Based on the original code written by R. Car and A. Pasquarello.
+   Download CP (initial public release)
+
+ * FPMD code: Car-Parrinello variable-cell molecular dynamics.
+   Developed by C. Cavazzoni (CINECA, Bologna), S. Scandolo (ICTP, Trieste),
+   G. Chiarotti (SISSA, Trieste), P. Focher, G. Ballabio and others.
+   Based on the original code written by R. Car and A. Pasquarello.
+   Download FPMD (initial public release)
+
+--------------------------------------------------------------------------
+ Dr.Taisuke Ozaki's open-source codes (http://staff.aist.go.jp/t-ozaki/)
+
+ * ADPACK (Atomic Density functional program PACKage)
+   GNU-GPL code for atomic density functional calculations
+   (http://staff.aist.go.jp/t-ozaki/adpack/adpack.html)
+
+ * OpenMX (Open source package for Material eXplorer)
+   GNU-GPL code for O(N) density functional calculations of molecules and bulks
+   (http://staff.aist.go.jp/t-ozaki/openmx/openmx.html)
+
+ * B-BOP (a program package for Block Bond-Order Potential method)
+   GNU-GPL code for O(N) semiempirical tight-binding calculations
+   (http://staff.aist.go.jp/t-ozaki/b-bop/b-bop.html)
+   OpenMX Forum OpenMX Forum
+
+ * Forum for discussion of technical issues on OpenMX and ADPACK
+   (http://www.openmx-square.org/forum/patio.cgi)
+--------------------------------------------------------------------------

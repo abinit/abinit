@@ -8,7 +8,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2017 ABINIT group (MT, FJ, TRangel)
+!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -352,9 +352,8 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
      dth =c*(2.d0*sinth*costh**2-sinth**3)   *CMPLX(costwophi,sintwophi)
      dphi=c*(2.d0*sinth**2*costh)*(0.d0,1.d0)*CMPLX(costwophi,sintwophi)
    else if (abs(im)==3) then
-     c = SQRT(35.d0/(64.d0*pi))
-     dth =-c*3.d0*sinth**2*costh       *CMPLX(costhreephi,sinthreephi)
-     dphi=-c*3.d0*sinth**3 *(0.d0,1.d0)*CMPLX(costhreephi,sinthreephi)
+     dth =-SQRT(35.d0/(64.d0*pi))*3.d0*sinth**2*costh*CMPLX(costhreephi,sinthreephi)
+     dphi=-SQRT(35.d0/(64.d0*pi))*sinth**3*(0.d0,3.d0)*CMPLX(costhreephi,sinthreephi)
    end if
 
  case default

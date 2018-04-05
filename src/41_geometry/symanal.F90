@@ -12,7 +12,7 @@
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, RC)
+!! Copyright (C) 1998-2018 ABINIT group (XG, RC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      ingeo,m_ab7_symmetry,m_use_ga
+!!      ingeo,m_ab7_symmetry,m_tdep_sym,m_use_ga
 !!
 !! CHILDREN
 !!      chkprimit,getptgroupma,symbrav,symlatt,symptgroup,symspgr,wrtout

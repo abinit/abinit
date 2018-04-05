@@ -11,7 +11,7 @@
 !! The content of dtsets should not be modified anymore afterwards.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FJ,MT)
+!! Copyright (C) 1999-2018 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -223,18 +223,18 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
 !  From total number of procs, compute all possible distributions
-!  Ignore exit flag if GW calculations because autoparal section is performed in screening/sigma/bethe_salpeter
+!  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
    call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE])) iexit = 0
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])) iexit = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
 &   (dtsets(idtset)%npkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
 !&   .or.(dtsets(idtset)%iscf<0)) then
      dtsets(idtset)%npkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
-     dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1
+     dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     message = 'For non ground state calculation, set bandpp, npfft, npband, npspinor and npkpt to 1'
+     message = 'For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1'
      MSG_WARNING(message)
    end if
 
@@ -307,9 +307,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%pawmixdg=1
    end if
 
-   mpi_enregs(idtset)%paral_kgb=dtsets(idtset)%paral_kgb
-
    call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
+   nproc=mpi_enregs(idtset)%nproc_cell
 
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0) then
@@ -323,9 +322,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &   dtsets(idtset)%rfelfd/=0 .or. dtsets(idtset)%rfphon/=0 .or. dtsets(idtset)%rfstrs/=0 .or. &
 &   dtsets(idtset)%rfuser/=0 .or. dtsets(idtset)%rfmagn/=0) response=1
 
-   nproc=mpi_enregs(idtset)%nproc_cell
+!  If no MPI, set all npxxx variables to 1
+   if (nproc==1) then
+     dtsets(idtset)%npkpt    = 1 ; dtsets(idtset)%npband   = 1
+     dtsets(idtset)%npfft    = 1 ; dtsets(idtset)%npspinor = 1
+     dtsets(idtset)%nphf     = 1
+   end if
 
-!  --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
+!    --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
    if(dtsets(idtset)%tfkinfunc==2 .and. nproc/=1)then
      dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%npkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
      dtsets(idtset)%npkpt = 1
@@ -385,6 +389,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &       'when npfft or npkpt or npband or nspinor are chosen manually in the input file.'
        MSG_ERROR(message)
      end if
+   end if
+
+!  LOBPCG and ChebFi need paral_kgb=1 in parallel
+   if ((dtsets(idtset)%npband*dtsets(idtset)%npfft>1).and. &
+&   (mod(dtsets(idtset)%wfoptalg,10)==1.or.mod(dtsets(idtset)%wfoptalg,10)==4)) then
+     dtsets(idtset)%paral_kgb=1
    end if
 
 !  Check size of Scalapack communicator
@@ -450,6 +460,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
 !  Set mpi_enreg
+   mpi_enregs(idtset)%paral_kgb=dtsets(idtset)%paral_kgb
    if(dtsets(idtset)%paral_kgb/=0)then
      mpi_enregs(idtset)%nproc_kpt=dtsets(idtset)%npkpt
      mpi_enregs(idtset)%nproc_fft=dtsets(idtset)%npfft

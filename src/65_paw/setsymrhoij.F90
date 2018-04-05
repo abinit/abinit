@@ -10,7 +10,7 @@
 !! and other similar quantities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (NH, FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (NH, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,8 +48,8 @@
 !!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,gstate,initberry,respfn,screening,sigma
-!!      wfk_analyze
+!!      bethe_salpeter,dfpt_looppert,gstate,initberry,initorbmag,respfn
+!!      screening,sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      mkeuler,wrtout

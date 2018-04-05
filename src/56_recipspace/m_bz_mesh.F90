@@ -12,7 +12,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -415,7 +415,6 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  integer :: ik_bz,ik_ibz,isym,nkbz,nkbzX,nsym,timrev,itim
  real(dp) :: shift1,shift2,shift3
  logical :: ltest,do_wrap,do_hack
- character(len=500) :: msg
 !arrays
  integer,allocatable :: ktab(:),ktabi(:),ktabo(:)
  real(dp) :: rm1t(3),kbz_wrap(3)
@@ -1486,7 +1485,6 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  integer,parameter :: chksymbreak0=0
  integer :: iscf,nkbz,nkibz,nkpt_computed,my_nshiftk
  real(dp) :: kptrlen
- character(len=500) :: msg
  logical :: my_break_symmetry
 !arrays
  integer :: my_vacuum(3)
@@ -2420,8 +2418,8 @@ end subroutine findq
 !!  g0(3)=reciprocal space vector, to be used in igfft
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,gw_tools,m_gkk
-!!      m_phpi,prep_calc_ucrpa
+!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,m_gkk,m_phpi
+!!      m_sigma,prep_calc_ucrpa
 !!
 !! CHILDREN
 !!

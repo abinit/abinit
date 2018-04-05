@@ -7,7 +7,7 @@
 !!  Write to log and output the xc functional which will be used for this dataset
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MJV,CE)
+!! Copyright (C) 1999-2018 ABINIT group (MJV,CE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

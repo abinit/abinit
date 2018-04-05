@@ -7,7 +7,7 @@
 !! This module contains definitions for a number of named constants used in the GW part of abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2018 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -306,10 +306,15 @@ MODULE m_gwdefs
  type,public :: sigparams_t
 
   integer :: gwcalctyp                   ! Calculation type
-  integer :: minbdgw,maxbdgw             ! Minimum and maximum band index (considering the spin) defining
-                                         ! The set of bands where GW corrections are evaluated
+
   integer :: gwgamma                     ! If 1 include vertex correction (GWGamma)
   integer :: gwcomp                      ! 1 if the extrapolar technique is used.
+
+  integer :: minbdgw,maxbdgw             ! Minimum and maximum band index (considering the spin) defining
+                                         ! The set of bands where GW corrections are evaluated
+
+  integer :: mG0(3)                      ! For each reduced direction gives the max G0 component
+                                         ! to account for umklapp processes
 
   integer :: npwvec                      ! Max betwenn npwe and npwwfn, used to pass the dimension of arrays e.g gvec
   integer :: npwwfn                      ! No. of planewaves for wavefunctions
@@ -328,26 +333,27 @@ MODULE m_gwdefs
                                          ! 1 ==> take advantage of space group symmetries as well as time-reversal
   integer :: use_sigxcore                ! 1 if core contribution to sigma is estimated by using Hartree-Fock
 
-  real(dp) :: mbpt_sciss                   ! Scissor energy used in G0
-  real(dp) :: gwencomp                   ! Extrapolar energy used if gwcomp==1.
-
-  integer :: mG0(3)                      ! For each reduced direction gives the max G0 component
-                                         ! to account for umklapp processes
-
   real(dp) :: deltae                     ! Energy step used to evaluate numerically the derivative of the self energy
                                          ! $\frac{\partial \Re \Sigma(E)}{\partial E_o}$
+  real(dp) :: ecutwfn                    ! cutoff energy for the wavefunctions.
+  real(dp) :: ecutsigx                   ! cutoff energy for the the exchange parth of Sigma.
+  real(dp) :: ecuteps                    ! cutoff energy for W
+
+  real(dp) :: gwencomp                   ! Extrapolar energy used if gwcomp==1.
+
+  real(dp) :: mbpt_sciss                 ! Scissor energy used in G0
+
   real(dp) :: minomega_r                 ! Minimum real frequency for the evaluation of the spectral function
   real(dp) :: maxomega_r                 ! Maximum real frequency for the evaluation of the spectral function
   real(dp) :: maxomega4sd                ! Maximum displacement around the KS energy where evaluate the diagonal
                                          ! Elements of $ \Sigma(E)$
   real(dp) :: omegasimax                 ! Max omega for Sigma along the imag axis in case of analytic continuation
   real(dp) :: omegasimin                 ! min omega for Sigma along the imag axis in case of analytic continuation
+
+  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element. 
+                                         ! Usually one, except for the hybrid functionals.
+
   real(dp) :: zcut                       ! Value of $\delta$ used to avoid the divergences (see related input variable)
-
-  real(dp) :: ecutwfn                    ! cutoff energy for the wavefunctions.
-  real(dp) :: ecutsigx                   ! cutoff energy for the the exchange parth of Sigma.
-  real(dp) :: ecuteps                    ! cutoff energy for W
-
 
   integer,allocatable :: kptgw2bz(:)
   ! kptgw2bz(nkptgw)

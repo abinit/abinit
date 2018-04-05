@@ -8,7 +8,7 @@
 !! and the fixed contribution to the 1st-order Fermi energy (nonlocal and kinetic)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (DRH, XG, MT)
+!! Copyright (C) 1999-2018 ABINIT group (DRH, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -268,7 +268,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
      fe1norm_k(iband) =two*wtband
      
 !    Accumulate contribution to density and PAW occupation matrix
-  
+     
      call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
 &     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
 &     npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,prtvol,rhoaug,tim_fourwf,&

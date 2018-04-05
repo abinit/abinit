@@ -13,7 +13,7 @@
 !! H^(i) is the ith derivative of the Hamiltonian with respect to one or several perturbation(s).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017-2017 ABINIT group (MT)
+!! Copyright (C) 2017-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@
 !!  natom=number of atoms in cell.
 !!  nband(nkpt)=number of bands at each k point
 !!  nfft=number of FFT grid points
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points in Brillouin zone
 !!  nloalg(3)=governs the choice of the algorithm for non-local operator.
 !!  npwarr(nkpt)=number of planewaves in basis and boundary at each k

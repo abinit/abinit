@@ -7,7 +7,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -154,10 +154,9 @@ CONTAINS  !=====================================================================
 !! fit_data<fit_data_type> = fit_data datatype to be initialized
 !!
 !! PARENTS
-!!
+!!      m_fit_data
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -232,10 +231,9 @@ end subroutine fit_data_init
 !! OUTPUT
 !!
 !! PARENTS
-!!
+!!      m_fit_data,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -260,8 +258,8 @@ subroutine fit_data_free(fit_data)
 ! *************************************************************************
 
 ! Reset integer values
-  fit_data%ntime = zero
-  fit_data%natom = zero
+  fit_data%ntime = 0
+  fit_data%natom = 0
 
 ! Deallocate arrays  
   if(allocated(fit_data%energy_diff)) then
@@ -300,10 +298,9 @@ end subroutine fit_data_free
 !! fit_data<fit_data_type> = fit_data is now filled
 !!
 !! PARENTS
-!! 
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -319,7 +316,6 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_data_compute'
- use interfaces_14_hidewrite
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -337,7 +333,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !scalar
  integer :: ii,itime,natom,ntime
  real(dp):: energy
- logical :: found,need_verbose
+ logical :: need_verbose
 !arrays
  character(len=500) :: message
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
@@ -419,57 +415,15 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !  Compute \Omega^{2} and ucvol for each time
    call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
 !  Formula: sqomega(itime) = (((ucvol(itime)**(-2.))* ((natom)**(0.5)))**(-1.0/3.0))**2
-!  Compact form:
+!   Compact form:
    sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom)**(1/3.0)))
 
 !  Compute the difference between History and model (fixed part)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
-   strten_fixed = -1 * strten_fixed
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
  end do
    
-!Check if the initial stresses of the reference is set to the potential
- if(all(eff_pot%strten(:)==zero))then
-   ii = zero
-!  Try to find if any snapshot corresponding to the reference, 
-!  in order to fill the initial stresses...
-   found = .FALSE.
-   do itime=1,ntime
-     if(all(abs(strain(:,itime)) < tol15) .and. all(abs(displacement(:,:,itime)) < tol15)) then
-       write(message, '(6a,I0,6a)' )ch10,&
-&          ' --- !WARNING',ch10,&
-&          '     The initial stress tensor is not included in the effective potential.',ch10,&
-&          '     The iteration ',itime,' corresponding to the reference,',ch10,&
-&          '     thus the stress tensor for the reference will be set with this iteration',ch10,&
-&          ' ---',ch10       
-       ii = itime
-       found = .TRUE.
-     else
-       write(message, '(11a)' )ch10,&
-&          ' --- !WARNING',ch10,&
-&          '     The initial stress tensor is not included in the effective potential.',ch10,&
-&          '     No iteration of the hist file corresponds to the reference,',ch10,&
-&          '     Please make sure than the stress tensor of the reference is 0.0 Ha/bohr**3',ch10,&
-&          ' ---',ch10
-     end if
-     exit
-   end do
-   if(need_verbose) then
-     call wrtout(std_out,message,"COLL")
-   end if
-   if (found) then
-     if( ii < zero .and. ii > ntime)then
-       write(message,'(a)') 'ii is not correct'
-       MSG_BUG(message)
-     else 
-       do itime=1,ntime
-         strten_diff(:,itime)  = strten_diff(:,itime)  - hist%strten(:,ii)
-       end do
-     end if
-   end if
- end if
-
 !Set the training set
  call training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
 !Set the fit_data
@@ -513,10 +467,9 @@ end subroutine fit_data_compute
 !! ts<training_set_type> = training set to be initialized
 !!
 !! PARENTS
-!!
+!!      m_fit_data
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -580,10 +533,9 @@ end subroutine training_set_init
 !! OUTPUT
 !!
 !! PARENTS
-!!
+!!      m_fit_data
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -608,8 +560,8 @@ subroutine training_set_free(ts)
 ! *************************************************************************
 
 ! Reset integer values
-  ts%ntime = zero
-  ts%natom = zero
+  ts%ntime = 0
+  ts%natom = 0
 
 ! Deallocate arrays  
   if(allocated(ts%displacement)) then

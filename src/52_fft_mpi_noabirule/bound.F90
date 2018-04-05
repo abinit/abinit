@@ -10,7 +10,7 @@
 !!  Find distance**2 to boundary point of fft box farthest to kpt
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,7 @@
 !!
 !! INPUTS
 !!  kpt(3)=real input k vector (reduced coordinates)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  gmet(3,3)=reciprocal space metric (currently in Bohr**-2)
 !!
 !! OUTPUT

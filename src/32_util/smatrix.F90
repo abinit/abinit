@@ -9,7 +9,7 @@
 !! its inverse and the product of its inverse with the wavefunctions at k.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT  group (MVeithen)
+!! Copyright (C) 2000-2018 ABINIT  group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,7 +94,7 @@
 !!    for a group of valence bands defined by minbd and maxbd.
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,getcgqphase,make_grad_berry
+!!      berryphase_new,cgwf,chern_number,getcgqphase,make_grad_berry
 !!
 !! CHILDREN
 !!      dzgedi,dzgefa,overlap_g

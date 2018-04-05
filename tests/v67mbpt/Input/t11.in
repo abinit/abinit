@@ -169,7 +169,6 @@ bs_freq_mesh8      0 10.0 0.1 eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = gfortran@shiva
 #%% [files]
 #%% files_to_test = 
 #%%  t11.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;

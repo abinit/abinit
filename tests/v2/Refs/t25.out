@@ -2,7 +2,7 @@
 .Version 8.4.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -35,7 +35,7 @@
       natifc         2
        atifc         2         3
  Description of grid 1 :
-        brav         1
+        brav        -1
        ngqpt         2         2         2
       nqshft         4
       q1shft

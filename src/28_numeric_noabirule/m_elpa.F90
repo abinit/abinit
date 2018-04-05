@@ -8,7 +8,7 @@
 !! See http://elpa.mpcdf.mpg.de
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2017 ABINIT group (MT)
+!! Copyright (C) 2016-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,7 +120,7 @@ CONTAINS  !=====================================================================
 !!      m_abi_linalg
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -182,7 +182,7 @@ end subroutine elpa_func_init
 !!      m_abi_linalg
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -236,8 +236,11 @@ end subroutine elpa_func_uninit
 !!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
 !!
 !! PARENTS
+!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -349,8 +352,11 @@ end subroutine elpa_func_deallocate
 !!  No output, only printing
 !!
 !! PARENTS
+!!      m_elpa
 !!
 !! CHILDREN
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -420,9 +426,10 @@ end subroutine elpa_func_error_handler
 !!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
 !!
 !! PARENTS
+!!      m_elpa
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -512,8 +519,11 @@ end subroutine elpa_func_get_communicators
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
+!!      m_slk
 !!
 !! CHILDREN
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
+!!      mult_ah_b_complex
 !!
 !! SOURCE
 
@@ -606,7 +616,7 @@ end subroutine elpa_func_set_matrix
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -708,7 +718,7 @@ end subroutine elpa_func_solve_evp_1stage_real
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -804,7 +814,7 @@ end subroutine elpa_func_solve_evp_1stage_complex
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -893,7 +903,7 @@ end subroutine elpa_func_cholesky_real
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -982,7 +992,7 @@ end subroutine elpa_func_cholesky_complex
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -1072,7 +1082,7 @@ end subroutine elpa_func_invert_triangular_real
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -1181,7 +1191,7 @@ end subroutine elpa_func_invert_triangular_complex
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE
@@ -1292,7 +1302,7 @@ end subroutine elpa_func_hermitian_multiply_real
 !! PARENTS
 !!
 !! CHILDREN
-!!      elpa_deallocate,elpa_hdl%hermitian_multiply,elpa_hdl%set
+!!      elpa_func_error_handler,elpa_hdl%elpa%hermitian_multiply
 !!      mult_ah_b_complex
 !!
 !! SOURCE

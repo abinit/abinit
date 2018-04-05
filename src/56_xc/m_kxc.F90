@@ -9,7 +9,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2017 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,8 +100,9 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -198,8 +199,9 @@ end subroutine kxc_rpa
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -401,8 +403,9 @@ end subroutine kxc_local
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -439,14 +442,14 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !integer :: i1,i2,i3,k1,n1,n2,n3
 !real(dp) :: kx,rho,rhomax,ftest
 !scalars
- integer :: ifft,ikxc,intxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
+ integer :: ifft,ikxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
  real(dp),parameter :: gsqcut=1._dp
  real(dp) :: enxc,rhocuttot,rhomin,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: strsxc(6)
- real(dp) :: dum(0),qphon(3)
+ real(dp) :: dum(0)
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 
@@ -471,9 +474,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  ABI_MALLOC(vhartree,(nfft))
  ABI_MALLOC(vxc,(nfft,nspden))
 
- intxc=0
- call xcdata_init(dtset%auxc_ixc,intxc,ixc,&
-&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
@@ -530,7 +531,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
@@ -585,7 +586,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -663,8 +664,9 @@ end subroutine kxc_alda
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -891,8 +893,9 @@ end subroutine kxc_pgg
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,wrtout
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
+!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -1034,7 +1037,7 @@ end subroutine kxc_eok
 !! Cryst<crystal_t>=Info on the crystal structure.
 !! ixc = choice for the exchange-correlation potential.
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nfft_tot = Total number of points on the FFT grid.
 !! nspden=Number of independent spin densities.
 !! rhor(nfft_tot,nspden) = the charge density on the full FFT grid.
@@ -1057,8 +1060,9 @@ end subroutine kxc_eok
 !!      screening,sigma
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -1092,7 +1096,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
- integer :: cplex,i1,i2,i3,ig,igp,intxc,iq,ir,n3xccc,ngfft1,ngfft2,izero
+ integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  real(dp) :: enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
@@ -1120,9 +1124,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  write(msg,'(a,i3)') ' kxc_driver: calculating exchange-correlation kernel using ixc = ',ixc
  call wrtout(std_out,msg,'COLL')
 
- intxc=0
- call xcdata_init(Dtset%auxc_ixc,intxc,ixc,&
-&  Dtset%nelect,Dtset%tphysel,Dtset%usekden,Dtset%vdw_xc,Dtset%xc_tb09_c,Dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=Dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
@@ -1174,7 +1176,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
@@ -1300,7 +1302,7 @@ end subroutine kxc_driver
 !! Cryst<crystal_t>=Info on the unit cell.
 !! ixc = choice for the exchange-correlation potential.
 !! ngfft(18)=contain all needed information about 3D FFT,
-!!  see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
 !! nfft = total number of points on the FFT grid.
 !! rhor(nfft,nspden) = the charge density on the FFT grid.
 !!  (total in first half and spin-up in second half if nsppol=2)
@@ -1321,8 +1323,9 @@ end subroutine kxc_driver
 !!      screening,sigma
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,dtset_copy,dtset_free,fourdp,fourdp_6d,initmpi_seq
+!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
+!!      xcdata_init
 !!
 !! SOURCE
 
@@ -1360,7 +1363,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
- integer :: i1,i2,i3,ig,igp,intxc,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
+ integer :: i1,i2,i3,ig,igp,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
  real(dp) :: enxc,gsqcut,ucvol !,rs,Kx,Kc
@@ -1408,9 +1411,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  call wrtout(std_out,msg,'COLL')
  inv_kappa_sq = one/(kappa*kappa)
 
- intxc=0
- call xcdata_init(dtset%auxc_ixc,intxc,ixc,&
-&  dtset%nelect,dtset%tphysel,dtset%usekden,dtset%vdw_xc,dtset%xc_tb09_c,dtset%xc_denpos,xcdata)
+ call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
@@ -1501,7 +1502,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,nspden,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
+& dum,0,dum,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values

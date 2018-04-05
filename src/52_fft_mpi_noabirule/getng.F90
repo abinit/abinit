@@ -9,7 +9,7 @@
 !! Pay attention that the FFT grid must be compatible with the symmetry operations (see irrzg.f).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@
 !!   Other choices may better, but this is left for the future.
 !! ngfft(7)=choice for FFT algorithm, see the input variable fftalg
 !! ngfft(8)=size of the cache, in bytes (not used here presently).!!
-!!   other ngfft slots are used for parallelism see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
 !! [unit] = Output Unit number (DEFAULT std_out)
 !!
 !! PARENTS

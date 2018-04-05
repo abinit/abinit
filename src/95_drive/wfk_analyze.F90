@@ -13,7 +13,7 @@
 !!     and use python tools to analyze data
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG)
+!! Copyright (C) 2009-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -299,7 +299,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
 & pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ============================

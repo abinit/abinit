@@ -7,7 +7,7 @@
 !! Invert a general matrix of real*8 elements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (GMR)
+!! Copyright (C) 2001-2018 ABINIT group (GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@
 !!
 !! PARENTS
 !!      calc_optical_mels,ddb_elast,ddb_piezo,get_tau_k,linear_optics_paw
-!!      m_chi0,m_haydock,m_vcoul,matpointsym,mka2f_tr,mlwfovlp_ylmfar,setup_bse
+!!      m_haydock,m_vcoul,matpointsym,mka2f_tr,mlwfovlp_ylmfar,setup_bse
 !!      strainsym
 !!
 !! CHILDREN

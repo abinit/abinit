@@ -9,7 +9,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,get_uug,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
 !!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
 !!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
@@ -208,7 +208,7 @@ end subroutine exc_build_ham
 !!      exc_build_ham
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,get_uug,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
 !!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
 !!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!

@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,9 +45,10 @@ MODULE m_numeric_tools
  public :: get_diag              ! Return the diagonal of a matrix as a vector
  public :: isdiagmat             ! True if matrix is diagonal
  public :: r2c,c2r               ! Transfer complex data stored in a real array to a complex array and vice versa
- public :: iseven                ! Return .TRUE. if int is even
- public :: isinteger             ! Return .TRUE. if all elements of rr differ from an integer by less than tol
- public :: is_zero               ! Return .TRUE. if all elements of rr differ from zero by less than tol
+ public :: iseven                ! True if int is even
+ public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
+ public :: is_zero               ! True if all elements of rr differ from zero by less than tol
+ public :: isinside              ! True if float is inside an interval.
  public :: bisect                ! Given a monotonic array A and x find j such that A(j)>x>A(j+1) using bisection
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
  public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
@@ -78,7 +79,8 @@ MODULE m_numeric_tools
  public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ where 1 is not included (tol12)
  public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] where -1/2 is not included (tol12)
  public :: interpol3d            ! Linear interpolation in 3D
- public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be ! interpolated in interpol3d
+ public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
+ public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
  public :: rhophi                ! Compute the phase and the module of a complex number.
@@ -109,6 +111,7 @@ MODULE m_numeric_tools
  end interface get_trace
 
  interface get_diag
+   module procedure get_diag_int
    module procedure get_diag_rdp
    module procedure get_diag_cdp
  end interface get_diag
@@ -767,6 +770,51 @@ pure function get_trace_cdp(matrix) result(trace)
 end function get_trace_cdp
 !!***
 
+!!****f* m_numeric_tools/get_diag_int
+!! NAME
+!!  get_diag_int
+!!
+!! FUNCTION
+!!  Return the diagonal of a square matrix as a vector
+!!
+!! INPUTS
+!!  matrix(:,:)
+!!
+!! OUTPUT
+!!  diag(:)=the diagonal
+!!
+!! SOURCE
+
+function get_diag_int(mat) result(diag)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_diag_int'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mat(:,:)
+ integer :: diag(SIZE(mat,1))
+
+!Local variables-------------------------------
+ integer :: ii
+! *************************************************************************
+
+ ii=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
+& __FILE__,__LINE__)
+
+ do ii=1,SIZE(mat,1)
+  diag(ii)=mat(ii,ii)
+ end do
+
+end function get_diag_int
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_numeric_tools/get_diag_rdp
@@ -774,13 +822,13 @@ end function get_trace_cdp
 !!  get_diag_rdp
 !!
 !! FUNCTION
-!!  Return the trace of a square matrix as a vector
+!!  Return the diagonal of a square matrix as a vector
 !!
 !! INPUTS
 !!  matrix(:,:)
 !!
 !! OUTPUT
-!!  diag(:)=the diagonalr
+!!  diag(:)=the diagonal
 !!
 !! SOURCE
 function get_diag_rdp(mat) result(diag)
@@ -1567,6 +1615,36 @@ end function is_zero_rdp_1d
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/isinside
+!! NAME
+!!  isinside
+!!
+!! FUNCTION
+!!  True if float `xval` is inside the interval [win(1), win(2)]
+!!
+!! SOURCE
+
+pure logical function isinside(xval, win)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'isinside'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: xval,win(2)
+! *************************************************************************
+
+ isinside = (xval >= win(1) .and. xval <= win(2))
+
+end function isinside
+!!***
 
 !!****f* m_numeric_tools/bisect_rdp
 !! NAME
@@ -5122,6 +5200,96 @@ pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
  if(pr3==0) pr3=nr3
 
 end subroutine interpol3d_indices
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/interpolate_denpot
+!! NAME
+!! interpolate_denpot
+!!
+!! FUNCTION
+!!  Linear interpolation of density/potential given on the real space FFT mesh.
+!!  Assumes array on full mesh i.e. no MPI-FFT.
+!!
+!! INPUTS
+!!  cplex=1 for real, 2 for complex data.
+!!  in_ngfft(3)=Mesh divisions of input array
+!!  nspden=Number of density components.
+!!  in_rhor(cplex * in_nfftot * nspden)=Input array
+!!  out_ngfft(3)=Mesh divisions of output array
+!!
+!! OUTPUT
+!!  outrhor(cplex * out_nfftot * nspden)=Output array with interpolated data.
+!!
+!! PARENTS
+!!      m_ioarr
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_rhor)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'interpolate_denpot'
+!End of the abilint section
+
+ implicit none
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nspden
+!arrays
+ integer,intent(in) :: in_ngfft(3), out_ngfft(3)
+ real(dp),intent(in) :: in_rhor(cplex, product(in_ngfft), nspden)
+ real(dp),intent(out) :: out_rhor(cplex, product(out_ngfft), nspden)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer :: ispden, ir1, ir2, ir3, ifft
+ real(dp) :: rr(3)
+ real(dp),allocatable :: re(:,:),im(:,:)
+
+! *************************************************************************
+
+ if (cplex == 2) then
+   ! copy slices for efficiency reasons (the best would be to have stride option in interpol3d)
+   ABI_MALLOC(re, (product(in_ngfft), nspden))
+   ABI_MALLOC(im, (product(in_ngfft), nspden))
+   re = in_rhor(1, :, :)
+   im = in_rhor(2, :, :)
+ end if
+
+ ! Linear interpolation.
+ do ispden=1,nspden
+   do ir3=0,out_ngfft(3)-1
+     rr(3) = DBLE(ir3)/out_ngfft(3)
+     do ir2=0,out_ngfft(2)-1
+       rr(2) = DBLE(ir2)/out_ngfft(2)
+       do ir1=0,out_ngfft(1)-1
+         rr(1) = DBLE(ir1)/out_ngfft(1)
+         ifft = 1 + ir1 + ir2*out_ngfft(1) + ir3*out_ngfft(1)*out_ngfft(2)
+         if (cplex == 1) then
+           out_rhor(1, ifft, ispden) = interpol3d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_rhor(1, :, ispden))
+         else
+           out_rhor(1, ifft, ispden) = interpol3d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), re(:, ispden))
+           out_rhor(2, ifft, ispden) = interpol3d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), im(:, ispden))
+         end if
+       end do
+     end do
+   end do
+ end do
+
+ if (cplex == 2) then
+   ABI_FREE(re)
+   ABI_FREE(im)
+ end if
+
+end subroutine interpolate_denpot
 !!***
 
 !----------------------------------------------------------------------

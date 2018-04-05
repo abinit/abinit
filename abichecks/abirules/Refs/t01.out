@@ -3,43 +3,43 @@
  ============================================================= 
 Read biblio/origin_files/abiref.bib as database input file for the bibliography references ..
 Read biblio/origin_files/bibfiles.yml as database input file for the list of generated files in the biblio directory ..
-Read input_variables/origin_files/abinit_vars.yml as database input file for the input variables and their characteristics ..
-Read input_variables/origin_files/characteristics.yml as database input file for the list of allowed characteristics ..
-Read input_variables/origin_files/list_externalvars.yml as database input file for the list of external parameters (known at compile or run time) ..
-Read input_variables/origin_files/varsets.yml as database input file for the list of varsets ..
+Read variables/origin_files/abinit_vars.yml as database input file for the input variables and their characteristics ..
+Read variables/origin_files/characteristics.yml as database input file for the list of allowed characteristics ..
+Read variables/origin_files/list_externalvars.yml as database input file for the list of external parameters (known at compile or run time) ..
+Read variables/origin_files/varsets.yml as database input file for the list of varsets ..
 Read theory/origin_files/theorydocs.yml as database input file for the list of theory documents ..
 Read topics/origin_files/default_topic.yml to initialize the topic html files with default values ..
 Read topics/origin_files/list_of_topics.yml as database input file for the list of topics ..
-Read topics/origin_files/list_tribes.yml as database input file for the list of tribes ..
+Read topics/origin_files/list_relevances.yml as database input file for the list of relevances ..
 Read topics/origin_files/tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ..
 Read tutorial/origin_files/lessons.yml as database input file for the list of lessons ..
-Read users/origin_files/helps.yml as database input file for the list of help files in the users directory ..
+Read guide/origin_files/helps.yml as database input file for the list of help files in the guide directory ..
 File biblio/generated_files/abiref.txt written ..
 File biblio/generated_files/abiref.yml written ..
-File input_variables/generated_files/varset_external.html written ..
-File input_variables/generated_files/varset_allvars.html written ..
-File input_variables/generated_files/varset_stats.html written ..
-File input_variables/generated_files/varset_aim.html written ..
-File input_variables/generated_files/varset_anaddb.html written ..
-File input_variables/generated_files/varset_basic.html written ..
-File input_variables/generated_files/varset_bse.html written ..
-File input_variables/generated_files/varset_dev.html written ..
-File input_variables/generated_files/varset_dmft.html written ..
-File input_variables/generated_files/varset_eph.html written ..
-File input_variables/generated_files/varset_ffield.html written ..
-File input_variables/generated_files/varset_files.html written ..
-File input_variables/generated_files/varset_geo.html written ..
-File input_variables/generated_files/varset_gstate.html written ..
-File input_variables/generated_files/varset_gw.html written ..
-File input_variables/generated_files/varset_internal.html written ..
-File input_variables/generated_files/varset_optic.html written ..
-File input_variables/generated_files/varset_paral.html written ..
-File input_variables/generated_files/varset_paw.html written ..
-File input_variables/generated_files/varset_dfpt.html written ..
-File input_variables/generated_files/varset_rlx.html written ..
-File input_variables/generated_files/varset_vdw.html written ..
-File input_variables/generated_files/varset_w90.html written ..
-File input_variables/generated_files/all_files.html written ..
+File variables/generated_files/varset_external.html written ..
+File variables/generated_files/varset_allvars.html written ..
+File variables/generated_files/varset_stats.html written ..
+File variables/generated_files/varset_aim.html written ..
+File variables/generated_files/varset_anaddb.html written ..
+File variables/generated_files/varset_basic.html written ..
+File variables/generated_files/varset_bse.html written ..
+File variables/generated_files/varset_dev.html written ..
+File variables/generated_files/varset_dmft.html written ..
+File variables/generated_files/varset_eph.html written ..
+File variables/generated_files/varset_ffield.html written ..
+File variables/generated_files/varset_files.html written ..
+File variables/generated_files/varset_geo.html written ..
+File variables/generated_files/varset_gstate.html written ..
+File variables/generated_files/varset_gw.html written ..
+File variables/generated_files/varset_internal.html written ..
+File variables/generated_files/varset_optic.html written ..
+File variables/generated_files/varset_paral.html written ..
+File variables/generated_files/varset_paw.html written ..
+File variables/generated_files/varset_dfpt.html written ..
+File variables/generated_files/varset_rlx.html written ..
+File variables/generated_files/varset_vdw.html written ..
+File variables/generated_files/varset_w90.html written ..
+File variables/generated_files/all_files.html written ..
 Read theory/origin_files/theorydoc_mbt.yml to build theorydoc_mbt.html ... File theory/generated_files/theorydoc_mbt.html written ..
 Read theory/origin_files/theorydoc_bse.yml to build theorydoc_bse.html ... File theory/generated_files/theorydoc_bse.html written ..
 File theory/generated_files/all_files.html written ..
@@ -82,18 +82,18 @@ Read tutorial/origin_files/lesson_udet.yml to build lesson_udet.html ... File tu
 Read tutorial/origin_files/lesson_wannier90.yml to build lesson_wannier90.html ... File tutorial/generated_files/lesson_wannier90.html written ..
 Read tutorial/origin_files/lesson_welcome.yml to build lesson_welcome.html ... File tutorial/generated_files/lesson_welcome.html written ..
 File tutorial/generated_files/all_files.html written ..
-Read users/origin_files/help_abinit.yml to build help_abinit.html ... File users/generated_files/help_abinit.html written ..
-Read users/origin_files/help_aim.yml to build help_aim.html ... File users/generated_files/help_aim.html written ..
-Read users/origin_files/help_anaddb.yml to build help_anaddb.html ... File users/generated_files/help_anaddb.html written ..
-Read users/origin_files/help_cut3d.yml to build help_cut3d.html ... File users/generated_files/help_cut3d.html written ..
-Read users/origin_files/help_fold2bloch.yml to build help_fold2bloch.html ... File users/generated_files/help_fold2bloch.html written ..
-Read users/origin_files/help_mrgddb.yml to build help_mrgddb.html ... File users/generated_files/help_mrgddb.html written ..
-Read users/origin_files/help_mrgscr.yml to build help_mrgscr.html ... File users/generated_files/help_mrgscr.html written ..
-Read users/origin_files/help_new_user.yml to build help_new_user.html ... File users/generated_files/help_new_user.html written ..
-Read users/origin_files/help_optic.yml to build help_optic.html ... File users/generated_files/help_optic.html written ..
-Read users/origin_files/help_respfn.yml to build help_respfn.html ... File users/generated_files/help_respfn.html written ..
-Read users/origin_files/help_features.yml to build help_features.html ... File users/generated_files/help_features.html written ..
-File users/generated_files/all_files.html written ..
+Read guide/origin_files/help_abinit.yml to build help_abinit.html ... File guide/generated_files/help_abinit.html written ..
+Read guide/origin_files/help_aim.yml to build help_aim.html ... File guide/generated_files/help_aim.html written ..
+Read guide/origin_files/help_anaddb.yml to build help_anaddb.html ... File guide/generated_files/help_anaddb.html written ..
+Read guide/origin_files/help_cut3d.yml to build help_cut3d.html ... File guide/generated_files/help_cut3d.html written ..
+Read guide/origin_files/help_fold2bloch.yml to build help_fold2bloch.html ... File guide/generated_files/help_fold2bloch.html written ..
+Read guide/origin_files/help_mrgddb.yml to build help_mrgddb.html ... File guide/generated_files/help_mrgddb.html written ..
+Read guide/origin_files/help_mrgscr.yml to build help_mrgscr.html ... File guide/generated_files/help_mrgscr.html written ..
+Read guide/origin_files/help_new_user.yml to build help_new_user.html ... File guide/generated_files/help_new_user.html written ..
+Read guide/origin_files/help_optic.yml to build help_optic.html ... File guide/generated_files/help_optic.html written ..
+Read guide/origin_files/help_respfn.yml to build help_respfn.html ... File guide/generated_files/help_respfn.html written ..
+Read guide/origin_files/help_features.yml to build help_features.html ... File guide/generated_files/help_features.html written ..
+File guide/generated_files/all_files.html written ..
 Read topics/origin_files/topic_Abipy.yml to initiate the topic 'Abipy' ...
 Read topics/origin_files/topic_APPA.yml to initiate the topic 'APPA' ...
 Read topics/origin_files/topic_Artificial.yml to initiate the topic 'Artificial' ...
@@ -132,6 +132,7 @@ Read topics/origin_files/topic_GW.yml to initiate the topic 'GW' ...
 Read topics/origin_files/topic_GWls.yml to initiate the topic 'GWls' ...
 Read topics/origin_files/topic_Hybrids.yml to initiate the topic 'Hybrids' ...
 Read topics/origin_files/topic_k-points.yml to initiate the topic 'k-points' ...
+Read topics/origin_files/topic_LDAminushalf.yml to initiate the topic 'LDAminushalf' ...
 Read topics/origin_files/topic_LOTF.yml to initiate the topic 'LOTF' ...
 Read topics/origin_files/topic_MagField.yml to initiate the topic 'MagField' ...
 Read topics/origin_files/topic_MagMom.yml to initiate the topic 'MagMom' ...
@@ -212,6 +213,7 @@ File topics/generated_files/topic_GW.html written ..
 File topics/generated_files/topic_GWls.html written ..
 File topics/generated_files/topic_Hybrids.html written ..
 File topics/generated_files/topic_k-points.html written ..
+File topics/generated_files/topic_LDAminushalf.html written ..
 File topics/generated_files/topic_LOTF.html written ..
 File topics/generated_files/topic_MagField.html written ..
 File topics/generated_files/topic_MagMom.html written ..
@@ -274,14 +276,6 @@ FAIL:  getdkde  does not appear in any var*html files
 FAIL:  getdkde  does not appear in the central varset_allvars.html file 
 FAIL:  getpawden  does not appear in any var*html files 
 FAIL:  getpawden  does not appear in the central varset_allvars.html file 
-FAIL:  hyb_mixing  does not appear in any var*html files 
-FAIL:  hyb_mixing  does not appear in the central varset_allvars.html file 
-FAIL:  hyb_mixing_sr  does not appear in any var*html files 
-FAIL:  hyb_mixing_sr  does not appear in the central varset_allvars.html file 
-FAIL:  hyb_range_dft  does not appear in any var*html files 
-FAIL:  hyb_range_dft  does not appear in the central varset_allvars.html file 
-FAIL:  hyb_range_fock  does not appear in any var*html files 
-FAIL:  hyb_range_fock  does not appear in the central varset_allvars.html file
 FAIL:  irdpawden  does not appear in any var*html files 
 FAIL:  irdpawden  does not appear in the central varset_allvars.html file 
 FAIL:  rf2_dkde  does not appear in any var*html files 
@@ -332,10 +326,6 @@ FAIL:  getpawden  does not appear in automatic test suite
 FAIL:  gw_nstep  does not appear in automatic test suite 
 FAIL:  gw_sctype  does not appear in automatic test suite 
 FAIL:  gw_toldfeig  does not appear in automatic test suite 
-FAIL:  hyb_mixing  does not appear in automatic test suite 
-FAIL:  hyb_mixing_sr  does not appear in automatic test suite 
-FAIL:  hyb_range_dft  does not appear in automatic test suite 
-FAIL:  hyb_range_fock  does not appear in automatic test suite 
 FAIL:  irdbscoup  does not appear in automatic test suite 
 FAIL:  irdhaydock  does not appear in automatic test suite 
 FAIL:  irdpawden  does not appear in automatic test suite 

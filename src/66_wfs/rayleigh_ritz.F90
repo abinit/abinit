@@ -18,7 +18,7 @@
 !! hamiltonian/overlap matrices in full and calling the subdiago method
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -260,7 +260,7 @@ end subroutine rayleigh_ritz_subdiago
 !! hamiltonian/overlap matrices directly, and calling the ScaLapack routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -565,7 +565,7 @@ end subroutine rayleigh_ritz_distributed
 !! Fills block_cyclic_mat with the columns of full_mat owned by iproc, using a 1D block-cyclic distribution
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -638,7 +638,7 @@ end subroutine from_mat_to_block_cyclic
 !! Fills the columns of full_mat owned by iproc with block_cyclic_mat, using a 1D block-cyclic distribution
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -712,7 +712,7 @@ end subroutine from_block_cyclic_to_mat
 !! Packs a matrix into hermitian format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

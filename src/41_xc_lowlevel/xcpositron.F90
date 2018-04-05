@@ -9,7 +9,7 @@
 !! Returns Fxc, Vxc_pos, Vxc_el from input rhor_pos and rhor_el for positron and electrons.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
 !!
 !! PARENTS
-!!      m_pawxc,rhotoxc,rhohxcpositron
+!!      m_pawxc,rhohxcpositron,rhotoxc
 !!
 !! CHILDREN
 !!      invcb

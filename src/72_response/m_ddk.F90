@@ -9,7 +9,7 @@
 !!  wrt k, and the corresponding wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2017 ABINIT group (MJV)
+!! Copyright (C) 2016-2018 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -680,7 +680,7 @@ end subroutine ddk_read_fsvelocities
 !!
 !! SOURCE
 
-subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
+subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -693,7 +693,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm  ! could distribute this over k in the future
+!integer,intent(in) :: comm  ! could distribute this over k in the future
  real(dp),intent(in) :: sigmas(:)
  type(ebands_t),intent(in) :: ebands
  type(ddk_t),intent(inout) :: ddk

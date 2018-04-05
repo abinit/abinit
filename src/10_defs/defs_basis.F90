@@ -8,7 +8,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2018 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ module defs_basis
                                                   ! except for use of libraries
 
 !nb of bytes related to GW arrays, that can be tuned from sp to dp independently
-!of other variables in ABINIT. Presently double-precision is the default.
+!of other variables in ABINIT. Presently single-precision is the default (see config/specs/options.conf)..
 #if defined HAVE_GW_DPC
  integer, parameter :: gwp=kind(1.0d0)
  integer, parameter :: gwpc=kind((1.0_dp,1.0_dp))
@@ -417,10 +417,10 @@ CONTAINS  !=====================================================================
 !!  new_io_comm=new value for IO MPI communicator
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver,fftprof
-!!      fold2Bloch,initmpi_world,ioprof,lapackprof,m_io_redirect,macroave
-!!      memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet
-!!      vdw_kernelgen
+!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver
+!!      dummy_tests,fftprof,fold2Bloch,initmpi_world,ioprof,lapackprof
+!!      m_io_redirect,macroave,memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr
+!!      multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!
