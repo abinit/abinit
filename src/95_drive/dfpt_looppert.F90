@@ -886,7 +886,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
 &     ipert==dtset%natom+5 .or. &
-&     dtset%iscf<0) timrev_pert=0
+&     dtset%prtfull1wf==1) timrev_pert=0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
      nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
    end if
