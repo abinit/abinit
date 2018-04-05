@@ -32,7 +32,7 @@
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
 !!                   value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
-!!  use_symrec :: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
+!!  use_symrec: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
 !!  dksqmax=maximal value of the norm**2 of the difference between

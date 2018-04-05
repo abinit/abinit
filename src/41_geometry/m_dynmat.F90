@@ -5838,8 +5838,7 @@ end subroutine massmult_and_breaksym
 !!           These coordinates are normalized (=> * acell(3)!!)
 !! qpt_full(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
 !!           if qtor=0 these vectors are read in the input file
-!! wghatm(natom,natom,nrpt)
-!!         = Weights associated to a pair of atoms and to a R vector
+!! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !!
 !! OUTPUT
 !!  (see side effects)

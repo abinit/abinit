@@ -733,7 +733,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,iv1,iq,idir,ipert
+ integer :: my_unt,my_prtvol,iv1,iq,idir,ipert,iatom
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -752,10 +752,26 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
  write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
- write(std_out,"(a)")"List of q-points:"
- do iq=1,db%nqpt
+ write(std_out,"(a)")"List of q-points: min(10, nqpt)"
+ do iq=1,min(db%nqpt, 10)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
  end do
+ if (db%nqpt > 10) write(std_out,"(a)")"..."
+
+ write(std_out,"(a)")sjoin("Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
+ if (db%has_dielt_zeff) then
+   write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
+     db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
+     db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), &
+     db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
+   write(std_out, '(a)') ' Effectives Charges: '
+   do iatom=1,db%natom
+     write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ',iatom, &
+       db%zeff(1,1,iatom), db%zeff(1,2,iatom), db%zeff(1,3,iatom), &
+       db%zeff(2,1,iatom), db%zeff(2,2,iatom), db%zeff(2,3,iatom), &
+       db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom)
+   end do
+ end if
 
  if (my_prtvol > 0) then
    call crystal_print(db%cryst, header="Crystal structure in DVDB file")
@@ -766,7 +782,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
      write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
    end do
 
-   write(std_out, "(a)")"q-point, idir, iper, rhog1(q,G=0)"
+   write(std_out, "(a)")"q-point, idir, ipert, rhog1(q,G=0)"
    do iv1=1,db%numv1
      idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
      write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &

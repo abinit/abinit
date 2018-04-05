@@ -626,6 +626,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'tmesh',tread,'DPR')
  if(tread==1) dtset%tmesh=dprarr(1:3)
  ABI_CHECK(all(dtset%tmesh >= zero), sjoin("Invalid tmesh:", ltoa(dtset%tmesh)))
+ ABI_CHECK(dtset%tmesh(2) >= dtset%tmesh(1), "tmesh(2) < tmesh(1)")
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tsmear',tread,'ENE')
  if(tread==1) dtset%tsmear=dprarr(1)
@@ -1339,10 +1340,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
 !Now take care of the parameters for hybrid functionals
- if(dtset%usefock==1)then 
+ if(dtset%usefock==1)then
 
-   if(ixc_current ==40 .or. ixc_current ==41 .or. ixc_current ==42)then 
-     dtset%hyb_mixing_sr=zero 
+   if(ixc_current ==40 .or. ixc_current ==41 .or. ixc_current ==42)then
+     dtset%hyb_mixing_sr=zero
      dtset%hyb_range_dft=zero ; dtset%hyb_range_fock=zero
      if(ixc_current==40)dtset%hyb_mixing=one
      if(ixc_current==41)dtset%hyb_mixing=quarter
@@ -1403,7 +1404,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      end if
      dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
    end if
-   
+
    if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
    if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft
 
@@ -3059,6 +3060,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  ABI_DEALLOCATE(dprarr)
 
  call timab(191,2,tsec)
- 
+
 end subroutine invars2
 !!***
