@@ -7,7 +7,7 @@
 !! FUNCTION
 !! Find the space group, Bravais lattice, including Shubnikov characteristics
 !! from the list of symmetries (including magnetic characteristics), and lattice parameters
-!! Warning : the recognition of the space group might not yet work for the
+!! Warning: the recognition of the space group might not yet work for the
 !! Shubnikov group of type IV
 !! 
 !!

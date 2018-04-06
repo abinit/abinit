@@ -80,6 +80,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
  use m_xmpi
 
  use m_sort, only : sort_dp
+ use m_geometry,   only : xcart2xred, xred2xcart, metric
  use m_paw_numeric, only : paw_splint
  use m_pawrad, only : pawrad_type,pawrad_init,pawrad_free
  use m_pawtab, only : pawtab_type
@@ -552,6 +553,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
  use m_errors
  use m_splines
 
+ use m_geometry, only : xred2xcart, xcart2xred, metric
  use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,  only : pawtab_type
  use m_xmpi,    only : xmpi_comm_size,xmpi_sum
@@ -690,7 +692,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
  perz=(geocode /= 'F')
 
 !Compute values of external buffers
- call ext_buffers(perx,nbl1,nbr1) 
+ call ext_buffers(perx,nbl1,nbr1)
  call ext_buffers(pery,nbl2,nbr2)
  call ext_buffers(perz,nbl3,nbr3)
 
@@ -726,12 +728,12 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
    end if
 
 !  Create mesh_core object
-!  since core_mesh_size can be bigger than pawrad%mesh_size, 
+!  since core_mesh_size can be bigger than pawrad%mesh_size,
    msz=pawtab(itypat)%core_mesh_size
    call pawrad_init(core_mesh,mesh_size=msz,mesh_type=pawrad(itypat)%mesh_type,&
 &   rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
 
-!  Big loop on atoms  
+!  Big loop on atoms
    do iat=1,nattyp(itypat)
      iatm=iatm+1;iatom=atindx1(iatm)
      iatom_tot=iatom
@@ -781,14 +783,14 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
                  rcart(1)=xx; rcart(2)=yy; rcart(3)=zz
                  rr(nfgd)=(rr2)**0.5
                  ifftsph_tmp(nfgd)=shift+ind
-                 if(option>1) then 
+                 if(option>1) then
                    call xcart2xred(1,rprimd,rcart,rred(:,nfgd))
                  end if
                else if (option==4) then
 !                We save r=0 vectors only for option==4:
 !                for other options this is ignored
                  ind=j1+1+nbl1+(j2+nbl2)*n1i+(j3-i3s)*n1i*n2i
-!                We reuse the same variable "ifftshp_tmp", 
+!                We reuse the same variable "ifftshp_tmp",
 !                but we start from the higher index
                  nfgd_r0=nfgd_r0+1
                  ifftsph_tmp(ncmax-nfgd_r0+1)=shift+ind

@@ -228,6 +228,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_hdr
 
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
+ use m_geometry,         only : xred2xcart, metric
+ use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,exchange_electronpositron
  use m_dtset,            only : dtset_copy, dtset_free
@@ -242,6 +244,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type
  use m_fock,             only : fock_type
+ use m_kg,               only : getph
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -257,8 +260,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #define ABI_FUNC 'afterscfloop'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw

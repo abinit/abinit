@@ -172,6 +172,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  use m_ab7_mixing
  use m_cgtools
 
+ use m_geometry, only : metric
  use m_pawtab,  only : pawtab_type
  use m_pawrhoij,only : pawrhoij_type
 
@@ -180,7 +181,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 #undef ABI_FUNC
 #define ABI_FUNC 'newvtr'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_68_rsprc, except_this_one => newvtr
 !End of the abilint section
@@ -191,7 +191,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
   ! WARNING
   ! BEWARE THERE IS TWO DIFFERENT SIZE DECLARED FOR ARRAY NHAT IN RHOTOV AND RHOHXC
   ! THIS MIGHT RESULT IN A BUG
-!scalars 
+!scalars
  integer,intent(in) :: dielstrt,initialized,ispmix,istep,mgfft
  integer,intent(in) :: moved_atm_inside,my_natom,n1xccc,nfft
  integer,intent(in) :: nfftf,nfftmix,nkxc,npawmix,npwdiel,nstep

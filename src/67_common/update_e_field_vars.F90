@@ -115,13 +115,13 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_kg,       only : getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'update_e_field_vars'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => update_e_field_vars
 !End of the abilint section

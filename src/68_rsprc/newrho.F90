@@ -146,6 +146,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  use m_ab7_mixing
  use m_abi2big
 
+ use m_geometry, only : metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
 
@@ -154,7 +155,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 #undef ABI_FUNC
 #define ABI_FUNC 'newrho'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_68_rsprc, except_this_one => newrho
 !End of the abilint section

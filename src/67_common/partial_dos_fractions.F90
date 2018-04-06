@@ -86,6 +86,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  use m_epjdos,        only : recip_ylm, epjdos_t
  use m_io_tools,      only : get_unit
  use m_fstrings,      only : int2char4
+ use m_gsphere,       only : getkpgnorm
+ use m_kg,            only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

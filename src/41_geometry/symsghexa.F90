@@ -362,5 +362,4 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
 !ENDDEBUG
 
 end subroutine symsghexa
-
 !!***

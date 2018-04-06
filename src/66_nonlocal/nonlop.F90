@@ -288,6 +288,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  use m_errors
  use m_profiling_abi
  use m_gemm_nonlop
+
  use m_hamiltonian, only : gs_hamiltonian_type,KPRIME_H_K,K_H_KPRIME,K_H_K,KPRIME_H_KPRIME
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_copy
 
@@ -353,16 +354,13 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !Error(s) on incorrect input
  if (hamk%useylm==0) then
    if (paw_opt>0) then
-     msg = 'When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.'
-     MSG_BUG(msg)
+     MSG_BUG('When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.')
    end if
    if (cpopt/=-1) then
-     msg = 'If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !'
-     MSG_BUG(msg)
+     MSG_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
    end if
    if (hermdij) then
-     msg = 'If useylm=0, ie no PAW, nucdipmom/=0 is not allowed !'
-     MSG_BUG(msg)
+     MSG_BUG('If useylm=0, ie no PAW, nucdipmom/=0 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
      msg = 'When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.'
@@ -370,12 +368,10 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
  end if
  if ((.not.associated(hamk%kg_k)).or.(.not.associated(hamk%kg_kp))) then
-   msg = 'kg_k/kg_kp should be associated!'
-   MSG_BUG(msg)
+   MSG_BUG('kg_k/kg_kp should be associated!')
  end if
  if ((.not.associated(hamk%ffnl_k)).or.(.not.associated(hamk%ffnl_kp))) then
-   msg = 'ffnl_k/ffnl_kp should be associated!'
-   MSG_BUG(msg)
+   MSG_BUG('ffnl_k/ffnl_kp should be associated!')
  end if
 !if (hamk%istwf_k/=hamk%istwf_kp) then
 !  msg = 'istwf has to be the same for both k-points.'

@@ -95,7 +95,8 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  use m_profiling_abi
  use m_errors
 
- use m_pawtab, only : pawtab_type
+ use m_geometry,   only : xred2xcart
+ use m_pawtab,     only : pawtab_type
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -106,7 +107,6 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl'
- use interfaces_41_geometry
  use interfaces_67_common, except_this_one => mklocl
 !End of the abilint section
 

@@ -51,11 +51,12 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
  use m_abihist
  use m_linalg_interfaces
 
+ use m_geometry,  only : fcart2fred, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prec_simple'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

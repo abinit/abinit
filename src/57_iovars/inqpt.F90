@@ -33,7 +33,7 @@
 !! OUTPUT
 !!  qptn(3)=reduced coordinates of eventual q point (normalisation is already included)
 !!  kptrlatt(3,3)=q-point lattice specification (if kptopt/=0)
-!!  wtqc=weigth of the eventual current q point 
+!!  wtqc=weigth of the eventual current q point
 !!
 !! SIDE EFFECTS
 !!
@@ -57,12 +57,14 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,     only : metric
+ use m_parser,  only : intagm
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inqpt'
  use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_56_recipspace
 !End of the abilint section
 
@@ -90,7 +92,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 !arrays
  integer :: bravais(11)
  integer :: ngqpt(3)
- integer, allocatable :: symafm_new(:) 
+ integer, allocatable :: symafm_new(:)
  integer, allocatable :: ptsymrel(:,:,:),symrel_new(:,:,:)
  integer,allocatable :: intarr(:)
  real(dp) :: gmet(3,3),gprimd(3,3),qpt(3),rmet(3,3),shiftq(3,210)

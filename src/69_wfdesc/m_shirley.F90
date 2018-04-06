@@ -2505,7 +2505,6 @@ subroutine shirley_bands(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawra
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shirley_bands'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -2637,7 +2636,6 @@ subroutine shirley_window(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'shirley_window'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

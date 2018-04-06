@@ -62,7 +62,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_xmpi,      only : xmpi_abort
+ use m_xmpi
+
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

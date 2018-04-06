@@ -228,10 +228,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  use m_cgtools,  only : mean_fftr
  use m_fstrings, only : int2char4, sjoin
+ use m_geometry, only : metric
  use m_time,     only : abi_wtime, sec2str
  use m_io_tools, only : open_file
  use m_exit,     only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_mpinfo,   only : iwrite_fftdatar
+ use m_kg,       only : getcut
  use m_ioarr,    only : ioarr, fftdatar_write_from_hdr, fort_denpot_skip
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
@@ -252,10 +254,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_54_abiutil
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_scfcv

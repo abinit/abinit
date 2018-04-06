@@ -110,11 +110,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  use m_profiling_abi
  use m_errors
 
- use m_xmpi,       only : xmpi_comm_self, xmpi_comm_size
- use defs_datatypes,only : pseudopotential_type
- use m_pawtab,     only : pawtab_type
- use m_distribfft, only : distribfft_type
- use m_mpinfo,     only : set_mpi_enreg_fft, unset_mpi_enreg_fft
+ use m_xmpi,         only : xmpi_comm_self, xmpi_comm_size
+ use defs_datatypes, only : pseudopotential_type
+ use m_pawtab,       only : pawtab_type
+ use m_distribfft,   only : distribfft_type
+ use m_fft,          only : zerosym
+ use m_mpinfo,       only : set_mpi_enreg_fft, unset_mpi_enreg_fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

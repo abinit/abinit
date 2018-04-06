@@ -109,6 +109,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  use m_fstrings,        only : strcat, sjoin, endswith
  use m_io_tools,        only : file_exists, iomode_from_fname
+ use m_geometry,        only : mkrdim, metric
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt
@@ -137,8 +138,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
- use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
+ use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_dmft,        only : paw_dmft_type
+ use m_kg,              only : getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -146,12 +148,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 #define ABI_FUNC 'bethe_salpeter'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
@@ -193,7 +192,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  real(dp) :: ucvol,drude_plsmf,ecore,ecut_eff,ecutdg_eff,opt_ecut,norm
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp
  real(dp) :: compch_fft,compch_sph,gsq_osc
- real(dp) :: vxcavg 
+ real(dp) :: vxcavg
  logical :: iscompatibleFFT,paw_add_onsite,call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,w_fname
@@ -256,7 +255,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  comm = xmpi_world; nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- wfk_fname = dtfil%fnamewffk 
+ wfk_fname = dtfil%fnamewffk
 
  if (nctk_try_fort_or_ncfile(wfk_fname, msg) /= 0) then
    MSG_ERROR(msg)
@@ -350,7 +349,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
 
    ! Test if we have to call pawinit
-   call paw_gencond(Dtset,gnt_option,"test",call_pawinit) 
+   call paw_gencond(Dtset,gnt_option,"test",call_pawinit)
 
    if (psp_gencond==1.or.call_pawinit) then
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
@@ -359,7 +358,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 &     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,Dtset%usepotzero)
 
      ! Update internal values
-     call paw_gencond(Dtset,gnt_option,"save",call_pawinit) 
+     call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
    else
      if (Pawtab(1)%has_kij  ==1) Pawtab(1:Cryst%ntypat)%has_kij  =2
      if (Pawtab(1)%has_nabla==1) Pawtab(1:Cryst%ntypat)%has_nabla=2
@@ -418,7 +417,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    ABI_FREE(nq_spl)
    ABI_FREE(qmax)
-   !  
+   !
    ! Variables/arrays related to the fine FFT grid ===
    ABI_MALLOC(ks_nhat,(nfftf,Dtset%nspden))
    ks_nhat=zero
@@ -432,7 +431,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! * 1 if Vloc in atomic data is VH(tnzc) (Kresse s formulation)
    write(msg,'(a,i2)')' bethe_salpeter : using usexcnhat = ',usexcnhat
    call wrtout(std_out,msg,'COLL')
-   !  
+   !
    ! Identify parts of the rectangular grid where the density has to be calculated ===
    optcut=0; optgr0=Dtset%pawstgylm; optgr1=0; optgr2=0; optrad=1-Dtset%pawstgylm
    if (Dtset%xclevel==2.and.usexcnhat>0) optgr1=Dtset%pawstgylm
@@ -494,7 +493,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  call timab(651,2,tsec) ! bse(Init1)
  call timab(653,1,tsec) ! bse(rdkss)
- 
+
  call wfd_read_wfk(Wfd,wfk_fname,iomode_from_fname(wfk_fname))
 
  ! This test has been disabled (too expensive!)
@@ -569,7 +568,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  !=== Additional computation for PAW ===
  nhatgrdim=0
  if (Dtset%usepaw==1) then
-   !  
+   !
    ! Calculate the compensation charge nhat.
    if (Dtset%xclevel==2) nhatgrdim=usexcnhat*Dtset%pawnhatxc
    ider=2*nhatgrdim; izero=0; qphon(:)=zero
@@ -639,7 +638,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! - eventually compute 3D core electron density xccc3d
  ! - eventually compute vxc and vhartr
  ! - set up ks_vtrial
- ! 
+ !
  ! *******************************************************************
  ! **** NOTE THAT HERE Vxc CONTAINS THE CORE-DENSITY CONTRIBUTION ****
  ! *******************************************************************
@@ -699,7 +698,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  if (Wfd%usepaw==1) then
    _IBM6("Another silly write for IBM6")
    call timab(561,1,tsec)
-   !  
+   !
    ! Calculate the unsymmetrized Dij.
    call pawdij(cplex1,Dtset%enunit,Cryst%gprimd,ipert0,&
 &   Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
@@ -707,12 +706,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 &   Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
 &   k0,Dtset%spnorbscl,Cryst%ucvol,dtset%charge,ks_vtrial,ks_vxc,Cryst%xred,&
 &   nucdipmom=Dtset%nucdipmom)
-   !  
+   !
    ! Symmetrize KS Dij
    call symdij(Cryst%gprimd,Cryst%indsym,ipert0,&
 &   Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,0,KS_paw_ij,Pawang,&
 &   Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec)
-   !  
+   !
    ! Output the pseudopotential strengths Dij and the augmentation occupancies Rhoij.
    call pawprt(Dtset,Cryst%natom,KS_paw_ij,KS_Pawrhoij,Pawtab)
    call timab(561,2,tsec)
@@ -735,7 +734,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  qp_aerhor=ks_rhor
 
  ! PAW: Compute AE rhor. Under testing
- if (Wfd%usepaw==1 .and. BSp%mdlf_type/=0) then 
+ if (Wfd%usepaw==1 .and. BSp%mdlf_type/=0) then
    MSG_WARNING("Entering qp_aerhor with PAW")
 
    ABI_MALLOC(qp_rhor_paw   ,(nfftf,Wfd%nspden))
@@ -744,7 +743,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    ABI_MALLOC(qp_nhat,(nfftf,Wfd%nspden))
    qp_nhat = ks_nhat
-   ! TODO: I pass KS_pawrhoij instead of QP_pawrhoij but in the present version there's no difference. 
+   ! TODO: I pass KS_pawrhoij instead of QP_pawrhoij but in the present version there's no difference.
 
    call denfgr(Cryst%atindx1,Cryst%gmet,Wfd%comm,Cryst%natom,Cryst%natom,Cryst%nattyp,ngfftf,qp_nhat,&
 &   Wfd%nspinor,Wfd%nsppol,Wfd%nspden,Cryst%ntypat,Pawfgr,Pawrad,KS_pawrhoij,Pawtab,Dtset%prtvol,&
@@ -780,7 +779,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
        end do
      end do
    end do
-!  
+!
 !  * Now read m_lda_to_qp and update the energies in QP_BSt.
 !  TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Wfd%nspden))
@@ -794,11 +793,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      call pawrhoij_free(prev_pawrhoij)
    end if
    ABI_DT_FREE(prev_pawrhoij)
-   !  
+   !
    !  if (nscf>0.and.wfd_iam_master(Wfd)) then ! Print the unitary transformation on std_out.
    !  call show_QP(QP_BSt,m_lda_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    !  end if
-   !  
+   !
    !  === Compute QP wfg as linear combination of KS states ===
    !  * Wfd%ug is modified inside calc_wf_qp
    !  * For PAW, update also the on-site projections.
@@ -808,7 +807,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call wfd_rotate(Wfd,Cryst,m_lda_to_qp)
 
    ABI_FREE(m_lda_to_qp)
-   !  
+   !
    !  === Reinit the storage mode of Wfd as ug have been changed ===
    !  * Update also the wavefunctions for GW corrections on each processor
    call wfd_reset_ur_cprj(Wfd)
@@ -868,7 +867,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    !W_info%use_ppm
    !W_info%vtx_test
    !W_info%wint_method
-   !  
+   !
    !W_info%ada_kappa
    W_info%eps_inf = BSp%eps_inf
    !W_info%drude_plsmf
@@ -936,19 +935,19 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    if (BSp%use_interp) then
      MSG_ERROR("Interpolation technique not coded for diagonalization and CG")
-   end if   
+   end if
 
  case (BSE_ALGO_Haydock)
    call timab(661,1,tsec) ! bse(exc_haydock_driver)
 
    if (BSp%use_interp) then
-     
+
      call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren,&
 &     Kmesh_dense,KS_BSt_dense,QP_BSt_dense,Wfd_dense,Vcp_dense,grid)
    else
      call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren)
    end if
-   
+
    call timab(661,2,tsec) ! bse(exc_haydock_driver)
  case default
    write(msg,'(a,i0)')" Wrong BSE algorithm: ",BSp%algorithm
@@ -992,7 +991,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call eprenorms_free(Epren)
 
  ! Free memory used for interpolation.
- if (BSp%use_interp) then 
+ if (BSp%use_interp) then
    call double_grid_free(grid)
    call wfd_free(Wfd_dense)
    call gsph_free(Gsph_x_dense)
@@ -1006,7 +1005,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  end if
 
  ! Optional deallocation for PAW.
- if (Dtset%usepaw==1) then 
+ if (Dtset%usepaw==1) then
    call pawrhoij_free(KS_Pawrhoij)
    ABI_DT_FREE(KS_Pawrhoij)
    call pawfgrtab_free(Pawfgrtab)

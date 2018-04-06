@@ -69,13 +69,14 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,    only : xcart2xred, xred2xcart, metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_nose'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

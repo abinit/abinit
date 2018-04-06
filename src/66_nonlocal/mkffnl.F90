@@ -158,12 +158,13 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  use m_errors
  use m_splines
 
+ use m_kg,            only : mkkin
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkffnl'
  use interfaces_18_timing
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -293,7 +294,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    if (nkpg<3) then
      ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass_free=one
 !    Note that with ecutsm=0, the right kinetic energy is computed
-!     call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw)
      call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw,0,0)
 !$OMP PARALLEL DO
      do ig=1,npw
@@ -648,7 +648,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
  ABI_DEALLOCATE(kpgnorm_inv)
  ABI_DEALLOCATE(kpgnorm)
-
  ABI_DEALLOCATE(wk_ffnl1)
  ABI_DEALLOCATE(wk_ffnl2)
  ABI_DEALLOCATE(wk_ffnl3)

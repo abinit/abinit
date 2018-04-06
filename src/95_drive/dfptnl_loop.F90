@@ -106,6 +106,8 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_hdr
 
  use m_ioarr,    only : read_rhor
+ use m_kg,       only : getph
+ use m_cgtools,  only : dotprod_vn 
  use m_pawrhoij, only : pawrhoij_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -116,7 +118,6 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_72_response

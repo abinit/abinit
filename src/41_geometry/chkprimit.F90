@@ -25,10 +25,6 @@
 !! OUTPUT
 !!  multi=multiplicity of the unit cell
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      symanal
 !!

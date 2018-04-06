@@ -98,17 +98,18 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
- use m_xg, only : xg_finalize
+ use m_xgScalapack
 
+ use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
+ use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
  use m_pawang,       only : pawang_type, pawang_free
  use m_pawrad,       only : pawrad_type, pawrad_free
  use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
  use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
- use m_dtset,        only : dtset_copy, dtset_free
+ use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
- use m_xgScalapack
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -122,10 +123,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_54_abiutil
  use interfaces_95_drive, except_this_one => driver
 !End of the abilint section
 
@@ -271,7 +270,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call xgScalapack_config(SLK_AUTO)
    else if ( dtset%np_slk > 1 ) then
      call xgScalapack_config(dtset%np_slk)
-   else 
+   else
      call xgScalapack_config(SLK_AUTO)
    end if
 

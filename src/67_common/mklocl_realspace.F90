@@ -67,14 +67,14 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_paw_numeric, only : paw_splint
  use m_xmpi
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,    only : xred2xcart
  use m_mpinfo,      only : ptabs_fourdp
  use m_pawtab,      only : pawtab_type
-
+ use m_paw_numeric, only : paw_splint
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : coulomb_operator,deallocate_coulomb_operator
  use defs_PSolver
@@ -87,7 +87,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_realspace'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_62_poisson
  use interfaces_67_common, except_this_one => mklocl_realspace

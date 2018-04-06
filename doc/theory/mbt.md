@@ -7,7 +7,9 @@ authors: MG, MS
 The aim of this section is to introduce the Green's function formalism, the
 concept of self-energy and the set of coupled equations proposed by Hedin
 whose self-consistent solution, in principle, gives the exact Green's function
-of the interacting system. We mainly focus on the aspects of the theory that
+of the interacting system.
+
+We mainly focus on the aspects of the theory that
 are important for understanding the different steps of the calculation and the
 role played by the input variables used to control the run. A much more
 consistent and rigorous introduction to the physical concept of Green's
@@ -47,9 +49,9 @@ E_i^{(N+1)} - E_0^N & \text{if}\,\varepsilon_i > \mu \\\ E_0^N-E_i^{(N-1)} & \te
 \end{cases} 
 \end{equation} 
 
-where _E 0N_ is the ground state energy of
-the electron system with _N_ electrons, and _i_ is the set of quantum numbers
-labeling the excited states with _N ±_1 electrons. Finally, _μ_ is the
+where $E_0^N$  is the ground state energy of
+the electron system with $N$ electrons, and $i$ is the set of quantum numbers
+labeling the excited states with $N \pm 1$ electrons. Finally, $\mu$ is the
 chemical potential of the system. Other important quantities that will be used
 in the following are the so-called Lehmann amplitudes defined, in the Schrodinger representation, by 
 
@@ -67,8 +69,8 @@ G (\rr_1,\rr_2;\ww) = \sum_i \frac{\Psi_i(\rr_1)\Psi_i^\*(\rr_2)} {\ww-\ee_i
 \end{equation} 
 
 makes it clear that, in the frequency domain, the time-ordered Green's function
-contains the complete excitation spectrum corresponding to excitations of an (
-_N_ -1)-particle and an ( _N_ +1)-particle system. Hence, locating the poles
+contains the complete excitation spectrum corresponding to excitations of an 
+$(N-1)$-particle and an $(N+1)$-particle system. Hence, locating the poles
 of the Green's function in the complex plane provides the information needed
 to interpret those processes measured in experiments in which a single
 electron is inserted to or removed from the system. The figure below gives a
@@ -87,14 +89,14 @@ The Dyson equation
 G(12) = \Go(12) + \int \Go(13)\,\Sigma(34)\,G(42)\dd34. 
 \end{equation} 
 
-establishes a connection between the fully interacting _G_ and the propagator, _G 0_, of an approximate
+establishes a connection between the fully interacting $G$ and the propagator, $\Go$, of an approximate
 non-interacting system through a (non-local, non-Hermitian and time dependent)
-potential called the self-energy, Σ. Since _G 0_ is supposed to be known
-exactly, the problem of calculating _G_ (12) has now been reduced to the calculation of the self-energy.
+potential called the self-energy, $\Sigma$. Since $\Go$ is supposed to be known
+exactly, the problem of calculating $G (12)$ has now been reduced to the calculation of the self-energy.
 
 The self-energy is not a mere mathematical device used in a roundabout way to
-obtain _G_ but is has a direct physical meaning. The knowledge of the self-
-energy operator, allows one to describe the quantum-mechanical state of a
+obtain $G$ but is has a direct physical meaning. The knowledge of the self-energy operator, 
+allows one to describe the quantum-mechanical state of a
 renormalized electron in the many-body system by solving the quasiparticle
 (QP) equation [[cite:Onida2002]]:
 
@@ -104,7 +106,7 @@ renormalized electron in the many-body system by solving the quasiparticle
 \end{equation}  
 
 The QP eigenstates so obtained can be used
-to construct _G_ according to the Lehmann representation. Note that the QP
+to construct $G$ according to the Lehmann representation. Note that the QP
 equation departs from the Kohn Sham equation since the QP eigenvectors and
 eigenvalues do have a direct physical meaning: they can be used to obtain both
 the charge density of the interacting system and to describe the properties of charged excitations.
@@ -113,7 +115,7 @@ the charge density of the interacting system and to describe the properties of c
   
 In 1965 Hedin [[cite:Hedin1965]] showed how to derive a set of coupled integro-
 differential equations whose self-consistent solution, in principle, gives the
-exact self-energy of the system and therefore the exact _G_.
+exact self-energy of the system and therefore the exact $G$.
 
 The fundamental building blocks employed in the formalism are the irreducible polarizability:
 
@@ -124,14 +126,14 @@ The fundamental building blocks employed in the formalism are the irreducible po
 which describes the linear response of the density to changes in the total
 effective potential (the superposition of the external potential plus the
 internal classical Hartree potential) and the dynamically screened
-interaction, _W_ , that is related to the bare Coulomb interaction, _v_ , and
+interaction, $W$ , that is related to the bare Coulomb interaction, $v$ , and
 to the inverse dielectric function through: 
 
 \begin{equation} \label{W_def}
 W(12) \equiv \int \ee^{-1}(13)\,v(32)\dd3. 
 \end{equation} 
 
-The dielectric matrix є(12) is related to the irreducible polarizability _χ_ (12) by the
+The dielectric matrix $\ee(12)$ is related to the irreducible polarizability $\tchi(12)$ by the
 following relation: 
 
 \begin{equation} 
@@ -143,12 +145,12 @@ The pentagon sketched in the figure below shows how the various physical quantit
 ![](mbt_assets/hedin_pentagon.svg)
 
 The polarization function renormalises the bare interaction resulting in the
-screened interaction _W_ (12). The screened interaction, _W_ (12), the many-
-body propagator _G_ (12), and the vertex function, Γ(12;3), which describe the
+screened interaction $W (12)$. The screened interaction, $W (12)$, the many-
+body propagator $G (12)$, and the vertex function, $\Gamma(12;3)$, which describe the
 interactions between virtual hole and electron excitations [[cite:Onida2002]], are
-the essential ingredients for the determination of Σ(12).
+the essential ingredients for the determination of $\Sigma(12)$.
 
-The iteration starts by setting _G_ = _G 0_. Then the set of equations should
+The iteration starts by setting $G = \Go$. Then the set of equations should
 in principle be iterated until self-consistency in all terms is reached.
 
 ## The GW approximation
@@ -160,7 +162,7 @@ challenging. The set of equations can, however, be iterated assuming that only
 a few iterations are actually needed to obtain physically meaningful results.
 
 A widely used approach to the approximate solution of Hedin's equations is the
-so-called _GW_ approximation [[cite:Hedin1965]], which consists in approximating
+so-called $GW$ approximation [[cite:Hedin1965]], which consists in approximating
 the vertex function with a local and instantaneous function:
 
 \begin{equation} 
@@ -172,7 +174,7 @@ the full set of Hedin's equations, leads to a considerable simplification in the
 
 ![](mbt_assets/gw_pentagon.svg)
 
-Thanks to the neglect of vertex corrections, the irreducible polarizability _χ_ (12) is now given by
+Thanks to the neglect of vertex corrections, the irreducible polarizability $\tchi (12)$ is now given by
 
 \begin{equation}\label{eq:RPA_with_G} 
 \tchi = -i\,G(12)G(21^+). 
@@ -182,7 +184,7 @@ which, once rewritten in terms of orbitals and energies, reduces to the RPA
 expression proposed by Adler [[cite:Adler1962]] and Wiser [[cite:Wiser1963]].
 
 In real space, the self-energy reduces to a simple direct product of the
-dressed electron propagator, _G_ (12), and the dynamically screened interaction, _W_ (12):
+dressed electron propagator, $G (12)$, and the dynamically screened interaction, $W (12)$:
 
 \begin{equation} 
 \Sigma(12) = i G(12)\,W(1^+2). 
@@ -209,16 +211,16 @@ self-consistent approach would need the inclusion of some kind of vertex
 correction during the solution of the equations.
 
 For this reason, the most common approach employed in the _ab initio_
-community consists of using the best available approximation for _G_ and _W_
+community consists of using the best available approximation for $G$ and $W$
 as a starting point and performing only a single-iteration of the
-parallelogram (the so-called one-shot _GW_ method, or _G 0W0_). In this case
+parallelogram (the so-called one-shot $GW$ method, or $\Go\Wo$). In this case
 the self-energy is simply given by:
 
 \begin{equation} 
 \Sigma(12) = i\Go^\KS(12)\Wo(1^+2) 
 \end{equation} 
 
-where _G0KS_(12) is the independent-particle propagator of the Kohn-Sham (KS)
+where $\Go^\KS(12)$ is the independent-particle propagator of the Kohn-Sham (KS)
 Hamiltonian, and the screened interaction is approximated with the RPA
 calculated with KS energies and wave functions: 
 
@@ -236,11 +238,11 @@ are usually in qualitative agreement with experiment.
 
 This observation suggests that a simple, albeit accurate, solution for the QP
 energies can be obtained using first-order perturbation theory, treating the
-exchange and correlation potential, _V xc_, as a zeroth-order approximation to
+exchange and correlation potential, $V_{xc}$, as a zeroth-order approximation to
 the non-local and energy dependent self-energy [[cite:Hybertsen1985]], [[cite:Hybertsen1986]]
 
 Under the assumption that the QP wavefunctions equal the KS orbitals, we can
-expand the self-energy operator around _ε KS_ obtaining a closed expression for _ε QP_:
+expand the self-energy operator around $\ee^\KS$ obtaining a closed expression for $\ee^\QP$:
 
 \begin{equation} \label{eq:implicit_QP_energy} 
 \ee^\QP = \ee^\KS + Z \langle\Psi^\KS|\Sigma(\ee^\KS)-\vxc|\Psi^\KS\rangle. 
@@ -267,9 +269,9 @@ particle polarizability assumes the form:
 
 ![](mbt_assets/chi0_sc_tr.svg)
 
-where only the transitions between valence ( _v_ ) and conduction states (_c_) contribute 
-(for simplicity we have assumed a semiconductor with time-
-reversal invariance, the conventions used for the Fourier transform are
+where only the transitions between valence ($v$) and conduction states ($c$) contribute 
+(for simplicity we have assumed a semiconductor with time-reversal invariance,
+the conventions used for the Fourier transform are
 discussed in the [notation](#notations) section).
 
 The number of bands used to compute the polarizability is specified by
@@ -277,21 +279,22 @@ The number of bands used to compute the polarizability is specified by
 divergences in the denominators. The frequency mesh is defined by the set of
 variables [[nfreqre]], [[nfreqim]], [[freqremax]], and [[freqremin]] (a number
 of more exotic grid choices are available through input variables beginning
-with gw_... or cd_..., e.g. [[gw_frqim_inzgrid]]).
+with `gw_...` or `cd_...`, e.g. [[gw_frqim_inzgrid]]).
 
-_M_ is a shorthand notation to denote the matrix element of a plane wave
+$M$ is a shorthand notation to denote the matrix element of a plane wave
 sandwiched between two wavefunctions (i.e. oscillator matrix elements). 
 The number of planewaves (PW) used to describe the wavefunctions is determined by
-[[ecutwfn]] while the number of _G_ -vectors used to describe the
+[[ecutwfn]] while the number of $\GG$-vectors used to describe the
 polarizability (i.e. the number of _G_ vectors in the oscillator matrix
 elements) is determined by [[ecuteps]]. 
+
 The oscillators are ubiquitous in the Many-Body part of ABINIT and their calculation 
 represents one of the most CPU intensive part of the execution. For this reason we 
 devote [[#6|section 6]] to the discussion of some important technical details concerning their computation.
 
-In principle, the set of **q** -points in the screening matrix is given by all
+In principle, the set of $\qq$-points in the screening matrix is given by all
 the possible differences between two crystalline momenta of the wavefunctions
-stored in the KSS file, so it is controlled by the chosen **k** -point grid.
+stored in the KSS file, so it is controlled by the chosen $\kk$-point grid.
 The code, however, exploits the invariance of the two-point function under the
 action of any symmetry operation of the crystalline space group:
 
@@ -300,7 +303,7 @@ action of any symmetry operation of the crystalline space group:
 \bigl(\Ri(\rr_1-\tt),\Ri(\rr_2-\tt)\bigr) 
 \end{equation} 
 
-so that only the **q** -points in the irreducible Brillouin zone (IBZ) have to be calculated explicitly.
+so that only the $\qq$-points in the irreducible Brillouin zone (IBZ) have to be calculated explicitly.
 
 In frequency and reciprocal space, the microscopic dielectric function is
 related to the irreducible polarizability by the following relation
@@ -311,7 +314,7 @@ related to the irreducible polarizability by the following relation
 \end{equation} 
 
 from which the inverse dielectric function is obtained via matrix inversion. Following Adler
-[[cite:Adler1962]], the macroscopic dielectric function, єMLF(ω), can be directly
+[[cite:Adler1962]], the macroscopic dielectric function, $\ee_M^{\text{LF}}(\ww)$, can be directly
 related to the inverse of the microscopic dielectric matrix by means of:
 
 \begin{equation} \label{eq:abs_LFE} 
@@ -319,7 +322,7 @@ related to the inverse of the microscopic dielectric matrix by means of:
 \end{equation} 
 
 The optical absorption spectrum -- the quantity one can compare with experiments -- is
-given by the imaginary part: Im[єMLF(ω)].
+given by the imaginary part.
 
 Note that the equation above differs from
 
@@ -353,13 +356,13 @@ link and use the FFTW3 library in GW calculations (controlled by setting
 [[fftalg]] 312). The performance of the various FFT libraries for a given type
 of calculation can be benchmarked with the **fftprof** utility.
 
-For a given set of indices ( _b 1_, _b 2_, **k**, **q** ), the calculation of
+For a given set of indices ( $b_1$, $b_2$, $\kk$, $\qq$ ), the calculation of
 the oscillator is done in four different steps:
 
-  1. The two wavefunctions in the irreducible wedge are FFT transformed from the **G** -space to the real space representation, 
-  2. The orbitals are rotated in real space on the FFT mesh to obtain the points **k** and **k-q** in the full Brillouin zone. 
+  1. The two wavefunctions in the irreducible wedge are FFT transformed from the $\GG$-space to the real space representation, 
+  2. The orbitals are rotated in real space on the FFT mesh to obtain the points $\kk$ and $\kk-\qq$ in the full Brillouin zone. 
   3. Computation of the wavefunction product. 
-  4. FFT transform of the product to obtain _M_
+  4. FFT transform of the product to obtain $M$
 
 Each oscillator thus requires three different FFTs (two transforms to
 construct the product, one FFT to get M). The number of FFTs can be
@@ -371,10 +374,10 @@ time instead. This option is controlled by the second digit of the input variabl
 
 The third term in the equation defining the oscillators makes it clear that
 the product of the periodic part of the orbitals has non-zero Fourier
-components in a sphere whose radius is 2 × _R wfn_ where _R wfn_ is the radius
-of the **G** -sphere used for the wavefunctions (set by [[ecutwfn]]). To avoid
+components in a sphere whose radius is $2 × R_{wfn}$ where $R_{wfn}$ is the radius
+of the $\GG$-sphere used for the wavefunctions (set by [[ecutwfn]]). To avoid
 aliasing errors in the FFT one should therefore use an FFT box that encloses
-the sphere with radius 2× _R wfn_, but this leads to a significant increase in
+the sphere with radius $2 × R_{wfn}$, but this leads to a significant increase in
 the computing effort as well as in the memory requirements. The input variable
 [[fftgw]] specifies how to setup the FFT box for the oscillators and should be
 used to test how the aliasing errors affect the final results. The default
@@ -428,7 +431,7 @@ expensive frequency integration (a Hilbert transform):
 
 The price to be paid, however, is that a large table for the spectral function
 has to be stored in memory and a Hilbert transform has to be performed for
-each pair ( **G** 1, **G** 2). Since the computing time required for the
+each pair ( $\GG_1, \GG_2$). Since the computing time required for the
 transform scales quadratically with the number of vectors in the
 polarizability (governed by [[ecuteps]]), the CPU time spent in this part will
 overcome the computing time of the standard Adler-Wiser formalism for large
@@ -450,8 +453,8 @@ W = v + (\ee^{-1} - 1) v
 
 where matrix notation is used.
 
-This particular decomposition of _W_ , once inserted in the convolution
-defining Σ, leads to the split of the self-energy into two different
+This particular decomposition of $W$ , once inserted in the convolution
+defining $\Sigma$, leads to the split of the self-energy into two different
 contributions (exchange and correlation):
 
 \begin{equation} 
@@ -467,7 +470,7 @@ quasiparticle amplitudes
 \sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
 \end{equation} 
 
-while the dynamic part Σc(ω) accounts for correlation effects beyond Σx.
+while the dynamic part $\Sigma_c(\ww)$ accounts for correlation effects beyond $\Sigma_x$.
 
 It is important to stress that, for computational efficiency, the code does
 not compute the full self-energy operator by default. Only its matrix elements
@@ -489,13 +492,14 @@ converged independently of others if necessary, and given a much larger value
 in comparison to [[ecut]], [[ecutwfn]] and [[ecuteps]].
 
 Another point worth noting is the presence in the expression of the Coulomb
-singularity for | **q** + **G** | -> 0\. From a mathematical point of view,
-the integral is well-defined since the singularity is integrable in three-
-dimensional space once the thermodynamical limit, _N_ **q** -> ∞, is reached.
-On the other hand, only a finite number of **q** -points can be used for
+singularity for $| \qq + \GG | \rightarrow 0$ . 
+From a mathematical point of view, the integral is well-defined since the singularity is integrable in three-
+dimensional space once the thermodynamical limit, $N_\qq \rightarrow \infty$, is reached.
+
+On the other hand, only a finite number of $\qq$-points can be used for
 practical applications, and a careful numerical treatment is needed to avoid
 an exceedingly slow convergence with respect to the BZ sampling. To accelerate
-the convergence in the number of **q** -points, the code implements several
+the convergence in the number of $\qq$-points, the code implements several
 techniques proposed in the literature. We refer to the documentation of
 [[icutcoul]] for a more extensive discussion.
 
@@ -512,7 +516,7 @@ approximate way, alternatively, it is possible to use the more sophisticated
 frequency integration of the contour deformation method [[cite:Lebegue2003]] for
 accurate QP calculations (see the related variables [[ppmodel]] and [[gwcalctyp]]).
 
-The double sum over **G** -vectors is performed for all the plane waves
+The double sum over $\GG$-vectors is performed for all the plane waves
 contained within a sphere of energy [[ecuteps]] (it cannot be larger than the
 value used to generate the SCR file). For each state, the correlated matrix
 elements are evaluated on a linear frequency mesh centered around the initial
@@ -520,7 +524,7 @@ KS energy and the derivative needed for the renormalization factor is obtained
 numerically (see [[nomegasrd]] and [[omegasrdmax]]).
 
 Note that here, in contrast to the exchange term, the sum over the band index
-_n_ should extend up to infinity although in practice only a finite number of
+$n$ should extend up to infinity although in practice only a finite number of
 states can be used (specified by [[nband]]).
 
 ## Plasmon-pole models
@@ -528,14 +532,14 @@ states can be used (specified by [[nband]]).
 One of the major computational efforts in self-energy calculations is
 represented by the calculation of the frequency dependence of the screened
 interaction, which is needed for the evaluation of the convolution. Due to the
-ragged behavior of _G_ (ω) and _W_ (ω) along the real axis, numerous real
+ragged behavior of $G(\ww)$ and $W (\ww)$ along the real axis, numerous real
 frequencies are in principle required to converge the results (note that the
 maximum frequencies needed are now reported if [[prtvol]] > 9). On the other
-hand, since the fine details of _W_ (ω) are integrated over, it is reasonable
+hand, since the fine details of $W(\ww)$ are integrated over, it is reasonable
 to expect that approximate models, able to capture the main physical features
 of the screened interaction, should give sufficiently accurate results with a
 considerably reduction of computational effort. This is the basic idea behind
-the so-called plasmon-pole models in which the frequency dependence of _W_ (ω)
+the so-called plasmon-pole models in which the frequency dependence of $W(\ww)$
 is modelled in terms of analytic expressions depending on coefficients that
 are derived from first principles, i.e. without any adjustable external parameters.
 
@@ -558,7 +562,7 @@ function is modeled according to
 The two models differ in the approach used to compute the
 parameters. [[ppmodel]]=1 derives the parameters such that the inverse
 dielectric matrix is correctly reproduced at two different explicitly
-calculated frequencies: the static limit (ω = 0) and an additional imaginary
+calculated frequencies: the static limit ($\ww = 0$) and an additional imaginary
 point located at [[ppmfrq]]. Unless the user overrides this, the default value
 is calculated from the average electronic density of the system. The plasmon-
 pole parameters of [[ppmodel]]=2 are calculated so as to reproduce the static
@@ -589,8 +593,8 @@ contributions coming from the poles of the integrand lying inside the contour:
 \end{equation}
 
 
-In the above equation, the first sum is restricted to the poles lying inside the path
-_C_. _W_ c( _z_ ) represents the frequency dependent part of the screened
+In the above equation, the first sum is restricted to the poles lying inside the path $\mcC$. 
+$W^c(z)$ represents the frequency dependent part of the screened
 interaction, whose expression in reciprocal space is given by:
 
 \begin{equation} 
@@ -619,7 +623,7 @@ v(\rr_1,\rr_2)\,\delta(t_1-t_2) $$
 
 $$ 1^+ = (\rr_1,t_1 + \eta)_{\eta \rightarrow 0^+} $$ 
 
-where _v_ ( **r** 1, **r** 2) represents the bare Coulomb interaction, and η is a positive infinitesimal.
+where $v(\rr_1, \rr_2)$ represents the bare Coulomb interaction, and $\eta$ is a positive infinitesimal.
 
 The Fourier transforms for periodic lattice quantities are defined as
 
@@ -640,6 +644,6 @@ f_{\GG_1\GG_2}(\qq) =
 (\qq+\GG_2) \cdot \rr_2}\dd\rr_1\dd\rr_2
 \end{equation} 
 
-The volume of the unit cell is denoted with Ω, while _V_ is the total volume of the crystal simulated
+The volume of the unit cell is denoted with $\Omega$, while $V$ is the total volume of the crystal simulated
 employing Born-von Karman periodic boundary condition. Unless otherwise
 specified, Hartree atomic units will be used throughout.

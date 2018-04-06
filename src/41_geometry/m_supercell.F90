@@ -307,7 +307,6 @@ end subroutine init_supercell
 
 subroutine order_supercell_typat (scell)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -372,7 +371,6 @@ end subroutine order_supercell_typat
 
 subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -455,7 +453,6 @@ end subroutine freeze_displ_supercell
 
 subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -524,7 +521,6 @@ end subroutine prt_supercell_for_qpt
 
 subroutine prt_supercell (filename, scell, title1, title2)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -844,7 +840,7 @@ subroutine destroy_supercell (scell)
 
 !Arguments ------------------------------------
 !scalars
-  type(supercell_type), intent(inout) :: scell !vz_i
+  type(supercell_type), intent(inout) :: scell 
 
 ! *************************************************************************
 

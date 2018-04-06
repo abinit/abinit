@@ -33,14 +33,15 @@
 #endif
 
 subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
-    
+
  use defs_basis
+
+ use m_geometry,       only : xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkgrid_fft'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -58,7 +59,7 @@ subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
  real(dp), dimension(3) :: coord
  real(dp), dimension(3,nfft) :: gridred
 !character(len=500) :: message                   ! to be uncommented, if needed
- 
+
 ! *************************************************************************
 
  n1    = ngfft(1)
@@ -82,8 +83,6 @@ subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
    end if
  end do
  call xred2xcart(nfft, rprimd, gridcart, gridred)
-
- 
 
 end subroutine mkgrid_fft
 !!***

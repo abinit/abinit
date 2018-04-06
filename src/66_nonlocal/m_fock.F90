@@ -43,11 +43,14 @@ module m_fock
  use m_pawfgr
  use m_pawfgrtab
  use m_pawcprj
- use m_paw_ij,          only : paw_ij_type
+ use m_cgtools
 
  use m_mpinfo,          only : ptabs_fourdp
  use m_fstrings,        only : itoa, ftoa, sjoin
- use m_cgtools         
+ use m_fft,             only : zerosym
+ use m_kg,              only : ph1d3d, getph
+ use m_paw_ij,          only : paw_ij_type
+
 
  implicit none
 
@@ -95,7 +98,7 @@ module m_fock
   integer :: natom
    ! Number of atoms, input variable
 
-  integer :: nsppol 
+  integer :: nsppol
    ! Number of independent spin polarizations, input variable
    ! Note that this value does not take into account the MPI distribution of the wavefunctions.
 
@@ -110,7 +113,7 @@ module m_fock
 
   integer :: use_ACE
     ! option to use the ACE method of Lin Lin
-    !==0 if the normal Fock operator is to be created and/or used 
+    !==0 if the normal Fock operator is to be created and/or used
     !==1 if the ACE operator is to be created and/or used
 
   integer ABI_PRIVATE :: getghc_call_ = 1
@@ -130,7 +133,7 @@ module m_fock
   logical :: scf_converged
     ! .false. if the SCF cycle (with fixed Fock/ACE operator) is not converged
     ! .true. if the SCF cycle (with fixed Fock/ACE operator) has converged
- 
+
 ! Real(dp) scalars
 
   real(dp) :: gsqcut
@@ -144,11 +147,11 @@ module m_fock
     ! hybrid mixing coefficient for the short-range Fock contribution
 
   real(dp) :: hyb_range_dft
-    ! hybrid range for separation, used in the DFT functional 
+    ! hybrid range for separation, used in the DFT functional
     ! (should be equal to hyb_range_fock, but this is not true for HSE03)
 
   real(dp) :: hyb_range_fock
-    ! hybrid range for separation, used in the fock contribution 
+    ! hybrid range for separation, used in the fock contribution
 
   integer, allocatable :: atindx(:)
     !  atindx(natom)=index table for atoms (see gstate.f)
@@ -189,7 +192,7 @@ module m_fock
 ! Note that these are references to already existing objects.
 
   type(pawtab_type), pointer :: pawtab(:)
-  type(pawfgr_type),pointer :: pawfgr 
+  type(pawfgr_type),pointer :: pawfgr
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
 
 
@@ -217,14 +220,14 @@ module m_fock
     ! kg_bz(3,mpw*mkpt)
     ! G-vectors for each k-point in the BZ treate by this node
 
-  integer, allocatable :: nbandocc_bz(:,:) 
+  integer, allocatable :: nbandocc_bz(:,:)
     ! nbandocc_bz,(mkpt,my_nsppol))
     ! nb of bands at each k point
 
   integer, allocatable :: npwarr(:)
     ! npwarr(mkpt)
 
-  integer, allocatable :: istwfk_bz(:) 
+  integer, allocatable :: istwfk_bz(:)
     ! istwfk_bz,(mkpt))
     ! storage mode of the wavefunction at each k-point
 
@@ -290,7 +293,7 @@ module m_fock
  type,public :: fock_ACE_type
 
 ! ===== Real pointers
-  real(dp), allocatable :: xi(:,:,:) 
+  real(dp), allocatable :: xi(:,:,:)
 
  end type fock_ACE_type
 !----------------------------------------------------------------------
@@ -370,7 +373,7 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_A
 ! character(len=500) :: message                   ! to be uncommented, if needed
 
 ! *************************************************************************
- 
+
  !write (std_out,*) ' fockbz_create : enter'
 
 !* Create the array %kptns_bz = the k points in full BZ
@@ -416,7 +419,7 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_A
  ABI_ALLOCATE(fockbz%phase,(2,mpw*mkpt))
  fockbz%phase=zero
 
-!* Create the array %timerev i= 1 if time reversal symmetry must be used (0 otherwise) at each k point 
+!* Create the array %timerev i= 1 if time reversal symmetry must be used (0 otherwise) at each k point
  ABI_ALLOCATE(fockbz%timerev,(mkpt))
  fockbz%timerev=0
 
@@ -671,7 +674,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    do jkpt=1,nkpt_bz
      fockbz%mpi_enreg%proc_distrb(jkpt,:,1)=fockbz%mpi_enreg%me_kpt
    end do
- 
+
    mgfft=dtset%mgfft
    fockcommon%usepaw=dtset%usepaw
    if (fockcommon%usepaw==1)then
@@ -726,8 +729,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      ABI_ALLOCATE(dimcprj,(dtset%natom))
      call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
      ncpgr = 0
-     if (dtset%optforces== 1) ncpgr = 3 
-!     if (dtset%optstress /= 0) ncpgr = 6 
+     if (dtset%optforces== 1) ncpgr = 3
+!     if (dtset%optstress /= 0) ncpgr = 6
 !     ncpgr=3*dtset%optforces+6*dtset%optstress
      call pawcprj_alloc(fockbz%cwaveocc_prj,ncpgr,dimcprj)
      ABI_DEALLOCATE(dimcprj)
@@ -750,13 +753,13 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      msg='The parameter nnsclohf must be a non-negative integer.'
      MSG_ERROR(msg)
    end if
-   if (dtset%nnsclohf==0) then 
+   if (dtset%nnsclohf==0) then
      fockcommon%nnsclo_hf=1
      msg=' - The parameter nnsclohf is set to its default value 1.'
      call wrtout(std_out,msg,'COLL')
 !* Default value is set to 1 (updating cgocc at each step)
-!* May be useful to put default to 3 
-   else 
+!* May be useful to put default to 3
+   else
      fockcommon%nnsclo_hf=dtset%nnsclohf
      write(msg,'(a,i3)') ' - The parameter nnsclohf is set to the value:', dtset%nnsclohf
      call wrtout(std_out,msg,'COLL')
@@ -767,16 +770,16 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 ! === Initialize the hybrid coefficient ===
 ! =========================================
    fockcommon%ixc = dtset%ixc
-!  By convention, positive values are the default values for the ixc, 
+!  By convention, positive values are the default values for the ixc,
 !  while negative values have been set by the user (and stored as negative numbers)
    fockcommon%hyb_mixing=abs(dtset%hyb_mixing)
    fockcommon%hyb_mixing_sr=abs(dtset%hyb_mixing_sr)
    fockcommon%hyb_range_dft=abs(dtset%hyb_range_dft)
    fockcommon%hyb_range_fock=abs(dtset%hyb_range_fock)
 
-!  Set the hybrid parameters if functional from libxc for which parameters can be changed, or if the user asked to do so. 
+!  Set the hybrid parameters if functional from libxc for which parameters can be changed, or if the user asked to do so.
 !  Usually, these parameters were obtained from libxc,
-!  but the user might have possibly modified them. By the way, must define them here for the usual changeable fonctionals, 
+!  but the user might have possibly modified them. By the way, must define them here for the usual changeable fonctionals,
 !  since otherwise might inherit them from the previous dataset !
    if(dtset%ixc<0)then
      if (dtset%ixc==-406.or.dtset%ixc==-427.or.dtset%ixc==-428 .or. &
@@ -1060,7 +1063,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        if(sum(tau_nons(:)**2)>tol8) then
 !* Initialize %calc_phase(jkpt) to 1
          fockbz%calc_phase(my_jkpt)=1
-!* Compute the phase factor exp(i*2*pi*G.tau) for all G. 
+!* Compute the phase factor exp(i*2*pi*G.tau) for all G.
          indx(1)=1
          phase1d=zero
          call getph(indx,1,n1,n2,n3,phase1d,tau_nons)
@@ -1072,7 +1075,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !          phktnons(1,1)=one
 !          phktnons(2,1)=zero
 !* Convert 1D phase factors to 3D phase factors exp(i*2*pi*(k+G).tau) and store it in %phase_j
-         call ph1d3d(1,1,fockbz%kg_bz(:,1+jkg_this_proc:npwj+jkg_this_proc),1,1,npwj,n1,n2,n3, & 
+         call ph1d3d(1,1,fockbz%kg_bz(:,1+jkg_this_proc:npwj+jkg_this_proc),1,1,npwj,n1,n2,n3, &
 &          phktnons,phase1d,fockbz%phase(:,1+jkg_this_proc:npwj+jkg_this_proc))
        end if
 !* Apply time-reversal symmetry if required
@@ -1083,7 +1086,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        end if
 !* Initialize %kg_bz
        do jpw=1,npwj
-         v1=fockbz%kg_bz(1,jpw+jkg_this_proc) ; v2=fockbz%kg_bz(2,jpw+jkg_this_proc) ; v3=fockbz%kg_bz(3,jpw+jkg_this_proc) 
+         v1=fockbz%kg_bz(1,jpw+jkg_this_proc) ; v2=fockbz%kg_bz(2,jpw+jkg_this_proc) ; v3=fockbz%kg_bz(3,jpw+jkg_this_proc)
          fockbz%kg_bz(1,jpw+jkg_this_proc)=-shiftg(1)+symm(1,1)*v1+symm(2,1)*v2+symm(3,1)*v3
          fockbz%kg_bz(2,jpw+jkg_this_proc)=-shiftg(2)+symm(1,2)*v1+symm(2,2)*v2+symm(3,2)*v3
          fockbz%kg_bz(3,jpw+jkg_this_proc)=-shiftg(3)+symm(1,3)*v1+symm(2,3)*v2+symm(3,3)*v3
@@ -1100,7 +1103,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      end if
 
 !* Initialize the array %gbound_bz = boundary of the basis sphere of G vectors at each k point
-     call sphereboundary(fockbz%gbound_bz(:,:,my_jkpt),fockbz%istwfk_bz(my_jkpt),& 
+     call sphereboundary(fockbz%gbound_bz(:,:,my_jkpt),fockbz%istwfk_bz(my_jkpt),&
 &      fockbz%kg_bz(:,1+jkg_this_proc:npwj+jkg_this_proc),mgfft,npwj)
 
      jkg_this_proc=jkg_this_proc+npwj
@@ -1124,7 +1127,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !         fock%tab_icg(my_jkpt,1)=my_icgtab(ikpt,2)
 !       end if
      else
-!* In this case, my_nsppol=dtset%nsppol=2 
+!* In this case, my_nsppol=dtset%nsppol=2
        fockbz%tab_ibg(my_jkpt,:)=my_ibgtab(ikpt,:)
        fockbz%tab_icg(my_jkpt,:)=my_icgtab(ikpt,:)
        fockbz%tab_icp(my_jkpt,:)=my_icptab(ikpt,:)
@@ -1255,7 +1258,7 @@ subroutine fock_set_ieigen(fock,iband)
 !Arguments ------------------------------------
  integer, intent(in) :: iband
  type(fock_common_type),pointer :: fock
- 
+
 ! *************************************************************************
 
 !Nothing to do if fock pointer is not associated...
@@ -1313,7 +1316,7 @@ subroutine fock_destroy(fock)
  ABI_DATATYPE_DEALLOCATE(fock%fock_common)
  ABI_DATATYPE_DEALLOCATE(fock%fock_BZ)
  ABI_DATATYPE_DEALLOCATE(fock)
- 
+
  DBG_EXIT("COLL")
 end subroutine fock_destroy
 
@@ -1341,7 +1344,7 @@ subroutine fock_common_destroy(fock)
  if (allocated(fock%typat)) then
     ABI_DEALLOCATE(fock%typat)
  endif
- ! real arrays 
+ ! real arrays
  if (allocated(fock%forces)) then
    ABI_DEALLOCATE(fock%forces)
  endif
@@ -1362,7 +1365,7 @@ subroutine fock_common_destroy(fock)
     call pawfgrtab_free(fock%pawfgrtab)
     ABI_DATATYPE_DEALLOCATE(fock%pawfgrtab)
  endif
- 
+
  ! Put the integer to 0
  fock%ieigen=0
  fock%ikpt=0
@@ -1401,7 +1404,7 @@ subroutine fock_BZ_destroy(fock)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
  if (allocated(fock%cwaveocc_bz)) then
    ABI_DEALLOCATE(fock%cwaveocc_bz)
  endif
@@ -1465,7 +1468,7 @@ subroutine fock_BZ_destroy(fock)
 !* Put the integer to 0
    fock%nkpt_bz=0
 
-!* Deallocate real arrays 
+!* Deallocate real arrays
 
 !* Deallocate integer arrays
  if (allocated(fock%gbound_bz)) then
@@ -1532,7 +1535,7 @@ subroutine fock_ACE_destroy(fockACE)
 end subroutine fock_ACE_destroy
 !!***
 
- 
+
 !!****f* m_fock/fock_calc_ene
 !! NAME
 !!  fock_calc_ene
@@ -1859,14 +1862,14 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !               cycle
 !             end if
          my_jkpt=my_jkpt+1
-         
+
          ikpt=fockbz%tab_ikpt(my_jkpt)
 
 !* ikpt = the point of IBZ that jkpt is an image of in BZ
          npwj=npwarr(ikpt)
-!* npwj= number of plane wave in basis for the wavefunction 
-         jstwfk=fockbz%istwfk_bz(my_jkpt)     
-!* jstwfk= how is stored the wavefunction 
+!* npwj= number of plane wave in basis for the wavefunction
+         jstwfk=fockbz%istwfk_bz(my_jkpt)
+!* jstwfk= how is stored the wavefunction
          ibg=fockbz%tab_ibg(my_jkpt,my_jsppol)
 !* ibg = shift to be applied on the location of data in the array occ
          icg=fockbz%tab_icg(my_jkpt,my_jsppol)
@@ -1945,7 +1948,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !* Keep the processors in %comm_kpt which needs the values in cgocc_tmp to build their own %cwaveocc and %occ_bz.
              if ((mpi_enreg%nproc_kpt/=1).and.(nsppol==2)) then
                if (fockbz%timerev(my_jkpt)==mpi_enreg%my_isppoltab(isppol)) cycle
-!* In the case of a parallel spin-polarized calculation 
+!* In the case of a parallel spin-polarized calculation
 !* when time reversal symmetry is applied at this k-point (timrev==1), only the processors with the opposite spin (my_isppoltab==0) are kept.
 !* when time reversal symmetry is not applied at this k-point (timrev==0), only the processors with the same spin (my_isppoltab==1) are kept.
 
@@ -1974,7 +1977,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
              end if ! phase
 
 !* apply time reversal symmetry if necessary
-             if (fockbz%timerev(my_jkpt)==1) then 
+             if (fockbz%timerev(my_jkpt)==1) then
                cgocc(2,:) = - cgocc(2,:)
                if((mpi_enreg%nproc_kpt==1).and.(nsppol==2)) my_jsppol=mod(my_jsppol,2)+1
 !* exchange spin (1 ->2 ; 2-> 1) in the sequential case.
@@ -1983,7 +1986,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !* apply FFT to get cwaveocc in real space
 
              if (allocated(fockbz%cwaveocc_bz)) then
- 
+
                ABI_ALLOCATE(dummytab2,(2,npwj))
                call fourwf(1,dummytab3,cgocc(:,1:npwj),dummytab2,fockbz%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol), &
 &               gbound_k,gbound_k,jstwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,&
@@ -2058,8 +2061,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 
 
 ! Restricted or unrestricted HF
-     if (nsppol==1) then 
-!* Update the array %occ_bz => May be limited to the occupied states only 
+     if (nsppol==1) then
+!* Update the array %occ_bz => May be limited to the occupied states only
        fockbz%occ_bz(:,:)=half*fockbz%occ_bz(:,:)
 
 ! If nsppol=1, this is a restricted Hartree-Fock calculation.
@@ -2172,7 +2175,7 @@ end function fock_get_getghc_call
 !!
 !! SOURCE
 
-subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol) 
+subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2275,7 +2278,6 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bare_vqg'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
