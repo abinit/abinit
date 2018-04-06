@@ -344,6 +344,7 @@ end subroutine atompaw_shapebes
 !!  radmesh <type(pawrad_type)>=paw radial mesh (and related data)
 !!  radmesh_core <type(pawrad_type)>=radial mesh (and related data) for the core densities
 !!  radmesh_vloc <type(pawrad_type)>=radial mesh (and related data) for the local potential (VH(tnZc))
+!!  [vminushalf(:)]= -optional- potential associated to the half-ion technique (LDA-1/2)
 !!  vhtnzc(:)= local potential VH(tnZc)
 !!  znucl= valence and total charge of the atomic species
 !!
@@ -359,7 +360,9 @@ end subroutine atompaw_shapebes
 !! SOURCE
 
 
- subroutine atompaw_dij0(indlmn,kij,lmnmax,ncore,opt_init,pawtab,radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl,vminushalf)
+ subroutine atompaw_dij0(indlmn,kij,lmnmax,ncore,opt_init,pawtab,&
+&                        radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl,&
+&                      vminushalf) ! optional argument
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -383,7 +386,8 @@ end subroutine atompaw_shapebes
  real(dp),optional,intent(in) :: vminushalf(:)
 
 !Local variables ---------------------------------------
- integer :: il,ilm,iln,ilmn,j0lmn,jl,jlm,jln,jlmn,klmn,lmn2_size,meshsz,meshsz1,meshsz_core,meshsz_vhtnzc
+ integer :: il,ilm,iln,ilmn,j0lmn,jl,jlm,jln,jlmn,klmn,lmn2_size,meshsz,meshsz_core
+ integer :: meshsz_vhtnzc,meshsz_vmh
  real(dp) :: intg,intvh,yp1,ypn
  real(dp),allocatable :: ff(:),ff1(:),r2k(:),shpf(:),vhnzc(:),vhtnzc_sph(:),work1(:),work2(:)
 
@@ -434,28 +438,6 @@ end subroutine atompaw_shapebes
  end do
  LIBPAW_DEALLOCATE(vhnzc)
 
-!Computation of <phi_i|vminushalf|phi_j>  (if any)
-!=================================================
- if(present(vminushalf)) then
-   if(size(vminushalf)>=1) then
-     meshsz1=radmesh%mesh_size
-     LIBPAW_ALLOCATE(ff1,(meshsz1))
-     do jlmn=1,pawtab%lmn_size
-       j0lmn=jlmn*(jlmn-1)/2
-       jlm=indlmn(4,jlmn);jln=indlmn(5,jlmn)
-       do ilmn=1,jlmn
-         klmn=j0lmn+ilmn
-         ilm=indlmn(4,ilmn);iln=indlmn(5,ilmn)
-         if (jlm==ilm) then
-           ff1(1:meshsz1)=pawtab%phi(1:meshsz1,iln)*pawtab%phi(1:meshsz1,jln)*vminushalf(1:meshsz1)
-           call simp_gen(intg,ff1,radmesh)
-           pawtab%dij0(klmn)=pawtab%dij0(klmn)+intg
-         end if
-       end do
-     end do
-     LIBPAW_DEALLOCATE(ff1)
-   end if
- end if
 !Computation of -<tphi_i|vh(tnZc)|tphi_j> on the PAW sphere
 !==========================================================
  do jlmn=1,pawtab%lmn_size
@@ -472,6 +454,27 @@ end subroutine atompaw_shapebes
    end do
  end do
 
+!Computation of <phi_i|vminushalf|phi_j>  (if any)
+!=================================================
+ if(present(vminushalf)) then
+   if(size(vminushalf)>=1) then
+     meshsz_vmh=min(meshsz,size(vminushalf))
+     do jlmn=1,pawtab%lmn_size
+       j0lmn=jlmn*(jlmn-1)/2
+       jlm=indlmn(4,jlmn);jln=indlmn(5,jlmn)
+       do ilmn=1,jlmn
+         klmn=j0lmn+ilmn
+         ilm=indlmn(4,ilmn);iln=indlmn(5,ilmn)
+         if (jlm==ilm) then
+           ff(1:meshsz_vmh)=pawtab%phi(1:meshsz_vmh,iln)*pawtab%phi(1:meshsz_vmh,jln)*vminushalf(1:meshsz_vmh)
+           call simp_gen(intg,ff(1:meshsz_vmh),radmesh)
+           pawtab%dij0(klmn)=pawtab%dij0(klmn)+intg
+         end if
+       end do
+     end do
+   end if
+ end if
+
 !Computation of -int[vh(tnzc)*Qijhat(r)dr]
 !=========================================
  if (opt_init==0) then
@@ -480,7 +483,7 @@ end subroutine atompaw_shapebes
    if (pawtab%shape_type==3) then
      LIBPAW_ALLOCATE(r2k,(radmesh%int_meshsz))
      r2k=zero
-     r2k(2:radmesh%int_meshsz)=shpf(2:radmesh%int_meshsz)*radmesh%rad(2:radmesh%int_meshsz)**(2)
+     r2k(2:radmesh%int_meshsz)=shpf(2:radmesh%int_meshsz)*radmesh%rad(2:radmesh%int_meshsz)**2
      if(radmesh%mesh_type==5) then
        call simp_gen(intg,r2k,radmesh)
      else
@@ -500,7 +503,7 @@ end subroutine atompaw_shapebes
        il=indlmn(1,ilmn);iln=indlmn(5,ilmn);ilm=indlmn(4,ilmn)
        if (ilm==jlm) then
          ff(1:meshsz)=(pawtab%phi (1:meshsz,iln)*pawtab%phi (1:meshsz,jln)&
-&         -pawtab%tphi(1:meshsz,iln)*pawtab%tphi(1:meshsz,jln))
+&                     -pawtab%tphi(1:meshsz,iln)*pawtab%tphi(1:meshsz,jln))
          call simp_gen(intg,ff,radmesh)
          pawtab%dij0(klmn)=pawtab%dij0(klmn)-intvh*intg
        end if
@@ -552,6 +555,7 @@ end subroutine atompaw_shapebes
 !!  radmesh <type(pawrad_type)>=paw radial mesh (and related data)
 !!  radmesh_core <type(pawrad_type)>=radial mesh (and related data) for the core densities
 !!  radmesh_vloc <type(pawrad_type)>=radial mesh (and related data) for the local potential (VH(tnZc))
+!!  [vminushalf(:)]= -optional- potential associated to the half-ion technique (LDA-1/2)
 !!  vhtnzc(:)= local potential VH(tnZc)
 !!  znucl= valence and total charge of the atomic species
 !!
@@ -566,7 +570,9 @@ end subroutine atompaw_shapebes
 !!
 !! SOURCE
 
- subroutine atompaw_kij(indlmn,kij,lmnmax,ncore,opt_init,opt_vhnzc,pawtab,radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl)
+ subroutine atompaw_kij(indlmn,kij,lmnmax,ncore,opt_init,opt_vhnzc,pawtab, &
+&                       radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl,&
+&                       vminushalf) ! optional argument
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -588,11 +594,13 @@ end subroutine atompaw_shapebes
  real(dp),intent(out) :: kij(pawtab%lmn2_size)
  real(dp),intent(in) :: ncore(:)
  real(dp),intent(in) :: vhtnzc(:)
+ real(dp),optional,intent(in) :: vminushalf(:)
 
 !Local variables ---------------------------------------
- integer :: il,ilm,iln,ilmn,j0lmn,jl,jlm,jln,jlmn,klmn,lmn2_size,meshsz,meshsz_core,meshsz_vhtnzc
+ integer :: il,ilm,iln,ilmn,j0lmn,jl,jlm,jln,jlmn,klmn,lmn2_size
+ integer :: meshsz,meshsz_core,meshsz_vhtnzc,meshsz_vmh
  real(dp) :: intg,intvh,yp1,ypn
- real(dp),allocatable :: ff(:),shpf(:),vhnzc(:),vhtnzc_sph(:),work1(:),work2(:)
+ real(dp),allocatable :: ff(:),r2k(:),shpf(:),vhnzc(:),vhtnzc_sph(:),work1(:),work2(:)
 
 ! *********************************************************************
 
@@ -621,8 +629,8 @@ end subroutine atompaw_shapebes
 !=========================
  kij(1:lmn2_size)=pawtab%dij0(1:lmn2_size)
 
-!Substraction of <phi_i|vh(nZc)|phi_j> on the PAW sphere
-!=======================================================
+!Substraction of -<phi_i|vh(nZc)|phi_j> on the PAW sphere
+!========================================================
  if (opt_vhnzc/=0) then
    meshsz_core=size(ncore)
    LIBPAW_ALLOCATE(vhnzc,(meshsz_core))
@@ -643,8 +651,8 @@ end subroutine atompaw_shapebes
    LIBPAW_DEALLOCATE(vhnzc)
  end if
 
-!Substraction of -<tphi_i|vh(tnZc)|tphi_j> on the PAW sphere
-!===========================================================
+!Substraction of <tphi_i|vh(tnZc)|tphi_j> on the PAW sphere
+!==========================================================
  do jlmn=1,pawtab%lmn_size
    j0lmn=jlmn*(jlmn-1)/2
    jlm=indlmn(4,jlmn);jln=indlmn(5,jlmn)
@@ -659,11 +667,44 @@ end subroutine atompaw_shapebes
    end do
  end do
 
-!Substraction of -int[vh(tnzc)*Qijhat(r)dr]
+!Computation of -<phi_i|vminushalf|phi_j>  (if any)
+!==================================================
+ if(present(vminushalf)) then
+   if(size(vminushalf)>=1) then
+     meshsz_vmh=min(meshsz,size(vminushalf))
+     do jlmn=1,pawtab%lmn_size
+       j0lmn=jlmn*(jlmn-1)/2
+       jlm=indlmn(4,jlmn);jln=indlmn(5,jlmn)
+       do ilmn=1,jlmn
+         klmn=j0lmn+ilmn
+         ilm=indlmn(4,ilmn);iln=indlmn(5,ilmn)
+         if (jlm==ilm) then
+           ff(1:meshsz_vmh)=pawtab%phi(1:meshsz_vmh,iln)*pawtab%phi(1:meshsz_vmh,jln)*vminushalf(1:meshsz_vmh)
+           call simp_gen(intg,ff(1:meshsz_vmh),radmesh)
+           kij(klmn)=kij(klmn)-intg
+         end if
+       end do
+     end do
+   end if
+ end if
+
+!Computation of int[vh(tnzc)*Qijhat(r)dr]
 !==========================================
  if (opt_init==0) then
    LIBPAW_ALLOCATE(shpf,(radmesh%mesh_size))
    call atompaw_shpfun(0,radmesh,intg,pawtab,shpf)
+   if (pawtab%shape_type==3) then
+     LIBPAW_ALLOCATE(r2k,(radmesh%int_meshsz))
+     r2k=zero
+     r2k(2:radmesh%int_meshsz)=shpf(2:radmesh%int_meshsz)*radmesh%rad(2:radmesh%int_meshsz)**2
+     if(radmesh%mesh_type==5) then
+       call simp_gen(intg,r2k,radmesh)
+     else
+       call simp_gen(intg,r2k,radmesh,r_for_intg=pawtab%rshp)
+     end if
+     shpf(1:meshsz)=shpf(1:meshsz)/intg
+     LIBPAW_DEALLOCATE(r2k)
+   end if
    ff(1:meshsz)=vhtnzc_sph(1:meshsz)*shpf(1:meshsz)*radmesh%rad(1:meshsz)**2
    LIBPAW_DEALLOCATE(shpf)
    call simp_gen(intvh,ff,radmesh)
@@ -675,7 +716,7 @@ end subroutine atompaw_shapebes
        il=indlmn(1,ilmn);iln=indlmn(5,ilmn);ilm=indlmn(4,ilmn)
        if (ilm==jlm) then
          ff(1:meshsz)=(pawtab%phi (1:meshsz,iln)*pawtab%phi (1:meshsz,jln)&
-&         -pawtab%tphi(1:meshsz,iln)*pawtab%tphi(1:meshsz,jln))
+&                     -pawtab%tphi(1:meshsz,iln)*pawtab%tphi(1:meshsz,jln))
          call simp_gen(intg,ff,radmesh)
          kij(klmn)=kij(klmn)+intvh*intg
        end if
