@@ -14,7 +14,7 @@
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2018 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -175,6 +175,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_io_tools, only : file_exists
  use m_mpinfo,   only : destroy_mpi_enreg
  use m_hdr,      only : hdr_skip
+ use m_occ,      only : occeig
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -186,6 +187,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawcprj,  only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
+ use m_kg,       only : mkkin, kpgstr
+ use m_cgtools,  only : dotprod_vn
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -197,10 +200,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_56_recipspace
  use interfaces_56_xc
- use interfaces_61_occeig
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -278,7 +279,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
- integer :: option,optxc,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
+ integer :: option,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -635,9 +636,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          else
 !          Non-collinear magnetism (should the second nkxc be nkxc_cur ?)
            if (nspden==4) then
-             option=0;optxc=1
-             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nkxc,nspden,n3xccc,1,option,optxc,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,&
+             option=0
+             call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum1,0,dum2,0,dum3,0,nkxc,&
+&             nspden,n3xccc,1,option,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
@@ -648,8 +649,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !      Get first-order Hartree potential (metric tensor contribution only)
        if (nvh1>0) then
-         call hartrestr(gmet,gprimd,gsqcut,idir1,ipert1,mpi_enreg,dtset%natom,&
-&         nfftf,ngfftf,dtset%paral_kgb,rhog,vhartr01)
+         call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,dtset%natom,&
+&         nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr01)
        end if
 
 !      Get Hartree + xc + local contributions to dynamical matrix or elastic tensor

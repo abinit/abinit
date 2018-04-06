@@ -8,7 +8,7 @@
 !! non linear response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVeithen, MB)
+!! Copyright (C) 2002-2018 ABINIT group (MVeithen, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,10 +49,10 @@
 !!
 !! CHILDREN
 !!      d3sym,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfptnl_doutput
-!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hdr_free
+!!      dfptnl_loop,ebands_free,fourdp,getcut,getkgrid,getshell,hartre,hdr_free
 !!      hdr_init,hdr_update,initmv,inwffil,kpgio,mkcore,nlopt,pspini,read_rhor
-!!      rhohxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
-!!      wrtout
+!!      rhotoxc,setsym,setup1,status,symmetrize_xred,sytens,timab,wffclose
+!!      wrtout,xcdata_init
 !!
 !! SOURCE
 
@@ -76,6 +76,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_xmpi
  use m_hdr
  use m_ebands
+ use m_xcdata
 
  use m_dynmat,   only : d3sym, sytens
  use m_ddb,      only : nlopt, DDB_VERSION
@@ -84,6 +85,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_kg,       only : getcut, kpgio
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -109,6 +111,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !scalars
  integer,intent(in) :: iexit,mband,mgfft,mkmem,mpw,nfft
  integer,intent(in) :: natom,nkpt,nspden,nspinor,nsppol,nsym
+ logical :: non_magnetic_xc
  real(dp),intent(inout) :: etotal
  character(len=6),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -137,6 +140,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  type(ddb_hdr_type) :: ddb_hdr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: dum_kptrlatt(3,3),dum_vacuum(3),perm(6)
  integer,allocatable :: blkflg(:,:,:,:,:,:),carflg(:,:,:,:,:,:),cgindex(:,:)
@@ -158,6 +162,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  comm_cell = mpi_enreg%comm_cell
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check if the perturbations asked in the input file can be computed
 
@@ -341,7 +348,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Open and read pseudopotential files
  ecore = 0_dp
  call status(0,dtfil%filstat,iexit,level,'call pspini   ')
- call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,level,&
+ call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 !Initialize band structure datatype
@@ -420,7 +427,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(dyfrx2)
  end if
 
-!Comput kxc (second- and third-order exchange-correlation kernel)
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+
+!Compute kxc (second- and third-order exchange-correlation kernel)
  option=3
  nkxc=2*nspden-1 ! LDA
  if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
@@ -429,11 +438,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(kxc,(nfft,nkxc))
  ABI_ALLOCATE(k3xc,(nfft,nk3xc))
 
- call status(0,dtfil%filstat,iexit,level,'call rhohxc   ')
+ call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
  ABI_ALLOCATE(work,(0))
- call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,dtset%ngfft,&
-& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,rhog,rhor,rprimd,strsxc,1,&
-& vhartr,vxc,vxcavg,xccc3d,k3xc)
+ call xcdata_init(xcdata,dtset=dtset)
+ call rhotoxc(enxc,kxc,mpi_enreg,nfft,dtset%ngfft,&
+& work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
+& vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
  ABI_DEALLOCATE(work)
 
  ABI_DEALLOCATE(vhartr)

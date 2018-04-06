@@ -7,7 +7,7 @@
 !! This routine is called to compute the energy corresponding to constrained magnetic moments.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (ILuk)
+!! Copyright (C) 1998-2018 ABINIT group (ILuk)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,16 +39,16 @@
 
 subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
 
-!use functions
-use defs_basis
-use defs_abitypes
+ use defs_basis
+ use defs_abitypes
+
+ use m_geometry,  only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mag_constr_e'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_54_abiutil
 !End of the abilint section
 
@@ -67,6 +67,7 @@ use defs_abitypes
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii
+ integer :: cplex1=1    ! dummy argument for calcdensphere
  real(dp) :: intgden_proj, Epen,Econstr,lVp, norm
 !arrays
  real(dp) :: intmm(3), mag_1atom(3)
@@ -83,8 +84,9 @@ use defs_abitypes
  ABI_ALLOCATE (intgden, (nspden,natom))
 
 !We need the integrated magnetic moments
+ cplex1=1
  call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,&
-& 1,intgden)
+& 1,cplex1,intgden=intgden)
 
  Epen=0
  Econstr=0
@@ -138,7 +140,7 @@ use defs_abitypes
 
 !    Calculate the energy Epen corresponding to the constraining potential
 !    Epen = -Econstr - lVp
-!    Econstr = -M**2 + spinat**2 
+!    Econstr = -M**2 + spinat**2
 !    lVp = +2 M \cdot spinat
      Epen=Epen+magcon_lambda*(intmm(1)*intmm(1)+intmm(2)*intmm(2)+intmm(3)*intmm(3))
      Econstr=Econstr-magcon_lambda*(mag_1atom(1)*mag_1atom(1)+&

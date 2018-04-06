@@ -8,7 +8,7 @@
 !! for Wannier code (www.wannier.org f90 version).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (BAmadon,FJollet,TRangel,drh)
+!! Copyright (C) 2005-2018 ABINIT group (BAmadon,FJollet,TRangel,drh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,6 +84,7 @@
  use m_xmpi
  use m_sort
 
+ use m_numeric_tools, only : uniformrandom
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type
  use m_paw_sphharm, only : ylm_cmplx
@@ -93,7 +94,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_proj'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_67_common, except_this_one => mlwfovlp_proj
 !End of the abilint section
 
@@ -147,7 +147,7 @@
 
 !no_abirules
 !Tables 3.1 & 3.2, User guide
- integer,save :: orb_l_defs(-5:3)=(/2,2,1,1,1,0,1,2,3/) 
+ integer,save :: orb_l_defs(-5:3)=(/2,2,1,1,1,0,1,2,3/)
 ! integer,parameter :: mtransfo(0:3,7)=&
 !&  reshape((/1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,-2,-1,2,1,0,0,0,-1,1,2,-2,-3,3/),(/4,7/))
 
@@ -188,13 +188,13 @@
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
      do ikpt=1,nkpt
-!      
+!
 !      MPI: cycle over kpts not treated by this node
-!      
+!
        if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
 !      write(std_out,'("kpt loop2: ikpt",i3," rank ",i3)') ikpt,rank
 
-!      
+!
        do iband1=1,mband
          xnormb=0.d0
          do iband2=1,nwan(isppol)
@@ -215,11 +215,11 @@
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
      do ikpt=1,nkpt
-!      
+!
 !      MPI: cycle over kpts not treated by this node
-!      
+!
        if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
-!      
+!
        do iband2=1,nwan(isppol)
          jband=0
          do iband1=1,mband
@@ -242,14 +242,14 @@
 
 !********************* Projection on atomic orbitals based on .win file
  if( lproj==2) then !based on .win file
-   nproj(:)=nwan(:)/nspinor !if spinors, then the number of projections are 
+   nproj(:)=nwan(:)/nspinor !if spinors, then the number of projections are
    mproj=maxval(nproj(:))
 !  half the total of wannier functions
-!  
+!
 !  obtain lmax and lmax2
    lmax(:)=0
    lmax2(:)=0
-!  
+!
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
      do iproj=1,nproj(isppol)
@@ -261,18 +261,18 @@
    max_lmax2=maxval(lmax2(:))
 !  Allocate arrays
    ABI_ALLOCATE(ylmc_fac,(max_lmax2,mproj,nsppol))
-!  
+!
 !  get ylmfac, factor used for rotations and hybrid orbitals
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
      call mlwfovlp_ylmfac(ylmc_fac(1:lmax2(isppol),1:nproj(isppol),isppol),lmax(isppol),lmax2(isppol),&
 &     mband,nproj(isppol),proj_l(:,isppol),proj_m(:,isppol),proj_x(:,:,isppol),proj_z(:,:,isppol))
    end do
-!  
+!
    norm_error=zero
    norm_error_bar=zero
    icg=0
-!  
+!
    do isppol=1,nsppol
 !    Allocate arrays
      if(spin.eq.0 .or. spin.eq.isppol) then
@@ -285,20 +285,20 @@
        ABI_ALLOCATE(radial,(lmax2(isppol)))
        ABI_ALLOCATE(ylmcp,(lmax2(isppol)))
      end if
-!    
+!
      ikg=0
      do ikpt=1, nkpt
-!      
+!
 !      MPI: cycle over kpts not treated by this node
-!      
+!
        if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
-!      
+!
        if(spin.eq.0 .or. spin.eq.isppol) then
          write(message, '(a,i6,a,2i6)' ) &
 &         '   processor',rank,' will compute k-point,spin=',ikpt,isppol
          call wrtout(std_out,  message,'COLL')
        end if
-!      
+!
 !      Initialize variables
        npw_k=npwarr(ikpt)
        gsum2(:)=0.d0
@@ -310,80 +310,80 @@
          kpg(1)= (kpt(1) + real(kg_k(1,ipw),dp))     !k+G
          kpg(2)= (kpt(2) + real(kg_k(2,ipw),dp))
          kpg(3)= (kpt(3) + real(kg_k(3,ipw),dp))
-!        
+!
 !        Calculate modulus of k+G
          xx=gprimd(1,1)*kpg(1)+gprimd(1,2)*kpg(2)+gprimd(1,3)*kpg(3)
          yy=gprimd(2,1)*kpg(1)+gprimd(2,2)*kpg(2)+gprimd(2,3)*kpg(3)
          zz=gprimd(3,1)*kpg(1)+gprimd(3,2)*kpg(2)+gprimd(3,3)*kpg(3)
          kpg2(ipw)= two_pi*sqrt(xx**2+yy**2+zz**2)
-!        
+!
 !        Complex Y_lm for k+G
          if(lmax(isppol)==0) then
            ylmcp(1)=c1/sqrt(four_pi)
          else
            call ylm_cmplx(lmax(isppol),ylmcp,xx,yy,zz)
          end if
-!        
+!
          if(spin.eq.0 .or. spin.eq.isppol) then
 !          !
            do iproj=1,nproj(isppol)
-!            
-!            In PAW, we can use proj_radial > 4 to indicate that we just 
+!
+!            In PAW, we can use proj_radial > 4 to indicate that we just
 !            want the in-sphere contribution
-!            
+!
              if( psps%usepaw==1) then
                if( just_augmentation(iproj,isppol)) cycle
              end if
-!            
+!
 !            obtain radial part
              call mlwfovlp_radial(proj_zona(iproj,isppol),lmax(isppol),lmax2(isppol)&
 &             ,radial,proj_radial(iproj,isppol),kpg2(ipw))
-!            
+!
 !            scale complex representation of projector orbital with radial functions
 !            of appropriate l
              gft_lm(:)=radial(:)*ylmc_fac(1:lmax2(isppol),iproj,isppol)
-!            
+!
 !            complex structure factor for projector orbital position
              arg = ( kpg(1)*proj_site(1,iproj,isppol) + &
 &             kpg(2)*proj_site(2,iproj,isppol) + &
 &             kpg(3)*proj_site(3,iproj,isppol) ) * 2*pi
              cstr_fact = cmplx(cos(arg), -sin(arg) )
-!            
+!
 !            obtain guiding functions
              gf(ipw,iproj)=cstr_fact*dot_product(ylmcp,gft_lm)
-!            
+!
              gsum2(iproj)=gsum2(iproj)+real(gf(ipw,iproj))**2+aimag(gf(ipw,iproj))**2
            end do !iproj
          end if !spin
        end do !ipw
-!      
+!
        if(spin.eq.0 .or. spin.eq.isppol) then
          do iproj=1,nproj(isppol)
-!          
-!          In PAW, we can use proj_radial > 4 to indicate that we just 
+!
+!          In PAW, we can use proj_radial > 4 to indicate that we just
 !          want the in-sphere contribution
-!          
+!
            if(psps%usepaw==1 ) then
              if (just_augmentation(iproj,isppol)) cycle
            end if
-!          
+!
            gsum2(iproj)=16._dp*pi**2*gsum2(iproj)/ucvol
            gf(:,iproj)=gf(:,iproj)/sqrt(gsum2(iproj))
            norm_error=max(abs(gsum2(iproj)-one),norm_error)
            norm_error_bar=norm_error_bar+(gsum2(iproj)-one)**2
          end do !iproj
-!        
+!
 !        Guiding functions are computed.
 !        compute overlaps of gaussian projectors and wave functions
          do iproj=1,nproj(isppol)
-!          
-!          In PAW, we can use proj_radial > 4 to indicate that we just 
+!
+!          In PAW, we can use proj_radial > 4 to indicate that we just
 !          want the in-sphere contribution
-!          
+!
            if(psps%usepaw==1 ) then
              if ( just_augmentation(iproj,isppol)) cycle
            end if
-!          
+!
            jband=0
            do iband=1,mband
              if(band_in(iband,isppol)) then
@@ -392,11 +392,11 @@
                amn_tmp(:)=cmplx(0.d0,0.d0)
                do ispinor=1,nspinor
                  do ipw=1,npw_k
-!                  
+!
 !                  The case of spinors is tricky, we have nproj =  nwan/2
-!                  so we project to spin up and spin down separately, to have at 
+!                  so we project to spin up and spin down separately, to have at
 !                  the end an amn matrix with nwan projections.
-!                  
+!
 !                  idx=ipw*nspinor - (nspinor-ispinor)
                    idx=ipw+(ispinor-1)*npw_k
                    amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*cmplx(cg(1,idx+icg_shift),-cg(2,idx+icg_shift))
@@ -423,7 +423,7 @@
        ABI_DEALLOCATE(ylmcp)
      end if
    end do !isppol
-!  
+!
 !  if(isppol==1) then
 !  norm_error_bar=sqrt(norm_error_bar/real(nkpt*(nwan(1)),dp))
 !  else
@@ -442,10 +442,10 @@
 !  '  under "begin projectors" in ',trim(filew90_win),' file',ch10
 !  call wrtout(std_out,message,'COLL')
 !  end if
-!  
+!
 !  !Deallocate
 !  deallocate(ylmc_fac)
-!  
+!
    ABI_DEALLOCATE(ylmc_fac)
  end if !lproj==2
 

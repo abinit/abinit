@@ -9,7 +9,7 @@
 !! input on log grid, and splined to regular grid between 0 and rchrg
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (AF,DRH)
+!! Copyright (C) 1998-2018 ABINIT group (AF,DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -215,5 +215,4 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  ABI_DEALLOCATE(xx)
 
 end subroutine cc_derivatives
-
 !!***

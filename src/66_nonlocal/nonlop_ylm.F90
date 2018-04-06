@@ -23,7 +23,7 @@
 !! * This routine uses spherical harmonics Ylm to express Vnl.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,7 +106,7 @@
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpgin,nkpgout=second sizes of arrays kpgin/kpgout
 !!  nloalg(3)=governs the choice of the algorithm for nonlocal operator
 !!  nnlout=dimension of enlout (when signs=1 and choice>0):
@@ -295,6 +295,7 @@
  use m_profiling_abi
  use m_errors
 
+ use m_kg,      only : ph1d3d
  use m_pawcprj, only : pawcprj_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -302,7 +303,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_ylm'
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => nonlop_ylm
 !End of the abilint section
 
@@ -711,6 +711,7 @@
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
          if (((choice==2).or.(choice==3)).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if ((choice==2).and.(ndgxdt_stored==9).and.(signs==2)) ishift=ishift+6
          if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor

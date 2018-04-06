@@ -7,7 +7,7 @@
 !! driver for the parser
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG)
+!! Copyright (C) 1999-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,9 @@ module m_ab7_invars
   use interfaces_32_util
   use interfaces_57_iovars
 
-  use m_dtset,  only : dtset_free
+  use m_fstrings, only : inupper
+  use m_parser,   only : intagm, importxyz, parsefile
+  use m_dtset,    only : dtset_free
 
   implicit none
 
@@ -56,10 +58,14 @@ module m_ab7_invars
      type(dtsets_list),  pointer :: prev => null()
      type(dataset_type), pointer :: dtsets(:)
      type(pspheader_type), pointer :: pspheads(:)=>null()   !vz_z
-     integer :: mxga_n_rules, mxgw_nqlwl, mxnatom, mxntypat, mxlpawu, mxmband_upper, mxnatpawu, &
-         & mxnatsph, mxnatsph_extra, mxnconeq, mxn_efmas_dirs, mxnimage, mxnkptgw, mxnatvshift, mxnimfrqs, mxnfreqsp, &
-         & mxn_projection_frequencies, mxnkpt,  mxnnos, mxnqptdm, mxnsppol, mxnsym, mxnspinor, mxmband, mxnbandhf, mxnkpthf, &
-         & mxnzchempot
+     integer :: mxga_n_rules, mxgw_nqlwl, mxlpawu, &
+         & mxmband, mxmband_upper, &
+         & mxnatom, mxnatpawu, mxnatsph, mxnatsph_extra, mxnatvshift, &
+         & mxnbandhf, mxnconeq, mxnfreqsp, &
+         & mxnimage, mxnimfrqs, mxnkpt, mxnkptgw, mxnkpthf, &
+         & mxnnos, mxnqptdm, mxnspinor, mxnsppol, mxnsym, &
+         & mxntypat, mxnzchempot, &
+         & mxn_efmas_dirs, mxn_projection_frequencies
      integer :: istatr, istatshft, dmatpuflag, papiopt, timopt
   end type dtsets_list
 
@@ -117,7 +123,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      abinit
+!!      abinit,multibinit
 !!
 !! CHILDREN
 !!
@@ -438,9 +444,6 @@ end subroutine get_token
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_new_from_string'
- use interfaces_32_util
- use interfaces_42_parser
- use interfaces_57_iovars
 !End of the abilint section
 
  integer, intent(out) :: dtsetsId
@@ -524,7 +527,6 @@ subroutine ab7_invars_new_from_file(dtsetsId, filename, n, pspfiles, npsp, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_new_from_file'
- use interfaces_57_iovars
 !End of the abilint section
 
  integer, intent(out) :: dtsetsId
@@ -733,7 +735,7 @@ end subroutine ab7_invars_new_from_file
    & token%mxmband_upper,&
    & token%mxnatom,token%mxnatpawu,token%mxnatsph,token%mxnatsph_extra,&
    & token%mxnatvshift,&
-   & token%mxnconeq,token%mxnimage,token%mxn_efmas_dirs,token%mxnkpt,token%mxnkptgw,token%mxnnos,&
+   & token%mxnconeq,token%mxnimage,token%mxn_efmas_dirs,token%mxnkpt,token%mxnkptgw,token%mxnkpthf,token%mxnnos,&
    & token%mxnqptdm,&
    & token%mxnspinor,token%mxnsppol,token%mxnsym,token%mxntypat,token%mxnimfrqs,&
    & token%mxnfreqsp,token%mxnzchempot,token%mxn_projection_frequencies,ndtset,&

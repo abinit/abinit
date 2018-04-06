@@ -7,7 +7,7 @@
 !! Echo variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +31,7 @@
 !!         nimfrqs    =maximal value of input cd_customnimfrqs for all the datasets
 !!         nkpt       =maximal value of input nkpt for all the datasets
 !!         nkptgw     =maximal value of input nkptgw for all the datasets
+!!         nkpthf     =maximal value of input nkpthf for all the datasets
 !!         nnos       =maximal value of input nnos for all the datasets
 !!         nqptdm     =maximal value of input nqptdm for all the datasets
 !!         nspinor    =maximal value of input nspinor for all the datasets
@@ -82,6 +83,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 #if defined HAVE_NETCDF
  use netcdf
 #endif
+
+ use m_nctk,      only : create_nc_file
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -167,7 +170,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 
 #ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
- ! otherwise v6[34] crashes with errmess: 
+ ! otherwise v6[34] crashes with errmess:
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
  ! because we keep on creating dimensions in write_var_netcdf.
  ! one should use groups for this kind of operations!!
@@ -239,10 +242,10 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      if(dtsets(1)%cd_customnimfrqs  /=dtsets(idtset)%cd_customnimfrqs  ) multivals%nimfrqs  =1
      if(dtsets(1)%nkpt     /=dtsets(idtset)%nkpt     ) multivals%nkpt     =1
      if(dtsets(1)%nkptgw   /=dtsets(idtset)%nkptgw   ) multivals%nkptgw   =1
-     if(dtsets(1)%nkpthf   /=dtsets(idtset)%nkpthf   ) multivals%nkpthf   =1
+     if(dtsets(1)%nkpthf*dtsets(1)%usefock /=dtsets(idtset)%nkpthf*dtsets(idtset)%usefock) multivals%nkpthf=1
      if(dtsets(1)%nnos     /=dtsets(idtset)%nnos     ) multivals%nnos     =1
      if(dtsets(1)%nqptdm   /=dtsets(idtset)%nqptdm   ) multivals%nqptdm   =1
-     if(dtsets(1)%nsppol*dtsets(1)%nspinor/=dtsets(idtset)%nsppol*dtsets(idtset)%nspinor)multivals%nsp=1
+     if(dtsets(1)%nsppol*dtsets(1)%nspinor/=dtsets(idtset)%nsppol*dtsets(idtset)%nspinor) multivals%nsp=1
      if(dtsets(1)%nsppol   /=dtsets(idtset)%nsppol   ) multivals%nsppol   =1
      if(dtsets(1)%nspinor  /=dtsets(idtset)%nspinor  ) multivals%nspinor  =1
      if(dtsets(1)%nsym     /=dtsets(idtset)%nsym     ) multivals%nsym     =1
@@ -251,6 +254,11 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      if(dtsets(1)%nzchempot/=dtsets(idtset)%nzchempot) multivals%nzchempot=1
    end do
  end if
+
+!DEBUG
+ write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
+ write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
+!ENDDEBUG
 
  nshiftk=1
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
@@ -298,6 +306,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 & 3*mxvals%nberry,&
 & mxvals%nimage,&
 & 3*mxvals%nkptgw,&
+& 3*mxvals%nkpthf,&
 & mxvals%nkpt*mxvals%nsppol*mxvals%mband,&
 & 3*mxvals%nkpt,npsp,&
 & 3*mxvals%nqptdm,&

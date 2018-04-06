@@ -6,7 +6,7 @@
 !!  Tools for the management of a set of Fermi surface k-points
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ module m_fstab
 !!
 !! FUNCTION
 !!  Tables with the correspondence between points of the Fermi surface (FS) and the k-points in the
-!!  IBZ (k-points found in ebands_t). We used `nsppol` fstab_t objects to account for spin polarization.
+!!  IBZ (k-points found in ebands_t). We use `nsppol` fstab_t objects to account for spin polarization.
 !!
 !! SOURCE
 

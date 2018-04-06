@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (JB)
+!!  Copyright (C) 2014-2018 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +40,7 @@ module m_scfcv
  use m_wffile
  use m_rec
  use m_efield
+ use m_orbmag
 
  use m_scf_history,      only: scf_history_type
  use m_results_gs ,      only: results_gs_type
@@ -72,7 +73,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (JB)
+!!  Copyright (C) 2014-2018 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,6 +97,7 @@ module m_scfcv
    type(datafiles_type),pointer :: dtfil => null()
    type(dataset_type),pointer :: dtset => null()
    type(efield_type),pointer :: dtefield => null()
+   type(orbmag_type),pointer :: dtorbmag => null()
    type(electronpositron_type),pointer :: electronpositron => null()
    type(hdr_type),pointer :: hdr => null()
    type(pawfgr_type),pointer :: pawfgr => null()
@@ -175,7 +177,7 @@ contains
 !! SOURCE
 
 subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
-&  dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,&
+&  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &  indsym,initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -201,6 +203,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
  type(datafiles_type),intent(in),target :: dtfil
  type(dataset_type),intent(in),target :: dtset
  type(efield_type),intent(in),target :: dtefield
+ type(orbmag_type),intent(in),target :: dtorbmag
 ! type(electronpositron_type),pointer :: electronpositron
  type(hdr_type),intent(in),target :: hdr
  type(pawang_type),intent(in),target :: pawang
@@ -298,6 +301,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
  this%cg=>cg
  this%dmatpawu=>dmatpawu
  this%dtefield=>dtefield
+ this%dtorbmag=>dtorbmag
  this%dtfil=>dtfil
  this%dtpawuj=>dtpawuj
  this%eigen=>eigen
@@ -409,6 +413,7 @@ type(scfcv_t), intent(inout) :: this
  this%dtfil => null()
  this%dtset => null()
  this%dtefield => null()
+ this%dtorbmag => null()
  this%electronpositron => null()
  this%hdr => null()
  this%pawfgr => null()
@@ -734,7 +739,7 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-   call scfcv(this%atindx,this%atindx1,this%cg,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtpawuj,&
+   call scfcv(this%atindx,this%atindx1,this%cg,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtorbmag,this%dtpawuj,&
 &    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
 &    this%initialized,this%irrzon,this%kg,this%mcg,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,this%nfftf,this%npwarr,&
 &    this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&

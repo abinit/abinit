@@ -7,7 +7,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MG)
+!! Copyright (C) 2004-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,7 +58,6 @@ program mrgdv
 #undef ABI_FUNC
 #define ABI_FUNC 'mrgdv'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

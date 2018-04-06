@@ -8,7 +8,7 @@
 !! Perrot F.,Phys. Rev. A20,586-594 (1979)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (JFD,LK)
+!! Copyright (C) 1998-2018 ABINIT group (JFD,LK)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@
 !!  vxci(npts,nspden)=exchange-correlation potential
 !!
 !! PARENTS
-!!      rhohxc
+!!      rhotoxc
 !!
 !! CHILDREN
 !!      invcb

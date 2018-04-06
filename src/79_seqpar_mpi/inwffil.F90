@@ -9,7 +9,7 @@
 !! (initialization of wavefunctions from scratch or from file, translations of wavefunctions, ...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MB, MVer)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@
 !!  mpi_enreg=informations about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol)=number of bands at each k point
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points
 !!  npwarr(nkpt)=array holding npw for each k point.
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -138,6 +138,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  use m_io_tools, only : file_exists
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
  use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg
+ use m_kg,       only : kpgio
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

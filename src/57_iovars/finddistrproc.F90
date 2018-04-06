@@ -11,7 +11,7 @@
 !!   (use_slk, np_slk, gpu_linalg_limit)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FJ,MT,FD)
+!! Copyright (C) 1999-2018 ABINIT group (FJ,MT,FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,14 +76,15 @@
  use m_hdr
  use m_sort
 
- use m_fftcore, only : kpgcount
+ use m_geometry,     only : mkrdim, metric
+ use m_fftcore,      only : kpgcount
+ use m_dtset,        only : get_npert_rbz
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'finddistrproc'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_54_abiutil
  use interfaces_57_iovars, except_this_one => finddistrproc

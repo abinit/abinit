@@ -1,40 +1,7 @@
 **********************************************************************
 Warning pattern : 'Unused variable'
 **********************************************************************
-chkdilatmx.F90 : var = eigval_orig [41_geometry]
-m_pawpsp.F90 : var = ii [42_libpaw]
-pred_velverlet.F90 : var = vel_nexthalf [45_geomoptim]
-m_io_screening.F90 : var = bufdc [62_iowfdenpot]
-fock_getghc.F90 : var = dummy [66_wfs]
-mklocl.F90 : var = rhor_ptr [67_common]
-mlwfovlp.F90 : var = caux [67_common]
-mlwfovlp.F90 : var = caux2 [67_common]
-mlwfovlp.F90 : var = caux3 [67_common]
-mlwfovlp.F90 : var = corrvdw [67_common]
-mlwfovlp.F90 : var = csix [67_common]
-mlwfovlp.F90 : var = kk [67_common]
-mlwfovlp.F90 : var = occ_arr [67_common]
-mlwfovlp.F90 : var = occ_wan [67_common]
-mlwfovlp.F90 : var = spreadw [67_common]
-mlwfovlp.F90 : var = tdocc_wan [67_common]
-rf2_init.F90 : var = igs [72_response]
-m_dvdb.F90 : var = mgfftf [72_response]
-m_gkk.F90 : var = onpw [78_eph]
-afterscfloop.F90 : var = compute_wvl_tail [94_scfcv]
-afterscfloop.F90 : var = eexctx [94_scfcv]
-afterscfloop.F90 : var = eh [94_scfcv]
-afterscfloop.F90 : var = ekin [94_scfcv]
-afterscfloop.F90 : var = eloc [94_scfcv]
-afterscfloop.F90 : var = enl [94_scfcv]
-afterscfloop.F90 : var = eproj [94_scfcv]
-afterscfloop.F90 : var = esicdc [94_scfcv]
-afterscfloop.F90 : var = evxc [94_scfcv]
-afterscfloop.F90 : var = exc [94_scfcv]
-afterscfloop.F90 : var = ia [94_scfcv]
-afterscfloop.F90 : var = ii [94_scfcv]
-afterscfloop.F90 : var = ucvol_local [94_scfcv]
-afterscfloop.F90 : var = xcart [94_scfcv]
-anaddb.F90 : var = dimekb [98_main]
+dummy_tests.F90 = line: 71, var: 'unused_variable' [98_main]
 **********************************************************************
-Warning count = 34
+Warning count = 1  
 **********************************************************************

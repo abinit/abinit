@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/Psolver_rhohxc
+!!****f* ABINIT/psolver_rhohxc
 !! NAME
-!! Psolver_rhohxc
+!! psolver_rhohxc
 !!
 !! FUNCTION
 !! Given rho(r), compute Hartree potential considering the system as
@@ -10,10 +10,10 @@
 !! Psolver() developped for BigDFT.
 !! It can compute the xc energy and potential if required. This computation is
 !! built on the drivexc() routine of ABINIT but access it directly from real
-!! space. The present routine is a real space counter part to rhohxc().
+!! space. The present routine is a real space counter part to rhotoxc().
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR,TRangel).
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,6 +71,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  use m_cgtools
 
  use m_xmpi, only: xmpi_comm_rank,xmpi_comm_size,xmpi_sum
+ use m_geometry, only : metric
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
@@ -82,7 +83,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 #undef ABI_FUNC
 #define ABI_FUNC 'psolver_rhohxc'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_62_poisson, except_this_one => psolver_rhohxc
 !End of the abilint section
@@ -104,14 +104,14 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
   !arrays
   integer, intent(in)    :: ngfft(18)
   real(dp),intent(in) :: xccc3d(n3xccc)
-  real(dp),intent(in) :: nhat(nfft,nspden*nhatdim)  
+  real(dp),intent(in) :: nhat(nfft,nspden*nhatdim)
   real(dp),intent(inout) :: rhor(nfft, nspden)
   real(dp),intent(out)   :: vhartr(nfft)
   real(dp),intent(out)   :: vxc(nfft, nspden)
 
   !Local variables-------------------------------
 #if defined HAVE_BIGDFT
-! n_c and \hat{n} can be added/rested inside bigdft by passing 
+! n_c and \hat{n} can be added/rested inside bigdft by passing
 ! them as pointers (rhocore and rhohat):
   logical, parameter :: add_n_c_here=.true.  !Add n_c here or inside bigdft
   logical, parameter :: rest_hat_n_here=.true.  !Rest \hat{n} here or inside bigdft
@@ -145,7 +145,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  comm=mpi_enreg%comm_fft
  if(usewvl==1) comm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(comm)
- nproc=xmpi_comm_size(comm) 
+ nproc=xmpi_comm_size(comm)
 
  if(n3xccc>0) then
    if(nfft .ne. n3xccc)then
@@ -227,7 +227,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    if(wvl_den%denspot%rhov_is .ne. ELECTRONIC_DENSITY) then
      message= "psolver_rhohxc: rhov should contain the electronic density"
      MSG_ERROR(message)
-   end if  
+   end if
  end if
 
  if(usewvl==1) then
@@ -266,7 +266,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
      call mkdenpos(iwarn, nfft, nspden, opt_mkdenpos, rhocore, tol20 )
    end if
  end if
- 
+
 !write(*,*)'psolver_rhohxc, erase me, set rhocore=0'
 !if( associated(wvl_den%denspot%rho_C))wvl_den%denspot%rho_C=zero
 !if(associated(rhocore))rhocore=zero
@@ -293,11 +293,11 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 !If usewvl=1, vpsp(or v_ext) will be summed to vhartree
  if(usewvl==1) then
    pot_ion=>wvl_den%denspot%V_ext
-   sumpion=.false. 
+   sumpion=.false.
 !  Note:
 !  if sumpion==.true.
 !  call wvl_newvtr in setvtr and rhotov
-!  if sumpion==.false.  
+!  if sumpion==.false.
 !  modify setvtr and rhotov to not use wvl_newvtr and follow the normal ABINIT flow.
  else
 !  This is not allowed
@@ -308,18 +308,18 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !To make this work, make sure that xc_init has been called
 !in gstate.
- if(.not. use_psolver) then 
-!  T.Rangel: 
-!  Use this approach for PAW and sometimes for NC since 
+ if(.not. use_psolver) then
+!  T.Rangel:
+!  Use this approach for PAW and sometimes for NC since
 !  in psolver() the core density is not added.
-!  
-!  PAW case: 
+!
+!  PAW case:
 !  It is important to call H_potential before XC_potential:
 !  In XC_potential, if test_nhat, we do:
-!  1) rhor=rhor-rhohat, 
+!  1) rhor=rhor-rhohat,
 !  2) makepositive(rhor,tol20)
-!  3) after Psolver, we do rhor=rhor+rhohat, 
-!  I found that rhor at input and output are slightly different, 
+!  3) after Psolver, we do rhor=rhor+rhohat,
+!  I found that rhor at input and output are slightly different,
 !  These differences lead to a difference of ~0.01 hartree in V_hartree.
 !  If PAW, substract compensation density from effective density:
 !  - if GGA, because nhat gradients are computed separately
@@ -327,7 +327,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !  save rhor in rhonow to avoid modifying it.
    ABI_ALLOCATE(rhonow,(nfft,nspden))
-!  copy rhor into rhonow: 
+!  copy rhor into rhonow:
 !  ABINIT convention is followed: (ispin=1: for spin up + spin down)
    do ispin=1,nspden
      do ifft=1,nfft
@@ -345,16 +345,16 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 &     kernel,rhonow,vxc,enhartr,&
 &     zero,sumpion)
    end if
-!  
+!
    do ifft=1,nfft
      vhartr(ifft)=rhonow(ifft,1)
    end do
 !  write(*,*)'erase me psolver_rhohxc l350, set vhartr=0'
 !  vhartr=zero ; enhartr=zero
-!  
+!
 !  Since rhonow was modified inside H_potential:
-!  copy rhor again into rhonow following the BigDFT convention:  
-   call wvl_rhov_abi2big(1,rhor,rhonow) 
+!  copy rhor again into rhonow following the BigDFT convention:
+   call wvl_rhov_abi2big(1,rhor,rhonow)
 
 !  Add n_c here:
    if(n3xccc>0 .and. add_n_c_here) then
@@ -456,7 +456,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !Pass vhartr and vxc to BigDFT objects (useless?)
 !if(usewvl==1) then
-!  write(message, '(a,a,a,a)' ) ch10, ' rhohxc_wvlpaw : but why are you copying me :..o('
+!  write(message, '(a,a,a,a)' ) ch10, ' rhotoxc_wvlpaw : but why are you copying me :..o('
 ! call wvl_vhartr_abi2big(1,vhartr,wvl_den)
 !  (this can be commented out, since we do not use denspot%v_xc
 ! call wvl_vxc_abi2big(1,vxc,wvl_den)
@@ -477,7 +477,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  if(test_nhat .and. .not. rest_hat_n_here) then
 !  if(nspden==2) ABI_DEALLOCATE(rhohat)
    ABI_DEALLOCATE(rhohat)
-   if(associated(rhohat)) nullify(rhohat) 
+   if(associated(rhohat)) nullify(rhohat)
  end if
  if( n3xccc>0 .and. .not. add_n_c_here) then
    if(usepaw==1) then

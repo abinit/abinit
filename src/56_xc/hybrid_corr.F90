@@ -59,7 +59,6 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hybrid_corr'
- use interfaces_56_xc, except_this_one => hybrid_corr
 !End of the abilint section
 
  implicit none
@@ -120,13 +119,15 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
    call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
  end if
 
- call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,nfft,dum,dum,0,dum,0,nkxc,0,nspden,n3xccc,&
+ call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,nfft,dum,dum,0,dum,0,nkxc,0,&
+& dtset%usepawu==4.or.dtset%usepawu==14,nspden,n3xccc,&
 & 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,dum,xccc3d)
 
  vxc(:,:) = vxc(:,:) + hybrid_mixing*vxc_corr(:,:)
  enxc = enxc + hybrid_mixing*enxc_corr
 
- call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,dum,dum,dum,0,dum,0,nkxc,0,nspden,0,&
+ call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,dum,dum,dum,0,dum,0,nkxc,0,&
+& dtset%usepawu==4.or.dtset%usepawu==14,nspden,0,&
 & 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,vxcavg,0)
 
  vxc(:,:) = vxc(:,:) - hybrid_mixing*vxc_corr(:,:)

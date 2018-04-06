@@ -8,7 +8,7 @@
 !! using a model dielectric function in real space
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (PMA)
+!! Copyright (C) 1998-2018 ABINIT group (PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,7 +17,7 @@
 !! INPUTS
 !!  nfft=number of fft grid points
 !!  nspden=number of spin-density components
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  dielar(7)=input parameters for dielectric matrix:
 !!                diecut,dielng,diemac,diemix,diegap,dielam,diemixmag.
 !!  gprimd(3,3)=dimensional primitive translations in fourier space (bohr**-1)

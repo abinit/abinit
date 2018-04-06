@@ -4,12 +4,12 @@
 !!  m_vkbr
 !!
 !! FUNCTION
-!!  This module provides objects and methods used to calculate the matrix elements 
+!!  This module provides objects and methods used to calculate the matrix elements
 !!  of the commutator [H,r] needed for the correct treatment of the optical limit q-->0
 !!  in the matrix elements <k-q,b1|e^{-iqr}|k,b2> when non-local pseudopotentials are used.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2018 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ MODULE m_vkbr
  use m_paw_sphharm,   only : ylmc, ylmcd
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
+ use m_kg,            only : mkkin
 
  implicit none
 
@@ -47,11 +48,11 @@ MODULE m_vkbr
 !! NAME
 !!
 !! FUNCTION
-!!  Matrix elements in |k+G> space needed for the 
-!!  evaluation of the matrix elements of the commutator [Vnl,r] for the 
+!!  Matrix elements in |k+G> space needed for the
+!!  evaluation of the matrix elements of the commutator [Vnl,r] for the
 !!  optical limit in <kb1|e^{-iqr}|kb2>.
 !!
-!! SOURCE                                                                                   
+!! SOURCE
 
  type,public :: vkbr_t
 
@@ -79,15 +80,14 @@ MODULE m_vkbr
   complex(gwpc),allocatable :: fnl(:,:,:,:)
   ! fnl(npw,mpsang**2,mproj,natom)
 
-  complex(gwpc),allocatable :: fnld(:,:,:,:,:) 
+  complex(gwpc),allocatable :: fnld(:,:,:,:,:)
   ! fnld(3,npw,mpsang**2,mproj,natom)
 
  end type vkbr_t
 
- !vkbr_init
- public :: vkbr_init
- public :: vkbr_free
- public :: nc_ihr_comm
+ public :: vkbr_init       ! vkbr_t Constructor
+ public :: vkbr_free       ! Free memory
+ public :: nc_ihr_comm     ! Compute matrix elements of the commutator i[H,r] for NC pseudos
 !!***
 
  interface vkbr_free
@@ -169,7 +169,7 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
 
  ! Calculate KB form factors and derivatives.
  ! The arrays are allocated with lnmax to support pseudos with more than projector.
- ! Note that lnmax takes into account lloc hence arrays are in packed form and one should be 
+ ! Note that lnmax takes into account lloc hence arrays are in packed form and one should be
  ! accessed with the indices provided by indlmn.
  ! TODO: they should be calculated on-the-fly using calc_vkb
  !       For the moment, we opt for a quick an dirty implementation.
@@ -178,9 +178,9 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_MALLOC(vkb, (npw, psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkbd, (npw, psps%lnmax, cryst%ntypat))
  call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
- 
+
  select case (inclvkb)
- case (2) 
+ case (2)
    ! Complex spherical harmonics (CPU and mem \propto npw).
    write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*psps%mpsang**2*psps%mproj*cryst%natom*2*gwpc*b2Mb
    ABI_STAT_MALLOC(vkbr%fnl,(npw,psps%mpsang**2,psps%mproj,cryst%natom), ierr)
@@ -200,7 +200,7 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_FREE(vkb)
  ABI_FREE(vkbd)
 
-end subroutine vkbr_init 
+end subroutine vkbr_init
 !!***
 
 !----------------------------------------------------------------------
@@ -300,7 +300,7 @@ end subroutine vkbr_free_1D
 !!
 !! FUNCTION
 !!  Calculate the matrix elements of the dipole operator <phi1|r|phi2>.
-!!  For norm conserving potentials the commutator [Vnl,r] is included according to inclvkb. 
+!!  For norm conserving potentials the commutator [Vnl,r] is included according to inclvkb.
 !!
 !! INPUTS
 !!  vkbr<vkbr_t>
@@ -317,7 +317,7 @@ end subroutine vkbr_free_1D
 !! NOTES
 !!   1) <k b1|e^{-iq.r}|k b2> = \delta_{b1 b2} -iq <k b1|r|k b2> =  \delta_{b1 b2} -iq ( <k b1| [H,r] |k b2> / (e1-e2) ).
 !!
-!!      This routine calculates the matrix elements of ir*(e1-e2) 
+!!      This routine calculates the matrix elements of ir*(e1-e2)
 !!      Remember that [H,r] = -\nabla + [V_nl,r]
 !!
 !!  2) The Fourier transform of a two-point real function f(r1,r2) satisfies:
@@ -365,9 +365,11 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !************************************************************************
 
- ! Adding term i <c,k|[Vnl,r]|v,k> === 
+ ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
+
+ ! Adding term i <c,k|[Vnl,r]|v,k> ===
  select case (vkbr%inclvkb)
- case (2)  
+ case (2)
   ! Complex spherical harmonics (much faster!).
   dum=czero_gw; gamma_term=czero
 
@@ -382,16 +384,14 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
       if (iln <= iln0) cycle
       iln0 = iln
       !if (indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-    !end do
-    !in = 1
+      !in = 1
       do im=1,2*(il-1)+1
         ! Index of im and il
         ilm = im + (il-1)*(il-1)
-
-      !do ilm=1,vkbr%mpsang**2
+        !do ilm=1,vkbr%mpsang**2
         cta1 = czero_gw; cta2(:) = czero_gw
         cta4 = czero_gw; cta3(:) = czero_gw
-        do ig=1,npw 
+        do ig=1,npw
           ! Here we take advantage of the property Y_(l-m)= (-i)^m Y_lm^*.
           cta1   = cta1    + ug1(ig) * vkbr%fnl (ig,ilm,in,iat)
           cta2(:)= cta2(:) + ug2(ig) * vkbr%fnld(:,ig,ilm,in,iat)
@@ -424,7 +424,7 @@ end subroutine add_vnlr_commutator
 !!  calc_vkb
 !!
 !! FUNCTION
-!!  This routine calculates the Kleynman-Bylander form factors and its derivatives 
+!!  This routine calculates the Kleynman-Bylander form factors and its derivatives
 !!  needed for the evaluation of the matrix elements of the dipole operator <phi1|r|phi2>.
 !!
 !! INPUTS
@@ -458,7 +458,6 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vkb'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 
@@ -471,7 +470,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(in) :: kpoint(3) 
+ real(dp),intent(in) :: kpoint(3)
  real(dp),intent(out) :: vkb (npw_k,psps%lnmax,psps%ntypat)
  real(dp),intent(out) :: vkbd(npw_k,psps%lnmax,psps%ntypat)
  real(dp),intent(out) :: vkbsign(psps%lnmax,psps%ntypat)
@@ -492,9 +491,9 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  ! Compute KB dyadic sign.
  vkbsign=zero
  do itypat=1,psps%ntypat
-   iln0 = 0 
+   iln0 = 0
    nlmn = count(psps%indlmn(3,:,itypat) > 0)
-   do ilmn=1,nlmn 
+   do ilmn=1,nlmn
      iln = psps%indlmn(5,ilmn,itypat)
      if (iln <= iln0) cycle
      iln0 = iln
@@ -503,7 +502,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  end do
 
  ! Allocate KB form factor and derivative wrt k+G
- ! * Here we do not use correct ordering for dimensions
+ ! Here we do not use correct ordering for dimensions
  idir=0; nkpg=0; ider=1; dimffnl=2 ! To retrieve the first derivative.
 
  ! Quantities used only if useylm==1
@@ -513,7 +512,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  ABI_MALLOC(ffnl, (npw_k,dimffnl, psps%lmnmax, psps%ntypat))
 
  call mkffnl(psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
-   kg_k,kpg_dum,kpoint,psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
+   kg_k,kpg_dum,kpoint,psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,&
    psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
 
  ABI_FREE(ylm_k)
@@ -582,8 +581,8 @@ end subroutine calc_vkb
 !!  nc_pwihr_comm
 !!
 !! FUNCTION
-!!  Calculate the matrix elements of the commutator i[H,r]  
-!!  For norm conserving potentials the commutator i[Vnl,r] is included depending on inclvkb. 
+!!  Calculate the matrix elements of the commutator i[H,r]
+!!  For norm conserving potentials the commutator i[Vnl,r] is included depending on inclvkb.
 !!
 !! INPUTS
 !!  vkbr<vkbr_t>
@@ -600,7 +599,7 @@ end subroutine calc_vkb
 !!
 !! OUTPUT
 !!  ihr_comm(3,nspinor**2)= Matrix elements of the commutator i[H,r] between the input states.
-!!   Result is in reduced coordinates. ug1 and ug2 are supposed to be orthogonal. 
+!!   Result is in reduced coordinates. ug1 and ug2 are supposed to be orthogonal.
 !!
 !! NOTES
 !!  <k b1|e^{-iq.r}|k b2> = \delta_{b1 b2} -iq <k b1|r|k b2> =  \delta_{b1 b2} -iq ( <k b1| [H,r] |k b2> / (e1-e2) ).
@@ -648,42 +647,39 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
 !************************************************************************
 
  ! [H, r] = -\nabla + [V_{nl}, r]
- ! V_nl is present only in the case of NC pseudos but 
+ ! V_nl is present only in the case of NC pseudos but
  ! not in PAW unless even the AE Hamiltonian in non-local e.g. LDA+U or LEXX.
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates is always included.
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
- ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and 
+ ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and
  ! hence k+G can be replaced by G.
 
- spinorwf_pad=RESHAPE((/0,0,npw,npw,0,npw,npw,0/),(/2,4/))
-
+ spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates.
- ! FIXME: This term is spin diagonal!
- if (istwfk==1) then
-   do iab=1,nspinor**2
-     spad1 = spinorwf_pad(1,iab)
-     spad2 = spinorwf_pad(2,iab)
-     do ig=1,npw 
+ ! This term is spin diagonal if nspinor == 2
+ if (istwfk == 1) then
+   do iab=1,nspinor
+     spad1 = spinorwf_pad(1,iab); spad2 = spinorwf_pad(2,iab)
+     do ig=1,npw
        c_tmp = CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
        ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp*gvec(:,ig)
      end do
    end do
  else
    ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0,G0) term is null.
-   do ig=1,npw 
+   ABI_CHECK(nspinor == 1, "nspinor != 1")
+   do ig=1,npw
      c_tmp = CONJG(ug1(ig)) * ug2(ig)
      ihr_comm(:,1) = ihr_comm(:,1) + two*j_dpc * AIMAG(c_tmp) * (kpoint + gvec(:,ig))
-   end do  
+   end do
  end if
 
- ! Add second term $i <c,k|[Vnl,r]|v,k> in$ reduced cordinates.
- if (inclvkb/=0) then 
-   ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
+ ! Add second term $i <c,k|[Vnl,r]|v,k> $ in reduced cordinates.
+ if (inclvkb /= 0) then
    ABI_CHECK(istwfk == vkbr%istwfk, "input istwfk /= vkbr%istwfk")
-   !ABI_CHECK(istwfk == 1, "istwfk /=1 not coded")
    call add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)
  end if
 
@@ -716,9 +712,9 @@ end function nc_ihr_comm
 !!  fnld(3,npw,mpsang*2,natom)
 !!
 !! NOTES
-!!  Subroutine taken from the EXC code  
-!!  All the calculations are done in double precision, but the output arrays fnl and fnld 
-!!  are in single precision, should use double precision after modification of the other subroutines 
+!!  Subroutine taken from the EXC code
+!!  All the calculations are done in double precision, but the output arrays fnl and fnld
+!!  are in single precision, should use double precision after modification of the other subroutines
 !!
 !! PARENTS
 !!      m_vkbr
@@ -748,7 +744,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
  real(dp),intent(in) :: vkb(npw,psps%lnmax,cryst%ntypat)
- real(dp),intent(in) :: vkbd(npw,psps%lnmax,cryst%ntypat) 
+ real(dp),intent(in) :: vkbd(npw,psps%lnmax,cryst%ntypat)
  real(dp),intent(in) :: vkbsign(psps%lnmax,cryst%ntypat)
  complex(gwpc),intent(out) :: fnl(npw,psps%mpsang**2,psps%mproj,cryst%natom)
  complex(gwpc),intent(out) :: fnld(3,npw,psps%mpsang**2,psps%mproj,cryst%natom)
@@ -771,7 +767,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
  if (psps%mpsang > 4) then
    write(msg,'(3a)')&
     'Number of angular momentum components bigger than programmed.',ch10,&
-    'Taking into account only s p d f ' 
+    'Taking into account only s p d f '
    MSG_ERROR(msg)
  end if
 
@@ -805,20 +801,20 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
    sinth = sq/mkg
    cosphi= kcart(1)/sq
    sinphi= kcart(2)/sq
-   
+
    gradth(1)  = kcart(1)*kcart(3)/mkg**3/sinth
    gradth(2)  = kcart(2)*kcart(3)/mkg**3/sinth
    gradth(3)  = -(one/mkg-kcart(3)**2/mkg**3)/sinth
    gradphi(1) = -(one/sq - kcart(1)**2/sq**3)/sinphi
    gradphi(2) = kcart(2)*kcart(1)/sq**3/sinphi
    gradphi(3) = czero
-   
+
    do iat=1,cryst%natom
      itypat = cryst%typat(iat)
      xdotg = gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
-     ! Remember that in the GW code the reciprocal vectors 
+     ! Remember that in the GW code the reciprocal vectors
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
-     sfac=CMPLX(COS(xdotg), SIN(xdotg)) 
+     sfac=CMPLX(COS(xdotg), SIN(xdotg))
 
      iln0 = 0
      nlmn = count(psps%indlmn(3,:,itypat) > 0)
@@ -849,7 +845,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
          ! Cartesian to crystallographic axis
          ! Notice: a bug was discovered by Marco Cazzaniga, december 2009
          ! the transformation matrix A=(a1,a2,a3) must act *on its left* on the
-         ! covariant vector dylmcart (a *row* vector). The previous implementation assumed A 
+         ! covariant vector dylmcart (a *row* vector). The previous implementation assumed A
          ! acting on its right on a column vector, yielding wrong results for the (small)
          ! non local contributions to the spectra, such as a spurious anisotropy in isotropic systems.
          ! This is the correct version:
@@ -861,7 +857,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
          do ii=1,3
            fnld(ii,ig,ilm,in,iat) = factor*sfac* &
             ( kg(ii)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,iln,itypat) + dylmcrys(ii)*vkb(ig,iln,itypat) )
-         end do 
+         end do
 
        end do !im
      end do !il

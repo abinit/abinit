@@ -10,7 +10,7 @@
 !! then update density.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (MT).
+!! Copyright (C) 2005-2018 ABINIT group (MT).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,9 +65,9 @@
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  nfftmix=dimension of FFT grid used to mix the densities (used in PAW only)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftmix(18)=contain all needed information about 3D FFT, for the grid corresponding to nfftmix
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npawmix=-PAW only- number of spherical part elements to be mixed
 !!  npwdiel=number of planewaves for dielectric matrix
 !!  nresid(nfft,nspden)=array for the residual of the density
@@ -141,6 +141,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  use m_ab7_mixing
  use m_abi2big
 
+ use m_geometry, only : metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
 
@@ -149,7 +150,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 #undef ABI_FUNC
 #define ABI_FUNC 'newrho'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_68_rsprc, except_this_one => newrho
 !End of the abilint section

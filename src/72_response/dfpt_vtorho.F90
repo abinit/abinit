@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,7 +158,7 @@
 #include "abi_common.h"
 
 subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
-& dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,&
+& dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,qphon,&
 & edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,&
 & fermie1,gh0c1_set,gh1c_set,gmet,gprimd,idir,indsy1,&
 & ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,&
@@ -180,6 +180,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use m_wfk
  use m_cgtools
 
+ use m_occ,      only : occeig
  use m_hdr,      only : hdr_skip, hdr_io
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
@@ -198,7 +199,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_61_occeig
  use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common
@@ -231,6 +231,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer,intent(in) :: kg(3,mpw*mkmem),kg1(3,mpw1*mk1mem)
  integer,intent(in) :: nband_rbz(nkpt_rbz*nsppol),npwar1(nkpt_rbz,2)
  integer,intent(in) :: npwarr(nkpt_rbz,2),symaf1(nsym1),symrc1(3,3,nsym1),symrl1(3,3,nsym1)
+ real(dp),intent(in) :: qphon(3)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)
  real(dp),intent(inout) :: cg1(2,mpw1*dtset%nspinor*mband*mk1mem*nsppol)
  real(dp),intent(inout):: cg1_active(2,mpw1*dtset%nspinor*mband*mk1mem*nsppol*dim_eig2rf)
@@ -340,7 +341,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
- qne0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2>=tol14)
+ qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=tol14)
 
 !Initialize PW 1st-order density if needed
 !Also store old rho1 in case of density mixing
@@ -438,16 +439,16 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !  Continue to initialize the Hamiltonian
    call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,with_nonlocal=.true.)
+     call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,with_nonlocal=.true.)
      if (ipert==natom+11) then ! load vlocal1
-       call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1)
+       call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,vlocal1=vlocal1)
      end if
    end if
 
    if (ipert==natom+5) then !SPr deb, in case of magnetic field perturbation, no non-local
-     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1)
+     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1)
    end if
 
 !  Nullify contribution to 1st-order density from this k-point
@@ -478,7 +479,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
 
      kpoint(:)=kpt_rbz(:,ikpt)
-     kpq(:)=kpoint(:);if (ipert<natom+3) kpq(:)=kpq(:)+dtset%qptn(1:3)
+     kpq(:)=kpoint(:);if (ipert<natom+3.or.ipert==natom+5) kpq(:)=kpq(:)+qphon(1:3)
      ABI_ALLOCATE(kg_k,(3,npw_k))
      ABI_ALLOCATE(kg1_k,(3,npw1_k))
      ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))

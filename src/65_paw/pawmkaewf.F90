@@ -7,7 +7,7 @@
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@
 !! Cprj(natom,nspinor*mband*mkmem*nsppol)=<p_lmn|Cnk> coefficients for each WF |Cnk>
 !!   and each |p_lmn> non-local projector
 !! npwarr(nkpt)=Number of plane waves at each k-point
-!! ngfftf(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfftf(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  Note that ngfftf refers to the fine mesh.
 !! kg(3,mpw*mkmem)=reduced planewave coordinates
 !! Hdr<hdr_type>=the header of wf, den and pot files
@@ -105,6 +105,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : wrap2_zero_one
  use m_pptools,        only : printxsf
+ use m_geometry,       only : xcart2xred
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_ebands,         only : ebands_ncwrite
@@ -121,7 +122,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 #define ABI_FUNC 'pawmkaewf'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_65_paw, except_this_one => pawmkaewf
@@ -315,7 +315,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
    NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
 
    ! Define wavefunctions in real space on the dense FFT mesh
-   ! Fortran layout: 
+   ! Fortran layout:
    !real_space_wavefunctions: double 8d array with shape:
    !  [real_or_complex_wavefunctions]
    !  [number_of_grid_points_vector1][number_of_grid_points_vector2][number_of_grid_points_vector3]
@@ -347,15 +347,15 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
    ! Complete the geometry information.
    NCF_CHECK(crystal_ncwrite(crystal, ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   
+
    ! Close the file.
    NCF_CHECK(nf90_close(ncid))
  end if
 
  call xmpi_barrier(comm_cell)
- 
+
  ! Reopen the file in parallel inside comm_cell
- ! Note that we use individual IO thus there's no need to handle idle processes 
+ ! Note that we use individual IO thus there's no need to handle idle processes
  ! if paral_kgb == 0 and nprocs > nkpt * nsppol
  NCF_CHECK(nctk_open_modify(ncid, fname, comm_cell))
  ae_ncid = nctk_idname(ncid, "ur_ae")
@@ -459,7 +459,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
      end if
 
      ! Loop over bands.
-     do iband=start_band,stop_band 
+     do iband=start_band,stop_band
 
        ! Fourier transform on the real fft box of the smooth part.
        ndat=Dtset%nspinor
@@ -570,7 +570,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
          buf_tmp(:,:,2) = ur_ae_onsite
          buf_tmp(:,:,3) = ur_ps_onsite
          call xmpi_sum(buf_tmp,my_comm_atom,ierr)
-         ur_ae = buf_tmp(:,:,1) 
+         ur_ae = buf_tmp(:,:,1)
          ur_ae_onsite= buf_tmp(:,:,2)
          ur_ps_onsite= buf_tmp(:,:,3)
          ABI_FREE(buf_tmp)

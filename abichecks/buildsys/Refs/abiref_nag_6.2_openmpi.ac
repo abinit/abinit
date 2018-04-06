@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi_nag"
+with_mpi_prefix="/usr/local/openmpi-2.1.2_nag6.2"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/netcdf-4.4.1_nag/include"
+with_netcdf_incs="-I/usr/local/netcdf-4.4.1.1_nag62/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/netcdf-4.4.1_nag/lib -lnetcdff -lnetcdf -L/usr/local/hdf5-1.8.17_openmpi/lib -lhdf5_hl -lhdf5 -lz -lcurl -ldl"
+with_netcdf_libs="-L/usr/local/netcdf-4.4.1.1_nag62/lib -lnetcdff -lnetcdf -L/usr/local/hdf5-1.8.20_openmpi/lib -lhdf5_hl -lhdf5 -lz -lcurl -ldl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -769,7 +769,7 @@ enable_netcdf_default="yes"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -777,7 +777,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L${MKLROOT}/mkl/lib/intel64 -lmkl_gf_lp64 -lmkl_core -lmkl_sequential -lpthread -lm"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,7 +852,7 @@ with_fft_libs="-L${MKLROOT}/mkl/lib/intel64 -lmkl_gf_lp64 -lmkl_core -lmkl_seque
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="mkl"
+with_linalg_flavor="goto"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -860,7 +860,7 @@ with_linalg_flavor="mkl"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L${MKLROOT}/mkl/lib/intel64 -lmkl_gf_lp64 -lmkl_core -lmkl_sequential -lpthread -lm"
+with_linalg_libs="-L/usr/local/OpenBLAS-0.2.20_gcc55_nag62/lib -lopenblas -lpthread -lm"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -953,11 +953,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/fallbacks/nag/6.1/mpi/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/3.0.0/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/fallbacks/nag/6.1/mpi/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.0/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 

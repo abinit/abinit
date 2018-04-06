@@ -4,7 +4,7 @@
 # Energy in Ha , DOS in states/Ha
 # Tetrahedron method, nqibz= 145
 # 
-# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type=1] ...
+# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type=1] ...  
 #
   -4.09808283E-04   0.00000000E+00   0.00000000E+00   0.00000000E+00   0.00000000E+00  
   -4.06133350E-04   0.00000000E+00   0.00000000E+00   0.00000000E+00   0.00000000E+00  

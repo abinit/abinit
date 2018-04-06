@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,8 +68,8 @@
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  nfftdiel=number of fft grid points for the computation of the diel matrix
 !!  ngfftdiel(18)=contain all needed information about 3D FFT, for dielectric matrix,
-!!                see ~abinit/doc/input_variables/vargs.htm#ngfft
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!                see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  npwdiel=size of the susmat array.
 !!  ntypat=number of types of atoms in unit cell.
@@ -207,7 +207,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_wffile
  use m_efield
  use m_cgtools
+ use m_gemm_nonlop
 
+ use m_geometry,           only : xred2xcart
+ use m_occ,                only : newocc
+ use m_dtset,              only : testsusmat
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -228,7 +232,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_abi2big,            only : wvl_occ_abi2big,wvl_rho_abi2big,wvl_occopt_abi2big
  use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
- use m_gemm_nonlop
+ use m_tddft,              only : tddft
+ use m_kg,                 only : mkkin
+ use m_suscep_stat,        only : suscep_stat
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
 #endif
@@ -238,20 +245,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
- use interfaces_16_hideleave
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_77_suscep
  use interfaces_79_seqpar_mpi, except_this_one => vtorho
 !End of the abilint section
 
@@ -342,6 +345,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
+ complex(dpc),allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(oper_type) :: lda_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
@@ -383,7 +387,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  usefock = (dtset%usefock==1 .and. associated(fock))
  usefock_ACE=0
  if (usefock) usefock_ACE=fock%fock_common%use_ACE
- 
+
 
 !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
@@ -807,6 +811,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
        end if
 
+!     compute and load nuclear dipole Hamiltonian at current k point
+       if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+         if(allocated(nucdipmom_k)) then
+           ABI_DEALLOCATE(nucdipmom_k)
+         end if
+         ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+         call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
+         call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+       end if
+
+
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
 !       - Prepare various tabs in case of band-FFT parallelism
@@ -895,6 +910,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(kinpw)
        ABI_DEALLOCATE(kg_k)
        ABI_DEALLOCATE(kpg_k)
+       if(allocated(nucdipmom_k)) then
+         ABI_DEALLOCATE(nucdipmom_k)
+       end if
        ABI_DEALLOCATE(ylm_k)
        ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(cgq)
@@ -1176,7 +1194,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              write(message,'(a,e12.3)')&
 &             ' ERROR: Wavefunctions not converged : DFT+DMFT calculation cannot be carried out safely ',residm
              call wrtout(std_out,message,'COLL')
-             call leave_new('COLL')
+             write(message,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
+             MSG_ERROR(message)
            end if
 
          else if (paw_dmft%use_dmft>0 .and. residm>tol10.and. dtset%dmftcheck>=0) then
@@ -1274,7 +1293,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
      energies%e_nonlocalpsp = zero
-     if (usefock) then 
+     if (usefock) then
        energies%e_fock     = zero
        if (optforces>0) fock%fock_common%forces=zero
      end if
@@ -1756,7 +1775,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!  See also "wvl_nscf_loop_bigdft"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1884,7 +1903,7 @@ subroutine wvl_nscf_loop()
 !!  See also "wvl_nscf_loop"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel, D. Caliste)
+!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel, D. Caliste)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2002,7 +2021,7 @@ subroutine wvl_nscf_loop_bigdft()
 !!  Computes eigenvalues energy from eigen, occ, kpt, wtk
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2086,7 +2105,7 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !!  Computes occupations for the wavelet case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2118,7 +2137,6 @@ subroutine wvl_occ()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_occ'
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -2157,7 +2175,7 @@ subroutine wvl_occ()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2226,7 +2244,7 @@ subroutine wvl_occ_bigdft()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

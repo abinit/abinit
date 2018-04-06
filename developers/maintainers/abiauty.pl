@@ -1,6 +1,6 @@
 # This script beautifies a Fortran source file or a collection of sources from
 # a specific subdirectory or, from current directory and all src/* subdirectories.
-# Copyright (C) 2007-2017 ABINIT group (LSi)
+# Copyright (C) 2007-2018 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@ $RobodocLast = '!!***';		# last source line
 # Upper case keywords that should trigger a warning and exceptions ...
 @UpCaseKeyWds = ('CASE','DO','ELSE','END','IF','SELECT','THEN');
 # ... excluding if present in the following expressions ...
-@UpCaseExcl =('DOS','DOWN','DOUBLE','DOCTYPE','MPI_SEND','ENDDEF','DOT_PRODUCT');
+@UpCaseExcl =('DOS','DOWN','DOUBLE','DOCTYPE','MPI_SEND','ENDDEF','DOT_PRODUCT','IFC');
 # ENDDEBUG and TODO are normally commented
 #
 # Indentation constants (that may be changed with caution):

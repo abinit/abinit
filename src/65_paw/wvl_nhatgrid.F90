@@ -10,7 +10,7 @@
 !! (and derivatives) on this grid (g_l=radial shape function).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (T Rangel)
+!! Copyright (C) 2011-2018 ABINIT group (T Rangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +55,7 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,     only : xred2xcart
  use m_pawtab,       only : pawtab_type
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_paw_finegrid, only : pawgylm, pawrfgd_wvl
@@ -64,7 +65,6 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_nhatgrid'
  use interfaces_18_timing
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -127,8 +127,8 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 !Loop over types of atom
  iatm=0
  do itypat=1,ntypat
-   
-   rloc=psppar(0,0,itypat)  
+
+   rloc=psppar(0,0,itypat)
    if (optcut==1) then
      rshp=pawtab(itypat)%rpaw
    else

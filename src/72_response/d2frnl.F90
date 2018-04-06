@@ -8,7 +8,7 @@
 !! (strain and/or phonon)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnuC.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@
 !!  nfftf= -PAW ONLY- number of FFT grid points for the fine grid
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!     see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftf(18)= -PAW ONLY- contain all needed information about 3D FFT for the fine grid
 !!              (ngs_rbzfftf=ngfft for norm-conserving potential runs)
 !!  npwarr(nkpt)=number of planewaves at each k point, and boundary
@@ -115,6 +115,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_efmas_defs
  use m_wfk
 
+ use m_geometry, only : metric
  use m_efmas,    only : check_degeneracies
  use m_io_tools, only : file_exists
  use m_hdr,      only : hdr_skip
@@ -129,6 +130,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get,&
 &                       pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
+ use m_kg,       only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -138,7 +140,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal
 !End of the abilint section

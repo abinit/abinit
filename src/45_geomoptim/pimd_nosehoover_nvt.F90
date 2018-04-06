@@ -13,7 +13,7 @@
 !! No change of acell and rprim at present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (GG,MT)
+!! Copyright (C) 2011-2018 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,12 +73,13 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  use m_profiling_abi
  use m_pimd
 
+ use m_geometry,  only : xcart2xred, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_nosehoover_nvt'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

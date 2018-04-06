@@ -9,7 +9,7 @@
 !! NOTE
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,9 +19,9 @@
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  nspden=number of spin density components
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  paral_kgb=flag for (k,band,FFT) parallelism
@@ -178,7 +178,7 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
  do ifft=1,nfft
    electronpositron%e_xc  =electronpositron%e_xc  +fxcapn(ifft)
    electronpositron%e_xcdc=electronpositron%e_xcdc+vxcapn(ifft,1)*rhor(ifft,1)
-!  strdiag=strdiag+fxcapn(ifft)   ! Already stored in rhohxc !
+!  strdiag=strdiag+fxcapn(ifft)   ! Already stored in rhotoxc !
    strdiag=strdiag-vxcapn(ifft,1)*rhop(ifft,1)
  end do
  if (usepaw==1.and.usexcnhat==0) then

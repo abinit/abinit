@@ -7,7 +7,7 @@
 !! Primary routine for conducting DFT calculations of Response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,17 +88,17 @@
 !!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
 !!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
 !!      efmasfr_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
-!!      exit_check,fourdp,getcut,getph,hdr_free,hdr_init,hdr_update,initrhoij
-!!      initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q,matr3inv
-!!      mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init,pawfgrtab_free
-!!      pawfgrtab_init,pawinit,pawmknhat,pawpuxinit,pawrhoij_alloc
-!!      pawrhoij_bcast,pawrhoij_copy,pawrhoij_free,pawrhoij_nullify
-!!      pawtab_get_lsize,prteigrs,pspini,q0dy3_apply,q0dy3_calc,read_rhor
-!!      rhohxc,setsym,setsymrhoij,setup1,status,symdij,symmetrize_xred,sytens
-!!      timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose,wings3,wrtloctens,wrtout
-!!      xmpi_bcast
+!!      exit_check,fourdp,getcut,getph,hartre,hdr_free,hdr_init,hdr_update
+!!      initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q
+!!      matr3inv,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
+!!      paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init
+!!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
+!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
+!!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
+!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
+!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsymrhoij,setup1,status,symdij
+!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      wings3,wrtloctens,wrtout,xcdata_init,xmpi_bcast
 !!
 !! SOURCE
 
@@ -125,11 +125,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_results_respfn
  use m_hdr
  use m_crystal
+ use m_xcdata
 
  use m_fstrings,    only : strcat
+ use m_kpts,        only : symkchk
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_occ,         only : newocc
  use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
  use m_wfk,         only : wfk_read_eigenvalues
  use m_ioarr,       only : read_rhor
@@ -145,6 +148,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft,    only : paw_dmft_type
+ use m_kg,          only : getcut, getph, kpgio
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -161,7 +165,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
- use interfaces_61_occeig
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
@@ -208,7 +211,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method
- logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit
+ logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit,non_magnetic_xc
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
  real(dp) :: epaw,epawdc,etot,evdw,fermie,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
@@ -224,6 +227,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
  type(crystal_t) :: Crystal
+ type(xcdata_type) :: xcdata
  integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3),rf2_dirs_from_rfpert_nl(3,3)
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
@@ -269,6 +273,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(133,1,tsec)
 
  call status(0,dtfil%filstat,iexit,level,'init          ')
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Some data for parallelism
  nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
@@ -389,7 +396,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Open and read pseudopotential files
  call status(0,dtfil%filstat,iexit,level,'call pspini(1)')
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,pawrad,pawtab,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
  call timab(134,2,tsec)
@@ -677,9 +684,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_dijnd=1; req_cplex_dij=2
    end if
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*dtset%nspden-1                   ! LDA
+     has_kxc=1;nkxc1=2*min(dtset%nspden,2)-1            ! LDA
      if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
      if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
+     if (dtset%nspden==4) nkxc1=nkxc1+3  ! Non-coll.: need to store 3 additional arrays in kxc
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
@@ -845,18 +853,22 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Set up hartree and xc potential. Compute kxc here.
+ ABI_ALLOCATE(vhartr,(nfftf))
+
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+
  option=2 ; nk3xc=1
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
- ABI_ALLOCATE(vhartr,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
 
- _IBM6("Before rhohxc")
+ _IBM6("Before rhotoxc")
 
- call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,&
-& rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d)
+ call xcdata_init(xcdata,dtset=dtset)
+ call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
+& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
@@ -1219,7 +1231,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
 &     ntypat,psps%n1xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
-&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor)
+&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,vxc=vxc)
    else
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
@@ -1337,6 +1349,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout(std_out,message,'COLL')
 
  ABI_DEALLOCATE(vxc)
+
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_DEALLOCATE(rfpert_nl)
  end if

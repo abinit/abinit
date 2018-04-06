@@ -7,7 +7,7 @@
 !!  Utility for profiling the FFT libraries supported by ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MG)
+!! Copyright (C) 2004-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,13 +83,14 @@ program fftprof
  use m_errors
  use m_FFT_prof
  use m_profiling_abi
+ use m_dfti
 
  use m_fstrings,   only : lower
  use m_io_tools,   only : flush_unit
+ use m_geometry,   only : metric
  use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi
  use m_fft,        only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
  use m_fftw3,      only : fftw3_init_threads
- use m_dfti
  use m_mpinfo,     only : destroy_mpi_enreg
 
 !This section has been created automatically by the script Abilint (TD).
@@ -97,7 +98,6 @@ program fftprof
 #undef ABI_FUNC
 #define ABI_FUNC 'fftprof'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
 !End of the abilint section

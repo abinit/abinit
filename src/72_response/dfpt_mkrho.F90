@@ -8,7 +8,7 @@
 !! from input RF and GS wavefunctions, band occupations, and k point weights.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@
 !!   at each k point for each spin channel.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!    see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!    see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_rbz=number of k points in the reduced Brillouin zone
 !!  npwarr(nkpt_rbz)=number of planewaves and boundary planewaves at k points
 !!  npwar1(nkpt_rbz)=number of planewaves and boundary planewaves at k+q points

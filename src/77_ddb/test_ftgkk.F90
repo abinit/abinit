@@ -7,7 +7,7 @@
 !!  Test the fourier transform routine ftgkk for the el-phon matrix elements
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MVerstra)
+!! Copyright (C) 2004-2018 ABINIT group (MVerstra)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

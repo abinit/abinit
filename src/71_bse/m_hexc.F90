@@ -7,7 +7,7 @@
 !! module for excitonic hamiltonian for Haydock
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2018 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -464,7 +464,6 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_interp_init'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -857,7 +856,6 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_compute_hinterp'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1417,7 +1415,6 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hexc_interp_matmul'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1793,7 +1790,6 @@ end subroutine hexc_matmul_tda
 !!
 !! INPUTS
 !! hexc<hexc_t> = Excitonic hamiltonian
-!! hexc_i<hexc_interp_t> = Interpolated excitonic hamiltonian
 !! phi = Input ket
 !! ep_renorm = vector with electron-phonon renorms
 !! op = 'N' for H | psi >, 'C' for H^\dagger | psi >
@@ -1809,7 +1805,7 @@ end subroutine hexc_matmul_tda
 !!
 !! SOURCE
 
-subroutine hexc_matmul_elphon(hexc, hexc_i, phi, hphi, op, ep_renorm)
+subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1823,7 +1819,6 @@ subroutine hexc_matmul_elphon(hexc, hexc_i, phi, hphi, op, ep_renorm)
 
 !Arguments ---------------------------
  type(hexc_t),intent(in) :: hexc
- type(hexc_interp_t),intent(in) :: hexc_i
  character,intent(in) :: op
  complex(dpc),intent(in) :: phi(hexc%my_nt)
  complex(dpc),intent(out) :: hphi(hexc%hsize)

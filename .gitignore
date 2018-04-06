@@ -7,6 +7,8 @@ config.h.in~
 .idea
 .*.sw[op]
 __pycache__
+*.egg
+*.egg-info
 Makefile.am
 Makefile.in
 Makefile
@@ -36,7 +38,6 @@ interfaces_*.F90
 tmp-*
 tmp_*
 ui_*.py
-abipy.egg-info
 math.so
 positions.so
 topology.so
@@ -58,8 +59,6 @@ tests/TestBot_MPI*/*
 /.abilint
 /abilint.log
 /abilint.out
-/abipy-0.1.0.dev/doc/examples/*
-/abipy-0.1.0.dev/doc/_build/*
 /aclocal.m4
 /autom4te.cache
 /build
@@ -118,6 +117,11 @@ tests/TestBot_MPI*/*
 /config/wrappers/wrap-mpicc
 /config/wrappers/wrap-mpicxx
 /config/wrappers/wrap-mpifc
+
+# Documentation
+mkdocs_plugins/dist
+/site/
+/doc/developers/statistics.json
 /doc/abinit-doc-*.tar.gz
 /doc/aclocal.m4
 /doc/autom4te.cache
@@ -138,7 +142,6 @@ tests/TestBot_MPI*/*
 /doc/macroave/macroave.toc
 /doc/theory/fixd_theory.pdf
 /doc/theory/geometry.pdf
-/doc/theory/gwa.pdf
 /doc/theory/noncol.pdf
 /doc/theory/set_WFs.pdf
 /doc/theory/vanderbilt-anaddb-notes.pdf
@@ -171,6 +174,8 @@ tests/TestBot_MPI*/*
 /doc/*/*.log
 /doc/*/*.toc
 /doc/*/*/*~
+
+# fallbacks
 /fallbacks/aclocal.m4
 /fallbacks/autom4te.cache
 /fallbacks/configure
@@ -397,7 +402,6 @@ bzr.status
 special/special.env
 special.env
 doc/input_variables/YML_vars_test
-scripts/*/*/*.egg-info
 scripts/*/*/build
 scripts/*/*/dist
 /tests/built-in/Input/*_o_*
@@ -442,3 +446,5 @@ tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
 vpn0941.ac
 doc/input-web/*~
+src/98_main/tdep
+src/98_main/dummy_tests

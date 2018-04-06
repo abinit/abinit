@@ -9,7 +9,7 @@
 !! optional arguments are defined.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (YP)
+!! Copyright (C) 2004-2018 ABINIT group (YP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

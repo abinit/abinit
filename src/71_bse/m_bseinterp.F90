@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2018 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -644,7 +644,6 @@ subroutine int_compute_corresp(interpolator,BSp,double_grid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'int_compute_corresp'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

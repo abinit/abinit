@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,7 +105,7 @@ integer :: v
 integer :: nbandv                                    !Public
 integer :: mcg
 integer :: ktot                                      !Public
-integer :: tmp2i(2)
+!integer :: tmp2i(2)
 integer, parameter   :: iovar=6 !137                 !Public
 integer, allocatable :: gbound(:,:)
 integer, allocatable :: istwfk(:)                    !Public

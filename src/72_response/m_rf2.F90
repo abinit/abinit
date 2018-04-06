@@ -8,7 +8,7 @@
 !! equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2017 ABINIT group (LB,MT)
+!!  Copyright (C) 2015-2018 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -451,6 +451,13 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
  type(pawcprj_type),pointer :: cprj_j(:,:)
 
 ! *********************************************************************
+
+ ABI_UNUSED(dtfil%ireadwf)
+ ABI_UNUSED(ikpt)
+ ABI_UNUSED(isppol)
+ ABI_UNUSED(mband)
+ ABI_UNUSED(mkmem)
+ ABI_UNUSED(nsppol)
 
 !Check sizes
  if (size(cprj_jband)/=0) then

@@ -4,12 +4,11 @@
 !! getspinrot
 !!
 !! FUNCTION
-!! From the symmetry matrix symrel_conv expressed
-!! in the coordinate system rprimd,
+!! From the symmetry matrix symrel_conv expressed in the coordinate system rprimd,
 !! compute the components of the spinor rotation matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG)
+!! Copyright (C) 2000-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

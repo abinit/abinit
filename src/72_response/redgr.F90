@@ -17,7 +17,7 @@
 !! and unshifted grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 !!  mpi_enreg=informations about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
-!!   see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!   see ~abinit/doc/variables/vargs.htm#ngfft
 !!  frin(nfft)=real space input function
 !!
 !! OUTPUT
@@ -37,7 +37,7 @@
 !!      dfpt_eltfrxc
 !!
 !! CHILDREN
-!!      fourdp,timab
+!!      fourdp
 !!
 !! SOURCE
 
@@ -58,7 +58,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'redgr'
- use interfaces_18_timing
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -77,7 +76,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !scalars
  integer :: cplex_tmp,i1,i2,i3,id,idir,ifft,ig,ii,ing,n1,n2,n3
 !arrays
- real(dp) :: tsec(2)
  real(dp),allocatable :: gg(:,:),wkcmpx(:,:),work(:),workgr(:,:)
 
 ! *************************************************************************
@@ -107,9 +105,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Obtain rho(G) in wkcmpx from input rho(r)
  work(:)=frin(:)
 
- call timab(82,1,tsec)
  call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
- call timab(82,2,tsec)
 
 !Gradient calculation for three reduced components in turn.
 !Code duplicated to remove logic from loops.
@@ -155,9 +151,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
      end do
    end if !idir
 
-   call timab(82,1,tsec)
    call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-   call timab(82,2,tsec)
 
 !$OMP PARALLEL DO 
    do ifft=1,nfft

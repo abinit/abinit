@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -19,33 +19,26 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "cg_rotate.F90",
- "getcut.F90",
  "getkgrid.F90",
- "getkpgnorm.F90",
- "getmpw.F90",
- "getph.F90",
  "get_full_kgrid.F90",
  "get_kpt_fullbz.F90",
  "initylmg.F90",
  "irrzg.F90",
- "kpgio.F90",
- "kpgstr.F90",
  "laplacian.F90",
  "listkk.F90",
  "m_ab7_kpoints.F90",
  "m_bz_mesh.F90",
  "m_double_grid.F90",
  "m_gsphere.F90",
+ "m_kg.F90",
  "m_kpts.F90",
  "m_nesting.F90",
  "m_skw.F90",
- "mkkin.F90",
- "ph1d3d.F90",
+ "mknucdipmom_k.F90",
+ "mkpwind_k.F90",
  "setmqgrid.F90",
  "setsym.F90",
  "smpbz.F90",
- "symkchk.F90",
- "symg.F90",
  "testkgrid.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

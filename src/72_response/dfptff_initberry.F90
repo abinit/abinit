@@ -7,7 +7,7 @@
 !! Initialization of response calculations in finite electric field. 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (XW).
+!! Copyright (C) 2004-2018 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,13 +69,14 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  use m_errors
  use m_efield
 
+ use m_kg,   only : kpgio
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_initberry'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

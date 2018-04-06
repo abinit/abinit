@@ -5,10 +5,10 @@
 !! DESCRIPTION
 !! This directory contains level-3 routines used
 !! to treat the exchange-correlation energy. The main entry point to
-!! this library is the routine rhohxc.F90 .
+!! this library is the routine rhotoxc.F90 .
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (TD)
+!! Copyright (C) 1998-2018 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@
 !! m_xc_vdw.F90
 !! mkcore.F90
 !! phase.F90
-!! rhohxc.F90
+!! rhotoxc.F90
 !! rhohxcpositron.F90
 !! xcden.F90
 !! xchybrid_ncpp_cc.F90

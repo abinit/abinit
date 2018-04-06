@@ -7,7 +7,7 @@
 !! Routine for conducting DFT calculations for a set of (dynamical) images
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, AR, GG, MT)
+!! Copyright (C) 1998-2018 ABINIT group (XG, AR, GG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,8 +150,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use m_results_img
  use m_scf_history
  use m_io_redirect
- use m_specialmsg, only : specialmsg_mpisum
 
+ use m_geometry,     only : mkradim, mkrdim, fcart2fred
+ use m_specialmsg,   only : specialmsg_mpisum
  use m_libpaw_tools, only : libpaw_spmsg_mpisum
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
@@ -168,7 +169,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_45_geomoptim
  use interfaces_67_common
  use interfaces_95_drive, except_this_one => gstateimg

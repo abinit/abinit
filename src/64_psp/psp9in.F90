@@ -9,7 +9,7 @@
 !! local and non-local potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (JJ, MVer)
+!! Copyright (C) 1999-2018 ABINIT group (JJ, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,8 +66,10 @@
 !!      pspatm
 !!
 !! CHILDREN
-!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,ps_destroy
-!!      ps_get_projector_indexes,psml_reader,psp8lo,psp8nl,psp9cc,spline,wrtout
+!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,ps_corecharge_get
+!!      ps_destroy,ps_nonlocalprojectors_filter,ps_projector_get
+!!      ps_provenance_get,ps_pseudoatomspec_get,ps_valenceconfiguration_get
+!!      ps_valenceshell_get,psml_reader,psp8lo,psp8nl,psp9cc,spline,wrtout
 !!
 !! SOURCE
 
@@ -122,20 +124,26 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Local variables-------------------------------
 !no_abirules
 !scalars
+#if defined HAVE_PSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
  integer :: mm,nn,nso,ii,ir,il
+ integer :: nshells
+ integer :: iproj,irelt,nders
+ integer :: np_dn, np_lj, np_nr, np_so, np_sr, np_up, val_l, val_n
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,zval
+ real(dp) :: rmax,rmatch,z,chgvps
+ real(dp) :: val_occ
+ logical :: has_nlcc,has_spin
  logical :: has_tvale,oncvpsp
  character(len=500) :: message
- type(pawrad_type) :: mesh
  character(len=30)  :: creator
  character(len=7), parameter  :: oncvpsp_name = "ONCVPSP"
- integer :: iproj,irelt,nders
- real(dp) :: rmax,rmatch,z,chgvps
+ type(pawrad_type) :: mesh
+#endif
 !arrays
+#if defined HAVE_PSML
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
-#if defined HAVE_PSML
  type(ps_t) :: psxml
 #endif
 
@@ -147,7 +155,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  call psml_reader(filpsp,psxml,debug=.true.)
 
 !Identify the atomic code that generated the pseudopotential
- creator = ps_Creator(psxml)
+ call ps_Provenance_Get(psxml, 1, creator=creator)
 !Check whether the pseudopotential has been created with ONCVPSP,
 !Don Hamann's code
  oncvpsp = (trim(creator(1:7)) .eq. trim(oncvpsp_name))
@@ -178,13 +186,17 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 ! The atomic number is a real number instead of a simple integer
 ! z (in Abinit), atomic-number in the header of the PSML file.
- z      = ps_AtomicNumber(psxml)
-
+! z      = ps_AtomicNumber(psxml)
+!
 ! The difference between the number of protons in the nucleus and the
 ! sum of the populations of the core shells is the effective atomic number 
 ! of the pseudo-atom, Zval (in Abinit), z-pseudo in the header of the
 ! PSML file.
- zval   = ps_Zpseudo(psxml)
+! zval   = ps_Zpseudo(psxml)
+
+ call ps_PseudoAtomSpec_Get(psxml, &
+& atomic_number=z, z_pseudo=zval, &
+& spin_dft=has_spin, core_corrections=has_nlcc)
 
 !---
 
@@ -207,15 +219,15 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! end do
 
 !Determine the maximum number of points in the grid ---
- rmax = 6.0_dp
- amesh    = 0.01_dp
- mmax     = int(rmax/amesh)
+ rmax  = 6.0_dp
+ amesh = 0.01_dp
+ mmax  = int(rmax/amesh)
 ! if(mod(mmax,2) .eq. 0) mmax = mmax + 1
 
 !Print core charge info, for compatibility with psp8
  rchrg  = zero
  fchrg  = zero
- if (ps_HasCoreCorrections(psxml)) then
+ if (has_nlcc) then
    rchrg = amesh * (mmax - 2)
 !  PSML does not store fchrg for now but we know we have core corrections,
 !  then let's set it arbitrarily to 1.0
@@ -228,20 +240,21 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
-!PSML files always contain valence charge (for now)
- has_tvale = .true.
+!Do we have a valence charge?
+ call ps_ValenceConfiguration_Get(psxml, nshells=nshells)
+ has_tvale = (nshells > 0)
 
 ! Compute the valence charge of the reference configuration used to 
 ! generate the pseudopotential
  chgvps = 0.0_dp
 ! Loop on all the shells included in the valence
- do il = 1, ps_NValenceShells(psxml)
+ do il = 1, nshells
 !  Sum the corresponding occupation of each shell
-   chgvps = chgvps + ps_ValenceShellOccupation(psxml, il)
+!  FIXME: What if there is spin?
+   call ps_ValenceShell_Get(psxml, il, n=val_n, l=val_l, occupation=val_occ)
+   chgvps = chgvps + val_occ
    write(std_out,*)' psp9in : n, l, occupation = ',   &
-&   ps_ValenceShellN(psxml, il),                  &
-&   ps_ValenceShellL(psxml, il),                  &
-&   ps_ValenceShellOccupation(psxml, il)
+&   val_n, val_l, val_occ
  end do
 
 !DEBUG
@@ -260,12 +273,18 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 ! TODO: should be simple to average these and get difference for SREL+SOC,
 ! but also the Ekb etc...
- if (ps_Number_Of_Projectors(psxml,SET_LJ) > 0) then
+ call ps_NonlocalProjectors_Filter(psxml, set=SET_DOWN, number=np_dn)
+ call ps_NonlocalProjectors_Filter(psxml, set=SET_LJ, number=np_lj)
+ call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, number=np_nr)
+ call ps_NonlocalProjectors_Filter(psxml, set=SET_SO, number=np_so)
+ call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=np_sr)
+ call ps_NonlocalProjectors_Filter(psxml, set=SET_UP, number=np_up)
+ if (np_lj > 0) then
    message = 'For the moment LJ format projectors are not supported; SREL + SO is the internal abinit format'
    MSG_BUG(message)
  end if
 
- if (ps_Number_Of_Projectors(psxml,SET_UP) > 0 .or. ps_Number_Of_Projectors(psxml,SET_DOWN) > 0) then
+ if (np_up > 0 .or. np_dn > 0) then
    write (message,'(3a)') 'For the moment separate spin up and down format projectors are not supported;',ch10,&
 &   ' spin average is the internal abinit format'
    MSG_BUG(message)
@@ -282,20 +301,22 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !Find the number of projectors per angular momentum shell
  nproj(:)=0
- if (ps_Number_Of_Projectors(psxml,SET_NONREL) > 0) then
-   call ps_Get_Projector_Indexes(psxml,SET_NONREL,idx_sr)
-   do iproj = 1, ps_Number_Of_Projectors(psxml,SET_NONREL)
-     il = ps_Projector_L(psxml, idx_sr(iproj))
+ if (np_nr > 0) then
+   call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, indexes=idx_sr)
+   do iproj = 1, np_nr
+     call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
      nproj(il+1) = nproj(il+1) + 1
    end do
- else if (ps_Number_Of_Projectors(psxml,SET_SREL) > 0) then
-   call ps_Get_Projector_Indexes(psxml,SET_SREL,idx_sr)
-   do iproj = 1, ps_Number_Of_Projectors(psxml,SET_SREL)
-     il = ps_Projector_L(psxml, idx_sr(iproj))
-     nproj(il+1) = nproj(il+1) + 1
-   end do
- else ! this should not happen
-   MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
+ else
+   if (np_sr > 0) then
+     call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, indexes=idx_sr)
+     do iproj = 1, np_sr
+       call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
+       nproj(il+1) = nproj(il+1) + 1
+     end do
+   else ! this should not happen
+     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
+   end if
  end if
 
  write(message, '(a,5i6)' ) '     nproj',nproj(1:lmax+1)
@@ -304,9 +325,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  irelt = 0
  if (nso == 2) then
-   call ps_Get_Projector_Indexes(psxml,SET_SO,idx_so)
-   do iproj = 1, ps_Number_Of_Projectors(psxml,SET_SO)
-     il = ps_Projector_L(psxml, idx_so(iproj))
+   call ps_NonlocalProjectors_Filter(psxml, set=SET_SO, indexes=idx_so)
+   do iproj = 1, np_so
+     call ps_Projector_Get(psxml, idx_so(iproj), l=il)
      nproj(il+lmax+2) = nproj(il+lmax+2) + 1
      irelt = 1
    end do
@@ -383,7 +404,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  rmatch = zero
  nders  = 0
- if (ps_HasCoreCorrections(psxml)) then
+ if (has_nlcc) then
 
 !    In Abinit, at least for the Troullier-Martins pseudopotential,
 !    the pseudocore charge density and its derivatives (xccc1d)
@@ -391,8 +412,8 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !    This grid is normalized, so the radial coordinates run between
 !    from 0 and 1 (from 0 to xcccrc, where xcccrc is the radius
 !    where the pseudo-core becomes zero).
-   rmatch = ps_CoreCharge_MatchingRadius(psxml)
-   nders  = ps_CoreCharge_NumberOfKeptDerivatives(psxml)
+
+   call ps_CoreCharge_get(psxml, rc=rmatch, nderivs=nders)
    write (message,'(1X,A,A,5X,A,1X,F8.3,A,5X,A,I8,A)') &
 &   "Reading pseudocore charge",ch10, &
 &   "- matching radius:",rmatch,ch10, &
@@ -415,7 +436,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
    maxrad = rad(mmax)
 
- end if ! ps_HasCoreCorrections(psxml)
+ end if ! has_nlcc
 
 !!   DEBUG
 !    write(std_out,*)' xcccrc = ', xcccrc, rchrg
@@ -487,9 +508,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Zero out all Kleinman-Bylander energies to initialize
  do ii = 1, lmnmax ! loop over all possible projectors
    if (indlmn(6,ii) == 1) then
-     ekb (indlmn(5,ii)) = ps_Projector_Ekb(psxml, idx_sr(indlmn(5,ii)))
+     call ps_Projector_Get(psxml, idx_sr(indlmn(5,ii)), ekb=ekb(indlmn(5,ii)))
    else if (indlmn(6,ii) == 2) then
-     ekb (indlmn(5,ii)) = ps_Projector_Ekb(psxml, idx_so(indlmn(5,ii)))
+     call ps_Projector_Get(psxml, idx_so(indlmn(5,ii)), ekb=ekb(indlmn(5,ii)))
    end if
  end do
 
@@ -609,6 +630,10 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !--------------------------------------------------------------------
 
 #else
+ ABI_UNUSED(mpsang)
+ ABI_UNUSED(pspso)
+ ABI_UNUSED(qgrid_vl)
+ ABI_UNUSED(nctab%mqgrid_vl)
 !Initialize some arguments, for portability at compile time
  indlmn=0 ; mmax=0 ; nproj=0
  ekb=zero ; epsatm=zero ; ffspl=zero ; qchrg=zero ; vlspl=zero ; xcccrc=zero ; xccc1d=zero
@@ -616,7 +641,10 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_PSML is false
  if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_PSML is false
  if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_PSML is false
+ if(.false.)write(std_out,*)mpsang ! Just to keep mpsang when HAVE_PSML is false
+ if(.false.)write(std_out,*)pspso  ! Just to keep pspso when HAVE_PSML is false
  if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_PSML is false
+ if(.false.)write(std_out,*)qgrid_vl ! Just to keep qgrid_vl when HAVE_PSML is false
  if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_PSML is false
  if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_PSML is false
  if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_PSML is false

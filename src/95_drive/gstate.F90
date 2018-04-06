@@ -7,7 +7,7 @@
 !! Primary routine for conducting DFT calculations by CG minimization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -132,6 +132,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_wffile
  use m_rec
  use m_efield
+ use m_orbmag
  use m_ddb
  use m_bandfft_kpt
  use m_invovl
@@ -142,9 +143,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
+ use m_io_tools,         only : open_file
+ use m_occ,              only : newocc, getnel
  use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_fstrings,         only : strcat, sjoin
+ use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
+ use m_kg,               only : kpgio, getph
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
@@ -160,6 +165,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                               electronpositron_calctype
  use m_scfcv,            only : scfcv_t,scfcv_init, scfcv_destroy, scfcv_run
  use m_iowf,             only : outwf
+ use m_outqmc,           only : outqmc
  use m_ioarr,            only : ioarr,read_rhor
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
@@ -181,7 +187,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_43_wvl_wrappers
 #if defined HAVE_GPU_CUDA
  use interfaces_52_manage_cuda
@@ -189,8 +194,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_53_ffts
  use interfaces_56_io_mpi
  use interfaces_56_recipspace
- use interfaces_57_iovars
- use interfaces_61_occeig
  use interfaces_62_poisson
  use interfaces_64_psp
  use interfaces_65_paw
@@ -240,9 +243,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: nblok,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt
+ integer :: cnt,spin,band,ikpt,usecg
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
- real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
+ real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
@@ -255,6 +258,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
  type(macro_uj_type) :: dtpawuj(0)
+ type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(recursion_type) ::rec_set
@@ -424,7 +428,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  has_to_init=(initialized==0.or.scf_history%history_size<0)
  if (initialized==0) then
 !  This call has to be done before any use of SCF history
-   call scf_history_init(dtset,mpi_enreg,scf_history)
+   usecg=0
+   if(dtset%extrapwf>0)usecg=1
+   call scf_history_init(dtset,mpi_enreg,usecg,scf_history)
  end if
 
  call timab(33,2,tsec)
@@ -436,12 +442,20 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Open and read pseudopotential files
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
 
  call timab(701,2,tsec)
  call timab(33,3,tsec)
-
+ if (psps%usepaw==1.and.dtset%usefock==1)then
+   do itypat=1,dtset%ntypat
+     if(pawtab(itypat)%has_fock==0) then
+       write(message, '(a)' )&
+&       'The PAW data file does not contain Fock information. Change the PAW data file.'
+       MSG_BUG(message)
+     end if
+   end do
+ end if
 !In case of isolated computations, ecore must set to zero
 !because its contribution is counted in the ewald energy as the ion-ion interaction.
  if (dtset%icoulomb == 1) ecore = zero
@@ -912,8 +926,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (psp_gencond==1.or.call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     hyb_range=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range)
-     call pawinit(gnt_option,gsqcut_shp,hyb_range,dtset%pawlcutd,dtset%pawlmix,&
+     hyb_range_fock=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range_fock)
+     call pawinit(gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
 
@@ -973,13 +987,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (has_to_init) then
    if (dtset%iscf>0 .or. (dtset%iscf==0 .and. dtset%usewvl==1 )) then ! .and. dtset%usepaw==1)) then
-     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
 
+     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
        ! Read density
        rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
        if (dtset%usewvl==0) then
          call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
          results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
        else
          fform=52 ; accessfil=0
@@ -998,7 +1012,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        ! Read kinetic energy density
        if(dtfil%ireadkden/=0 .and. dtset%usekden==1 )then
          call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
          call hdr_free(hdr_den)
        end if
 
@@ -1153,6 +1167,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
+ !! orbital magnetization initialization
+ dtorbmag%orbmag = dtset%orbmag
+ if (dtorbmag%orbmag > 0) then
+   call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
+&   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&   rprimd,symrec,xred)
+ end if
+
+
  fatvshift=one
 
  if (dtset%usewvl == 1 .and. wvl_debug) then
@@ -1193,7 +1216,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call timab(35,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &   indsym,initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1325,6 +1348,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+   !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
+   !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
  end if
 
  if (dtset%prtwf==2) then
@@ -1561,11 +1586,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   0, dtset%ngfft, 1, dtset%nscforder)
  end if
 
+ if (associated(pwind)) then
+   ABI_DEALLOCATE(pwind)
+ end if
+ if (associated(pwnsfac)) then
+   ABI_DEALLOCATE(pwnsfac)
+ end if
  if ((dtset%berryopt<0).or.&
 & (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17)) then
-   ABI_DEALLOCATE(pwind)
-   ABI_DEALLOCATE(pwnsfac)
    if (xmpi_paral == 1) then
      ABI_DEALLOCATE(mpi_enreg%kptdstrb)
      if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -1582,12 +1611,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (allocated(mpi_enreg%mkmem)) then
      ABI_DEALLOCATE(mpi_enreg%mkmem)
    end if
- else
-   ABI_DEALLOCATE(pwind)
-   ABI_DEALLOCATE(pwnsfac)
  end if
 
+ ! deallocate efield
  call destroy_efield(dtefield)
+
+ ! deallocate orbmag
+ call destroy_orbmag(dtorbmag)
 
 !deallocate Recursion
  if (dtset%userec == 1) then
@@ -1749,4 +1779,456 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
  end subroutine setup2
 !!***
 
+!!****f* ABINIT/clnup1
+!! NAME
+!! clnup1
+!!
+!! FUNCTION
+!! Perform "cleanup" at end of execution of gstate routine.
+!!
+!! INPUTS
+!!  acell(3)=length scales of primitive translations (bohr)
+!!  dosdeltae=DOS delta of Energy
+!!  dtset <type(dataset_type)>=all input variables in this dataset
+!!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree) for all bands
+!!                           at each k point
+!!  enunit=choice for units of output eigenvalues: 0=>hartree,
+!!   1=> eV, 2=> hartree and eV
+!!  fermie=fermi energy (Hartree)
+!!  fnameabo_dos=filename of output DOS file
+!!  fnameabo_eig=filename of output EIG file
+!!  fred(3,natom)=d(E)/d(xred) (hartree)
+!!  iatfix(3,natom)=0 if not fixed along specified direction,
+!!                  1 if fixed
+!!  iscf=parameter controlling scf or non-scf choice
+!!  kptopt=option for the generation of k points
+!!  kptns(3,nkpt)=k points in terms of recip primitive translations
+!!  mband=maximum number of bands
+!!  mpi_enreg=information about MPI parallelization
+!!  natom=number of atoms in unit cell
+!!  nband(nkpt*nsppol)=number of bands
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT,
+!!            see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nkpt=number of k points
+!!  nspden=number of spin-density components
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  nstep=desired number of electron iteration steps
+!!  occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
+!!  occopt=option for occupancies
+!!  prtdos= if == 1, will print the density of states
+!!  prtfor= if >0, will print the forces
+!!  prtstm= input variable prtstm
+!!  prtvol=control print volume and debugging
+!!  resid(mband*nkpt*nsppol)=squared residuals for each band and k point where
+!!                     resid(n,k)=|<C(n,k)|(H-e(n,k))|C(n,k)>|^2
+!!  rhor(nfft,nspden)=electron density (electrons/bohr^3)
+!!  rprimd(3,3)=dimensional real space primitive translations (bohr)
+!!  tphysel="physical" electronic temperature with FD occupations
+!!  tsmear=smearing energy or temperature (if metal)
+!!  vxcavg=average of vxc potential
+!!  wtk(nkpt)=real(dp) array of k-point weights
+!!  xred(3,natom)=reduced atomic coordinates
+!!
+!! OUTPUT
+!!  (only print and write to disk)
+!!
+!! PARENTS
+!!      gstate
+!!
+!! CHILDREN
+!!      getnel,metric,prteigrs,prtrhomxmn,prtxf,write_eig,wrtout
+!!
+!! SOURCE
+
+subroutine clnup1(acell,dtset,eigen,fermie,&
+  & fnameabo_dos,fnameabo_eig,fred,&
+  & mpi_enreg,nfft,ngfft,occ,prtfor,&
+  & resid,rhor,rprimd,vxcavg,xred)
+
+ !use defs_wvltypes
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'clnup1'
+ use interfaces_14_hidewrite
+ use interfaces_59_ionetcdf
+ use interfaces_67_common
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft
+ integer,intent(in) :: prtfor
+ real(dp),intent(in) :: fermie
+ real(dp),intent(in) :: vxcavg
+ character(len=*),intent(in) :: fnameabo_dos,fnameabo_eig
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in)  :: ngfft(18)
+ real(dp),intent(in) :: acell(3)
+ real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: fred(3,dtset%natom)
+ real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: rhor(nfft,dtset%nspden)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: xred(3,dtset%natom)
+ real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: comm,iatom,ii,iscf_dum,iwfrc,me,nnonsc,option,unitdos
+ real(dp) :: entropy,grmax,grsum,maxocc,nelect,tolwf,ucvol
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ character(len=500) :: message
+ character(len=fnlen) filename
+!arrays
+ real(dp),allocatable :: doccde(:)
+
+! ****************************************************************
+
+ comm=mpi_enreg%comm_cell; me=xmpi_comm_rank(comm)
+
+ if(dtset%prtstm==0)then ! Write reduced coordinates xred
+   write(message, '(a,i5,a)' )' reduced coordinates (array xred) for',dtset%natom,' atoms'
+   call wrtout(ab_out,message,'COLL')
+   do iatom=1,dtset%natom
+     write(message, '(1x,3f20.12)' ) xred(:,iatom)
+     call wrtout(ab_out,message,'COLL')
+   end do
+ end if
+
+!Write reduced gradients if iscf > 0 and dtset%nstep>0 and
+ if (dtset%iscf>=0.and.dtset%nstep>0.and.dtset%prtstm==0) then
+
+!  Compute absolute maximum and root mean square value of gradients
+   grmax=0.0_dp
+   grsum=0.0_dp
+   do iatom=1,dtset%natom
+     do ii=1,3
+!      To be activated in v5.5
+!      grmax=max(grmax,abs(fred(ii,iatom)))
+       grmax=max(grmax,fred(ii,iatom))
+       grsum=grsum+fred(ii,iatom)**2
+     end do
+   end do
+   grsum=sqrt(grsum/dble(3*dtset%natom))
+
+   write(message, '(1x,a,1p,e12.4,a,e12.4,a)' )'rms dE/dt=',grsum,'; max dE/dt=',grmax,'; dE/dt below (all hartree)'
+   call wrtout(ab_out,message,'COLL')
+   do iatom=1,dtset%natom
+     write(message, '(i5,1x,3f20.12)' ) iatom,fred(1:3,iatom)
+     call wrtout(ab_out,message,'COLL')
+   end do
+
+ end if
+
+ if(dtset%prtstm==0)then
+
+!  Compute and write out dimensional cartesian coords and forces:
+   call wrtout(ab_out,' ','COLL')
+
+!  (only write forces if iscf > 0 and dtset%nstep>0)
+   if (dtset%iscf<0.or.dtset%nstep<=0.or.prtfor==0) then
+     iwfrc=0
+   else
+     iwfrc=1
+   end if
+
+   call prtxf(fred,dtset%iatfix,ab_out,iwfrc,dtset%natom,rprimd,xred)
+
+!  Write length scales
+   write(message, '(1x,a,3f16.12,a)' )'length scales=',acell,' bohr'
+   call wrtout(ab_out,message,'COLL')
+   write(message, '(14x,a,3f16.12,a)' )'=',Bohr_Ang*acell(1:3),' angstroms'
+   call wrtout(ab_out,message,'COLL')
+
+ end if
+
+ option=1; nnonsc=0; tolwf=0.0_dp
+
+ if(dtset%iscf<0 .and. dtset%iscf/=-3)option=3
+ iscf_dum=dtset%iscf
+ if(dtset%nstep==0)iscf_dum=-1
+
+ if(dtset%tfkinfunc==0)then
+   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
+&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&   vxcavg,dtset%wtk)
+   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
+&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&   vxcavg,dtset%wtk)
+
+#if defined HAVE_NETCDF
+   if (dtset%prteig==1 .and. me == master) then
+     filename=trim(fnameabo_eig)//'.nc'
+     call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
+   end if
+#endif
+
+ end if
+
+!Compute and print location of maximal and minimal density
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ call prtrhomxmn(std_out,mpi_enreg,nfft,ngfft,dtset%nspden,2,rhor,ucvol=ucvol)
+ if( dtset%prtvol>1)then
+   call prtrhomxmn(ab_out,mpi_enreg,nfft,ngfft,dtset%nspden,2,rhor,ucvol=ucvol)
+ end if
+
+!If needed, print DOS (unitdos is closed in getnel, occ is not changed if option == 2
+ if (dtset%prtdos==1 .and. me == master) then
+   if (open_file(fnameabo_dos,message, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
+     MSG_ERROR(message)
+   end if
+   rewind(unitdos)
+   maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
+   option=2
+   ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,&
+&   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
+&   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
+&   dtset%tsmear,unitdos,dtset%wtk)
+   ABI_DEALLOCATE(doccde)
+ end if
+
+end subroutine clnup1
+!!***
+
+!!****f* ABINIT/clnup2
+!! NAME
+!! clnup2
+!!
+!! FUNCTION
+!! Perform more "cleanup" after completion of iterations.
+!! This subroutine prints out more breakdown of force
+!! information, shifts of atomic positions, and stresses.
+!!
+!! INPUTS
+!!  fred(3,natom)=d(E_total)/d(xred) derivatives (hartree)
+!!  grchempottn(3,natom)=d(E_chempot)/d(xred) derivatives (hartree)
+!!  grewtn(3,natom)=d(E_Ewald)/d(xred) derivatives (hartree)
+!!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
+!!  grxc(3,natom)=d(Exc)/d(xred) derivatives (0 without core charges)
+!!  iscf=parameter controlling scf or non-scf iterations
+!!  natom=number of atoms in unit cell
+!!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
+!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!  prtfor= >0 if forces have to be printed (0 otherwise)
+!!  prtstr= >0 if stresses have to be printed (0 otherwise)
+!!  prtvol=control print volume and debugging output
+!!  start(3,natom)=starting coordinates in terms of real space
+!!   primitive translations
+!!  strten(6)=components of the stress tensor (hartree/bohr^3)
+!!  synlgr(3,natom)=d(E_nlpsp)/d(xred) derivatives (hartree)
+!!  xred(3,natom)=final coordinates in terms of primitive translations
+!!
+!! OUTPUT
+!!  (only print)
+!!
+!! PARENTS
+!!      gstate
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
+&                 prtfor,prtstr,prtvol,start,strten,synlgr,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'clnup2'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iscf,n1xccc,natom,ngrvdw,prtfor,prtstr,prtvol
+!arrays
+ real(dp),intent(in) :: fred(3,natom),grchempottn(3,natom),gresid(3,natom)
+ real(dp),intent(in) :: grewtn(3,natom),grvdw(3,ngrvdw)
+ real(dp),intent(in) :: grxc(3,natom),start(3,natom),strten(6),synlgr(3,natom)
+ real(dp),intent(in) :: xred(3,natom)
+
+!Local variables-------------------------------
+ character(len=*), parameter :: format01020 ="(i5,1x,3f20.12)"
+!scalars
+ integer :: iatom,mu
+ real(dp) :: devsqr,grchempot2
+ character(len=500) :: message
+
+! *************************************************************************
+!
+!DEBUG
+!write(std_out,*)' clnup2 : enter '
+!ENDDEBUG
+
+!Only print additional info for scf calculations
+ if (iscf>=0) then
+
+   if((prtvol>=10).and.(prtfor>0))then
+
+     write(message, '(a,10x,a)' ) ch10,&
+&     '===> extra information on forces <==='
+     call wrtout(ab_out,message,'COLL')
+
+     write(message, '(a)' ) ' ewald contribution to reduced grads'
+     call wrtout(ab_out,message,'COLL')
+     do iatom=1,natom
+       write(message,format01020) iatom,(grewtn(mu,iatom),mu=1,3)
+       call wrtout(ab_out,message,'COLL')
+     end do
+
+     grchempot2=sum(grchempottn(:,:)**2)
+     if(grchempot2>tol16)then
+       write(message, '(a)' ) ' chemical potential contribution to reduced grads'
+       call wrtout(ab_out,message,'COLL')
+       do iatom=1,natom
+         write(message,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
+         call wrtout(ab_out,message,'COLL')
+       end do
+     end if
+
+     write(message, '(a)' ) ' nonlocal contribution to red. grads'
+     call wrtout(ab_out,message,'COLL')
+     do iatom=1,natom
+       write(message,format01020) iatom,(synlgr(mu,iatom),mu=1,3)
+       call wrtout(ab_out,message,'COLL')
+     end do
+
+     write(message, '(a)' ) ' local psp contribution to red. grads'
+     call wrtout(ab_out,message,'COLL')
+     if (n1xccc/=0) then
+       do iatom=1,natom
+         write(message,format01020) iatom,fred(:,iatom)-&
+&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
+         call wrtout(ab_out,message,'COLL')
+       end do
+     else
+       do iatom=1,natom
+         write(message,format01020) iatom,fred(:,iatom)-&
+&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
+         call wrtout(ab_out,message,'COLL')
+       end do
+     end if
+
+     if (n1xccc/=0) then
+       write(message, '(a)' ) ' core charge xc contribution to reduced grads'
+       call wrtout(ab_out,message,'COLL')
+       do iatom=1,natom
+         write(message,format01020) iatom,(grxc(mu,iatom),mu=1,3)
+         call wrtout(ab_out,message,'COLL')
+       end do
+     end if
+
+     if (ngrvdw==natom) then
+       write(message, '(a)' ) ' Van der Waals DFT-D contribution to reduced grads'
+       call wrtout(ab_out,message,'COLL')
+       do iatom=1,natom
+         write(message,format01020) iatom,(grvdw(mu,iatom),mu=1,3)
+         call wrtout(ab_out,message,'COLL')
+       end do
+     end if
+
+     write(message, '(a)' ) ' residual contribution to red. grads'
+     call wrtout(ab_out,message,'COLL')
+     do iatom=1,natom
+       write(message,format01020) iatom,(gresid(mu,iatom),mu=1,3)
+       call wrtout(ab_out,message,'COLL')
+     end do
+
+   end if
+
+!  Compute mean squared deviation from starting coords
+   devsqr=0.0_dp
+   do iatom=1,natom
+     do mu=1,3
+       devsqr=devsqr+(xred(mu,iatom)-start(mu,iatom))**2
+     end do
+   end do
+
+!  When shift is nonnegligible then print values
+   if (devsqr>1.d-14) then
+     write(message, '(a,1p,e12.4,3x,a)' ) &
+&     ' rms coord change=',sqrt(devsqr/dble(3*natom)),&
+&     'atom, delta coord (reduced):'
+     call wrtout(ab_out,message,'COLL')
+     do iatom=1,natom
+       write(message, '(1x,i5,2x,3f20.12)' ) iatom,&
+&       (xred(mu,iatom)-start(mu,iatom),mu=1,3)
+       call wrtout(ab_out,message,'COLL')
+     end do
+   end if
+
+!  Write out stress results
+   if (prtstr>0) then
+     write(message, '(a,a)' ) ch10,&
+&     ' Cartesian components of stress tensor (hartree/bohr^3)'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+
+     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+&     '  sigma(1 1)=',strten(1),'  sigma(3 2)=',strten(4)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+&     '  sigma(2 2)=',strten(2),'  sigma(3 1)=',strten(5)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+&     '  sigma(3 3)=',strten(3),'  sigma(2 1)=',strten(6)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+
+!    Also output the pressure (minus one third the trace of the stress
+!    tensor.
+     write(message, '(a,a,es12.4,a)' ) ch10,&
+&     '-Cartesian components of stress tensor (GPa)         [Pressure=',&
+&     -(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa]'
+
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+
+     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+&     '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
+&     '  sigma(3 2)=',strten(4)*HaBohr3_GPa
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+&     '- sigma(2 2)=',strten(2)*HaBohr3_GPa,&
+&     '  sigma(3 1)=',strten(5)*HaBohr3_GPa
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+&     '- sigma(3 3)=',strten(3)*HaBohr3_GPa,&
+&     '  sigma(2 1)=',strten(6)*HaBohr3_GPa
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+   end if
+
+!  Last end if above refers to iscf > 0
+ end if
+
+!DEBUG
+!write(std_out,*)' clnup2 : exit '
+!ENDDEBUG
+
+end subroutine clnup2
+!!***
+
 end subroutine gstate
+!!***

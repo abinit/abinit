@@ -26,7 +26,7 @@
 !! Velocity verlet algorithm : Swope et al JCP 76 (1982) 637
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,13 +69,14 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,    only : xcart2xred, xred2xcart, metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_nose'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

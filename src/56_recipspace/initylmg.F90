@@ -8,7 +8,7 @@
 !! over a set of (reciprocal space) (k+G) vectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,8 +58,8 @@
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
 !!
 !! PARENTS
-!!      debug_tools,dfpt_looppert,dfpt_nstpaw,dfptnl_loop,gstate,ks_ddiago
-!!      m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,nonlop_test
+!!      debug_tools,dfpt_looppert,dfpt_nstpaw,dfptnl_loop,forstr,gstate
+!!      ks_ddiago,m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,nonlop_test
 !!      partial_dos_fractions,respfn,scfcv
 !!
 !! CHILDREN
@@ -153,6 +153,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
  do ikpt=1,nkpt
 
    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband(ikpt),-1,me_distrb)) cycle 
+
 
 !  Get k+G-vectors, for this k-point:
    npw_k=npwarr(ikpt)

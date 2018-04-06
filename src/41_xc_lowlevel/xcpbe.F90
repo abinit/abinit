@@ -23,7 +23,7 @@
 !! If option==6, RPBE functional of Hammer, Hansen and Norskov, PRB 59, 7413 (1999)
 !! If option==7, WC functional of Wu and Cohen, PRB 73, 235116 (2006)
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG,MF,LG,CE)
+!! Copyright (C) 1998-2018 ABINIT group (XG,MF,LG,CE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -244,7 +244,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
 !Checks the compatibility between the presence of dvxci and ndvxci
  if(ndvxci /=0 .neqv. present(dvxci))then
-   message = ' If ndvxci/=0 there must the optional arguments dvxci'
+   message = ' If ndvxci/=0 there must the optional argument dvxci'
    MSG_BUG(message)
  end if
 
@@ -274,7 +274,9 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
  if (present(grho2_updn)) then
    if (ngr2/=2*nspden-1 ) then
-     MSG_BUG(' ngr2 must be 2*nspden-1 !')
+     write(message, '(a,2i6)' )&
+&     ' ngr2 must be 2*nspden-1 ! ngr2,nspden=',ngr2,nspden
+     MSG_BUG(message)
    end if
  end if
 

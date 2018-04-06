@@ -7,7 +7,7 @@
 !! Verify that the paw spheres are not overlapping
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,21 +156,21 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
      if (iovl(ii)==1) then
        write(message, '(3a)' ) trim(message),ch10,&
-&      '   There is one pair of overlapping atoms.'
+&       '   There is one pair of overlapping atoms.'
      else
        write(message, '(3a,i5,a)' ) trim(message),ch10,&
-&      '   There are ', iovl(1),' pairs of overlapping atoms.'
+&       '   There are ', iovl(1),' pairs of overlapping atoms.'
      end if
      write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
-       '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
+     '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
      write(message, '(2a,2(a,i3),a,f9.5,a,2(a,i3,a,f9.5,a),a,f5.2,a)' ) trim(message),ch10,&
-&      '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii)),ch10,&
-&      '    | PAW radius of the sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rpaw,ch10,&
-&      '    | PAW radius of the sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rpaw,ch10,&
-&      '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
+&     '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii)),ch10,&
+&     '    | PAW radius of the sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rpaw,ch10,&
+&     '    | PAW radius of the sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rpaw,ch10,&
+&     '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
      if (ii==2) then
-     write(message, '(3a)' ) trim(message),ch10,&
-&      'THIS IS DANGEROUS !, as PAW formalism assumes non-overlapping compensation densities.'
+       write(message, '(3a)' ) trim(message),ch10,&
+&       'THIS IS DANGEROUS !, as PAW formalism assumes non-overlapping compensation densities.'
      end if
 
      if (stop_on_error) then

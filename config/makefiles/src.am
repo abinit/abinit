@@ -1,6 +1,6 @@
 # Help
 help:
-	@cat $(top_srcdir)/doc/help_make/help_make_src
+	@cat $(top_srcdir)/doc/help_make/help_make_src.txt
 
 # ---------------------------------------------------------------------------- #
 
@@ -49,63 +49,63 @@ parents:
 # 4) ERROR(10_defs/defs_wannier90.F90): found end statement at line 62 for '' subroutine wannier_setup '' before executable section
 abiauty:
 	@echo 'Reporting possible errors in the abiauty procedure' > tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 10_defs >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 11_memory_mpi >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 12_hide_mpi >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 14_hidewrite >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 15_gpu_toolbox >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 16_hideleave >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 18_timing >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 20_datashare >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 27_toolbox_oop >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 32_util >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 41_geometry >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 41_xc_lowlevel >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 42_libpaw >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 42_nlstrain >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 42_parser >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 43_wvl_wrappers >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 44_abitypes_defs >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 45_geomoptim >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 49_gw_toolbox_oop >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 51_manage_mpi >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 52_manage_cuda >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 53_ffts >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 53_spacepar >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 54_abiutil >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 56_io_mpi >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 56_mixing >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 56_recipspace >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 56_xc >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 57_iopsp_parser >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 57_iovars >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 59_ionetcdf >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 61_occeig >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 62_ctqmc >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 62_iowfdenpot >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 62_poisson >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 62_wvl_wfs >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 63_bader >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 64_atompaw >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 64_psp >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 65_lotf_base >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 65_paw >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 66_wfs >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 66_nonlocal >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 67_common >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 68_dmft >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 68_lotf >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 68_recursion >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 68_rsprc >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 72_response >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 77_ddb >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 77_suscep >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 79_seqpar_mpi >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 83_cut3d >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 84_fold2Bloch >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 94_scfcv >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 95_drive >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 98_main >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/10_defs >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/11_memory_mpi >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/12_hide_mpi >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/14_hidewrite >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/15_gpu_toolbox >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/16_hideleave >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/18_timing >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/20_datashare >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/27_toolbox_oop >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/32_util >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/41_geometry >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/41_xc_lowlevel >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/42_libpaw >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/42_nlstrain >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/42_parser >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/43_wvl_wrappers >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/44_abitypes_defs >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/45_geomoptim >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/49_gw_toolbox_oop >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/51_manage_mpi >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/52_manage_cuda >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/53_ffts >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/53_spacepar >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/54_abiutil >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_io_mpi >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_mixing >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_recipspace >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_xc >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/57_iopsp_parser >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/57_iovars >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/59_ionetcdf >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/61_occeig >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/62_ctqmc >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/62_iowfdenpot >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/62_poisson >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/62_wvl_wfs >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/63_bader >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/64_atompaw >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/64_psp >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/65_lotf_base >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/65_paw >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/66_wfs >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/66_nonlocal >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/67_common >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/68_dmft >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/68_lotf >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/68_recursion >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/68_rsprc >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/72_response >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/77_ddb >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/77_suscep >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/79_seqpar_mpi >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/83_cut3d >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/84_fold2Bloch >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/94_scfcv >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/95_drive >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/98_main >> tmp-abiauty.log
 	grep ERROR tmp-abiauty.log > error_make_abiauty  || true
 
 # ---------------------------------------------------------------------------- #

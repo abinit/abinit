@@ -7,7 +7,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2002-2007 Stefan Goedecker, CEA Grenoble
-!!  Copyright (C) 2014-2017 ABINIT group (XG)
+!!  Copyright (C) 2014-2018 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1340,7 +1340,7 @@ end subroutine sg2002_mpiforw_wf
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ndat=Numbre of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r 

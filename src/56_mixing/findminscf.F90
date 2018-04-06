@@ -1,4 +1,3 @@
-
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/findminscf
 !!
@@ -13,7 +12,7 @@
 !! point, and at the two other points
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

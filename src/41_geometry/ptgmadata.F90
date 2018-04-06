@@ -12,7 +12,7 @@
 !! Cracknell, Clarendon Press, Oxford.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (XG)
+!! Copyright (C) 2002-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,8 +23,6 @@
 !!
 !! OUTPUT
 !! ptgrpmasb= symbol
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      prtspgroup
@@ -57,9 +55,6 @@ subroutine ptgmadata(ptgroupma,ptgrpmasb)
 !scalars
  integer,intent(in) :: ptgroupma
  character(len=10),intent(out) :: ptgrpmasb
-
-!Local variables-------------------------------
-!character(len=500) :: message
 
 ! *************************************************************************
 

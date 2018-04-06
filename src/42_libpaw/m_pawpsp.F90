@@ -7,7 +7,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2018 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1414,7 +1414,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
  integer :: ib,i1,i2,il,ilm,ilmn,iln,ios,jln,nmesh,npts,unt
  real(dp) :: noccor,r1,r2
  logical :: ex,oldformat,usexml
- character(len=8) :: dum
+ character(len=8) :: dum,dum1,dum2,dum3,dum4
  character(len=80) :: fline
  character(len=500) :: filename_,msg
 !arrays
@@ -1564,8 +1564,9 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    LIBPAW_ALLOCATE(phi_cor,(npts,nphicor))
    LIBPAW_ALLOCATE(rad,(npts))
    do iln=1,nphicor
-     read(unt,'("# n=",i4," l=",i4," nocc=",f15.7," energy=",f15.7)') &
-&       ncor(iln),lcor(iln),noccor,energy_cor(iln)
+     read(unt,'(a4,i4,a3,i4,a6,f15.7,a8,f15.7)') &
+&     dum1,ncor(iln),dum2,lcor(iln),dum3,noccor,dum4,energy_cor(iln)
+
      do jln=1,npts
        read(unt,*) rad(jln),phi_cor(jln,iln)
      end do
@@ -1795,7 +1796,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  integer,parameter :: reduced_mshsz=2501
  integer :: ib,il,ilm,ilmn,iln,ir,isnotzero,itest
  integer :: j0lmn,jlm,jlmn,jln,klmn,msz,msz1,msz_tmp,mst_tmp,nspden
- logical :: has_dij0,reduced_ncor,reduced_nval,reduced_vloc,testval
+ logical :: has_dij0,non_magnetic_xc,reduced_ncor,reduced_nval,reduced_vloc,testval
  real(dp),parameter :: reduced_rstep=0.00025_dp,rm_vloc=20.0_dp
  real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,qcore,qq,rstep_tmp,yp1,ypn
  character(len=500) :: msg
@@ -1813,6 +1814,9 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 
 !==========================================================
 !Perfom tests on meshes
+
+! initialise logical 
+ non_magnetic_xc=.false. 
 
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
@@ -2213,15 +2217,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        if (nspden==2) work2(msz+1:2*msz)=half*nwk
        if (nspden==2) work3(msz+1:2*msz)=half*nhatwk
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
@@ -2235,15 +2239,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        LIBPAW_ALLOCATE(vxc2,(msz))
        LIBPAW_ALLOCATE(work1,(msz))
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
@@ -2491,10 +2495,10 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size))
  work1(:)=zero
  if (pawxcdev/=0) then
-   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,core_mesh%mesh_size,&
+   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,work2,xclevel,xc_denpos)
  else
-   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,1,tmp_lmselect,work3,0,core_mesh%mesh_size,&
+   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,work1,1,0,work2,xclevel,xc_denpos)
  end if
  LIBPAW_DEALLOCATE(work1)
@@ -2983,7 +2987,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !arrays
  integer,allocatable :: mesh_shift(:),nprj(:)
  real(dp),allocatable :: kij(:),ncore(:)
- real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:),v_minushalf(:)
+ real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:),work4(:)
  type(pawrad_type),allocatable :: radmesh(:)
 
@@ -3525,9 +3529,10 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      MSG_ERROR(msg)
    end if
    has_v_minushalf=1
-   LIBPAW_ALLOCATE(v_minushalf,(vloc_mesh%mesh_size))
+   LIBPAW_ALLOCATE(pawtab%v_minushalf,(vloc_mesh%mesh_size))
    shft=mesh_shift(ivlocmesh)
-   v_minushalf(1+shft:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
+   pawtab%vminus_mesh_size=vloc_mesh%mesh_size
+   pawtab%v_minushalf(1+shft:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
    if (shft==1) call pawrad_deducer0(v_minushalf,vloc_mesh%mesh_size,vloc_mesh)
    write(msg,'(a,i1)') &
 &   ' Radial grid used for LDA-1/2 potential is grid ',ivlocmesh
@@ -3535,8 +3540,14 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call wrtout(std_out,  msg,'COLL')
  else
    has_v_minushalf=0
-!   LIBPAW_ALLOCATE(v_minushalf,(0))
  end if
+ if(has_v_minushalf==0.and.pawtab%has_vminushalf==1) then
+   write(msg, '(a)' )&
+&     'The LDA-1/2 potential must be given in the XML PAW datafile.'
+   MSG_ERROR(msg)
+ end if
+
+
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
  if (pawtab%shape_type==-1) then
@@ -3659,19 +3670,13 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
-!   if (allocated(v_minushalf)) then
-!   call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
-!&                    vloc_mesh,vlocr,znucl,v_minushalf)
-!   else
+   if (allocated(pawtab%vminushalf).and.pawtab%has_vminushalf==1) then
+     vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+pawtab%vminushalf(1:vloc_mesh%mesh_size)
+   end if
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
 &                    vloc_mesh,vlocr,znucl)
-!   end if
+ end if
 
- end if
- if (allocated(v_minushalf)) then
-   vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+v_minushalf(1:vloc_mesh%mesh_size)/sqrt(fourpi)
-   LIBPAW_DEALLOCATE(v_minushalf)
- end if
 !Keep eventualy Kij in memory
  if (pawtab%has_kij==1.or.vlocopt==0) then
    LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
@@ -4370,7 +4375,10 @@ implicit none
  integer,intent(out):: lloc,lmax,pspcod,pspxc
  real(dp),intent(out):: r2well,zion,znucl
 !Local variables-------------------------------
- integer :: ii,il
+ integer :: il
+#if defined LIBPAW_HAVE_LIBXC
+ integer :: ii
+#endif
  character(len=100) :: xclibxc
  character(len=500) :: msg
 !arrays

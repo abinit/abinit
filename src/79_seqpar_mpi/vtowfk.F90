@@ -9,7 +9,7 @@
 !! but might also simply compute eigenvectors and eigenvalues at this k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -492,7 +492,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    choice=2*optforces
    paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
    if (dtset%usefock==1) then
-     if (dtset%optforces/= 0) then
+!     if (dtset%optforces/= 0) then
+     if (optforces/= 0) then
        choice=2;cpopt=1; nnlout=3*natom
      end if
    end if

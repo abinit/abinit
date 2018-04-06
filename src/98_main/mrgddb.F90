@@ -6,7 +6,7 @@
 !! This code merges the derivative databases.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SP)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +70,6 @@ program mrgddb
 #define ABI_FUNC 'mrgddb'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_51_manage_mpi
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -79,7 +78,7 @@ program mrgddb
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
- integer :: chkopt
+ integer :: chkopt,ios
  integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
@@ -199,9 +198,19 @@ program mrgddb
      write(std_out,'(a,a)' )' ',trim(filnam(2))
    else
      do iddb=1,nddb
-       write(std_out,*)' Give name for derivative database number',iddb,' : '
-       read(std_in, '(a)' ) filnam(iddb+1)
-       write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
+       !Added to catch error message if the number of input ddbs is greater than the 
+       !actually number of ddb files entered by the user.
+       read(std_in, '(a)',IOSTAT =ios ) filnam(iddb+1)
+       if (ios < 0) then
+         write(msg, '(a,i0,a,a,a,a)' )&
+&         'The number of input ddb files: ',nddb,' exceeds the number ',&
+&         'of ddb file names.', ch10, &
+&         'Action: change the number of ddb files in the mrgddb input file.'
+         MSG_ERROR(msg) 
+       else 
+         write(std_out,*)' Give name for derivative database number',iddb,' : '
+         write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
+       end if
      end do
    end if
 

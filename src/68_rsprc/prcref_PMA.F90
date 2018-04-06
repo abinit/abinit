@@ -23,7 +23,7 @@
 !! from two different sources at the same time which resulted in a splitting.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA,XG,MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,9 +73,9 @@
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=number of fft grid points
 !!  nfftprc=size of FFT grid on which the potential residual will be preconditionned
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftprc(18)=contain all needed information about 3D FFT for the grid corresponding to nfftprc
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npawmix=-PAW only- number of spherical part elements to be mixed
 !!  npwdiel=number of planewaves for dielectric matrix
 !!  ntypat=number of types of atoms in cell.
@@ -120,9 +120,10 @@
 !!      newvtr
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,indirect_parallel_fourier
-!!      kgindex,mean_fftr,metric,mkcore,mklocl,moddiel,prcrskerker1
-!!      prcrskerker2,rhohxc,testsusmat,xcart2xred,xmpi_sum,zerosym
+!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
+!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
+!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
+!!      xcdata_init,xmpi_sum,zerosym
 !!
 !! SOURCE
 
@@ -149,18 +150,21 @@
  use m_profiling_abi
  use m_xmpi
  use m_cgtools
+ use m_xcdata
 
+ use m_geometry, only : xcart2xred, metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_fft,      only : zerosym
+ use m_kg,       only : getph
+ use m_dtset,    only : testsusmat
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref_PMA'
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_67_common
@@ -207,7 +211,9 @@
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel
+ logical :: non_magnetic_xc
  character(len=500) :: message
+ type(xcdata_type) :: xcdata
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
@@ -231,6 +237,9 @@
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -589,12 +598,15 @@
    ABI_ALLOCATE(vhartr_wk,(nfft))
    option=1
 
-!  to be adjusted for the call to rhohxc
+   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
+
+!  Prepare the call to rhotoxc
+   call xcdata_init(xcdata,dtset=dtset)
    nk3xc=1
    ABI_ALLOCATE(work,(0))
-   call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog_wk,rhor_wk,rprimd,strsxc,1,&
-&   vhartr_wk,vxc_wk,vxcavg,xccc3d)
+   call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
+&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)
 

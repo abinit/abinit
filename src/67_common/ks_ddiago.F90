@@ -22,7 +22,7 @@
 !!  At present, only norm-conserving pseudopotentials are implemented.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (MG)
+!! Copyright (C) 2000-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@
 !!  comm=MPI communicator.
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!  nfftc=Number of points in the coarse FFT mesh.
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  Diago_ctl<ddiago_ctl_type>=Datatype storing variables and options controlling the direct diagonalization.
 !!
 !! OUTPUT
@@ -114,6 +114,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  use m_errors
  use m_hamiltonian
 
+ use m_geometry,          only : metric
  use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
  use m_electronpositron,  only : electronpositron_type
  use m_fftcore,           only : kpgsph
@@ -123,13 +124,13 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
 &                                pawcprj_reorder
  use m_pawfgr,            only : pawfgr_type
+ use m_kg,                only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ks_ddiago'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_recipspace

@@ -9,7 +9,7 @@
 !! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (CL,XG)
+!! Copyright (C) 1999-2018 ABINIT group (CL,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,6 +62,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
  use m_io_tools,       only : open_file
  use m_dynmat,         only : gtdyn9
+ use m_geometry,       only : mkrdim
  use m_crystal,        only : crystal_t
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_ifc,            only : ifc_type, ifc_fourq
@@ -793,7 +794,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &           '    Angstrom^2, cartesian coordinates'
            call wrtout(std_out,msg,'COLL')
            call wrtout(iout,msg,'COLL')
-           
+
            do itemper=1,ntemper
 !            tmp in K
              tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
@@ -821,7 +822,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
              do iatom=1,natom
                vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
-!              The following check zeros out <v^2> if it is very small, in order to 
+!              The following check zeros out <v^2> if it is very small, in order to
 !              avoid numerical noise being interpreted by the automatic tests as
 !              something real. Note also that we compare it in
 !              absolute value, that's because if any of the phonon frequencies are
@@ -880,11 +881,11 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
                tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
                vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
 
-!            The following check zeros out <v^2> if it is very small, in order to 
+!            The following check zeros out <v^2> if it is very small, in order to
 !            avoid numerical noise being interpreted by the automatic tests as
 !            something real. Note also that we compare it in
 !            absolute value, that's because if any of the phonon frequencies are
-!            computed as negative, <v^2> can take a negative value.      
+!            computed as negative, <v^2> can take a negative value.
                do icomp=1, 6
                  if (abs(vij(icomp,iatom,itemper)) < 1.0e-12) vij(icomp,iatom,itemper)=zero
                end do

@@ -31,7 +31,7 @@
 !!    !!!!! >>>> Compute XC stuff here.
 !!    !!!!! if (new_ixc<0) call libxc_functionals_end()
 !!    !!!!! if (old_ixc<0) call libxc_functionals_init(old_ixc,nspden)
-!!  * It is also to define a local (private) variable of type libxc_functional_type.
+!!  * It is also possible to define a local (private) variable of type libxc_functional_type.
 !!    For that, the different methods have to be called with an extra optional
 !!    argument (called xc_funcs in this example):
 !!    !!!!! call libxc_functionals_init(ixc,nspden,xc_funcs)
@@ -48,6 +48,9 @@
 #endif
 
 #include "abi_common.h"
+#if defined HAVE_LIBXC
+#include "xc_version.h"
+#endif
 
 module libxc_functionals
 
@@ -213,6 +216,7 @@ module libxc_functionals
    end subroutine xc_mgga
  end interface
 !
+#if ( XC_MAJOR_VERSION < 4 )
  interface
    subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
@@ -244,6 +248,7 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_mgga_x_tb09_set_params
  end interface
+#endif
 !
  interface
    subroutine xc_get_singleprecision_constant(xc_cst_singleprecision) bind(C)
@@ -479,7 +484,8 @@ contains
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
+!!      xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -585,7 +591,14 @@ contains
 !  Special treatment for LDA_C_XALPHA functional
    if (xc_func%id==libxc_functionals_getid('XC_LDA_C_XALPHA')) then
      alpha_c=real(zero,kind=C_DOUBLE)
+#if ( XC_MAJOR_VERSION < 4 )
      call xc_lda_c_xalpha_set_params(xc_func%conf,alpha_c);
+#else
+     msg='seems set_params has disappeared for xalpha in libxc 4. defaults are being used'
+     MSG_WARNING(msg)
+     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+#endif
+
    end if
 
 !  Get functional kind
@@ -650,7 +663,8 @@ end subroutine libxc_functionals_init
 !!                     XC functionals to initialize
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,hybrid_corr,m_kxc,m_xc_vdw,rhohxc,xchybrid_ncpp_cc
+!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
+!!      xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!
@@ -1037,6 +1051,12 @@ function libxc_functionals_ismgga(xc_functionals)
  else
    libxc_functionals_ismgga =(any(xc_global%family==XC_FAMILY_MGGA))
  end if
+
+!DEBUG
+! write(std_out,*)' libxc_functionals_ismgga : present(xc_functionals)=',present(xc_functionals)
+!write(std_out,*)' libxc_functionals_ismgga : xc_func%abi_ixc=',xc_func%abi_ixc
+! write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga
+!ENDDEBUG
 
 end function libxc_functionals_ismgga
 !!***
@@ -1533,7 +1553,7 @@ end subroutine libxc_functionals_getvxc
 !!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      m_fock
+!!      invars2,rhotoxc
 !!
 !! CHILDREN
 !!
@@ -1633,7 +1653,7 @@ end subroutine libxc_functionals_get_hybridparams
 !! OUTPUT
 !!
 !! PARENTS
-!!      calc_vhxc_me
+!!      calc_vhxc_me,m_fock
 !!
 !! CHILDREN
 !!
@@ -1654,8 +1674,9 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
 !Local variables -------------------------------
- integer :: ii
+ integer :: ii,id_pbe0,id_hse03,id_hse06
  logical :: is_pbe0,is_hse
+ integer :: func_id(2)
  character(len=500) :: msg
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
@@ -1666,6 +1687,9 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
 
  is_pbe0=.false.
  is_hse =.false.
+ id_pbe0=libxc_functionals_getid('HYB_GGA_XC_PBEH')
+ id_hse03=libxc_functionals_getid('HYB_GGA_XC_HSE03')
+ id_hse06=libxc_functionals_getid('HYB_GGA_XC_HSE06')
 
  do ii = 1, 2
 
@@ -1675,42 +1699,65 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
    else
      xc_func => xc_global(ii)
    end if
+   func_id(ii)=xc_func%id
 
 !  Doesnt work with all hybrid functionals
    if (is_pbe0.or.is_hse) then
      msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
      MSG_ERROR(msg)
    end if
-   is_pbe0=(xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH'))
-   is_hse=((xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE03')).or.&
-&          (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')))
+   is_pbe0=(xc_func%id==id_pbe0)
+   is_hse=((xc_func%id==id_hse03).or.(xc_func%id==id_hse06))
    if ((.not.is_pbe0).and.(.not.is_hse)) cycle
 
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
-!  First retrieve current values of parameters
-   call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
-
 !  New values for parameters
-   if (present(hyb_mixing)) alpha_c=real(hyb_mixing,kind=C_DOUBLE)
-   if (present(hyb_mixing_sr)) beta_c=real(hyb_mixing_sr,kind=C_DOUBLE)
-   if (present(hyb_range)) omega_c=real(hyb_range,kind=C_DOUBLE)
 
-!  PBE0: set parameters
-   if (is_pbe0) then
+!  PBE0 type functionals
+   if (present(hyb_mixing))then
+     xc_func%hyb_mixing=hyb_mixing
+     alpha_c=real(xc_func%hyb_mixing,kind=C_DOUBLE)
+     if(is_pbe0)then
+#if ( XC_MAJOR_VERSION < 4 )
        call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+#else
+       msg='seems set_params has disappeared for pbeh in libxc 4. defaults are being used'
+       MSG_WARNING(msg)
+       !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+#endif
+     endif
+   endif
+
+!  HSE type functionals
+   if(present(hyb_mixing_sr).or.present(hyb_range))then
+     if(present(hyb_mixing_sr))xc_func%hyb_mixing_sr=hyb_mixing_sr
+     if(present(hyb_range))xc_func%hyb_range=hyb_range
+     beta_c=real(xc_func%hyb_mixing_sr,kind=C_DOUBLE)
+     omega_c=real(xc_func%hyb_range,kind=C_DOUBLE)
+     if(is_hse)then
+#if ( XC_MAJOR_VERSION < 4 )
+       call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+#else
+       msg='seems set_params has disappeared for hse in libxc 4. defaults are being used'
+       MSG_WARNING(msg)
+     !call hyb_gga_xc_hse_init(xc_func%conf)
+#endif
+     endif
    end if
 
-!  HSE: set parameters
-   if (is_hse) then
-     call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
-   end if
+#else
+   ABI_UNUSED(hyb_mixing)
+   ABI_UNUSED(hyb_mixing_sr)
+   ABI_UNUSED(hyb_range)
 #endif
 
  end do
 
  if ((.not.is_pbe0).and.(.not.is_hse)) then
-   msg='Invalid XC functional: not able to change parameters for this functional!'
-   MSG_WARNING(msg)
+   write(msg,'(3a,2i6,a,a,i6,a,i6,a,i6,a)')'Invalid XC functional: not able to change parameters for this functional !',ch10,&
+&      'The IDs are ',func_id(:),ch10,&
+&      'Allowed HYB_GGA_XC_PBEH, HYB_GGA_XC_HSE03, and HYB_GGA_XC_HSE06 with IDs =',id_pbe0,',',id_hse03,',',id_hse06,'.'
+   MSG_ERROR(msg)
  end if
 
 end subroutine libxc_functionals_set_hybridparams
@@ -1735,7 +1782,7 @@ end subroutine libxc_functionals_set_hybridparams
 !! INPUTS
 !! [hybrid_id]=<type(libxc_functional_type)>, optional : id of an input hybrid functional
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional : XC functionals from which
-!!                     the id(s) can to be used
+!!                     the id(s) can be used
 !!
 !! OUTPUT
 !! [gga_id(2)]=array that contains the GGA libXC id(s)
@@ -1789,6 +1836,18 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 
  c_name="unknown" ; x_name="unknown"
 
+!Specific treatment of the B3LYP functional, whose GGA counterpart does not exist in LibXC
+ if(trial_id(1)==402 .or. trial_id(2)==402)then
+   libxc_functionals_gga_from_hybrid=.true.
+   if (present(gga_id)) then
+     gga_id(1)=0
+     gga_id(2)=-1402 ! This corresponds to a native ABINIT functional,
+                     ! actually a composite from different LibXC functionals!
+     write(std_out,*)' libxc_functionals_gga_from_hybrid, return with gga_id=',gga_id
+   endif
+   return
+ endif
+
  do ii = 1, 2
 
    if (trial_id(ii)==0) cycle
@@ -1822,6 +1881,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
      libxc_functionals_gga_from_hybrid=.true.
    end if
 
+
 #endif
 
  enddo ! ii
@@ -1834,6 +1894,8 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
      gga_id(:)=-1
    end if
  end if
+
+!Note that in the case of B3LYP functional, the return happened immediately after the setup of B3LYP parameters.
 
 end function libxc_functionals_gga_from_hybrid
 !!***
@@ -1941,7 +2003,13 @@ end function libxc_functionals_gga_from_hybrid
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if ( XC_MAJOR_VERSION < 4 )
        call xc_mgga_x_tb09_set_params(xc_funcs(ii)%conf,cc)
+#else
+       msg='seems set_params has disappeared for tb09 in libxc 4. defaults are being used'
+       MSG_WARNING(msg)
+       !call xc_hyb_gga_xc_tb09_init(xc_func%conf)
+#endif
 #endif
      end if
    end do

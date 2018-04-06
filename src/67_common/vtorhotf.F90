@@ -8,7 +8,7 @@
 !! using the Thomas-Fermi functional
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, AR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -199,7 +199,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
    ABI_ALLOCATE(rhor_mid,(nfft))
    ABI_ALLOCATE(rhor_middx,(nfft))
    fermie_tol=1.e-10_dp
-   cktf=one/two/pi**2*(two*dtset%tsmear)**1.5_dp
+   cktf=one/two/pi**2*(two*dtset%tphysel)**1.5_dp
 
 !  Should be made an input variable, if TF really needed for production
 !  rtnewt=dtset%userra
@@ -214,17 +214,17 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
    do while (.not.lnewtonraphson)
      jdicho=jdicho+1
 !    do ifft=1,nfft
-!    rhor_mid(ifft)=cktf*zfermi12((rtnewt-vtrial(ifft,1))/dtset%tsmear)
-!    rhor_middx(ifft)=cktf*zfermim12((rtnewt-vtrial(ifft,1))/dtset%tsmear)
+!    rhor_mid(ifft)=cktf*zfermi12((rtnewt-vtrial(ifft,1))/dtset%tphysel)
+!    rhor_middx(ifft)=cktf*zfermim12((rtnewt-vtrial(ifft,1))/dtset%tphysel)
 !    end do
-     call fm12a1t(cktf,rtnewt,dtset%tsmear,vtrial(:,1),rhor_middx,rhor_mid,&
+     call fm12a1t(cktf,rtnewt,dtset%tphysel,vtrial(:,1),rhor_middx,rhor_mid,&
 &     nfft)
      sum_rhor_mid=sum(rhor_mid(:))
      sum_rhor_middx=sum(rhor_middx(:))
      call xmpi_sum(sum_rhor_mid,mpi_enreg%comm_fft ,ierr)
      call xmpi_sum(sum_rhor_middx,mpi_enreg%comm_fft ,ierr)
      nelect_mid=sum_rhor_mid*ucvol/(nfft*nproc_fft)-dtset%nelect
-     dnelect_mid_dx=sum_rhor_middx*ucvol/(nfft*nproc_fft)/dtset%tsmear/two
+     dnelect_mid_dx=sum_rhor_middx*ucvol/(nfft*nproc_fft)/dtset%tphysel/two
      dxrtnewt=nelect_mid/dnelect_mid_dx
      rtnewt=rtnewt-dxrtnewt
      if (abs(nelect_mid) < fermie_tol/2._dp) then
@@ -293,13 +293,13 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 ! *************************************************************************
 
    ABI_ALLOCATE(betamumoinsV,(nfft))
-   cktf=one/two/pi**2*(two*dtset%tsmear)**1.5_dp
+   cktf=one/two/pi**2*(two*dtset%tphysel)**1.5_dp
    eektf=zero
    feektf=zero
    do ifft=1,nfft
 
 !    betamumoinsv(ifft)=ifermi12(rhor(ifft,1)/cktf)
-     betamumoinsv(ifft)=(rtnewt-vtrial(ifft,1))/dtset%tsmear
+     betamumoinsv(ifft)=(rtnewt-vtrial(ifft,1))/dtset%tphysel
 !    eektemp=zfermi32(betamumoinsV(ifft))/zfermi12(betamumoinsV(ifft))
      eektemp=fp32a1(betamumoinsV(ifft))/rhor(ifft,1)*cktf
      feektemp=betamumoinsV(ifft)-two/three*eektemp
@@ -311,16 +311,16 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
    call xmpi_sum(eektf,mpi_enreg%comm_fft ,ierr)
    call xmpi_sum(feektf,mpi_enreg%comm_fft ,ierr)
    call timab(48,2,tsec)
-   eektf=eektf*dtset%tsmear
+   eektf=eektf*dtset%tphysel
    eektf=eektf*ucvol/dble(nfft*nproc_fft)
-   feektf=feektf*dtset%tsmear
+   feektf=feektf*dtset%tphysel
    feektf=feektf*ucvol/dble(nfft*nproc_fft)
 !  DEBUG
 !  write(std_out,*)'eektf',eektf
 !  stop ('vtorhotf')
 !  ENDDEBUG
    ek=eektf
-   entropy=(eektf-feektf)/dtset%tsmear
+   entropy=(eektf-feektf)/dtset%tphysel
    ABI_DEALLOCATE(betamumoinsV)
  end subroutine tfek
 
@@ -1567,7 +1567,7 @@ end function ifermi52
 !!
 !! SOURCE
 
- subroutine fm12a1t (cktf,rtnewt,tsmear,vtrial,rhor_middx,rhor_mid,nfft)
+ subroutine fm12a1t (cktf,rtnewt,tphysel,vtrial,rhor_middx,rhor_mid,nfft)
 
  use defs_basis
 
@@ -1580,7 +1580,7 @@ end function ifermi52
  implicit none
 
  integer,intent(in) :: nfft
- real(dp),intent(in) :: tsmear,rtnewt,cktf
+ real(dp),intent(in) :: tphysel,rtnewt,cktf
  real(dp),intent(in) :: vtrial(nfft)
  real(dp),intent(out) :: rhor_middx(nfft),rhor_mid(nfft)
 
@@ -1600,7 +1600,7 @@ end function ifermi52
 !Erreur relative maximum annoncee 4.75 e-5
 !
  do ifft=1,nfft
-   x=(rtnewt-vtrial(ifft))/tsmear
+   x=(rtnewt-vtrial(ifft))/tphysel
    if (x.lt.2._dp) then
      y=exp(x)
      rhor_middx(ifft)=cktf*y*(23.1456e0_dp+y*(13.7820e0_dp+y))&

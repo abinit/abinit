@@ -9,9 +9,9 @@ A.2 Update herald.F90
 A.3 Update KNOWN_PROBLEMS
 A.4 Run the "On-demand only slaves"
 A.5 Check manually that "make tests_in" works (on one of the slaves)
-A.6 Run ./generate_doc.py inside ~abinit/doc
+A.6 Issue ./mksite.py build, then ./mksite.py validate [generate lots of errors, but can be ignored at present]
+A.7 Issue pytest abimkdocs_tests/test_variables.py [generate lots of errors, can be ignored at present]
 A.7 Run abilint (to avoid source files be updated by each separate developer)
-A.8 Write letter to JMB, to initialize the new branches
 
 B. For all merges of a development version
 ------------------------------------------
@@ -20,10 +20,8 @@ B.1 src/make parents , src/make abiauty
 C. For the final merge of a development version  
 -----------------------------------------------
 C.1 src/make abiauty  and perhaps at some point again abirules ...
-C.2 Update all reference files.
-C.3 Initialize the next release notes, install notes, features ...
-C.4 Ask the developers to publish their intention of work on DevWiki (when it exists).
-C.5 Ask the "local farmers" (YP, JZ, MT, MC) to test the buildsys on local machine.
+C.2 Update all reference files (optional, but definitely for major version number change).
+C.3 Initialize the next release notes and installation.md file.
 
 D. For the first merge of a production version (possibly for the first release also)
 ------------------------------------------------------------------------------------

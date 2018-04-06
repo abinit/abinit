@@ -9,7 +9,7 @@
 !! of each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FDortu,MVeithen)
+!! Copyright (C) 1999-2018 ABINIT group (FDortu,MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,18 +48,17 @@ program band2eps
  use m_effective_potential
  use m_multibinit_dataset
  use m_effective_potential_file
-
- use m_io_tools,       only : open_file
- use m_fstrings,       only : int2char4,tolower
- use m_time ,          only : asctime
  use m_band2eps_dataset
+
+ use m_io_tools,      only : open_file
+ use m_fstrings,      only : int2char4, tolower, inupper
+ use m_time,          only : asctime
+ use m_parser,        only : instrng
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'band2eps'
- use interfaces_32_util
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -151,16 +150,16 @@ program band2eps
 !Read the input file
  call invars11(inp,lenstr,string)
  if(inp%prtout == 1) call outvars_band2eps(inp,std_out)
- 
+
 !Open the '.eps' file for write
  write(std_out,'(a,a)') 'Creation of file ', filnam(2)
  if (open_file(filnam(2),message,newunit=unt1,form="formatted",status="unknown",action="write") /= 0) then
    MSG_ERROR(message)
- end if 
+ end if
 !Open the phonon energies file
  if (open_file(filnam(3),message,newunit=unt2,form="formatted") /= 0) then
    MSG_ERROR(message)
- end if 
+ end if
  if(filnam(4)/='no') then
 !  Open the displacements file
    if (open_file(filnam(4),message,newunit=unt3,form="formatted",status="old",action='read') /= 0) then
@@ -168,7 +167,7 @@ program band2eps
    end if
  end if
 
- 
+
 !Boundings of the plot (only the plot and not what is around)
  EminN=6900
  EmaxN=2400
@@ -396,7 +395,7 @@ program band2eps
  write(unt1,'(a)') '%****Write Bands****'
 
  lastPos=kminN
- 
+
  read(unt2,*) (phfrqqm1(ii),ii=1,3*inp%natom)
 
  do jj=1,inp%nlines
@@ -437,7 +436,7 @@ program band2eps
 &       *inp%scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
 
-       write(unt1,'(a,i5,a,i5,a)') 'n ',posk,' ',pos,' m'       
+       write(unt1,'(a,i5,a,i5,a)') 'n ',posk,' ',pos,' m'
 
        pos=int(((EminN-EmaxN)*phfrq(imode) &
 &       +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))

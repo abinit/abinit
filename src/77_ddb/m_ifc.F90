@@ -8,7 +8,7 @@
 !!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (XG,MJV,EB,MG)
+!! Copyright (C) 2011-2018 ABINIT group (XG,MJV,EB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,7 +50,7 @@ MODULE m_ifc
  use m_pptools,     only : printbxsf
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
- use m_geometry,    only : phdispl_cart2red, normv
+ use m_geometry,    only : phdispl_cart2red, normv, mkrdim
  use m_kpts,        only : kpts_ibz_from_kptrlatt
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, &
@@ -125,20 +125,20 @@ MODULE m_ifc
      ! amu(ntypat)
      ! mass of the atoms (atomic mass unit)
 
-   real(dp),allocatable :: atmfrc(:,:,:,:,:,:)
-     ! atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: atmfrc(:,:,:,:,:)
+     ! atmfrc(3,natom,3,natom,nrpt)
      ! Inter atomic forces in real space
 
    integer,allocatable :: cell(:,:)
      ! cell(nrpt,3)
      ! Give the index of the the cell and irpt
 
-   real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:,:)
-     ! Ewald_atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:)
+     ! Ewald_atmfrc(3,natom,3,natom,nrpt)
      ! Ewald Inter atomic forces in real space
 
-   real(dp),allocatable :: short_atmfrc(:,:,:,:,:,:)
-     ! short_atmfrc(2,3,natom,3,natom,nrpt)
+   real(dp),allocatable :: short_atmfrc(:,:,:,:,:)
+     ! short_atmfrc(3,natom,3,natom,nrpt)
      ! Short range part of Inter atomic forces in real space
 
    real(dp),allocatable :: qshft(:,:)
@@ -351,7 +351,7 @@ end subroutine ifc_free
 !! INPUTS
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
 !! ddb<type(ddb_type)> = Database with derivatives.
-!! brav=bravais lattice (1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
+!! brav=bravais lattice (1 or -1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
 !! asr= Option for the imposition of the ASR
 !!   0 => no ASR,
 !!   1 => modify "asymmetrically" the diagonal element
@@ -385,7 +385,7 @@ end subroutine ifc_free
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!!      anaddb,eph,m_effective_potential_file,m_gruneisen
+!!      anaddb,eph,m_effective_potential_file,m_gruneisen,m_tdep_abitypes
 !!
 !! CHILDREN
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
@@ -613,12 +613,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- new_wght = 0
  call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
-&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
+&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
- ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
+ ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
  call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz)
 
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
@@ -649,17 +648,17 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt+1
  end do
 
- ABI_CALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%atmfrc,(3,natom,3,natom,Ifc%nrpt))
  ABI_CALLOC(Ifc%rpt,(3,Ifc%nrpt))
  ABI_CALLOC(Ifc%cell,(3,Ifc%nrpt))
  ABI_CALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
- ABI_CALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- ABI_CALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%short_atmfrc,(3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%ewald_atmfrc,(3,natom,3,natom,Ifc%nrpt))
 
  irpt_new = 1
  do irpt = 1, ifc_tmp%nrpt
    if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) then
-     Ifc%atmfrc(:,:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,:,irpt)
+     Ifc%atmfrc(:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,irpt)
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
      Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
@@ -750,7 +749,7 @@ end subroutine ifc_init
 !!  Only printing
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_tdep_abitypes
 !!
 !! CHILDREN
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
@@ -842,14 +841,14 @@ end subroutine ifc_print
 !!  phfrq(3*natom) = Phonon frequencies in Hartree
 !!  displ_cart(2,3,natom,3*natom) = Phonon displacement in Cartesian coordinates
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
-!!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
+!!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix in Cartesian coords..
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_gruneisen
-!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova
-!!      mkph_linwid,read_gkk
+!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,m_tdep_phdos,mka2f,mka2f_tr
+!!      mka2f_tr_lova,mkph_linwid,read_gkk
 !!
 !! CHILDREN
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
@@ -1361,7 +1360,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
  real(dp) :: qred(3),qred_vers(3),phfrqs(3*ifc%natom) !,dwdq(3,3*ifc%natom)
  real(dp),allocatable :: ref_phfrq(:,:),cut_phfrq(:,:)
- real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:,:)
+ real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:)
 
 ! *********************************************************************
 
@@ -1377,7 +1376,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  call xmpi_sum(ref_phfrq, comm, ierr)
 
  ABI_MALLOC(save_wghatm, (natom,natom,nrpt))
- ABI_MALLOC(save_atmfrc, (2,3,natom,3,natom,ifc%nrpt))
+ ABI_MALLOC(save_atmfrc, (3,natom,3,natom,ifc%nrpt))
  save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
 
  ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
@@ -1641,7 +1640,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_write'
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1656,7 +1654,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
-! unit number to print out ifc information for dynamical matrix (AI2PS) 
+! unit number to print out ifc information for dynamical matrix (AI2PS)
  integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
  real(dp) :: maxdist_tdep
@@ -1744,9 +1742,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 &   ' constants in TDEP format. This is because prt_ifc==1. '
    ! Print necessary stuff for TDEP
    write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
- 
+
    ! look at all pairs, find furthest one with weight 1
-!   do ia 
+!   do ia
 !Ifc%wghatm(ia,ib,irpt)
    maxdist_tdep = Ifc%r_inscribed_sphere !maxval(dist)*0.8_dp
    write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxdist_tdep*Bohr_Ang
@@ -1849,7 +1847,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
          ! TODO: check whether this is correct for TDEP: might need just lattice
          ! vector part and not full vector, and could be in integers instead of
          ! cartesian vector...
-         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
+         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim)
 
          !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
@@ -1859,8 +1857,8 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
            ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
            !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
-           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
-           
+           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
+
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
          end do
@@ -2112,7 +2110,7 @@ implicit none
      ! without taking into account the dipole-dipole interaction
      do mu=1,3
        do nu=1,3
-         rsiaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
+         rsiaf(mu,nu,ii)=Ifc%atmfrc(mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
        end do
      end do
      ! Output of the ifcs in cartesian coordinates
@@ -2121,8 +2119,7 @@ implicit none
          write(iout, '(1x,3f9.5)' )(rsiaf(mu,nu,ii)+tol10,mu=1,3)
 !       transfer short range and long range
          do mu=1,3
-           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
-           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = zero
+           Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
          end do
 
        end do
@@ -2213,7 +2210,7 @@ implicit none
      ! "total" force constants (=real space FC)
      do mu=1,3
        do nu=1,3
-         sriaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
+         sriaf(mu,nu,ii)=Ifc%atmfrc(mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
          rsiaf(mu,nu,ii)=ewiaf1(mu,nu)+sriaf(mu,nu,ii)
        end do
      end do
@@ -2228,8 +2225,8 @@ implicit none
 
 !       transfer short range and long range
          do mu=1,3
-           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
-           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
+           Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
+           Ifc%ewald_atmfrc(mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
          end do
        end do
      end if
@@ -2293,6 +2290,7 @@ end subroutine ifc_getiaf
 !----------------------------------------------------------------------
 
 !!****f* m_ifc/omega_decomp
+!!
 !! NAME
 !!  omega_decomp
 !!
@@ -3167,7 +3165,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
    do iq_bz=1,nqbz
      iq_ibz = bz2ibz(iq_bz,1)
      do nu=1,natom3
-       call skw_eval_bks(new, cryst, nu, qbz(:,iq_bz), 1, phfrq(nu))
+       call skw_eval_bks(new, nu, qbz(:,iq_bz), 1, phfrq(nu))
      end do
      write(std_out,*)"BZ-IBZ:", maxval(abs(phfrq - ibz_freqs(:, iq_ibz)))
    end do
@@ -3351,7 +3349,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
    ! SKW interpolation
    call cwtime(cpu, wall, gflops, "start")
    do nu=1,natom3
-     call skw_eval_bks(skw, cryst, nu, qpt, 1, ofreqs(nu))
+     call skw_eval_bks(skw, nu, qpt, 1, ofreqs(nu))
    end do
    call cwtime(cpu, wall, gflops, "stop")
    cpu_skw = cpu_skw + cpu; wall_skw = wall_skw + wall

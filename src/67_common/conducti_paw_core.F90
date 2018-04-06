@@ -9,7 +9,7 @@
 !! from the Kubo-Greenwood formula for PAW formalism
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (VRecoules, PGhosh)
+!! Copyright (C) 2002-2018 ABINIT group (VRecoules, PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,12 +71,12 @@
  use m_hdr
 
  use m_io_tools,     only : open_file, get_unit
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_paw_core'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -150,7 +150,7 @@
  opt2_unt = get_unit()
  call WffOpen(iomode,spaceComm,filnam2,ierr,wff2,master,me,opt2_unt)
 
-!Read the header 
+!Read the header
  rdwr=1
  call hdr_io(fform2,hdr,rdwr,wff2)
 
@@ -202,7 +202,7 @@
    write(std_out,'(a,2i4,f10.5)') ' n, l, Energy (Ha): ',ncor(icor),lcor(icor),energy_cor(icor)
  end do
  write(std_out,'(a)')'--------------------------------------------'
- 
+
 !---------------------------------------------------------------------------------
 !gmet inversion to get ucvol
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -261,14 +261,14 @@
 &             psinablapsi2(1,l1,iband,icor,iatom)*psinablapsi2(1,l1,iband,icor,iatom) &
 &             +psinablapsi2(2,l1,iband,icor,iatom)*psinablapsi2(2,l1,iband,icor,iatom))
            end do
-           
+
            diff_occ = (two/dble(nsppol))-occ_k(iband)
 !          Spectro for each omega
            omin = -1.0
            do iom=1,mom
-             oml=-energy_cor(icor)+oml1(iom)+omin 
+             oml=-energy_cor(icor)+oml1(iom)+omin
              sigx(iatom,iom,icor)=sigx(iatom,iom,icor)+ wtk(ikpt)*dhdk2_g(iatom,iband,icor)&
-&             *(diff_occ)/oml*dexp(-((-energy_cor(icor)+eig0_k(iband)-oml)/dom)**2)        
+&             *(diff_occ)/oml*dexp(-((-energy_cor(icor)+eig0_k(iband)-oml)/dom)**2)
            end do
          end do !icor
        end do  !iband
@@ -288,7 +288,7 @@
      do iom=1,mom
        if(sigx(iatom,iom,icor)<=tol16) sigx(iatom,iom,icor)=zero
      end do
-   end do 
+   end do
  end do ! iatom
 
  sigx=sigx*two_pi*third*dble(natom)/(dom*ucvol)*half/dsqrt(pi)
@@ -299,7 +299,7 @@
        sigx_av(iom,icor) =sigx_av(iom,icor)+sigx(iatom,iom,icor)/dble(natom)
      end do
    end do
- end do 
+ end do
 
  if (open_file(trim(filnam_out)//'_sigX', msg, newunit=sigx_unt, form='formatted', action="write") /= 0) then
    MSG_ERROR(msg)

@@ -7,12 +7,12 @@
 !! needed for the allocations depending on the routine which is called from the drivexc routine
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (TD)
+!! Copyright (C) 1998-2018 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!! This routine has been written from rhohxc (DCA, XG, GMR, MF, GZ)
+!! This routine has been written from rhotoxc (DCA, XG, GMR, MF, GZ)
 !!
 !! INPUTS
 !!  [add_tfw]= optional flag controling the addition of Weiszacker gradient correction to Thomas-Fermi XC energy
@@ -22,6 +22,7 @@
 !!    2=also computes the kernel (return exc,vxc,kxc)
 !!   -2=like 2, except (to be described)
 !!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>
 !!
 !! OUTPUT
 !!  ndvxc size of the array dvxc(npts,ndvxc) for allocation
@@ -30,7 +31,7 @@
 !!  nvxcdgr size of the array dvxcdgr(npts,nvxcdgr) for allocation
 !!
 !! PARENTS
-!!      m_pawxc,rhohxc
+!!      m_pawxc,rhotoxc
 !!
 !! CHILDREN
 !!
@@ -43,7 +44,8 @@
 #include "abi_common.h"
 
 
-subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
+subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
+& add_tfw,xc_funcs) ! Optional 
 
  use defs_basis
  use m_profiling_abi
@@ -61,13 +63,26 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
  integer, intent(in) :: ixc,nspden,order
  integer, intent(out) :: ndvxc,nd2vxc,ngr2,nvxcdgr
  logical, intent(in), optional :: add_tfw
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
 
 !Local variables----------------
- logical :: add_tfw_
+ logical :: add_tfw_,isgga,ismgga,is_hybrid
 
 ! *************************************************************************
 
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
+ isgga=.false. ; ismgga=.false. ; is_hybrid=.false.
+ if(ixc<0)then
+   if(present(xc_funcs))then
+     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
+   else
+     isgga=libxc_functionals_isgga()
+     ismgga=libxc_functionals_ismgga()
+     is_hybrid=libxc_functionals_is_hybrid()
+   end if
+ end if
 
  ngr2=0
  nvxcdgr=0
@@ -76,15 +91,14 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
 
 !Dimension for the gradient of the density (only allocated for GGA or mGGA)
  if ((ixc>=11.and.ixc<=17).or.(ixc>=23.and.ixc<=24).or.ixc==26.or.ixc==27.or. &
-& (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.(add_tfw_)) ngr2=2*min(nspden,2)-1
- if (ixc<0.and.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functionals_is_hybrid() )) &
-& ngr2=2*min(nspden,2)-1
+& (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.ixc==1402000.or.(add_tfw_)) ngr2=2*min(nspden,2)-1
+ if (ixc<0.and.isgga.or.ismgga.or.is_hybrid) ngr2=2*min(nspden,2)-1
 
 !A-Only Exc and Vxc
 !=======================================================================================
  if (order**2 <= 1) then
    if (((ixc>=11 .and. ixc<=15) .and. ixc/=13) .or. (ixc>=23 .and. ixc<=24) .or. &
-&   (ixc==41 .or. ixc==42)) nvxcdgr=3
+&   (ixc==41 .or. ixc==42) .or. ixc==1402000) nvxcdgr=3
    if (ixc==16.or.ixc==17.or.ixc==26.or.ixc==27) nvxcdgr=2
    if (ixc<0) nvxcdgr=3
    if (ixc>=31 .and. ixc<=34) nvxcdgr=3 !Native fake metaGGA functionals (for testing purpose only)
@@ -119,6 +133,9 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
      nvxcdgr=2
    else if (ixc==50) then
      ndvxc=1 !  IIT xc (no spin-pol)
+   else if (ixc==1402000) then
+     ndvxc=15
+     nvxcdgr=3
    else if (ixc<0) then
      if(libxc_functionals_isgga() .or. libxc_functionals_ismgga() .or. libxc_functionals_is_hybrid()) then
        ndvxc=15
@@ -136,6 +153,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
      if ((ixc>=7 .and. ixc<=10) .or. (ixc==13)) nd2vxc=3*min(nspden,2)-2
 !    Following line to be corrected when the calculation of d2vxcar is implemented for these functionals
      if ((ixc>=11 .and. ixc<=15 .and. ixc/=13) .or. (ixc==23.and.ixc<=24) .or. (ixc==41.or.ixc==42)) nd2vxc=1
+     if(ixc==1402000)nd2vxc=3*min(nspden,2)-2
      if ((ixc<0.and.(.not.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functionals_is_hybrid() )))) &
 &     nd2vxc=3*min(nspden,2)-2
    end if

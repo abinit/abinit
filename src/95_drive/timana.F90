@@ -10,7 +10,7 @@
 !! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -264,7 +264,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(78)='nonlop(dyfrnl)                  '
  names(79)='nonlop(ddk)                     '
  names(80)='etotfor/=forces                 '
- names(81)='xc:pot                          ' ! rhohxc_coll, except the call to hartre.f
+ names(81)='xc:pot                          ' ! rhotoxc_coll, except the call to hartre.f
  names(82)='xc:fourdp                       '
  names(83)='newvtr/rho(3):io                '; basic(83)=1
  names(84)='suscep                          '
@@ -713,6 +713,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(793)='mkrho%energy                    '
  names(794)='mkrho%respfn                    '
  names(795)='mkrho%afterscfloop              '
+ names(796)='mkrho%scfcv                     '
  names(798)='mkrho/=                         '; basic(798)=1
  names(799)='mkrho/=+fourwf                  '
 
@@ -769,7 +770,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(938)='outkss(write)                   '
 
  names(940)='rhotov                          '
- names(941)='rhotov(rhohxc)                  '
+ names(941)='rhotov(rhotoxc)                 '
  names(942)='rhotov(dotprod_vn)              '
  names(943)='rhotov(PSolver_rhohxc)          '
  names(944)='rhotov(rhohxcpositron)          '
@@ -893,6 +894,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1685) = 'xgBlock_copy                   '
  names(1686) = 'xgBlock_cshift                 '
  names(1687) = 'xgBlock_pack                   '
+ names(1690) = 'xgScalapack_init               '
+ names(1691) = 'xgScalapack_free               '
+ names(1692) = 'xgScalapack_heev               '
+ names(1693) = 'xgScalapack_hegv               '
+ names(1694) = 'xgScalapack_scatter            '
 
  ! GWLS GW code
  names(1701)='gwls_sternheimer                ';basic(1701)=1
@@ -1178,8 +1184,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
    case(43) 
-!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop
-     tslots(:6)=(/790,791,792,793,794,795/)
+!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop + mkrho%scfcv
+     tslots(:7)=(/790,791,792,793,794,795,796/)
    case(44) 
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
@@ -1218,7 +1224,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !For the following sections, the number of counts is non standard, and thus these sections have not been placed
 !in the previous doloop.
 
-!Compute xc part of rhohxc and dfpt_mkvxc, minus the calls to fourdp inside that part
+!Compute xc part of rhotoxc and dfpt_mkvxc, minus the calls to fourdp inside that part
  ncount(11)=ncount(81)+ncount(181)
  times(1:2,11)=times(1:2,81)+times(1:2,181)-times(1:2,82)
  ftimes(1:2,11)=ftimes(1:2,81)+ftimes(1:2,181)-ftimes(1:2,82)
@@ -1566,6 +1572,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(76)
          list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
          message='low-level xgBlock type '
+       case(77)
+         list(:5)=(/1690,1691,1692,1693,1694/)
+         message='low-level xgScalapack type '
        case default   
          cycle ! This allows to disable temporarily some partitionings
          

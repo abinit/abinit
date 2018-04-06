@@ -13,7 +13,7 @@
 !! point r to r(i) -> r(i) + Sum(j) [eps(i,j)*r(j)].
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,7 @@
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nlstr(6)=nonlocal part of stress tensor
 !!  nspden=number of spin-density components
 !!  nsym=number of symmetries in space group
@@ -137,12 +137,14 @@
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,         only : metric
  use m_fock,             only : fock_type
  use m_ewald,            only : ewald2
  use defs_datatypes,     only : pseudopotential_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_fft,              only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -200,7 +202,7 @@
  real(dp) :: gprimd(3,3),harstr(6),lpsstr(6),rmet(3,3),tsec(2),uncorr(3)
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: dummy_in(0)
- real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0) 
+ real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0)
  real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
  real(dp),allocatable :: vxctotg(:,:)
  character(len=10) :: EPName(1:2)=(/"Electronic","Positronic"/)
@@ -311,7 +313,7 @@
 !======================= Hartree energy contribution ===================
 !=======================================================================
 
- call strhar(ehart,gprimd,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,ucvol)
+ call strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd)
 
 !=======================================================================
 !======================= Ewald contribution ============================
@@ -329,7 +331,7 @@
 &   xred,znucl,str_vdw_dftd2=vdwstr)
  elseif (vdw_xc==6.or.vdw_xc==7) then
    call vdw_dftd3(e_dum,ixc,natom,ntypat,0,typat,rprimd,vdw_xc,&
-&   vdw_tol,vdw_tol_3bt,xred,znucl,str_vdw_dftd3=vdwstr) 
+&   vdw_tol,vdw_tol_3bt,xred,znucl,str_vdw_dftd3=vdwstr)
  end if
 
  call timab(38,2,tsec)
@@ -385,7 +387,7 @@
 !XC part of stress tensor has already been computed in "strsxc"
 
 !ii part of stress (diagonal) is trivial!
- strsii=-eii/ucvol 
+ strsii=-eii/ucvol
 !qvpotzero is non zero, only when usepotzero=1
  strsii=strsii+qvpotzero/ucvol
 
@@ -431,7 +433,7 @@
  end if
 
 ! compute additional F3-type stress due to projectors for electric field with PAW
- if ( efield_flag .and. calc_epaw3_stress ) then  
+ if ( efield_flag .and. calc_epaw3_stress ) then
    do sdir = 1, 6
      ep3(:) = zero
      do idir = 1, 3
@@ -470,9 +472,10 @@
 !=======================================================================
 !===== Assemble the various contributions to the stress tensor =========
 !=======================================================================
-!In cartesian coordinates (symmetric storage) 
+!In cartesian coordinates (symmetric storage)
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
+
  if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
    strten(:)=strten(:)+fock%fock_common%stress(:)
  end if
@@ -480,7 +483,7 @@
 !Add contributions for constant E or D calculation.
  if ( efield_flag ) then
    strten(:)=strten(:)+Maxstr(:)
-   if ( calc_epaw3_stress ) strten(:) = strten(:) + epaws3red(:) 
+   if ( calc_epaw3_stress ) strten(:) = strten(:) + epaws3red(:)
  end if
  if (vdw_xc>=5.and.vdw_xc<=7) strten(:)=strten(:)+vdwstr(:)
 
@@ -488,7 +491,7 @@
  ipositron=0
  if (present(electronpositron)) then
    if (associated(electronpositron)) then
-     if (allocated(electronpositron%stress_ep)) ipositron=electronpositron_calctype(electronpositron) 
+     if (allocated(electronpositron%stress_ep)) ipositron=electronpositron_calctype(electronpositron)
    end if
  end if
  if (abs(ipositron)==1) then
@@ -504,7 +507,7 @@
    ABI_ALLOCATE(dummy,(6))
    call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
    rhog_ep=-rhog_ep
-   call strhar(electronpositron%e_hartree,gprimd,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,ucvol)
+   call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)
    ABI_DEALLOCATE(rhog_ep)
    ABI_DEALLOCATE(dummy)

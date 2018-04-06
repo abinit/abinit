@@ -4,7 +4,7 @@
 !! m_FFT_prof
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@ MODULE m_FFT_prof
  use defs_basis
  use defs_abitypes
  use m_xomp
- use m_errors 
+ use m_errors
  use m_profiling_abi
  use m_fftw3
  use m_fft
@@ -30,6 +30,7 @@ MODULE m_FFT_prof
  use m_numeric_tools,  only : arth
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
+ use m_geometry,       only : metric
  use m_blas,           only : xcopy
  use m_cgtools,        only : set_istwfk
  use m_fftcore,        only : get_kg, print_ngfft, fftalg_info
@@ -58,11 +59,11 @@ MODULE m_FFT_prof
 !!****t* m_fft_mesh/FFT_test_t
 !! NAME
 !! FFT_test_t
-!! 
+!!
 !! FUNCTION
-!! Structure storing the set of paramenters passed to the FFT routines used in 
+!! Structure storing the set of paramenters passed to the FFT routines used in
 !! abinit (fourdp|fourwf).
-!! 
+!!
 !! SOURCE
 
  type,public :: FFT_test_t
@@ -84,12 +85,12 @@ MODULE m_FFT_prof
    real(dp) :: rprimd(3,3),rmet(3,3)
    real(dp) :: gprimd(3,3),gmet(3,3)
 
-   integer,allocatable :: kg_k(:,:)    
+   integer,allocatable :: kg_k(:,:)
    integer,allocatable :: kg_kout(:,:)
    integer,allocatable :: indpw_k(:)
-  
+
    type(MPI_type) :: MPI_enreg
- end type FFT_test_t   
+ end type FFT_test_t
 
  public :: fft_test_init
  public :: fft_test_nullify
@@ -107,21 +108,21 @@ MODULE m_FFT_prof
 !!****t* m_fft_mesh/FFT_prof_t
 !! NAME
 !! FFT_prof_t
-!! 
+!!
 !! FUNCTION
-!!  The results of the tests 
-!! 
+!!  The results of the tests
+!!
 !! SOURCE
 
  type,public :: FFT_prof_t
    integer :: ncalls
    integer :: ndat
-   integer :: nthreads 
+   integer :: nthreads
    real(dp) :: cpu_time
    real(dp) :: wall_time
    real(dp) :: gflops
-   character(len=TNAME_LEN) :: test_name   
-   complex(dpc),allocatable :: results(:)  
+   character(len=TNAME_LEN) :: test_name
+   complex(dpc),allocatable :: results(:)
  end type FFT_prof_t
 
  public :: fftprof_init
@@ -189,7 +190,6 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fft_test_init'
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
 !End of the abilint section
@@ -238,9 +238,9 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
  Ftest%ndat      = ndat
 
  Ftest%istwf_k = set_istwfk(kpoint)
-                                                             
- call get_kg(Ftest%kpoint,Ftest%istwf_k,ecut,gmet,Ftest%npw_k,Ftest%kg_k) 
- call get_kg(Ftest%kpoint,Ftest%istwf_k,ecut,gmet,Ftest%npw_kout,Ftest%kg_kout) 
+
+ call get_kg(Ftest%kpoint,Ftest%istwf_k,ecut,gmet,Ftest%npw_k,Ftest%kg_k)
+ call get_kg(Ftest%kpoint,Ftest%istwf_k,ecut,gmet,Ftest%npw_kout,Ftest%kg_kout)
 
  call copy_mpi_enreg(MPI_enreg_in,Ftest%MPI_enreg)
 
@@ -255,7 +255,7 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
 
  ! Compute the index of each plane wave in the FFT grid.
  ABI_MALLOC(Ftest%indpw_k,(Ftest%npw_k))
-                                                                                     
+
  ABI_MALLOC(mask,(Ftest%npw_k))
  call kgindex(Ftest%indpw_k,Ftest%kg_k,mask,Ftest%MPI_enreg,Ftest%ngfft,Ftest%npw_k)
  ABI_CHECK(ALL(mask),"FFT parallelism not supported in fftprof")
@@ -344,7 +344,7 @@ subroutine fft_test_free_0D(Ftest)
 !scalars
  type(FFT_test_t),intent(inout) :: Ftest
 
-! ********************************************************************* 
+! *********************************************************************
 
  !@FFT_test_t
  Ftest%available=0
@@ -356,11 +356,11 @@ subroutine fft_test_free_0D(Ftest)
  Ftest%npw_k=-1
  Ftest%npw_kout=-1
  Ftest%paral_kgb=-1
-                                         
+
  Ftest%ecut=zero
-                                         
+
  Ftest%ngfft=-1
-                                         
+
  Ftest%kpoint =zero
  Ftest%rprimd =zero
  Ftest%rmet   =zero
@@ -422,7 +422,7 @@ subroutine fft_test_free_1D(Ftest)
 !scalars
  integer :: ii
 
-! ********************************************************************* 
+! *********************************************************************
 
  do ii=LBOUND(Ftest,DIM=1),UBOUND(Ftest,DIM=1)
    call fft_test_free_0D(Ftest(ii))
@@ -453,7 +453,7 @@ end subroutine fft_test_free_1D
 !!
 !! SOURCE
 
-subroutine fft_test_print(Ftest,header,unit,mode_paral,prtvol) 
+subroutine fft_test_print(Ftest,header,unit,mode_paral,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -468,7 +468,7 @@ subroutine fft_test_print(Ftest,header,unit,mode_paral,prtvol)
 !Arguments -----------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral 
+ character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
  type(FFT_test_t),intent(in) :: Ftest
 
@@ -476,15 +476,15 @@ subroutine fft_test_print(Ftest,header,unit,mode_paral,prtvol)
 !scalars
  integer :: my_unt,my_prtvol
  character(len=4) :: my_mode
- character(len=500) :: msg      
-! ********************************************************************* 
+ character(len=500) :: msg
+! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol 
+ my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  !msg=' ==== Info on the FFT test object ==== '
- if (PRESENT(header)) then 
+ if (PRESENT(header)) then
    msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
    call wrtout(my_unt,msg,my_mode)
  end if
@@ -513,7 +513,7 @@ end subroutine fft_test_print
 !!
 !! SOURCE
 
-function name_of(Ftest) 
+function name_of(Ftest)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -533,7 +533,7 @@ function name_of(Ftest)
 !scalars
  character(len=TNAME_LEN) :: library_name,cplex_mode,padding_mode
 
-! ********************************************************************* 
+! *********************************************************************
 
  call fftalg_info(Ftest%ngfft(7),library_name,cplex_mode,padding_mode)
  !name_of = TRIM(library_name)//"; "//TRIM(cplex_mode)//"; "//TRIM(padding_mode)
@@ -646,7 +646,7 @@ subroutine fftprof_free_0D(Ftprof)
 !scalars
  type(FFT_prof_t),intent(inout) :: Ftprof
 
-! ********************************************************************* 
+! *********************************************************************
 
  !@FFT_prof_t
  Ftprof%ncalls=0
@@ -701,7 +701,7 @@ subroutine fftprof_free_1D(Ftprof)
 !Local variables-------------------------------
 !scalars
  integer :: ii
-! ********************************************************************* 
+! *********************************************************************
 
  !@FFT_prof_t
  do ii=LBOUND(Ftprof,DIM=1),UBOUND(Ftprof,DIM=1)
@@ -733,7 +733,7 @@ end subroutine fftprof_free_1D
 !!
 !! SOURCE
 
-subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol) 
+subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -748,7 +748,7 @@ subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
 !Arguments -----------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral 
+ character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
  type(FFT_prof_t),intent(in) :: Fprof(:)
 
@@ -759,12 +759,12 @@ subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
  real(dp) :: mabs_err,mean_err,check_mabs_err,check_mean_err
  real(dp) :: ref_wtime,para_eff
  character(len=4) :: my_mode
- character(len=500) :: ofmt,hfmt,nafmt,msg      
+ character(len=500) :: ofmt,hfmt,nafmt,msg
 
-! ********************************************************************* 
+! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol 
+ my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  msg='==== Info on the FFT_prof_t object ===='
@@ -810,7 +810,7 @@ subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
        !mean_err = 100 * MAXVAL( ABS(Fprof(ii)%results - Fprof(1)%results)/ ABS(Fprof(1)%results ))
        !ifft = imax_loc( ABS(Fprof(ii)%results - Fprof(1)%results)/ ABS(Fprof(1)%results) )
        !write(std_out,*) Fprof(ii)%results(ifft),Fprof(1)%results(ifft)
-     end if 
+     end if
      if (Fprof(ii)%nthreads==1) ref_wtime = Fprof(ii)%wall_time
      para_eff = 100 * ref_wtime / ( Fprof(ii)%wall_time * Fprof(ii)%nthreads)
      write(std_out,ofmt)&
@@ -818,7 +818,7 @@ subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
 &       Fprof(ii)%nthreads,"(",NINT(para_eff),"%)",ncalls,mabs_err,mean_err
      check_mabs_err = MAX(check_mabs_err, mabs_err)
      check_mean_err = MAX(check_mean_err, mean_err)
-   else 
+   else
      write(nafmt,*)"(a",field1_w,",2x,a)"
      write(std_out,nafmt)"- "//Fprof(ii)%test_name,"   N/A        N/A        N/A     N/A       N/A        N/A"
    end if
@@ -827,7 +827,7 @@ subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
  if (ref_lib>0) then
    write(std_out,'(/,2(a,es9.2),2a)')&
 &    " Consistency check: MAX(Max_|Err|) = ",check_mabs_err,&
-&    ", Max(<|Err|>) = ",check_mean_err,", reference_lib: ",TRIM(Fprof(ref_lib)%test_name) 
+&    ", Max(<|Err|>) = ",check_mean_err,", reference_lib: ",TRIM(Fprof(ref_lib)%test_name)
  end if
  write(std_out,*)
 
@@ -872,7 +872,7 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
 !scalars
  integer,intent(in) :: cplex,isign
  character(len=500),intent(out) :: header
- type(FFT_test_t),intent(inout) :: Ftest 
+ type(FFT_test_t),intent(inout) :: Ftest
  type(FFT_prof_t),intent(out) :: Ftprof
 
 !Local variables-------------------------------
@@ -889,7 +889,7 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
  real(dp),allocatable :: fofg(:,:),fofr(:)
  complex(dpc),allocatable :: results(:),ctmp(:)
 
-! ********************************************************************* 
+! *********************************************************************
 
  test_name = name_of(Ftest)
  n1=Ftest%ngfft(1)
@@ -929,16 +929,16 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
        end do
      end do
    end do
- 
- else ! init fofr 
+
+ else ! init fofr
    if (cplex==2) then
      call calc_eigr(g0,Ftest%nfft,Ftest%ngfft,fofr)
-   else if (cplex==1) then  
+   else if (cplex==1) then
      ABI_MALLOC(ctmp,(Ftest%nfft))
      call calc_ceigr(g0,Ftest%nfft,nspinor1,Ftest%ngfft,ctmp)
      fofr = REAL(ctmp)
      ABI_FREE(ctmp)
-   else 
+   else
      write(msg,'(a,i0)')" Wrong cplex: ",cplex
      MSG_ERROR(msg)
    end if
@@ -955,7 +955,7 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
    call fourdp(cplex,fofg,fofr,isign,Ftest%MPI_enreg,Ftest%nfft,Ftest%ngfft,Ftest%paral_kgb,0)
    !
    ! Store results at the first call.
-   if (icall==1) then 
+   if (icall==1) then
      if (isign==1) then
        if (cplex==1) then
          results = DCMPLX(fofr, zero)
@@ -1033,7 +1033,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  integer,parameter :: g0(3) = (/1,-2,1/)
  integer :: gg(3)
  complex(dpc),allocatable :: ffc(:),ggc(:),results(:)
-! ********************************************************************* 
+! *********************************************************************
 
  test_name = name_of(Ftest)
 
@@ -1075,7 +1075,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
        end do
      end do
    end do
- else 
+ else
    MSG_ERROR("Wrong isign")
  end if
 
@@ -1099,14 +1099,14 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
      call fftbox_execute(plan,ffc,ggc)
      ! Store results at the first call.
      if (icall==1) results = ggc
-   end do 
+   end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
      call fftbox_execute(plan,ffc)
      ! Store results at the first call.
      if (icall==1) results = ffc
-   end do 
+   end do
  case default
    write(msg,'(a,i0)')" Wrong value for inplace= ",inplace
    MSG_ERROR(msg)
@@ -1180,12 +1180,12 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
 !arrays
  integer,parameter :: g0(3)=(/1,-1,2/) !g0(3)=(/1,0,0/)
  integer :: gg(3)
- integer,allocatable :: gbound_in(:,:),gbound_out(:,:) 
- real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:) 
- real(dp),allocatable :: fofr_4(:,:,:,:),fofg_out(:,:) 
+ integer,allocatable :: gbound_in(:,:),gbound_out(:,:)
+ real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:)
+ real(dp),allocatable :: fofr_4(:,:,:,:),fofg_out(:,:)
  complex(dpc),allocatable :: results(:)
 
-! ********************************************************************* 
+! *********************************************************************
 
  test_name = name_of(Ftest)
 
@@ -1322,7 +1322,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
  case default
    write(msg,'(a,i0)')" Wrong value for option_fourwf: ",option_fourwf
    MSG_ERROR(msg)
- end select 
+ end select
 
  call cwtime(cpu_time,wall_time,gflops,"start")
 
@@ -1335,7 +1335,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
 &    Ftest%paral_kgb,tim0,weight_r,weight_i)
    !
    ! Store results at the first call.
-   if (icall==1) then 
+   if (icall==1) then
      select case (option_fourwf)
      case (0)
        !! for option==0, fofgin(2,npwin*ndat)=holds input wavefunction in G sphere;
@@ -1379,7 +1379,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
              end do
            end do
          end do
-       else 
+       else
          MSG_ERROR("Wrong cplex")
        end if
 
@@ -1404,7 +1404,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
        !    write(Ftest%ngfft(7),*)ipw,dat,results(idx)
        !  end do
        !end do
-     end select 
+     end select
    end if
  end do
 
@@ -1437,7 +1437,7 @@ end subroutine time_fourwf
 !! INPUTS
 !!   ncalls=Number of calls to be used.
 !!
-!! SIDE EFFECTS 
+!! SIDE EFFECTS
 !!  NCALLS_FOR_TEST = ncalls
 !!
 !! PARENTS
@@ -1464,7 +1464,7 @@ subroutine fftprof_ncalls_per_test(ncalls)
 !scalars
  integer,intent(in) :: ncalls
 
-! ********************************************************************* 
+! *********************************************************************
 
  NCALLS_FOR_TEST = ncalls
 
@@ -1513,7 +1513,7 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
  character(len=500),intent(out) :: header
  type(FFT_test_t),intent(inout) :: Ftest
  type(FFT_prof_t),intent(out) :: Ftprof
-!arrays 
+!arrays
  integer,intent(in) :: osc_gvec(3,osc_npw)
 
 !Local variables-------------------------------
@@ -1529,7 +1529,7 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
 !arrays
  !integer,parameter :: g1(3)=(/1,1,2/),g2(3)=(/-1,-2,-1/)
  integer,parameter :: g1(3)=(/-1,0,0/),g2(3)=(/1,0,0/)
- integer,allocatable :: gbound(:,:) 
+ integer,allocatable :: gbound(:,:)
  integer,allocatable :: ktabr1(:),ktabr2(:)
  integer,allocatable :: igfftg0(:)
  real(dp),parameter :: spinrot1(4)=(/one,zero,zero,one/),spinrot2(4)=(/one,zero,zero,one/)
@@ -1538,7 +1538,7 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
  complex(gwpc),allocatable :: rhotwg(:)
  complex(gwpc),allocatable :: wfn1(:),wfn2(:)
 
-! ********************************************************************* 
+! *********************************************************************
 
  test_name = name_of(Ftest)
 
@@ -1571,8 +1571,8 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
  ABI_MALLOC(ktabr2,(nfft))
 
  do ifft=1,nfft
-   ktabr1(ifft)= ifft 
-   ktabr2(ifft)= ifft 
+   ktabr1(ifft)= ifft
+   ktabr2(ifft)= ifft
  end do
 
  ABI_MALLOC(igfftg0,(osc_npw*map2sphere))
@@ -1585,7 +1585,7 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
  end if
 
  ABI_MALLOC(gbound,(2*Ftest%mgfft+8,2*use_padfft))
- if (use_padfft==1) then  
+ if (use_padfft==1) then
    call sphereboundary(gbound,istwfk1,osc_gvec,Ftest%mgfft,osc_npw)
  end if
 
@@ -1690,7 +1690,7 @@ subroutine time_fftu(Ftest,isign,header,Ftprof)
  integer :: gg(3)
  integer,allocatable :: kg_k(:,:),gbound(:,:)
  complex(dpc),allocatable :: ug(:),results(:),ur(:)
-! ********************************************************************* 
+! *********************************************************************
 
  test_name = name_of(Ftest)
 
@@ -1719,8 +1719,8 @@ subroutine time_fftu(Ftest,isign,header,Ftprof)
  !
  istwf_k = Ftest%istwf_k
  !istwf_k = 1 ! Do not use istwf_k trick here
- call get_kg(Ftest%kpoint,istwf_k,Ftest%ecut,Ftest%gmet,npw_k,kg_k) 
-                                                                     
+ call get_kg(Ftest%kpoint,istwf_k,Ftest%ecut,Ftest%gmet,npw_k,kg_k)
+
  ABI_MALLOC(gbound,(2*Ftest%mgfft+8,2))
  call sphereboundary(gbound,istwf_k,kg_k,Ftest%mgfft,npw_k)
 
@@ -1767,7 +1767,7 @@ subroutine time_fftu(Ftest,isign,header,Ftprof)
      end do
    end do
 
- else 
+ else
    write(msg,'(a,i0)')" Wrong isign= ",isign
    MSG_ERROR(msg)
  end if
@@ -1867,9 +1867,9 @@ subroutine prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin,rprimd,n
  integer :: ngfft_ecut(18,necut)
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
- real(dp),allocatable :: prof_res(:,:,:) 
+ real(dp),allocatable :: prof_res(:,:,:)
 
-! ********************************************************************* 
+! *********************************************************************
 
  nsetups = SIZE(fft_setups,DIM=2)
  ecut_list = arth(ecut_arth(1),ecut_arth(2),necut)
@@ -1903,7 +1903,7 @@ subroutine prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin,rprimd,n
 
      call time_fourdp(Ftest,isign,cplex,header,Ftprof)
 
-     prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls 
+     prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls
      prof_res(2,iec,set) = Ftprof%wall_time/Ftprof%ncalls
      !
      ! Save FFT divisions.
@@ -1972,7 +1972,7 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 
 !Local variables-------------------------------
 !scalars
- integer :: iec,nsetups,set,funt,istwf_k   
+ integer :: iec,nsetups,set,funt,istwf_k
  type(FFT_test_t) :: Ftest
  type(FFT_prof_t) :: Ftprof
  character(len=500) :: msg,frm,header
@@ -1980,9 +1980,9 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 !arrays
  integer :: ngfft_ecut(18,necut)
  real(dp) :: ecut_list(necut)
- real(dp),allocatable :: prof_res(:,:,:) 
+ real(dp),allocatable :: prof_res(:,:,:)
 
-! ********************************************************************* 
+! *********************************************************************
 
  nsetups = SIZE(fft_setups,DIM=2)
  ecut_list = arth(ecut_arth(1),ecut_arth(2),necut)
@@ -2017,7 +2017,7 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 
      call time_fourwf(Ftest,cplex,option,header,Ftprof)
 
-     prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls 
+     prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls
      prof_res(2,iec,set) = Ftprof%wall_time/Ftprof%ncalls
      !
      ! Save FFT divisions.
@@ -2097,9 +2097,9 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
  integer :: ngfft_ecut(18,necut)
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
- real(dp),allocatable :: prof_res(:,:,:) 
+ real(dp),allocatable :: prof_res(:,:,:)
 
-! ********************************************************************* 
+! *********************************************************************
 
  nsetups = SIZE(fft_setups,DIM=2)
  ecut_list = arth(ecut_arth(1),ecut_arth(2),necut)
@@ -2140,7 +2140,7 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
 
      call time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftprof)
 
-     prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls 
+     prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls
      prof_res(2,iec,set) = Ftprof%wall_time/Ftprof%ncalls
      !
      ! Save FFT divisions.
@@ -2202,16 +2202,16 @@ function empty_cache(kbsize) result(fake)
 !scalars
  integer :: sz
 !arrays
- real(dp),allocatable :: chunk(:) 
+ real(dp),allocatable :: chunk(:)
 
-! ********************************************************************* 
+! *********************************************************************
 
  if (kbsize <= 0) RETURN
 
  sz = (100. * kbsize) / dp
 
  ABI_MALLOC(chunk,(sz))
- call random_number(chunk) 
+ call random_number(chunk)
  fake = SUM(chunk) ! Need a result, otherwise some smart compiler could skip the call.
  ABI_FREE(chunk)
 

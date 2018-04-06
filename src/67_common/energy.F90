@@ -15,7 +15,7 @@
 !! of ehart, enxc, and eei.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,13 +134,13 @@
 !! CHILDREN
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_vn,fftpac,fourdp,gpu_finalize_ffnl_ph3d,gpu_update_ffnl_ph3d
-!!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,mag_constr
-!!      make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi,mkrho,nonlop
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawmknhat
-!!      pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
+!!      hartre,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
+!!      mag_constr,make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi
+!!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxc,rhohxcpositron,symrhoij,timab
-!!      transgrid,xmpi_sum
+!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,symrhoij,timab
+!!      transgrid,xcdata_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -167,7 +167,10 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_errors
  use m_xmpi
  use m_gemm_nonlop
+ use m_xcdata
 
+ use m_geometry,         only : metric
+ use m_kg,               only : mkkin 
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
@@ -181,6 +184,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
+ use m_cgtools,           only : dotprod_vn
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -188,10 +192,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 #define ABI_FUNC 'energy'
  use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_53_spacepar
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_65_paw
@@ -254,9 +256,11 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,usetimerev,with_vxctau
  logical :: wvlbigdft=.false.
+ logical :: non_magnetic_xc
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
+ type(xcdata_type) :: xcdata
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
@@ -276,6 +280,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+! Create variable for non_magnetic_xc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (dtset%usekden/=0)
@@ -326,21 +333,23 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+     call xcdata_init(xcdata,dtset=dtset)
      ABI_ALLOCATE(kxc,(1,nkxc))
-!    to be adjusted for the call to rhohxc
+!    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d,taug=taug,taur=taur, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
-       call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc, &
+       call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,rprimd,strsxc, &
-&       usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
-&       electronpositron=electronpositron,taug=taug,taur=taur, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
+&       electronpositron=electronpositron,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      end if
      ABI_DEALLOCATE(kxc)
@@ -605,7 +614,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !    Compute kinetic energy
      ABI_ALLOCATE(kinpw,(npw_k))
-!     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !    Compute kinetic energy of each band

@@ -1,13 +1,13 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/linvmat 
+!!****f* ABINIT/linvmat
 !! NAME
 !!  linvmat
 !!
 !! FUNCTION
-!!  inverts real matrix inmat 
+!!  inverts real matrix inmat
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DJA)
+!! Copyright (C) 1998-2018 ABINIT group (DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,13 +19,13 @@
 !!  nam=comment specifiying the input matrix (to be printed in output)
 !!  option=how to invert inmat
 !!      option=1 or 3 add charge bath to matrix and add gam for inversion
-!!      option=2 simply invert matrix 
-!!  gam=gamma added to inmat before inversion in case charge bath is used (allows inversion of otherwise 
+!!      option=2 simply invert matrix
+!!  gam=gamma added to inmat before inversion in case charge bath is used (allows inversion of otherwise
 !!               singular matrix)
-!!  prtvol=controls output to files (see subroutine lprtmat) 
+!!  prtvol=controls output to files (see subroutine lprtmat)
 !!
 !! OUTPUT
-!!  oumat(nnat,nnat)=inverse of inmat, nnat=nat+1 for option=1 or option=3; nnat=nat for option=2 
+!!  oumat(nnat,nnat)=inverse of inmat, nnat=nat+1 for option=1 or option=3; nnat=nat for option=2
 !!
 !! PARENTS
 !!      pawuj_red,pawuj_utils
@@ -51,7 +51,6 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'linvmat'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw, except_this_one => linvmat
 !End of the abilint section
 
@@ -84,20 +83,20 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
  if (option==1.or.option==3) then
    write(bastrin,'(a)')'+ charge bath '
    write(gastrin,'(a,d10.2,a)')'+ gamma  (=',gam,') '
- else 
+ else
    write(bastrin,'(a)')''
    write(gastrin,'(a)')''
  end if
- 
+
  write(message,fmt='(a)')' matrix '//trim(nam)
  call lprtmat(message,1,prtvol,inmat,nat)
 
  if (option==1.or.option==3) then
    call blow_pawuj(inmat,nat,oumat)
-   write(message,fmt='(a,a)')' ',trim(nam)//trim(bastrin) 
+   write(message,fmt='(a,a)')' ',trim(nam)//trim(bastrin)
    call lprtmat(message,1,prtvol,oumat,nat+1)
    oumat=oumat+gam
-   write(message,fmt='(a,a)')' ',trim(nam)//trim(bastrin) ! //trim(gastrin) 
+   write(message,fmt='(a,a)')' ',trim(nam)//trim(bastrin) ! //trim(gastrin)
    call lprtmat(message,1,prtvol,oumat-gam,nat+1)
    nnat=nat+1
  else
@@ -105,8 +104,8 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
    oumat=inmat
    oumat(1,1)=inmat(1,1)
  end if
- 
- 
+
+
  ABI_ALLOCATE(hma,(nnat,nnat))
  ABI_ALLOCATE(work,(nnat))
  ABI_ALLOCATE(ipvt,(nnat))
@@ -119,7 +118,7 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
    call wrtout(ab_out,message,'COLL')
    return
  end if
- 
+
  call dgetri(nnat,hma,nnat,ipvt,work,nnat,info)
  oumat=hma(:,:)
 
@@ -138,19 +137,19 @@ end subroutine linvmat
 !!  lprtmat
 !!
 !! FUNCTION
-!!  prints out the real matrix mmat 
+!!  prints out the real matrix mmat
 !!
 !! INPUTS
 !!  mmat(nat,nat)=matrix to be printed
-!!  nat=dimension of mmat 
-!!  prtvol specifies the volume of printing 
+!!  nat=dimension of mmat
+!!  prtvol specifies the volume of printing
 !!   3: print the whole matrix
 !!   2: print the first line
 !!   1: do not print anything
 !!  chan specifies the output files
-!!   1: output only to std_out 
+!!   1: output only to std_out
 !!   2: output also to ab_out
-!!  commnt=comment specifying matirix 
+!!  commnt=comment specifying matirix
 !!
 !! OUTPUT
 !!  oumat(nat+1,nat+1)=inverse of inmat
@@ -191,7 +190,7 @@ subroutine lprtmat(commnt,chan,prtvol,mmat,nat)
    write(message,fmt='(a)') trim(commnt)
    call wrtout(std_out,message,'COLL')
    call prmat(mmat,nat,nat,nat,std_out)
-   if (chan==2) then 
+   if (chan==2) then
      call wrtout(ab_out,message,'COLL')
      call prmat(mmat,nat,nat,nat,ab_out)
    end if
@@ -220,9 +219,9 @@ subroutine lprtmat(commnt,chan,prtvol,mmat,nat)
 end subroutine lprtmat
 !!***
 
-!!****f* ABINIT/lcalcu 
+!!****f* ABINIT/lcalcu
 !! NAME
-!!  lcalcu 
+!!  lcalcu
 !!
 !! FUNCTION
 !!  prints out real the real matrice mmat
@@ -232,15 +231,15 @@ end subroutine lprtmat
 !!  natom=number of atoms
 !!  rprimd(3,3)=lattic vectors of unit cell
 !!  xred(3,natom)=positions of atoms
-!!  chi(natom)=full response of atoms due to shift on atom pawujat 
+!!  chi(natom)=full response of atoms due to shift on atom pawujat
 !!  chi0(natom)= response of atoms due to shift on atom pawujat
 !!  pawujat=specifies on which atom the potential shift was done
 !!  prtvol=controls output to files (see subroutine lprtmat)
-!!  gam=gamma to be used for inversion of matrices (see subroutine livmat) 
+!!  gam=gamma to be used for inversion of matrices (see subroutine livmat)
 !!  opt=wether to use charge bath (1 or 3) or not (else)
 !!
 !! OUTPUT
-!!  ures=resulting U (in eV) on atom pawujat 
+!!  ures=resulting U (in eV) on atom pawujat
 !!
 !! PARENTS
 !!      pawuj_det
@@ -255,11 +254,12 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
  use defs_parameters
  use m_profiling_abi
 
+ use m_geometry, only : ioniondist
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lcalcu'
- use interfaces_41_geometry
  use interfaces_65_paw, except_this_one => lcalcu
 !End of the abilint section
 
@@ -292,7 +292,7 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
  end if
 
  if (present(prtvol)) then
-   prtvoll=prtvol 
+   prtvoll=prtvol
  else
    prtvoll=1
  end if
@@ -334,9 +334,9 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
 end subroutine lcalcu
 !!***
 
-!!****f* ABINIT/pawuj_free 
+!!****f* ABINIT/pawuj_free
 !! NAME
-!!  pawuj_free 
+!!  pawuj_free
 !!
 !! FUNCTION
 !!   deallocate pawuj stuff
@@ -395,3 +395,62 @@ subroutine pawuj_free(dtpawuj)
 end subroutine pawuj_free
 !!***
 
+!!****f* ABINIT/blow_pawuj
+!!
+!! NAME
+!! blow_pawuj
+!!
+!! FUNCTION
+!! This subroutine reads a real nxn matrice and appends lines n+1 and clumn n+1 containing
+!! the sum of the lines
+!!
+!! INPUTS
+!!  mat(nj,nj) matrix to be completed
+!!
+!! OUTPUT
+!!  matt(nj+1,nj+1) completed matrix
+!!
+!! PARENTS
+!!      pawuj_utils
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine blow_pawuj(mat,nj,matt)
+
+ use defs_basis
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'blow_pawuj'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)        :: nj
+!arrays
+ real(dp),intent(in)       :: mat(nj,nj)
+ real(dp),intent(out)      :: matt(nj+1,nj+1)
+
+!Local variables-------------------------------
+!scalars
+ integer                   :: ii
+!arrays
+
+! *************************************************************************
+
+ matt(1:nj,1:nj)=mat
+ do  ii = 1,nj
+   matt(ii,nj+1)=-sum(matt(ii,1:nj))
+ end do
+
+ do  ii = 1,nj+1
+   matt(nj+1,ii)=-sum(matt(1:nj,ii))
+ end do
+
+end subroutine blow_pawuj
+!!***

@@ -9,7 +9,7 @@
 !! filenames, checking of input data, etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,7 +21,7 @@
 !!  ecut_eff=effective energy cutoff (hartree) for planewave basis sphere
 !!  ecutc_eff=- PAW only - effective energy cutoff (hartree) for the coarse grid
 !!  natom=number of atoms
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngfftc(18)=contain all needed information about 3D FFT for the coarse grid
 !!  nkpt=number of k points
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -70,13 +70,14 @@ subroutine setup1(acell,amass,amu,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,   only : mkrdim, metric
+ use m_kg,         only : getcut
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup1'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

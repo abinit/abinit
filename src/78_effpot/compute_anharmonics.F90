@@ -10,7 +10,7 @@
 !!
 !! INPUTS
 !! filenames(17) = path with all name files
-!! inp <type(multibinit_dataset_type)> = datatype with all the input variables
+!! inp <type(multibinit_dtset_type)> = datatype with all the input variables
 !! comm=MPI communicator
 !!
 !! OUTPUT
@@ -47,7 +47,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_anharmonics_terms
  use m_effective_potential
  use m_effective_potential_file
- use m_multibinit_dataset, only : multibinit_dataset_type
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_strain
  use m_fstrings, only : itoa,int2char4,ftoa
 
@@ -65,7 +65,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   integer, intent(in) :: comm
   character(len=fnlen),intent(in) :: filenames(17)
   type(effective_potential_type),target, intent(inout) :: eff_pot
-  type(multibinit_dataset_type),intent(in) :: inp
+  type(multibinit_dtset_type),intent(in) :: inp
  !arrays
 
  !Local variables-------------------------------
@@ -223,7 +223,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
   have_strain = 0
 
-  write(message,'(a)') ' Strains available after reading the files after:'
+  write(message,'(a)') ' Strains available after reading the files:'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
   do ii=1,size(eff_pots)
@@ -315,7 +315,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   end do
 
 ! check if strain exist
-  if(all(have_strain==zero).and.inp%strcpling /= 2) then
+  if(all(have_strain==0).and.inp%strcpling /= 2) then
       write(message, '(6a)' )&
 &    ' WARNING: There is no file corresponding to strain',&
 &    ' to compute 3rd order derivatives.',ch10,&
@@ -431,15 +431,15 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
         delta1 = zero
         delta2 = zero
         do jj=1,size(eff_pots)
-          if (effpot_strain(jj)%direction==ii.and.(effpot_strain(jj)%direction/=zero))then
-            if (delta1==zero) then
+          if (effpot_strain(jj)%direction==ii.and.(effpot_strain(jj)%direction/=0))then
+            if (abs(delta1)<tol16) then
               delta1 = jj 
             else
               delta2 = jj
             end if
           end if
         end do
-        if (delta1/=0.and.delta1/=0)then
+        if (abs(delta1)>tol16.and.abs(delta1)>tol16)then
  !        check if delta1 < delta2, in this case, inverse delta1 and delta2
           if (effpot_strain(int(delta1))%delta < effpot_strain(int(delta2))%delta) then
             delta = delta1
@@ -448,15 +448,15 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           end if
 !         Compute strain phonon-coupling
           phonon_strain(ii)%nrpt =  nrpt
-          ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
+          ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
           ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
           phonon_strain(ii)%atmfrc = zero
           phonon_strain(ii)%cell =  eff_pots(int(delta1))%harmonics_terms%ifcs%cell
 
           do irpt=1,phonon_strain(ii)%nrpt
-            phonon_strain(ii)%atmfrc(:,:,:,:,:,irpt) =&
-&           (eff_pots(int(delta1))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt)&
-&          - eff_pots(int(delta2))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt)) / &
+            phonon_strain(ii)%atmfrc(:,:,:,:,irpt) =&
+&           (eff_pots(int(delta1))%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)&
+&          - eff_pots(int(delta2))%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)) / &
 &            (2 * abs(effpot_strain(int(delta1))%delta))
           end do
 

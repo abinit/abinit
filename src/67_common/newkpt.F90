@@ -12,7 +12,7 @@
 !! or input as argument.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, ZL, AR, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, ZL, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +70,7 @@
 !!  nband2(nkpt2*nsppol2)=desired number of bands at each k point
 !!  ngfft1(18)=all needed information about 3D FFT, for the input wf file
 !!  ngfft2(18)=all needed information about 3D FFT, for the output wf file
-!!             see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!             see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt1, nkpt2=number of k points in each set
 !!  npwarr1(nkpt1)=array holding npw for each k point (input wf file).
 !!  npwarr2(nkpt2)=array holding npw for each k point (output wf file).
@@ -153,6 +153,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  use m_xmpi
 
  use m_pptools,    only : prmat
+ use m_occ,        only : pareigocc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -162,7 +163,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_56_io_mpi
- use interfaces_61_occeig
  use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section
@@ -542,7 +542,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    write(std_out,*)' newkpt: mkmem2=',mkmem2
 !    stop
 !    ENDDEBUG
-     
+
      call timab(783,2,tsec)
      call timab(784,1,tsec)
 
@@ -610,7 +610,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  end do ! isppol2
 
  call timab(786,1,tsec)
- 
+
  if(xmpi_paral==1)then
 !  Transmit eigenvalues (not yet occupation numbers)
 !  newkpt.F90 is not yet suited for RF format

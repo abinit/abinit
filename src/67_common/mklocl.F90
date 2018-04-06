@@ -16,7 +16,7 @@
 !!                second derivative of E wrt xred  (only with reciprocal space computations)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms.
 !!  option= (see above)
@@ -95,7 +95,8 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  use m_profiling_abi
  use m_errors
 
- use m_pawtab, only : pawtab_type
+ use m_geometry,   only : xred2xcart
+ use m_pawtab,     only : pawtab_type
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -106,7 +107,6 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl'
- use interfaces_41_geometry
  use interfaces_67_common, except_this_one => mklocl
 !End of the abilint section
 
@@ -136,7 +136,9 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: xcart(:,:)
+#if defined HAVE_BIGDFT
  real(dp),pointer :: rhor_ptr(:,:)
+#endif
 
 ! *************************************************************************
 

@@ -11,7 +11,7 @@
 !! Updates positions, velocities and forces
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,11 +71,12 @@ subroutine pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
+ use m_geometry,    only : xcart2xred, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_moldyn'
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_moldyn
 !End of the abilint section
 
@@ -168,7 +169,7 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
  ihist_prev4 = abihist_findIndex(hist,-4)
  ihist_prev5 = abihist_findIndex(hist,-5)
  ihist_next  = abihist_findIndex(hist,+1)
- 
+
  fcart_cur => hist%fcart(:,:,ihist)
  if (itime==2) fcart_prev  => hist%fcart(:,:,ihist_prev4)
  if (itime==3) fcart_prev2 => hist%fcart(:,:,ihist_prev5)
@@ -410,7 +411,7 @@ end subroutine pred_moldyn
 !! of forces, velocity and viscosity
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

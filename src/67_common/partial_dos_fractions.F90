@@ -9,7 +9,7 @@
 !!  2: should be able to choose certain atoms or atom types, slabs of space...
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MVer,MB,MG)
+!! Copyright (C) 1998-2018 ABINIT group (MVer,MB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,6 +84,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  use m_special_funcs, only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_cgtools,       only : cg_getspin
  use m_epjdos,        only : recip_ylm, epjdos_t
+ use m_gsphere,       only : getkpgnorm
+ use m_kg,            only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -7,7 +7,7 @@
 !! Do various initializations for the positron lifetime calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  nhat(nfftf,nspden*usepaw)= -PAW only- compensation density
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  npwarr(nkpt)=number of planewaves in basis and on boundary for each k
 !!  nvresid(nfftf,nspden)=array for the residual of the density/potential
 !!  optres=0 if the potential residual has to be used for forces corrections
@@ -135,7 +135,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_pawfgr,   only : pawfgr_type
  use m_fock,     only : fock_type
-
+ use m_kg,       only : getcut
  use defs_wvltypes, only : wvl_data
 
 !This section has been created automatically by the script Abilint (TD).
@@ -144,7 +144,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 #define ABI_FUNC 'setup_positron'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => setup_positron
@@ -554,7 +553,7 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gmet,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qphon,rhog_ep,&
+     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
 &     electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else

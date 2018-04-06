@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (Mver)
+!! Copyright (C) 2005-2018 ABINIT group (Mver)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,12 +69,12 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf
+ use m_geometry,   only : xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_current'
- use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_67_common, except_this_one => spin_current
@@ -146,7 +146,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !write(std_out,*) ' dtset%ngfft = ', dtset%ngfft
 !write(std_out,*) ' hdr%istwfk = ', hdr%istwfk
 
-!===================== init and checks ============================  
+!===================== init and checks ============================
 !check if nspinor is 2
  if (dtset%nspinor /= 2) then
    write(message, '(a,i0)' )' nspinor must be 2, but it is ',dtset%nspinor
@@ -178,10 +178,10 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  spinor_sym = (/'u','d'/)
  realimag = (/'Re','Im'/)
 
- 
+
  write(std_out,*) ' psps%mpsang,psps%mpssoang ', psps%mpsang,psps%mpssoang
 
-!======================= main code ================================  
+!======================= main code ================================
 !-----------------------------------------------------------------------------------------
 !-----------------------------------------------------------------------------------------
 !first get normal contribution to current, as psi tau dpsidr + dpsidr tau psi
@@ -195,7 +195,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  ikg = 0
 !init occupation/band counter
  iocc = 1
- 
+
 !rspace point, cartesian direction, spin pol=x,y,z
  ABI_ALLOCATE(spincurrent,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),3,3))
  spincurrent = zero
@@ -248,12 +248,12 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
 !    multiply psi by - i 2 pi G
      do ig=1,npw
-       gpsi(1,ig,:,1) =  two_pi * kgcart(1,ig)*psi(2,ig,:) 
-       gpsi(2,ig,:,1) = -two_pi * kgcart(1,ig)*psi(1,ig,:) 
-       gpsi(1,ig,:,2) =  two_pi * kgcart(2,ig)*psi(2,ig,:) 
-       gpsi(2,ig,:,2) = -two_pi * kgcart(2,ig)*psi(1,ig,:) 
-       gpsi(1,ig,:,3) =  two_pi * kgcart(3,ig)*psi(2,ig,:) 
-       gpsi(2,ig,:,3) = -two_pi * kgcart(3,ig)*psi(1,ig,:) 
+       gpsi(1,ig,:,1) =  two_pi * kgcart(1,ig)*psi(2,ig,:)
+       gpsi(2,ig,:,1) = -two_pi * kgcart(1,ig)*psi(1,ig,:)
+       gpsi(1,ig,:,2) =  two_pi * kgcart(2,ig)*psi(2,ig,:)
+       gpsi(2,ig,:,2) = -two_pi * kgcart(2,ig)*psi(1,ig,:)
+       gpsi(1,ig,:,3) =  two_pi * kgcart(3,ig)*psi(2,ig,:)
+       gpsi(2,ig,:,3) = -two_pi * kgcart(3,ig)*psi(1,ig,:)
      end do
 
 !    loop over spinorial components
@@ -293,7 +293,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !    get 3 pauli matrix contributions to the current: x,y,z, cart dir, spin dir
      do icartdir=1,3
 
-!      x pauli spin matrix 
+!      x pauli spin matrix
 !      sigma_x =  | 0   1 |
 !      | 1   0 |
        spincurrent(:,:,:,icartdir,1) =  spincurrent(:,:,:,icartdir,1) + prefact_nk * &
@@ -327,11 +327,11 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 &       + psi_r(2,:,:,:,2)*dpsidr(2,:,:,:,2,icartdir))
      end do ! end icartdir
 
-!    
+!
 !    accumulate non local density matrix in real space
 !    NOTE: if we are only using the local part of the current, this becomes the
 !    density spinor matrix! (much lighter to calculate) rho(r, sigma, sigmaprime)
-!    
+!
      do ispinor=1,dtset%nspinor
        do i3=1,dtset%ngfft(3)
          do i2=1,dtset%ngfft(2)
@@ -352,9 +352,9 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !              do i2p=1,dtset%ngfft(2)
 !              do i1p=1,dtset%ngfft(1)
 !              irealsp_p = i1p + (i2p-1)*dtset%ngfft(1) + (i3p-1)*dtset%ngfft(2)*dtset%ngfft(1)
-!              
+!
 !              NOTE : sign changes in second terms below because rho = psi*(r) psi(rprime)
-!              
+!
 !              density_matrix(1,irealsp,ispinor,irealsp_p,ispinorp) = &
 !              &           density_matrix(1,irealsp,ispinor,irealsp_p,ispinorp) + &
 !              &           prefact_nk * (psi_r(1,i1,i2,i3,ispinor)*psi_r(1,i1p,i2p,i3p,ispinorp)&
@@ -368,7 +368,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !              end do ! end irealspprime
 
              end do !end ispinorp do
-             
+
            end do
          end do
        end do ! end irealsp
@@ -398,7 +398,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !prefactor is 1/2 * 1/2 * 2 Re(.):
 !1/2 from the formula for the current
 !1/2 from the use of the normalized Pauli matrices
-!2 from the complex conjugate part 
+!2 from the complex conjugate part
 !total = 1/2
  spincurrent = half * spincurrent
 
@@ -410,7 +410,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
        position_op(:,i1,i2,i3) = matmul(hdr%rprimd,(/i1-one,i2-one,i3-one/))&
 &       /(/dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3)/)
      end do
-   end do 
+   end do
  end do
 
 !-----------------------------------------------------------------------------------------
@@ -443,7 +443,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
 !multiply by density (or density matrix for nonlocal case)
 !and add to spin current
- 
+
 
 
  ABI_DEALLOCATE(density)
@@ -473,7 +473,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
    if (open_file(filnam,message,newunit=spcur_unit,status='unknown') /= 0) then
      MSG_ERROR(message)
    end if
-   
+
 !  print header
    write (spcur_unit,'(a)')          '#'
    write (spcur_unit,'(a)')          '#  Xcrysden format file'
@@ -492,7 +492,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
          write (spcur_unit,'(a, 3(E10.3),2x, 3(E20.10))') 'X ', &
 &         position_op(:, i1, i2, i3), spincurrent(i1, i2, i3, :, ispindir)*rescale_current
        end do
-     end do 
+     end do
    end do
    close (spcur_unit)
 
@@ -528,7 +528,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
          write (spcur_unit,'(a,3(I5,1x))') '#  fft grid is ', dtset%ngfft(1), dtset%ngfft(2),   dtset%ngfft(3)
          write (spcur_unit,'(a,a,a)')    '# ', spin_symbol(ispindir), '-spin contribution '
          write (spcur_unit,'(a,a,a)')    '# ', spinor_sym(ispinor)//spinor_sym(ispinorp), '-spin element of the spinor 2x2 matrix '
-         
+
          write (spcur_unit,'(a,a)')      '#  cart x     *  cart y    *  cart z    ***',&
 &         ' up-up component    *  up-down           * down-up          * down-down          '
 
@@ -539,17 +539,17 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 &         datagrid,hdr%rprimd,(/zero,zero,zero/), dtset%natom, dtset%ntypat, &
 &         dtset%typat, xcart, dtset%znucl, spcur_unit,realrecip)
 
-!        
+!
 !        NOTE: have chosen actual dims of grid (n123) instead of fft box, for which n45
 !        may be different
-!        
+!
 !        do i3_dum=1,dtset%ngfft(3)+1
-!        i3 = mod(i3_dum-1,dtset%ngfft(3)) + 1 
+!        i3 = mod(i3_dum-1,dtset%ngfft(3)) + 1
 !        do i2_dum=1,dtset%ngfft(2)+1
-!        i2 = mod(i2_dum-1,dtset%ngfft(2)) + 1 
+!        i2 = mod(i2_dum-1,dtset%ngfft(2)) + 1
 !        do i1_dum=1,dtset%ngfft(1)+1
-!        i1 = mod(i1_dum-1,dtset%ngfft(1)) + 1 
-!        
+!        i1 = mod(i1_dum-1,dtset%ngfft(1)) + 1
+!
 !        irealsp = i1 + (i2-1)*dtset%ngfft(1) + (i3-1)*dtset%ngfft(2)*dtset%ngfft(1)
 !        write (spcur_unit,'(E20.10,1x)')&
 !        &      vso_realspace(icplex,irealsp,  ispinor, ispinorp, ispindir)

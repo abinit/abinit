@@ -7,7 +7,7 @@
 !! (To be described ...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (YP)
+!! Copyright (C) 2017-2018 ABINIT group (YP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -198,7 +198,7 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
 
  return
 
-  10 continue
+ 10 continue
 
  if ( ierr /= 0 ) then
    write(msg,'(a,a,a,i8)') "Error writing pseudopotential information", &

@@ -7,7 +7,7 @@
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVeithen,MB)
+!! Copyright (C) 2002-2018 ABINIT group (MVeithen,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@
 !!  nfft  = (effective) number of FFT grid points (for this processor)
 !!  nkpt  = number of k points
 !!  nkpt3 = number of k-points in the full BZ
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  nneigh  = total number of neighbours required to evaluate the finite
 !!          difference formula
 !!  nspinor = number of spinorial components of the wavefunctions
@@ -106,6 +106,8 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_hdr
 
  use m_ioarr,    only : read_rhor
+ use m_kg,       only : getph
+ use m_cgtools,  only : dotprod_vn 
  use m_pawrhoij, only : pawrhoij_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -116,7 +118,6 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_72_response
@@ -424,7 +425,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    end if  ! i2pert <= natom
 
                    call status(counter,dtfil%filstat,iexit,level,'call hartre   ')
-                   call hartre(cplex,gmet,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,dtset%qptn,rho2g1,vhartr1)
+                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rho2g1,rprimd,vhartr1,qpt=dtset%qptn)
                    option=1
                    call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkvxc   ')
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&

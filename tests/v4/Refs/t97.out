@@ -2,7 +2,7 @@
 .Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2017 ABINIT group . 
+.Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -79,7 +79,7 @@ P           mkmem           1
         tfkinfunc           1
            timopt          -1
            toldfe      1.00000000E-06 Hartree
-           tsmear      2.57245160E-02 Hartree
+          tphysel      2.57245160E-02 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1
               vel     -2.5298357213E-03  3.6818676446E-03 -1.7257200666E-04
@@ -1641,7 +1641,7 @@ P           mkmem           1
         tfkinfunc           1
            timopt          -1
            toldfe      1.00000000E-06 Hartree
-           tsmear      2.57245160E-02 Hartree
+          tphysel      2.57245160E-02 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1
               vel     -2.4199793928E-03  3.8900889861E-03 -5.1269450141E-04

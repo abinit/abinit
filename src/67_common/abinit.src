@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -24,8 +24,7 @@ sources = [
  "calc_fc.F90",
  "cgq_builder.F90",
  "cgwf.F90",
- "clnup1.F90",
- "clnup2.F90",
+ "chern_number.F90",
  "conducti_nc.F90",
  "conducti_paw.F90",
  "conducti_paw_core.F90",
@@ -34,30 +33,25 @@ sources = [
  "dieltcel.F90",
  "emispec_paw.F90",
  "energy.F90",
- "erlxconv.F90",
- "etheta.F90",
  "etotfor.F90",
  "evdw_wannier.F90",
  "extraprho.F90",
  "extrapwf.F90",
- "fconv.F90",
- "fixsym.F90",
  "forces.F90",
  "forstr.F90",
  "forstrnps.F90",
  "fresid.F90",
  "fresidrsp.F90",
  "getcgqphase.F90",
- "hartre1.F90",
  "init_e_field_vars.F90",
  "initberry.F90",
+ "initorbmag.F90",
  "initmv.F90",
  "initro.F90",
  "ionion_realspace.F90",
  "ionion_surface.F90",
  "jellium.F90",
  "ks_ddiago.F90",
- "linemin.F90",
  "m_epjdos.F90",
  "mag_constr.F90",
  "mag_constr_e.F90",
@@ -74,7 +68,6 @@ sources = [
  "mklocl_wavelets.F90",
  "mkresi.F90",
  "mkrho.F90",
- "mksubham.F90",
  "m_ioarr.F90",
  "m_iowf.F90",
  "mlwfovlp.F90",
@@ -119,7 +112,6 @@ sources = [
  "strhar.F90",
  "sygrad.F90",
  "symrhg.F90",
- "testsusmat.F90",
  "uderiv.F90",
  "update_e_field_vars.F90",
  "vdw_dftd2.F90",
@@ -127,6 +119,7 @@ sources = [
  "vso_realspace_local.F90",
  "vtorhotf.F90",
  "waveformat.F90",
+ "wf_mixing.F90",
  "wvl_initro.F90",
  "wvl_mkrho.F90"]
 
