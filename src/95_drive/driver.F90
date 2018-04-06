@@ -634,7 +634,15 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        call xc_vdw_trigger(.false.)
        call wrtout(std_out,message,'COLL')
      end if
+#else
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
+       write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet. &
+&      The calculation will proceed without adding any vdW energy contribution',ch10
+     MSG_WARNING(message)
+     end if
 #endif
+
+
    end if
 
 !  FFTW3 threads initialization

@@ -120,7 +120,7 @@ program vdw_kernelgen
 !* Init fake MPI type with values for sequential case.
  call initmpi_seq(MPI_enreg_seq)
 
- write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet',&
+ write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',&
 & ch10
  MSG_ERROR(message)
 

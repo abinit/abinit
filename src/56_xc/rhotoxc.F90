@@ -1154,17 +1154,18 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !  Calculate van der Waals correction when requested
 #if defined DEV_YP_VDWXC
-   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
+   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 3) .and. (xc_vdw_status()) ) then
      call xc_vdw_aggregate(ucvol,gprimd,nfft,nspden_updn,ngrad*ngrad, &
 &     ngfft(1),ngfft(2),ngfft(3),rhonow, &
 &     deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,strsxc_vdw)
    end if
-#endif
-   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) ) then
-     write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet',&
-&    ch10
-     MSG_ERROR(message)
+#else
+   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 3) ) then
+     write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet. &
+&    The calculation will proceed without adding any vdW energy contribution.',ch10
+     MSG_WARNING(message)
    end if
+#endif
 !  Normalize enxc, strsxc and vxc
    divshft=one/dble(xcdata%intxc+1)
    strsxc(:)=strsxc(:)/dble(nfftot)*divshft
