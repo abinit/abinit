@@ -3539,6 +3539,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,  msg,'COLL')
  else
+   LIBPAW_ALLOCATE(pawtab%vminushalf,(0))
    has_v_minushalf=0
  end if
  if(has_v_minushalf==0.and.pawtab%has_vminushalf==1) then
@@ -3546,7 +3547,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &     'The LDA-1/2 potential must be given in the XML PAW datafile.'
    MSG_ERROR(msg)
  end if
-
 
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
@@ -3667,10 +3667,9 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      if (ilm==jlm) kij(klmn)=paw_setup(ipsploc)%kinetic_energy_differences%data(jln+(iln-1)*nval)
    end do
  end do
-
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
-   if (allocated(pawtab%vminushalf).and.pawtab%has_vminushalf==1) then
+   if (size(pawtab%vminushalf)>0.and.pawtab%has_vminushalf==1) then
      vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+pawtab%vminushalf(1:vloc_mesh%mesh_size)
    end if
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
