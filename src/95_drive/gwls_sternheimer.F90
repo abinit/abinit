@@ -54,18 +54,19 @@ use gwls_GenerateEpsilon
 use defs_basis
 use defs_datatypes
 use defs_abitypes
- use defs_wvltypes
+use defs_wvltypes
 use m_pawang
 use m_pawrad
 use m_pawtab
 use m_profiling_abi
 use m_errors
 
+use m_time,      only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gwls_sternheimer'
- use interfaces_18_timing
  use interfaces_95_drive, except_this_one => gwls_sternheimer
 !End of the abilint section
 

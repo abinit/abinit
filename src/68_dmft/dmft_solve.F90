@@ -56,7 +56,9 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  use m_xmpi
  use m_errors
  use m_profiling_abi
+ use m_data4entropyDMFT
 
+ use m_time,           only : timab
  use m_pawang, only : pawang_type
  use m_pawtab, only : pawtab_type
  use m_paw_dmft, only: paw_dmft_type
@@ -69,14 +71,12 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  use m_hu, only : hu_type,init_hu,destroy_hu
  use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
  use m_matlu, only : print_matlu,sym_matlu
- use m_data4entropyDMFT
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dmft_solve'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_dmft, except_this_one => dmft_solve
 !End of the abilint section
 

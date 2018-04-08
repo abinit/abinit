@@ -155,12 +155,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
+ use m_time,       only : timab
  use m_fstrings,   only : strcat
  use m_geometry,   only : mkrdim, metric
  use m_exit,       only : exit_check, disable_timelimit
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
-                        & gkk_t, gkk_init, gkk_ncwrite,gkk_free
+                          gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main
@@ -185,7 +186,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_51_manage_mpi

@@ -94,13 +94,14 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use m_wfk
  use m_xmpi
 
+ use m_time,    only : timab
  use m_pawcprj, only : pawcprj_type
+ use m_kg,      only : mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstwf'
- use interfaces_18_timing
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_72_response, except_this_one => dfpt_nstwf

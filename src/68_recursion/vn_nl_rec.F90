@@ -48,18 +48,19 @@
 subroutine vn_nl_rec(vn,natom,typat,ngfftrec,&
   &                    inf_ucvol,nlrec,projec)
 
- use m_profiling_abi
- 
+
  use defs_basis
  use defs_rectypes
- use m_per_cond,only             :per_cond
+ use m_profiling_abi
  use m_linalg_interfaces
+
+ use m_time,     only : timab
+ use m_per_cond, only : per_cond
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vn_nl_rec'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

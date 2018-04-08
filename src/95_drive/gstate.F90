@@ -118,7 +118,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use defs_rectypes
  use m_errors
  use m_xmpi
@@ -143,6 +142,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
+ use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
  use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
@@ -185,7 +185,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #undef ABI_FUNC
 #define ABI_FUNC 'gstate'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_43_wvl_wrappers
 #if defined HAVE_GPU_CUDA

@@ -54,6 +54,7 @@ subroutine wfd_vnlpsi(Wfd,band,ik_ibz,spin,npw_k,Cryst,GS_hamk,vnl_psi,opaw_psi,
  use m_profiling_abi
 
  use m_crystal,        only : crystal_t
+ use m_kg,             only : mkkpg
  use m_wfd,            only : wfd_t, kdata_t, wfd_get_cprj
  use m_hamiltonian,    only : gs_hamiltonian_type, load_k_hamiltonian
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_free

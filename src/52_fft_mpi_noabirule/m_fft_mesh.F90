@@ -9,7 +9,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, YMN, RS)
+!! Copyright (C) 2008-2018 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,6 +54,7 @@ MODULE m_fft_mesh
  public :: calc_ceikr          ! e^{ik.r} on the FFT mesh (complex valued).
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
+ public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -1684,6 +1685,71 @@ pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
  end do
 
 end subroutine times_eikr
+!!***
+
+!!****f* m_fft_mesh/phase
+!! NAME
+!! phase
+!!
+!! FUNCTION
+!! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
+!! while ig runs from 1 to ngfft.
+!!
+!! INPUTS
+!!  ngfft=number of points
+!!
+!! OUTPUT
+!!  ph(2*ngfft)=phase array (complex)
+!!
+!! NOTES
+!! XG 990504 : changed the formulation, in order to preserve
+!! the invariance between n and -n, that was broken for n=ngfft/2 if ngfft even.
+!! Simply suppresses the corresponding sine.
+!!
+!! PARENTS
+!!      xcden,xcpot
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phase(ngfft,ph)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phase'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ngfft
+!arrays
+ real(dp),intent(out) :: ph(2*ngfft)
+
+!Local variables-------------------------------
+!scalars
+ integer :: id,ig,nn
+ real(dp) :: arg,fac
+
+! *************************************************************************
+
+ id=ngfft/2+2
+ fac=pi/dble(ngfft)
+ do ig=1,ngfft
+   nn=ig-1-(ig/id)*ngfft
+   arg=fac*dble(nn)
+   ph(2*ig-1)=cos(arg)
+   ph(2*ig)  =sin(arg)
+
+ end do
+!XG 990504 Here zero the corresponding sine
+ if((ngfft/2)*2==ngfft) ph(2*(id-1))=zero
+
+end subroutine phase
 !!***
 
 !----------------------------------------------------------------------

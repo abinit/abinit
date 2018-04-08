@@ -101,18 +101,18 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  use m_profiling_abi
  use m_errors
 
- use m_geometry,     only : metric
- use m_cgtools,  only : set_istwfk
- use m_parser,  only : intagm
+ use m_time,      only : timab
+ use m_geometry,  only : metric
+ use m_cgtools,   only : set_istwfk
+ use m_parser,    only : intagm
+ use m_kpts,      only : getkgrid, testkgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inkpts'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

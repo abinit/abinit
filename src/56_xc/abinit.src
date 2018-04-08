@@ -31,7 +31,6 @@ sources = [
 "hartre.F90",
 "interfaces_56_xc.F90",
 "mkcore.F90",
-"phase.F90",
 "rhohxcpositron.F90",
 "rhotoxc.F90",
 "xcpot.F90",

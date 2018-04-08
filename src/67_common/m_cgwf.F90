@@ -1,5 +1,58 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/cgwf
+!!****m* ABINIT/m_cgwf
+!! NAME
+!!  m_cgwf
+!!
+!! FUNCTION
+!!  Conjugate-gradient eigensolver.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_cgwf
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_xmpi
+ use m_profiling_abi
+ use m_cgtools
+ use m_efield
+
+ use m_time, only : timab
+ use m_numeric_tools, only : rhophi
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
+&                          pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
+ use m_hamiltonian, only : gs_hamiltonian_type
+ use m_fock,        only : fock_set_ieigen,fock_set_getghc_call
+
+ implicit none
+
+ private
+!!***
+
+ public :: cgwf
+!!***
+
+contains
+!!***
+
+!!****f* m_cgwf/cgwf
 !! NAME
 !! cgwf
 !!
@@ -9,13 +62,6 @@
 !! Uses a conjugate-gradient algorithm.
 !! In case of paw, resolves a generalized eigenproblem using an
 !!  overlap matrix (not used for norm conserving psps).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  berryopt == 4/14: electric field is on;
@@ -98,12 +144,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                filnam_ds1,gsc,gs_hamk,icg,igsc,ikpt,inonsc,&
 &                isppol,mband,mcg,mcgq,mgsc,mkgq,mpi_enreg,&
@@ -112,31 +152,17 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
 &                subvnl,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_xmpi
- use m_profiling_abi
- use m_cgtools
- use m_efield
-
- use m_numeric_tools, only : rhophi
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
-&                          pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_fock,        only : fock_set_ieigen,fock_set_getghc_call
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cgwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common, except_this_one => cgwf
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -1318,10 +1344,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
  DBG_EXIT("COLL")
 
-contains
+end subroutine cgwf
 !!***
 
-!!****f* ABINIT/linemin
+!!****f* m_cgwf/linemin
 !! NAME
 !! linemin
 !!
@@ -1664,7 +1690,7 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 end subroutine linemin
 !!***
 
-!!****f* ABINIT/etheta
+!!****f* m_cgwf/etheta
 !! NAME
 !! etheta
 !!
@@ -1790,7 +1816,7 @@ subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
 end subroutine etheta
 !!***
 
-!!****f* ABINIT/mksubham
+!!****f* m_cgwf/mksubham
 !! NAME
 !! mksubham
 !!
@@ -2018,5 +2044,5 @@ subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
 end subroutine mksubham
 !!***
 
-end subroutine cgwf
+end module m_cgwf
 !!***

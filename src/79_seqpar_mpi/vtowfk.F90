@@ -119,11 +119,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use m_linalg_interfaces
  use m_cgtools
 
+ use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_paw_dmft,    only : paw_dmft_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
  use m_paw_dmft,    only : paw_dmft_type
  use gwls_hamiltonian, only : build_H
+ use m_cgwf,        only : cgwf
  use m_lobpcgwf,    only : lobpcgwf2
 
 !This section has been created automatically by the script Abilint (TD).
@@ -131,12 +133,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtowfk'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_53_spacepar
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common
  use interfaces_79_seqpar_mpi, except_this_one => vtowfk
 !End of the abilint section
 
@@ -189,8 +189,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
-
 
 ! **********************************************************************
 

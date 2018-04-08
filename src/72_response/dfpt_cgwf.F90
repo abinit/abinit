@@ -122,6 +122,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  use m_cgtools
  use m_rf2
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type,KPRIME_H_KPRIME
 
@@ -130,7 +131,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_cgwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs
 !End of the abilint section
 

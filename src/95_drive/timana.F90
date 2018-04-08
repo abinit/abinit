@@ -37,56 +37,56 @@
 !! *) The number of fourwf and nonlop calls can be computed as follows, in the
 !!    groud-state case, with no reading of wavefunctions (irdwfk==0 and the like),
 !!    and iscf>0 :
-!!    
+!!
 !!    1) For fourwf.f
-!!    
+!!
 !!    In each cgwf call, there will be
 !!    1 call (isign=+1 and -1) for the first gradient calculation,
 !!    and iline calls for the line minimizations,
 !!    minus the number of ffts skipped because some wfs are sufficiently converged
 !!    (there is a counter for that, see the log file)
-!!    
+!!
 !!    There are nband*nkpt*(nstep+2) calls to cgwf presently, where the
 !!    (nstep+2) comes from the number of the presence of 2 nonscf loops
 !!    in the first 2 steps.
 !!    Thus, the number of fourwf calls in cgwf is
 !!    nband*nkpt*(nstep+2)*(1+iline) - nskip_fourwf_in_cgwf
-!!    
+!!
 !!    To compute the density (either in vtowfk or in vtorho - by a mkrho call - )
 !!    at each step, there will be nband*nkpt one-way calls,
 !!    minus the number of bands skipped because the occupation number
 !!    is too small (smaller than 1.0d-14). There is another counter for that.
 !!    Thus, the number of fourwf calls for the density is
 !!    nband*nkpt*nstep - nskip_fourwf_for_density
-!!    
+!!
 !!    For example, for Si with nline=3, nkpt=2, nband=4, nstep=10, and supposing
 !!    no fourwf calls are skipped, there will be
 !!    at most 4*2*12=96 calls to cgwf, with 4 two-way fft,
 !!    that is 384 two-way ffts,
 !!    and 4*2*10=80 one-way ffts to make the density.
 !!    Altogether 464-nskip one-way ffts at most.
-!!    
+!!
 !!    2) For nonlop.f
-!!    
+!!
 !!    Presently, there are three different types of call to nonlop :
 !!    for energy and gradient wrt wavefunctions (choice=1), for forces (choice=2),
 !!    and for stresses (choice=3).
-!!    
+!!
 !!    In each cgwf call, there will be one nonlop call for two fourwf calls
 !!    (independently of the number of skipped fourwf calls, since
 !!    nonlop is also skipped then). These are the only calls with choice=1.
 !!    Thus the number will be
 !!    nband*nkpt*(nstep+2)*(1+iline) - nskip_fourwf_in_cgwf
-!!    
+!!
 !!    The number of choice=2 nonlop calls is equal to the number of fourwf calls
 !!    to make the density, that is
 !!    nband*nkpt*nstep - nskip_fourwf_for_density
-!!    
+!!
 !!    The number of choice=8 calls is equal to the number of occupied bands
 !!    at the end of the calculation :
 !!    nband(occupied)*nkpt
 !!    The number of bands skipped then is not counted.
-!!    
+!!
 !!    NOTE : the number of fourwf calls is equal to
 !!    the # of nonlop (choice=1) calls + the # of nonlop (choice=2) calls
 !!
@@ -112,14 +112,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  use m_profiling_abi
  use m_xomp
 
- use defs_time,    only : mtim
+ use m_time,       only : time_accu, timab, TIMER_SIZE
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'timana'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -133,7 +132,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
 !Local variables-------------------------------
 !scalars
- integer :: aslot,bslot,cslot,flag_count,flag_write,ierr,ii,ikpt,ipart 
+ integer :: aslot,bslot,cslot,flag_count,flag_write,ierr,ii,ikpt,ipart
  integer :: ilist,isort,islot,isppol,itim,itimab,ltimab,maxii,me
  integer :: npart,nlist,nothers,nproc,nthreads,return_ncount
  integer(i8b) :: npwmean,npwnbdmean
@@ -141,11 +140,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  real(dp) :: cpunm,lflops,other_cpu,other_wal,percent_limit,subcpu,subwal,timab_cpu,timab_wall,wallnm
  character(len=500) :: message
 !arrays
- integer(i8b) :: basic(mtim),ndata(mtim),tslots(mtim)
- integer :: ncount(mtim)
+ integer(i8b) :: basic(TIMER_SIZE),ndata(TIMER_SIZE),tslots(TIMER_SIZE)
+ integer :: ncount(TIMER_SIZE)
  integer,allocatable :: list(:)
- real(dp) :: ftimes(2,mtim),ftsec(2),mflops(mtim),nflops(mtim),times(2,mtim),tsec(2),my_tsec(2)
- character(len=32) :: names(-1:mtim),entry_name
+ real(dp) :: ftimes(2,TIMER_SIZE),ftsec(2),mflops(TIMER_SIZE),nflops(TIMER_SIZE),times(2,TIMER_SIZE),tsec(2),my_tsec(2)
+ character(len=32) :: names(-1:TIMER_SIZE),entry_name
  character(len=*),parameter :: format01040 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,16x,f7.2,1x,f10.2)"
  character(len=*),parameter :: format01041 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
  character(len=*),parameter :: format01042 ="('- ',a24,f12.3,f6.1,f11.3,g12.3,i15)"
@@ -193,10 +192,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Channels 1700 to 1747 are for GWLS.
 !Channels 1520 and beyond are not yet attributed.
 
- names(1:mtim)='***                             '
+ names(1:TIMER_SIZE)='***                             '
 !Basic slots are not overlapping. Their sum should cover most of the code.
 !WARNING : the slots from 1 to 99 should be avoided in the future ... They are hard to track.
- basic(1:mtim)=0
+ basic(1:TIMER_SIZE)=0
  names(1)='abinit                          '
  names(5)='ewald                           ' ; basic(5)=1
  names(6)='setsym                          ' ; basic(6)=1
@@ -510,7 +509,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(547)='alltoall%prep_fo                '
  names(548)='allgather%prep_f                '
  names(549)='symrhg%mkrho                    '
- 
+
  names(550)='forces:pawatm2ff                '
  names(551)='stress:pawatm2ff                '
  names(552)='setvtr:pawatm2ff                '
@@ -546,8 +545,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(588)='vtowfk(ssdiag)                  '; basic(588)=1
  names(589)='vtowfk(contrib)                 '; basic(589)=1
- names(590)='vtowfk(2)                       ' 
- names(591)='vtowfk(3)                       ' 
+ names(590)='vtowfk(2)                       '
+ names(591)='vtowfk(3)                       '
 
  names(593)='set_paw_pert                    '
  names(594)='get_exchange_atom               '
@@ -627,7 +626,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(685)='exc_build_block(write_ha        '
  names(686)='exc_build_block(exch.spi        '
 
- names(690)='exc_haydock_driver              '   
+ names(690)='exc_haydock_driver              '
  names(691)='exc_haydock_driver(read)        '
  names(692)='exc_haydock_driver(prep)        '
  names(693)='exc_haydock_driver(wo lf        '
@@ -646,7 +645,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(706)='gstateimg(aft. gstate)          '
  names(707)='gstateimg(aft. loop img)        '
  names(708)='gstateimg(finalize)             '
- 
+
 
  names(710)='inwffil                         '
  names(711)='inwffil(read header)            '
@@ -860,7 +859,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1620) = 'mkinvovl                      '
  names(1621) = 'mkinvovl(build_d)             '
  names(1622) = 'mkinvovl(build_ptp)           '
- 
+
  ! lobpcg2
  names(1650) = 'lobpcgwf2                     '; basic(1650) = 1
  names(1651) = 'lobpcg_init                    '
@@ -909,16 +908,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1706)='setup proj. sternheimer         '
  names(1707)='compute proj.sternheimer        '
  names(1708)='eps^{-1} - eps_m^{-1}           '
- names(1709)='eps_m^{-1} - 1                  '           
- names(1710)='Modify Lbasis Coulomb           '   
- names(1711)='Diag eps^{-1}-eps_m^{-1}        '   
- names(1712)='exact  AT shift lanczos         '   
- names(1713)='model  AT shift lanczos         '   
- names(1714)='exact  BT shift lanczos         '   
+ names(1709)='eps_m^{-1} - 1                  '
+ names(1710)='Modify Lbasis Coulomb           '
+ names(1711)='Diag eps^{-1}-eps_m^{-1}        '
+ names(1712)='exact  AT shift lanczos         '
+ names(1713)='model  AT shift lanczos         '
+ names(1714)='exact  BT shift lanczos         '
  names(1715)='model  BT shift lanczos         '
- names(1716)='compute poles                   ' 
- names(1717)='Sigma_A Lanczos                 ' 
- names(1718)='Sigma_B num. integrands         ' 
+ names(1716)='compute poles                   '
+ names(1717)='Sigma_A Lanczos                 '
+ names(1718)='Sigma_B num. integrands         '
 
 
  names(1719)='gwls: extract_QR                ';basic(1719)=1
@@ -961,7 +960,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1747)='inv eps_m and subtract 1        '
 
 
- names(mtim)='(other)                         ' ! This is a generic slot, to compute a complement
+ names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================
 
@@ -1035,7 +1034,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
 !Get separate time reports from all timed sections
  totcount=0
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    call time_accu(itim,return_ncount,times(:,itim),nflops(itim),ftimes(:,itim))
    ncount(itim)=return_ncount
    totcount=totcount+return_ncount
@@ -1051,7 +1050,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Gather the different parts of selected time slots
 !Or, alternatively, deduce the value of the complement of some time slots.
 !This loop is finished when the default case is hit (see below)
- do ii=1,mtim
+ do ii=1,TIMER_SIZE
 
    tslots(:)=0
 
@@ -1063,130 +1062,130 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !  then the number of counts will be set to the value of the first routine to be accumulated.
    select case(ii)
 !    Gather the different parts of nonlop  (SHOULD BE REEXAMINED !)
-   case(1) 
+   case(1)
      tslots(:5)=(/75, 221,223,229,233/)
-   case(2) 
+   case(2)
      tslots(:4)=(/76, 222,225,227/)
-   case(3) 
+   case(3)
      tslots(:2)=(/77, 224/)
-   case(4) 
+   case(4)
      tslots(:2)=(/78, 226/)
-   case(5) 
+   case(5)
      tslots(:2)=(/79, 228/)
-   case(6) 
+   case(6)
 !      Gather the different parts of selected time channels
      tslots(:10)=(/97, 75,76,77,78,79,220,230,231,232/)
-   case(7) 
+   case(7)
 !      Gather the different parts of fourwf (NOTE : should attribute the channel 840 to one of the 4 modes !!!)
      tslots(:3)=(/802, 841,844/)
-   case(8) 
+   case(8)
      tslots(:4)=(/803, 842,843,846/)
-   case(9) 
+   case(9)
      tslots(:10)=(/804, 845,847,848,850,854,858,859,861,862/)
-   case(10) 
+   case(10)
      tslots(:6)=(/805, 849,851,857,871,872/)
-   case(11) 
+   case(11)
 !      In the following, the part coming from the prep_fourwf interface is added to the total.
      tslots(:7)=(/801, 802,803,804,805,840,856/)
-   case(13) 
+   case(13)
 !      Gather the different parts of prep_fourwf
      tslots(:3)=(/539, 537,538/)
-   case(14) 
+   case(14)
 !      Gather the different parts of fourdp
      tslots(:11)=(/9, 260,261,262,263,264,265,266,267,268,269/)
-   case(15) 
+   case(15)
 !      Gather the different parts of getghc
      tslots(:9)=(/200, 201,202,203,204,205,206,207,208/)
-   case(16) 
+   case(16)
 !      Gather the different parts of projbd
      tslots(:3)=(/210, 211,212/)
    case(17)
 !      Gather the different parts of rwwf (wavefunctions read/write)
      tslots(:24)=&
 &     (/14, 270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292/)
-   case(18) 
+   case(18)
 !      Estimate the complement of getghc (non fourwf, non nonlop)
      tslots(:4)=(/-98, 200,-841,-221/)
-   case(19) 
+   case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
      tslots(:5)=(/-40, 22,530,-201,-211/)
-   case(20) 
+   case(20)
 !      Estimate the complement of dfpt_cgwf (non getghc,projbd,nonlop,fourwf)
      tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)
-   case(21) 
+   case(21)
 !      Estimate different complements in vtowfk
 !      vtowfk(ssdiag) (= vtowfk(loop)    - cgwf )
      tslots(:5)=(/-588, 39,-22,-530, -1600/)
-   case(22) 
+   case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
-   case(23) 
+   case(23)
 !      vtowfk (1) = vtowfk - vtowfk(loop) - vtowfk(afterloop)
      tslots(:4)=(/31, 28,-39,-30/)
-   case(24) 
+   case(24)
 !      Estimate different complements in dfpt_vtowfk
 !      dfpt_vtowfk(contrib) (= vtowfk3(loop) - cgwf - fourwf%vtowfk3 - rwwf%vtowfk3 - corrmetalwf1)
      tslots(:6)=(/-108, 139,-122,-845,-288,-214/)
-   case(25) 
+   case(25)
 !      vtowfk (1) = dfpt_vtowfk - vtowfk3(loop) - vtowfk3 (3)
      tslots(:4)=(/ 131, 128,-139,-130/)
-   case(28) 
+   case(28)
 !      dfpt_vtorho-kpt loop (= dfpt_vtowfk (2) - vtowfk3 - rwwf)
      tslots(:4)=(/126,125,-128,-287/)
-   case(29) 
+   case(29)
 !      Estimate complement in mkrho
      tslots(:3)=(/798,799,-843/)
-   case(30) 
+   case(30)
 !      Estimate complement in dfpt_looppert
 !      dfpt_looppert(other) (= loper3 - loper3(kpgio) - loper3(getmpw) - loper3(inwffil)
 !      dfpt_scfcv - dfpt_looppert(outwf) -loper3(eigt2tot)
      tslots(:8)=(/145,141,-142,-143,-144,-120,-146,-147/)
-   case(31) 
+   case(31)
 !      Estimate complement in sigma
 !      sigma/=fourdp = sigma - fourdp%rhotwg%si - fourdp%fftwfn%si
      tslots(:4)=(/410,401,-262,-265/)
-   case(32) 
+   case(32)
 !      Estimate complement in bethe_salpeter
      tslots(:2)=(/699,650/)
-   case(33) 
+   case(33)
 !      Estimate complement in susk
 !      NOTE : fourwf%susk _PAW should actually be split between susk (loop except FFT)
 !      and susk (accumul.except FFT . But a renumbering of the fourwf splitting should be done ...
 !      susk (loop except FFT) = susk (loop) - fourwf%susk !0 - fourwf%susk !3
      tslots(:4)=(/756,752,-848,-849/)
-   case(34) 
+   case(34)
 !      susk (accumul.except FFT = susk (accumul) - fourwf%susk !3bis - fourwf%susk _PAW
      tslots(:4)=(/757,754,-859,-857/)
-   case(35) 
+   case(35)
 !      Estimate complement in suskmm
 !      NOTE : fourwf%susk _PAW should actually be split between susk (loop except FFT)
 !      and suskmm (accum.except FFT . But a renumbering of the fourwf splitting should be done ...
 !      suskmm (loop except FFT) = suskmm (loop) - fourwf%suskmm !0 part 1 - fourwf%suskmm !3 part 1
      tslots(:4)=(/764,762,-861,-871/)
-   case(36) 
+   case(36)
 !      suskmm (accum.except FFT = suskmm (accumul) - fourwf%suskmm !0 part 2 - fourwf%suskmm !3 part 2 - fourwf%susk _PAW
      tslots(:5)=(/765,763,-862,-872,-857/)
-   case(37) 
+   case(37)
 !      inwffil(excl. calls) = inwffil - inwffil(call wfsinp) - inwffil(call newkpt);
      tslots(:4)=(/718,710,-714,-717/)
-   case(38) 
+   case(38)
 !      wfsinp(excl. calls) = wfsinp - wfsinp(call  initwf) - wfsinp(call rwwf)
      tslots(:4)=(/728,720,-724,-727/)
-   case(39) 
+   case(39)
 !      newkpt(excl. rwwf   )=newkpt(before loop) + newkpt(before rwwf) + newkpt(after rwwf)
 !      newkpt(call wfconv) + newkpt(finalize loop) + newkpt(after loop   )
      tslots(:7)=(/-788,781,782,783,784,785,786/)
-   case(40) 
+   case(40)
 !      More complements in vtowfk
 !      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon
      tslots(:7)=(/-590,39,-22,-530,-585,-583, -1600/)
-   case(41) 
+   case(41)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
-   case(43) 
+   case(43)
 !      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop + mkrho%scfcv
      tslots(:7)=(/790,791,792,793,794,795,796/)
-   case(44) 
+   case(44)
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
 
@@ -1201,7 +1200,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    nflops(    aslot)=zero
    ftimes(1:2,aslot)=zero
    flag_count=1
-   do islot=2,mtim
+   do islot=2,TIMER_SIZE
      bslot=tslots(islot)
      cslot=abs(bslot)
      if(bslot>0)then
@@ -1240,7 +1239,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
 
 !Calculating Gigaflops for all cases
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    mflops(itim)=-2
    if(abs(ftimes(1,itim)) > tol10) then ! VALGRIND complains that here there is a jump on uninitialized values
      mflops(itim)=nflops(itim)*1.e-9/ftimes(1,itim)
@@ -1250,7 +1249,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end do
 
 !Warning if the time is negative
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    if(times(1,itim)<-tol6 .or. times(2,itim)<-tol6 .or. ncount(itim)<-1 )then
      write(message, '(6a,i4,4a,es16.6,a,es16.6,a,i6,a,es16.6)' ) ch10,&
 &     ' timana : WARNING -',ch10,&
@@ -1262,10 +1261,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end do
 
 !List of major independent code sections
- ABI_ALLOCATE(list,(mtim))
+ ABI_ALLOCATE(list,(TIMER_SIZE))
  list(:)=0
  nlist=0
- do itim=1,mtim
+ do itim=1,TIMER_SIZE
    if(basic(itim)/=0)then
      nlist=nlist+1
      list(nlist)=itim
@@ -1358,7 +1357,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    wallnm=100._dp/tsec(2)
 
 !  Calculating Gigaflops for all process
-   do itim=1,mtim
+   do itim=1,TIMER_SIZE
      mflops(itim)=-2
      if(abs(ftimes(1,itim)) > tol10) then ! VALGRIND complains that here there is a jump on uninitialized values
        mflops(itim)=nflops(itim)*1.e-9/ftimes(1,itim)
@@ -1433,32 +1432,32 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    if (timopt<0) then
 
      npart=1000
-     do ipart=1,npart 
-       list(:)=0 
+     do ipart=1,npart
+       list(:)=0
        select case(ipart)
 
        case(1)
-         list(:11)=(/1,41,42,43,44,45,640,46,49,50,mtim/)      ; message='abinit '
+         list(:11)=(/1,41,42,43,44,45,640,46,49,50,TIMER_SIZE/)      ; message='abinit '
        case(2)
-         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,mtim/)  ; message='driver '
+         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)  ; message='driver '
        case(3)
          list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; message='gstateimg+gstate '
        case(4)
-         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,mtim/); message='scfcv '
+         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); message='scfcv '
        case(5)
-         list(:7)=(/940,941,942,943,944,945,mtim/)             ; message= 'rhotov '
+         list(:7)=(/940,941,942,943,944,945,TIMER_SIZE/)             ; message= 'rhotov '
        case(6)
-         list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,mtim/)
+         list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
          message= 'vtorho '
        case(7)
-         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,mtim/) ; message='vtowfk '
+         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,TIMER_SIZE/) ; message='vtowfk '
        case(8)
          if(abs(timopt)==3)then
            list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; message='lobpcgwf (abs(timopt)==3)'
          else if(abs(timopt)==4)then
            list(:8)=(/530,520,521,522,523,524,525,526/)               ; message='lobpcgwf (abs(timopt)==4)'
 !            else
-!            list(:3)=(/530,204,205/) 
+!            list(:3)=(/530,204,205/)
 !            message='lobpcgwf (light analysis: for a deeper one, use abs(timopt)=3 or 4)'
          end if
        case(9)
@@ -1466,7 +1465,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(10)
          list(:8)=(/132,133,134,135,136,137,138,141/)          ; message='respfn '
        case(11)
-         list(:8)=(/141,142,143,144,120,146,147,mtim/)         ; message='dfpt_looppert '
+         list(:8)=(/141,142,143,144,120,146,147,TIMER_SIZE/)         ; message='dfpt_looppert '
        case(12)
          list(:9)=(/120,154,121,157,152,158,160,150,564/) ; message='dfpt_scfcv '
        case(13)
@@ -1483,25 +1482,25 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(18)
          list(:5)=(/933,934,936,937,938/)                      ; message='outkss '
        case(19)
-         list(:14)=(/301,302,315,316,319,304,305,320,321,306,307,308,309,310/) 
+         list(:14)=(/301,302,315,316,319,304,305,320,321,306,307,308,309,310/)
          message='screening '
        case(20)
          list(:13)=(/401,402,403,404,405,406,407,408,409,421,423,424,425/); message='sigma  '
        case(21)
          list(:9)=(/431,432,433,434,435,445,440,441,442/)     ; message='calc_sigc_me '
        case(23)
-         list(:11)=(/630,631,632,633,634,545,635,636,637,638,mtim/)         ; message='prep_getghc '
+         list(:11)=(/630,631,632,633,634,545,635,636,637,638,TIMER_SIZE/)         ; message='prep_getghc '
        case(24)
          list(:4)=(/539,856,547,548/)                          ; message='prep_fourwf '
        case(25)
-         list(:5)=(/570,231,232,581,mtim/)                     ; message='prep_nonlop '
+         list(:5)=(/570,231,232,581,TIMER_SIZE/)                     ; message='prep_nonlop '
        case(26)
          list(:6)=(/790,791,792,793,794,795/)                  ; message='mkrho (upwards partitioning)'
 !          Disabled (temporarily ?) because the partitioning was not correct
 !          case(27);list(:17)=(/600,601,602,603,604,605,617,606,607,608,609,610,611,612,613,614,615/)
 !          message='vtorhorec '
        case(28)
-         list(:10)=(/650,651,653,654,655,656,658,659,660,661/) 
+         list(:10)=(/650,651,653,654,655,656,658,659,660,661/)
          message='bethe_salpeter '
        case(29)
          list(:8)=(/740,741,742,743,744,745,746,747/)          ; message='suscep_stat '
@@ -1512,13 +1511,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(32)
          list(:8)=(/710,711,712,713,714,715,716,717/)          ; message='inwffil '
        case(33)
-         list(:10)=(/720,721,722,723,724,725,726,727,67,mtim/)  ; message='wfsinp '
+         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/)  ; message='wfsinp '
        case(34)
          list(:5)=(/770,771,772,272,290/)                      ; message='initwf '
        case(35)
          list(:9)=(/780,781,782,783,784,785,786,291,292/)      ; message='newkpt '
        case(36)
-         list(:8)=(/93,901,902,903,904,905,268,mtim/)          ; message='newvtr '
+         list(:8)=(/93,901,902,903,904,905,268,TIMER_SIZE/)          ; message='newvtr '
        case(37)
          list(:2)=(/94,269/)                                   ; message='newrho '
        case(38)
@@ -1528,7 +1527,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(40)
          list(:5)=(/910,911,912,913,914/)                      ; message='forstr '
        case(41)
-         list(:10)=(/920,921,927,922,923,926,924,65,925,mtim/) ; message='forstrnps '
+         list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; message='forstrnps '
        case(42)
          list(:4)=(/670,671,672,673/)                          ; message='exc_build_ham '
        case(43)
@@ -1541,7 +1540,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(46)
          list(:8)=(/620,621,622,623,624,625,626,627/)          ; message='dmft '
        case(47)
-         list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/) 
+         list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/)
          message='initberry '
        case(50)
          list(:12)=(/1500,1501,1502,1503,1504,1505,1506,1507,1508,1509,1510,1511/)          ; message='hartreefock '
@@ -1555,16 +1554,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:5)=(/1701,1702,1703,1721,1722/)
          message='gwls GW code'
        case(71)
-         list(:16)=(/1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1715,1716,1717,1718/) 
+         list(:16)=(/1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1715,1716,1717,1718/)
          message='gwls: compute_correlations_shift_lanczos'
        case(72)
-         list(:10)=(/1724,1725,1726,1727,1728,1729,1730,1731,1732,1733/) 
+         list(:10)=(/1724,1725,1726,1727,1728,1729,1730,1731,1732,1733/)
          message='gwls: Applying the susceptibility Pk'
        case(73)
-         list(:7)=(/1734,1735,1736,1737,1738,1739,1740/) 
+         list(:7)=(/1734,1735,1736,1737,1738,1739,1740/)
          message='gwls: Applying the model susceptibility Pk_model'
        case(74)
-         list(:7)=(/1741,1742,1743,1744,1745,1746,1747/) 
+         list(:7)=(/1741,1742,1743,1744,1745,1746,1747/)
          message='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
          list(:12)=(/1650,1651,1652,1653,1654,1655,1656,1657,1658,1659,1660,1661/)
@@ -1575,13 +1574,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/)
          message='low-level xgScalapack type '
-       case default   
+       case default
          cycle ! This allows to disable temporarily some partitionings
-         
+
        end select
 
        nlist=0
-       do itim=1,mtim
+       do itim=1,TIMER_SIZE
          if(list(itim)/=0)then
            nlist=nlist+1
          else
@@ -1599,25 +1598,25 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          subwal=zero
          do ilist=1,nlist
            isort = list(ilist)
-!          When the LAST item is mtim, a complement is evaluated (count number set to -1)
-           if(ilist==nlist .and. list(nlist)==mtim)then
-             times(1,mtim)=times(1,list(1))-subcpu
-             times(2,mtim)=times(2,list(1))-subwal
-             ncount(mtim)=-1
-             ftimes(1,mtim)=zero
-             mflops(mtim)=0
+!          When the LAST item is TIMER_SIZE, a complement is evaluated (count number set to -1)
+           if(ilist==nlist .and. list(nlist)==TIMER_SIZE)then
+             times(1,TIMER_SIZE)=times(1,list(1))-subcpu
+             times(2,TIMER_SIZE)=times(2,list(1))-subwal
+             ncount(TIMER_SIZE)=-1
+             ftimes(1,TIMER_SIZE)=zero
+             mflops(TIMER_SIZE)=0
 #if defined HAVE_TEST_TIME_PARTITIONING
-             if(times(2,mtim)>1.2d0 .and. wallnm*times(2,mtim)>3.d0)then
+             if(times(2,TIMER_SIZE)>1.2d0 .and. wallnm*times(2,TIMER_SIZE)>3.d0)then
                write(ount, '(3a,es16.6,4a,es16.6,2a)')&
 &               ' Note : the partitioning does not work well for this routine.',ch10,&
-&               '   The (other) Wall time            ',times(2,mtim),ch10,&
+&               '   The (other) Wall time            ',times(2,TIMER_SIZE),ch10,&
 &               '   is bigger than 1.2 secs. ',ch10,&
-&               '   The (other) Wall time percentage ',wallnm*times(2,mtim),ch10,&
+&               '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
 &               '   is bigger than 3% '
-             else if (times(2,mtim)<0.2d0 .and. wallnm*times(2,mtim)<-0.2d0)then
+             else if (times(2,TIMER_SIZE)<0.2d0 .and. wallnm*times(2,TIMER_SIZE)<-0.2d0)then
                write(ount, '(3a,es16.6,2a)')&
 &               ' Note : the partitioning does not work well for this routine.',ch10,&
-&               '   The (other) Wall time percentage ',wallnm*times(2,mtim),ch10,&
+&               '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
 &               '   is negative '
              end if
 #endif
@@ -1673,7 +1672,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        if(ncount(list(1))/=0)then
          do ilist=1,nlist
            isort = list(ilist)
-!          
+!
            if (ncount(isort)/=0) then
              write(ount,format01040)names(isort),&
 &             times(1,isort),times(1,isort)*cpunm,&
@@ -1687,7 +1686,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
                write(ount, '(a)' ) '-'
              end if
            end if !ncount
-!          
+!
          end do !ilist
 
          subwal = subwal + tol14

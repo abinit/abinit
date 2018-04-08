@@ -39,6 +39,8 @@ use m_profiling_abi
 use m_bandfft_kpt
 use m_errors
 
+use m_time,      only : timab
+
 implicit none
 save
 private
@@ -404,7 +406,6 @@ subroutine Pk_model_implementation_1(psi_out,psi_in)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'Pk_model_implementation_1'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

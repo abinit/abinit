@@ -217,7 +217,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use defs_wvltypes
  use m_energies
  use m_errors
@@ -227,6 +226,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_ab7_mixing
  use m_hdr
 
+ use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
  use m_geometry,         only : xred2xcart, metric
  use m_crystal,          only : prtposcar
@@ -259,7 +259,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #undef ABI_FUNC
 #define ABI_FUNC 'afterscfloop'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw

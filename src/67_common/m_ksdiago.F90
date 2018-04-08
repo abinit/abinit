@@ -1,7 +1,165 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/ks_ddiago
+!!****m* ABINIT/m_ksdiago
 !! NAME
-!! ks_ddiago
+!!  m_ksdiago
+!!
+!! FUNCTION
+!!  Direct diagonalization of the KS Hamiltonian H_k(G,G')
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_ksdiago
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+ use m_hamiltonian
+
+ use m_fstrings,          only : toupper
+ use m_geometry,          only : metric
+ use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
+ use m_kg,                only : mkkin, mkkpg
+ use m_fftcore,           only : kpgsph
+ use m_cgtools,           only : set_istwfk
+ use m_electronpositron,  only : electronpositron_type
+ use m_mpinfo,            only : destroy_mpi_enreg
+ use m_pawtab,            only : pawtab_type
+ use m_paw_ij,            only : paw_ij_type
+ use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder
+ use m_pawfgr,            only : pawfgr_type
+
+
+ implicit none
+
+ private
+!!***
+
+!!****t* m_ksdiago/ddiago_ctl_type
+!! NAME
+!!  ddiago_ctl_type
+!!
+!! FUNCTION
+!!  Structure storing the variables controlling the direct diagonalization of the Kohn-Sham Hamiltonian.
+!!  Mainly used for debugging (and in the KSS code!)
+!!
+!! SOURCE
+
+ type, public :: ddiago_ctl_type
+
+  integer :: isppol
+   ! The spin component of the Hamiltonian (1 if nspinor==1 or nsppol==1).
+
+  integer :: istwf_k
+   ! Option defining whether time-reversal symmetry is used at particular k-points
+   ! If 0, the code will automatically use TR symmetry if possible (depending on the k-point)
+
+  integer :: nband_k
+   ! Number of bands to be calculated.
+
+  integer :: npw_k
+  ! The number of planes waves for the wavefunctions taking into account time-reversal symmetry.
+
+  integer :: npwtot
+  ! The number of planes waves in the Hamiltonian without taking into account istwf_k
+
+  integer :: nspinor
+  ! Number of spinorial components.
+
+  integer :: prtvol
+   ! Flag controlling the verbosity.
+
+  integer :: use_scalapack
+  ! 0 if diagonalization is done in sequential on each node.
+  ! 1 to use scalapack
+
+  real(dp) :: abstol
+   ! used fro RANGE="V","I", and "A" when do_full_diago=.FALSE.
+   ! The absolute error tolerance for the eigenvalues. An approximate eigenvalue is accepted
+   ! as converged when it is determined to lie in an interval [a,b] of width less than or equal to
+   !
+   !         ABSTOL + EPS *   max( |a|,|b| ) ,
+   !
+   ! where EPS is the machine precision.  If ABSTOL is less than or equal to zero, then  EPS*|T|  will be used in its place,
+   ! where |T| is the 1-norm of the tridiagonal matrix obtained by reducing A to tridiagonal form.
+   !
+   ! Eigenvalues will be computed most accurately when ABSTOL is
+   ! set to twice the underflow threshold 2*DLAMCH('S'), not zero.
+   ! If this routine returns with INFO>0, indicating that some
+   ! eigenvectors did not converge, try setting ABSTOL to 2*DLAMCH('S').
+
+  real(dp) :: ecut
+   ! The cutoff energy for the plane wave basis set.
+
+  real(dp) :: ecutsm
+   ! Smearing energy for plane wave kinetic energy (Ha)
+
+  real(dp) :: effmass_free
+   ! Effective mass for electrons (usually one).
+
+  logical :: do_full_diago
+  ! Specifies whether direct or partial diagonalization will be performed.
+  ! Meaningful only if RANGE='A'.
+
+  integer :: ilu(2)
+   ! If RANGE='I', the indices (in ascending order) of the smallest and largest eigenvalues to be returned.
+   ! il=ilu(1), iu=ilu(2) where
+   ! 1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0. NOT used if RANGE = 'A' or 'V'.
+
+  integer :: nloalg(3)
+
+  real(dp) :: kpoint(3)
+   ! The k-point in reduced coordinates at which the Hamiltonian is diagonalized.
+
+  real(dp) :: vlu(2)
+   ! If RANGE='V', the lower and upper bounds of the interval to
+   ! be searched for eigenvalues. vl=vlu(1) and vu=vlu(2) with VL < VU.
+   ! Not referenced if RANGE = 'A' or 'I'.
+
+  character(len=1) :: jobz
+   ! character defining whether wavefunctions are required (lapack option).
+   ! "N":  Compute eigenvalues only;
+   ! "V":  Compute eigenvalues and eigenvectors.
+
+  character(len=1) :: range
+   ! character defining the subset of eigenstates that will be calculated (lapack option).
+   ! "A": all eigenvalues will be found.
+   ! "V": all eigenvalues in the half-open interval (VL,VU] will be found.
+   ! "I": the IL-th through IU-th eigenvalues will be found.
+
+  !$character(len=fnlen) :: fname
+  ! The name of the file storing the eigenvectors and eigenvalues (only if jobz="V")
+
+ end type ddiago_ctl_type
+
+ public ::  ksdiago
+ public ::  init_ddiago_ctl
+!!***
+
+contains
+!!***
+
+!!****f* m_ksdiago/ksdiago
+!! NAME
+!! ksdiago
 !!
 !! FUNCTION
 !!  This routine performs the direct diagonalization of the Kohn-Sham Hamiltonian
@@ -20,13 +178,6 @@
 !!  The main drawback of the direct diagonalization is the bad scaling with the size
 !!  of the basis set (npw**3) and the large memory requirements.
 !!  At present, only norm-conserving pseudopotentials are implemented.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  kpoint(3)
@@ -79,8 +230,8 @@
 !! NOTES
 !!  Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
 !!  or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
-!!  ks_ddiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
-!!  or spin (not efficient but easy to code). Therefore ks_ddiago is useful non only for
+!!  ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
+!!  or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
 !!  the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
 !!
 !! PARENTS
@@ -95,41 +246,16 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
+subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 & typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
 & Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
 & Electronpositron) ! Optional arguments
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_hamiltonian
-
- use m_geometry,          only : metric
- use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
- use m_electronpositron,  only : electronpositron_type
- use m_fftcore,           only : kpgsph
- use m_mpinfo,            only : destroy_mpi_enreg
- use m_pawtab,            only : pawtab_type
- use m_paw_ij,            only : paw_ij_type
- use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
-&                                pawcprj_reorder
- use m_pawfgr,            only : pawfgr_type
- use m_kg,                only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ks_ddiago'
+#define ABI_FUNC 'ksdiago'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
@@ -202,7 +328,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  master=0
 
  if (nprocs>1) then
-   MSG_WARNING(" ks_ddiago not supported in parallel. Running in sequential.")
+   MSG_WARNING("ksdiago not supported in parallel. Running in sequential.")
  end if
 
  call initmpi_seq(MPI_enreg_seq) ! Fake MPI_type for sequential part.
@@ -348,7 +474,6 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 !==== Kinetic energy ====
 !========================
  ABI_MALLOC(kinpw,(npw_k))
-! call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
  call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 !
 !================================
@@ -564,5 +689,194 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 
  DBG_EXIT("COLL")
 
-end subroutine ks_ddiago
+end subroutine ksdiago
+!!***
+!----------------------------------------------------------------------
+
+!!****f* m_ksdiago/init_ddiago_ctl
+!! NAME
+!!  init_ddiago_ctl
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_shirley,outkss
+!!
+!! CHILDREN
+!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!
+!! SOURCE
+
+subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
+& nband_k,istwf_k,ecutsm,effmass_free,abstol,range,ilu,vlu,use_scalapack,prtvol)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'init_ddiago_ctl'
+ use interfaces_14_hidewrite
+ use interfaces_51_manage_mpi
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: isppol,nspinor
+ integer,optional,intent(in) :: istwf_k,prtvol,use_scalapack,nband_k
+ real(dp),intent(in) :: ecut
+ real(dp),optional,intent(in) :: ecutsm,effmass_free
+ real(dp),optional,intent(in) :: abstol
+ character(len=*),intent(in) :: jobz
+ character(len=*),optional,intent(in) :: range
+ type(ddiago_ctl_type),intent(out) :: Dctl
+!arrays
+ integer,intent(in) :: nloalg(3)
+ integer,optional,intent(in) :: ilu(2)
+ real(dp),intent(in) :: kpoint(3)
+ real(dp),optional,intent(in) :: vlu(2)
+ real(dp),intent(in) :: gmet(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: npw_k
+ logical :: ltest
+ character(len=500) :: msg
+ type(MPI_type) :: MPI_enreg_seq
+!arrays
+ integer,allocatable :: kg_k(:,:)
+
+! *************************************************************************
+
+ call initmpi_seq(MPI_enreg_seq) ! Fake MPI_type.
+
+ Dctl%isppol  = isppol
+ Dctl%nspinor = nspinor
+ Dctl%kpoint  = kpoint
+
+ if (PRESENT(istwf_k)) then
+  Dctl%istwf_k = istwf_k
+ else
+  Dctl%istwf_k = set_istwfk(kpoint)
+ end if
+
+ ABI_CHECK(Dctl%istwf_k==1,"istwf_k/=1 not coded")
+
+ Dctl%jobz   = toupper(jobz(1:1))
+ Dctl%range  = "A"
+ if (PRESENT(range)) then
+  Dctl%range = toupper(range)
+ end if
+
+ Dctl%ecut = ecut
+ Dctl%ecutsm = zero; if (PRESENT(ecutsm)) Dctl%ecutsm = ecutsm
+ Dctl%effmass_free = one; if (PRESENT(effmass_free)) Dctl%effmass_free = effmass_free
+ Dctl%nloalg  = nloalg
+ Dctl%prtvol = 0; if (PRESENT(prtvol)) Dctl%prtvol = prtvol
+ Dctl%abstol = -tol8; if (PRESENT(abstol)) Dctl%abstol = abstol
+
+ ABI_ALLOCATE(kg_k,(3,0))
+
+! * Total number of G-vectors for this k-point with istwf_k=1.
+ call kpgsph(ecut,0,gmet,0,0,1,kg_k,kpoint,0,MPI_enreg_seq,0,Dctl%npwtot)
+
+! * G-vectors taking into account time-reversal symmetry.
+ call kpgsph(ecut,0,gmet,0,0,istwf_k,kg_k,kpoint,0,MPI_enreg_seq,0,npw_k)
+
+ Dctl%npw_k = npw_k
+ ABI_DEALLOCATE(kg_k)
+
+ Dctl%do_full_diago = .FALSE.
+
+ SELECT CASE (Dctl%range)
+  CASE ("A")
+
+  ! Check on the number of stored bands.
+  Dctl%nband_k=-1
+  if (PRESENT(nband_k)) Dctl%nband_k=nband_k
+
+  if (Dctl%nband_k==-1.or.Dctl%nband_k>=npw_k*nspinor) then
+    Dctl%nband_k=npw_k*nspinor
+    write(msg,'(4a)')ch10,&
+&    'Since the number of bands to be computed was (-1) or',ch10,&
+&    'too large, it has been set to the max. value npw_k*nspinor. '
+    if (Dctl%prtvol>0) then
+      call wrtout(std_out,msg,'COLL')
+    end if
+  else
+    Dctl%nband_k=nband_k
+  end if
+
+  Dctl%do_full_diago = (Dctl%nband_k==npw_k*nspinor)
+
+  if (Dctl%do_full_diago) then
+    write(msg,'(6a)')ch10,&
+&    'Since the number of bands to be computed',ch10,&
+&    'is equal to the number of G-vectors found for this k-point,',ch10,&
+&    'the program will perform complete diagonalization.'
+  else
+    write(msg,'(6a)')ch10,&
+&     'Since the number of bands to be computed',ch10,&
+&     'is less than the number of G-vectors found,',ch10,&
+&     'the program will perform partial diagonalization.'
+  end if
+  if (Dctl%prtvol>0) then
+    call wrtout(std_out,msg,'COLL')
+  end if
+
+ CASE ("I")
+  if (.not.PRESENT(ilu)) then
+    MSG_ERROR(" ilu must be specified when range=I ")
+  end if
+  Dctl%ilu = ilu
+
+  ltest = ( ( ilu(2)>=ilu(1) ) .and. ilu(1)>=1 .and. ilu(2)<=Dctl%npwtot )
+  write(msg,'(a,2i0)')" Illegal value for ilu: ",ilu
+  ABI_CHECK(ltest,msg)
+  Dctl%nband_k= ilu(2)-ilu(1)+1
+
+ CASE ("V")
+  if (.not.PRESENT(vlu)) then
+    MSG_ERROR(" vlu must be specified when range=V ")
+  end if
+  Dctl%vlu = vlu
+
+  Dctl%nband_k=-1 !??
+
+  ltest = (vlu(2)>vlu(1))
+  write(msg,'(a,2f0.3)')" Illegal value for vlu: ",vlu
+  ABI_CHECK(ltest,msg)
+
+ CASE DEFAULT
+   msg = " Unknown value for range: "//TRIM(Dctl%range)
+   MSG_ERROR(msg)
+ END SELECT
+
+ ! Consider the case in which we asked for the entire set of eigenvectors
+ ! but the number of bands is less that npw_k. Therefore have to prepare the call to ZHEEVX.
+ ! TODO this has to be done in a cleaner way.
+ if (Dctl%range=="A".and. (.not.Dctl%do_full_diago)) then
+   Dctl%range="I"
+   Dctl%ilu(1) = 1
+   Dctl%ilu(2) = npw_k*nspinor
+   Dctl%nband_k= npw_k*nspinor
+ end if
+
+ Dctl%use_scalapack=0
+ if (PRESENT(use_scalapack)) then
+   Dctl%use_scalapack=use_scalapack
+ end if
+ ABI_CHECK(Dctl%use_scalapack==0," scalapack mode not coded")
+
+ call destroy_mpi_enreg(MPI_enreg_seq)
+
+end subroutine init_ddiago_ctl
+!!***
+
+end module m_ksdiago
 !!***

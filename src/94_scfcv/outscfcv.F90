@@ -136,7 +136,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use defs_datatypes
  use defs_wvltypes
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_sort
  use m_efield
@@ -153,6 +152,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_splines
  use m_ebands
 
+ use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith
  use m_geometry,         only : bonds_lgth_angles
@@ -177,19 +177,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_epjdos,           only : dos_calcnwrite, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
+ use m_io_kss,           only : outkss
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outscfcv'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_54_abiutil
  use interfaces_62_iowfdenpot
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_69_wfdesc
  use interfaces_70_gw
 !End of the abilint section
 

@@ -72,14 +72,14 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
  use m_wfk
  use m_wffile
 
- use m_io_tools,     only : get_unit
+ use m_time,      only : timab
+ use m_io_tools,  only : get_unit
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_56_io_mpi
  use interfaces_62_iowfdenpot, except_this_one => initwf
 !End of the abilint section

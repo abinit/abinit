@@ -167,6 +167,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  use defs_wvltypes
  use m_efield
  use m_profiling_abi
+
+ use m_time,             only : timab
  use m_fock,             only : fock_type
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
@@ -180,7 +182,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'etotfor'
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => etotfor
 !End of the abilint section

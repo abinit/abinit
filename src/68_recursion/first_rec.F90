@@ -64,12 +64,13 @@ subroutine first_rec(dtset,psps,rset)
  use m_profiling_abi
  use m_errors
 
- use m_rec,only         : init_nlpsprec,cpu_distribution
- use m_rec_tools,only   : get_pt0_pt1,reshape_pot
+ use m_time,       only : timein, timab
+ use m_rec,        only : init_nlpsprec,cpu_distribution
+ use m_rec_tools,  only : get_pt0_pt1,reshape_pot
+ use m_xmpi,       only:  xmpi_sum
 #if defined HAVE_GPU_CUDA
  use m_initcuda,only    : cudap
  use m_hidecudarec,only : cudarec,CleanRecGPU
- use m_xmpi,only	: xmpi_sum
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
@@ -77,7 +78,6 @@ subroutine first_rec(dtset,psps,rset)
 #undef ABI_FUNC
 #define ABI_FUNC 'first_rec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_recursion, except_this_one => first_rec
 !End of the abilint section
 

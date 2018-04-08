@@ -18,8 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "bound.F90",
- "getng.F90",
  "indirect_parallel_Fourier.F90",
  "m_fftw3.F90",
  "m_dfti.F90",
@@ -27,7 +25,6 @@ sources = [
  "m_fft_mesh.F90",
  "m_sgfft.F90",
  "m_sg2002.F90",
- "sphereboundary.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -39,6 +39,8 @@ use m_errors
 use m_profiling_abi
 use m_bandfft_kpt
 
+use m_time,      only : timab
+
 implicit none
 save
 private
@@ -106,7 +108,6 @@ subroutine Pk(psi_inout,omega)
 #undef ABI_FUNC
 #define ABI_FUNC 'Pk'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

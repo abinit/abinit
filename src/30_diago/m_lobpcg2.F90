@@ -14,6 +14,8 @@ module m_lobpcg2
   use omp_lib
 #endif
 
+  use m_time, only : timab 
+
   implicit none
 
   private
@@ -134,7 +136,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_init'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
@@ -326,7 +327,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_run'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -620,7 +620,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_orthoXwrtBlocks'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -662,7 +661,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_Borthonormalize'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t), intent(inout) :: lobpcg
@@ -756,7 +754,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_rayleighRitz'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -1059,7 +1056,6 @@ module m_lobpcg2
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcg_getResidu'
- use interfaces_18_timing
 !End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg

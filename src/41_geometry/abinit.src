@@ -41,7 +41,6 @@ sources = [
  "polcart.F90",
  "prtspgroup.F90",
  "ptgmadata.F90",
- "remove_inversion.F90",
  "smallprim.F90",
  "spgdata.F90",
  "stresssym.F90",

@@ -23,7 +23,6 @@ sources = [
  "fourdp.F90",
  "fourdp_6d.F90",
  "fourwf.F90",
- "kgindex.F90",
  "m_fft.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

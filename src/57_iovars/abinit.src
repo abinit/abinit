@@ -21,7 +21,6 @@ sources = [
  "chkinp.F90",
  "chkvars.F90",
  "compute_kgb_indicator.F90",
- "getdim_nloc.F90",
  "finddistrproc.F90",
  "indefo.F90",
  "indefo1.F90",
@@ -35,8 +34,6 @@ sources = [
  "invars1m.F90",
  "invars2.F90",
  "invars2m.F90",
- "macroin.F90",
- "macroin2.F90",
  "m_memeval.F90",
  "mpi_setup.F90",
  "m_ab7_invars_f90.F90",
@@ -48,8 +45,6 @@ sources = [
  "m_outxml.F90",
  "out_acknowl.F90",
  "prtocc.F90",
- "prttagm.F90",
- "prttagm_images.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

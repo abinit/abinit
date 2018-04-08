@@ -55,6 +55,7 @@ use m_profiling_abi
 use m_xmpi
 use m_cgtools
 
+use m_time,                only : timab
 use m_io_tools,            only: get_unit
 use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 
@@ -470,7 +471,6 @@ subroutine compute_eps_model_m1_minus_one(lmax_model, npt_gauss, second_model_pa
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_eps_model_m1_minus_one'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

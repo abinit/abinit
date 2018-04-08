@@ -38,7 +38,6 @@ program ujdet
  use defs_basis
  use defs_abitypes
  use defs_datatypes
- use defs_parameters
  use m_xmpi
  use m_profiling_abi
  use m_build_info

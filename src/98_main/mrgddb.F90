@@ -59,18 +59,16 @@ program mrgddb
  use m_xmpi
  use m_ddb_hdr
 
- use m_time ,        only : asctime
+ use m_time ,        only : asctime, timein
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
- use m_ddb,          only : DDB_VERSION
+ use m_ddb,          only : DDB_VERSION, mblktyp1, mblktyp5
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mrgddb'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -198,7 +196,7 @@ program mrgddb
      write(std_out,'(a,a)' )' ',trim(filnam(2))
    else
      do iddb=1,nddb
-       !Added to catch error message if the number of input ddbs is greater than the 
+       !Added to catch error message if the number of input ddbs is greater than the
        !actually number of ddb files entered by the user.
        read(std_in, '(a)',IOSTAT =ios ) filnam(iddb+1)
        if (ios < 0) then
@@ -206,8 +204,8 @@ program mrgddb
 &         'The number of input ddb files: ',nddb,' exceeds the number ',&
 &         'of ddb file names.', ch10, &
 &         'Action: change the number of ddb files in the mrgddb input file.'
-         MSG_ERROR(msg) 
-       else 
+         MSG_ERROR(msg)
+       else
          write(std_out,*)' Give name for derivative database number',iddb,' : '
          write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
        end if
@@ -230,13 +228,10 @@ program mrgddb
  ! msym = maximum number of symmetry elements in space group
  mblktyptmp=1
  do iddb=1,nddb
-   call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,&
-&   dimonly=1)
+   call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,dimonly=1)
 
-   if(ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
-
+   if (ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
    call ddb_hdr_free(ddb_hdr)
-
  end do
 
  mblktyp = mblktyptmp

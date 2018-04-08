@@ -80,11 +80,12 @@ subroutine dotprodm_v(cplex,cpldot,dot,index1,index2,mpicomm,mpi_summarize,&
  use m_errors
  use m_xmpi
 
+ use m_time,           only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dotprodm_v'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -48,12 +48,13 @@ MODULE m_shirley
  use m_abilasi,        only : xheev, xhegv, xheevx, xhegvx
  use m_fft_mesh,       only : fft_check_rotrans, setmesh
  use m_geometry,       only : normv, vdotw
- use m_fftcore,        only : get_kg
+ use m_fftcore,        only : get_kg, kgindex
+ use m_kg,             only : mkkpg
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : kmesh_t, get_BZ_item, make_mesh, kmesh_free, kpath_t
  use m_ebands,         only : pack_eneocc, ebands_init, ebands_ncwrite, ebands_free
- use m_hamiltonian,    only : ddiago_ctl_type, init_ddiago_ctl, destroy_hamiltonian, init_hamiltonian, &
+ use m_hamiltonian,    only : destroy_hamiltonian, init_hamiltonian, &
 &                             load_spin_hamiltonian,load_k_hamiltonian, gs_hamiltonian_type
  use m_wfd,            only : wfd_get_ur, wfd_t, wfd_barrier, wfd_get_cprj, wfd_barrier, wfd_change_ngfft, wfd_print,&
 &                             wfd_sym_ur, wfd_init, wfd_push_ug, wfd_reset_ur_cprj, wfd_ihave_ur, wfd_free,&
@@ -67,6 +68,7 @@ MODULE m_shirley
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free, pawpwij_t, pawpwij_init,&
 &                             pawpwij_free, paw_rho_tw_g
  use m_pawfgr,         only : pawfgr_type
+ use m_ksdiago,        only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
 
  implicit none
 
@@ -1980,7 +1982,6 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
 #undef ABI_FUNC
 #define ABI_FUNC 'shirley_interp'
  use interfaces_14_hidewrite
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -2302,7 +2303,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
        ABI_MALLOC(copy_vtrial,(nfftf,nspden))
        copy_vtrial = vtrial ! To avoid intent inout
 
-       call ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
+       call ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 &        Cryst%typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
 &        Psps,Cryst%rprimd,copy_vtrial,Cryst%xred,onband_diago,diag_ene,&
 &        diag_vec,diag_Cprj,xmpi_comm_self,ierr)
@@ -2807,7 +2808,6 @@ subroutine wfd_shirley_to_eh(Wsh,Cryst,Psps,Pawtab,Pawang,Pawrad,min_bsize,eh_co
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_shirley_to_eh'
  use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

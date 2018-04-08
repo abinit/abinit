@@ -227,6 +227,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  use m_xc_vdw
  use libxc_functionals
 
+ use m_time,             only : timab
  use m_geometry,         only : metric
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
@@ -234,7 +235,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotoxc'
- use interfaces_18_timing
  use interfaces_41_xc_lowlevel
  use interfaces_56_xc, except_this_one => rhotoxc
 !End of the abilint section

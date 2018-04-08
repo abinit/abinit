@@ -31,11 +31,9 @@ module m_scfcv
  use defs_basis
  use m_profiling_abi
  use m_errors
-
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use defs_parameters
  use defs_rectypes
  use m_wffile
  use m_rec

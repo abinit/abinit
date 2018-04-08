@@ -107,6 +107,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use libxc_functionals
  use m_wfd
 
+ use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa
  use m_blas,          only : xdotc
@@ -153,7 +154,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #undef ABI_FUNC
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_64_psp
@@ -713,45 +713,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call timab(404,2,tsec) ! rdkss
  call timab(405,1,tsec) ! Init2
-
-!Debugging section.
-!if (.TRUE.) then
- if (.FALSE.) then
-!
-   if (.FALSE..and.Wfd%usepaw==1) then
-     ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
-     call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-     ABI_DT_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
-     call pawcprj_alloc(Cp2,0,Wfd%nlmn_atm)
-
-     call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
-
-     do spin=1,Wfd%nsppol
-       do ik_bz=1,Kmesh%nbz
-         ik_ibz=Kmesh%tab(ik_bz)
-         do band=1,Wfd%nband(ik_ibz,spin)
-           call paw_check_symcprj(Wfd,ik_bz,band,spin,1,Cryst,Kmesh,Psps,Pawtab,Pawang,Cp1)
-           call paw_check_symcprj(Wfd,ik_bz,band,spin,2,Cryst,Kmesh,Psps,Pawtab,Pawang,Cp2)
-
-           do iat=1,Cryst%natom
-             do isp=1,Wfd%nspinor
-               write(789,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp1(iat,isp)%cp
-               write(790,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp2(iat,isp)%cp
-               write(791,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp1(iat,isp)%cp(1,:)**2 + Cp1(iat,isp)%cp(2,:)**2
-               write(792,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp2(iat,isp)%cp(1,:)**2 + Cp2(iat,isp)%cp(2,:)**2
-             end do
-           end do
-         end do
-       end do
-     end do
-
-     call pawcprj_free(Cp1)
-     ABI_DT_FREE(Cp1)
-     call pawcprj_free(Cp2)
-     ABI_DT_FREE(Cp2)
-   end if
-
- end if
 
  ! ==============================================================
  ! ==== Find little group of the k-points for GW corrections ====

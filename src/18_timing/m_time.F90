@@ -4,9 +4,11 @@
 !! m_time
 !!
 !! FUNCTION
+!! This module contains accumulators for the timer.
+!! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, XG, MT)
+!! Copyright (C) 2009-2018 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +31,7 @@ MODULE m_time
 #endif
 
  use m_xpapi,    only: xpapi_flops
- use m_fstrings, only: char_count 
+ use m_fstrings, only: char_count
 
  implicit none
 
@@ -45,11 +47,45 @@ MODULE m_time
  public :: abi_wtime     ! Returns wall clock time in seconds since some arbitrary start.
  public :: abi_cpu_time  ! Returns cpu time in seconds since some arbitrary start.
  public :: cwtime        ! Returns cpu, wall clock time and gflops
+ ! FIXME: Deprecated Should be replaced by cwtime
+ public :: timein
+ public :: time_accu
+ public :: timab
+ public :: time_set_papiopt
+ public :: time_get_papiopt
+
 !!***
 
-!----------------------------------------------------------------------
+ ! papiopt is a flag which indicates if there is or not an analysis of speed execution is made.
+ ! By defaut the analysis is not done
+ integer,private,save :: papiopt=0
 
-CONTAINS  !===========================================================
+ !==================
+ ! Counter variables
+ !==================
+
+ ! TIMER_SIZE determines the maximum number of "timing slots" available
+ integer,public,parameter :: TIMER_SIZE=1999
+
+ ! timeopt is a flag which indicates the suppression or not of the timing.
+ integer,private,save :: timopt=1
+
+ ! Number of times that the routine has been called
+ integer,private,save :: ncount(TIMER_SIZE)=0
+
+ ! Accumulating cpu time (1) and wall to wall time (2) for each "timing slots"
+ real(dp),private,save  :: acctim(2,TIMER_SIZE)=zero,tzero(2,TIMER_SIZE)=zero
+
+ ! Accumulating number of floating point operation and cpu time (1) and wall time (2) for each "performance slot"
+ real(dp),private,save :: papi_accflops(TIMER_SIZE)=zero, papi_acctim(2,TIMER_SIZE)=zero
+
+ ! Reference value for number of floating point operation and time (cpu and wall) for each performance slot
+ real(dp),private,save :: papi_flops(TIMER_SIZE)=zero , papi_tzero(2,TIMER_SIZE)=zero
+
+ ! Elapsed time and elapsed number of floating point operation since a reference
+ real(dp),private,save :: papi_tottim(2,TIMER_SIZE)=zero, papi_totflops(TIMER_SIZE)=zero
+
+CONTAINS
 !!***
 
 !!****f* m_time/asctime
@@ -161,7 +197,7 @@ pure function sec2str(time_s) result(str)
 
 ! *************************************************************************
 
- days    = time_s / 86400 
+ days    = time_s / 86400
  hours   = MOD(time_s,86400._dp) / 3600
  minutes = MOD(time_s,3600._dp) / 60
  seconds = MOD(time_s,60._dp)
@@ -186,7 +222,7 @@ end function sec2str
 !!  str2sec
 !!
 !! FUNCTION
-!!  Convert a string to time data in seconds. Return negative value if not valid string 
+!!  Convert a string to time data in seconds. Return negative value if not valid string
 !!  Accepts a string in one the following (SLURM) forms:
 !!
 !!     # "days-hours",
@@ -228,7 +264,7 @@ real(dp) pure function str2sec(str) result(time)
      read(str(dash+1:),*,err=1)hours
    else
      read(str(dash+1:),*,err=1)minutes
-   end if 
+   end if
 
  case (1)
    i = index(str, ":")
@@ -238,7 +274,7 @@ real(dp) pure function str2sec(str) result(time)
    else
      read(str(:i-1),*,err=1)minutes
      read(str(i+1:),*,err=1)seconds
-   end if 
+   end if
 
  case(2)
    i = index(str, ":")
@@ -248,13 +284,13 @@ real(dp) pure function str2sec(str) result(time)
    read(str(j+1:),*,err=1)seconds
 
  case default
-   time = -one; return 
+   time = -one; return
  end select
 
  time = 24 * 3600 * days + hours * 3600 + minutes * 60 + seconds
  return
 
-1 time = -one 
+1 time = -one
 
 end function str2sec
 !!***
@@ -320,7 +356,7 @@ function abi_cpu_time() result(cpu)
 #elif defined FC_SUN
  real :: tmp(2)
  real :: etime
-#elif defined FC_COMPAQ || defined HAVE_OS_MACOSX 
+#elif defined FC_COMPAQ || defined HAVE_OS_MACOSX
  real :: tmp(2) !real array only needed by etime
  real(dp) :: etime
 #else
@@ -472,7 +508,7 @@ end function abi_wtime
 !! INPUTS
 !!  start_or_stop=
 !!    "start" to start the timers
-!!    "stop" to stop the timers and return the final cpu_time and wall_time 
+!!    "stop" to stop the timers and return the final cpu_time and wall_time
 !!
 !! OUTPUT
 !!  cpu= cpu time in seconds
@@ -483,7 +519,7 @@ end function abi_wtime
 !!  Example:
 !!  ! Init cpu and wall
 !!  call cwtime(cpu,wall,gflops,"start")
-!! 
+!!
 !!  do_stuff()
 !!
 !!  ! stop the counters, return cpu- and wall-time spent in do_stuff()
@@ -524,7 +560,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
 #else
  logical,parameter :: use_papi=.TRUE.
 #endif
- integer(C_INT)  :: check 
+ integer(C_INT)  :: check
  integer(C_LONG_LONG) :: flops
  real(C_FLOAT) :: real_time,proc_time,mflops
 
@@ -539,7 +575,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
    cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
  end if
 
- CASE ("stop") 
+ CASE ("stop")
  if (use_papi) then
    call xpapi_flops(real_time,proc_time,flops,mflops,check)
    cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
@@ -552,6 +588,400 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
  END SELECT
 
 end subroutine cwtime
+!!***
+
+!!****f* m_time/timein
+!! NAME
+!!  timein
+!!
+!! FUNCTION
+!!  Timing routine. Returns cpu and wall clock time in seconds since some arbitrary start.
+!!  For wall clock time, call the F90 intrinsic date_and_time.
+!!
+!! INPUTS
+!!  (no inputs)
+!!
+!! OUTPUT
+!!  cpu= cpu time in seconds
+!!  wall= wall clock time in seconds
+!!
+!! NOTES
+!!  For CPU time, contains machine-dependent code (choice will be selected
+!!  by C preprocessor, see abi_cpu_time).
+!!
+!! TODO
+!!  Should be replaced by cwtime
+!!
+!! PARENTS
+!!      abinit,aim,aim_follow,anaddb,bsepostproc,conducti,cpdrv,cut3d,drvaim
+!!      elphon,first_rec,m_exit,mrgddb,mrgscr,multibinit,optic,rsurf,surf,timab
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine timein(cpu,wall)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'timein'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(out) :: cpu,wall
+! *************************************************************************
+
+ ! CPU time
+ cpu = abi_cpu_time()
+ ! Wall time
+ wall = abi_wtime()
+
+end subroutine timein
+!!***
+
+!!****f* m_time/time_accu
+!! NAME
+!!  time_accu
+!!
+!! FUNCTION
+!!  Return the number of times the counter has been called
+!!  and corresponding data for given index
+!!
+!! INPUTS
+!!  nn=index of accumulator (distinguish what is being timed);
+!!
+!! OUTPUT
+!!  tottim(2)=accumulated time for accumulator nn
+!!  totftimes(2)=accumulated time for accumulator nn evaluated by papi
+!!  totffops =accumulated number of flops for accumulator nn evaluated by papi
+!!  return_ncount gives the number of times that the accumulator has been incremented
+!!
+!! PARENTS
+!!      timana
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'time_accu'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ integer,intent(out) :: return_ncount
+ real(dp),intent(out) :: totflops
+!arrays
+ real(dp),intent(out) :: totftimes(2),tottim(2)
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: message
+
+! *************************************************************************
+
+!Check that nn lies in sensible bounds
+ if (nn<0.or.nn>TIMER_SIZE) then
+   write(message,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
+   MSG_BUG(message)
+ end if
+
+!return accumulated time for nn
+ tottim(1)=acctim(1,nn)
+ tottim(2)=acctim(2,nn)
+
+!return accumulated number flops for nn
+ totflops = papi_accflops(nn)
+
+!return accumulated time for nn evaluated by papi
+ totftimes(1) = papi_acctim(1,nn)
+ totftimes(2) = papi_acctim(2,nn)
+ return_ncount=ncount(nn)
+
+end subroutine time_accu
+!!***
+
+!!****f* m_time/time_set_papiopt
+!! NAME
+!!  time_set_papiopt
+!!
+!! FUNCTION
+!!  Set the value of papiopt
+!!
+!! PARENTS
+!!      abinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine time_set_papiopt(opt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'time_set_papiopt'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: opt
+
+! *************************************************************************
+
+ papiopt = opt
+
+end subroutine time_set_papiopt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_time/time_get_papiopt
+!! NAME
+!!  time_get_papiopt
+!!
+!! FUNCTION
+!!  Return the value of papiopt
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function time_get_papiopt()
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'time_get_papiopt'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer :: time_get_papiopt
+
+! *************************************************************************
+
+ time_get_papiopt = papiopt
+
+end function time_get_papiopt
+!!***
+
+!!****f* m_time/timab
+!! NAME
+!!  timab
+!!
+!! FUNCTION
+!!  Timing subroutine. Calls machine-dependent "timein" which returns elapsed cpu and wall clock times in sec.
+!!  Depending on value of "option" routine will:
+!!
+!!  (0) zero all accumulators
+!!  (1) start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
+!!  (2) stop time slice; add time to accumulator n also increase by one the counter for this accumulator
+!!  (3) start with new incremental time slice for accumulator n
+!!        using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
+!!  (4) report time slice for accumlator n (not full time accumlated)
+!!  (5) option to suppress timing (nn should be 0) or reenable it (nn /=0)
+!!
+!!  If, on first entry, subroutine is not being initialized, it
+!!  will automatically initialize as well as rezero accumulator n.
+!!  However, initialization SHOULD be done explicitly by the user
+!!  so that it can be done near the top of his/her main routine.
+!!
+!! INPUTS
+!!  nn=index of accumulator (distinguish what is being timed); NOT used if option=0
+!!  option=see comment above
+!!
+!! OUTPUT
+!!  on option=4 :
+!!    tottim(2,nn)=accumulated time for accumulator nn; otherwise
+!!     tottim is a dummy variable.
+!!    option gives the number of times that the
+!!     accumulator has been incremented
+!!
+!! PARENTS
+!!      abinit,afterscfloop,atm2fft,bethe_salpeter,calc_sigc_me,calc_sigx_me
+!!      calcdensph,cchi0,cgq_builder,cgwf,chebfi,cohsex_me,corrmetalwf1,d2frnl
+!!      density_rec,dfpt_cgwf,dfpt_dyfro,dfpt_dyxc1,dfpt_eltfrhar,dfpt_eltfrkin
+!!      dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_looppert,dfpt_mkrho
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_newvtr,dfpt_nstdy
+!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_rhotov,dfpt_scfcv,dfpt_vtorho
+!!      dfpt_vtowfk,dfpt_wfkfermi,dfptnl_loop,dielmt,dieltcel,dmft_solve
+!!      dotprodm_v,dotprodm_vn,driver,dyson,eig2stern,eig2tot,elt_ewald
+!!      eltxccore,energy,entropyrec,etotfor,exc_build_block,exc_build_ham
+!!      fermisolverec,first_rec,fock2ACE,fock_getghc,forces,forstr,forstrnps
+!!      fourdp,fourwf,fxphas,getgh1c,getghc,getgsc,getngrec,gran_potrec
+!!      green_kernel,gstate,gstateimg,gwls_ComputeCorrelationEnergy
+!!      gwls_DielectricArray,gwls_QR_factorization,gwls_lineqsolver
+!!      gwls_model_polarisability,gwls_polarisability,gwls_sternheimer,hartre
+!!      impurity_solve,initberry,initorbmag,initwf,inkpts,invars2,inwffil
+!!      listkk,lobpcgwf,m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver
+!!      m_fftcore,m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf
+!!      m_lobpcg,m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg
+!!      m_xgScalapack,mag_constr,mkcore,mkcore_paw,mkcore_wvl,mkffnl
+!!      mklocl_realspace,mklocl_recipspace,mkresi,mkrho,newkpt,newocc,newrho
+!!      newvtr,nhatgrid,nlenergyrec,nonlinear,nonlop,odamix,opernla_ylm
+!!      optics_paw,optics_paw_core,optics_vloc,outkss,outscfcv,pareigocc
+!!      partial_dos_fractions_paw,pawdenpot,pawdfptenergy,pawinit,pawmknhat
+!!      pawmknhat_psipsi,pawmkrho,pawpolev,prep_bandfft_tabs,prep_calc_ucrpa
+!!      prep_fourwf,prep_getghc,prep_nonlop,pspatm,pspheads_comm,pspini
+!!      pw_orthon,rayleigh_ritz,recursion,recursion_nl,respfn,rhotov,rhotoxc
+!!      rwwf,scfcv,screening,setsym,setvtr,sigma,sqnormm_v,status,stress,strhar
+!!      suscep_stat,susk,suskmm,symrhg,symsgcube,tddft,timana,vn_nl_rec,vtorho
+!!      vtorhorec,vtorhotf,vtowfk,wf_mixing,wfconv,wfk_analyze,wfsinp
+!!      wvl_nhatgrid,xcden,xcpot
+!!
+!! CHILDREN
+!!      papif_flops,papif_perror,timein
+!!
+!! SOURCE
+!!
+
+subroutine timab(nn,option,tottim)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'timab'
+!End of the abilint section
+
+ implicit none
+
+#ifdef HAVE_PAPI
+#include "f90papi.h"
+#endif
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nn,option
+!arrays
+ real(dp),intent(out) :: tottim(2)
+
+!Local variables-------------------------------
+!scalars
+ real(dp),save :: cpu,wall
+ character(len=500) :: message
+#ifdef HAVE_PAPI
+ integer(C_INT) :: check
+ integer(C_LONG_LONG),save :: flops1
+ real(C_FLOAT),save :: real_time,proc_time
+ real(C_FLOAT) :: mflops1
+ character(len=PAPI_MAX_STR_LEN) :: papi_errstr
+#endif
+! *************************************************************************
+
+ if (option==5) timopt=nn
+
+!If timopt was set to zero by a call with option=5, suppress
+!all action of this routine (might as well return at this point !)
+ if(timopt/=0 .and. option/=5)then
+   ! Check that nn lies in sensible bounds
+   if (nn<1.or.nn>TIMER_SIZE) then
+     write(message,'(a,i0,a,i0)')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
+     MSG_BUG(message)
+   end if
+
+#ifdef HAVE_PAPI
+   ! for all active options for time if papi analysis has been selected.
+   if (option/=3.and.time_get_papiopt()==1) then
+     call PAPIf_flops(real_time, proc_time, flops1, mflops1, check)
+     if (check /= PAPI_OK) then
+       call papif_perror(check,papi_errstr,check)
+       write(std_out,*) 'Problem to initialize papi high level inteface'
+       write(std_out,*) 'Error code', papi_errstr
+     end if
+     if (flops1 < 0) then
+       MSG_WARNING("Number of floating point instruction Overflow")
+       papi_flops(:)=-1
+     end if
+   end if
+#endif
+
+   select case (option)
+   case (0)
+     ! Zero out all accumulators of time and init timers
+     acctim(:,:)      = 0.0d0
+     tzero(:,:)       = 0.0d0
+     ncount(:)        = 0
+     papi_flops(:)    = 0
+     papi_acctim(:,:) = 0.
+     papi_accflops(:) = 0.
+     papi_tzero(:,:)  = 0.
+
+   case (1)
+     ! Initialize timab for nn
+     call timein(cpu,wall)
+     tzero(1,nn)=cpu
+     tzero(2,nn)=wall
+#ifdef HAVE_PAPI
+     papi_flops(nn)   = flops1       ! Initialize megaflops for nn
+     papi_tzero(1,nn) = proc_time
+     papi_tzero(2,nn) = real_time
+#endif
+
+   case (2)
+     ! Accumulate time for nn (also keep the values of cpu, wall, proc_time, real_time, flops1)
+     call timein(cpu,wall)
+     acctim(1,nn)=acctim(1,nn)+cpu -tzero(1,nn)
+     acctim(2,nn)=acctim(2,nn)+wall-tzero(2,nn)
+     ncount(nn)=ncount(nn)+1
+#ifdef HAVE_PAPI
+     ! accumulate time and flops for nn Difference between 2 calls to Papif_flops
+     papi_acctim(1,nn)=papi_acctim(1,nn)+ proc_time - papi_tzero(1,nn)
+     papi_acctim(2,nn)=papi_acctim(2,nn)+ real_time - papi_tzero(2,nn)
+     papi_accflops(nn)=papi_accflops(nn)+ flops1- papi_flops(nn)
+#endif
+
+   case (3)
+     ! Use previously obtained values to initialize timab for nn
+     tzero(1,nn)=cpu
+     tzero(2,nn)=wall
+#ifdef HAVE_PAPI
+     papi_flops(nn)=flops1
+     papi_tzero(1,nn) = proc_time
+     papi_tzero(2,nn) = real_time
+#endif
+
+   case (4)
+     ! Return elapsed time for nn (do not accumulate)
+     call timein(cpu,wall)
+     tottim(1)=cpu-tzero(1,nn)
+     tottim(2)=wall-tzero(2,nn)
+#ifdef HAVE_PAPI
+     ! return elapsed floating point operationfor nn (do not accumulate)
+     papi_tottim(1,nn)= proc_time - papi_tzero(1,nn)
+     papi_tottim(2,nn)= real_time - papi_tzero(2,nn)
+     papi_totflops(nn)= flops1 - papi_flops(nn)
+#endif
+
+   case default
+     write(message,'(a,i10,a)')'  Input option not valid, =',option,'.'
+     MSG_BUG(message)
+   end select
+ end if
+
+end subroutine timab
 !!***
 
 END MODULE m_time

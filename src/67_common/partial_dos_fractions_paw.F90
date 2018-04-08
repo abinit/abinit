@@ -74,6 +74,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  use m_errors
  use m_profiling_abi
 
+ use m_time,    only : timab
  use m_pawrad,  only : pawrad_type, simp_gen
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
@@ -83,7 +84,6 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions_paw'
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 

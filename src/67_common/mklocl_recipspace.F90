@@ -85,6 +85,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  use m_errors
  use m_xmpi
 
+ use m_time,     only : timab
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
 
@@ -93,7 +94,6 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mklocl_recipspace'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_53_ffts
 !End of the abilint section
 
