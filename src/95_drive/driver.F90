@@ -589,7 +589,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call libxc_functionals_init(dtset%ixc,dtset%nspden)
 
 #if defined DEV_YP_VDWXC
-     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) ) then
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
        vdw_params%functional = dtset%vdw_xc
        vdw_params%acutmin = dtset%vdw_df_acutmin
        vdw_params%aratio = dtset%vdw_df_aratio
@@ -636,8 +636,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      end if
 #else
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
-       write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet. &
-&      The calculation will proceed without adding any vdW energy contribution',ch10
+       write(message,'(7a)') ch10,'vdW-DF functionals are not fully operational yet.', &
+&      ch10, 'The calculation will proceed without adding',ch10, 'any vdW-DF energy contribution',ch10
      MSG_WARNING(message)
      end if
 #endif

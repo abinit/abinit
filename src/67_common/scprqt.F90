@@ -500,9 +500,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      call xc_vdw_trigger( (abs(deltae)<vdw_df_threshold) )
 #endif
 !    Here treat the tolwfr criterion : if maximum residual is less than
-!    Here treat the tolwfr criterion : if maximum residual is less than!    input tolwfr, stop steps (exit loop here)
-!    Here treat the tolwfr criterion : if maximum residual is less than     if( ttolwfr==1 .and. residm<tolwfr .and. (.not.noquit)) then
-!    Here treat the tolwfr criterion : if maximum residual is less than       if (dtset%usewvl == 0) then
+!    input tolwfr, stop steps (exit loop here)
+     if( ttolwfr==1 .and. residm<tolwfr .and. (.not.noquit)) then
+       if (dtset%usewvl == 0) then
          write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
 &         ' At SCF step',istep,'   max residual=',residm,' < tolwfr=',tolwfr,' =>converged.'
        else
