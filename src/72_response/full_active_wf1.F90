@@ -74,6 +74,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
  use m_errors
  use m_profiling_abi
  use m_cgtools
+ use m_time, only : timab
 
  use m_pawcprj, only : pawcprj_type, pawcprj_copy, pawcprj_zaxpby
 
@@ -81,7 +82,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'full_active_wf1'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
