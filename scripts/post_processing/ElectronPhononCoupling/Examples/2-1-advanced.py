@@ -1,9 +1,10 @@
 """
-Compute the zero-point renormalization (ZPR) using the dynamical AHC theory
-(ieig2rf=5).
+Initialize the EpcAnalyzer object and call specific functions
+before writing the netCDF file. Only two functions are being called
+in this example, but the user may look up the list of functions available.
 """
 
-from ElectronPhononCoupling import compute
+from ElectronPhononCoupling import EpcAnalyzer
 
 
 # Lists of files used
@@ -36,18 +37,16 @@ Calculations/01-LiF-dynamical/odat_calc_DS15_GKK.nc
 eigk_fname = 'Calculations/01-LiF-dynamical/odat_calc_DS3_EIG.nc'
 
 
-# Computation of the ZPR
-# ======================
+# Initialization and computation
+# ==============================
 
-epc = compute(
-    renormalization=True,   # Compute the eigenvalues renormalization
-    broadening = False,       # Do not compute broadening
-    temperature = False,    # Compute only at T=0
+epca = EpcAnalyzer(
 
-    write = True,           # Do write the results
-    rootname = 'Out/1-1',   # Rootname for the output
+    rootname = 'Out/2-1',   # Rootname for the output
     
-    smearing_eV = 0.01,     # Imaginary parameter for broadening.
+    smearing_eV = 0.10,               # Imaginary parameter for broadening.
+    omega_range = [-0.1, 0.1, 0.001], # Frequency range in Ha (min, max, step)
+    temp_range = [0, 1000, 250],      # Temperature range (min, max, step)
 
     nqpt = 3,                   # Number of q-points (2x2x2 qpt grid)
     wtq = [0.125, 0.5, 0.375],  # Weights of the q-points.
@@ -57,7 +56,16 @@ epc = compute(
     eigk_fname = eigk_fname,        # All the files needed for
     eigq_fnames = eigq_fnames,      # this calculation.
     ddb_fnames = ddb_fnames,        #
-    eigr2d_fnames = eigr2d_fnames,  #
     gkk_fnames = gkk_fnames,        #
+    eigr2d_fnames = eigr2d_fnames,  #
     )
 
+
+# Compute the temperature-dependent dynamical self-energy.
+epca.compute_td_self_energy()
+
+# Compute the mode-by-mode decomposition of the zero-point renormalization.
+epca.compute_dynamical_zp_renormalization_modes()
+
+# Write the result in a netCDF file.
+epca.write_netcdf()

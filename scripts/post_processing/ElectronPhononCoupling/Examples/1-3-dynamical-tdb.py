@@ -1,6 +1,6 @@
 """
-Compute the zero-point renormalization (ZPR) using the dynamical AHC theory
-(ieig2rf=5).
+Compute the temperature-dependent broadening
+using the dynamical AHC theory (ieig2rf=5).
 """
 
 from ElectronPhononCoupling import compute
@@ -21,12 +21,6 @@ Calculations/01-LiF-dynamical/odat_calc_DS10_EIG.nc
 Calculations/01-LiF-dynamical/odat_calc_DS14_EIG.nc
 """.split()
 
-eigr2d_fnames = """
-Calculations/01-LiF-dynamical/odat_calc_DS7_EIGR2D.nc
-Calculations/01-LiF-dynamical/odat_calc_DS11_EIGR2D.nc
-Calculations/01-LiF-dynamical/odat_calc_DS15_EIGR2D.nc
-""".split()
-
 gkk_fnames = """
 Calculations/01-LiF-dynamical/odat_calc_DS7_GKK.nc
 Calculations/01-LiF-dynamical/odat_calc_DS11_GKK.nc
@@ -36,18 +30,18 @@ Calculations/01-LiF-dynamical/odat_calc_DS15_GKK.nc
 eigk_fname = 'Calculations/01-LiF-dynamical/odat_calc_DS3_EIG.nc'
 
 
-# Computation of the ZPR
+# Computation of the TDB
 # ======================
 
 epc = compute(
-    renormalization=True,   # Compute the eigenvalues renormalization
-    broadening = False,       # Do not compute broadening
-    temperature = False,    # Compute only at T=0
+    renormalization=False, # Do not compute the eigenvalues renormalization
+    broadening = True,       # Do compute broadening
+    temperature = True,    # Compute at several temperatures
 
     write = True,           # Do write the results
-    rootname = 'Out/1-1',   # Rootname for the output
-    
-    smearing_eV = 0.01,     # Imaginary parameter for broadening.
+    rootname = 'Out/1-3',   # Rootname for the output
+
+    smearing_eV = 0.01,         # Imaginary parameter for broadening.
 
     nqpt = 3,                   # Number of q-points (2x2x2 qpt grid)
     wtq = [0.125, 0.5, 0.375],  # Weights of the q-points.
@@ -57,7 +51,6 @@ epc = compute(
     eigk_fname = eigk_fname,        # All the files needed for
     eigq_fnames = eigq_fnames,      # this calculation.
     ddb_fnames = ddb_fnames,        #
-    eigr2d_fnames = eigr2d_fnames,  #
     gkk_fnames = gkk_fnames,        #
     )
 

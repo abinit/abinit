@@ -1,5 +1,5 @@
 """
-Compute the self-energy and the spectral function at zero temperature.
+Compute the temperature-dependent self-energy and spectral function.
 (ieig2rf=5)
 """
 
