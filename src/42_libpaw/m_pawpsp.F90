@@ -3480,7 +3480,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
    LIBPAW_ALLOCATE(vlocr,(vloc_mesh%mesh_size))
    shft=mesh_shift(ivlocmesh)
-   vlocr(1+shft:vloc_mesh%mesh_size)=paw_setup(ipsploc)%kresse_joubert_local_ionic_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
+   vlocr(1+shft:vloc_mesh%mesh_size)= &
+&   paw_setup(ipsploc)%kresse_joubert_local_ionic_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
    if (shft==1) call pawrad_deducer0(vlocr,vloc_mesh%mesh_size,vloc_mesh)
  else if(paw_setup(ipsploc)%zero_potential%tread) then
    usexcnhat=0;vlocopt=0
@@ -3532,7 +3533,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    LIBPAW_ALLOCATE(pawtab%vminushalf,(vloc_mesh%mesh_size))
    shft=mesh_shift(ivlocmesh)
    pawtab%vminus_mesh_size=vloc_mesh%mesh_size
-   pawtab%vminushalf(1+shft:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
+   pawtab%vminushalf(1+shft:vloc_mesh%mesh_size)= &
+&   paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size-shft)/sqrt(fourpi)
    if (shft==1) call pawrad_deducer0(pawtab%vminushalf,vloc_mesh%mesh_size,vloc_mesh)
    write(msg,'(a,i1)') &
 &   ' Radial grid used for LDA-1/2 potential is grid ',ivlocmesh
