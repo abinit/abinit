@@ -113,6 +113,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
+ use m_double_grid,     only : double_grid_t, double_grid_init
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -133,6 +134,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
+ type(hdr_type),intent(out) :: hdr_wfk_dense
+ type(double_grid_t) :: double_grid 
 !arrays
  real(dp),intent(in) :: acell(3),rprim(3,3),xred(3,dtset%natom)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
@@ -173,6 +176,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
+ real(dp),pointer :: energies_dense(:,:,:)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -573,6 +577,53 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ===========================================
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
 & pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+
+ ! =======================================
+ ! === Prepare Double grid integration ===
+ ! =======================================
+
+ ! 1. Read kpoints and eig from a WFK/EIG/GSR file
+ ! 2. Initialize a double grid object for the claculations
+ ! of the integration weights on a coarse grid using the
+ ! values of energy in a fine grid
+ !
+ ! -------------------
+ ! |. . .|. . .|. . .| 
+ ! |. x .|. x .|. x .| 
+ ! |. . .|. . .|. . .|
+ ! -------------------
+ ! . = double grid
+ ! x = coarse grid
+ !
+ ! The fine grid is used to evaluate the weights on the coarse grid
+ ! The points of the fine grid are associated to the points of the
+ ! coarse grid according to proximity
+ ! The integration weights are returned on the coarse grid.
+ ! The interface should be compatible with libtetrabz
+ ! 
+
+ wfk_fname_dense = dtfil%fnameabi_wfkfine
+ call wrtout(std_out,"EPH Interpolation: will read energies and kmesh from: "//trim(wfk_fname_dense),"COLL")
+
+ if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ dtfil%fnameabi_wfkfine = wfk_fname_dense
+ ! for preliminary tests we hardcode interp_kmult
+ ! then it should be calculated from hdr_wfk_dense%nkpt
+ ! it can also be read from the input file using BSp%interp_kmult
+ interp_kmult = 2
+
+ call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
+
+ call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,dtset%kptopt)
+
+ call double_grid_init(kmesh,kmesh_dense,dtset%kptrlatt,interp_kmult,double_grid)
+
+ ! create a function to check if double grid correctly finds the points 
+
+ ! end double grid stuff
 
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
