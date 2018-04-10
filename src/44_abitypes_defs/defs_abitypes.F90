@@ -490,6 +490,7 @@ type dataset_type
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
+ integer :: prtfull1wf
  integer :: prtfsurf
  integer :: prtgsr=1
  integer :: prtgden

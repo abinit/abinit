@@ -618,6 +618,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0
+   dtsets(idtset)%prtfull1wf=0
    dtsets(idtset)%prtfsurf=0
    dtsets(idtset)%prtgden=0
    dtsets(idtset)%prtgeo=0
