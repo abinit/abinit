@@ -108,6 +108,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+ use m_bz_mesh,         only : kmesh_t, kmesh_init 
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
@@ -134,8 +135,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
- type(hdr_type),intent(out) :: hdr_wfk_dense
- type(double_grid_t) :: double_grid 
 !arrays
  real(dp),intent(in) :: acell(3),rprim(3,3),xred(3,dtset%natom)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
@@ -147,6 +146,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
+ integer :: interp_kmult(3)
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
@@ -159,7 +159,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path,wfk_fname_dense
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
@@ -168,9 +168,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(dvdb_t) :: dvdb
  type(ddk_t) :: ddk
  type(ifc_type) :: ifc
+ type(kmesh_t) :: kmesh, kmesh_dense
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
+ type(hdr_type) :: hdr_wfk_dense
+ type(double_grid_t) :: double_grid 
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
@@ -602,25 +605,51 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! The interface should be compatible with libtetrabz
  ! 
 
- wfk_fname_dense = dtfil%fnameabi_wfkfine
- call wrtout(std_out,"EPH Interpolation: will read energies and kmesh from: "//trim(wfk_fname_dense),"COLL")
+ if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
+&         (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
+   write(*,*) dtfil%fnameabi_wfkfine
+   wfk_fname_dense = dtfil%fnameabi_wfkfine
+   call wrtout(std_out,"EPH Interpolation: will read energies and kmesh from: "//trim(wfk_fname_dense),"COLL")
 
- if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
-   MSG_ERROR(msg)
+   if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
+   call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
+
+   write(*,*) 'coarse:', wfk0_hdr%nkpt,wfk0_hdr%kptopt
+   write(*,*) 'shift:',  hdr_wfk_dense%shiftk
+   write(*,*) 'kpoints:'
+   do ii=1,wfk0_hdr%nkpt
+     write(*,*) wfk0_hdr%kptns(:,ii)
+   end do
+   write(*,*) 'dense: ', hdr_wfk_dense%nkpt,hdr_wfk_dense%kptopt
+   write(*,*) 'shift:',  hdr_wfk_dense%shiftk
+   write(*,*) 'kpoints:'
+   do ii=1,hdr_wfk_dense%nkpt
+     write(*,*) hdr_wfk_dense%kptns(:,ii)
+   end do
+
+   call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     dtset%kptopt)
+   call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,dtset%kptopt)
+
+   ! for preliminary tests we hardcode interp_kmult
+   ! then it should be calculated from hdr_wfk_dense%nkpt
+   ! it can also be read from the input file using BSp%interp_kmult
+   interp_kmult = 2
+   write(*,*) interp_kmult
+
+   kmesh%nshift = 1
+   kmesh_dense%nshift = 1
+   kmesh%shift = wfk0_hdr%shiftk
+   kmesh_dense%shift = hdr_wfk_dense%shiftk
+   write(*,*) 'init double grid'
+   call double_grid_init(kmesh,kmesh_dense,dtset%kptrlatt,interp_kmult,double_grid)
+   write(*,*) 'done'
+
+   call exit(0)
  end if
-
- dtfil%fnameabi_wfkfine = wfk_fname_dense
- ! for preliminary tests we hardcode interp_kmult
- ! then it should be calculated from hdr_wfk_dense%nkpt
- ! it can also be read from the input file using BSp%interp_kmult
- interp_kmult = 2
-
- call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
-
- call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,dtset%kptopt)
-
- call double_grid_init(kmesh,kmesh_dense,dtset%kptrlatt,interp_kmult,double_grid)
-
  ! create a function to check if double grid correctly finds the points 
 
  ! end double grid stuff
