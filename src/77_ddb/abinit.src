@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "alignph.F90",
  "complete_gamma.F90",
  "complete_gamma_tr.F90",
  "complete_gkk.F90",
@@ -38,7 +37,6 @@ sources = [
  "ep_setupqpt.F90",
  "freeze_displ_allmodes.F90",
  "ftgkk.F90",
- "gam_mult_displ.F90",
  "get_all_gkk2.F90",
  "get_all_gkq.F90",
  "get_all_gkr.F90",
@@ -77,9 +75,7 @@ sources = [
  "normsq_gkq.F90",
  "order_fs_kpts.F90",
  "ddb_piezo.F90",
- "prt_gkk_yambo.F90",
  "ramansus.F90",
- "rchkgsheader.F90",
  "read_el_veloc.F90",
  "read_gkk.F90",
  "relaxpol.F90",
