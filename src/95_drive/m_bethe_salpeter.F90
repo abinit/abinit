@@ -84,6 +84,7 @@ module m_bethe_salpeter
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_dmft,        only : paw_dmft_type
+ use m_exc_build,       only : exc_build_ham
 
  implicit none
 
