@@ -269,9 +269,8 @@ B.  Most noticeable achievements
 B.1 Implementation of algorithms to interpolate the electronic band structure,
     based either on "star functions" of on "B-splines" (as alternatives to Wannier function interpolation).
     See the input variables [[einterp]], [[nkpath]], and [[prtebands]], and tests 
-    old syntax: `Tlibxc#42, Tv8#04` replaced by `[[tests/libxc/Input/t41.in]], [[test:v8_04]]`
-    [[tests/libxc/Input/t41.in]], [[test:v8_04]] 
-    [[ac:abiref_gnu_5.3_debug.ac]]
+    old syntax: `Tlibxc#42, Tv8#04` replaced by 
+    [[tests/libxc/Input/t41.in]], [[test:v8_04]]. 
     Work by M. Giantomassi
 
 B.2 The Fock mixing factor for the HSE hybrid functional can be tuned thanks to the input variable gwfockmix  .

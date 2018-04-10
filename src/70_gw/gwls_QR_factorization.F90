@@ -49,7 +49,9 @@ use defs_wvltypes
 use m_profiling_abi
 use m_xmpi
 use m_errors
+
 use m_io_tools,  only : get_unit
+use m_time,      only : timab
 
 
 implicit none
@@ -107,7 +109,6 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extract_QR'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none
@@ -178,7 +179,6 @@ subroutine extract_SVD(mpi_communicator, Hsize,lsolutions_max,svd_matrix,svd_val
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extract_SVD'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

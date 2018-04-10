@@ -71,14 +71,14 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
- use m_bandfft_kpt,only : bandfft_kpt_type,bandfft_kpt,bandfft_kpt_get_ikpt
+ use m_bandfft_kpt, only : bandfft_kpt_type,bandfft_kpt,bandfft_kpt_get_ikpt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prep_fourwf'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_66_wfs, except_this_one => prep_fourwf
 !End of the abilint section

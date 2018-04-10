@@ -48,11 +48,13 @@ subroutine thmeig(inp, ddb, crystal, &
  use m_xmpi
  use m_sort
 
+ use m_geometry,       only : mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
+ use m_kpts,           only : getkgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -61,7 +63,6 @@ subroutine thmeig(inp, ddb, crystal, &
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -166,14 +167,14 @@ subroutine thmeig(inp, ddb, crystal, &
 !0) Initializations
 !=========================================================================
 
- 
+
  g2fsmear = inp%a2fsmear
- 
+
  telphint = inp%telphint
  temperinc = inp%temperinc
  tempermin = inp%tempermin
  thmflag = inp%thmflag
- 
+
  ntemper = inp%ntemper
  natifc = inp%natifc
 
@@ -185,9 +186,9 @@ subroutine thmeig(inp, ddb, crystal, &
  call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION)
 
  mband = ddb_hdr%mband
- nkpt = ddb_hdr%nkpt  
- ntypat = ddb_hdr%ntypat  
- 
+ nkpt = ddb_hdr%nkpt
+ ntypat = ddb_hdr%ntypat
+
  msym = ddb_hdr%msym
  nblok2 = ddb_hdr%nblok
  nsym = ddb_hdr%nsym
@@ -250,7 +251,7 @@ subroutine thmeig(inp, ddb, crystal, &
  !tnons = ddb_hdr%tnons  ! out
 
  !acell = ddb%acell
- !natom = ddb_hdr%natom  
+ !natom = ddb_hdr%natom
  acell = ddb_hdr%acell
  rprim = ddb_hdr%rprim
 

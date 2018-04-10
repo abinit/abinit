@@ -62,11 +62,12 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,         only : mkradim, metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xfpack_vin2x'
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => xfpack_vin2x
 !End of the abilint section
 

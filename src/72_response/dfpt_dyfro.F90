@@ -104,14 +104,15 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  use m_profiling_abi
  use m_errors
 
- use defs_datatypes,only : pseudopotential_type
- use m_pawtab,      only : pawtab_type
+ use m_time,          only : timab
+ use defs_datatypes,  only : pseudopotential_type
+ use m_pawtab,        only : pawtab_type
+ use m_fft,           only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_dyfro'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_64_psp

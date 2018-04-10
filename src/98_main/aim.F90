@@ -39,7 +39,6 @@
 program aim
 
  use defs_basis
- use defs_aimprom
  use defs_abitypes
  use m_profiling_abi
  use m_xmpi
@@ -50,16 +49,16 @@ program aim
  use netcdf
 #endif
 
+ use m_time,     only : timein
  use m_io_tools, only : open_file, file_exists
  use m_fstrings, only : int2char4
+ use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'aim'
- use interfaces_18_timing
- use interfaces_51_manage_mpi
- use interfaces_63_bader
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -245,11 +244,11 @@ program aim
  call xmpi_bcast (instr(1:lenstr), master, comm, ierr)
 
 !DEBUG
-!write(std_out,*) ' after inpar, infile= ',infile 
-!write(std_out,*) ' after inpar, dnfile= ',dnfile 
-!write(std_out,*) ' after inpar, ofile= ',ofile 
+!write(std_out,*) ' after inpar, infile= ',infile
+!write(std_out,*) ' after inpar, dnfile= ',dnfile
+!write(std_out,*) ' after inpar, ofile= ',ofile
 !do ii=1,nfcfile
-!write(std_out,*) ' after inpar, fcfile(',ii,')= ',fcfile(ii) 
+!write(std_out,*) ' after inpar, fcfile(',ii,')= ',fcfile(ii)
 !enddo
 !write(std_out,*) ' after inpar, instr= ',instr(1:lenstr)
 !write(std_out,*) ' after inpar, lenstr= ',lenstr
@@ -333,7 +332,7 @@ program aim
      hname(fin+2:fin+4)='pld'
      if (open_file(hname(1:fin+5),msg,unit=untp,status='unknown',form='formatted') /= 0) then
        MSG_ERROR(msg)
-     end if 
+     end if
    end if
 
  end if

@@ -32,9 +32,6 @@
 !! nogen = number of generators, number of operations to be applied onto
 !!  themselves
 !!
-!! NOTES
-!!
-!!
 !! PARENTS
 !!      symsgcube,symsghexa,symsgortho,symsgtetra
 !!

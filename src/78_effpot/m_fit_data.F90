@@ -27,11 +27,13 @@ module m_fit_data
  use defs_basis
  use m_errors
  use m_profiling_abi
+
+ use m_geometry,     only : metric
  
  implicit none
 !!***
 
-!!****t* defs_abitypes/training_set_type
+!!****t* m_fit_data/training_set_type
 !! NAME
 !! training_set_type
 !!
@@ -85,7 +87,7 @@ module m_fit_data
 
 !----------------------------------------------------------------------
  
-!!****t* defs_abitypes/fit_data_type
+!!****t* m_fit_data/fit_data_type
 !! NAME
 !! fit_data_type
 !!
@@ -316,7 +318,6 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_data_compute'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

@@ -117,7 +117,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  use m_hdr
 
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
- use m_time,         only : cwtime
+ use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file
  use m_blas,         only : xdotc, xgemv
  use m_geometry,     only : normv
@@ -139,7 +139,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_block'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
 !End of the abilint section
 
@@ -1769,7 +1768,6 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_v'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

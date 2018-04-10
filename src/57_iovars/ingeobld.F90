@@ -53,12 +53,13 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  use m_profiling_abi
  use m_errors
 
+ use m_parser,  only : intagm
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeobld'
  use interfaces_14_hidewrite
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -88,8 +89,6 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  real(dp) :: objbax(6),objbro(4),objbtr(12),parall(3),perpen(3),rotated(3)
  real(dp) :: vectora(3),vectorb(3)
  real(dp),allocatable :: typat_full(:),xcart_full(:,:)
-!no_abirules
-!Dummy arguments for subroutine 'intagm' to parse input file
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
 

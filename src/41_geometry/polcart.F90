@@ -40,10 +40,6 @@
 !! [-1,1] before it is transformed to cartesian coordinates.
 !! This means that in some cases, ptot_cart /= pel_cart + pion_cart
 !!
-!!
-!! SIDE EFFECTS
-!!
-!!
 !! NOTES
 !! - pel and pion do not take into account the factor 1/ucvol.
 !!   At the opposite, this factor is taken into account in

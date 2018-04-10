@@ -3,14 +3,15 @@ description: How to check for regressions.
 authors: XG
 ---
 
-This page gives hints on how to  with the ABINIT package.
+This page explains how portability and non-regression is managed in the ABINIT project.
 
 ## Introduction
 
 ABINIT is tested at each merge in the trunk, on a dedicated test farm, see
-[[http://dev.abinit.org/environment/buildbot/buildbot-slave-matrix]] and
-[[http://dev.abinit.org/environment/buildbot/buildbot-builder-matrix]]. The
-numerous tests contained in ~abinit/tests/doc are executed, and compared with
+[[https://wiki.abinit.org/doku.php?id=bb:slaves]]
+and
+[[https://wiki.abinit.org/doku.php?id=bb:builder]]. The
+numerous tests contained in ~abinit/tests are executed, and compared with
 reference files.
 
 

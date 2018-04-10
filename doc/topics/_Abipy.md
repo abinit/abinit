@@ -17,7 +17,7 @@ ipython and jupyter thus providing a powerful and user-friendly environment
 for data analysis and visualization.
 
 The official documentation of the stable version is available at . Check out
-our [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html>) 
+our [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html) 
 and the [gallery of AbiPy workflows](http://abinit.github.io/abipy/flow_gallery/index.html). 
 To learn more about the integration between jupyter and AbiPy, visit our
 [collection of notebooks](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/index.ipynb)

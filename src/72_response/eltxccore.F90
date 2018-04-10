@@ -72,6 +72,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
  use m_errors
  use m_profiling_abi
 
+ use m_time,       only : timab
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
  use m_xmpi,       only : xmpi_comm_self,xmpi_sum
 
@@ -79,7 +80,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eltxccore'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,10 +59,13 @@ MODULE m_numeric_tools
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
+ public :: cspint                ! Estimates the integral of a tabulated function.
+ public :: ctrap                 ! Corrected trapezoidal integral on uniform grid of spacing hh.
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
  public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
+ public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
  public :: print_arr             ! Print a vector/array
  public :: pade,dpade            ! Functions for Pade approximation (complex case)
@@ -87,6 +90,9 @@ MODULE m_numeric_tools
  public :: smooth                ! Smooth data.
  public :: nderiv                ! Compute first or second derivative of input function y(x) on a regular grid.
  public :: central_finite_diff   ! Coefficients of the central differences, for several orders of accuracy.
+ public :: uniformrandom         ! Returns a uniform random deviate between 0.0 and 1.0.
+ public :: findmin               ! Compute the minimum of a function whose value and derivative are known at two points.
+ public :: kramerskronig         ! check or apply the Kramers Kronig relation
 
  interface arth
    module procedure arth_int
@@ -2859,7 +2865,6 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'quadrature'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -3044,6 +3049,340 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  ierr = -1
 
 end subroutine quadrature
+!!***
+
+!!****f* m_numeric_tools/ctrap
+!! NAME
+!! ctrap
+!!
+!! FUNCTION
+!! Do corrected trapezoidal integral on uniform grid of spacing hh.
+!!
+!! INPUTS
+!!  imax=highest index of grid=grid point number of upper limit
+!!  ff(imax)=integrand values
+!!  hh=spacing between x points
+!!
+!! OUTPUT
+!!  ans=resulting integral by corrected trapezoid
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      psden,psp11lo,psp11nl,psp5lo,psp5nl,psp8lo,psp8nl,vhtnzc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ctrap(imax,ff,hh,ans)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ctrap'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: imax
+ real(dp),intent(in) :: hh
+ real(dp),intent(out) :: ans
+!arrays
+ real(dp),intent(in) :: ff(imax)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ir,ir2
+ real(dp) :: endpt,sum
+
+! *************************************************************************
+
+ if (imax>=10)then
+
+!  endpt=end point correction terms (low and high ends)
+   endpt  = (23.75d0*(ff(1)+ff(imax  )) &
+&   + 95.10d0*(ff(2)+ff(imax-1)) &
+&   + 55.20d0*(ff(3)+ff(imax-2)) &
+&   + 79.30d0*(ff(4)+ff(imax-3)) &
+&   + 70.65d0*(ff(5)+ff(imax-4)))/ 72.d0
+   ir2 = imax - 5
+   sum=0.00d0
+   if (ir2 > 5) then
+     do ir=6,ir2
+       sum = sum + ff(ir)
+     end do
+   end if
+   ans = (sum + endpt ) * hh
+
+ else if (imax>=8)then
+   endpt  = (17.0d0*(ff(1)+ff(imax  )) &
+&   + 59.0d0*(ff(2)+ff(imax-1)) &
+&   + 43.0d0*(ff(3)+ff(imax-2)) &
+&   + 49.0d0*(ff(4)+ff(imax-3)) )/ 48.d0
+   sum=0.0d0
+   if(imax==9)sum=ff(5)
+   ans = (sum + endpt ) * hh
+
+ else if (imax==7)then
+   ans = (17.0d0*(ff(1)+ff(imax  )) &
+&   + 59.0d0*(ff(2)+ff(imax-1)) &
+&   + 43.0d0*(ff(3)+ff(imax-2)) &
+&   + 50.0d0* ff(4)                )/ 48.d0  *hh
+
+ else if (imax==6)then
+   ans = (17.0d0*(ff(1)+ff(imax  )) &
+&   + 59.0d0*(ff(2)+ff(imax-1)) &
+&   + 44.0d0*(ff(3)+ff(imax-2)) )/ 48.d0  *hh
+
+ else if (imax==5)then
+   ans = (     (ff(1)+ff(5)) &
+&   + four*(ff(2)+ff(4)) &
+&   + two * ff(3)         )/ three  *hh
+
+ else if (imax==4)then
+   ans = (three*(ff(1)+ff(4)) &
+&   + nine *(ff(2)+ff(3))  )/ eight  *hh
+
+ else if (imax==3)then
+   ans = (     (ff(1)+ff(3)) &
+&   + four* ff(2)         )/ three *hh
+
+ else if (imax==2)then
+   ans = (ff(1)+ff(2))/ two  *hh
+
+ else if (imax==1)then
+   ans = ff(1)*hh
+
+ end if
+
+end subroutine ctrap
+!!***
+
+!!****f* m_numeric_tools/cspint
+!! NAME
+!!  cspint
+!!
+!! FUNCTION
+!!  Estimates the integral of a tabulated function.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!!    The routine is given the value of a function F(X) at a set of
+!!    nodes XTAB, and estimates
+!!
+!!      Integral ( A <= X <= B ) F(X) DX
+!!
+!!    by computing the cubic natural spline S(X) that interpolates
+!!    F(X) at the nodes, and then computing
+!!
+!!      Integral ( A <= X <= B ) S(X) DX
+!!
+!!    exactly.
+!!
+!!    Other output from the program includes the definite integral
+!!    from X(1) to X(I) of S(X), and the coefficients necessary for
+!!    the user to evaluate the spline S(X) at any point.
+!!
+!!  Modified:
+!!
+!!    30 October 2000
+!!
+!!  Reference:
+!!
+!!    Philip Davis and Philip Rabinowitz,
+!!    Methods of Numerical Integration,
+!!    Blaisdell Publishing, 1967.
+!!
+!!  Parameters:
+!!
+!!    Input, real (dp) FTAB(NTAB), contains the tabulated values of
+!!    the function, FTAB(I) = F(XTAB(I)).
+!!
+!!    Input, real (dp) XTAB(NTAB), contains the points at which the
+!!    function was evaluated.  The XTAB's must be distinct and
+!!    in ascending order.
+!!
+!!    Input, integer NTAB, the number of entries in FTAB and
+!!    XTAB.  NTAB must be at least 3.
+!!
+!!    Input, real (dp) A, lower limit of integration.
+!!
+!!    Input, real (dp) B, upper limit of integration.
+!!
+!!    Output, real (dp) Y(3,NTAB), will contain the coefficients
+!!    of the interpolating natural spline over each subinterval.
+!!
+!!    For XTAB(I) <= X <= XTAB(I+1),
+!!
+!!      S(X) = FTAB(I) + Y(1,I)*(X-XTAB(I))
+!!                   + Y(2,I)*(X-XTAB(I))**2
+!!                   + Y(3,I)*(X-XTAB(I))**3
+!!
+!!    Output, real (dp) E(NTAB), E(I) = the definite integral from
+!!    XTAB(1) to XTAB(I) of S(X).
+!!
+!!    Workspace, real (dp) WORK(NTAB).
+!!
+!!    Output, real (dp) RESULT, the estimated value of the integral.
+!!
+!!
+!! PARENTS
+!!      m_xc_vdw,mrgscr
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cspint'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: ntab
+  real(dp), intent(in) :: a
+  real(dp), intent(in) :: b
+  real(dp), intent(inout) :: e(ntab)
+  real(dp), intent(in) :: ftab(ntab)
+  real(dp), intent(inout) :: work(ntab)
+  real(dp), intent(in) :: xtab(ntab)
+  real(dp), intent(inout) :: y(3,ntab)
+  real(dp), intent(out) :: result
+
+!Local variables ------------------------------
+!scalars
+  integer :: i
+  integer :: j
+  real(dp) :: r
+  real(dp) :: s
+  real(dp) :: term
+  real(dp) :: u
+
+!************************************************************************
+
+  if ( ntab < 3 ) then
+    write(std_out,'(a)' ) ' '
+    write(std_out,'(a)' ) 'CSPINT - Fatal error!'
+    write(std_out,'(a,i6)' ) '  NTAB must be at least 3, but input NTAB = ',ntab
+    MSG_ERROR("Aborting now")
+  end if
+
+  do i = 1, ntab-1
+
+    if ( xtab(i+1) <= xtab(i) ) then
+      write(std_out,'(a)' ) ' '
+      write(std_out,'(a)' ) 'CSPINT - Fatal error!'
+      write(std_out,'(a)' ) '  Nodes not in strict increasing order.'
+      write(std_out,'(a,i6)' ) '  XTAB(I) <= XTAB(I-1) for I=',i
+      write(std_out,'(a,g14.6)' ) '  XTAB(I) = ',xtab(i)
+      write(std_out,'(a,g14.6)' ) '  XTAB(I-1) = ',xtab(i-1)
+      MSG_ERROR("Aborting now")
+    end if
+
+  end do
+
+  s = zero
+  do i = 1, ntab-1
+    r = ( ftab(i+1) - ftab(i) ) / ( xtab(i+1) - xtab(i) )
+    y(2,i) = r - s
+    s = r
+  end do
+
+  result = zero
+  s = zero
+  r = zero
+  y(2,1) = zero
+  y(2,ntab) = zero
+
+  do i = 2, ntab-1
+    y(2,i) = y(2,i) + r * y(2,i-1)
+    work(i) = two * ( xtab(i-1) - xtab(i+1) ) - r * s
+    s = xtab(i+1) - xtab(i)
+    r = s / work(i)
+  end do
+
+  do j = 2, ntab-1
+    i = ntab+1-j
+    y(2,i) = ( ( xtab(i+1) - xtab(i) ) * y(2,i+1) - y(2,i) ) / work(i)
+  end do
+
+  do i = 1, ntab-1
+    s = xtab(i+1) - xtab(i)
+    r = y(2,i+1) - y(2,i)
+    y(3,i) = r / s
+    y(2,i) = three * y(2,i)
+    y(1,i) = ( ftab(i+1) - ftab(i) ) / s - ( y(2,i) + r ) * s
+  end do
+
+  e(1) = 0.0D+00
+  do i = 1, ntab-1
+    s = xtab(i+1)-xtab(i)
+    term = ((( y(3,i) * quarter * s + y(2,i) * third ) * s &
+      + y(1,i) * half ) * s + ftab(i) ) * s
+    e(i+1) = e(i) + term
+  end do
+!
+!  Determine where the endpoints A and B lie in the mesh of XTAB's.
+!
+  r = a
+  u = one
+
+  do j = 1, 2
+!
+!  The endpoint is less than or equal to XTAB(1).
+!
+    if ( r <= xtab(1) ) then
+      result = result-u*((r-xtab(1))*y(1,1)*half +ftab(1))*(r-xtab(1))
+!
+!  The endpoint is greater than or equal to XTAB(NTAB).
+!
+    else if ( xtab(ntab) <= r ) then
+
+      result = result -u * ( e(ntab) + ( r - xtab(ntab) ) &
+        * ( ftab(ntab) + half * ( ftab(ntab-1) &
+        + ( xtab(ntab) - xtab(ntab-1) ) * y(1,ntab-1) ) &
+        * ( r - xtab(ntab) )))
+!
+!  The endpoint is strictly between XTAB(1) and XTAB(NTAB).
+!
+    else
+
+      do i = 1, ntab-1
+
+        if ( r <= xtab(i+1) ) then
+          r = r-xtab(i)
+          result = result-u*(e(i)+(((y(3,i)*quarter*r+y(2,i)*third)*r &
+            +y(1,i)*half )*r+ftab(i))*r)
+          go to 120
+        end if
+
+      end do
+
+    end if
+
+  120   continue
+
+    u = -one
+    r = b
+
+  end do
+
+end subroutine cspint
 !!***
 
 !!****f* m_numeric_tools/coeffs_gausslegint
@@ -3463,6 +3802,132 @@ pure subroutine mkherm(array,ndim)
  end do
 
 end subroutine mkherm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/hermit
+!! NAME
+!! hermit
+!!
+!! FUNCTION
+!! Take a matrix in hermitian storage mode (lower triangle stored)
+!! and redefine diagonal elements to impose Hermiticity
+!! (diagonal terms have to be real).
+!! If abs(Im(H(i,i)))>4096*machine precision, print error warning.
+!! (Typical 64 bit machine precision is 2^-52 or 2.22e-16)
+!!
+!! INPUTS
+!!  chmin(n*n+n)=complex hermitian matrix with numerical noise possibly
+!!   rendering Im(diagonal elements) approximately 1e-15 or so
+!!  ndim=size of complex hermitian matrix
+!!
+!! OUTPUT
+!!  chmout(n*n+n)=redefined matrix with strictly real diagonal elements.
+!!   May be same storage location as chmin.
+!!  ierr=0 if no problem, 1 if the imaginary part of some element
+!!   too large (at present, stop in this case).
+!!
+!! TODO
+!!  Name is misleading, perhaps hermit_force_diago?
+!!  Interface allows aliasing
+!!
+!! PARENTS
+!!      extrapwf,subdiago
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine hermit(chmin,chmout,ierr,ndim)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'hermit'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndim
+ integer,intent(out) :: ierr
+!arrays
+ real(dp),intent(inout) :: chmin(ndim*ndim+ndim)
+ real(dp),intent(inout) :: chmout(ndim*ndim+ndim)
+
+!Local variables-------------------------------
+!scalars
+ integer,save :: mmesgs=20,nmesgs=0
+ integer :: idim,merrors,nerrors
+ real(dp),parameter :: eps=epsilon(0.0d0)
+ real(dp) :: ch_im,ch_re,moduls,tol
+ character(len=500) :: message
+
+! *************************************************************************
+
+ tol=4096.0d0*eps
+
+ ierr=0
+ merrors=0
+
+!Copy matrix into possibly new location
+ chmout(:)=chmin(:)
+
+!Loop over diagonal elements of matrix (off-diag not altered)
+ do idim=1,ndim
+
+   ch_im=chmout(idim*idim+idim  )
+   ch_re=chmout(idim*idim+idim-1)
+
+!  check for large absolute Im part and print warning when
+!  larger than (some factor)*(machine precision)
+   nerrors=0
+   if( abs(ch_im) > tol .and. abs(ch_im) > tol8*abs(ch_re)) nerrors=2
+   if( abs(ch_im) > tol .or. abs(ch_im) > tol8*abs(ch_re)) nerrors=1
+
+   if( (abs(ch_im) > tol .and. nmesgs<mmesgs) .or. nerrors==2)then
+     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     call wrtout(std_out,message,'PERS')
+     nmesgs=nmesgs+1
+   end if
+
+   if( ( abs(ch_im) > tol8*abs(ch_re) .and. nmesgs<mmesgs) .or. nerrors==2)then
+     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     call wrtout(std_out,message,'PERS')
+     nmesgs=nmesgs+1
+   end if
+
+!  compute modulus $= (\Re^2+\Im^2)^{1/2}$
+   moduls=sqrt(ch_re**2+ch_im**2)
+
+!  set Re part to modulus with sign of original Re part
+   chmout(idim*idim+idim-1)=sign(moduls,ch_re)
+
+!  set Im part to 0
+   chmout(idim*idim+idim)=zero
+
+   merrors=max(merrors,nerrors)
+
+ end do
+
+ if(merrors==2)then
+   ierr=1
+   write(message, '(3a)' )&
+&   'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
+&   'See previous messages.'
+   MSG_BUG(message)
+ end if
+
+end subroutine hermit
 !!***
 
 !----------------------------------------------------------------------
@@ -5902,6 +6367,481 @@ real(dp) function central_finite_diff(order, ipos, npts) result(fact)
 10 MSG_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
 
 end function central_finite_diff
+!!***
+
+!!****f* m_numeric_tools/uniformrandom
+!! NAME
+!!  uniformrandom
+!!
+!! FUNCTION
+!! Returns a uniform random deviate between 0.0 and 1.0.
+!! Set seed to any value < 0 to initialize or reinitialize sequence.
+!! Parameters are chosen from integer overflow=2**23 (conservative).
+!! For some documentation, see Numerical Recipes, 1986, p196.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function uniformrandom(seed)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'uniformrandom'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: uniformrandom
+ integer,intent(inout) :: seed
+
+!Local variables ---------------------------------------
+ integer, parameter :: im1=11979,ia1= 430,ic1=2531
+ integer, parameter :: im2= 6655,ia2= 936,ic2=1399
+ integer, parameter :: im3= 6075,ia3=1366,ic3=1283
+ integer, save :: init=0
+ integer, save :: ii1,ii2,ii3
+ integer :: kk
+ real(dp) :: im1inv,im2inv
+ real(dp), save :: table(97)
+ character(len=500) :: message
+
+! *********************************************************************
+
+ im1inv=1.0d0/im1 ; im2inv=1.0d0/im2
+
+!Initialize on first call or when seed<0:
+ if (seed<0.or.init==0) then
+   seed=-abs(seed)
+
+!  First generator
+   ii1=mod(ic1-seed,im1)
+   ii1=mod(ia1*ii1+ic1,im1)
+!  Second generator
+   ii2=mod(ii1,im2)
+   ii1=mod(ia1*ii1+ic1,im1)
+!  Third generator
+   ii3=mod(ii1,im3)
+
+!  Fill table
+   do kk=1,97
+     ii1=mod(ia1*ii1+ic1,im1)
+     ii2=mod(ia2*ii2+ic2,im2)
+     table(kk)=(dble(ii1)+dble(ii2)*im2inv)*im1inv
+   enddo
+
+   init=1 ; seed=1
+ end if
+
+!Third generator gives index
+ ii3=mod(ia3*ii3+ic3,im3)
+ kk=1+(97*ii3)/im3
+ if (kk<1.or.kk>97) then
+   write(message,'(a,2i0,a)' ) ' trouble in uniformrandom; ii3,kk=',ii3,kk,' =>stop'
+   MSG_ERROR(message)
+ end if
+ uniformrandom=table(kk)
+
+!Replace old value, based on generators 1 and 2
+ ii1=mod(ia1*ii1+ic1,im1)
+ ii2=mod(ia2*ii2+ic2,im2)
+ table(kk)=(dble(ii1)+dble(ii2)*im2inv)*im1inv
+
+end function uniformrandom
+!!***
+
+!!****f* m_numeric_tools/findmin
+!!
+!! NAME
+!! findmin
+!!
+!! FUNCTION
+!! Compute the minimum of a function whose value and derivative are known at two points.
+!! Also deduce different quantities at this predicted point, and at the two other points
+!! It uses a quartic interpolation, with the supplementary
+!! condition that the second derivative vanishes at one and
+!! only one point (See Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! For this option, lambda_1 must be 1 (new point),
+!! and lambda_2 must be 0 (old point).
+!! Also, if the derivative at the new point is more negative
+!! than the derivative at the old point, the predicted
+!! point cannot correspond to a minimum, but will be lambda=2.5_dp,
+!! if the energy of the second point is lower than the energy
+!! of the first point.
+!!
+!! INPUTS
+!! etotal_1=first value of the function
+!! etotal_2=second value of the function
+!! dedv_1=first value of the derivative
+!! dedv_2=second value of the derivative
+!! lambda_1=first value of the argument
+!! lambda_2=second value of the argument
+!!
+!! OUTPUT
+!! dedv_predict=predicted value of the derivative (usually zero,
+!!  except if choice=4, if it happens that a minimum cannot be located,
+!!  and a trial step is taken)
+!! d2edv2_predict=predicted value of the second derivative (not if choice=4)
+!! d2edv2_1=first value of the second derivative (not if choice=4)
+!! d2edv2_2=second value of the second derivative (not if choice=4)
+!! etotal_predict=predicted value of the function
+!! lambda_predict=predicted value of the argument
+!! status= 0 if everything went normally ;
+!!         1 if negative second derivative
+!!         2 if some other problem
+!!
+!! PARENTS
+!!      m_bfgs
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine findmin(dedv_1,dedv_2,dedv_predict,&
+& d2edv2_1,d2edv2_2,d2edv2_predict,&
+& etotal_1,etotal_2,etotal_predict,&
+& lambda_1,lambda_2,lambda_predict,status)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'findmin'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: status
+ real(dp),intent(in) :: dedv_1,dedv_2,etotal_1,etotal_2,lambda_1,lambda_2
+ real(dp),intent(out) :: d2edv2_1,d2edv2_2,d2edv2_predict,dedv_predict
+ real(dp),intent(out) :: etotal_predict,lambda_predict
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: aa,bb,bbp,cc,ccp,d_lambda,dd
+ real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
+ real(dp) :: uu3,vv,vv3
+ character(len=500) :: message
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,*)' findmin : enter'
+!write(std_out,*)' choice,lambda_1,lambda_2=',choice,lambda_1,lambda_2
+!ENDDEBUG
+
+ status=0
+ d_lambda=lambda_1-lambda_2
+
+!DEBUG
+!do choice=3,1,-1
+!ENDDEBUG
+
+ if(abs(lambda_1-1.0_dp)>tol12 .or. abs(lambda_2)>tol12) then
+   message = '  For choice=4, lambda_1 must be 1 and lambda_2 must be 0.'
+   MSG_BUG(message)
+ end if
+
+!Evaluate quartic interpolation
+!etotal = aa + bb * lambda + cc * lambda**2 + dd * lambda**3 + ee * lambda**4
+!Impose positive second derivative everywhere, with
+!one point where it vanishes :  3*dd**2=8*cc*ee
+ aa=etotal_2
+ bb=dedv_2
+ sum1=etotal_1-aa-bb
+ sum2=dedv_1-bb
+ sum3=sum2-2.0_dp*sum1
+
+!Build the discriminant of the associated 2nd degree equation
+ discr=sum2**2-3.0_dp*sum3**2
+ if(discr<0.0_dp .or. sum2<0.0_dp)then
+
+! jmb init
+   d2edv2_2=0.0
+   d2edv2_1=0.0
+   d2edv2_predict=0.0
+
+!  Even if there is a problem, try to keep going ...
+   message = 'The 2nd degree equation has no positive root (choice=4).'
+   MSG_WARNING(message)
+   status=2
+   if(etotal_1<etotal_2)then
+     write(message, '(a,a,a)' )&
+&     'Will continue, since the new total energy is lower',ch10,&
+&     'than the old. Take a larger step in the same direction.'
+     MSG_COMMENT(message)
+     lambda_predict=2.5_dp
+   else
+     write(message, '(a,a,a,a,a)' )&
+&     'There is a problem, since the new total energy is larger',ch10,&
+&     'than the old (choice=4).',ch10,&
+&     'I take a point between the old and new, close to the old .'
+     MSG_COMMENT(message)
+     lambda_predict=0.25_dp
+   end if
+!  Mimick a zero-gradient lambda, in order to avoid spurious
+!  action of the inverse hessian (the next line would be a realistic estimation)
+   dedv_predict=0.0_dp
+!  dedv_predict=dedv_2+lambda_predict*(dedv_1-dedv_2)
+!  Uses the energies, and the gradient at lambda_2
+   etotal_predict=etotal_2+dedv_2*lambda_predict&
+&   +(etotal_1-etotal_2-dedv_2)*lambda_predict**2
+
+ else
+
+!  Here, there is an acceptable solution to the 2nd degree equation
+   discr=sqrt(discr)
+!  The root that gives the smallest ee corresponds to  -discr
+!  This is the one to be used: one aims at modelling the
+!  behaviour of the function as much as possible with the
+!  lowest orders of the polynomial, not the quartic term.
+   ee=(sum2-discr)*0.5_dp
+   dd=sum3-2.0_dp*ee
+   cc=sum1-dd-ee
+
+!  DEBUG
+!  write(std_out,*)'aa,bb,cc,dd,ee',aa,bb,cc,dd,ee
+!  ENDDEBUG
+
+!  Now, must find the unique root of
+!$0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3$
+!  This root is unique because it was imposed that the second derivative
+!  of the quartic polynomial is everywhere positive.
+!  First, remove the quadratic term, by a shift of lambda
+!  lambdap=lambda-lambda_shift
+!$0 = bbp + ccp * lambdap + eep * lambdap^3$
+   eep=4.0_dp*ee
+   lambda_shift=-dd/(4.0_dp*ee)
+   ccp=2.0_dp*cc-12.0_dp*ee*lambda_shift**2
+   bbp=bb+ccp*lambda_shift+eep*lambda_shift**3
+
+!  DEBUG
+!  write(std_out,*)'bbp,ccp,eep,lambda_shift',bbp,ccp,eep,lambda_shift
+!  ENDDEBUG
+
+!  The solution of a cubic polynomial equation is as follows :
+   discr=(bbp/eep)**2+(4.0_dp/27.0_dp)*(ccp/eep)**3
+!  In the present case, discr will always be positive
+   discr=sqrt(discr)
+   uu3=0.5_dp*(-bbp/eep+discr) ; uu=sign((abs(uu3))**(1.0_dp/3.0_dp),uu3)
+   vv3=0.5_dp*(-bbp/eep-discr) ; vv=sign((abs(vv3))**(1.0_dp/3.0_dp),vv3)
+   lambda_predict=uu+vv
+
+!  Restore the shift
+   lambda_predict=lambda_predict+lambda_shift
+   etotal_predict=aa+bb*lambda_predict+cc*lambda_predict**2+&
+&   dd*lambda_predict**3+ee*lambda_predict**4
+   dedv_predict=bb+2.0_dp*cc*lambda_predict+3.0_dp*dd*lambda_predict**2+&
+&   4.0_dp*ee*lambda_predict**3
+   d2edv2_1=2*cc+6*dd*lambda_1+12*ee*lambda_1**2
+   d2edv2_2=2*cc+6*dd*lambda_2+12*ee*lambda_2**2
+   d2edv2_predict=2*cc+6*dd*lambda_predict+12*ee*lambda_predict**2
+
+ end if
+
+ write(message, '(a,i3)' )'   line minimization, algorithm ',4
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a)' ) ' '
+ call wrtout(std_out,message,'COLL')
+
+end subroutine findmin
+!!***
+
+!!****f* m_numeric_tools/kramerskronig
+!! NAME
+!! kramerskronig
+!!
+!! FUNCTION
+!! check or apply the Kramers Kronig relation:
+!!  Re \epsilon(\omega) = 1 + \frac{2}{\pi}
+!!  \int_0^\infty d\omega' frac{\omega'}{\omega'^2 - \omega^2} Im \epsilon(\omega')
+!!
+!! INPUTS
+!!  nomega=number of real frequencies
+!!  omega(nomega)= real frequencies
+!!  eps(nomega)= function on the frequency grid (both real and imaginary part)
+!!   real part can be used to check whether the K-K relation is satisfied or not
+!!  method=method used to perform the integration
+!!   0= naive integration
+!!   1=simpson rule
+!!  only_check= if /=0 the real part of eps is checked against the imaginary part,
+!!                a final report in written but the array eps is not modified
+!!              if ==0 the real part of eps is overwritten using the
+!!              results obtained using the Kramers-Kronig relation
+!!
+!! OUTPUT
+!!
+!! NOTES
+!! Inspired to check_kramerskronig of the DP code
+!!
+!! PARENTS
+!!      linear_optics_paw
+!!
+!! CHILDREN
+!!      simpson_int,wrtout
+!!
+!! SOURCE
+
+subroutine kramerskronig(nomega,omega,eps,method,only_check)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kramerskronig'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: method,nomega,only_check
+!arrays
+ real(dp),intent(in) :: omega(nomega)
+ complex,intent(inout) :: eps(nomega)
+
+!Local variables-------------------------------
+!scalars
+ integer,save :: enough=0
+ integer :: ii,ip
+ real(dp) :: acc,domega,eav,kkdif,kkrms,ww,wwp
+ character(len=500) :: msg
+!arrays
+ real(dp) :: e1kk(nomega),intkk(nomega),kk(nomega)
+
+! *************************************************************************
+
+!Check whether the frequency grid is linear or not
+ domega = (omega(nomega) - omega(1)) / (nomega-1)
+ do ii=2,nomega
+   if (ABS(domega-(omega(ii)-omega(ii-1))) > 0.001) then
+     if (only_check/=1) then
+       msg="check cannot be performed since the frequency step is not constant"
+       MSG_WARNING(msg)
+       RETURN
+     else
+       msg=' Cannot perform integration since frequency step is not constant'
+       MSG_ERROR(msg)
+     end if
+   end if
+ end do
+
+!Check whether omega(1) is small or not
+ if (omega(1) > 0.1/Ha_eV) then
+   if (only_check/=1) then
+     msg=' Check cannot be performed since first frequency on the grid > 0.1 eV'
+     MSG_WARNING(msg)
+     RETURN
+   else
+     msg=' Cannot perform integration since first frequency on the grid > 0.1 eV'
+     MSG_ERROR(msg)
+   end if
+ end if
+
+!If eps(nomega) is not 0 warn
+ if (AIMAG(eps(nomega)) > 0.1 .and. enough<50) then
+   enough=enough+1
+   write(msg,'(a,f8.4,3a,f8.2,2a)')&
+&   'Im epsilon for omega = ',omega(nomega)*Ha_eV,' eV',ch10,&
+&   'is not yet zero, epsilon_2 = ',AIMAG(eps(nomega)),ch10,&
+&   'Kramers Kronig could give wrong results'
+   MSG_WARNING(msg)
+   if (enough==50) then
+     write(msg,'(3a)')' sufficient number of WARNINGS-',ch10,' stop writing '
+     call wrtout(std_out,msg,'COLL')
+   end if
+ end if
+
+
+!Perform Kramers-Kronig using naive integration
+ select case (method)
+ case (0)
+
+   do ii=1,nomega
+     ww = omega(ii)
+     acc = 0.0_dp
+     do ip=1,nomega
+       if (ip == ii) CYCLE
+       wwp = omega(ip)
+       acc = acc + wwp/(wwp**2-ww**2) *AIMAG(eps(ip))
+     end do
+     e1kk(ii) = one + two/pi*domega* acc
+   end do
+
+!    Perform Kramers-Kronig using Simpson integration
+!    Simpson O(1/N^4), from NumRec in C p 134  NumRec in Fortran p 128
+ case (1)
+
+   kk=zero
+
+   do ii=1,nomega
+     ww=omega(ii)
+     do ip=1,nomega
+       if (ip == ii) CYCLE
+       wwp = omega(ip)
+       kk(ip) = wwp/(wwp**2-ww**2) *AIMAG(eps(ip))
+     end do
+     call simpson_int(nomega,domega,kk,intkk)
+     e1kk(ii) = one + two/pi * intkk(nomega)
+   end do
+
+ case default
+   write(msg,'(a,i0)')' Wrong value for method ',method
+   MSG_BUG(msg)
+ end select
+
+!at this point real part is in e1kk, need to put it into eps
+ do ii=1,nomega
+   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)))
+ end do
+
+!Verify Kramers-Kronig
+ eav   = zero
+ kkdif = zero
+ kkrms = zero
+
+ do ii=1,nomega
+   kkdif = kkdif + ABS(REAL(eps(ii)) - e1kk(ii))
+   kkrms = kkrms + (REAL(eps(ii)) - e1kk(ii))*(REAL(eps(ii)) - e1kk(ii))
+   eav = eav + ABS(REAL(eps(ii)))
+ end do
+
+ eav = eav/nomega
+ kkdif = (kkdif/nomega) / eav
+ kkrms = (kkrms/nomega) / (eav*eav)
+
+ kk = ABS(REAL(eps(1)) - e1kk(1)) / REAL(eps(1))
+
+!Write data
+ write(msg,'(a,f7.2,a)')' Kramers-Kronig transform is verified within ',MAXVAL(kk)*100,"%"
+ call wrtout(std_out,msg,'COLL')
+
+end subroutine kramerskronig
 !!***
 
 END MODULE m_numeric_tools

@@ -43,9 +43,10 @@
 subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 
  use m_profiling_abi
-
  use defs_basis
  use m_linalg_interfaces
+
+ use m_abilasi,     only : matrginv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

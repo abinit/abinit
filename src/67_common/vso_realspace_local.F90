@@ -45,18 +45,19 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
  use defs_abitypes
  use m_splines
 
+ use m_geometry,   only : xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vso_realspace_local'
  use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
 
 !Arguments -------------------------------
-   
+
   type(hdr_type),intent(inout) :: hdr
   type(dataset_type),intent(in) :: dtset
   type(pseudopotential_type),intent(in) :: psps
@@ -229,7 +230,7 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
    end do ! iradgrid
  end do ! lmax
 
-!spline v_SO(radial coord): get second derivative coefficients 
+!spline v_SO(radial coord): get second derivative coefficients
  ABI_ALLOCATE(vso_radial_pp,(nradgrid,psps%npsp))
 
  ABI_ALLOCATE(tmp_spline,(nradgrid))
@@ -251,7 +252,7 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
  vso_realspace = zero
  do iatom=1,dtset%natom
 !  atom type will be dtset%typat(iatom)
-   
+
 !  for each point on grid
    do ir3=1,dtset%ngfft(3)
      do ir2=1,dtset%ngfft(2)
@@ -281,7 +282,7 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 !        multiply by vectorial spin factor (S x r)
 !        NOTE: this r is taken relative to atom center. It could be that the r operator should
 !        applied in an absolute way wrt the origin...
-!        
+!
 !        Is this correct: accumulated sum over atoms ?
          vso_realspace(1,irealsp,:,:,1) = vso_realspace(1,irealsp,:,:,1) + &
 &         vso_interpol * reshape((/y,   zero,zero,-y/),(/2,2/))

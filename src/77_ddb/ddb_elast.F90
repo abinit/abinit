@@ -70,6 +70,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  use m_ddb
 
  use m_fstrings,       only : itoa, sjoin
+ use m_abilasi,        only : matrginv
  use m_dynmat,         only : asria_corr
  use m_anaddb_dataset, only : anaddb_dataset_type
 
@@ -78,7 +79,6 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_elast'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

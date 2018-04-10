@@ -85,16 +85,16 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  use m_cgtools
  use m_xmpi
 
+ use m_time,      only : timab
  use m_io_tools,  only : get_unit, iomode_from_fname
+ use m_fftcore,   only : sphereboundary
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkrho'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_67_common
 !End of the abilint section

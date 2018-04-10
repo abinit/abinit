@@ -81,7 +81,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use netcdf
 #endif
 
+ use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
@@ -91,10 +93,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_42_parser
- use interfaces_56_recipspace
  use interfaces_57_iovars, except_this_one => invars2
 !End of the abilint section
 
@@ -1607,7 +1606,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 .and. dtset%nbandkss==0) dtset%usepawu = 10
+ if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
+  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1757,6 +1759,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
+   if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
+     write(message, '(a,a,a)' )&
+&     'usepawu==4 and usedmft=1, dmft_dc should be equal to 5  ',ch10,&
+&     'impose dmft_dc = 5'
+     MSG_WARNING(message)
+     dtset%dmft_dc=5
+   endif
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
@@ -2098,6 +2107,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
  if(tread==1) dtset%prtfc=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfull1wf',tread,'INT')
+ if(tread==1) dtset%prtfull1wf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfsurf',tread,'INT')
  if(tread==1) dtset%prtfsurf=intarr(1)

@@ -64,6 +64,7 @@ program macroave
  use netcdf
 #endif
  use m_hdr
+ use m_macroave
 
  use m_fstrings,        only : sjoin, strcat, endswith
  use m_io_tools,        only : file_exists, open_file
@@ -72,7 +73,6 @@ program macroave
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'macroave'
- use interfaces_01_macroavnew_ext
 !End of the abilint section
 
  implicit none

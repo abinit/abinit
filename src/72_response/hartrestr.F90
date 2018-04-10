@@ -68,12 +68,12 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
  use m_profiling_abi
 
  use m_mpinfo,     only : ptabs_fourdp
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartrestr'
- use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 

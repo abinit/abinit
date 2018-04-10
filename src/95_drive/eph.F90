@@ -122,7 +122,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #define ABI_FUNC 'eph'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_io_mpi
  use interfaces_64_psp
 !End of the abilint section
 
@@ -382,11 +381,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
    ! since occ are set to zero, and fermie is taken from the previous density.
-   call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
-   if (use_wfq) then
-     call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
-     call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+   if (dtset%kptopt > 0) then
+     call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+     call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+     if (use_wfq) then
+       call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
+       call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+     end if
    end if
 
  end if

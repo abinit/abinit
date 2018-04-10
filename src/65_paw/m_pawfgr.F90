@@ -46,6 +46,7 @@ MODULE m_pawfgr
  use m_xmpi
 
  use defs_abitypes, only : dataset_type
+ use m_kg,       only : getcut
 
  implicit none
 
@@ -173,7 +174,6 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
 #undef ABI_FUNC
 #define ABI_FUNC 'pawfgr_init'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
