@@ -28,8 +28,6 @@
 module m_exc_build
 
  use defs_basis
- use defs_datatypes
- !use defs_abitypes
  use m_profiling_abi
  use m_bs_defs
  use m_bse_io
@@ -42,6 +40,7 @@ module m_exc_build
  use m_hdr
 
  use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : hdr_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file
@@ -162,6 +161,7 @@ contains
 
 subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,Hdr_bse,&
 &  nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,rhxtwg_q0,is_resonant,fname)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1772,6 +1772,7 @@ end subroutine exc_build_block
 subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gsph_c,Vcp,&
 &  is_resonant,rhxtwg_q0,nproc,my_rank,t_start,t_stop,my_bsham)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2166,12 +2167,12 @@ end subroutine exc_build_v
 subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
 & Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_ham'
  use interfaces_14_hidewrite
- use interfaces_71_bse, except_this_one => exc_build_ham
 !End of the abilint section
 
  implicit none
@@ -2304,6 +2305,7 @@ end subroutine exc_build_ham
 
 subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 & Psps,Pawtab,Paw_pwff,lomo_spin,homo_spin,humo_spin,nfftot_osc,ngfft_osc,npweps,mgq0)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

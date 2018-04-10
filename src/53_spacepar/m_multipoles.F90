@@ -78,6 +78,7 @@ contains
 subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
 &                          distribfft,mpi_comm_grid)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -238,12 +239,12 @@ end subroutine multipoles_fftr
 subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
 &                         ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'multipoles_out'
  use interfaces_14_hidewrite
- use interfaces_53_spacepar
 !End of the abilint section
 
  implicit none

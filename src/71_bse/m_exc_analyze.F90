@@ -37,7 +37,7 @@ module m_exc_analyze
  use m_io_tools,          only : open_file
  use m_numeric_tools,     only : iseven, wrap2_zero_one
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
- use m_crystal,           only : crystal_t,
+ use m_crystal,           only : crystal_t
  use m_wfd,               only : wfd_t, wfd_change_ngfft, wfd_get_cprj, wfd_sym_ur, wfd_get_ur
  use m_bse_io,            only : exc_read_eigen
  use m_pptools,           only : printxsf
@@ -98,6 +98,7 @@ contains
 !! SOURCE
 
 subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -452,6 +453,7 @@ end subroutine exc_plot
 !! SOURCE
 
 subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
