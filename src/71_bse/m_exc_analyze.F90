@@ -55,12 +55,11 @@ module m_exc_analyze
 
  public :: exc_den
  !public :: exc_plot      Plots the excitonic wavefunction in real space.
-!!***
 
 contains
 !!***
 
-!!****f* ABINIT/m_exc_analyze
+!!****f* m_exc_analyze/m_exc_analyze
 !! NAME
 !!  exc_plot
 !!

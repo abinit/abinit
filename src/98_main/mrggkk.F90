@@ -64,6 +64,7 @@ program mrggkk
 #endif
  use m_hdr
 
+ use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin
  use m_io_tools,        only : flush_unit, open_file, file_exists
  use m_mpinfo,          only : destroy_mpi_enreg

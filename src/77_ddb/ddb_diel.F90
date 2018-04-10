@@ -496,6 +496,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  ABI_DEALLOCATE(oscstr)
 
 contains
+!!***
 
 !!****f* ABINIT/alignph
 !!
