@@ -1,16 +1,71 @@
-!!****f* ABINIT/exc_plot
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_exc_analyze
+!! NAME
+!!  m_exc_analyze
+!!
+!! FUNCTION
+!!  Postprocessing tools for BSE calculations.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
+!!  Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_exc_analyze
+
+ use defs_basis
+ use defs_datatypes
+ use m_profiling_abi
+ use m_bs_defs
+ use m_xmpi
+ use m_errors
+
+ use m_io_tools,          only : open_file
+ use m_numeric_tools,     only : iseven, wrap2_zero_one
+ use m_bz_mesh,           only : kmesh_t, get_BZ_item
+ use m_crystal,           only : crystal_t,
+ use m_wfd,               only : wfd_t, wfd_change_ngfft, wfd_get_cprj, wfd_sym_ur, wfd_get_ur
+ use m_bse_io,            only : exc_read_eigen
+ use m_pptools,           only : printxsf
+
+ use m_pawrad,            only : pawrad_type
+ use m_pawtab,            only : pawtab_type,pawtab_get_lsize
+ use m_pawfgrtab,         only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
+ use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
+
+ implicit none
+
+ private
+!!***
+
+ public :: exc_den
+ !public :: exc_plot      Plots the excitonic wavefunction in real space.
+!!***
+
+contains
+!!***
+
+!!****f* ABINIT/m_exc_analyze
 !! NAME
 !!  exc_plot
 !!
 !! FUNCTION
 !!  Plots the excitonic wavefunction in real space.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! Bsp<excparam>=Container storing the input variables of the run.
@@ -42,34 +97,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
-
- use defs_basis
- use defs_datatypes
- use m_profiling_abi
- use m_bs_defs
- use m_xmpi
- use m_errors
-
- use m_io_tools,          only : open_file
- use m_numeric_tools,     only : iseven, wrap2_zero_one
- use m_bz_mesh,           only : kmesh_t, get_BZ_item
- use m_crystal,           only : crystal_t
- use m_wfd,               only : wfd_t, wfd_change_ngfft, wfd_get_cprj, wfd_sym_ur
- use m_bse_io,            only : exc_read_eigen
- use m_pptools,           only : printxsf
-
- use m_pawrad,            only : pawrad_type
- use m_pawtab,            only : pawtab_type,pawtab_get_lsize
- use m_pawfgrtab,         only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
- use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -403,20 +431,12 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
 end subroutine exc_plot
 !!***
 
-!!****f* ABINIT/exc_den
+!!****f* m_exc_analyze/exc_den
 !! NAME
 !!  exc_den
 !!
 !! FUNCTION
 !!  This routines calculates the electron-hole excited state density.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  filbseig=Name of the file containing the excitonic eigenvectors and eigenvalues.
@@ -432,15 +452,6 @@ end subroutine exc_plot
 !! SOURCE
 
 subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
-
- use defs_basis
- use m_profiling_abi
- use m_bs_defs
- use m_errors
-
- use m_io_tools,        only : open_file
- use m_bz_mesh,         only : kmesh_t
- use m_wfd,             only : wfd_t, wfd_get_ur
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -668,4 +679,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
  close(sden_unt)
 
 end subroutine exc_den
+!!***
+
+end module m_exc_analyze
 !!***
