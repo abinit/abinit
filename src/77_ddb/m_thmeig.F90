@@ -1,28 +1,18 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/thmeig
+!!****m* ABINIT/m_thmeig
 !! NAME
-!! thmeig
+!!  m_thmeig
 !!
 !! FUNCTION
-!! This routine calculates the thermal corrections to the eigenvalues.
-!! The output is this quantity for the input k point.
+!! Calculate thermal corrections to the eigenvalues.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (PB, XG, GA)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors .
-!!
-!! INPUTS
-!!  elph_base_name = root filename for outputs
-!!  eig2_filnam = name of the eig2 database file
-!!  comm=MPI communicator
-!!
-!! OUTPUT
+!!  Copyright (C) 2008-2018 ABINIT group (PB, XG, GA)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
 !!
@@ -34,10 +24,7 @@
 
 #include "abi_common.h"
 
-subroutine thmeig(inp, ddb, crystal, &
-&                 elph_base_name, eig2_filnam, ddbun, iout, &
-&                 natom, mpert, msize, d2asr, &
-&                 comm)
+module m_thmeig
 
  use defs_basis
  use m_profiling_abi
@@ -55,6 +42,44 @@ subroutine thmeig(inp, ddb, crystal, &
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
  use m_kpts,           only : getkgrid
+
+ implicit none
+
+ private
+!!***
+
+ public :: thmeig
+!!***
+
+contains
+!!***
+
+!!****f* m_thmeig/thmeig
+!! NAME
+!! thmeig
+!!
+!! FUNCTION
+!! This routine calculates the thermal corrections to the eigenvalues.
+!! The output is this quantity for the input k point.
+!!
+!! INPUTS
+!!  elph_base_name = root filename for outputs
+!!  eig2_filnam = name of the eig2 database file
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine thmeig(inp, ddb, crystal, &
+&                 elph_base_name, eig2_filnam, ddbun, iout, &
+&                 natom, mpert, msize, d2asr, &
+&                 comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -982,10 +1007,10 @@ subroutine thmeig(inp, ddb, crystal, &
 
  call destroy_tetra(tetrahedra)
 
- contains
+end subroutine thmeig
 !!***
 
-!!****f* ABINIT/outphdos
+!!****f* m_thmeig/outphdos
 !! NAME
 !! outphdos
 !!
@@ -1104,7 +1129,7 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
  end subroutine outphdos
 !!***
 
-!!****f* ABINIT/outg2f
+!!****f* m_thmeig/outg2f
 !! NAME
 !! outg2f
 !!
@@ -1194,7 +1219,8 @@ subroutine outg2f(deltaene,enemin,enemax,filnam,g2f,g2fsmear,kpnt,mband,nene,nkp
 
    close (unit=unit_g2f)
 
- end subroutine outg2f
+end subroutine outg2f
 !!***
 
-end subroutine thmeig
+end module m_thmeig
+!!***

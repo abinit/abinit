@@ -1,5 +1,59 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/harmonic_thermo
+!!****m* ABINIT/m_harmonic_thermo
+!! NAME
+!! m_harmonic_thermo
+!!
+!! FUNCTION
+!! This routine to calculate phonon density of states,
+!! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (CL, XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_harmonic_termo
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ use m_sortph
+ use m_xmpi
+
+ use m_io_tools,       only : open_file
+ use m_dynmat,         only : gtdyn9
+ use m_geometry,       only : mkrdim
+ use m_crystal,        only : crystal_t
+ use m_anaddb_dataset, only : anaddb_dataset_type
+ use m_ifc,            only : ifc_type, ifc_fourq
+ use m_kpts,           only : smpbz
+
+ implicit none
+
+ private
+!!***
+
+ public :: harmonic_thermo
+!!***
+
+contains
+!!***
+
+!!****f* m_harmonic_termo/harmonic_thermo
 !!
 !! NAME
 !! harmonic_thermo
@@ -7,13 +61,6 @@
 !! FUNCTION
 !! This routine to calculate phonon density of states,
 !! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (CL,XG)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! Crystal<crystal_t>=data type gathering info on the crystalline structure.
@@ -44,29 +91,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
-subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,&
-& thmflag)
-
- use defs_basis
- use m_errors
- use m_sortph
- use m_profiling_abi
- use m_xmpi
-
- use m_io_tools,       only : open_file
- use m_dynmat,         only : gtdyn9
- use m_geometry,       only : mkrdim
- use m_crystal,        only : crystal_t
- use m_anaddb_dataset, only : anaddb_dataset_type
- use m_ifc,            only : ifc_type, ifc_fourq
- use m_kpts,           only : smpbz
+subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,thmflag)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -980,4 +1005,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  close (vij_unit)
 
 end subroutine harmonic_thermo
+!!***
+
+end module m_harmonic_thermo
 !!***
