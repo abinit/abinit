@@ -96,6 +96,7 @@ contains
 
 subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -103,7 +104,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_77_ddb, except_this_one => read_gkk
+ use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -738,6 +739,7 @@ end subroutine read_gkk
 
 subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phasecg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -861,6 +863,7 @@ end subroutine outgkk
 
 subroutine prt_gkk_yambo(displ_cart,displ_red,kpt_phon,h1_mat_el,iqpt,&
 &       natom,nFSband,nkpt_phon,phfrq,qptn)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1060,6 +1063,7 @@ end subroutine prt_gkk_yambo
 !! SOURCE
 
 subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -706,7 +706,6 @@ end subroutine elph_k_destroy
 subroutine elph_k_procs(nproc, elph_k)
 
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

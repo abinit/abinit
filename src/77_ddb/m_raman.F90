@@ -80,6 +80,7 @@ contains
 subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
 & natom,phfrq,qphon,qphnrm,rsus,ucvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -309,6 +310,7 @@ end subroutine ramansus
 !! SOURCE
 
 subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsus,ucvol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -44,9 +44,9 @@ module m_elphon
  use m_numeric_tools,   only : wrap2_pmhalf, simpson, simpson_int
  use m_pptools,         only : printvtk
  use m_dynmat,          only : ftgam_init, ftgam
- use m_geometry,        only : phdispl_cart2red, ifc_fourq
+ use m_geometry,        only : phdispl_cart2red
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type
+ use m_ifc,             only : ifc_type, ifc_fourq
  use m_nesting,         only : mknesting, bfactor
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_eliashberg_1d,   only : eliashberg_1d
@@ -2094,7 +2094,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 #undef ABI_FUNC
 #define ABI_FUNC 'mka2f'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => mka2f
+ use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -2642,6 +2642,7 @@ end subroutine mka2f
 !! SOURCE
 
 subroutine mka2fQgrid(elph_ds,fname)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
