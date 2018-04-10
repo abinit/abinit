@@ -381,6 +381,7 @@ end subroutine multipoles_out
 subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 &  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
