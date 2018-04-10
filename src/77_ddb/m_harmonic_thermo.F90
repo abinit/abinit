@@ -25,7 +25,7 @@
 
 #include "abi_common.h"
 
-module m_harmonic_termo
+module m_harmonic_thermo
 
  use defs_basis
  use m_errors
@@ -53,7 +53,7 @@ module m_harmonic_termo
 contains
 !!***
 
-!!****f* m_harmonic_termo/harmonic_thermo
+!!****f* m_harmonic_thermo/harmonic_thermo
 !!
 !! NAME
 !! harmonic_thermo
@@ -92,6 +92,7 @@ contains
 !! SOURCE
 
 subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,thmflag)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

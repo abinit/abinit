@@ -749,7 +749,6 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_eval_qibz'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -891,7 +890,6 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_interp'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -1250,7 +1248,6 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_vv_eval_qibz'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -1443,7 +1440,6 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_vv_interp'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -3871,7 +3867,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_66_wfs
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none

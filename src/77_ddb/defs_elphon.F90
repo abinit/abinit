@@ -46,6 +46,8 @@ module defs_elphon
  private
 !!***
 
+ public :: gam_mult_displ
+
 !----------------------------------------------------------------------
 !!****t* defs_elphon/elph_kgrid_type
 !! NAME
@@ -785,6 +787,7 @@ end subroutine elph_k_procs
 !! SOURCE
 
 subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

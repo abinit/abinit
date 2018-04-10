@@ -90,7 +90,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_diel'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => ddb_diel
 !End of the abilint section
 
  implicit none
@@ -541,6 +540,7 @@ contains
 !! SOURCE
 
 subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -71,7 +71,6 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 #undef ABI_FUNC
 #define ABI_FUNC 'mka2f_tr_lova'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => mka2f_tr_lova
 !End of the abilint section
 
  implicit none

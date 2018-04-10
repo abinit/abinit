@@ -56,7 +56,6 @@ subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nmsq_pure_gkk'
- use interfaces_77_ddb, except_this_one => nmsq_pure_gkk
 !End of the abilint section
 
  implicit none

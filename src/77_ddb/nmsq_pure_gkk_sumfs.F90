@@ -53,7 +53,6 @@ subroutine nmsq_pure_gkk_sumfs(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqto
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nmsq_pure_gkk_sumfs'
- use interfaces_77_ddb, except_this_one => nmsq_pure_gkk_sumfs
 !End of the abilint section
 
  implicit none

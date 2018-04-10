@@ -76,12 +76,12 @@ contains
 
 subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eliashberg_1d'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => eliashberg_1d
 !End of the abilint section
 
  implicit none
@@ -271,6 +271,7 @@ end subroutine eliashberg_1d
 
 
 subroutine eli_app_m_1d (delta_1d,lambda_1d,nmatsu,z_1d)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -516,6 +517,7 @@ end subroutine eli_diag_m_1d
 
 subroutine eli_lambda_1d (a2f_1d,elph_ds,lambda_1d,nmatsu,tc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -598,11 +600,11 @@ end subroutine eli_lambda_1d
 
 subroutine eli_m_iter_1d (delta_1d,lambda_1d,maxeigval,nmatsu,z_1d)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eli_m_iter_1d'
- use interfaces_77_ddb, except_this_one => eli_m_iter_1d
 !End of the abilint section
 
  implicit none
@@ -740,6 +742,7 @@ end subroutine eli_m_iter_1d
 !! SOURCE
 
 subroutine eli_z_1d (lambda_1d,nmatsu,z_1d)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
