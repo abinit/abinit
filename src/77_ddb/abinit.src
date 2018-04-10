@@ -51,8 +51,6 @@ sources = [
  "integrate_gamma_tr.F90",
  "integrate_gamma_tr_lova.F90",
  "interpolate_gkk.F90",
- "mka2f.F90",
- "mka2fQgrid.F90",
  "mka2f_tr.F90",
  "mka2f_tr_lova.F90",
  "mkqptequiv.F90",
