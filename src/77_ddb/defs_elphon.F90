@@ -38,6 +38,7 @@ module defs_elphon
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_xmpi
 
  use m_kptrank,  only : kptrank_type, destroy_kptrank, copy_kptrank
 
@@ -704,7 +705,7 @@ end subroutine elph_k_destroy
 
 subroutine elph_k_procs(nproc, elph_k)
 
- use m_xmpi
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -50,6 +50,7 @@ module m_elphon
  use m_nesting,         only : mknesting, bfactor
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_eliashberg_1d,   only : eliashberg_1d
+ use m_iogkk,           only : read_el_veloc
 
  implicit none
 
