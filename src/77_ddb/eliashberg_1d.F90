@@ -1,20 +1,60 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/eliashberg_1d
+!!****m* ABINIT/m_eliashberg_1d
+!! NAME
+!!  m_eliashberg_1d
+!!
+!! FUNCTION
+!!  Solve the Eliashberg equations in the isotropic case
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MVer)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_eliashberg_1d
+
+ use defs_basis
+ use defs_elphon
+ use m_errors
+ use m_profiling_abi
+ use m_io_tools
+ use m_profiling_abi
+
+ use m_numeric_tools,   only : simpson_int
+
+ implicit none
+
+ private
+!!***
+
+ public :: eliashberg_1d
+!!***
+
+contains
+!!***
+
+!!****f* m_eliashberg_1d/eliashberg_1d
 !!
 !! NAME
 !! eliashberg_1d
 !!
 !! FUNCTION
 !!  Solve the Eliashberg equations in the isotropic case
-!!   First the linearized case, which allows the estimation of Tc
-!!   then the full case which gives the gap as a function of temperature.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!  First the linearized case, which allows the estimation of Tc
+!!  then the full case which gives the gap as a function of temperature.
 !!
 !! INPUTS
 !!  a2f_1d = alpha^2F function averaged over the FS (only energy dependence)
@@ -34,19 +74,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
-
- use defs_basis
- use defs_elphon
- use m_io_tools
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -59,7 +87,6 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
  implicit none
 
 !Arguments ------------------------------------
-  ! needed for phonon interpolation
 !scalars
  real(dp),intent(in) :: mustar
  type(elph_type),intent(in) :: elph_ds
@@ -127,9 +154,9 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
 
    omega_cutoff = (two*nmatsu+one) * pi * tc
 
-!  
+!
 !  calculate array of lambda values
-!  
+!
    call eli_lambda_1d (a2f_1d,elph_ds,lambda_1d,nmatsu,tc)
    write (unit_lam,'(a)') '#'
    write (unit_lam,'(a)') '# ABINIT package : lambda file'
@@ -144,9 +171,9 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
    end do
    write (unit_lam,*)
 
-!  
+!
 !  calculate array of z values
-!  
+!
    call eli_z_1d (lambda_1d,nmatsu,z_1d)
    write (unit_z,'(a)') '#'
    write (unit_z,'(a)') '# ABINIT package : Z file'
@@ -164,9 +191,9 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
 !  !
 !  call eli_m_iter_1d (delta_1d,lambda_1d,maxeigval,nmatsu,z_1d)
 
-!  
+!
 !  diagonalize M brute forcefully
-!  
+!
    call eli_diag_m_1d(delta_1d,lambda_1d,maxeigval,mustar,nmatsu,tc,z_1d)
 
    write (unit_del,'(a)') '#'
@@ -184,7 +211,7 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
 !  if eigenvalue is < 1 increase T
 !  else if eigenvalue is > 1 decrease T
 !  if eigenvalue ~= 1 stop
-!  
+!
    if (abs(maxeigval-one) < tol8) then
      write(std_out,*) 'Eliashberg Tc found = ', tc, ' (Ha) = ', tc/kb_HaK, ' (K)'
      exit
@@ -215,24 +242,16 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
 
  write(std_out,*) ' eliashberg_1d : end '
 
-
 end subroutine eliashberg_1d
 !!***
 
-!!****f* ABINIT/eli_app_m_1d
+!!****f* m_eliashberg_1d/eli_app_m_1d
 !!
 !! NAME
 !! eli_app_m_1d
 !!
 !! FUNCTION
 !!   Apply the linearized Eliashberg matrix once to the input vector.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!   lambda_1d = coupling constant as a function of frequency
@@ -252,10 +271,6 @@ end subroutine eliashberg_1d
 
 
 subroutine eli_app_m_1d (delta_1d,lambda_1d,nmatsu,z_1d)
-
- use defs_basis
- use defs_elphon
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -349,7 +364,7 @@ subroutine eli_app_m_1d (delta_1d,lambda_1d,nmatsu,z_1d)
 end subroutine eli_app_m_1d
 !!***
 
-!!****f* ABINIT/eli_diag_m_1d
+!!****f* m_eliashberg_1d/eli_diag_m_1d
 !!
 !! NAME
 !! eli_diag_m_1d
@@ -358,13 +373,6 @@ end subroutine eli_app_m_1d
 !!  diagonalize M matrix. Heavy and should be avoided for production.
 !!  Actually, since M is not symmetrical, diagonalize M^{t} M and
 !!  get right-eigenvalues and vectors
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!   lambda_1d = coupling constant as a function of frequency
@@ -390,9 +398,6 @@ end subroutine eli_app_m_1d
 
 subroutine eli_diag_m_1d (delta_1d,lambda_1d,maxeigval,mustar,nmatsu,tc,z_1d)
 
- use defs_basis
- use defs_elphon
- use m_profiling_abi
  use m_linalg_interfaces
 
 !This section has been created automatically by the script Abilint (TD).
@@ -477,7 +482,7 @@ subroutine eli_diag_m_1d (delta_1d,lambda_1d,maxeigval,mustar,nmatsu,tc,z_1d)
 end subroutine eli_diag_m_1d
 !!***
 
-!!****f* ABINIT/eli_lambda_1d
+!!****f* m_eliashberg_1d/eli_lambda_1d
 !!
 !! NAME
 !! eli_lambda_1d
@@ -486,13 +491,6 @@ end subroutine eli_diag_m_1d
 !!  In the solving of the 1D (energy only) Eliashberg equations, calculate
 !!  the lambda, which is the e-p coupling strength. See Allen and Mitrovic
 !!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull, p.45
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!   a2f_1d = 1D alpha2F function
@@ -517,12 +515,6 @@ end subroutine eli_diag_m_1d
 !! SOURCE
 
 subroutine eli_lambda_1d (a2f_1d,elph_ds,lambda_1d,nmatsu,tc)
-
- use defs_basis
- use defs_elphon
- use m_profiling_abi
-
- use m_numeric_tools,   only : simpson_int
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -573,20 +565,13 @@ subroutine eli_lambda_1d (a2f_1d,elph_ds,lambda_1d,nmatsu,tc)
 end subroutine eli_lambda_1d
 !!***
 
-!!****f* ABINIT/eli_m_iter_1d
+!!****f* m_eliashberg_1d/eli_m_iter_1d
 !!
 !! NAME
 !! eli_m_iter_1d
 !!
 !! FUNCTION
 !!  Find largest eigenvalue of M matrix, to deduce superconducting Tc
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!   lambda_1d = coupling constant as a function of frequency
@@ -612,10 +597,6 @@ end subroutine eli_lambda_1d
 !! SOURCE
 
 subroutine eli_m_iter_1d (delta_1d,lambda_1d,maxeigval,nmatsu,z_1d)
-
- use defs_basis
- use defs_elphon
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -698,7 +679,7 @@ subroutine eli_m_iter_1d (delta_1d,lambda_1d,maxeigval,nmatsu,z_1d)
 !  end do
 !  dnewnorm = sqrt(dnewnorm)
 !  write(std_out,*) 'eli_m_iter_1d : dnewnorm ', dnewnorm
-!  
+!
 !  do imatsu=-nmatsu,nmatsu
 !  write (112,*) imatsu,delta_1d(imatsu)/delta_old(imatsu)
 !  end do
@@ -729,7 +710,7 @@ subroutine eli_m_iter_1d (delta_1d,lambda_1d,maxeigval,nmatsu,z_1d)
 end subroutine eli_m_iter_1d
 !!***
 
-!!****f* ABINIT/eli_z_1d
+!!****f* m_eliashberg_1d/eli_z_1d
 !!
 !! NAME
 !! eli_z_1d
@@ -738,13 +719,6 @@ end subroutine eli_m_iter_1d
 !!  In the solving of the 1D (energy only) Eliashberg equations, calculate
 !!  the Z function, which is the renormalization factor. See Allen and Mitrovic
 !!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!   lambda_1d = coupling constant as a function of frequency
@@ -766,10 +740,6 @@ end subroutine eli_m_iter_1d
 !! SOURCE
 
 subroutine eli_z_1d (lambda_1d,nmatsu,z_1d)
-
- use defs_basis
- use defs_elphon
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -810,4 +780,7 @@ subroutine eli_z_1d (lambda_1d,nmatsu,z_1d)
  end do
 
 end subroutine eli_z_1d
+!!***
+
+end module m_eliashberg_1d
 !!***

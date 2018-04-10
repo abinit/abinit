@@ -30,7 +30,7 @@ sources = [
  "ddb_elast.F90",
  "ddb_interpolate.F90",
  "electrooptic.F90",
- "eliashberg_1d.F90",
+ "m_eliashberg_1d.F90",
  "m_elphon.F90",
  "ep_el_weights.F90",
  "ep_fs_weights.F90",
