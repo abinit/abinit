@@ -82,7 +82,6 @@ sources = [
  "m_strain.F90",
  "newfermie1.F90",
  "outddbnc.F90",
- "outgkk.F90",
  "qmatrix.F90",
  "redgr.F90",
  "rf2_init.F90",

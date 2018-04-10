@@ -74,7 +74,7 @@ sources = [
  "ddb_piezo.F90",
  "m_raman.F90",
  "read_el_veloc.F90",
- "read_gkk.F90",
+ "m_iogkk.F90",
  "relaxpol.F90",
  "m_thmeig.F90",
  ]

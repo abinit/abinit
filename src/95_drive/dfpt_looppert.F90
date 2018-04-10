@@ -180,6 +180,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
  use m_rf2,        only : rf2_getidirs
+ use m_iogkk,      only : outgkk
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
