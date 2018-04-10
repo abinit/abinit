@@ -147,7 +147,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: interp_kmult(3)
- integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
+ integer :: ii,jj,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
@@ -607,7 +607,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &         (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
-   write(*,*) dtfil%fnameabi_wfkfine
    wfk_fname_dense = dtfil%fnameabi_wfkfine
    call wrtout(std_out,"EPH Interpolation: will read energies and kmesh from: "//trim(wfk_fname_dense),"COLL")
 
@@ -634,19 +633,31 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     dtset%kptopt)
    call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,dtset%kptopt)
 
+   write(*,*) kmesh%nbz
+   write(*,*) kmesh_dense%nbz
+
    ! for preliminary tests we hardcode interp_kmult
    ! then it should be calculated from hdr_wfk_dense%nkpt
    ! it can also be read from the input file using BSp%interp_kmult
-   interp_kmult = 2
+   interp_kmult(1) = hdr_wfk_dense%kptrlatt(1,1) / wfk0_hdr%kptrlatt(1,1)
+   interp_kmult(2) = hdr_wfk_dense%kptrlatt(2,2) / wfk0_hdr%kptrlatt(2,2)
+   interp_kmult(3) = hdr_wfk_dense%kptrlatt(3,3) / wfk0_hdr%kptrlatt(3,3)
+
    write(*,*) interp_kmult
 
    kmesh%nshift = 1
    kmesh_dense%nshift = 1
    kmesh%shift = wfk0_hdr%shiftk
    kmesh_dense%shift = hdr_wfk_dense%shiftk
-   write(*,*) 'init double grid'
+
    call double_grid_init(kmesh,kmesh_dense,dtset%kptrlatt,interp_kmult,double_grid)
-   write(*,*) 'done'
+
+   !test write all the indices of the coarse and dense
+   do ii=1,wfk0_hdr%nkpt
+    do jj=1,double_grid%ndiv
+      write(*,*) ii, double_grid%coarse_to_dense(ii,jj)
+    enddo
+   enddo
 
    call exit(0)
  end if
