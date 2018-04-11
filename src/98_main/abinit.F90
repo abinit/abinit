@@ -94,7 +94,6 @@ program abinit
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use m_ab7_invars
  use m_build_info
  use m_cppopts_dumper
@@ -111,8 +110,7 @@ program abinit
  use mpi
 #endif
 
- use defs_time,     only : time_set_papiopt
- use m_time ,       only : asctime, sec2str
+ use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
  use m_io_tools,    only : open_file, flush_unit, delete_file, num_opened_units, show_units
  use m_specialmsg,  only : specialmsg_getcount
@@ -121,21 +119,22 @@ program abinit
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_pawxmlps,    only : paw_setup, paw_setup_free, npsp_pawxml,ipsp2xml
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
+ use m_memeval,     only : memory_eval
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
 #endif
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
+ use m_outxml,      only : outxml_open, outxml_finalise
+ use m_parser,      only : parsefile
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_51_manage_mpi
  use interfaces_57_iovars
  use interfaces_95_drive
 !End of the abilint section
@@ -195,10 +194,6 @@ program abinit
 #ifdef HAVE_GPU_CUDA
  integer :: gpu_devices(5)
 #endif
-#if defined HAVE_MPI
- real(dp) :: tsec_s(2)
-#endif
-
 
 !******************************************************************
 
@@ -583,8 +578,7 @@ program abinit
  if(me==0)then
    write(ab_out,'(3a,i4,a,f13.1,a,f13.1)')'-',ch10,'- Proc.',me,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  end if
- call MPI_ALLREDUCE(tsec,tsec_s,2,MPI_DOUBLE_PRECISION,MPI_SUM,xmpi_world,ierr)
- tsec=tsec_s
+ call xmpi_sum(tsec, xmpi_world, ierr)
 #else
  write(ab_out, '(a,a,a,f13.1,a,f13.1)' )'-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
 #endif

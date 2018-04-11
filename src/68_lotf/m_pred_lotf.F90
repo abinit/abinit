@@ -30,6 +30,9 @@ module m_pred_lotf
  use m_abihist
  use lotfpath
 
+ use m_numeric_tools, only : uniformrandom
+ use m_geometry,      only : xcart2xred
+
  implicit none
 
  private
@@ -84,14 +87,13 @@ CONTAINS !===========================================================
  !! SOURCE
  subroutine pred_lotf(ab_mover,hist,itime,icycle,zDEBUG,iexit)
 
+ use m_geometry,       only : xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_lotf'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -255,7 +257,7 @@ CONTAINS !===========================================================
     call fitclus(.true.,fcart(:,:),xcart,alpha_end,1,ab_mover%natom)
 
     !--Forces/mass for the first step
-    forall(iatom = 1:ab_mover%natom) fcart_m(:,iatom) = fcart(:,iatom)/ab_mover%amass(iatom) 
+    forall(iatom = 1:ab_mover%natom) fcart_m(:,iatom) = fcart(:,iatom)/ab_mover%amass(iatom)
 
     !print *,'b-end 1step',itime,sum(sum(alpha,dim=2)),sum(sum(alpha_in,dim=2)),sum(sum(alpha_end,dim=2))
     !PRINT *,'HH-first-2',itime,icycle,sum(abs(xcart(1,:))),sum(abs(fcart(1,:))),sum(abs(vel(1,:)))
@@ -269,11 +271,11 @@ CONTAINS !===========================================================
   !  1-a) The final values of alpha are set as initial value
   !  1-b) The actual coordinates and velocities are stored in a local saved array
   !  1-c) I the first the coordinated of the atoms at the step itime+lotfvar%nitex
-  !        will be extrapolated and alpha_in updated   
-  !  2-a) The new final value of alpha_end (step itime+lotfvar%nitex) are computed 
+  !        will be extrapolated and alpha_in updated
+  !  2-a) The new final value of alpha_end (step itime+lotfvar%nitex) are computed
   !  2-b) Restore velocities and positions
-  extrapolation_lotf: if(do_extrap) then 
-    select case(icycle) 
+  extrapolation_lotf: if(do_extrap) then
+    select case(icycle)
     case(1)
       !--
       write(message, '(a)' )' LOTF : Extrapolation'
@@ -290,7 +292,7 @@ CONTAINS !===========================================================
     !PRINT *,'HH-extra-1',itime,icycle,sum(abs(xcart(1,:))),sum(abs(fcart(1,:))),sum(abs(vel(1,:)))
 
       !--Compute new bond, and positions by extrpolation (xcartfit) at
-      !  the step=itime+lotfvar%nitex 
+      !  the step=itime+lotfvar%nitex
       call extrapolation_loop(itime,ab_mover%mdtemp(1),ab_mover%dtion,ab_mover%amass,xcart,&
 &                     vel,xcart_next,vel_nexthalf)
 

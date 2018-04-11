@@ -72,6 +72,7 @@
  use m_profiling_abi
  use m_hdr
 
+ use m_time,      only : timab
  use m_io_tools,  only : get_unit
  use m_pawrad,    only : pawrad_type, pawrad_deducer0, simp_gen, nderiv_gen
  use m_pawtab,    only : pawtab_type
@@ -82,7 +83,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optics_paw'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_65_paw, except_this_one => optics_paw
 !End of the abilint section

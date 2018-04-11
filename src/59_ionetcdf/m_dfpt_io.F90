@@ -4,7 +4,7 @@
 !! m_dfpt_io
 !!
 !! FUNCTION
-!! Module containing the methods used to do IO on DFPT results. 
+!! Module containing the methods used to do IO on DFPT results.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2018 ABINIT group (DW)
@@ -36,14 +36,14 @@ MODULE m_dfpt_io
 
  implicit none
 
- private 
+ private
 !!***
 
  public :: elast_ncwrite    ! Dump the elastic and compliance tensors in a netcdf file.
 
 CONTAINS
 
-!!****f* m_dfpt_io/elast_ncwrite 
+!!****f* m_dfpt_io/elast_ncwrite
 !! NAME
 !!  elast_ncwrite
 !!
@@ -93,7 +93,7 @@ subroutine elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,el
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid 
+ integer,intent(in) :: ncid
 !arrays
  real(dp),intent(in) :: compl(6,6), compl_clamped(6,6),compl_stress(6,6)
  real(dp),intent(in) :: elast(6,6), elast_clamped(6,6),elast_stress(6,6)
@@ -118,7 +118,7 @@ subroutine elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,el
    nctkarr_t('elastic_constants_relaxed_ion_stress_corrected', "dp", 'six, six')])
  NCF_CHECK(ncerr)
 
- ! Write variables. 
+ ! Write variables.
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, vid('compliance_constants_relaxed_ion'), compl))
  NCF_CHECK(nf90_put_var(ncid, vid('compliance_constants_clamped_ion'), compl_clamped))
@@ -133,7 +133,7 @@ subroutine elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,el
 #endif
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 
 !This section has been created automatically by the script Abilint (TD).

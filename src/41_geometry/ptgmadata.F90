@@ -24,8 +24,6 @@
 !! OUTPUT
 !! ptgrpmasb= symbol
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      prtspgroup
 !!
@@ -57,9 +55,6 @@ subroutine ptgmadata(ptgroupma,ptgrpmasb)
 !scalars
  integer,intent(in) :: ptgroupma
  character(len=10),intent(out) :: ptgrpmasb
-
-!Local variables-------------------------------
-!character(len=500) :: message
 
 ! *************************************************************************
 

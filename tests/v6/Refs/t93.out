@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ANADDB 
+.Version 8.7.6 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h02 )
+.Starting date : Thu  8 Mar 2018.
+- ( at 06h31 )
   
 
 ================================================================================
@@ -99,6 +99,7 @@ Phonon band structure files, with atomic projections, will be output
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.018  and twall      0.019 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -145,20 +146,20 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    3.333333E-01    3.333333E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        1.510416E-03    7.923276E-06    6.890586E-02
-       2        1.760080E-03    1.731476E-07    1.108910E-03
-       3        1.760080E-03    1.727133E-07    1.106129E-03
-       4        1.814886E-03    6.189890E-06    3.728455E-02
-       5        1.814886E-03    7.500438E-06    4.517858E-02
-       6        2.075154E-03    5.767052E-06    2.657038E-02
+       1        1.682240E-03    7.648314E-06    5.362091E-02
+       2        1.716226E-03    2.065425E-07    1.391249E-03
+       3        1.716226E-03    2.065425E-07    1.391249E-03
+       4        1.960201E-03    7.127504E-06    3.680281E-02
+       5        1.960201E-03    7.320390E-06    3.779878E-02
+       6        2.203370E-03    6.799580E-06    2.778765E-02
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.390399E-18    0.000000E+00
-       2        0.000000E+00    1.123980E-10    0.000000E+00
-       3        0.000000E+00    7.547127E-11    0.000000E+00
-       4        1.049696E-03    1.185051E-05    2.133806E-01
-       5        1.049696E-03    7.954288E-06    1.432251E-01
+       1        0.000000E+00    1.217026E-17    0.000000E+00
+       2        0.000000E+00    1.123984E-10    0.000000E+00
+       3        0.000000E+00    7.547090E-11    0.000000E+00
+       4        1.049696E-03    1.185042E-05    2.133790E-01
+       5        1.049696E-03    7.954377E-06    1.432267E-01
        6        2.778532E-03    9.740731E-09    2.503256E-05
 
  Q point =    5.000000E-01    0.000000E+00    0.000000E+00   isppol =    1
@@ -172,28 +173,28 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    3.333333E-01    3.333333E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        1.510416E-03    7.923276E-06    6.890586E-02
-       2        1.760080E-03    1.731476E-07    1.108910E-03
-       3        1.760080E-03    1.727133E-07    1.106129E-03
-       4        1.814886E-03    6.189890E-06    3.728455E-02
-       5        1.814886E-03    7.500438E-06    4.517858E-02
-       6        2.075154E-03    5.767052E-06    2.657038E-02
+       1        1.682240E-03    7.648314E-06    5.362091E-02
+       2        1.716226E-03    2.065425E-07    1.391249E-03
+       3        1.716226E-03    2.065425E-07    1.391249E-03
+       4        1.960201E-03    7.127504E-06    3.680281E-02
+       5        1.960201E-03    7.320390E-06    3.779878E-02
+       6        2.203370E-03    6.799580E-06    2.778765E-02
 
  Q point =    3.333333E-01    3.333333E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        8.290816E-04    9.957818E-07    2.874181E-02
-       2        8.290816E-04    9.957818E-07    2.874181E-02
-       3        1.692076E-03    1.091602E-06    7.564306E-03
-       4        1.692076E-03    1.091602E-06    7.564306E-03
-       5        2.323611E-03    9.799140E-07    3.600855E-03
-       6        2.323611E-03    9.799140E-07    3.600855E-03
+       1        9.634253E-04    1.035403E-06    2.213186E-02
+       2        9.634253E-04    1.035403E-06    2.213186E-02
+       3        1.825910E-03    1.146080E-06    6.820254E-03
+       4        1.825910E-03    1.146080E-06    6.820254E-03
+       5        2.372240E-03    1.040564E-06    3.668563E-03
+       6        2.372240E-03    1.040564E-06    3.668563E-03
 
  Q point =    0.000000E+00    0.000000E+00    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.134321E-04    5.832802E-07    2.273612E-02
-       2        7.134321E-04    6.145467E-07    2.395488E-02
-       3        7.134321E-04    1.055144E-06    4.112926E-02
-       4        7.134321E-04    1.023877E-06    3.991050E-02
+       1        7.134321E-04    6.298133E-07    2.454997E-02
+       2        7.134321E-04    6.581848E-07    2.565589E-02
+       3        7.134321E-04    1.008611E-06    3.931541E-02
+       4        7.134321E-04    9.802394E-07    3.820950E-02
        5        1.797700E-03    6.551288E-07    4.021951E-03
        6        1.797700E-03    6.551288E-07    4.021951E-03
 
@@ -208,12 +209,12 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    3.333333E-01    3.333333E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        8.290816E-04    9.957818E-07    2.874181E-02
-       2        8.290816E-04    9.957818E-07    2.874181E-02
-       3        1.692076E-03    1.091602E-06    7.564306E-03
-       4        1.692076E-03    1.091602E-06    7.564306E-03
-       5        2.323611E-03    9.799140E-07    3.600855E-03
-       6        2.323611E-03    9.799140E-07    3.600855E-03
+       1        9.634253E-04    1.035403E-06    2.213186E-02
+       2        9.634253E-04    1.035403E-06    2.213186E-02
+       3        1.825910E-03    1.146080E-06    6.820254E-03
+       4        1.825910E-03    1.146080E-06    6.820254E-03
+       5        2.372240E-03    1.040564E-06    3.668563E-03
+       6        2.372240E-03    1.040564E-06    3.668563E-03
 
  Q point =    5.000000E-01    0.000000E+00    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -235,19 +236,19 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.390399E-18    0.000000E+00
-       2        0.000000E+00    1.123980E-10    0.000000E+00
-       3        0.000000E+00    7.547127E-11    0.000000E+00
-       4        1.049696E-03    1.185051E-05    2.133806E-01
-       5        1.049696E-03    7.954288E-06    1.432251E-01
+       1        0.000000E+00    1.217026E-17    0.000000E+00
+       2        0.000000E+00    1.123984E-10    0.000000E+00
+       3        0.000000E+00    7.547090E-11    0.000000E+00
+       4        1.049696E-03    1.185042E-05    2.133790E-01
+       5        1.049696E-03    7.954377E-06    1.432267E-01
        6        2.778532E-03    9.740731E-09    2.503256E-05
 
  Q point =    0.000000E+00    0.000000E+00    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        7.134321E-04    5.832802E-07    2.273612E-02
-       2        7.134321E-04    6.145467E-07    2.395488E-02
-       3        7.134321E-04    1.055144E-06    4.112926E-02
-       4        7.134321E-04    1.023877E-06    3.991050E-02
+       1        7.134321E-04    6.298133E-07    2.454997E-02
+       2        7.134321E-04    6.581848E-07    2.565589E-02
+       3        7.134321E-04    1.008611E-06    3.931541E-02
+       4        7.134321E-04    9.802394E-07    3.820950E-02
        5        1.797700E-03    6.551288E-07    4.021951E-03
        6        1.797700E-03    6.551288E-07    4.021951E-03
 
@@ -255,20 +256,20 @@ Phonon band structure files, with atomic projections, will be output
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
  mka2f: lambda <omega^2> =     3.171371E-07
- mka2f: lambda <omega^3> =     4.863392E-10
- mka2f: lambda <omega^4> =     8.174316E-13
- mka2f: lambda <omega^5> =     1.472415E-15
- mka2f: isotropic lambda =     2.078705E-01
- mka2f: omegalog  =     1.008907E-03 (Ha)     3.185872E+02 (Kelvin)
+ mka2f: lambda <omega^3> =     4.801290E-10
+ mka2f: lambda <omega^4> =     8.068547E-13
+ mka2f: lambda <omega^5> =     1.465467E-15
+ mka2f: isotropic lambda =     2.207329E-01
+ mka2f: omegalog  =     9.780938E-04 (Ha)     3.088572E+02 (Kelvin)
  mka2f: input mustar =     1.000000E-02
--mka2f: MacMillan Tc =     1.410801E-06 (Ha)     4.454953E-01 (Kelvin)
- mka2f_tr_lova: 1/3 trace of TRANSPORT lambda for isppol   1 =      2.071315E-01
+-mka2f: MacMillan Tc =     1.895336E-06 (Ha)     5.984989E-01 (Kelvin)
+ mka2f_tr_lova: 1/3 trace of TRANSPORT lambda for isppol   1 =      2.167473E-01
 
 ================================================================================
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  1.049696E-03  1.049696E-03
@@ -284,16 +285,16 @@ Phonon band structure files, with atomic projections, will be output
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  3.56775809E-07 -2.39346938E-03
+-  1  0.00000000E+00  4.93618682E-07 -2.39346936E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  3.56775809E-07 -2.39346938E-03
+-  2  0.00000000E+00  4.93618682E-07 -2.39346936E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  2.39346938E-03  3.56775816E-07
+-  1  0.00000000E+00  2.39346936E-03  4.93618686E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  2.39346938E-03  3.56775816E-07
+-  2  0.00000000E+00  2.39346936E-03  4.93618686E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -303,14 +304,14 @@ Phonon band structure files, with atomic projections, will be output
 -  2  2.39346941E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    4   Energy    1.049696E-03
--  1  9.46169125E-07 -2.39346922E-03  0.00000000E+00
+-  1  8.95394857E-07 -2.39346924E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2 -9.46169125E-07  2.39346922E-03  0.00000000E+00
+-  2 -8.95394857E-07  2.39346924E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    5   Energy    1.049696E-03
--  1  2.39346922E-03  9.46169125E-07  0.00000000E+00
+-  1  2.39346924E-03  8.95394857E-07  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2 -2.39346922E-03 -9.46169125E-07  0.00000000E+00
+-  2 -2.39346924E-03 -8.95394857E-07  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    6   Energy    2.778532E-03
 ;  1  0.00000000E+00  0.00000000E+00  2.39346941E-03
@@ -321,16 +322,16 @@ Phonon band structure files, with atomic projections, will be output
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -3.0  1.0 -1.0  2.0 -2.0  1.0 -1.0  0.0  0.0  1.0 -1.0 -1.0  1.0  1.0 -1.0
+  3.0 -3.0  1.0 -1.0  2.0 -2.0  1.0 -1.0 -0.0  0.0  1.0 -1.0 -1.0  1.0  1.0 -1.0
  -0.0  0.0  1.0 -1.0  2.0 -2.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0  2.0  0.0  0.0 -1.0 -1.0  0.0  0.0 -1.0 -1.0 -0.0 -0.0  2.0  2.0  0.0  0.0
- -1.0 -1.0  0.0  0.0 -1.0 -1.0 -0.0 -0.0
+  2.0  2.0  0.0  0.0 -1.0 -1.0 -0.0 -0.0 -1.0 -1.0 -0.0 -0.0  2.0  2.0  0.0  0.0
+ -1.0 -1.0 -0.0 -0.0 -1.0 -1.0 -0.0 -0.0
  Symmetry characters of vibration mode #   6
   1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
   1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    9.956626E-04  1.330052E-03  1.660483E-03  2.079686E-03  2.147570E-03
@@ -378,6 +379,6 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
-+Total cpu time      2.234  and wall time      2.233 sec
++Total cpu time      2.232  and wall time      2.241 sec
 
  anaddb : the run completed succesfully.

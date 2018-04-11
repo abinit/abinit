@@ -52,15 +52,19 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_distribfft
  use m_xmpi
  use m_errors
  use m_profiling_abi
 
- use m_fftcore,      only : fftalg_for_npfft
+ use m_geometry,     only : metric
+ use m_parser,       only : intagm
+ use m_geometry,     only : mkrdim
+ use m_fftcore,      only : fftalg_for_npfft, getng
  use m_mpinfo,       only : init_mpi_enreg,mpi_distrib_is_ok
  use m_libpaw_tools, only : libpaw_write_comm_set
+ use m_dtset,        only : get_npert_rbz
+ use m_kg,           only : getmpw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -68,11 +72,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 #define ABI_FUNC 'mpi_setup'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_42_parser
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
  use interfaces_57_iovars, except_this_one => mpi_setup
 !End of the abilint section
 
@@ -223,9 +223,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
 !  From total number of procs, compute all possible distributions
-!  Ignore exit flag if GW calculations because autoparal section is performed in screening/sigma/bethe_salpeter
+!  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
    call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE])) iexit = 0
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])) iexit = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
 &   (dtsets(idtset)%npkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &

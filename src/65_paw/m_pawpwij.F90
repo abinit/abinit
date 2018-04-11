@@ -33,6 +33,7 @@ MODULE m_pawpwij
  use m_fft
 
  use m_numeric_tools,  only : arth
+ use m_geometry,       only : metric
  use m_paw_numeric,    only : paw_jbessel_4spline, paw_spline
  use m_splines,        only : splfit
  use m_pawang,         only : pawang_type, realgaunt
@@ -76,7 +77,7 @@ MODULE m_pawpwij
    ! qgrid_spl(nq_spl)
    ! The coordinates of the points of the radial grid for the integrals used in the spline.
 
-  real(dp),allocatable :: pwff_spl(:,:,:,:) 
+  real(dp),allocatable :: pwff_spl(:,:,:,:)
   ! pwff_spl(nq_spl,2,0:dim1,dim2)
   ! The different integrals on the radial |q| grid, for a given atom type.
 
@@ -122,7 +123,7 @@ MODULE m_pawpwij
   ! $<phi|e^{-i(q+G).r}|phj> - <tphi|e^{-i(q+G).r}|tphj>$
 
  end type pawpwij_t
- 
+
  public :: pawpwij_init       ! Calculate onsite matrix elements of a set of plane waves.
  public :: pawpwij_free        ! Deallocate dynamic memory in the structure.
  !public :: paw_pwij_bcast
@@ -345,7 +346,6 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpwij_init'
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace
 !End of the abilint section
@@ -406,7 +406,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 
  ! Fake MPI_type for sequential part.
  call initmpi_seq(MPI_enreg_seq)
- 
+
  call initylmg(gprimd,gvec,my_qtmp,my_mqmem,MPI_enreg_seq,two_lmaxp1,npw,dummy_nband,my_nqpt,&
    npwarr,dummy_nsppol,optder,rprimd,ylm_q,ylmgr_q)
 
@@ -741,7 +741,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
          end if
          !
          ! === Compute second derivative of ff^{al}_{ij)(q) ===
-         !yp1=zero; ypn=zero 
+         !yp1=zero; ypn=zero
          call paw_spline(qgrid_spl,tmp_spl(:,1,ll,kln),nq_spl,yp1,ypn,tmp_spl(:,2,ll,kln))
        end do !ll
 
@@ -1003,7 +1003,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
    ! === Re-evaluate Gaunt coefficients, just to be on the safe side ===
    ! * Note that gntselect is in packed form, thanks to invariance under permutation.
    ! * Could use Pawang% but size of gntselect depends on pawxcdev!
-   
+
    ABI_MALLOC(  realgnt,((2*mpsang-1)**2*(mpsang)**4))
    ABI_MALLOC(gntselect,((2*mpsang-1)**2, mpsang**2*(mpsang**2+1)/2))
    call realgaunt(mpsang,ngnt,gntselect,realgnt)
@@ -1107,7 +1107,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
            !
            ! === Evaluate matrix elements for each plane wave ===
            do ig=1,npw
-             dummy = newfun(ig) * ylm_q(ig,ilm_G) 
+             dummy = newfun(ig) * ylm_q(ig,ilm_G)
              paw_rhox(1,ig,klmn) = paw_rhox(1,ig,klmn) &
 &              + dummy * mi_l(1,ipow) !(ph3d(1,ig)*mi_l(1,ipow)-ph3d(2,ig)*mi_l(2,ipow))
 
@@ -1158,7 +1158,7 @@ end subroutine paw_mkrhox
 !!  npw=number of plane waves for oscillator matrix elements
 !!  natom=number of atoms
 !!  Cprj_kmqb1(natom,nspinor),Cprj_kb2(natom,nspinor) <type(pawcprj_type)>=
-!!   projected input wave functions <Proj_i|Cnk> with all NL projectors corresponding to 
+!!   projected input wave functions <Proj_i|Cnk> with all NL projectors corresponding to
 !!   wavefunctions (k-q,b1,s) and (k,b2,s), respectively.
 !!
 !! SIDE EFFECTS
@@ -1320,7 +1320,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
  type(fftbox_plan3_t) :: plan
 !arrays
  complex(dpc),allocatable :: usk(:),uu(:),rho(:)
- 
+
 ! *************************************************************************
 
  SELECT CASE (nspinor)

@@ -70,13 +70,14 @@ subroutine setup1(acell,amass,amu,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  use m_profiling_abi
  use m_errors
 
+ use m_geometry,   only : mkrdim, metric
+ use m_kg,         only : getcut
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup1'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

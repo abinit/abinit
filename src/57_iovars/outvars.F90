@@ -84,6 +84,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  use netcdf
 #endif
 
+ use m_nctk,      only : create_nc_file
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -168,7 +170,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 
 #ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
- ! otherwise v6[34] crashes with errmess: 
+ ! otherwise v6[34] crashes with errmess:
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
  ! because we keep on creating dimensions in write_var_netcdf.
  ! one should use groups for this kind of operations!!

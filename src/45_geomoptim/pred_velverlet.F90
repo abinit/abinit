@@ -10,7 +10,7 @@
 !!  it better conserves the total energy and time-reversibility).
 !!  VV is a second order integration scheme that requires a single
 !!  evaluatoin of forces per time step. These properties make VV
-!!  a good candidate integrator for use in Hybrid Monte Carlo 
+!!  a good candidate integrator for use in Hybrid Monte Carlo
 !!  simulation scheme.
 !!
 !!
@@ -22,15 +22,15 @@
 !!
 !! INPUTS
 !!  ab_mover =  Data structure containing information about
-!!              input variables related to MD, e.g dtion, masses, etc. 
-!!  hist     =  history of ionic positions, forces, 
+!!              input variables related to MD, e.g dtion, masses, etc.
+!!  hist     =  history of ionic positions, forces,
 !!  itime    =  index of current time step
 !!  ntime    =  total number of time steps
-!!  zDEBUG   =  flag indicating whether to print debug info 
+!!  zDEBUG   =  flag indicating whether to print debug info
 !!  iexit    =  flag indicating finilization of mover loop
 !!  hmcflag  =  optional argument indicating whether the predictor is called from the Hybrid Monte Carlo (HMC) routine
 !!  icycle   =  if hmcflag==1, then icycle providing information about number of HMC cycle is needed
-!!  ncycle   =  if hmcflag==1, then ncycle provides the total number of cycles within one HMC iteration  
+!!  ncycle   =  if hmcflag==1, then ncycle provides the total number of cycles within one HMC iteration
 !!
 !! OUTPUT
 !!  hist =  history of ionic positions, forces etc. is updated
@@ -38,10 +38,10 @@
 !! SIDE EFFECTS
 !!
 !! NOTES
-!! 
+!!
 !! This routine can be used either to simulate NVE molecular dynamics (ionmov = 24) or
 !! is called from pred_hmc routine (ionmov = 25) to perform updates of ionic positions
-!! in Hybrid Monte Carlo iterations. 
+!! in Hybrid Monte Carlo iterations.
 !!
 !! PARENTS
 !!      mover,pred_hmc
@@ -59,18 +59,19 @@
 
 
 subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,ncycle)
-    
+
  use defs_basis
  use m_errors
  use m_profiling_abi
  use m_abimover
  use m_abihist
 
+ use m_geometry,  only : xcart2xred, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_velverlet'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -89,7 +90,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 !Local variables-------------------------------
 
  integer  :: ii,jj                                                              ! dummy integers for loop indexes
- real(dp) :: epot,ekin,ekin_tmp                                                 ! potential (electronic), kinetic (ionic) energies  
+ real(dp) :: epot,ekin,ekin_tmp                                                 ! potential (electronic), kinetic (ionic) energies
  real(dp) :: xcart(3,ab_mover%natom)                                            ! Cartesian coordinates of all ions
  real(dp) :: xred(3,ab_mover%natom)                                             ! reduced coordinates of all ions
  real(dp) :: vel(3,ab_mover%natom)                                              ! ionic velocities in Cartesian coordinates
@@ -108,7 +109,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 !***************************************************************************
 
  DBG_ENTER("COLL")
- 
+
 ! if (option/=1 .and. option/=2 ) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
@@ -190,7 +191,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 
 
  if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
-   
+
    !the following breakdown of single time step in two halfs is needed for initialization.
    !half step velocities "vel_prev" are saved to be used in the next iteration
    !the velocities "vel" are only used to estimate kinetic energy at correct time instances
@@ -206,7 +207,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
        vel(jj,ii) = vel_prev(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      end do
    end do
-   ! use half-step behind velocity values to propagate coordinates one time step forward!!!! 
+   ! use half-step behind velocity values to propagate coordinates one time step forward!!!!
    do ii=1,ab_mover%natom
      do jj=1,3
        xcart(jj,ii) = xcart(jj,ii) + ab_mover%dtion*vel_prev(jj,ii)
@@ -215,9 +216,9 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
    ! now, at this 1st iteration, "vel_prev" correspond to a time instance half-step behind
    ! that of "xcart"
 
- else 
+ else
 
-   !at this moment "vel_prev" is behind "xcart" by half of a time step 
+   !at this moment "vel_prev" is behind "xcart" by half of a time step
    !(saved from the previous iteration) and these are the velocity values to be propagated
    !using forces that are evaluated at the same time instance as xcart
    do ii=1,ab_mover%natom ! propagate velocities one time step forward
@@ -233,7 +234,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
      factor=one
    end if
 
-   do ii=1,ab_mover%natom ! propagate coordinates 
+   do ii=1,ab_mover%natom ! propagate coordinates
      do jj=1,3
        xcart(jj,ii) = xcart(jj,ii) + factor*ab_mover%dtion*vel_prev(jj,ii)
      end do
@@ -251,18 +252,18 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
      do jj=1,3
        ekin=ekin+0.5_dp*ab_mover%amass(ii)*vel(jj,ii)**2
      end do
-   end do 
+   end do
    ekin_tmp=0.0
    do ii=1,ab_mover%natom
      do jj=1,3
        ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
      end do
    end do
-   !write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
+   !write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor
 
  end if
 
- !Convert new xcart to xred to set correct output values 
+ !Convert new xcart to xred to set correct output values
  !Update the history with the new coordinates, velocities, etc.
 
  !Increase indexes

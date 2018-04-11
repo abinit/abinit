@@ -4026,7 +4026,7 @@ end subroutine pawdijfr
        end if
 
 !      Full localized limit
-       if(pawtab%usepawu==1) then ! not activated if usepawu=10 !!
+       if(pawtab%usepawu==1.or.pawtab%usepawu==4) then ! not activated if usepawu=10 !!
 !        Here we compute vpawu=vpawu-v_dc
          vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-pawtab%upawu*(n_tot-half)
          if (ndij/=4.or.option_interaction==2) then
@@ -4089,7 +4089,7 @@ end subroutine pawdijfr
            end do
          end do
        end do
-       if(pawtab%usepawu==1.and.option_interaction==3) then ! not activated if usepawu=10 !!
+       if((pawtab%usepawu==1.or.pawtab%usepawu==4).and.option_interaction==3) then ! not activated if usepawu=10 !!
          vpawu(1,m11,m11,ispden)=vpawu(1,m11,m21,ispden)+half*pawtab%jpawu*mx
          if(ispden==3) then
            vpawu(2,m11,m11,ispden)=vpawu(1,m11,m21,ispden)-half*pawtab%jpawu*my

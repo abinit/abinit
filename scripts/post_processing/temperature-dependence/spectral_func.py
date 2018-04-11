@@ -35,7 +35,7 @@ kb_HaK = 3.1668154267112283e-06
 print '\n################################################'
 print '# Spectral function of the dynamical self-energy #'
 print '##################################################'
-print '\nThis script compute the zero-point motion and the temperature dependance \n\
+print '\nThis script compute the zero-point motion and the temperature dependence \n\
 of eigenenergies due to electron-phonon interaction. This script can \n\
 only compute Q-points with the same weight. If you want symmetry you must hack the script.\n\
 WARNING: The first Q-point MUST be the Gamma point\n'

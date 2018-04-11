@@ -38,13 +38,13 @@ program ujdet
  use defs_basis
  use defs_abitypes
  use defs_datatypes
- use defs_parameters
  use m_xmpi
  use m_profiling_abi
  use m_build_info
  use m_errors
 
  use m_io_tools,  only : open_file
+ use m_parser,    only : intagm, parsefile
  use m_mpinfo,    only : destroy_mpi_enreg
 
 !This section has been created automatically by the script Abilint (TD).
@@ -53,9 +53,7 @@ program ujdet
 #define ABI_FUNC 'ujdet'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_42_parser
  use interfaces_51_manage_mpi
- use interfaces_57_iovars
  use interfaces_65_paw
 !End of the abilint section
 

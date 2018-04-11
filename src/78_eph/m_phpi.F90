@@ -50,6 +50,7 @@ module m_phpi
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
  use m_io_tools,        only : iomode_from_fname
  use m_cgtools,         only : dotprod_g
+ use m_kg,              only : getph
  use m_fftcore,         only : get_kg, kpgsph, sphere
  use m_crystal,         only : crystal_t
  use m_crystal_io,      only : crystal_ncwrite
@@ -120,7 +121,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phpi'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_wfs
 !End of the abilint section
 

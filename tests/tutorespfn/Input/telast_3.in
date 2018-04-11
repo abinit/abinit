@@ -20,7 +20,7 @@ instrflag  1  !the flag for the internal strain tensor
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = D. Hamann
 #%% keywords =  NC, DFPT
 #%% description =  The input file for the anaddb code
 #%%<END TEST_INFO>

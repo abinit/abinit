@@ -29,8 +29,6 @@
 !! OUTPUT
 !! ptgroupma = magnetic point group number
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      symanal
 !!

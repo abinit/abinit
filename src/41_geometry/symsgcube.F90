@@ -5,8 +5,7 @@
 !!
 !! FUNCTION
 !! Generate all the symmetry operations starting from the space group symbol
-!! for the cubic groups
-!! (according to the International Tables of Crystallography, 1983)
+!! for the cubic groups (according to the International Tables of Crystallography, 1983)
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2018 ABINIT group (RC,XG)
@@ -29,8 +28,6 @@
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
-!! TODO
-!!
 !! PARENTS
 !!      gensymspgr
 !!
@@ -52,11 +49,12 @@ subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
  use defs_basis
  use m_profiling_abi
 
+ use m_time,     only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symsgcube'
- use interfaces_18_timing
  use interfaces_41_geometry, except_this_one => symsgcube
 !End of the abilint section
 

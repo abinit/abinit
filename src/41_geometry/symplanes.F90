@@ -4,8 +4,7 @@
 !! symplanes
 !!
 !! FUNCTION
-!! Determines the type of symmetry mirror planes :
-!! m,a,b,c,d,n,g.
+!! Determines the type of symmetry mirror planes: m,a,b,c,d,n,g.
 !! This is used (see symlist.f) to identify the space group.
 !!
 !! COPYRIGHT

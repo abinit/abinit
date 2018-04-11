@@ -26,6 +26,8 @@ module m_ab7_symmetry
   use defs_basis
   use m_profiling_abi
 
+ use m_geometry,     only : metric
+
   implicit none
 
   private
@@ -393,7 +395,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_set_lattice'
- use interfaces_41_geometry
 !End of the abilint section
 
     integer, intent(in) :: id

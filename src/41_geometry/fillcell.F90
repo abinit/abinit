@@ -40,8 +40,6 @@
 !!  typat(1:natom)=type integer for each atom in cell
 !!  xred(3,1:natom)=reduced dimensionless atomic coordinates
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      ingeo
 !!

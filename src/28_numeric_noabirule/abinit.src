@@ -18,22 +18,12 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "cspint.F90",
- "dzgedi.F90",
- "dzgefa.F90",
  "gamma_function.F90",
- "interp.F90",
- "intrpl.F90",
- "j0y0.F90",
- "j1y1.F90",
- "jacobi.F90",
- "k0.F90",
- "k1.F90",
- "lib_four.F90",
- "ludcmp.F90",
+ "m_lib_four.F90",
  "m_abilasi.F90",
  "m_abi_linalg.F90",
  "m_array.F90",
+ "m_bessel.F90",
  "m_cgtools.F90",
  "m_cplxtools.F90",
  "m_blas.F90",
@@ -48,7 +38,6 @@ sources = [
  "m_slk.F90",
  "m_sort.F90",
  "m_splines.F90",
- "uniformrandom.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

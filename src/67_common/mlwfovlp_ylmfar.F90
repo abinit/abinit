@@ -14,9 +14,9 @@
 !!   it would produce a matrix of the following form:
 !!   [1/2,-1/2,1/3,0,0...0]
 !!
-!! This function is similar to mlwfovlp_ylmfac, but the factors it uses 
+!! This function is similar to mlwfovlp_ylmfac, but the factors it uses
 !! real spherical harmonics instead of complex
-!! spherical harmonics. Remember that real spherical harmonics 
+!! spherical harmonics. Remember that real spherical harmonics
 !! are linear combinations of complex
 !! spherical harmonics
 !!
@@ -58,18 +58,20 @@
 #include "abi_common.h"
 
 subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-    
+
  use defs_basis
  use m_errors
  use m_profiling_abi
+
+ use m_geometry,    only : rotmat
+ use m_numeric_tools, only : uniformrandom
+ use m_abilasi,     only : matrginv
  use m_paw_sphharm, only : initylmr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_ylmfar'
- use interfaces_28_numeric_noabirule
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -97,9 +99,9 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
  character(len=500) :: message                   ! to be uncommented, if needed
 !no_abirules
 !integer :: orb_idx(16)=(/1,3,4,2,7,8,6,9,5,13,14,12,15,11,16,10/) !Tab3.1 Wannier90 user guide
- 
+
 ! *************************************************************************
- 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !DEBUG
 !write(std_out,*)'lmax ',lmax,'lmax2 ',lmax2
@@ -250,7 +252,7 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 
 !    get the u matrix that rotates the reference frame
      call rotmat(proj_x(:,iwan),proj_z(:,iwan),inversion_flag,umat)
-!    
+!
 !    find rotated r-vetors. Optional inversion
 !    operation is an extension of the wannier90 axis-setting options
 !    which only allow for proper axis rotations
@@ -271,9 +273,9 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
      ABI_DEALLOCATE(nrm)
 !    the matrix product sum(ir) ylmr_rrinv(lm,ir)*ylmr_rp(ir,lm') gives the
 !    the  lmXlm matrix representation of the coordinate rotation
-     
+
      rot(:,:)=matmul(ylmr_rrinv(:,:),ylmr_rp(:,:))
-!    
+!
 !    now rotate the current wannier orbital
      ylmrp(:)=matmul(rot(:,:),ylmr_fac(:,iwan))
      ylmr_fac(:,iwan)=ylmrp(:)

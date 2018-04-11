@@ -436,6 +436,7 @@ interface xmpi_irecv
   module procedure xmpi_irecv_intv
   module procedure xmpi_irecv_int1d
   module procedure xmpi_irecv_dp1d
+  module procedure xmpi_irecv_dp2d
 end interface xmpi_irecv
 
 !----------------------------------------------------------------------
@@ -454,6 +455,7 @@ end interface xmpi_scatterv
 interface xmpi_isend
   module procedure xmpi_isend_int1d
   module procedure xmpi_isend_dp1d
+  module procedure xmpi_isend_dp2d
 end interface xmpi_isend
 
 !----------------------------------------------------------------------
@@ -1826,8 +1828,8 @@ end subroutine xmpi_comm_translate_ranks
 !!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_abihist,m_bse_io
 !!      m_dvdb,m_exc_diago,m_exc_itdiago,m_exc_spectra,m_fit_polynomial_coeff
 !!      m_green,m_haydock,m_hdr,m_io_redirect,m_ioarr,m_iowf,m_plowannier
-!!      m_sigmaph,m_slk,m_wfd,m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover
-!!      mover_effpot,outkss,pawmkaewf,qmc_prep_ctqmc,rf2_init,sigma,tddft
+!!      m_sigmaph,m_slk,m_wfd,m_wffile,m_wfk,m_xgScalapack,mlwfovlp,mlwfovlp_pw
+!!      mover,mover_effpot,outkss,pawmkaewf,qmc_prep_ctqmc,rf2_init,sigma,tddft
 !!      vtorho,vtorhorec,wfk_analyze
 !!
 !! CHILDREN

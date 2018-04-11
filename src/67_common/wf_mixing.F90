@@ -62,7 +62,8 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  use m_errors
  use m_cgtools
 
- use m_pawtab, only : pawtab_type
+ use m_time,    only : timab
+ use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
 &                      pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim
 
@@ -70,7 +71,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wf_mixing'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_66_wfs
 !End of the abilint section
@@ -193,7 +193,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !- the values of indh from wfmixalg+1 to 2*wfmixalg-1 store the biorthogonalized output cgcprj (coming as argument)
 
 !First step
-  if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
+ if (istep==1 .or. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) ) then
 
    indh=2   ! This input wavefunction is NOT the reference
    if(wfmixalg==2)indh=1 ! But this does not matter in the simple mixing case that has history_size=1

@@ -64,12 +64,13 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  use m_errors
  use m_xmpi
 
+ use m_time,           only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorhotf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 
@@ -187,7 +188,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tf'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_67_common
 !End of the abilint section
@@ -284,7 +284,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tfek'
- use interfaces_18_timing
  use interfaces_67_common
 !End of the abilint section
 

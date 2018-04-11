@@ -60,12 +60,13 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,  only : xred2xcart, metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtimg'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_67_common, except_this_one => prtimg
 !End of the abilint section
 
