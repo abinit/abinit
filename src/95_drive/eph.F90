@@ -177,8 +177,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
- real(dp),pointer :: energies_dense(:,:,:)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
+ real(dp),pointer :: energies_dense(:,:,:), phfrq_dense(:,:), displ_cart(:,:,:,:) 
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -603,9 +603,17 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! The points of the fine grid are associated to the points of the
  ! coarse grid according to proximity
  ! The integration weights are returned on the coarse grid.
+ !
+ ! Steps of the implementation
+ ! 1. Load the fine k grid from file
+ ! 2. Find the matching between the k_coarse and k_dense using the double_grid object
+ ! 3. Calculate the phonon frequencies on the dense mesh and store them on a array
+ ! 4. To obtain the weight of the coarse mesh calculated using the dense mesh
+ !    we call a routine with ik_ibz and ikq_ibz in the coarse grid. 
  ! The interface should be compatible with libtetrabz
  ! 
 
+ !1.
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &         (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
    wfk_fname_dense = dtfil%fnameabi_wfkfine
@@ -618,15 +626,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
    call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
 
-   write(*,*) 'coarse:', wfk0_hdr%nkpt,wfk0_hdr%kptopt
-   write(*,*) 'shift:',  hdr_wfk_dense%shiftk
-   write(*,*) 'kpoints:'
+   write(msg,*) 'coarse:', wfk0_hdr%nkpt,wfk0_hdr%kptopt
+   write(msg,*) 'shift:',  hdr_wfk_dense%shiftk
+   write(msg,*) 'kpoints:'
    do ii=1,wfk0_hdr%nkpt
      write(*,*) wfk0_hdr%kptns(:,ii)
    end do
-   write(*,*) 'dense: ', hdr_wfk_dense%nkpt,hdr_wfk_dense%kptopt
-   write(*,*) 'shift:',  hdr_wfk_dense%shiftk
-   write(*,*) 'kpoints:'
+   write(msg,*) 'dense: ', hdr_wfk_dense%nkpt,hdr_wfk_dense%kptopt
+   write(msg,*) 'shift:',  hdr_wfk_dense%shiftk
+   write(msg,*) 'kpoints:'
    do ii=1,hdr_wfk_dense%nkpt
      write(*,*) hdr_wfk_dense%kptns(:,ii)
    end do
@@ -651,14 +659,33 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    kmesh%shift = wfk0_hdr%shiftk
    kmesh_dense%shift = hdr_wfk_dense%shiftk
 
+ !2.
    call double_grid_init(kmesh,kmesh_dense,dtset%kptrlatt,interp_kmult,double_grid)
 
    !test write all the indices of the coarse and dense
+   !loop over coarse kpoints
    do ii=1,wfk0_hdr%nkpt
+    !loop over dense kpoints near the current coarse kpoint
     do jj=1,double_grid%ndiv
       write(*,*) ii, double_grid%coarse_to_dense(ii,jj)
     enddo
    enddo
+
+ !3.  
+   !calculate the phonon frequencies at the q-points on the dense q-grid
+   allocate(phfrq_dense(3*cryst%natom,kmesh_dense%nibz), displ_cart(2,3,cryst%natom,3*cryst%natom))
+   do ii=1,kmesh_dense%nibz
+
+     qpt = kmesh_dense%ibz(:,ii)
+     write(*,*) qpt 
+
+     ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+     call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
+
+   enddo   
+   deallocate(displ_cart)
+
+ !4. 
 
    call exit(0)
  end if
