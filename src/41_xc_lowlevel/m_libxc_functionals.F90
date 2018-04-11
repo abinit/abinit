@@ -1250,7 +1250,8 @@ end function libxc_functionals_nspin
 !scalars
  integer  :: ii,ipts
  logical :: is_gga,is_mgga
- real(dp) :: exctmp,xc_tb09_c_
+ real(dp) :: xc_tb09_c_
+ real(dp),target :: exctmp
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
@@ -1996,13 +1997,14 @@ end subroutine libxc_functionals_set_tb09
 #if defined HAVE_FC_ISO_C_BINDING
 function xc_char_to_c(f_string) result(c_string)
 
+!Arguments ------------------------------------
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_char_to_c'
 !End of the abilint section
 
-!Arguments ------------------------------------
  character(len=*),intent(in) :: f_string
  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
 !Local variables -------------------------------
@@ -2045,13 +2047,14 @@ end function xc_char_to_c
 #if defined HAVE_FC_ISO_C_BINDING
 subroutine xc_char_to_f(c_string,f_string)
 
+!Arguments ------------------------------------
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xc_char_to_f'
 !End of the abilint section
 
-!Arguments ------------------------------------
  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
  character(len=*),intent(out) :: f_string
 !Local variables -------------------------------
