@@ -32,7 +32,7 @@ module m_tdep_phdos
   public :: tdep_calc_thermo
   public :: tdep_calc_elastic
 
-contains 
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
@@ -44,7 +44,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
 #define ABI_FUNC 'tdep_calc_phdos'
 !End of the abilint section
 
-  implicit none 
+  implicit none
 
   integer :: prtdos,ii,iqpt,iatom
   integer :: natom,natom_unitcell,iomega
@@ -70,7 +70,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,'(a)') ' See the vdos.dat and TDEP_PHDOS* files'
 
-! Copy Phij_NN to Ifc%atmfrc 
+! Copy Phij_NN to Ifc%atmfrc
 ! ==========================
   call tdep_ifc2phij(Ifc%dipdip,Ifc,InVar,Lattice,natom_unitcell,0,Phij_NN,Rlatt4abi,Shell2at,Sym)
 
@@ -83,9 +83,9 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   if (InVar%ReadIFC.eq.2) then
 !   Read IFC from ifc.tdep (ReadIFC=2)
     call tdep_read_ifc(Ifc,InVar,natom_unitcell)
-!   Copy Ifc%atmfrc to Phij_NN    
+!   Copy Ifc%atmfrc to Phij_NN
     call tdep_ifc2phij(Ifc%dipdip,Ifc,InVar,Lattice,natom_unitcell,1,Phij_NN,Rlatt4abi,Shell2at,Sym)
-!   Copy Phij_NN to Ifc%atmfrc 
+!   Copy Phij_NN to Ifc%atmfrc
     call tdep_ifc2phij(Ifc%dipdip,Ifc,InVar,Lattice,natom_unitcell,0,Phij_NN,Rlatt4abi,Shell2at,Sym)
 !   Write IFC in ifc.out (for check)
     call tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,1)
@@ -96,10 +96,10 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
       open(unit=55,file='Phij_NN-new.dat')
       do iatom=1,3*natom
         write(55,'(10000(f10.6,1x))') Phij_NN(iatom,:)
-      end do  
+      end do
       close(55)
-    end if  
-  end if  
+    end if
+  end if
 
 ! Compute the DOS
 ! ===============
@@ -119,14 +119,14 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   ABI_MALLOC(displ,(2*3*natom_unitcell*3*natom_unitcell,Qpt%nqpt)); displ(:,:)=zero
   ABI_MALLOC(omega,(3*natom_unitcell,Qpt%nqpt)); omega(:,:)=zero
   open(unit=53,file='omega-abinit.dat')
-  do iqpt=1,Qpt%nqpt 
+  do iqpt=1,Qpt%nqpt
     call ifc_fourq(Ifc,Crystal,Qpt%qpt_red(:,iqpt),omega(:,iqpt),displ(:,iqpt))
-    if (iqpt.le.Qpt%nqpt) then 
+    if (iqpt.le.Qpt%nqpt) then
       if (InVar%Enunit.eq.0) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)*Ha_eV*1000,ii=1,3*natom_unitcell)
       if (InVar%Enunit.eq.1) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)*Ha_cmm1   ,ii=1,3*natom_unitcell)
       if (InVar%Enunit.eq.2) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)           ,ii=1,3*natom_unitcell)
     end if
-  end do  
+  end do
   close(53)
 
 ! Print the DOS
@@ -147,7 +147,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   end do
   close(56)
 
-end subroutine  
+end subroutine tdep_calc_phdos
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
@@ -159,7 +159,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
 #define ABI_FUNC 'tdep_calc_thermo'
 !End of the abilint section
 
-  implicit none 
+  implicit none
 
   integer :: iomega,itemp
   double precision :: k_B,wovert,heatcapa,entropy,internalE,freeE,expm2x,ln2shx,cothx,xx
@@ -219,7 +219,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
   write(20,'(1x,a)')'    2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0'
   write(20,'(1x,a)')'    3/ We assume that DeltaF_AH^QHA(T)=a(V)*T**2'
   write(20,'(1x,a)')'    4/ F_tot^QHA+AH(T) = U_0 + F_vib^QHA(T) + DeltaF_AH^QHA(T)'
-  write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)    DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)'   
+  write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)    DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)'
   do itemp=1,100
     wovert=1.d0/(2*real(itemp)*100*k_B)
     freeE=0.d0
@@ -232,10 +232,10 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
     Ftot=U0*Ha_eV+freeE*itemp*100+DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature*100)**2
     write(20,'(1x,i5,4(1x,f15.5))') itemp*100,freeE*itemp*100,U0*Ha_eV+freeE*itemp*100,&
 &                          DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature)**2,Ftot
-  end do  
+  end do
   close(20)
 
-end subroutine  
+end subroutine tdep_calc_thermo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
@@ -247,7 +247,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 #define ABI_FUNC 'tdep_calc_elastic'
 !End of the abilint section
 
-  implicit none 
+  implicit none
 
   integer :: iatom,ii,jj,kk,ll,iatcell,itypat
 ! integer :: istep
@@ -271,9 +271,9 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 ! Define atomic mass average
   mass_amu=zero
   do iatom=1,InVar%natom_unitcell
-    itypat=InVar%typat_unitcell(iatom) 
+    itypat=InVar%typat_unitcell(iatom)
     mass_amu=mass_amu+InVar%amu(itypat)
-  end do  
+  end do
   mass_amu=mass_amu/real(InVar%natom_unitcell)
 
   rho=(mass_amu/1e3)*InVar%natom_unitcell/Lattice%ucvol/bohr**3/6.022e23
@@ -286,12 +286,12 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 !FB  do istep=1,InVar%nstep
 !FB    sigma_11=sigma_11+InVar%sigma(1,istep)
 !FB    sigma_21=sigma_21+InVar%sigma(2,istep)
-!FB  end do  
+!FB  end do
 !FB  sigma_11=sigma_11/real(InVar%nstep)
 !FB  sigma_21=sigma_21/real(InVar%nstep)
-  
+
 ! New calculation of elastic constants using the formula (12.28 and 12.29 of
-! Wallace, Statistical physics of crystals and liquids, Worl Scientific)  
+! Wallace, Statistical physics of crystals and liquids, Worl Scientific)
   ABI_MALLOC(aijkl,(3,3,3,3)); aijkl(:,:,:,:)=0.d0
   ABI_MALLOC(cijkl,(3,3,3,3)); cijkl(:,:,:,:)=0.d0
   do ii=1,3
@@ -302,7 +302,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
             do iatcell=1,InVar%natom_unitcell
               aijkl(ii,jj,kk,ll)=aijkl(ii,jj,kk,ll)-Phij_NN(ii+(iatcell-1)*3,3*(iatom-1)+jj)&
 &               *distance(iatcell,iatom,kk+1)*distance(iatcell,iatom,ll+1)/2.d0/Lattice%ucvol
-            end do  
+            end do
           end do
         enddo
       enddo
@@ -320,28 +320,28 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
     enddo
   enddo
   ABI_FREE(aijkl)
-  
+
   cijkl(:,:,:,:)=cijkl(:,:,:,:)*29421.033d0
 
   ABI_MALLOC(Cij,(6,6)) ; Cij(:,:)=0.d0
-  Cij(1,1)=cijkl(1,1,1,1) ; Cij(1,2)=cijkl(1,1,2,2) ; Cij(1,3)=cijkl(1,1,3,3)  
+  Cij(1,1)=cijkl(1,1,1,1) ; Cij(1,2)=cijkl(1,1,2,2) ; Cij(1,3)=cijkl(1,1,3,3)
   Cij(1,4)=cijkl(1,1,2,3) ; Cij(1,5)=cijkl(1,1,1,3) ; Cij(1,6)=cijkl(1,1,1,2)
-  Cij(2,1)=cijkl(2,2,1,1) ; Cij(2,2)=cijkl(2,2,2,2) ; Cij(2,3)=cijkl(2,2,3,3) 
+  Cij(2,1)=cijkl(2,2,1,1) ; Cij(2,2)=cijkl(2,2,2,2) ; Cij(2,3)=cijkl(2,2,3,3)
   Cij(2,4)=cijkl(2,2,2,3) ; Cij(2,5)=cijkl(2,2,1,3) ; Cij(2,6)=cijkl(2,2,1,2)
-  Cij(3,1)=cijkl(3,3,1,1) ; Cij(3,2)=cijkl(3,3,2,2) ; Cij(3,3)=cijkl(3,3,3,3) 
+  Cij(3,1)=cijkl(3,3,1,1) ; Cij(3,2)=cijkl(3,3,2,2) ; Cij(3,3)=cijkl(3,3,3,3)
   Cij(3,4)=cijkl(3,3,2,3) ; Cij(3,5)=cijkl(3,3,1,3) ; Cij(3,6)=cijkl(3,3,1,2)
-  Cij(4,1)=cijkl(2,3,1,1) ; Cij(4,2)=cijkl(2,3,2,2) ; Cij(4,3)=cijkl(2,3,3,3) 
+  Cij(4,1)=cijkl(2,3,1,1) ; Cij(4,2)=cijkl(2,3,2,2) ; Cij(4,3)=cijkl(2,3,3,3)
   Cij(4,4)=cijkl(2,3,2,3) ; Cij(4,5)=cijkl(2,3,1,3) ; Cij(4,6)=cijkl(2,3,1,2)
-  Cij(5,1)=cijkl(1,3,1,1) ; Cij(5,2)=cijkl(1,3,2,2) ; Cij(5,3)=cijkl(1,3,3,3) 
+  Cij(5,1)=cijkl(1,3,1,1) ; Cij(5,2)=cijkl(1,3,2,2) ; Cij(5,3)=cijkl(1,3,3,3)
   Cij(5,4)=cijkl(1,3,2,3) ; Cij(5,5)=cijkl(1,3,1,3) ; Cij(5,6)=cijkl(1,3,1,2)
-  Cij(6,1)=cijkl(1,2,1,1) ; Cij(6,2)=cijkl(1,2,2,2) ; Cij(6,3)=cijkl(1,2,3,3) 
+  Cij(6,1)=cijkl(1,2,1,1) ; Cij(6,2)=cijkl(1,2,2,2) ; Cij(6,3)=cijkl(1,2,3,3)
   Cij(6,4)=cijkl(1,2,2,3) ; Cij(6,5)=cijkl(1,2,1,3) ; Cij(6,6)=cijkl(1,2,1,2)
 ! Remove the rounding errors before writing (for non regression testing purposes)
   do ii=1,6
     do jj=1,6
       if (abs(Cij(ii,jj)).lt.tol8) Cij(ii,jj)=zero
     end do
-  end do  
+  end do
   write(InVar%stdout,'(a)') ' '
   write(InVar%stdout,'(a)') '========== Using the formulation proposed by Wallace (using the IFC) ========='
   write(InVar%stdout,'(a)') 'Cijkl='
@@ -356,7 +356,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Cij(1,2)=(Cij(1,2)+Cij(2,1))/2.d0 ; Cij(2,1)=Cij(1,2)
   Cij(1,3)=(Cij(1,3)+Cij(3,1))/2.d0 ; Cij(3,1)=Cij(1,3)
   Cij(2,3)=(Cij(2,3)+Cij(3,2))/2.d0 ; Cij(3,2)=Cij(2,3)
-  
+
 ! Young's modulus
   E1=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)&
 &   /(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
@@ -374,25 +374,25 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Nu13=(Cij(2,2)*Cij(1,3)-Cij(1,2)*Cij(2,3))/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
   Nu32=(Cij(1,1)*Cij(2,3)-Cij(1,2)*Cij(1,3))/(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
   write(InVar%stdout,'(a,6(f8.3,1x))') 'Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=',Nu21,Nu31,Nu23,Nu12,Nu13,Nu32
-  
-! Shear modulus  
+
+! Shear modulus
   G23=Cij(4,4) ; G13=Cij(5,5) ; G12=Cij(6,6)
   write(InVar%stdout,'(a,3(f8.3,1x))') 'Shear modulus G23, G13 and G12=',G23,G13,G12
-  
-! Compliance matrix  
+
+! Compliance matrix
   ABI_MALLOC(Sij,(6,6)) ; Sij(:,:)=0.d0
-  Sij(1,1)= 1.d0/E1 ; Sij(1,2)=-Nu21/E2 ; Sij(1,3)=-Nu31/E3 ; Sij(1,4)=0.d0     ; Sij(1,5)=0.d0     ; Sij(1,6)=0.d0 
-  Sij(2,1)=-Nu12/E1 ; Sij(2,2)= 1.d0/E2 ; Sij(2,3)=-Nu32/E3 ; Sij(2,4)=0.d0     ; Sij(2,5)=0.d0     ; Sij(2,6)=0.d0 
-  Sij(3,1)=-Nu13/E1 ; Sij(3,2)=-Nu23/E2 ; Sij(3,3)= 1.d0/E3 ; Sij(3,4)=0.d0     ; Sij(3,5)=0.d0     ; Sij(3,6)=0.d0 
-  Sij(4,1)= 0.d0    ; Sij(4,2)= 0.d0    ; Sij(4,3)= 0.d0    ; Sij(4,4)=1.d0/G23 ; Sij(4,5)=0.d0     ; Sij(4,6)=0.d0 
-  Sij(5,1)= 0.d0    ; Sij(5,2)= 0.d0    ; Sij(5,3)= 0.d0    ; Sij(5,4)=0.d0     ; Sij(5,5)=1.d0/G13 ; Sij(5,6)=0.d0 
-  Sij(6,1)= 0.d0    ; Sij(6,2)= 0.d0    ; Sij(6,3)= 0.d0    ; Sij(6,4)=0.d0     ; Sij(6,5)=0.d0     ; Sij(6,6)=1.d0/G12 
+  Sij(1,1)= 1.d0/E1 ; Sij(1,2)=-Nu21/E2 ; Sij(1,3)=-Nu31/E3 ; Sij(1,4)=0.d0     ; Sij(1,5)=0.d0     ; Sij(1,6)=0.d0
+  Sij(2,1)=-Nu12/E1 ; Sij(2,2)= 1.d0/E2 ; Sij(2,3)=-Nu32/E3 ; Sij(2,4)=0.d0     ; Sij(2,5)=0.d0     ; Sij(2,6)=0.d0
+  Sij(3,1)=-Nu13/E1 ; Sij(3,2)=-Nu23/E2 ; Sij(3,3)= 1.d0/E3 ; Sij(3,4)=0.d0     ; Sij(3,5)=0.d0     ; Sij(3,6)=0.d0
+  Sij(4,1)= 0.d0    ; Sij(4,2)= 0.d0    ; Sij(4,3)= 0.d0    ; Sij(4,4)=1.d0/G23 ; Sij(4,5)=0.d0     ; Sij(4,6)=0.d0
+  Sij(5,1)= 0.d0    ; Sij(5,2)= 0.d0    ; Sij(5,3)= 0.d0    ; Sij(5,4)=0.d0     ; Sij(5,5)=1.d0/G13 ; Sij(5,6)=0.d0
+  Sij(6,1)= 0.d0    ; Sij(6,2)= 0.d0    ; Sij(6,3)= 0.d0    ; Sij(6,4)=0.d0     ; Sij(6,5)=0.d0     ; Sij(6,6)=1.d0/G12
 ! Remove the rounding errors before writing (for non regression testing purposes)
   do ii=1,6
     do jj=1,6
       if (abs(Sij(ii,jj)).lt.tol8) Sij(ii,jj)=zero
     end do
-  end do  
+  end do
   write(InVar%stdout,'(a)') ' '
   write(InVar%stdout,'(a)') 'Sijkl='
   write(InVar%stdout,'(a,6(f8.3,1x))') '| S11 S12 S13 S14 S15 S16 |   ',Sij(1,1),Sij(1,2),Sij(1,3),Sij(1,4),Sij(1,5),Sij(1,6)
@@ -405,10 +405,10 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 !==========================================================================================
 !===================== Bulk and Shear modulus--Sound velocities ===========================
 !==========================================================================================
-! Voigt notation  
+! Voigt notation
   write(InVar%stdout,'(a,f9.3)')'For density rho=',rho
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '========================= Voigt average (constant strain) ===================' 
+  write(InVar%stdout,*) '========================= Voigt average (constant strain) ==================='
   BV=((Cij(1,1)+Cij(2,2)+Cij(3,3))+2.d0*(Cij(1,2)+Cij(1,3)+Cij(2,3)))/9.d0
   GV=((Cij(1,1)+Cij(2,2)+Cij(3,3))-     (Cij(1,2)+Cij(1,3)+Cij(2,3))+3.d0*(Cij(4,4)+Cij(5,5)+Cij(6,6)))/15.d0
   write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BV,' and Shear G=',GV
@@ -422,9 +422,9 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Vphi=dsqrt(1.d9*BV/rho)
   write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
-! Reuss notation  
+! Reuss notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '========================= Reuss average (constant stress) ===================' 
+  write(InVar%stdout,*) '========================= Reuss average (constant stress) ==================='
   BR=1.d0/(Sij(1,1)+Sij(2,2)+Sij(3,3)+2.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3)))
   GR=15.d0/(4.d0*(Sij(1,1)+Sij(2,2)+Sij(3,3))-4.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3))+3.d0*(Sij(4,4)+Sij(5,5)+Sij(6,6)))
   write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BR,' and Shear G=',GR
@@ -440,7 +440,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 
 ! Voigt-Reuss-Hill notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '============================== Hill average =================================' 
+  write(InVar%stdout,*) '============================== Hill average ================================='
   BH=(BR+BV)/2.d0
   GH=(GR+GV)/2.d0
   write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BH,' and Shear G=',GH
@@ -459,7 +459,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   ABI_FREE(cijkl)
   ABI_FREE(Cij)
   ABI_FREE(Sij)
-end subroutine tdep_calc_elastic 
+end subroutine tdep_calc_elastic
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module m_tdep_phdos

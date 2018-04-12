@@ -671,7 +671,7 @@ end subroutine phdos_free
 !! dossmear=Gaussian broadening used if prtdos==1.
 !! dos_ngqpt(3)=Divisions of the q-mesh used for computing the DOS
 !! dos_qshift(3)=Shift of the q-mesh.
-!! comm=MPI communicator
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !! PHdos<phonon_dos_type>=Container with phonon DOS, IDOS and atom-projected DOS.
@@ -696,8 +696,7 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
-&   dos_qshift, comm)
+subroutine mkphdos(PHdos, Crystal, Ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, dos_qshift, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -712,12 +711,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: prtdos
- integer,intent(in) :: comm
+ integer,intent(in) :: prtdos,comm
  real(dp),intent(in) :: dosdeltae,dossmear
  type(crystal_t),intent(in) :: Crystal
  type(ifc_type),intent(in) :: Ifc
- type(phonon_dos_type),intent(inout) :: PHdos
+ type(phonon_dos_type),intent(out) :: PHdos
 !arrays
  integer,intent(in) :: dos_ngqpt(3)
  real(dp),intent(in) :: dos_qshift(3)
@@ -726,20 +724,19 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 !scalars
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1,master=0
  integer :: iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
- integer :: nmesh,nqbz,nqshft,ierr,natom,nomega
- integer :: jdir, isym
- integer :: nprocs, my_rank
- integer :: ncid
+ integer :: nmesh,nqbz,nqshft,ierr,natom,nomega,jdir, isym
+ integer :: nprocs, my_rank,ncid
+ real(dp),parameter :: max_occ1=one, gaussmaxarg = sqrt(-log(1.d-90))
  real(dp) :: nsmallq
- real(dp) :: dum,gaussfactor,gaussprefactor,low_bound,max_occ !,pnorm
- real(dp) :: upr_bound,gaussmaxarg
+ real(dp) :: dum,gaussfactor,gaussprefactor,low_bound !,pnorm
+ real(dp) :: upr_bound
  real(dp) :: max_smallq = 0.0625_dp
  real(dp) :: normq
  real(dp) :: cpu, wall, gflops
  logical :: out_of_bounds
  character(len=500) :: msg
  character(len=80) :: errstr
- character(len=80) ::  prefix = "freq_displ"
+ character(len=80) ::  prefix = "freq_displ" ! FIXME
  type(t_tetrahedron) :: tetraq
 !arrays
  integer :: qptrlatt(3,3)
@@ -754,7 +751,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  real(dp) :: symcart(3,3,crystal%nsym)
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
- real(dp),allocatable :: wtqibz(:)
+ real(dp),allocatable :: wtq_ibz(:)
  real(dp), allocatable :: pjdos_tmp(:,:,:)
  real(dp),allocatable :: xvals(:), gvals_wtq(:), wdt(:,:)
  real(dp) :: syme2_xyza(3, crystal%natom)
@@ -766,25 +763,24 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! Consistency check.
- if (ALL(prtdos /= [1,2])) then
+ if (all(prtdos /= [1, 2])) then
    MSG_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
  end if
- if (dosdeltae<=zero) then
+ if (dosdeltae <= zero) then
    MSG_BUG(sjoin('dosdeltae should be positive, but received', ftoa(dosdeltae)))
  end if
- if (prtdos==1.and.dossmear<=zero) then
+ if (prtdos==1 .and. dossmear <= zero) then
    MSG_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
  end if
 
  call cwtime(cpu, wall, gflops, "start")
 
- natom = Crystal%natom
- gaussmaxarg = sqrt(-log(1.d-90))
-
+ ! Get symmetries in cartesian coordinates
  do isym = 1, Crystal%nsym
    call symredcart(Crystal%rprimd,Crystal%gprimd,symcart(:,:,isym),Crystal%symrel(:,:,isym))
  end do
 
+ natom = Crystal%natom
  nomega = 1
  PHdos%ntypat     = crystal%ntypat
  PHdos%natom      = natom
@@ -797,9 +793,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  PHdos%dossmear   = dossmear
 
  ABI_MALLOC(PHdos%atom_mass, (natom))
- PHdos%atom_mass(:) = Crystal%amu(Crystal%typat(:))*amu_emass
+ PHdos%atom_mass = Crystal%amu(Crystal%typat(:)) * amu_emass
 
- ! These arrays are independent of nqibz
+ ! These arrays do not depend on nqibz
  ABI_MALLOC(PHdos%omega, (nomega))
  ABI_MALLOC(PHdos%phdos, (nomega))
  ABI_MALLOC(PHdos%phdos_int, (nomega))
@@ -812,15 +808,15 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  ABI_CALLOC(pjdos_tmp,(2,3,natom))
 
  ! Parameters defining the gaussian approximant.
- if (prtdos==1) then
+ if (prtdos == 1) then
    ! TODO: use dirac_delta and update reference files.
-   gaussprefactor=one/(dossmear*sqrt(two_pi))
-   gaussfactor=one/(sqrt2*dossmear)
+   gaussprefactor = one / (dossmear * sqrt(two_pi))
+   gaussfactor = one / (sqrt2 * dossmear)
    write(msg,'(4a,f8.5,2a,f8.5)')ch10,&
-&   ' mkphdos: calculating phonon DOS using gaussian method :',ch10,&
-&   '    gaussian smearing [meV] = ',dossmear*Ha_meV,ch10,&
-&   '    frequency step    [meV] = ',PHdos%omega_step*Ha_meV
- else if (prtdos==2) then
+    ' mkphdos: calculating phonon DOS using gaussian method :',ch10, &
+    '    gaussian smearing [meV] = ',dossmear*Ha_meV,ch10, &
+    '    frequency step    [meV] = ',PHdos%omega_step*Ha_meV
+ else if (prtdos == 2) then
    write(msg,'(2a)')ch10,' mkphdos: calculating phonon DOS using tetrahedron method'
  end if
  call wrtout(std_out,msg,'COLL')
@@ -837,7 +833,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  nmesh=2
  ABI_MALLOC(ngqpt,(3,nmesh))
  do imesh=1,nmesh
-
    write(msg,'(a,I6)') ' Mesh number ', imesh
    call wrtout(std_out,msg,'COLL')
 
@@ -858,11 +853,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
      qshft(:,1)=dos_qshift(:)
    end if
 
-   qptrlatt=0
-   qptrlatt(1,1)=ngqpt(1,imesh); qptrlatt(2,2)=ngqpt(2,imesh); qptrlatt(3,3)=ngqpt(3,imesh)
+   qptrlatt = 0
+   qptrlatt(1,1) = ngqpt(1,imesh); qptrlatt(2,2) = ngqpt(2,imesh); qptrlatt(3,3) = ngqpt(3,imesh)
 
-   if(allocated(wtqibz)) then
-     ABI_FREE(wtqibz)
+   if(allocated(wtq_ibz)) then
+     ABI_FREE(wtq_ibz)
    end if
    if(allocated(qibz)) then
      ABI_FREE(qibz)
@@ -870,29 +865,29 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
    ! This call will set %nqibz, IBZ and BZ arrays
    call kpts_ibz_from_kptrlatt(crystal, qptrlatt, qptopt1, nqshft, qshft, &
-     phdos%nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+     phdos%nqibz, qibz, wtq_ibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
    ABI_FREE(qshft)
 
-   if (prtdos==2.and.imesh==2) then
+   if (prtdos == 2 .and. imesh == 2) then
      ! Second mesh with tetrahedron method
      ! convert kptrlatt to double and invert, qlatt here refer to the shortest qpt vectors
      rlatt = qptrlatt; call matr3inv(rlatt,qlatt)
 
-     ABI_MALLOC(qshft,(3,nqshft))
+     ABI_MALLOC(qshft,(3, nqshft))
      !qshft(:,1)=inp%q2shft(:)  ! FIXME small inconsistency in the dimension of q1shft
      qshft(:,1)= dos_qshift(:)
      nkpt_fullbz=nqbz
      ABI_MALLOC(bz2ibz,(nkpt_fullbz))
-     ABI_MALLOC(kpt_fullbz,(3,nkpt_fullbz))
+     ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
 
      ! Make full kpoint grid and get equivalence to irred kpoints.
      ! This routines scales **very badly** wrt nkpt_fullbz, should introduce check on the norm.
-     call get_full_kgrid(bz2ibz,qibz,kpt_fullbz,qptrlatt,PHdos%nqibz,&
-&      nkpt_fullbz,nqshft,Crystal%nsym,qshft,Crystal%symrel)
+     call get_full_kgrid(bz2ibz,qibz,kpt_fullbz,qptrlatt,PHdos%nqibz, &
+       nkpt_fullbz,nqshft,Crystal%nsym,qshft,Crystal%symrel)
 
-     ! Get tetrahedra, ie indexes of the full q-points at their summits
+     ! Get tetrahedra, i.e. indexes of the full q-points at their summits
      call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr)
-     ABI_CHECK(ierr==0,errstr)
+     ABI_CHECK(ierr == 0, errstr)
 
      ABI_FREE(qshft)
      ABI_FREE(bz2ibz)
@@ -900,10 +895,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
      ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
      ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
-     ABI_MALLOC(full_phfrq,(3*natom,PHdos%nqibz))
-     ABI_STAT_MALLOC(full_eigvec,(2,3,natom,3*natom,PHdos%nqibz), ierr)
-     ABI_CHECK(ierr==0, 'out-of-memory in full_eigvec')
-   end if  ! prtdos==2.and.imesh==2
+     ABI_MALLOC(full_phfrq, (3*natom, PHdos%nqibz))
+     ABI_STAT_MALLOC(full_eigvec, (2, 3, natom, 3*natom, PHdos%nqibz), ierr)
+     ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
+   end if ! prtdos==2.and.imesh==2
 
    ! This infinite loop is used to be sure that the frequency mesh is large enough to contain
    ! the entire phonon spectrum. The mesh is enlarged if, during the Fourier interpolation,
@@ -931,12 +926,12 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
      ABI_MALLOC(PHdos%omega,(PHdos%nomega))
      do io=1,PHdos%nomega
-       PHdos%omega(io)=PHdos%omega_min+PHdos%omega_step*(io-1)
+       PHdos%omega(io) = PHdos%omega_min + PHdos%omega_step * (io - 1)
      end do
 
-     ABI_CALLOC(PHdos%phdos,(PHdos%nomega))
-     ABI_CALLOC(PHdos%pjdos,(PHdos%nomega,3,natom))
-     ABI_CALLOC(PHdos%msqd_dos_atom,(PHdos%nomega,3,3,natom))
+     ABI_CALLOC(PHdos%phdos, (PHdos%nomega))
+     ABI_CALLOC(PHdos%pjdos, (PHdos%nomega,3,natom))
+     ABI_CALLOC(PHdos%msqd_dos_atom, (PHdos%nomega, 3, 3, natom))
 
      if (allocated(gvals_wtq)) then
        ABI_FREE(gvals_wtq)
@@ -948,8 +943,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
      ABI_MALLOC(xvals, (phdos%nomega))
 
      ! Sum over irreducible q-points
-     nsmallq = zero
-     speedofsound = zero
+     nsmallq = zero; speedofsound = zero
      do iq_ibz=1,PHdos%nqibz
        !if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
@@ -963,27 +957,27 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
        !   full_eigvec
 
        ! Fourier interpolation.
-       call ifc_fourq(Ifc,Crystal,qibz(:,iq_ibz),phfrq,displ,out_eigvec=eigvec)
+       call ifc_fourq(Ifc, Crystal, qibz(:,iq_ibz), phfrq, displ, out_eigvec=eigvec)
 
        dum=MINVAL(phfrq); PHdos%omega_min=MIN(PHdos%omega_min,dum)
        dum=MAXVAL(phfrq); PHdos%omega_max=MAX(PHdos%omega_max,dum)
        out_of_bounds = (PHdos%omega_min<low_bound .or. PHdos%omega_max>upr_bound)
 
-       normq = sum(qibz(:,iq_ibz)**2)
+       normq = sum(qibz(:,iq_ibz) ** 2)
        if (normq < max_smallq .and. normq > tol6) then
-          call phdos_calc_vsound(eigvec, Crystal%gmet, natom, phfrq, qibz(:,iq_ibz), speedofsound_)
-         speedofsound = speedofsound + speedofsound_*wtqibz(iq_ibz)
-         nsmallq = nsmallq + wtqibz(iq_ibz)
+         call phdos_calc_vsound(eigvec, Crystal%gmet, natom, phfrq, qibz(:,iq_ibz), speedofsound_)
+         speedofsound = speedofsound + speedofsound_ * wtq_ibz(iq_ibz)
+         nsmallq = nsmallq + wtq_ibz(iq_ibz)
        end if
 
-       if (imesh>1.and..not.out_of_bounds) then
+       if (imesh >1 .and. .not.out_of_bounds) then
          select case (prtdos)
          case (1)
            do imode=1,3*natom
              ! Precompute \delta(w - w_{qnu}) * weight(q)
              xvals = (PHdos%omega(:) - phfrq(imode)) * gaussfactor
              where (abs(xvals) < gaussmaxarg)
-               gvals_wtq = gaussprefactor * exp(-xvals*xvals) * wtqibz(iq_ibz)
+               gvals_wtq = gaussprefactor * exp(-xvals*xvals) * wtq_ibz(iq_ibz)
              elsewhere
                gvals_wtq = zero
              end where
@@ -1010,7 +1004,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
              do iat=1,natom
                do idir=1,3
                  PHdos%pjdos(:,idir,iat) = PHdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * gvals_wtq
-               end do ! idir
+               end do
              end do
 
              ! Accumulate outer product of displacement vectors
@@ -1049,10 +1043,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
          case (2)
            ! Tetrahedrons
-           ! * Save phonon frequencies and eigenvectors.
-           ! * Sum is done after the loops over the two meshes.
-           full_phfrq(:,iq_ibz)=phfrq(:)
-           full_eigvec(:,:,:,:,iq_ibz)=eigvec
+           ! Save phonon frequencies and eigenvectors.
+           ! Sum is done after the loops over the two meshes.
+           full_phfrq(:,iq_ibz) = phfrq(:)
+           full_eigvec(:,:,:,:,iq_ibz) = eigvec
 
          case default
            MSG_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
@@ -1065,8 +1059,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
        upr_bound=PHdos%omega_max+ABS(PHdos%omega_max/ten)
        low_bound=PHdos%omega_min-ABS(PHdos%omega_min/ten)
        write(msg,'(3a)')&
-&       ' At least one phonon frequency falls outside the frequency mesh chosen',ch10,&
-&       ' restarting the calculation with a larger frequency mesh '
+        ' At least one phonon frequency falls outside the frequency mesh chosen',ch10,&
+        ' restarting the calculation with a larger frequency mesh '
        if (imesh>1) then
          MSG_COMMENT(msg)
        end if
@@ -1076,17 +1070,18 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    end do !infinite loop
 
    if (nsmallq > tol10) then
-     speedofsound = speedofsound/nsmallq
-
-     write (msg,'(a,E20.10,3a,F16.4,2a)') ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10,&
-&               '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
+     speedofsound = speedofsound / nsmallq
+     write (msg,'(a,E20.10,3a,F16.4,2a)') &
+         ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10, &
+         '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
      call wrtout (ab_out,msg,"COLL")
      call wrtout (std_out,msg,"COLL")
 
      ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
      debyefreq = third*sum(speedofsound) * (six*pi**2/Crystal%ucvol)**(1./3.)
-     write (msg,'(a,E20.10,3a,E20.10,a)') ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10,&
-&                                         '-                                 = ', debyefreq*Ha_THz, ' (THz)'
+     write (msg,'(a,E20.10,3a,E20.10,a)') &
+        ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10, &
+        '-                                 = ', debyefreq*Ha_THz, ' (THz)'
      call wrtout (ab_out,msg,"COLL")
      call wrtout (std_out,msg,"COLL")
 
@@ -1115,14 +1110,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
  ABI_CALLOC(PHdos%phdos_int,(PHdos%nomega))
 
- if (prtdos==2) then
+ if (prtdos == 2) then
    ! Finalize integration with tetrahedra
-   ! * All the data are contained in full_phfrq and full_eigvec.
-   ! * low_bound and upr_bound contain the entire spectrum calculated on the dense mesh.
-   ABI_MALLOC(tmp_phfrq,(PHdos%nqibz))
-   ABI_MALLOC(PHdos%pjdos_int,(PHdos%nomega,3,natom))
-   PHdos%phdos=zero; PHdos%pjdos=zero; PHdos%pjdos_int=zero
-   max_occ=one
+   ! All the data are contained in full_phfrq and full_eigvec.
+   ! low_bound and upr_bound contain the entire spectrum calculated on the dense mesh.
+   ABI_MALLOC(tmp_phfrq, (PHdos%nqibz))
+   ABI_MALLOC(PHdos%pjdos_int, (PHdos%nomega, 3, natom))
+   PHdos%phdos = zero; PHdos%pjdos = zero; PHdos%pjdos_int = zero
 
    ABI_MALLOC(wdt, (phdos%nomega, 2))
    ABI_MALLOC(tweight, (PHdos%nomega, PHdos%nqibz))
@@ -1130,8 +1124,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
    !cnt = 0
    do imode=1,3*natom
-     tmp_phfrq(:)= full_phfrq(imode,:)
-     call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ,phdos%nomega,&
+     tmp_phfrq(:) = full_phfrq(imode,:)
+     call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
         phdos%nqibz,bcorr0,tweight,dtweightde,comm)
 
      do iq_ibz=1,phdos%nqibz
@@ -1162,7 +1156,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
          do idir=1,3
            PHdos%pjdos(:,idir,iat) = PHdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,1)
            PHdos%pjdos_int(:,idir,iat) = PHdos%pjdos_int(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,2)
-         end do ! idir
+         end do
        end do
 
        do iat=1,natom
@@ -1208,12 +1202,12 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
      ! TODO: should pass prefix as arg.
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
      NCF_CHECK(crystal_ncwrite(Crystal, ncid))
-     call phonons_ncwrite(ncid,natom,PHdos%nqibz, qibz, wtqibz, full_phfrq, full_eigvec)
+     call phonons_ncwrite(ncid,natom,PHdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
      NCF_CHECK(nf90_close(ncid))
 #endif
    end if
 
-! immediately free this - it contains displ and not eigvec at this stage
+   ! immediately free this - it contains displ and not eigvec at this stage
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
@@ -1226,19 +1220,19 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 #endif
  end if ! prtdos 2 = tetrahedra
 
-! normalize by nsym : symmetrization is used in all prtdos cases
+ ! normalize by nsym: symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
  PHdos%pjdos = PHdos%pjdos / Crystal%nsym
  if (prtdos == 2) PHdos%pjdos_int = PHdos%pjdos_int / Crystal%nsym
 
  ABI_FREE(pjdos_tmp)
  ABI_FREE(qibz)
- ABI_FREE(wtqibz)
+ ABI_FREE(wtq_ibz)
 
-! normalize by mass and factor of 2 ! now added in the printout to agree with harmonic_thermo
-! do iat=1, natom
-!   PHdos%msqd_dos_atom(:,:,:,iat) = PHdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
-! end do ! iat
+ ! normalize by mass and factor of 2 ! now added in the printout to agree with harmonic_thermo
+ ! do iat=1, natom
+ !   PHdos%msqd_dos_atom(:,:,:,iat) = PHdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
+ ! end do ! iat
 
  ! =======================
  ! === calculate IPDOS ===
@@ -1258,21 +1252,21 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  ABI_CALLOC(PHdos%pjdos_type_int, (PHdos%nomega,Crystal%ntypat))
 
  do iat=1,natom
-   itype=Crystal%typat(iat)
+   itype = Crystal%typat(iat)
    do io=1,PHdos%nomega
-     PHdos%pjdos_rc_type(io,:,itype)=PHdos%pjdos_rc_type(io,:,itype)+PHdos%pjdos(io,:,iat)
-     PHdos%pjdos_type(io,itype)=PHdos%pjdos_type(io,itype)+sum(PHdos%pjdos(io,:,iat))
+     PHdos%pjdos_rc_type(io,:,itype) = PHdos%pjdos_rc_type(io,:,itype) + PHdos%pjdos(io,:,iat)
+     PHdos%pjdos_type(io,itype) = PHdos%pjdos_type(io,itype) + sum(PHdos%pjdos(io,:,iat))
    end do
-   if (prtdos==2) then
+   if (prtdos == 2) then
      do io=1,PHdos%nomega
-       PHdos%pjdos_type_int(io,itype)=PHdos%pjdos_type_int(io,itype)+SUM(PHdos%pjdos_int(io,:,iat))
+       PHdos%pjdos_type_int(io,itype) = PHdos%pjdos_type_int(io,itype) + sum(PHdos%pjdos_int(io,:,iat))
      end do
    end if
  end do
 
  ! Evaluate IDOS using simple simpson integration
  ! TODO should avoid the simpson rule using derf.F90, just to be consistent
- if (prtdos==1) then
+ if (prtdos == 1) then
    call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%phdos,PHdos%phdos_int)
    !do iat=1,natom
    !  do idir=1,3
@@ -1280,7 +1274,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
    !  end do
    !end do
    do itype=1,Crystal%ntypat
-     call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos_type(:,itype),PHdos%pjdos_type_int(:,itype))
+     call simpson_int(PHdos%nomega, PHdos%omega_step, PHdos%pjdos_type(:,itype), PHdos%pjdos_type_int(:,itype))
    end do
  end if
 
@@ -1347,7 +1341,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 !arrays
  integer, allocatable :: modeindex(:)
  real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
- real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
+ real(dp), allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:)
  real(dp), allocatable :: phfrq_allq(:), phdispl_allq(:,:,:,:,:)
  real(dp), allocatable :: phfrq(:), phdispl(:,:,:,:),pheigvec(:,:,:,:)
  real(dp), allocatable :: phdispl1(:,:,:)
@@ -1377,7 +1371,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 
  ! This call will set nqibz, IBZ and BZ arrays
  call kpts_ibz_from_kptrlatt(crystal, rlatt, qptopt1, 1, qshft, &
-&   nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+&   nqibz, qibz, wtq_ibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
  ABI_FREE(qshft)
 
  ! allocate arrays with all of the q, omega, and displacement vectors
@@ -1462,7 +1456,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  ABI_FREE(phdispl1)
  ABI_FREE(qibz)
  ABI_FREE(qbz)
- ABI_FREE(wtqibz)
+ ABI_FREE(wtq_ibz)
 
 end subroutine thermal_supercell_make
 !!***
@@ -2041,8 +2035,7 @@ end subroutine mkphbs
 !!
 !! SOURCE
 
-subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
-&   speedofsound)
+subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2059,7 +2052,6 @@ subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
 !arrays
  real(dp), intent(in) :: gmet(3,3),qphon(3)
  real(dp), intent(in) :: phfrq(3*natom),eigvec(2,3*natom,3*natom)
-
  real(dp), intent(out) :: speedofsound(3)
 
 !Local variables -------------------------
