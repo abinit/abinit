@@ -86,8 +86,9 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  use m_hamiltonian
  use m_errors
  use m_rf2
+ use m_kg
 
- use m_cgtools,    only : dotprod_g,sqnorm_g
+ use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
  use m_pawang,     only : pawang_type
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrad,     only : pawrad_type
@@ -106,7 +107,6 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 #define ABI_FUNC 'dfptnl_pert'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_53_spacepar
  use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal

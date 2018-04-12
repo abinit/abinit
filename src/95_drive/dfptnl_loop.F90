@@ -134,11 +134,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_loop'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_recipspace
- use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_72_response

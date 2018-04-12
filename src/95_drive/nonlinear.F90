@@ -89,7 +89,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_ebands
  use m_xcdata
 
- use m_time,     only : timab
+ use m_time,        only : timab
  use m_dynmat,      only : d3sym, sytens
  use m_ddb,         only : nlopt, DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
@@ -105,18 +105,16 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &                          pawrhoij_bcast, pawrhoij_nullify
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
- use m_kg,       only : getcut, kpgio
+ use m_kg,       only : getcut,kpgio,getph
  use m_kpts,     only : getkgrid
  
  use m_paw_dmft,    only : paw_dmft_type
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts

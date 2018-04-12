@@ -122,7 +122,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdenpot'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw, except_this_one => pawdenpot
 !End of the abilint section
 
@@ -592,7 +591,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        call wrtout(std_out,msg,'COLL')
 
        call pawxc(pawtab(itypat)%coredens,eexc_val,eexcdc_val,ixc,kxc_tmp,k3xc_tmp,lm_size,&
-&       paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,,mesh_size,nspden,option,&
+&       paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
 &       pawang,pawrad(itypat),rho1,0,0,vxc_tmp,xclevel,xc_denpos)
      end if
      if (option<2) paw_an(iatom)%vxc1_val(:,:,:)=vxc_tmp(:,:,:)

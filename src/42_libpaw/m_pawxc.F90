@@ -914,7 +914,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    msg='K3xc for nspden=4 not implemented!'
    MSG_ERROR(msg)
  end if
- if(nk3xc>0.and.nkxc_updn==0) then
+ if(nk3xc>0.and.nkxc==0) then
    msg='nkxc must be non-zero if nk3xc is'
    MSG_ERROR(msg)
  end if
@@ -1185,11 +1185,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
          kxc(1:nrad,ipts,nkxc-1)=rhonow(1:nrad,3,1)
          kxc(1:nrad,ipts,nkxc  )=rhonow(1:nrad,4,1)
        end if
+     end if
 
 !    kernel derivative :
      if (nk3xc>0.and.nd2vxc>0) then
        k3xc(1:nrad,ipts,1:min(nk3xc,nd2vxc))=d2vxci(1:nrad,1:min(nk3xc,nd2vxc))
-
      end if
 
 !    ----------------------------------------------------------------------
