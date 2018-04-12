@@ -76,6 +76,16 @@ module m_sigmaph
 
  public :: sigmaph   ! Main entry point to compute self-energy matrix elements
 !!***
+
+ ! Double grid datatype for electron-phonon
+ type,public :: eph_double_grid_t
+   type(double_grid_t)  :: double_grid
+   type(ebands_t)       :: ebands_dense
+   integer,allocatable  :: bz2ibz_dense(:)
+   integer,allocatable  :: scatter_dense(:,:)
+   real(dp),allocatable :: phfrq_dense(:,:)
+ end type eph_double_grid_t 
+ 
  
  ! Tables for degenerated KS states.
  type bids_t
@@ -361,7 +371,7 @@ contains  !=====================================================
 
 subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,&
-                   double_grid,ebands_double,bz2ibz_dense,scatter_dense,phfrq_dense)
+                   eph_double_grid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -389,15 +399,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
  type(mpi_type),intent(in) :: mpi_enreg
- type(double_grid_t),optional,intent(in) :: double_grid ! eph_double_grid struct?
- type(ebands_t),optional,intent(in) :: ebands_double    ! eph_double_grid struct?
+ type(eph_double_grid_t),optional,intent(in) :: eph_double_grid
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- integer,optional,intent(in)  :: bz2ibz_dense(:)        ! eph_double_grid struct?
- integer,optional,intent(in)  :: scatter_dense(:,:)     ! eph_double_grid struct?
- real(dp),optional,intent(in) :: phfrq_dense(:,:)       ! eph_double_grid struct?
 
 !Local variables ------------------------------
 !scalars
@@ -426,6 +432,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(rf_hamiltonian_type) :: rf_hamkq
  type(sigmaph_t) :: sigma
  type(gspline_t) :: gspl
+ type(double_grid_t) :: double_grid
+ type(ebands_t) :: ebands_dense
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
@@ -913,20 +921,22 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                !
                ! double grid stuff
                !
-               if (present(double_grid)) then
+               if (present(eph_double_grid)) then
+                  double_grid = eph_double_grid%double_grid
+                  ebands_dense = eph_double_grid%ebands_dense
+
                   cfact = 0
 
                   !fine grid around k
                   do ii=1,double_grid%ndiv
 
                     !get eig0nk for this fine k point
-
                     ! we modify the coarse_to_dense indexes
                     ik_bz_fine = double_grid%coarse_to_dense(ik_ibz,ii)
-                    ik_ibz_fine  = bz2ibz_dense(ik_bz_fine)
+                    ik_ibz_fine  = eph_double_grid%bz2ibz_dense(ik_bz_fine)
                     ! ik_ibz_fine = double_grid%coarse_to_dense(ik_ibz,ii)
 
-                    eig0nk = ebands_double%eig(band,ik_ibz_fine,spin)
+                    eig0nk = ebands_dense%eig(band,ik_ibz_fine,spin)
 
                     !fine grid around k+q
                     do jj=1,double_grid%ndiv
@@ -935,19 +945,19 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                       ! we modify the coarse_to_dense indexes
                       ikq_bz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
-                      ikq_ibz_fine = bz2ibz_dense(ikq_bz_fine)
-                      ! ikq_ibz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
+                      ikq_ibz_fine = eph_double_grid%bz2ibz_dense(ikq_bz_fine)
+                      !ikq_ibz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
 
-                      eig0mkq = ebands_double%eig(ibsum_kq,ikq_ibz_fine,spin)
-                      f_mkq = ebands_double%occ(ibsum_kq,ikq_ibz_fine,spin)
-                      !gives the index of iq_ibz from ik_ibz,ikq_ibz
+                      eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+                      !f_mkq = ebands_dense%occ(ibsum_kq,ikq_ibz_fine,spin)
 
                       ! we could modify the scatter indexes
-                      iq_bz_fine = scatter_dense(ik_bz_fine,ikq_bz_fine)
-                      iq_ibz_fine = bz2ibz_dense(iq_bz_fine)
-                      ! iq_ibz_fine = scatter_dense(ik_bz_fine,ikq_bz_fine)
+                      iq_bz_fine = eph_double_grid%scatter_dense(ik_bz_fine,ikq_bz_fine)
+                      iq_ibz_fine = eph_double_grid%bz2ibz_dense(iq_bz_fine)
+                      ! gives the index of iq_ibz from ik_ibz,ikq_ibz
+                      !iq_ibz_fine = scatter_dense(ik_bz_fine,ikq_bz_fine)
 
-                      wqnu = phfrq_dense(nu,iq_ibz_fine)
+                      wqnu = eph_double_grid%phfrq_dense(nu,iq_ibz_fine)
 
                       !calculate nqnu, f_mkq
                       nqnu = nbe(wqnu, sigma%kTmesh(it), zero)

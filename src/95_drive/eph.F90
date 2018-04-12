@@ -113,7 +113,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph
+ use m_sigmaph,         only : sigmaph, eph_double_grid_t
  use m_double_grid,     only : double_grid_t, double_grid_init
 
 !This section has been created automatically by the script Abilint (TD).
@@ -173,13 +173,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(phonon_dos_type) :: phdos
  type(hdr_type) :: hdr_wfk_dense
  type(double_grid_t) :: double_grid 
+ type(eph_double_grid_t) :: eph_double_grid
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  integer,allocatable :: scatter_dense(:,:), bz2ibz_dense(:) 
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
- real(dp),pointer :: energies_dense(:,:,:), phfrq_dense(:,:), displ_cart(:,:,:,:) 
+ real(dp),pointer :: energies_dense(:,:,:), displ_cart(:,:,:,:) 
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -624,10 +625,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      MSG_ERROR(msg)
    end if
 
+
    call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
    call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
-
-   !TODO create ebands_dense
+   eph_double_grid%ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
 
    write(msg,*) 'coarse:', wfk0_hdr%nkpt,wfk0_hdr%kptopt
    write(msg,*) 'shift:',  hdr_wfk_dense%shiftk
@@ -679,14 +680,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call find_qmesh(qmesh_dense,cryst,kmesh_dense)
 
    !calculate the phonon frequencies at the q-points on the dense q-grid
-   allocate(phfrq_dense(3*cryst%natom,kmesh_dense%nibz), displ_cart(2,3,cryst%natom,3*cryst%natom))
+   allocate(eph_double_grid%phfrq_dense(3*cryst%natom,kmesh_dense%nibz), displ_cart(2,3,cryst%natom,3*cryst%natom))
    do ii=1,kmesh_dense%nibz
 
-     qpt = kmesh_dense%ibz(:,ii)
+     qpt = qmesh_dense%ibz(:,ii)
      write(*,*) qpt 
 
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-     call ifc_fourq(ifc, cryst, qpt, phfrq_dense(:,ii), displ_cart )
+     call ifc_fourq(ifc, cryst, qpt, eph_double_grid%phfrq_dense(:,ii), displ_cart )
 
    enddo   
    deallocate(displ_cart)
@@ -694,11 +695,19 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !4. 
    !create scatter array giving the index iq_bz from ik_bz and ikq_ibz
    !TODO
+   allocate(eph_double_grid%bz2ibz_dense(kmesh_dense%nbz))
+   allocate(eph_double_grid%scatter_dense(kmesh_dense%nbz,kmesh_dense%nbz))
+   eph_double_grid%bz2ibz_dense=1
+   eph_double_grid%scatter_dense=1
+   eph_double_grid%double_grid = double_grid
 
  !5. we will call sigmaph here for testing purposes only
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,&
-   double_grid,ebands_double,bz2ibz_dense,scatter_dense,phfrq_dense)
+                pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_double_grid)
+
+   deallocate(eph_double_grid%phfrq_dense)
+   deallocate(eph_double_grid%scatter_dense)
+   deallocate(eph_double_grid%bz2ibz_dense)
 
    call exit(0)
  end if
