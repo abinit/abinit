@@ -23,7 +23,6 @@ sources = [
  "calc_efg.F90",
  "calc_fc.F90",
  "cgq_builder.F90",
-
  "chern_number.F90",
  "conducti_nc.F90",
  "conducti_paw.F90",
@@ -42,7 +41,6 @@ sources = [
  "forstrnps.F90",
  "fresid.F90",
  "fresidrsp.F90",
- "getcgqphase.F90",
  "init_e_field_vars.F90",
  "initberry.F90",
  "initorbmag.F90",
@@ -81,7 +79,6 @@ sources = [
  "mlwfovlp_ylmfac.F90",
  "mlwfovlp_ylmfar.F90",
  "moddiel.F90",
- "multipoles_out.F90",
  "m_eprenorms.F90",
  "m_plowannier.F90",
  "m_vcoul.F90",
@@ -118,7 +115,6 @@ sources = [
  "vdw_dftd3.F90",
  "vso_realspace_local.F90",
  "vtorhotf.F90",
- "waveformat.F90",
  "wf_mixing.F90",
  "wvl_initro.F90",
  "wvl_mkrho.F90"]

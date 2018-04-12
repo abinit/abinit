@@ -80,7 +80,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
  use m_time,     only : timab
  use m_dynmat,   only : d3sym, sytens
- use m_ddb,      only : nlopt, DDB_VERSION
+ use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type

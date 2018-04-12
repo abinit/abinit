@@ -86,6 +86,7 @@ program fftprof
  use m_dfti
 
  use m_fstrings,   only : lower
+ use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit
  use m_geometry,   only : metric
  use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng

@@ -66,6 +66,7 @@ program anaddb
  use m_dfpt_io,        only : elast_ncwrite
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
+ use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time,           only : asctime, timein
  use m_parser,         only : instrng
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
@@ -73,6 +74,9 @@ program anaddb
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
  use m_elphon,         only : elphon
+ use m_harmonic_thermo,only : harmonic_thermo
+ use m_thmeig,         only : thmeig
+ use m_raman,          only : ramansus, electrooptic
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
