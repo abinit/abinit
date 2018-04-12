@@ -108,7 +108,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
- use m_bz_mesh,         only : kmesh_t, kmesh_init 
+ use m_bz_mesh,         only : kmesh_t, kmesh_init, find_qmesh
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
@@ -162,12 +162,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands, ebands_kq
+ type(ebands_t) :: ebands, ebands_kq, ebands_double
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
  type(ddk_t) :: ddk
  type(ifc_type) :: ifc
- type(kmesh_t) :: kmesh, kmesh_dense
+ type(kmesh_t) :: kmesh, kmesh_dense, qmesh_dense
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
@@ -176,6 +176,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
+ integer,allocatable :: scatter_dense(:,:), bz2ibz_dense(:) 
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
  real(dp),pointer :: energies_dense(:,:,:), phfrq_dense(:,:), displ_cart(:,:,:,:) 
@@ -626,6 +627,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
    call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
 
+   !TODO create ebands_dense
+
    write(msg,*) 'coarse:', wfk0_hdr%nkpt,wfk0_hdr%kptopt
    write(msg,*) 'shift:',  hdr_wfk_dense%shiftk
    write(msg,*) 'kpoints:'
@@ -671,7 +674,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
     enddo
    enddo
 
- !3.  
+ !3.
+   !find q grid  
+   call find_qmesh(qmesh_dense,cryst,kmesh_dense)
+
    !calculate the phonon frequencies at the q-points on the dense q-grid
    allocate(phfrq_dense(3*cryst%natom,kmesh_dense%nibz), displ_cart(2,3,cryst%natom,3*cryst%natom))
    do ii=1,kmesh_dense%nibz
@@ -686,6 +692,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    deallocate(displ_cart)
 
  !4. 
+   !create scatter array giving the index iq_bz from ik_bz and ikq_ibz
+   !TODO
+
+ !5. we will call sigmaph here for testing purposes only
+   call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,&
+   double_grid,ebands_double,bz2ibz_dense,scatter_dense,phfrq_dense)
 
    call exit(0)
  end if

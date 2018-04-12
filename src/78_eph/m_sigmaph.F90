@@ -56,6 +56,7 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
+ use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
  use m_pawang,         only : pawang_type
@@ -75,7 +76,7 @@ module m_sigmaph
 
  public :: sigmaph   ! Main entry point to compute self-energy matrix elements
 !!***
-
+ 
  ! Tables for degenerated KS states.
  type bids_t
    integer, allocatable :: vals(:)
@@ -359,7 +360,8 @@ contains  !=====================================================
 !! SOURCE
 
 subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,&
+                   double_grid,ebands_double,bz2ibz_dense,scatter_dense,phfrq_dense)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -387,10 +389,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
  type(mpi_type),intent(in) :: mpi_enreg
+ type(double_grid_t),optional,intent(in) :: double_grid ! eph_double_grid struct?
+ type(ebands_t),optional,intent(in) :: ebands_double    ! eph_double_grid struct?
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ integer,optional,intent(in)  :: bz2ibz_dense(:)        ! eph_double_grid struct?
+ integer,optional,intent(in)  :: scatter_dense(:,:)     ! eph_double_grid struct?
+ real(dp),optional,intent(in) :: phfrq_dense(:,:)       ! eph_double_grid struct?
 
 !Local variables ------------------------------
 !scalars
@@ -398,9 +405,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in,ndeg !,ib,nstates
+ integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in,ndeg !,ib,nstates
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
+ integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
@@ -901,9 +909,62 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! Accumulate Sigma(w=eKS) for state ib_k
                !my_ieta = sigma%ieta * sign(one, ebands%fermie - eig0nk)
                my_ieta = sigma%ieta
-               cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
-                        (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)
 
+               !
+               ! double grid stuff
+               !
+               if (present(double_grid)) then
+                  cfact = 0
+
+                  !fine grid around k
+                  do ii=1,double_grid%ndiv
+
+                    !get eig0nk for this fine k point
+
+                    ! we modify the coarse_to_dense indexes
+                    ik_bz_fine = double_grid%coarse_to_dense(ik_ibz,ii)
+                    ik_ibz_fine  = bz2ibz_dense(ik_bz_fine)
+                    ! ik_ibz_fine = double_grid%coarse_to_dense(ik_ibz,ii)
+
+                    eig0nk = ebands_double%eig(band,ik_ibz_fine,spin)
+
+                    !fine grid around k+q
+                    do jj=1,double_grid%ndiv
+
+                      !get eig0mkq and wqnu for this fine grid k+q
+
+                      ! we modify the coarse_to_dense indexes
+                      ikq_bz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
+                      ikq_ibz_fine = bz2ibz_dense(ikq_bz_fine)
+                      ! ikq_ibz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
+
+                      eig0mkq = ebands_double%eig(ibsum_kq,ikq_ibz_fine,spin)
+                      f_mkq = ebands_double%occ(ibsum_kq,ikq_ibz_fine,spin)
+                      !gives the index of iq_ibz from ik_ibz,ikq_ibz
+
+                      ! we could modify the scatter indexes
+                      iq_bz_fine = scatter_dense(ik_bz_fine,ikq_bz_fine)
+                      iq_ibz_fine = bz2ibz_dense(iq_bz_fine)
+                      ! iq_ibz_fine = scatter_dense(ik_bz_fine,ikq_bz_fine)
+
+                      wqnu = phfrq_dense(nu,iq_ibz_fine)
+
+                      !calculate nqnu, f_mkq
+                      nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
+
+                      cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
+                               (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta) + cfact
+
+                    enddo
+                  enddo
+                  cfact = cfact / double_grid%ndiv**2
+               else
+                  cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
+                           (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)
+               endif
+               !
+               !end double grid stuff
+               !
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
 
                ! Accumulate contribution to Eliashberg functions (Fan term)
