@@ -1161,9 +1161,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    end if
 #else
    if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 3) ) then
-     write(message,'(7a)') ch10,'vdW-DF functionals are not fully operational yet.', &
-&    ch10, 'The calculation will proceed without adding',ch10, 'any vdW-DF energy contribution',ch10
-     MSG_WARNING(message)
+     write(message,'(3a)')&
+&     'vdW-DF functionals are not fully operational yet.',ch10,&
+&     'Action : modify vdw_xc'
+     MSG_ERROR(message)
    end if
 #endif
 !  Normalize enxc, strsxc and vxc
