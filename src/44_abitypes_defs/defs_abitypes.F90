@@ -491,6 +491,7 @@ type dataset_type
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
+ integer :: prtfull1wf
  integer :: prtfsurf
  integer :: prtgsr=1
  integer :: prtgden
@@ -932,6 +933,7 @@ type dataset_type
  integer :: nkpath=0
  real(dp) :: einterp(4)=zero
  real(dp),allocatable :: kptbounds(:,:)
+ real(dp) :: tmesh(3) ! = [10._dp, 300._dp, 5._dp] This triggers a bug in the bindings
 
  end type dataset_type
 !!***

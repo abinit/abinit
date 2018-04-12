@@ -17,7 +17,7 @@ nshiftk  1
 shiftk   0.0 0.0 0.0
 
 ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
-#eph_ngqpt_fine3  8 8 8 # Activate Fourier interpolation of DFPT potentials.
+#eph_ngqpt_fine3  4 4 4 # Activate Fourier interpolation of DFPT potentials.
 
 ############
 # Dataset 1
@@ -29,6 +29,7 @@ optdriver  7
 nband     54
 eph_task   4
 #gw_qprange -2
+tmesh 5 59 6
 
 nkptgw   2
 kptgw 
@@ -69,11 +70,10 @@ znucl 6
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 
-#%%   t44.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 1.0e-2
+#%%   t44.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-2
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
-#%% [shell]
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

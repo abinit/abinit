@@ -48,6 +48,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
  use m_errors
  use m_xmpi
 
+ use m_geometry,   only : xred2xcart
 #if defined HAVE_BIGDFT
  use BigDFT_API,only: initialize_DFT_local_fields,allocateRhoPot, &
 &                     input_variables,dpbox_set,density_descriptors
@@ -58,7 +59,6 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_denspot_set'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -83,11 +83,11 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 #endif
 
   ! *************************************************************************
- 
+
 !DEBUG
 !write (std_out,*) ' wvl_denspot_set : enter'
 !ENDDEBUG
- 
+
 #if defined HAVE_BIGDFT
 
  write(message, '(a,a)' ) ch10,&

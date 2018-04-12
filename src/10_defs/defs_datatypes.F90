@@ -23,7 +23,6 @@
 !!
 !! List of datatypes :
 !! * ebands_t : different information about the band structure
-!! * bcp_type : a "bonding critical point" for aim
 !! * datafil_type : the data (units,filenames) related to files
 !! * pseudopotential_type : for norm-conserving pseudopotential, all the
 !!   information
@@ -46,7 +45,6 @@
 module defs_datatypes
 
  use defs_basis
- use defs_parameters
 
  implicit none
 !!***
@@ -97,11 +95,11 @@ module defs_datatypes
   ! npwarr(nkpt)
   ! Number of plane waves at each k point.
 
-  real(dp),allocatable :: kptns(:,:) 
+  real(dp),allocatable :: kptns(:,:)
   ! kptns(3,nkpt)
   ! k-point vectors.
 
-  real(dp),allocatable :: eig(:,:,:) 
+  real(dp),allocatable :: eig(:,:,:)
   ! eig(mband,nkpt,nsppol)
   ! Eigenvalues of each band.
 
@@ -109,11 +107,11 @@ module defs_datatypes
   ! lifetime(mband,nkpt,nsppol)
   ! Lifetime of each band
 
-  real(dp),allocatable :: occ(:,:,:) 
+  real(dp),allocatable :: occ(:,:,:)
   ! occ(mband,nkpt,nsppol)
   ! occupation of each band.
 
-  real(dp),allocatable :: doccde(:,:,:) 
+  real(dp),allocatable :: doccde(:,:,:)
   ! doccde(mband,nkpt,nsppol)
   ! derivative of the occupation of each band wrt energy (needed for RF).
 
@@ -125,7 +123,7 @@ module defs_datatypes
   integer :: kptopt
   ! Option used for k-point generation.
 
-  integer :: nshiftk_orig, nshiftk 
+  integer :: nshiftk_orig, nshiftk
   ! original number of shifts given in input and the actual value (changed in inkpts)
 
   real(dp) :: charge
@@ -138,42 +136,10 @@ module defs_datatypes
   ! shiftk_orig(3,nshiftk_orig)
   ! original shifts given in input (changed in inkpts).
 
-  real(dp),allocatable :: shiftk(:,:)         
+  real(dp),allocatable :: shiftk(:,:)
   ! shiftk(3,nshiftk)
 
  end type ebands_t
-!!***
-
-!----------------------------------------------------------------------
-
-!!****t* defs_datatypes/bcp_type
-!! NAME
-!! bcp_type
-!!
-!! FUNCTION
-!! a "bonding critical point" for aim
-!!
-!! SOURCE
-
- type bcp_type
-
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
-! declared in another part of ABINIT, that might need to take into account your modification.
-
-! Integer
-  integer :: iat       ! number of the bonding atom inside a primitive cell
-  integer :: ipos      ! number of the primitive cell of the bonding atom
-
-! Real
-  real(dp) :: chg      ! charge at the critical point
-  real(dp) :: diff(3)  ! three distances : AT-CP,BAT-CP,AT-BAT
-  real(dp) :: ev(3)    ! eigenvalues of the Hessian
-  real(dp) :: pom(3)   ! position of the bonding atom
-  real(dp) :: rr(3)    ! position of the bcp
-  real(dp) :: vec(3,3) ! eigenvectors of the Hessian
-  real(dp) :: vv(3)    ! position of the bcp relative to the central atom
-
- end type bcp_type
 !!***
 
 !----------------------------------------------------------------------
@@ -239,7 +205,7 @@ module defs_datatypes
 !!
 !! SOURCE
 
- type,public :: nctab_t 
+ type,public :: nctab_t
 
    integer :: mqgrid_vl=0
    ! Number of points in the reciprocal space grid on which
@@ -247,7 +213,7 @@ module defs_datatypes
 
    logical :: has_tvale=.False.
     ! True if the norm-conserving pseudopotential provides the atomic pseudized valence density.
-    ! If alchemy, has_tvale is True only if all the mixed pseudos 
+    ! If alchemy, has_tvale is True only if all the mixed pseudos
     ! have the valence charge in the pseudopotential file.
 
    logical :: has_tcore=.False.
@@ -323,7 +289,7 @@ module defs_datatypes
    !  If mpspso is 2, lmnmax takes into account the spin-orbit projectors,
    !  so, it is equal to the max of lnprojso, see pspheader_type
 
-  integer :: mproj  
+  integer :: mproj
    ! Maximum number of non-local projectors over all angular momenta and type of psps
    ! 0 only if all psps are local
 
@@ -404,36 +370,36 @@ module defs_datatypes
    ! algalch(ntypalch)
    ! For each type of pseudo atom, the algorithm to mix the pseudopotentials
 
-  integer, allocatable :: indlmn(:,:,:) 
+  integer, allocatable :: indlmn(:,:,:)
    ! indlmn(6,lmnmax,ntypat)
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
    !                                or i=lmn (if useylm=1)
    ! NB: spin is used for NC pseudos with SOC term: 1 if scalar term (spin diagonal), 2 if SOC term.
 
-  integer, allocatable :: pspdat(:) 
+  integer, allocatable :: pspdat(:)
    ! pspdat(ntypat)
    ! For each type of psp, the date of psp generation, as given by the psp file
 
-  integer, allocatable :: pspcod(:)  
+  integer, allocatable :: pspcod(:)
    ! pspcod(npsp)
    ! For each type of psp, the format -or code- of psp generation,
    !  as given by the psp file
 
-  integer, allocatable :: pspso(:) 
+  integer, allocatable :: pspso(:)
    ! pspso(npsps)
-   ! For each type of psp, 
+   ! For each type of psp,
    ! 1 if no spin-orbit component is taken into account
    ! 2 if a spin-orbit component is used
 
-  integer, allocatable :: pspxc(:) 
+  integer, allocatable :: pspxc(:)
    ! pspxc(npsps)
    ! For each type of psp, the XC functional that was used to generate it,
    ! as given by the psp file
 
 ! Real (real(dp)) arrays
 
-  real(dp), allocatable :: ekb(:,:) 
+  real(dp), allocatable :: ekb(:,:)
    ! ekb(dimekb,ntypat*(1-usepaw))
    !  ->NORM-CONSERVING PSPS ONLY:
    !    (Real) Kleinman-Bylander energies (hartree)
@@ -445,24 +411,24 @@ module defs_datatypes
    !             dimekb=lnmax*(lnmax+1)/2
    !             in the place of dimekb=lmnmax.
 
-  real(dp), allocatable :: ffspl(:,:,:,:) 
+  real(dp), allocatable :: ffspl(:,:,:,:)
    ! ffspl(mqgrid_ff,2,lnmax,ntypat)
    ! Gives, on the radial grid, the different non-local projectors,
    ! in both the norm-conserving case, and the PAW case
 
-  real(dp), allocatable :: mixalch(:,:) 
+  real(dp), allocatable :: mixalch(:,:)
    ! mixalch(npspalch,ntypalch)
    ! Mixing coefficients to generate alchemical pseudo atoms
 
-  real(dp), allocatable :: qgrid_ff(:)  
+  real(dp), allocatable :: qgrid_ff(:)
    ! qgrid_ff(mqgrid_ff)
    ! The coordinates of all the points of the radial grid for the nl form factors
 
-  real(dp), allocatable :: qgrid_vl(:)  
+  real(dp), allocatable :: qgrid_vl(:)
    ! qgrid_vl(mqgrid_vl)
    ! The coordinates of all the points of the radial grid for the local part of psp
 
-  real(dp), allocatable :: vlspl(:,:,:) 
+  real(dp), allocatable :: vlspl(:,:,:)
    ! vlspl(mqgrid_vl,2,ntypat)
    ! Gives, on the radial grid, the local part of each type of psp.
 
@@ -471,11 +437,11 @@ module defs_datatypes
    ! Gives, on the radial grid, the first derivative of the local
    ! part of each type of psp (computed when the flag 'vlspl_recipSpace' is true).
 
-  real(dp), allocatable :: xcccrc(:)  
+  real(dp), allocatable :: xcccrc(:)
    ! xcccrc(ntypat)
    ! Gives the maximum radius of the pseudo-core charge, for each type of psp.
 
-  real(dp), allocatable :: xccc1d(:,:,:) 
+  real(dp), allocatable :: xccc1d(:,:,:)
    ! xccc1d(n1xccc*(1-usepaw),6,ntypat)
    ! Norm-conserving psps only
    ! The component xccc1d(n1xccc,1,ntypat) is the pseudo-core charge
@@ -483,7 +449,7 @@ module defs_datatypes
    ! xccc1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
    ! pseudo-core charge with respect to the radial distance.
 
-  real(dp), allocatable :: zionpsp(:) 
+  real(dp), allocatable :: zionpsp(:)
    ! zionpsp(npsp)
    ! For each pseudopotential, the ionic pseudo-charge
    ! (giving raise to a long-range coulomb potential)
@@ -493,24 +459,24 @@ module defs_datatypes
    !  For each type of atom (might be alchemy wrt psps), the ionic pseudo-charge
    ! (giving raise to a long-range coulomb potential)
 
-  real(dp), allocatable :: znuclpsp(:)  
+  real(dp), allocatable :: znuclpsp(:)
    ! znuclpsp(npsp)
    ! The atomic number of each pseudopotential
 
-  real(dp), allocatable :: znucltypat(:) 
+  real(dp), allocatable :: znucltypat(:)
    ! znucltypat(ntypat)
    ! The atomic number of each type of atom (might be alchemy wrt psps)
 
 ! Character arrays
-  character(len=fnlen), allocatable :: filpsp(:) 
+  character(len=fnlen), allocatable :: filpsp(:)
    ! filpsp(npsps)
    ! The filename of the pseudopotential
 
-  character(len=fnlen), allocatable :: title(:) 
+  character(len=fnlen), allocatable :: title(:)
    ! title(npsp)
    ! The content of first line read from the psp file
 
-  character(len=md5_slen), allocatable :: md5_pseudos(:) 
+  character(len=md5_slen), allocatable :: md5_pseudos(:)
   ! md5pseudos(npsp)
   ! md5 checksums associated to pseudos (read from file)
 
@@ -589,16 +555,16 @@ module defs_datatypes
                         !           s and p      -> lmax=1
                         !           s,p,d        -> lmax=2
 
-  integer :: pspcod     
+  integer :: pspcod
     ! code number of the pseudopotential
 
-  integer :: pspdat     
+  integer :: pspdat
     ! date of generation of the pseudopotential
 
-  integer :: pspxc      
+  integer :: pspxc
     ! exchange-correlation functional
 
-  integer :: pspso      
+  integer :: pspso
     ! spin-orbit characteristics
     ! 0 if pseudo does not support SOC, 1 or 2 if SOC terms are available in the pp file.
     ! Note that one could have a pseudo with SOC terms but ignore the SOC contribution
@@ -609,28 +575,28 @@ module defs_datatypes
    ! if usewvl=0 ,  plane waves
    ! is usewvl=1 ,  wavelets
 
-  integer :: xccc       
+  integer :: xccc
     ! =0 if no XC core correction, non-zero if XC core correction
 
-  real(dp) :: zionpsp       
+  real(dp) :: zionpsp
     ! charge of the ion made of core electrons only
 
-  real(dp) :: znuclpsp      
+  real(dp) :: znuclpsp
     ! atomic number of the nuclei
 
-  real(dp) :: GTHradii(0:4) 
+  real(dp) :: GTHradii(0:4)
     ! Radii values for GTH (and HGH) family potentials
 
-  character(len=fnlen) :: filpsp   
+  character(len=fnlen) :: filpsp
     ! name of the psp file
 
-  character(len=fnlen) :: title    
+  character(len=fnlen) :: title
     ! content of first line read from the psp file
 
   character(len=md5_slen) :: md5_checksum = md5_none
     ! md5 checksum read from file.
 
-  type(pspheader_paw_type) :: pawheader 
+  type(pspheader_paw_type) :: pawheader
     ! only for PAW psps ; see m_pawpsp.
 
  end type pspheader_type

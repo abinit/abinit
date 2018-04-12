@@ -69,7 +69,7 @@ run_standard_tests = $(BOURNE_SHELL) \\
 all-local: help
 
 help:
-	@cat $(top_srcdir)/doc/help_make/help_make_abichecks
+	@cat $(top_srcdir)/doc/help_make/help_make_abichecks.txt
 """ % (name,stamp,name)
 
 

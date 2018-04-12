@@ -31,13 +31,13 @@ MODULE m_exp_mat
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_linalg_interfaces
 
  implicit none
 
  private  
 
- public ::            &
-   exp_mat!--exponential of a complex matrix   
+ public :: exp_mat  ! exponential of a complex matrix   
 
 
  interface exp_mat
@@ -68,10 +68,9 @@ CONTAINS  !===========================================================
 !!      zgeev,zgetrf,zgetri
 !!
  !! SOURCE
+
  subroutine exp_mat_cx(mat_a,mat_a_size,factor)
 
-  use defs_basis
- use m_linalg_interfaces
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

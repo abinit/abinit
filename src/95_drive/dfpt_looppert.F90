@@ -152,16 +152,20 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_hdr
  use m_ebands
 
+ use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
+ use m_time,       only : timab
  use m_fstrings,   only : strcat
+ use m_geometry,   only : mkrdim, metric
  use m_exit,       only : exit_check, disable_timelimit
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
-                        & gkk_t, gkk_init, gkk_ncwrite,gkk_free
+                          gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main
+ use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
  use m_ioarr,      only : read_rhor
@@ -175,7 +179,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &                         pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
- use m_rf2,       only : rf2_getidirs
+ use m_rf2,        only : rf2_getidirs
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -315,7 +319,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: rhor1_save(:,:,:)
  real(dp),allocatable :: rhor1(:,:),rho1wfg(:,:),rho1wfr(:,:),tnons1(:,:),tnons1_tmp(:,:)
  real(dp),allocatable :: rhor1_pq(:,:),rhor1_mq(:,:),rhog1_pq(:,:),rhog1_mq(:,:)          !+q/-q duplicates
- real(dp),allocatable :: cg_mq(:,:),cg1_mq(:,:),resid_mq(:)                   ! 
+ real(dp),allocatable :: cg_mq(:,:),cg1_mq(:,:),resid_mq(:)                   !
  real(dp),allocatable :: cg1_active_mq(:,:),occk_mq(:)                 !
  real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_mq(:,:)        !
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
@@ -513,6 +517,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call wrtout(std_out,message,'COLL')
          call wrtout(ab_out,message,'COLL')
        end if ! Test of existence of symmetry of perturbation
+     else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
+       to_compute_this_pert = 1
      else if (ipert==dtset%natom+10 .and. rfpert(ipert)==1 .and. idir <= 6) then
        if (idir<=3) then
          if (rfdir(idir) == 1) to_compute_this_pert = 1
@@ -891,7 +897,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &     dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&     ipert==dtset%natom+5.or.dtset%kptopt==3) timrev_pert=0
+&     ipert==dtset%natom+5.or.dtset%kptopt==3.or.dtset%prtfull1wf==1) timrev_pert=0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
      nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
    end if
@@ -1213,7 +1219,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      !ABI_STAT_ALLOCATE(cg_pq,(2,mcgq), ierr)
      !ABI_CHECK(ierr==0, "out-of-memory in cgmq")
      !ABI_ALLOCATE(eigen_pq,(dtset%mband*nkpt_rbz*dtset%nsppol))
-     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol 
+     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
      ABI_STAT_ALLOCATE(cg_mq,(2,mcgmq), ierr)
      ABI_CHECK(ierr==0, "out-of-memory in cgmq")
      ABI_ALLOCATE(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
@@ -1414,7 +1420,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
      ABI_STAT_ALLOCATE(cg1_mq,(2,mcg1mq), ierr)
      ABI_CHECK(ierr==0, "out of memory in cg1_mq")
-   end if   
+   end if
 
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
@@ -1721,9 +1727,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          !Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
-         
+
          call dfpt_init_mag1(idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-         
+
          if(.not.kramers_deg) then
            rhor1_pq=rhor1
            call dfpt_init_mag1(idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)

@@ -27,6 +27,7 @@ module m_wfutils
  use m_errors
 
  use m_cgtools,  only : cg_to_reim, cg_from_reim
+ use m_time,     only : timab
 
  implicit none
 
@@ -224,7 +225,6 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfcopy'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

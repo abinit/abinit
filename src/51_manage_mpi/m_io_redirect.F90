@@ -353,7 +353,6 @@ contains
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: commspace,commworld,nfil,paral,prtvol
-!arrays
 
 !Local variables ------------------------------
  integer :: me

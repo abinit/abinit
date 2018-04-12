@@ -62,13 +62,14 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,  only : xcart2xred, xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_isokinetic'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -419,7 +420,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !increment the ihist
  hist%ihist = abihist_findIndex(hist,+1)
- 
+
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)

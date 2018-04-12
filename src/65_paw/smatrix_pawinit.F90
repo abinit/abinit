@@ -71,6 +71,7 @@
  use m_profiling_abi
  use m_xmpi
 
+ use m_special_funcs, only : sbf8
  use m_pawang, only : pawang_type
  use m_pawrad, only : pawrad_type, simp_gen
  use m_pawtab, only : pawtab_type
@@ -81,7 +82,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'smatrix_pawinit'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -191,16 +191,16 @@
  if (nprocs>1) then
    if (ABS(MPI_enreg%proc_distrb(ikpt2,1,isppol)-rank)/=0) then
      lfile=.true.
-!    
+!
 !    get maximum of lmn_size
      max_lmn=0
      do itypat=1,ntypat
        lmn_size=pawtab(itypat)%lmn_size
        if(lmn_size>max_lmn) max_lmn=lmn_size
      end do
-!    
+!
 !    get file name and open it
-!    
+!
      write(cprj_file,'(a,I5.5,".",I1)') trim(seed_name),ikpt2,isppol
      iunit=1000
 !    write(std_out,*)'reading file',trim(cprj_file)
@@ -209,7 +209,7 @@
        write(message,*) " smatrix_pawinit: file",trim(cprj_file), "not found"
        MSG_ERROR(message)
      end if
-!    
+!
 !    start reading
      do ii=1,mband*nspinor
        do iatom=1,natom
@@ -220,15 +220,15 @@
          end do !ilmn
        end do
      end do
-!    
+!
 !    close file
-!    
+!
      close (unit=iunit,iostat=ios)
      if(ios /= 0) then
        write(message,*) " smatrix_pawinit: error closing file ",trim(cprj_file)
        MSG_ERROR(message)
      end if
-!    
+!
    end if
  end if !mpi
 
@@ -426,7 +426,7 @@
 !            &     cprj(iatom,idx1+icg1)%cp(1,jlmn)*cprj(iatom,idx2+icg2)%cp(2,ilmn)-&
 !            &     cprj(iatom,idx1+icg1)%cp(2,jlmn)*cprj(iatom,idx2+icg2)%cp(1,ilmn)
            end do !ispinor
-!          
+!
 !          delta: diagonal terms are counted twice ! so
 !          we need a 0.5 factor for diagonal elements.
            delta=one

@@ -73,13 +73,13 @@ subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
- use m_bfgs, only : hessinit, hessupdt, brdene
+ use m_geometry,    only : mkrdim, fcart2fred, metric
+ use m_bfgs,        only : hessinit, hessupdt, brdene
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_bfgs'
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_bfgs
 !End of the abilint section
 

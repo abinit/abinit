@@ -1,5 +1,5 @@
 
-.Version 8.1.7 of ANADDB 
+.Version 8.7.6 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 13 Dec 2016.
-- ( at 21h19 )
+.Starting date : Thu  8 Mar 2018.
+- ( at 06h29 )
   
 
 ================================================================================
@@ -90,6 +90,7 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.015  and twall      0.016 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -151,9 +152,9 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -7.900582E-04    1.615069E-05    2.893238E-01
-       2       -1.613054E-04    1.307081E-05    5.617147E+00
-       3        9.510759E-04    1.944445E-05    2.403680E-01
+       1       -1.070872E-03    2.110464E-05    2.057853E-01
+       2        9.900223E-04    2.131852E-05    2.432083E-01
+       3        9.900223E-04    2.131852E-05    2.432083E-01
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -164,32 +165,32 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
- mka2f: lambda <omega^2> =     4.598417E-07
- mka2f: lambda <omega^3> =     3.688714E-10
- mka2f: lambda <omega^4> =     3.779184E-13
- mka2f: lambda <omega^5> =     4.394792E-16
- mka2f: isotropic lambda =     1.286425E+01
- mka2f: omegalog  =     1.833821E-05 (Ha)     5.790740E+00 (Kelvin)
+ mka2f: lambda <omega^2> =     4.423699E-07
+ mka2f: lambda <omega^3> =     4.406578E-10
+ mka2f: lambda <omega^4> =     4.836533E-13
+ mka2f: lambda <omega^5> =     5.724677E-16
+ mka2f: isotropic lambda =     9.467762E-01
+ mka2f: omegalog  =     2.589403E-04 (Ha)     8.176678E+01 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     4.429608E-06 (Ha)     1.398758E+00 (Kelvin)
+-mka2f: MacMillan Tc =     1.352268E-05 (Ha)     4.270121E+00 (Kelvin)
 
 ================================================================================
 
  Calculation of phonon density of states 
 
- Average speed of sound partial sums:    -0.5947310100E-03 (at units)
--                                   =       -1301.0878 (m/s)
+ Average speed of sound partial sums:    -0.6590764448E-03 (at units)
+-                                   =          -1.4419 [km/s]
 
- Debye frequency from partial sums:    -0.4906400322E-03 (Ha)
--                                 =    -0.3228256331E+01 (THz)
--Debye temperature from partial sums:    -0.1549316845E+03 (K)
+ Debye frequency from partial sums:    -0.5437236040E-03 (Ha)
+-                                 =    -0.3577529454E+01 (THz)
+-Debye temperature from partial sums:    -0.1716941307E+03 (K)
 
- Average speed of sound:     0.6197677937E-04 (at units)
--                      =         135.5861 (m/s)
+ Average speed of sound:     0.5989264382E-04 (at units) 
+-                      =           0.1310 [km/s]
 
- Debye frequency from DOS:     0.5112948294E-04 (Ha)
--                        =     0.3364158367E+00 (THz)
--Debye temperature from DOS:     0.1614539458E+02 (K)
+ Debye frequency from DOS:     0.4941011685E-04 (Ha) 
+-                        =     0.3251029513E+00 (THz)
+-Debye temperature from DOS:     0.1560246235E+02 (K)
 
 
 ================================================================================
@@ -210,12 +211,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -4.56607086E-07  4.50906596E-03
+-  1  0.00000000E+00  0.00000000E+00 -4.50906598E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906596E-03  4.56606876E-07
+-  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -228,7 +229,7 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
   0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -243,12 +244,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.33353688E-04 -3.00861755E-03  3.34197124E-03
+-  1  3.32914791E-04 -3.00887154E-03  3.34178633E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66651415E-03  2.12194984E-03  1.54456431E-03
+-  1  3.66655403E-03  2.12158968E-03  1.54496435E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03 -2.60331046E-03 -2.60331046E-03
@@ -267,12 +268,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.33317206E-04 -3.00863867E-03 -3.34195587E-03
+-  1  3.31738994E-04 -3.00955173E-03 -3.34129072E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66651747E-03  2.12191990E-03 -1.54459756E-03
+-  1  3.66666060E-03  2.12062469E-03 -1.54603590E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03 -2.60331046E-03  2.60331046E-03
@@ -291,12 +292,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  5.61003982E-07  4.50906595E-03  0.00000000E+00
+-  1  1.07638461E-06  4.50906585E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  4.50906595E-03 -5.61003982E-07  0.00000000E+00
+-  1  4.50906585E-03 -1.07638461E-06  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
@@ -315,12 +316,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.32783543E-04  3.00894748E-03  3.34173102E-03
+-  1  3.32823304E-04  3.00892447E-03  3.34174778E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66656594E-03 -2.12148197E-03  1.54508397E-03
+-  1  3.66656233E-03 -2.12151460E-03  1.54504773E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03  2.60331046E-03 -2.60331046E-03
@@ -339,12 +340,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  9.45071592E-07  0.00000000E+00 -4.50906588E-03
+-  1  1.07363954E-06  0.00000000E+00 -4.50906585E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  4.50906588E-03  0.00000000E+00  9.45071592E-07
+-  1  4.50906585E-03  0.00000000E+00  1.07363954E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
@@ -363,12 +364,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  1.50120114E-04  4.50656632E-03
+-  1  0.00000000E+00  1.68860272E-04  4.50590304E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50656632E-03 -1.50120114E-04
+-  1  0.00000000E+00  4.50590304E-03 -1.68860272E-04
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
@@ -387,21 +388,21 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.33178559E-04  3.00871890E-03 -3.34189746E-03
+-  1  3.33737257E-04  3.00839555E-03 -3.34213281E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66653007E-03 -2.12180613E-03 -1.54472394E-03
+-  1  3.66647926E-03 -2.12226457E-03 -1.54421468E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03  2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=         10.5  wall=         10.8
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
-+Total cpu time     10.539  and wall time     10.802 sec
++Total cpu time      2.417  and wall time      2.443 sec
 
  anaddb : the run completed succesfully.

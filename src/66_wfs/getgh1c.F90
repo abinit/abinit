@@ -86,14 +86,15 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  use m_profiling_abi
  use m_errors
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
+ use m_kg,          only : kpgstr, mkkin, mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgh1c'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_66_nonlocal
 !End of the abilint section
@@ -826,6 +827,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
  use m_errors
 
  use m_pawfgr, only : pawfgr_type
+ use m_kg,     only : mkkin, kpgstr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -944,6 +946,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  use m_profiling_abi
  use m_errors
 
+ use m_kg,          only : mkkin, kpgstr, mkkpg
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
 &                          load_k_hamiltonian,load_kprime_hamiltonian,&
 &                          load_k_rf_hamiltonian
@@ -952,7 +955,6 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgh1c_setup'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

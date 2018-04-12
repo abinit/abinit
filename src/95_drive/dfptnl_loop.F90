@@ -7,7 +7,7 @@
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVeithen,MB)
+!! Copyright (C) 2002-2018 ABINIT group (MVeithen,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,7 +111,10 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  use m_wffile
  use m_wfk
 
+ use m_time,     only : timab
  use m_io_tools,    only : file_exists
+ use m_kg,       only : getph
+ use m_cgtools,  only : dotprod_vn
  use m_ioarr,       only : read_rhor
  use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
                            init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
@@ -134,6 +137,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
+ use interfaces_56_recipspace
+ use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_72_response

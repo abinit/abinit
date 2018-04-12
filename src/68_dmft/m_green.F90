@@ -31,8 +31,10 @@
  use m_xmpi
  use m_profiling_abi
  use m_errors
+ use m_lib_four
  
  use m_io_tools, only : flush_unit, open_file
+ use m_time,     only : timab
  use m_oper, only : oper_type
  use m_matlu, only : matlu_type
  
@@ -1048,7 +1050,6 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_green'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1439,7 +1440,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 #undef ABI_FUNC
 #define ABI_FUNC 'integrate_green'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -2749,7 +2749,6 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 #undef ABI_FUNC
 #define ABI_FUNC 'fourier_fct'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

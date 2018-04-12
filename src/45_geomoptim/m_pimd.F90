@@ -34,6 +34,9 @@ MODULE m_pimd
  use m_io_tools
  use m_random_zbq
 
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,       only : mkradim
+
  implicit none
 
  private
@@ -683,7 +686,6 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_print'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -957,7 +959,6 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtat
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_initvel'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1090,7 +1091,6 @@ subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zer
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_random'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1311,7 +1311,6 @@ subroutine pimd_langevin_random_bar(alea_bar,irandom,iseed)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_random_bar'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

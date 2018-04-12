@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
 "exc_build_block.F90",
-"exc_den.F90",
 "exc_build_ham.F90",
 "exc_plot.F90",
 "m_bse_io.F90",
@@ -30,9 +29,6 @@ sources = [
 "m_haydock.F90",
 "m_haydock_io.F90",
 "m_hexc.F90",
-"setup_bse.F90",
-"setup_bse_interp.F90",
-"sumrule.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

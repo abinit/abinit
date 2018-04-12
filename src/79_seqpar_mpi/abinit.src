@@ -23,7 +23,7 @@ sources = [
  "m_lobpcgwf.F90",
  "m_lobpcg.F90",
  "pead_nl_mv.F90",
- "tddft.F90",
+ "m_tddft.F90",
  "vtowfk.F90",
  "vtorho.F90",
  "wfsinp.F90",

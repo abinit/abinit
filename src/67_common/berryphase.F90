@@ -137,14 +137,15 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
  use m_profiling_abi
  use m_hdr
 
+ use m_geometry,         only : xred2xcart
+ use m_abilasi,          only : dzgedi, dzgefa
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'berryphase'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

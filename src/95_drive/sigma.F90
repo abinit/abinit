@@ -107,12 +107,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use libxc_functionals
  use m_wfd
 
+ use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa
  use m_blas,          only : xdotc
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_mpinfo,        only : destroy_mpi_enreg
- use m_geometry,      only : normv
+ use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt
  use m_ioarr,         only : fftdatar_write, read_rhor
@@ -123,6 +124,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free
  use m_gsphere,       only : gsphere_t, gsph_free
+ use m_kg,            only : getph
  use m_vcoul,         only : vcoul_t, vcoul_free
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_lda_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results
@@ -152,11 +154,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #undef ABI_FUNC
 #define ABI_FUNC 'sigma'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
@@ -714,45 +713,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call timab(404,2,tsec) ! rdkss
  call timab(405,1,tsec) ! Init2
-
-!Debugging section.
-!if (.TRUE.) then
- if (.FALSE.) then
-!
-   if (.FALSE..and.Wfd%usepaw==1) then
-     ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
-     call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-     ABI_DT_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
-     call pawcprj_alloc(Cp2,0,Wfd%nlmn_atm)
-
-     call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
-
-     do spin=1,Wfd%nsppol
-       do ik_bz=1,Kmesh%nbz
-         ik_ibz=Kmesh%tab(ik_bz)
-         do band=1,Wfd%nband(ik_ibz,spin)
-           call paw_check_symcprj(Wfd,ik_bz,band,spin,1,Cryst,Kmesh,Psps,Pawtab,Pawang,Cp1)
-           call paw_check_symcprj(Wfd,ik_bz,band,spin,2,Cryst,Kmesh,Psps,Pawtab,Pawang,Cp2)
-
-           do iat=1,Cryst%natom
-             do isp=1,Wfd%nspinor
-               write(789,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp1(iat,isp)%cp
-               write(790,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp2(iat,isp)%cp
-               write(791,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp1(iat,isp)%cp(1,:)**2 + Cp1(iat,isp)%cp(2,:)**2
-               write(792,'(3i2,/,(f8.4))') band,ik_bz,spin,Cp2(iat,isp)%cp(1,:)**2 + Cp2(iat,isp)%cp(2,:)**2
-             end do
-           end do
-         end do
-       end do
-     end do
-
-     call pawcprj_free(Cp1)
-     ABI_DT_FREE(Cp1)
-     call pawcprj_free(Cp2)
-     ABI_DT_FREE(Cp2)
-   end if
-
- end if
 
  ! ==============================================================
  ! ==== Find little group of the k-points for GW corrections ====
@@ -2200,7 +2160,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ABI_DEALLOCATE(sigcme_k) 
+       ABI_DEALLOCATE(sigcme_k)
 
      end do
    end if
@@ -2228,7 +2188,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
      call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_k,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
-     ABI_DEALLOCATE(sigcme_k) 
+     ABI_DEALLOCATE(sigcme_k)
      !
      ! Calculate direct gap for each spin and print out final results.
      ! We use the valence index of the KS system because we still do not know

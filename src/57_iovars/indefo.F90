@@ -619,6 +619,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0
+   dtsets(idtset)%prtfull1wf=0
    dtsets(idtset)%prtfsurf=0
    dtsets(idtset)%prtgden=0
    dtsets(idtset)%prtgeo=0
@@ -723,6 +724,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+   dtsets(idtset)%tmesh=[5._dp, 59._dp, 6._dp]
    dtsets(idtset)%tsmear=0.01_dp
 !  U
    dtsets(idtset)%ucrpa_bands(:)=-1

@@ -48,11 +48,12 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
  use defs_abitypes
  use defs_abitypes
  use defs_wvltypes
- use m_wffile 
+ use m_wffile
  use m_errors
  use m_profiling_abi
  use m_xmpi
 
+ use m_geometry,     only : xred2xcart
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: readonewave, reformatonewave, readmywaves, &
 &                       WF_FORMAT_NONE
@@ -66,7 +67,6 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_read'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -155,12 +155,12 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 !    We check if we need reformating
      if (abs(hdr%rprimd(1,1) / hdr%ngfft(1) - &
 &     hdr0%rprimd(1,1) / hdr0%ngfft(1)) < tol8 .and. &
-&     maxval(abs(hdr%nwvlarr - hdr0%nwvlarr)) == 0 .and. & 
+&     maxval(abs(hdr%nwvlarr - hdr0%nwvlarr)) == 0 .and. &
 &     maxval(abs(hdr%ngfft   - hdr0%ngfft  )) == 0 ) then
        reformat = .false.
        write(message, '(2a)' ) ch10,&
 &       ' wvl_read:  wavefunctions needs NO reformatting.'
-       call wrtout(std_out,message,'COLL')           
+       call wrtout(std_out,message,'COLL')
 
      else
        reformat = .true.
@@ -254,7 +254,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
      electrons_folder%eigenvalues%data1D => wfs%ks%orbs%eval
      call etsf_io_electrons_get(wff%unwff, electrons_folder, lstat, error)
      ETSF_CHECK_ERROR(lstat, error)
-     
+
 !    Deallocate temporary arrays
      ABI_DEALLOCATE(wvl_band)
      ABI_DEALLOCATE(basis_folder%number_of_coefficients_per_grid_point%data1D)
@@ -330,6 +330,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_geometry,     only : xred2xcart
 
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : writeonewave,writemywaves,WF_FORMAT_NONE
@@ -343,7 +344,6 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_write'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
