@@ -40,10 +40,11 @@ MODULE m_matlu
  use m_profiling_abi
 
  use m_abilasi,  only : xginv
+ use m_geometry, only : symredcart
 
  implicit none
 
- private 
+ private
 
  public :: init_matlu
  public :: inverse_matlu
@@ -69,7 +70,7 @@ MODULE m_matlu
  public :: printplot_matlu
  public :: identity_matlu
 !!***
- 
+
 
 !!****t* m_matlu/matlu_type
 !! NAME
@@ -82,19 +83,19 @@ MODULE m_matlu
 
  type, public :: matlu_type ! for each atom
 
-  integer :: lpawu         
+  integer :: lpawu
   ! value of the angular momentum for correlated electrons
 
-!  integer :: natom       
+!  integer :: natom
    ! number of atoms (given for each atom, not useful..could be changed)
 !
 !  integer :: mband
 !  ! Number of bands
-!      
+!
 !  integer :: mbandc
 !  ! Total number of bands in the Kohn-Sham Basis for PAW+DMFT
 !
-!  integer :: natpawu         ! Number of correlated atoms 
+!  integer :: natpawu         ! Number of correlated atoms
 !
 !  integer :: nkpt
 !  ! Number of k-point in the IBZ.
@@ -105,11 +106,11 @@ MODULE m_matlu
   ! Number of spinorial component
 !
   integer :: nsppol
-  ! Number of polarization 
+  ! Number of polarization
 
   complex(dpc), allocatable :: mat(:,:,:,:,:)
   ! local quantity
-      
+
  end type matlu_type
 
 !----------------------------------------------------------------------
@@ -192,7 +193,7 @@ end subroutine init_matlu
 !! zero_matlu
 !!
 !! FUNCTION
-!!  zero_matlu 
+!!  zero_matlu
 !!
 !! INPUTS
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
@@ -294,7 +295,7 @@ end subroutine destroy_matlu
 !! copy_matlu
 !!
 !! FUNCTION
-!!  Copy matlu1 into matlu2 
+!!  Copy matlu1 into matlu2
 !!
 !! INPUTS
 !!  maltu1 <type(matlu_type)>= density matrix matlu1 in the local orbital basis and related variables
@@ -348,7 +349,7 @@ subroutine copy_matlu(nmat1,nmat2,natom,opt_diag,opt_non_diag,opt_re)
                  if(im1/=im2.or.ispinor/=ispinor1) then
                    nmat2(iatom)%mat(im1,im2,isppol,ispinor,ispinor1)=nmat1(iatom)%mat(im1,im2,isppol,ispinor,ispinor1)
                  endif
-               else 
+               else
                  nmat2(iatom)%mat(im1,im2,isppol,ispinor,ispinor1)=nmat1(iatom)%mat(im1,im2,isppol,ispinor,ispinor1)
                  if(present(opt_re)) nmat2(iatom)%mat(im1,im2,isppol,ispinor,ispinor1)=&
 &                         cmplx(real(nmat1(iatom)%mat(im1,im2,isppol,ispinor,ispinor1)),0.d0,kind=dp)
@@ -649,12 +650,12 @@ end subroutine print_matlu
         at_indx=cryst_struc%indsym(4,irot,iatom)
         do m3=1, 2*lpawu+1
          do m4=1, 2*lpawu+1
-          zarot2=pawang%zarot(m3,m1,lpawu+1,irot)*pawang%zarot(m4,m2,lpawu+1,irot) 
+          zarot2=pawang%zarot(m3,m1,lpawu+1,irot)*pawang%zarot(m4,m2,lpawu+1,irot)
           glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)=&
 &          glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)&
 &          +gloc(at_indx)%mat(m3,m4,isppol,ispinor,ispinor1)*zarot2
          end do  ! m3
-        end do  ! m4 
+        end do  ! m4
        end do  ! irot
        glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)=&
 &       glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)/real(cryst_struc%nsym,kind=dp)
@@ -716,18 +717,18 @@ end subroutine print_matlu
        at_indx=cryst_struc%indsym(4,irot,iatom)
        do m3=1, 2*lpawu+1
         do m4=1, 2*lpawu+1
-         zarot2=pawang%zarot(m3,m2,lpawu+1,irot)*pawang%zarot(m4,m1,lpawu+1,irot) 
-         sumrho=sumrho +  glocnm(at_indx)%mat(m4,m3,isppol,1,1)  * zarot2 
+         zarot2=pawang%zarot(m3,m2,lpawu+1,irot)*pawang%zarot(m4,m1,lpawu+1,irot)
+         sumrho=sumrho +  glocnm(at_indx)%mat(m4,m3,isppol,1,1)  * zarot2
          do mu=1,3
-          summag(mu)=summag(mu) + glocnm(at_indx)%mat(m4,m3,isppol,mu+1,1) * zarot2 
+          summag(mu)=summag(mu) + glocnm(at_indx)%mat(m4,m3,isppol,mu+1,1) * zarot2
          enddo
         end do ! m3
        end do !m4
 
-!       ==  special case of magnetization 
+!       ==  special case of magnetization
        do nu=1,3
         do mu=1,3
-         rotmag(mu)=rotmag(mu)+symrec_cart(mu,nu,irot)*summag(nu) 
+         rotmag(mu)=rotmag(mu)+symrec_cart(mu,nu,irot)*summag(nu)
         end do
        end do
 !      write(std_out,'(a,3i4,2x,3(2f10.5,2x))') "rotmag",irot,m1,m2,(rotmag(mu),mu=1,3)
@@ -881,7 +882,7 @@ end subroutine print_matlu
 !!  matlu1(natom) <type(matlu_type)>= density matrix 1 in the local orbital basis and related variables
 !!  matlu2(natom) <type(matlu_type)>= density matrix 2 in the local orbital basis and related variables
 !!  natom = number of atoms
-!!  option =1      if diff> toldiff , stop 
+!!  option =1      if diff> toldiff , stop
 !!          0      print diff and toldiff
 !!          else   do not test and do not print
 !!  toldiff = maximum value for the difference between matlu1 and matlu2
@@ -970,14 +971,14 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
    write(message,'(a,3x,a)') ch10,trim(char2)
    call wrtout(std_out,message,'COLL')
    call print_matlu(matlu2,natom,prtopt=1,opt_diag=-1)
-   if(option==1) then 
+   if(option==1) then
      call flush_unit(std_out)
      MSG_ERROR("option==1, aborting now!")
    end if
    if(present(ierr)) ierr=-1
   endif
  endif
- 
+
 end subroutine diff_matlu
 !!***
 
@@ -1031,7 +1032,7 @@ subroutine add_matlu(matlu1,matlu2,matlu3,natom,sign_matlu2)
  do iatom = 1 , natom
    matlu3(iatom)%mat=matlu1(iatom)%mat+float(sign_matlu2)*matlu2(iatom)%mat
  enddo ! natom
- 
+
 end subroutine add_matlu
 !!***
 
@@ -1167,7 +1168,7 @@ end subroutine add_matlu
     endif !prtopt>3
    endif ! lpawu/=-1
   end do ! iatom
- else  
+ else
   message = "stop in chg_repr_matlu"
   MSG_ERROR(message)
  endif
@@ -1186,7 +1187,7 @@ end subroutine add_matlu
 !!  Compute the trace of the matlu matrix
 !!
 !! INPUTS
-!!  maltu(natom) <type(matlu_type)>= density matrix in the 
+!!  maltu(natom) <type(matlu_type)>= density matrix in the
 !!               local orbital basis and related variables
 !!  natom = number of atoms
 !!
@@ -1238,7 +1239,7 @@ end subroutine add_matlu
  traceloc=zero
  do iatom = 1 , natom
    lpawu=matlu(iatom)%lpawu
-   if(lpawu/=-1) then 
+   if(lpawu/=-1) then
       write(message,'(2a,i4)')  ch10,'   -------> For Correlated Atom', iatom
      if(.not.present(itau)) then
        call wrtout(std_out,  message,'COLL')
@@ -1253,12 +1254,12 @@ end subroutine add_matlu
          do m = 1 ,  2*lpawu+1
            traceloc(iatom,isppol)=traceloc(iatom,isppol)+&
 &           matlu(iatom)%mat(m,m,isppol,ispinor,ispinor)
-         enddo 
-       enddo 
+         enddo
+       enddo
       traceloc(iatom,nsppol+1)=traceloc(iatom,nsppol+1)+traceloc(iatom,isppol)
-     enddo 
+     enddo
      if(nsppol==1.and.nspinor==1)  traceloc(iatom,nsppol+1)=traceloc(iatom,nsppol+1)*two
-     if(.not.present(itau)) then 
+     if(.not.present(itau)) then
        write(message,'(8x,a,f12.6)')   'Nb of Corr. elec. from G(w) is:'&
 &       ,traceloc(iatom,nsppol+1)
        call wrtout(std_out,  message,'COLL')
@@ -1335,7 +1336,7 @@ end subroutine add_matlu
 
  implicit none
 
-! type  matlus_type 
+! type  matlus_type
 !  SEQUENCE
 !  complex(dpc), pointer :: mat(:,:)
 ! end type matlus_type
@@ -1385,7 +1386,7 @@ end subroutine add_matlu
                enddo
              enddo ! ispinor1
            enddo ! isppol1
-         enddo 
+         enddo
        enddo !ispinor
      enddo ! isppol
    endif
@@ -1429,7 +1430,7 @@ end subroutine add_matlu
 !!
 !! INPUTS
 !!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity to diagonalize
-!!  natom=number of atoms 
+!!  natom=number of atoms
 !!  prtopt= option to define level of printing
 !!  nsppol_imp= if 1, one can diagonalize with the same matrix the Up
 !!   and Dn matlu matrix. It is convenient because one can thus have the
@@ -1494,12 +1495,12 @@ end subroutine add_matlu
  nsppol=matlu(1)%nsppol
  if(present(nsppol_imp)) then
    nsppolimp=nsppol_imp
- else 
+ else
    nsppolimp=nsppol
  endif
  if(present(checkstop)) then
   checkstop_in=checkstop
- else 
+ else
   checkstop_in=.true.
  endif
  nspinor=matlu(1)%nspinor
@@ -1550,14 +1551,14 @@ end subroutine add_matlu
  endif
 
 
-! Below, gathermatlu is used to store eigenvectors (after diagonalization) 
+! Below, gathermatlu is used to store eigenvectors (after diagonalization)
 ! For nsppol=2, and if nsppolimp=1, these eigenvectors computed for isppol=1, and applied to
 ! rotate matrix for isppol=2. It is the reason why the sum below is only
 ! from 1 to nsppolimp !
 
 
 
- do isppol=1,nsppolimp ! 
+ do isppol=1,nsppolimp !
 ! ===========================
 ! Define gathermatlu
 ! ===========================
@@ -1673,7 +1674,7 @@ end subroutine add_matlu
          ABI_DEALLOCATE(rwork)
          ABI_DEALLOCATE(work)
          ABI_DEALLOCATE(valuer)
-         ABI_DEALLOCATE(eig)     
+         ABI_DEALLOCATE(eig)
 !     endif
 !   enddo
 ! ===========================
@@ -1681,7 +1682,7 @@ end subroutine add_matlu
 ! ===========================
          if (present(eigvectmatlu)) then
            tndim=nspinor*(2*matlu(iatom)%lpawu+1)
-           eigvectmatlu(iatom,isppol)%value(:,:)=gathermatlu(iatom)%value(:,:) 
+           eigvectmatlu(iatom,isppol)%value(:,:)=gathermatlu(iatom)%value(:,:)
 !           write(std_out,*) "eigvect in diag_matlu"
 !           do im1=1,tndim
 !             write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))')&
@@ -1756,7 +1757,7 @@ end subroutine add_matlu
 &             (temp_mat2(im1,im3),im3=1,tndim)
              call wrtout(std_out,message,'COLL')
            end do
-           if(iatom==2) then 
+           if(iatom==2) then
              MSG_ERROR("iatom==2")
            end if
          endif
@@ -2191,7 +2192,7 @@ end subroutine add_matlu
                if(abs(aimag(matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)))>maximag) then
                  maximag=abs(aimag(matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)))
                  if(im==im1.and.ispinor==ispinor1) maximagdiag=abs(aimag(matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)))
-               endif 
+               endif
                if((im/=im1.or.ispinor/=ispinor1).and.abs(matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))>maxoffdiag) then
                  maxoffdiag=abs(matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                endif
@@ -2311,7 +2312,7 @@ end subroutine add_matlu
  !              if(present(nondiag)) then
                  if((im/=im1.or.ispinor/=ispinor1)&
 &                         .and.abs(real(matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)))>tol) then
-                   nondiag=.true. 
+                   nondiag=.true.
                   ! write(6,*) "NONDIAG", matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
                  endif
                !if(ispinor/=ispinor1.and.(abs(matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))>tol))  then
@@ -2346,7 +2347,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity 
+!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity
 !!  matlu2(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity
 !!
 !! OUTPUT
@@ -2429,7 +2430,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity 
+!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity
 !!
 !! SIDE EFFECTS
 !!
@@ -2498,7 +2499,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity 
+!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity
 
 !! SIDE EFFECTS
 !!
@@ -2570,7 +2571,7 @@ end subroutine add_matlu
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity 
+!!  matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity
 !!  natom :: number of atoms
 !!  option=1 go from Slm to Ylm basis
 !!  option=2 go from Ylm to Slm basis
@@ -2653,7 +2654,7 @@ end subroutine add_matlu
            ABI_ALLOCATE(mat_inp_c,(2*ll+1,2*ll+1))
            mat_inp_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
            mat_out_c=czero
-     
+
            if(optprt>2) then
              write(message,'(2a)') ch10,"SLM input matrix"
              call wrtout(std_out,message,'COLL')
@@ -2689,7 +2690,7 @@ end subroutine add_matlu
                call wrtout(std_out,message,'COLL')
              end do
            endif
-      
+
            matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)=mat_out_c(:,:)
            ABI_DEALLOCATE(mat_out_c)
            ABI_DEALLOCATE(mat_inp_c)
@@ -2846,7 +2847,7 @@ end subroutine add_matlu
    if(lpawu.ne.-1) then
      unitnb=units+iatom
      call int2char4(iatom,tag_at)
-     if(present(imre)) then 
+     if(present(imre)) then
        tmpfilre = trim(char1)//tag_at//"re"
        tmpfilim = trim(char1)//tag_at//"im"
        open (unit=unitnb+10,file=trim(tmpfilre),status='unknown',form='formatted')
