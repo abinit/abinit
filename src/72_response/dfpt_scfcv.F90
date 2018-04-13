@@ -415,6 +415,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  call status(0,dtfil%filstat,iexit,level,'init          ')
 
+ ! intel 18 really needs this to be initialized
+ maxfor = zero
+
  ! enable time limit handler if not done in callers.
  if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
    write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))

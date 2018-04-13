@@ -625,6 +625,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  call set_pert_comm(mpi_enreg,dtset%nppert)
 
 !*Redistribute PAW on-site data
+ nullify(old_atmtab,pawfgrtab_pert,pawrhoij_pert,paw_an_pert,paw_ij_pert)
  if (paral_pert_inplace) then
    call set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &   paw_an,paw_ij,pawfgrtab,pawrhoij)
