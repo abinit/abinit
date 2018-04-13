@@ -63,6 +63,32 @@ module m_kpts
 
 !----------------------------------------------------------------------
 
+! type, public :: ephtetra_t
+!
+!     integer :: nsppol
+!     integer :: nbcount
+!     integer :: natom3
+!     integer :: bstart
+!
+!     integer :: kptrlatt_dense(3, 3)
+!     ! kptrlatt associated to the mesh
+!
+!     real(dp) :: klatt(3, 3)
+!
+!     real(dp) :: w_ibz(:,:)
+!     ! (nkibz, natom3)
+!
+!     real(dp) :: e_ibz(:,:,:)
+!     ! (nbcount, nkibz, nsppol)
+!
+!     type(t_tetrahedron) :: tetra
+!
+! end type ephtetra_t
+!
+! public :: ephtetra_nw
+! public :: ephtetra_get_weigts
+! public :: ephtetra_free
+
 contains  !============================================================
 !!***
 
@@ -343,7 +369,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    ierr = 2; goto 10
  end if
 
- rlatt = new_kptrlatt; call matr3inv(rlatt,klatt)
+ rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
  call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
  if (ierr /= 0) msg = errorstring

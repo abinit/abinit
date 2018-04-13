@@ -55,6 +55,8 @@ integer, parameter :: dp_ = kind(1.0d0)
 
 real(dp_),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
 
+real(dp_), parameter :: sqrtpi = 1.7724538509055159d0
+
 
 !!****t* m_tetrahedron/t_tetrahedron
 !! NAME
@@ -67,11 +69,14 @@ real(dp_),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
 
 type, public :: t_tetrahedron
 
-  integer :: ntetra=0
+  integer :: ntetra = 0
   ! Number of tetrahedra
 
   real(dp_)  :: vv
   ! volume of the tetrahedra
+
+  real(dp_) :: klatt(3, 3)
+  ! reciprocal of lattice vectors for full kpoint grid
 
   integer,allocatable :: tetra_full(:,:,:)
   !(4,2,ntetra)
@@ -209,7 +214,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
 !scalars
  integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
- real(dp_)  :: shift1,shift2,shift3, rcvol,hashfactor
+ real(dp_) :: shift1,shift2,shift3, rcvol,hashfactor
  type(kptrank_type) :: kptrank_t
 !arrays
  integer :: tetra_shifts(3,4,6)  ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
@@ -229,6 +234,8 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  shift1 = zero
  shift2 = zero
  shift3 = zero
+
+ tetra%klatt = klatt
 
  mtetra = 6 * nkpt_fullbz
  TETRA_ALLOCATE(tetra_full_, (4,2,mtetra))
@@ -351,7 +358,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
            itmp = tetra_full_(jsummit,2,ialltetra)
            tetra_full_(jsummit,2,ialltetra) = tetra_full_(jsummit-1,2,ialltetra)
            tetra_full_(jsummit-1,2,ialltetra) = itmp
-!          keep fullbz_kpt tetrahedra points in same order
+           ! keep fullbz_kpt tetrahedra points in same order
            itmp = tetra_wrap_(1,jsummit,ialltetra)
            tetra_wrap_(1,jsummit,ialltetra) = tetra_wrap_(1,jsummit-1,ialltetra)
            tetra_wrap_(1,jsummit-1,ialltetra) = itmp
@@ -362,9 +369,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
            tetra_wrap_(3,jsummit,ialltetra) = tetra_wrap_(3,jsummit-1,ialltetra)
            tetra_wrap_(3,jsummit-1,ialltetra) = itmp
          end if
-       end do !  loop jsummit
+       end do ! jsummit
 
-     end do !  loop isummit
+     end do ! isummit
 
      if (ialltetra > mtetra) then
        write (errorstring, '(3a,i0,a,i0)' ) &
@@ -375,8 +382,8 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
        return
      end if
      ialltetra = ialltetra+1
-   end do !  loop itetra
- end do !  loop ikpt_full
+   end do ! itetra
+ end do ! ikpt_full
 
  call destroy_kptrank (kptrank_t)
 
@@ -422,7 +429,8 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  jalltetra = 1
  irred_itetra(1) = 1
  do ialltetra=2, tetra%ntetra
-   if (abs(tetra_hash(ialltetra)-tetra_hash(ialltetra-1)) > tol6) then !found a new series
+   if (abs(tetra_hash(ialltetra)-tetra_hash(ialltetra-1)) > tol6) then
+     ! found a new series
      jalltetra = jalltetra + 1
    end if
    irred_itetra(ialltetra) = jalltetra
@@ -431,8 +439,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  ! reset number of tetra
  ntetra_irred = jalltetra
 
- ! allocate definitive tetra arrays
- ! transfer to new arrays
+ ! allocate definitive tetra arrays and transfer to new arrays
  TETRA_ALLOCATE(tetra%tetra_full, (4,2,ntetra_irred))
  TETRA_ALLOCATE(tetra%tetra_mult, (ntetra_irred))
  TETRA_ALLOCATE(tetra%tetra_wrap, (3,4,ntetra_irred))
@@ -699,10 +706,8 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
  real(dp_) :: deltaene,volconst,volconst_mult
 !arrays
  integer :: ind_ibz(4)
- !character(len=500) :: msg
- real(dp_)  :: eigen_1tetra(4)
- real(dp_) , allocatable :: tweight_tmp(:,:),dtweightde_tmp(:,:)
- real(dp_) , allocatable :: buffer(:,:)
+ real(dp_) :: eigen_1tetra(4)
+ real(dp_), allocatable :: tweight_tmp(:,:),dtweightde_tmp(:,:),buffer(:,:)
 
 ! *********************************************************************
 
@@ -876,7 +881,6 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
  real(dp_)  :: dccde1, dccde1_pre
  real(dp_)  :: volconst,volconst_mult
  real(dp_)  :: ii0, ii1, ii3
- real(dp_), parameter :: sqrtpi = 1.7724538509055159d0
 !arrays
  integer :: ind_k(4)
  real(dp_), allocatable :: tweight_tmp(:,:,:)
@@ -1585,7 +1589,6 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  real(dp_)  :: cc_tmp, dccde_tmp
  real(dp_)  :: dcc1de_pre, dcc2de_pre, dcc3de_pre
  real(dp_)  :: tmp,volconst,volconst_mult
- real(dp_) ,parameter :: sqrtpi = 1.7724538509055159d0
 
 ! *********************************************************************
 
@@ -1915,8 +1918,8 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
  type(t_tetrahedron), intent(in) :: tetra
  real(dp_) ,intent(in) :: enemin,enemax,max_occ
 !arrays
- real(dp_) ,intent(in) :: eig_ibz(nkibz)
- real(dp_) ,intent(out) :: weights(nene,2)
+ real(dp_),intent(in) :: eig_ibz(nkibz)
+ real(dp_),intent(out) :: weights(nene,2)
 
 !Local variables-------------------------------
 !scalars
