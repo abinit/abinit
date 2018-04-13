@@ -13,6 +13,10 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
+!! TODO
+!!  1) Test carefull the case of degenerate tethraedron (add
+!!  2) Change API so that we can pass the energy mesh instead of omega_min and omega_max
+!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -46,9 +50,10 @@ implicit none
 private
 !!***
 
-integer, parameter :: dp = kind(1.0d0)
+! Don't use dp because stupid abilint generates wrong interfaces
+integer, parameter :: dp_ = kind(1.0d0)
 
-real(dp),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
+real(dp_),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
 
 
 !!****t* m_tetrahedron/t_tetrahedron
@@ -65,7 +70,7 @@ type, public :: t_tetrahedron
   integer :: ntetra=0
   ! Number of tetrahedra
 
-  real(dp)  :: vv
+  real(dp_)  :: vv
   ! volume of the tetrahedra
 
   integer,allocatable :: tetra_full(:,:,:)
@@ -195,7 +200,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  integer,intent(in) :: nkpt_fullbz
 !arrays
  integer,intent(in) :: indkpt(nkpt_fullbz)
- real(dp) ,intent(in) :: gprimd(3,3),klatt(3,3),kpt_fullbz(3,nkpt_fullbz)
+ real(dp_) ,intent(in) :: gprimd(3,3),klatt(3,3),kpt_fullbz(3,nkpt_fullbz)
  integer, intent(out) :: ierr
  character(len=80), intent(out) :: errorstring
  type(t_tetrahedron),intent(out) :: tetra
@@ -204,17 +209,17 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
 !scalars
  integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
- real(dp)  :: shift1,shift2,shift3, rcvol,hashfactor
+ real(dp_)  :: shift1,shift2,shift3, rcvol,hashfactor
  type(kptrank_type) :: kptrank_t
 !arrays
  integer :: tetra_shifts(3,4,6)  ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
- real(dp)  :: k1(3),k2(3),k3(3)
+ real(dp_)  :: k1(3),k2(3),k3(3)
  integer,allocatable :: tetra_full_(:,:,:)
  integer,allocatable :: tetra_mult_(:)
  integer,allocatable :: tetra_wrap_(:,:,:)
  integer, allocatable :: reforder(:)
  integer, allocatable :: irred_itetra(:)
- real(dp), allocatable :: tetra_hash(:)
+ real(dp_), allocatable :: tetra_hash(:)
 
 ! *********************************************************************
 
@@ -512,7 +517,7 @@ subroutine tetra_write(tetra, nkibz, kibz, path)
  character(len=*),intent(in) :: path
  type(t_tetrahedron),intent(in) :: tetra
 !arrays
- real(dp),intent(in) :: kibz(3,nkibz)
+ real(dp_),intent(in) :: kibz(3,nkibz)
 
 !Local variables-------------------------------
  integer,parameter :: version=1
@@ -624,13 +629,13 @@ subroutine get_tetra_weight(eigen_in,enemin,enemax,max_occ,nene,nkpt,tetra,&
 !scalars
  integer,intent(in) :: nene,nkpt,bcorr,comm
  type(t_tetrahedron), intent(in) :: tetra
- real(dp) ,intent(in) :: enemax,enemin,max_occ
+ real(dp_) ,intent(in) :: enemax,enemin,max_occ
 !arrays
- real(dp) ,intent(in) :: eigen_in(nkpt)
- real(dp) ,intent(out) :: dtweightde(nkpt,nene),tweight(nkpt,nene)
+ real(dp_) ,intent(in) :: eigen_in(nkpt)
+ real(dp_) ,intent(out) :: dtweightde(nkpt,nene),tweight(nkpt,nene)
 
 !Local variables-------------------------------
- real(dp) , allocatable :: dtweightde_ek(:, :), tweight_ek(:, :)
+ real(dp_) , allocatable :: dtweightde_ek(:, :), tweight_ek(:, :)
 
 ! *********************************************************************
 
@@ -683,21 +688,21 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
 !scalars
  integer,intent(in) :: nene,nkpt,bcorr,comm
  type(t_tetrahedron), intent(in) :: tetra
- real(dp) ,intent(in) :: enemax,enemin,max_occ
+ real(dp_) ,intent(in) :: enemax,enemin,max_occ
 !arrays
- real(dp) ,intent(in) :: eigen_in(nkpt)
- real(dp) ,intent(out) :: dtweightde_t(nene,nkpt),tweight_t(nene,nkpt)
+ real(dp_) ,intent(in) :: eigen_in(nkpt)
+ real(dp_) ,intent(out) :: dtweightde_t(nene,nkpt),tweight_t(nene,nkpt)
 
 !Local variables-------------------------------
 !scalars
  integer :: itetra,nprocs,my_start,my_stop,ierr
- real(dp) :: deltaene,volconst,volconst_mult
+ real(dp_) :: deltaene,volconst,volconst_mult
 !arrays
  integer :: ind_ibz(4)
  !character(len=500) :: msg
- real(dp)  :: eigen_1tetra(4)
- real(dp) , allocatable :: tweight_tmp(:,:),dtweightde_tmp(:,:)
- real(dp) , allocatable :: buffer(:,:)
+ real(dp_)  :: eigen_1tetra(4)
+ real(dp_) , allocatable :: tweight_tmp(:,:),dtweightde_tmp(:,:)
+ real(dp_) , allocatable :: buffer(:,:)
 
 ! *********************************************************************
 
@@ -837,13 +842,13 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
  integer,intent(in) :: nene1,nene2,nkpt
  integer,intent(out) :: ierr
  type(t_tetrahedron), intent(in) :: tetra
- real(dp),intent(in) :: enemax1,enemin1
- real(dp),intent(in) :: enemax2,enemin2
- real(dp),intent(in) :: max_occ
+ real(dp_),intent(in) :: enemax1,enemin1
+ real(dp_),intent(in) :: enemax2,enemin2
+ real(dp_),intent(in) :: max_occ
 !arrays
- real(dp),intent(in) :: eigen1_in(nkpt)
- real(dp),intent(in) :: eigen2_in(nkpt)
- real(dp),intent(out) :: dtweightde(nkpt,nene1,nene2),tweight(nkpt,nene1,nene2)
+ real(dp_),intent(in) :: eigen1_in(nkpt)
+ real(dp_),intent(in) :: eigen2_in(nkpt)
+ real(dp_),intent(out) :: dtweightde(nkpt,nene1,nene2),tweight(nkpt,nene1,nene2)
 
 !Local variables-------------------------------
 !  needed for gaussian replacement of Dirac functions
@@ -856,28 +861,28 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
  integer :: nn1_1,nn1_2,nn1_3,nn1_4
  integer :: nn2_1,nn2_2,nn2_3
  integer :: ind_a(3), ind_b(3), ind_c(3)
- real(dp)  :: deltaene1,eps1
- real(dp)  :: deltaene2,eps2
-! real(dp)  :: gau_prefactor,gau_width,gau_width2
- real(dp)  :: epsilon1(4,4)
- real(dp)  :: epsilon2(4,4)
- real(dp)  :: inv_epsilon1(4,4)
- real(dp)  :: aa(3),bb(3),cc(3)
- real(dp)  :: delaa(3),delbb(3),delcc(3)
- real(dp)  :: delaa0,delbb0,delcc0
- real(dp)  :: inv_delaa(3),inv_delbb(3),inv_delcc(3)
- real(dp)  :: deleps1, deleps2
- real(dp)  :: inv_deleps1
- real(dp)  :: dccde1, dccde1_pre
- real(dp)  :: volconst,volconst_mult
- real(dp)  :: ii0, ii1, ii3
- real(dp), parameter :: sqrtpi = 1.7724538509055159d0
+ real(dp_)  :: deltaene1,eps1
+ real(dp_)  :: deltaene2,eps2
+! real(dp_)  :: gau_prefactor,gau_width,gau_width2
+ real(dp_)  :: epsilon1(4,4)
+ real(dp_)  :: epsilon2(4,4)
+ real(dp_)  :: inv_epsilon1(4,4)
+ real(dp_)  :: aa(3),bb(3),cc(3)
+ real(dp_)  :: delaa(3),delbb(3),delcc(3)
+ real(dp_)  :: delaa0,delbb0,delcc0
+ real(dp_)  :: inv_delaa(3),inv_delbb(3),inv_delcc(3)
+ real(dp_)  :: deleps1, deleps2
+ real(dp_)  :: inv_deleps1
+ real(dp_)  :: dccde1, dccde1_pre
+ real(dp_)  :: volconst,volconst_mult
+ real(dp_)  :: ii0, ii1, ii3
+ real(dp_), parameter :: sqrtpi = 1.7724538509055159d0
 !arrays
  integer :: ind_k(4)
- real(dp), allocatable :: tweight_tmp(:,:,:)
- real(dp), allocatable :: dtweightde_tmp(:,:,:)
- real(dp)  :: eigen1_1tetra(4)
- real(dp)  :: eigen2_1tetra(4)
+ real(dp_), allocatable :: tweight_tmp(:,:,:)
+ real(dp_), allocatable :: dtweightde_tmp(:,:,:)
+ real(dp_)  :: eigen1_1tetra(4)
+ real(dp_)  :: eigen2_1tetra(4)
 
 ! *********************************************************************
 
@@ -1339,11 +1344,11 @@ subroutine sort_tetra(n,list,iperm,tol)
 
  integer, intent(in) :: n
  integer, intent(inout) :: iperm(n)
- real(dp), intent(inout) :: list(n)
- real(dp), intent(in) :: tol
+ real(dp_), intent(inout) :: list(n)
+ real(dp_), intent(in) :: tol
 
  integer :: l,ir,iap,i,j
- real(dp) :: ap
+ real(dp_) :: ap
  character(len=500) :: msg
 
  if (n==1) then
@@ -1555,12 +1560,12 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
 !scalars
  integer,intent(in) :: nene,bcorr,itetra
  type(t_tetrahedron), intent(in) :: tetra
- real(dp) ,intent(in) :: enemax,enemin,max_occ
+ real(dp_) ,intent(in) :: enemax,enemin,max_occ
 !arrays
  ! MGTODO: This layout is not optimal (lots of cache thrashing, I will optimize it later on)
- real(dp), intent(out) ::  tweight_tmp(nene, 4)
- real(dp), intent(out) :: dtweightde_tmp(nene, 4)
- real(dp),intent(in)  :: eigen_1tetra(4)
+ real(dp_), intent(out) ::  tweight_tmp(nene, 4)
+ real(dp_), intent(out) :: dtweightde_tmp(nene, 4)
+ real(dp_),intent(in)  :: eigen_1tetra(4)
 
 !Local variables-------------------------------
 !  needed for gaussian replacement of Dirac functions
@@ -1570,17 +1575,17 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
 !    contribute to the DOS in any tetrahedron
 !scalars
  integer :: ieps,nn1,nn2,nn3,nn4
- real(dp)  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
- real(dp)  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
- real(dp)  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31,gval
- real(dp)  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
- real(dp)  :: deleps1, deleps2, deleps3, deleps4
- real(dp)  :: invepsum, cc_pre, dccde_pre
- real(dp)  :: cc1_pre, cc2_pre, cc3_pre
- real(dp)  :: cc_tmp, dccde_tmp
- real(dp)  :: dcc1de_pre, dcc2de_pre, dcc3de_pre
- real(dp)  :: tmp,volconst,volconst_mult
- real(dp) ,parameter :: sqrtpi = 1.7724538509055159d0
+ real(dp_)  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
+ real(dp_)  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
+ real(dp_)  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31,gval
+ real(dp_)  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
+ real(dp_)  :: deleps1, deleps2, deleps3, deleps4
+ real(dp_)  :: invepsum, cc_pre, dccde_pre
+ real(dp_)  :: cc1_pre, cc2_pre, cc3_pre
+ real(dp_)  :: cc_tmp, dccde_tmp
+ real(dp_)  :: dcc1de_pre, dcc2de_pre, dcc3de_pre
+ real(dp_)  :: tmp,volconst,volconst_mult
+ real(dp_) ,parameter :: sqrtpi = 1.7724538509055159d0
 
 ! *********************************************************************
 
@@ -1908,19 +1913,19 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 !scalars
  integer,intent(in) :: ik_ibz,nene,nkibz,bcorr
  type(t_tetrahedron), intent(in) :: tetra
- real(dp) ,intent(in) :: enemin,enemax,max_occ
+ real(dp_) ,intent(in) :: enemin,enemax,max_occ
 !arrays
- real(dp) ,intent(in) :: eig_ibz(nkibz)
- real(dp) ,intent(out) :: weights(nene,2)
+ real(dp_) ,intent(in) :: eig_ibz(nkibz)
+ real(dp_) ,intent(out) :: weights(nene,2)
 
 !Local variables-------------------------------
 !scalars
  integer :: itetra,ii
- real(dp) :: deltaene
+ real(dp_) :: deltaene
 !arrays
  integer :: ind_ibz(4)
- real(dp) :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
- real(dp) :: eigen_1tetra(4)
+ real(dp_) :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
+ real(dp_) :: eigen_1tetra(4)
 
 ! *********************************************************************
 
