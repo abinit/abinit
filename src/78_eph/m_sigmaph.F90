@@ -949,7 +949,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                       !ikq_ibz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
 
                       eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
-                      !f_mkq = ebands_dense%occ(ibsum_kq,ikq_ibz_fine,spin)
+                      f_mkq = ebands_dense%occ(ibsum_kq,ikq_ibz_fine,spin)
 
                       ! we could modify the scatter indexes
                       iq_bz_fine = eph_double_grid%scatter_dense(ik_bz_fine,ikq_bz_fine)

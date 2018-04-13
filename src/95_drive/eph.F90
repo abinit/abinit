@@ -108,13 +108,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
- use m_bz_mesh,         only : kmesh_t, kmesh_init, find_qmesh
+ use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_print, find_qmesh
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph, eph_double_grid_t
  use m_double_grid,     only : double_grid_t, double_grid_init
+ use m_kpts,            only : listkk
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -141,7 +142,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,level40=40,natifc0=0,timrev2=2,selectz0=0
+ integer,parameter :: master=0,level40=40,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
  integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
@@ -178,9 +179,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  integer,allocatable :: scatter_dense(:,:), bz2ibz_dense(:) 
+ integer,allocatable :: indqq(:,:)
  real(dp),parameter :: k0(3)=zero
+ real(dp) :: dksqmax
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
- real(dp),pointer :: energies_dense(:,:,:), displ_cart(:,:,:,:) 
+ real(dp),pointer :: energies_dense(:,:,:), displ_cart(:,:,:,:), kq_kpts(:,:) 
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -630,24 +633,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
    eph_double_grid%ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
 
-   write(msg,*) 'coarse:', wfk0_hdr%nkpt,wfk0_hdr%kptopt
-   write(msg,*) 'shift:',  hdr_wfk_dense%shiftk
-   write(msg,*) 'kpoints:'
-   do ii=1,wfk0_hdr%nkpt
-     write(*,*) wfk0_hdr%kptns(:,ii)
-   end do
-   write(msg,*) 'dense: ', hdr_wfk_dense%nkpt,hdr_wfk_dense%kptopt
-   write(msg,*) 'shift:',  hdr_wfk_dense%shiftk
-   write(msg,*) 'kpoints:'
-   do ii=1,hdr_wfk_dense%nkpt
-     write(*,*) hdr_wfk_dense%kptns(:,ii)
-   end do
-
    call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     dtset%kptopt)
    call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,dtset%kptopt)
 
-   write(*,*) kmesh%nbz
-   write(*,*) kmesh_dense%nbz
+   write(*,*) 'coarse kmesh'
+   call kmesh_print(kmesh)
+   write(*,*) 'dense kmesh'
+   call kmesh_print(kmesh_dense)
 
    ! for preliminary tests we hardcode interp_kmult
    ! then it should be calculated from hdr_wfk_dense%nkpt
@@ -656,7 +648,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    interp_kmult(2) = hdr_wfk_dense%kptrlatt(2,2) / wfk0_hdr%kptrlatt(2,2)
    interp_kmult(3) = hdr_wfk_dense%kptrlatt(3,3) / wfk0_hdr%kptrlatt(3,3)
 
-   write(*,*) interp_kmult
+   write(*,*) 'interp_kmult',interp_kmult
 
    kmesh%nshift = 1
    kmesh_dense%nshift = 1
@@ -665,15 +657,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  !2.
    call double_grid_init(kmesh,kmesh_dense,dtset%kptrlatt,interp_kmult,double_grid)
-
-   !test write all the indices of the coarse and dense
-   !loop over coarse kpoints
-   do ii=1,wfk0_hdr%nkpt
-    !loop over dense kpoints near the current coarse kpoint
-    do jj=1,double_grid%ndiv
-      write(*,*) ii, double_grid%coarse_to_dense(ii,jj)
-    enddo
-   enddo
+   eph_double_grid%double_grid = double_grid
 
  !3.
    !find q grid  
@@ -682,13 +666,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !calculate the phonon frequencies at the q-points on the dense q-grid
    allocate(eph_double_grid%phfrq_dense(3*cryst%natom,kmesh_dense%nibz), displ_cart(2,3,cryst%natom,3*cryst%natom))
    do ii=1,kmesh_dense%nibz
-
      qpt = qmesh_dense%ibz(:,ii)
-     write(*,*) qpt 
-
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
      call ifc_fourq(ifc, cryst, qpt, eph_double_grid%phfrq_dense(:,ii), displ_cart )
-
    enddo   
    deallocate(displ_cart)
 
@@ -697,9 +677,37 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !TODO
    allocate(eph_double_grid%bz2ibz_dense(kmesh_dense%nbz))
    allocate(eph_double_grid%scatter_dense(kmesh_dense%nbz,kmesh_dense%nbz))
-   eph_double_grid%bz2ibz_dense=1
-   eph_double_grid%scatter_dense=1
-   eph_double_grid%double_grid = double_grid
+
+   !create bz2ibz
+   allocate(indqq(qmesh_dense%nbz,6))
+   call listkk(dksqmax,cryst%gmet,indqq,&
+               qmesh_dense%ibz, qmesh_dense%bz,&
+               qmesh_dense%nibz,qmesh_dense%nbz,&
+               cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+   eph_double_grid%bz2ibz_dense(:) = indqq(:,1)
+   ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
+
+   ! scatter_dense gives the q_bz_fine (q) index that scatters from ik_bz_fine -> ikq_bz_fine (k -> k+q)
+   ! this is most likely not the most efficient way to do this
+   allocate(kq_kpts(3,qmesh_dense%nbz))
+   do ii=1,qmesh_dense%nbz
+     qpt = qmesh_dense%bz(:,ii)
+     !calculate k+q
+     do jj=1,qmesh_dense%nbz
+       kq_kpts(:,jj) = kmesh_dense%bz(:,jj) + qpt
+     enddo
+     !get indexes of k in k+q
+     call listkk(dksqmax,cryst%gmet,indqq,&
+                 kmesh_dense%bz, kq_kpts,&
+                 kmesh_dense%nbz,kmesh_dense%nbz,&
+                 cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+     ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
+     !store in the scatter array
+     do jj=1,qmesh_dense%nbz
+       eph_double_grid%scatter_dense(jj,indqq(jj,1)) = ii
+     end do
+   enddo
+   deallocate(indqq)
 
  !5. we will call sigmaph here for testing purposes only
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
@@ -711,7 +719,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    call exit(0)
  end if
- ! create a function to check if double grid correctly finds the points 
 
  ! end double grid stuff
 
