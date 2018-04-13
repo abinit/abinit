@@ -613,9 +613,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! 1. Load the fine k grid from file
  ! 2. Find the matching between the k_coarse and k_dense using the double_grid object
  ! 3. Calculate the phonon frequencies on the dense mesh and store them on a array
- ! 4. To obtain the weight of the coarse mesh calculated using the dense mesh
- !    we call a routine with ik_ibz and ikq_ibz in the coarse grid. 
- ! The interface should be compatible with libtetrabz
+ ! 4. Create an array to bring the points in the full brillouin zone to the irreducible brillouin zone
+ ! 5. Create a scatter array between the points in the fine grid
  ! 
 
  !1.
@@ -687,6 +686,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    eph_double_grid%bz2ibz_dense(:) = indqq(:,1)
    ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
 
+ !5.
    ! scatter_dense gives the q_bz_fine (q) index that scatters from ik_bz_fine -> ikq_bz_fine (k -> k+q)
    ! this is most likely not the most efficient way to do this
    allocate(kq_kpts(3,qmesh_dense%nbz))
@@ -709,7 +709,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    enddo
    deallocate(indqq)
 
- !5. we will call sigmaph here for testing purposes only
+ !6. we will call sigmaph here for testing purposes only
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                 pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_double_grid)
 
