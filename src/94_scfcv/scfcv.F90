@@ -171,7 +171,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use defs_parameters
  use defs_rectypes
  use m_xmpi
  use m_profiling_abi
@@ -186,8 +185,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_hdr
  use m_xcdata
 
+ use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
  use m_geometry,         only : metric
+ use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_abi_etsf,         only : abi_etsf_init
@@ -225,13 +226,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc

@@ -65,12 +65,13 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  use m_xmpi
  use m_errors
 
+ use m_time,         only : timab
  use m_gwdefs,       only : czero_gw
  use m_crystal,      only : crystal_t
  use m_gsphere,      only : gsphere_t
  use m_vcoul,        only : vcoul_t
  use m_bz_mesh,      only : kmesh_t
- use m_pawpwij,     only : pawpwff_t
+ use m_pawpwij,      only : pawpwff_t
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type
@@ -82,7 +83,6 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_build_ham'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_71_bse, except_this_one => exc_build_ham
 !End of the abilint section
 
@@ -224,12 +224,12 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
  use defs_datatypes,  only : pseudopotential_type
  use m_gwdefs,        only : czero_gw
- use m_time,          only : cwtime
+ use m_time,          only : cwtime, timab
  use m_crystal,       only : crystal_t
  use m_gsphere,       only : gsphere_t, gsph_fft_tabs
  use m_vcoul,         only : vcoul_t
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
- use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_ihave_ur, wfd_distribute_bbp
@@ -240,7 +240,6 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_all_mgq0'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

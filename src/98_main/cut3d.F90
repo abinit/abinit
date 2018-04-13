@@ -66,6 +66,7 @@ program cut3d
  use m_crystal_io
 
  use m_fstrings,        only : endswith, sjoin, itoa
+ use m_time,            only : timein
  use m_geometry,        only : xred2xcart, metric
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_fftcore,         only : ngfft_seq
@@ -78,7 +79,6 @@ program cut3d
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -940,11 +940,8 @@ program cut3d
  write(std_out,*)
 
  call flush_unit(std_out)
-
  call destroy_mpi_enreg(mpi_enreg)
-
  call abinit_doctor("__cut3d")
-
  call xmpi_end()
 
  end program cut3d

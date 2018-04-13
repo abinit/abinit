@@ -38,6 +38,7 @@ MODULE m_haydock
  use netcdf
 #endif
 
+ use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
  use defs_abitypes,       only : Hdr_type
@@ -47,6 +48,7 @@ MODULE m_haydock
  use m_abilasi,           only : matrginv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_fft_mesh,          only : calc_ceigr
+ use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
  use m_crystal_io,        only : crystal_ncwrite
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
@@ -111,8 +113,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_haydock_driver'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_56_recipspace
  use interfaces_69_wfdesc
 !End of the abilint section
 

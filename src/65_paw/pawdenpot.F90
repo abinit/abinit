@@ -105,6 +105,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  use m_errors
  use m_xmpi
 
+ use m_time,    only : timab
  use m_pawang,  only: pawang_type
  use m_pawrad,  only: pawrad_type, pawrad_deducer0, poisson, simp_gen
  use m_pawtab,  only: pawtab_type
@@ -121,7 +122,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'pawdenpot'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw, except_this_one => pawdenpot
 !End of the abilint section
 

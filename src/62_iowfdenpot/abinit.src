@@ -24,9 +24,6 @@ sources = [
  "out1dm.F90",
  "m_outqmc.F90",
  "m_outwant.F90",
- "randac.F90",
- "rdnpw.F90",
- "WffReadEigK.F90",
  "WffReadSkipK.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

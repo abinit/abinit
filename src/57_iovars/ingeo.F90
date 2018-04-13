@@ -6,7 +6,7 @@
 !!
 !! FUNCTION
 !! Initialize geometry variables for the ABINIT code.
-!! 1) set up unit cell : acell, rprim and rprimd ; deduce Bravais lattice
+!! 1) set up unit cell: acell, rprim and rprimd ; deduce Bravais lattice
 !! 2) (removed)
 !! 3) Set up the number of atoms (natrd) in the primitive set, to be read.
 !! 4) Read the type of each atom in the primitive set
@@ -170,7 +170,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_new(3,3),scalecart(3)
-!real(dp) :: tsec(2)
  real(dp),allocatable :: mass_psp(:)
  real(dp),allocatable :: tnons_cart(:,:),xangst_read(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
@@ -316,7 +315,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  if(natrd<1 .or. natrd>natom)then
    write(message, '(3a,i0,a,i0,2a,a)' )&
 &   'The number of atoms to be read (natrd) must be positive and not bigger than natom.',ch10,&
-&   'This is not the case : natrd=',natrd,', natom=',natom,ch10,&
+&   'This is not the case: natrd=',natrd,', natom=',natom,ch10,&
 &   'Action: correct natrd or natom in your input file.'
    MSG_ERROR(message)
  end if
@@ -370,7 +369,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    MSG_ERROR(message)
  end if
 !if(nimage/=1 .and. iimage/=1)then
-!FIXME : should this be called outside the above end if?
+!FIXME: should this be called outside the above end if?
  call randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat_read,xred_read(:,1:natrd),znucl,acell)
 !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
 !end if
@@ -418,14 +417,14 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
 
  if(txred==1 .or. txrandom /=0 )then
-   call wrtout(std_out,' ingeo : takes atomic coordinates from input array xred ','COLL')
+   call wrtout(std_out,' ingeo: takes atomic coordinates from input array xred ','COLL')
    call xred2xcart(natrd,rprimd,xcart_read,xred_read)
  else
    if(txangst==1)then
-     call wrtout(std_out,' ingeo : takes atomic coordinates from input array xangst','COLL')
+     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xangst','COLL')
      xcart_read(:,:)=xangst_read(:,:)/Bohr_Ang
    else
-     call wrtout(std_out,' ingeo : takes atomic coordinates from input array xcart','COLL')
+     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xcart','COLL')
    end if
    txred=1
  end if
@@ -469,7 +468,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    if(nsym>1 .and. tread==0)then
      write(message,'(3a)')&
 &     'When nsym>1, symrel must be defined in the input file.',ch10,&
-&     'Action : either change nsym, or define symrel in your input file.'
+&     'Action: either change nsym, or define symrel in your input file.'
      MSG_ERROR(message)
    end if
    if(tread==1) symrel(:,:,1:nsym)=reshape( intarr(1:9*nsym) , (/3,3,nsym/) )
@@ -486,7 +485,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 &         'When symmorph/=1, the vectors of translation (tnons)',ch10,&
 &         'a symmetry operation must vanish.',ch10,&
 &         'However, for the symmetry operation number ',isym,', tnons =',tnons(:,isym),'.',ch10,&
-&         'Action : either change your list of allowed symmetry operations, or use the symmetry finder (nsym=0).'
+&         'Action: either change your list of allowed symmetry operations, or use the symmetry finder (nsym=0).'
          MSG_ERROR(message)
        end if
      end do
@@ -554,7 +553,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
    call ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
 
-!  Finalize the computation of coordinates : produce xred.
+!  Finalize the computation of coordinates: produce xred.
    call xcart2xred(natom,rprimd,xcart,xred)
 
  else ! nobj==0
@@ -636,7 +635,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
          MSG_ERROR(message)
        end if
 
-!      TODO : all the symmetry generation operations should be in one big routine
+!      TODO: all the symmetry generation operations should be in one big routine
 
 !      If spgroupma is defined, check whether it is consistent
 !      with spgroup, determine the Shubnikov type,
@@ -718,7 +717,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !        end do
 !        ENDDEBUG
 
-!        Prune the symmetry operations : suppress those with
+!        Prune the symmetry operations: suppress those with
 !        exactly the same point and magnetic part
          nsym_now=1
          do isym=2,nsym
@@ -788,7 +787,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
      else
 
        typat(:)=typat_read(:)
-!      Find the symmetry operations : nsym, symafm, symrel and tnons.
+!      Find the symmetry operations: nsym, symafm, symrel and tnons.
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
        use_inversion=1;if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) use_inversion=0
@@ -850,7 +849,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
    end if
 
-!  Finalize the computation of coordinates : produce xcart
+!  Finalize the computation of coordinates: produce xcart
    call xred2xcart(natom,rprimd,xcart,xred)
 
  end if ! check of existence of an object
@@ -926,7 +925,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  angdeg(1)=180.0_dp/pi * acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))
  angdeg(2)=180.0_dp/pi * acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))
  angdeg(3)=180.0_dp/pi * acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))
- write(std_out,'(a,3f14.8)') ' ingeo : angdeg(1:3)=',angdeg(1:3)
+ write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
 
 !--------------------------------------------------------------------------------------
 
@@ -953,7 +952,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !ENDDEBUG
 
 !9) initialize the list of fixed atoms, and initial velocities -----------------
-!Note : these inputs do not influence the previous generation of
+!Note: these inputs do not influence the previous generation of
 !symmetry operations. This might be changed in the future
 
 !idir=0 is for iatfix , idir=1 is for iatfixx,
@@ -1058,7 +1057,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 &       'For the alchemical atom number ',itypat,ch10,&
 &       'the sum of the pseudopotential coefficients is',sumalch,ch10,&
 &       'while it should be one.',ch10,&
-&       'Action : check the content of the input variable mixalch.'
+&       'Action: check the content of the input variable mixalch.'
        MSG_ERROR(message)
      end if
    end do

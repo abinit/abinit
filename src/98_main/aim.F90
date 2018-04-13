@@ -39,7 +39,6 @@
 program aim
 
  use defs_basis
- use defs_aimprom
  use defs_abitypes
  use m_profiling_abi
  use m_xmpi
@@ -50,16 +49,16 @@ program aim
  use netcdf
 #endif
 
+ use m_time,     only : timein
  use m_io_tools, only : open_file, file_exists
  use m_fstrings, only : int2char4
- use m_bader,    only : adini, drvaim, inpar, defad
+ use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'aim'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

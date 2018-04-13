@@ -39,7 +39,7 @@ module m_fstab
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_special_funcs,  only : dirac_delta
- use m_kpts,           only : kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_timrev_from_kptopt, listkk, smpbz
 
  implicit none
 
@@ -245,7 +245,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 #define ABI_FUNC 'fstab_init'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

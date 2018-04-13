@@ -94,7 +94,6 @@ program abinit
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use m_ab7_invars
  use m_build_info
  use m_cppopts_dumper
@@ -111,8 +110,7 @@ program abinit
  use mpi
 #endif
 
- use defs_time,     only : time_set_papiopt
- use m_time ,       only : asctime, sec2str
+ use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
  use m_io_tools,    only : open_file, flush_unit, delete_file, num_opened_units, show_units
  use m_specialmsg,  only : specialmsg_getcount
@@ -136,7 +134,6 @@ program abinit
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_57_iovars
  use interfaces_95_drive

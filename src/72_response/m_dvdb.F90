@@ -51,7 +51,7 @@ MODULE m_dvdb
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_crystal,       only : crystal_t, crystal_free, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
- use m_kpts,          only : kpts_ibz_from_kptrlatt
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
 
  implicit none
 
@@ -1865,7 +1865,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 #define ABI_FUNC 'dvdb_ftinterp_setup'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -2373,7 +2372,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_get_v1scf_rpt'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

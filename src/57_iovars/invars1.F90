@@ -84,7 +84,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  use m_fstrings, only : inupper
  use m_geometry, only : mkrdim
- use m_parser,   only : intagm
+ use m_parser,   only : intagm, chkint_ge
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

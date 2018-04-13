@@ -27,13 +27,14 @@
 #include "abi_common.h"
 
 module m_sg2002
-    
+
  use defs_basis
  use defs_fftdata
  use m_profiling_abi
  use m_errors
  use m_xmpi
 
+ use m_time,         only : timab
  use m_fstrings,     only : itoa
  use m_fftcore,      only : sphere_fft1, fill, scramble, switchreal, switch, mpiswitch,&
 &                           unfill, unscramble, unswitchreal, unswitch, unmpiswitch,&
@@ -44,7 +45,7 @@ module m_sg2002
  implicit none
 
  private
- 
+
  ! Public API:
  !public :: sg2002_seqfourdp   ! seq-FFT of densities and potentials.
  public :: sg2002_mpifourdp    ! MPI-FFT of densities and potentials.
@@ -56,13 +57,13 @@ module m_sg2002
 ! These procedure shouls be accessed via a wrapper that selected the library via fftalg
  public :: sg2002_back           ! G --> R for densities and potentials
  public :: sg2002_forw           ! R --> G for densities and potentials
- public :: sg2002_mpiback_wf     ! G --> R for wavefunctions 
- public :: sg2002_mpiforw_wf     ! R --> G for wavefunctions 
+ public :: sg2002_mpiback_wf     ! G --> R for wavefunctions
+ public :: sg2002_mpiforw_wf     ! R --> G for wavefunctions
  public :: sg2002_applypot       ! Compute <G|vloc|u> where u is given in reciprocal space.
  public :: sg2002_applypot_many  ! Compute <G|vloc|u> where u is given in reciprocal space.
  public :: sg2002_accrho         ! Compute rho = weigth_r*Re(u(r))**2 + weigth_i*Im(u(r))**2
 
-contains 
+contains
 !!***
 
 !!****f* m_sg2002/sg2002_back
@@ -70,7 +71,7 @@ contains
 !!  sg2002_back
 !!
 !! FUNCTION
-!!   CALCULATES THE DISCRETE FOURIER TRANSFORM  in parallel using MPI/OpenMP 
+!!   CALCULATES THE DISCRETE FOURIER TRANSFORM  in parallel using MPI/OpenMP
 !!
 !!   ZR(I1,I2,I3)= \sum_(j1,j2,j3) EXP(isign*i*2*pi*(j1*i1/n1+j2*i2/n2+j3*i3/n3)) ZF(j1,j3,j2)
 !!
@@ -129,7 +130,6 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_back'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -141,7 +141,7 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
  real(dp),intent(out) :: zr(2,nd1eff,nd2,nd3proc,ndat)
 
 !Local variables-------------------------------
-!scalars 
+!scalars
  integer :: i,j,i1,ic1,ic2,ic3,idat,ierr,includelast,inzee,j2,j2st,j3,jeff,jp2st,lot,lzt
  integer :: ma,mb,n1dfft,n1eff,n2eff,n1zt,ncache,nnd3,nproc_fft,me_fft
  character(len=500) :: msg
@@ -170,7 +170,7 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
  end if
 
 ! check input
- if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then 
+ if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
    MSG_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
@@ -185,7 +185,7 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
  if (mod(n2eff,4) == 0) lzt=lzt+1
 
 ! maximal number of big box 3rd dim slices for all procs
- nnd3=nd3proc*nproc_fft        
+ nnd3=nd3proc*nproc_fft
 
  ABI_ALLOCATE(trig1,(2,n1))
  ABI_ALLOCATE(after1,(mdata))
@@ -253,7 +253,7 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
    ! input:  G1,G2,R3,Rp3,(Gp2)
    ! output: G1,G2,G3,Gp2,(Rp3)
    if (nproc_fft>1) then
-     call timab(543,1,tsec) 
+     call timab(543,1,tsec)
      call xmpi_alltoall(zmpi2,2*n1*nd2proc*nd3proc, &
 &                       zmpi1,2*n1*nd2proc*nd3proc,comm_fft,ierr)
      call timab(543,2,tsec)
@@ -421,10 +421,9 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_forw'
- use interfaces_18_timing
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -478,7 +477,7 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
  if (mod(n2eff,4) == 0) lzt=lzt+1
 
  ! maximal number of big box 3rd dim slices for all procs
- nnd3=nd3proc*nproc_fft        
+ nnd3=nd3proc*nproc_fft
 
  ABI_ALLOCATE(trig1,(2,n1))
  ABI_ALLOCATE(after1,(mdata))
@@ -574,7 +573,7 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
    ! input:  G1,G2,R3,Gp2,(Rp3)
    ! output: G1,G2,R3,Rp3,(Gp2)
    if (nproc_fft>1) then
-     call timab(544,1,tsec) 
+     call timab(544,1,tsec)
      call xmpi_alltoall(zmpi1,2*n1*nd2proc*nd3proc, &
 &                       zmpi2,2*n1*nd2proc*nd3proc,comm_fft,ierr)
      call timab(544,2,tsec)
@@ -705,7 +704,6 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_mpiback_wf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -735,7 +733,7 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
  ! call timab(541,1,tsec)
  ! FIXME must provide a default value but which one?
- ! ioption = 0 
+ ! ioption = 0
  ioption = 1
  !if (paral_kgb==1) ioption=1
 
@@ -762,7 +760,7 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  if (mod(m2eff,4)==0) lzt=lzt+1
 
  ! maximal number of big box 3rd dim slices for all procs
- nnd3=nd3proc*nproc_fft 
+ nnd3=nd3proc*nproc_fft
 
  ABI_ALLOCATE(trig1,(2,n1))
  ABI_ALLOCATE(after1,(mdata))
@@ -843,7 +841,7 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
     ! input:  G1,G2,R3,Rp3,(Gp2)
     ! output: G1,G2,R3,Gp2,(Rp3)
     if (nproc_fft>1) then
-      call timab(543,1,tsec) 
+      call timab(543,1,tsec)
       call xmpi_alltoall(zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc, &
 &                        zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,ierr)
       call timab(543,2,tsec)
@@ -987,7 +985,7 @@ end subroutine sg2002_mpiback_wf
 !! FUNCTION
 !!   Does multiple 3-dim backward FFTs from real into Fourier space
 !!   Adopt standard convention that isign=-1 for forward transform
-!!   CALCULATES THE DISCRETE FOURIERTRANSFORM 
+!!   CALCULATES THE DISCRETE FOURIERTRANSFORM
 !!
 !!   ZF(I1,I3,I2)=S_(j1,j2,j3) EXP(isign*i*2*pi*(j1*i1/n1+j2*i2/n2+j3*i3/n3)) ZR(j1,j2,j3)
 !!
@@ -1052,7 +1050,6 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_mpiforw_wf'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1085,7 +1082,7 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  ! call timab(542,1,tsec)
 
  ! FIXME must provide a default value but which one?
- !ioption = 0 
+ !ioption = 0
  ioption = 1
  !if (paral_kgb==1) ioption=1
 
@@ -1112,7 +1109,7 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  if (mod(m2eff,4)==0) lzt=lzt+1
 
  ! maximal number of big box 3rd dim slices for all procs
- nnd3=nd3proc*nproc_fft        
+ nnd3=nd3proc*nproc_fft
 
  ABI_ALLOCATE(trig1,(2,n1))
  ABI_ALLOCATE(after1,(mdata))
@@ -1331,7 +1328,7 @@ end subroutine sg2002_mpiforw_wf
 !!
 !! FUNCTION
 !! Conduct Fourier transform of REAL or COMPLEX function f(r)=fofr defined on
-!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid 
+!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid
 !! in reciprocal space, in full storage mode, or the reverse operation.
 !! For the reverse operation, the final data is divided by nfftot.
 !! REAL case when cplex=1, COMPLEX case when cplex=2
@@ -1343,7 +1340,7 @@ end subroutine sg2002_mpiforw_wf
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! ndat=Numbre of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
-!!    +1 for transforming from G to r 
+!!    +1 for transforming from G to r
 !!    -1 for transforming from r to G.
 !! fftn2_distrib(2),ffti2_local(2)
 !! fftn3_distrib(3),ffti3_local(3)
@@ -1365,7 +1362,7 @@ end subroutine sg2002_mpiforw_wf
 !! SOURCE
 
 subroutine sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
-&  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)  
+&  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1498,7 +1495,6 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_applypot'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1553,7 +1549,7 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  if (mod(m2eff,4) == 0) lzt=lzt+1
 
  ! maximal number of big box 3rd dim slices for all procs
- nnd3=nd3proc*nproc_fft        
+ nnd3=nd3proc*nproc_fft
 
  ABI_ALLOCATE(btrig1,(2,n1))
  ABI_ALLOCATE(ftrig1,(2,n1))
@@ -1630,7 +1626,7 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    ! input:  G1,G2,R3,Rp3,(Gp2)
    ! output: G1,G2,R3,Gp2,(Rp3)
    if (nproc_fft > 1) then
-      call timab(543,1,tsec) 
+      call timab(543,1,tsec)
       call xmpi_alltoall(zmpi2,2*md1*md2proc*nd3proc,&
 &                        zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
       call timab(543,2,tsec)
@@ -1777,7 +1773,7 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    ! input:  G1,G2,R3,Gp2,(Rp3)
    ! output: G1,G2,R3,Rp3,(Gp2)
    if (nproc_fft > 1) then
-     call timab(544,1,tsec) 
+     call timab(544,1,tsec)
      call xmpi_alltoall(zmpi1,2*md1*md2proc*nd3proc, &
 &                       zmpi2,2*md1*md2proc*nd3proc,comm_fft,ierr)
      call timab(544,2,tsec)
@@ -1925,7 +1921,6 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_applypot_many'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -1982,7 +1977,7 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
  if (mod(m2eff,4) == 0) lzt=lzt+1
 
  ! maximal number of big box 3rd dim slices for all procs
- nnd3=nd3proc*nproc_fft        
+ nnd3=nd3proc*nproc_fft
 
  ABI_ALLOCATE(btrig1,(2,n1))
  ABI_ALLOCATE(ftrig1,(2,n1))
@@ -2062,7 +2057,7 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
    ! input:  G1,G2,R3,Rp3,(Gp2)
    ! output: G1,G2,R3,Gp2,(Rp3)
    if (nproc_fft > 1) then
-      call timab(543,1,tsec) 
+      call timab(543,1,tsec)
       call xmpi_ialltoall(zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc,&
 &                         zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
       call timab(543,2,tsec)
@@ -2215,7 +2210,7 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
    ! input:  G1,G2,R3,Gp2,(Rp3)
    ! output: G1,G2,R3,Rp3,(Gp2)
    if (nproc_fft > 1) then
-     call timab(544,1,tsec) 
+     call timab(544,1,tsec)
      call xmpi_ialltoall(zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc, &
 &                        zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
      call timab(544,2,tsec)
@@ -2326,7 +2321,7 @@ end subroutine sg2002_applypot_many
 !!   weight(ndat)= weight for the density accumulation
 !!
 !! OUTPUTS:
-!!    RHOoutput(i1,i2,i3) = RHOinput(i1,i2,i3) + sum on idat of (Re(FFT(ZF))**2 *weight_r + weight_i*Im(FFT(ZF))**2 
+!!    RHOoutput(i1,i2,i3) = RHOinput(i1,i2,i3) + sum on idat of (Re(FFT(ZF))**2 *weight_r + weight_i*Im(FFT(ZF))**2
 !!        i1=1,n1 , i2=1,n2 , i3=1,n3
 !!   comm_fft: MPI communicator
 !!   nproc_fft: number of processors used as returned by MPI_COMM_SIZE
@@ -2368,13 +2363,12 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sg2002_accrho'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc 
+ integer,intent(in) :: icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
  integer,intent(in) :: max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft
  real(dp),intent(in) :: zf(2,md1,md3,md2proc,ndat)
  real(dp),intent(in) :: weight_r(ndat), weight_i(ndat)
@@ -2423,7 +2417,7 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  if (mod(m2eff,4) == 0) lzt=lzt+1
 
  ! maximal number of big box 3rd dim slices for all procs
- nnd3=nd3proc*nproc_fft        
+ nnd3=nd3proc*nproc_fft
 
  ABI_ALLOCATE(trig1,(2,n1))
  ABI_ALLOCATE(after1,(mdata))
@@ -2487,7 +2481,7 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    ! input:  G1,G2,R3,Rp3,(Gp2)
    ! output: G1,G2,R3,Gp2,(Rp3)
    if (nproc_fft > 1) then
-     call timab(543,1,tsec) 
+     call timab(543,1,tsec)
      call xmpi_alltoall(zmpi2,2*md1*md2proc*nd3proc, &
 &                       zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
      call timab(543,2,tsec)
@@ -2634,13 +2628,13 @@ subroutine ctrig(n,trig,after,before,now,isign,ic)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: n,isign 
+ integer,intent(in) :: n,isign
  integer,intent(inout) :: ic
- integer,intent(inout) :: after(mdata),before(mdata),now(mdata) 
+ integer,intent(inout) :: after(mdata),before(mdata),now(mdata)
  real(dp),intent(inout) :: trig(2,n)
 
 !Local variables-------------------------------
-!scalars 
+!scalars
  integer :: i,itt,j,nh
  real(dp) :: angle,trigc,trigs
 

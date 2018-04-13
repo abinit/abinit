@@ -7,7 +7,7 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG, DC)
+!!  Copyright (C) 2008-2018 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ MODULE m_memeval
 
  use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
+ use m_fftcore,       only : getng
  use m_kg,            only : getmpw
 
  implicit none
@@ -43,6 +44,8 @@ MODULE m_memeval
 !!***
 
  public :: memory_eval   ! Main entry point
+ public :: getdim_nloc   ! Determine the dimensions of arrays with non-local projectors: ekb, ffspl, indlmn
+ public :: setmqgrid     ! Sets the number of points needed to represent the pseudopotentials in q-space
 
 contains
 
@@ -88,9 +91,6 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 #define ABI_FUNC 'memory_eval'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none
@@ -2312,6 +2312,274 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  ABI_DEALLOCATE(cfft_dum)
 
 end subroutine memorf
+!!***
+
+!!****f* m_memeval/getdim_nloc
+!! NAME
+!! getdim_nloc
+!!
+!! FUNCTION
+!! Determine the dimensions of arrays that contain
+!! the definition of non-local projectors : ekb, ffspl, indlmn
+!!
+!! INPUTS
+!!  mixalch(npspalch,ntypalch,nimage)=alchemical mixing coefficients
+!!  nimage=number of images
+!!  npsp=number of pseudopotentials
+!!  npspalch=number of pseudopotentials for alchemical purposes
+!!  ntypat=number of types of pseudo atoms
+!!  ntypalch=number of types of alchemical pseudo atoms
+!!  pspheads(npsp)=<type pspheader_type>all the important information from the
+!!   pseudopotential file headers, as well as the psp file names
+!!
+!! OUTPUT
+!!  lmnmax=maximum number of l,m,n projectors, not taking into account the spin-orbit
+!!  lmnmaxso=maximum number of l,m,n projectors, taking into account the spin-orbit
+!!  lnmax=maximum number of l,n projectors, not taking into account the spin-orbit
+!!  lnmaxso=maximum number of l,n projectors, taking into account the spin-orbit
+!!
+!! PARENTS
+!!      m_psps,memory_eval
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
+& ntypat,ntypalch,pspheads)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getdim_nloc'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nimage,npsp,npspalch,ntypalch,ntypat
+ integer,intent(out) :: lmnmax,lmnmaxso,lnmax,lnmaxso
+!arrays
+ real(dp),intent(in) :: mixalch(npspalch,ntypalch,nimage)
+ type(pspheader_type),intent(in) :: pspheads(npsp)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ilang,ipsp,ipspalch,itypalch,itypat,ntyppure
+!integer :: llmax
+ character(len=500) :: message
+!arrays
+ integer,allocatable :: lmnproj_typat(:),lmnprojso_typat(:),lnproj_typat(:)
+ integer,allocatable :: lnprojso_typat(:),nproj_typat(:,:),nprojso_typat(:,:)
+
+! *************************************************************************
+
+!write(std_out,*)' getdim_nloc: 'pspheads(1)%nproj(0:3)=',pspheads(1)%nproj(0:3)
+
+ ABI_ALLOCATE(lmnproj_typat,(ntypat))
+ ABI_ALLOCATE(lmnprojso_typat,(ntypat))
+ ABI_ALLOCATE(lnproj_typat,(ntypat))
+ ABI_ALLOCATE(lnprojso_typat,(ntypat))
+ ABI_ALLOCATE(nproj_typat,(0:3,ntypat))
+ ABI_ALLOCATE(nprojso_typat,(3,ntypat))
+ lmnproj_typat(:)=0 ; lmnprojso_typat(:)=0
+ lnproj_typat(:)=0 ; lnprojso_typat(:)=0
+ nproj_typat(:,:)=0 ; nprojso_typat(:,:)=0
+
+ ntyppure=ntypat-ntypalch
+
+!For each type of pseudo atom, compute the number of projectors
+!First, pure pseudo atoms
+ if(ntyppure>0)then
+   do itypat=1,ntyppure
+     nproj_typat(0:3,itypat)=pspheads(itypat)%nproj(0:3)
+     nprojso_typat(:,itypat)=pspheads(itypat)%nprojso(:)
+   end do
+ end if
+
+!Then, alchemical pseudo atoms
+ if(ntypalch>0)then
+   do itypat=ntyppure+1,ntypat
+     itypalch=itypat-ntyppure
+     do ipsp=ntyppure+1,npsp
+       ipspalch=ipsp-ntyppure
+!      If there is some mixing, must accumulate the projectors
+       if(sum(abs(mixalch(ipspalch,itypalch,:)))>tol10)then
+         nproj_typat(0:3,itypat)=nproj_typat(0:3,itypat)+pspheads(ipsp)%nproj(0:3)
+         nprojso_typat(:,itypat)=nprojso_typat(:,itypat)+pspheads(ipsp)%nprojso(:)
+       end if
+     end do
+   end do
+ end if
+
+!Now that the number of projectors is known, accumulate the dimensions
+ do itypat=1,ntypat
+   do ilang=0,3
+     lnproj_typat(itypat)=lnproj_typat(itypat)+nproj_typat(ilang,itypat)
+     lmnproj_typat(itypat)=lmnproj_typat(itypat)+nproj_typat(ilang,itypat)*(2*ilang+1)
+   end do
+   lnprojso_typat(itypat)=lnproj_typat(itypat)
+   lmnprojso_typat(itypat)=lmnproj_typat(itypat)
+   do ilang=1,3
+     lnprojso_typat(itypat)=lnprojso_typat(itypat)+nprojso_typat(ilang,itypat)
+     lmnprojso_typat(itypat)=lmnprojso_typat(itypat)+nprojso_typat(ilang,itypat)*(2*ilang+1)
+   end do
+ end do
+
+!Compute the maximal bounds, at least equal to 1, even for local psps
+ lmnmax=1;lmnmaxso=1;lnmax=1;lnmaxso=1
+ do itypat=1,ntypat
+   lmnmax  =max(lmnmax  ,lmnproj_typat  (itypat))
+   lmnmaxso=max(lmnmaxso,lmnprojso_typat(itypat))
+   lnmax   =max(lnmax   ,lnproj_typat   (itypat))
+   lnmaxso =max(lnmaxso ,lnprojso_typat (itypat))
+ end do
+!The initial coding (below) was not totally portable (MT 110215)
+!lmnmax=max(maxval(lmnproj_typat(1:ntypat)),1)
+!lmnmaxso=max(maxval(lmnprojso_typat(1:ntypat)),1)
+!lnmax=max(maxval(lnproj_typat(1:ntypat)),1)
+!lnmaxso=max(maxval(lnprojso_typat(1:ntypat)),1)
+
+ if(maxval(lmnproj_typat(1:ntypat))==0)then
+   write(message, '(3a)' )&
+&   'Despite there is only a local part to pseudopotential(s),',ch10,&
+&   'lmnmax and lnmax are set to 1.'
+   MSG_COMMENT(message)
+ end if
+
+!XG040806 : These lines make modifications of lnmax and lmnmax
+!that are unjustified in many cases, according to the many tests cases
+!where they produce a changes, while the test case was working properly.
+!One should understand better the needs, and code more appropriate changes ...
+!lnmax/lmnmax has to be bigger than 1+lmax (for compatibility reasons)
+!llmax=maxval(pspheads(1:ntypat)%lmax)+1 ! And this line might have trouble with HP compiler
+!if (lnmax   <llmax) lnmax=llmax
+!if (lnmaxso <llmax) lnmaxso=llmax
+!if (lmnmax  <llmax) lmnmax=llmax
+!if (lmnmaxso<llmax) lmnmaxso=llmax
+
+ write(message, '(a,a,i4,a,i4,3a,i4,a,i4,a)' ) ch10,&
+& ' getdim_nloc : deduce lmnmax  =',lmnmax,', lnmax  =',lnmax,',',ch10,&
+& '                      lmnmaxso=',lmnmaxso,', lnmaxso=',lnmaxso,'.'
+ call wrtout(std_out,message,'COLL')
+
+ ABI_DEALLOCATE(lmnproj_typat)
+ ABI_DEALLOCATE(lmnprojso_typat)
+ ABI_DEALLOCATE(lnproj_typat)
+ ABI_DEALLOCATE(lnprojso_typat)
+ ABI_DEALLOCATE(nproj_typat)
+ ABI_DEALLOCATE(nprojso_typat)
+
+end subroutine getdim_nloc
+!!***
+
+!!****f* m_memeval/setmqgrid
+!! NAME
+!!  setmqgrid
+!!
+!! FUNCTION
+!!  Sets the number of points needed to represent the pseudopotentials in
+!!  reciprocal space for a specified resolution.
+!!
+!! INPUTS
+!!  ecut=cutoff energy for the wavefunctions
+!!  ecutdg=cutoff energy for the fine grid in case usepaw==1
+!!  gprimd=primitive translation vectors for reciprocal space
+!!  nptsgvec=number of points along the smallest primitive translation vector
+!!    of the reciprocal space
+!!  usepaw=1 if PAW is used, 0 otherwise
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_psps,memory_eval
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'setmqgrid'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer , intent(inout)  :: mqgrid,mqgriddg
+ integer , intent(in)  :: nptsgvec,usepaw
+ real(dp), intent(in) :: ecut,ecutdg
+ real(dp), intent(in) :: gprimd(3,3)
+
+!Local variables-------------------------------
+ integer :: mqgrid2,mqgriddg2
+ real(dp) :: gmax,gmaxdg,gvecnorm
+ character(len=500) :: message
+
+! *************************************************************************
+
+ gvecnorm=sqrt(min(dot_product(gprimd(:,1),gprimd(:,1)), &
+& dot_product(gprimd(:,2),gprimd(:,2)), &
+& dot_product(gprimd(:,3),gprimd(:,3))))
+ gmax=one/(sqrt2*pi)*sqrt(ecut)
+
+ if (mqgrid == 0) then
+   mqgrid2=ceiling(gmax/gvecnorm*nptsgvec)
+   mqgrid=max(mqgrid2,3001)
+   write(message, '(5a,i0,a)' )&
+&   'The number of points "mqgrid" in reciprocal space used for the',ch10,&
+&   'description of the pseudopotentials has been set automatically',ch10,&
+&   'by abinit to: ',mqgrid,'.'
+   !MSG_COMMENT(message)
+ else
+   mqgrid2=ceiling(gmax/gvecnorm*nptsgvec)
+   if (mqgrid2>mqgrid) then
+     write(message, '(3a,i8,3a,i8,3a)' )&
+&     'The number of points "mqgrid" in reciprocal space used for the',ch10,&
+&     'description of the pseudopotentials is : ',mqgrid,'.',ch10,&
+&     'It would be better to increase it to at least ',mqgrid2,', or',ch10,&
+&     'let abinit choose it automatically by setting mqgrid = 0.'
+     MSG_WARNING(message)
+   end if
+ end if
+
+ if (usepaw==1) then
+   if(ecutdg<tol6)then
+     write(message,'(a)')&
+&     'The value of (paw)ecutdg is zero or negative, which is forbidden.'
+     MSG_ERROR(message)
+   end if
+   gmaxdg=one/(sqrt2*pi)*sqrt(ecutdg)
+   if (mqgriddg == 0) then
+     mqgriddg2=ceiling(gmaxdg/gvecnorm*nptsgvec)
+     mqgriddg=max(mqgriddg2,3001)
+     write(message, '(5a,i0,a)' )&
+&     'The number of points "mqgriddg" in reciprocal space used for the',ch10,&
+&     'description of the pseudopotentials has been set automatically',ch10,&
+&     'by abinit to: ',mqgriddg,'.'
+     !MSG_COMMENT(message)
+   else
+     mqgriddg2=ceiling(gmax/gvecnorm*nptsgvec)
+     if (mqgriddg2>mqgriddg) then
+       write(message, '(3a,i8,3a,i8,3a)' )&
+&       'The number of points "mqgriddg" in reciprocal space used for the',ch10,&
+&       'description of the pseudopotentials (fine grid) is :',mqgriddg,'.',ch10,&
+&       'It would be better to increase it to at least ',mqgriddg2,', or',ch10,&
+&       'let abinit choose it automatically by setting mqgrid = 0.'
+       MSG_WARNING(message)
+     end if
+   end if
+ end if
+
+end subroutine setmqgrid
 !!***
 
 !!****f* m_memeval/wvl_memory

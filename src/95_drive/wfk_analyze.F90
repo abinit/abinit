@@ -84,7 +84,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_wfk
  use m_wfd
 
- !use m_time,            only : cwtime
+ use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
  use m_kpts,            only : tetra_from_kptrlatt
@@ -109,9 +109,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_analyze'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
- use interfaces_56_io_mpi
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_69_wfdesc
@@ -133,7 +131,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,level40=40,brav1=1,timrev2=2,dummy_npw=1
+ integer,parameter :: master=0,brav1=1,timrev2=2,dummy_npw=1
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
@@ -297,7 +295,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
 & pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ============================

@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "hdr_vs_dtset.F90",
  "m_abi_etsf.F90",
  "m_exit.F90",
  "m_hdr.F90",

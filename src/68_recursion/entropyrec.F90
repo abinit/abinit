@@ -52,16 +52,17 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 &                     n_pt_integ,xmax,&
 &                     ent_out1,ent_out2,ent_out3,ent_out4)
 
- use m_profiling_abi
- 
+
  use defs_basis
+ use m_profiling_abi
+
+ use m_time,             only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'entropyrec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

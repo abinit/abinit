@@ -13428,6 +13428,21 @@ Variable(
 ),
 
 Variable(
+    abivarname="prtfull1wf",
+    varset="dfpt",
+    vartype="integer",
+    topics=['DFPT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT FULL 1st-order WaveFunction",
+    text="""
+If set to 1, the output _1WF files will contain the full 1st-order wavefunctions, for both valence and conduction bands.
+Otherwise, the _1WF files are not really 1st-order perturbed wavefunctions, but mereley a set of perturbed wavefunctions that yield the correct perturbed density.
+This is used when one expect to perform post-processing of the 1st-order wavefunctions.
+""",
+),
+
+Variable(
     abivarname="prtfsurf",
     varset="files",
     vartype="integer",

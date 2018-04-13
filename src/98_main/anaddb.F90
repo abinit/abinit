@@ -66,19 +66,19 @@ program anaddb
  use m_dfpt_io,        only : elast_ncwrite
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
- use m_time,           only : asctime
+ use m_time,           only : asctime, timein
  use m_parser,         only : instrng
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_elphon,         only : elphon
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'anaddb'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_72_response
  use interfaces_77_ddb
@@ -555,40 +555,21 @@ program anaddb
  if (inp%prtddb==1 .and. inp%ifcflag==1) then
 
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
-
    close(ddbun)
 
    call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,filnam(2),comm)
 
    call ddb_hdr_free(ddb_hdr)
-
  end if
 
 !***********************************************************************
 
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
-
-    ! DEBUG
-    !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
-    ! &                     dimonly=1)
-
-    !mband = ddb_hdr%mband
-    !msym = ddb_hdr%msym
-    !natom = ddb_hdr%natom
-    !nblok2 = ddb_hdr%nblok
-    !nkpt = ddb_hdr%nkpt
-    !ntypat = ddb_hdr%ntypat
-    !usepaw = ddb_hdr%usepaw
-
-    !call ddb_hdr_free(ddb_hdr)
-    ! END DEBUG
-
    !write(std_out,*)'Entering thmeig: '
    elph_base_name=trim(filnam(2))//"_ep"
 
    call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),&
 &   ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
-
  end if
 
 !**********************************************************************

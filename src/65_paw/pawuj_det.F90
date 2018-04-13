@@ -41,13 +41,13 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_errors
 
  use m_special_funcs,  only : iradfnh
  use m_pptools,        only : prmat
  use m_geometry,       only : shellstruct
+ use m_parser,         only : prttagm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -55,7 +55,6 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 #define ABI_FUNC 'pawuj_det'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_57_iovars
  use interfaces_65_paw, except_this_one => pawuj_det
 !End of the abilint section
 

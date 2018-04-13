@@ -63,6 +63,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use m_fftcore,        only : fftalg_has_mpi
  use m_dtset,          only : dtset_copy, dtset_free
  use m_exit,           only : get_timelimit
+ use m_parser,         only : chkdpr, chkint, chkint_eq, chkint_ge, chkint_le, chkint_ne
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -70,7 +71,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 #define ABI_FUNC 'chkinp'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_57_iovars, except_this_one => chkinp
 !End of the abilint section
 
  implicit none
@@ -1195,7 +1195,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  tim1rev
    call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)
-   
+
 !  kptnrm and kpt
 !  Coordinates components must be between -1 and 1.
    if(dt%kptnrm<1.0-1.0d-10)then

@@ -3627,7 +3627,6 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_expandk'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -3800,7 +3799,6 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebspl_new'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

@@ -38,7 +38,9 @@ module m_fftcore
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_sort
 
+ use m_time,         only : timab
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : destroy_mpi_enreg
 
@@ -53,6 +55,9 @@ module m_fftcore
  public :: get_cache_kb        ! Returns the cache size in Kbs (based on CPP variables).
  public :: ngfft_seq           ! initialize ngfft(18) from the FFT divisions (assume sequential FFT)
  public :: print_ngfft         ! Print the content of ngfft(18) in explicative format.
+ public :: bound               ! Find distance**2 to boundary point of fft box nearest to kpt
+ public :: getng               ! From ecut and metric tensor in reciprocal space, computes recommended ngfft(1:3)
+ public :: sphereboundary      ! Finds the boundary of the basis sphere of G vectors
  public :: sphere
  public :: sphere_fft      ! Insert cg inside box.
  public :: sphere_fft1     ! TODO: This one should be replaced by sphere_fft.
@@ -60,6 +65,7 @@ module m_fftcore
  public :: kpgsph          ! Set up the G vector list
  public :: kpgcount        ! Give the number of G vector in each direction
  public :: get_kg          ! Helper function to calculate the set of G-vectors at a given kpoint (no MPI FFT)
+ public :: kgindex         ! Compute the index of each plane wave on a FFT grid.
 
  ! Low-level tools for MPI FFT
  public :: switch
@@ -540,6 +546,932 @@ subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
  end if
 
 end subroutine print_ngfft
+!!***
+
+!!****f* m_fftcore/bound
+!! NAME
+!! bound
+!!
+!! FUNCTION
+!! For given kpt, ngfft, and gmet,
+!!  Find distance**2 to boundary point of fft box nearest to kpt
+!!  Find distance**2 to boundary point of fft box farthest to kpt
+!!
+!! INPUTS
+!!  kpt(3)=real input k vector (reduced coordinates)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  gmet(3,3)=reciprocal space metric (currently in Bohr**-2)
+!!
+!! OUTPUT
+!!  dsqmax=maximum distance**2 from k to boundary in Bohr**-2.
+!!  dsqmin=minimum distance**2 from k to boundary in Bohr**-2.
+!!  gbound(3)=coords of G on boundary (correspnding to gsqmin)
+!!  plane=which plane min occurs in (1,2, or 3 for G1,etc).
+!!
+!! NOTES
+!! Potential trouble: this routine was written assuming kpt lies inside
+!! first Brillouin zone.  No measure is taken to fold input kpt back
+!! into first zone.  Given arbitrary kpt, this will cause trouble.
+!!
+!! PARENTS
+!!      getcut,getng
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'bound'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: plane
+ real(dp),intent(out) :: dsqmax,dsqmin
+!arrays
+ integer,intent(in) :: ngfft(18)
+ integer,intent(out) :: gbound(3)
+ real(dp),intent(in) :: gmet(3,3),kpt(3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i1min,i2,i2min,i3,i3min
+ real(dp) :: dsm,dsp
+ character(len=500) :: message
+
+! *************************************************************************
+
+! dsq(i1,i2,i3)=gmet(1,1)*(kpt(1)+dble(i1))**2&
+!& +gmet(2,2)*(kpt(2)+dble(i2))**2&
+!& +gmet(3,3)*(kpt(3)+dble(i3))**2&
+!& +2._dp*(gmet(1,2)*(kpt(1)+dble(i1))*(kpt(2)+dble(i2))&
+!& +gmet(2,3)*(kpt(2)+dble(i2))*(kpt(3)+dble(i3))&
+!& +gmet(3,1)*(kpt(3)+dble(i3))*(kpt(1)+dble(i1)))
+
+!Set plane to impossible value
+ plane=0
+
+!look at +/- g1 planes:
+ dsqmax=zero
+ dsqmin=dsq(ngfft(1)/2,-ngfft(2)/2,-ngfft(3)/2,gmet,kpt)+0.01_dp
+ do i2=-ngfft(2)/2,ngfft(2)/2
+   do i3=-ngfft(3)/2,ngfft(3)/2
+     dsp = dsq(ngfft(1)/2, i2, i3,gmet,kpt)
+     dsm = dsq( - ngfft(1)/2, i2, i3,gmet,kpt)
+     if (dsp>dsqmax) dsqmax = dsp
+     if (dsm>dsqmax) dsqmax = dsm
+     if (dsp<dsqmin) then
+       dsqmin = dsp
+       i1min = ngfft(1)/2
+       i2min = i2
+       i3min = i3
+       plane=1
+     end if
+     if (dsm<dsqmin) then
+       dsqmin = dsm
+       i1min =  - ngfft(1)/2
+       i2min = i2
+       i3min = i3
+       plane=1
+     end if
+   end do
+ end do
+!
+!+/- g2 planes:
+ do i1=-ngfft(1)/2,ngfft(1)/2
+   do i3=-ngfft(3)/2,ngfft(3)/2
+     dsp = dsq(i1,ngfft(2)/2,i3,gmet,kpt)
+     dsm = dsq(i1,-ngfft(2)/2,i3,gmet,kpt)
+     if (dsp>dsqmax) dsqmax = dsp
+     if (dsm>dsqmax) dsqmax = dsm
+     if (dsp<dsqmin) then
+       dsqmin = dsp
+       i1min = i1
+       i2min = ngfft(2)/2
+       i3min = i3
+       plane=2
+     end if
+     if (dsm<dsqmin) then
+       dsqmin = dsm
+       i1min = i1
+       i2min =  - ngfft(2)/2
+       i3min = i3
+       plane=2
+     end if
+   end do
+ end do
+!
+!+/- g3 planes:
+ do i1=-ngfft(1)/2,ngfft(1)/2
+   do i2=-ngfft(2)/2,ngfft(2)/2
+     dsp = dsq(i1,i2,ngfft(3)/2,gmet,kpt)
+     dsm = dsq(i1,i2,-ngfft(3)/2,gmet,kpt)
+     if (dsp>dsqmax) dsqmax = dsp
+     if (dsm>dsqmax) dsqmax = dsm
+     if (dsp<dsqmin) then
+       dsqmin = dsp
+       i1min = i1
+       i2min = i2
+       i3min = ngfft(3)/2
+       plane=3
+     end if
+     if (dsm<dsqmin) then
+       dsqmin = dsm
+       i1min = i1
+       i2min = i2
+       i3min =  - ngfft(3)/2
+       plane=3
+     end if
+   end do
+ end do
+
+ if (plane==0) then
+!  Trouble: missed boundary somehow
+   write(message, '(a,a,a,3f9.4,a,3i5,a,a,a,a,a)' )&
+&   'Trouble finding boundary of G sphere for',ch10,&
+&   'kpt=',kpt(:),' and ng=',ngfft(1:3),ch10,&
+&   'Action : check that kpt lies',&
+&   'reasonably within first Brillouin zone; ',ch10,&
+&   'else code bug, contact ABINIT group.'
+   MSG_BUG(message)
+ end if
+
+ gbound(1)=i1min
+ gbound(2)=i2min
+ gbound(3)=i3min
+
+ contains
+
+   function dsq(i1,i2,i3,gmet,kpt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dsq'
+!End of the abilint section
+
+     integer :: i1,i2,i3
+     real(dp) :: dsq
+     real(dp) :: kpt(3),gmet(3,3)
+
+     dsq=gmet(1,1)*(kpt(1)+dble(i1))**2&
+&      +gmet(2,2)*(kpt(2)+dble(i2))**2&
+&      +gmet(3,3)*(kpt(3)+dble(i3))**2&
+&      +2._dp*(gmet(1,2)*(kpt(1)+dble(i1))*(kpt(2)+dble(i2))&
+&      +gmet(2,3)*(kpt(2)+dble(i2))*(kpt(3)+dble(i3))&
+&      +gmet(3,1)*(kpt(3)+dble(i3))*(kpt(1)+dble(i1)))
+   end function dsq
+
+end subroutine bound
+!!***
+
+!!****f* m_fftcore/getng
+!! NAME
+!! getng
+!!
+!! FUNCTION
+!! From ecut and metric tensor in reciprocal space, computes recommended ngfft(1:3)
+!! Also computes the recommended value of nfft and mgfft
+!! Pay attention that the FFT grid must be compatible with the symmetry operations (see irrzg.f).
+!!
+!! INPUTS
+!! boxcutmin=minimum value of boxcut admitted (boxcut is the ratio
+!!  between the radius of the sphere contained in the FFT box, and the
+!!  radius of the planewave sphere) : usually 2.0 .
+!! ecut=energy cutoff in Hartrees
+!! gmet(3,3)=reciprocal space metric (bohr**-2).
+!! kpt(3)=input k vector in terms of reciprocal lattice primitive translations
+!! me_fft=index of the processor in the FFT set (use 0 if sequential)
+!! nproc_fft=number of processors in the FFT set (use 1 if sequential)
+!! nsym=number of symmetry elements in group
+!! paral_fft=0 if no FFT parallelisation ; 1 if FFT parallelisation
+!! symrel(3,3,nsym)=symmetry matrices in real space (integers)
+!!
+!! OUTPUT
+!! mgfft= max(ngfft(1),ngfft(2),ngfft(3))
+!! nfft=number of points in the FFT box=ngfft(1)*ngfft(2)*ngfft(3)/nproc_fft
+!!
+!! SIDE EFFECTS
+!! Input/Output
+!! ngfft(1:18)=integer array with FFT box dimensions and other
+!!   information on FFTs. On input ngfft(1:3) contains
+!!   optional trial values. If ngfft(1:3)/minbox is greater than value
+!!   calculated to avoid wrap-around error and ngfft obeys constraint
+!!   placed by the FFT routine that is used
+!!   then ngfft(1:3) is left unchanged. Otherwise set to value computed in now.
+!!
+!! Note that there is the possibility of an undetected error if we
+!! are dealing with a cubic unit cell and ngfft(1), ngfft(2) and ngfft(3)
+!! are different. In the future we should handle this case.
+!!
+!! ngfft(4),ngfft(5),ngfft(6)= modified values to avoid cache trashing,
+!!        presently : ngfft(4)=ngfft(1)+1 if ngfft(1) is even ;
+!!                    ngfft(5)=ngfft(2)+1 if ngfft(2) is even.
+!!           in the other cases, ngfft(4:6)=ngfft(1:3).
+!!   Other choices may better, but this is left for the future.
+!! ngfft(7)=choice for FFT algorithm, see the input variable fftalg
+!! ngfft(8)=size of the cache, in bytes (not used here presently).!!
+!!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
+!! [unit] = Output Unit number (DEFAULT std_out)
+!!
+!! PARENTS
+!!      fftprof,m_fft,m_fft_prof,memory_eval,mpi_setup,mrgscr,scfcv
+!!
+!! CHILDREN
+!!      bound,print_ngfft,sort_int,wrtout
+!!
+!! SOURCE
+
+subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,paral_fft,symrel,&
+&                ngfftc,use_gpu_cuda,unit) ! optional
+
+ use defs_fftdata,  only : mg
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getng'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: me_fft,nproc_fft,nsym,paral_fft
+ integer,intent(out) :: mgfft,nfft
+ integer,optional,intent(in) :: unit,use_gpu_cuda
+ real(dp),intent(in) :: boxcutmin,ecut
+!arrays
+ integer,intent(in) :: symrel(3,3,nsym)
+ integer,intent(in),optional :: ngfftc(3)
+ integer,intent(inout) :: ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),kpt(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,save :: first=1,msrch(3),previous_paral_mode=0
+ integer :: element,ii,index,isrch,isrch1,isrch2,isrch3,isym,jj,mu,paral_fft_
+ integer :: plane,testok,tobechecked,ount,fftalga
+ real(dp),parameter :: minbox=0.75_dp
+ real(dp) :: dsqmax,dsqmin,ecutmx,prodcurrent,prodtrial,xx,yy
+ logical :: testdiv
+ character(len=500) :: message
+ integer,parameter :: largest_ngfft=mg ! Goedecker FFT: any powers of 2, 3, and 5 - must be coherent with defs_fftdata.F90
+ integer,parameter :: maxpow2 =16      ! int(log(largest_ngfft+half)/log(two))
+ integer,parameter :: maxpow3 =6       ! int(log(largest_ngfft+half)/log(three))
+ integer,parameter :: maxpow5 =6       ! int(log(largest_ngfft+half)/log(five))
+ integer,parameter :: maxpow7 =0
+ integer,parameter :: maxpow11=0
+ integer,parameter :: mmsrch=(maxpow2+1)*(maxpow3+1)*(maxpow5+1)*(maxpow7+1)*(maxpow11+1)
+ integer,save :: iperm(mmsrch),srch(mmsrch,3)
+ integer(i8b) :: li_srch(mmsrch)
+ integer :: divisor(3,3),gbound(3),imax(3),imin(3),ngcurrent(3)
+ integer :: ngmax(3),ngsav(3),ngtrial(3)
+
+! *************************************************************************
+
+ ount = std_out; if (PRESENT(unit)) ount = unit
+
+ fftalga = ngfft(7)/100
+
+!If not yet done, compute recommended (boxcut>=2) fft grid dimensions
+!In case we switch for paral to sequential mode, recompute srch.
+!This is the case e.g. when computing ngfftdiel in sequential mode
+!after an initial computation of ngfft in parallel
+
+ paral_fft_=paral_fft;if (nproc_fft==0) paral_fft_=0
+
+ if(first==1.or.paral_fft_ /= previous_paral_mode) then
+   first=0; previous_paral_mode=paral_fft_
+   srch(:,:)=0
+
+   ! Factors of 2
+   srch(1,1)=1
+   do ii=1,maxpow2
+     srch(ii+1,1)=srch(ii,1)*2
+   end do
+
+   ! Factors of 3
+   index=maxpow2+1
+   if(maxpow3>0)then
+     do ii=1,max(1,maxpow3)
+       srch(1+ii*index:(ii+1)*index,1)=3*srch(1+(ii-1)*index:ii*index,1)
+     end do
+   end if
+
+   ! Factors of 5
+   index=(maxpow3+1)*index
+   if(maxpow5>0)then
+     do ii=1,max(1,maxpow5)
+       li_srch = 0
+       li_srch(1+ii*index:(ii+1)*index)=5_i8b*srch(1+(ii-1)*index:ii*index,1)
+       where (li_srch > huge(maxpow3)) li_srch = huge(maxpow3)
+       srch(1+ii*index:(ii+1)*index,1)=li_srch(1+ii*index:(ii+1)*index)
+     end do
+   end if
+
+   ! Factors of 7
+   index=(maxpow5+1)*index
+   if(maxpow7>0)then
+     do ii=1,max(1,maxpow7)
+       srch(1+ii*index:(ii+1)*index,1)=7*srch(1+(ii-1)*index:ii*index,1)
+     end do
+   end if
+
+   ! Factors of 11
+   index=(maxpow7+1)*index
+   if(maxpow11>0)then
+     do ii=1,max(1,maxpow11)
+       srch(1+ii*index:(ii+1)*index,1)=11*srch(1+(ii-1)*index:ii*index,1)
+     end do
+   end if
+
+   call sort_int(mmsrch,srch(:,1),iperm)
+
+   do ii=1,mmsrch
+     if(srch(ii,1)>largest_ngfft)exit
+   end do
+   msrch(1)=ii-1
+
+   ! In case of FFT parallelism, one need ngfft(2) and ngfft(3) to be multiple of nproc_fft
+   if(paral_fft_==1)then
+     msrch(2)=0
+     do ii=1,msrch(1)
+       if(modulo(srch(ii,1),nproc_fft)==0) then
+         msrch(2)=msrch(2)+1
+         srch(msrch(2),2)=srch(ii,1)
+       end if
+     end do
+     !write(message,'(a,i0,a,i0,2a,i0)')&
+     ! 'The second and third dimension of the FFT grid: ',ngfft(2),", ",ngfft(3),ch10,&
+     ! 'were imposed to be multiple of the number of processors for the FFT: ', nproc_fft
+     !if (ount /= dev_null) MSG_COMMENT(message)
+   else
+     msrch(2)=msrch(1)
+     srch(:,2)=srch(:,1)
+   end if
+
+   ! The second and third search list have the same constraint
+   msrch(3)=msrch(2)
+   srch(:,3)=srch(:,2)
+
+!  The set of allowed ngfft values has been found
+ end if ! first==1
+
+!Save input values of ngfft
+ ngsav(1:3) = ngfft(1:3)
+
+!As an initial guess for ngfft, use the provided coarse mesh grid
+ if (PRESENT(ngfftc)) then
+   ngfft(1:3)=ngfftc(1:3)
+   call wrtout(ount,' Using supplied coarse mesh as initial guess.','COLL')
+ else
+   ngfft(1:3)=2
+ end if
+
+!Enlarge the initial guess until the set of ngfft entirely comprises the sphere
+ do
+
+   call bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
+
+   ! Exit the infinite do-loop if the sphere is inside the FFT box
+   if (dsqmin>=(half*boxcutmin**2*ecut/pi**2)) exit
+
+   ! Fix nearest boundary
+   do ii=1,msrch(plane)-1
+     if (srch(ii,plane)>=ngfft(plane)) then
+!      redefine ngfft(plane) to next higher choice
+       ngfft(plane)=srch(ii+1,plane)
+       exit ! Exit the loop over ii
+     end if
+
+     if (ii==msrch(plane)-1)then
+       ! Here, we are in trouble
+       write(message, '(a,i12,5a)' ) &
+&       'ngfft is bigger than allowed value =',ngfft(plane),'.',ch10,&
+&       'This indicates that desired ngfft is larger than getng',ch10,&
+&       'can handle. The code has to be changed and compiled.'
+       MSG_BUG(message)
+     end if
+   end do
+
+ end do ! End of the infinite do-loop : will either "exit", or abort
+
+!ecutmx=maximum ecut consistent with chosen ngfft
+ ecutmx=0.5_dp*pi**2*dsqmin
+
+!Print results
+ write(message, '(a,1p,e14.6,a,3i8,a,a,e14.6)' ) &
+& ' For input ecut=',ecut,' best grid ngfft=',ngfft(1:3),ch10,&
+& '       max ecut=',ecutmx
+ call wrtout(ount,message,'COLL')
+
+! The FFT grid is compatible with the symmetries if for each
+! symmetry isym, each ii and each jj, the quantity
+! (ngfft(jj)*symrel(jj,ii,isym))/ngfft(ii) is an integer.
+! This relation is immediately verified for diagonal elements, since
+! symrel is an integer. It is also verified if symrel(ii,jj,isym) is zero.
+
+!Compute the biggest (positive) common divisor of each off-diagonal element of the symmetry matrices
+ divisor(:,:)=0; tobechecked=0
+
+ do ii=1,3
+   do jj=1,3
+     if(jj==ii)cycle
+     do isym=1,nsym
+       if(symrel(jj,ii,isym)==0 .or. divisor(jj,ii)==1 )cycle
+       tobechecked=1
+       element=abs(symrel(jj,ii,isym))
+       testdiv= ( divisor(jj,ii)==0 .or. divisor(jj,ii)==element .or. element==1)
+       if(testdiv)then
+         divisor(jj,ii)=element
+       else
+!        Must evaluate common divisor between non-trivial numbers
+         do
+           if(divisor(jj,ii)<element)element=element-divisor(jj,ii)
+           if(divisor(jj,ii)>element)divisor(jj,ii)=divisor(jj,ii)-element
+           if(divisor(jj,ii)==element)exit
+         end do
+       end if
+     end do
+   end do
+ end do
+
+!Check whether there is a problem
+ testok=1
+ if(tobechecked==1)then
+   do ii=1,3
+     do jj=1,3
+       xx=divisor(jj,ii)*ngfft(jj)
+       yy=xx/ngfft(ii)
+       if(abs(yy-nint(yy))>tol8)testok=0
+     end do
+   end do
+ end if
+
+!There is definitely a problem
+ if(testok==0)then
+!  Use a brute force algorithm
+!  1) Because one knows that three identical numbers will satisfy
+!  the constraint, use the maximal ngfft value to define current triplet
+!  and associate total number of grid points
+   ngcurrent(1:3)=maxval(ngfft(1:3))
+!  Takes into account the fact that ngfft(2) and ngfft(3) must
+!  be multiple of nproc_fft
+   if(mod(ngcurrent(1),nproc_fft)/=0)ngcurrent(1:3)=ngcurrent(1:3)*max(1,nproc_fft)
+   prodcurrent=ngcurrent(1)**3+1.0d-3
+!  2) Define maximal values for each component, limited
+!  by the maximal value of the list
+   ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
+   ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
+   ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
+!  3) Get minimal and maximal search indices
+   do ii=1,3
+     do isrch=1,msrch(ii)
+       index=srch(isrch,ii)
+       if(index==ngfft(ii))imin(ii)=isrch
+!      One cannot suppose that imax belongs to the allowed list,
+!      so must use <= instead of == , to determine largest index
+       if(index<=ngmax(ii))imax(ii)=isrch
+     end do
+   end do
+!  4) Compute product of trial ngffts
+!  DEBUG
+!  write(ount,*)' getng : enter triple loop '
+!  write(ount,*)'imin',imin(1:3)
+!  write(ount,*)'imax',imax(1:3)
+!  write(ount,*)'ngcurrent',ngcurrent(1:3)
+!  ENDDEBUG
+   do isrch1=imin(1),imax(1)
+     ngtrial(1)=srch(isrch1,1)
+     do isrch2=imin(2),imax(2)
+       ngtrial(2)=srch(isrch2,2)
+       do isrch3=imin(3),imax(3)
+         ngtrial(3)=srch(isrch3,3)
+         prodtrial=real(ngtrial(1))*real(ngtrial(2))*real(ngtrial(3))+1.0d-3
+         if(prodtrial>prodcurrent-1.0d-4)exit
+!        The trial product is lower or equal to the current product,
+!        so now, checks whether the symmetry constraints are OK
+         testok=1
+         do ii=1,3
+           do jj=1,3
+             xx=divisor(jj,ii)*ngtrial(jj)
+             yy=xx/ngtrial(ii)
+             if(abs(yy-nint(yy))>tol8)testok=0
+           end do
+         end do
+!        DEBUG
+!        write(ount,'(a,3i6,a,i3,a,es16.6)' )' getng : current trial triplet',ngtrial(1:3),&
+!        &     ' testok=',testok,' prodtrial=',prodtrial
+!        ENDDEBUG
+         if(testok==0)cycle
+!        The symmetry constraints are fulfilled, so update current values
+         ngcurrent(1:3)=ngtrial(1:3)
+         prodcurrent=prodtrial
+       end do
+     end do
+   end do
+
+   ngfft(1:3)=ngcurrent(1:3)
+   call bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
+!  ecutmx=maximum ecut consistent with chosen ngfft
+   ecutmx=0.5_dp*pi**2*dsqmin
+!  Give results
+   write(message, '(a,3i8,a,a,e14.6)' ) &
+&   ' However, must be changed due to symmetry =>',ngfft(1:3),ch10,&
+&   '       with max ecut=',ecutmx
+   call wrtout(ount,message,'COLL')
+
+   if (prodcurrent>huge(ii)) then
+     write(message, '(5a)' )&
+&     'The best FFT grid will lead to indices larger',ch10,&
+&     'than the largest representable integer on this machine.',ch10,&
+&     'Action: try to deal with smaller problems. Also contact ABINIT group.'
+     MSG_ERROR(message)
+   end if
+
+ end if ! testok==0
+
+!Possibly use the input values of ngfft
+ if ( int( dble(ngsav(1)) / minbox ) >= ngfft(1) .and.&
+&     int( dble(ngsav(2)) / minbox ) >= ngfft(2) .and.&
+&     int( dble(ngsav(3)) / minbox ) >= ngfft(3) ) then
+
+!  Must check whether the values are in the allowed list
+   testok=0
+   do mu=1,3
+     do ii=1,msrch(mu)
+       if(srch(ii,mu)==ngsav(mu))then
+         testok=testok+1
+         exit
+       end if
+     end do
+   end do
+   if(testok==3)then
+     write(message,'(a,3(a,i1,a,i3),a)') ' input values of',&
+&     (' ngfft(',mu,') =',ngsav(mu),mu=1,3),' are alright and will be used'
+     call wrtout(ount,message,'COLL')
+     do mu = 1,3
+       ngfft(mu) = ngsav(mu)
+     end do
+   end if
+
+ end if
+
+!mgfft needs to be set to the maximum of ngfft(1),ngfft(2),ngfft(3)
+ mgfft = maxval(ngfft(1:3))
+
+ if (paral_fft_==1) then
+   ! For the time being, one need ngfft(2) and ngfft(3) to be multiple of nproc_fft
+   if(modulo(ngfft(2),nproc_fft)/=0)then
+     write(message,'(3a,i5,a,i5)')&
+&     'The second dimension of the FFT grid, ngfft(2), should be',&
+&     'a multiple of the number of processors for the FFT, nproc_fft.',&
+&     'However, ngfft(2)=',ngfft(2),' and nproc_fft=',nproc_fft
+     MSG_BUG(message)
+   end if
+   if(modulo(ngfft(3),nproc_fft)/=0)then
+     write(message,'(3a,i5,a,i5)')&
+&     'The third dimension of the FFT grid, ngfft(3), should be',&
+&     'a multiple of the number of processors for the FFT, nproc_fft.',&
+&     'However, ngfft(3)=',ngfft(3),' and nproc_fft=',nproc_fft
+     MSG_BUG(message)
+   end if
+
+ else if (paral_fft_/=0) then
+   write(message,'(a,i0)')'paral_fft_ should be 0 or 1, but its value is ',paral_fft_
+   MSG_BUG(message)
+ end if
+
+! Compute effective number of FFT points (for this MPI node if parall FFT)
+ nfft=product(ngfft(1:3))/max(1,nproc_fft)
+
+!Set up fft array dimensions ngfft(4,5,6) to avoid cache conflicts
+ ngfft(4)=2*(ngfft(1)/2)+1
+ ngfft(5)=2*(ngfft(2)/2)+1
+ ngfft(6)=ngfft(3)
+ if (any(fftalga == [FFT_FFTW3, FFT_DFTI])) then
+   ! FFTW3 supports leading dimensions but at the price of a larger number of FFTs
+   ! to be executed along z when the zero-padded version is used.
+   ! One should check whether the augmentation is beneficial for FFTW3.
+   ngfft(4)=2*(ngfft(1)/2)+1
+   ngfft(5)=2*(ngfft(2)/2)+1
+   !ngfft(4)=ngfft(1)
+   !ngfft(5)=ngfft(2)
+   ngfft(6)=ngfft(3)
+ end if
+
+ if (present(use_gpu_cuda)) then
+   if (use_gpu_cuda==1) then
+     ngfft(4)=ngfft(1)
+     ngfft(5)=ngfft(2)
+     ngfft(6)=ngfft(3)
+   end if
+ end if
+
+ ngfft(14:18)=0 ! ngfft(14) to be filled outside of getng
+
+ if (paral_fft_==0) then
+   ngfft(9)=0     ! paral_fft_
+   ngfft(10)=1    ! nproc_fft
+   ngfft(11)=0    ! me_fft
+   ngfft(12)=0    ! n2proc
+   ngfft(13)=0    ! n3proc
+ else
+   ngfft(9)=1     ! paral_fft_
+   ngfft(10)=nproc_fft
+   ngfft(11)=me_fft
+   ngfft(12)=ngfft(2)/nproc_fft
+   ngfft(13)=ngfft(3)/nproc_fft
+ end if
+
+
+ call print_ngfft(ngfft,header="FFT mesh",unit=ount,mode_paral="COLL")
+
+end subroutine getng
+!!***
+
+!!****f* m_fftcore/sphereboundary
+!! NAME
+!! sphereboundary
+!!
+!! FUNCTION
+!! Finds the boundary of the basis sphere of G vectors (at a given
+!! k point) for use in improved zero padding of ffts in 3 dimensions.
+!! Provides data to be used by subroutine fourwf, in the form of
+!! an array gbound(2*mgfft+8,2).
+!!
+!! The first component (for use when mod(fftalg,10)==2))
+!! provides integer values g1min,g1max,g2min,g2max
+!! and then for g2 in the
+!! sequence g2=0,1,2,...,g2max,g2min,g2min+1,...,-1, provides g1min, g1max.
+!!
+!! The second component (for use when mod(fftalg,10)==1))
+!! provides integer values g1min,g1max,g3min,g3max,
+!! where g3min and g3max have been corrected in case of time-reversal
+!! and then for g3 in the sequence
+!! g3=0,1,2,...,g3max,g3min,g3min+1,...,-1, provides g2min, g2max.
+!! (also corrected in case of time-reversal)
+!!
+!! These values are stored in the above order in array gbound.
+!! Debug mode, if fftalg is between 000 and 099
+!!
+!! INPUTS
+!!  istwf_k=option parameter that describes the storage of wfs
+!!  kg_k(3,npw)=integer coordinates of G vectors in basis sphere
+!!  mgfft=maximum size of 1D FFTs (only for dimensioning purposes)
+!!  npw=number of G vectors in basis at this k point
+!!
+!! OUTPUT
+!!  gbound(2*mgfft+8,2)=defined above
+!!
+!! PARENTS
+!!      dfpt_eltfrkin,dfpt_mkrho,fock_getghc,m_bandfft_kpt,m_cut3d,m_epjdos
+!!      m_fft,m_fft_prof,m_fock,m_gsphere,m_hamiltonian,m_wfd,mkrho,mlwfovlp
+!!      pawmkaewf,posdoppler,scfcv,spin_current,suscep_stat,susk,tddft,wfconv
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sphereboundary'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,mgfft,npw
+!arrays
+ integer,intent(in) :: kg_k(3,npw)
+ integer,intent(out) :: gbound(2*mgfft+8,2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: dim_a,dim_b,fftalgc,g_a,gmax_a,gmax_b,gmax_b1,gmax_b2,gmin_a,gmin_b
+ integer :: gmin_b1,gmin_b2,igb,ii,iloop,ipw,testm,testp,kgk
+ character(len=500) :: message
+!arrays
+ integer :: gmax(2),gmin(2)
+
+! *************************************************************************
+!
+!DEBUG
+!write(std_out,*)' sphereboundary : enter'
+!write(std_out, '(a)' )' sphereboundary : list of plane waves coordinates for k point '
+!write(std_out, '(a)' )'       ipw       kg_k(1:3,ipw) '
+!do ipw=1,npw
+!write(std_out, '(i10,a,3i6)' )ipw,'  ',kg_k(1:3,ipw)
+!end do
+!gbound=-999
+!ENDDEBUG
+
+!Determine cube boundaries
+ gbound(1,1)=minval(kg_k(1,:))
+ gbound(2,1)=maxval(kg_k(1,:))
+ gbound(1:2,2)=gbound(1:2,1)
+
+!Treat differently the fftalgc cases
+ do ii=1,2
+
+   fftalgc=3-ii
+
+   if(fftalgc/=2)then
+     dim_a=3
+     dim_b=2
+   else
+     dim_a=2
+     dim_b=1
+   end if
+
+!  Relevant boundaries
+   gbound(3,ii)=minval(kg_k(dim_a,:))
+   gbound(4,ii)=maxval(kg_k(dim_a,:))
+   gmin_a=gbound(3,ii)
+   gmax_a=gbound(4,ii)
+
+!  Must complete the sphere for fftalgc==1 and special storage modes.
+!  Explanation : sg_fftpad is not able to take into account
+!  the time-reversal symmetry, so that the boundaries will not be delimited
+!  by the kg_k set, but by their symmetric also.
+   if(istwf_k>=2 .and. fftalgc==1)then
+     if( istwf_k==2 .or. istwf_k==3 .or. istwf_k==6 .or. istwf_k==7 )then
+       gbound(4,2)=max(gmax_a,-gmin_a)
+       gbound(3,2)=-gbound(4,2)
+     else if( istwf_k==4 .or. istwf_k==5 .or. istwf_k==8 .or. istwf_k==9 )then
+       gbound(4,2)=max(gmax_a,-gmin_a-1)
+       gbound(3,2)=-gbound(4,2)-1
+     end if
+     gmax_a=gbound(4,2) ; gmin_a=gbound(3,2)
+   end if
+
+   igb=5
+
+!  Consider first every g_a in range 0 ... gmax_a, then gmin_a ... -1
+   gmin(1)=0         ; gmax(1)=gmax_a
+   gmin(2)=gmin_a    ; gmax(2)=-1
+
+   do iloop=1,2
+
+     if( gmin(iloop) <= gmax(iloop) )then
+
+       do g_a=gmin(iloop),gmax(iloop)
+
+         if(istwf_k==1 .or. fftalgc/=1)then
+           ! Select the minimal and maximal values, in the selected plane
+           gmin_b=mgfft+1 ! Initialized with a value larger than all possible ones
+           gmax_b=-mgfft-1 ! Initialized with a value smaller than all possible ones
+           do ipw=1,npw
+             if(kg_k(dim_a,ipw)==g_a)then
+               kgk=kg_k(dim_b,ipw)
+               if(kgk<=gmin_b)gmin_b=kgk
+               if(kgk>=gmax_b)gmax_b=kgk
+             end if
+           end do
+
+         else if(istwf_k>=2 .and. fftalgc==1)then
+
+           ! Here, must take into account time-reversal symmetry explicitely
+
+           ! Determine the boundaries for the plane g_a
+           testp=0
+           if(g_a<=gmax_a)then
+             ! Select the minimal and maximal values, in the selected plane
+             gmin_b1=mgfft+1 ! Initialized with a value larger than all possible ones
+             gmax_b1=-mgfft-1 ! Initialized with a value smaller than all possible ones
+             do ipw=1,npw
+               if(kg_k(dim_a,ipw)==g_a)then
+                 kgk=kg_k(dim_b,ipw)
+                 if(kgk<=gmin_b1)gmin_b1=kgk
+                 if(kgk>=gmax_b1)gmax_b1=kgk
+               end if
+             end do
+
+
+             testp=1
+           end if
+
+           ! Determine the boundaries for the plane -g_a or -g_a-1
+           testm=0
+           if( istwf_k==2 .or. istwf_k==3 .or. istwf_k==6 .or. istwf_k==7 )then
+
+             if(-g_a>=gmin_a)then
+               ! Select the minimal and maximal values, in the selected plane
+               ! Warning : there is an inversion of search (might be confusing)
+               gmax_b2=mgfft+1 ! Initialized with a value larger than all possible ones
+               gmin_b2=-mgfft-1 ! Initialized with a value smaller than all possible ones
+               do ipw=1,npw
+                 if(kg_k(dim_a,ipw)==-g_a)then
+                   kgk=kg_k(dim_b,ipw)
+                   if(kgk<=gmax_b2)gmax_b2=kgk
+                   if(kgk>=gmin_b2)gmin_b2=kgk
+                 end if
+               end do
+               testm=1
+             end if
+
+           else if( istwf_k==4 .or. istwf_k==5 .or. istwf_k==8 .or. istwf_k==9 )then
+
+             if(-g_a-1>=gmin_a)then
+               ! Select the minimal and maximal values, in the selected plane
+               ! Warning : there is an inversion of search (might be confusing)
+               gmax_b2=mgfft+1 ! Initialized with a value larger than all possible ones
+               gmin_b2=-mgfft-1 ! Initialized with a value smaller than all possible ones
+               do ipw=1,npw
+                 if(kg_k(dim_a,ipw)==-g_a-1)then
+                   kgk=kg_k(dim_b,ipw)
+                   if(kgk<=gmax_b2)gmax_b2=kgk
+                   if(kgk>=gmin_b2)gmin_b2=kgk
+                 end if
+               end do
+               testm=1
+             end if
+
+           end if
+
+           !  Must invert the boundaries, to use them for plane g_a
+           if(testm==1)then
+             ! This is needed to avoid border effect
+             ! if the search did not lead to any element
+             gmin_b2=max(gmin_b2,-mgfft) ; gmax_b2=min(gmax_b2,mgfft)
+             if(istwf_k<=5)then
+               gmax_b2=-gmax_b2 ; gmin_b2=-gmin_b2
+             else
+               gmax_b2=-gmax_b2-1 ; gmin_b2=-gmin_b2-1
+             end if
+           end if
+
+           if( testp==1 .and. testm==1)then
+             gmin_b=min(gmin_b1,gmin_b2) ; gmax_b=max(gmax_b1,gmax_b2)
+           else if( testp==1 )then
+             gmin_b=gmin_b1 ; gmax_b=gmax_b1
+           else if( testm==1 )then
+             gmin_b=gmin_b2 ; gmax_b=gmax_b2
+           end if
+
+         end if ! Endif take into account time-reversal symmetry
+
+         if (igb+1>2*mgfft+4) then
+           write(message, '(2a, 4(a,3(i0,1x),a))' )&
+             "About to overwrite gbound array (FFT mesh too small) ",ch10, &
+             "   iloop, igb, mgb = ",iloop,igb,2*mgfft+4, ch10, &
+             "   istwfk, mgfft, npw = ",istwf_k, mgfft, npw, ch10, &
+             "   minval(kg_k) = ",minval(kg_k, dim=2), ch10, &
+             "   maxval(kg_k) = ",maxval(kg_k, dim=2), ch10
+           MSG_BUG(message)
+         end if
+
+         gbound(igb,ii)=gmin_b
+         gbound(igb+1,ii)=gmax_b
+
+         if( iloop==1 .and. istwf_k>=2 .and. istwf_k<=5 .and. fftalgc==2 .and. g_a==0)then
+!          If k_y=0 , for fftalgc==2, the g_a==0 plane must be completed
+           if(istwf_k==2 .or. istwf_k==4)then
+             gbound(igb+1,ii)=max(gmax_b,-gmin_b)
+             gbound(igb,ii)=-gbound(igb+1,ii)
+           else if(istwf_k==3 .or. istwf_k==5)then
+             gbound(igb+1,ii)=max(gmax_b,-gmin_b-1)
+             gbound(igb,ii)=-gbound(igb+1,ii)-1
+           end if
+
+         end if
+
+         igb=igb+2
+
+       end do ! g_a
+     end if
+   end do  ! iloop
+ end do ! ii (fftalgc)
+
+!DEBUG
+!write(std_out,'(a)')' sphereoundary : list of plane waves coordinates for 1st k point '
+!write(std_out,'(a)')'       ipw       kg_k(1:3,ipw) '
+!do ipw=1,npw
+!write(std_out, '(i10,a,3i6)' )ipw,'  ',kg_k(1:3,ipw)
+!end do
+!write(std_out, '(a)' )' sphereboundary : list of boundaries '
+!do igb=1,2*mgfft+8
+!write(std_out, '(i10,a,2i6)' )igb,'  ',gbound(igb,1),gbound(igb,2)
+!end do
+!write(std_out,*)' sphereboundary : exit '
+!ENDDEBUG
+
+end subroutine sphereboundary
 !!***
 
 !----------------------------------------------------------------------
@@ -3388,7 +4320,6 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 #undef ABI_FUNC
 #define ABI_FUNC 'kpgsph'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -3940,6 +4871,105 @@ subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
  call destroy_mpi_enreg(MPI_enreg_seq)
 
 end subroutine get_kg
+!!***
+
+!!****f* m_fftcore/kgindex
+!! NAME
+!! kgindex
+!!
+!! FUNCTION
+!! Compute the index of each plane wave on a FFT grid.
+!!
+!! INPUTS
+!!  kg_k(3,npw_k)=dimensionless coords of G vecs (integer)
+!!  mpi_enreg=information about MPI parallelization
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  npw_k=number of planewaves
+!!
+!! OUTPUT
+!!  indpw_k(npw_k)=linear list number (in fft box) of given G vector for the current processor (local adress)
+!!                =0 if kg_k(ipw) is not treated by this procesor
+!!  mask(npw_k)=True if  kg_k(ipw) belongs to this procesor, false otherwise.
+!!
+!! NOTES
+!!   mpi_enreg is not necessary in this case (the info is also in ngfft), but much more easy to read...
+!!
+!! PARENTS
+!!      m_fft_prof,m_gsphere,m_screening,m_shirley,m_wfd,prcref,prcref_PMA
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kgindex'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: kg_k(3,npw_k),ngfft(18)
+ integer,intent(out) :: indpw_k(npw_k)
+ logical,intent(out) :: mask(npw_k)
+!Local variables-------------------------------
+!scalars
+ integer :: ig,ig1,ig2,ig3,me_fft,n1,n2,n3,nd2
+ character(len=500) :: msg
+ !arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ !integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+
+! *************************************************************************
+
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+
+!Use the following indexing (N means ngfft of the adequate direction)
+!0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= kg
+!1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index
+
+ me_fft=mpi_enreg%me_fft
+ nd2=(n2-1)/mpi_enreg%nproc_fft+1
+
+ if (n2== mpi_enreg%distribfft%n2_coarse) then
+   fftn2_distrib => mpi_enreg%distribfft%tab_fftdp2_distrib
+   ffti2_local => mpi_enreg%distribfft%tab_fftdp2_local
+ else if (n2 == mpi_enreg%distribfft%n2_fine) then
+   fftn2_distrib => mpi_enreg%distribfft%tab_fftdp2dg_distrib
+   ffti2_local => mpi_enreg%distribfft%tab_fftdp2dg_local
+ else
+   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+ end if
+
+ !call ptabs_fourwf(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ do ig=1,npw_k
+   ig1=modulo(kg_k(1,ig),n1)
+   ig2=modulo(kg_k(2,ig),n2)
+   ig3=modulo(kg_k(3,ig),n3)
+   if(me_fft==fftn2_distrib(ig2+1)) then
+     ig2=ffti2_local(ig2+1) - 1
+     indpw_k(ig)=ig1+1+n1*(ig2+nd2*ig3)
+     mask(ig)=.true.
+   else
+     indpw_k(ig)=0
+     mask(ig)=.false.
+   end if
+   if ( ANY(kg_k(:,ig)>ngfft(1:3)/2) .or. ANY(kg_k(:,ig)<-(ngfft(1:3)-1)/2) ) then
+     write(msg,'(a,i0,a)')" The G-vector with ig: ",ig," falls outside the FFT box."
+     MSG_ERROR(msg)
+   end if
+ end do
+
+end subroutine kgindex
 !!***
 
 !----------------------------------------------------------------------

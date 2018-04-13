@@ -40,7 +40,7 @@ MODULE m_gsphere
  use m_numeric_tools, only : bisect
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
- use m_fftcore,       only : kpgsph
+ use m_fftcore,       only : kpgsph, kgindex, sphereboundary
  use m_mpinfo,        only : destroy_mpi_enreg
 
  implicit none
@@ -520,8 +520,6 @@ subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
 #undef ABI_FUNC
 #define ABI_FUNC 'gsph_fft_tabs'
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

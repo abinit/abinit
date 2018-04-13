@@ -127,6 +127,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_crystal
  use m_xcdata
 
+ use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_kpts,        only : symkchk
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
@@ -149,13 +150,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft,    only : paw_dmft_type
  use m_kg,          only : getcut, getph, kpgio
+ use m_eig2d,       only : eig2tot, elph2_fanddw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
@@ -396,7 +397,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Open and read pseudopotential files
  call status(0,dtfil%filstat,iexit,level,'call pspini(1)')
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,pawrad,pawtab,&
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
  call timab(134,2,tsec)

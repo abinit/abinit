@@ -81,6 +81,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use netcdf
 #endif
 
+ use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
  use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
@@ -92,9 +93,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_57_iovars, except_this_one => invars2
 !End of the abilint section
 
@@ -2108,6 +2107,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
  if(tread==1) dtset%prtfc=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfull1wf',tread,'INT')
+ if(tread==1) dtset%prtfull1wf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfsurf',tread,'INT')
  if(tread==1) dtset%prtfsurf=intarr(1)

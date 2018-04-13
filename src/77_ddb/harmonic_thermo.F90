@@ -66,6 +66,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  use m_crystal,        only : crystal_t
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_ifc,            only : ifc_type, ifc_fourq
+ use m_kpts,           only : smpbz
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -74,7 +75,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

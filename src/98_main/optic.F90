@@ -98,7 +98,7 @@ program optic
  use netcdf
 #endif
 
- use m_time ,          only : asctime
+ use m_time ,          only : asctime, timein
  use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r
@@ -111,7 +111,6 @@ program optic
 #undef ABI_FUNC
 #define ABI_FUNC 'optic'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 

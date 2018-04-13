@@ -21,16 +21,20 @@ pseudopotentials or to PAW.
 There are several sets of norm-conserving pseudopotentials available for most
 elements of the periodic table, either in LDA or in GGA-PBE. The
 [[https://www.abinit.org/psp-tables|recommended one]]
-(GGA-PBE, [[ixc]]=11) comes from the ONCVPSP generator (with spin-orbit
-coupling). 
+(GGA-PBE, [[ixc]]=11) comes from the ONCVPSP generator.
+For the formalism please consult [[cite:Hamann2013]]. 
+The generation and validation of the table is discussed in [[cite:Setten2018]].
+
 [Others](https://www.abinit.org/atomic-data-files) are also available.
 The Goedecker HGH table (e.g. LDA, [[ixc]]=1), also including spin-orbit
 is rather accurate, but requires often large
 [[ecut]]. The old Troullier-Martins type tables 
 are deprecated, because not accurate enough, and also not
-including spin-orbit coupling. The different format for norm-conserving
-pseudopotentials are described in
-[[https://wiki.abinit.org/doku.php?id=developers:pseudos]].
+including spin-orbit coupling. The different formats for norm-conserving
+pseudopotentials are described in [[https://wiki.abinit.org/doku.php?id=developers:pseudos]].
+A much more flexible and powerful file format (PSM) has been recently proposed in [[cite:Garcia2018]].
+The format is supported by Abinit via the psml library that must be activated by user during 
+the configuration of the package.
 
 **PAW atomic data tables**
 

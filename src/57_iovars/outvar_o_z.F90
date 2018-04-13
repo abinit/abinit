@@ -89,6 +89,7 @@
  use m_xmpi
 
  use m_geometry,     only : mkrdim, xred2xcart
+ use m_parser,       only : prttagm, prttagm_images
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -514,6 +515,9 @@
 
  intarr(1,:)=dtsets(:)%prtfc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfc','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtfull1wf
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfull1wf','INT',0)
 
  intarr(1,:)=dtsets(:)%prtfsurf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfsurf','INT',0)
