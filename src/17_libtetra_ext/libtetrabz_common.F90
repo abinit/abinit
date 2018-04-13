@@ -28,10 +28,10 @@
 !
 MODULE libtetrabz_common
   !
+  IMPLICIT NONE
 #if defined HAVE_MPI1
  include 'mpif.h'
 #endif
-  IMPLICIT NONE
   !
   PRIVATE
   PUBLIC :: libtetrabz_initialize, libtetrabz_sort, libtetrabz_interpol_indx, &
