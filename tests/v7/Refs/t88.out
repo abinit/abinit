@@ -355,6 +355,13 @@ Values initialized with zeros
 -                                 =     0.6320300909E+01 (THz)
 -Debye temperature from partial sums:     0.3033262436E+03 (K)
 
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS1_PHDOS
 
  Will write phonon FREQS in BoltzTrap format to file t88o_DS1_BTRAP
@@ -587,6 +594,13 @@ Values initialized with zeros
 -                                 =     0.6320300909E+01 (THz)
 -Debye temperature from partial sums:     0.3033262436E+03 (K)
 
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -645,9 +659,9 @@ All the independent perturbations are available
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        0.000000E+00    6.481592E-20    0.000000E+00
-    2        0.000000E+00    6.481592E-20    0.000000E+00
-    3        0.000000E+00    6.481592E-20    0.000000E+00
+    1        0.000000E+00    0.000000E+00    0.000000E+00
+    2        0.000000E+00    0.000000E+00    0.000000E+00
+    3        0.000000E+00    0.000000E+00    0.000000E+00
 
  q-point =    2.500000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -791,6 +805,13 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
  Average speed of sound partial sums:     0.1164368178E-02 (at units)
 -                                   =           2.5473 [km/s]
 
