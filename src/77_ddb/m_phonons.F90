@@ -696,7 +696,7 @@ end subroutine phdos_free
 !! SOURCE
 
 subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, &
-                   count_wminmax, wminmax, comm)
+                   wminmax, count_wminmax, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).

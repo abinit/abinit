@@ -113,9 +113,16 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   dos_ngqpt(:)=InVar%ngqpt2(:)
   write(InVar%stdout,'(a)') ' Compute the vDOS'
   ! Only 1 shift in q-mesh
-  count_wminmax = 0; wminmax = zero
-  call mkphdos(PHdos,Crystal,Ifc,prtdos,InVar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
-    count_wminmax, wminmax, XMPI_WORLD)
+  wminmax = zero
+  do
+    call mkphdos(PHdos,Crystal,Ifc,prtdos,InVar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
+      wminmax, count_wminmax, XMPI_WORLD)
+     if (all(count_wminmax == 0)) exit
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
+     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     call phdos_free(phdos)
+  end do
+
   write(InVar%stdout,'(a)') ' ------- achieved'
   write(InVar%stdout,'(a)') ' (Please, pay attention to convergency wrt the BZ mesh : the ngqpt2 input variable)'
 

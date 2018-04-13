@@ -503,9 +503,15 @@ program anaddb
    call wrtout(std_out,message,'COLL')
 
    ! Only 1 shift in q-mesh
-   count_wminmax = 0; wminmax = zero
-   call mkphdos(Phdos, Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
-     count_wminmax, wminmax, comm)
+   wminmax = zero
+   do
+     call mkphdos(Phdos, Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
+       wminmax, count_wminmax, comm)
+     if (all(count_wminmax == 0)) exit
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
+     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     call phdos_free(phdos)
+   end do
 
    if (iam_master) then
      call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)

@@ -487,9 +487,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%prtphdos == 1) then
 
    ! Phonon Density of States.
-   count_wminmax = 0; wminmax = zero
-   call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
-     dtset%ph_nqshift, dtset%ph_qshift, count_wminmax, wminmax, comm)
+   wminmax = zero
+   do
+     call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
+       dtset%ph_nqshift, dtset%ph_qshift, wminmax, count_wminmax, comm)
+     if (all(count_wminmax == 0)) exit
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
+     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     call phdos_free(phdos)
+   end do
 
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
