@@ -56,7 +56,7 @@ subroutine dtfil_init_time(dtfil,iapp)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtfil_init_time'
- use interfaces_32_util
+ use interfaces_95_drive, except_this_one => dtfil_init_time
 !End of the abilint section
 
  implicit none

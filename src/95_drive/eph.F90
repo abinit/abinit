@@ -170,8 +170,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
+ integer :: count_wminmax(2)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
+ real(dp) :: wminmax(2)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -485,9 +487,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%prtphdos == 1) then
 
    ! Phonon Density of States.
-   ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
-   ! TODO: Parallelize this routine.
-   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift,comm)
+   count_wminmax = 0; wminmax = zero
+   call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
+     dtset%ph_nqshift, dtset%ph_qshift, count_wminmax, wminmax, comm)
 
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
