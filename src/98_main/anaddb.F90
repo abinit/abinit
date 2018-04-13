@@ -72,7 +72,7 @@ program anaddb
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
- use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_dynmat,         only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_elphon,         only : elphon
  use m_harmonic_thermo,only : harmonic_thermo
  use m_thmeig,         only : thmeig

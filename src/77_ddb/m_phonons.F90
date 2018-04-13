@@ -47,7 +47,7 @@ module m_phonons
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
  use m_geometry,        only : mkrdim, symredcart
- use m_dynmat,          only : gtdyn9, dfpt_phfrq
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
  use m_ifc,             only : ifc_type, ifc_fourq, ifc_calcnwrite_nana_terms
