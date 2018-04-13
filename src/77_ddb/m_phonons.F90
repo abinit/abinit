@@ -9,7 +9,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,MG,MJV,GMR)
+!! Copyright (C) 1999-2018 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,8 +255,6 @@ subroutine phdos_print(PHdos,fname)
  end do
  close(unt)
 
-
-
  fname_by_atom = trim(fname) // "_by_atom"
  if (open_file(fname_by_atom,msg,newunit=unt_by_atom,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
@@ -276,8 +274,6 @@ subroutine phdos_print(PHdos,fname)
    write(unt_by_atom,*)
  end do
  close(unt_by_atom)
-
-
 
  fname_msqd = trim(fname) // "_msqd"
  if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
@@ -308,7 +304,6 @@ subroutine phdos_print(PHdos,fname)
    write(unt_msqd,*)
  end do
  close(unt_msqd)
-
 
 end subroutine phdos_print
 !!***
@@ -488,6 +483,8 @@ implicit none
 !arrays
  real(dp), allocatable :: free(:), energy(:), entropy(:), spheat(:),wme(:)
 
+! *********************************************************************
+
  ABI_ALLOCATE(free,    (ntemper))
  ABI_ALLOCATE(energy,  (ntemper))
  ABI_ALLOCATE(entropy, (ntemper))
@@ -520,30 +517,28 @@ implicit none
 &  '     see THERMO output file ...'
  call wrtout(std_out,msg,'COLL')
 
- domega = (PHdos%omega(2)-PHdos%omega(1))
+ domega = phdos%omega_step
 
  do itemper=1,ntemper
-
-!  The temperature (tmp) is given in Ha
+   ! The temperature (tmp) is given in Ha
    tmp=(tempermin+temperinc*dble(itemper-1))*kb_HaK
 
    do iomega=1,PHdos%nomega
      if (abs(PHdos%phdos(iomega)) < 1.e-200_dp) cycle
 
-!    wover2t= hbar*w / 2kT dimensionless
+     ! wover2t= hbar*w / 2kT dimensionless
      wover2t = zero;     if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
      ! should not be much of a problem for the log, but still put a check.
      ln2shx=zero;        if (wover2t > tol16 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t))
      cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t)
      invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
-!    This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
      free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
      energy(itemper) = energy(itemper)  + PHdos%phdos(iomega)*half*PHdos%omega(iomega)*cothx
      spheat(itemper) = spheat(itemper)  + PHdos%phdos(iomega)*wover2t**2 * invsinh2
      entropy(itemper)= entropy(itemper) + PHdos%phdos(iomega)*(wover2t*cothx - ln2shx)
      wme(itemper)    = wme(itemper)     + PHdos%phdos(iomega)*PHdos%omega(iomega)*wover2t**2 * invsinh2
-
    end do ! iomega
 
    ! suppose homogeneous omega grid and multiply by domega
@@ -555,7 +550,7 @@ implicit none
 
    if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
 
-! do the printing to file
+   ! do the printing to file
    write(msg,'(es11.3,5es15.7)') tmp/kb_HaK,&
 &    Ha_J*Avogadro*free(itemper),&
 &    Ha_J*Avogadro*energy(itemper),&
@@ -2061,9 +2056,6 @@ subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 
 end subroutine phdos_print_vsound
 !!***
-
-
-
 
 !----------------------------------------------------------------------
 
