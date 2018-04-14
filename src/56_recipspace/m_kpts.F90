@@ -63,32 +63,6 @@ module m_kpts
 
 !----------------------------------------------------------------------
 
-! type, public :: ephtetra_t
-!
-!     integer :: nsppol
-!     integer :: nbcount
-!     integer :: natom3
-!     integer :: bstart
-!
-!     integer :: kptrlatt_dense(3, 3)
-!     ! kptrlatt associated to the mesh
-!
-!     real(dp) :: klatt(3, 3)
-!
-!     real(dp) :: w_ibz(:,:)
-!     ! (nkibz, natom3)
-!
-!     real(dp) :: e_ibz(:,:,:)
-!     ! (nbcount, nkibz, nsppol)
-!
-!     type(t_tetrahedron) :: tetra
-!
-! end type ephtetra_t
-!
-! public :: ephtetra_nw
-! public :: ephtetra_get_weigts
-! public :: ephtetra_free
-
 contains  !============================================================
 !!***
 
@@ -243,7 +217,7 @@ end subroutine kpts_ibz_from_kptrlatt
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/tetra_from_kptrlatt
+!!****f* m_kpts/tetra_from_kptrlatt
 !! NAME
 !! tetra_from_kptrlatt
 !!
@@ -2982,7 +2956,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 
    call xmpi_abort()
    call leave_new('PERS',exit_status=0,print_config=.false.)
-
  end if
 
 end subroutine testkgrid
