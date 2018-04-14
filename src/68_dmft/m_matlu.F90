@@ -595,7 +595,6 @@ end subroutine print_matlu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sym_matlu'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

@@ -2313,7 +2313,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
 

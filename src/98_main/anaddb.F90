@@ -84,7 +84,6 @@ program anaddb
 #define ABI_FUNC 'anaddb'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -100,6 +99,7 @@ program anaddb
  integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
+ integer :: count_wminmax(2)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli
  real(dp) :: dielt(3,3)
@@ -107,6 +107,7 @@ program anaddb
  real(dp) :: dielt_rlx(3,3),elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: epsinf(3,3),red_ptot(3),pel(3)
  real(dp) :: piezo(6,3),qphnrm(3),qphon(3,3),strten(6),tsec(2)
+ real(dp) :: wminmax(2)
  real(dp),allocatable :: d2cart(:,:),dchide(:,:,:)
  real(dp),allocatable :: dchidt(:,:,:,:),displ(:),eigval(:,:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),fact_oscstr(:,:,:),instrain(:,:)
@@ -494,13 +495,22 @@ program anaddb
    call thermal_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
  end if
 
-!Phonon density of states calculation, Start if interatomic forces have been calculated
+ ! Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
+   ! Only 1 shift in q-mesh
+   wminmax = zero
+   do
+     call mkphdos(Phdos, Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
+       wminmax, count_wminmax, comm)
+     if (all(count_wminmax == 0)) exit
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
+     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     call phdos_free(phdos)
+   end do
 
    if (iam_master) then
      call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)

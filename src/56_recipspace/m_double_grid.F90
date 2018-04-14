@@ -29,8 +29,8 @@ MODULE m_double_grid
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_bz_mesh
  use m_blas
+ use m_bz_mesh
  use m_kptrank
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
