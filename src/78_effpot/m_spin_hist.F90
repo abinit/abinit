@@ -1,212 +1,291 @@
+
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_hist
+!! NAME
+!! m_spin_hist
+!!
+!! FUNCTION
+!! This module contains definition the type spin_hist
+!! and its related routines
+!!
+!! Datatypes:
+!!
+!! * spin_hist: Historical record of spin orientations and amplitudes
+!!
+!! Subroutines:
+!!
+!! * abispinhist_init
+!! * abispinhist_free
+!! * abispinhist_bcast
+!! * abispinhist_compare
+!! * spinhist2var
+!! * var2spinhist
+!! * dSdt2spinhist
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2017 ABINIT group (XG, SE)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! SOURCE
+
+! TODO hexu:
+! sync ihist_latt when lattice dynamics
+! add average , variance, etc (should they be here?)
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "abi_common.h"
+
 module m_spin_hist
+
   use defs_basis
+  use m_profiling_abi
+  use m_errors
+  use m_xmpi
+  use m_nctk
+#if defined HAVE_NETCDF
+  use netcdf
+#endif
+
   implicit none
-  type spin_hist_t
-     ! nmatoms: number of atoms
-     ! max_save: max number of steps to be saved.
-     ! current_step: current step
-     ! n_saved_step: number of steps saved.
-     integer:: nmatoms, max_save, step_save, current_step, n_saved_step
-     integer, allocatable :: steps(:)  ! steps saved.
-     real(dp), allocatable :: current_S(:, :),  & ! current spin (xyz,iatom)
-                              &  last_S(:,:), &  ! last spin (xyz, iatom)
-                                & saved_S(:,:,:), & ! saved spin (xyz, iatom, step)
-                                & saved_time(:)  ! saved time (step)
 
-     ! average_S(xyz, step): average Sx, Sy, Sz over timesteps
-     ! average_S_per_site(xyz, site, step) site is the index of magnetic atom in primitive cell.
-     ! TODO hexu: For incommensurate structure, this is not a good way to describe magnetic moment.
-     real(dp), allocatable :: average_S(:,:), average_S_per_site(:,:,:) 
+  private
+  !!***
 
-     ! belows: as they literally are.
-     real(dp) :: current_time, last_time, dt, current_average_S
-  !  CONTAINS
-  !    procedure :: initialize => spin_hist_t_initialize
-  !    procedure :: finalize => spin_hist_t_finalize
-  !    procedure :: insert => spin_hist_t_insert
-  !    procedure :: save_file => spin_hist_t_save_file
-  !    procedure :: calc_observables => spin_hist_t_calc_observables
+  !----------------------------------------------------------------------
+
+  !!****t* m_spin_hist/spin_hist_t
+  !! NAME
+  !! spin_hist_t
+  !!
+  !! FUNCTION
+  !! This type has several vectors, and index scalars to store
+  !! a proper history of previous evaluations of forces and
+  !! stresses,velocities,positions and energies
+  !!
+  !! It contains:
+  !! * mxhist                  : Maximum size of history
+  !! * ihist                   : index of history
+
+  !! natom : number of atoms
+  !! nmatoms: number of magnetic atoms
+  !! * acell(3)         : Acell (acell , rprimd, xred: only initial value kept if there is!!  no lattice dynamics. Other wise for each step, the corresponding lattice step number is kept)
+  !! * rprimd(3,3)      : Rprimd
+  !! * xred(3,natom)    : Xred
+  !! * index_spin     : the index of atom in spin model, -1 if it is not in the spin model 
+  !! * heff(3,nmatom,mxhist)   : effective magnetic field (cartesian)
+  !! * snorm(nmatom, mxhist) : magnetitude of spin.
+  !! * S(3,nmatom,mxhist)   : spin orientation of atoms (cartesian)
+  !! * dSdt(3, nmatom, mxhist) : dS/dt (cartesian)
+  !! * etot(mxhist)            : Electronic total Energy
+  !! * entropy(mxhist)         : Entropy
+  !! * time(mxhist)            : Time (or iteration number for GO)
+  !!
+  !! * has_latt (whether lattice dynamics is also present)
+  !! * ihist_latt(mxhist): the corresponding lattice step. 0 if none.
+  !! SOURCE
+
+  type, public :: spin_hist_t
+     ! scalars
+     ! Index of the last element on all records
+     integer :: ihist = 0
+     integer :: ihist_prev = -1
+     ! Maximun size of the historical records
+     integer :: mxhist = 0
+
+     integer :: natom
+     integer :: nmatom
+     ! whether lattice dynamics is also present
+     interger, allocatable :: ihist_latt(:)
+     logical :: has_latt
+
+     ! arrays
+     ! structure
+     real(dp) :: acell(3)
+     real(dp) :: rprimd(3,3)
+     ! xred(3, natom)
+     real(dp), allocatable :: xred(3, :)
+
+     ! spin
+     !heff(3, nmatom, mxhist)
+     real(dp), allocatable :: heff(3, :, :)
+     !snorm(nmatom, mxhist)
+     real(dp), allocatable :: snorm(:, :)
+
+     !S(3, nmatom, mxhist)
+     real(dp), allocatable :: S(3, nmatom, mxhist)
+     !dSdt(3, nmatom, mxhist)
+     ! TODO hexu: is it useful?
+     real(dp), allocatable :: dSdt(3, nmatom, mxhist)
+
+     ! etot(mxhist)
+     real(dp), allocatable :: etot(:)
+     real(dp) :: entropy(:)
+     real(dp) :: time(:)
+
   end type spin_hist_t
-CONTAINS
-  subroutine spin_hist_t_initialize(self, nmatoms, max_save, step_save, dt)
 
+  public :: spin_hist_t_init
+  public :: spin_hist_t_free
+  public :: spinhist2var
+  public :: var2spinhist
+  public :: spin_hist_t_findIndex
+  public :: write_sd_hist
+  public :: read_md_hist
+  public :: get_dims_spinhist
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_initialize'
-!End of the abilint section
-
+contains
+  subroutine spin_hist_t_init(hist, natom, nmatom, mxhist, has_latt)
+    implicit none
     class(spin_hist_t), intent(inout) :: self
-    integer, intent(in) :: nmatoms, max_save, step_save
-    real(dp), intent(in) :: dt
+    integer, intent(in) :: natom, nmatom, mxhist
+    logical, intent(in) :: has_latt
 
-    self%nmatoms=nmatoms
-    self%max_save=max_save
-    self%step_save=step_save
-    self%dt=dt
+    hist%ihist=1
+    hist%ihist_prev=0
+    hist%mxhist=mxhist
 
-    self%current_time=0.0d0
-    self%current_step=0
-    self%n_saved_step=0
+    hist%has_latt=has_latt
 
-    if(.not. allocated(self%last_S)) then
-       ABI_ALLOCATE(self%last_S, (3, self%nmatoms))
-    endif
-    self%last_S(:,:)=0.0d0
+    ABI_ALLOCATE(hist%xred, (3, natoms))
+    ABI_ALLOCATE(hist%heff, (3, nmatoms, mxhist))
+    ABI_ALLOCATE(hist%snorm, (nmatoms, mxhist))
+    ABI_ALLOCATE(hist%S, (3, nmatoms, mxhist))
+    ABI_ALLOCATE(hist%dSdt, (3, nmatoms, mxhist))
 
-    if(.not. allocated(self%current_S)) then
-       ABI_ALLOCATE(self%current_S, (3, self%nmatoms))
-    endif
-    self%current_S(:,:)=0.0d0
+    ABI_ALLOCATE(hist%etot, (mxhist))
+    ABI_ALLOCATE(hist%entropy, (mxhist))
+    ABI_ALLOCATE(hist%time, (mxhist))
+    hist%etot(1) =zero
+    hist%entropy(1) =zero
+    hist%time(1) =zero
 
-    if(.not. allocated(self%saved_S)) then
-       ABI_ALLOCATE(self%saved_S, (3, self%nmatoms, self%max_save))
-    endif
+    hist%acell(:)=zero
+    hist%rprimd(:, :)=zero
+    hist%xred(:,:) =zero
+    hist%heff(:,:,1)=zero
+    hist%S(:,:,1)=zero
+    hist%dSdt(:,:,1)=zero
+    hist%snorm(:,:,1)=zero
+  end subroutine spin_hist_t_init
 
-    if(.not. allocated(self%saved_time)) then
-       ABI_ALLOCATE(self%saved_time, (self%max_save))
-    endif
+  subroutine spin_hist_t_free(hist)
+    implicit none
+    class(spin_hist_t) , intent(inout) :: hist
 
-    if(.not. allocated(self%average_S)) then
-       ABI_ALLOCATE(self%average_S, (3, self%max_save))
-    endif
-
-    if(.not. allocated(self%average_S_per_site)) then
-       ABI_ALLOCATE(self%average_S_per_site, (3, self%nmatoms, self%max_save))
-    endif
-
-  end subroutine spin_hist_t_initialize
-
-  subroutine spin_hist_t_finalize(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_finalize'
-!End of the abilint section
-
-    class(spin_hist_t), intent(inout) :: self
-    self%nmatoms=0
-    self%max_save=0
-    self%step_save=0
-    self%dt=0
-
-    self%current_time=0.0d0
-    self%current_step=0
-    self%n_saved_step=0
-
-    if( allocated(self%last_S)) then
-       ABI_DEALLOCATE(self%last_S)
-    endif
-
-    if( allocated(self%current_S)) then
-       ABI_DEALLOCATE(self%current_S)
-    endif
-
-    if( allocated(self%saved_S)) then
-       ABI_DEALLOCATE(self%saved_S)
-    endif
-
-    if( allocated(self%saved_time)) then
-       ABI_DEALLOCATE(self%saved_time)
-    endif
-
-    if( allocated(self%average_S)) then
-       ABI_DEALLOCATE(self%average_S)
-    endif
-
-    if(allocated(self%average_S_per_site)) then
-       ABI_DEALLOCATE(self%average_S_per_site)
-    endif
-
-  end subroutine spin_hist_t_finalize
-
-  subroutine spin_hist_t_insert(self, S)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_insert'
-!End of the abilint section
-    class(spin_hist_t), intent(inout) :: self
-    real(dp), intent(in) :: S(3, self%nmatoms)
-    real(dp), save:: avg_S, total_S
-    integer :: i
-    !print *, "Spin hist: insert new S. current_step= ", self%current_step, mod( self%current_step, self%step_save)
-    self%last_S(:,:)=self%current_S(:,:)
-    self%current_S(:,:)=S(:,:)
-    self%current_step=self%current_step+1
-    self%current_time=self%current_time+self%dt
-    avg_S=0
-    if ( mod( self%current_step-1, self%step_save)==0  ) then
-       if ( self%n_saved_step<self%max_save) then
-          self%n_saved_step=self%n_saved_step+1
-          self%saved_S(:,:,self%n_saved_step)=S(:,:)
-          self%saved_time(self%n_saved_step)=self%current_time
-          !call self%calc_observables()
-          call spin_hist_t_calc_observables(self)
-          !print "(I8, 4X, 4ES13.5)", self%current_step, anorm, (a(i) , i=1, 3)
-          !TODO hexu: detect if converged, begins to average over time.
-          if(self%n_saved_step>100) then
-             total_S=total_S+self%current_average_S
-
-          !print "(I8, 4X, 5ES13.5)", self%current_step, anorm, (a(i) , i=1, 3), total_S/(self%n_saved_step-100)
-          endif
-       else
-          print *, "Warning: the steps to save exceeded the maximum number of spin in the hist."
-       endif
+    if (allocated(hist%xred)) then
+       ABI_DEALLOCATE(hist%xred)
     end if
-  end subroutine spin_hist_t_insert
+    if (allocated(hist%heff)) then
+       ABI_DEALLOCATE(hist%heff)
+    end if
+    if (allocated(hist%snorm)) then
+       ABI_DEALLOCATE(hist%snorm)
+    end if
+    if (allocated(hist%S)) then
+       ABI_DEALLOCATE(hist%S)
+    end if
+    if (allocated(hist%dSdt)) then
+       ABI_DEALLOCATE(hist%dSdt)
+    end if
+    if (allocated(hist%etot)) then
+       ABI_DEALLOCATE(hist%etot)
+    end if
+    if (allocated(hist%entropy)) then
+       ABI_DEALLOCATE(hist%entropy)
+    end if
+    if (allocated(hist%time)) then
+       ABI_DEALLOCATE(hist%time)
+    end if
+  end subroutine spin_hist_t_free
 
-  subroutine spin_hist_t_calc_observables(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_calc_observables'
-!End of the abilint section
-
-    class(spin_hist_t), intent(inout) :: self
-    call spin_hist_t_calc_average_S(self)
-  end subroutine spin_hist_t_calc_observables
-
-  subroutine spin_hist_t_calc_average_S(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_calc_average_S'
-!End of the abilint section
-
-    class(spin_hist_t), intent(inout) :: self
-    real(dp) :: a(3), anorm
+  subroutine spin_hist_t_get_S(hist, S, step)
+    class(spin_hist_t), intent(in) :: hist
+    real(dp), intent(out) :: S(3, hist%nmatoms)
+    integer, intent(in), optional:: step
     integer :: i
-    a(:)=sum(self%current_S(:,:), dim=2)/self%nmatoms
-    anorm=sqrt(sum(a(:)**2))
-    self%current_average_S=anorm
-    !self%current
-    !print *, "average S_total, Sx, Sy, Sz: ", anorm,  a(:)
-  end subroutine spin_hist_t_calc_average_S
+    if (.not. present(step)) then
+       step=0
+    end if
+    i=spin_hist_t_findIndex(step=step)
+    S(:,:)=hist%S(:,:,i)
+  end subroutine spin_hist_t_get_S
 
+  subroutine spin_hist_t_inc(hist)
+    class(spin_hist_t), intent(inout) :: hist
+    hist%ihist_prev=hist%ihist
+    hist%ihist=spin_hist_t_findIndex(1)
+  end subroutine spin_hist_t_inc
 
-  subroutine spin_hist_t_save_file(self, filename)
+  function spin_hist_t_findIndex(hist, step) result(index)
+    type(spin_hist_t), intent(inout) :: hist
+    integer , intent(in) :: step
+    integer :: index
+    !Local variables-------------------------------
+    !scalars
+    integer :: ii,mxhist
+    !arrays
+    character(len=500) :: msg
+    ! *************************************************************
 
+    mxhist = hist%mxhist
+    if ((mxhist ==1.and.step/=+1).or.&
+         &    (mxhist /=1.and.abs(step) >=mxhist)) then
+       write(msg,'(a,I0,2a)')' The requested step must be lass than ',mxhist,ch10,&
+            &                     'Action: increase the number of history store in the hist'
+       MSG_BUG(msg)
+    end if
+    index= mod(hist%ihist+step, hist%mxhist)
+  end function spin_hist_t_findIndex
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_save_file'
-!End of the abilint section
+  subroutine spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
+    class(spin_hist_t), intent(inout) :: hist
+    real(dp), intent(in), optional :: S(3, hist%nmatoms), Snorm(hist%nmatom), &
+         & dSdt(3, hist%nmatoms), Heff(3, hist%nmatoms), etot, entropy, time
+    integer, optional :: ihist_latt
+    logical, intent(in), optional :: inc
+    if(present(inc) .and. inc) then
+       call spin_hist_t_inc(hist)
+    end if
+    if(present(S)) then
+       hist%S(:, :, ihist)=S(:,:)
+    end if
+    if(present(Snorm)) then
+       hist%Snorm(:,  ihist)=Snorm(:)
+    endif
+    if(present(dSdt)) then
+       hist%dSdt(:, :, ihist)=dSdt(:,:)
+    end if
+    if(present(Heff)) then
+       hist%Heff(:, :, ihist)=Heff(:,:)
+    end if
+    if(present(etot)) then
+       hist%etot( ihist)=etot
+    end if
+    if(present(entropy)) then
+       hist%entropy(ihist)=entropy
+    end if
+    if(present(time)) then
+       hist%time( ihist)=time
+    end if
+    if(present(ihist_latt)) then
+       hist%ihist_latt(ihist)=ihist_latt
+    endif
+  end subroutine spin_hist_t_set_vars
 
-    class(spin_hist_t), intent(inout) :: self
-    character (len=40), intent(in) :: filename
-    !TODO
-  end subroutine spin_hist_t_save_file
+  subroutine write_spin_hist(hist, filename, ifirst, itime, natom, nmatom, ntypat, & typat, amu, znucl, dtspin, sdtemp, index_spin)
+    integer,intent(in) :: ifirst,itime,natom,ntypat
+    real(dp),intent(in) :: dtion
+    character(len=*),intent(in) :: filename
+    !arrays
+    integer,intent(in) :: typat(natom), index_spin(natom)
+    real(dp),intent(in) :: amu(ntypat),znucl(:),mdtemp(2)
+    type(spin_hist_t),intent(inout),target :: hist
+  end subroutine write_spin_hist
 
 end module m_spin_hist

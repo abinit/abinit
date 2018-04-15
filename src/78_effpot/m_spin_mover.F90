@@ -87,13 +87,11 @@ contains
 
   subroutine spin_mover_t_run_time(self, calculator, hist)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_mover_t_run_time'
 !End of the abilint section
-
     class(spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t), intent(inout) :: hist
@@ -102,11 +100,14 @@ contains
     t=0.0
     do while(t<self%total_time)
        !call self%run_one_step(calculator, hist%current_S, S)
-       call spin_mover_t_run_one_step(self, calculator, hist%current_S, S)
-       !call hist%insert(S)
-       call spin_hist_t_insert(hist, S)
+       call spin_mover_t_run_one_step(self, calculator, spin_hist_t_get_S(hist), S)
+       call spin_hist_t_insert_vars(hist, S=S, time=t, inc=.True.)
        t=t+self%dt
     enddo
   end subroutine spin_mover_t_run_time
+
+  subroutine spin_mover_t_finalize(self)
+    class(spin_mover_t), intent(inout):: self
+  end subroutine spin_mover_t_finalize
 
 end module m_spin_mover

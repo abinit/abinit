@@ -4,9 +4,8 @@ module m_spin_model
          & spin_model_primitive_t_initialize, &
          & spin_model_primitive_t_print_terms, &
          & spin_model_primitive_t_finalize, &
-         & spin_model_primitive_t_read_xml, & 
+         & spin_model_primitive_t_read_xml, &
          & spin_model_primitive_t_make_supercell
-
   use m_spin_mover
   use m_spin_hist
   use m_multibinit_dataset
@@ -40,7 +39,6 @@ contains
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_model_t_run'
 !End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     integer :: i
 
@@ -84,8 +82,9 @@ contains
     ! set parameters to hamiltonian and mover
     self%nmatoms= self%spin_calculator%nmatoms
     ! TODO hexu: max_save, step_save should be defined in input file and params
-    !call self%spin_hist%initialize(self%nmatoms, max_save=40000, step_save=1000, dt=self%params%dtspin)
-    call spin_hist_t_initialize(self%spin_hist, self%nmatoms, max_save=40000, step_save=100, dt=self%params%dtspin)
+
+    !TODO hexu: mxhist, has_latt, natom should be input with their true values when lattice part also added
+    call spin_hist_t_init(hist=self%hist, natom=self.nmatoms, nmatom=self%nmatoms, mxhist=3, has_latt=.False.)
 
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self, mode=0)
@@ -172,7 +171,11 @@ contains
        print *, "Error: Set initial spin: mode should be 0 (FM) or 1 (random)"
     end if
     !call self%spin_hist%insert(S)
-    call spin_hist_t_insert(self%spin_hist, S)
+    !call spin_hist_t_insert(self%spin_hist, S)
+
+    ! spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
+    !TODO initialize lattice structure, spin_type, Snorm
+    call spin_hist_t_set_var(self%spin_hist, S=S, time=0.0, ihist_latt=0, inc=.True.)
     !print *, "initial spin", self%spin_hist%current_S
   end subroutine spin_model_t_set_initial_spin
 
@@ -188,13 +191,11 @@ contains
 
     class(spin_model_t), intent(inout) :: self
     real(dp) :: S_tmp(3,self%nmatoms)
-    !call self%spin_mover%run_one_step(self%spin_calculator, &
-    !     self%spin_hist%current_S,S_tmp)
     call spin_mover_t_run_one_step(self%spin_mover, self%spin_calculator, &
-         self%spin_hist%current_S,S_tmp)
+         spin_hist_t_get_S(self%spin_hist),S_tmp)
 
-    !call self%spin_hist%insert(S_tmp)
-    call spin_hist_t_insert(self%spin_hist, S_tmp)
+
+    call spin_hist_t_set_vars(self%spin_hist, S=S_tmp, inc=.True.)
   end subroutine spin_model_t_run_one_step
 
   ! run all time step
