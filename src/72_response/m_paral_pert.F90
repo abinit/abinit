@@ -249,13 +249,13 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !arrays
  integer,pointer,intent(out) :: old_atmtab(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
- type(paw_ij_type),optional,pointer,intent(out) :: paw_ij_out(:)
+ type(paw_ij_type),optional,pointer,intent(inout) :: paw_ij_out(:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
- type(paw_an_type),optional,pointer,intent(out) :: paw_an_out(:)
+ type(paw_an_type),optional,pointer,intent(inout) :: paw_an_out(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
- type(pawfgrtab_type),optional,pointer,intent(out) :: pawfgrtab_out(:)
+ type(pawfgrtab_type),optional,pointer,intent(inout) :: pawfgrtab_out(:)
  type(pawrhoij_type),allocatable,target,intent(inout) :: pawrhoij(:)
- type(pawrhoij_type),optional,pointer,intent(out) :: pawrhoij_out(:)
+ type(pawrhoij_type),optional,pointer,intent(inout) :: pawrhoij_out(:)
 
 !Local variables ---------------------------------------
 !scalars
@@ -508,13 +508,13 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !arrays
  integer,pointer,intent(inout) :: old_atmtab(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
- type(paw_ij_type),optional,pointer,intent(out) :: paw_ij_out(:)
+ type(paw_ij_type),optional,pointer,intent(inout) :: paw_ij_out(:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
- type(paw_an_type),optional,pointer,intent(out) :: paw_an_out(:)
+ type(paw_an_type),optional,pointer,intent(inout) :: paw_an_out(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
- type(pawfgrtab_type),optional,pointer,intent(out) :: pawfgrtab_out(:)
+ type(pawfgrtab_type),optional,pointer,intent(inout) :: pawfgrtab_out(:)
  type(pawrhoij_type),allocatable,target,intent(inout) :: pawrhoij(:)
- type(pawrhoij_type),optional,pointer,intent(out) :: pawrhoij_out(:)
+ type(pawrhoij_type),optional,pointer,intent(inout) :: pawrhoij_out(:)
 
 !Local variables ---------------------------------------
 !scalars
