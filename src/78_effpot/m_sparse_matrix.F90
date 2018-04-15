@@ -1,13 +1,16 @@
+! This file implement several sparse matrix format and matrix vector product.
+! Dense matrix is also here for test.
 ! Dense_mat
 ! LIL_mat
 ! COO_mat
 ! CSR_mat
-! LIL mat is use to construct matrix.
+! LIL mat is use only for constructing matrix, therefore there is no mat-vec production.
 ! No good to use COO in this implementation. (perhaps)
-! CSR mat is used for matrix-vector product.
+! CSR mat is better used for matrix-vector product.
 ! Dense_mat is better if matrix is dense or small.
-! Dense<->LIL->CSR translations are possible.
-! A distributed counterpart of the module is m_sparse_matrix_distributed. (TODO)
+! Dense<->LIL->CSR and LIL->COO translations are possible.
+
+! A distributed counterpart of the module is m_sparse_matrix_distributed. (TODO: To be implemented)
 
 #include "abi_common.h"
 
@@ -733,7 +736,7 @@ endif
     !$OMP PARALLEL DO private(i, i1, i2)
     do irow=1, A%nrow
 
-        ! bench mark: this version is the second fastest
+        ! benchmark: this version is the second fastest
         !y(irow)=dot_product(A%val(A%row_shift(irow):A%row_shift(irow+1)-1),  x(A%icol(A%row_shift(irow):A%row_shift(irow+1)-1)))
 
         ! third fastest
@@ -755,7 +758,7 @@ endif
             y(irow)=y(irow)+ A%val(i)*x(A%icol(i))
         end do
 
-        ! Same as previous 
+        ! Same speed as previous 
         !do i=A%row_shift(irow), A%row_shift(irow+1)-1
         !    y(irow)=y(irow)+ A%val(i)*x(A%icol(i))
         !end do
@@ -766,6 +769,7 @@ endif
   end subroutine CSR_mat_mv
 
 #ifdef DMKL
+! wrapper to mkl CSR matrix mv mkl_dcsrgemv. For test only.
   subroutine CSR_mat_mv_mkl(A, x, y)
 
 

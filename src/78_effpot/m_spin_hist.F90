@@ -3,11 +3,23 @@ module m_spin_hist
   use defs_basis
   implicit none
   type spin_hist_t
+     ! nmatoms: number of atoms
+     ! max_save: max number of steps to be saved.
+     ! current_step: current step
+     ! n_saved_step: number of steps saved.
      integer:: nmatoms, max_save, step_save, current_step, n_saved_step
-     integer, allocatable :: steps(:)
-     real(dp), allocatable :: current_S(:, :), last_S(:,:), &
-          & saved_S(:,:,:), saved_time(:)
-     real(dp), allocatable :: average_S(:,:), average_S_per_site(:,:,:)
+     integer, allocatable :: steps(:)  ! steps saved.
+     real(dp), allocatable :: current_S(:, :),  & ! current spin (xyz,iatom)
+                              &  last_S(:,:), &  ! last spin (xyz, iatom)
+                                & saved_S(:,:,:), & ! saved spin (xyz, iatom, step)
+                                & saved_time(:)  ! saved time (step)
+
+     ! average_S(xyz, step): average Sx, Sy, Sz over timesteps
+     ! average_S_per_site(xyz, site, step) site is the index of magnetic atom in primitive cell.
+     ! TODO hexu: For incommensurate structure, this is not a good way to describe magnetic moment.
+     real(dp), allocatable :: average_S(:,:), average_S_per_site(:,:,:) 
+
+     ! belows: as they literally are.
      real(dp) :: current_time, last_time, dt, current_average_S
   !  CONTAINS
   !    procedure :: initialize => spin_hist_t_initialize
@@ -120,10 +132,10 @@ CONTAINS
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_hist_t_insert'
 !End of the abilint section
-
     class(spin_hist_t), intent(inout) :: self
     real(dp), intent(in) :: S(3, self%nmatoms)
     real(dp), save:: avg_S, total_S
+    integer :: i
     !print *, "Spin hist: insert new S. current_step= ", self%current_step, mod( self%current_step, self%step_save)
     self%last_S(:,:)=self%current_S(:,:)
     self%current_S(:,:)=S(:,:)
@@ -132,17 +144,18 @@ CONTAINS
     avg_S=0
     if ( mod( self%current_step-1, self%step_save)==0  ) then
        if ( self%n_saved_step<self%max_save) then
-          !print *, "spin saved to hist."
           self%n_saved_step=self%n_saved_step+1
           self%saved_S(:,:,self%n_saved_step)=S(:,:)
           self%saved_time(self%n_saved_step)=self%current_time
           !call self%calc_observables()
           call spin_hist_t_calc_observables(self)
+          !print "(I8, 4X, 4ES13.5)", self%current_step, anorm, (a(i) , i=1, 3)
+          !TODO hexu: detect if converged, begins to average over time.
           if(self%n_saved_step>100) then
              total_S=total_S+self%current_average_S
-             print *, "average: ", total_S/(self%n_saved_step-100)
+
+          !print "(I8, 4X, 5ES13.5)", self%current_step, anorm, (a(i) , i=1, 3), total_S/(self%n_saved_step-100)
           endif
-          !self%average_S(:,self%n_saved_step)=
        else
           print *, "Warning: the steps to save exceeded the maximum number of spin in the hist."
        endif
@@ -173,11 +186,12 @@ CONTAINS
 
     class(spin_hist_t), intent(inout) :: self
     real(dp) :: a(3), anorm
+    integer :: i
     a(:)=sum(self%current_S(:,:), dim=2)/self%nmatoms
     anorm=sqrt(sum(a(:)**2))
     self%current_average_S=anorm
-    print *, "average S_total, Sx, Sy, Sz: ", anorm,  a(:)
-
+    !self%current
+    !print *, "average S_total, Sx, Sy, Sz: ", anorm,  a(:)
   end subroutine spin_hist_t_calc_average_S
 
 

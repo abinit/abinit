@@ -43,6 +43,7 @@ contains
 
     class(spin_model_t), intent(inout) :: self
     integer :: i
+
     do i=1, self%params%ntime_spin
         call spin_model_t_run_one_step(self)
     enddo

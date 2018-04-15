@@ -1,25 +1,43 @@
+! list of changes made to abihist
+! map from abihist to abihist_spin
+! xred - scart
+! fcart - torque
+! vel - dSdt
+
+! vars not used but still kept
+! TODO hexu: should they be removed or not?
+! vel_cell
+! ekin
+! entropy (to be used.)
+
+! subroutines
+! abihist_init - abihist_spin_init...
+! rule: any hist becomes hist_spin. if spin is not the end of the word, it is hist_spin_
+
+
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_abihist
+!!****m* ABINIT/m_abihist_spin
 !! NAME
-!! m_abihist
+!! m_abihist_spin
 !!
 !! FUNCTION
-!! This module contains definition the type abihist
-!! and its related routines
+!! This module contains definition the type abihist_spin
+!! and its related routines, it is modified from m_abihist, so
+!! the format is kept as close as possible to the lattice HIST file.
 !!
 !! Datatypes:
 !!
-!! * abihist: Historical record of atomic positions forces and cell parameters
+!! * abihist_spin: Historical record of atomic positions forces and cell parameters
 !!
 !! Subroutines:
 !!
-!! * abihist_init
-!! * abihist_free
-!! * abihist_bcast
-!! * abihist_compare
-!! * hist2var
-!! * var2hist
-!! * vel2hist
+!! * abihist_spin_init
+!! * abihist_spin_free
+!! * abihist_spin_bcast
+!! * abihist_spin_compare
+!! * hist_spin_2var
+!! * var2hist_spin
+!! * vel2hist_spin
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2017 ABINIT group (XG, SE)
@@ -35,7 +53,7 @@
 
 #include "abi_common.h"
 
-module m_abihist
+module m_abihist_spin
 
  use defs_basis
  use m_profiling_abi
@@ -53,9 +71,9 @@ module m_abihist
 
 !----------------------------------------------------------------------
 
-!!****t* m_abihist/abihist
+!!****t* m_abihist_spin/abihist_spin
 !! NAME
-!! abihist
+!! abihist_spin
 !!
 !! FUNCTION
 !! This type has several vectors, and index scalars to store
@@ -91,7 +109,7 @@ module m_abihist
 !!
 !! SOURCE
 
- type, public :: abihist
+ type, public :: abihist_spin
 
 ! scalars
 ! Index of the last element on all records
@@ -100,7 +118,7 @@ module m_abihist
     integer :: mxhist = 0
 ! Booleans to know if some arrays are changing
     logical :: isVused  ! If velocities are changing
-    logical :: isARused ! If Acell and Rprimd are changing
+    logical :: isARused ! If Acell and Rprimd are changing, should be false in spin dynamics
 
 ! arrays
 ! Vector of (x,y,z)x(mxhist) values of cell dimensions
@@ -108,13 +126,22 @@ module m_abihist
 ! Vector of (x,y,z)x(x,y,z)x(mxhist) values of primitive vectors
     real(dp), allocatable :: rprimd(:,:,:)
 ! Vector of (x,y,z)x(natom)x(mxhist) values of reduced coordinates
-    real(dp), allocatable :: xred(:,:,:)
-! Vector of (x,y,z)x(natom)x(mxhist) values of cartesian forces
-    real(dp), allocatable :: fcart(:,:,:)
+!    real(dp), allocatable :: xred(:,:,:)
+! Vector of (x,y,z)x(natom)x(mxhist) values of spin orientation in cartisian coordinates
+    real(dp), allocatable :: scart(:,:,:)
+    
+!! Vector of (x,y,z)x(natom)x(mxhist) values of cartesian forces
+    !real(dp), allocatable :: fcart(:,:,:)
+
+! Vector of (x,y,z)x(nmatom)x(mxhist) values of spin torque.
+    real(dp), allocatable :: torque(:,:,:)
+    
 ! Vector of (6)x(mxhist) values of stress tensor
     real(dp), allocatable :: strten(:,:)
-! Vector of (x,y,z)x(natom)x(mxhist) values of atomic velocities
-    real(dp), allocatable :: vel(:,:,:)
+!! Vector of (x,y,z)x(natom)x(mxhist) values of atomic velocities
+!    real(dp), allocatable :: vel(:,:,:)
+! Vector of (x,y,z)x(natom)x(mxhist) values of atomic velocities: dS/dt
+    real(dp), allocatable :: dSdt(:,:,:)
 ! Vector of (x,y,z)x(x,y,z)x(mxhist) values of cell velocities
     real(dp), allocatable :: vel_cell(:,:,:)
 ! Vector of (mxhist) values of electronic total energy
@@ -126,17 +153,21 @@ module m_abihist
 ! Vector of (mxhist) values of time (relevant for MD calculations)
     real(dp), allocatable :: time(:)
 
- end type abihist
+ end type abihist_spin
 
- public :: abihist_init             ! Initialize the object
- public :: abihist_free             ! Destroy the object
- public :: abihist_bcast            ! Broadcast the object
- public :: abihist_copy             ! Copy 2 HIST records
- public :: abihist_compare_and_copy ! Compare 2 HIST records; if similar copy
+ public :: abihist_spin_init             ! Initialize the object
+ public :: abihist_spin_free             ! Destroy the object
+ public :: abihist_spin_bcast            ! Broadcast the object
+ public :: abihist_spin_copy             ! Copy 2 HIST records
+ public :: abihist_spin_compare_and_copy ! Compare 2 HIST records; if similar copy
  public :: hist2var                 ! Get xred, acell and rprimd from the history.
- public :: abihist_findIndex            ! Shift history indexes
- public :: var2hist                 ! Append xred, acell and rprimd
- public :: vel2hist                 ! Append velocities and Kinetic Energy
+ public :: abihist_spin_findIndex            ! Shift history indexes
+ ! public :: var2hist                 ! Append xred, acell and rprimd
+ public :: var2hist_spin
+ !public :: vel2hist                 ! Append velocities and Kinetic Energy
+
+ public :: dSdt2hist_spin           ! Append dSdt to hist_spin
+
  public :: write_md_hist            ! Write the history into a netcdf file
  public :: write_md_hist_img        ! Write the history into a netcdf file (with images)
  public :: read_md_hist             ! Read the history from a netcdf file
@@ -144,18 +175,18 @@ module m_abihist
  public :: get_dims_hist
  public :: read_csts_hist
 
- interface abihist_init
-   module procedure abihist_init_0D
-   module procedure abihist_init_1D
- end interface abihist_init
- interface abihist_free
-   module procedure abihist_free_0D
-   module procedure abihist_free_1D
- end interface abihist_free
- interface abihist_bcast
-   module procedure abihist_bcast_0D
-   module procedure abihist_bcast_1D
- end interface abihist_bcast
+ interface abihist_spin_init
+   module procedure abihist_spin_init_0D
+   module procedure abihist_spin_init_1D
+ end interface abihist_spin_init
+ interface abihist_spin_free
+   module procedure abihist_spin_free_0D
+   module procedure abihist_spin_free_1D
+ end interface abihist_spin_free
+ interface abihist_spin_bcast
+   module procedure abihist_spin_bcast_0D
+   module procedure abihist_spin_bcast_1D
+ end interface abihist_spin_bcast
 
 !!***
 
@@ -164,26 +195,25 @@ module m_abihist
 contains  !=============================================================
 !!***
 
-!!****f* m_abihist/abihist_init_0D
+!!****f* m_abihist_spin/abihist_spin_init_0D
 !! NAME
-!! abihist_init_0D
+!! abihist_spin_init_0D
 !!
 !! FUNCTION
 !! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
- 
 !!  natom = Number of atoms per unitary cell
 !!  mxhist = Maximal number of records to store
 !!  isVUsed,isARUsed=flags used to initialize hsit structure
 !!
 !! OUTPUT
-!!  hist <type(abihist)> = The hist to initialize
+!!  hist <type(abihist_spin)> = The hist to initialize
 !!
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -191,13 +221,13 @@ contains  !=============================================================
 !!
 !! SOURCE
 
-subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
+subroutine abihist_spin_init_0D(hist,natom,mxhist,isVused,isARused)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_init_0D'
+#define ABI_FUNC 'abihist_spin_init_0D'
 !End of the abilint section
 
  implicit none
@@ -205,7 +235,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 !Arguments ------------------------------------
  integer,intent(in) :: natom,mxhist
  logical,intent(in) :: isVUsed,isARused
- type(abihist),intent(inout) :: hist
+ type(abihist_spin),intent(inout) :: hist
 
 ! ***************************************************************
 
@@ -243,14 +273,14 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%vel(:,:,1)=zero
  hist%vel_cell(:,:,1)=zero
 
-end subroutine abihist_init_0D
+end subroutine abihist_spin_init_0D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_init_1D
+!!****f* m_abihist_spin/abihist_spin_init_1D
 !! NAME
-!! abihist_init_1D
+!! abihist_spin_init_1D
 !!
 !! FUNCTION
 !! Initialize a hist structure - Target: 1D array
@@ -261,7 +291,7 @@ end subroutine abihist_init_0D
 !!  isVUsed,isARUsed=flags used to initialize hsit structure
 !!
 !! OUTPUT
-!!  hist(:) <type(abihist)> = The hist to initialize
+!!  hist(:) <type(abihist_spin)> = The hist to initialize
 !!
 !! SIDE EFFECTS
 !!
@@ -273,13 +303,13 @@ end subroutine abihist_init_0D
 !!
 !! SOURCE
 
-subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
+subroutine abihist_spin_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_init_1D'
+#define ABI_FUNC 'abihist_spin_init_1D'
 !End of the abilint section
 
  implicit none
@@ -287,7 +317,7 @@ subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
 !Arguments ------------------------------------
  integer,intent(in) :: natom,mxhist
  logical,intent(in) :: isVUsed,isARUsed
- type(abihist),intent(inout) :: hist(:)
+ type(abihist_spin),intent(inout) :: hist(:)
 
 !Local variables-------------------------------
  integer :: ii
@@ -295,17 +325,17 @@ subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
 ! ***************************************************************
 
  do ii=1,size(hist)
-   call abihist_init_0D(hist(ii),natom,mxhist,isVUsed,isARUsed)
+   call abihist_spin_init_0D(hist(ii),natom,mxhist,isVUsed,isARUsed)
  end do
 
-end subroutine abihist_init_1D
+end subroutine abihist_spin_init_1D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_free_0D
+!!****f* m_abihist_spin/abihist_spin_free_0D
 !! NAME
-!! abihist_free_0D
+!! abihist_spin_free_0D
 !!
 !! FUNCTION
 !! Deallocate all the pointers in a hist structure - Target: scalar
@@ -315,10 +345,10 @@ end subroutine abihist_init_1D
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  hist <type(abihist)> = The hist to deallocate
+!!  hist <type(abihist_spin)> = The hist to deallocate
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -326,19 +356,19 @@ end subroutine abihist_init_1D
 !!
 !! SOURCE
 
-subroutine abihist_free_0D(hist)
+subroutine abihist_spin_free_0D(hist)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_free_0D'
+#define ABI_FUNC 'abihist_spin_free_0D'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
- type(abihist),intent(inout) :: hist
+ type(abihist_spin),intent(inout) :: hist
 
 ! ***************************************************************
 
@@ -387,14 +417,14 @@ subroutine abihist_free_0D(hist)
    ABI_DEALLOCATE(hist%time)
  end if
 
-end subroutine abihist_free_0D
+end subroutine abihist_spin_free_0D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_free_1D
+!!****f* m_abihist_spin/abihist_spin_free_1D
 !! NAME
-!! abihist_free_1D
+!! abihist_spin_free_1D
 !!
 !! FUNCTION
 !! Deallocate all the pointers in a hist structure - Target: 1D array
@@ -404,7 +434,7 @@ end subroutine abihist_free_0D
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  hist(:) <type(abihist)> = The hist to deallocate
+!!  hist(:) <type(abihist_spin)> = The hist to deallocate
 !!
 !! PARENTS
 !!
@@ -414,19 +444,19 @@ end subroutine abihist_free_0D
 !!
 !! SOURCE
 
-subroutine abihist_free_1D(hist)
+subroutine abihist_spin_free_1D(hist)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_free_1D'
+#define ABI_FUNC 'abihist_spin_free_1D'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
- type(abihist),intent(inout) :: hist(:)
+ type(abihist_spin),intent(inout) :: hist(:)
 
 !Local variables-------------------------------
  integer :: ii
@@ -434,17 +464,17 @@ subroutine abihist_free_1D(hist)
 ! ***************************************************************
 
  do ii=1,size(hist)
-   call abihist_free_0D(hist(ii))
+   call abihist_spin_free_0D(hist(ii))
  end do
 
-end subroutine abihist_free_1D
+end subroutine abihist_spin_free_1D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_bcast_0D
+!!****f* m_abihist_spin/abihist_spin_bcast_0D
 !! NAME
-!! abihist_bcast_0D
+!! abihist_spin_bcast_0D
 !!
 !! FUNCTION
 !! Broadcast a hist datastructure (from a root process to all others) - Target: scalar
@@ -456,10 +486,10 @@ end subroutine abihist_free_1D
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  hist <type(abihist)> = The hist to broadcast
+!!  hist <type(abihist_spin)> = The hist to broadcast
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -467,13 +497,13 @@ end subroutine abihist_free_1D
 !!
 !! SOURCE
 
-subroutine abihist_bcast_0D(hist,master,comm)
+subroutine abihist_spin_bcast_0D(hist,master,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_bcast_0D'
+#define ABI_FUNC 'abihist_spin_bcast_0D'
 !End of the abilint section
 
  implicit none
@@ -481,7 +511,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: master,comm
- type(abihist),intent(inout) :: hist
+ type(abihist_spin),intent(inout) :: hist
 
 !Local variables-------------------------------
 !scalars
@@ -599,7 +629,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeX
    buffer_r(indx+1:indx+sizeF)=reshape(hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3),(/sizeF/))
  else
-   call abihist_free(hist)
+   call abihist_spin_free(hist)
    ABI_ALLOCATE(hist%acell,(sizeA1,sizeA2))
    ABI_ALLOCATE(hist%etot,(sizeEt))
    ABI_ALLOCATE(hist%ekin,(sizeEk))
@@ -647,14 +677,14 @@ subroutine abihist_bcast_0D(hist,master,comm)
  end if
  ABI_DEALLOCATE(buffer_r)
 
-end subroutine abihist_bcast_0D
+end subroutine abihist_spin_bcast_0D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_bcast_1D
+!!****f* m_abihist_spin/abihist_spin_bcast_1D
 !! NAME
-!! abihist_bcast_1D
+!! abihist_spin_bcast_1D
 !!
 !! FUNCTION
 !! Broadcast a hist datastructure (from a root process to all others) - Target: 1D array
@@ -666,7 +696,7 @@ end subroutine abihist_bcast_0D
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  hist(:) <type(abihist)> = The hist to broadcast
+!!  hist(:) <type(abihist_spin)> = The hist to broadcast
 !!
 !! PARENTS
 !!
@@ -676,13 +706,13 @@ end subroutine abihist_bcast_0D
 !!
 !! SOURCE
 
-subroutine abihist_bcast_1D(hist,master,comm)
+subroutine abihist_spin_bcast_1D(hist,master,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_bcast_1D'
+#define ABI_FUNC 'abihist_spin_bcast_1D'
 !End of the abilint section
 
  implicit none
@@ -690,7 +720,7 @@ subroutine abihist_bcast_1D(hist,master,comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: master,comm
- type(abihist),intent(inout) :: hist(:)
+ type(abihist_spin),intent(inout) :: hist(:)
 
 !Local variables-------------------------------
  integer :: ii
@@ -698,15 +728,15 @@ subroutine abihist_bcast_1D(hist,master,comm)
 ! ***************************************************************
 
  do ii=1,size(hist)
-   call abihist_bcast_0D(hist(ii),master,comm)
+   call abihist_spin_bcast_0D(hist(ii),master,comm)
  end do
 
-end subroutine abihist_bcast_1D
+end subroutine abihist_spin_bcast_1D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/var2hist
+!!****f* m_abihist_spin/var2hist
 !!
 !! NAME
 !! var2hist
@@ -726,7 +756,7 @@ end subroutine abihist_bcast_1D
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
+!! hist<type abihist_spin>=Historical record of positions, forces
 !!      |                    acell, stresses, and energies,
 !!
 !! PARENTS
@@ -753,7 +783,7 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
- type(abihist),intent(inout) :: hist
+ type(abihist_spin),intent(inout) :: hist
  logical,intent(in) :: zDEBUG
 !arrays
  real(dp),intent(in) :: acell(3)
@@ -788,15 +818,15 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 end subroutine var2hist
 !!***
 
-!!****f* m_abihist/abihist_fi
+!!****f* m_abihist_spin/abihist_spin_fi
 !!
 !! NAME
-!! abihist_findIndex
+!! abihist_spin_findIndex
 !!
 !! FUNCTION
 !!
 !! INPUTS
-!! hist<type abihist>=Historical record of positions, forces
+!! hist<type abihist_spin>=Historical record of positions, forces
 !!      |                    acell, stresses, and energies
 !! step = value of the needed step
 !!
@@ -811,13 +841,13 @@ end subroutine var2hist
 !!
 !! SOURCE
 
-function abihist_findIndex(hist,step) result(index)
+function abihist_spin_findIndex(hist,step) result(index)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_findIndex'
+#define ABI_FUNC 'abihist_spin_findIndex'
 !End of the abilint section
 
  implicit none
@@ -827,7 +857,7 @@ function abihist_findIndex(hist,step) result(index)
  integer,intent(in) :: step
  integer :: index
 !arrays
- type(abihist),intent(in) :: hist
+ type(abihist_spin),intent(in) :: hist
 !Local variables-------------------------------
 !scalars
  integer :: ii,mxhist
@@ -855,12 +885,12 @@ function abihist_findIndex(hist,step) result(index)
  
  index = ii
  
-end function abihist_findIndex
+end function abihist_spin_findIndex
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/hist2var
+!!****f* m_abihist_spin/hist2var
 !!
 !! NAME
 !! hist2var
@@ -871,7 +901,7 @@ end function abihist_findIndex
 !!
 !! INPUTS
 !! natom = Number of atoms
-!! hist<type abihist>=Historical record of positions, forces
+!! hist<type abihist_spin>=Historical record of positions, forces
 !!                           acell, stresses, and energies,
 !! zDebug = If true some output will be printed
 !!
@@ -905,7 +935,7 @@ subroutine hist2var(acell,hist,natom,rprimd,xred,zDEBUG)
 !Arguments ------------------------------------
 !scalars
 integer,intent(in) :: natom
-type(abihist),intent(in) :: hist
+type(abihist_spin),intent(in) :: hist
 logical,intent(in) :: zDEBUG
 !arrays
 real(dp),intent(out) :: acell(3)
@@ -942,7 +972,7 @@ end subroutine hist2var
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/vel2hist
+!!****f* m_abihist_spin/vel2hist
 !!
 !! NAME
 !! vel2hist
@@ -959,7 +989,7 @@ end subroutine hist2var
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
+!! hist<type abihist_spin>=Historical record of positions, forces
 !!                               stresses, cell and energies,
 !!
 !! PARENTS
@@ -982,7 +1012,7 @@ subroutine vel2hist(amass,hist,vel,vel_cell)
 
 !Arguments ------------------------------------
 !scalars
-type(abihist),intent(inout) :: hist
+type(abihist_spin),intent(inout) :: hist
 !arrays
 real(dp),intent(in) :: amass(:)
 real(dp),intent(in) :: vel(:,:)
@@ -1025,19 +1055,19 @@ end subroutine vel2hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_copy
+!!****f* m_abihist_spin/abihist_spin_copy
 !! NAME
-!! abihist_copy
+!! abihist_spin_copy
 !!
 !! FUNCTION
 !! Copy one HIST record in another
 !!
 !! INPUTS
-!!  hist_in <type(abihist)>
+!!  hist_in <type(abihist_spin)>
 !!
 !! OUTPUT
 !! SIDE EFFECTS
-!!  hist_out <type(abihist)>
+!!  hist_out <type(abihist_spin)>
 !!
 !! PARENTS
 !!      gstateimg,m_effective_potential_file
@@ -1046,21 +1076,21 @@ end subroutine vel2hist
 !!
 !! SOURCE
 
-subroutine abihist_copy(hist_in,hist_out)
+subroutine abihist_spin_copy(hist_in,hist_out)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_copy'
+#define ABI_FUNC 'abihist_spin_copy'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
-type(abihist),intent(in) :: hist_in
-type(abihist),intent(inout) :: hist_out
+type(abihist_spin),intent(in) :: hist_in
+type(abihist_spin),intent(inout) :: hist_out
 
 !Local variables-------------------------------
 !scalars
@@ -1091,20 +1121,20 @@ type(abihist),intent(inout) :: hist_out
  hist_out%entropy(hist_out%ihist)     = hist_in%entropy(hist_in%ihist)
  hist_out%time(hist_out%ihist)        = hist_in%time(hist_in%ihist)
 
-end subroutine abihist_copy
+end subroutine abihist_spin_copy
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_compare_and_copy
+!!****f* m_abihist_spin/abihist_spin_compare_and_copy
 !! NAME
-!! abihist_compare
+!! abihist_spin_compare
 !!
 !! FUNCTION
 !! Compare 2 HIST records
 !!
 !! INPUTS
-!!  hist_in <type(abihist)>
+!!  hist_in <type(abihist_spin)>
 !!  tolerance
 !!  store_all = flag to known if we need to increment ihist (store all the history)
 !!              or just call shift (store just le last step)
@@ -1114,7 +1144,7 @@ end subroutine abihist_copy
 !!           0 the records are not consistent
 !!
 !! SIDE EFFECTS
-!!  hist_out <type(abihist)>
+!!  hist_out <type(abihist_spin)>
 !!
 !! PARENTS
 !!      mover
@@ -1123,13 +1153,13 @@ end subroutine abihist_copy
 !!
 !! SOURCE
 
-subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all)
+subroutine abihist_spin_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_compare_and_copy'
+#define ABI_FUNC 'abihist_spin_compare_and_copy'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1140,8 +1170,8 @@ subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,sto
 integer,intent(in) :: natom
 integer,intent(out) :: similar
 real(dp),intent(in) :: tolerance
-type(abihist),intent(in) :: hist_in
-type(abihist),intent(inout) :: hist_out
+type(abihist_spin),intent(in) :: hist_in
+type(abihist_spin),intent(inout) :: hist_out
 logical,intent(in) :: store_all
 !Local variables-------------------------------
 !scalars
@@ -1219,12 +1249,12 @@ character(len= 500) :: msg
    hist_out%time(hist_out%ihist)        =hist_in%time(hist_in%ihist)
  end if
 
-end subroutine abihist_compare_and_copy
+end subroutine abihist_spin_compare_and_copy
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/write_md_hist
+!!****f* m_abihist_spin/write_md_hist
 !!
 !! NAME
 !! write_md_hist
@@ -1235,7 +1265,7 @@ end subroutine abihist_compare_and_copy
 !!
 !! INPUTS
 !!  filname=filename of the file where the history will be stored
-!!  hist<type abihist>=Historical record of positions, forces, stresses,
+!!  hist<type abihist_spin>=Historical record of positions, forces, stresses,
 !!                        cell dims and energies,
 !!  ifirst=1 if first access to the file
 !!  itime = index of the step in the hist file
@@ -1280,7 +1310,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,ntypat,&
 !arrays
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: amu(ntypat),znucl(:),mdtemp(2)
- type(abihist),intent(inout),target :: hist
+ type(abihist_spin),intent(inout),target :: hist
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
@@ -1347,7 +1377,7 @@ end subroutine write_md_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/write_md_hist_img
+!!****f* m_abihist_spin/write_md_hist_img
 !!
 !! NAME
 !! write_md_hist_img
@@ -1358,7 +1388,7 @@ end subroutine write_md_hist
 !!
 !! INPUTS
 !!  filname= filename of the file where the history will be stored
-!!  hist(:)<type abihist>= Historical record of positions, forces, stresses,
+!!  hist(:)<type abihist_spin>= Historical record of positions, forces, stresses,
 !!                         cell dims and energies,
 !!    Size(hist) is equal to a number of images to be written
 !!  ifirst= 1 if first access to the file
@@ -1412,7 +1442,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  integer,intent(in) :: typat(natom)
  integer,intent(in),optional :: imgtab(:)
  real(dp),intent(in) :: amu(ntypat),znucl(:),mdtemp(2)
- type(abihist),intent(inout),target :: hist(:)
+ type(abihist_spin),intent(inout),target :: hist(:)
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
@@ -1425,7 +1455,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage, has_imgmov
  character(len=500) :: msg
- type(abihist),pointer :: hist_
+ type(abihist_spin),pointer :: hist_
 !arrays
  integer,allocatable :: my_imgtab(:)
 #endif
@@ -1511,7 +1541,7 @@ end subroutine write_md_hist_img
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/read_md_hist
+!!****f* m_abihist_spin/read_md_hist
 !!
 !! NAME
 !! read_md_hist
@@ -1525,7 +1555,7 @@ end subroutine write_md_hist_img
 !!  isVUsed,isARUsed=flags used to initialize hist structure
 !!
 !! OUTPUT
-!!  hist<type abihist>=Historical record of positions, forces, stresses,
+!!  hist<type abihist_spin>=Historical record of positions, forces, stresses,
 !!                     cell dims and energies,
 !!
 !! PARENTS
@@ -1551,7 +1581,7 @@ implicit none
  logical,intent(in) :: isVUsed,isARUsed,readOnlyLast
  character(len=*),intent(in) :: filename
 !arrays
- type(abihist),intent(inout),target :: hist
+ type(abihist_spin),intent(inout),target :: hist
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
@@ -1593,7 +1623,7 @@ implicit none
  end if
 
 !Allocate hist structure
- call abihist_init(hist,natom,time,isVused,isARused)
+ call abihist_spin_init(hist,natom,time,isVused,isARused)
 
 !Get the ID of a variables from their name
  call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
@@ -1615,7 +1645,7 @@ end subroutine read_md_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/read_md_hist_img
+!!****f* m_abihist_spin/read_md_hist_img
 !!
 !! NAME
 !! read_md_hist_img
@@ -1632,7 +1662,7 @@ end subroutine read_md_hist
 !!               Size must be equal to size(hist)
 !!
 !! OUTPUT
-!!  hist(:)<type abihist>=Historical record of positions, forces, stresses,
+!!  hist(:)<type abihist_spin>=Historical record of positions, forces, stresses,
 !!                        cell dims and energies,
 !!    Size(hist) is equal to a number of images to be read
 !!
@@ -1660,7 +1690,7 @@ implicit none
  character(len=*),intent(in) :: filename
 !arrays
  integer,intent(in),optional :: imgtab(:)
- type(abihist),intent(inout),target :: hist(:)
+ type(abihist_spin),intent(inout),target :: hist(:)
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
@@ -1672,7 +1702,7 @@ implicit none
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
  character(len=500) :: msg
- type(abihist),pointer :: hist_
+ type(abihist_spin),pointer :: hist_
  integer,allocatable :: my_imgtab(:)
 #endif
 
@@ -1721,7 +1751,7 @@ implicit none
    hist_ => hist(iimage)
 
 !  Allocate hist structure
-   call abihist_init(hist_,natom,time,isVused,isARused)
+   call abihist_spin_init(hist_,natom,time,isVused,isARused)
 
 !  Get the ID of a variables from their name
    call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
@@ -1747,7 +1777,7 @@ end subroutine read_md_hist_img
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/def_file_hist
+!!****f* m_abihist_spin/def_file_hist
 !!
 !! NAME
 !! def_file_hist
@@ -1759,7 +1789,7 @@ end subroutine read_md_hist_img
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -1960,7 +1990,7 @@ end subroutine def_file_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/get_dims_hist
+!!****f* m_abihist_spin/get_dims_hist
 !!
 !! NAME
 !! get_dims_hist
@@ -1972,7 +2002,7 @@ end subroutine def_file_hist
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abihist,m_tdep_readwrite
+!!      m_abihist_spin,m_tdep_readwrite
 !!
 !! CHILDREN
 !!
@@ -2051,7 +2081,7 @@ end subroutine get_dims_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/get_varid_hist
+!!****f* m_abihist_spin/get_varid_hist
 !!
 !! NAME
 !! get_varid_hist
@@ -2063,7 +2093,7 @@ end subroutine get_dims_hist
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -2146,7 +2176,7 @@ end subroutine get_varid_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/read_csts_hist
+!!****f* m_abihist_spin/read_csts_hist
 !!
 !! NAME
 !! read_csts_hist
@@ -2227,7 +2257,7 @@ end subroutine read_csts_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/write_csts_hist
+!!****f* m_abihist_spin/write_csts_hist
 !!
 !! NAME
 !! write_csts_hist
@@ -2239,7 +2269,7 @@ end subroutine read_csts_hist
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -2321,7 +2351,7 @@ end subroutine write_csts_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/write_vars_hist
+!!****f* m_abihist_spin/write_vars_hist
 !!
 !! NAME
 !! write_vars_hist
@@ -2333,7 +2363,7 @@ end subroutine write_csts_hist
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -2360,7 +2390,7 @@ implicit none
  integer,intent(in) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
  logical,intent(in) :: has_nimage
- type(abihist),intent(inout),target :: hist
+ type(abihist_spin),intent(inout),target :: hist
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
@@ -2495,7 +2525,7 @@ end subroutine write_vars_hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/read_vars_hist
+!!****f* m_abihist_spin/read_vars_hist
 !!
 !! NAME
 !! read_vars_hist
@@ -2507,7 +2537,7 @@ end subroutine write_vars_hist
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abihist
+!!      m_abihist_spin
 !!
 !! CHILDREN
 !!
@@ -2534,7 +2564,7 @@ implicit none
  integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
  integer,intent(in) :: start_time
  logical,intent(in) :: has_nimage
- type(abihist),intent(inout),target :: hist
+ type(abihist_spin),intent(inout),target :: hist
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
@@ -2636,4 +2666,4 @@ implicit none
 end subroutine read_vars_hist
 !!***
 
-end module m_abihist
+end module m_abihist_spin
