@@ -56,6 +56,7 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
+ use m_occ,            only : occ_fd, occ_be
  use m_lgroup,         only : lgroup_t, lgroup_new, lgroup_free
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
@@ -844,9 +845,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                !nqnu = one; f_mkq = one
                !write(std_out,*)wqnu,sigma%kTmesh(it)
                !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it),eig0mkq-sigma%mu_e(it) / sigma%kTmesh(it)
-               nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
+               nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                ! TODO: Find good tolerances to treat limits
-               !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
+               !f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
                !if (nsppol == 1 .and. nspinor == 1 .and. nspden == 1) f_mkq = f_mkq * half
 
                ! Accumulate Sigma(w=eKS) for state ib_k
@@ -1089,7 +1090,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          !gdw2_mn = zero
 
          ! Get phonon occupation for all temperatures.
-         nqnu_tlist = nbe(wqnu, sigma%kTmesh(:), zero)
+         nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
          ! Sum over bands and add (static) DW contribution for the different temperatures.
          do ibsum=1,nbsum
@@ -1286,122 +1287,6 @@ subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_nu
  end do
 
 end subroutine gkknu_from_atm
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_sigmaph/nfd
-!! NAME
-!!  nfd
-!!
-!! FUNCTION
-!!  Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
-!!
-!! INPUTS
-!!   ee=Single particle energy in Ha
-!!   kT=Value of K_Boltzmann x T in Ha.
-!!   mu=Chemical potential in Ha.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-elemental real(dp) function nfd(ee, kT, mu)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nfd'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- real(dp),intent(in) :: ee, kT, mu
-
-!Local variables ------------------------------
- real(dp) :: ee_mu,arg
-! *************************************************************************
-
- ee_mu = ee - mu
-
- !TODO: Find good tols.
- ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
- if (kT > tol6) then
-   arg = ee_mu / kT
-   nfd = one / (exp(arg) + one)
- else
-   ! Heaviside
-   if (ee_mu > zero) then
-     nfd = zero
-   else if (ee < zero) then
-     nfd = one
-   else
-     nfd = half
-   end if
- end if
-
-end function nfd
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_sigmaph/nbe
-!! NAME
-!!  nbe
-!!
-!! FUNCTION
-!!   Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
-!!
-!! INPUTS
-!!   ee=Single particle energy in Ha
-!!   kT=Value of K_Boltzmann x T in Ha.
-!!   mu=Chemical potential in Ha.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-elemental real(dp) function nbe(ee, kT, mu)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nbe'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- real(dp),intent(in) :: ee, kT, mu
-
-!Local variables ------------------------------
- real(dp) :: ee_mu, arg
-! *************************************************************************
-
- ee_mu = ee - mu
-
- !TODO: Find good tols.
- ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
- if (kT > tol12) then
-   arg = ee_mu / kT
-   if (arg > tol12 .and. arg < 600._dp) then
-     nbe = one / (exp(arg) - one)
-   else
-     nbe = zero
-   end if
- else
-   ! No condensate for T --> 0
-   nbe = zero
- end if
-
-end function nbe
 !!***
 
 !----------------------------------------------------------------------

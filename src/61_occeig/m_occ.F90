@@ -44,8 +44,11 @@ module m_occ
  public :: getnel        ! Compute total number of electrons from efermi or DOS
  public :: newocc        ! Compute new occupation numbers at each k point,
  public :: occeig        ! (occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$,
+ public :: occ_fd        ! Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
+ public :: occ_be        ! Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
  public :: dos_hdr_write
  public :: pareigocc
+
 
 contains
 !!***
@@ -1426,6 +1429,122 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
  end do ! ibandk
 
 end subroutine occeig
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_occ/occ_fd
+!! NAME
+!!  occ_fd
+!!
+!! FUNCTION
+!!  Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!   mu=Chemical potential in Ha.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function occ_fd(ee, kT, mu)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'occ_fd'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, kT, mu
+
+!Local variables ------------------------------
+ real(dp) :: ee_mu,arg
+! *************************************************************************
+
+ ee_mu = ee - mu
+
+ !TODO: Find good tols.
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol6) then
+   arg = ee_mu / kT
+   occ_fd = one / (exp(arg) + one)
+ else
+   ! Heaviside
+   if (ee_mu > zero) then
+     occ_fd = zero
+   else if (ee < zero) then
+     occ_fd = one
+   else
+     occ_fd = half
+   end if
+ end if
+
+end function occ_fd
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_occ/occ_be
+!! NAME
+!!  occ_be
+!!
+!! FUNCTION
+!!   Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!   mu=Chemical potential in Ha (usually zero)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function occ_be(ee, kT, mu)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'occ_be'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, kT, mu
+
+!Local variables ------------------------------
+ real(dp) :: ee_mu, arg
+! *************************************************************************
+
+ ee_mu = ee - mu
+
+ !TODO: Find good tols.
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol12) then
+   arg = ee_mu / kT
+   if (arg > tol12 .and. arg < 600._dp) then
+     occ_be = one / (exp(arg) - one)
+   else
+     occ_be = zero
+   end if
+ else
+   ! No condensate for T --> 0
+   occ_be = zero
+ end if
+
+end function occ_be
 !!***
 
 !!****f* m_occ/dos_hdr_write

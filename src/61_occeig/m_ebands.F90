@@ -4136,7 +4136,15 @@ end subroutine ebspl_free
 !! INPUTS
 !!  ebands<ebands_t> = Object with input energies.
 !!  cryst<crystal_t> = Crystalline structure.
-!!  params(:)
+!!  params(:):
+!!     params(0): interpolation type. 1 for star-functions, 2 for b-spline
+!!     if star-functions:
+!!         params(2): Ratio between star functions and ab-initio k-points.
+!!         params(3:4): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639) if params(2) > tol6
+!!         params(3)=rcut, params(4) = rsigma
+!!     if B-spline:
+!!        params(2:4)=order of the spline for the three directions. params(2) must be in [0, nkx] where
+!!                nkx is the number of points along the x-axis. Same for params(2:3)
 !!  intp_kptrlatt(3,3) = New k-mesh
 !!  intp_nshiftk= Number of shifts in new k-mesh.
 !!  intp_shiftk(3,intp_nshiftk) = Shifts in new k-mesh.

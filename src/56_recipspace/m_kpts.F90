@@ -171,7 +171,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
  integer :: my_nshiftk,nkpt_computed
  real(dp) :: kptrlen
 !arrays
- integer,parameter :: vacuum0(3)=[0,0,0]
+ integer,parameter :: vacuum0(3)=[0, 0, 0]
  integer :: my_kptrlatt(3,3)
  real(dp) :: my_shiftk(3,210)
 
@@ -934,7 +934,7 @@ end subroutine listkk
 !! OUTPUT
 !! kptrlen=length of the smallest real space supercell vector associated with the lattice of k points.
 !! nkpt_computed=number of k-points in the IBZ computed in the present routine
-!! If nkpt/=0  the following are also output :
+!! If nkpt/=0  the following are also output:
 !!   kpt(3,nkpt)=reduced coordinates of k points.
 !!   wtk(nkpt)=weight assigned to each k point.
 !! [fullbz(3,nkpt_fullbz)]=k-points generated in the full Brillouin zone.

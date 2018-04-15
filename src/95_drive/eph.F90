@@ -113,6 +113,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
+ use m_ephwg,           only : ephwg_test
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -423,13 +424,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if
 
- !if (.False.) then
- !!if (.True.) then
- !  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
- !  call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
- !  MSG_ERROR("interpolation done")
- !end if
-
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
@@ -485,8 +479,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
 
  if (dtset%prtphdos == 1) then
-
-   ! Phonon Density of States.
+   ! Compute Phonon Density of States.
    wminmax = zero
    do
      call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
@@ -621,6 +614,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call dvdb_interpolate_and_write(dtfil,ngfftc,ngfftf,cryst,dvdb,&
 &   ifc%ngqpt,ifc%nqshft,ifc%qshft, &
 &   dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
+
+ case (-4)
+   call ephwg_test(cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

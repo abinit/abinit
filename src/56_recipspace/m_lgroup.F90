@@ -235,6 +235,7 @@ end function lgroup_new
 
 subroutine lgroup_print(self, title, unit, prtvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
