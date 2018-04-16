@@ -476,6 +476,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      !write(std_out,*)"bmin, bmax for tetra: ",bmin,bmax
      ABI_CHECK(bmin /= huge(1) .and. bmax /= -huge(1), "No point on the Fermi surface!")
 
+     !call libtetrabz_dbldelta(ltetra, bvec, nb, nge, eig1, eig2, ngw, wght_bz, comm)
+
      do band=bmin,bmax
        ! Get the contribution of this band
        tmp_eigen = ebands%eig(band, :nkibz, spin)

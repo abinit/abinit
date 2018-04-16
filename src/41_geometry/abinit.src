@@ -60,7 +60,6 @@ sources = [
  "symlist_prim.F90",
  "symptgroup.F90",
  "symplanes.F90",
- "symredcart.F90",
  "symrelrot.F90",
  "symsgcube.F90",
  "symsghexa.F90",

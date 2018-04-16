@@ -58,6 +58,7 @@ program multibinit
  use m_abihist
  use m_ab7_invars
 
+ use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit, open_file
  use m_fstrings,   only : replace, inupper
  use m_time,       only : asctime, timein

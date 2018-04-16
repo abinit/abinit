@@ -51,6 +51,7 @@ program aim
 
  use m_time,     only : timein
  use m_io_tools, only : open_file, file_exists
+ use m_specialmsg,  only : specialmsg_getcount, herald
  use m_fstrings, only : int2char4
  use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
 
@@ -58,7 +59,6 @@ program aim
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'aim'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

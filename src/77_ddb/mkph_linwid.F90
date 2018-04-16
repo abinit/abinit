@@ -60,7 +60,6 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 #undef ABI_FUNC
 #define ABI_FUNC 'mkph_linwid'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => mkph_linwid
 !End of the abilint section
 
  implicit none

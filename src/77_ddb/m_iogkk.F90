@@ -1,5 +1,61 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/read_gkk
+!!****m* ABINIT/m_iogkk
+!! NAME
+!!  m_iogkk
+!!
+!! FUNCTION
+!!  IO routines for GKK files
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MVer)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_iogkk
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_elphon
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+ use m_kptrank
+ use m_hdr
+
+ use m_numeric_tools,   only : wrap2_pmhalf
+ use m_io_tools,        only : open_file, get_unit
+ use m_geometry,        only : phdispl_cart2red
+ use m_crystal,         only : crystal_t
+ use m_ifc,             only : ifc_type, ifc_fourq
+
+ implicit none
+
+ private
+!!***
+
+ public :: read_gkk
+ public :: outgkk
+ public :: read_el_veloc
+!!***
+
+contains
+!!***
+
+!!****f* m_iogkk/read_gkk
 !!
 !! NAME
 !! read_gkk
@@ -7,13 +63,6 @@
 !! FUNCTION
 !! This routine reads in elphon matrix elements and completes them
 !! using the appropriate symmetries
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, MG)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  elph_ds = datastructure containing elphon matrix elements
@@ -45,28 +94,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_elphon
- use m_errors
- use m_profiling_abi
- use m_xmpi
- use m_kptrank
- use m_hdr
-
- use m_numeric_tools,   only : wrap2_pmhalf
- use m_geometry,        only : phdispl_cart2red
- use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -75,7 +104,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_77_ddb, except_this_one => read_gkk
+ use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -682,4 +711,608 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  ABI_DEALLOCATE(qdata_tmp)
 
 end subroutine read_gkk
+!!***
+
+!!****f* m_iogkk/outgkk
+!! NAME
+!! outgkk
+!!
+!! FUNCTION
+!! output gkk file for one perturbation (used for elphon calculations in anaddb)
+!!
+!! INPUTS
+!!  bantot0 = total number of bands for all kpoints
+!!  bantot1 = total number of matrix elements for 1st order eigenvalues
+!!  eigen0 = GS eigenvalues
+!!  eigen1 = response function 1st order eigenvalue matrix
+!!  hdr0 = GS header
+!!  hdr1 = RF header
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! PARENTS
+!!      dfpt_looppert
+!!
+!! CHILDREN
+!!      hdr_fort_write,wrtout
+!!
+!! SOURCE
+
+subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phasecg)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'outgkk'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: bantot0,bantot1
+ character(len=fnlen),intent(in) :: outfile
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(hdr_type),intent(inout) :: hdr0,hdr1
+!arrays
+ real(dp),intent(in) :: eigen0(bantot0),eigen1(2*bantot1)
+ real(dp),intent(in) :: phasecg(2,bantot1)
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform,iband,ikpt,isppol,me,ntot,unitout
+ integer :: iband_off, mband, ierr
+ character(len=500) :: msg
+ real(dp), allocatable :: tmpeig(:)
+
+! *************************************************************************
+
+!only master should be writing to disk
+!Init me
+ me=mpi_enreg%me_kpt
+ if (me /= 0) return
+
+ call wrtout(std_out,' writing gkk file: '//outfile,"COLL")
+
+!initializations
+ fform = 42
+ ntot = 1
+
+!open gkk file
+ if (open_file(outfile, msg, newunit=unitout, form='unformatted', status='unknown', action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+!output GS header
+ call hdr_fort_write(hdr0, unitout, fform, ierr)
+ ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
+
+!output GS eigenvalues
+ iband=0
+ do isppol=1,hdr0%nsppol
+   do ikpt=1,hdr0%nkpt
+     write (unitout) eigen0(iband+1:iband+hdr0%nband(ikpt))
+     iband=iband+hdr0%nband(ikpt)
+   end do
+ end do
+
+!output number of gkk in this file (1)
+ write (unitout) ntot
+
+!output RF header
+ call hdr_fort_write(hdr1, unitout, fform, ierr)
+ ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
+
+!output RF eigenvalues
+ mband = maxval(hdr1%nband(:))
+ ABI_ALLOCATE(tmpeig,(2*mband**2))
+ iband_off = 0
+ tmpeig(1) = phasecg(1, 1)
+ do isppol = 1, hdr1%nsppol
+   do ikpt = 1, hdr1%nkpt
+     tmpeig = zero
+     do iband = 1, hdr1%nband(ikpt)**2
+       tmpeig (2*(iband-1)+1) = eigen1(2*(iband_off+iband-1)+1)
+       tmpeig (2*(iband-1)+2) = eigen1(2*(iband_off+iband-1)+2)
+     end do
+     write (unitout) tmpeig(1:2*hdr1%nband(ikpt)**2)
+     iband_off = iband_off + hdr1%nband(ikpt)**2
+   end do
+ end do
+ ABI_DEALLOCATE(tmpeig)
+
+!close gkk file
+ close (unitout)
+
+end subroutine outgkk
+!!***
+
+!!****f* m_iogkk/prt_gkk_yambo
+!!
+!! NAME
+!! prt_gkk_yambo
+!!
+!! FUNCTION
+!! This routine outputs el-phon related quantities for the yambo code at 1
+!!   q-point
+!!
+!! INPUTS
+!!  displ_cart = phonon displacement vectors for this q-point in Cartesian coordinates.
+!!  displ_red = phonon displacement vectors for this q-point, in reduced coordinates
+!!  elph_ds = datastructure containing elphon matrix elements
+!!  h1_mat_el = matrix elements of first order hamiltonian for present q-point,
+!!     all perturbations
+!!  iqptfull = index of present q-point in full array of q-points
+!!  irredpert = index of irreducible perturbation (atom displaced)
+!!  natom = number of atoms
+!!  phfrq = phonon frequencies at present q-point
+!!  qptn = q-point we will print for
+!!
+!! OUTPUT
+!!  only writes to a file
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      read_gkk
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine prt_gkk_yambo(displ_cart,displ_red,kpt_phon,h1_mat_el,iqpt,&
+&       natom,nFSband,nkpt_phon,phfrq,qptn)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'prt_gkk_yambo'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,iqpt
+ integer,intent(in) :: nFSband,nkpt_phon
+ !arrays
+ real(dp),intent(in) :: kpt_phon(3,nkpt_phon)
+ real(dp),intent(in) :: h1_mat_el(2,nFSband*nFSband,3*natom,nkpt_phon,1)
+ real(dp),intent(in) :: phfrq(3*natom)
+ real(dp),intent(in) :: displ_cart(2,3*natom,3*natom)
+ real(dp),intent(in) :: displ_red(2,3*natom,3*natom)
+ real(dp),intent(in) :: qptn(3)
+
+!Local variables-------------------------------
+ !scalars
+ integer, save :: firsttime=1
+ integer :: outunit,ikpt,imode,iband,ibandp,iatom,idir,ibandindex
+ integer :: jmode, outunit2, outunit3
+ !arrays
+ real(dp) :: gkk_mode_dep(2)
+! *************************************************************************
+
+!if first time round:
+ if (firsttime==1) then
+   firsttime=0
+!  squash file
+   outunit=get_unit()
+   open (unit=outunit,file="yambo_elphon_data",status="REPLACE")
+   outunit2=get_unit()
+   open (unit=outunit2,file="yambo_elphon_gkk_bymode",status="replace")
+   outunit3=get_unit()
+   open (unit=outunit3,file="yambo_elphon_gkksqtw_bymode",status="replace")
+
+!  write dimensions
+   write (outunit,'(a,I6)') 'number of el atoms ', natom
+   write (outunit2,'(a,I6)') 'number of el atoms ', natom
+   write (outunit3,'(a,I6)') 'number of el atoms ', natom
+   write (outunit,'(a,I6)') 'number of ph modes ', 3*natom
+   write (outunit2,'(a,I6)') 'number of ph modes ', 3*natom
+   write (outunit3,'(a,I6)') 'number of ph modes ', 3*natom
+   write (outunit,'(a,I6)') 'number of el bands ', nFSband
+   write (outunit2,'(a,I6)') 'number of el bands ', nFSband
+   write (outunit3,'(a,I6)') 'number of el bands ', nFSband
+
+!  write k-points
+   write (outunit,'(a,I6)') 'number of k-points ', nkpt_phon
+   write (outunit2,'(a,I6)') 'number of k-points ', nkpt_phon
+   write (outunit3,'(a,I6)') 'number of k-points ', nkpt_phon
+   do ikpt=1,nkpt_phon
+     write (outunit,'(a,I6,3E20.10)') 'reduced coord kpoint no ', ikpt, kpt_phon(:,ikpt)
+     write (outunit2,'(a,I6,3E20.10)') 'reduced coord kpoint no ', ikpt, kpt_phon(:,ikpt)
+     write (outunit3,'(a,I6,3E20.10)') 'reduced coord kpoint no ', ikpt, kpt_phon(:,ikpt)
+   end do
+
+!  band energies are not accessible this deep in the code: simpler to get them
+!  from elsewhere
+
+   close (outunit)
+   close (outunit2)
+   close (outunit3)
+ end if ! first time round
+
+!open file
+ outunit=get_unit()
+ open (unit=outunit,file="yambo_elphon_data",status="unknown",position="append")
+
+!qpoint
+ write (outunit,'(a,I6,3E20.10)') 'reduced coord qpoint no ', iqpt, qptn(:)
+
+!frequencies
+ do imode=1,3*natom
+   write (outunit,'(a,I6,3E20.10)') 'phonon freq no ', imode, phfrq(imode)
+ end do
+
+!displacement vector
+ do imode=1,3*natom
+   write (outunit,'(a,I6,3E20.10)') 'phonon displ vec no ', imode
+   do iatom=1,natom
+     write (outunit,'(3(2E20.10,2x))') displ_cart(:,(iatom-1)*3+1:iatom*3,imode)
+   end do
+ end do
+
+!the beef: matrix elements of the first order hamiltonian for displacement of
+!all atoms along all reduced directions
+ write (outunit,'(a)') ' matrix elements of all perturbations for this q-point'
+ do ikpt=1,nkpt_phon
+   write (outunit,'(a,I6)') ' kpoint ', ikpt
+   imode=0
+   do iatom=1,natom
+     do idir=1,3
+       imode=imode+1
+       write (outunit,'(a,I6,I6)') ' atom, direction = ', iatom,idir
+       ibandindex=0
+       do iband=1,nFSband
+         do ibandp=1,nFSband
+           ibandindex=ibandindex+1
+           write (outunit,'(a,I6,I6,2E20.10)') ' mat el for n,np ', iband,ibandp,&
+&           h1_mat_el(:,ibandindex,imode,ikpt,1)
+         end do !bandp
+       end do !band
+     end do !dir
+   end do !atom
+ end do
+
+!blank line
+ write (outunit,*)
+ close (outunit)
+
+ outunit2=get_unit()
+ open (unit=outunit2,file="yambo_elphon_gkk_bymode",status="unknown",position="append")
+ outunit3=get_unit()
+ open (unit=outunit3,file="yambo_elphon_gkksqtw_bymode",status="unknown",position="append")
+
+!qpoint
+ write (outunit2,'(a,I6,3E20.10)') 'reduced coord qpoint no ', iqpt, qptn(:)
+ write (outunit3,'(a,I6,3E20.10)') 'reduced coord qpoint no ', iqpt, qptn(:)
+
+!print out mode-dependent matrix elements
+ write (outunit2,'(a)') ' matrix elements of all phonon modes for this q-point'
+ write (outunit3,'(a)') ' 1/w**1/2 times matrix elements of all phonon modes for this q-point'
+ do ikpt=1,nkpt_phon
+   write (outunit2,'(a,I6)') ' kpoint ', ikpt
+   write (outunit3,'(a,I6)') ' kpoint ', ikpt
+   ibandindex=0
+   do iband=1,nFSband
+     do ibandp=1,nFSband
+       ibandindex=ibandindex+1
+       write (outunit2,'(a,I6,I6)') ' el bands n,np ', iband,ibandp
+       write (outunit3,'(a,I6,I6)') ' el bands n,np ', iband,ibandp
+       do imode=1,3*natom
+!        gkk_mode_dep = cg_zdotc(3*natom,displ_red(:,:,imode),h1_mat_el(:,ibandindex,:,ikpt,1))
+         gkk_mode_dep = zero
+         do jmode=1,3*natom
+           gkk_mode_dep(1) = gkk_mode_dep(1) &
+&           + displ_red(1,jmode,imode)*h1_mat_el(1,ibandindex,jmode,ikpt,1) &
+&           + displ_red(2,jmode,imode)*h1_mat_el(2,ibandindex,jmode,ikpt,1)
+           gkk_mode_dep(2) = gkk_mode_dep(2) &
+&           + displ_red(1,jmode,imode)*h1_mat_el(2,ibandindex,jmode,ikpt,1) &
+&           - displ_red(2,jmode,imode)*h1_mat_el(1,ibandindex,jmode,ikpt,1)
+         end do
+         write (outunit2,'(a,I6,2E20.10)') ' mat el for phonon mode num = ', imode, gkk_mode_dep
+         write (outunit3,'(a,I6,2E20.10)') ' 1/w**1/2 * mat el for phonon mode num = ', &
+&         imode, gkk_mode_dep/sqrt(two*abs(phfrq(imode))+tol10)
+       end do !imode
+     end do !bandp
+   end do !band
+ end do
+!blank line
+ write (outunit2,*)
+ write (outunit3,*)
+
+ close (outunit2)
+ close (outunit3)
+
+end subroutine prt_gkk_yambo
+!!***
+
+!!****f* m_iogkk/read_el_veloc
+!!
+!! NAME
+!! read_el_veloc
+!!
+!! FUNCTION
+!! This routine reads the velocities of the electronic GS
+!! for all kpts and bands
+!! then maps them into the FS kpt states
+!!
+!! COPYRIGHT
+!! Copyright (C) 2002-2018 ABINIT group (JPCroc) based on conducti
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!! nkpt_in = number of kpoints according to parent routine
+!! nband_in = number of bands according to parent routine
+!! nsppol_in = number of spin polarizations
+!!
+!! OUTPUT
+!! el_veloc(nkpt_in,nband_in,3)
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      destroy_kptrank,get_rank_1kpt,hdr_free,inpgkk,mkkptrank
+!!
+!! SOURCE
+
+subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'read_el_veloc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -----------------------------------
+!scalars
+ integer, intent(in) :: nband_in,nkpt_in,nsppol_in
+ type(elph_tr_type), intent(inout) :: elph_tr_ds
+ real(dp), intent(in) :: kpt_in(3,nkpt_in)
+
+!Local variables-------------------------------
+!scalars
+ integer :: bd2tot_index
+ integer :: iband,ii,ikpt, ikpt_ddk
+ integer :: isppol,l1,mband
+ integer :: bantot1
+ integer :: unit_ddk
+ integer :: symrankkpt
+ character(len=fnlen) :: filnam1,filnam2,filnam3
+ character(len=500) :: msg
+ type(hdr_type) :: hdr1
+ type(kptrank_type) :: kptrank_t
+
+!arrays
+ real(dp) :: im_el_veloc(3)
+ real(dp),allocatable :: eig1_k(:,:)
+ real(dp),allocatable :: eigen11(:),eigen12(:),eigen13(:)
+
+! *********************************************************************************
+
+!Read data file name
+!TODO: this should be standardized and read in anaddb always, not
+!conditionally. Otherwise when new files are added to the anaddb files
+!file...  Catastrophe!
+
+ write(std_out,*)'enter read_el_veloc '
+
+!Read data file
+ if (open_file(elph_tr_ds%ddkfilename,msg,newunit=unit_ddk,form='formatted') /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ rewind(unit_ddk)
+ read(unit_ddk,'(a)')filnam1       ! first ddk file
+ read(unit_ddk,'(a)')filnam2       ! second ddk file
+ read(unit_ddk,'(a)')filnam3       ! third ddk file
+ close (unit_ddk)
+
+ bantot1 = 2*nband_in**2*nkpt_in*nsppol_in
+
+ call inpgkk(eigen11,filnam1,hdr1)
+ call hdr_free(hdr1)
+
+ call inpgkk(eigen12,filnam2,hdr1)
+ call hdr_free(hdr1)
+
+!we use the hdr1 from the last call - should add some consistency
+!testing here, we are trusting users not to mix different ddk files...
+ call inpgkk(eigen13,filnam3,hdr1)
+
+!Extract info from the header
+ if(hdr1%nsppol /= nsppol_in) then
+   MSG_ERROR('nsspol /= input nsppol')
+ end if
+
+!Get mband, as the maximum value of nband(nkpt)
+ mband=maxval(hdr1%nband(1:hdr1%nkpt))
+ if (mband /= nband_in) then
+   MSG_ERROR('nband_in input to read_el_veloc is inconsistent with mband')
+ end if
+
+ write(std_out,*)
+ write(std_out,*)                     'readings from read_el_veloc header'
+ write(std_out,'(a,i8)')              ' natom                =',hdr1%natom
+ write(std_out,'(a,3i8)')             ' nkpt,nband_in,mband  =',hdr1%nkpt,nband_in,mband
+ write(std_out,'(a, f10.5,a)' )      ' ecut                 =',hdr1%ecut,' Ha'
+ write(std_out,'(a,e15.5,a,e15.5,a)' )' fermie               =',hdr1%fermie,' Ha ',hdr1%fermie*Ha_eV,' eV'
+
+ ABI_ALLOCATE(eig1_k,(2*nband_in**2,3))
+ bd2tot_index = 0
+ elph_tr_ds%el_veloc=zero
+
+!need correspondence between the DDK kpoints and the kpt_phon
+ call mkkptrank (hdr1%kptns,hdr1%nkpt,kptrank_t)
+
+ do isppol=1,nsppol_in
+   im_el_veloc(:)=zero
+   do ikpt=1,nkpt_in
+     call get_rank_1kpt (kpt_in(:,ikpt),symrankkpt, kptrank_t)
+     ikpt_ddk = kptrank_t%invrank(symrankkpt)
+     if (ikpt_ddk == -1) then
+       write(std_out,*)'read_el_veloc ******** error in correspondence between ddk and gkk kpoint sets'
+       write(std_out,*)' kpt sets in gkk and ddk files must agree.'
+       MSG_ERROR("Aborting now")
+     end if
+     bd2tot_index=2*nband_in**2*(ikpt_ddk-1)
+
+!    first derivative eigenvalues for k-point
+     eig1_k(:,1)=eigen11(1+bd2tot_index:2*nband_in**2+bd2tot_index)
+     eig1_k(:,2)=eigen12(1+bd2tot_index:2*nband_in**2+bd2tot_index)
+     eig1_k(:,3)=eigen13(1+bd2tot_index:2*nband_in**2+bd2tot_index)
+
+!    turn el_veloc to cartesian coordinates
+     do iband=1,nband_in
+       do l1=1,3
+         do ii=1,3
+           elph_tr_ds%el_veloc(ikpt,iband,l1,isppol)=elph_tr_ds%el_veloc(ikpt,iband,l1,isppol)+&
+&           hdr1%rprimd(l1,ii)*eig1_k(2*iband-1+(iband-1)*2*nband_in,ii)/two_pi
+           im_el_veloc(l1)=im_el_veloc(l1)+&
+&           hdr1%rprimd(l1,ii)*eig1_k(2*iband+(iband-1)*2*nband_in,ii)/two_pi
+         end do
+       end do ! l1
+     end do
+   end do
+ end do ! end isppol
+
+ call destroy_kptrank (kptrank_t)
+ ABI_DEALLOCATE(eig1_k)
+ ABI_DEALLOCATE(eigen11)
+ ABI_DEALLOCATE(eigen12)
+ ABI_DEALLOCATE(eigen13)
+
+ call hdr_free(hdr1)
+
+ write(std_out,*)'out of read_el_veloc '
+
+end subroutine read_el_veloc
+!!***
+
+!!****f* m_iogkk/inpgkk
+!! NAME
+!! inpgkk
+!!
+!! FUNCTION
+!! read in gkk file and return eigenvalue matrix
+!! Only works for a single gkk matrix (1 perturbation and qpoint) in the file
+!! like the files produced by outgkk
+!!
+!! INPUTS
+!!
+!!  filegkk= filename
+!!
+!! OUTPUT
+!!  eigen1 = response function 1st order eigenvalue matrix
+!!
+!! PARENTS
+!!      read_el_veloc
+!!
+!! CHILDREN
+!!      hdr_fort_read,hdr_free,wrtout
+!!
+!! SOURCE
+
+subroutine inpgkk(eigen1,filegkk,hdr1)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'inpgkk'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ character(len=fnlen),intent(in) :: filegkk
+ type(hdr_type), intent(out) :: hdr1
+!arrays
+ real(dp),allocatable,intent(out) :: eigen1(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: bantot1
+ integer :: isppol, ikpt, mband, ikb
+ integer :: unitgkk, fform, ierr, n1wf, i1wf
+ type(hdr_type) :: hdr0
+ real(dp), allocatable :: eigen(:)
+ character(len=500) :: message
+
+! *************************************************************************
+
+ if (open_file(filegkk,message,newunit=unitgkk,form='unformatted',status='old') /= 0) then
+   MSG_ERROR(message)
+ end if
+
+
+!read in header of GS file and eigenvalues
+ call hdr_fort_read(hdr0, unitgkk, fform)
+ ABI_CHECK(fform /= 0, "hdr_fort_read returned fform == 0")
+
+ mband = maxval(hdr0%nband(:))
+ ABI_ALLOCATE(eigen,(mband))
+ call wrtout(std_out,'inpgkk : try to reread GS eigenvalues','COLL')
+
+ do isppol=1,hdr0%nsppol
+   do ikpt=1,hdr0%nkpt
+     read (unitgkk,IOSTAT=ierr) eigen(1:hdr0%nband(ikpt))
+     ABI_CHECK(ierr==0,'reading eigen from gkk file')
+   end do
+ end do
+
+ read(unitgkk,IOSTAT=ierr) n1wf
+ ABI_CHECK(ierr==0,"reading n1wf from gkk file")
+
+ ABI_DEALLOCATE(eigen)
+ call hdr_free(hdr0)
+
+ if (n1wf > 1) then
+   write(message,'(3a)')&
+&   'several 1wf records were found in the file,',ch10, &
+&   'which is not allowed for reading with this routine'
+   MSG_ERROR(message)
+ end if
+
+!read in header of 1WF file
+ call hdr_fort_read(hdr1, unitgkk, fform)
+ if (fform == 0) then
+   write(message,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
+   MSG_ERROR(message)
+ end if
+
+ bantot1 = 2*hdr1%nsppol*hdr1%nkpt*mband**2
+ ABI_ALLOCATE(eigen1, (bantot1))
+
+
+!retrieve 1WF <psi_k+q | H | psi_k> from gkk file and echo to output
+ ikb = 0
+ do isppol=1,hdr1%nsppol
+   do ikpt=1,hdr1%nkpt
+     read (unitgkk,IOSTAT=ierr) eigen1(ikb+1:ikb+2*hdr1%nband(ikpt)**2)
+     ikb = ikb + 2*hdr1%nband(ikpt)**2
+     if (ierr /= 0) then
+       write(message,'(a,2i0)')'reading eigen1 from gkk file, spin, kpt_idx',isppol,ikpt
+       MSG_ERROR(message)
+     end if
+   end do
+ end do
+
+ close(unitgkk)
+
+end subroutine inpgkk
+!!***
+
+end module m_iogkk
 !!***

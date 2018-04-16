@@ -72,6 +72,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  use m_xmpi
 
  use m_time,     only : timab
+ use m_geometry, only : symredcart
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
@@ -79,7 +80,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 #undef ABI_FUNC
 #define ABI_FUNC 'symrhg'
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
 !End of the abilint section
 

@@ -184,12 +184,12 @@
 -                                 =    -0.3577529454E+01 (THz)
 -Debye temperature from partial sums:    -0.1716941307E+03 (K)
 
- Average speed of sound:     0.1317063571E-03 (at units) 
--                      =           0.2881 [km/s]
+ Average speed of sound:     0.5019056303E-04 (at units) 
+-                      =           0.1098 [km/s]
 
- Debye frequency from DOS:     0.1086548544E-03 (Ha) 
--                        =     0.7149145984E+00 (THz)
--Debye temperature from DOS:     0.3431044862E+02 (K)
+ Debye frequency from DOS:     0.4140611310E-04 (Ha) 
+-                        =     0.2724391366E+00 (THz)
+-Debye temperature from DOS:     0.1307500087E+02 (K)
 
 
 ================================================================================

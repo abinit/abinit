@@ -217,7 +217,7 @@ end subroutine kpts_ibz_from_kptrlatt
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/tetra_from_kptrlatt
+!!****f* m_kpts/tetra_from_kptrlatt
 !! NAME
 !! tetra_from_kptrlatt
 !!
@@ -343,7 +343,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    ierr = 2; goto 10
  end if
 
- rlatt = new_kptrlatt; call matr3inv(rlatt,klatt)
+ rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
  call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
  if (ierr /= 0) msg = errorstring
@@ -2956,7 +2956,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 
    call xmpi_abort()
    call leave_new('PERS',exit_status=0,print_config=.false.)
-
  end if
 
 end subroutine testkgrid

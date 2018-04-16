@@ -67,6 +67,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
  use m_fstrings, only : int2char4
  use m_crystal,  only : crystal_t
  use m_ifc,      only : ifc_type
+ use m_iogkk,    only : read_gkk
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -96,7 +97,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
  character(len=500) :: message
  character(len=fnlen) :: fname
 !arrays
- integer,allocatable :: gkk_flag(:,:,:,:,:) 
+ integer,allocatable :: gkk_flag(:,:,:,:,:)
 
 ! *************************************************************************
 
