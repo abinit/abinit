@@ -558,8 +558,7 @@ end subroutine atompaw_shapebes
 !!
 !! OUTPUT
 !!  kij(pawtab%lmn2_size)= kinetic part of Dij
-!!print *,size(vminushalf);stop
-
+!!
 !! PARENTS
 !!      m_pawpsp
 !!
