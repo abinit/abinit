@@ -642,19 +642,19 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  ! =======================================================================================
 
  ! term 2b: from vhnzc - vthnzc
- do itypat=1, dtset%ntypat
-    if ( (pawtab(itypat)%has_vhnzc .NE. 2) .OR. (pawtab(itypat)%has_vhtnzc .NE. 2) ) then
-       message = "VH[n_Zc] or VH[tn_Zc] not present in pawtab..."
-       MSG_ERROR(message)
-    end if
- end do
+ ! do itypat=1, dtset%ntypat
+ !    if ( (pawtab(itypat)%has_vhnzc .NE. 2) .OR. (pawtab(itypat)%has_vhtnzc .NE. 2) ) then
+ !       message = "VH[n_Zc] or VH[tn_Zc] not present in pawtab..."
+ !       MSG_ERROR(message)
+ !    end if
+ ! end do
 
- ABI_ALLOCATE(calc_twdij,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
- call pawtwdij_2b(calc_twdij,dtorbmag,gprimd,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+ ! ABI_ALLOCATE(calc_twdij,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
+ ! call pawtwdij_2b(calc_twdij,dtorbmag,gprimd,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
- dtorbmag%twdij0(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom) = calc_twdij(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom)
+ ! dtorbmag%twdij0(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom) = calc_twdij(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom)
 
- ABI_DEALLOCATE(calc_twdij)
+ ! ABI_DEALLOCATE(calc_twdij)
  
  call timab(1009,2,tsec)
  call timab(1001,2,tsec)

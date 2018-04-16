@@ -260,7 +260,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
       & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=my_nucdipmom,&
       & paw_ij=paw_ij)
 
- !gs_hamk123 is used to compute <u_nk1|Hk2|u_mk3>. Eventually paw_ij will be the phase-twisted versions
+ !gs_hamk123 is used to compute <u_nk1|Hk2|u_mk3>. 
  call init_hamiltonian(gs_hamk123,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
       & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=my_nucdipmom,&
       & paw_ij=paw_ij)
@@ -326,7 +326,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
              end if
 
              !      Compute (1/2) (2 Pi)**2 (k+G)**2:
-!             ABI_ALLOCATE(kinpw,(npw_k))
              call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
              !  Compute (k+G) vectors (only if useylm=1)
@@ -613,7 +612,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                    ABI_ALLOCATE(bra,(2,npw_kg))
 
                    ! getghc: type_calc_123 1 means local only, 3 means kinetic, local only
-                   type_calc_123 = 0
+                   type_calc_123 = 3
 
                    do nn = 1, nband_k
                       cwavef(1,1:npw_kb) = cg(1,icgb+(nn-1)*npw_kb+1:icgb+nn*npw_kb)
@@ -634,12 +633,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                          end do
                          hmat123(1,n1,nn,ikptg,ikptb) = dotr
                          hmat123(2,n1,nn,ikptg,ikptb) = doti
-                         ! hmat123(1,nn,n1,ikptb,ikptg) = dotr
-                         ! hmat123(2,nn,n1,ikptb,ikptg) = -doti
+                         hmat123(1,nn,n1,ikptb,ikptg) = dotr
+                         hmat123(2,nn,n1,ikptb,ikptg) = -doti
                       end do
                    end do
                    has_hmat123(ikptg,ikptb) = .TRUE.
-                   ! has_hmat123(ikptb,ikptg) = .TRUE.
+                   has_hmat123(ikptb,ikptg) = .TRUE.
 
                    ABI_DEALLOCATE(cwavef)
                    ABI_DEALLOCATE(bra)
@@ -647,7 +646,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                    ABI_DEALLOCATE(gsc)
                    ABI_DEALLOCATE(gvnlc)
 
-!                   ABI_DEALLOCATE(kinpw)
                    ABI_DEALLOCATE(kpg_k_dummy)
                    ABI_DEALLOCATE(ph3d)
                    ABI_DEALLOCATE(kg_kb)
@@ -666,7 +664,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                       do n2 = 1, nband_k
 
-                         IIA2 = cmplx(hmat123(1,n1,n2,ikptg,ikptb),hmat123(2,n1,n2,ikptg,ikptb))
+!                         IIA2 = cmplx(hmat123(1,n1,n2,ikptg,ikptb),hmat123(2,n1,n2,ikptg,ikptb))
+                         IIA2=cone
                          IIA3 = cmplx(smat_all(1,n2,nn,ikptb,ikpt),smat_all(2,n2,nn,ikptb,ikpt))
 
                          IIIA2 = cmplx(smat_all(1,n1,n2,ikptb,ikptg),smat_all(2,n1,n2,ikptb,ikptg))
@@ -689,10 +688,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
        end do ! end loop over fnkpt
     end do ! end loop over epsabg
 
-    orbmagvec(1,adir) = real(IIA+IIIA)
-    orbmagvec(2,adir) = aimag(IIA+IIIA)
-    ! orbmagvec(1,adir) = real(IIIA)
-    ! orbmagvec(2,adir) = aimag(IIIA)
+    ! orbmagvec(1,adir) = real(IIA+IIIA)
+    ! orbmagvec(2,adir) = aimag(IIA+IIIA)
+    orbmagvec(1,adir) = real(IIIA)
+    orbmagvec(2,adir) = aimag(IIIA)
  end do ! end loop over adir
 
  orbmagvec(1,1:3) = MATMUL(gprimd,orbmagvec(1,1:3))
