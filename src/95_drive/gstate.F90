@@ -1169,9 +1169,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  !! orbital magnetization initialization
  dtorbmag%orbmag = dtset%orbmag
  if (dtorbmag%orbmag > 0) then
-   call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
-&   rprimd,symrec,xred)
+    call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
+&                   pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                   rprimd,symrec,xred)
  end if
 
 

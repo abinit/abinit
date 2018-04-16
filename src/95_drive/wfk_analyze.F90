@@ -131,7 +131,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,level40=40,brav1=1,timrev2=2,dummy_npw=1
+ integer,parameter :: master=0,brav1=1,timrev2=2,dummy_npw=1
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij

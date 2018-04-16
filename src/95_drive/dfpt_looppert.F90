@@ -625,6 +625,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  call set_pert_comm(mpi_enreg,dtset%nppert)
 
 !*Redistribute PAW on-site data
+ nullify(old_atmtab,pawfgrtab_pert,pawrhoij_pert,paw_an_pert,paw_ij_pert)
  if (paral_pert_inplace) then
    call set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &   paw_an,paw_ij,pawfgrtab,pawrhoij)
@@ -1718,12 +1719,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          !Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
-
-         call dfpt_init_mag1(idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
+         
+         call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
 
          if(.not.kramers_deg) then
            rhor1_pq=rhor1
-           call dfpt_init_mag1(idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
+           call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
          end if
        end if
 

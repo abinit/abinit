@@ -1701,6 +1701,11 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  dimekb = ddb_hdr%psps%dimekb
  lmnmax = ddb_hdr%psps%lmnmax
 
+ ! JWZ occopt was used below before being initialized
+ ! 13 April 2018
+ occopt = ddb_hdr%occopt
+ !
+
  call ddb_hdr_free(ddb_hdr)
 
  if (ddb_natom /= natom) then
