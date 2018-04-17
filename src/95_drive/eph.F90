@@ -632,7 +632,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
    eph_dg%ebands_dense = ebands_dense
 
-   call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     wfk0_hdr%kptopt,    )
+   call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     wfk0_hdr%kptopt     )
    call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,hdr_wfk_dense%kptopt)
 
    write(*,*) 'coarse kmesh'
