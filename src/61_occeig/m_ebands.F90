@@ -3099,7 +3099,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
    cnt = 0
    do spin=1,edos%nsppol
      do ikpt=1,ebands%nkpt
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
           wme0 = edos%mesh - ebands%eig(band, ikpt, spin)
@@ -3131,7 +3131,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
        ! For each band get its contribution
        tmp_eigen = ebands%eig(band,:,spin)
        do ikpt=1,ebands%nkpt
-         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi parallelism.
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
 
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
          call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
@@ -4154,6 +4154,11 @@ end subroutine ebspl_free
 !!
 !! OUTPUT
 !!  New ebands_t object with interpolated energies.
+!!
+!! NOTES
+!!  Fermi level and occupation factors are not recomputed by this routine.
+!!  This operation is delegated to the caller.
+!!  Strictly speaking these quantities should be recomputed only for metals or semi-metals.
 !!
 !! PARENTS
 !!

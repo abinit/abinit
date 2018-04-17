@@ -348,9 +348,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
      "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
      call wrtout(ab_out,msg)
-     call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
+     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
      if (use_wfq) then
-       call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
+       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
      end if
    end if
 
@@ -616,7 +616,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 &   dtset%eph_ngqpt_fine,dtset%qptopt,mpi_enreg,comm)
 
  case (-4)
-   call ephwg_test(cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
+   call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

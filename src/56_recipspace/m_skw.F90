@@ -227,10 +227,10 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  do
    call find_rstar_gen(new, cryst, nrwant, rmax, r2vals, comm)
    if (new%nr >= nrwant) then
-     write(std_out,*)"Entered with rmax",rmax,"abs(skw%rpts(last)): ",abs(new%rpts(:,new%nr))
+     !write(std_out,*)"Entered with rmax", rmax," abs(skw%rpts(last)): ", abs(new%rpts(:,new%nr))
      exit
    end if
-   write(std_out,*)"rmax: ",rmax," was not large enough to find ",nrwant," R-star points."
+   write(std_out,*)"rmax: ", rmax," was not large enough to find ", nrwant," R-star points."
    rmax = 2 * rmax
    write(std_out,*)"Will try again with enlarged rmax: ",rmax
    ABI_FREE(r2vals)
@@ -281,7 +281,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  end do
 
  ! Solve all bands and spins at once
- call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", &
+ call wrtout(std_out, " Solving system of linear equations to get lambda coefficients (eq. 10 of PRB 38 2721)...", &
              do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
  ABI_MALLOC(ipiv, (nkpt-1))

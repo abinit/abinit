@@ -702,7 +702,7 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
 
 !Local variables-------------------------------
 !scalars
- integer :: itetra,nprocs,my_start,my_stop,ierr
+ integer :: itetra,nprocs,my_start,my_stop,ierr,ii
  real(dp_) :: deltaene,volconst,volconst_mult
 !arrays
  integer :: ind_ibz(4)
@@ -748,14 +748,14 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
    call get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr,tweight_tmp,dtweightde_tmp)
 
    ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
-   !call daxpy (nene, 1.d0,    tweight_tmp(:,1), 1,    tweight_t(:,ind_ibz(1)), 1)
-   !call daxpy (nene, 1.d0,    tweight_tmp(:,2), 1,    tweight_t(:,ind_ibz(2)), 1)
-   !call daxpy (nene, 1.d0,    tweight_tmp(:,3), 1,    tweight_t(:,ind_ibz(3)), 1)
-   !call daxpy (nene, 1.d0,    tweight_tmp(:,4), 1,    tweight_t(:,ind_ibz(4)), 1)
-   !call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_ibz(1)), 1)
-   !call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_ibz(2)), 1)
-   !call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_ibz(3)), 1)
-   !call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_ibz(4)), 1)
+   !if (nene > 100) then
+   !  do ii=1,4
+   !    call daxpy (nene, 1.d0, tweight_tmp(:,ii), 1, tweight_t(:,ind_ibz(ii)), 1)
+   !  end do
+   !  do ii=1,4
+   !    call daxpy (nene, 1.d0, dtweightde_tmp(:,ii), 1, dtweightde_t(:,ind_ibz(ii)), 1)
+   !  end do
+   !else
    tweight_t(:,ind_ibz(1)) = tweight_t(:,ind_ibz(1)) + tweight_tmp(:,1)
    tweight_t(:,ind_ibz(2)) = tweight_t(:,ind_ibz(2)) + tweight_tmp(:,2)
    tweight_t(:,ind_ibz(3)) = tweight_t(:,ind_ibz(3)) + tweight_tmp(:,3)
@@ -764,6 +764,7 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
    dtweightde_t(:,ind_ibz(2)) = dtweightde_t(:,ind_ibz(2)) + dtweightde_tmp(:,2)
    dtweightde_t(:,ind_ibz(3)) = dtweightde_t(:,ind_ibz(3)) + dtweightde_tmp(:,3)
    dtweightde_t(:,ind_ibz(4)) = dtweightde_t(:,ind_ibz(4)) + dtweightde_tmp(:,4)
+   !end if
  end do ! itetra
 
  TETRA_DEALLOCATE(tweight_tmp)
@@ -1275,19 +1276,18 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
      ! dtweightde unchanged by this tetrahedron
    end do
 
-   !
-   !  if we have a fully degenerate tetrahedron,
-   !  1) the tweight is a Heaviside (step) function, which is correct above, but
-   !  2) the dtweightde should contain a Dirac function: add a Gaussian here
+   ! if we have a fully degenerate tetrahedron,
+   ! 1) the tweight is a Heaviside (step) function, which is correct above, but
+   ! 2) the dtweightde should contain a Dirac function: add a Gaussian here
 
-   ! TODO : add treatment in double tetra case
+   ! TODO: add treatment in double tetra case
    !  end degenerate tetrahedron if
 
-   ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
-   !   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_ibz(1)), 1)
-   !   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_ibz(2)), 1)
-   !   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_ibz(3)), 1)
-   !   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_ibz(4)), 1)
+   ! the following blas calls are not working systematically, or do not give speed ups, strange...
+   !call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_ibz(1)), 1)
+   !call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_ibz(2)), 1)
+   !call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_ibz(3)), 1)
+   !call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_ibz(4)), 1)
 
    do ieps2 = 1, nene2
      dtweightde(ind_k(1),:,ieps2) = dtweightde(ind_k(1),:,ieps2) + dtweightde_tmp(1,ieps2,:)
