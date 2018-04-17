@@ -56,6 +56,7 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
+ use m_bz_mesh,        only : kmesh_t
  use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
@@ -79,11 +80,53 @@ module m_sigmaph
 
  ! Double grid datatype for electron-phonon
  type,public :: eph_double_grid_t
-   type(double_grid_t)  :: double_grid
    type(ebands_t)       :: ebands_dense
+
+   real(dp),allocatable :: kpts_coarse(:,:)
+   real(dp),allocatable :: kpts_dense(:,:)
+   integer :: coarse_nbz, dense_nbz
+
+   integer,allocatable  :: bz2ibz_coarse(:)
+   ! map full Brillouin zone to ibz (in the coarse grid)
+
    integer,allocatable  :: bz2ibz_dense(:)
+   ! map full Brillouin zone to ibz (in the dense grid)
+
    integer,allocatable  :: scatter_dense(:,:)
+   ! given k and k' get q with k - k' = q (indexes in the full brillouin zone)
+
+   integer :: nkpt_coarse(3), nkpt_dense(3)
+   ! size of the coarse and dense meshes
+
+   integer :: interp_kmult(3)
+   ! multiplicity of the meshes
+
+   integer :: ndiv
+   ! interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
+
+   ! the integer indexes for the coarse grid are calculated for kk(3) with:
+   ! [nint(kk(1)*nkpt_coarse(1))+1,
+   !  nint(kk(2)*nkpt_coarse(2))+1,
+   !  nint(kk(3)*nkpt_coarse(3))+1]
+
+   integer,allocatable :: indexes_to_coarse(:,:,:)
+   ! given integer indexes get the array index of the kpoint (coarse)
+   integer,allocatable :: coarse_to_indexes(:,:)
+   ! given the array index get the integer indexes of the kpoints (coarse)
+
+   integer,allocatable :: indexes_to_dense(:,:,:)
+   ! given integer indexes get the array index of the kpoint (dense)
+   integer,allocatable :: dense_to_indexes(:,:)
+   ! given the array index get the integer indexes of the kpoint (dense)
+
+   integer,allocatable :: dense_to_coarse(:)
+   ! map dense to coarse mesh (mult(intep_kmult))
+
+   integer,allocatable :: coarse_to_dense(:,:)
+   ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
+
    real(dp),allocatable :: phfrq_dense(:,:)
+   ! phonon frequencies calculated on the dense mesh
  end type eph_double_grid_t 
  
  
@@ -415,6 +458,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
+ integer :: ik_bz, ikq_bz, iq_bz
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
@@ -432,13 +476,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(rf_hamiltonian_type) :: rf_hamkq
  type(sigmaph_t) :: sigma
  type(gspline_t) :: gspl
- type(double_grid_t) :: double_grid
  type(ebands_t) :: ebands_dense
+ type(kmesh_t) :: kmesh_dense
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
- integer :: indkk_kq(1,6)
+ integer :: indkk_kq(1,6), nkpt_coarse(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: lf(2),rg(2),res(2)
@@ -922,43 +966,51 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! double grid stuff
                !
                if (present(eph_double_grid)) then
-                  double_grid = eph_double_grid%double_grid
                   ebands_dense = eph_double_grid%ebands_dense
+                  nkpt_coarse = eph_double_grid%nkpt_coarse
+
+                  !calculate index of kk in the coarse grid
+                  ik_bz  = eph_double_grid%indexes_to_coarse(&
+                           mod(nint((kk(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
+                           mod(nint((kk(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
+                           mod(nint((kk(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
+
+                  ikq_bz = eph_double_grid%indexes_to_coarse(&
+                           mod(nint((kq(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
+                           mod(nint((kq(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
+                           mod(nint((kq(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
+
+                  iq_bz  = eph_double_grid%indexes_to_coarse(&
+                           mod(nint((qpt(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
+                           mod(nint((qpt(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
+                           mod(nint((qpt(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
 
                   cfact = 0
 
                   !fine grid around k
-                  do ii=1,double_grid%ndiv
+                  do ii=1,eph_double_grid%ndiv
 
                     !get eig0nk for this fine k point
-                    ! we modify the coarse_to_dense indexes
-                    ik_bz_fine = double_grid%coarse_to_dense(ik_ibz,ii)
-                    ik_ibz_fine  = eph_double_grid%bz2ibz_dense(ik_bz_fine)
-                    ! ik_ibz_fine = double_grid%coarse_to_dense(ik_ibz,ii)
+                    ik_bz_fine = eph_double_grid%coarse_to_dense(ik_bz,ii)
+                    ik_ibz_fine = eph_double_grid%bz2ibz_dense(ik_bz_fine)
 
                     eig0nk = ebands_dense%eig(band,ik_ibz_fine,spin)
 
                     !fine grid around k+q
-                    do jj=1,double_grid%ndiv
+                    do jj=1,eph_double_grid%ndiv
 
                       !get eig0mkq and wqnu for this fine grid k+q
-
-                      ! we modify the coarse_to_dense indexes
-                      ikq_bz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
+                      ikq_bz_fine = eph_double_grid%coarse_to_dense(ikq_bz,jj)
                       ikq_ibz_fine = eph_double_grid%bz2ibz_dense(ikq_bz_fine)
-                      !ikq_ibz_fine = double_grid%coarse_to_dense(ikq_ibz,jj)
 
                       eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                       !f_mkq = ebands_dense%occ(ibsum_kq,ikq_ibz_fine,spin)
 
-                      ! we could modify the scatter indexes
                       iq_bz_fine = eph_double_grid%scatter_dense(ik_bz_fine,ikq_bz_fine)
                       iq_ibz_fine = eph_double_grid%bz2ibz_dense(iq_bz_fine)
-                      ! gives the index of iq_ibz from ik_ibz,ikq_ibz
-                      !iq_ibz_fine = scatter_dense(ik_bz_fine,ikq_bz_fine)
 
                       wqnu = eph_double_grid%phfrq_dense(nu,iq_ibz_fine)
-
+ 
                       !calculate nqnu, f_mkq
                       nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
 
@@ -967,7 +1019,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                     enddo
                   enddo
-                  cfact = cfact / double_grid%ndiv**2
+                  cfact = cfact / eph_double_grid%ndiv**2
                else
                   cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)

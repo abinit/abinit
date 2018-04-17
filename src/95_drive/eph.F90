@@ -146,8 +146,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: interp_kmult(3)
- integer :: ii,jj,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
+ integer :: interp_kmult(3), nkpt_coarse(3), nkpt_dense(3)
+ integer :: ii,jj,kk,i1,i2,i3,i_coarse,i_dense,i_subdense
+ integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
@@ -163,22 +164,21 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands, ebands_kq, ebands_double
+ type(ebands_t) :: ebands, ebands_kq, ebands_dense
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
  type(ddk_t) :: ddk
  type(ifc_type) :: ifc
- type(kmesh_t) :: kmesh, kmesh_dense, qmesh_dense
+ type(kmesh_t) :: kmesh, kmesh_dense
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
  type(hdr_type) :: hdr_wfk_dense
- type(double_grid_t) :: double_grid 
- type(eph_double_grid_t) :: eph_double_grid
+ type(eph_double_grid_t) :: eph_dg
 !arrays
  integer :: ngfftc(18),ngfftf(18)
+ integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: dummy_atifc(:)
- integer,allocatable :: scatter_dense(:,:), bz2ibz_dense(:) 
  integer,allocatable :: indqq(:,:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dksqmax
@@ -627,13 +627,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      MSG_ERROR(msg)
    end if
 
-
    call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
    call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
-   eph_double_grid%ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
+   ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
+   eph_dg%ebands_dense = ebands_dense
 
-   call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     dtset%kptopt)
-   call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,dtset%kptopt)
+   call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     wfk0_hdr%kptopt,    )
+   call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,hdr_wfk_dense%kptopt)
 
    write(*,*) 'coarse kmesh'
    call kmesh_print(kmesh)
@@ -642,80 +642,177 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    ! for preliminary tests we hardcode interp_kmult
    ! then it should be calculated from hdr_wfk_dense%nkpt
-   ! it can also be read from the input file using BSp%interp_kmult
-   interp_kmult(1) = hdr_wfk_dense%kptrlatt(1,1) / wfk0_hdr%kptrlatt(1,1)
-   interp_kmult(2) = hdr_wfk_dense%kptrlatt(2,2) / wfk0_hdr%kptrlatt(2,2)
-   interp_kmult(3) = hdr_wfk_dense%kptrlatt(3,3) / wfk0_hdr%kptrlatt(3,3)
 
-   write(*,*) 'interp_kmult',interp_kmult
+   nkpt_coarse = [wfk0_hdr%kptrlatt(1,1),&
+                  wfk0_hdr%kptrlatt(2,2),&
+                  wfk0_hdr%kptrlatt(3,3)]
+   nkpt_dense  = [hdr_wfk_dense%kptrlatt(1,1),&
+                  hdr_wfk_dense%kptrlatt(2,2),&
+                  hdr_wfk_dense%kptrlatt(3,3)]
+   interp_kmult = nkpt_dense/nkpt_coarse
 
-   kmesh%nshift = 1
-   kmesh_dense%nshift = 1
-   kmesh%shift = wfk0_hdr%shiftk
-   kmesh_dense%shift = hdr_wfk_dense%shiftk
+   write(*,*) 'coarse:      ', nkpt_coarse
+   write(*,*) 'dense:       ', nkpt_dense
+   write(*,*) 'interp_kmult:', interp_kmult
 
  !2.
-   call double_grid_init(kmesh,kmesh_dense,dtset%kptrlatt,interp_kmult,double_grid)
-   eph_double_grid%double_grid = double_grid
+   !call double_grid_init(kmesh,kmesh_dense,wfk0_hdr%kptrlatt,interp_kmult,double_grid)
+
+   allocate(eph_dg%kpts_coarse(3,kmesh%nbz))
+   allocate(eph_dg%kpts_dense(3,kmesh_dense%nbz))
+   allocate(eph_dg%dense_to_coarse(kmesh_dense%nbz))
+   allocate(eph_dg%coarse_to_dense(kmesh%nbz,interp_kmult(1)*interp_kmult(2)*interp_kmult(3)))
+
+   allocate(eph_dg%dense_to_indexes(3,kmesh_dense%nbz))
+   allocate(eph_dg%indexes_to_dense(nkpt_dense(1),nkpt_dense(2),nkpt_dense(3)))
+
+   allocate(eph_dg%coarse_to_indexes(3,kmesh%nbz))
+   allocate(eph_dg%indexes_to_coarse(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
+
+   allocate(eph_dg%scatter_dense(kmesh_dense%nbz,kmesh_dense%nbz))
+   eph_dg%dense_nbz = kmesh_dense%nbz
+   eph_dg%coarse_nbz = kmesh%nbz
+   eph_dg%interp_kmult = interp_kmult
+   eph_dg%nkpt_coarse = nkpt_coarse
+   eph_dg%nkpt_dense = nkpt_dense
+   eph_dg%ndiv = interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
+ 
+   write(*,*) 'create dense to coarse mapping'
+   ! generate mapping of points in dense bz to the dense bz
+   ! coarse loop
+   i_dense = 0
+   i_coarse = 0
+   do kk=1,nkpt_coarse(3)
+     do jj=1,nkpt_coarse(2)
+       do ii=1,nkpt_coarse(1)
+         i_coarse = i_coarse + 1
+         !calculate reduced coordinates of point in coarse mesh
+         eph_dg%kpts_coarse(:,i_coarse) = [dble(ii-1)/nkpt_coarse(1),&
+                                           dble(jj-1)/nkpt_coarse(2),&
+                                           dble(kk-1)/nkpt_coarse(3)]
+         !fine loop
+         i_subdense = 0
+         do i3=1,interp_kmult(3)
+           do i2=1,interp_kmult(2)
+             do i1=1,interp_kmult(1)
+               i_dense = i_dense + 1
+               i_subdense = i_subdense + 1
+               !calculate reduced coordinates of point in dense mesh
+               eph_dg%kpts_dense(:,i_dense) =  &
+                        [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
+                         dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
+                         dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
+               !array indexes mapping
+               eph_dg%dense_to_coarse(i_dense) = i_coarse
+               eph_dg%coarse_to_dense(i_coarse,i_subdense) = i_dense
+               !integer indexes mapping
+               eph_dg%indexes_to_dense((ii-1)*interp_kmult(1)+i1,&
+                                       (jj-1)*interp_kmult(2)+i2,&
+                                       (kk-1)*interp_kmult(3)+i3) = i_dense
+               eph_dg%dense_to_indexes(:,i_dense) = [(ii-1)*interp_kmult(1)+i1,&
+                                                     (jj-1)*interp_kmult(2)+i2,&
+                                                     (kk-1)*interp_kmult(3)+i3]
+             enddo
+           enddo
+         enddo
+         eph_dg%indexes_to_coarse(ii,jj,kk) = i_coarse
+         eph_dg%coarse_to_indexes(:,i_coarse) = [ii,jj,kk]
+       enddo
+     enddo
+   enddo 
+   
+   ABI_CHECK(i_dense == kmesh_dense%nbz, 'dense mesh mapping is incomplete') 
+
+   write(*,*) 'calculate scatering'
+   !from any two k and k' find q such that k - k' = q (in bz)
+   do ii=1,kmesh_dense%nbz
+     do jj=1,kmesh_dense%nbz
+       !calculate indexes of k and k'
+       indexes_jk = eph_dg%dense_to_indexes(:,jj)
+       indexes_ik = eph_dg%dense_to_indexes(:,ii)
+       !calcualte indexes of q 
+       indexes_qq = indexes_jk - indexes_ik
+       !bring to first bz
+       indexes_qq(1) = mod(indexes_qq(1)+nkpt_dense(1),nkpt_dense(1))+1
+       indexes_qq(2) = mod(indexes_qq(2)+nkpt_dense(2),nkpt_dense(2))+1
+       indexes_qq(3) = mod(indexes_qq(3)+nkpt_dense(3),nkpt_dense(3))+1
+       !calculate index of q
+       eph_dg%scatter_dense(jj,ii) = eph_dg%indexes_to_dense(indexes_qq(1),&
+                                                             indexes_qq(2),&
+                                                             indexes_qq(3))
+     enddo
+   enddo
 
  !3.
-   !find q grid  
-   call find_qmesh(qmesh_dense,cryst,kmesh_dense)
-
-   !calculate the phonon frequencies at the q-points on the dense q-grid
-   allocate(eph_double_grid%phfrq_dense(3*cryst%natom,kmesh_dense%nibz), displ_cart(2,3,cryst%natom,3*cryst%natom))
+   write(*,*) 'calculate phonon frequencies'
+   !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
+   allocate(eph_dg%phfrq_dense(3*cryst%natom,kmesh_dense%nibz), displ_cart(2,3,cryst%natom,3*cryst%natom))
    do ii=1,kmesh_dense%nibz
-     qpt = qmesh_dense%ibz(:,ii)
+     qpt = kmesh_dense%ibz(:,ii)
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-     call ifc_fourq(ifc, cryst, qpt, eph_double_grid%phfrq_dense(:,ii), displ_cart )
+     call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
    enddo   
    deallocate(displ_cart)
-
+ 
  !4. 
-   !create scatter array giving the index iq_bz from ik_bz and ikq_ibz
-   !TODO
-   allocate(eph_double_grid%bz2ibz_dense(kmesh_dense%nbz))
-   allocate(eph_double_grid%scatter_dense(kmesh_dense%nbz,kmesh_dense%nbz))
-
-   !create bz2ibz
-   allocate(indqq(qmesh_dense%nbz,6))
-   call listkk(dksqmax,cryst%gmet,indqq,&
-               qmesh_dense%ibz, qmesh_dense%bz,&
-               qmesh_dense%nibz,qmesh_dense%nbz,&
+   !create bz2ibz dense
+   write(*,*) 'map bz2ibz'
+   allocate(eph_dg%bz2ibz_dense(kmesh_dense%nbz))
+   allocate(indqq(kmesh_dense%nbz,6))
+   call listkk(dksqmax,cryst%gmet,          indqq,&
+               ebands_dense%kptns, eph_dg%kpts_dense,&
+               ebands_dense%nkpt,  eph_dg%dense_nbz,&
                cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
-   eph_double_grid%bz2ibz_dense(:) = indqq(:,1)
    ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
+   eph_dg%bz2ibz_dense(:) = indqq(:,1)
+
+   !debug
+   open (unit = 2, file = "coarse2dense.dat")
+   !write(*,*) 'indices coarse->dense'
+   do ii=1,kmesh%nbz
+     write(2,*)
+     write(2,*)
+     write(2,*) eph_dg%kpts_coarse(:,ii)
+     do jj=1,eph_dg%ndiv
+       i_dense = eph_dg%coarse_to_dense(ii,jj)
+       !write(*,*) ii, i_dense, eph_dg%bz2ibz_dense(i_dense)
+       write(2,*) eph_dg%kpts_dense(:,i_dense)
+     end do
+   end do
+
+   open (unit = 2, file = "dense2coarse.dat")
+   !write(*,*) 'indices dense->coarse'
+   do ii=1,kmesh_dense%nbz
+     write(2,*)
+     write(2,*)
+     write(2,*) eph_dg%kpts_dense(:,ii)
+     i_coarse = eph_dg%dense_to_coarse(ii)
+     !write(*,*) ii, i_coarse, eph_dg%bz2ibz_dense(i_coarse)
+     write(2,*) eph_dg%kpts_coarse(:,i_coarse)
+   end do
+
+   open (unit = 2, file = "coarse.dat")
+   do ii=1,eph_dg%coarse_nbz
+     write(2,*) eph_dg%kpts_coarse(:,ii)
+   end do
+   close(2)
+
+   open (unit = 2, file = "dense.dat")
+   do ii=1,eph_dg%dense_nbz
+     write(2,*) eph_dg%kpts_dense(:,ii)
+   end do
+   close(2)
+   !end debug
 
  !5.
-   ! scatter_dense gives the q_bz_fine (q) index that scatters from ik_bz_fine -> ikq_bz_fine (k -> k+q)
-   ! this is most likely not the most efficient way to do this
-   allocate(kq_kpts(3,qmesh_dense%nbz))
-   do ii=1,qmesh_dense%nbz
-     qpt = qmesh_dense%bz(:,ii)
-     !calculate k+q
-     do jj=1,qmesh_dense%nbz
-       kq_kpts(:,jj) = kmesh_dense%bz(:,jj) + qpt
-     enddo
-     !get indexes of k in k+q
-     call listkk(dksqmax,cryst%gmet,indqq,&
-                 kmesh_dense%bz, kq_kpts,&
-                 kmesh_dense%nbz,kmesh_dense%nbz,&
-                 cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
-     ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
-     !store in the scatter array
-     do jj=1,qmesh_dense%nbz
-       eph_double_grid%scatter_dense(jj,indqq(jj,1)) = ii
-     end do
-   enddo
-   deallocate(indqq)
 
  !6. we will call sigmaph here for testing purposes only
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_double_grid)
+                pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_dg)
 
-   deallocate(eph_double_grid%phfrq_dense)
-   deallocate(eph_double_grid%scatter_dense)
-   deallocate(eph_double_grid%bz2ibz_dense)
+   deallocate(eph_dg%phfrq_dense)
+   deallocate(eph_dg%scatter_dense)
+   deallocate(eph_dg%bz2ibz_dense)
 
    call exit(0)
  end if
