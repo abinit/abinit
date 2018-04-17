@@ -57,7 +57,6 @@ subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtoful
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nmsq_gam'
- use interfaces_77_ddb, except_this_one => nmsq_gam
 !End of the abilint section
 
  implicit none

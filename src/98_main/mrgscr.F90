@@ -65,6 +65,7 @@ program mrgscr
  use m_crystal
  use m_pawrhoij
 
+ use m_specialmsg,          only : specialmsg_getcount, herald
  use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT
  use m_io_tools,            only : prompt, file_exists, flush_unit, open_file

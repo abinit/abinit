@@ -55,7 +55,6 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nmsq_gam_sumFS'
- use interfaces_77_ddb, except_this_one => nmsq_gam_sumFS
 !End of the abilint section
 
  implicit none

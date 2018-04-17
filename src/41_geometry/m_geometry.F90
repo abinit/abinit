@@ -61,6 +61,7 @@ MODULE m_geometry
  public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
  public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
+ public  :: symredcart        ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
 
  interface normv
   module procedure normv_rdp_vector
@@ -2895,6 +2896,82 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
  end if
 
 end subroutine remove_inversion
+!!***
+
+!!****f* m_geometry/symredcart
+!! NAME
+!! symredcart
+!!
+!! FUNCTION
+!! Convert a symmetry operation from reduced coordinates (integers)
+!! to cartesian coordinates (reals). Can operate in real or reciprocal space
+!!
+!! INPUTS
+!! symred(3,3)=symmetry matrice in reduced coordinates (integers) (real or reciprocal space)
+!! aprim(3,3)=real or reciprocal space dimensional primitive translations (see below)
+!! bprim(3,3)=real or reciprocal space dimensional primitive translations (see below)
+!!
+!! OUTPUT
+!! symcart(3,3)=symmetry matrice in cartesian coordinates (reals)
+!!
+!! NOTES
+!! When aprim=rprimd and bprim=gprimd, the routine operates in real space (on a real space symmetry)
+!! When aprim=gprimd and bprim=rprimd, the routine operates in reciprocal space (on a real space symmetry)
+!!
+!! PARENTS
+!!      m_matlu,m_phonons,symrhg
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine symredcart(aprim,bprim,symcart,symred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symredcart'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: symred(3,3)
+ real(dp),intent(in) :: aprim(3,3),bprim(3,3)
+ real(dp),intent(out) :: symcart(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj,kk
+ real(dp) :: symtmp
+!arrays
+ real(dp) :: work(3,3)
+
+! *************************************************************************
+
+ work=zero
+ do kk=1,3
+   do jj=1,3
+     symtmp=dble(symred(jj,kk))
+     do ii=1,3
+       work(ii,jj)=work(ii,jj)+bprim(ii,kk)*symtmp
+     end do
+   end do
+ end do
+
+ symcart=zero
+ do kk=1,3
+   do jj=1,3
+     symtmp=work(jj,kk)
+     do ii=1,3
+       symcart(ii,jj)=symcart(ii,jj)+aprim(ii,kk)*symtmp
+     end do
+   end do
+ end do
+
+end subroutine symredcart
 !!***
 
 end module  m_geometry

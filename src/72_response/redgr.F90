@@ -24,7 +24,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
 !!   see ~abinit/doc/variables/vargs.htm#ngfft
