@@ -104,7 +104,7 @@
  use m_errors
  use m_hdr
 
- use m_kg,       only : ph1d3d
+ use m_kg,       only : ph1d3d, mkkpg
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
 &                       pawcprj_set_zero, pawcprj_mpi_sum
 

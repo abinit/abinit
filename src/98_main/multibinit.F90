@@ -58,9 +58,10 @@ program multibinit
  use m_abihist
  use m_ab7_invars
 
+ use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit, open_file
  use m_fstrings,   only : replace, inupper
- use m_time,       only : asctime
+ use m_time,       only : asctime, timein
  use m_parser,     only : instrng
 
 !This section has been created automatically by the script Abilint (TD).
@@ -68,7 +69,6 @@ program multibinit
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_78_effpot
  use interfaces_95_drive

@@ -82,7 +82,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
 
  use defs_basis
- use defs_parameters
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
@@ -100,6 +99,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #endif
  use m_xgScalapack
 
+ use m_time,         only : timab
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
@@ -111,6 +111,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
 
+ use m_bethe_salpeter,   only : bethe_salpeter
+ use m_screening_driver, only : screening
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
@@ -121,7 +124,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'driver'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
@@ -589,7 +591,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call libxc_functionals_init(dtset%ixc,dtset%nspden)
 
 #if defined DEV_YP_VDWXC
-     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) ) then
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
        vdw_params%functional = dtset%vdw_xc
        vdw_params%acutmin = dtset%vdw_df_acutmin
        vdw_params%aratio = dtset%vdw_df_aratio
@@ -633,6 +635,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &       '[vdW-DF] activation threshold: vdw_df_threshold=',dtset%vdw_df_threshold,ch10
        call xc_vdw_trigger(.false.)
        call wrtout(std_out,message,'COLL')
+     end if
+#else
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
+       write(message,'(3a)')&
+&       'vdW-DF functionals are not fully operational yet.',ch10,&
+&       'Action : modify vdw_xc'
+       MSG_ERROR(message)
      end if
 #endif
    end if

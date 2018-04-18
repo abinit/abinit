@@ -136,7 +136,7 @@ end type gaussian_expansion_t
 type, public :: shape_function_t
   logical              :: tread=.false.
   character(len=20)    :: gtype
-  real(dpxml)          :: rc=0 !vz_z
+  real(dpxml)          :: rc=0
   character(len=6)     :: grid
   integer              :: lamb
   real(dpxml), allocatable :: data(:,:)
@@ -2371,22 +2371,24 @@ end subroutine paw_setup_copy
 
 
 !Local variables ---------------------------------------
- integer :: funit,iaewf,ii,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh
+ integer :: funit,iaewf,ii,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh,shft
  logical :: endfile,found, tread
- real(dp),allocatable :: work(:),phitmp(:,:)
  type(pawrad_type) :: tmpmesh
  character(len=100) :: msg,version
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg
  character (len=30) :: strg1
+ integer,allocatable :: mesh_shift(:)
+ real(dp),allocatable :: work(:),phitmp(:,:)
  character (len=20), allocatable :: gridwf(:),statewf(:)
  type(state_t),allocatable   :: corestate (:)
  type(radial_grid_t),allocatable   :: grids (:)
  type(pawrad_type),allocatable :: radmesh(:)
 
 ! *************************************************************************
- funit=100
+
 !Open the atomicdata XML file for reading
+ funit=100
  open(unit=funit,file=filename,form='formatted',status='old', recl=XML_RECL)
 
 !Start a reading loop
@@ -2560,14 +2562,17 @@ end subroutine paw_setup_copy
  nmesh=igrid
  if(nmesh>0)then
    LIBPAW_DATATYPE_ALLOCATE(radmesh,(nmesh))
+   LIBPAW_ALLOCATE(mesh_shift,(nmesh))
    do imsh=1,nmesh
      radmesh(imsh)%mesh_type=-1
      radmesh(imsh)%rstep=zero
      radmesh(imsh)%lstep=zero
+     mesh_shift(imsh)=0
      select case(trim(grids(imsh)%eq))
        case("r=a*exp(d*i)")
+         mesh_shift(imsh)=1
          radmesh(imsh)%mesh_type=3
-         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+2
+         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+1+mesh_shift(imsh)
          radmesh(imsh)%rstep=grids(imsh)%aa
          radmesh(imsh)%lstep=grids(imsh)%dd
        case("r=a*i/(1-b*i)")
@@ -2576,19 +2581,22 @@ end subroutine paw_setup_copy
 &         '  Action: check your psp file.'
          MSG_ERROR(msg)
        case("r=a*i/(n-i)")
+         mesh_shift(imsh)=0
          radmesh(imsh)%mesh_type=5
-         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+1
+         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+1+mesh_shift(imsh)
          radmesh(imsh)%rstep=grids(imsh)%aa
          radmesh(imsh)%lstep=dble(grids(imsh)%nn)
        case("r=a*(exp(d*i)-1)")
+         mesh_shift(imsh)=0
          radmesh(imsh)%mesh_type=2
-         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+1
-        if(grids(imsh)%istart==1)radmesh(imsh)%mesh_size=radmesh(imsh)%mesh_size+1
+         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+1+mesh_shift(imsh)
+         if(grids(imsh)%istart==1)radmesh(imsh)%mesh_size=radmesh(imsh)%mesh_size+1
          radmesh(imsh)%rstep=grids(imsh)%aa
          radmesh(imsh)%lstep=grids(imsh)%dd
        case("r=d*i")
+         mesh_shift(imsh)=0
          radmesh(imsh)%mesh_type=1
-         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+1
+         radmesh(imsh)%mesh_size=grids(imsh)%iend-grids(imsh)%istart+1+mesh_shift(imsh)
          if(grids(imsh)%istart==1)radmesh(imsh)%mesh_size=radmesh(imsh)%mesh_size+1
          radmesh(imsh)%rstep=grids(imsh)%dd
        case("r=(i/n+a)^5/a-a^4")
@@ -2606,7 +2614,7 @@ end subroutine paw_setup_copy
  LIBPAW_DATATYPE_ALLOCATE(gridwf,(nphicor))
  LIBPAW_DATATYPE_ALLOCATE(statewf,(nphicor))
  maxmeshz=maxval(radmesh(:)%mesh_size)
- LIBPAW_ALLOCATE(phitmp,(nphicor, maxmeshz))
+ LIBPAW_ALLOCATE(phitmp,(nphicor,maxmeshz))
 
  do while (.not.endfile)
    read(funit,'(a)',err=11,end=11) readline
@@ -2649,8 +2657,8 @@ end subroutine paw_setup_copy
        if(trim(gridwf(ii))==trim(grids(imsh)%id)) imeshae=imsh
      end do
      if ((pawrad%mesh_type/=radmesh(imeshae)%mesh_type) &
-&     .or.(pawrad%rstep/=radmesh(imeshae)%rstep) &
-&     .or.(pawrad%lstep/=radmesh(imeshae)%lstep)) then
+&    .or.(pawrad%rstep/=radmesh(imeshae)%rstep) &
+&    .or.(pawrad%lstep/=radmesh(imeshae)%lstep)) then
        if(maxmeshz>pawrad%mesh_size) then
          write(msg, '(3a)' )&
 &         '  rdpawpsxml_core:maxmeshz>pawrad%mesh_size',ch10,&
@@ -2667,14 +2675,17 @@ end subroutine paw_setup_copy
        LIBPAW_DEALLOCATE(work)
        call pawrad_free(tmpmesh)
      else
-       phi_cor(1:radmesh(imeshae)%mesh_size,ii)=phitmp(ii,1:radmesh(imeshae)%mesh_size)
+       shft=mesh_shift(imeshae)
+       phi_cor(1+shft:radmesh(imeshae)%mesh_size,ii)=phitmp(ii,1:radmesh(imeshae)%mesh_size-shft)
+       phi_cor(1+shft:maxmeshz,ii)=phi_cor(1+shft:maxmeshz,ii)*radmesh(imeshae)%rad(1+shft:maxmeshz)
        if (radmesh(imeshae)%mesh_size<maxmeshz) phi_cor(radmesh(imeshae)%mesh_size+1:maxmeshz,ii)=zero
-       phi_cor(1:maxmeshz,ii)=phi_cor(1:maxmeshz,ii)*radmesh(imeshae)%rad(1:maxmeshz)
+       if (shft==1) phi_cor(1,ii)=zero
      end if
    end do
  end if
 
  LIBPAW_DATATYPE_DEALLOCATE(radmesh)
+ LIBPAW_DATATYPE_DEALLOCATE(mesh_shift)
 
  LIBPAW_DATATYPE_DEALLOCATE(grids)
  LIBPAW_DATATYPE_DEALLOCATE(corestate)

@@ -50,6 +50,7 @@
 !! SOURCE
 
 subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
+
  use defs_basis
  use defs_abitypes
  use m_cgtools
@@ -58,12 +59,13 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  use m_profiling_abi
  use m_abi_linalg
 
+ use m_time,     only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rayleigh_ritz_subdiago'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs, except_this_one => rayleigh_ritz_subdiago
 !End of the abilint section
 
@@ -295,6 +297,7 @@ end subroutine rayleigh_ritz_subdiago
 !!
 !! SOURCE
 subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
+
  use defs_basis
  use defs_abitypes
  use m_errors
@@ -303,11 +306,12 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  use m_abi_linalg
  use m_slk
 
+ use m_time,     only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rayleigh_ritz_distributed'
- use interfaces_18_timing
  use interfaces_66_wfs, except_this_one => rayleigh_ritz_distributed
 !End of the abilint section
 

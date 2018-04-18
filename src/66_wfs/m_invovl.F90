@@ -34,12 +34,13 @@
 
 MODULE m_invovl
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
  use m_errors
  use m_xmpi
+ use m_profiling_abi
+
+ use m_time,              only : timab
 
  implicit none
 
@@ -208,7 +209,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #undef ABI_FUNC
 #define ABI_FUNC 'make_invovl'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -481,7 +481,6 @@ end subroutine make_invovl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'apply_invovl'
- use interfaces_18_timing
  use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section

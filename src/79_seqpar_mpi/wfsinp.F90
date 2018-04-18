@@ -138,6 +138,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  use mpi
 #endif
 
+ use m_time,       only : timab
  use m_occ,        only : pareigocc
 
 !This section has been created automatically by the script Abilint (TD).
@@ -145,7 +146,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfsinp'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_62_iowfdenpot
  use interfaces_66_wfs

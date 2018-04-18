@@ -78,21 +78,22 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_ebands
  use m_xcdata
 
+ use m_time,     only : timab
  use m_dynmat,   only : d3sym, sytens
- use m_ddb,      only : nlopt, DDB_VERSION
+ use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_kg,       only : getcut, kpgio
+ use m_kpts,     only : getkgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts

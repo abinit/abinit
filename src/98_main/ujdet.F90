@@ -38,15 +38,15 @@ program ujdet
  use defs_basis
  use defs_abitypes
  use defs_datatypes
- use defs_parameters
  use m_xmpi
  use m_profiling_abi
  use m_build_info
  use m_errors
 
- use m_io_tools,  only : open_file
- use m_parser,    only : intagm, parsefile
- use m_mpinfo,    only : destroy_mpi_enreg
+ use m_specialmsg,  only : specialmsg_getcount, herald
+ use m_io_tools,    only : open_file
+ use m_parser,      only : intagm, parsefile
+ use m_mpinfo,      only : destroy_mpi_enreg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

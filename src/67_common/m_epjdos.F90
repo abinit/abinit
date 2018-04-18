@@ -51,6 +51,7 @@ module m_epjdos
  use m_pawtab,         only : pawtab_type
  use m_kpts,           only : tetra_from_kptrlatt
  use m_kg,             only : ph1d3d
+ use m_fftcore,        only : sphereboundary
 
  implicit none
 
@@ -1232,7 +1233,6 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dens_in_sph'
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
 !End of the abilint section
 

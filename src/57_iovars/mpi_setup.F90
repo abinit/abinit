@@ -52,7 +52,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
  use defs_basis
  use defs_abitypes
- use defs_parameters
  use m_distribfft
  use m_xmpi
  use m_errors
@@ -61,7 +60,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use m_geometry,     only : metric
  use m_parser,       only : intagm
  use m_geometry,     only : mkrdim
- use m_fftcore,      only : fftalg_for_npfft
+ use m_fftcore,      only : fftalg_for_npfft, getng
  use m_mpinfo,       only : init_mpi_enreg,mpi_distrib_is_ok
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_dtset,        only : get_npert_rbz
@@ -74,7 +73,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_57_iovars, except_this_one => mpi_setup
 !End of the abilint section
 

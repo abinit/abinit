@@ -104,6 +104,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : wrap2_zero_one
+ use m_fftcore,        only : sphereboundary
  use m_pptools,        only : printxsf
  use m_geometry,       only : xcart2xred
  use m_crystal,        only : crystal_t
@@ -122,7 +123,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 #define ABI_FUNC 'pawmkaewf'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_65_paw, except_this_one => pawmkaewf
 !End of the abilint section

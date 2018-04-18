@@ -41,6 +41,7 @@ MODULE m_exc_diago
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
  use m_crystal,         only : crystal_t
+ use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
  use m_ebands,          only : ebands_report_gap
  use m_eprenorms,       only : eprenorms_t
@@ -243,7 +244,6 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_diago_resonant'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

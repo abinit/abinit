@@ -93,6 +93,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  use m_xmpi
  use m_errors
 
+ use m_time,         only : timab
+ use m_fftcore,      only : sphereboundary
  use m_hamiltonian,  only : gs_hamiltonian_type
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type
@@ -102,9 +104,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 #undef ABI_FUNC
 #define ABI_FUNC 'mkrho'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_66_wfs
  use interfaces_67_common, except_this_one => mkrho

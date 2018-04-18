@@ -51,10 +51,10 @@ MODULE m_ifc
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t,crystal_free
  use m_geometry,    only : phdispl_cart2red, normv, mkrdim
- use m_kpts,        only : kpts_ibz_from_kptrlatt
+ use m_kpts,        only : kpts_ibz_from_kptrlatt, listkk, smpbz
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, &
-&                          massmult_and_breaksym, dfpt_phfrq
+&                          massmult_and_breaksym, dfpt_phfrq, dfpt_prtph
  use m_ddb
  use m_ddb_hdr
 
@@ -407,8 +407,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 #define ABI_FUNC 'ifc_init'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_56_recipspace
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -2858,7 +2856,6 @@ type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ord
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_build_phbspl'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -3206,7 +3203,6 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_build_skw'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

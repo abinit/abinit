@@ -105,6 +105,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_profiling_abi
  use m_hdr
 
+ use m_time,     only : timab
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getph
  use m_cgtools,  only : dotprod_vn 
@@ -115,7 +116,6 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_loop'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_56_recipspace

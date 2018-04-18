@@ -169,6 +169,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_gemm_nonlop
  use m_xcdata
 
+ use m_time,             only : timab
  use m_geometry,         only : metric
  use m_kg,               only : mkkin 
  use m_energies,         only : energies_type
@@ -190,7 +191,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'energy'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_53_spacepar

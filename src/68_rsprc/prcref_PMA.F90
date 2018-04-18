@@ -156,6 +156,7 @@
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_fft,      only : zerosym
+ use m_fftcore,  only : kgindex
  use m_kg,       only : getph
  use m_dtset,    only : testsusmat
 

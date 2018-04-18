@@ -209,6 +209,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_cgtools
  use m_gemm_nonlop
 
+ use m_time,               only : timab
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
  use m_dtset,              only : testsusmat
@@ -233,7 +234,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_tddft,              only : tddft
- use m_kg,                 only : mkkin
+ use m_kg,                 only : mkkin, mkkpg
  use m_suscep_stat,        only : suscep_stat
 
 #if defined HAVE_BIGDFT
@@ -245,7 +246,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_56_recipspace

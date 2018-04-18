@@ -120,7 +120,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #define ABI_FUNC 'eph'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_io_mpi
  use interfaces_64_psp
 !End of the abilint section
 
@@ -140,7 +139,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,level40=40,natifc0=0,timrev2=2,selectz0=0
+ integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0
  integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
@@ -171,8 +170,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
+ integer :: count_wminmax(2)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
+ real(dp) :: wminmax(2)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -375,11 +376,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
    ! since occ are set to zero, and fermie is taken from the previous density.
-   call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
-   if (use_wfq) then
-     call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
-     call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+   if (dtset%kptopt > 0) then
+     call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+     call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+     if (use_wfq) then
+       call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
+       call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+     end if
    end if
 
  end if
@@ -484,9 +487,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%prtphdos == 1) then
 
    ! Phonon Density of States.
-   ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
-   ! TODO: Parallelize this routine.
-   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift,comm)
+   wminmax = zero
+   do
+     call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
+       dtset%ph_nqshift, dtset%ph_qshift, wminmax, count_wminmax, comm)
+     if (all(count_wminmax == 0)) exit
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
+     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     call phdos_free(phdos)
+   end do
 
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")

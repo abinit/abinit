@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_sgfft  
+!!****m* ABINIT/m_sgfft
 !! NAME
-!!  m_sgfft      
+!!  m_sgfft
 !!
 !! FUNCTION
 !!  This module provides low-level interfaces to Goedecker's FFT library.
@@ -32,14 +32,14 @@ MODULE m_sgfft
 
  implicit none
 
- private 
+ private
 
 ! Public API.
  public :: sg_fft_cc      ! Complex-Complex version (full box)
  public :: sg_fft_rc      ! Real-Complex version (full box)
  public :: sg_fftpad      ! Zero-padding version of "fft".
  public :: sg_fftrisc     ! Fourier transforms of wavefunctions
- public :: sg_fftrisc_2 
+ public :: sg_fftrisc_2
  public :: sg_poisson     ! Solve the poisson equation in G-space starting from n(r).
 
 CONTAINS  !====================================================================
@@ -109,7 +109,7 @@ subroutine sg_fft_cc(fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign,arr,ftarr)
  integer,intent(in) :: fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign
 !arrays
  real(dp),intent(inout) :: arr(2,nd1*nd2*nd3*ndat)
- real(dp),intent(inout) :: ftarr(2,nd1*nd2*nd3*ndat) 
+ real(dp),intent(inout) :: ftarr(2,nd1*nd2*nd3*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -252,7 +252,7 @@ end subroutine fft_cc_one_nothreadsafe
 !!
 !! FUNCTION
 !! Conduct Fourier transform of REAL or COMPLEX function f(r)=fofr defined on
-!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid 
+!! fft grid in real space, to create complex f(G)=fofg defined on full fft grid
 !! in reciprocal space, in full storage mode, or the reverse operation.
 !! For the reverse operation, the final data is divided by nfftot.
 !! REAL case when cplex=1, COMPLEX case when cplex=2. Usually used for density and potentials.
@@ -267,7 +267,7 @@ end subroutine fft_cc_one_nothreadsafe
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! isign=sign of Fourier transform exponent: current convention uses
-!!  +1 for transforming from G to r 
+!!  +1 for transforming from G to r
 !!  -1 for transforming from r to G.
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -361,7 +361,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 !Take advantage of the fact that fofr is real, and that fofg has corresponding symmetry properties.
 
 #ifdef DEBUG_MODE
- if (n1>mg .or. n2>mg .or. n3>mg) then 
+ if (n1>mg .or. n2>mg .or. n3>mg) then
    write(msg, '(a,3i10,a,a,a,i10,a)' )&
 &   'One of the dimensions n1,n2,n3=',n1,n2,n3,',',ch10,&
 &   'exceeds allowed dimension mg=',mg,'.'
@@ -746,7 +746,7 @@ subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr
  if (n1>mg.or.n2>mg.or.n3>mg) then
    write(message, '(a,3i10,a,i10)')&
 &   'one of the dimensions n1,n2,n3=',n1,n2,n3,' exceeds the allowed dimension mg=',mg
-   MSG_BUG(message)  
+   MSG_BUG(message)
  end if
 #endif
 
@@ -799,7 +799,7 @@ subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr
      call sg_ctrig(n3,trig,aft,bef,now,ris,ic,ind,mfac,mg)
    end if
 
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
    do i2=1,n2
      call sg_fftz(mfac,mg,nd1,nd2,nd3,n1,i2,i2,arr,ftarr,&
 &     trig,aft,now,bef,ris,ind,ic)
@@ -813,7 +813,7 @@ subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr
 !  Transform along z direction
    call sg_ctrig(n3,trig,aft,bef,now,ris,ic,ind,mfac,mg)
 
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
    do i2=1,n2
      call sg_fftz(mfac,mg,nd1,nd2,nd3,n1,i2,i2,arr,ftarr,&
 &     trig,aft,now,bef,ris,ind,ic)
@@ -1005,7 +1005,7 @@ subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
        mb=min(g2+(lot-1),upplim)
 
 !      -------------------------------------------------------------------------
-!      
+!
 !      Direct transformation
 
 !      Run over all factors except the last (to ic-1), performing
@@ -6087,7 +6087,7 @@ end subroutine sg_fftrisc_2
 !! sg_poisson
 !!
 !! FUNCTION
-!!  Solve the Poisson equation in G-space given the density, n(r), 
+!!  Solve the Poisson equation in G-space given the density, n(r),
 !!  in real space of the FFT box.
 !!
 !! INPUTS
@@ -6099,7 +6099,7 @@ end subroutine sg_fftrisc_2
 !! vg(nx*ny*nz)=Potential in reciprocal space.
 !!
 !! SIDE EFFECTS
-!! nr(cplex*ldx*ldy*ldz*ndat) 
+!! nr(cplex*ldx*ldy*ldz*ndat)
 !!    input: n(r) (real or complex)
 !!    output: the hartree potential in real space
 !!
@@ -6130,8 +6130,8 @@ subroutine sg_poisson(fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
 !scalars
  integer,intent(in) :: fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat
 !arrays
- real(dp),intent(inout) :: nr(cplex*ldx*ldy*ldz*ndat) 
- real(dp),intent(in) :: vg(nx*ny*nz) 
+ real(dp),intent(inout) :: nr(cplex*ldx*ldy*ldz*ndat)
+ real(dp),intent(in) :: vg(nx*ny*nz)
 
 !Local variables-------------------------------
  integer,parameter :: ndat1=1
@@ -6150,7 +6150,7 @@ subroutine sg_poisson(fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
 
  do dat=1,ndat
    ! n(r) --> n(G)
-   ptr = 1 + (dat-1)*cplex*ldx*ldy*ldz 
+   ptr = 1 + (dat-1)*cplex*ldx*ldy*ldz
    call sg_fft_cc(fftcache,nx,ny,nz,ldx,ldy,ldz,ndat1,-1,nr(ptr),work)
 
    ! Multiply by v(G)

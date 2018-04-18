@@ -82,6 +82,7 @@ subroutine dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  use m_xmpi
 
  use m_cgtools,    only : dotprod_g
+ use m_kg,         only : mkkpg
  use m_pawtab,     only : pawtab_type
  use m_pawcprj,    only : pawcprj_type
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,&

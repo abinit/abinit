@@ -153,6 +153,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  use m_geometry, only : xcart2xred, metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_fftcore,  only : kgindex
  use m_fft,      only : zerosym
  use m_kg,       only : getph
  use m_dtset,    only : testsusmat
