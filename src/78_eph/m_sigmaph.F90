@@ -56,7 +56,6 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
- use m_bz_mesh,        only : kmesh_t
  use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
@@ -477,7 +476,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(sigmaph_t) :: sigma
  type(gspline_t) :: gspl
  type(ebands_t) :: ebands_dense
- type(kmesh_t) :: kmesh_dense
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
