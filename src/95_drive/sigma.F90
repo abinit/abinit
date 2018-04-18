@@ -180,7 +180,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: level40=40,tim_fourdp5=5,master=0,cplex1=1
+ integer,parameter :: tim_fourdp5=5,master=0,cplex1=1
  integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount

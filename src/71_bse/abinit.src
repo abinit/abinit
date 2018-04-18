@@ -18,9 +18,8 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
-"exc_build_block.F90",
-"exc_build_ham.F90",
-"exc_plot.F90",
+"m_exc_build.F90",
+"m_exc_analyze.F90",
 "m_bse_io.F90",
 "m_exc_diago.F90",
 "m_bseinterp.F90",

@@ -91,7 +91,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 
  use m_time,        only : timab
  use m_dynmat,      only : d3sym, sytens
- use m_ddb,         only : nlopt, DDB_VERSION
+ use m_ddb,         only : nlopt, DDB_VERSION,dfptnl_doutput
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,       only : read_rhor
  use m_pawfgr,      only : pawfgr_type,pawfgr_init, pawfgr_destroy

@@ -199,7 +199,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !Local variables ------------------------------
  character(len=4) :: ctype='RPA '
 !scalars
- integer,parameter :: level30=30,tim_fourdp4=4,NOMEGA_PRINTED=15,master=0
+ integer,parameter :: tim_fourdp4=4,NOMEGA_PRINTED=15,master=0
  integer :: spin,ik_ibz,my_nbks
  integer :: choice,cplex,dim_kxcg,dim_wing,ount,omp_ncpus
  integer :: fform_chi0,fform_em1,gnt_option,iat,ider,idir,ierr,band

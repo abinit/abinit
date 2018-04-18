@@ -69,6 +69,7 @@ module m_bethe_salpeter
  use m_io_screening,    only : hscr_t, hscr_free, hscr_io, hscr_bcast, hscr_from_file, hscr_print
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
+ use m_exc_analyze,     only : exc_den
  use m_eprenorms,       only : eprenorms_t, eprenorms_free, eprenorms_from_epnc, eprenorms_bcast
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -83,6 +84,7 @@ module m_bethe_salpeter
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_dmft,        only : paw_dmft_type
+ use m_exc_build,       only : exc_build_ham
 
  implicit none
 
@@ -188,7 +190,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_69_wfdesc
- use interfaces_71_bse
 !End of the abilint section
 
  implicit none

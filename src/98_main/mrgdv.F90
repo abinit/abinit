@@ -49,6 +49,7 @@ program mrgdv
  use m_profiling_abi
  use m_dvdb
 
+ use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt

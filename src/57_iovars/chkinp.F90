@@ -2014,8 +2014,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
   !  orbmag
-  ! only values of 0 (default) and 1 are allowed
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,2,(/0,1/),iout)
+  ! only values of 0 (default) 1, 2, 3 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
    if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
@@ -2031,7 +2031,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nproc',nproc,1,(/1/),iout)
    end if
-
+  ! require usexcnhat 0
+  if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,1,(/0/),iout)
+  end if
+  ! require PAW
+  if(dt%orbmag .NE. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
+  end if
 
 !  paral_atom
    call chkint_eq(0,0,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,2,(/0,1/),iout)

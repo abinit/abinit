@@ -65,6 +65,7 @@ program cut3d
  use m_crystal
  use m_crystal_io
 
+ use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein
  use m_geometry,        only : xred2xcart, metric
