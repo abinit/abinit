@@ -495,12 +495,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    if (ipositron/=1) then
      if (pawxcdev/=0) then
        if (ipert==0) then
-           !ABI_ALLOCATE(kxc_tmp,(0,0,0))
          call pawxcm(pawtab(itypat)%tcoredens(:,1),&
 &         eexc,eexcdc,idum,ixc,kxc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),pawxcdev,trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos)
-           !ABI_DEALLOCATE(kxc_tmp)
        else
          call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
@@ -522,7 +520,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
          eexcdc=zero
        end if
      end if
-
      if (option/=1) then
        etild1xc=etild1xc+eexc
        etild1xcdc=etild1xcdc+eexcdc

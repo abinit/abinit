@@ -600,7 +600,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call libxc_functionals_init(dtset%ixc,dtset%nspden)
 
 #if defined DEV_YP_VDWXC
-     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) ) then
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
        vdw_params%functional = dtset%vdw_xc
        vdw_params%acutmin = dtset%vdw_df_acutmin
        vdw_params%aratio = dtset%vdw_df_aratio
@@ -644,6 +644,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &       '[vdW-DF] activation threshold: vdw_df_threshold=',dtset%vdw_df_threshold,ch10
        call xc_vdw_trigger(.false.)
        call wrtout(std_out,message,'COLL')
+     end if
+#else
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
+       write(message,'(3a)')&
+&       'vdW-DF functionals are not fully operational yet.',ch10,&
+&       'Action : modify vdw_xc'
+       MSG_ERROR(message)
      end if
 #endif
    end if
