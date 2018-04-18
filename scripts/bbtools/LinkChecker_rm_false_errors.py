@@ -78,19 +78,28 @@ def main(filename,home_dir=""):
   
       norc = True  # True : we consider that this is not an error
   
+      url_rc = None
       url = child.find('url')
       url_rc = no_error['url'].search(url.text)
       norc = norc and ( url_rc != None )
   
+      info_rc = None
       info=child.find('infos/info')
       if info is not None:
+        try:
          info_rc=no_error['info'].search(info.text)
          norc = norc and ( info_rc != None )
+        except:
+         pass
   
+      valid_rc = None
       valid=child.find('valid').get("result")
       valid_rc=no_error['valid'].search(valid)
       norc = norc and ( valid_rc != None )
   
+      if url_rc != None and infor_rc != None and valid_rc != None:
+          break
+
       if not norc :
           # found a true error... : reporting on bb
           rc += 1
