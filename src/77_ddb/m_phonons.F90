@@ -1597,7 +1597,6 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
 
  ! for all modes at all q in whole list, sorted
  do iq = 1, nqibz
-   write(std_out,*) iq , qibz(:,iq)
    do imode = 1, 3*Crystal%natom
      
      ! skip modes with too low or negative frequency -> Bose factor explodes (eg acoustic at Gamma)
@@ -1642,7 +1641,6 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
        ! add displacement for this mode to supercell positions eq 5 of Zacharias
        call RANDOM_NUMBER(rand)
        rand = two * rand - one
-       !rand = one
 
        ! from TDEP documentation for gaussian distribution of displacements 
        !call RANDOM_NUMBER(rand1)

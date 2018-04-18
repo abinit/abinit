@@ -456,7 +456,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  real(dp),allocatable :: dprarr(:),work(:)
 
 !*********************************************************************
- marr=3
+ marr=30
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
