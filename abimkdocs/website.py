@@ -630,7 +630,7 @@ in order of number of occurrence in the input files provided with the package.
                 def sort_relevances(t):
                     # TODO: Add rank to ABI_RELEVANCES
                     try:
-                        return {"basic": 0, "compulsory": 1, "expert": 2, "useful": 3, "internal": 4,
+                        return {"compulsory": 0, "basic": 1, "useful": 2, "expert": 3, "internal": 4,
                                 "prpot": 5, "prfermi": 6, "prden": 7, "prgeo": 8, "prdos": 9, "prgs": 10,
                                 "prngs": 11, "prmisc": 12}[t[0]]
                     except KeyError:
