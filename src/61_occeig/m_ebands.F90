@@ -5500,14 +5500,14 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  ! Generate k-path
  ndivsm = dtset%ndivsm
  if (ndivsm <= 0) then
-   MSG_WARNING("Setting ndivsm to 10 because variable is not given in input file")
-   ndivsm = 10
+   MSG_WARNING("Setting ndivsm to 20 because variable is not given in input file")
+   ndivsm = 20
  end if
  nbounds = dtset%nkpath
  if (nbounds <= 0) then
    MSG_WARNING("Using hard-coded k-path because nkpath not present in input file.")
    nbounds = 5
-   ABI_MALLOC(bounds, (3,5))
+   ABI_MALLOC(bounds, (3, 5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
  else
    call alloc_copy(dtset%kptbounds, bounds)
