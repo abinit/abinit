@@ -637,8 +637,12 @@ in order of number of occurrence in the input files provided with the package.
                         raise KeyError("Cannot find relevance `%s` in dict. Add it to sort_relevances with the proper rank."
                                 % str(t))
 
-                items = sorted([(v.topic2relevances[topic][0], v) for v in vlist], key=lambda t: sort_relevances(t))
-                for relevance, group in sort_and_groupby(items, key=lambda t: t[0]):
+                # Build list of (relevance, variable) tuple then sort and group by relevance.
+                items = [(v.topic2relevances[topic][0], v) for v in vlist]
+                for num, group in sort_and_groupby(items, key=lambda t: sort_relevances(t)):
+                    # Alphabetical order inside group.
+                    group = list(sorted(group, key=lambda t: t[1].name))
+                    relevance = group[0][0]
                     lines.append("*%s:*\n" % relevance)
                     lines.extend("- %s  %s" % (v.wikilink, v.mnemonics) for (_, v) in group)
                     lines.append(" ")
