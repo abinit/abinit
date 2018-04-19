@@ -5960,8 +5960,6 @@ definitions from other codes. Usually, [[hyb_range_dft]] is the same as
 [[hyb_range_fock]], see the latter for the different values. However, there is
 a noticeable exception, the HSE03 from the original paper (not the HSE03 from VASP),
 for which [[hyb_range_dft]]=0.188988 while [[hyb_range_fock]]=0.106066.
-
-If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
 """,
 ),
 
@@ -5989,8 +5987,6 @@ The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of
 VASP is 0.105835 (=0.2 Angstrom$^-1$).
 The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is
 0.1587531 (=0.3 Angstrom$^-1$).
-
-If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
 """,
 ),
 
