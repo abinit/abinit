@@ -53,15 +53,15 @@
 !! kptrlen=length of the smallest real space supercell vector
 !! nshiftk_orig=Original number of k-point shifts (0 if not read)
 !! nshiftk=actual number of k-point shifts in shiftk (if kptopt/=0)
-!! shiftk(3,210)=shift vectors for k point generation (if kptopt/=0)
-!! If nkpt/=0  the following arrays are also output :
+!! shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation (if kptopt/=0)
+!! If nkpt/=0  the following arrays are also output:
 !!  istwfk(nkpt)=option parameters that describes the storage of wfs
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  kpthf(3,nkpthf)=reduced coordinates of k points for Fock operator.
 !!  wtk(nkpt)=weight assigned to each k point.
 !! ngkpt(3)=Number of divisions along the three reduced directions
 !!   (0 signals that this variable has not been used.
-!! shiftk_orig(3,210)=Original shifts read from the input file
+!! shiftk_orig(3,MAX_NSHIFTK)=Original shifts read from the input file
 !!   (0 signals that this variable has not been read).
 !!
 !! SIDE EFFECTS
@@ -131,7 +131,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  integer,intent(in) :: bravais(11),symafm(msym),symrel(3,3,msym),vacuum(3)
  integer,intent(out) :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),ngkpt(3)
  real(dp),intent(in) :: rprimd(3,3),qptn(3)
- real(dp),intent(out) :: kpt(3,nkpt),kpthf(3,nkpthf),shiftk(3,210),wtk(nkpt),shiftk_orig(3,210)
+ real(dp),intent(out) :: kpt(3,nkpt),kpthf(3,nkpthf),shiftk(3,MAX_NSHIFTK),wtk(nkpt),shiftk_orig(3,MAX_NSHIFTK)
 
 !Local variables-------------------------------
 !scalars
@@ -149,7 +149,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  call timab(192,1,tsec)
 
 !Compute the maximum size of arrays intarr and dprarr
- marr=max(3*nkpt,3*210)
+ marr=max(3*nkpt,3*MAX_NSHIFTK)
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
@@ -368,9 +368,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nshiftk',tread,'INT')
    if(tread==1)nshiftk=intarr(1)
 
-   if(nshiftk<1 .or. nshiftk>210 )then
-     write(message,  '(3a,i0,3a)' )&
-&     'The only allowed values of nshiftk are between 1 and 210,',ch10,&
+   if (nshiftk < 1 .or. nshiftk > MAX_NSHIFTK )then
+     write(message,  '(a,i0,2a,i0,3a)' )&
+&     'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
 &     'while it is found to be',nshiftk,'.',ch10,&
 &     'Action: change the value of nshiftk in your input file, or change kptopt.'
      MSG_ERROR(message)

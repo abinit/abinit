@@ -851,7 +851,7 @@ type dataset_type
  real(dp), allocatable :: rprim_orig(:,:,:)   !SET2NULL  ! rprim_orig(3,3,nimage)
  real(dp), allocatable :: rprimd_orig(:,:,:)  !SET2NULL  ! rprimd_orig(3,3,nimage)
  real(dp), allocatable :: shiftk(:,:)         !SET2NULL  ! shiftk(3,nshiftk)
- real(dp) :: shiftk_orig(3,210)             ! original shifts given in input (changed in inkpts).
+ real(dp) :: shiftk_orig(3,MAX_NSHIFTK)       ! original shifts given in input (changed in inkpts).
 
  real(dp), allocatable :: spinat(:,:)         !SET2NULL  ! spinat(3,natom)
  real(dp), allocatable :: tnons(:,:)          !SET2NULL  ! tnons(3,nsym)

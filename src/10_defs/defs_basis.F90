@@ -113,6 +113,9 @@ module defs_basis
 ! the maximum length of a record in a file connected for sequential access.
  integer,public,parameter :: ABI_RECL=524288  ! 2**19
 
+ integer,public,parameter :: MAX_NSHIFTK = 210
+ ! Maximun number of shifts in input k-mesh.
+
 !Real constants
  real(dp), parameter :: zero=0._dp
  real(dp), parameter :: one=1._dp

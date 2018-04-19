@@ -141,7 +141,7 @@ contains
     integer, intent(out) :: errno
     integer, intent(in) :: ngkpt(3)
     integer, intent(inout) :: nshiftk
-    real(dp), intent(inout) :: shiftk(3,210)
+    real(dp), intent(inout) :: shiftk(3,MAX_NSHIFTK)
     real(dp), intent(out) :: kptrlen
     integer, intent(out) :: kptrlatt(3,3)
     integer, intent(out) :: nkpt
@@ -204,7 +204,7 @@ contains
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(inout) :: nshiftk
-    real(dp), intent(inout) :: shiftk(3,210)
+    real(dp), intent(inout) :: shiftk(3,MAX_NSHIFTK)
     integer, intent(in) :: nkpt
     real(dp), intent(out) :: kpt(3,nkpt), wkpt(nkpt)
     real(dp), intent(inout) :: kptrlen
@@ -269,7 +269,7 @@ contains
     real(dp) :: kptrlen
     integer :: kptrlatt(3,3)
     integer :: nshiftk_
-    real(dp) :: shiftk_(3,210)
+    real(dp) :: shiftk_(3,MAX_NSHIFTK)
 
     if (AB_DBG) write(std_err,*) "AB symmetry: call get k grid."
 
@@ -323,7 +323,7 @@ contains
     integer, intent(out) :: nkpt
     real(dp), intent(inout) :: kptrlen
     integer, intent(out) :: nshiftk
-    real(dp), intent(out) :: shiftk(3,210)
+    real(dp), intent(out) :: shiftk(3,MAX_NSHIFTK)
     integer, intent(out) :: kptrlatt(3,3)
 
     type(symmetry_type), pointer  :: sym
@@ -396,7 +396,7 @@ contains
     real(dp), intent(out) :: kpt(3,nkpt), wkpt(nkpt)
     real(dp), intent(inout) :: kptrlen
     integer, intent(inout) :: nshiftk
-    real(dp), intent(inout) :: shiftk(3,210)
+    real(dp), intent(inout) :: shiftk(3,MAX_NSHIFTK)
     integer, intent(inout) :: kptrlatt(3,3)
 
     type(symmetry_type), pointer  :: sym
@@ -456,7 +456,7 @@ contains
     real(dp) :: kptrlen_
     integer :: kptrlatt(3,3)
     integer :: nshiftk
-    real(dp) :: shiftk(3,210)
+    real(dp) :: shiftk(3,MAX_NSHIFTK)
 
     if (AB_DBG) write(std_err,*) "AB symmetry: call get auto k grid."
 

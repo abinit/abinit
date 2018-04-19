@@ -150,7 +150,7 @@ subroutine thmeig(inp, ddb, crystal, &
  real(dp) :: diff_qpt(3)
  real(dp) :: gprimd(3,3),mesh(3,3)
  real(dp) :: qlatt(3,3),qphnrm(3),qpt_search(3,3)
- real(dp) :: rprimd(3,3),shiftq(3,210),tempqlatt(3)
+ real(dp) :: rprimd(3,3),shiftq(3,MAX_NSHIFTK),tempqlatt(3)
  real(dp) :: dummy(0),dummy2(0,0)
  real(dp),allocatable :: xcart(:,:),xred(:,:)
  real(dp),allocatable :: amu(:),zion(:)

@@ -1239,6 +1239,14 @@ END SUBROUTINE SIM4TWOI
 !C            [|w1-w2|<e,|w3-w2|<e];
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE  SIM0LEPS(VERM, N, W, AS, LONE, EPS, LEPS, iuerr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'SIM0LEPS'
+!End of the abilint section
+
       IMPLICIT       NONE
       DOUBLE COMPLEX   VERM(4)
       INTEGER          N
@@ -2029,6 +2037,14 @@ END SUBROUTINE S2D3TWOI
 !C LONE(3) [w1<w2<ONE]; [w1<ONE<w2]; [ONE<w1<w2]
 !C LEPS(1) [|w1-w2|<eps]
       SUBROUTINE  S2D0LEPS(VERM, N, W, AS, LONE, EPS, LEPS, iuerr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'S2D0LEPS'
+!End of the abilint section
+
       IMPLICIT       NONE
       DOUBLE COMPLEX   VERM(3)
       INTEGER          N
@@ -2477,6 +2493,14 @@ END SUBROUTINE S1D2TWOI
 !C LONE(2) [w1<ONE]; [ONE<w1]
 !C LEPS(1) null
       SUBROUTINE  S1D0LEPS(VERM, N, W, AS, LONE, EPS, LEPS, iuerr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'S1D0LEPS'
+!End of the abilint section
+
       IMPLICIT       NONE
       DOUBLE COMPLEX   VERM(2)
       INTEGER          N

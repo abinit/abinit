@@ -455,7 +455,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%rprimd_orig,(3,3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%so_psp,(npsp))
    ABI_ALLOCATE(dtsets(idtset)%spinat,(3,mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,210))
+   ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_ALLOCATE(dtsets(idtset)%typat,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%upawu,(mxntypat,mxnimage))
 !   if (dtsets(idtset)%plowan_compute>0) then

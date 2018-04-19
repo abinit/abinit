@@ -400,7 +400,7 @@ end subroutine ephwg_set_kpoint
 !!
 !! SOURCE
 
-subroutine ephwg_delta_weights(self, band, spin, nu, nene, eminmax, bcorr, wdt_plus, comm,
+subroutine ephwg_delta_weights(self, band, spin, nu, nene, eminmax, bcorr, wdt_plus, comm, &
                                broad)  ! optional
 
 
@@ -428,7 +428,7 @@ subroutine ephwg_delta_weights(self, band, spin, nu, nene, eminmax, bcorr, wdt_p
  real(dp),parameter :: max_occ1 = one
  real(dp) :: omega_step
 !arrays
- real(dp)  :: dtweightde_t(nene, self%nq_k),tweight_t(nene, self%nq_k)
+ real(dp)  :: dtweightde_t(nene, self%nq_k),tweight_t(nene, self%nq_k), wme0(nene)
  real(dp),allocatable :: pme_k(:,:)
 
 !----------------------------------------------------------------------
@@ -444,17 +444,19 @@ subroutine ephwg_delta_weights(self, band, spin, nu, nene, eminmax, bcorr, wdt_p
    pme_k(iq_k, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
- if present(broad) then
-   omega_step = (einmax(2) - eminmax(1)) / (nene - 1)
-   ! workspace array
-   !eminmax(1) + (ie - 1) * omega_step
-   !dtweightde_t(nene, 1)
-   !do iq_k=1,self%nq_k
-   !wme0 = edos%mesh - pme_k(iq_k, 1)
-   !wdt_plus(:, iq_k, 1, 1) = dirac_delta(wme0, broad)
-   !end do
- else
+ if (present(broad)) then
+   omega_step = (eminmax(2) - eminmax(1)) / (nene - 1)
+   ! Use dtweightde_t as workspace array
+   dtweightde_t(:, 1) = arth(eminmax(1), omega_step, nene)
+   do iq_k=1,self%nq_k
+     do ie=1,2
+       wme0 = dtweightde_t(:, 1) - pme_k(iq_k, ie)
+       wdt_plus(:, iq_k, ie, 1) = dirac_delta(wme0, broad)
+     end do
+   end do
 
+ else
+   ! TODO Add routine to compute only delta
    call tetra_blochl_weights(self%tetra_k, pme_k(:,1), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
      bcorr, wdt_plus(:,:,1,2), wdt_plus(:,:,1,1), comm)
 
@@ -521,7 +523,8 @@ subroutine ephwg_gdz_weights(self, iqlk, band, spin, nz, nbsigma, zvals, cweight
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq_k,nprocs, my_rank
+ integer,parameter :: master=0
+ integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq_k,nprocs, my_rank, ierr
  real(dp) :: volconst_mult
 !arrays
  real(dp),allocatable :: pme_k(:,:,:)
@@ -562,7 +565,7 @@ subroutine ephwg_gdz_weights(self, iqlk, band, spin, nz, nbsigma, zvals, cweight
        do ii=1,2
          ! Compute weights for nz points.
          do iz=1,nz
-           verm = pme_k(ind_ibz(:), ii, nu) + zvals(iz, ib)
+           verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii, nu)
            !call SIM0ONEI(SIM0, SIM0I, VERM)
            !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
            call SIM0TWOI(VERL, VERLI, VERM)
@@ -591,10 +594,12 @@ subroutine ephwg_gdz_weights(self, iqlk, band, spin, nz, nbsigma, zvals, cweight
    volconst_mult = self%lgrp_k%weights(iqlk)
    do ib=1,nbsigma
      do nu=1,self%natom3
-       write(std_out,*)"# naive vs tetra integration for band, nu", band, nu
+       write(std_out,*)"# naive vs tetra integration for band, nu", ib - 1 + self%bstart, nu
        do iz=1,nz
-         write(std_out,*) zvals(iz) one / (zvals(iz, ib) + pme_k(iqlk, 1, nu)) * volconst_mult, cweights(iz, 1, nu, ib)
-         write(std_out,*) zvals(iz, one / (zvals(iz, ib) + pme_k(iqlk, 2, nu)) * volconst_mult, cweights(iz, 2, nu, ib)
+         write(std_out,"(5es16.8)") &
+           dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 1, nu)) * volconst_mult, cweights(iz, 1, nu, ib)
+         write(std_out,"(5es16.8)") &
+           dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 2, nu)) * volconst_mult, cweights(iz, 2, nu, ib)
        end do
      end do
    end do
@@ -802,8 +807,8 @@ subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
    call ephwg_set_kpoint(ephwg, eb_dense%kptns(:, ik_ibz))
 
 #if 1
-  zvals(1, 1) = eb_dense%eig(1, 10, 1) + j_dpc * dtset%zcut !* tol12
-  zvals(2, 1) = eb_dense%eig(2, 10, 1) + j_dpc * dtset%zcut !* tol12
+  zvals(1, 1) = eb_dense%eig(5, 1, 1) + j_dpc * dtset%zcut !* tol12
+  zvals(2, 1) = eb_dense%eig(5, 2, 1) + j_dpc * dtset%zcut !* tol12
   call ephwg_gdz_weights(self=ephwg, iqlk=1, band=5, spin=1, nz=nz, nbsigma=nbsigma, zvals=zvals, cweights=cweights, comm=comm)
   call ephwg_gdz_weights(self=ephwg, iqlk=14, band=5, spin=1, nz=nz, nbsigma=nbsigma, zvals=zvals, cweights=cweights, comm=comm)
   stop "hello"

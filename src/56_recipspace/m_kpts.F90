@@ -173,7 +173,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 !arrays
  integer,parameter :: vacuum0(3)=[0, 0, 0]
  integer :: my_kptrlatt(3,3)
- real(dp) :: my_shiftk(3,210)
+ real(dp) :: my_shiftk(3,MAX_NSHIFTK)
 
 ! *********************************************************************
 
@@ -182,8 +182,8 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
  ABI_MALLOC(wtk, (0))
 
  ! Copy kptrlatt and shifts because getkgrid can change them
- ! Be careful as getkgrid expects shiftk(3,210).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= 210, "nshiftk must be in [1,210]")
+ ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
+ ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be in 1 and", itoa(MAX_NSHIFTK)))
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
@@ -949,7 +949,7 @@ end subroutine listkk
 !! nkpt=number of k points (might be zero, see output description)
 !! kptrlatt(3,3)=k-point lattice specification
 !! nshiftk=actual number of k-point shifts in shiftk
-!! shiftk(3,210)=shift vectors for k point generation
+!! shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation
 !! [nkpthf = number of k points in the full BZ, for the Fock operator]
 !!
 !! PARENTS
@@ -988,7 +988,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  integer,optional,intent(in) :: downsampling(3)
  integer,intent(inout) :: kptrlatt(3,3)
  real(dp),intent(in) :: rprimd(3,3)
- real(dp),intent(inout) :: shiftk(3,210)
+ real(dp),intent(inout) :: shiftk(3,MAX_NSHIFTK)
  real(dp),intent(inout) :: kpt(3,nkpt) !vz_i
  real(dp),intent(inout) :: wtk(nkpt)
  real(dp),optional,allocatable,intent(out) :: fullbz(:,:)
@@ -996,7 +996,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
 !Local variables-------------------------------
 !scalars
- integer, parameter :: max_number_of_prime=47,mshiftk=210
+ integer, parameter :: max_number_of_prime=47
  integer :: brav,decreased,found,ii,ikpt,iprime,ishiftk,isym,jshiftk,kshiftk,mkpt,mult
  integer :: nkpthf_computed,nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
  integer :: test_prime,timrev
@@ -1048,8 +1048,8 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  kptrlatt2(:,:)=kptrlatt(:,:)
  nshiftk2=nshiftk
- ABI_ALLOCATE(shiftk2,(3,mshiftk))
- ABI_ALLOCATE(shiftk3,(3,mshiftk))
+ ABI_ALLOCATE(shiftk2,(3,MAX_NSHIFTK))
+ ABI_ALLOCATE(shiftk3,(3,MAX_NSHIFTK))
  shiftk2(:,:)=shiftk(:,:)
 
 !Find a primitive k point lattice, if possible, by decreasing the number of shifts.
@@ -1552,10 +1552,9 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 
 !Local variables-------------------------------
 !scalars
- integer, parameter :: max_number_of_prime=47,mshiftk=210
+ integer, parameter :: max_number_of_prime=47
  integer :: det,ii,ikshft,iprim,jj,kk,nn
  character(len=500) :: message
-
 !arrays
  integer :: boundmax(3),boundmin(3),common_factor(3)
  integer, parameter :: prime_factor(max_number_of_prime)=(/2,3,5,7,9, 11,13,17,19,23,&
@@ -2281,7 +2280,7 @@ end subroutine smpbz
 !! OUTPUT
 !!  kptrlatt(3,3)=k-point lattice specification
 !!  nshiftk=number of k-point shifts in shiftk (always 1 from this routine)
-!!  shiftk(3,210)=shift vectors for k point generation
+!!  shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation
 !!
 !! SIDE EFFECTS
 !!  kptrlen=length of the smallest real space supercell vector associated with the lattice of k points.
@@ -2323,7 +2322,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
  integer,intent(in) :: bravais(11),symafm(msym),symrel(3,3,msym),vacuum(3)
  integer,intent(out) :: kptrlatt(3,3)
  real(dp),intent(in) :: rprimd(3,3)
- real(dp),intent(inout) :: shiftk(3,210) !vz_i
+ real(dp),intent(inout) :: shiftk(3,MAX_NSHIFTK) !vz_i
 
 !Local variables-------------------------------
 !scalars
@@ -2340,7 +2339,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
  integer,allocatable :: grid_list(:)
  real(dp) :: axes(3,3),gmet(3,3),gprimd(3,3),matrix1(3,3),matrix2(3,3)
  real(dp) :: metmin(3,3),minim(3,3),r2d(3,3),rmet(3,3),rsuper(3,3)
- real(dp) :: shiftk_current(3,210),shiftk_trial(3,210)
+ real(dp) :: shiftk_current(3,MAX_NSHIFTK),shiftk_trial(3,MAX_NSHIFTK)
  real(dp),allocatable :: kpt(:,:),kptrlen_list(:),wtk(:)
 
 ! *************************************************************************

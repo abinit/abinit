@@ -80,6 +80,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
  use m_time,     only : timab
  use m_dynmat,   only : d3sym, sytens
+ use m_fstrings, only : sjoin, itoa
  use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
@@ -148,7 +149,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
  integer,allocatable :: kptindex(:,:),npwarr(:),pwind(:,:,:),rfpert(:,:,:,:,:,:),symrec(:,:,:)
- real(dp) :: dum_shiftk(3,210),dummy2(6),gmet(3,3),gprimd(3,3),k0(3)
+ real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy2(6),gmet(3,3),gprimd(3,3),k0(3)
  real(dp) :: rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3lo(:,:,:,:,:,:,:),dum_kptns(:,:)
@@ -459,7 +460,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Prepare first call to getkgrid (obtain number of k points in FBZ)
  dum_kptrlatt(:,:) = dtset%kptrlatt(:,:)
  dum_nshiftk = dtset%nshiftk
- ABI_CHECK(dum_nshiftk<=210,"dum_nshiftk must be <= 210!")
+ ABI_CHECK(dum_nshiftk <= MAX_NSHIFTK, sjoin("dum_nshiftk must be <= ", itoa(MAX_NSHIFTK)))
  dum_shiftk(:,:) = zero
  dum_shiftk(:,1:dtset%nshiftk) = dtset%shiftk(:,1:dtset%nshiftk)
  dum_vacuum(:) = 0

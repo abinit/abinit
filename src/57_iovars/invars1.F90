@@ -82,7 +82,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  use m_xmpi
  use m_atomdata
 
- use m_fstrings, only : inupper
+ use m_fstrings, only : inupper, sjoin, itoa
  use m_geometry, only : mkrdim
  use m_parser,   only : intagm, chkint_ge
 
@@ -132,6 +132,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 
 !************************************************************************
+
+ ! This counter is incremented when we find a non-critical error.
+ ! The code outputs a warning and stops at end.
+ leave = 0
 
 !Some initialisations
  ierr=0
@@ -331,13 +335,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'SpinPolarized',tread_alt,'LOG')
  if(tread_alt==1)then
    if(tread==1)then
-     write(message, '(a,a,a,a,a,a,a,a)' ) ch10,&
-&     ' invars1: ERROR -',ch10,&
-&     '  nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
-&     '  for the same dataset.',ch10,&
-&     '  Action : check the input file.'
-     call wrtout(std_out,  message,'COLL')
-     leave=1
+     write(message, '(3a)' )&
+     'nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
+     'for the same dataset.'
+     MSG_ERROR_NOSTOP(message, leave)
    else
 !    Note that SpinPolarized is a logical input variable
      nsppol=1
@@ -703,62 +704,35 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%ga_n_rules=intarr(1)
 
 !Perform the first checks
-
- leave=0
-
 !Check that nkpt is greater than 0
  if (nkpt<=0) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  After inkpts, nkpt must be > 0, but was ',nkpt,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
-   call wrtout(std_out,  message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'After inkpts, nkpt must be > 0, but was ',nkpt
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nsppol is 1 or 2
  if (nsppol/=1 .and. nsppol/=2) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  Input nsppol must be 1 or 2, but was ',nsppol,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'Input nsppol must be 1 or 2, but was ',nsppol
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nspinor is 1 or 2
  if (nspinor/=1 .and. nspinor/=2) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  Input nspinor must be 1 or 2, but was ',nspinor,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'Input nspinor must be 1 or 2, but was ',nspinor
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nspinor and nsppol are not 2 together
  if (nsppol==2 .and. nspinor==2) then
-   write(message, '(8a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  nspinor and nsappol cannot be 2 together !',ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   MSG_ERROR_NOSTOP('nspinor and nsappol cannot be 2 together!', leave)
  end if
 
 !Here, leave if an error has been detected earlier
- if(leave==1) then
-   message = ' Other errors might be present in the input file. '
-   MSG_ERROR(message)
+ if (leave /= 0) then
+   MSG_ERROR('Errors are present in the input file. See above messages')
  end if
 
-
 !Now, take care of mband_upper
-
  mband_upper=1
  occopt=1
  fband=0.5_dp

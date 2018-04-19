@@ -1509,8 +1509,8 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  my_vacuum = (/0,0,0/); if (PRESENT(vacuum)) my_vacuum=vacuum
 
  my_nshiftk = nshiftk
- ABI_CHECK(my_nshiftk>0.and.my_nshiftk<=210,"Wrong nshiftk")
- ABI_MALLOC(my_shiftk,(3,210))
+ ABI_CHECK(my_nshiftk>0.and.my_nshiftk<=MAX_NSHIFTK, sjoin("Wrong nshiftk must be between 1 and ", itoa(MAX_NSHIFTK)))
+ ABI_MALLOC(my_shiftk, (3, MAX_NSHIFTK))
  my_shiftk=zero; my_shiftk(:,1:nshiftk) = shiftk(:,:)
 
  !write(std_out,*)" In make_mesh"

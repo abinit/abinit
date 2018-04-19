@@ -3004,7 +3004,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
      mqpt = anaddb_dtset%ngqpt(1)*anaddb_dtset%ngqpt(2)*anaddb_dtset%ngqpt(3)*anaddb_dtset%nqshft
      ABI_ALLOCATE(qpt_full,(3,mqpt))
      ABI_ALLOCATE(wtq,(mqpt))
-     ABI_ALLOCATE(tmpshifts,(3,210))
+     ABI_ALLOCATE(tmpshifts,(3,MAX_NSHIFTK))
 
      wtq(:) = one
 
