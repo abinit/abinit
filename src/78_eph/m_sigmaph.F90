@@ -1004,7 +1004,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                     eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                     !f_mkq = ebands_dense%occ(ibsum_kq,ikq_ibz_fine,spin)
                  
-                    iq_bz_fine = eph_double_grid%scatter_dense(ik_bz_fine,ikq_bz_fine)
+                    iq_bz_fine = eph_double_grid%scatter_dense(ik_bz,ikq_bz_fine)
                     iq_ibz_fine = eph_double_grid%bz2ibz_dense(iq_bz_fine)
                  
                     wqnu = eph_double_grid%phfrq_dense(nu,iq_ibz_fine)

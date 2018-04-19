@@ -145,19 +145,21 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: interp_kmult(3), nkpt_coarse(3), nkpt_dense(3)
+ integer :: interp_kmult(3), nkpt_coarse(3), nkpt_dense(3), band_block(2)
+ integer :: intp_kptrlatt(3,3), intp_nshiftk
  integer :: ii,jj,kk,i1,i2,i3,i_coarse,i_dense,i_subdense
  integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
+ real(dp):: params(3), intp_shiftk(3)
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk,use_wfq,use_dvdb
+ logical :: use_wfk,use_wfq,use_dvdb,use_dg
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path,wfk_fname_dense
  character(len=fnlen) :: ddk_path(3)
@@ -225,6 +227,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
  use_dvdb = (dtset%eph_task /= 0)
+ use_dg = .false.
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -617,7 +620,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  !1.
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
-&         (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
+     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
+
    wfk_fname_dense = dtfil%fnameabi_wfkfine
    call wrtout(std_out,"EPH Interpolation: will read energies and kmesh from: "//trim(wfk_fname_dense),"COLL")
 
@@ -630,16 +634,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
    eph_dg%ebands_dense = ebands_dense
 
-   !call kmesh_init(kmesh,      cryst,wfk0_hdr%nkpt,     wfk0_hdr%kptns,     wfk0_hdr%kptopt     )
-   !call kmesh_init(kmesh_dense,cryst,hdr_wfk_dense%nkpt,hdr_wfk_dense%kptns,hdr_wfk_dense%kptopt)
-
-   !write(*,*) 'coarse kmesh'
-   !call kmesh_print(kmesh)
-   !write(*,*) 'dense kmesh'
-   !call kmesh_print(kmesh_dense)
-
-   ! for preliminary tests we hardcode interp_kmult
-   ! then it should be calculated from hdr_wfk_dense%nkpt
+   !TODO add a check for consistency
+   ! number of bands and kpoints (comensurability)
 
    nkpt_coarse = [wfk0_hdr%kptrlatt(1,1),&
                   wfk0_hdr%kptrlatt(2,2),&
@@ -648,16 +644,58 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                   hdr_wfk_dense%kptrlatt(2,2),&
                   hdr_wfk_dense%kptrlatt(3,3)]
    interp_kmult = nkpt_dense/nkpt_coarse
+   use_dg = .true.
+ end if
+
+ !read bs_interpmult
+ if (dtset%bs_interp_kmult(1) /= 0 .or.&
+     dtset%bs_interp_kmult(2) /= 0 .or.&
+     dtset%bs_interp_kmult(3) /= 0 ) then
+
+   call wrtout(std_out,"EPH Interpolation: will use star functions interpolation","COLL")
+
+   nkpt_coarse = [wfk0_hdr%kptrlatt(1,1),&
+                  wfk0_hdr%kptrlatt(2,2),&
+                  wfk0_hdr%kptrlatt(3,3)]
+   interp_kmult = dtset%bs_interp_kmult
+   nkpt_dense = nkpt_coarse*interp_kmult
+
+   ! Interpolate band energies with star-functions
+   params = 0; params(1) = 1; params(2) = 5
+   !TODO: mband should be min of nband
+   band_block = [1, ebands%mband]
+   intp_kptrlatt = reshape([nkpt_dense(1), 0, 0, 0, nkpt_dense(2), 0, 0, 0, nkpt_dense(3)], [3, 3])
+   intp_shiftk = zero
+   intp_nshiftk = 1
+   write(*,*) band_block
+   write(*,*) wfk0_hdr%kptrlatt
+   write(*,*) intp_kptrlatt
+   write(*,*) intp_nshiftk
+   write(*,*) intp_shiftk
+   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm)
+   eph_dg%ebands_dense = ebands_dense
+   use_dg = .true.
+ end if
+
+ if (use_dg) then
+ !2.
+
+   write(*,*) 'start dg calculation'
+
+   write(*,*) 'dense ngkpt:',ebands_dense%nkpt
+   write(*,*) 'dense mband:',ebands_dense%mband
+   write(*,*) 'dense kpoints:'
+   do ii=1,ebands_dense%nkpt
+     write(*,*) ebands_dense%kptns(:,ii)
+   enddo
+
    eph_dg%dense_nbz = nkpt_dense(1)*nkpt_dense(2)*nkpt_dense(3)
    eph_dg%coarse_nbz = nkpt_coarse(1)*nkpt_coarse(2)*nkpt_coarse(3)
-
    write(*,*) 'coarse:      ', nkpt_coarse
    write(*,*) 'dense:       ', nkpt_dense
    write(*,*) 'interp_kmult:', interp_kmult
 
- !2.
    !call double_grid_init(kmesh,kmesh_dense,wfk0_hdr%kptrlatt,interp_kmult,double_grid)
-
    allocate(eph_dg%kpts_coarse(3,eph_dg%coarse_nbz))
    allocate(eph_dg%kpts_dense(3,eph_dg%dense_nbz))
    allocate(eph_dg%dense_to_coarse(eph_dg%dense_nbz))
@@ -670,8 +708,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    allocate(eph_dg%indexes_to_coarse(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
 
    allocate(eph_dg%scatter_dense(eph_dg%dense_nbz,eph_dg%dense_nbz))
-   eph_dg%dense_nbz = eph_dg%dense_nbz
-   eph_dg%coarse_nbz = eph_dg%coarse_nbz
    eph_dg%interp_kmult = interp_kmult
    eph_dg%nkpt_coarse = nkpt_coarse
    eph_dg%nkpt_dense = nkpt_dense
@@ -749,6 +785,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    allocate(eph_dg%phfrq_dense(3*cryst%natom,ebands_dense%nkpt), displ_cart(2,3,cryst%natom,3*cryst%natom))
    do ii=1,ebands_dense%nkpt
      qpt = ebands_dense%kptns(:,ii)
+     write(*,*) qpt
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
      call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
    enddo   
@@ -813,6 +850,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    deallocate(eph_dg%phfrq_dense)
    deallocate(eph_dg%scatter_dense)
    deallocate(eph_dg%bz2ibz_dense)
+   deallocate(eph_dg%kpts_coarse)
+   deallocate(eph_dg%kpts_dense)
+   deallocate(eph_dg%dense_to_coarse)
+   deallocate(eph_dg%coarse_to_dense)
+   deallocate(eph_dg%dense_to_indexes)
+   deallocate(eph_dg%indexes_to_dense)
+   deallocate(eph_dg%coarse_to_indexes)
+   deallocate(eph_dg%indexes_to_coarse)
 
    call exit(0)
  end if
