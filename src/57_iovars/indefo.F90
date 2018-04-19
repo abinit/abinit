@@ -578,7 +578,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
-   dtsets(idtset)%ph_ngqpt(:) = 1
    dtsets(idtset)%ph_nqshift = 0
    if(dtsets(idtset)%ph_nqshift > 0)then
      dtsets(idtset)%ph_qshift = zero

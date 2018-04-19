@@ -752,7 +752,7 @@ end subroutine ifc_init
 !!
 !! SOURCE
 
-subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff)
+subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -766,7 +766,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
 !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: nqshift
+ integer,intent(in) :: nqshift,comm
  integer,intent(inout) :: natom
  !arrays
  integer,intent(in) :: ngqpt(3)
@@ -778,7 +778,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  type(crystal_t),intent(out) :: ucell_ddb
 !Local variables -------------------------
  !scalars
- integer :: comm,dipdip,i,iblok,iblok_tmp
+ integer :: dipdip,i,iblok,iblok_tmp
  logical :: file_exists
  !arrays
  integer,allocatable :: atifc(:)
@@ -790,7 +790,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
  !check if ddb file exists
  inquire(file=filename, exist=file_exists)
- comm=0
+
  if (file_exists .eqv. .true.)then
    !Reading the ddb
    call ddb_hdr_open_read(ddb_hdr,filename,2,DDB_VERSION,comm,dimonly=1)

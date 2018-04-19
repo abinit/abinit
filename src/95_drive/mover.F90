@@ -461,7 +461,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    INQUIRE(FILE=filename, EXIST=file_exists)
    call generate_training_set(acell,fname_ddb,hist,ab_mover%natom,ntime,ab_mover%ph_ngqpt,&
 &                             ab_mover%ph_nqshift,ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
-&                             rprimd,ab_mover%mdtemp(2),xred,DEBUG)
+&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
  else
    !Fill history with the values of xred, acell and rprimd
    call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)

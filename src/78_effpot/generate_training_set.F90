@@ -18,6 +18,7 @@
 !! rprimd(3,3)=dimensional primitive translations (bohr)
 !! temperature_K =  temperature in Kelvin
 !! xred(3,natom) = reduced dimensionless atomic coordinates in the supercell
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !!
@@ -39,7 +40,7 @@
 #include "abi_common.h"
 
 subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift,qshift,rlatt,rprimd,&
-&                                temperature_k,xred,DEBUG)
+&                                temperature_k,xred,comm,DEBUG)
 
  use defs_basis
  use m_errors
@@ -63,7 +64,7 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
 
 !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: natom,nconfig,nqshift
+  integer,intent(in) :: natom,nconfig,nqshift,comm
   logical,intent(in) :: DEBUG
   real(dp),intent(in):: temperature_k
   !arrays
@@ -97,7 +98,7 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff)
+  call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff,comm)
 
   write(message, '(a,I0,a,f10.2,02a)' )' Generation of ',nconfig,' at the temperature ',&
 &                            temperature_K,' K from the phonons',ch10
