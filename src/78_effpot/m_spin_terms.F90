@@ -8,10 +8,12 @@ module  m_spin_terms
   implicit none
   real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t
-     integer :: nmatoms
+     integer :: nmatoms, natoms
      real(dp), allocatable :: ms(:), pos(:,:),  spinat(:,:), S(:,:)
      real(dp):: cell(3,3)
      integer, allocatable :: zion(:)
+     ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
+     integer, allocatable :: spin_index(:)
      integer :: seed
      ! random seed
      ! has_xxx : which terms are included in hamiltonian
@@ -113,7 +115,7 @@ module  m_spin_terms
   !    procedure :: get_Langevin_Heff => get_Langevin_Heff
    end type spin_terms_t
 contains
-  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion)
+  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion, spin_index)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -126,15 +128,19 @@ contains
     !Arguments ------------------------------------
     !scalars
     class(spin_terms_t), intent(out) :: self
-    integer, intent(in) :: zion(:)
+    integer, intent(in) :: zion(:), spin_index(:)
     real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:)
     !Local variables-------------------------------
-    integer :: nmatoms, i
-
+    integer :: nmatoms, natoms, i
+    ! TODO: should be sth else, not zion
     nmatoms=size(zion)
+    natoms=size(spin_index)
     self%nmatoms=nmatoms
+    self%natoms=natoms
     ABI_ALLOCATE(self%zion, (nmatoms))
+    ABI_ALLOCATE(self%spin_index, (natoms))
     self%zion(:)=zion(:)
+    self%spin_index(:)=spin_index(:)
     self%cell(:,:)=cell(:,:)
     ABI_ALLOCATE( self%pos, (3,nmatoms) )
     self%pos(:,:)=pos(:,:)
