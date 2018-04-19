@@ -136,7 +136,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 !Local variables-------------------------------
 !scalars
  integer :: dkpt,ii,ikpt,jkpt,marr,ndiv_small,nkpt_computed
- integer :: nsegment,prtkpt,tread,tread_kptrlatt,tread_ngkpt
+ integer :: nsegment,prtkpt,tread,tread_kptrlatt,tread_ngkpt ! tread_ngkpt_fine
  real(dp) :: fraction,norm,ucvol,wtksum
  character(len=500) :: message
 !arrays
@@ -339,9 +339,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      do ii=1,3
        if(ngkpt(ii)<1)then
          write(message,'(a,i0,3a,i0,3a)') &
-&         'The input variable ngkpt(',ii,') must be strictly positive,',ch10,&
-&         'while it is found to be',ngkpt(ii),'.',ch10,&
-&         'Action: change it in your input file, or change kptopt.'
+         'The input variable ngkpt(',ii,') must be strictly positive,',ch10,&
+         'while it is found to be',ngkpt(ii),'.',ch10,&
+         'Action: change it in your input file, or change kptopt.'
          MSG_ERROR(message)
        end if
      end do
@@ -352,9 +352,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
    if(tread_ngkpt==1 .and. tread_kptrlatt==1)then
      write(message,  '(5a)' ) &
-&     'The input variables ngkpt and kptrlatt cannot both ',ch10,&
-&     'be defined in the input file.',ch10,&
-&     'Action : change one of ngkpt or kptrlatt in your input file.'
+     'The input variables ngkpt and kptrlatt cannot both ',ch10,&
+     'be defined in the input file.',ch10,&
+     'Action: change one of ngkpt or kptrlatt in your input file.'
      MSG_ERROR(message)
    else if(tread_ngkpt==1)then
      kptrlatt(:,:)=0
@@ -370,9 +370,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
    if (nshiftk < 1 .or. nshiftk > MAX_NSHIFTK )then
      write(message,  '(a,i0,2a,i0,3a)' )&
-&     'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
-&     'while it is found to be',nshiftk,'.',ch10,&
-&     'Action: change the value of nshiftk in your input file, or change kptopt.'
+     'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
+     'while it is found to be',nshiftk,'.',ch10,&
+     'Action: change the value of nshiftk in your input file, or change kptopt.'
      MSG_ERROR(message)
    end if
 
@@ -385,9 +385,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    else
      if(nshiftk/=1)then
        write(message,  '(3a,i0,2a)' )&
-&       'When nshiftk is not equal to 1, shiftk must be defined in the input file.',ch10,&
-&       'However, shiftk is not defined, while nshiftk=',nshiftk,ch10,&
-&       'Action: change the value of nshiftk in your input file, or define shiftk.'
+       'When nshiftk is not equal to 1, shiftk must be defined in the input file.',ch10,&
+       'However, shiftk is not defined, while nshiftk=',nshiftk,ch10,&
+       'Action: change the value of nshiftk in your input file, or define shiftk.'
        MSG_ERROR(message)
      end if
 !    Default values used in indefo
@@ -422,27 +422,75 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    kptnrm=one
 
  else
-
    write(message,  '(3a,i0,3a)' ) &
-&   'The only values of kptopt allowed are smaller than 4.',ch10,&
-&   'The input value of kptopt is',kptopt,'.',ch10,&
-&   'Action: change kptopt in your input file.'
+   'The only values of kptopt allowed are smaller than 4.',ch10,&
+   'The input value of kptopt is',kptopt,'.',ch10,&
+   'Action: change kptopt in your input file.'
    MSG_ERROR(message)
  end if
 
  if(kptnrm<tol10)then
    write(message, '(5a)' )&
-&   'The input variable kptnrm is lower than 1.0d-10,',ch10,&
-&   'while it must be a positive, non-zero number.   ',ch10,&
-&   'Action: correct the kptnrm in the input file.'
+   'The input variable kptnrm is lower than 1.0d-10,',ch10,&
+   'while it must be a positive, non-zero number.   ',ch10,&
+   'Action: correct the kptnrm in the input file.'
    MSG_ERROR(message)
  end if
 
 !The k point number has been computed, and, if nkpt/=0, also the list of k points.
 !Also nkpthf has been computed, and, if nkpt/=0, also the list kpthf.
 
-!Now, determine istwfk, and eventually shift the k points by the value of qptn.
+! Now read kptrlatt_fine, shiftk_fine and nshiftk_fine
 
+#if 0
+ ! Read ngkpt_fine
+ ngkpt_fine = 0; nshiftk_fine = 1; shiftk_fine = zero
+
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'ngkpt_fine', tread_ngkpt_fine, 'INT')
+ if (tread_ngkpt_fine == 1) then
+   ngkpt_fine(1:3) = intarr(1:3)
+   do ii=1,3
+     if (ngkpt_fine(ii) < 1 ) then
+       write(message,'(a,i0,3a,i0,3a)') &
+       'The input variable ngkpt_fine(',ii,') must be strictly positive,',ch10,&
+       'while it is found to be',ngkpt_fine(ii),'.',ch10,&
+       'Action: change it in your input file.'
+       MSG_ERROR(message)
+     end if
+   end do
+
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'nshiftk_fine', tread, 'INT')
+   if (tread == 1) nshiftk_fine = intarr(1)
+
+   if (nshiftk_fine < 1 .or. nshiftk_fine > MAX_NSHIFTK )then
+     write(message,  '(a,i0,2a,i0,3a)' )&
+     'The only allowed values of nshiftk_fine are between 1 and ',MAX_NSHIFTK,ch10,&
+     'while it is found to be',nshiftk_fine,'.',ch10,&
+     'Action: change the value of nshiftk_fine in your input file, or change kptopt.'
+     MSG_ERROR(message)
+   end if
+
+   call intagm(dprarr, intarr, jdtset, marr, 3*nshiftk_fine, string(1:lenstr), 'shiftk_fine', tread, 'DPR')
+   if (tread == 1) then
+     shiftk_fine(:,1:nshiftk_fine) = reshape(dprarr(1:3*nshiftk_fine), [3, nshiftk_fine])
+   else
+     if (nshiftk_fine /= 1) then
+       write(message, '(3a,i0,2a)' )&
+       'When nshiftk_fine is not equal to 1, shiftk_fine must be defined in the input file.',ch10,&
+       'However, shiftk_fine is not defined, while nshiftk_fine=',nshiftk_fine,ch10,&
+       'Action: change the value of nshiftk_fine in your input file, or define shiftk_fine.'
+       MSG_ERROR(message)
+     end if
+     ! Default values used in indefo
+     !shiftk_fine(:,1:nshiftk) = half
+   end if
+
+   call getkgrid(chksymbreak, 0, iscf, kpt_fine, kptopt, kptrlatt_fine, kptrlen, &
+     msym, nkpt, nkpt_computed_fine, nshiftk_fine, nsym, rprimd, shiftk_fine, symafm, symrel, vacuum, wtk_fine)
+ end if
+#endif
+
+!Now, determine istwfk, and eventually shift the k points by the value of qptn.
  if(nkpt/=0)then
 
    istwfk(1:nkpt)=0
