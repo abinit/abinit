@@ -697,7 +697,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    eph_dg%interp_kmult = interp_kmult
    eph_dg%nkpt_coarse = nkpt_coarse
    eph_dg%nkpt_dense = nkpt_dense
+   
    eph_dg%ndiv = interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
+   if (dtset%bs_interp_mode == 1) then
+       write(*,*) 'interpolation mode: centered', eph_dg%ndiv
+   else
+       write(*,*) 'interpolation mode: simple', eph_dg%ndiv
+   endif
 
    write(*,*) 'coarse:      ', nkpt_coarse
    write(*,*) 'dense:       ', nkpt_dense
@@ -731,16 +737,25 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                                            dble(kk-1)/nkpt_coarse(3)]
          !fine loop
          i_subdense = 0
+         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          do i3=1,interp_kmult(3)
            do i2=1,interp_kmult(2)
              do i1=1,interp_kmult(1)
                i_dense = i_dense + 1
                i_subdense = i_subdense + 1
-               !calculate reduced coordinates of point in dense mesh
-               eph_dg%kpts_dense(:,i_dense) =  &
-                        [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
-                         dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
-                         dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
+               if (dtset%bs_interp_mode == 1) then
+                 !calculate reduced coordinates of point in dense mesh
+                 eph_dg%kpts_dense(:,i_dense) =  &
+                          [dble((ii-1)*interp_kmult(1)+i1-1-interp_kmult(1)/2)/(nkpt_coarse(1)*interp_kmult(1)),&
+                           dble((jj-1)*interp_kmult(2)+i2-1-interp_kmult(2)/2)/(nkpt_coarse(2)*interp_kmult(2)),&
+                           dble((kk-1)*interp_kmult(3)+i3-1-interp_kmult(3)/2)/(nkpt_coarse(3)*interp_kmult(3))]
+               else
+                 !calculate reduced coordinates of point in dense mesh
+                 eph_dg%kpts_dense(:,i_dense) =  &
+                          [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
+                           dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
+                           dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
+               endif
                !array indexes mapping
                eph_dg%dense_to_coarse(i_dense) = i_coarse
                eph_dg%coarse_to_dense(i_coarse,i_subdense) = i_dense
