@@ -113,7 +113,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph, eph_double_grid_t
- use m_double_grid,     only : double_grid_t, double_grid_init
  use m_kpts,            only : listkk
 
 !This section has been created automatically by the script Abilint (TD).
@@ -623,7 +622,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
 
    wfk_fname_dense = dtfil%fnameabi_wfkfine
-   call wrtout(std_out,"EPH Interpolation: will read energies and kmesh from: "//trim(wfk_fname_dense),"COLL")
+   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense),"COLL")
 
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
      MSG_ERROR(msg)
@@ -672,7 +671,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    write(*,*) intp_kptrlatt
    write(*,*) intp_nshiftk
    write(*,*) intp_shiftk
-   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm)
+   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt,&
+                                      intp_nshiftk, intp_shiftk, band_block, comm)
    eph_dg%ebands_dense = ebands_dense
    use_dg = .true.
  end if
@@ -682,24 +682,31 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    write(*,*) 'start dg calculation'
 
+
+   !debug
    write(*,*) 'dense ngkpt:',ebands_dense%nkpt
    write(*,*) 'dense mband:',ebands_dense%mband
    write(*,*) 'dense kpoints:'
    do ii=1,ebands_dense%nkpt
      write(*,*) ebands_dense%kptns(:,ii)
    enddo
+   !end debug
 
    eph_dg%dense_nbz = nkpt_dense(1)*nkpt_dense(2)*nkpt_dense(3)
    eph_dg%coarse_nbz = nkpt_coarse(1)*nkpt_coarse(2)*nkpt_coarse(3)
+   eph_dg%interp_kmult = interp_kmult
+   eph_dg%nkpt_coarse = nkpt_coarse
+   eph_dg%nkpt_dense = nkpt_dense
+   eph_dg%ndiv = interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
+
    write(*,*) 'coarse:      ', nkpt_coarse
    write(*,*) 'dense:       ', nkpt_dense
    write(*,*) 'interp_kmult:', interp_kmult
 
-   !call double_grid_init(kmesh,kmesh_dense,wfk0_hdr%kptrlatt,interp_kmult,double_grid)
    allocate(eph_dg%kpts_coarse(3,eph_dg%coarse_nbz))
    allocate(eph_dg%kpts_dense(3,eph_dg%dense_nbz))
    allocate(eph_dg%dense_to_coarse(eph_dg%dense_nbz))
-   allocate(eph_dg%coarse_to_dense(eph_dg%coarse_nbz,interp_kmult(1)*interp_kmult(2)*interp_kmult(3)))
+   allocate(eph_dg%coarse_to_dense(eph_dg%coarse_nbz,eph_dg%ndiv))
 
    allocate(eph_dg%dense_to_indexes(3,eph_dg%dense_nbz))
    allocate(eph_dg%indexes_to_dense(nkpt_dense(1),nkpt_dense(2),nkpt_dense(3)))
@@ -708,11 +715,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    allocate(eph_dg%indexes_to_coarse(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
 
    allocate(eph_dg%scatter_dense(eph_dg%dense_nbz,eph_dg%dense_nbz))
-   eph_dg%interp_kmult = interp_kmult
-   eph_dg%nkpt_coarse = nkpt_coarse
-   eph_dg%nkpt_dense = nkpt_dense
-   eph_dg%ndiv = interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
- 
+
    write(*,*) 'create dense to coarse mapping'
    ! generate mapping of points in dense bz to the dense bz
    ! coarse loop
@@ -782,7 +785,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !3.
    write(*,*) 'calculate phonon frequencies'
    !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
-   allocate(eph_dg%phfrq_dense(3*cryst%natom,ebands_dense%nkpt), displ_cart(2,3,cryst%natom,3*cryst%natom))
+   allocate(eph_dg%phfrq_dense(3*cryst%natom,ebands_dense%nkpt))
+   allocate(displ_cart(2,3,cryst%natom,3*cryst%natom))
    do ii=1,ebands_dense%nkpt
      qpt = ebands_dense%kptns(:,ii)
      write(*,*) qpt
@@ -844,8 +848,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !5.
 
  !6. we will call sigmaph here for testing purposes only
-   call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_dg)
+   if (dtset%eph_task == 4) then
+     call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+                  pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_dg)
+   endif
 
    deallocate(eph_dg%phfrq_dense)
    deallocate(eph_dg%scatter_dense)
@@ -859,7 +865,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    deallocate(eph_dg%coarse_to_indexes)
    deallocate(eph_dg%indexes_to_coarse)
 
-   call exit(0)
  end if
 
  ! end double grid stuff
@@ -894,8 +899,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (4)
    ! Compute electron self-energy (phonon contribution)
-   call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   if ( .not. use_dg) then
+     call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   endif
 
  case (5)
    ! Interpolate the phonon potential
