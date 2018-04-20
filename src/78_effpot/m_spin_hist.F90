@@ -186,9 +186,9 @@ contains
     hist%entropy(1) =zero
     hist%time(1) =zero
 
-    hist%acell(:)=zero
-    hist%rprimd(:, :)=zero
-    hist%xred(:,:) =zero
+    !hist%acell(:)=zero
+    !hist%rprimd(:, :)=zero
+    !hist%xred(:,:) =zero
     hist%heff(:,:,1)=zero
     hist%S(:,:,1)=zero
     hist%dSdt(:,:,1)=zero

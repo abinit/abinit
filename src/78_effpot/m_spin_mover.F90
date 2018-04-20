@@ -102,25 +102,33 @@ contains
     real(dp) ::  S(3, self%nmatoms)
     real(dp):: t
     integer :: counter
-    character(len=50) :: msg
+    character(len=100) :: msg
     t=0.0
     counter=0
+
+    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "average M", "Energy"
+    write(std_out,*) msg
+    write(ab_out, *) msg
     do while(t<self%total_time)
        counter=counter+1
        !call self%run_one_step(calculator, hist%current_S, S)
        call spin_mover_t_run_one_step(self, calculator, spin_hist_t_get_S(hist), S)
        call spin_hist_t_set_vars(hist=hist, S=S, time=t, inc=.True.)
-       call spin_ncfile_t_write_one_step(ncfile, hist)
-       write(msg, "(ES13.5, 4X, ES13.5)") t, sum((sum(S, dim=2)/self%nmatoms)**2)
-       write(std_out,*) msg
+       if(mod(counter, hist%spin_nctime)==0) then
+          call spin_ncfile_t_write_one_step(ncfile, hist)
+          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, sqrt(sum((sum(S, dim=2)/self%nmatoms)**2)), &
+               & hist%etot(hist%ihist_prev)
+          write(std_out,*) msg
+          write(ab_out, *) msg
+       endif
        !call wrtout_myproc(std_out,msg)
           !print "(I8, 4X, 4ES13.5)", self%current_step, anorm, (a(i) , i=1, 3)
        t=t+self%dt
-
     enddo
   end subroutine spin_mover_t_run_time
 
   subroutine spin_mover_t_finalize(self)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

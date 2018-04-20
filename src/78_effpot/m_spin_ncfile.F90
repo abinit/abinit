@@ -102,7 +102,7 @@ contains
     integer :: ncerr, itime
     itime=self%itime+1
 #if defined HAVE_NETCDF
-    write(std_out, *) "writing spin dynamics step into spin hist netcdf file: itime: ", itime
+    !write(std_out, *) "writing spin dynamics step into spin hist netcdf file: itime: ", itime
     ncerr=nf90_put_var(self%ncid, self%S_id, hist%S(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nmatom, 1])
     ncerr=nf90_put_var(self%ncid, self%dsdt_id, hist%dsdt(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nmatom, 1])
     ncerr=nf90_put_var(self%ncid, self%heff_id, hist%heff(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nmatom, 1])
@@ -155,6 +155,7 @@ contains
   end subroutine spin_ncfile_t_write_primitive_cell
 
   subroutine spin_ncfile_t_write_supercell(self, scell)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

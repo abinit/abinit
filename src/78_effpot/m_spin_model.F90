@@ -21,9 +21,9 @@ module m_spin_model
        & spin_model_primitive_t_read_xml, &
        & spin_model_primitive_t_make_supercell
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
-       &   spin_hist_t_set_params
+       & spin_hist_t_set_params
   use m_spin_mover, only: spin_mover_t, spin_mover_t_initialize, spin_mover_t_finalize, &
-       &  spin_mover_t_run_time, spin_mover_t_run_one_step
+       & spin_mover_t_run_time, spin_mover_t_run_one_step
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
        & spin_ncfile_t_write_one_step
@@ -83,7 +83,6 @@ contains
     ! read input
     !call self%spin_primitive%initialize()
     call spin_model_primitive_t_initialize(self%spin_primitive)
-
     self%params=params
     !call self%read_xml(xml_fname)
     call spin_model_t_read_xml(self, xml_fname)
@@ -100,7 +99,6 @@ contains
 
     ! set parameters to hamiltonian and mover
     self%nmatoms= self%spin_calculator%nmatoms
-    ! TODO hexu: max_save, step_save should be defined in input file and params
 
     !TODO hexu: mxhist, has_latt, natom should be input with their true values when lattice part also added
     call spin_hist_t_init(hist=self%spin_hist, nmatom=self%nmatoms, mxhist=3, has_latt=.False.)
@@ -214,6 +212,8 @@ contains
 
   ! run one time step
   subroutine spin_model_t_run_one_step(self)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -238,22 +238,7 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    real(dp) :: t
-    integer :: i
-    t=0.0d0
-    i=0
-
     call spin_mover_t_run_time(self%spin_mover,self%spin_calculator,self%spin_hist, self%spin_ncfile)
-    do while(i<self%params%spin_ntime)
-       print *, "==================", i
-       i=i+1
-       t=t+self%params%spin_dt
-       !print *, "t= ", t
-       !call self%run_one_step()
-       !call spin_model_t_run_one_step(self)
-       !call spin_hist_t_set_vars(self%spin_hist, time=t, inc=.True.)
-       !call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
-    end do
   end subroutine spin_model_t_run_time
 
   ! run spin .vs. temperature
@@ -282,7 +267,6 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    !TODO
     write(std_err, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvH
 

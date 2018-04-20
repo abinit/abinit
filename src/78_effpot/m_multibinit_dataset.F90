@@ -161,6 +161,7 @@ module m_multibinit_dataset
   real(dp) :: spin_tolvar !covariance
 
   real(dp) :: spin_mag_field(3)  ! external magnetic field
+  real(dp) :: spin_qpoint(3) 
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -196,7 +197,7 @@ module m_multibinit_dataset
   ! qph2l(3,nph2l)
 
   ! spin part
-  !real(dp), allocatable :: gilbert_damping(:) ! if not provided in xml or override is needed. 
+  !real(dp), allocatable :: gilbert_damping ! if not provided in xml or override is needed. 
   !real(dp), allocatable :: gyro_ratio(:) ! if not provided in xml
 
   !real(dp), allocatable :: qspin1l(:,:)
@@ -351,6 +352,7 @@ multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above.
  multibinit_dtset%strten_reference(:)= zero
 
  multibinit_dtset%spin_mag_field(:)=zero
+ multibinit_dtset%spin_qpoint(:)=zero
 
  ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
  multibinit_dtset%atifc(:)=0
@@ -1095,7 +1097,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
- 
  multibinit_dtset%spin_ntime=10000
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_ntime',tread,'INT')
  if(tread==1) multibinit_dtset%spin_ntime=intarr(1)
@@ -1128,6 +1129,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
  
 
+ multibinit_dtset%spin_qpoint= zero
+ if(3>marr)then
+    marr=3
+    ABI_DEALLOCATE(intarr)
+    ABI_DEALLOCATE(dprarr)
+    ABI_ALLOCATE(intarr,(marr))
+    ABI_ALLOCATE(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_qpoint',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_mag_field(1:3)= dprarr(1:3)
 
 
  multibinit_dtset%spin_temperature=325
@@ -1142,8 +1153,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
-
-
  multibinit_dtset%spin_tolavg=1d-02
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_tolavg',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_tolavg=dprarr(1)
@@ -1155,7 +1164,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- 
  multibinit_dtset%spin_tolvar=1d-02
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_tolvar',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_tolvar=dprarr(1)
