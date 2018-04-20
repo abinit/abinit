@@ -16189,12 +16189,14 @@ Variable(
     defaultval=0,
     mnemonics="TIMe 1st order REVersal",
     characteristics=['[[DEVELOP]]'],
-    commentdims="possible values are 0 and 1",
     text="""
+Allowed values are 0 or 1.
+
 If tim1rev is equal to 1, the Sternheimer equation is solved simultaneously at
 +q and -q perturbation wavevectors. The first order potential at -q is taken
 to be equal to the Hermitian conjugate of the first order potential at +q.
-Relevant in the case of magnetic field perturbation.
+The wavefunctions from both +q and -q are then combined to generate the first order density.
+Relevant in the case of magnetic field perturbation (but will be relevant also in case of non-zero frequency DFPT, when implemented).
 """,
 ),
 
