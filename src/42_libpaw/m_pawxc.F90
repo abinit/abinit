@@ -895,6 +895,12 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
 !----------------------------------------------------------------------
 !----- Check options
 !----------------------------------------------------------------------
+
+ nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==19)
+ if(nkxc_updn>3) then
+   msg='Kxc for GGA not implemented!'
+   MSG_ERROR(msg)
+ end if
  if(nspden==4.and.nkxc>0) then
    msg='Kxc for nspden=4 not implemented!'
    MSG_ERROR(msg)
