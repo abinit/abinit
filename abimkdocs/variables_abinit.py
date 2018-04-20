@@ -7623,10 +7623,10 @@ Variable(
     abivarname="ixcrot",
     varset="dfpt",
     vartype="integer",
-    topics=['DFPT_internal', 'xc_expert', 'DFPT_internal'],
+    topics=['DFPT_expert', 'xc_expert'],
     dimensions="scalar",
     defaultval=3,
-    mnemonics="Index of the XC ROTation method used to calculate first-order exchange-correltation potential in non-collinear DFPT calculations",
+    mnemonics="Index of the XC ROTation method used to calculate first-order exchange-correlation potential in non-collinear DFPT calculations",
     characteristics=['[[DEVELOP]]'],
     text="""
 Method of calculation of the 1st order XC potential in non-collinear DFPT

@@ -659,6 +659,7 @@ in order of number of occurrence in the input files provided with the package.
             # Read template, interpolate and write md file included in mkdocs.yml.
             with io.open(os.path.join(self.root, "topics", "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
                 template = fh.read()
+                template = template.replace("is the source file for this topics. Can be edited."," file has been generated automatically from the corresponding _* source file. DO NOT EDIT. Edit the source file instead.")
                 template = template.replace("{{ related_variables }}", related_variables)
                 template = template.replace("{{ selected_input_files }}", selected_input_files)
 
@@ -1085,6 +1086,7 @@ The bibtex file is available [here](../abiref.bib).
                 tokens = name.split("_")
                 suite_name, tnum = "_".join(tokens[:-1]), tokens[-1]
                 url = "/tests/%s/Input/t%s.in" % (suite_name, tnum)
+
                 if a.text is None: a.text = "%s[%s]" % (suite_name, tnum)
                 test = self.rpath2test[url[1:]]
                 content = test.description # + "\n\n" + ", ".join(test.authors)
