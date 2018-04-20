@@ -1162,7 +1162,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
      v_i2pert(:,:) = v_i2pert(:,:) + vxc1_i2pert(:,:)
    end if
 
-   call dotprod_vn(cplex,nhat21,eHxc21_nhat(1),eHxc21_nhat(2),nfftf,nfftotf,nspden,2,v_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+   call dotprod_vn(cplex,nhat21,eHxc21_nhat(1),eHxc21_nhat(2),nfftf,nfftotf,nspden,2,v_i2pert,&
+&                  ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
 
    ABI_DEALLOCATE(v_i2pert)
    ABI_DEALLOCATE(nhat21)
@@ -1181,54 +1182,24 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  sumi = sum_psi1H1psi1_i + sum_lambda1psi1psi1_i + sum_lambda1psi0S1psi1_i + sum_psi0H2psi1a_i + sum_psi0H2psi1b_i
  sumi = sumi   + half * (eHxc21_paw(2)+eHxc21_nhat(2)) + sixth * (exc3(2) + exc3_paw(2))
 
- write(msg,'(2a,3(a,i2,a,i1),a)') ch10,'NONLINEAR : ',&
- ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,ch10
+ write(msg,'(2a,3(a,i2,a,i1))') ch10,'NONLINEAR : ',&
+ ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  if (dtset%nonlinear_info>0) then
-   write(msg,'(2(a,f18.8))') '        sum_psi1H1psi1 = ',sum_psi1H1psi1,        ',',sum_psi1H1psi1_i
+   write(msg,'(10(a,2(a,f18.8)),a)') &
+    ch10,'        sum_psi1H1psi1 = ',sum_psi1H1psi1,        ',',sum_psi1H1psi1_i,&
+    ch10,'   sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,   ',',sum_lambda1psi1psi1_i,&
+    ch10,' sum_lambda1psi0S1psi1 = ',sum_lambda1psi0S1psi1, ',',sum_lambda1psi0S1psi1_i,&
+    ch10,'       sum_psi0H2psi1a = ',sum_psi0H2psi1a,       ',',sum_psi0H2psi1a_i,&
+    ch10,'       sum_psi0H2psi1b = ',sum_psi0H2psi1b,       ',',sum_psi0H2psi1b_i,&
+    ch10,'          eHxc21_paw/2 = ',half*eHxc21_paw(1),    ',',half*eHxc21_paw(2),&
+    ch10,'         eHxc21_nhat/2 = ',half*eHxc21_nhat(1),   ',',half*eHxc21_nhat(2),&
+    ch10,'                exc3/6 = ',sixth*exc3(1),         ',',sixth*exc3(2),&
+    ch10,'            exc3_paw/6 = ',sixth*exc3_paw(1),     ',',sixth*exc3_paw(2),&
+    ch10,' >>>>>>>>>>>>>>> e3tot = ',e3tot,                 ',',sumi,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') '   sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,   ',',sum_lambda1psi1psi1_i
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') ' sum_lambda1psi0S1psi1 = ',sum_lambda1psi0S1psi1, ',',sum_lambda1psi0S1psi1_i
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') '       sum_psi0H2psi1a = ',sum_psi0H2psi1a,       ',',sum_psi0H2psi1a_i
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') '       sum_psi0H2psi1b = ',sum_psi0H2psi1b,       ',',sum_psi0H2psi1b_i
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') '          eHxc21_paw/2 = ',half*eHxc21_paw(1),    ',',half*eHxc21_paw(2)
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') '         eHxc21_nhat/2 = ',half*eHxc21_nhat(1),   ',',half*eHxc21_nhat(2)
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') '                exc3/6 = ',sixth*exc3(1),         ',',sixth*exc3(2)
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8))') '            exc3_paw/6 = ',sixth*exc3_paw(1),     ',',sixth*exc3_paw(2)
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(2(a,f18.8),a)') ' >>>>>>>>>>>>>>> e3tot = ',e3tot,                 ',',sumi,ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-!   write(msg,'(10(a,2(a,f18.8)),a)') &
-!    ch10,'        sum_psi1H1psi1 = ',sum_psi1H1psi1,        ',',sum_psi1H1psi1_i,&
-!    ch10,'   sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,   ',',sum_lambda1psi1psi1_i,&
-!    ch10,' sum_lambda1psi0S1psi1 = ',sum_lambda1psi0S1psi1, ',',sum_lambda1psi0S1psi1_i,&
-!    ch10,'       sum_psi0H2psi1a = ',sum_psi0H2psi1a,       ',',sum_psi0H2psi1a_i,&
-!    ch10,'       sum_psi0H2psi1b = ',sum_psi0H2psi1b,       ',',sum_psi0H2psi1b_i,&
-!    ch10,'          eHxc21_paw/2 = ',half*eHxc21_paw(1),    ',',half*eHxc21_paw(2),&
-!    ch10,'         eHxc21_nhat/2 = ',half*eHxc21_nhat(1),   ',',half*eHxc21_nhat(2),&
-!    ch10,'                exc3/6 = ',sixth*exc3(1),         ',',sixth*exc3(2),&
-!    ch10,'            exc3_paw/6 = ',sixth*exc3_paw(1),     ',',sixth*exc3_paw(2),&
-!    ch10,' >>>>>>>>>>>>>>> e3tot = ',e3tot,                 ',',sumi,ch10
-!   call wrtout(std_out,msg,'COLL')
-!   call wrtout(ab_out,msg,'COLL')
   end if
 
 !Real parts
@@ -1268,7 +1239,6 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  ABI_DEALLOCATE(ylm1)
  ABI_DEALLOCATE(ylmgr)
  ABI_DEALLOCATE(ylmgr1)
- ABI_DEALLOCATE(vlocal)
  ABI_DEALLOCATE(vlocal1_i2pert)
  ABI_DEALLOCATE(wfraug)
 
