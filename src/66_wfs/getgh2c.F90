@@ -446,8 +446,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      end if
      nullify(cwaveprj_ptr)
 
-     if (associated(enl_ptr)) nullify(enl_ptr)
-     if (allocated(enl_temp)) ABI_DEALLOCATE(enl_temp)
+     if (associated(enl_ptr)) then
+       nullify(enl_ptr)
+     end if
+     if (allocated(enl_temp)) then
+       ABI_DEALLOCATE(enl_temp)
+     end if
 
    end if
 

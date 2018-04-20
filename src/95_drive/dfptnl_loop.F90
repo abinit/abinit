@@ -770,6 +770,10 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
    ABI_DEALLOCATE(nhat1_i1pert)
    ABI_DEALLOCATE(nhat1_i2pert)
    ABI_DEALLOCATE(nhat1_i3pert)
+   call paw_an_free(paw_an1_i2pert)
+   call paw_ij_free(paw_ij1_i2pert)
+   ABI_DATATYPE_DEALLOCATE(paw_an1_i2pert)
+   ABI_DATATYPE_DEALLOCATE(paw_ij1_i2pert)
  end if
  ABI_DATATYPE_DEALLOCATE(pawrhoij1_i1pert)
  ABI_DATATYPE_DEALLOCATE(pawrhoij1_i2pert)

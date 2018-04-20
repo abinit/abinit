@@ -784,8 +784,12 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !    Change the pointer ffnl_k back to ffnl1 (idir_ffnl=4, for nonlop with signs=2)
      call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
 
-     if (associated(enl_ptr)) nullify(enl_ptr)
-     if (allocated(enl_temp)) ABI_DEALLOCATE(enl_temp)
+     if (associated(enl_ptr)) then
+       nullify(enl_ptr)
+     end if
+     if (allocated(enl_temp)) then
+       ABI_DEALLOCATE(enl_temp)
+     end if
 
    end if ! end tests
 ! *******************************************************************************************
