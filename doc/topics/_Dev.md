@@ -2,6 +2,7 @@
 description: How to modify ABINIT behaviour for developers
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to modify ABINIT behaviour for developers with the ABINIT package.
 

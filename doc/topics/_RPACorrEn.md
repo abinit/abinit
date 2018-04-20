@@ -2,6 +2,7 @@
 description: How to calculate the RPA correlation energy
 authors: FB
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to calculate the RPA correlation energy with the ABINIT package.
 

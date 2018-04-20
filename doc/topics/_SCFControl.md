@@ -2,6 +2,7 @@
 description: How to control the SCF cycle
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to control the SCF cycle with the ABINIT package.
 

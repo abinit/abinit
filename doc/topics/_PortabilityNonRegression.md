@@ -2,6 +2,7 @@
 description: How to check for regressions. 
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page explains how portability and non-regression is managed in the ABINIT project.
 

@@ -2,6 +2,7 @@
 description: How to set parameters related to the electronic wavevectors (k-points)
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters related to the electronic wavevectors (k-points) with the ABINIT package.
 

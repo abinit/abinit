@@ -2,6 +2,7 @@
 description: How to to tune the computation of forces and stresses
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to to tune the computation of forces and stresses with the ABINIT package.
 
