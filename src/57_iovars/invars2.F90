@@ -977,8 +977,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  else
    write(message, '(a,i0,3a)' )&
-&   'occopt=',occopt,' not allowed.',ch10,&
-&   'Action: correct your input file.'
+&   'occopt=',occopt,' not allowed.',ch10,'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1306,8 +1305,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1)then
      write(message, '(5a)' )&
 &     'ixc and xcname cannot be specified simultaneously',ch10,&
-&     'for the same dataset.',ch10,&
-&     'Action: check the input file.'
+&     'for the same dataset.',ch10,'Action: check the input file.'
      MSG_ERROR(message)
    else
 !    Note that xcname is a 'key' variable : its value is stored in keyw at output of intagm
@@ -1364,8 +1362,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&       ' A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
-&       ' Action: modify hyb_mixing in the input file.'
+&       'A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
+&       'Action: modify hyb_mixing in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_mixing=-dprarr(1) ! Note the minus sign
@@ -1375,8 +1373,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&       ' A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
-&       ' Action: modify hyb_mixing_sr in the input file.'
+&       'A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
+&       'Action: modify hyb_mixing_sr in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_mixing_sr=-dprarr(1) ! Note the minus sign
@@ -1386,8 +1384,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread_dft==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&       ' A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
-&       ' Action: modify hyb_range_dft in the input file.'
+&       'A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
+&       'Action: modify hyb_range_dft in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_range_dft=-dprarr(1) ! Note the minus sign
@@ -1397,8 +1395,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread_fock==1)then
      if(dprarr(1)<-tol14)then
        write(message, '(5a)' )&
-&       ' A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
-&       ' Action: modify hyb_range_fock in the input file.'
+&       'A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
+&       'Action: modify hyb_range_fock in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
@@ -2386,9 +2384,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) then
    if(dtset%nsym/=1) then
      write(message,*)&
-&     '  Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
-&     '  (because symmetry is not yet used)',ch10,&
-&     '  Action : check your calculation  with nsym=1'
+&     'Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
+&     '(because symmetry is not yet used)',ch10,&
+&     'Action : check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_window(1:2)=dprarr(1:2)
@@ -2396,9 +2394,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  if(tread==1.and.tread_key==1) then
    write(message, '(a,a,a,a,a)' )&
-&   ' ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
-&   ' for the same dataset.',ch10,&
-&   ' Action : check the input file.'
+&   'ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
+&   'for the same dataset.',ch10,&
+&   'Action : check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -2441,7 +2439,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    write(message, '(5a)' )&
 &   'Only one of the tolmxf/tolmxde variables may be defined at once.',ch10,&
 &   'Action: check values of tolmxf, tolmxde. If you want to use ',ch10,&
-&   '        tolmxde, you should explicitly put tolmxf to 0.0.'
+&   'tolmxde, you should explicitly put tolmxf to 0.0.'
    MSG_ERROR(message)
  end if
 
@@ -2907,8 +2905,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      dtset%nbandhf=nband1
    else
      write(message, '(a,i0,3a)' )&
-&     'occopt=',occopt,' not allowed.',ch10,&
-&     'Action: correct your input file.'
+&     'occopt=',occopt,' not allowed.',ch10,'Action: correct your input file.'
      MSG_ERROR(message)
    end if
  end if

@@ -487,7 +487,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
    call getkgrid(chksymbreak, 0, iscf, kpt_fine, kptopt, kptrlatt_fine, kptrlen, &
      msym, nkpt, nkpt_computed_fine, nshiftk_fine, nsym, rprimd, shiftk_fine, symafm, symrel, vacuum, wtk_fine)
- end if
+ end if ! ngkpt_fine read
 #endif
 
 !Now, determine istwfk, and eventually shift the k points by the value of qptn.

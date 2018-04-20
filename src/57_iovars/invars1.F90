@@ -249,10 +249,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        call inupper(symbol)
        call inupper(string2)
 
-!      DEBUG
 !      write(std_out,'(a)')' invars1 : before test, trim(adjustl(symbol)),trim(adjustl(string2))'
 !      write(std_out,'(5a)' )'"',trim(adjustl(symbol)),'","',trim(adjustl(string2)),'"'
-!      ENDDEBUG
 
        if(trim(adjustl(symbol))==trim(adjustl(string2)))then
          found=1
@@ -263,10 +261,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
            MSG_ERROR(message)
          end if
 
-!        DEBUG
 !        write(std_out,*)' invars1 : found ipsp=',ipsp
-!        ENDDEBUG
-
          write(string1,'(i1)')ipsp
          string(index_lower:index_lower+1)=blank//string1
          index_lower=index_lower+2
@@ -543,8 +538,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%nkptgw<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input nkptgw must be >= 0, but was ',dtset%nkptgw,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -555,8 +549,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gw_nqlwl<0) then
    write(message, '(a,i12,a,a,a,a)' )&
 &   'Input gw_nqlwl must be > 0, but was ',dtset%gw_nqlwl,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -633,8 +626,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%nqptdm<-1) then
    write(message, '(a,i12,a,a,a,a)' )&
 &   'Input nqptdm must be >= 0, but was ',dtset%nqptdm,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -647,8 +639,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%cd_customnimfrqs<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input cd_customnimfrqs must be >= 0, but was ',dtset%cd_customnimfrqs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -658,8 +649,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gw_customnfreqsp<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gw_customnfreqsp must be >= 0, but was ',dtset%gw_customnfreqsp,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -669,8 +659,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gwls_n_proj_freq<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action : check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -680,8 +669,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (ABS(dtset%efmas_calc_dirs)>3) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input efmas_calc_dirs must be between -3 and 3, but was ',dtset%efmas_calc_dirs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -691,8 +679,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%efmas_n_dirs<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input efmas_n_dirs must be >= 0, but was ',dtset%efmas_n_dirs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 !---------------------------------------------------------------------------
@@ -831,8 +818,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_DEALLOCATE(reaalloc)
  else
    write(message, '(a,i0,3a)' )&
-&   'occopt=',occopt,' is not an allowed value.',ch10,&
-&   'Action: correct your input file.'
+&   'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -840,8 +826,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (mband_upper<=0) then
    write(message, '(a,i0,4a)' )&
 &   'Maximal nband must be > 0, but was ',mband_upper,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
