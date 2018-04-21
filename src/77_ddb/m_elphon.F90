@@ -53,6 +53,7 @@ module m_elphon
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_eliashberg_1d,   only : eliashberg_1d
  use m_iogkk,           only : read_el_veloc,  read_gkk
+ use m_bz_mesh,         only : make_path
 
  implicit none
 
@@ -3163,16 +3164,8 @@ end subroutine ep_setupqpt
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
-
- !use m_bz_mesh
- !use m_ifc
+ 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3525,6 +3518,7 @@ end subroutine mkph_linwid
 
 subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband,nkptirr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3673,11 +3667,11 @@ end subroutine get_fs_bands
 
 subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_all_gkk2'
- use interfaces_77_ddb, except_this_one => get_all_gkk2
 !End of the abilint section
 
  implicit none
@@ -3783,11 +3777,12 @@ end subroutine get_all_gkk2
 
 subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'interpolate_gkk'
- use interfaces_77_ddb, except_this_one => interpolate_gkk
+ use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4040,12 +4035,13 @@ end subroutine interpolate_gkk
 subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksize,&
 &    qpttoqpt,ep_prt_yambo,unitgkk,ifltransport)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_all_gkq'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => get_all_gkq
+ use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4211,11 +4207,12 @@ end subroutine get_all_gkq
 
 subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_all_gkr'
- use interfaces_77_ddb, except_this_one => get_all_gkr
+ use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
