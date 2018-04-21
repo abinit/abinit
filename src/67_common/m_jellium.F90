@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-module m_foo
+module m_jellium
 
  use defs_basis
  use defs_abitypes
