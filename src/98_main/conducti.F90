@@ -50,6 +50,7 @@ program conducti
 #if defined HAVE_MPI2
  use mpi
 #endif
+ use m_conducti
 
  use m_io_tools,  only : open_file
  use m_time,      only : timein
