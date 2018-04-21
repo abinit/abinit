@@ -46,7 +46,7 @@ sources = [
  "initro.F90",
  "ionion_realspace.F90",
  "ionion_surface.F90",
- "jellium.F90",
+ "m_jellium.F90",
  "m_cgwf.F90",
  "m_epjdos.F90",
  "m_ksdiago.F90",

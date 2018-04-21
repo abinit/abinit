@@ -31,13 +31,10 @@ module m_conducti
  use defs_basis
  use m_errors
  use m_profiling_abi
-
  use defs_abitypes
- use m_errors
  use m_xmpi
  use m_wffile
  use m_wfk
- use m_profiling_abi
  use m_hdr
  use m_nctk
 

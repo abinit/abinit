@@ -89,6 +89,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
  use m_atomdata, only : atom_length
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc
+ use m_jellium,  only : jellium
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
