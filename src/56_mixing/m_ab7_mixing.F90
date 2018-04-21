@@ -723,7 +723,6 @@ end subroutine ab7_mixing_eval_deallocate
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_mixing_eval'
- use interfaces_56_mixing
 !End of the abilint section
 
  implicit none
@@ -1020,12 +1019,12 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 & i_rhor,i_vresid,i_vrespc,moved_atm_inside,mpicomm,mpi_summarize,&
 & natom,nfft,nfftot,nspden,n_fftgr,n_index,opt_denpot,response,rhor,ucvol,vtrial,xred,errid,errmess)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcge'
  use interfaces_14_hidewrite
- use interfaces_56_mixing, except_this_one => scfcge
 !End of the abilint section
 
  implicit none
@@ -1827,6 +1826,7 @@ end subroutine scfcge
 
 subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2031,12 +2031,12 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 & n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial,errid,errmess, &
 & comm_atom) ! optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfopt'
  use interfaces_14_hidewrite
- use interfaces_56_mixing, except_this_one => scfopt
 !End of the abilint section
 
  implicit none
@@ -2423,6 +2423,7 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
 & etotal_1,etotal_2,etotal_predict,&
 & lambda_1,lambda_2,lambda_predict,errid,errmess)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2574,6 +2575,7 @@ end subroutine findminscf
 
 subroutine dotprodm_v(cplex,cpldot,dot,index1,index2,mpicomm,mpi_summarize,&
 &   mult1,mult2,nfft,npot1,npot2,nspden,opt_storage,potarr1,potarr2)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2757,6 +2759,7 @@ end subroutine dotprodm_v
 
 subroutine dotprodm_vn(cplex,cpldot,denarr,dot,id,ip,mpicomm, mpi_summarize,multd,multp,&
 & nden,nfft,nfftot,npot,nspden,potarr,ucvol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3053,6 +3056,7 @@ end subroutine dotprodm_vn
 
 subroutine sqnormm_v(cplex,index,mpicomm, mpi_summarize,mult,nfft,norm2,npot,nspden,opt_storage,potarr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3184,11 +3188,11 @@ subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
 &  f_atm,f_fftgr,i_rhor2,i_vresid,moved_atm_inside,&
 &  mpicomm,mpi_summarize,natom,nfft,nfftot,nspden,n_fftgr,rhor,ucvol,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'aprxdr'
- use interfaces_56_mixing, except_this_one => aprxdr
 !End of the abilint section
 
  implicit none

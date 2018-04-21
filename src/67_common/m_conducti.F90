@@ -125,11 +125,11 @@ contains
 
  subroutine conducti_paw(filnam,filnam_out,mpi_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_paw'
- use interfaces_67_common, except_this_one => conducti_paw
 !End of the abilint section
 
  implicit none
@@ -569,6 +569,7 @@ end subroutine conducti_paw
 
  subroutine conducti_paw_core(filnam,filnam_out,mpi_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -897,12 +898,12 @@ end subroutine conducti_paw_core
 
 subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti_nc'
  use interfaces_32_util
- use interfaces_67_common, except_this_one => conducti_nc
 !End of the abilint section
 
  implicit none
@@ -1530,6 +1531,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !! SOURCE
 
 subroutine msig(fcti,npti,xi,filnam_out_sig)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

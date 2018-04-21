@@ -36,7 +36,7 @@ module m_jellium
  private
 !!***
 
- !public :: prtposcar
+ public :: jellium
 !!***
 
 contains
@@ -83,6 +83,7 @@ contains
 
 subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 &  option,paral_kgb,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

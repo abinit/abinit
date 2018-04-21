@@ -169,7 +169,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_45_geomoptim
- use interfaces_67_common
  use interfaces_95_drive, except_this_one => gstateimg
 !End of the abilint section
 
@@ -789,7 +788,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 #undef ABI_FUNC
 #define ABI_FUNC 'prtimg'
  use interfaces_14_hidewrite
- use interfaces_67_common, except_this_one => prtimg
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
