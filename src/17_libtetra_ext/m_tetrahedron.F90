@@ -126,7 +126,6 @@ contains
 !!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -185,7 +184,6 @@ end subroutine destroy_tetra
 !!      thmeig
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -503,7 +501,6 @@ end subroutine init_tetra
 !!      gstate,wfk_analyze
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -613,7 +610,6 @@ end subroutine tetra_write
 !!      ep_el_weights,ep_fs_weights,ep_ph_weights,thmeig
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -669,13 +665,12 @@ end subroutine get_tetra_weight
 !!
 !! FUNCTION
 !! calculate integration weights and their derivatives from Blochl et al PRB 49 16223
-!! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
+!! Same API as get_tetra_weight but output weights here have shape (nene, nkpt)
 !!
 !! PARENTS
 !!      m_fstab,m_phonons,m_tetrahedron
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -703,7 +698,7 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
 !Local variables-------------------------------
 !scalars
  integer :: itetra,nprocs,my_start,my_stop,ierr,ii
- real(dp_) :: deltaene,volconst,volconst_mult
+ real(dp_) :: volconst,volconst_mult
 !arrays
  integer :: ind_ibz(4)
  real(dp_) :: eigen_1tetra(4)
@@ -716,13 +711,8 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
  tweight_t = zero; dtweightde_t = zero
 
  volconst = tetra%vv/4.d0
- if (nene <= 1) then
-   TETRA_ERROR('tetra_blochl_weights: nene must be at least 2')
- else
-   deltaene = (enemax-enemin) / (nene-1)
- end if
 
- call split_work(tetra%ntetra,comm,nprocs,my_start,my_stop,ierr)
+ call split_work(tetra%ntetra, comm, nprocs, my_start, my_stop, ierr)
  if (ierr /= 0) TETRA_ERROR("Error in MPI layer")
 
  ! for each tetrahedron
@@ -733,17 +723,11 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
    volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
 
    ! Here we need the original ordering to reference the correct irred kpoints
-   ind_ibz(1) = tetra%tetra_full(1,1,itetra)
-   ind_ibz(2) = tetra%tetra_full(2,1,itetra)
-   ind_ibz(3) = tetra%tetra_full(3,1,itetra)
-   ind_ibz(4) = tetra%tetra_full(4,1,itetra)
+   ind_ibz(:) = tetra%tetra_full(:,1,itetra)
 
    ! Sort energies before calling get_onetetra_
-   eigen_1tetra(1) = eigen_in(ind_ibz(1))
-   eigen_1tetra(2) = eigen_in(ind_ibz(2))
-   eigen_1tetra(3) = eigen_in(ind_ibz(3))
-   eigen_1tetra(4) = eigen_in(ind_ibz(4))
-   call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
+   eigen_1tetra(:) = eigen_in(ind_ibz(:))
+   call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
 
    call get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr,tweight_tmp,dtweightde_tmp)
 
@@ -756,14 +740,12 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
    !    call daxpy (nene, 1.d0, dtweightde_tmp(:,ii), 1, dtweightde_t(:,ind_ibz(ii)), 1)
    !  end do
    !else
-   tweight_t(:,ind_ibz(1)) = tweight_t(:,ind_ibz(1)) + tweight_tmp(:,1)
-   tweight_t(:,ind_ibz(2)) = tweight_t(:,ind_ibz(2)) + tweight_tmp(:,2)
-   tweight_t(:,ind_ibz(3)) = tweight_t(:,ind_ibz(3)) + tweight_tmp(:,3)
-   tweight_t(:,ind_ibz(4)) = tweight_t(:,ind_ibz(4)) + tweight_tmp(:,4)
-   dtweightde_t(:,ind_ibz(1)) = dtweightde_t(:,ind_ibz(1)) + dtweightde_tmp(:,1)
-   dtweightde_t(:,ind_ibz(2)) = dtweightde_t(:,ind_ibz(2)) + dtweightde_tmp(:,2)
-   dtweightde_t(:,ind_ibz(3)) = dtweightde_t(:,ind_ibz(3)) + dtweightde_tmp(:,3)
-   dtweightde_t(:,ind_ibz(4)) = dtweightde_t(:,ind_ibz(4)) + dtweightde_tmp(:,4)
+   do ii=1,4
+     tweight_t(:,ind_ibz(ii)) = tweight_t(:,ind_ibz(ii)) + tweight_tmp(:,ii)
+   end do
+   do ii=1,4
+     dtweightde_t(:,ind_ibz(ii)) = dtweightde_t(:,ind_ibz(ii)) + dtweightde_tmp(:,ii)
+   end do
    !end if
  end do ! itetra
 
@@ -827,7 +809,6 @@ end subroutine tetra_blochl_weights
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1330,7 +1311,6 @@ end subroutine get_dbl_tetra_weight
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1486,7 +1466,6 @@ end function tetralib_has_mpi
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1792,7 +1771,6 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
    tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + volconst_mult - cc_tmp*inv_epsilon43
    tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + volconst_mult - cc*4.d0 + cc_tmp*invepsum
 
-
    dccde = dccde_pre * deleps4*deleps4
    dccde_tmp = -dccde*deleps4 + cc
    dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + dccde_tmp * inv_epsilon41
@@ -1897,7 +1875,6 @@ end subroutine get_onetetra_
 !!      m_ebands,m_epjdos,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1944,18 +1921,12 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
  do itetra=1,tetra%ntetra
 
    ! Here we need the original ordering to reference the correct irred kpoints
-   ind_ibz(1) = tetra%tetra_full(1,1,itetra)
-   ind_ibz(2) = tetra%tetra_full(2,1,itetra)
-   ind_ibz(3) = tetra%tetra_full(3,1,itetra)
-   ind_ibz(4) = tetra%tetra_full(4,1,itetra)
+   ind_ibz(:) = tetra%tetra_full(:,1,itetra)
    ! Cycle if this tetra does not contribute to this k-point.
    if (all(ind_ibz /= ik_ibz)) cycle
 
    ! Sort energies before calling get_onetetra_
-   eigen_1tetra(1) = eig_ibz(ind_ibz(1))
-   eigen_1tetra(2) = eig_ibz(ind_ibz(2))
-   eigen_1tetra(3) = eig_ibz(ind_ibz(3))
-   eigen_1tetra(4) = eig_ibz(ind_ibz(4))
+   eigen_1tetra(:) = eig_ibz(ind_ibz(:))
    call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
 
    call get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,&
