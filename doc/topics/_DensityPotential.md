@@ -2,6 +2,7 @@
 description: How to analyze the densities and potentials
 authors: SS, XG, YG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to analyze the densities and potentials with the ABINIT package.
 

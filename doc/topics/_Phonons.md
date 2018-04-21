@@ -2,6 +2,7 @@
 description: How to compute phonon frequencies and modes, IR and Raman spectra, Born effective charges, IR reflectivity ...
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute phonon frequencies and modes, IR and Raman spectra, Born effective
 charges, IR reflectivity ... with the ABINIT package.

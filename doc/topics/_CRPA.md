@@ -2,6 +2,7 @@
 description: How to calculate the effective Coulomb interaction
 authors: BAmadon
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to calculate the effective Coulomb interaction with the ABINIT package.
 

@@ -2,6 +2,7 @@
 description: How to use hybrid functionals
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to use hybrid functionals with the ABINIT package.
 

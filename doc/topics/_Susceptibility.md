@@ -2,6 +2,7 @@
 description: How compute the frequency-dependent susceptibility matrix, and related screened interaction matrix, and inverse dielectric marix
 authors: MG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute the frequency-dependent susceptibility matrix, and related screened
 interaction matrix, and inverse dielectric marix with the ABINIT package.

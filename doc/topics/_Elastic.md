@@ -2,6 +2,7 @@
 description: How to compute elastic, piezoelectric and internal strain tensors from DFPT
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute elastic, piezoelectric and internal strain tensors 
 from DFPT with the ABINIT package.
