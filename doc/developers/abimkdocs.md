@@ -408,6 +408,9 @@ See the new input variables [[einterp]], [[nkpath]], and [[prtebands]],
 and the new tests [[test:v8_04]], [[test:libxc_41]].
 Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
 
+B.2
+Added subsuite syntax [[test:gspw_01]]
+
 C.2  
 New versions of Fortran compilers have been integrated in the test farm:
 
@@ -421,11 +424,15 @@ Corresponding examples are available in [[ac:abiref_gnu_5.3_debug.ac]]
 
 produces a nice report with links to the features available in the new version:
 
+
 B.1   
 Implementation of algorithms to interpolate the electronic band structure.
 See the new input variables [[einterp]], [[nkpath]], and [[prtebands]], 
 and the new tests [[test:v8_04]], [[test:libxc_41]].
 Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
+
+B.2
+Added subsuite syntax [[test:gspw_01]]
 
 C.2  
 New versions of Fortran compilers have been integrated in the test farm:

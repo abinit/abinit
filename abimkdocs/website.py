@@ -292,6 +292,7 @@ class Website(object):
 
         # Build flat list of tests.
         from doc import tests as tmod
+        self.abinit_tests = tmod.abitests
         tests = tmod.abitests.select_tests(suite_args=[], regenerate=True, flat_list=True)
 
         # Construct dictionary rpath --> test. Use OrderedDict to have deterministic behaviour.
@@ -1085,13 +1086,18 @@ The bibtex file is available [here](../abiref.bib).
                 if a.text is None: a.text = "%s varset" % name
 
             elif namespace == "test":
-                # Handle [[test:libxc_41]]
-                # TODO: Treat subsuite
+                # Handle [[test:libxc_41]] (syntax for suite) [[test:gspw_01]] (syntax for subsuite)
                 tokens = name.split("_")
-                suite_name, tnum = "_".join(tokens[:-1]), tokens[-1]
-                url = "/tests/%s/Input/t%s.in" % (suite_name, tnum)
+                prefix, tnum = "_".join(tokens[:-1]), tokens[-1]
+                if prefix in self.abinit_tests.all_subsuite_names:
+                    # [[test:gspw_01]]  --> Need to get the name of suite from subsuite.
+                    suite_name = self.abinit_tests.suite_of_subsuite(prefix).name
+                    url = "/tests/%s/Input/t%s.in" % (suite_name, name)
+                else:
+                    # [[test:libxc_41]]
+                    url = "/tests/%s/Input/t%s.in" % (prefix, tnum)
 
-                if a.text is None: a.text = "%s[%s]" % (suite_name, tnum)
+                if a.text is None: a.text = "%s[%s]" % (prefix, tnum)
                 test = self.rpath2test[url[1:]]
                 content = test.description # + "\n\n" + ", ".join(test.authors)
                 add_popover(a, content=content)
