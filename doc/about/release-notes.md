@@ -207,7 +207,7 @@ D.14 Post-processing script for Raman calculations (script/post-processing/Raman
 D.15 Refactoring for DFPT+NON_COLL : first version for PAW
      By M. Torrent
 
-D.16 Fix of several bugs in constrained magnetization calculations [[magcon]].
+D.16 Fix of several bugs in constrained magnetization calculations [[magconon]].
      By E. Bousquet
 
 D.17 Wrong sign of the derivative of spherical harmonics for f orbitals.
