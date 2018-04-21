@@ -329,7 +329,7 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="AUXiliary XC functional, IXC number",
+    mnemonics="AUXiliary XC functional for hybrid functional, IXC number",
     text="""
 Specification of an auxiliary exchange-correlation functional, thanks to its
 [[ixc]] value, to possibly replace the heavy evaluation of an hybrid
@@ -349,7 +349,7 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1.0,
-    mnemonics="FOCK AUXiliary xc functional - SCALing factor",
+    mnemonics="AUXiliary xc functional for hybrid functional- SCALing factor",
     text="""
 Possible scaling factor for the auxiliary exchange-correlation functional
 defined by [[auxc_ixc]] that has the goal to replace the Fock operator or

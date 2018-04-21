@@ -3,7 +3,7 @@
 Many thanks to the contributors to the ABINIT project between
 November 2017 and April 2018. These release notes
 are relative to modifications/improvements of ABINITv8.8 with respect to v8.6.
-Merge request 285 not included.
+Merge request 285 first MR not included in the release. 
 
 The list of contributors includes :
 B. Amadon, G. Antonius, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen, 
