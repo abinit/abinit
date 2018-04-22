@@ -128,6 +128,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use m_cgtools,    only : dotprod_vn
  use m_pawtab,     only : pawtab_type
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
+ use m_spacepar,   only : hartrestr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

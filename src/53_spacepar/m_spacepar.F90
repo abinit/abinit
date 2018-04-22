@@ -8,7 +8,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG, BA, MT)
+!!  Copyright (C) 2008-2018 ABINIT group (XG, BA, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ module m_spacepar
  use m_xmpi
 
  use defs_abitypes,     only : MPI_type
+ use m_geometry,        only : metric
  use m_mpinfo,          only : ptabs_fourdp
 
  implicit none
@@ -42,6 +43,7 @@ module m_spacepar
 
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
+public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
 !!***
 
 contains
@@ -450,5 +452,358 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 
 end subroutine laplacian
 !!***
+
+!!****f* m_spacepar/redgr
+!! NAME
+!! redgr
+!!
+!! FUNCTION
+!! Compute reduced gradients of a real function on the usual unshifted
+!! fft grid. The gradient directions are the along the primitive
+!! reciprocal lattice vectors.
+!! The input function is intended to be a single spin component of
+!! the valence charge density, the valence + core charge densities
+!! or the first-order core charge density for use in frozen wf
+!! elastic tensor calculations within the GGA.
+!!
+!! NOTES
+!! Closely linked to xcden, but limited to Q=0, real charge densities,
+!! and unshifted grids.
+!!
+!! INPUTS
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT,
+!!   see ~abinit/doc/variables/vargs.htm#ngfft
+!!  frin(nfft)=real space input function
+!!
+!! OUTPUT
+!!  frredgr(nfft,3)= reduced gradient of input function (same units as frin)
+!!
+!! PARENTS
+!!      dfpt_eltfrxc
+!!
+!! CHILDREN
+!!      fourdp
+!!
+!! SOURCE
+
+subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'redgr'
+ use interfaces_53_ffts
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,paral_kgb
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: frin(nfft)
+ real(dp),intent(out) :: frredgr(nfft,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: cplex_tmp,i1,i2,i3,id,idir,ifft,ig,ii,ing,n1,n2,n3
+!arrays
+ real(dp),allocatable :: gg(:,:),wkcmpx(:,:),work(:),workgr(:,:)
+
+! *************************************************************************
+
+!Only real arrays are treated
+ cplex_tmp=1
+
+!Keep local copy of fft dimensions
+ n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+
+!In order to speed the routine, precompute the components of g, including 2pi factor
+ ABI_ALLOCATE(gg,(max(n1,n2,n3),3))
+ do ii=1,3
+   id=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id)*ngfft(ii)-1
+     gg(ing,ii)=two_pi*ig
+   end do
+!  Note that the G <-> -G symmetry must be maintained
+   if(mod(ngfft(ii),2)==0)gg(ngfft(ii)/2+1,ii)=zero
+ end do
+
+ ABI_ALLOCATE(wkcmpx,(2,nfft))
+ ABI_ALLOCATE(work,(nfft))
+ ABI_ALLOCATE(workgr,(2,nfft))
+
+!Obtain rho(G) in wkcmpx from input rho(r)
+ work(:)=frin(:)
+
+ call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+
+!Gradient calculation for three reduced components in turn.
+!Code duplicated to remove logic from loops.
+ do idir=1,3
+   if(idir==1) then
+!$OMP PARALLEL DO PRIVATE(ifft)
+     do i3=1,n3
+       ifft=(i3-1)*n1*n2
+       do i2=1,n2
+         do i1=1,n1
+           ifft=ifft+1
+!          Multiply by i 2pi G(idir)
+           workgr(2,ifft)= gg(i1,idir)*wkcmpx(1,ifft)
+           workgr(1,ifft)=-gg(i1,idir)*wkcmpx(2,ifft)
+         end do
+       end do
+     end do
+   else if(idir==2) then
+!$OMP PARALLEL DO PRIVATE(ifft)
+     do i3=1,n3
+       ifft=(i3-1)*n1*n2
+       do i2=1,n2
+         do i1=1,n1
+           ifft=ifft+1
+!          Multiply by i 2pi G(idir)
+           workgr(2,ifft)= gg(i2,idir)*wkcmpx(1,ifft)
+           workgr(1,ifft)=-gg(i2,idir)*wkcmpx(2,ifft)
+         end do
+       end do
+     end do
+   else
+!$OMP PARALLEL DO PRIVATE(ifft)
+     do i3=1,n3
+       ifft=(i3-1)*n1*n2
+       do i2=1,n2
+         do i1=1,n1
+           ifft=ifft+1
+!          Multiply by i 2pi G(idir)
+           workgr(2,ifft)= gg(i3,idir)*wkcmpx(1,ifft)
+           workgr(1,ifft)=-gg(i3,idir)*wkcmpx(2,ifft)
+         end do
+       end do
+     end do
+   end if !idir
+
+   call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+
+!$OMP PARALLEL DO
+   do ifft=1,nfft
+     frredgr(ifft,idir)=work(ifft)
+   end do
+
+ end do !idir
+
+ ABI_DEALLOCATE(gg)
+ ABI_DEALLOCATE(wkcmpx)
+ ABI_DEALLOCATE(work)
+ ABI_DEALLOCATE(workgr)
+
+end subroutine redgr
+!!***
+
+!!****f* m_spacepar/hartrestr
+!! NAME
+!! hartrestr
+!!
+!! FUNCTION
+!! To be called for strain perturbation only
+!! Compute the inhomogenous terms generated by the strain derivative of
+!! Hartree potential due to the ground state charge rho(G)
+!!
+!!  FFT of (rho(G)/pi)*[d(1/G**2)/d(strain)
+!!
+!!          - delta(diagonal strain)*(1/G**2)]
+!!
+!! NOTES
+!! *based largely on hartre.f
+!! *Modified code to avoid if statements inside loops to skip G=0.
+!!  Replaced if statement on G^2>gsqcut to skip G s outside where
+!!  rho(G) should be 0.  Effect is negligible but gsqcut should be
+!!  used to be strictly consistent with usage elsewhere in code.
+!! *The speed-up is provided by doing a few precomputations outside
+!!  the inner loop. One variable size array is needed for this (gq).
+!!
+!! INPUTS
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!  idir=direction of the current perturbation
+!!  ipert=type of the perturbation
+!!  mpi_enreg=informations about MPI parallelization
+!!  natom=number of atoms in cell.
+!!  nfft=number of fft grid points (gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2))
+!!  ngfft(18)=contain all needed information about 3D FFT,
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
+!!  rhog(2,nfft)=array for Fourier transform of GS electron density
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!
+!! OUTPUT
+!!  vhartr1(nfft)=Inhomogeneous term in strain-perturbation-induced Hartree
+!!   potential in real space,
+!!
+!! PARENTS
+!!      dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
+!!
+!! CHILDREN
+!!      fourdp,metric,ptabs_fourdp
+!!
+!! SOURCE
+
+subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
+&  paral_kgb,rhog,rprimd,vhartr1)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'hartrestr'
+ use interfaces_53_ffts
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: idir,ipert,natom,nfft,paral_kgb
+ real(dp),intent(in) :: gsqcut
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: rhog(2,nfft),rprimd(3,3)
+ real(dp),intent(out) :: vhartr1(nfft)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i23,i3,id2,id3,ig,ig2,ig3,ii,ii1,ing,istr,ka,kb,n1,n2,n3
+ real(dp),parameter :: tolfix=1.000000001_dp
+ real(dp) :: cutoff,ddends,den,dgsds,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3
+ real(dp) :: term,ucvol
+ character(len=500) :: message
+!arrays
+ integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
+ integer :: id(3)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: dgmetds(3,3),gmet(3,3),gprimd(3,3),gqr(3),rmet(3,3)
+ real(dp),allocatable :: gq(:,:),work1(:,:)
+
+! *************************************************************************
+
+ if( .not. (ipert==natom+3 .or. ipert==natom+4))then
+   write(message, '(a,i0,a,a)' )&
+&   'From the calling routine, ipert=',ipert,ch10,&
+&   'so this routine for the strain perturbation should not be called.'
+   MSG_BUG(message)
+ end if
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+
+!Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!Initialize a few quantities
+ cutoff=gsqcut*tolfix
+
+ istr=idir + 3*(ipert-natom-3)
+
+ if(istr<1 .or. istr>6)then
+   write(message, '(a,i10,a,a,a)' )&
+&   'Input dir gives istr=',istr,' not allowed.',ch10,&
+&   'Possible values are 1,2,3,4,5,6 only.'
+   MSG_BUG(message)
+ end if
+
+ ka=idx(2*istr-1);kb=idx(2*istr)
+ do ii = 1,3
+   dgmetds(:,ii)=-(gprimd(ka,:)*gprimd(kb,ii)+gprimd(kb,:)*gprimd(ka,ii))
+ end do
+!For historical reasons:
+ dgmetds(:,:)=0.5_dp*dgmetds(:,:)
+
+!In order to speed the routine, precompute the components of g+q
+!Also check if the booked space was large enough...
+ ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id(ii))*ngfft(ii)-1
+     gq(ii,ing)=ig
+   end do
+ end do
+
+ ABI_ALLOCATE(work1,(2,nfft))
+ id2=n2/2+2
+ id3=n3/2+2
+!Triple loop on each dimension
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+!  Precompute some products that do not depend on i2 and i1
+   gqr(3)=gq(3,i3)
+   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+   gqgm23=gq(3,i3)*gmet(2,3)*2
+   gqgm13=gq(3,i3)*gmet(1,3)*2
+
+   do i2=1,n2
+     if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+       gqr(2)=gq(2,i2)
+       gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+       gqgm12=gq(2,i2)*gmet(1,2)*2
+       gqg2p3=gqgm13+gqgm12
+       ig2=i2-(i2/id2)*n2-1
+!      i23=n1*((i2-1)+n2*(i3-1))
+       i23=n1*((ffti2_local(i2)-1)+(n2/mpi_enreg%nproc_fft)*(i3-1))
+!      Do the test that eliminates the Gamma point outside
+!      of the inner loop
+       ii1=1
+       if(i23==0  .and. ig2==0 .and. ig3==0)then
+         ii1=2
+         work1(re,1+i23)=0.0_dp
+         work1(im,1+i23)=0.0_dp
+       end if
+
+!      Final inner loop on the first dimension
+!      (note the lower limit)
+       do i1=ii1,n1
+         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+         ii=i1+i23
+         if(gs<=cutoff)then
+           den=piinv/gs
+           gqr(1)=gq(1,i1)
+           dgsds=&
+&           (gqr(1)*(dgmetds(1,1)*gqr(1)+dgmetds(1,2)*gqr(2)+dgmetds(1,3)*gqr(3))+  &
+&           gqr(2)*(dgmetds(2,1)*gqr(1)+dgmetds(2,2)*gqr(2)+dgmetds(2,3)*gqr(3))+  &
+&           gqr(3)*(dgmetds(3,1)*gqr(1)+dgmetds(3,2)*gqr(2)+dgmetds(3,3)*gqr(3)) )
+           ddends=-piinv*dgsds/gs**2
+           if(istr<=3)then
+             term=2.0_dp*ddends-den
+           else
+             term=2.0_dp*ddends
+           end if
+           work1(re,ii)=rhog(re,ii)*term
+           work1(im,ii)=rhog(im,ii)*term
+         else
+           work1(re,ii)=0.0_dp
+           work1(im,ii)=0.0_dp
+         end if
+
+       end do ! End loop on i1
+     end if
+   end do ! End loop on i2
+ end do !  End loop on i3
+
+ ABI_DEALLOCATE(gq)
+
+!Fourier Transform Vhartree.
+!Vh in reciprocal space was stored in work1
+ call fourdp(1,work1,vhartr1,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+
+ ABI_DEALLOCATE(work1)
+
+end subroutine hartrestr
+!!***
+
 end module m_spacepar
 !!***
