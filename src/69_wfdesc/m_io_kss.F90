@@ -55,6 +55,7 @@ MODULE m_io_kss
  use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_fftcore,          only : get_kg, sphere
+ use m_fft,              only : fftpac
  use m_crystal ,         only : crystal_t
  use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg

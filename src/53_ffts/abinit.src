@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "ccfft.F90",
- "fftpac.F90",
  "fourdp.F90",
  "fourwf.F90",
  "m_fft.F90",

@@ -39,6 +39,7 @@ module m_ksdiago
  use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
  use m_kg,                only : mkkin, mkkpg
  use m_fftcore,           only : kpgsph
+ use m_fft,               only : fftpac
  use m_cgtools,           only : set_istwfk
  use m_electronpositron,  only : electronpositron_type
  use m_mpinfo,            only : destroy_mpi_enreg

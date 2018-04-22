@@ -40,7 +40,6 @@ use m_cgtools
 ! abinit modules
 use defs_basis
 use defs_datatypes
-use m_pawcprj,          only : pawcprj_type
 use defs_abitypes
 use m_profiling_abi
 use m_xmpi
@@ -54,12 +53,14 @@ use m_dtset,            only : dtset_copy, dtset_free
 use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian, destroy_hamiltonian, &
 &                              load_k_hamiltonian
 use m_paw_dmft,         only : paw_dmft_type
-
+use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
 use m_crystal,          only : crystal_t, crystal_init, crystal_free, crystal_print
 use m_io_kss,           only : make_gvec_kss
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
+use m_fft,              only : fftpac
+
 
 implicit none
 save
