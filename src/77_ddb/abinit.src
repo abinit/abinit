@@ -20,7 +20,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "complete_gamma.F90",
  "complete_gamma_tr.F90",
- "complete_gkk.F90",
  "d2c_weights.F90",
  "d2c_wtq.F90",
  "defs_elphon.F90",
