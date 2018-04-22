@@ -195,7 +195,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 #define ABI_FUNC 'energy'
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_65_paw

@@ -135,7 +135,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 #define ABI_FUNC 'vtowfk'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_79_seqpar_mpi, except_this_one => vtowfk

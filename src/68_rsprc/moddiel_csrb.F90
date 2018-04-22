@@ -57,7 +57,6 @@ subroutine moddiel_csrb(dielar,dtset,gprimd,mpi_enreg,rdiemac,rhor_in)
 #undef ABI_FUNC
 #define ABI_FUNC 'moddiel_csrb'
  use interfaces_53_ffts
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

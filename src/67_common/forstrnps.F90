@@ -125,7 +125,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 #define ABI_FUNC 'forstrnps'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section

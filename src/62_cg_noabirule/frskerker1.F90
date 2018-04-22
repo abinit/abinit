@@ -232,7 +232,6 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'frskerker1__pf'
- use interfaces_56_recipspace
  use interfaces_62_cg_noabirule
 !End of the abilint section
 
@@ -288,7 +287,6 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'frskerker1__dpf'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

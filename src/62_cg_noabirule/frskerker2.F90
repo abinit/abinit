@@ -232,7 +232,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'frskerker2__pf'
- use interfaces_56_recipspace
  use interfaces_62_cg_noabirule
 !End of the abilint section
 
@@ -295,7 +294,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'frskerker2__dpf'
- use interfaces_56_recipspace
 !End of the abilint section
 
     implicit none

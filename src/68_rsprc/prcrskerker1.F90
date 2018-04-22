@@ -67,7 +67,6 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcrskerker1'
- use interfaces_56_recipspace
  use interfaces_62_cg_noabirule
 !End of the abilint section
 
