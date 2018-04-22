@@ -54,6 +54,7 @@ module m_elphon
  use m_eliashberg_1d,   only : eliashberg_1d
  use m_iogkk,           only : read_el_veloc,  read_gkk
  use m_bz_mesh,         only : make_path
+ use m_fstab,           only : mkqptequiv
 
  implicit none
 
@@ -3165,7 +3166,7 @@ end subroutine ep_setupqpt
 !! SOURCE
 
 subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
- 
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
