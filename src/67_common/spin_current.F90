@@ -37,7 +37,6 @@ module m_spin_current
  use m_geometry,   only : xred2xcart
  use m_fftcore,    only : sphereboundary
 
-
  implicit none
 
  private
@@ -163,7 +162,6 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !real(dp),allocatable :: vso_realspace_nl(:,:,:,:,:)
 
 ! *************************************************************************
-!source
 
 !write(std_out,*) ' Entering subroutine spin_current '
 !write(std_out,*) ' dtset%ngfft = ', dtset%ngfft
@@ -201,7 +199,6 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  spinor_sym = (/'u','d'/)
  realimag = (/'Re','Im'/)
 
-
  write(std_out,*) ' psps%mpsang,psps%mpssoang ', psps%mpsang,psps%mpssoang
 
 !======================= main code ================================
@@ -238,7 +235,6 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
 !loop over kpoints
  do ikpt=1,dtset%nkpt
-
 
 !  number of plane waves for this kpt
    npw = hdr%npwarr(ikpt)
@@ -543,15 +539,15 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
            MSG_ERROR(message)
          end if
 
-!        print header
+         ! print header
          write (spcur_unit,'(a)')        '#'
          write (spcur_unit,'(a)')        '#  Xcrysden format file'
          write (spcur_unit,'(a)')        '#  spin-orbit potential (space diagonal), for all real space points'
          write (spcur_unit,'(a)')        '#    Real part first, then imaginary part'
          write (spcur_unit,'(a,3(I5,1x))') '#  fft grid is ', dtset%ngfft(1), dtset%ngfft(2),   dtset%ngfft(3)
          write (spcur_unit,'(a,a,a)')    '# ', spin_symbol(ispindir), '-spin contribution '
-         write (spcur_unit,'(a,a,a)')    '# ', spinor_sym(ispinor)//spinor_sym(ispinorp), '-spin element of the spinor 2x2 matrix '
-
+         write (spcur_unit,'(a,a,a)')    '# ', spinor_sym(ispinor)//spinor_sym(ispinorp), &
+             '-spin element of the spinor 2x2 matrix '
          write (spcur_unit,'(a,a)')      '#  cart x     *  cart y    *  cart z    ***',&
 &         ' up-up component    *  up-down           * down-up          * down-down          '
 
@@ -636,36 +632,31 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
  implicit none
 
 !Arguments -------------------------------
-
-  type(hdr_type),intent(inout) :: hdr
-  type(dataset_type),intent(in) :: dtset
-  type(pseudopotential_type),intent(in) :: psps
-
-  real(dp),intent(in) :: position_op(3,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3))
-
-  real(dp),intent(out) :: vso_realspace(2,dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),&
-      & dtset%nspinor,dtset%nspinor,3)
+ type(hdr_type),intent(inout) :: hdr
+ type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+ real(dp),intent(in) :: position_op(3,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3))
+ real(dp),intent(out) :: vso_realspace(2,dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),&
+& dtset%nspinor,dtset%nspinor,3)
 
 !Local variables -------------------------
-
-  integer :: i,j,l, lmax,ipsp,iatom, ir1,ir2,ir3
-  integer :: rcexponent,irealsp
-  integer :: nradgrid,iradgrid
-
-  real(dp) :: gammai, gammaj, relative_position(3), radial_cutoff, norm_rel_pos
-  real(dp) :: expfact,lfact, vso_interpol, x,y,z
-  real(dp) :: xcart(3,dtset%natom),splint_x(1),splint_y(1)
-
-  real(dp), allocatable :: radial_grid(:)
-  real(dp), allocatable :: prefact_ijl(:,:,:,:),tmpvso(:),tmpvso_pp(:)
-  real(dp), allocatable :: vso_radial(:,:),vso_radial_pp(:,:),tmp_spline(:)
-  real(dp), allocatable :: offdiag_l_fact(:,:,:),kpar_matrix(:,:)
+!scalars
+ integer :: i,j,l, lmax,ipsp,iatom, ir1,ir2,ir3
+ integer :: rcexponent,irealsp
+ integer :: nradgrid,iradgrid
+ real(dp) :: gammai, gammaj, relative_position(3), radial_cutoff, norm_rel_pos
+ real(dp) :: expfact,lfact, vso_interpol, x,y,z
+!arrays
+ real(dp) :: xcart(3,dtset%natom),splint_x(1),splint_y(1)
+ real(dp), allocatable :: radial_grid(:)
+ real(dp), allocatable :: prefact_ijl(:,:,:,:),tmpvso(:),tmpvso_pp(:)
+ real(dp), allocatable :: vso_radial(:,:),vso_radial_pp(:,:),tmp_spline(:)
+ real(dp), allocatable :: offdiag_l_fact(:,:,:),kpar_matrix(:,:)
 
 ! *********************************************************************
 
 !recalculate xcart (option = 1)
  call xred2xcart(dtset%natom,hdr%rprimd,xcart,hdr%xred)
-
 
  lmax = psps%mpsang-1
 
@@ -793,8 +784,7 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
    do iradgrid=1,nradgrid
      norm_rel_pos = radial_grid(iradgrid)
      do ipsp=1,psps%npsp
-       expfact = exp(-norm_rel_pos**2 / &
-&       (psps%gth_params%psppar(l+1,0,ipsp))**2)
+       expfact = exp(-norm_rel_pos**2 / (psps%gth_params%psppar(l+1,0,ipsp))**2)
 
        do i=1,3
          do j=1,3
@@ -877,7 +867,6 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 &         vso_interpol * reshape((/zero,-y, -y,   zero/),(/2,2/))
          vso_realspace(2,irealsp,:,:,3) = vso_realspace(2,irealsp,:,:,3) + &
 &         vso_interpol * reshape((/zero,-x, -x,    zero/),(/2,2/))
-
 
        end do  ! ir3
      end do  ! ir2
