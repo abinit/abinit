@@ -1257,6 +1257,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !ENDDEBUG
 
 contains
+!!***
 
 !!****f* ABINIT/trace2
 !! NAME
