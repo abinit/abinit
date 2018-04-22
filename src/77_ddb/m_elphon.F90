@@ -4042,7 +4042,6 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 #undef ABI_FUNC
 #define ABI_FUNC 'get_all_gkq'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4339,6 +4338,7 @@ end subroutine get_all_gkr
 !! SOURCE
 
 subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprimd,symrec,symrel)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

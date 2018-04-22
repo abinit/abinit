@@ -1288,6 +1288,7 @@ contains
 
 subroutine trace2(gxa,gmet,trace)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1360,6 +1361,7 @@ end subroutine trace2
 !! SOURCE
 
 subroutine strsocv(red,gprimd,cart)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1451,6 +1453,7 @@ end subroutine strsocv
 !! SOURCE
 
 subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
