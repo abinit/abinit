@@ -21,7 +21,6 @@ sources = [
  "ccfft.F90",
  "fftpac.F90",
  "fourdp.F90",
- "fourdp_6d.F90",
  "fourwf.F90",
  "m_fft.F90",
  ]

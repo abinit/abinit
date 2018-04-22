@@ -56,6 +56,7 @@ MODULE m_kxc
  use m_pptools,       only : printxsf
  use m_numeric_tools, only : hermitianize
  use m_fft_mesh,      only : g2ifft
+ use m_fft,           only : fourdp_6d
  use m_mpinfo,        only : destroy_mpi_enreg
 
  implicit none
