@@ -61,6 +61,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 
  use m_cgtools, only : dotprod_vn
  use m_mpinfo,  only : ptabs_fourdp
+ use m_spacepar, only : laplacian
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

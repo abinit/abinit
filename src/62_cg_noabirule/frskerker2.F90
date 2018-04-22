@@ -15,7 +15,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~ABINIT/Infos/contributors .
 !!
-!! NOTES 
+!! NOTES
 !! this is neither a function nor a subroutine. This is a module
 !! It is made of two functions and one init subroutine
 !!
@@ -31,7 +31,7 @@
 
 #include "abi_common.h"
 
-module frskerker2 
+module frskerker2
 
   use defs_basis
   use defs_abitypes
@@ -39,6 +39,9 @@ module frskerker2
   use interfaces_32_util        ! THIS IS MANDATORY TO CALL dotproduct
   use interfaces_53_spacepar
   use interfaces_56_recipspace  ! THIS IS MANDATORY TO CALL LAPLACIAN
+
+  use m_spacepar, only : laplacian
+
 
   implicit none
 
