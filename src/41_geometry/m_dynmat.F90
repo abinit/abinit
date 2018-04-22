@@ -4179,7 +4179,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 &       'The sum of the weights is : ',sumwght,ch10,&
 &       'The number of q points is : ',nqpt
        call wrtout(std_out,message,'COLL')
-       write(message, '(13a)'),&
+       write(message, '(13a)')&
 &       'This might have several sources.',ch10,&
 &       'If tolsym is larger than 1.0e-8, the atom positions might be loose',ch10,&
 &       'and the q point weights not computed properly.',ch10,&
