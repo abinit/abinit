@@ -147,6 +147,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get,pawcprj_copy
  use m_hamiltonian,  only : gs_hamiltonian_type,rf_hamiltonian_type,KPRIME_H_KPRIME
+ use m_spacepar,     only : meanvalue_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

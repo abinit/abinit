@@ -1,22 +1,61 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spacepar
+!! NAME
+!! m_spacepar
+!!
+!! FUNCTION
+!!  Relatively Low-level procedures operating on arrays defined on the FFT box (G- or R- space)
+!!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (XG, BA)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_spacepar
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+
+ use defs_abitypes,     only : MPI_type
+
+ implicit none
+
+ private
+!!***
+
+public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/meanvalue_g
 !! NAME
 !! meanvalue_g
 !!
 !! FUNCTION
 !!  Compute the mean value of one wavefunction, in reciprocal space,
-!!  for an operator that is real, diagonal in reciprocal space:
-!!  <wf|op|wf>
+!!  for an operator that is real, diagonal in G-space: <wf|op|wf>
 !!  For the time being, only spin-independent operators are treated.
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT group (XG,BA)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
-!!  diag(npw)=diagonal operator (real, spin-independent !)
+!!  diag(npw)=diagonal operator (real, spin-independent!)
 !!  filter= if 1, need to filter on the value of diag, that must be less than huge(0.0d0)*1.d-11
 !!          otherwise, should be 0
 !!  istwf_k=storage mode of the vectors
@@ -37,20 +76,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -232,4 +258,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  end if
 
 end subroutine meanvalue_g
+!!***
+
+end module m_spacepar
 !!***

@@ -127,6 +127,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use gwls_hamiltonian, only : build_H
  use m_cgwf,        only : cgwf
  use m_lobpcgwf,    only : lobpcgwf2
+ use m_spacepar,    only : meanvalue_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

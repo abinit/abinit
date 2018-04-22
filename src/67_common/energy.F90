@@ -187,6 +187,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_paw_dmft,         only : paw_dmft_type
  use m_cgtools,          only : dotprod_vn
  use m_fft,              only : fftpac
+ use m_spacepar,         only : meanvalue_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
