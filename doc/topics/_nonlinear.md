@@ -2,6 +2,7 @@
 description: How to compute Raman intensity, and the related electro-optic coefficients
 authors: RC, XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute Raman intensity, and the related electro-optic 
 coefficients with the ABINIT package.

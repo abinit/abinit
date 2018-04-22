@@ -2,6 +2,7 @@
 description: How to select the SCF algorithm
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to select the SCF algorithm with the ABINIT package.
 

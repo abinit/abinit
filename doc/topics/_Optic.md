@@ -2,6 +2,7 @@
 description: How to compute linear and non-linear optical properties in the independent-particle approximation
 authors: SS, XG, YG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute linear and non-linear optical properties 
 in the independent-particle approximation with the ABINIT package.

@@ -2,6 +2,7 @@
 description: How to compute the polarisation and take into account a finite homogeneous electric field
 authors: JZ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute the polarisation and take into account a finite homogeneous electric
 field with the ABINIT package.

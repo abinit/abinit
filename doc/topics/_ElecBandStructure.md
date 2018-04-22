@@ -2,6 +2,7 @@
 description: How to generate the electronic band structure related topics
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to generate the electronic band structure related topics with the ABINIT package.
 
