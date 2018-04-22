@@ -259,7 +259,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 #define ABI_FUNC 'ksdiago'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal

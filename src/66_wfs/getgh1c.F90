@@ -819,7 +819,6 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf_transgrid_and_pack'
- use interfaces_53_ffts
  use interfaces_65_paw
 !End of the abilint section
 

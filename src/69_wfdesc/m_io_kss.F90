@@ -1028,7 +1028,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 #define ABI_FUNC 'gshgg_mkncwrite'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs

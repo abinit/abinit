@@ -199,7 +199,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtorho'
  use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common

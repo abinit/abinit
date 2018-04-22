@@ -169,7 +169,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhofermi'
  use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common

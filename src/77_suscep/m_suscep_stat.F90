@@ -172,7 +172,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 #define ABI_FUNC 'suscep_stat'
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section
