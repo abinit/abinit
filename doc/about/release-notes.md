@@ -9,7 +9,7 @@ The list of contributors includes :
 B. Amadon, G. Antonius, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen, 
 C. Espejo, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, A. Martin,
 H. Miranda, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, F. Ricci, 
-G.-M. Rinanese, M. Torrent , M. Verstraete, J. Zwanziger
+G.-M. Rignanese, M. Torrent , M. Verstraete, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases ...
