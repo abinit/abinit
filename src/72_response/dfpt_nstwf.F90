@@ -488,6 +488,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  DBG_EXIT("COLL")
 
 contains
+!!***
 
 !!****f* ABINIT/gaugetransfo
 !! NAME
