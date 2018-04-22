@@ -2795,7 +2795,6 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
      ! Add the long-range part of the potential
      v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
      v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
-
    end do
 
    ! Remove the phase.
@@ -2811,7 +2810,6 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
  ABI_FREE(eiqr)
  ABI_FREE(v1r_lr)
-
 
 end subroutine dvdb_get_v1scf_qpt
 !!***
@@ -2899,17 +2897,15 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
    ! FIXME I think this should be ngfftf and not ngfft
    !       Also, other calls to dvdb_ftinterp_setup should use ngfftf.
    call dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
-   &                       db%nrpt, db%nspden, ipert, v1scf_rpt, comm)
+&                         db%nrpt, db%nspden, ipert, v1scf_rpt, comm)
 
    call dvdb_get_v1scf_qpt(db, cryst, qpt, nfftf, ngfftf, db%nrpt, db%nspden, &
-   &                       ipert, v1scf_rpt, v1scf(:,:,:,ipert), comm)
+&                          ipert, v1scf_rpt, v1scf(:,:,:,ipert), comm)
 
    ABI_FREE(db%rpt)
-
  end do
 
  ABI_FREE(v1scf_rpt)
-
 
 end subroutine dvdb_interpolate_v1scf
 !!***
@@ -2960,7 +2956,7 @@ integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 
 ! *************************************************************************
 
- my_qtol = 0.0001_dp; if (present(qtol)) my_qtol = qtol
+ my_qtol = tol6; if (present(qtol)) my_qtol = qtol
 
  iqpt = -1
  do iq=1,db%nqpt

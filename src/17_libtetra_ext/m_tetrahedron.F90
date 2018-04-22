@@ -14,8 +14,10 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
-!!  1) Test carefull the case of degenerate tethraedron (add
+!!  1) Test carefully the case of degenerate tethraedron
 !!  2) Change API so that we can pass the energy mesh instead of omega_min and omega_max
+!!  3) Add table ik_ibz --> tetra_list to avoid cycling inside big loop over ntetra
+!!  4) Add options to get only delta and/or theta ?
 !!
 !! PARENTS
 !!
@@ -53,7 +55,7 @@ private
 ! Don't use dp because stupid abilint generates wrong interfaces
 integer, parameter :: dp_ = kind(1.0d0)
 
-real(dp_),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
+real(dp_),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0, one = 1.d0
 
 real(dp_), parameter :: sqrtpi = 1.7724538509055159d0
 
@@ -94,19 +96,17 @@ type, public :: t_tetrahedron
 
 end type t_tetrahedron
 
-public :: init_tetra           ! Initialize the object
-                               ! (see also the high-level interface tetra_from_kptrlatt provided by m_kpts).
-public :: get_tetra_weight     ! Calculate integration weights and their derivatives. shape (nkpt,nene)
-public :: tetra_blochl_weights ! Same as in get_tetra_weight but weights have shape (nene,nkpt)
-public :: get_dbl_tetra_weight ! Calculate integration weights for double tetrahedron
-                               !  integration of delta functions (NB these correspond
-                               !  to the derivative terms in normal tetrahedron).
-public :: destroy_tetra        ! Free memory.
-
-public :: tetra_write          ! Write text file with tetra info.
-
-public :: tetralib_has_mpi     ! Return True if the library has been compiled with MPI support
-public :: tetra_get_onewk      ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
+public :: init_tetra               ! Initialize the object
+                                   ! See also the high-level interface tetra_from_kptrlatt provided by m_kpts.
+public :: get_tetra_weight         ! Calculate integration weights and their derivatives. shape (nkpt, nene).
+public :: tetra_blochl_weights     ! Same as in get_tetra_weight but weights have shape (nene, nkpt).
+public :: get_dbl_tetra_weight     ! Calculate integration weights for double tetrahedron integration of delta functions.
+                                   ! (NB these correspond to the derivative terms in normal tetrahedron).
+public :: destroy_tetra            ! Free memory.
+public :: tetra_write              ! Write text file (XML format) with tetra info.
+public :: tetralib_has_mpi         ! Return True if the library has been compiled with MPI support.
+public :: tetra_get_onewk          ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
+public :: tetra_get_onewk_wvals    ! Similar to tetra_get_onewk_wvalsa but reveives arbitrary list of frequency points.
 !!***
 
 contains
@@ -720,7 +720,7 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
    tweight_tmp = zero
    dtweightde_tmp = zero
 
-   volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
+   volconst_mult = max_occ*volconst*dble(tetra%tetra_mult(itetra))
 
    ! Here we need the original ordering to reference the correct irred kpoints
    ind_ibz(:) = tetra%tetra_full(:,1,itetra)
@@ -895,7 +895,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    tweight_tmp = zero
    dtweightde_tmp = zero
 
-   volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
+   volconst_mult = max_occ*volconst*dble(tetra%tetra_mult(itetra))
 
    ! Here we need the original ordering to reference the correct irred kpoints
    ! ind_k refers to the index in the full k list of the summits of the present tetrahedra
@@ -1578,7 +1578,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  ! This is output
  tweight_tmp = zero; dtweightde_tmp = zero
 
- volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
+ volconst_mult = max_occ*volconst*dble(tetra%tetra_mult(itetra))
 
  ! all notations are from Blochl PRB 49 16223 Appendix B
  epsilon21 = eigen_1tetra(2)-eigen_1tetra(1)
@@ -1587,18 +1587,13 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  epsilon32 = eigen_1tetra(3)-eigen_1tetra(2)
  epsilon42 = eigen_1tetra(4)-eigen_1tetra(2)
  epsilon43 = eigen_1tetra(4)-eigen_1tetra(3)
- inv_epsilon21 = zero
- inv_epsilon31 = zero
- inv_epsilon41 = zero
- inv_epsilon32 = zero
- inv_epsilon42 = zero
- inv_epsilon43 = zero
- if (epsilon21 > tol6) inv_epsilon21 = 1.d0 / epsilon21
- if (epsilon31 > tol6) inv_epsilon31 = 1.d0 / epsilon31
- if (epsilon41 > tol6) inv_epsilon41 = 1.d0 / epsilon41
- if (epsilon32 > tol6) inv_epsilon32 = 1.d0 / epsilon32
- if (epsilon42 > tol6) inv_epsilon42 = 1.d0 / epsilon42
- if (epsilon43 > tol6) inv_epsilon43 = 1.d0 / epsilon43
+ inv_epsilon21 = zero; if (epsilon21 > tol6) inv_epsilon21 = 1.d0 / epsilon21
+ inv_epsilon31 = zero; if (epsilon31 > tol6) inv_epsilon31 = 1.d0 / epsilon31
+ inv_epsilon41 = zero; if (epsilon41 > tol6) inv_epsilon41 = 1.d0 / epsilon41
+ inv_epsilon32 = zero; if (epsilon32 > tol6) inv_epsilon32 = 1.d0 / epsilon32
+ inv_epsilon42 = zero; if (epsilon42 > tol6) inv_epsilon42 = 1.d0 / epsilon42
+ inv_epsilon43 = zero; if (epsilon43 > tol6) inv_epsilon43 = 1.d0 / epsilon43
+
  nn1 = int((eigen_1tetra(1)-enemin)/deltaene)+1
  nn2 = int((eigen_1tetra(2)-enemin)/deltaene)+1
  nn3 = int((eigen_1tetra(3)-enemin)/deltaene)+1
@@ -1835,6 +1830,9 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
    do ieps=1,nene
      tmp = eps - cc
      gval = gau_prefactor*exp(-tmp*tmp*gau_width2)
+     ! MG TODO: I think this is not correct, because we have divided by 4 so
+     ! the other points should be accumulated as well.
+     ! There are however changes in the unit tests if I activate these lines...
      !dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + gval
      !dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + gval
      !dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + gval
@@ -1901,19 +1899,12 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 !Local variables-------------------------------
 !scalars
  integer :: itetra,ii
- real(dp_) :: deltaene
 !arrays
  integer :: ind_ibz(4)
  real(dp_) :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
  real(dp_) :: eigen_1tetra(4)
 
 ! *********************************************************************
-
- if (nene <= 1) then
-   TETRA_ERROR('tetra_blochl_weights: nene must be at least 2')
- else
-   deltaene = (enemax-enemin) / (nene-1)
- end if
 
  weights = zero
 
@@ -1929,11 +1920,10 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
    eigen_1tetra(:) = eig_ibz(ind_ibz(:))
    call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
 
-   call get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,&
-&   nene,bcorr,tweight_tmp,dtweightde_tmp)
+   call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ, nene, bcorr, &
+     tweight_tmp, dtweightde_tmp)
 
-   ! Accumulate contributions to ik_ibz
-   ! (there might be multiple vertexes that map onto ik_ibz)
+   ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
    do ii=1,4
      if (ind_ibz(ii) == ik_ibz) then
        weights(:,1) = weights(:,1) + dtweightde_tmp(:,ii)
@@ -1943,6 +1933,99 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
  end do ! itetra
 
 end subroutine tetra_get_onewk
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_tetrahedron/tetra_get_onewk_wvals
+!! NAME
+!! tetra_get_onewk_wvals
+!!
+!! FUNCTION
+!! Calculate integration weights and their derivatives for a single k-point in the IBZ.
+!!
+!! INPUTS
+!! tetra<t_tetrahedron>=Object with tables for tetrahedron method.
+!! ik_ibz=Index of the k-point in the IBZ array
+!! bcorr=1 to include Blochl correction else 0.
+!! nw=number of energies in wvals
+!! nibz=number of irreducible kpoints
+!! wvals(nw)=Frequency points.
+!! eigen_ibz(nkibz)=eigenenergies for each k point
+!!
+!! OUTPUT
+!!  weights(nw,2) = integration weights for
+!!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
+!!    for a given (band, k-point, spin).
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz, weights)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'tetra_get_onewk_wvals'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ik_ibz,nw,nkibz,bcorr
+ type(t_tetrahedron), intent(in) :: tetra
+!arrays
+ real(dp_),intent(in) :: wvals(nw)
+ real(dp_),intent(in) :: eig_ibz(nkibz)
+ real(dp_),intent(out) :: weights(nw, 2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: itetra,ii,iw
+ real(dp_),parameter :: max_occ1 = one
+ real(dp_) :: enemin, enemax
+!arrays
+ integer :: ind_ibz(4)
+ real(dp_) :: theta_tmp(2,4), delta_tmp(2,4), eigen_1tetra(4)
+
+! *********************************************************************
+
+ weights = zero
+
+ ! For each tetrahedron
+ do itetra=1,tetra%ntetra
+
+   ! Here we need the original ordering to reference the correct irred kpoints
+   ind_ibz(:) = tetra%tetra_full(:,1,itetra)
+   ! Cycle if this tetra does not contribute to this k-point.
+   if (all(ind_ibz /= ik_ibz)) cycle
+
+   ! Sort energies before calling get_onetetra_
+   eigen_1tetra(:) = eig_ibz(ind_ibz(:))
+   call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
+
+   do iw=1,nw
+     enemin = wvals(iw); enemax = enemin + tol6
+     call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, 2, bcorr, &
+        theta_tmp, delta_tmp)
+
+     ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
+     do ii=1,4
+       if (ind_ibz(ii) == ik_ibz) then
+         weights(iw, 1) = weights(iw, 1) + delta_tmp(1, ii)
+         weights(iw, 2) = weights(iw, 2) + theta_tmp(1, ii)
+       end if
+     end do
+   end do
+
+ end do ! itetra
+
+end subroutine tetra_get_onewk_wvals
 !!***
 
 end module m_tetrahedron

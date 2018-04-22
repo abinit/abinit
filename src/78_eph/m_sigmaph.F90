@@ -40,6 +40,7 @@ module m_sigmaph
  use m_hamiltonian
  use m_pawcprj
  use m_wfd
+ use m_ephwg
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -262,6 +263,9 @@ module m_sigmaph
    ! First slice: Fan term at omega=e0_KS
    ! Second slice: DW term
 
+  type(ephwg_t) :: ephwg
+   ! This object compute the weights for the BZ integration in q-space.
+
   type(degtab_t),allocatable :: degtab(:,:)
    ! (nkcalc, nsppol)
    ! Table used to average QP results in the degenerate subspace if symsigma == 1
@@ -346,8 +350,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
+ integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,bcorr0=0
+ integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in,ndeg !,ib,nstates
@@ -386,9 +390,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp) :: d0mat(2,3*cryst%natom,3*cryst%natom)
  complex(dpc) :: cmat(3*cryst%natom,3*cryst%natom),cvec1(3*cryst%natom),cvec2(3*cryst%natom)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
+ real(dp),allocatable :: e0vals(:), deltaw_pm(:,:,:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dbwl_nu(:,:,:,:),gdw2_mn(:,:),gkk0_atm(:,:,:,:)
- complex(dpc),allocatable :: tpp(:,:),hka_mn(:,:,:),wmat1(:,:,:)
+ complex(dpc),allocatable :: tpp(:,:),hka_mn(:,:,:),wmat1(:,:,:), cweights(:,:,:,:), zvals(:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -525,7 +530,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    kk = sigma%kcalc(:, ikcalc)
 
    ! Find IBZ(k) for q-point integration.
-   call sigmaph_setup_kcalc(sigma, cryst, ikcalc)
+   call sigmaph_setup_kcalc(sigma, cryst, ikcalc, dtset%prtvol)
    call wrtout(std_out, sjoin("Computing self-energy matrix elements for k-point:", ktoa(kk)))
    call wrtout(std_out, sjoin("Number of q-points in the IBZ(k):", itoa(sigma%nqibz_k)))
 
@@ -592,12 +597,22 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      gkk0_atm = zero
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
+     ! and save KS energies in e0vals
      ! TODO: symmetrize them if kk is not irred
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
+     ABI_MALLOC(e0vals, (nbcalc_ks))
      do ib_k=1,nbcalc_ks
        band = ib_k + bstart_ks - 1
        call wfd_copy_cg(wfd, band, ik_ibz, spin, kets_k(1,1,ib_k))
+       e0vals(ib_k) = ebands%eig(band, ik_ibz, spin)
      end do
+
+     ! Weights for Re-Im with i.eta shift.
+     ABI_MALLOC(cweights, (nz, 2, nbcalc_ks, natom3))
+     ABI_MALLOC(zvals, (nz, nbcalc_ks))
+
+     ! Weights for Im (tethraedron, eta --> 0)
+     ABI_MALLOC(deltaw_pm, (nbcalc_ks, 2, natom3))
 
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
@@ -829,6 +844,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          if (nsppol == 1 .and. nspinor == 1 .and. nspden == 1) f_mkq = f_mkq * half
          weigth_q = sigma%wtq_k(iq_ibz)
 
+         ! Compute \int 1/z with tetrahedron if real part of sigma is wanted.
+         zvals(1, :) = e0vals + sigma%ieta
+         !call ephwg_zinv_weights(sigma%ephwg, nz, nbcalc_ks, zvals, qpt, ibsum_kq, spin, cweights, xmpi_comm_self)
+
+         ! Frequency points for delta function with tetra
+         call ephwg_get_dweights(sigma%ephwg, qpt, nbcalc_ks, e0vals, ibsum_kq, spin, bcorr0, deltaw_pm, xmpi_comm_self)
+
          do nu=1,natom3
            ! Ignore acoustic or unstable modes.
            wqnu = phfrq(nu); if (wqnu < tol6) cycle
@@ -843,8 +865,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
              do it=1,sigma%ntemp
                !nqnu = one; f_mkq = one
-               !write(std_out,*)wqnu,sigma%kTmesh(it)
-               !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it),eig0mkq-sigma%mu_e(it) / sigma%kTmesh(it)
                nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                ! TODO: Find good tolerances to treat limits
                !f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
@@ -924,6 +944,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call wrtout(std_out, msg, do_flush=.True.)
      end do ! iq_ibz (sum over q-points)
 
+     ABI_FREE(e0vals)
+     ABI_FREE(cweights)
+     ABI_FREE(zvals)
+     ABI_FREE(deltaw_pm)
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
      ABI_FREE(gkk_nu)
@@ -1339,7 +1363,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer,parameter :: master=0,brav1=1,occopt3=3,qptopt1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,ibstop
- integer :: nk_found,ifo,jj
+ integer :: nk_found,ifo,jj,bstart,nbcount
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
@@ -1398,7 +1422,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! TODO: Use GW variables but change default
  !dtset%freqspmin
  !dtset%freqspmax
- !dtset%nfreqsp
+ !new%nwr = dtset%nfreqsp
  new%nwr = 201
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
  new%wr_step = 0.05 * eV_Ha
@@ -1670,6 +1694,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_CALLOC(new%vals_nuq, (new%ntemp, new%max_nbcalc, 3*cryst%natom, new%nqbz, 2))
  end if
 
+ ! Initialize object for the computation of integration weights.
+ bstart = 1
+ new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
+ !eb_dense = ebands_interp_kmesh(ebands, cryst, dtset%einterp, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm)
+ !call epwgw_print(new%ephgw)
+
  ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
 #ifdef HAVE_NETCDF
@@ -1918,6 +1948,7 @@ subroutine sigmaph_free(self)
     end do
     ABI_DT_FREE(self%degtab)
  end if
+ call ephwg_free(self%ephwg)
 
  ! Close netcdf file.
 #ifdef HAVE_NETCDF
@@ -1939,6 +1970,7 @@ end subroutine sigmaph_free
 !! INPUTS
 !!  crystal<crystal_t> = Crystal structure.
 !!  ikcalc=Index of the k-point to compute.
+!!  prtbol= Verbosity level
 !!
 !! PARENTS
 !!      m_sigmaph
@@ -1947,7 +1979,7 @@ end subroutine sigmaph_free
 !!
 !! SOURCE
 
-subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
+subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1959,7 +1991,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: ikcalc
+ integer,intent(in) :: ikcalc, prtvol
  type(crystal_t),intent(in) :: cryst
  type(sigmaph_t),intent(inout) :: self
 
@@ -1974,6 +2006,9 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
  if (allocated(self%wtq_k)) then
    ABI_FREE(self%wtq_k)
  end if
+
+ ! Prepare weights for BZ(k) integration
+ call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol)
 
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
