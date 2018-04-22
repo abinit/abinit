@@ -171,7 +171,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
  use m_time,             only : timab
  use m_geometry,         only : metric
- use m_kg,               only : mkkin 
+ use m_kg,               only : mkkin
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
@@ -185,7 +185,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
- use m_cgtools,           only : dotprod_vn
+ use m_cgtools,          only : dotprod_vn
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

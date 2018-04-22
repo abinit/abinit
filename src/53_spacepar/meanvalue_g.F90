@@ -85,14 +85,13 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
  if(nspinor==2 .and. istwf_k/=1)then
    write(message,'(a,a,a,i6,a,i6)')&
-&   '  When istwf_k/=1, nspinor must be 1,',ch10,&
-&   '  however, nspinor=',nspinor,', and istwf_k=',istwf_k
+&   'When istwf_k/=1, nspinor must be 1,',ch10,&
+&   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
    MSG_BUG(message)
  end if
 
  if(use_ndo==1 .and. (istwf_k==2 .and.me_g0==1)) then
-   write(message,'(a,a)') ch10,' use_ndo==1, not tested'
-   MSG_BUG(message)
+   MSG_BUG('use_ndo==1, not tested')
  end if
 
  ar=zero
@@ -126,13 +125,13 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        end do
      end if
 
-!    !$OMP PARALLEL DO REDUCTION(+:ar,ar_im) 
+!    !$OMP PARALLEL DO REDUCTION(+:ar,ar_im)
 !    do ipw=1,npw
 !    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
 !    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
 !    end do
 !    if(nspinor==2)then
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im) 
+!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
 !    do ipw=1+npw,2*npw
 !    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
 !    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw-npw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
@@ -172,7 +171,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
      end if
 
 
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im) 
+!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
 !    do ipw=1,npw
 !    if(diag(ipw)<huge(0.0d0)*1.d-11)then
 !    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
@@ -180,7 +179,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !    end if
 !    end do
 !    if(nspinor==2)then
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im) 
+!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
 !    do ipw=1+npw,2*npw
 !    if(diag(ipw-npw)<huge(0.0d0)*1.d-11)then
 !    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
@@ -199,7 +198,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        ar=half*diag(1)*vect(1,1)*vect1(1,1) ; i1=2
      end if
 
-!$OMP PARALLEL DO REDUCTION(+:ar) 
+!$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
        ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
      end do
