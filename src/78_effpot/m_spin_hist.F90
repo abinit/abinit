@@ -395,7 +395,7 @@ contains
        hist%Heff(:, :, ihist)=Heff(:,:)
     end if
     if(present(etot)) then
-       hist%etot( ihist)=etot
+       hist%etot(ihist)=etot
     end if
     if(present(entropy)) then
        hist%entropy(ihist)=entropy

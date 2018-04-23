@@ -35,7 +35,7 @@ contains
   end subroutine spin_mover_t_initialize
 
   ! Heun's integration Method
-  subroutine spin_mover_t_run_one_step(self, calculator, S_in, S_out)
+  subroutine spin_mover_t_run_one_step(self, calculator, S_in, S_out, etot)
     !class (spin_mover_t), intent(inout):: self
 
 !This section has been created automatically by the script Abilint (TD).
@@ -47,7 +47,7 @@ contains
     type(spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nmatoms)
-    real(dp), intent(out) :: S_out(3,self%nmatoms)
+    real(dp), intent(out) :: S_out(3,self%nmatoms), etot
     integer :: i
     real(dp) ::  dSdt(3, self%nmatoms), dSdt2(3, self%nmatoms), &
          & Heff(3, self%nmatoms), Heff2(3, self%nmatoms), &
@@ -65,14 +65,10 @@ contains
     end do
     !$OMP END PARALLEL DO
 
-    !do i=1, self%nmatoms
-    !   S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
-    !end do
-
     ! correction
-
     !call calculator%get_dSdt(S_out, H_lang, dSdt2)
     call spin_terms_t_get_dSdt(calculator, S_out, H_lang, dSdt2)
+    etot=calculator%etot
     !$OMP PARALLEL DO
     do i =1, self%nmatoms
        S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
@@ -99,7 +95,7 @@ contains
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t), intent(inout) :: hist
     type(spin_ncfile_t), intent(inout) :: ncfile
-    real(dp) ::  S(3, self%nmatoms)
+    real(dp) ::  S(3, self%nmatoms), etot
     real(dp):: t
     integer :: counter
     character(len=100) :: msg
@@ -112,8 +108,8 @@ contains
     do while(t<self%total_time)
        counter=counter+1
        !call self%run_one_step(calculator, hist%current_S, S)
-       call spin_mover_t_run_one_step(self, calculator, spin_hist_t_get_S(hist), S)
-       call spin_hist_t_set_vars(hist=hist, S=S, time=t, inc=.True.)
+       call spin_mover_t_run_one_step(self, calculator, spin_hist_t_get_S(hist), S, etot)
+       call spin_hist_t_set_vars(hist=hist, S=S, time=t,etot=etot, inc=.True.)
        if(mod(counter, hist%spin_nctime)==0) then
           call spin_ncfile_t_write_one_step(ncfile, hist)
           write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, sqrt(sum((sum(S, dim=2)/self%nmatoms)**2)), &

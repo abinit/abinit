@@ -108,7 +108,7 @@ contains
     !call spin_hist_t_set_atomic_structure(self%spin_hist, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
     !call self%set_initial_spin(mode=1)
-    call spin_model_t_set_initial_spin(self, mode=0)
+    call spin_model_t_set_initial_spin(self, mode=1)
 
     !call self%spin_mover%initialize(self%nmatoms, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nmatoms, dt=params%spin_dt, &
@@ -195,6 +195,7 @@ contains
        ! randomize S using uniform random number
        print *, "Initial spin set to random value"
        call random_number(S)
+       S=S-0.5
        do i=1, self%nmatoms
           S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
        end do
@@ -221,10 +222,10 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    real(dp) :: S_tmp(3,self%nmatoms)
+    real(dp) :: S_tmp(3,self%nmatoms), etot
     call spin_mover_t_run_one_step(self%spin_mover, self%spin_calculator, &
-         spin_hist_t_get_S(self%spin_hist),S_tmp)
-    call spin_hist_t_set_vars(self%spin_hist, S=S_tmp, inc=.False.)
+         spin_hist_t_get_S(self%spin_hist),S_tmp, etot)
+    call spin_hist_t_set_vars(self%spin_hist, S=S_tmp, etot=etot, inc=.False.)
   end subroutine spin_model_t_run_one_step
 
   ! run all time step

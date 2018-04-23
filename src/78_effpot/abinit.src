@@ -40,6 +40,7 @@ sources = [
     "m_spin_model_primitive.F90",
     "m_spin_mover.F90",
     "m_spin_ncfile.F90",
+    "m_spin_reciprocal.F90",
     "m_spin_terms.F90",
     "m_spin_terms_funcs.F90", # TODO hexu: to be merged with m_spin_terms
     "ziggurat.F90"

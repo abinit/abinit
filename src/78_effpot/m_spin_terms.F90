@@ -9,7 +9,11 @@ module  m_spin_terms
   real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t
      integer :: nmatoms, natoms
+     real(dp) :: etot
      real(dp), allocatable :: ms(:), pos(:,:),  spinat(:,:), S(:,:)
+     ! iatom_prim, index of atom in primitive cell
+     ! rvec: R vector from primitive cell to supercell
+     integer, allocatable :: iatom_prim(:), rvec(3,:)
      real(dp):: cell(3,3)
      integer, allocatable :: zion(:)
      ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
@@ -115,7 +119,7 @@ module  m_spin_terms
   !    procedure :: get_Langevin_Heff => get_Langevin_Heff
    end type spin_terms_t
 contains
-  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion, spin_index)
+  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion, spin_index, iatom_prim, rvec)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -128,7 +132,7 @@ contains
     !Arguments ------------------------------------
     !scalars
     class(spin_terms_t), intent(out) :: self
-    integer, intent(in) :: zion(:), spin_index(:)
+    integer, intent(in) :: zion(:), spin_index(:), iatom_prim(:), rvec(3,natoms)
     real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:)
     !Local variables-------------------------------
     integer :: nmatoms, natoms, i
@@ -139,8 +143,12 @@ contains
     self%natoms=natoms
     ABI_ALLOCATE(self%zion, (nmatoms))
     ABI_ALLOCATE(self%spin_index, (natoms))
+    ABI_ALLOCATE(self%iatom_prim, (natoms))
+    ABI_ALLOCATE(self%rvec, (natoms))
     self%zion(:)=zion(:)
     self%spin_index(:)=spin_index(:)
+    self%iatom_prim(:)=iatom_prim
+    self%rvec(:)=rvec(:)
     self%cell(:,:)=cell(:,:)
     ABI_ALLOCATE( self%pos, (3,nmatoms) )
     self%pos(:,:)=pos(:,:)
@@ -606,6 +614,27 @@ contains
     !!$OMP END PARALLEL DO
   end subroutine spin_terms_t_Heff_to_dsdt
 
+  subroutine spin_terms_t_get_etot(self, S, Heff, etot)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_terms_t_get_etot'
+!End of the abilint section
+
+    class(spin_terms_t), intent(inout) :: self
+    real(dp), intent(in) :: S(3, self%nmatoms), Heff(3, self%nmatoms)
+    real(dp), intent(out) :: etot
+    integer :: i, j
+    etot=0.0_dp
+    do i=1, self%nmatoms
+       do j=1, 3
+          etot=etot-Heff(j, i)*S(j,i)*self%ms(i)
+       end do
+    end do
+  end subroutine spin_terms_t_get_etot
+
   subroutine spin_terms_t_get_dSdt(self,  S, H_lang, dSdt )
 
 
@@ -621,6 +650,7 @@ contains
      real(dp):: Heff(3, self%nmatoms)
      !call self%get_Heff(S=S, Heff=Heff)
      call spin_terms_t_total_Heff(self=self, S=S, Heff=Heff)
+     call spin_terms_t_get_etot(self=self, S=S, Heff=Heff, etot=self%etot)
      Heff(:,:)=Heff(:,:)+H_lang(:,:)
      !call self%Heff_to_dsdt(Heff,S, dSdt)
      call spin_terms_t_Heff_to_dsdt(self, Heff, S, dSdt)
