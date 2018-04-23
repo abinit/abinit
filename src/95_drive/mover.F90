@@ -209,14 +209,14 @@ logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
-integer :: iapp
+integer :: iapp,hmc_iacc
 real(dp) :: minE,wtime_step,now,prev
 type(crystal_t) :: crystal
 logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
 real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
-
+real(dp),allocatable :: rhor_hmc_prev(:,:), rhog_hmc_prev(:,:) 
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
@@ -391,10 +391,22 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #endif
 
 !###########################################################
+!### Allocate the density arrays for storing a recovery state in MC simulation
+
+ if(ab_mover%ionmov==25) then
+   ABI_ALLOCATE(rhor_hmc_prev,(scfcv_args%dtset%nfft,scfcv_args%dtset%nspden))
+   ABI_ALLOCATE(rhog_hmc_prev,(2,scfcv_args%dtset%nfft))
+ end if
+
+!###########################################################
 !### 05. Allocate the hist structure
 
  iexit=0; timelimit_exit=0
  ncycle=specs%ncycle
+
+ if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>0) then
+  ncycle=scfcv_args%dtset%hmctt
+ endif
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 
@@ -525,7 +537,15 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycles)
    do icycle=1,ncycle
+
      itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
+
+     !if(ab_mover%ionmov==25.and.icycle==1.and.itime>1) then
+     !  hmc_scfcv_skip = .TRUE.
+     !else
+     !  hmc_scfcv_skip = .FALSE.
+     !endif
+
 
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
@@ -612,12 +632,18 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          if (need_scfcv_cycle) then
+
            call dtfil_init_time(dtfil,iapp)
            call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
            if (conv_retcode == -1) then
-             message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
-             MSG_WARNING(message)
+               message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
+               MSG_WARNING(message)
            end if
+
+           if(ab_mover%ionmov==25.and.icycle==1) then
+             rhor_hmc_prev(:,:)=rhor(:,:)
+             rhog_hmc_prev(:,:)=rhog(:,:)
+           endif
 
          else
 !          For monte carlo don't need to recompute energy here
@@ -796,6 +822,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    do a double loop: 1- compute vel, 2- exit
      nloop=1
 
+     !write(message,'(a,i4,a,i4,a,i4)') ' DBGHMC itime= ',itime,' icycle= ',icycle,' ihist= ',hist%ihist
+     !call wrtout(ab_out,message,'COLL')
+
 
      if (scfcv_args%dtset%nctime>0.and.iexit==1) then
        iexit=0;nloop=2
@@ -838,7 +867,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (24)
          call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (25)
-         call pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,DEBUG,iexit)
+         call pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,DEBUG,iexit,hmc_iacc)
        case (27)
          !In case of ionmov 27, all the atomic configurations have been computed at the
          !begining of the routine in generate_training_set, thus we just need to increase the indexes
@@ -951,6 +980,21 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,ihist_prev))/(ab_mover%dtion)
        end if
      end if
+
+
+     if(icycle==ncycle.and.ab_mover%ionmov==25) then
+      if(hmc_iacc==0) then
+        write(message,'(2a,i7,a,i2,a,D24.16)') ch10,' HMC Sweep => ',itime,' iacc= ',hmc_iacc,' epot= ',&
+&                                              hist%etot(hist%ihist-ncycle)
+        rhor(:,:)=rhor_hmc_prev(:,:)
+        rhog(:,:)=rhog_hmc_prev(:,:)
+      else
+        write(message,'(2a,i7,a,i2,a,D24.16)') ch10,' HMC Sweep => ',itime,' iacc= ',hmc_iacc,' epot= ',&
+&                                              hist%etot(hist%ihist-1)
+      endif
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+     endif
 
 !    This is needed for some compilers such as
 !    pathscale, g95, xlf that do not exit

@@ -595,6 +595,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
  dtout%hyb_range_dft   = dtin%hyb_range_dft
  dtout%hyb_range_fock  = dtin%hyb_range_fock
+ dtout%hmctt              = dtin%hmctt  
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul

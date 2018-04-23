@@ -228,22 +228,24 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
    end do
    !now, the "vel_prev" velocities are half of a time step ahead and can be used to propagate xcart
 
-   if((hmcflag_==0.and.itime==ntime-1).or.(hmcflag_==1.and.icycle_==ncycle_-1))then
-     factor=0.5_dp
-   else
-     factor=one
-   end if
+   !if((hmcflag_==0.and.itime==ntime-1).or.(hmcflag_==1.and.icycle_==ncycle_-1))then
+   !  factor=0.5_dp
+   !else
+   !  factor=one
+   !end if
 
    do ii=1,ab_mover%natom ! propagate coordinates
      do jj=1,3
-       xcart(jj,ii) = xcart(jj,ii) + factor*ab_mover%dtion*vel_prev(jj,ii)
+       xcart(jj,ii) = xcart(jj,ii) + ab_mover%dtion*vel_prev(jj,ii)
+      !xcart(jj,ii) = xcart(jj,ii) + factor*ab_mover%dtion*vel_prev(jj,ii)
      end do
    end do
    !to estimate kinetic energy at the same time instance as the potential (electronic sub-system) energy
    !propagate "vel" another half-time forward (these values are not to be used in the next time-step)
    do ii=1,ab_mover%natom ! propagate velocities half time step forward
      do jj=1,3
-       vel(jj,ii) = vel_prev(jj,ii) + (factor-0.5_dp) * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
+       vel(jj,ii) = vel_prev(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
+      !vel(jj,ii) = vel_prev(jj,ii) +(factor-0.5_dp) * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      end do
    end do
 
@@ -253,12 +255,12 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
        ekin=ekin+0.5_dp*ab_mover%amass(ii)*vel(jj,ii)**2
      end do
    end do
-   ekin_tmp=0.0
-   do ii=1,ab_mover%natom
-     do jj=1,3
-       ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
-     end do
-   end do
+   !ekin_tmp=0.0
+   !do ii=1,ab_mover%natom
+   !  do jj=1,3
+   !    ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
+   !  end do
+   !end do
    !write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor
 
  end if

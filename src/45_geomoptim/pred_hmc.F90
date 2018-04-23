@@ -28,7 +28,8 @@
 !!  iexit    =  flag indicating finilization of mover loop
 !!
 !! OUTPUT
-!!  hist = ionic positions, lattice parameters etc. are updated
+!!  hist  = ionic positions, lattice parameters etc. are updated
+!!  fiacc = acceptance decision made at the end of the sweep
 !!
 !! SIDE EFFECTS
 !!
@@ -48,7 +49,7 @@
 
 #include "abi_common.h"
 
-subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
+subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
 
  use defs_basis
  use m_errors
@@ -76,6 +77,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  integer,intent(in)          :: ntime
  integer,intent(in)          :: ncycle
  integer,intent(in)          :: iexit
+ integer,intent(out)         :: fiacc
  logical,intent(in)          :: zDEBUG
 
 !Local variables-------------------------------
@@ -92,11 +94,14 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  real(dp)      :: acell(3)                                                     ! lattice parameters
  real(dp)      :: rprimd(3,3)                                                  ! lattice vectors
 
- real(dp),save :: etotal_hmc_prev                                              ! total energy of the initial state
+ real(dp),save :: etotal_hmc_prev,epot_hmc_prev                                ! total energy of the initial state
+ real(dp),save :: entropy_hmc_prev                                             ! total energy of the initial state
  real(dp),save :: acell_hmc_prev(3)                                            !
  real(dp),save :: rprimd_hmc_prev(3,3)                                         !
+ real(dp),save :: strten_hmc_prev(6)                                           !
  real(dp),allocatable,save :: xcart_hmc_prev(:,:)                              ! Cart. coordinates of the ions corresponding to the initial state
  real(dp),allocatable,save :: xred_hmc_prev(:,:)                               ! reduced coordinates of the ions corresponding to the initial state
+ real(dp),allocatable,save :: fcart_hmc_prev(:,:)                              ! reduced coordinates of the ions corresponding to the initial state
 
 
 ! *************************************************************************
@@ -120,12 +125,15 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  DBG_EXIT("COLL")
 
 
- if(iexit/=0)then
+ if(iexit/=0)then  !icycle=ncycle and itime=ntime
    if (allocated(xcart_hmc_prev))  then
      ABI_DEALLOCATE(xcart_hmc_prev)
    end if
    if (allocated(xred_hmc_prev))  then
      ABI_DEALLOCATE(xred_hmc_prev)
+   end if
+   if (allocated(fcart_hmc_prev))  then
+     ABI_DEALLOCATE(fcart_hmc_prev)
    end if
    return
  end if
@@ -154,8 +162,13 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      if (allocated(xred_hmc_prev))  then
        ABI_DEALLOCATE(xred_hmc_prev)
      end if
+     if (allocated(fcart_hmc_prev))  then
+       ABI_DEALLOCATE(fcart_hmc_prev)
+     end if
+
      ABI_ALLOCATE(xcart_hmc_prev,(3,ab_mover%natom))
      ABI_ALLOCATE(xred_hmc_prev,(3,ab_mover%natom))
+     ABI_ALLOCATE(fcart_hmc_prev,(3,ab_mover%natom))
    end if
 
  !generate new set of velocities and get rid of the possible overall momentum
@@ -194,10 +207,12 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
    hist%vel(:,:,hist%ihist)=vel(:,:)
 
 
-
   !save the starting values of ionic positions (before an update attempt is performed)
    call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred_hmc_prev,zDEBUG)
    call xred2xcart(ab_mover%natom,rprimd_hmc_prev,xcart_hmc_prev,xred_hmc_prev)
+   fcart_hmc_prev(:,:)=hist%fcart(:,:,hist%ihist)
+   strten_hmc_prev(:)=hist%strten(:,hist%ihist)
+   entropy_hmc_prev=hist%entropy(hist%ihist)
 
   !also save the initial total energy
    ekin=0.0
@@ -208,7 +223,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
    end do
    epot = hist%etot(hist%ihist)                     ! electronic sub-system energy
    etotal_hmc_prev = epot + ekin                    ! total energy before an attempt of variables update is performed
-
+   epot_hmc_prev = epot
 
    call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
 
@@ -252,18 +267,25 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
   !write(238,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
   !write(239,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
   !write(239,*) 'ekin= ',ekin,'  epot= ',epot,'  e_start= ',etotal_hmc_prev,'  e_end= ',etotal,'  iacc=',iacc, '  dekT=',-de/kbtemp
+   fiacc=iacc;
 
    call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
   !call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
+   hist%ihist=abihist_findIndex(hist,+1)
    if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates
     !write(std_out,*) '  the proposed state was not accepted, roll back the configuration'
     !xcart(:,:)=xcart_hmc_prev(:,:)
     !no need to roll back xcart any longer, everything is stored in xred now (v8.3.1)
      xred(:,:)=xred_hmc_prev(:,:)
+     acell(:)=acell_hmc_prev(:)
+     rprimd(:,:)=rprimd_hmc_prev(:,:)
+     hist%fcart(:,:,hist%ihist)=fcart_hmc_prev(:,:)
+     hist%etot(hist%ihist)=epot_hmc_prev
+     hist%entropy(hist%ihist)=entropy_hmc_prev
+     hist%strten(:,hist%ihist)=strten_hmc_prev(:)
    end if
 
-   hist%ihist=abihist_findIndex(hist,+1)
    call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
  end if
