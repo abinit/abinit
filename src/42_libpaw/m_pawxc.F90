@@ -906,6 +906,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !----------------------------------------------------------------------
 !----- Check options
 !----------------------------------------------------------------------
+
  nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==19)
  if(nkxc_updn>3) then
    msg='Kxc for GGA not implemented!'

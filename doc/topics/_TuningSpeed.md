@@ -2,6 +2,7 @@
 description: How to tune the speed and memory usage
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to tune the speed and memory usage with the ABINIT package.
 

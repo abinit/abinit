@@ -2,6 +2,7 @@
 description: How to use the APPA post-processing tool for the analysis of molecular dynamics output files (trajectories)
 authors: SS, XG, YG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to use the APPA post-processing tool for the analysis of molecular dynamics
 output files (trajectories) with the ABINIT package.

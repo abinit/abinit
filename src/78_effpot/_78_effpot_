@@ -14,6 +14,7 @@
 !!
 !! CHILDREN
 !! compute_anharmonics.F90
+!! generate_training_set.F90  
 !! init10.F90
 !! interfaces_78_effpot.F90
 !! m_anharmonics_terms.F90

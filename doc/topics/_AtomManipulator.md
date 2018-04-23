@@ -2,6 +2,7 @@
 description: How to manipulate atoms and groups of atoms to generate the set of atomic positions
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to manipulate atoms and groups of atoms to generate 
 the set of atomic positions with the ABINIT package.

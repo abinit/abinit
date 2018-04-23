@@ -2,6 +2,7 @@
 description: How to generate the electronic DOS and related topics
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to generate the electronic DOS and related topics with the ABINIT package.
 

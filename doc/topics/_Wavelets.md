@@ -2,6 +2,7 @@
 description: How to perform calculations on a wavelet basis
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform calculations on a wavelet basis with the ABINIT package.
 
