@@ -9,6 +9,9 @@ module  m_spin_terms
   real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t
      integer :: nmatoms
+     ! ispin_prim: index in the spin model in primitive cell, which is used as the index of sublattice.
+     ! rvec: supercell R vector.
+     integer, allocatable :: ispin_prim(:), rvec(:,:)
      real(dp), allocatable :: ms(:), pos(:,:),  spinat(:,:), S(:,:)
      real(dp):: cell(3,3)
      integer, allocatable :: zion(:)
@@ -113,7 +116,7 @@ module  m_spin_terms
   !    procedure :: get_Langevin_Heff => get_Langevin_Heff
    end type spin_terms_t
 contains
-  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion)
+  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion, ispin_prim, rvec)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -127,6 +130,7 @@ contains
     !scalars
     class(spin_terms_t), intent(out) :: self
     integer, intent(in) :: zion(:)
+    integer, intent(in) :: ispin_prim(:), rvec(:,:)
     real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:)
     !Local variables-------------------------------
     integer :: nmatoms, i
@@ -143,6 +147,12 @@ contains
 
     ABI_ALLOCATE( self%ms, (nmatoms) )
     self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))*bohr_mag
+
+    ABI_ALLOCATE( self%ispin_prim, (nmatoms))
+    ABI_ALLOCATE(self%rvec, (3, nmatoms))
+
+    self%ispin_prim(:)=ispin_prim(:)
+    self%rvec(:)=rvec(:)
 
     ABI_ALLOCATE( self%S, (3, nmatoms))
     do i=1,nmatoms
@@ -638,6 +648,14 @@ contains
     if (allocated(self%pos)) deallocate(self%pos, stat=err)
     if (allocated(self%spinat)) deallocate(self%spinat, stat=err)
     if (allocated(self%zion)) deallocate(self%zion, stat=err)
+
+    if (allocated(self%ispin_prim)) then
+       ABI_DEALLOCATE(self%ispin_prim)
+    endif
+    if (allocated(self%rvec)) then
+       ABI_DEALLOCATE(self%rvec)
+    endif
+
 
     if (allocated(self%gyro_ratio)) deallocate(self%gyro_ratio, stat=err)
     if ( err/= 0) print *, "self%gyro_ratio: Deallocation request denied"

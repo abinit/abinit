@@ -718,6 +718,7 @@ contains
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
     integer, allocatable ::sc_index_spin(:), sc_znucl(:)
+    integer, allocatable :: sc_ispin_prim(:), sc_rvec(3, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
     typat_primcell(:)=1
@@ -733,7 +734,9 @@ contains
     !scell%xcart
     !nmatoms
     sc_nmatoms=scell%ncells*self%nmatoms
-    ABI_ALLOCATE(sc_index_spin, (scell%natom) )
+    ABI_ALLOCATE(sc_index_spin, (scell%natom))
+    ABI_ALLOCATE(sc_ind_spin_prim, (sc_nmatoms) )
+    ABI_ALLOCATE(sc_rvec, (3, sc_nmatoms) )
     ABI_ALLOCATE(sc_spinat, (3, sc_nmatoms) )
     ABI_ALLOCATE(sc_spinpos, (3, sc_nmatoms) )
     ABI_ALLOCATE(sc_gyroratios, (sc_nmatoms))
@@ -751,6 +754,8 @@ contains
           sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
+          sc_ispin_prim(counter) = self%index_spin(iatom)
+          sc_rvec(counter)=self%uc_indexing(iatom, :)
        else
           sc_index_spin(i)=-1
        endif
@@ -764,7 +769,7 @@ contains
     !call sc_ham%initialize( cell=scell%rprimd, pos=sc_spinpos, &
     !     spinat=sc_spinat, zion=sc_znucl)
     call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
-         spinat=sc_spinat, zion=sc_znucl)
+         spinat=sc_spinat, zion=sc_znucl, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
     sc_ham%gyro_ratio(:)=sc_gyroratios(:)
     sc_ham%gilbert_damping(:)=sc_damping_factors(:)
 
@@ -787,6 +792,13 @@ contains
           call spin_terms_t_set_bilinear_term_single(sc_ham, ii, jj, tmp)
        enddo
     enddo
+
+    if (allocated(sc_ispin_prim)) then
+        ABI_DEALLOCATE(sc_ispin_prim)
+    endif
+    if (allocated(sc_rvec)) then
+        ABI_DEALLOCATE(sc_rvec)
+    endif
     if (allocated(sc_index_spin)) then
        ABI_DEALLOCATE(sc_index_spin)
     endif
