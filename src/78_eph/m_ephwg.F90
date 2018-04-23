@@ -53,7 +53,7 @@ module m_ephwg
  use m_time,            only : cwtime, sec2str
  use m_numeric_tools,   only : arth
  use m_special_funcs,   only : dirac_delta
- use m_fstrings,        only : strcat, ltoa, itoa, ftoa, sjoin
+ use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
  use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt
  use m_occ,             only : occ_fd, occ_be
@@ -634,7 +634,7 @@ subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm
  ib = band - self%bstart + 1
 
  iqlk = ephwg_findq_ibzk(self, qpt)
- ABI_CHECK(iqlk /= -1, "Cannot find q-point in IBZ(k)")
+ ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
 
  do nu = 1, self%natom3
    ! fill array for e_{k+q, b} +- w_{q,nu)
@@ -646,6 +646,7 @@ subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm
    end do
    do ii = 1, 2
      call tetra_get_onewk_wvals(self%tetra_k, iqlk, bcorr, nw, wvals, self%nq_k, pme_k(:, ii), weights)
+     !write(std_out, *)"weig", weights(:, 1)
      deltaw_pm(:, ii, nu) = weights(:, 1)
    end do
  end do
@@ -708,6 +709,7 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
  integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq_k,nprocs, my_rank, ierr, iqlk
  real(dp) :: volconst_mult
 !arrays
+ real(dp) :: ework(4, 2)
  real(dp),allocatable :: pme_k(:,:,:)
  integer :: ind_ibz(4)
  !complex(dpc) :: SIM0, SIM0I
@@ -717,7 +719,7 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  iqlk = ephwg_findq_ibzk(self, qpt)
- ABI_CHECK(iqlk /= -1, "Cannot find q-point in IBZ(k)")
+ ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
 
  ! Allocate array for e_{k+q, b} +- w_{q,nu)
  ABI_MALLOC(pme_k, (self%nq_k, 2, self%natom3))
@@ -744,11 +746,13 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
    volconst_mult = self%tetra_k%vv * dble(self%tetra_k%tetra_mult(itetra))
 
    do nu=1,self%natom3
+     ework = pme_k(ind_ibz(:), :, nu)
      do ib=1,nbsigma
        do ii=1,2
          ! Compute weights for nz points.
          do iz=1,nz
-           verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii, nu)
+           verm = zvals(iz, ib) - ework(:, ii)
+           !verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii, nu)
            !call SIM0ONEI(SIM0, SIM0I, VERM)
            !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
            call SIM0TWOI(VERL, VERLI, VERM)
@@ -756,8 +760,7 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
          end do
 
          ! TODO
-         ! Accumulate contributions to ik_ibz
-         ! (there might be multiple vertexes that map onto ik_ibz)
+         ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
          do jj=1,4
            if (ind_ibz(jj) == iqlk) then
              !weights(:,1) = weights(:,1) + dtweightde_tmp(:,jj)

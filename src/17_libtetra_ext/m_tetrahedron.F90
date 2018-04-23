@@ -698,7 +698,6 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
 !Local variables-------------------------------
 !scalars
  integer :: itetra,nprocs,my_start,my_stop,ierr,ii
- real(dp_) :: volconst,volconst_mult
 !arrays
  integer :: ind_ibz(4)
  real(dp_) :: eigen_1tetra(4)
@@ -710,8 +709,6 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
  TETRA_ALLOCATE(dtweightde_tmp, (nene, 4))
  tweight_t = zero; dtweightde_t = zero
 
- volconst = tetra%vv/4.d0
-
  call split_work(tetra%ntetra, comm, nprocs, my_start, my_stop, ierr)
  if (ierr /= 0) TETRA_ERROR("Error in MPI layer")
 
@@ -719,8 +716,6 @@ subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
  do itetra=my_start,my_stop
    tweight_tmp = zero
    dtweightde_tmp = zero
-
-   volconst_mult = max_occ*volconst*dble(tetra%tetra_mult(itetra))
 
    ! Here we need the original ordering to reference the correct irred kpoints
    ind_ibz(:) = tetra%tetra_full(:,1,itetra)
@@ -1901,8 +1896,7 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
  integer :: itetra,ii
 !arrays
  integer :: ind_ibz(4)
- real(dp_) :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
- real(dp_) :: eigen_1tetra(4)
+ real(dp_) :: tweight_tmp(nene,4),dtweightde_tmp(nene,4),eigen_1tetra(4)
 
 ! *********************************************************************
 
@@ -1918,7 +1912,7 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 
    ! Sort energies before calling get_onetetra_
    eigen_1tetra(:) = eig_ibz(ind_ibz(:))
-   call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
+   call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
 
    call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ, nene, bcorr, &
      tweight_tmp, dtweightde_tmp)
@@ -1986,12 +1980,14 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
 
 !Local variables-------------------------------
 !scalars
- integer :: itetra,ii,iw
+ !integer,save :: done = 0
+ integer,parameter :: nene=3
+ integer :: itetra,ii,iw,ie
  real(dp_),parameter :: max_occ1 = one
  real(dp_) :: enemin, enemax
 !arrays
  integer :: ind_ibz(4)
- real(dp_) :: theta_tmp(2,4), delta_tmp(2,4), eigen_1tetra(4)
+ real(dp_) :: theta_tmp(nene,4), delta_tmp(nene,4), eigen_1tetra(4)
 
 ! *********************************************************************
 
@@ -1999,7 +1995,6 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
 
  ! For each tetrahedron
  do itetra=1,tetra%ntetra
-
    ! Here we need the original ordering to reference the correct irred kpoints
    ind_ibz(:) = tetra%tetra_full(:,1,itetra)
    ! Cycle if this tetra does not contribute to this k-point.
@@ -2010,19 +2005,30 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
    call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
 
    do iw=1,nw
-     enemin = wvals(iw); enemax = enemin + tol6
-     call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, 2, bcorr, &
+     enemin = wvals(iw) - 0.01; enemax = wvals(iw) + 0.01
+     ie = nene / 2 + 1
+     call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene, bcorr, &
         theta_tmp, delta_tmp)
+
+     !if (iw == 5 .and. ik_ibz /= 1 .and. wvals(iw) > eigen_1tetra(2) .and. wvals(iw) < eigen_1tetra(3)) then
+     !  done = done + 1
+     !  if (done == 10) then
+     !    write(*, *)"Got it with delta_tmp ", maxval(delta_tmp(ie, :))
+     !    do ii=1,nene
+     !      write(777, *)delta_tmp(ii, :)
+     !    end do
+     !    stop
+     !  end if
+     !end if
 
      ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
      do ii=1,4
        if (ind_ibz(ii) == ik_ibz) then
-         weights(iw, 1) = weights(iw, 1) + delta_tmp(1, ii)
-         weights(iw, 2) = weights(iw, 2) + theta_tmp(1, ii)
+         weights(iw, 1) = weights(iw, 1) + delta_tmp(ie, ii)
+         weights(iw, 2) = weights(iw, 2) + theta_tmp(ie, ii)
        end if
      end do
-   end do
-
+   end do ! iw
  end do ! itetra
 
 end subroutine tetra_get_onewk_wvals

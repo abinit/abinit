@@ -143,10 +143,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  if(abs(metmin(1,1)-metmin(3,3))<tolsym*half*(metmin(1,1)+metmin(3,3)))equal(2)=1
  if(abs(metmin(2,2)-metmin(3,3))<tolsym*half*(metmin(2,2)+metmin(3,3)))equal(1)=1
 
-!DEBUG
-!write(std_out,*)' ang90=',ang90(:)
-!write(std_out,*)' equal=',equal(:)
-!ENDDEBUG
+!write(std_out,*)' ang90=',ang90(:), ' equal=',equal(:)
 
 !-----------------------------------------------------------------------
 !Identification of the centering
@@ -166,10 +163,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !  Initialize the target holohedry
    iholohedry=list_holo(index)
-
-!  DEBUG
 !  write(std_out,*)' symlatt : trial holohedry',iholohedry
-!  ENDDEBUG
 
    orthogonal=0
    if(iholohedry==7 .or. iholohedry==4 .or. iholohedry==3)orthogonal=1
@@ -250,10 +244,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !      Checks that the basis vectors are OK for the target holohedry
        call holocell(cell_base,0,foundc,iholohedry,tolsym)
      end if
-
-!    DEBUG
 !    write(std_out,*)' after test_b, foundc=',foundc
-!    ENDDEBUG
 
 !    Working hypothesis : the conventional cell is orthogonal, and
 !    the trial vector is one of the future axes
@@ -288,10 +279,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          end if
        end if
      end if
-
-!    DEBUG
 !    write(std_out,*)' after test_c, foundc=',foundc
-!    ENDDEBUG
 
 !    Working hypothesis : the conventional cell is orthogonal,
 !    and body centered with no basis vector being an axis,
@@ -449,9 +437,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
        reducedb=( minim(1,itrial)*vectb(1)+       &
 &       minim(2,itrial)*vectb(2)+       &
 &       minim(3,itrial)*vectb(3) )/norm2trial
-!      DEBUG
 !      write(std_out,*)' reduceda,reducedb=',reduceda,reducedb
-!      ENDDEBUG
        if(abs(abs(reduceda)-1.0d0/3.0d0)<tolsym .and.      &
 &       abs(abs(reducedb)-1.0d0/3.0d0)<tolsym      ) then
 !        Possibly change of sign to make positive the scalar product with
@@ -653,13 +639,13 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !      Try to find a vector that belongs to the mediator plane, or the binary vector.
 !      There must be one such vector, if centered monoclinic and no pair of vectors of equal length,
 !      either among the three vectors, or among one of their differences or sums.
-!      And there must be, among the two other vectors, one vector whose projection 
+!      And there must be, among the two other vectors, one vector whose projection
 !      on this vector is half the length of this vector.
        vecta(:)=minim(:,ia)
        vectb(:)=minim(:,ib)
 !      Try the different possibilities for the vector on which the projection will be half ...
        do ii=1,5
-         if(ii==1)vectc(:)=minim(:,itrial) 
+         if(ii==1)vectc(:)=minim(:,itrial)
          if(ii==2)vectc(:)=minim(:,itrial)+vecta(:)
          if(ii==3)vectc(:)=minim(:,itrial)-vecta(:)
          if(ii==4)vectc(:)=minim(:,itrial)+vectb(:)
@@ -671,18 +657,18 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          found=0
          if(abs(abs(reduceda)-0.5d0)<tolsym)then
            vin1(:)=vectc(:)
-           vin2(:)=2.0d0*(vecta(:)-reduceda*vectc(:))  
+           vin2(:)=2.0d0*(vecta(:)-reduceda*vectc(:))
            vext(:)=vectb(:)
            found=1
          else if(abs(abs(reducedb)-0.5d0)<tolsym)then
            vin1(:)=vectc(:)
-           vin2(:)=2.0d0*(vectb(:)-reduceda*vectc(:))  
-           vext(:)=vecta(:)     
+           vin2(:)=2.0d0*(vectb(:)-reduceda*vectc(:))
+           vext(:)=vecta(:)
            found=1
          end if
          if(found==1)exit
        end do
-!      Now, vin1 and vin2 are perpendicular to each other, and in the plane that contains the binary vector. 
+!      Now, vin1 and vin2 are perpendicular to each other, and in the plane that contains the binary vector.
 !      One of them must be the binary vector if any.
 !      On the other hand, vext is out-of-plane. Might belong to the mediator plane or not.
 !      If C monoclinc, then the projection of this vext on the binary vector will be either 0 or +1/2 or -1/2.
@@ -703,7 +689,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
            cell_base(:,1)=vin2(:)
            cell_base(:,2)=vin1(:)
            cell_base(:,3)=vext(:)-reduceda*vin1(:)+vin2(:)*half
-         else 
+         else
 !          Test vin2 being the binary axis
            norm2trial=vin2(1)**2+vin2(2)**2+vin2(3)**2
            reduceda=(vext(1)*vin2(1)+vext(2)*vin2(2)+vext(3)*vin2(3))/norm2trial
@@ -758,7 +744,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  if(metmin(1,2)**2<tolsym**2*metmin(1,1)*metmin(2,2))ang90(3)=1
  if(metmin(1,3)**2<tolsym**2*metmin(1,1)*metmin(3,3))ang90(2)=1
  if(metmin(2,3)**2<tolsym**2*metmin(2,2)*metmin(3,3))ang90(1)=1
- equal(:)=0  
+ equal(:)=0
  if(abs(metmin(1,1)-metmin(2,2))<tolsym*half*(metmin(1,1)+metmin(2,2)))equal(3)=1
  if(abs(metmin(1,1)-metmin(3,3))<tolsym*half*(metmin(1,1)+metmin(3,3)))equal(2)=1
  if(abs(metmin(2,2)-metmin(3,3))<tolsym*half*(metmin(2,2)+metmin(3,3)))equal(1)=1
@@ -783,11 +769,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      if(center==0 .or. center==-1 .or. center==-3)then
        iholohedry=7 ; found=1
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cP (primitive cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cP (primitive cubic)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cI (body-centered cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cI (body-centered cubic)'
        else if(center==-3)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cF (face-centered cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cF (face-centered cubic)'
        end if
      end if
    end if
@@ -806,9 +792,9 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          axes(:,:)=cell_base(:,:)
        end if
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is tP (primitive tetragonal)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tP (primitive tetragonal)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is tI (body-centered tetragonal)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tI (body-centered tetragonal)'
        end if
      end if
    end if
@@ -818,13 +804,13 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      iholohedry=3 ; found=1
      axes(:,:)=cell_base(:,:)
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oP (primitive orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oP (primitive orthorhombic)'
      else if(center==-1)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oI (body-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oI (body-centered orthorhombic)'
      else if(center==1 .or. center==2 .or. center==3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oC (one-face-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oC (one-face-centered orthorhombic)'
      else if(center==-3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oF (face-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oF (face-centered orthorhombic)'
      end if
    end if
 
@@ -833,7 +819,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !  Hexagonal system
    if(found==0 .and. ang90(1)==1 .and. ang90(2)==1 .and. equal(3)==1 .and. (2*metmin(2,1)+metmin(1,1))<tolsym*metmin(1,1))then
      iholohedry=6 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is hP (primitive hexagonal)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hP (primitive hexagonal)'
    end if
 
 !  Rhombohedral system
@@ -841,23 +827,23 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 &   abs(metmin(2,1)-metmin(3,2))<tolsym*metmin(2,2)             .and.       &
 &   abs(metmin(2,1)-metmin(3,1))<tolsym*metmin(1,1) )then
      iholohedry=5 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is hR (rhombohedral)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hR (rhombohedral)'
    end if
 
 !  Monoclinic system
    if(found==0 .and. ang90(1)+ang90(2)+ang90(3)==2 )then
      iholohedry=2 ; found=1
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is mP (primitive monoclinic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mP (primitive monoclinic)'
      else if(center==3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is mC (one-face-centered monoclinic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mC (one-face-centered monoclinic)'
      end if
    end if
 
 !  Triclinic system
    if(found==0)then
      iholohedry=1 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is aP (primitive triclinic)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is aP (primitive triclinic)'
    end if
 
  end if
@@ -894,7 +880,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      norm2trial=sum(rprimd(:,ia)**2)
      scprods(:,ia)=scprods(:,ia)/sqrt(norm2trial)
    end do
-   
+
 !  One should now try all the generators of the
 !  proper rotations of each Bravais lattice, coupled with change of
 !  signs of each vector. This is not done systematically in what follows ...
@@ -1014,7 +1000,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  gen2z(:,:)=0 ; gen2z(1,1)=-1; gen2z(2,2)=-1; gen2z(3,3)=1
 
 !--------------------------------------------------------------------------
- 
+
 !Define the generators for each holohedry (inversion is already included)
  if(iholohedry==6)then
    ngen=2

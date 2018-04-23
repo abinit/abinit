@@ -250,10 +250,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
        rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
        rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-!      DEBUG
-!      write(std_out,*)' ingeo : angdeg=',angdeg(1:3)
-!      write(std_out,*)' ingeo : aa,cc=',aa,cc
-!      ENDDEBUG
+!      write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
      else
 !      Treat all the other cases
        rprim(:,:)=0.0_dp
@@ -925,7 +922,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  angdeg(1)=180.0_dp/pi * acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))
  angdeg(2)=180.0_dp/pi * acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))
  angdeg(3)=180.0_dp/pi * acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))
- write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
+ !write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
 
 !--------------------------------------------------------------------------------------
 
@@ -946,10 +943,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    nsym=jsym
  end if
 
-
-!DEBUG
-!call symmultsg(nsym,symafm,symrel,tnons)
-!ENDDEBUG
+ !call symmultsg(nsym,symafm,symrel,tnons)
 
 !9) initialize the list of fixed atoms, and initial velocities -----------------
 !Note: these inputs do not influence the previous generation of

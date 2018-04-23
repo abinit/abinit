@@ -493,7 +493,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  if ((dtset%nstep==0 .or. dtset%iscf < 0) .and. dtset%plowan_compute==0) then
    energies%e_fermie = results_gs%energies%e_fermie
    results_gs%fermie = results_gs%energies%e_fermie
-   write(std_out,*)"in scfcv: results_gs%fermie: ",results_gs%fermie
+   !write(std_out,*)"in scfcv: results_gs%fermie: ",results_gs%fermie
  end if
 
  select case(dtset%usepotzero)

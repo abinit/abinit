@@ -18,7 +18,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! berryopt    =  4/14, 6/16, 7/17: electric or displacement field 
+!! berryopt    =  4/14, 6/16, 7/17: electric or displacement field
 !! efield=cartesian coordinates of the electric field
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
 !! msym=default maximal number of symmetries
@@ -28,7 +28,7 @@
 !!         else 0
 !! nptsym=number of point symmetries of the Bravais lattice
 !! nucdipmom(3,natom) (optional) array of nuclear dipole moments
-!! nzchempot=if non-zero, means that a z-spatially varying chemical potential is added 
+!! nzchempot=if non-zero, means that a z-spatially varying chemical potential is added
 !! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
 !!   of the Bravais lattice in real space in terms
 !!   of primitive translations.
@@ -94,6 +94,7 @@
 !Local variables-------------------------------
 ! TRUE if antiferro symmetries are used with non-collinear magnetism
 !scalars
+ integer,parameter :: prtvol = 0
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
  real(dp) :: spinatcl2,spinatcl20,det
@@ -367,7 +368,7 @@
              diff(:) = nucdipmom(:,iatom3) - symnucdipmom2(:)
              if(any(diff>tolsym))found3=0
            end if
-           
+
            if(found3==1)exit
 
 !          End loop over iatom3
@@ -416,18 +417,15 @@
    ABI_DEALLOCATE(spinatred)
  end if
 
-!DEBUG
- write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10
- write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
- call wrtout(std_out,message,'COLL')
- do isym=1,nsym
-   write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-&   symafm(isym),tnons(:,isym)
+ if (prtvol > 0) then
+   write(message,'(a, i0,a)')' symfind: exit, nsym=',nsym,ch10
+   write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are:'
    call wrtout(std_out,message,'COLL')
- end do
-
-!stop
-!ENDDEBUG
+   do isym=1,nsym
+     write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
+     call wrtout(std_out,message,'COLL')
+   end do
+ end if
 
 end subroutine symfind
 !!***

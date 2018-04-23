@@ -204,7 +204,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
      write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
-&     ' symspgr : problem with isym=',isym,ch10,&
+&     ' symspgr: problem with isym=',isym,ch10,&
 &     '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
 &     '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
 &     '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
@@ -212,8 +212,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 &     '  trialt(:)=',trialt(:)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i4,2a)' )&
-&     'The space symmetry operation number',isym,ch10,&
-&     'is not a (translated) root of unity'
+&     'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
      MSG_BUG(message)
    else if (t_axes(isym) == -2) then
      write(message, '(a,i0,a)' )'The symmetry operation number ',isym,' is not a root of unity'
@@ -380,16 +379,15 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
  if(spgroup/=0)then
-   write(message, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr : spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
+   write(message, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr: spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
    call wrtout(std_out,message,'COLL')
  end if
 
  if(bravais(1)==7)then
-   write(message, '(a)' ) ' symspgr : optical characteristics = isotropic '
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,' symspgr: optical characteristics = isotropic ','COLL')
  else if(bravais(1)==4 .or. bravais(1)==5 .or. bravais(1)==6)then
-   write(message, '(a)' ) ' symspgr : optical characteristics = uniaxial '
-   call wrtout(std_out,message,'COLL')
+   write(message, '(a)' )
+   call wrtout(std_out,' symspgr: optical characteristics = uniaxial ','COLL')
 !  Identify the first symmetry operation that is order 3, 4 or 6
    found=0
    do isym=1,nsym

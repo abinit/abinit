@@ -137,8 +137,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
    dtset%nelect=one
  end if
 
-! write(std_out,*)ch10
-! write(std_out,*)' chkneu : enter, dtset%nelect=',dtset%nelect
+! write(std_out,*)ch10,' chkneu : enter, dtset%nelect=',dtset%nelect
 ! write(std_out,*)' occopt,dtset%nsppol,dtset%nspden=',occopt,dtset%nsppol,dtset%nspden
 
 !(2) Optionally initialize occ with semiconductor occupancies
@@ -153,9 +152,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
    nocc=(dtset%nelect-1.0d-8)/maxocc + 1
 !  Occupation number of the highest level
    occlast=dtset%nelect-maxocc*(nocc-1)
-
    !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
-
 
 !  The number of allowed bands must be sufficiently large
    if( nocc<=dtset%nband(1)*dtset%nsppol .or. dtset%iscf==-2) then
@@ -211,13 +208,13 @@ subroutine dtset_chkneu(charge,dtset,occopt)
          end if
          !write(std_out,*)' dtset%nband(1),maxocc,occlast=',dtset%nband(1),maxocc,occlast
          if(dtset%nband(1)*nint(maxocc)<nocc)then
-           write(message, '(a,i4,a, a,2i6,a, a,es16.6,a, a,es16.6,6a)' )&
-&           'Initialization of occ, with nspden=',dtset%nspden,ch10,&
-&           'number of bands=',dtset%nband(1:2),ch10,&
-&           'number of electrons=',dtset%nelect,ch10,&
-&           'and spinmagntarget=',dtset%spinmagntarget,ch10,&
+           write(message, '(a,i0,a, a,2i0,a, a,es16.6,a, a,es16.6,6a)' )&
+&           'Initialization of occ, with nspden = ',dtset%nspden,ch10,&
+&           'number of bands = ',dtset%nband(1:2),ch10,&
+&           'number of electrons = ',dtset%nelect,ch10,&
+&           'and spinmagntarget = ',dtset%spinmagntarget,ch10,&
 &           'This combination is not possible, because of a lack of bands.',ch10,&
-&           'Action : modify input file ... ',ch10,&
+&           'Action: modify input file ... ',ch10,&
 &           '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
            MSG_ERROR(message)
          end if
@@ -235,11 +232,11 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        end do
 
      else
-       write(message, '(a,i4,a,a,es16.6,6a)' )&
-&       'Initialization of occ, with nspden=',dtset%nspden,ch10,&
-&       'and spinmagntarget=',dtset%spinmagntarget,ch10,&
+       write(message, '(a,i0,a,a,es16.6,6a)' )&
+&       'Initialization of occ, with nspden = ',dtset%nspden,ch10,&
+&       'and spinmagntarget = ',dtset%spinmagntarget,ch10,&
 &       'This combination is not possible.',ch10,&
-&       'Action : modify input file ... ',ch10,&
+&       'Action: modify input file ... ',ch10,&
 &       '(check nspden, nspinor, nsppol and spinmagntarget)'
        MSG_ERROR(message)
      end if
@@ -247,8 +244,8 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !    Now print the values
      if(dtset%nsppol==1)then
 
-       write(message, '(a,i4,a,a)' ) &
-&       ' chkneu : initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case : '
+       write(message, '(a,i0,a,a)' ) &
+&       ' chkneu: initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case:'
        call wrtout(std_out,message,'COLL')
        do ii=0,(dtset%nband(1)-1)/12
          write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)) )
@@ -256,17 +253,14 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        end do
 
      else
-
-       write(message, '(a,i4,a,a)' ) &
-&       ' chkneu : initialized the occupation numbers for occopt= ',occopt,&
-&       ch10,'    spin up   values : '
+       write(message, '(a,i0,2a)' ) &
+&       ' chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
        call wrtout(std_out,message,'COLL')
        do ii=0,(dtset%nband(1)-1)/12
          write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)) )
          call wrtout(std_out,message,'COLL')
        end do
-       write(message, '(a)' ) '    spin down values : '
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,'    spin down values:','COLL')
        do ii=0,(dtset%nband(1)-1)/12
          write(message,'(12f6.2)') &
 &         dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) )
@@ -277,8 +271,8 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 
 !    Here, treat the case when the number of allowed bands is not large enough
    else
-     write(message, '(a,i4,a,a,a,a,a,a,a,a)' )&
-&     'Initialization of occ, with occopt=',occopt,ch10,&
+     write(message, '(a,i0,8a)' )&
+&     'Initialization of occ, with occopt: ',occopt,ch10,&
 &     'There are not enough bands to get charge balance right',ch10,&
 &     'Action: modify input file ... ',ch10,&
 &     '(check the pseudopotential charges, the variable charge,',ch10,&
@@ -311,8 +305,8 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !    There is a discrepancy
      write(message, &
 &     '(a,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,a,a,a,a)' ) ch10,&
-&     ' chkneu: nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
-&     '         and input value of charge=',charge,',',ch10,&
+&     ' chkneu: nelect_occ = ',nelect_occ,', zval = ',zval,',',ch10,&
+&     '         and input value of charge = ',charge,',',ch10,&
 &     '   nelec_occ is computed from occ and wtk',ch10,&
 &     '   zval is nominal charge of all nuclei, computed from zion (read in psp),',ch10,&
 &     '   charge is an input variable (usually 0).'
@@ -321,22 +315,21 @@ subroutine dtset_chkneu(charge,dtset,occopt)
      if (abs(nelect_occ-dtset%nelect)>tol8) then
 !      The discrepancy is severe
        write(message,'(a,a,e9.2,a,a)')ch10,&
-&       'These must obey zval-nelect_occ=charge to better than ',tol8,ch10,&
-&       ' This is not the case. '
+&       'These must obey zval-nelect_occ=charge to better than ',tol8,ch10,' This is not the case. '
      else
 !      The discrepancy is not so severe
        write(message, '(a,a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
      end if
      MSG_WARNING(message)
 
-     write(message, '(a,a,a,a,a,a)' ) &
-&     'Action : check input file for occ,wtk, and charge.',ch10,&
+     write(message, '(6a)' ) &
+&     'Action: check input file for occ,wtk, and charge.',ch10,&
 &     'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
 &     'but IS automatically normalized otherwise.',ch10
      call wrtout(std_out,message,'COLL')
 
 !    If the discrepancy is severe, stop
-     if (abs(nelect_occ-dtset%nelect)>tol8)then
+     if (abs(nelect_occ-dtset%nelect)>tol8) then
        MSG_ERROR(message)
      end if
 

@@ -1438,7 +1438,9 @@ end subroutine occeig
 !!  occ_fd
 !!
 !! FUNCTION
-!!  Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
+!!  Fermi-Dirac statistic: 1 / [(exp((e - mu)/ KT) + 1]
+!!  Note that occ_fs in [0, 1] so the spin factor is not included, unlike the
+!!  occupations stored in ebands%occ.
 !!
 !! INPUTS
 !!   ee=Single particle energy in Ha
