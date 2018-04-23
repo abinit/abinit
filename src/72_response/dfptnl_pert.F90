@@ -1239,6 +1239,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  ABI_DEALLOCATE(ylm1)
  ABI_DEALLOCATE(ylmgr)
  ABI_DEALLOCATE(ylmgr1)
+ ABI_DEALLOCATE(vlocal)
  ABI_DEALLOCATE(vlocal1_i2pert)
  ABI_DEALLOCATE(wfraug)
 
