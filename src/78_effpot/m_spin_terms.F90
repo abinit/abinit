@@ -10,6 +10,9 @@ module  m_spin_terms
   type spin_terms_t
      integer :: nmatoms, natoms
      real(dp) :: etot
+     ! ispin_prim: index in the spin model in primitive cell, which is used as the index of sublattice.
+     ! rvec: supercell R vector.
+     integer, allocatable :: ispin_prim(:), rvec(:,:)
      real(dp), allocatable :: ms(:), pos(:,:),  spinat(:,:), S(:,:)
      ! iatom_prim, index of atom in primitive cell
      ! rvec: R vector from primitive cell to supercell
@@ -132,7 +135,8 @@ contains
     !Arguments ------------------------------------
     !scalars
     class(spin_terms_t), intent(out) :: self
-    integer, intent(in) :: zion(:), spin_index(:), iatom_prim(:), rvec(3,natoms)
+    integer, intent(in) :: ispin_prim(:), rvec(:,:)
+    integer, intent(in) :: zion(:), spin_index(:)
     real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:)
     !Local variables-------------------------------
     integer :: nmatoms, natoms, i
@@ -157,6 +161,12 @@ contains
 
     ABI_ALLOCATE( self%ms, (nmatoms) )
     self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))*bohr_mag
+
+    ABI_ALLOCATE( self%ispin_prim, (nmatoms))
+    ABI_ALLOCATE(self%rvec, (3, nmatoms))
+
+    self%ispin_prim(:)=ispin_prim(:)
+    self%rvec(:)=rvec(:)
 
     ABI_ALLOCATE( self%S, (3, nmatoms))
     do i=1,nmatoms
@@ -674,6 +684,17 @@ contains
     if (allocated(self%pos)) deallocate(self%pos, stat=err)
     if (allocated(self%spinat)) deallocate(self%spinat, stat=err)
     if (allocated(self%zion)) deallocate(self%zion, stat=err)
+
+    if (allocated(self%spin_index)) then
+       ABI_DEALLOCATE(self%spin_index)
+    endif
+    if (allocated(self%ispin_prim)) then
+       ABI_DEALLOCATE(self%ispin_prim)
+    endif
+    if (allocated(self%rvec)) then
+       ABI_DEALLOCATE(self%rvec)
+    endif
+
 
     if (allocated(self%gyro_ratio)) deallocate(self%gyro_ratio, stat=err)
     if ( err/= 0) print *, "self%gyro_ratio: Deallocation request denied"
