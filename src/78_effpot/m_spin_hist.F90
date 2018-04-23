@@ -31,7 +31,7 @@
 !! SOURCE
 
 ! TODO hexu:
-! sync ihist_latt when lattice dynamics
+! sync ihist_latt when with lattice dynamics
 ! add average , variance, etc (should they be here?)
 
 #if defined HAVE_CONFIG_H
@@ -39,18 +39,11 @@
 #endif
 
 #include "abi_common.h"
-
 module m_spin_hist
-
   use defs_basis
   use m_profiling_abi
   use m_errors
   use m_xmpi
-  use m_nctk
-#if defined HAVE_NETCDF
-  use netcdf
-#endif
-
   implicit none
 
   private
@@ -72,7 +65,7 @@ module m_spin_hist
   !! * ihist                   : index of history
 
   !! natom : number of atoms
-  !! nmatoms: number of magnetic atoms
+  !! nmatom: number of magnetic atoms
   !! * acell(3)         : Acell (acell , rprimd, xred: only initial value kept if there is!!  no lattice dynamics. Other wise for each step, the corresponding lattice step number is kept)
   !! * rprimd(3,3)      : Rprimd
   !! * xred(3,natom)    : Xred
@@ -83,6 +76,7 @@ module m_spin_hist
   !! * dSdt(3, nmatom, mxhist) : dS/dt (cartesian)
   !! * etot(mxhist)            : Electronic total Energy
   !! * entropy(mxhist)         : Entropy
+  !! * itime(mxhist)           : index of spin dynamics step.
   !! * time(mxhist)            : Time (or iteration number for GO)
   !!
   !! * has_latt (whether lattice dynamics is also present)
@@ -97,88 +91,180 @@ module m_spin_hist
      ! Maximun size of the historical records
      integer :: mxhist = 0
 
-     integer :: natom
      integer :: nmatom
      ! whether lattice dynamics is also present
-     interger, allocatable :: ihist_latt(:)
+     integer, allocatable :: ihist_latt(:)
      logical :: has_latt
 
      ! arrays
-     ! structure
+     !  placeholders for structure-related parameters. They are not used currently. 
+     integer :: natom
      real(dp) :: acell(3)
      real(dp) :: rprimd(3,3)
-     ! xred(3, natom)
-     real(dp), allocatable :: xred(3, :)
+     real(dp), allocatable :: xred(:, :)
+     integer :: ntypat
+     integer, allocatable :: typat(:)
+     real(dp), allocatable :: znucl(:)
+     integer, allocatable :: spin_index(:)
 
      ! spin
      !heff(3, nmatom, mxhist)
-     real(dp), allocatable :: heff(3, :, :)
+     real(dp), allocatable :: heff(:, :, :)
      !snorm(nmatom, mxhist)
      real(dp), allocatable :: snorm(:, :)
 
      !S(3, nmatom, mxhist)
-     real(dp), allocatable :: S(3, nmatom, mxhist)
+     real(dp), allocatable :: S(:, :, :)
      !dSdt(3, nmatom, mxhist)
      ! TODO hexu: is it useful?
-     real(dp), allocatable :: dSdt(3, nmatom, mxhist)
+     real(dp), allocatable :: dSdt(:, :, :)
 
+     ! label of spins, sublattice
+     integer(dp), allocatable :: label(:)
+     ! sc_label(3, nmatom) label of cell. (R)
+     integer(dp), allocatable :: sc_label(:,:)
      ! etot(mxhist)
      real(dp), allocatable :: etot(:)
-     real(dp) :: entropy(:)
-     real(dp) :: time(:)
-
+     real(dp), allocatable :: entropy(:)
+     real(dp), allocatable :: time(:)
+     integer, allocatable :: itime(:)
+     ! id of netcdf spin hist file
+     integer :: ncid
+     ! spin_nctime: interval of step for writing to netcdf hist file.
+     integer :: spin_nctime
+     real(dp) :: spin_temperature
   end type spin_hist_t
-
   public :: spin_hist_t_init
   public :: spin_hist_t_free
-  public :: spinhist2var
-  public :: var2spinhist
+  public :: spin_hist_t_get_S
   public :: spin_hist_t_findIndex
-  public :: write_sd_hist
-  public :: read_md_hist
-  public :: get_dims_spinhist
+  public :: spin_hist_t_set_vars
+  public :: spin_hist_t_set_params
+  !public :: spinhist2var
+  !public :: var2spinhist
+  !public :: write_sd_hist
+  !public :: read_md_hist
+  !public :: get_dims_spinhist
 
 contains
-  subroutine spin_hist_t_init(hist, natom, nmatom, mxhist, has_latt)
-    implicit none
-    class(spin_hist_t), intent(inout) :: self
-    integer, intent(in) :: natom, nmatom, mxhist
-    logical, intent(in) :: has_latt
+  subroutine spin_hist_t_init(hist, nmatom, mxhist, has_latt)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_init'
+!End of the abilint section
+
+    implicit none
+    class(spin_hist_t), intent(inout) :: hist
+    integer, intent(in) :: nmatom, mxhist
+    logical, intent(in) :: has_latt
+    hist%nmatom=nmatom
+    hist%ntypat=0
     hist%ihist=1
     hist%ihist_prev=0
     hist%mxhist=mxhist
-
+    hist%natom=0
     hist%has_latt=has_latt
 
-    ABI_ALLOCATE(hist%xred, (3, natoms))
-    ABI_ALLOCATE(hist%heff, (3, nmatoms, mxhist))
-    ABI_ALLOCATE(hist%snorm, (nmatoms, mxhist))
-    ABI_ALLOCATE(hist%S, (3, nmatoms, mxhist))
-    ABI_ALLOCATE(hist%dSdt, (3, nmatoms, mxhist))
+    print *, "initialize HIST spin"
+    ABI_ALLOCATE(hist%heff, (3, nmatom, mxhist))
+    ABI_ALLOCATE(hist%snorm, (nmatom, mxhist))
+    ABI_ALLOCATE(hist%S, (3, nmatom, mxhist))
+    ABI_ALLOCATE(hist%dSdt, (3, nmatom, mxhist))
+    ABI_ALLOCATE(hist%label, (nmatom))
 
     ABI_ALLOCATE(hist%etot, (mxhist))
     ABI_ALLOCATE(hist%entropy, (mxhist))
     ABI_ALLOCATE(hist%time, (mxhist))
+    ABI_ALLOCATE(hist%itime, (mxhist))
+
+    ABI_ALLOCATE(hist%ihist_latt, (mxhist))
+
     hist%etot(1) =zero
     hist%entropy(1) =zero
     hist%time(1) =zero
 
-    hist%acell(:)=zero
-    hist%rprimd(:, :)=zero
-    hist%xred(:,:) =zero
+    !hist%acell(:)=zero
+    !hist%rprimd(:, :)=zero
+    !hist%xred(:,:) =zero
     hist%heff(:,:,1)=zero
     hist%S(:,:,1)=zero
     hist%dSdt(:,:,1)=zero
-    hist%snorm(:,:,1)=zero
+    hist%snorm(:,1)=zero
+    print *, "Initialization spin hist finished"
   end subroutine spin_hist_t_init
 
+  ! set atomic structure. 
+  subroutine spin_hist_t_set_atomic_structure(hist, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_set_atomic_structure'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: hist
+    real(dp), intent(in) :: acell(3), rprimd(3,3), xred(:,:), znucl(:)
+    integer, intent(in):: spin_index(:), ntypat, typat(:)
+    integer :: natom
+    natom=size(typat)
+    ABI_ALLOCATE(hist%xred, (3, natom))
+    ABI_ALLOCATE(hist%spin_index, (natom))
+    ABI_ALLOCATE(hist%typat,(ntypat))
+
+    hist%acell(:)=acell(:)
+    hist%rprimd(:,:)=rprimd(:,:)
+    hist%xred(:,:)=xred(:,:)
+    hist%spin_index(:)=spin_index(:)
+    hist%ntypat=ntypat
+    hist%typat(:)=typat(:)
+    hist%znucl(:)=znucl(:)
+  end subroutine spin_hist_t_set_atomic_structure
+
+  subroutine spin_hist_t_set_params(hist, spin_nctime, spin_temperature)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_set_params'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: hist
+    integer, intent(in) :: spin_nctime
+    real(dp), intent(in) :: spin_temperature
+    hist%spin_nctime= spin_nctime
+    hist%spin_temperature=spin_temperature
+  end subroutine spin_hist_t_set_params
+
   subroutine spin_hist_t_free(hist)
-    implicit none
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_free'
+!End of the abilint section
+
     class(spin_hist_t) , intent(inout) :: hist
 
     if (allocated(hist%xred)) then
        ABI_DEALLOCATE(hist%xred)
+    end if
+    if (allocated(hist%typat)) then
+       ABI_DEALLOCATE(hist%typat)
+    end if
+    if (allocated(hist%znucl)) then
+       ABI_DEALLOCATE(hist%znucl)
+    end if
+    if (allocated(hist%label)) then
+       ABI_DEALLOCATE(hist%label)
+    end if
+    if (allocated(hist%spin_index)) then
+       ABI_DEALLOCATE(hist%spin_index)
     end if
     if (allocated(hist%heff)) then
        ABI_DEALLOCATE(hist%heff)
@@ -201,34 +287,67 @@ contains
     if (allocated(hist%time)) then
        ABI_DEALLOCATE(hist%time)
     end if
+    if (allocated(hist%itime)) then
+       ABI_DEALLOCATE(hist%itime)
+    end if
+    if (allocated(hist%ihist_latt)) then
+       ABI_DEALLOCATE(hist%ihist_latt)
+    end if
   end subroutine spin_hist_t_free
 
 
-  subroutine spin_hist_t_get_S(hist, S, step)
-    class(spin_hist_t), intent(in) :: hist
-    real(dp), intent(out) :: S(3, hist%nmatoms)
+  function spin_hist_t_get_S(hist, step) result(S)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_get_S'
+!End of the abilint section
+
+    class(spin_hist_t), intent(inout) :: hist
     integer, intent(in), optional:: step
-    integer :: i
+    real(dp) :: S(3, hist%nmatom)
+    integer :: i, j
     if (.not. present(step)) then
-       step=0
+       j=0
+    else
+       j=step
     end if
-    i=spin_hist_t_findIndex(step=step)
+    i=spin_hist_t_findIndex(hist,step=j)
     S(:,:)=hist%S(:,:,i)
-  end subroutine spin_hist_t_get_S
+  end function spin_hist_t_get_S
 
   subroutine spin_hist_t_inc(hist)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_inc'
+!End of the abilint section
+
     class(spin_hist_t), intent(inout) :: hist
+    hist%itime(hist%ihist)=hist%itime(hist%ihist_prev)+1
     hist%ihist_prev=hist%ihist
-    hist%ihist=spin_hist_t_findIndex(1)
+    hist%ihist=spin_hist_t_findIndex(hist, 1)
   end subroutine spin_hist_t_inc
 
   function spin_hist_t_findIndex(hist, step) result(index)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_findIndex'
+!End of the abilint section
+
     type(spin_hist_t), intent(inout) :: hist
     integer , intent(in) :: step
     integer :: index
     !Local variables-------------------------------
     !scalars
-    integer :: ii,mxhist
+    integer :: mxhist
     !arrays
     character(len=500) :: msg
     ! *************************************************************
@@ -240,15 +359,26 @@ contains
             &                     'Action: increase the number of history store in the hist'
        MSG_BUG(msg)
     end if
-    index= mod(hist%ihist+step, hist%mxhist)
+    index= mod(hist%ihist+step, hist%mxhist)+1
   end function spin_hist_t_findIndex
 
   subroutine spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_hist_t_set_vars'
+!End of the abilint section
+
     class(spin_hist_t), intent(inout) :: hist
-    real(dp), intent(in), optional :: S(3, hist%nmatoms), Snorm(hist%nmatom), &
-         & dSdt(3, hist%nmatoms), Heff(3, hist%nmatoms), etot, entropy, time
+    real(dp), optional, intent(in) :: S(3, hist%nmatom), Snorm(hist%nmatom), dSdt(3, hist%nmatom), &
+        &  Heff(3, hist%nmatom), etot, entropy, time
     integer, optional :: ihist_latt
     logical, intent(in), optional :: inc
+    integer :: ihist
+    ihist=hist%ihist
+    !print *, "set spin hist vars: ihist=", ihist
     if(present(inc) .and. inc) then
        call spin_hist_t_inc(hist)
     end if
@@ -277,15 +407,5 @@ contains
        hist%ihist_latt(ihist)=ihist_latt
     endif
   end subroutine spin_hist_t_set_vars
-
-  subroutine write_spin_hist(hist, filename, ifirst, itime, natom, nmatom, ntypat, & typat, amu, znucl, dtspin, sdtemp, index_spin)
-    integer,intent(in) :: ifirst,itime,natom,ntypat
-    real(dp),intent(in) :: dtion
-    character(len=*),intent(in) :: filename
-    !arrays
-    integer,intent(in) :: typat(natom), index_spin(natom)
-    real(dp),intent(in) :: amu(ntypat),znucl(:),mdtemp(2)
-    type(spin_hist_t),intent(inout),target :: hist
-  end subroutine write_spin_hist
 
 end module m_spin_hist

@@ -216,7 +216,7 @@ program multibinit
 
 ! Read and treat the reference structure 
 !****************************************************************************************
-if (inp%dynamics_spin>0) then
+if (inp%spin_dynamics>0) then
  if (iam_master) then
 
     write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
@@ -444,7 +444,7 @@ if (inp%dynamics/=0) then
 
 ! Run spin dynamics
 !****************************************************************************************    
- if(inp%dynamics_spin>0) then
+ if(inp%spin_dynamics>0) then
   ! TODO hexu: no mpi yet.
    if(iam_master) then
       call spin_model_t_run(spin_model)
