@@ -7,3 +7,5 @@ Configuration/installation tools
 - upgrade-build-config
     Update the ~/.abinit/build/hostname.ac file.
 
+- nag_config/
+    Patches for compilation with NAG compiler

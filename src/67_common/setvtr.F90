@@ -152,7 +152,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use m_xmpi
  use m_xcdata
 
+ use m_time,              only : timab
  use m_geometry,          only : xred2xcart
+ use m_cgtools,           only : dotprod_vn
  use m_ewald,             only : ewald
  use m_energies,          only : energies_type
  use m_electronpositron,  only : electronpositron_type,electronpositron_calctype
@@ -168,8 +170,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setvtr'
- use interfaces_18_timing
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs

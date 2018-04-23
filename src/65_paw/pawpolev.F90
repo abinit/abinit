@@ -46,6 +46,7 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
  use m_errors
 
  use m_xmpi, only : xmpi_sum
+ use m_time,     only : timab
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
 
@@ -53,7 +54,6 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpolev'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

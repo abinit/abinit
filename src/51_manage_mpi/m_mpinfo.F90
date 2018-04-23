@@ -16,7 +16,7 @@
 !! CHILDREN
 !!
 !! TODO
-!!  Change the name of the datatype: (MPI_|mpi_) is a reserved keyword 
+!!  Change the name of the datatype: (MPI_|mpi_) is a reserved keyword
 !!  and should not be used in client code!
 !!
 !! SOURCE
@@ -30,7 +30,7 @@
 MODULE m_mpinfo
 
  use defs_basis
- use m_errors 
+ use m_errors
  use m_profiling_abi
  use m_xmpi
  use m_distribfft
@@ -39,7 +39,7 @@ MODULE m_mpinfo
 
  implicit none
 
- private 
+ private
 
  public :: init_mpi_enreg        ! Initialise a mpi_enreg structure with dataset independent values.
  public :: nullify_mpi_enreg     ! nullify a mpi_enreg datastructure
@@ -51,7 +51,6 @@ MODULE m_mpinfo
  public :: ptabs_fourwf          ! Return *pointers* to the internal MPI-FFT tables used in fourwf
  public :: mpi_distrib_is_ok     ! Check if a MPI datastructure contains number of processors
                                  ! compatible (in terms of efficiency) with the number of spins/kpts/bands
-
 
 ! Destructor methods
  public :: clnmpi_atom
@@ -703,7 +702,7 @@ subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
 
  ! Get the distrib associated with this fft_grid => for i2 and i3 planes
  if (n2 == mpi_enreg%distribfft%n2_coarse) then
-   if (n3 == size(mpi_enreg%distribfft%tab_fftdp3_distrib))then 
+   if (n3 == size(mpi_enreg%distribfft%tab_fftdp3_distrib))then
      fftn2_distrib => mpi_enreg%distribfft%tab_fftwf2_distrib
      ffti2_local   => mpi_enreg%distribfft%tab_fftwf2_local
      fftn3_distrib => mpi_enreg%distribfft%tab_fftdp3_distrib
@@ -845,12 +844,12 @@ subroutine clnmpi_atom(mpi_enreg)
  DBG_ENTER("COLL")
 
  if (xmpi_paral==0) return
- 
+
  if (mpi_enreg%comm_atom/=mpi_enreg%comm_world) then
    call xmpi_comm_free(mpi_enreg%comm_atom)
    mpi_enreg%comm_atom=xmpi_comm_null
  end if
- 
+
  if(associated(mpi_enreg%my_atmtab)) then
    ABI_DEALLOCATE(mpi_enreg%my_atmtab)
  end if
@@ -1131,7 +1130,7 @@ subroutine pre_gather(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
 
 !Gather the array on all procs
  call xmpi_allgather(array,n1*n2*n3/mpi_enreg%nproc_fft,array_allgather,mpi_enreg%comm_fft,ier)
- 
+
 end subroutine pre_gather
 !!***
 
@@ -1221,7 +1220,7 @@ logical function iwrite_fftdatar(mpi_enreg) result(ans)
 ! *********************************************************************
 
  ans = (xmpi_paral==0 .or. &                                  ! No MPI
-  (mpi_enreg%paral_kgb==0 .and. mpi_enreg%me==0) .or. &       ! paral_kgb=0 does not use MPI-FFT and cartesian communicators. 
+  (mpi_enreg%paral_kgb==0 .and. mpi_enreg%me==0) .or. &       ! paral_kgb=0 does not use MPI-FFT and cartesian communicators.
   (mpi_enreg%paral_kgb==1 .and. mpi_enreg%me_band==0 .and. &  ! select procs in one FFT communicator.
   mpi_enreg%me_kpt==0 .and. mpi_enreg%me_spinor==0) .or.   &
   (mpi_enreg%paral_pert==1 .and. mpi_enreg%me_cell==0) & ! Group master in perturbation communicator.

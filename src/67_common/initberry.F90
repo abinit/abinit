@@ -70,10 +70,6 @@
 !!           nproc = number of cpus
 !!           nneighbour = number of neighbours for each k-point (= 6)
 !!
-!! TO DO
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      init_e_field_vars
 !!
@@ -103,7 +99,9 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_xmpi
  use m_efield
 
+ use m_time,    only : timab
  use m_geometry,only : metric
+ use m_kpts,    only : listkk, smpbz
  use m_fftcore, only : kpgsph
  use m_pawang,  only : pawang_type
  use m_pawrad,  only : pawrad_type
@@ -115,10 +113,8 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 #undef ABI_FUNC
 #define ABI_FUNC 'initberry'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section
 

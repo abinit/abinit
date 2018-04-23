@@ -2,6 +2,7 @@
 description: How to perform an effective mass calculation
 authors: JLaflamme
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform an effective mass calculation with the ABINIT package.
 

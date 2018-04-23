@@ -206,7 +206,7 @@ function abidocs_guidedtour() {
         },
         {
           element: tab_links[1],
-          intro: "This section contains pages providing an overview of the features implemented in the code. " + 
+          intro: "This section gives an overview of the features implemented in the code. " + 
                  "Each page provides links to related input variables, input files and scientific articles."
         },
         {
@@ -235,10 +235,10 @@ function abidocs_guidedtour() {
           element: 'a.md-logo',
           intro: "Click the logo to go back to the Abinit homepage."
         },
-        {
-          element: 'input.md-search__input',
-          intro: "In this form, you can search in the entire website."
-        },
+        //{
+        //  element: 'input.md-search__input',
+        //  intro: "In this form, you can search in the entire website."
+        //},
         {
           element: 'div.md-source__repository',
           intro: "Check out our organization on github for other Abinit-related software packages."
@@ -284,12 +284,12 @@ function abidocs_guidedtour() {
     intro.start();
 }
 
-function set_warning(txt) {
-  var warningbox = document.getElementById('warning_box');
-  warningbox.innerHTML = "<div class='alert warning'><span id='cbn' class='closebtn'>&times;</span><strong>Warning!</strong> ".concat(txt, "</div>");
-  var close = document.getElementById("cbn");
-  close.onclick = function(){
-     var div = document.getElementById('warning_box');
-     setTimeout(function(){ div.innerHTML = ""; }, 100);
-  }
-}
+//function set_warning(txt) {
+//  var warningbox = document.getElementById('warning_box');
+//  warningbox.innerHTML = "<div class='alert warning'><span id='cbn' class='closebtn'>&times;</span><strong>Warning!</strong> ".concat(txt, "</div>");
+//  var close = document.getElementById("cbn");
+//  close.onclick = function(){
+//     var div = document.getElementById('warning_box');
+//     setTimeout(function(){ div.innerHTML = ""; }, 100);
+//  }
+//}

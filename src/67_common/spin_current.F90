@@ -70,12 +70,12 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart
+ use m_fftcore,    only : sphereboundary
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_current'
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_67_common, except_this_one => spin_current
 !End of the abilint section

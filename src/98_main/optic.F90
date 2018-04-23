@@ -98,20 +98,19 @@ program optic
  use netcdf
 #endif
 
- use m_time ,          only : asctime
+ use m_specialmsg,     only : specialmsg_getcount, herald
+ use m_time ,          only : asctime, timein
  use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith
  use m_crystal_io,     only : crystal_ncwrite
- !use m_specialmsg,only : specialmsg_getcount
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optic'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 

@@ -33,7 +33,7 @@ MODULE m_FFT_prof
  use m_geometry,       only : metric
  use m_blas,           only : xcopy
  use m_cgtools,        only : set_istwfk
- use m_fftcore,        only : get_kg, print_ngfft, fftalg_info
+ use m_fftcore,        only : get_kg, print_ngfft, fftalg_info, kgindex, getng, sphereboundary
  use m_fft_mesh,       only : calc_eigr, calc_ceigr
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
  use m_oscillators,    only : rho_tw_g
@@ -190,8 +190,6 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fft_test_init'
- use interfaces_52_fft_mpi_noabirule
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1154,7 +1152,6 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'time_fourwf'
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1501,8 +1498,6 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
 #undef ABI_FUNC
 #define ABI_FUNC 'time_rhotwg'
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1664,7 +1659,6 @@ subroutine time_fftu(Ftest,isign,header,Ftprof)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'time_fftu'
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none

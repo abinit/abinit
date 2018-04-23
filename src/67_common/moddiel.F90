@@ -61,7 +61,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
  use m_profiling_abi
  use m_errors
 
- use m_geometry,     only : metric
+ use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).

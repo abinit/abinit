@@ -50,12 +50,13 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  use defs_abitypes
  use m_profiling_abi
 
+ use m_time,        only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'green_kernel'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_53_ffts
 !End of the abilint section
 

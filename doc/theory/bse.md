@@ -29,8 +29,8 @@ related to the irreducible polarizability by the following relation
 
 from which the inverse dielectric function is obtained via matrix inversion.
 
-The _**macroscopic**_ dielectric function, _є M_LF(ω), can be directly related
-to the inverse of a single element, the first ( **G** _1_ =0, **G** _2_ =0),
+The _**macroscopic**_ dielectric function, $\ee_M^{\text{LF}}(\ww)$, can be directly related
+to the inverse of a single element, the first ($\GG_1 = 0, \GG_2 =0$) element
 of the inverse of the _**microscopic**_ dielectric matrix by means of:
 
 \begin{equation}\label{eq:abs_LFE} 
@@ -39,8 +39,8 @@ of the inverse of the _**microscopic**_ dielectric matrix by means of:
 
 The microscopic dielectric matrix is the one usually calculated within the RPA in
 a GW calculation. The optical absorption spectrum is simply given by the
-imaginary part of _є M_LF(ω). Sometimes, especially when comparing with
-experimental spectra, the real part is simply called _є 1_ and the imaginary part _є 2_.
+imaginary part of $\ee_M^{\text{LF}}(\ww)$ . Sometimes, especially when comparing with
+experimental spectra, the real part is simply called $\ee_1$ and the imaginary part $\ee_2$.
 
 Note that above equation differs from
 
@@ -49,12 +49,15 @@ Note that above equation differs from
 \end{equation} 
 
 due to the so called local-field effects introduced by the presence of the crystalline environment. 
-The former quantity _with_ local fields (LF) is more accurate than the latter one
-with _no_ local field (NLF). The reason the two equations are different is
-because in the first, the expression in the denominator is the first element
-of the inverse of the _whole_ microscopic dielectric matrix. This element
-depends on the _entire_ matrix and cannot simply be calculated by taking the
-inverse of the first element of the non-inverted matrix.
+The former quantity _with_ local fields (LF) is more accurate than the latter one with _no_ local field (NLF). 
+
+!!! important
+
+    The reason the two equations are different is
+    because in the first, the expression in the denominator is the first element
+    of the inverse of the _whole_ microscopic dielectric matrix. This element
+    depends on the _entire_ matrix and cannot simply be calculated by taking the
+    inverse of the first element of the non-inverted matrix.
 
 In the [[theory:mbt#RPA_Fourier_space|GW_notes]], we have discussed how
 to calculate the irreducible polarizability and thus the absorption spectrum
@@ -75,8 +78,9 @@ The fundamental reason for the failure of the RPA can be traced back to the
 neglect of the electron-hole interaction that, in the many-body language,
 should be included through the vertex function. Replacing the vertex function
 with a local and instantaneous function is a too crude and unrealistic
-approximation for the many-body polarizability. In the next section we will
-discuss how to obtain an improved approximation for the vertex and therefore
+approximation for the many-body polarizability. 
+
+In the next section we will discuss how to obtain an improved approximation for the vertex and therefore
 an improved approximation for the polarizability that takes into account many-
 body effects due to the electron-hole interaction
 
@@ -89,12 +93,12 @@ spectra available in ABINIT is given below.
 
 The Bethe-Salpeter theory is formulated in terms of two-particle propagators.
 These are four-point functions describing the motion through the system of two
-particles at once. We will label them _L 0_ and _L_ , where the subscript zero
+particles at once. We will label them $L^0$ and $L$ , where the subscript zero
 indicates that the particles are non-interacting. By restricting the starting
-and ending point of the particles, the two-point contraction of _L 0_ gives
+and ending point of the particles, the two-point contraction of $L^0$ gives
 the reducible independent-particle polarizability according to
 
-$$ \chi^0(12) = L^0(11, 22) $$ while the two-point contraction of _L_ gives
+$$ \chi^0(12) = L^0(11, 22) $$ while the two-point contraction of $L$ gives
 the reducible many-body polarizability. $$ \hat\chi(12) = L(11, 22) $$ that
 should not be confused with the _irreducible_ polarizability of the many-body
 system (denoted with a tilde in the formulas in the [[theory:mbt#RPA_Fourier_space|GW_notes]]).
@@ -104,21 +108,20 @@ _**with**_ local field effects is obtained directly from the reducible
 polarizability using  
 
 \begin{equation} 
-\ee_M^{\text{LF}}(\ww) = 1 - \lim_{\qq
-\rightarrow 0} v(\qq)\,\tchi_{00}(\qq;\ww) 
+\ee_M^{\text{LF}}(\ww) = 1 - \lim_{\qq \rightarrow 0} v(\qq)\,\tchi_{00}(\qq;\ww) 
 \end{equation}
 
-Computing the reducible _L_ directly, if possible, thus allows one to avoid
+Computing the reducible $L$ directly, if possible, thus allows one to avoid
 the costly matrix inversion of the dielectric function that should otherwise
 be performed for each frequency.
 
-One can show that _L_ satisfies the Dyson-like equation:
+One can show that $L$ satisfies the Dyson-like equation:
 
 \begin{equation} 
 L = L^0 + L^0 K L \Longrightarrow L = \bigl [ 1 - L^0 K]^{-1} L^0 
 \end{equation} 
 
-that involves the Bethe-Salpeter kernel _K_ :
+that involves the Bethe-Salpeter kernel $K$:
 
 \begin{equation}\label{eq:BSE_kernel_LF} 
 K(1234) = \underbrace{\delta(12)\delta(34)\bar v(13)}_{Exchange} -
@@ -126,7 +129,7 @@ K(1234) = \underbrace{\delta(12)\delta(34)\bar v(13)}_{Exchange} -
 \end{equation} 
 
 where the bar symbol signifies that the Coulomb interaction has to be taken without its
-long-range Fourier component at **G** =0: 
+long-range Fourier component at $\GG =0$: 
 
 \begin{equation} \begin{cases} {\bar
 v(\qq)} = v(\qq) \quad {\text{if}}\; \qq \neq 0 \\\ \\\ {\bar v(\qq=0)} = 0
@@ -140,11 +143,10 @@ rewriting of the kernel in this way is mostly an algebraic trick which allows
 one to easily separate the contributions and calculate the optical spectrum
 both with and without the LF.
 
-The Dyson-like equation for _L_ becomes a matrix problem once a particular
+The Dyson-like equation for $L$ becomes a matrix problem once a particular
 basis set is chosen to expand the four-point functions involved in the
 problem. In the standard approach, the polarisabilities and the BS kernel are
-expressed in the so-called _transition_ space (i.e. as products of single-
-particle orbitals) using:
+expressed in the so-called _transition_ space (i.e. as products of single-particle orbitals) using:
 
 \begin{equation} F(1234) = 
 \sum_{ \substack{(n_1 n_2) \\\ (n_3 n_4)} }
@@ -158,7 +160,7 @@ and
 } = \int F(1234) \psi_{n_1}(1) \psi_{n_2}^\*(2) \psi_{n_3}^\*(3)
 \psi_{n_4}(4) \dd (1234) \end{equation} 
 
-where _n i_ is a shorthand notation to denote band, **k** -point and spin index. 
+where $n_i$ is a shorthand notation to denote band, **k**-point and spin index. 
 The expansion is exact provided that
 the set of single-particle orbitals from a complete basis set in the Hilbert space.
 
@@ -173,14 +175,14 @@ f_{n_1}) } { (\ee_{n_2} - \ee_{n_1} - \ww)} \delta_{n_1 n_3} \delta_{n_2 n_4}
 thus leading to a considerable simplification in the mathematical formalism.
 
 After some algebra (see [[cite:Onida2002]] for a more complete derivation) one
-finds that, in a system with an energy gap, the Dyson-like equation for _L_
-can be expressed in terms of an effective two-particle Hamiltonian, _H_ , according to
+finds that, in a system with an energy gap, the Dyson-like equation for $L$
+can be expressed in terms of an effective two-particle Hamiltonian, $H$ , according to
 
 \begin{equation} 
 L = \bigl [ H-\ww \bigr]^{-1}\,F 
 \end{equation} 
 
-The explicit form for _H_ and _F_ in the transition space is given by 
+The explicit form for $H$ and $F$ in the transition space is given by 
 
 \begin{equation}
 H =
@@ -204,9 +206,9 @@ F =
 \right) 
 \end{equation}
 
-where valence states are indicated by the indices _v_ , _v'_ while _c_ , _c'_
-are used for conduction bands. The _R_ sub-matrix is Hermitian and is usually
-referred to as the resonant block while _C_ (the so-called coupling block) is
+where valence states are indicated by the indices $v$ , $v'$ while $c$ , $c'$
+are used for conduction bands. The $R$ sub-matrix is Hermitian and is usually
+referred to as the resonant block while $C$ (the so-called coupling block) is
 a complex symmetric sub-matrix. Note that, due to the presence of the coupling
 term, the BS Hamiltonian is non-Hermitian although the operator possesses a real spectrum.
 
@@ -222,7 +224,7 @@ W_{(vc\kk)(v'c'\kk')}
 
 with single particle transition energies on the diagonal.
 
-The matrix elements of v and _W_ are defined as:
+The matrix elements of $v$ and $W$ are defined as:
 
 \begin{equation} 
 {\bar v}_{(n_1 n_2) (n_3 n_4)} = \delta_{\sigma_1 \sigma_2}\,
@@ -233,12 +235,12 @@ v(\rr-\rr')} \psi_{n_3}^*(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
 {W(\rr,\rr',\ww=0)} \psi^*_{n_2}(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
 \end{equation} 
 
-Note, in particular, that only the static limit ( ω = 0) of _W_ is involved in the last expression.
+Note, in particular, that only the static limit ($\omega = 0$) of $W$ is involved in the last expression.
 
 The coupling matrix elements are usually smaller than the resonant ones. This
 is especially true in bulk systems due to the different spatial behavior of
 conduction and valence states. In solid state calculations, it is therefore
-common practice to ignore the _C_ block (the so-called Tamm-Dancoff
+common practice to ignore the $C$ block (the so-called Tamm-Dancoff
 approximation). Under this assumption the excitonic Hamiltonian is given by a Hermitian operator.
 
 ![](bse_assets/TDA.svg)
@@ -246,8 +248,8 @@ approximation). Under this assumption the excitonic Hamiltonian is given by a He
 The variable [[bs_coupling]] defines whether the coupling block should be included in the calculation.
 
 The macroscopic dielectric function is obtained by contracting the many-body
-_L_ and then taking the optical limit of the **G** = **G'** =0 component along
-a particular direction in **q** -space. The final result reads:
+$L$ and then taking the optical limit of the $\GG = \GG' = 0$ component along
+a particular direction in $\qq$-space. The final result reads:
 
 \begin{equation} 
 \ee_M(\ww) = 1 - \lim_{\qq \rightarrow 0} v(\qq)\,\langle
@@ -273,7 +275,7 @@ change the default directions using the variables [[gw_nqlwl]] and [[gw_qlwl]].
 At this point it is clear that the evaluation of the macroscopic dielectric
 function within the BS formalism is a two-step process:
 
-  1. Construction of the _H_ matrix in the transition space.   
+  1. Construction of the $H$ matrix in the transition space.   
 
   2. Computation of the macroscopic dielectric function using the two equations reported at the end of the previous section. 
 
@@ -291,7 +293,7 @@ For BS computations, it is common practice to simulate the self-energy
 corrections by employing the scissors operator whose value can be obtained
 either from experiments or from ab-initio calculations. The scissors operator
 allows one to avoid a costly _GW_ calculation that should performed for all
-the **k** -points and bands included in the transition space (the optional
+the $\kk$-points and bands included in the transition space (the optional
 path on the right indicated with yellow arrows that corresponds to [[optdriver]]=4).
 
 The construction of the Hamiltonian matrix represents a significant portion of
@@ -305,7 +307,7 @@ matrix inversion for each frequency. The variable [[bs_algorithm]] is used to
 select among the different possibilities.
 
 [[bs_algorithm]]=1 employs standard (Sca)LAPACK routines to obtain the
-spectral representation of _H_ in terms of eigenvalues and right eigenvectors of _H_:
+spectral representation of $H$ in terms of eigenvalues and right eigenvectors of $H$:
 
 \begin{equation} 
 \begin{cases} H |\lambda\rangle = \ee_\lambda |\lambda\rangle
@@ -314,7 +316,7 @@ spectral representation of _H_ in terms of eigenvalues and right eigenvectors of
 \langle\lambda'| \end{cases} 
 \end{equation} 
 
-Then, as discussed in [2], the inverse of [ _H_ -ω] is obtained according to 
+Then, as discussed in [2], the inverse of $H - \ww$ is obtained according to 
 
 \begin{equation} \bigl[ H -\ww
 \bigr]^{-1} = \sum_{\lambda \lambda'} |\lambda\rangle \dfrac{O_{\lambda
@@ -371,7 +373,7 @@ We refer the reader to [[cite:Gruning2009]] for a generalization of the method t
 the case in which the coupling term cannot be neglected. The main drawback of
 the method is that it does not give direct access to the excitonic spectrum
 hence it cannot be used to calculate binding energies or to plot the excitonic
-wavefunctions. Moreover, for the time being, [[bs_algorithm]]=2 cannot be used
+wavefunctions. Moreover, for the time being, [[bs_algorithm]] = 2 cannot be used
 for calculations in which the coupling term is included.
 
 [[bs_algorithm]]=3 employs the conjugate-gradient method to calculate the
@@ -381,9 +383,8 @@ testing and does not support calculations with the coupling term.
 ## 4 Kernel matrix elements in reciprocal space
   
 Our implementation employs planewaves to expand the periodic part of the Bloch
-states, _u_ , and the two-point function _W(r,r')_ that becomes a **q**
--dependent matrix in reciprocal-space. The conventions used for the transforms
-are documented in [this section](mbt.md#notations) of the _GW_ notes.
+states, $u$ , and the two-point function $W(\rr,\rr')$ that becomes a $\qq$-dependent matrix in reciprocal-space.
+The conventions used for the transforms are documented in [this section](mbt.md#notations) of the $GW$ notes.
 
 The matrix elements of the exchange term are evaluated in reciprocal space using:
 
@@ -414,21 +415,20 @@ calculations without local field effects. The variable [[bs_coulomb_term]]
 governs the computation of the Coulomb term, the most CPU-demanding part due
 to the presence of the double sum over **G** -vectors.
 
-It is also important to stress that, in the two equations above, the **k**
--point index runs over the full Brillouin zone hence the size of the
+It is also important to stress that, in the two equations above, the **k**-point 
+index runs over the full Brillouin zone hence the size of the
 Hamiltonian is defined by the number of point in the full Brillouin zone and
 not by the number of points in the irreducible wedge.
 
 ## 5 Matrix elements of the dipole operator
   
 The accurate calculation of optical properties require the correct treatment
-of the optical limit ( **G** =0, **q** -> 0) of the oscillator matrix
+of the optical limit ($\GG = 0, |\qq| \rightarrow 0$) of the oscillator matrix
 elements. The computation of these terms deserves some clarification, due to
 the presence of the fully nonlocal pseudopotential term in the Kohn-Sham
 Hamiltonian.
 
-A linear expansion up to the first order in **q** of the oscillator matrix
-element results in:
+A linear expansion up to the first order in **q** of the oscillator matrix element results in:
 
 \begin{equation} 
 \langle b_1,\kmq|e^{-i\qq\cdot\rr}|b_2,\kk \rangle
@@ -436,9 +436,9 @@ element results in:
 \rangle + \mcO(q^2) 
 \end{equation} 
 
-where we have assumed _b 1 ≠ b2 _and the difference between the two wave functions 
-at **k** - **q** and **k** has been
-neglected because it only introduces terms that are quadratic in **q**.
+where we have assumed $b_1 \neq b_2$ and the difference between the two wave functions 
+at $\kk - \qq$ and $\kk$ has been
+neglected because it only introduces terms that are quadratic in $\qq$.
 
 Unfortunately, the above expression cannot be directly used because the matrix
 elements of the position operator are ill-defined when wavefunctions obey
@@ -458,7 +458,7 @@ the pseudopotential is more involved and much more CPU-demanding.
 
 The role played by this additional term is usually marginal in the case of GW
 calculations: the QP corrections are obtained by performing an integration in
-**q** -space and only the **q** -> 0 component of the inverse dielectric
+$\qq$-space and only the $\qq \rightarrow 0$ component of the inverse dielectric
 matrix is affected by the commutator of the non-local part of the pseudopotential.
 
 For this reason it is common practice, especially during the _GW_ convergence

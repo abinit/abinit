@@ -51,6 +51,7 @@ use m_xmpi
 use m_bandfft_kpt
 use m_cgtools
 
+use m_time,      only : timab
 use m_io_tools,  only : get_unit
 
 implicit none
@@ -130,7 +131,6 @@ subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sqmr'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

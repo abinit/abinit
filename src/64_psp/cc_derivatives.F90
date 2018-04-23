@@ -215,5 +215,4 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  ABI_DEALLOCATE(xx)
 
 end subroutine cc_derivatives
-
 !!***

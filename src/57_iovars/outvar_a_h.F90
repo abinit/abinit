@@ -85,11 +85,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  use m_profiling_abi
  use m_results_out
 
+ use m_parser,  only : prttagm, prttagm_images
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvar_a_h'
- use interfaces_57_iovars, except_this_one => outvar_a_h
 !End of the abilint section
 
  implicit none
@@ -436,7 +437,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%charge
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
 
-!chempot 
+!chempot
  narr=3*mxvals%nzchempot*mxvals%ntypat ! default size for all datasets
  if(narr/=0)then
    do idtset=0,ndtset_alloc       ! specific size for each dataset
@@ -456,9 +457,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
      end if
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-&   narrm,ncid,ndtset_alloc,'chempot','DPR',1) 
+&   narrm,ncid,ndtset_alloc,'chempot','DPR',1)
  end if
- 
+
  intarr(1,:)=dtsets(:)%chkdilatmx
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
 
@@ -1173,8 +1174,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    end do
    if(defo==0)then
      do idtset=1,ndtset_alloc
-!      Change the sign of user defined input value 
-       if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)then 
+!      Change the sign of user defined input value
+       if(dprarr(1,idtset)<-tol8 .and. abs(dprarr(1,idtset)+999.0_dp)>tol8)then
          dprarr(1,idtset)=abs(dprarr(1,idtset))
        end if
      end do

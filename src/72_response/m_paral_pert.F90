@@ -34,6 +34,7 @@ MODULE m_paral_pert
  use m_errors
  use m_xmpi
 
+ use m_time,      only : timab
  use m_copy,      only : deep_copy
  use m_paw_an,    only : paw_an_type, paw_an_free, paw_an_redistribute
  use m_paw_ij,    only : paw_ij_type, paw_ij_free, paw_ij_redistribute
@@ -234,7 +235,6 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'set_pert_paw'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -249,13 +249,13 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !arrays
  integer,pointer,intent(out) :: old_atmtab(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
- type(paw_ij_type),optional,pointer,intent(out) :: paw_ij_out(:)
+ type(paw_ij_type),optional,pointer,intent(inout) :: paw_ij_out(:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
- type(paw_an_type),optional,pointer,intent(out) :: paw_an_out(:)
+ type(paw_an_type),optional,pointer,intent(inout) :: paw_an_out(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
- type(pawfgrtab_type),optional,pointer,intent(out) :: pawfgrtab_out(:)
+ type(pawfgrtab_type),optional,pointer,intent(inout) :: pawfgrtab_out(:)
  type(pawrhoij_type),allocatable,target,intent(inout) :: pawrhoij(:)
- type(pawrhoij_type),optional,pointer,intent(out) :: pawrhoij_out(:)
+ type(pawrhoij_type),optional,pointer,intent(inout) :: pawrhoij_out(:)
 
 !Local variables ---------------------------------------
 !scalars
@@ -494,7 +494,6 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'unset_pert_paw'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -509,13 +508,13 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !arrays
  integer,pointer,intent(inout) :: old_atmtab(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
- type(paw_ij_type),optional,pointer,intent(out) :: paw_ij_out(:)
+ type(paw_ij_type),optional,pointer,intent(inout) :: paw_ij_out(:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
- type(paw_an_type),optional,pointer,intent(out) :: paw_an_out(:)
+ type(paw_an_type),optional,pointer,intent(inout) :: paw_an_out(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
- type(pawfgrtab_type),optional,pointer,intent(out) :: pawfgrtab_out(:)
+ type(pawfgrtab_type),optional,pointer,intent(inout) :: pawfgrtab_out(:)
  type(pawrhoij_type),allocatable,target,intent(inout) :: pawrhoij(:)
- type(pawrhoij_type),optional,pointer,intent(out) :: pawrhoij_out(:)
+ type(pawrhoij_type),optional,pointer,intent(inout) :: pawrhoij_out(:)
 
 !Local variables ---------------------------------------
 !scalars

@@ -147,6 +147,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_errors
  use m_wfk
 
+ use m_time,        only : timab
  use m_io_tools,    only : get_unit, iomode_from_fname
  use m_occ,         only : occeig
  use m_pawang,      only : pawang_type
@@ -160,13 +161,12 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawdij,      only : pawdijfr
  use m_pawfgr,      only : pawfgr_type
- use m_kg,          only : mkkin, kpgstr
+ use m_kg,          only : mkkin, kpgstr, mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhofermi'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_65_paw

@@ -45,10 +45,10 @@ MODULE m_wfd
  use m_blas,           only : xcopy, xdotc
  use m_pptools,        only : printxsf
  use m_cgtools,        only : cg_zdotc
- use m_fftcore,        only : print_ngfft
+ use m_fftcore,        only : print_ngfft, kgindex, sphereboundary
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
- use m_kg,             only : getph, ph1d3d
+ use m_kg,             only : getph, ph1d3d, mkkpg
  use m_gsphere,        only : kg_map, make_istwfk_table
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg
@@ -458,8 +458,6 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kdata_init'
- use interfaces_52_fft_mpi_noabirule
- use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section

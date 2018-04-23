@@ -2,6 +2,7 @@
 description: How to perform a DFT+U calculation
 authors: BAmadon
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a DFT+U calculation with the ABINIT package.
 

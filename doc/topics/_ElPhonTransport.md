@@ -2,6 +2,7 @@
 description: How to compute transport properties that are determined by the electron-phonon interaction (electrical resistivity, superconductivity, thermal conductivity)
 authors: MV
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute transport properties that are determined by the electron-phonon
 interaction (electrical resistivity, superconductivity, thermal conductivity) with the ABINIT package.

@@ -135,7 +135,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 #undef ABI_FUNC
 #define ABI_FUNC 'cchi0'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => cchi0
 !End of the abilint section

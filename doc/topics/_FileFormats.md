@@ -2,6 +2,7 @@
 description: How to manage file formats, and the interfacing with other applications outside of the ABINIT organisation
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to manage file formats, and the interfacing with other applications outside of
 the ABINIT organisation with the ABINIT package.

@@ -20,6 +20,8 @@
 !!  kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !!  npwarr(nkpt) = number of planewaves in basis and boundary at this k point
 !!  occ(mband*nkpt*nsppol) = occup number for each band at each k point
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3) = dimensional primitive vectors
@@ -32,10 +34,6 @@
 !!
 !! SIDE EFFECTS
 !!  mpi_enreg = information about MPI parallelization
-!!
-!! TO DO
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      gstate
@@ -52,7 +50,7 @@
 #include "abi_common.h"
 
 subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                     pawang,pawrad,pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                     rprimd,symrec,xred)
 
  use defs_basis
@@ -63,7 +61,11 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_errors
  use m_xmpi
 
+ use m_time,    only : timab
  use m_fftcore, only : kpgsph
+ use m_kpts,    only : listkk, smpbz
+ use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
 
@@ -72,10 +74,8 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 #undef ABI_FUNC
 #define ABI_FUNC 'initorbmag'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
  use interfaces_65_paw
 !End of the abilint section
 
@@ -87,6 +87,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(inout) :: dtset
  type(orbmag_type),intent(out) :: dtorbmag
+ type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  !arrays
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
@@ -95,6 +96,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),pointer :: pwnsfac(:,:)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
 !Local variables-------------------------------
@@ -112,7 +114,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  integer :: iadum(3),iadum1(3),dg(3)
  integer,allocatable :: kg1_k(:,:)
  real(dp) :: diffk(3),dk(3),dum33(3,3),kpt1(3),tsec(2)
- real(dp),allocatable :: spkpt(:,:)
+ real(dp),allocatable :: calc_twdij(:,:,:,:),spkpt(:,:)
 
 ! *************************************************************************
 
@@ -215,6 +217,8 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  ABI_ALLOCATE(dtorbmag%cprjindex,(dtset%nkpt,dtset%nsppol))
  dtorbmag%cprjindex(:,:) = 0
+
+ ABI_ALLOCATE(dtorbmag%twdij0,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
 
  if (dtset%kptopt /= 3) then
    ABI_ALLOCATE(dtorbmag%atom_indsym,(4,dtset%nsym,dtorbmag%natom))
@@ -633,6 +637,25 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  ABI_DEALLOCATE(kg1_k)
 
+ ! =======================================================================================
+ ! compute pawdij terms arising from <u_n1k1|H_k2|u_n3k3>
+ ! =======================================================================================
+
+ ! term 2b: from vhnzc - vthnzc
+ do itypat=1, dtset%ntypat
+    if ( (pawtab(itypat)%has_vhnzc .NE. 2) .OR. (pawtab(itypat)%has_vhtnzc .NE. 2) ) then
+       message = "VH[n_Zc] or VH[tn_Zc] not present in pawtab..."
+       MSG_ERROR(message)
+    end if
+ end do
+
+ ABI_ALLOCATE(calc_twdij,(2,24,dtorbmag%lmn2max,dtorbmag%natom))
+ call pawtwdij_2b(calc_twdij,dtorbmag,gprimd,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+
+ dtorbmag%twdij0(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom) = calc_twdij(1:2,1:24,1:dtorbmag%lmn2max,1:dtorbmag%natom)
+
+ ABI_DEALLOCATE(calc_twdij)
+ 
  call timab(1009,2,tsec)
  call timab(1001,2,tsec)
 

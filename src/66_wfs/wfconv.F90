@@ -150,7 +150,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  use m_profiling_abi
  use m_xmpi
 
- use m_fftcore,  only : kpgsph, sphere
+ use m_time,     only : timab
+ use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_cgtools,  only : cg_envlop
  use m_kg,       only : ph1d3d, getph
 
@@ -159,10 +160,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfconv'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_52_fft_mpi_noabirule
  use interfaces_66_wfs, except_this_one => wfconv
 !End of the abilint section
 

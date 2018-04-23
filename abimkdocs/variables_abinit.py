@@ -329,7 +329,7 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="AUXiliary XC functional, IXC number",
+    mnemonics="AUXiliary XC functional for hybrid functional, IXC number",
     text="""
 Specification of an auxiliary exchange-correlation functional, thanks to its
 [[ixc]] value, to possibly replace the heavy evaluation of an hybrid
@@ -349,7 +349,7 @@ Variable(
     topics=['Hybrids_useful'],
     dimensions="scalar",
     defaultval=1.0,
-    mnemonics="FOCK AUXiliary xc functional - SCALing factor",
+    mnemonics="AUXiliary xc functional for hybrid functional- SCALing factor",
     text="""
 Possible scaling factor for the auxiliary exchange-correlation functional
 defined by [[auxc_ixc]] that has the goal to replace the Fock operator or
@@ -5916,8 +5916,6 @@ Mixing coefficient for the unscreened Fock operator in case of hybrid
 functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25.
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
-
-If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
 """,
 ),
 
@@ -5937,8 +5935,6 @@ functionals. HSE has 0.25, B3LYP has 0.2.
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune
 this mixing coefficient.
-
-If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
 """,
 ),
 
@@ -5964,8 +5960,6 @@ definitions from other codes. Usually, [[hyb_range_dft]] is the same as
 [[hyb_range_fock]], see the latter for the different values. However, there is
 a noticeable exception, the HSE03 from the original paper (not the HSE03 from VASP),
 for which [[hyb_range_dft]]=0.188988 while [[hyb_range_fock]]=0.106066.
-
-If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
 """,
 ),
 
@@ -5993,8 +5987,6 @@ The HSE06 value from LibCX is 0.11, the one of Espresso is 0.106, the one of
 VASP is 0.105835 (=0.2 Angstrom$^-1$).
 The HSE03 value from LibCX is 0.106066 (=0.15/sqrt(2)), the one of VASP is
 0.1587531 (=0.3 Angstrom$^-1$).
-
-If [[gwcalctyp]]==5, 15 or 25, [[auxc_ixc]] refers to [[ixc_sigma]] instead of [[ixc]].
 """,
 ),
 
@@ -7631,10 +7623,10 @@ Variable(
     abivarname="ixcrot",
     varset="dfpt",
     vartype="integer",
-    topics=['DFPT_internal', 'xc_expert', 'DFPT_internal'],
+    topics=['DFPT_expert', 'xc_expert'],
     dimensions="scalar",
     defaultval=3,
-    mnemonics="Index of the XC ROTation method used to calculate first-order exchange-correltation potential in non-collinear DFPT calculations",
+    mnemonics="Index of the XC ROTation method used to calculate first-order exchange-correlation potential in non-collinear DFPT calculations",
     characteristics=['[[DEVELOP]]'],
     text="""
 Method of calculation of the 1st order XC potential in non-collinear DFPT
@@ -13428,6 +13420,21 @@ Variable(
 ),
 
 Variable(
+    abivarname="prtfull1wf",
+    varset="dfpt",
+    vartype="integer",
+    topics=['DFPT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT FULL 1st-order WaveFunction",
+    text="""
+If set to 1, the output _1WF files will contain the full 1st-order wavefunctions, for both valence and conduction bands.
+Otherwise, the _1WF files are not really 1st-order perturbed wavefunctions, but mereley a set of perturbed wavefunctions that yield the correct perturbed density.
+This is used when one expect to perform post-processing of the 1st-order wavefunctions.
+""",
+),
+
+Variable(
     abivarname="prtfsurf",
     varset="files",
     vartype="integer",
@@ -16197,12 +16204,14 @@ Variable(
     defaultval=0,
     mnemonics="TIMe 1st order REVersal",
     characteristics=['[[DEVELOP]]'],
-    commentdims="possible values are 0 and 1",
     text="""
+Allowed values are 0 or 1.
+
 If tim1rev is equal to 1, the Sternheimer equation is solved simultaneously at
 +q and -q perturbation wavevectors. The first order potential at -q is taken
 to be equal to the Hermitian conjugate of the first order potential at +q.
-Relevant in the case of magnetic field perturbation.
+The wavefunctions from both +q and -q are then combined to generate the first order density.
+Relevant in the case of magnetic field perturbation (but will be relevant also in case of non-zero frequency DFPT, when implemented).
 """,
 ),
 

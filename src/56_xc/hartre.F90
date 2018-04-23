@@ -62,6 +62,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  use m_errors
  use m_profiling_abi
 
+ use m_time,     only : timab
  use m_geometry, only : metric
  use m_mpinfo,   only : ptabs_fourdp
  use m_fft,      only : zerosym
@@ -70,7 +71,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartre'
- use interfaces_18_timing
  use interfaces_53_ffts
 !End of the abilint section
 

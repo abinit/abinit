@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.9.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Sep 2017.
-- ( at 16h33 )
+.Starting date : Fri 13 Apr 2018.
+- ( at 10h13 )
   
 - input  file    -> t88.in
 - output file    -> t88.out
@@ -355,6 +355,13 @@ Values initialized with zeros
 -                                 =     0.6320300909E+01 (THz)
 -Debye temperature from partial sums:     0.3033262436E+03 (K)
 
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS1_PHDOS
 
  Will write phonon FREQS in BoltzTrap format to file t88o_DS1_BTRAP
@@ -434,9 +441,9 @@ All the independent perturbations are available
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        0.000000E+00    4.231499E-20    0.000000E+00
-    2        0.000000E+00    4.231499E-20    0.000000E+00
-    3        0.000000E+00    4.231499E-20    0.000000E+00
+    1        0.000000E+00    0.000000E+00    0.000000E+00
+    2        0.000000E+00    0.000000E+00    0.000000E+00
+    3        0.000000E+00    0.000000E+00    0.000000E+00
 
  q-point =    2.500000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -587,6 +594,13 @@ Values initialized with zeros
 -                                 =     0.6320300909E+01 (THz)
 -Debye temperature from partial sums:     0.3033262436E+03 (K)
 
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -645,9 +659,9 @@ All the independent perturbations are available
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        0.000000E+00    6.481592E-20    0.000000E+00
-    2        0.000000E+00    6.481592E-20    0.000000E+00
-    3        0.000000E+00    6.481592E-20    0.000000E+00
+    1        0.000000E+00    0.000000E+00    0.000000E+00
+    2        0.000000E+00    0.000000E+00    0.000000E+00
+    3        0.000000E+00    0.000000E+00    0.000000E+00
 
  q-point =    2.500000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -798,6 +812,13 @@ Values initialized with zeros
 -                                 =     0.6320300909E+01 (THz)
 -Debye temperature from partial sums:     0.3033262436E+03 (K)
 
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =           2.5473 [km/s]
+
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
+-Debye temperature from partial sums:     0.3033262436E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS3_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -856,9 +877,9 @@ All the independent perturbations are available
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        0.000000E+00    4.231499E-20    0.000000E+00
-    2        0.000000E+00    4.231499E-20    0.000000E+00
-    3        0.000000E+00    4.231499E-20    0.000000E+00
+    1        0.000000E+00    0.000000E+00    0.000000E+00
+    2        0.000000E+00    0.000000E+00    0.000000E+00
+    3        0.000000E+00    0.000000E+00    0.000000E+00
 
  q-point =    1.250000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1277,10 +1298,10 @@ P           mkmem          29
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=         32.8  wall=         32.9
+- Proc.   0 individual time (sec): cpu=         27.5  wall=         27.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.8  wall=         32.9
+.Delivered   2 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         27.5  wall=         27.6

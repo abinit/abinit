@@ -2,6 +2,7 @@
 description: How to set parameters for a PAW calculation
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters for a PAW calculation with the ABINIT package.
 

@@ -32,6 +32,7 @@ module m_polynomial_coeff
  use m_sort,only : sort_dp
  use m_crystal,only : crystal_t,symbols_crystal
  use m_supercell, only: getPBCIndexes_supercell,distance_supercell,findBound_supercell
+ use m_geometry, only: xcart2xred,metric
  use m_xmpi
 #ifdef HAVE_MPI2
  use mpi
@@ -1339,13 +1340,13 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  integer :: ncoeff,ncoeff2,ncoeff_max,nu
  integer :: nsym,shift_atm1(3)
  integer :: shift_atm2(3)
- real(dp):: tolsym8
+ real(dp):: dist_orig,dist_sym,tolsym8
  logical :: found,check_pbc,possible
 !arrays
- integer :: sym(3,3),sc_size_in(3)
+ integer :: isym_rec(3,3),isym_rel(3,3),sc_size_in(3)
  integer :: transl(3),min_range(3),max_range(3)
  integer,allocatable :: blkval(:,:,:,:,:),list(:),list_symcoeff_tmp(:,:,:),list_symcoeff_tmp2(:,:,:)
- integer,allocatable :: list_symstr_tmp(:,:,:),indsym(:,:,:) ,symrec(:,:,:)
+ integer,allocatable :: list_symstr_tmp(:,:,:),indsym(:,:,:) ,symrec(:,:,:),symrel(:,:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: wkdist(:),xcart(:,:),xred(:,:),distance(:,:,:)
  real(dp) :: difmin(3)
@@ -1389,11 +1390,13 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 !Obtain a list of rotated atom labels:
  ABI_ALLOCATE(indsym,(4,nsym,natom))
  ABI_ALLOCATE(symrec,(3,3,nsym))
+ ABI_ALLOCATE(symrel,(3,3,nsym))
  ABI_ALLOCATE(tnons,(3,nsym))
  symrec = crystal%symrec
+ symrel = crystal%symrel
  tnons  = crystal%tnons
 
- tolsym8=tol8
+ tolsym8=tol20
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,crystal%typat,crystal%xred)
  ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
@@ -1421,14 +1424,14 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
    end if
    do isym=1,nsym
 !    Get the symmetry matrix
-     sym(:,:) = crystal%symrel(:,:,isym)
+     isym_rel(:,:) = crystal%symrel(:,:,isym)
      do idisy1=1,3
        do idisy2=1,3
-         if((sym(mu,idisy1)/=0.and.sym(nu,idisy2)/=0)) then
+         if((isym_rel(mu,idisy1)/=0.and.isym_rel(nu,idisy2)/=0)) then
 !          Transform to the voig notation
            if(idisy1==idisy2)then
              list_symstr_tmp(ia,isym,1) = idisy1
-             list_symstr_tmp(ia,isym,2) = sym(mu,idisy1)
+             list_symstr_tmp(ia,isym,2) = isym_rel(mu,idisy1)
            else
              if(idisy1==1.or.idisy2==1)then
                if(idisy1==2.or.idisy2==2)then
@@ -1441,7 +1444,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
                list_symstr_tmp(ia,isym,1) = 4
              end if
            end if           
-           list_symstr_tmp(ia,isym,2) = sym(mu,idisy1) * sym(nu,idisy2)
+           list_symstr_tmp(ia,isym,2) = isym_rel(mu,idisy1) * isym_rel(nu,idisy2)
          end if
        end do
      end do
@@ -1515,7 +1518,8 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
        possible = .false.
        end if
      end do
-!      If this distance is superior to the cutoff, we don't compute that term
+
+!    If this distance is superior to the cutoff, we don't compute that term
      if(.not.possible)then
        blkval(:,ia,:,ib,irpt)= 0
        if(irpt==irpt_ref)blkval(:,ib,:,ia,irpt)= 0
@@ -1523,8 +1527,12 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
        cycle
      end if
 
-     
+!    If this coefficient is not possible, we cycle...
      if (all(blkval(:,ia,:,ib,irpt)==0)) cycle
+
+!    Save the distance between the two atoms for futur checks
+     dist_orig = (dist(1,ia,ib,irpt)**2+dist(2,ia,ib,irpt)**2+dist(3,ia,ib,irpt)**2)**0.5
+     
      do mu=1,3
        do nu=1,3
 !      Check if : - The coefficient is not yet compute
@@ -1544,17 +1552,19 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
          if(blkval(mu,ia,nu,ib,irpt)==1)then
 !          Loop over symmetries 
            do isym=1,nsym
-!            Get the symmetry matrix 
-             sym(:,:) = crystal%symrel(:,:,isym)
+!            Get the symmetry matrix for this sym
+             isym_rec(:,:)  = crystal%symrec(:,:,isym)
+             isym_rel(:,:) = crystal%symrel(:,:,isym)
 !            Get the corresponding atom and shift with the symetries 
 !            For atom 1
              ipesy1 = indsym(4,isym,ia)
              shift_atm1 = indsym(1:3,isym,ia)
 !            And atom 2
              do jj=1,3 ! Apply transformation to original coordinates.
-               tratom(jj) = dble(sym(1,jj))*(xred(1,ib)+cell(1,irpt)-tnons(1,isym))&
-&                          +dble(sym(2,jj))*(xred(2,ib)+cell(2,irpt)-tnons(2,isym))&
-&                          +dble(sym(3,jj))*(xred(3,ib)+cell(3,irpt)-tnons(3,isym))
+              tratom(jj) = dble(isym_rec(1,jj))*(xred(1,ib)+cell(1,irpt)-tnons(1,isym))&
+&                         +dble(isym_rec(2,jj))*(xred(2,ib)+cell(2,irpt)-tnons(2,isym))&
+&                         +dble(isym_rec(3,jj))*(xred(3,ib)+cell(3,irpt)-tnons(3,isym))
+
              end do
 
 !            Find symmetrically equivalent atom
@@ -1563,7 +1573,6 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 
 !            Put information into array indsym: translations and label
              shift_atm2(:)= transl(:) - shift_atm1(:)
-             
              found = .false.
              do irpt3=1,nrpt
                if(cell(1,irpt3)==shift_atm2(1).and.&
@@ -1573,6 +1582,19 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
                  irpt_sym = irpt3
                end if
              end do
+             
+!            Check the distance
+             dist_sym = (dist(1,ipesy1,ipesy2,irpt_sym)**2+&
+&                        dist(2,ipesy1,ipesy2,irpt_sym)**2+&
+&                        dist(3,ipesy1,ipesy2,irpt_sym)**2)**0.5
+             if(abs(dist_orig - dist_sym) > tol10)then
+               write(message, '(a,i0,2a,I0,a,es15.8,2a,es15.8,2a)' )&
+&                'The distance between the atoms for the coefficient number ',icoeff,ch10,&
+&                'with the symmetry ',isym,' is ',dist_sym,ch10,'but the original distance is',&
+&                   dist_orig,ch10,&
+&                'Action: Contact abinit group'
+               MSG_BUG(message)
+             end if
 !            Now that a symmetric perturbation has been obtained,
 !            including the expression of the symmetry matrix, see
 !            if the symmetric perturbations are available
@@ -1585,7 +1607,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
                    blkval(idisy2,ipesy1,idisy1,ipesy2,irpt_sym) = 0
                    cycle
                  else
-                   if(sym(mu,idisy1)/=0.and.sym(nu,idisy2)/=0)then
+                   if(isym_rel(mu,idisy1)/=0.and.isym_rel(nu,idisy2)/=0)then
                      if(.not.found.or.(irpt_sym==irpt_ref.and.ipesy1==ipesy2)) then
 !                      Remove this term (is not computed) Sr-Sr or not include in the cell
 !                      Also remove oposite term... (Srx-Tix) = (Ti-Srx)
@@ -1593,9 +1615,17 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
                        blkval(idisy2,ipesy2,idisy1,ipesy1,irpt_sym) = 0
                        cycle
                      else
-!                      Fill the list with the coeff and symetric (need all symetrics)
+!                      Fill the list with the coeff and symmetric (need all symmetrics)
                        list_symcoeff_tmp(1:4,icoeff,isym)=(/idisy1,ipesy1,ipesy2,irpt_sym/)
-                       list_symcoeff_tmp(5,icoeff,isym)= sym(mu,idisy1)
+!                      Check the sign
+                       if(isym_rel(mu,idisy1)/=isym_rel(nu,idisy2))then
+                         write(message, '(a,i0,a,I0,4a)' )&
+&                        'The sign of coefficient number ',icoeff,' with the symmetry ',isym,ch10,&
+&                        'can not be found... Something is going wrong',ch10,&
+&                        'Action: Contact abinit group'
+                         MSG_BUG(message)                         
+                       end if
+                       list_symcoeff_tmp(5,icoeff,isym)= isym_rel(nu,idisy2)
                      end if
                    end if
                  end if
@@ -1812,6 +1842,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  ABI_DEALLOCATE(list_symstr_tmp)
  ABI_DEALLOCATE(indsym) 
  ABI_DEALLOCATE(symrec)
+ ABI_DEALLOCATE(symrel)
  ABI_DEALLOCATE(tnons)
  ABI_DEALLOCATE(xcart)
  ABI_DEALLOCATE(xred )
@@ -1896,6 +1927,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer :: master,my_rank,my_ncoeff,my_newncoeff,natom,ncombinaison,ncoeff_max,ncoeff_sym
  integer :: ncoeff_alone,ndisp_max,nproc,nrpt,nsym,nterm,nstr_sym,r1,r2,r3,my_size
  integer :: my_icoeff,rank_to_send,rank_to_receive,rank_to_send_save
+ real(dp):: norm
  logical :: iam_master,need_anharmstr,need_spcoupling,need_distributed,need_verbose
  logical :: need_only_odd_power,need_only_even_power
 !arrays
@@ -1967,10 +1999,15 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  xcart(:,:) = crystal%xcart(:,:)
  xred(:,:)  = crystal%xred(:,:)
 
- ncell =  (/int(anint(cutoff/rprimd(1,1))+1),&
-&          int(anint(cutoff/rprimd(2,2))+1),&
-&          int(anint(cutoff/rprimd(3,3))+1)/)
+!Compute the max range of the ifc with respect to the trainning set
+ range_ifc(:) = zero
+ do ii=1,3
+   norm = sqrt(rprimd(ii,1)**2+ rprimd(ii,2)**2+rprimd(ii,3)**2)
+   range_ifc(ii) = range_ifc(ii) + norm * sc_size(ii) / 2.0
+ end do
 
+!compute new ncell
+ ncell = sc_size
  lim1=((ncell(1)/2)) + 1
  lim2=((ncell(2)/2)) + 1
  lim3=((ncell(3)/2)) + 1 
@@ -1979,13 +2016,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  if(mod(ncell(3),2)/=0) lim3=lim3+1
  nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
 
-!Compute the max range of the ifc with respect to the trainning set
- range_ifc(:) = zero
- do ii=1,3
-   range_ifc(ii) = range_ifc(ii) + rprimd(ii,ii) * sc_size(ii) / 2.0
- end do
-
-!compute new ncell
  ncell(1) = 2*lim1+1
  ncell(2) = 2*lim2+1
  ncell(3) = 2*lim3+1

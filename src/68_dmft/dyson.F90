@@ -51,6 +51,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  use m_profiling_abi
  use m_errors
 
+ use m_time,         only : timab
  use m_paw_dmft, only: paw_dmft_type
  use m_crystal, only : crystal_t
  use m_green, only : green_type, destroy_green,init_green,copy_green
@@ -63,7 +64,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 #undef ABI_FUNC
 #define ABI_FUNC 'dyson'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
