@@ -182,7 +182,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: dksqmax
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
- real(dp),pointer :: energies_dense(:,:,:), displ_cart(:,:,:,:), kq_kpts(:,:) 
+ real(dp),pointer :: energies_dense(:,:,:), displ_cart(:,:,:,:), kq_kpts(:,:)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -621,7 +621,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
      (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
 
-   wfk_fname_dense = dtfil%fnameabi_wfkfine
+   wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
    call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense),"COLL")
 
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
@@ -644,12 +644,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                   hdr_wfk_dense%kptrlatt(3,3)]
    interp_kmult = nkpt_dense/nkpt_coarse
    use_dg = .true.
- end if
 
  !read bs_interpmult
- if (dtset%bs_interp_kmult(1) /= 0 .or.&
-     dtset%bs_interp_kmult(2) /= 0 .or.&
-     dtset%bs_interp_kmult(3) /= 0 ) then
+ else if (dtset%bs_interp_kmult(1) /= 0 .or.&
+          dtset%bs_interp_kmult(2) /= 0 .or.&
+          dtset%bs_interp_kmult(3) /= 0 ) then
 
    call wrtout(std_out,"EPH Interpolation: will use star functions interpolation","COLL")
 
@@ -666,11 +665,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    intp_kptrlatt = reshape([nkpt_dense(1), 0, 0, 0, nkpt_dense(2), 0, 0, 0, nkpt_dense(3)], [3, 3])
    intp_shiftk = zero
    intp_nshiftk = 1
-   write(*,*) band_block
-   write(*,*) wfk0_hdr%kptrlatt
-   write(*,*) intp_kptrlatt
-   write(*,*) intp_nshiftk
-   write(*,*) intp_shiftk
    ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt,&
                                       intp_nshiftk, intp_shiftk, band_block, comm)
    eph_dg%ebands_dense = ebands_dense
@@ -680,16 +674,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (use_dg) then
  !2.
 
-   write(*,*) 'start dg calculation'
-
-
    !debug
-   write(*,*) 'dense ngkpt:',ebands_dense%nkpt
-   write(*,*) 'dense mband:',ebands_dense%mband
-   write(*,*) 'dense kpoints:'
-   do ii=1,ebands_dense%nkpt
-     write(*,*) ebands_dense%kptns(:,ii)
-   enddo
+   write(std_out,*) 'dense ngkpt:',ebands_dense%nkpt
+   write(std_out,*) 'dense mband:',ebands_dense%mband
    !end debug
 
    eph_dg%dense_nbz = nkpt_dense(1)*nkpt_dense(2)*nkpt_dense(3)
@@ -700,29 +687,29 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    
    eph_dg%ndiv = interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
    if (dtset%bs_interp_mode == 1) then
-       write(*,*) 'interpolation mode: centered', eph_dg%ndiv
+       write(std_out,*) 'interpolation mode: centered', eph_dg%ndiv
    else
-       write(*,*) 'interpolation mode: simple', eph_dg%ndiv
+       write(std_out,*) 'interpolation mode: simple', eph_dg%ndiv
    endif
 
-   write(*,*) 'coarse:      ', nkpt_coarse
-   write(*,*) 'dense:       ', nkpt_dense
-   write(*,*) 'interp_kmult:', interp_kmult
+   write(std_out,*) 'coarse:      ', nkpt_coarse
+   write(std_out,*) 'dense:       ', nkpt_dense
+   write(std_out,*) 'interp_kmult:', interp_kmult
 
-   allocate(eph_dg%kpts_coarse(3,eph_dg%coarse_nbz))
-   allocate(eph_dg%kpts_dense(3,eph_dg%dense_nbz))
-   allocate(eph_dg%dense_to_coarse(eph_dg%dense_nbz))
-   allocate(eph_dg%coarse_to_dense(eph_dg%coarse_nbz,eph_dg%ndiv))
+   ABI_MALLOC(eph_dg%kpts_coarse,(3,eph_dg%coarse_nbz))
+   ABI_MALLOC(eph_dg%kpts_dense,(3,eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%dense_to_coarse,(eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%coarse_to_dense,(eph_dg%coarse_nbz,eph_dg%ndiv))
 
-   allocate(eph_dg%dense_to_indexes(3,eph_dg%dense_nbz))
-   allocate(eph_dg%indexes_to_dense(nkpt_dense(1),nkpt_dense(2),nkpt_dense(3)))
+   ABI_MALLOC(eph_dg%dense_to_indexes,(3,eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%indexes_to_dense,(nkpt_dense(1),nkpt_dense(2),nkpt_dense(3)))
 
-   allocate(eph_dg%coarse_to_indexes(3,eph_dg%dense_nbz))
-   allocate(eph_dg%indexes_to_coarse(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
+   ABI_MALLOC(eph_dg%coarse_to_indexes,(3,eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
 
-   allocate(eph_dg%scatter_dense(eph_dg%dense_nbz,eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%scatter_dense,(eph_dg%dense_nbz,eph_dg%dense_nbz))
 
-   write(*,*) 'create dense to coarse mapping'
+   write(std_out,*) 'create dense to coarse mapping'
    ! generate mapping of points in dense bz to the dense bz
    ! coarse loop
    i_dense = 0
@@ -777,20 +764,21 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    
    ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete') 
 
-   write(*,*) 'calculate scatering'
-   !from any two k and k' find q such that k - k' = q (in bz)
-   do ii=1,eph_dg%dense_nbz
-     do jj=1,eph_dg%dense_nbz
+ !5.
+   write(std_out,*) 'calculate scatering'
+   !from any two k and k' find q such that k - k' = q (in bz) k -> k'+q
+   do ii=1,eph_dg%dense_nbz !k'
+     do jj=1,eph_dg%dense_nbz !k
        !calculate indexes of k and k'
-       indexes_jk = eph_dg%dense_to_indexes(:,jj)
-       indexes_ik = eph_dg%dense_to_indexes(:,ii)
+       indexes_jk = eph_dg%dense_to_indexes(:,jj) !k
+       indexes_ik = eph_dg%dense_to_indexes(:,ii) !k'
        !calcualte indexes of q 
-       indexes_qq = indexes_jk - indexes_ik
+       indexes_qq = indexes_jk - indexes_ik !q = k - k'
        !bring to first bz
        indexes_qq(1) = mod(indexes_qq(1)+nkpt_dense(1),nkpt_dense(1))+1
        indexes_qq(2) = mod(indexes_qq(2)+nkpt_dense(2),nkpt_dense(2))+1
        indexes_qq(3) = mod(indexes_qq(3)+nkpt_dense(3),nkpt_dense(3))+1
-       !calculate index of q
+       !calculate given two indexes of k and k' give index of q such that k -> k'+q
        eph_dg%scatter_dense(jj,ii) = eph_dg%indexes_to_dense(indexes_qq(1),&
                                                              indexes_qq(2),&
                                                              indexes_qq(3))
@@ -798,52 +786,83 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    enddo
 
  !3.
-   write(*,*) 'calculate phonon frequencies'
+   eph_dg%kpts_dense_ibz = ebands_dense%kptns
+   eph_dg%dense_nibz = ebands_dense%nkpt
+   write(std_out,*) 'calculate phonon frequencies'
    !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
-   allocate(eph_dg%phfrq_dense(3*cryst%natom,ebands_dense%nkpt))
-   allocate(displ_cart(2,3,cryst%natom,3*cryst%natom))
-   do ii=1,ebands_dense%nkpt
-     qpt = ebands_dense%kptns(:,ii)
-     write(*,*) qpt
+   ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
+
+#if 0
+   !ibz version (HM: I noticed that the fourier interpolation sometimes breaks the symmetries)
+   ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nibz))
+   do ii=1,eph_dg%dense_nibz
+     qpt = eph_dg%kpts_dense_ibz(:,ii)
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
      call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
-   enddo   
-   deallocate(displ_cart)
+   enddo
+#else
+   !bz version
+   ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nbz))
+   do ii=1,eph_dg%dense_nbz
+     qpt = eph_dg%kpts_dense(:,ii)
+     ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+     call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
+   enddo
+#endif
+   ABI_FREE(displ_cart)
+
  
  !4. 
    !create bz2ibz dense
-   write(*,*) 'map bz2ibz'
-   allocate(eph_dg%bz2ibz_dense(eph_dg%dense_nbz))
-   allocate(indqq(eph_dg%dense_nbz,6))
-   call listkk(dksqmax,cryst%gmet,          indqq,&
-               ebands_dense%kptns, eph_dg%kpts_dense,&
-               ebands_dense%nkpt,  eph_dg%dense_nbz,&
+   ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
+   ABI_MALLOC(indqq,(eph_dg%dense_nbz,6))
+   call listkk(dksqmax,cryst%gmet,    indqq,&
+               eph_dg%kpts_dense_ibz, eph_dg%kpts_dense,&
+               eph_dg%dense_nibz,     eph_dg%dense_nbz, &
                cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
    ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
    eph_dg%bz2ibz_dense(:) = indqq(:,1)
 
+#if 0
    !debug
+   open (unit = 2, file = "ibz.dat")
+   do ii=1,eph_dg%dense_nibz
+     write(2,*) eph_dg%kpts_dense_ibz(:,ii)
+   end do
+
+   open (unit = 2, file = "bz.dat")
+   do ii=1,eph_dg%dense_nbz
+     write(2,*) eph_dg%kpts_dense(:,ii), eph_dg%bz2ibz_dense(ii)
+   end do
+
+   ABI_MALLOC(phfreq_bz,(cryst%natom*3))
+   ABI_MALLOC(phfreq_ibz,(cryst%natom*3))
+   open (unit = 2, file = "phbz.dat")
+   open (unit = 3, file = "phibz.dat")
+   do ii=1,eph_dg%dense_nbz
+     call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,ii), phfreq_bz, displ_cart )
+     call ifc_fourq(ifc, cryst, eph_dg%kpts_dense_ibz(:,eph_dg%bz2ibz_dense(ii)), phfreq_ibz, displ_cart )
+     write(2,*) phfreq_bz
+     write(3,*) phfreq_ibz 
+   end do
+
    open (unit = 2, file = "coarse2dense.dat")
-   !write(*,*) 'indices coarse->dense'
    do ii=1,eph_dg%coarse_nbz
      write(2,*)
      write(2,*)
      write(2,*) eph_dg%kpts_coarse(:,ii)
      do jj=1,eph_dg%ndiv
        i_dense = eph_dg%coarse_to_dense(ii,jj)
-       !write(*,*) ii, i_dense, eph_dg%bz2ibz_dense(i_dense)
        write(2,*) eph_dg%kpts_dense(:,i_dense)
      end do
    end do
 
    open (unit = 2, file = "dense2coarse.dat")
-   !write(*,*) 'indices dense->coarse'
    do ii=1,eph_dg%dense_nbz
      write(2,*)
      write(2,*)
      write(2,*) eph_dg%kpts_dense(:,ii)
      i_coarse = eph_dg%dense_to_coarse(ii)
-     !write(*,*) ii, i_coarse, eph_dg%bz2ibz_dense(i_coarse)
      write(2,*) eph_dg%kpts_coarse(:,i_coarse)
    end do
 
@@ -859,8 +878,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end do
    close(2)
    !end debug
+#endif
 
- !5.
 
  !6. we will call sigmaph here for testing purposes only
    if (dtset%eph_task == 4) then
@@ -868,17 +887,17 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_dg)
    endif
 
-   deallocate(eph_dg%phfrq_dense)
-   deallocate(eph_dg%scatter_dense)
-   deallocate(eph_dg%bz2ibz_dense)
-   deallocate(eph_dg%kpts_coarse)
-   deallocate(eph_dg%kpts_dense)
-   deallocate(eph_dg%dense_to_coarse)
-   deallocate(eph_dg%coarse_to_dense)
-   deallocate(eph_dg%dense_to_indexes)
-   deallocate(eph_dg%indexes_to_dense)
-   deallocate(eph_dg%coarse_to_indexes)
-   deallocate(eph_dg%indexes_to_coarse)
+   ABI_FREE(eph_dg%phfrq_dense)
+   ABI_FREE(eph_dg%scatter_dense)
+   ABI_FREE(eph_dg%bz2ibz_dense)
+   ABI_FREE(eph_dg%kpts_coarse)
+   ABI_FREE(eph_dg%kpts_dense)
+   ABI_FREE(eph_dg%dense_to_coarse)
+   ABI_FREE(eph_dg%coarse_to_dense)
+   ABI_FREE(eph_dg%dense_to_indexes)
+   ABI_FREE(eph_dg%indexes_to_dense)
+   ABI_FREE(eph_dg%coarse_to_indexes)
+   ABI_FREE(eph_dg%indexes_to_coarse)
 
  end if
 

@@ -83,7 +83,8 @@ module m_sigmaph
 
    real(dp),allocatable :: kpts_coarse(:,:)
    real(dp),allocatable :: kpts_dense(:,:)
-   integer :: coarse_nbz, dense_nbz
+   real(dp),allocatable :: kpts_dense_ibz(:,:)
+   integer :: coarse_nbz, dense_nbz, dense_nibz
 
    integer,allocatable  :: bz2ibz_coarse(:)
    ! map full Brillouin zone to ibz (in the coarse grid)
@@ -457,7 +458,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
- integer :: ik_bz, ikq_bz, iq_bz
+ integer :: ik_bz, ikq_bz, iq_bz, ndiv_count
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
@@ -984,40 +985,47 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                            mod(nint((qpt(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
 
                   cfact = 0
-
                   !fine grid around k
                   !do ii=1,eph_double_grid%ndiv
 
                     !get eig0nk for this fine k point
-                    !ik_bz_fine = eph_double_grid%coarse_to_dense(ik_bz,ii)
+                  ik_bz_fine = eph_double_grid%coarse_to_dense(ik_bz,1)
                     !ik_ibz_fine = eph_double_grid%bz2ibz_dense(ik_bz_fine)
 
                     !eig0nk = ebands_dense%eig(band,ik_ibz_fine,spin)
 
-                  !fine grid around k+q
+                  !fine grid around kq
+                  ndiv_count = 0
                   do jj=1,eph_double_grid%ndiv
                  
                     !get eig0mkq and wqnu for this fine grid k+q
                     ikq_bz_fine = eph_double_grid%coarse_to_dense(ikq_bz,jj)
                     ikq_ibz_fine = eph_double_grid%bz2ibz_dense(ikq_bz_fine)
-                 
+               
                     eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
                     !f_mkq = ebands_dense%occ(ibsum_kq,ikq_ibz_fine,spin)
-                 
-                    iq_bz_fine = eph_double_grid%scatter_dense(ik_bz,ikq_bz_fine)
+                
+                    !get wqnu for q such that k->k'+q 
+                    iq_bz_fine  = eph_double_grid%scatter_dense(ik_bz_fine,ikq_bz_fine)
+
+#if 0
+                    !ibz version
                     iq_ibz_fine = eph_double_grid%bz2ibz_dense(iq_bz_fine)
-                 
                     wqnu = eph_double_grid%phfrq_dense(nu,iq_ibz_fine)
-                 
-                    !calculate nqnu, f_mkq
+#else
+                    !bz version
+                    wqnu = eph_double_grid%phfrq_dense(nu,iq_bz_fine)
+#endif
+                    if (wqnu < tol6) cycle
+                    ndiv_count = ndiv_count + 1
                     nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
-                 
+                
                     cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
                              (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta) + cfact
                  
                   enddo
                   !enddo
-                  cfact = cfact / eph_double_grid%ndiv !**2
+                  cfact = cfact / ndiv_count 
                else
                   cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)
