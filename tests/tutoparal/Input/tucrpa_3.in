@@ -148,5 +148,5 @@ dmftbandf?2 25       # Precise the definition of Wannier functions (also used fo
 #%% [extra_info]
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon
-#%% description = For SrVO3, compute U
+#%% description = For SrVO3, compute U, convergence study on ecuteps
 #%%<END TEST_INFO>

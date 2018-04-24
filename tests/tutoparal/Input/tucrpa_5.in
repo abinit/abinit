@@ -150,5 +150,5 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 #%% [extra_info]
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon
-#%% description = For SrVO3, compute U
+#%% description = For SrVO3, compute U as a function of frequency.
 #%%<END TEST_INFO>

@@ -174,7 +174,7 @@ interactions is carried out, the choice of models is discussed in [[cite:Amadon2
 
 In this section, we will present the input variables and discuss how to
 extract useful information in the log file in the case of the _d-d_ model. The
-input file for a typical cRPA calculation (tucrpa_1.in) contains four datasets
+input file for a typical cRPA calculation (tucrpa_2.in) contains four datasets
 (as usual GW calculations, see the [GW tutorial](gw1.md#1a)): the
 first one is a well converged LDA calculation, the second is non self-consistent calculation
 to compute accurately full and empty states, the third
@@ -498,11 +498,11 @@ The table below gives for each model, the values of [[dmftbandi]],
 of bare and effective interactions.
     
           model      ucrpa dmftbandi/dmftbandf ucrpa_bands |  _U_ bare    _U_ bare diag   _J_ bare |   _U_      _U_ diag     _J_
-     _d - d_   1        21/25            21 25     |  15.4      16.3      0.66  |  2.8     3.5     0.60
-     _t2g-t2g_   1        21/25            21 25     |  15.3      16.0      0.54  |  2.8     3.4     0.47
-     _dp-dp_   1        12/25            12 25     |  19.4      20.6      0.96  | 10.8    12.0     0.91
-     _d -dp (a)_   1        12/25            21 25     |  19.4      20.6      0.96  |  3.4     4.4     0.87
-     _d -dp (b)_   2        12/25            12 25     |  19.4      20.6      0.96  |  1.6     2.6     0.86
+     _d - d_          1        21/25            21 25      |   15.4       16.3             0.66    |  2.8         3.5        0.60
+     _t2g-t2g_        1        21/25            21 25      |   15.3       16.0             0.54    |  2.8         3.4        0.47
+     _dp-dp_          1        12/25            12 25      |   19.4       20.6             0.96    | 10.8        12.0        0.91
+     _d -dp (a)_      1        12/25            21 25      |   19.4       20.6             0.96    |  3.4         4.4        0.87
+     _d -dp (b)_      2        12/25            12 25      |   19.4       20.6             0.96    |  1.6         2.6        0.86
     
 
 Even if our calculation is not perfectly converged with respect to k-points,
