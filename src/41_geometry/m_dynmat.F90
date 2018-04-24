@@ -3798,6 +3798,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wght9'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3815,6 +3816,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !scalars
  integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,new_wght,nptws,nreq
  integer :: idir
+ real(dp), parameter :: tolsym=tol8
  real(dp) :: factor,sumwght,normsq,proj
  character(len=500) :: message
 !arrays
@@ -4003,10 +4005,10 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
              ! if rdiff closer to ptws than the origin the weight is zero
              ! if rdiff close to the origin with respect to all the other ptws the weight is 1
              ! if rdiff is equidistant from the origin and N other ptws the weight is 1/(N+1)
-             if (proj-ptws(4,ii)>tol6) then
+             if (proj-ptws(4,ii)>tolsym) then
                nreq = 0
                EXIT
-             else if(abs(proj-ptws(4,ii))<=tol6) then
+             else if(abs(proj-ptws(4,ii))<=tolsym) then
                nreq=nreq+1
              end if
            end do
@@ -4172,13 +4174,19 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !      write(std_out,'(3es16.6,es18.6)' )&
 !      &    rpt(1,irpt),rpt(2,irpt),rpt(3,irpt),wghatm(ia,ib,irpt)
      end do
-     if (abs(sumwght-nqpt)>1.0d-10) then
-       write(message, '(a,a,a,2i4,a,a,es14.4,a,a,i4,a,a,a,a,a,a)' )&
+     if (abs(sumwght-nqpt)>tol10) then
+       write(message, '(a,a,a,2i4,a,a,es14.4,a,a,i4)' )&
 &       'The sum of the weight is not equal to nqpt.',ch10,&
 &       'atoms :',ia,ib,ch10,&
 &       'The sum of the weights is : ',sumwght,ch10,&
-&       'The number of q points is : ',nqpt,ch10,&
-&       'You might increase "buffer" in bigbx9.f, and recompile.',ch10,&
+&       'The number of q points is : ',nqpt
+       call wrtout(std_out,message,'COLL')
+       write(message, '(13a)')&
+&       'This might have several sources.',ch10,&
+&       'If tolsym is larger than 1.0e-8, the atom positions might be loose',ch10,&
+&       'and the q point weights not computed properly.',ch10,&
+&       'Action: make input atomic positions more symmetric.',ch10,&
+&       'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine, and recompile.',ch10,&
 &       'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
 &       'if abs(brav)/=1, in which case you should change brav to 1.'
        MSG_BUG(message)

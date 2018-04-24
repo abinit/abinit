@@ -16502,12 +16502,15 @@ vectors, or magnetization, to be considered equivalent, thanks to symmetry
 operations. This is used in the recognition of the set of symmetries of the
 system, or the application of the symmetry operations to generate from a
 reduced set of atoms, the full set of atoms. Note that a value larger than
-0.01 is considered to be unacceptable.
+0.01 is considered to be unacceptable, whatever the value of [[tolsym]]
+(so, it is not worth to set [[tolsym]] bigger than 0.01).
+
 Note: ABINIT needs the atomic positions to be symmmetric to each others
-within 1.e-8. If [[tolsym]] is set to a larger value than 1.e-8, then the
-input atomic coordinates will be automatically symmetrized by the symmetry
-operations that will have been found.
-""",
+within 1.e-8, irrespective of [[tolsym]]. 
+So, if [[tolsym]] is set to a larger value than 1.e-8, then the
+input atomic coordinates will be nevertheless automatically symmetrized by the symmetry
+operations that will have been found. 
+""" 
 ),
 
 Variable(
