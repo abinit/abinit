@@ -51,7 +51,7 @@ module m_ephwg
  use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : dataset_type
  use m_time,            only : cwtime, sec2str
- use m_numeric_tools,   only : arth
+ use m_numeric_tools,   only : arth, inrange
  use m_special_funcs,   only : dirac_delta
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
@@ -86,11 +86,11 @@ type, public :: ephwg_t
   ! Number of independent spin polarizations.
 
   integer :: nbcount
-  ! Number of bands treated
+  ! Number of bands treated.
 
   integer :: bstart
-  ! The fist band starts at bstart. Used to select bands
-  ! aroudh the Fermi level.
+  ! The fist band (global index) starts at bstart.
+  ! Used to select bands around the Fermi level.
 
   integer :: kptopt
   ! Option for k-point generation.
@@ -118,12 +118,11 @@ type, public :: ephwg_t
   ! points in full BZ.
 
   real(dp) :: klatt(3, 3)
-  ! reciprocal of lattice vectors for full kpoint grid.
-  ! Used by init_tetra
+  ! Reciprocal of lattice vectors for full kpoint grid. Used by init_tetra
 
   integer,allocatable :: lgk2ibz(:)
   ! lgk2ibz(nq_k)
-  ! Mapping Litte-group --> initial IBZ
+  ! Mapping Little-group IBZ_k --> initial IBZ
 
   real(dp),allocatable :: phfrq_ibz(:,:)
   ! (nibz, natom3)
@@ -131,28 +130,27 @@ type, public :: ephwg_t
 
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
-  ! Electron eigenvalues in the IBZ for nbcount states (not necessarly equal to nband)
+  ! Electron eigenvalues in the IBZ for nbcount states
+  ! (not necessarly equal to global nband, see also bstart and bcount)
 
   type(crystal_t), pointer :: cryst => null()
-  ! Pointer to input structure
+  ! Pointer to input structure (does not own memory)
 
   type(lgroup_t) :: lgk
   ! Little group of the k-point
 
   type(t_tetrahedron) :: tetra_k
-  ! tetrahedron object used to evaluate delta(w - e_{k+q} - phw_q)
+  ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
 
  end type ephwg_t
 
- public :: ephwg_new             ! Constructor
+ public :: ephwg_new             ! Basic Constructor
  public :: ephwg_from_ebands     ! Build object from ebands_t
- public :: ephwg_setup_kpoint    ! Prepare tetrahedron method for k-point
- !public :: ephwg_findq_ibzk     ! Find the index of the q-point in the IBZ(k).
- public :: ephwg_get_deltas      ! Compute weights for $\delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
- public :: ephwg_get_dweights    ! Compute weights for $\delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+ public :: ephwg_setup_kpoint    ! Prepare tetrahedron method for given external k-point.
+ public :: ephwg_get_deltas      ! Compute weights for $ \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+ public :: ephwg_get_dweights    ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
  public :: ephwg_zinv_weights
  public :: ephwg_free            ! Free memory
-
  public :: ephwg_test
 
 contains
@@ -297,8 +295,8 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
    new = ephwg_new(cryst, ifc, bstart, nbcount, ebands%kptopt, ebands%kptrlatt, ebands%nshiftk, ebands%shiftk, ebands%nkpt, &
       ebands%kptns, ebands%nsppol, ebands%eig, comm)
  else
-   !ABI_CHECK(isinside(bstart, [1, ebands%mband]), "Wrong bstart")
-   !ABI_CHECK(isinside(bstart + nbcount - 1, [1, ebands%mband]), "Wrong nbcount")
+   ABI_CHECK(inrange(bstart, [1, ebands%mband]), "Wrong bstart")
+   ABI_CHECK(inrange(bstart + nbcount - 1, [1, ebands%mband]), "Wrong nbcount")
    ! Copy submatrix of eigenvalues
    ABI_MALLOC(eig_ibz, (nbcount, ebands%nkpt, ebands%nsppol))
    eig_ibz = ebands%eig(bstart:bstart+nbcount-1, : , :)
@@ -315,10 +313,10 @@ end function ephwg_from_ebands
 !! ephwg_setup_kpoint
 !!
 !! FUNCTION
-!!  Set internal tables and object required to compute the delta functions with a given k-point.
+!!  Set internal tables and object required to compute integration weights with a given k-point.
 !!
 !! INPUTS
-!!  kpoint(3): K-point in reduced coordinates.
+!!  kpoint(3): k-point in reduced coordinates.
 !!  prtvol: Verbosity level
 !!
 !! OUTPUT
@@ -398,6 +396,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
     "At least one of the points in IBZ(k) + k could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
+
  if (allocated(self%kq2ibz)) then
    ABI_FREE(self%kq2ibz)
  end if
@@ -425,62 +424,6 @@ end subroutine ephwg_setup_kpoint
 !!***
 
 !----------------------------------------------------------------------
-
-!!****f* m_dvdb/ephwg_findq_ibzk
-!! NAME
-!!  ephwg_findq_ibzk
-!!
-!! FUNCTION
-!!  Find the index of the q-point in the IBZ(k). Non zero umklapp vectors are not allowed.
-!!  Returns -1 if not found.
-!!
-!! INPUTS
-!!  qpt(3)=q-point in reduced coordinates.
-!!  [qtol]=Optional tolerance for q-point comparison.
-!!         For each reduced direction the absolute difference between the coordinates must be less that qtol
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-integer pure function ephwg_findq_ibzk(self, qpt, qtol) result(iqpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_findq_ibzk'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- real(dp),optional,intent(in) :: qtol
- type(ephwg_t),intent(in) :: self
-!arrays
- real(dp),intent(in) :: qpt(3)
-
-!Local variables-------------------------------
-!scalars
- integer :: iq
- real(dp) :: my_qtol
-
-! *************************************************************************
-
- my_qtol = tol6; if (present(qtol)) my_qtol = qtol
-
- iqpt = -1
- do iq=1,self%lgk%nibz
-   if (all(abs(self%lgk%ibz(:, iq) - qpt) < my_qtol)) then
-      iqpt = iq; exit
-   end if
- end do
-
-end function ephwg_findq_ibzk
-!!***
 
 !!****f* m_ephwg/ephwg_get_deltas
 !! NAME
@@ -533,7 +476,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_k,iq_ibz,ikpq_ibz,ib,ie
+ integer :: iq,iq_ibz,ikpq_ibz,ib,ie
  real(dp),parameter :: max_occ1 = one
  real(dp) :: omega_step
 !arrays
@@ -544,21 +487,21 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
  ib = band - self%bstart + 1
 
  ! fill array for e_{k+q, b} +- w_{q,nu)
- do iq_k=1,self%nq_k
-   iq_ibz = self%lgk2ibz(iq_k)   ! IBZ_k --> IBZ
-   ikpq_ibz = self%kq2ibz(iq_k)  ! k + q --> IBZ
-   pme_k(iq_k, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-   pme_k(iq_k, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
+ do iq=1,self%nq_k
+   iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
+   ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
+   pme_k(iq, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
+   pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
  if (present(broad)) then
    omega_step = (eminmax(2) - eminmax(1)) / (nene - 1)
    ! Use thetaw as workspace array
    thetaw(:, 1) = arth(eminmax(1), omega_step, nene)
-   do iq_k=1,self%nq_k
+   do iq=1,self%nq_k
      do ie=1,2
-       wme0 = thetaw(:, 1) - pme_k(iq_k, ie)
-       deltaw_pm(:, iq_k, ie) = dirac_delta(wme0, broad)
+       wme0 = thetaw(:, 1) - pme_k(iq, ie)
+       deltaw_pm(:, iq, ie) = dirac_delta(wme0, broad)
      end do
    end do
 
@@ -585,7 +528,7 @@ end subroutine ephwg_get_deltas
 !!
 !! FUNCTION
 !! Compute weights for $ \delta(ww - \ee_{k+q, b} \pm \omega_{q\nu} $
-!! for a given (qpoint, band, spin), all phonon modes nu.
+!! for a given (qpoint, band, spin) and all phonon modes.
 !!
 !! INPUTS
 !! band=band index (global index i.e. unshifted)
@@ -593,7 +536,10 @@ end subroutine ephwg_get_deltas
 !! nw=number of energies for DOS
 !! bcorr=1 to include Blochl correction else 0.
 !! comm=MPI communicator
-!! [broad]=Gaussian broadening
+!! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
+!!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
+!!   If use_bzsum is set to True, the Nstar(q) coefficient is removed so that the caller can
+!!   integrate over the BZ without using symmetries.
 !!
 !! OUTPUT
 !!  deltaw_pm(nw, nq_k, 2)  (plus, minus) including the weights for BZ integration.
@@ -604,7 +550,7 @@ end subroutine ephwg_get_deltas
 !!
 !! SOURCE
 
-subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm, comm)
+subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm, comm, use_bzsum)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -619,13 +565,15 @@ subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm
 !scalars
  integer,intent(in) :: band, spin, nw, bcorr, comm
  type(ephwg_t),intent(in) :: self
+ logical, optional, intent(in) :: use_bzsum
 !arrays
  real(dp),intent(in) :: wvals(nw), qpt(3)
  real(dp),intent(out) :: deltaw_pm(nw, 2, self%natom3)
 
 !Local variables-------------------------------
 !scalars
- integer :: iqlk, iq_k, iq_ibz, ikpq_ibz, ib, nu, ii
+ integer :: iqlk, iq, iq_ibz, ikpq_ibz, ib, nu, ii
+ logical :: use_bzsum_
 !arrays
  real(dp) :: pme_k(self%nq_k, 2), weights(nw, 2)
 
@@ -633,23 +581,30 @@ subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm
 
  ib = band - self%bstart + 1
 
- iqlk = ephwg_findq_ibzk(self, qpt)
+ use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
+ if (use_bzsum_) then
+   iqlk = lgroup_find_ibzimage(self%lgk, qpt)
+ else
+   iqlk = lgroup_findq_ibzk(self%lgk, qpt)
+ end if
  ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
 
  do nu = 1, self%natom3
-   ! fill array for e_{k+q, b} +- w_{q,nu)
-   do iq_k=1,self%nq_k
-     iq_ibz = self%lgk2ibz(iq_k)   ! IBZ_k --> IBZ
-     ikpq_ibz = self%kq2ibz(iq_k)  ! k + q --> IBZ
-     pme_k(iq_k, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-     pme_k(iq_k, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
+   ! Fill array for e_{k+q, b} +- w_{q,nu)
+   do iq=1,self%nq_k
+     iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
+     ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
+     pme_k(iq, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
+     pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
    end do
    do ii = 1, 2
      call tetra_get_onewk_wvals(self%tetra_k, iqlk, bcorr, nw, wvals, self%nq_k, pme_k(:, ii), weights)
-     !write(std_out, *)"weig", weights(:, 1)
      deltaw_pm(:, ii, nu) = weights(:, 1)
    end do
  end do
+
+ ! Rescale weights so that caller can sum over the full BZ.
+ if (use_bzsum_) deltaw_pm = deltaw_pm / (self%lgk%weights(iqlk) * self%nbz)
 
 end subroutine ephwg_get_dweights
 !!***
@@ -662,7 +617,7 @@ end subroutine ephwg_get_dweights
 !!
 !! FUNCTION
 !! Compute weights
-!! for a given (kpoint, iq_k, spin) for all phonon modes.
+!! for a given (kpoint, qpoint, spin) for all phonon modes.
 !!
 !! INPUTS
 !! qpt(3)
@@ -672,6 +627,10 @@ end subroutine ephwg_get_dweights
 !! nbsigma
 !! zvals
 !! comm=MPI communicator
+!! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
+!!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
+!!   If use_bzsum is set to True, the Nstar(q) coefficient is removed so that the caller can
+!!   integrate over the BZ without using symmetries.
 !!
 !! OUTPUT
 !!  cweights(nz, 2, nbsigma, %natom3)  (plus, minus)
@@ -683,7 +642,7 @@ end subroutine ephwg_get_dweights
 !!
 !! SOURCE
 
-subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweights, comm)
+subroutine ephwg_zinv_weights(self, qpt, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -698,6 +657,7 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
 !scalars
  integer,intent(in) :: band, spin, nz, nbsigma,comm
  type(ephwg_t),intent(in) :: self
+ logical, optional, intent(in) :: use_bzsum
 !arraye
  real(dp),intent(in) :: qpt(3)
  complex(dpc),intent(in) :: zvals(nz, nbsigma)
@@ -706,8 +666,9 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq_k,nprocs, my_rank, ierr, iqlk
+ integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq,nprocs, my_rank, ierr, iqlk
  real(dp) :: volconst_mult
+ logical :: use_bzsum_
 !arrays
  real(dp) :: ework(4, 2)
  real(dp),allocatable :: pme_k(:,:,:)
@@ -718,7 +679,12 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- iqlk = ephwg_findq_ibzk(self, qpt)
+ use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
+ if (use_bzsum_) then
+   iqlk = lgroup_find_ibzimage(self%lgk, qpt)
+ else
+   iqlk = lgroup_findq_ibzk(self%lgk, qpt)
+ end if
  ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
 
  ! Allocate array for e_{k+q, b} +- w_{q,nu)
@@ -726,11 +692,11 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
 
  ib = band - self%bstart + 1
  do nu=1,self%natom3
-   do iq_k=1,self%nq_k
-     iq_ibz = self%lgk2ibz(iq_k)   ! IBZ_k --> IBZ
-     ikpq_ibz = self%kq2ibz(iq_k)  ! k + q --> IBZ
-     pme_k(iq_k, 1, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-     pme_k(iq_k, 2, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
+   do iq=1,self%nq_k
+     iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
+     ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
+     pme_k(iq, 1, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
+     pme_k(iq, 2, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
    end do
  end do
 
@@ -773,10 +739,14 @@ subroutine ephwg_zinv_weights(self, nz, nbsigma, zvals, qpt, band, spin, cweight
 
  end do ! itetra
 
+ ! Rescale weights so that the caller can sum over the full BZ.
+ if (use_bzsum_) cweights = cweights / (self%lgk%weights(iqlk) * self%nbz)
+
  call xmpi_sum(cweights, comm, ierr)
 
  ! Compare results with naive one-point integration.
  if (.False. .and. my_rank == master) then
+   volconst_mult = one
    volconst_mult = self%lgk%weights(iqlk)
    do ib=1,nbsigma
      do nu=1,self%natom3
@@ -854,6 +824,9 @@ subroutine ephwg_free(self)
  call destroy_tetra(self%tetra_k)
  call lgroup_free(self%lgk)
 
+ ! nullify pointers
+ self%cryst => null()
+
 end subroutine ephwg_free
 !!***
 
@@ -902,7 +875,7 @@ subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
 !scalars
  integer,parameter :: bcorr0 = 0, intp_nshiftk = 1, master = 0
  integer :: band, spin, nu, bstart, nbcount, ik_ibz, ii, it, nene, nprocs, my_rank, cnt, ierr, ntemp
- integer :: iq_k, iq_ibz, ikpq_ibz
+ integer :: iq, iq_ibz, ikpq_ibz
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
@@ -1004,9 +977,9 @@ subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
 
    do nu = 1, ifc%natom * 3
      ! Load phonons in IBZ(k)
-     do iq_k=1,ephwg%nq_k
-       iq_ibz = ephwg%lgk2ibz(iq_k)  ! IBZ_k --> IBZ
-       phq_list(iq_k) = ephwg%phfrq_ibz(iq_ibz, nu)
+     do iq=1,ephwg%nq_k
+       iq_ibz = ephwg%lgk2ibz(iq)  ! IBZ_k --> IBZ
+       phq_list(iq) = ephwg%phfrq_ibz(iq_ibz, nu)
      end do
 
      do band = band_block(1), band_block(2)
@@ -1015,9 +988,9 @@ subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
          !call ephwg_get_deltas(ephwg, band, spin, nu, nene, eminmax, bcorr0, deltaw_pm, xmpi_comm_self, broad=0.3 * eV_Ha)
 
          ! Load e_{k+q} in IBZ(k)
-         do iq_k=1,ephwg%nq_k
-           ikpq_ibz = ephwg%kq2ibz(iq_k)  ! k + q --> IBZ
-           ekq_list(iq_k) = eb_dense%eig(band, ikpq_ibz, spin)
+         do iq=1,ephwg%nq_k
+           ikpq_ibz = ephwg%kq2ibz(iq)  ! k + q --> IBZ
+           ekq_list(iq) = eb_dense%eig(band, ikpq_ibz, spin)
          end do
 
          ! TODO: Check conventions.
@@ -1025,11 +998,11 @@ subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
          do it=1,ntemp
            nq_list = occ_be(phq_list, ktmesh(it), zero)
            fkq_list = occ_fd(ekq_list, ktmesh(it), ebands%fermie)
-           do iq_k=1,ephwg%nq_k
+           do iq=1,ephwg%nq_k
              sdelta(:, 1, it, ik_ibz, spin) = sdelta(:, 1, it, ik_ibz, spin) +  &
-               (nq_list(iq_k) + fkq_list(iq_k)) * deltaw_pm(:, iq_k, 1)
+               (nq_list(iq) + fkq_list(iq)) * deltaw_pm(:, iq, 1)
              sdelta(:, 2, it, ik_ibz, spin) = sdelta(:, 2, it, ik_ibz, spin) +  &
-               (nq_list(iq_k) + one - fkq_list(iq_k)) * deltaw_pm(:, iq_k, 2)
+               (nq_list(iq) + one - fkq_list(iq)) * deltaw_pm(:, iq, 2)
            end do
          end do
 

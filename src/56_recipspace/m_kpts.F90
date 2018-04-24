@@ -759,6 +759,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !MG FIXME:
 ! Here there's a possible problem with the order of symmetries because
 ! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
+! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
 

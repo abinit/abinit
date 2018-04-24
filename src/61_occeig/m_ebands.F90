@@ -97,6 +97,7 @@ MODULE m_ebands
  public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
+ public :: ebands_downsample       ! Build a new ebands_t with a downsampled IBZ.
  public :: ebands_get_jdos         ! Compute the joint density of states.
  public :: ebands_interp_kmesh     ! Interpolate energies on a k-mesh.
  public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
@@ -3764,6 +3765,142 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ABI_FREE(kfull)
 
 end subroutine ebands_expandk
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_downsample
+!! NAME
+!! ebands_downsample
+!!
+!! FUNCTION
+!!  Return a new ebands_t object of type ebands_t with a smaller IBZ contained in the inititial one.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Info on unit cell and symmetries.
+!!  in_kptrlatt(3,3)=Defines the sampling of the "small" IBZ. Must be submesh of the "fine" mesh.
+!!  in_nshiftk= Number of shifts in the coarse k-mesh
+!!  in_shiftk(3, in_nshiftk) = Shifts of the coarse k-mesh
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, in_shiftk) result(new)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_downsample'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: in_nshiftk
+ type(ebands_t),intent(in) :: self
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: in_kptrlatt(3,3)
+ real(dp),intent(in) :: in_shiftk(3, in_nshiftk)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1 = 1
+ integer :: new_nkbz , timrev, bantot, new_nkibz, ik_ibz, ikf, spin,mband
+ real(dp) :: dksqmax
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: ibz_c2f(:,:)
+ integer :: new_kptrlatt(3,3)
+ integer,allocatable :: istwfk(:),nband(:,:),npwarr(:)
+ real(dp),allocatable :: new_kbz(:,:), new_wtk(:), new_kibz(:,:), doccde(:), eig(:), occ(:)
+ real(dp),allocatable :: doccde_3d(:,:,:), eig_3d(:,:,:), occ_3d(:,:,:), new_shiftk(:,:)
+
+! *********************************************************************
+
+ ! Find IBZ associated to the new mesh.
+ call kpts_ibz_from_kptrlatt(cryst, in_kptrlatt, self%kptopt, in_nshiftk, in_shiftk, &
+   new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+
+ ! Costruct mapping IBZ_coarse --> IBZ_fine
+ ! We don't change the value of nsppol hence sppoldbl1 is set to 1
+ ABI_MALLOC(ibz_c2f, (new_nkibz*sppoldbl1, 6))
+
+ timrev = kpts_timrev_from_kptopt(self%kptopt)
+ call listkk(dksqmax, cryst%gmet, ibz_c2f, self%kptns, new_kibz, self%nkpt, new_nkibz, cryst%nsym, &
+   sppoldbl1, cryst%symafm, cryst%symrel, timrev, use_symrec=.False.)
+
+ if (dksqmax > tol12) then
+   write(msg, '(a,es16.6,6a)' )&
+    "At least one of the k-points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+    "kptrlatt of input ebands: ",trim(ltoa(pack(self%kptrlatt, mask=.True.))),ch10, &
+    "downsampled K-mesh: ",trim(ltoa(pack(in_kptrlatt, mask=.True.)))
+   MSG_ERROR(msg)
+ end if
+
+ ABI_MALLOC(istwfk, (new_nkibz))
+ ABI_MALLOC(nband, (new_nkibz, self%nsppol))
+ ABI_MALLOC(npwarr, (new_nkibz))
+
+ do ik_ibz=1,new_nkibz
+   ikf = ibz_c2f(ik_ibz, 1)
+   do spin=1,self%nsppol
+     nband(ik_ibz, spin) = self%nband(ikf + (spin-1) * self%nkpt)
+   end do
+   istwfk(ik_ibz) = self%istwfk(ikf)
+   npwarr(ik_ibz) = self%npwarr(ikf)
+ end do
+
+ ! Recostruct eig, occ and doccde in the new IBZ.
+ bantot = sum(nband); mband = maxval(nband)
+
+ ABI_MALLOC(doccde_3d, (mband, new_nkibz, self%nsppol))
+ ABI_MALLOC(eig_3d, (mband, new_nkibz, self%nsppol))
+ ABI_MALLOC(occ_3d, (mband, new_nkibz, self%nsppol))
+
+ do spin=1,self%nsppol
+   do ik_ibz=1,new_nkibz
+     ikf = ibz_c2f(ik_ibz, 1)
+     doccde_3d(:, ik_ibz, spin) = self%doccde(:, ikf, spin)
+     eig_3d(:, ik_ibz, spin) = self%eig(:, ikf, spin)
+     occ_3d(:, ik_ibz, spin) = self%occ(:, ikf, spin)
+   end do
+ end do
+
+ ! Have to pack data to call ebands_init (I wonder who decided to use vectors!)
+ ABI_MALLOC(doccde, (bantot))
+ ABI_MALLOC(eig, (bantot))
+ ABI_MALLOC(occ, (bantot))
+
+ call pack_eneocc(new_nkibz, self%nsppol, mband, nband, bantot, doccde_3d, doccde)
+ call pack_eneocc(new_nkibz, self%nsppol, mband, nband, bantot, eig_3d, eig)
+ call pack_eneocc(new_nkibz, self%nsppol, mband, nband, bantot, occ_3d, occ)
+
+ ABI_FREE(doccde_3d)
+ ABI_FREE(eig_3d)
+ ABI_FREE(occ_3d)
+
+ call ebands_init(bantot, new, self%nelect, doccde, eig, istwfk, new_kibz, &
+   nband, new_nkibz, npwarr, self%nsppol, self%nspinor, self%tphysel, self%tsmear, self%occopt, occ, new_wtk, &
+   self%charge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
+
+ ABI_FREE(istwfk)
+ ABI_FREE(nband)
+ ABI_FREE(npwarr)
+ ABI_FREE(doccde)
+ ABI_FREE(eig)
+ ABI_FREE(occ)
+ ABI_FREE(new_kibz)
+ ABI_FREE(new_kbz)
+ ABI_FREE(new_wtk)
+ ABI_FREE(new_shiftk)
+ ABI_FREE(ibz_c2f)
+
+end function ebands_downsample
 !!***
 
 !----------------------------------------------------------------------

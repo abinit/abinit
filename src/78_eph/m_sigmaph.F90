@@ -167,9 +167,8 @@ module m_sigmaph
 
   integer :: qint_method
    ! Defines the method used to integrate in q-space
-   ! 0 --> Standard quadrature (one point per box)
+   ! 0 --> Standard quadrature (one point per small box)
    ! 1 --> Use tetrahedron method
-   ! 2 --> tetra_auto
 
   logical :: imag_only
    ! True if only the imaginary part of the self-energy must be computed
@@ -613,7 +612,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      end if
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
-     ! and save KS energies in e0vals
+     ! and save KS energies in sigma%e0vals
      ! TODO: symmetrize them if kk is not irred
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(e0vals, (nbcalc_ks))
@@ -863,13 +862,16 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
          ! Precompute weigths with tetrahedron
          if (sigma%qint_method > 0) then
+           !call sigma_get_qweights(sigma, qpt, nbcalc_ks, e0vals, ibsum_kq, spin, bcorr0, deltaw_pm, xmpi_comm_self)
            if (sigma%imag_only) then
              ! Compute weigths for delta functions at the KS energies with tetra.
-             call ephwg_get_dweights(sigma%ephwg, qpt, nbcalc_ks, e0vals, ibsum_kq, spin, bcorr0, deltaw_pm, xmpi_comm_self)
+             call ephwg_get_dweights(sigma%ephwg, qpt, nbcalc_ks, e0vals, ibsum_kq, spin, bcorr0, deltaw_pm, &
+               xmpi_comm_self, use_bzsum=sigma%symsigma == 0)
            else
-             ! Compute \int 1/z with tetrahedron if real part of sigma is wanted.
+             ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
              zvals(1, :) = e0vals + sigma%ieta
-             call ephwg_zinv_weights(sigma%ephwg, nz, nbcalc_ks, zvals, qpt, ibsum_kq, spin, cweights, xmpi_comm_self)
+             call ephwg_zinv_weights(sigma%ephwg, qpt, nz, nbcalc_ks, zvals, ibsum_kq, spin, cweights, &
+               xmpi_comm_self, use_bzsum=sigma%symsigma == 0)
            end if
            ! The Nstar(q) / N_qbz factor is already included in the weigths produced
            ! by the above routines so weigth_q must be set to one here.
@@ -937,7 +939,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    (nqnu - f_mkq + one)  * (hmod2 - two * (eig0nk - eig0mkq - wqnu) ** 2) / hmod2 ** 2   &
                  )
 
-                 ! Accumulate Sigma(w) for state ib_k if spectra function is wanted.
+                 ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
                  if (sigma%nwr > 0) then
                    cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
                                  (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
@@ -1345,6 +1347,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
+ logical :: downsample, use_doublegrid
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: dksqmax,ph_wstep
  character(len=500) :: msg
@@ -1399,13 +1402,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! TODO: Use GW variables but change default
  new%nwr = dtset%nfreqsp
  if (new%nwr > 0) then
-   if (mod(new%nwr, 2) == 1) new%nwr = new%nwr + 1
+   if (mod(new%nwr, 2) == 0) new%nwr = new%nwr + 1
  end if
  !dtset%freqspmin
  !dtset%freqspmax
  new%wr_step = 0.05 * eV_Ha
 
- ! Define q-mesh for integration.
+ ! Define q-mesh for integration of the self-energy.
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
  new%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
  if (all(dtset%eph_ngqpt_fine /= 0)) then
@@ -1642,7 +1645,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  my_mpw = new%mpw; call xmpi_max(my_mpw, new%mpw, comm, ierr)
  my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
- call wrtout(std_out, sjoin('optimal value of mpw=', itoa(new%mpw)))
+ call wrtout(std_out, sjoin('Optimal value of mpw=', itoa(new%mpw)))
 
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
@@ -1674,16 +1677,50 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  new%imag_only = .False.; if (dtset%useria == 23) new%imag_only = .True.
  new%qint_method = 0; if (dtset%userib == 23) new%qint_method = 1
- ! FIXME: tetra with symsigma 0
- !if (new%symsigma == 1) new%qint_method = 0
  write(std_out, *)"imag_only:", new%imag_only, "qint_method:", new%qint_method
 
- ! Initialize object for the computation of integration weights.
+ ! Initialize object for the computation of integration weights (integration in q-space).
+ ! Weights can be obtained in different ways:
+ !
+ !  1. Computed from eigens on the same coarse q-mesh as the one used for the self-energy.
+ !  2. Obtained from eigens on a denser q-mesh and then transfered to the coarse q-mesh.
+ !     In this case the eigens on the dense mesh are either read from an external file (ab-initio)
+ !     or interpolated on the fly with star-functions.
+ !
+ !  NB: The routines assume that the k-mesh for electrons and the q-mesh for phonons are the same.
+ !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
+ use_doublegrid = .False.
+ !use_doublegrid = F(dtset% dtftil% ....)
+
  if (new%qint_method > 0) then
+   ! bstart and new%bsum select the band range.
    bstart = 1
-   new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
-   !eb_dense = ebands_interp_kmesh(ebands, cryst, dtset%einterp, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm)
-   !call epwgw_print(new%ephwg)
+   if (.not. use_doublegrid) then
+     downsample = any(ebands%kptrlatt /= qptrlatt) .or. ebands%nshiftk /= my_nshiftq
+     if (ebands%nshiftk == my_nshiftq) downsample = downsample .or. any(ebands%nshiftk /= my_shiftq)
+     if (downsample) then
+       MSG_COMMENT("K-mesh != Q-mesh for self-energy. Will downsample electron energies.")
+       tmp_ebands = ebands_downsample(ebands, cryst, qptrlatt, my_nshiftq, my_shiftq)
+       new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
+       call ebands_free(tmp_ebands)
+     else
+       new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
+     end if
+   else
+     ! Double-grid technique
+     !if (dtset% dtftil% ....) then
+     !  tmp_ebands = wfk_read_ebands(filepath, comm)
+     !else
+     !  intp_kptrlatt =
+     !  intp_nshiftk =
+     !  intp_shiftk =
+     !  tmp_ebands = ebands_interp_kmesh(ebands, cryst, dtset%einterp, &
+     !    intp_kptrlatt, intp_nshiftk, intp_shiftk, [bstart, bstart + new%nbsum - 1], comm)
+     !end if
+     !new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
+     !new%double_grid = ...
+     !call ebands_free(tmp_ebands)
+   end if
  end if
 
  ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
@@ -2344,8 +2381,8 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin("Number of bands in e-ph self-energy:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
- !if (self%imag_only) write(unt, "(a)")"Only Imag(Sigma) will be computed"
  !write(unt, "(2a)")sjoin("Method for BZ integration:", itoa(self%qint_method))
+ !if (self%imag_only) write(unt, "(a)")"Only Imag(Sigma) will be computed"
  write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
  write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
