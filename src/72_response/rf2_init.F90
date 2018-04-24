@@ -567,9 +567,11 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        shift_jband_lambda=(jband-1)*2*nband_k
 
 !      Extract GS wavefunction
-       eig1_k_jband => null()
        cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
        if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1:size_cprj+shift_cprj_band1)
+
+!      Not used here, but a null pointer is not allowed... (called by rf2_apply_hamiltonian but not used)
+       eig1_k_jband => eig1_k_stored(1+shift_jband_lambda:2*nband_k+shift_jband_lambda)
 
        if (ipert==natom+11) then
 !        Extract ddk and multiply by i :
