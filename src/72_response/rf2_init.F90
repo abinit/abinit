@@ -24,6 +24,8 @@
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eig0_k(mband*nsppol)=GS eigenvalues at k (hartree)
 !!  eig1_k(2*mband*mband*nsppol)=2nd-order eigenvalues at k,q (hartree)
+!!  ffnl1=nonlocal form factors
+!!  ffnl1_test=nonlocal form factors used for tests (i.e. when dtset%nonlinear_info>2)
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  ibg=shift to be applied on the location of data in the array cprj
 !!  icg=shift to be applied on the location of data in the array cg
@@ -43,7 +45,7 @@
 !!    same as rf_hamkq, but the direction of the perturbation is different
 !!  occ_k(nband_k)=occupation number for each band (usually 2) for each k.
 !!  rocceig(nband_k,nband_k)= (occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
-!!  ddk<wfk_t>=struct info for DDK file.
+!!  ddk_f<wfk_t>=struct info for DDK file.
 !!
 !! OUTPUT
 !!  rf2%RHS_Stern
@@ -115,9 +117,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !
 !Local variables-------------------------------
 !scalars
- integer,parameter :: berryopt=0,iorder_cprj=0,level=19
+ integer,parameter :: iorder_cprj=0
  integer :: choice_cprj,cpopt_cprj,iband,icpgr_loc,idir1,idir2,idir_cprj,ierr
- integer :: igs,indb,ipert1,ipert2,iproc,jband,kdir1
+ integer :: indb,ipert1,ipert2,iproc,jband,kdir1
  integer :: me,my_nband,natom,ncpgr_loc,nproc_band,debug_mode
  integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1,shift_proc
  integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir1_loc,shift_dir2,shift_jband_lambda

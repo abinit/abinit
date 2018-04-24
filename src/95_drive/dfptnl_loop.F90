@@ -15,8 +15,6 @@
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol) = array for planewave coefficients of wavefunctions
-!!  cgindex(nkpt,nsppol) = for each k-point, cgindex tores the location
-!!                         of the WF in the cg array
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
@@ -25,38 +23,24 @@
 !!   that of the basis sphere--appropriate for charge density rho(G),
 !!   Hartree potential, and pseudopotentials
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
-!!  kneigh(30,nkpt) = index of the neighbours of each k-point
-!!  kg_neigh(30,nkpt,3) = necessary to construct the vector joining a k-point
-!!                         to its nearest neighbour in case of a single k-point,
-!!                         a line of k-points or a plane of k-points.
-!!  kptindex(2,nkpt3)= index of the k-points in the reduced BZ
-!!                     related to a k-point in the full BZ
-!!  kpt3(3,nkpt3) = reduced coordinates of k-points in the full BZ
 !!  kxc(nfftf,nkxc)=exchange-correlation kernel
 !!  k3xc(nfftf,nk3xc)=third-order exchange-correlation kernel
 !!  mband = maximum number of bands
 !!  mgfft = maximum single fft dimension
 !!  mkmem = Number of k points treated by this node.
-!!  mkmem_max = maximal number of k-points on each processor (MPI //)
 !!  mk1mem = Number of k points for first-order WF treated by this node.
 !!  mpert =maximum number of ipert
 !!  mpi_enreg=MPI-parallelisation information
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
-!!  mvwtk(30,nkpt) = weights to compute the finite difference ddk
 !!  natom = number of atoms in unit cell
 !!  nfftf  = (effective) number of FFT grid points (for this processor)
 !!  nkpt  = number of k points
-!!  nkpt3 = number of k-points in the full BZ
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
-!!  nneigh  = total number of neighbours required to evaluate the finite
-!!          difference formula
 !!  nspinor = number of spinorial components of the wavefunctions
 !!  nsppol = number of channels for spin-polarization (1 or 2)
 !!  npwarr(nkpt) = array holding npw for each k point
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
-!!  pwind(mpw,nneigh,mkmem) = array used to compute the overlap matrix smat
-!!                           between k-points
 !!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
 !!       that have to be computed
 !!       1   ->   element has to be computed explicitely
@@ -90,12 +74,12 @@
 #include "abi_common.h"
 
 
-subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut, &
-& hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,mband,mgfft,mgfftf,mkmem,mkmem_max,mk1mem,&
-& mpert,mpi_enreg,mpw,mvwtk,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,&
+subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut, &
+& hdr,kg,kxc,k3xc,mband,mgfft,mgfftf,mkmem,mk1mem,&
+& mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkxc,nk3xc,nspinor,nsppol,&
 & npwarr,occ,paw_an0,paw_ij0,&
 & pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
-& ph1d,ph1df,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
+& ph1d,ph1df,psps,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
 & nsym1,indsy1,symaf1,symrc1,&
 & d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
 
@@ -146,8 +130,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mgfft,mgfftf,mk1mem,mkmem,mkmem_max,mpert,mpw,natom,nfftf
- integer,intent(in) :: nk3xc,nkpt,nkpt3,nkxc,nneigh,nspinor,nsppol,nsym1,usecprj
+ integer,intent(in) :: mband,mgfft,mgfftf,mk1mem,mkmem,mpert,mpw,natom,nfftf
+ integer,intent(in) :: nk3xc,nkpt,nkxc,nspinor,nsppol,nsym1,usecprj
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -158,17 +142,16 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  type(pseudopotential_type),intent(in) :: psps
 
 !arrays
- integer,intent(in) :: atindx(natom),atindx1(natom),cgindex(nkpt,nsppol),kg(3,mk1mem*mpw),kneigh(30,nkpt)
- integer,intent(in) :: kg_neigh(30,nkpt,3)
- integer,intent(in) :: kptindex(2,nkpt3),nattyp(psps%ntypat),ngfftf(18),npwarr(nkpt),pwind(mpw,nneigh,mkmem)
+ integer,intent(in) :: atindx(natom),kg(3,mk1mem*mpw)
+ integer,intent(in) :: nattyp(psps%ntypat),ngfftf(18),npwarr(nkpt)
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
  integer,intent(in) :: indsy1(4,nsym1,dtset%natom),symaf1(nsym1),symrc1(3,3,nsym1)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert) !vz_i
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(in) :: gprimd(3,3),k3xc(nfftf,nk3xc),kpt3(3,nkpt3),kxc(nfftf,nkxc)
+ real(dp),intent(in) :: gprimd(3,3),k3xc(nfftf,nk3xc),kxc(nfftf,nkxc)
  real(dp),intent(in) :: nhat(nfftf,dtset%nspden)
- real(dp),intent(in) :: mvwtk(30,nkpt),rhog(2,nfftf),rhor(nfftf,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rprimd(3,3)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),ph1df(2,3*(2*mgfftf+1)*natom)
  real(dp),intent(in) :: vtrial(nfftf,dtset%nspden),xred(3,natom)
  real(dp),intent(in) :: vxc(nfftf,dtset%nspden)
@@ -195,8 +178,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  integer,parameter :: level=51
  integer :: ask_accurate,comm_cell,counter,cplex,cplex_rhoij,formeig,flag1,flag3
  integer :: has_dijfr
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ifft,ii,index,ir
- integer :: ireadwf,itypat
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ii,ireadwf
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: rdwrpaw,second_idir,timrev,usexcnhat
@@ -210,13 +192,13 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  type(hdr_type) :: hdr_den
 !arrays
  integer :: file_index(5)
- real(dp) :: rho_dum(1),qphon(3),tsec(2)
+ real(dp) :: qphon(3),tsec(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
  real(dp),allocatable :: nhat1_i1pert(:,:),nhat1_i2pert(:,:),nhat1_i3pert(:,:)
  real(dp),allocatable :: nhat1gr(:,:,:),vresid_dum(:,:)
  real(dp),allocatable :: rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:),rho3r1(:,:),vhartr1_i2pert(:)
- real(dp),allocatable :: vpsp1(:),vxc1_i2pert(:,:),work(:),xc_tmp(:,:)
+ real(dp),allocatable :: vpsp1(:),vxc1_i2pert(:,:),work(:)
  real(dp),allocatable,target :: vtrial1_i2pert(:,:)
  real(dp),pointer :: vtrial1_tmp(:,:)
  real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d3(:)
@@ -704,11 +686,11 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
 !                  NOTE : eigen2 equals zero here
 
-                   call dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
+                   call dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
 &                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
 &                   pawang,pawang1,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
-&                   paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,&
+&                   paw_an0,paw_an1_i2pert,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,&
 &                   rprimd,symaf1,symrc1,ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,&
 &                   ddk_f,xccc3d1,xccc3d2,xccc3d3,xred,&
 &                   d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)

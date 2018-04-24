@@ -67,7 +67,6 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
  use defs_abitypes
  use m_profiling_abi
  use m_errors
- use m_xmpi, only : xmpi_comm_self,xmpi_sum
 
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type,simp_gen
@@ -103,15 +102,12 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 
 !Local variables-------------------------------
 !scalars
- integer :: ilm,ipts,ir,ispden,jr,lm_size_eff,npts
- logical :: need_impart
+ integer :: ilm,ipts,ispden,lm_size_eff,npts
  real(dp) :: d3exc1_int
- real(dp) :: rho_dn,rho_up,rhoim_dn,rhoim_up,ro11i,ro11r,ro12i,ro12r,ro21i,ro21r,ro22i,ro22r
- real(dp) :: v11i,v11r,v12i,v12r,v21i,v21r,v22i,v22r
  character(len=500) :: msg
 !arrays
 ! real(dp) :: tsec(2)
- real(dp),allocatable :: ff(:),rho1arr(:,:),rho2arr(:,:),rho3arr(:,:),vxc1_(:,:)
+ real(dp),allocatable :: ff(:),rho1arr(:,:),rho2arr(:,:),rho3arr(:,:)
 
 ! *************************************************************************
 
@@ -166,12 +162,6 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 
  npts=pawang%angl_size
  lm_size_eff=min(lm_size,pawang%ylm_size)
-! need_impart=present(d2enxc_im)
-! if (option/=1) then
-!   d2enxc=zero
-!   if (need_impart) d2enxc_im=zero
-! end if
-! if (option<=1) vxc1(:,:,:)=zero
 
  d3exc1_iat(:) = zero
 

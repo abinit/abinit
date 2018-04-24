@@ -143,20 +143,18 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_1,cplex_2,cplex_3,cplex_dijh1,iatom,iatom_tot,ierr,ipts,irhoij,ispden,itypat,jrhoij
- integer :: klmn,ilm,lm_size_all,lm_size_eff,mesh_size,my_comm_atom,npts,nspden,nspdiag,nzlmopt
- integer :: opt_compch,optexc,optvxc,usecore,usetcore,usexcnhat
+ integer :: cplex_1,cplex_2,cplex_3,iatom,iatom_tot,itypat
+ integer :: lm_size_all,mesh_size,my_comm_atom,npts,nspden,nzlmopt
+ integer :: opt_compch,usecore,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: compch,d3exc1_iat(2),eexc,eexc_im
- character(len=500) :: msg
+ real(dp) :: compch,d3exc1_iat(2)
+! character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_1(:),lmselect_2(:),lmselect_3(:),lmselect_tmp(:)
- real(dp) :: dij(2),delta_energy_h(2),delta_energy_xc(2),ro(2),tsec(2)
  real(dp),allocatable :: nhat1_1(:,:,:),rho1_1(:,:,:),trho1_1(:,:,:) ! kxc_dum(:,:,:),
  real(dp),allocatable :: nhat1_2(:,:,:),rho1_2(:,:,:),trho1_2(:,:,:)
  real(dp),allocatable :: nhat1_3(:,:,:),rho1_3(:,:,:),trho1_3(:,:,:)
- real(dp),allocatable :: rho1arr(:,:),rho2arr(:,:),rho3arr(:,:)
 
 ! *************************************************************************
 

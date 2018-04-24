@@ -39,7 +39,6 @@
 !!          1: update rhoij (Ground-State)
 !!          2: update 1-st order rhoij (Response Function) according to ipert
 !!          3: update gradients of rhoij with respect to r,strain of both
-!!  usetimerev=.TRUE. if time-reversal symmetry is used (WF(-k)=Conjg[WF(k)])
 !!  wtk_k=weight assigned to current k-point
 !!
 !! SIDE EFFECTS
@@ -76,7 +75,7 @@
 
  subroutine paw_dfptnl_accrhoij(atindx,cplex,cwaveprj0_pert1,cwaveprj0_pert2,&
 &                       cwaveprj1_pert12,cwaveprj1_pert21,ipert1,ipert2,isppol,my_natom,natom,&
-&                       nspinor,occ_k,pawrhoij,usetimerev,wtk_k,occ_k_2, &
+&                       nspinor,occ_k,pawrhoij,wtk_k,&
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
 
 
@@ -101,9 +100,7 @@
 !scalars
  integer,intent(in) :: cplex,ipert1,ipert2,isppol,my_natom,natom,nspinor
  integer,optional,intent(in) :: comm_atom
- logical,intent(in) :: usetimerev
  real(dp),intent(in) :: occ_k,wtk_k
- real(dp),optional,intent(in) :: occ_k_2
 !arrays
  integer,intent(in) :: atindx(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
@@ -114,10 +111,10 @@
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex_rhoij,iatm,iatom,iatom1,ilmn,iplex,j0lmn,jlmn,klmn,klmn_im,klmn_re
- integer :: mu,my_comm_atom,ncpgr,nspden_rhoij
- logical :: compute_impart,compute_impart_cplex,substract_diagonal
+ integer :: my_comm_atom,ncpgr
+ logical :: compute_impart,compute_impart_cplex
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: ro11_im,ro11_re,ro12_im,ro12_re,ro21_im,ro21_re,ro22_im,ro22_re,weight,weight_2
+ real(dp) :: ro11_im,ro11_re,weight
  character(len=500) :: message
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -173,7 +170,6 @@
 
  compute_impart=(pawrhoij(1)%cplex==2)
  compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
-!substract_diagonal=(ipert==natom+3)
 
 ! NOT USED FOR PAWRHO21! => only for PAWRHO2
 !!Accumulate :   < Psi^(pert1) | p_i^(0) > < p_j^(0) | Psi^(pert2) >

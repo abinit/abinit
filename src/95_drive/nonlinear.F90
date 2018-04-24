@@ -150,15 +150,13 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
 !scalars
  logical :: paral_atom,call_pawinit,qeq0
- logical,parameter :: use_nhat_gga=.false.
  integer,parameter :: level=50,formeig=0,response=1,cplex1=1
- integer :: ask_accurate,band_index,bantot,choice,cplex,dum_nshiftk,flag
- integer :: fullinit,gencond,gnt_option,gscase
+ integer :: ask_accurate,band_index,bantot,cplex,dum_nshiftk,flag,gnt_option,gscase
  integer :: has_dijnd,has_kxc,has_k3xc
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
- integer :: iatom,iatom_tot,indx,iband,ider,idir,ierr,ifft,ikpt,ipert,isppol
+ integer :: iatom,indx,iband,ider,idir,ierr,ifft,ikpt,ipert,isppol
  integer :: ireadwf0,iscf_eff,ispden,itypat,izero,mcg,me,mgfftf,mkmem_max,mpert,my_natom
- integer :: n1,n2,n3,n3xccc,natom,nband_k,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: n1,n3xccc,natom,nband_k,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: nkpt_eff,nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nk3xc1,nneigh,ntypat,nsym1,nspden_rhoij,nzlmopt
  integer :: optcut,optgr0,optgr1,optgr2,optrad,option,optorth
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
@@ -205,7 +203,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: d3e_7(:,:,:,:,:,:,:),d3cart_7(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3e_8(:,:,:,:,:,:,:),d3cart_8(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3e_9(:,:,:,:,:,:,:),d3cart_9(:,:,:,:,:,:,:)
- real(dp),allocatable :: dum_wtk(:),dyfrlo(:,:,:),dyfrlo_indx(:,:,:),dyfrx2(:,:,:),eigen0(:) 
+ real(dp),allocatable :: dum_wtk(:),dyfrlo_indx(:,:,:),dyfrx2(:,:,:),eigen0(:) 
  real(dp),allocatable :: grtn_indx(:,:),grxc(:,:),k3xc(:,:),kpt3(:,:),kxc(:,:)
  real(dp),allocatable :: mvwtk(:,:),nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:),phnons(:,:,:),phnons1(:,:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:),tnons1(:,:)
@@ -986,12 +984,12 @@ end if
  else ! pead=0 in this case
 
    call status(0,dtfil%filstat,iexit,level,'call dfptnl_loop ')
-   call dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut,&
-&   hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,dtset%mgfft,mgfftf,&
-&   dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nattyp,ngfftf,nfftf,nhat,&
-&   dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,&
+   call dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut,&
+&   hdr,kg,kxc,k3xc,dtset%mband,dtset%mgfft,mgfftf,&
+&   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
+&   dtset%nkpt,nkxc,nk3xc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
 &   paw_an,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
-&   ph1d,ph1df,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
+&   ph1d,ph1df,psps,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
 &   nsym1,indsy1,symaf1,symrc1,&
 &   d3e_1,d3e_2,d3e_3,d3e_4,d3e_5,d3e_6,d3e_7,d3e_8,d3e_9)
 

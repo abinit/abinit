@@ -408,7 +408,10 @@ end subroutine rf2_accumulate_bands
 !!  cwaveprj(natom,nspinor) : input wave function |u>
 !!              projected with non-local projectors <p_i|u>
 !!  eig0 : 0-order eigenvalue for the present wavefunction at k
+!!  [enl]=optional (if not present, use hamk%ekb); non-local coeffs connecting projectors
 !!  eig1_k_jband : first-order lagrange multipliers for the band j (Lambda^(1)_ji for all i)
+!!  [ffnl1]=nonlocal form factors (needed for tests of ipert>=natom+10)
+!!  [ffnl1_test]=nonlocal form factors used for tests (needed for tests of ipert>=natom+10)
 !!  jband : band index of the input wavefunction
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  gvnl1(2,npw1*nspinor)=  part of <G|K^(1)+Vnl^(1)|C> not depending on VHxc^(1)              (sij_opt/=-1)
@@ -422,10 +425,13 @@ end subroutine rf2_accumulate_bands
 !!  isppol=1 index of current spin component
 !!  mkmem =number of k points trated by this node (GS data).
 !!  mpi_enreg=information about MPI parallelization
+!!  nband_k=number of bands at this k point for that spin polarization
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  debug_mode : if /=0 : some tests are done (see NOTES below). Wrong results are printed in std_out
 !!  prtvol=control print volume and debugging output (for getghc)
 !!  rf_hamk_idir <type(rf_hamiltonian_type)>=all data for the 1st-order Hamiltonian at k,q (here q=0)
+!!  size_cprj=size of a cprj array (=gs_hamkq%nspinor)
+!!  size_wf=size of a wavefunction array (=gs_hamkq%npw_k*gs_hamkq%nspinor)
 !!
 !! OUTPUT
 !!  h_cwave(2,size_wf) : array containing H^(ipert)|cwave>
@@ -439,8 +445,8 @@ end subroutine rf2_accumulate_bands
 !!      < u^(0)(jband)| H^(0) | u^(0)(jband)> = eig0(jband)
 !!    -- ipert = natom+1 or 2 :
 !!      < u^(0)(jband)| ( H^(1) - (eig0(jband)+eig0(iband))/2 * S^(1) ) | u^(0)(iband)> = Lambda^(1)(jband,iband)
-!!    --ipert = natom+10 or 11 :
-!!      nothing is done...
+!!    --ipert >= natom+10 :
+!!      < u^(0) | H^(2) | u^(0) > from getgh2c is equal to nonlop with signs=1
 !!  * Use of cprj :
 !!    The cprj array is computed in dfpt_looppert.F90. In the context of rf2 calculation, it contains
 !!    <Proj_i^(0)|u^(0)> and <Proj_i^(1)|u^(0)> (dir=1,2 and 3) for all wavefunctions u^(0) or
