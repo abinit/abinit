@@ -144,7 +144,7 @@ optdriver7    5 # for nonlinear calculation
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t101.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
+#%%    t101.out,  tolnlines =11, tolabs =0, tolrel = 1.0E-8 ;
 #%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10

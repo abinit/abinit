@@ -301,6 +301,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
    ABI_DATATYPE_ALLOCATE(cwaveprj1,(0,0))
  end if
 
+ nnlout = 0
  bandtot = 0
  icg0 = 0
  option = 2
