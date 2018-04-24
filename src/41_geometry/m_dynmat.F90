@@ -3797,6 +3797,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wght9'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
