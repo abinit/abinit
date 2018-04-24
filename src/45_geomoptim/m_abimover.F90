@@ -666,7 +666,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !specs%ncycle is 1 by default except for ionmov=1,9,14
  specs%ncycle=1
 
-!specs%nhist is -1 by default store all the history except for ionmov=12,13
+!specs%nhist is -1 by default store all the history
  specs%nhist=-1
 
 !This is the initialization for ionmov==1

@@ -342,6 +342,7 @@ program multibinit
 &       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
 &       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+&       initialize_data=inp%fit_initializeData==1,&
 &       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
 &       fit_tolMSDFS=inp%fit_tolMSDFS,&
 &       verbose=.true.,positive=.false.,&

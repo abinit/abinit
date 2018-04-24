@@ -77,6 +77,7 @@ module m_multibinit_dataset
   integer :: fit_anhaStrain
   integer :: fit_SPCoupling
   integer :: fit_generateTerm
+  integer :: fit_initializeData
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncoeff
@@ -267,6 +268,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
  multibinit_dtset%fit_generateTerm=1
+ multibinit_dtset%fit_initializeData=1
  multibinit_dtset%fit_tolMSDE=zero
  multibinit_dtset%fit_tolMSDS=zero
  multibinit_dtset%fit_tolMSDF=zero
@@ -913,6 +915,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%fit_initializeData=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_initializeData',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_initializeData=intarr(1)
+ if(multibinit_dtset%fit_initializeData<0.or.multibinit_dtset%fit_initializeData>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_initializeData is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'are 0, 1 or 2.',ch10,&
+&   'Action: correct fit_initializeData in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ 
  multibinit_dtset%fit_generateTerm=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_generateTerm',tread,'INT')
  if(tread==1) multibinit_dtset%fit_generateTerm=intarr(1)
@@ -1838,6 +1852,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(a)')' Fit the coefficients :'
    write(nunit,'(1x,a16,I3.1)')'       fit_coeff',multibinit_dtset%fit_coeff
    write(nunit,'(1x,a16,I3.1)')'fit_generateTerm',multibinit_dtset%fit_generateTerm
+   if(multibinit_dtset%fit_initializeData==0)then
+     write(nunit,'(1x,a16,I3.1)')'fit_initializeData',multibinit_dtset%fit_initializeData
+   end if
    if(multibinit_dtset%fit_tolMSDE > 0)then
      write(nunit,'(1x,a16,es16.8)')'    fit_tolMSDE',multibinit_dtset%fit_tolMSDE
    end if

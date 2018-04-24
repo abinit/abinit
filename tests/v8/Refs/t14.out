@@ -36,6 +36,7 @@
  Fit the coefficients :
         fit_coeff  1
  fit_generateTerm  0
+ fit_initializeDa  0
        fit_cutoff  0.00000000E+00
        fit_option  0
        fit_ncoeff  2

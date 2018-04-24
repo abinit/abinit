@@ -46,6 +46,7 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_strain
  use m_abihist, only : abihist,var2hist,abihist_findIndex
  use m_ifc, only : ifc_type,ifc_init_fromFile,ifc_free
  use m_crystal,     only : crystal_t,crystal_free
@@ -78,8 +79,10 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   type(abihist),intent(inout) :: hist
 !Local variables-------------------------------
 !scalar
-  integer :: ii,ia,iconfig,mu,nu,natom_uc
+  real(dp):: delta,rand
+  integer :: ii,iconfig,natom_uc,direction
   character(len=500) :: message
+  logical:: add_strain=.FALSE.
 !arrays
   real(dp) :: dielt(3,3)
   real(dp),allocatable :: zeff(:,:,:)
@@ -87,6 +90,7 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
   type(ifc_type) :: ifc
   type(crystal_t) :: crystal
   type(supercell_type),allocatable :: thm_scells(:)
+  type(strain_type) :: strain
 
 ! *************************************************************************
 
@@ -113,14 +117,24 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
 !   Get the atomic position for the new configuration
     call xcart2xred(thm_scells(iconfig)%natom,thm_scells(iconfig)%rprimd,&
 &                   thm_scells(iconfig)%xcart,xred_next)
-    
 !   Just fill acell with the reference value, we apply strain on rprimd    
     acell_next(:) = acell(:)
     
 !   Get the rprim for the new configuration
-    rprimd_next(:,:) = thm_scells(iconfig)%rprimd(:,:)
+    if(.not.add_strain)then
+      rprimd_next(:,:) = thm_scells(iconfig)%rprimd(:,:)
+    else
+      call random_number(rand)
+      direction = int(rand*3+1)
+      call random_number(rand)
+      delta = rand/100
+      call random_number(rand)
+      delta = delta*(two*rand-1)
+      
+      call strain_init(strain,delta=delta,direction=direction)
+      call strain_apply(thm_scells(iconfig)%rprimd,rprimd_next,strain)
+    end if
 
-    
 !   Fill history with the values of xred, acell and rprimd
     call var2hist(acell_next,hist,natom,rprimd_next,xred_next,DEBUG)
     hist%ihist = abihist_findIndex(hist,+1)
@@ -129,7 +143,6 @@ subroutine generate_training_set(acell,filename,hist,natom,nconfig,ngqpt,nqshift
 
 ! Restart ihist before to leave
   hist%ihist = 1
-
 
   call ifc_free(ifc)
   call crystal_free(crystal)

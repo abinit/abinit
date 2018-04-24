@@ -90,6 +90,8 @@ CONTAINS  !=====================================================================
 !! cutoff_in = optional,cut off to apply to the range of interation if
 !!           the coefficient are genereted in this routine
 !! max_power_strain = maximum power of the strain
+!! fit_initializeData = optional, logical !If true, we store all the informations for the fit,
+!!                      it will reduce the computation time but increase a lot the memory...
 !! fit_tolMSDF = optional, tolerance in eV^2/A^2 on the Forces for the fit process
 !! fit_tolMSDS = optional, tolerance in eV^2/A^2 on the Stresses for the fit process
 !! fit_tolMSDE = optional, tolerance in meV^2/A^2 on the Energy for the fit process
@@ -115,7 +117,7 @@ CONTAINS  !=====================================================================
 
 subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,power_disps,&
 &                                   nbancoeff,ncycle_in,nfixcoeff,option,comm,cutoff_in,&
-&                                   max_power_strain,&
+&                                   max_power_strain,initialize_data,&
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power)
@@ -143,9 +145,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
+ logical,optional,intent(in) :: initialize_data
 !Local variables-------------------------------
 !scalar
- integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
+ integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi
  integer :: rank_to_send
@@ -153,7 +156,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients
- logical :: need_only_odd_power,need_only_even_power
+ logical :: need_only_odd_power,need_only_even_power,need_initialize_data
 !arrays
  real(dp) :: mingf(4)
  integer :: sc_size(3)
@@ -184,6 +187,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Initialisation of optional arguments
  need_verbose = .TRUE.
  if(present(verbose)) need_verbose = verbose
+ need_initialize_data = .TRUE.
+ if(present(initialize_data)) need_initialize_data = initialize_data
  need_positive = .FALSE.
  if(present(positive)) need_positive = positive
  need_anharmstr = .FALSE.
@@ -467,15 +472,23 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
- ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
- ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
- ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
-
- call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
-&                                fit_data%training_set%displacement,&
-&                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
-&                                my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
-&                                strten_coeffs,fit_data%training_set%ucvol,my_coefflist,my_ncoeff)
+!If the user does not turn off this initialization, we store all the informations for the fit,
+!it will reduce the computation time but increase a lot the memory...
+ if(need_initialize_data)then
+   ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
+   ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
+   ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
+   call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
+&                                 fit_data%training_set%displacement,&
+&                                 energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+&                                 my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
+&                                 strten_coeffs,fit_data%training_set%ucvol,my_coefflist,my_ncoeff)
+ else
+!  Allocate just 1 dimension ! Save MEMORY !
+   ABI_ALLOCATE(energy_coeffs,(1,ntime))
+   ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,1,ntime))
+   ABI_ALLOCATE(strten_coeffs,(6,ntime,1))   
+ end if
 
 !Allocation of arrays
  ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle_max))
@@ -511,9 +524,23 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      rank_to_send = 0
      do icoeff=1,my_ncoeff
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
-         energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
-         fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,icoeff,:)
-         strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
+
+         if(need_initialize_data)then
+           my_icoeff = icoeff
+         else
+           my_icoeff = 1
+!          Need to initialized the data for the fit for this coefficient 
+           call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
+&                                          fit_data%training_set%displacement,&
+&                                          energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+&                                          my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
+&                                          strten_coeffs,fit_data%training_set%ucvol,&
+&                                          my_coefflist(icoeff),1)
+         end if
+         
+         energy_coeffs_tmp(icycle,:)    = energy_coeffs(my_icoeff,:)
+         fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
+         strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
          rank_to_send = my_rank
          call polynomial_coeff_free(coeffs_tmp(icycle))
          call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
@@ -536,7 +563,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Waiting for all
  if(nproc > 1)  then
    if(need_verbose)then
-     write(message, '(a)') 'Initialisation done... waiting for all the CPU'
+     write(message, '(a)') ' Initialisation done... waiting for all the CPU'
      call wrtout(std_out,message,'COLL')
    end if
    call xmpi_barrier(comm)
@@ -627,10 +654,23 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        end if
        list_coeffs(icycle) = my_coeffindexes(icoeff)
 
+       if(need_initialize_data)then
+         my_icoeff = icoeff
+       else
+!        Need to initialized the data for the fit for this coefficient
+         my_icoeff = 1        
+         call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
+&                                        fit_data%training_set%displacement,&
+&                                        energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+&                                        my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
+&                                        strten_coeffs,fit_data%training_set%ucvol,&
+&                                        my_coefflist(icoeff),1)
+       end if
+       
 !      Fill the temporary arrays
-       energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
-       fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,icoeff,:)
-       strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
+       energy_coeffs_tmp(icycle,:)    = energy_coeffs(my_icoeff,:)
+       fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
+       strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
 
 !      call the fit process routine
 !      This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
@@ -708,10 +748,26 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !    temporary array before broadcast
      rank_to_send = 0
      do icoeff=1,my_ncoeff
+
+
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
-         energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
-         fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,icoeff,:)
-         strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
+
+         if(need_initialize_data)then
+           my_icoeff = icoeff
+         else
+!          Need to initialized the data for the fit for this coefficient
+           my_icoeff = 1           
+           call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
+&                                          fit_data%training_set%displacement,&
+&                                          energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+&                                          my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
+&                                          strten_coeffs,fit_data%training_set%ucvol,&
+&                                          my_coefflist(icoeff),1)
+         end if
+
+         energy_coeffs_tmp(icycle,:)    = energy_coeffs(my_icoeff,:)
+         fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
+         strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
          call polynomial_coeff_free(coeffs_tmp(icycle))
          call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
 &                                   coeffs_tmp(icycle),my_coeffs(icoeff)%terms,&
