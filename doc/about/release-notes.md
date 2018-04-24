@@ -3,13 +3,13 @@
 Many thanks to the contributors to the ABINIT project between
 November 2017 and April 2018. These release notes
 are relative to modifications/improvements of ABINITv8.8 with respect to v8.6.
-Merge request 285 first MR not included in the release. 
+The merge request #285 is the first MR not reported in these release notes.
 
 The list of contributors includes :
-B. Amadon, G. Antonius, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen, 
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen, 
 C. Espejo, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, A. Martin,
 H. Miranda, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, F. Ricci, 
-G.-M. Rinanese, M. Torrent , M. Verstraete, J. Zwanziger
+G.-M. Rignanese, M. Torrent , M. Verstraete, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases ...
@@ -222,7 +222,7 @@ D.18 Add possibility to do DFT+U calculations without spin polarization
      By B. Amadon
 
 D.19 Miscellaneous additional bug fixes and improvements of documentation by :
-     W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
+     L. Baguet, W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
 
 
 * * *
