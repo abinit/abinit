@@ -461,7 +461,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
- integer :: ik_bz, ikq_bz, iq_bz, ndiv_count
+ integer :: ik_bz, ikq_bz, iq_bz
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
@@ -470,7 +470,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
- real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2
+ real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2, weight
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,my_ieta,cplx_ediff
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
@@ -998,7 +998,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                     !eig0nk = ebands_dense%eig(band,ik_ibz_fine,spin)
 
                   !fine grid around kq
-                  ndiv_count = 0
                   do jj=1,eph_double_grid%ndiv
                  
                     !get eig0mkq and wqnu for this fine grid k+q
@@ -1020,15 +1019,14 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                     wqnu = eph_double_grid%phfrq_dense(nu,iq_bz_fine)
 #endif
                     if (wqnu < tol6) cycle
-                    ndiv_count = ndiv_count + 1
                     nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
                 
-                    cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
-                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta) + cfact
+                    weight = eph_double_grid%weights_dense(ikq_bz_fine)
+                    cfact =  ( (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
+                               (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta) )*weight + cfact
                  
                   enddo
                   !enddo
-                  cfact = cfact / ndiv_count 
                else
                   cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + my_ieta) + &
                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + my_ieta)

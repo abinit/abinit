@@ -823,8 +823,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end do
    end do
    !weights_dense is array, ndiv is scalar
-   eph_dg%weights_dense = 1/eph_dg%weights_dense/eph_dg%ndiv
-
+   eph_dg%weights_dense = 1/eph_dg%weights_dense/(interp_kmult(1)*interp_kmult(2)*interp_kmult(3))
 
  !5.
    write(std_out,*) 'calculate scatering'
