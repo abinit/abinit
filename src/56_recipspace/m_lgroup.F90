@@ -270,6 +270,7 @@ end function lgroup_new
 
 integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -286,7 +287,6 @@ integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
  real(dp),intent(in) :: qpt(3)
 
 !Local variables-------------------------------
-!scalars
  integer :: iq
  real(dp) :: my_qtol
 
@@ -311,6 +311,8 @@ end function lgroup_findq_ibzk
 !! lgroup_find_ibzimage
 !!
 !! FUNCTION
+!!  Find the symmetrical image in the IBZ(k) of a qpoint in the BZ
+!!  Returns -1 if not found.
 !!
 !! INPUTS
 !!
@@ -328,8 +330,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'lgroup_print'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'lgroup_find_ibzimage'
 !End of the abilint section
 
  implicit none
@@ -470,9 +471,9 @@ subroutine lgroup_free(self)
  if (allocated(self%symafm_lg)) then
    ABI_FREE(self%symafm_lg)
  end if
- !if (allocated(self%lgsym2glob)) then
- !  ABI_FREE(self%lgsym2glob)
- !end if
+ if (allocated(self%lgsym2glob)) then
+   ABI_FREE(self%lgsym2glob)
+ end if
  if (allocated(self%symtab)) then
    ABI_FREE(self%symtab)
  end if

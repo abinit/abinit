@@ -287,7 +287,7 @@ module m_sigmaph
    ! Second slice: DW term
 
   type(ephwg_t) :: ephwg
-   ! This object compute the weights for the BZ integration in q-space.
+   ! This object compute the weights for the BZ integration in q-space if qint_method > 0
 
   type(degtab_t),allocatable :: degtab(:,:)
    ! (nkcalc, nsppol)
@@ -1798,6 +1798,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      !  end do
      !  tmp_ebands = ebands_interp_kmesh(ebands, cryst, dtset%einterp, &
      !    intp_kptrlatt, my_nshiftq, my_shiftq, [bstart, bstart + new%nbsum - 1], comm)
+     !  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
      !end if
      !new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
      !new%double_grid = ...
