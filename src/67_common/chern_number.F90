@@ -123,7 +123,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
 
 !Local variables -------------------------
-!scalars
+ !scalars
  integer :: adir,bdir,bfor,bsigma,ddkflag,epsabg,gdir,gfor,gsigma
  integer :: icg,icgb,icgg,icprj,icprjb,icprjg
  integer :: ikg,ikpt,ikptb,ikptg,isppol,itrs,job
@@ -136,12 +136,14 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2)
  real(dp),allocatable :: cg1_k(:,:),kk_paw(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:),smat_inv(:,:,:)
  real(dp),allocatable :: smat_kk(:,:,:)
+ real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:)
  logical,allocatable :: has_smat(:,:)
+ logical,allocatable :: has_smat_indx(:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
 
 ! ***********************************************************************
-! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+ ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
 
 ! TODO: generalize to nsppol > 1
  isppol = 1
@@ -197,6 +199,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  ABI_ALLOCATE(has_smat,(dtorbmag%fnkpt,dtorbmag%fnkpt))
  ABI_ALLOCATE(smat_all,(2,nband_k,nband_k,dtorbmag%fnkpt,dtorbmag%fnkpt))
  has_smat(:,:)=.FALSE.
+
+ ABI_ALLOCATE(has_smat_indx,(dtorbmag%fnkpt,0:6,0:6))
+ ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
+ has_smat_indx(:,:,:)=.FALSE.
  
  do adir = 1, 3
 
