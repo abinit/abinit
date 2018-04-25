@@ -176,7 +176,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(eph_double_grid_t) :: eph_dg
 !arrays
  integer :: ngfftc(18),ngfftf(18)
- integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: dummy_atifc(:)
  integer,allocatable :: indqq(:,:)
  real(dp),parameter :: k0(3)=zero
@@ -739,7 +738,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
 
    ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
-   ABI_MALLOC(eph_dg%scatter_dense,(eph_dg%dense_nbz,eph_dg%dense_nbz))
 
    write(std_out,*) 'create dense to coarse mapping'
    ! generate mapping of points in dense bz to the dense bz
@@ -826,6 +824,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    eph_dg%weights_dense = 1/eph_dg%weights_dense/(interp_kmult(1)*interp_kmult(2)*interp_kmult(3))
 
  !5.
+#if 0
    write(std_out,*) 'calculate scatering'
    !from any two k and k' find q such that k - k' = q (in bz) k -> k'+q
    do ii=1,eph_dg%dense_nbz !k'
@@ -845,7 +844,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                                                              indexes_qq(3))
      enddo
    enddo
-
+#endif
  !3.
    eph_dg%kpts_dense_ibz = ebands_dense%kptns
    eph_dg%dense_nibz = ebands_dense%nkpt
@@ -941,7 +940,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    ABI_FREE(eph_dg%weights_dense)
    ABI_FREE(eph_dg%phfrq_dense)
-   ABI_FREE(eph_dg%scatter_dense)
    ABI_FREE(eph_dg%bz2ibz_dense)
    ABI_FREE(eph_dg%kpts_coarse)
    ABI_FREE(eph_dg%kpts_dense)
