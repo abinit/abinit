@@ -305,6 +305,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  n1=dtset%ngfft(1) ; n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
  n4=dtset%ngfft(4) ; n5=dtset%ngfft(5) ; n6=dtset%ngfft(6)
 
+ ABI_ALLOCATE(dummy_array,(0))
+ ABI_ALLOCATE(dummy_array2,(0,0))
+
  ABI_ALLOCATE(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_ALLOCATE(vlocal1_i2pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
 
@@ -1197,7 +1200,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
     ch10,' >>>>>>>>>>>>>>> e3tot = ',e3tot,                 ',',sumi,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-  end if
+ end if
 
 !Real parts
  d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)   = e3tot
@@ -1228,6 +1231,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    call pawrhoij_free(pawrhoij21)
    ABI_DEALLOCATE(chi_ij)
  end if
+ ABI_DEALLOCATE(dummy_array)
+ ABI_DEALLOCATE(dummy_array2)
  ABI_DEALLOCATE(phkxred)
  ABI_DATATYPE_DEALLOCATE(cwaveprj0)
  ABI_DATATYPE_DEALLOCATE(cwaveprj1)
