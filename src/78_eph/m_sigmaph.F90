@@ -119,9 +119,6 @@ module m_sigmaph
    integer,allocatable :: dense_to_indexes(:,:)
    ! given the array index get the integer indexes of the kpoint (dense)
 
-   integer,allocatable :: dense_to_coarse(:)
-   ! map dense to coarse mesh (mult(intep_kmult))
-
    integer,allocatable :: coarse_to_dense(:,:)
    ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
 
@@ -1008,7 +1005,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                     !get wqnu for q such that k->k'+q 
                     iq_bz_fine  = eph_double_grid%scatter_dense(ik_bz_fine,ikq_bz_fine)
 
-#if 0
+#if 1
                     !ibz version
                     iq_ibz_fine = eph_double_grid%bz2ibz_dense(iq_bz_fine)
                     wqnu = eph_double_grid%phfrq_dense(nu,iq_ibz_fine)

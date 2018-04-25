@@ -635,6 +635,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    !TODO add a check for consistency
    ! number of bands and kpoints (comensurability)
+   ABI_CHECK(hdr_wfk_dense%mband == wfk0_hdr%mband, 'Inconsistent number of bands for the fine and dense grid')
 
    nkpt_coarse = [wfk0_hdr%kptrlatt(1,1),&
                   wfk0_hdr%kptrlatt(2,2),&
@@ -698,7 +699,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    ABI_MALLOC(eph_dg%kpts_coarse,(3,eph_dg%coarse_nbz))
    ABI_MALLOC(eph_dg%kpts_dense,(3,eph_dg%dense_nbz))
-   ABI_MALLOC(eph_dg%dense_to_coarse,(eph_dg%dense_nbz))
    ABI_MALLOC(eph_dg%coarse_to_dense,(eph_dg%coarse_nbz,eph_dg%ndiv))
 
    ABI_MALLOC(eph_dg%dense_to_indexes,(3,eph_dg%dense_nbz))
@@ -724,7 +724,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                                            dble(kk-1)/nkpt_coarse(3)]
          !fine loop
          i_subdense = 0
-         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          do i3=1,interp_kmult(3)
            do i2=1,interp_kmult(2)
              do i1=1,interp_kmult(1)
@@ -744,7 +743,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                            dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
                endif
                !array indexes mapping
-               eph_dg%dense_to_coarse(i_dense) = i_coarse
                eph_dg%coarse_to_dense(i_coarse,i_subdense) = i_dense
                !integer indexes mapping
                eph_dg%indexes_to_dense((ii-1)*interp_kmult(1)+i1,&
@@ -792,7 +790,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
    ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
 
-#if 0
+#if 1
    !ibz version (HM: I noticed that the fourier interpolation sometimes breaks the symmetries)
    ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nibz))
    do ii=1,eph_dg%dense_nibz
@@ -845,6 +843,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      write(2,*) phfreq_bz
      write(3,*) phfreq_ibz 
    end do
+#endif
 
    open (unit = 2, file = "coarse2dense.dat")
    do ii=1,eph_dg%coarse_nbz
@@ -855,15 +854,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        i_dense = eph_dg%coarse_to_dense(ii,jj)
        write(2,*) eph_dg%kpts_dense(:,i_dense)
      end do
-   end do
-
-   open (unit = 2, file = "dense2coarse.dat")
-   do ii=1,eph_dg%dense_nbz
-     write(2,*)
-     write(2,*)
-     write(2,*) eph_dg%kpts_dense(:,ii)
-     i_coarse = eph_dg%dense_to_coarse(ii)
-     write(2,*) eph_dg%kpts_coarse(:,i_coarse)
    end do
 
    open (unit = 2, file = "coarse.dat")
@@ -878,7 +868,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end do
    close(2)
    !end debug
-#endif
 
 
  !6. we will call sigmaph here for testing purposes only
@@ -892,7 +881,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ABI_FREE(eph_dg%bz2ibz_dense)
    ABI_FREE(eph_dg%kpts_coarse)
    ABI_FREE(eph_dg%kpts_dense)
-   ABI_FREE(eph_dg%dense_to_coarse)
    ABI_FREE(eph_dg%coarse_to_dense)
    ABI_FREE(eph_dg%dense_to_indexes)
    ABI_FREE(eph_dg%indexes_to_dense)
