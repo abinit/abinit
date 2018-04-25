@@ -230,6 +230,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
  call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pert,paw_ij1=paw_ij1_i2pert,has_e1kbsc=.true.)
 
+ ABI_ALLOCATE(dummy_array,(0))
+ ABI_ALLOCATE(dummy_array2,(0,0))
+
 !Acivate computation of rho^(2:1) and related energy derivatives if needed
  compute_rho21 = .false.
  if (usepaw==1.and.npert_phon==1.and.(i1pert<=natom.or.i3pert<=natom)) then ! so i2pert==natom+2
@@ -304,9 +307,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  option = 2
  n1=dtset%ngfft(1) ; n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
  n4=dtset%ngfft(4) ; n5=dtset%ngfft(5) ; n6=dtset%ngfft(6)
-
- ABI_ALLOCATE(dummy_array,(0))
- ABI_ALLOCATE(dummy_array2,(0,0))
 
  ABI_ALLOCATE(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_ALLOCATE(vlocal1_i2pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
@@ -1222,7 +1222,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  d3etot_5(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sum_psi0H2psi1b_i
  d3etot_6(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = half * eHxc21_paw(2)
  d3etot_7(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = half * eHxc21_nhat(2)
- d3etot_8(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sixth * exc3(2)
  d3etot_9(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sixth * exc3_paw(2)
 
  if (compute_rho21) then
