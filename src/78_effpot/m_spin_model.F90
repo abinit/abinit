@@ -115,9 +115,10 @@ contains
          &  total_time=params%spin_dt*params%spin_ntime, temperature=self%params%spin_temperature)
 
     call spin_ncfile_t_init(self%spin_ncfile, 'spinhist.nc')
-    !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
-    !call spin_ncfile_t_write_supercell(self%spin_ncfile, self%spin_calculator)
     call spin_ncfile_t_def_sd(self%spin_ncfile, self%spin_hist )
+    !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
+    call spin_ncfile_t_write_supercell(self%spin_ncfile, self%spin_calculator)
+
     call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
   end subroutine spin_model_t_initialize
 

@@ -14,9 +14,6 @@ module  m_spin_terms
      ! rvec: supercell R vector.
      integer, allocatable :: ispin_prim(:), rvec(:,:)
      real(dp), allocatable :: ms(:), pos(:,:),  spinat(:,:), S(:,:)
-     ! iatom_prim, index of atom in primitive cell
-     ! rvec: R vector from primitive cell to supercell
-     integer, allocatable :: iatom_prim(:), rvec(3,:)
      real(dp):: cell(3,3)
      integer, allocatable :: zion(:)
      ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
@@ -122,7 +119,7 @@ module  m_spin_terms
   !    procedure :: get_Langevin_Heff => get_Langevin_Heff
    end type spin_terms_t
 contains
-  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion, spin_index, iatom_prim, rvec)
+  subroutine spin_terms_t_initialize(self, cell, pos, spinat, zion, spin_index, ispin_prim, rvec)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -147,12 +144,8 @@ contains
     self%natoms=natoms
     ABI_ALLOCATE(self%zion, (nmatoms))
     ABI_ALLOCATE(self%spin_index, (natoms))
-    ABI_ALLOCATE(self%iatom_prim, (natoms))
-    ABI_ALLOCATE(self%rvec, (natoms))
     self%zion(:)=zion(:)
     self%spin_index(:)=spin_index(:)
-    self%iatom_prim(:)=iatom_prim
-    self%rvec(:)=rvec(:)
     self%cell(:,:)=cell(:,:)
     ABI_ALLOCATE( self%pos, (3,nmatoms) )
     self%pos(:,:)=pos(:,:)
@@ -166,7 +159,7 @@ contains
     ABI_ALLOCATE(self%rvec, (3, nmatoms))
 
     self%ispin_prim(:)=ispin_prim(:)
-    self%rvec(:)=rvec(:)
+    self%rvec(:,:)=rvec(:,:)
 
     ABI_ALLOCATE( self%S, (3, nmatoms))
     do i=1,nmatoms

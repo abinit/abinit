@@ -165,7 +165,22 @@ contains
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_terms_t), intent(in) :: scell
+    integer :: unitcell_id, ispin_prim_id, rvec_id, ncerr
     ! sc_matric
+
+#if defined HAVE_NETCDF
+    ncerr=nf90_redef(self%ncid)
+    ncerr=nf90_def_var(self%ncid, "unitcell", NF90_DOUBLE, [self%xyz_dimid, self%xyz_dimid], unitcell_id)
+    ncerr=nf90_def_var(self%ncid, "ispin_prim", NF90_INT, [self%nmatom_dimid], ispin_prim_id)
+    ncerr=nf90_def_var(self%ncid, "rvec", NF90_INT, [self%xyz_dimid,self%nmatom_dimid], rvec_id)
+
+    ncerr=nf90_enddef(self%ncid)
+
+    !ncerr=nf90_put_var(self%ncid, unitcell_id, scell%unitcell)
+    ncerr=nf90_put_var(self%ncid, ispin_prim_id, scell%ispin_prim)
+    ncerr=nf90_put_var(self%ncid, rvec_id, scell%rvec)
+
+#endif
   end subroutine spin_ncfile_t_write_supercell
 
   subroutine spin_ncfile_t_write_parameters(self, params)

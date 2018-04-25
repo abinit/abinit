@@ -328,7 +328,11 @@ contains
 !End of the abilint section
 
     class(spin_hist_t), intent(inout) :: hist
-    hist%itime(hist%ihist)=hist%itime(hist%ihist_prev)+1
+    if(hist%ihist_prev ==0 ) then
+        hist%itime(hist%ihist)=1
+    else
+        hist%itime(hist%ihist)=hist%itime(hist%ihist_prev)+1
+    endif
     hist%ihist_prev=hist%ihist
     hist%ihist=spin_hist_t_findIndex(hist, 1)
   end subroutine spin_hist_t_inc

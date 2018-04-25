@@ -718,7 +718,7 @@ contains
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
     integer, allocatable ::sc_index_spin(:), sc_znucl(:)
-    integer, allocatable :: sc_ispin_prim(:), sc_rvec(3, :)
+    integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
     typat_primcell(:)=1
@@ -734,8 +734,8 @@ contains
     !scell%xcart
     !nmatoms
     sc_nmatoms=scell%ncells*self%nmatoms
-    ABI_ALLOCATE(sc_index_spin, (scell%natom))
-    ABI_ALLOCATE(sc_ind_spin_prim, (sc_nmatoms) )
+    ABI_ALLOCATE(sc_index_spin, (self%natoms*scell%ncells))
+    ABI_ALLOCATE(sc_ispin_prim, (sc_nmatoms) )
     ABI_ALLOCATE(sc_rvec, (3, sc_nmatoms) )
     ABI_ALLOCATE(sc_spinat, (3, sc_nmatoms) )
     ABI_ALLOCATE(sc_spinpos, (3, sc_nmatoms) )
@@ -755,7 +755,8 @@ contains
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
           sc_ispin_prim(counter) = self%index_spin(iatom)
-          sc_rvec(counter)=self%uc_indexing(iatom, :)
+          sc_rvec(:,counter)=scell%uc_indexing(:,i)
+          print *, sc_rvec(:,counter)
        else
           sc_index_spin(i)=-1
        endif
@@ -794,10 +795,10 @@ contains
     enddo
 
     if (allocated(sc_ispin_prim)) then
-        ABI_DEALLOCATE(sc_ispin_prim)
+       ABI_DEALLOCATE(sc_ispin_prim)
     endif
     if (allocated(sc_rvec)) then
-        ABI_DEALLOCATE(sc_rvec)
+       ABI_DEALLOCATE(sc_rvec)
     endif
     if (allocated(sc_index_spin)) then
        ABI_DEALLOCATE(sc_index_spin)
