@@ -6,8 +6,7 @@
 !! FUNCTION
 !!  Tools and objects to compute the weights used for the BZ integration of EPH quantities.
 !!  More specifically the integration of quantities such as the imaginary part of the self-energy
-!!  involving delta functions.
-!!  Different approaches are available:
+!!  involving delta functions. Different approaches are available:
 !!
 !!    1.
 !!    2.
@@ -70,10 +69,9 @@ module m_ephwg
 !! ephwg_t
 !!
 !! FUNCTION
-!!  Stores electron eigevalues and phonon frequencies in the IBZ.
-!!  (use same mesh for e and ph)
+!!  Stores electron eigevalues and phonon frequencies in the IBZ (assume same mesh for e and ph).
 !!  Provides tools to compute (e_{k+q} - w{q}) in the IBZ(k)
-!!  and integrate the delta functions with the tetrahedron method.
+!!  and integrate the delta functions for phonon emission/absorption with the tetrahedron method.
 !!
 !! SOURCE
 
@@ -168,8 +166,8 @@ contains
 !! INPUTS
 !!  cryst<cryst_t>=Crystalline structure.
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
-!!  bstart
-!!  nbcount
+!!  bstart=Index of the first band to be included.
+!!  nbcount=Number of bands included
 !!  kptopt=Option for the k-point generation.
 !!  kptrlatt(3,3)=k-point lattice specification
 !!  nshiftk= number of shift vectors.
@@ -255,6 +253,7 @@ type(ephwg_t) function ephwg_new( &
    call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
  end do
+
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
 
 end function ephwg_new
@@ -313,7 +312,7 @@ end function ephwg_from_ebands
 !! ephwg_setup_kpoint
 !!
 !! FUNCTION
-!!  Set internal tables and object required to compute integration weights with a given k-point.
+!!  Set internal tables and object required to compute integration weights for a given k-point.
 !!
 !! INPUTS
 !!  kpoint(3): k-point in reduced coordinates.
@@ -550,7 +549,7 @@ end subroutine ephwg_get_deltas
 !!
 !! SOURCE
 
-subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm, comm, use_bzsum)
+subroutine ephwg_get_dweights(self, iqlk, nw, wvals, band, spin, bcorr, deltaw_pm, comm, use_bzsum)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -563,16 +562,16 @@ subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: band, spin, nw, bcorr, comm
+ integer,intent(in) :: iqlk, band, spin, nw, bcorr, comm
  type(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arrays
- real(dp),intent(in) :: wvals(nw), qpt(3)
+ real(dp),intent(in) :: wvals(nw)
  real(dp),intent(out) :: deltaw_pm(nw, 2, self%natom3)
 
 !Local variables-------------------------------
 !scalars
- integer :: iqlk, iq, iq_ibz, ikpq_ibz, ib, nu, ii
+ integer :: iq, iq_ibz, ikpq_ibz, ib, nu, ii
  logical :: use_bzsum_
 !arrays
  real(dp) :: pme_k(self%nq_k, 2), weights(nw, 2)
@@ -580,14 +579,7 @@ subroutine ephwg_get_dweights(self, qpt, nw, wvals, band, spin, bcorr, deltaw_pm
 !----------------------------------------------------------------------
 
  ib = band - self%bstart + 1
-
  use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
- if (use_bzsum_) then
-   iqlk = lgroup_find_ibzimage(self%lgk, qpt)
- else
-   iqlk = lgroup_findq_ibzk(self%lgk, qpt)
- end if
- ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
 
  do nu = 1, self%natom3
    ! Fill array for e_{k+q, b} +- w_{q,nu)
@@ -642,7 +634,7 @@ end subroutine ephwg_get_dweights
 !!
 !! SOURCE
 
-subroutine ephwg_zinv_weights(self, qpt, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
+subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -655,18 +647,17 @@ subroutine ephwg_zinv_weights(self, qpt, nz, nbsigma, zvals, band, spin, cweight
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: band, spin, nz, nbsigma,comm
+ integer,intent(in) :: iqlk, band, spin, nz, nbsigma,comm
  type(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arraye
- real(dp),intent(in) :: qpt(3)
  complex(dpc),intent(in) :: zvals(nz, nbsigma)
  complex(dpc),intent(out) :: cweights(nz, 2, nbsigma, self%natom3)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq,nprocs, my_rank, ierr, iqlk
+ integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq,nprocs, my_rank, ierr
  real(dp) :: volconst_mult
  logical :: use_bzsum_
 !arrays
@@ -680,12 +671,6 @@ subroutine ephwg_zinv_weights(self, qpt, nz, nbsigma, zvals, band, spin, cweight
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
- if (use_bzsum_) then
-   iqlk = lgroup_find_ibzimage(self%lgk, qpt)
- else
-   iqlk = lgroup_findq_ibzk(self%lgk, qpt)
- end if
- ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
 
  ! Allocate array for e_{k+q, b} +- w_{q,nu)
  ABI_MALLOC(pme_k, (self%nq_k, 2, self%natom3))
@@ -771,6 +756,7 @@ end subroutine ephwg_zinv_weights
 !! ephwg_free
 !!
 !! FUNCTION
+!!  Deallocate memory
 !!
 !! INPUTS
 !!

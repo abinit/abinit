@@ -3774,7 +3774,7 @@ end subroutine ebands_expandk
 !! ebands_downsample
 !!
 !! FUNCTION
-!!  Return a new ebands_t object of type ebands_t with a smaller IBZ contained in the inititial one.
+!!  Return a new ebands_t object of type ebands_t with a coarser IBZ contained in the inititial one.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=Info on unit cell and symmetries.
