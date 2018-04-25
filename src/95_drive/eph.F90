@@ -144,9 +144,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: interp_kmult(3), nkpt_coarse(3), nkpt_dense(3), band_block(2)
+ integer :: interp_kmult(3), interp_side(3), nkpt_coarse(3), nkpt_dense(3), band_block(2)
  integer :: intp_kptrlatt(3,3), intp_nshiftk
- integer :: ii,jj,kk,i1,i2,i3,i_coarse,i_dense,i_subdense
+ integer :: ii,jj,kk,i1,i2,i3,i_coarse,i_dense,i_subdense,this_dense
  integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
@@ -686,16 +686,43 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    eph_dg%nkpt_coarse = nkpt_coarse
    eph_dg%nkpt_dense = nkpt_dense
    
-   eph_dg%ndiv = interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
-   if (dtset%bs_interp_mode == 1) then
-       write(std_out,*) 'interpolation mode: centered', eph_dg%ndiv
-   else
-       write(std_out,*) 'interpolation mode: simple', eph_dg%ndiv
-   endif
+   ! we have to shift the dense grid a certain number of integers to make sure the fine grid 
+   ! is centered around the coarse pointi:
+   ! double grid:
+   ! ----------------- interp_kmult 2
+   ! |. .|.|.|.|. . .| side 1
+   ! |. x|.|x|.|. x .| size 3 (2*side+1)
+   ! |. .|.|.|.|. . .|
+   ! -----------------
+   !
+   ! triple grid:
+   ! ------------------- interp_kmult 3
+   ! |. . .|. . .|. . .| side 1
+   ! |. x .|. x .|. x .| size 3 (2*side+1)
+   ! |. . .|. . .|. . .|
+   ! -------------------
+   !
+   ! quadruple grid:
+   ! --------------------------- interp_kmult 4
+   ! |. . . .|.|. . .|.|. . . .| side 2
+   ! |. . . .|.|. . .|.|. . . .| size 5  (2*side+1)
+   ! |. . x .|.|. x .|.|. x . .|
+   ! |. . . .|.|. . .|.|. . . .|
+   ! |. . . .|.|. . .|.|. . . .|
+   ! ---------------------------
+   !
+   ! and so on
+   ! this is integer division
+   interp_side = interp_kmult/2
+
+   eph_dg%ndiv = (2*interp_side(1)+1)*&
+                 (2*interp_side(2)+1)*&
+                 (2*interp_side(3)+1)
 
    write(std_out,*) 'coarse:      ', nkpt_coarse
    write(std_out,*) 'dense:       ', nkpt_dense
    write(std_out,*) 'interp_kmult:', interp_kmult
+   write(std_out,*) 'ndiv:        ', eph_dg%ndiv
 
    ABI_MALLOC(eph_dg%kpts_coarse,(3,eph_dg%coarse_nbz))
    ABI_MALLOC(eph_dg%kpts_dense,(3,eph_dg%dense_nbz))
@@ -722,28 +749,16 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
          eph_dg%kpts_coarse(:,i_coarse) = [dble(ii-1)/nkpt_coarse(1),&
                                            dble(jj-1)/nkpt_coarse(2),&
                                            dble(kk-1)/nkpt_coarse(3)]
-         !fine loop
-         i_subdense = 0
+         !create the fine mesh
          do i3=1,interp_kmult(3)
            do i2=1,interp_kmult(2)
              do i1=1,interp_kmult(1)
                i_dense = i_dense + 1
-               i_subdense = i_subdense + 1
-               if (dtset%bs_interp_mode == 1) then
-                 !calculate reduced coordinates of point in dense mesh
-                 eph_dg%kpts_dense(:,i_dense) =  &
-                          [dble((ii-1)*interp_kmult(1)+i1-1-interp_kmult(1)/2)/(nkpt_coarse(1)*interp_kmult(1)),&
-                           dble((jj-1)*interp_kmult(2)+i2-1-interp_kmult(2)/2)/(nkpt_coarse(2)*interp_kmult(2)),&
-                           dble((kk-1)*interp_kmult(3)+i3-1-interp_kmult(3)/2)/(nkpt_coarse(3)*interp_kmult(3))]
-               else
-                 !calculate reduced coordinates of point in dense mesh
-                 eph_dg%kpts_dense(:,i_dense) =  &
-                          [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
-                           dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
-                           dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
-               endif
-               !array indexes mapping
-               eph_dg%coarse_to_dense(i_coarse,i_subdense) = i_dense
+               !calculate reduced coordinates of point in dense mesh
+               eph_dg%kpts_dense(:,i_dense) =  &
+                    [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
+                     dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
+                     dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
                !integer indexes mapping
                eph_dg%indexes_to_dense((ii-1)*interp_kmult(1)+i1,&
                                        (jj-1)*interp_kmult(2)+i2,&
@@ -759,7 +774,36 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        enddo
      enddo
    enddo 
-   
+
+   ! here we need to iterate again because we can have points of the dense grid
+   ! belonging to multiple coarse points
+   i_coarse = 0
+   do kk=1,nkpt_coarse(3)
+     do jj=1,nkpt_coarse(2)
+       do ii=1,nkpt_coarse(1)
+         i_coarse = i_coarse + 1
+
+         !create a mapping from coarse to dense
+         i_subdense = 0
+         do i3=-interp_side(3),interp_side(3)
+           do i2=-interp_side(2),interp_side(2)
+             do i1=-interp_side(1),interp_side(1)
+               i_subdense = i_subdense + 1
+               !integer indexes mapping
+               this_dense = eph_dg%indexes_to_dense(&
+                      mod((ii-1)*interp_kmult(1)+i1+nkpt_dense(1),nkpt_dense(1))+1,&
+                      mod((jj-1)*interp_kmult(2)+i2+nkpt_dense(2),nkpt_dense(2))+1,&
+                      mod((kk-1)*interp_kmult(3)+i3+nkpt_dense(3),nkpt_dense(3))+1)
+
+               !array indexes mapping
+               eph_dg%coarse_to_dense(i_coarse,i_subdense) = this_dense
+             enddo
+           enddo
+         enddo
+       enddo
+     enddo
+   enddo 
+
    ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete') 
 
  !5.
@@ -811,7 +855,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  
  !4. 
-   !create bz2ibz dense
+   write(std_out,*) 'map bz -> ibz'
    ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
    ABI_MALLOC(indqq,(eph_dg%dense_nbz,6))
    call listkk(dksqmax,cryst%gmet,    indqq,&
