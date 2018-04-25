@@ -85,6 +85,9 @@ module m_sigmaph
    real(dp),allocatable :: kpts_dense(:,:)
    real(dp),allocatable :: kpts_dense_ibz(:,:)
    integer :: coarse_nbz, dense_nbz, dense_nibz
+   
+   real(dp),allocatable :: weights_dense(:)
+   !weights in the dense grid
 
    integer,allocatable  :: bz2ibz_coarse(:)
    ! map full Brillouin zone to ibz (in the coarse grid)
@@ -124,6 +127,9 @@ module m_sigmaph
 
    real(dp),allocatable :: phfrq_dense(:,:)
    ! phonon frequencies calculated on the dense mesh
+
+
+
  end type eph_double_grid_t 
  
  

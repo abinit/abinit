@@ -686,8 +686,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    eph_dg%nkpt_coarse = nkpt_coarse
    eph_dg%nkpt_dense = nkpt_dense
    
-   ! we have to shift the dense grid a certain number of integers to make sure the fine grid 
-   ! is centered around the coarse pointi:
+   ! microzone is the set of points in the fine grid belonging to a certain coarse point
+   ! we have to consider a side of a certain size around the coarse point
+   ! to make sure the microzone is centered around it point.
+   ! The fine points shared by multiple microzones should have weights
+   ! according to in how many microzones they appear
+   !
    ! double grid:
    ! ----------------- interp_kmult 2
    ! |. .|.|.|.|. . .| side 1
@@ -734,6 +738,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ABI_MALLOC(eph_dg%coarse_to_indexes,(3,eph_dg%dense_nbz))
    ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
 
+   ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
    ABI_MALLOC(eph_dg%scatter_dense,(eph_dg%dense_nbz,eph_dg%dense_nbz))
 
    write(std_out,*) 'create dense to coarse mapping'
@@ -805,6 +810,21 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    enddo 
 
    ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete') 
+
+   !calculate the weights of each fine point
+   !different methods to distribute the weights might lead to better convergence
+   !loop over coarse points
+   eph_dg%weights_dense = 0
+   do ii=1,eph_dg%coarse_nbz
+     !loop over points in the microzone
+     do jj=1,eph_dg%ndiv
+       i_dense = eph_dg%coarse_to_dense(ii,jj)
+       eph_dg%weights_dense(i_dense) = eph_dg%weights_dense(i_dense) + 1
+     end do
+   end do
+   !weights_dense is array, ndiv is scalar
+   eph_dg%weights_dense = 1/eph_dg%weights_dense/eph_dg%ndiv
+
 
  !5.
    write(std_out,*) 'calculate scatering'
@@ -896,7 +916,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      write(2,*) eph_dg%kpts_coarse(:,ii)
      do jj=1,eph_dg%ndiv
        i_dense = eph_dg%coarse_to_dense(ii,jj)
-       write(2,*) eph_dg%kpts_dense(:,i_dense)
+       write(2,*) eph_dg%kpts_dense(:,i_dense), eph_dg%weights_dense(i_dense)
      end do
    end do
 
@@ -920,6 +940,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_dg)
    endif
 
+   ABI_FREE(eph_dg%weights_dense)
    ABI_FREE(eph_dg%phfrq_dense)
    ABI_FREE(eph_dg%scatter_dense)
    ABI_FREE(eph_dg%bz2ibz_dense)
