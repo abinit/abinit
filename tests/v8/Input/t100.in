@@ -56,7 +56,7 @@
 # For all datasets (except 1 and 2)
 #*******************************
     kptopt   2
-    tolwfr   1.0d-20
+    tolwfr   1.0d-28
     getden   2
     getwfk   2
 
@@ -71,13 +71,11 @@
 #*******************************
    getden2   1
    getwfk2   1
-   tolwfr2   1.0d-25
 
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
     rfddk3   1
     rfdir3   1 1 1
-   tolwfr3   1.0d-25
 # For a more effective non self-consistent computation:
     nstep3   1
     nline3   100
@@ -139,7 +137,7 @@ optdriver7    5 # for nonlinear calculation
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t100.out,  tolnlines =10, tolabs =0, tolrel = 1.0E-8 ;
+#%%    t100.out,  tolnlines =10, tolabs =1.0E-7, tolrel = 1.0E-6 ;
 #%% psp_files = 13al.pspnc,33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
