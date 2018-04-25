@@ -101,10 +101,20 @@ contains
     character(len=100) :: msg
     t=0.0
     counter=0
+    write(msg, *) " Begining spin dynamic steps :"
+    write(std_out,*) msg
+    write(ab_out, *) msg
+    write(msg, *)  "==================================================================================" 
+    write(std_out,*) msg
+    write(ab_out, *) msg
 
     write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "average M", "Energy"
     write(std_out,*) msg
     write(ab_out, *) msg
+    write(msg, *)  "-----------------------------------------------------------------------------------" 
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
     do while(t<self%total_time)
        counter=counter+1
        !call self%run_one_step(calculator, hist%current_S, S)
@@ -121,6 +131,10 @@ contains
           !print "(I8, 4X, 4ES13.5)", self%current_step, anorm, (a(i) , i=1, 3)
        t=t+self%dt
     enddo
+    write(msg, *)  "=====================================================================================" 
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
   end subroutine spin_mover_t_run_time
 
   subroutine spin_mover_t_finalize(self)

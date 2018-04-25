@@ -1967,16 +1967,18 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%spin_dynamics/=0) then
     write(nunit,'(a)')' Spin Dynamics :'
-    write(nunit,'(3x,a14,3I10.1)')' spin dynamics',multibinit_dtset%spin_dynamics
-    write(nunit,'(3x,a14,3F10.3)')'     spin_temperature',multibinit_dtset%spin_temperature
-    write(nunit,'(3x,a14,3I10.1)')'    spin_ntime',multibinit_dtset%spin_ntime
-    write(nunit,'(3x,a14,3i10)')  '         ncell',multibinit_dtset%n_cell !TODO hexu: duplicate but dynamics can be 0.
-    write(nunit,'(3x,a14,3es10.5)')  '       spin_dt',multibinit_dtset%spin_dt
-    write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
-    write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
-
-    write(nunit,'(1x,a13)')   '    spin_mag_field'
+    write(nunit,'(2x,a16,3I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
+    write(nunit,'(a18,3es15.5)')'spin_temperature',multibinit_dtset%spin_temperature
+    write(nunit,'(3x,a15,3I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
+    write(nunit,'(3x,a15,3I10)')  'ncell',multibinit_dtset%n_cell !TODO hexu: duplicate but dynamics can be 0.
+    write(nunit,'(3x,a15,3es15.5)')  'spin_dt',multibinit_dtset%spin_dt
+    !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
+    !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
+    write(nunit,'(3x,a15)')   'spin_mag_field'
     write(nunit,'(19x,3es12.5)')   (multibinit_dtset%spin_mag_field(ii),ii=1,3)
+    write(nunit,'(3x,a15)')   'spin_qpoint'
+    write(nunit,'(19x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
+
  end if
 
  if(multibinit_dtset%confinement==1)then

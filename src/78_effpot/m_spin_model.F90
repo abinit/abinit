@@ -118,6 +118,7 @@ contains
     call spin_ncfile_t_def_sd(self%spin_ncfile, self%spin_hist )
     !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
     call spin_ncfile_t_write_supercell(self%spin_ncfile, self%spin_calculator)
+    call spin_ncfile_t_write_parameters(self%spin_ncfile, self%params)
 
     call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
   end subroutine spin_model_t_initialize

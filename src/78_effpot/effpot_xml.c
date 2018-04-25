@@ -1100,7 +1100,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     if (!xmlStrcmp(cur->name, (const xmlChar *)("energy"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       *ref_energy = strtod((const char *)key, NULL);
-      printf("  energy: %lf\n", *ref_energy);
+      //printf("  energy: %lf\n", *ref_energy);
       xmlFree(key);
     }
 
@@ -1112,7 +1112,6 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
       string2Array((char *)key, unitcell, &size);
       xmlFree(key);
       key = xmlGetProp(cur, BAD_CAST "units");
-      printf("units: %s\n", key);
       xmlFree(key);
     }
 
@@ -1124,7 +1123,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
       // mass
       key = xmlGetProp(cur, BAD_CAST "mass");
 
-      printf("mass: %s\n", key);
+      //printf("mass: %s\n", key);
       insertArray(&mass_array, strtod((const char *)key, NULL));
       xmlFree(key);
 
@@ -1138,11 +1137,11 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
         ind_spin = -1;
       }
 
-      printf("index_spin: %d\n", ind_spin);
+      //printf("index_spin: %d\n", ind_spin);
 
       // gyroratio (optional)
       key = xmlGetProp(cur, BAD_CAST "gyroratio");
-      printf("gyroratio: %s\n", key);
+      //printf("gyroratio: %s\n", key);
       if (key != NULL) {
         insertArray(&gyroratio_array, strtod((const char *)key, NULL));
       }
@@ -1153,7 +1152,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
 
       // damping_factors(optional)
       key = xmlGetProp(cur, BAD_CAST "damping_factor");
-      printf("damping_factor: %s\n", key);
+      //printf("damping_factor: %s\n", key);
       if (key != NULL) {
         insertArray(&damping_factor_array, strtod((const char *)key, NULL));
       }
@@ -1173,7 +1172,6 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
         // positions
         if (!xmlStrcmp(cur2->name, BAD_CAST "position")) {
           key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
-          printf("position: %s\n", key);
           double *pos;
           string2Array((char *)key, &pos, &size);
           for (size_t i = 0; i < size; ++i) {
@@ -1185,10 +1183,10 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
         // spinat, which is optional.
         if (!xmlStrcmp(cur2->name, BAD_CAST "spinat")) {
           key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
-          printf("spinat: %s\n", key);
+          //printf("spinat: %s\n", key);
           double *spinat_tmp;
           string2Array((char *)key, &spinat_tmp, &size);
-	  for (int i=0;i<size;++i){printf("%lf ", spinat_tmp[i]);}
+	  //for (int i=0;i<size;++i){printf("%lf ", spinat_tmp[i]);}
           if (size != 3) {
             fprintf(stderr,
                     "Error reading xml file, spinat should be a 3-vector, size is %zu", size);
@@ -1234,14 +1232,12 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   }
   //
   //
-  printf("Here\n");
   freeIntArray(&index_spin_array);
   freeArray(&mass_array);
   freeArray(&gyroratio_array);
   freeArray(&damping_factor_array);
   freeArray(&position_array);
   freeArray(&spinat_array);
-  printf("Here\n");
   return 0;
 }
 

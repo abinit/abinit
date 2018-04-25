@@ -72,7 +72,7 @@ contains
     ncerr=nf90_def_dim(self%ncid, "nmatom", hist%nmatom, self%nmatom_dimid )
     ncerr=nf90_def_dim(self%ncid, "ntime_dimid", nf90_unlimited, self%ntime_dimid)
 
-    ncerr=nf90_def_var(self%ncid, "label", NF90_INT, (/ self%nmatom_dimid/), self%label_id)
+    !ncerr=nf90_def_var(self%ncid, "label", NF90_INT, (/ self%nmatom_dimid/), self%label_id)
 
     ncerr=nf90_def_var(self%ncid, "S", NF90_DOUBLE, (/ self%xyz_dimid, self%nmatom_dimid, self%ntime_dimid /), self%S_id)
     ncerr=nf90_def_var(self%ncid, "snorm", NF90_DOUBLE, (/ self%nmatom_dimid, self%ntime_dimid /), self%snorm_id)
@@ -194,12 +194,21 @@ contains
 
     class(spin_ncfile_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    integer :: qpoint_id, temperature_id, dt_id
     integer :: ncerr
     ncerr=nf90_redef(self%ncid)
 
     ! dims 
     ! vars
+    ncerr=nf90_def_var(self%ncid, "spin_qpoint", NF90_DOUBLE, [self%xyz_dimid], qpoint_id)
+    ncerr=nf90_def_var(self%ncid, "spin_temperature", NF90_DOUBLE,  temperature_id)
+    ncerr=nf90_def_var(self%ncid, "spin_dt", NF90_DOUBLE,  dt_id)
+
+    ncerr=nf90_enddef(self%ncid)
     ! put vars
+    ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_qpoint)
+    ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature)
+    ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt)
   end subroutine spin_ncfile_t_write_parameters
 
   subroutine spin_ncfile_t_close(self)

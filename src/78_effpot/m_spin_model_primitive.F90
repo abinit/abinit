@@ -117,12 +117,12 @@ contains
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
          spinat(3,nmatoms), gyroratios(nmatoms), damping_factors(nmatoms)
 
-    print *, "natoms",natoms
-    print *, "nmatoms", nmatoms
-    print *, "positions", positions
-    print *, "spinat", spinat
-    print *, "gyroratios", gyroratios
-    print *, "damping_factors", damping_factors
+    !print *, "natoms",natoms
+    !print *, "nmatoms", nmatoms
+    !print *, "positions", positions
+    !print *, "spinat", spinat
+    !print *, "gyroratios", gyroratios
+    !print *, "damping_factors", damping_factors
     ABI_ALLOCATE(self%positions, (3, natoms))
     ABI_ALLOCATE(self%index_spin, (natoms))
     ABI_ALLOCATE(self%spinat, (3, nmatoms))
@@ -318,9 +318,9 @@ contains
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
     print *, "Spin model: setting structure."
-    print *, "unitcell: ", unitcell
-    print *, "positions", positions
-    print *, "spinat", spinat
+    !print *, "unitcell: ", unitcell
+    !print *, "positions", positions
+    !print *, "spinat", spinat
     call spin_model_primitive_t_set_atoms(self,natoms,reshape(unitcell, [3,3]), & 
             & reshape(positions, [3, natoms]), &
             & nmatoms, &
@@ -336,7 +336,7 @@ contains
          reshape(exc_Rlist, (/3, exc_nnz /)), &
          reshape(exc_vallist, (/3, exc_nnz/)))
 
-    ! print *, "Spin model: setting dmi terms."
+    print *, "Spin model: setting dmi terms."
     ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
     !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
     !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
@@ -756,7 +756,6 @@ contains
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
           sc_ispin_prim(counter) = self%index_spin(iatom)
           sc_rvec(:,counter)=scell%uc_indexing(:,i)
-          print *, sc_rvec(:,counter)
        else
           sc_index_spin(i)=-1
        endif
@@ -774,7 +773,7 @@ contains
     sc_ham%gyro_ratio(:)=sc_gyroratios(:)
     sc_ham%gilbert_damping(:)=sc_damping_factors(:)
 
-    print *, "The total number of terms in primitive cell: ", self%total_nnz
+    !print *, "The total number of terms in primitive cell: ", self%total_nnz
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
           call find_supercell_ijR(scell=scell, i0=self%total_ilist%data(i), &
