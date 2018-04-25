@@ -2,6 +2,7 @@
 description: How to perform random stopping power calculation
 authors: FB
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform random stopping power calculation with the ABINIT package.
 

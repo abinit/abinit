@@ -223,14 +223,13 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  if((nsppol1==2.and.nspinor2==2).or.(nspinor1==2.and. nsppol2==2))then
 !  This is not yet possible. See later for a message about where to make the needed modifs.
 !  EDIT MT 20110707: these modifs are no more needed as they are now done in inwffil
-   write(message, '(a,a,a,a,a,a,a,a,a,i2,a,i2,a,a,i2,a,i2,a,a,a,a)' )ch10,&
-&   ' newkpt : ERROR -',ch10,&
-&   '  The wavefunction translator is (still) unable to interchange',ch10,&
-&   '  spin-polarized wfs and spinor wfs. However,',ch10,&
-&   '  the input  variables are nsppol1=',nsppol1,', and nspinor1=',nspinor1,ch10,&
-&   '  the output variables are nsppol2=',nsppol2,', and nspinor2=',nspinor2,ch10,&
-&   '  Action : use a non-spin-polarized wf to start a spinor wf,',ch10,&
-&   '           and a non-spinor wf to start a spin-polarized wf.'
+   write(message, '(5a,i2,a,i2,2a,i2,a,i2,4a)' ) &
+&   'The wavefunction translator is (still) unable to interchange',ch10,&
+&   'spin-polarized wfs and spinor wfs. However,',ch10,&
+&   'the input  variables are nsppol1=',nsppol1,', and nspinor1=',nspinor1,ch10,&
+&   'the output variables are nsppol2=',nsppol2,', and nspinor2=',nspinor2,ch10,&
+&   'Action: use a non-spin-polarized wf to start a spinor wf,',ch10,&
+&   '        and a non-spinor wf to start a spin-polarized wf.'
    MSG_ERROR(message)
  end if
 
@@ -246,8 +245,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
    end if
    if(mcg<mband2*mpw2*my_nspinor2)then
      write(message,'(a,i0,a,a,a,i0,a,i0,a,i2)' )&
-&     '  The dimension mcg=',mcg,', should be larger than',ch10,&
-&     '  the product of mband2=',mband2,', mpw2=',mpw2,', and nspinor2=',my_nspinor2
+&     'The dimension mcg= ',mcg,', should be larger than',ch10,&
+&     'the product of mband2= ',mband2,', mpw2= ',mpw2,', and nspinor2= ',my_nspinor2
      MSG_BUG(message)
    end if
  end if
@@ -393,8 +392,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
            call wrtout(iout,message,'PERS')
          end if
        else if(ikpt2==nkpt_eff+1)then
-         write(message,'(a)')'- newkpt : prtvol=0 or 1, do not print more k-points.'
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out, '- newkpt : prtvol=0 or 1, do not print more k-points.', 'PERS')
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
            call wrtout(iout,message,'PERS')
          end if
@@ -461,8 +459,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !      Checks that nbd1 and nbd1_rd are equal if eig and occ are input
        if(nbd1/=nbd1_rd)then
          write(message,'(a,a,a,i6,a,i6)')&
-&         '  When mkmem1/=0, one must have nbd1=nbd1_rd, while',ch10,&
-&         '  nbd1=',nbd1,', and nbd1_rd=',nbd1_rd
+&         'When mkmem1/=0, one must have nbd1=nbd1_rd, while',ch10,&
+&         'nbd1 = ',nbd1,', and nbd1_rd = ',nbd1_rd
          MSG_BUG(message)
        end if
 !      Need to put eigenvalues in eig_k, same for occ

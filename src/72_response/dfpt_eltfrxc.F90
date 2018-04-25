@@ -97,6 +97,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawpsp,      only : pawpsp_cg
  use m_paw_numeric, only : paw_spline
+ use m_spacepar,    only : redgr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

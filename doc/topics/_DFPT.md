@@ -2,6 +2,7 @@
 description: How to generically perform DFPT calculations
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to generically perform DFPT calculations with the ABINIT package.
 

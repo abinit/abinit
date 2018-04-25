@@ -252,7 +252,7 @@ program multibinit
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
- if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%fit_bound/=0) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_coeff/=0) then
 
    if(iam_master) then
 !    Read the MD file
@@ -340,7 +340,7 @@ program multibinit
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
 &       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
-&       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncycle,&
+&       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
 &       fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
 &       fit_tolMSDFS=inp%fit_tolMSDFS,&
@@ -359,8 +359,8 @@ program multibinit
 
 !try to bound the model with mover_effpot
 !we need to use the molecular dynamics
- if(inp%fit_bound>0.and.inp%fit_bound<=2)then
-   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%fit_bound,comm,hist=hist)
+ if(inp%bound_coeff>0.and.inp%bound_coeff<=2)then
+   call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_coeff,comm,hist=hist)
  end if
 
 !****************************************************************************************

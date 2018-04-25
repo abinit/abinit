@@ -2450,9 +2450,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
- if(tread==1) dtset%toldfe=dprarr(1)
+ if(tread==1) dtset%focktoldfe=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrde',tread,'DPR')
  if(tread==1) dtset%tolrde=dprarr(1)
 
 !find which tolXXX are defined generically and for this jdtset

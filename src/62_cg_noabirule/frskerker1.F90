@@ -8,7 +8,6 @@
 !! penalty function and its first derivative associated
 !! with some residuals and a real space dielectric function
 !!
-!!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
@@ -40,6 +39,8 @@ module frskerker1
   use interfaces_32_util        ! THIS IS MANDATORY TO CALL dotproduct
   use interfaces_53_spacepar
   use interfaces_56_recipspace  ! THIS IS MANDATORY TO CALL LAPLACIAN
+
+  use m_spacepar,  only : laplacian
 
   implicit none
   !! common variables copied from input
@@ -115,8 +116,8 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
    ok = .true.
   end if
  end subroutine frskerker1__init
-!!***  
-       
+!!***
+
 !!****f* frskerker1/frskerker1__end
 !! NAME
 !! frskerker1__end
@@ -126,7 +127,7 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
 !! deallocate memory areas
 !!
 !! INPUTS
-!!  
+!!
 !! OUTPUT
 !!
 !! PARENTS
@@ -161,7 +162,7 @@ subroutine frskerker1__end()
    ABI_DEALLOCATE(g2cart)
   end if
  end subroutine frskerker1__end
-!!***  
+!!***
 
 !!****f* frskerker1/frskerker1__newvres
 !! NAME
@@ -173,7 +174,7 @@ subroutine frskerker1__end()
 !! the density after application of the gradient
 !!
 !! INPUTS
-!!  
+!!
 !! OUTPUT
 !!
 !! PARENTS
@@ -214,15 +215,15 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 !! penalty function associated with the preconditionned residuals    !!
 !!
 !! INPUTS
-!!  
+!!
 !! OUTPUT
 !!
 !! PARENTS
 !!  Will be filled automatically by the parent script
-!!  
+!!
 !! CHILDREN
 !!  Will be filled automatically by the parent script
-!!     
+!!
 !! SOURCE
   function frskerker1__pf(nv1,nv2,vrespc)
 
@@ -231,7 +232,6 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'frskerker1__pf'
- use interfaces_56_recipspace
  use interfaces_62_cg_noabirule
 !End of the abilint section
 
@@ -270,15 +270,15 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 !! H*phi - int(phi**2H d3r)phi
 !!
 !! INPUTS
-!!  
+!!
 !! OUTPUT
 !!
 !! PARENTS
 !!  Will be filled automatically by the parent script
-!!  
+!!
 !! CHILDREN
 !!  Will be filled automatically by the parent script
-!!     
+!!
 !! SOURCE
   function frskerker1__dpf(nv1,nv2,vrespc)
 
@@ -287,7 +287,6 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'frskerker1__dpf'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

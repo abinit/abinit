@@ -161,6 +161,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use libxc_functionals,   only : libxc_functionals_is_hybrid
  use m_pawrad,            only : pawrad_type
  use m_pawtab,            only : pawtab_type
+ use m_jellium,           only : jellium
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history

@@ -94,7 +94,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: cgq(2,mcgq),cwavef(2,npw1*nspinor)
- real(dp),intent(in) :: eig0_kq(nband) 
+ real(dp),intent(in) :: eig0_kq(nband)
  real(dp),intent(in) :: eig1(2*nband**2)
  real(dp),intent(out) :: cwave1(2,npw1*nspinor)
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq),cwaveprj(natom,nspinor*usepaw)

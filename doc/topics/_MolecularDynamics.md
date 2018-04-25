@@ -2,6 +2,7 @@
 description: How to perform a molecular dynamics calculation
 authors: GG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a molecular dynamics calculation with the ABINIT package.
 

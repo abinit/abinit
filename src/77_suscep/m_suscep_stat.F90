@@ -41,6 +41,7 @@ MODULE m_suscep_stat
  use m_kg,      only : ph1d3d
  use m_gsphere, only : symg
  use m_fftcore, only : sphereboundary
+ use m_fft,     only : fftpac
 
  implicit none
 
@@ -171,7 +172,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 #define ABI_FUNC 'suscep_stat'
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_67_common
 !End of the abilint section

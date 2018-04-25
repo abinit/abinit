@@ -44,6 +44,7 @@
 !! ratsph(1:ntypat)=radius of the atomic sphere
 !! string*(*)=character string containing all the input data, used
 !!  only if choice=1 or 3. Initialized previously in instrng.
+!! supercell_latt(3,3)=supercell lattice
 !!
 !! OUTPUT
 !! acell(3)=length of primitive vectors
@@ -104,7 +105,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 & genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
 & msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
 & nucdipmom,nzchempot,pawspnorb,&
-& ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,symafm,&
+& ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
 
  use defs_basis
@@ -140,6 +141,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  real(dp),intent(out) :: slabzbeg,slabzend,tolsym
  character(len=*),intent(in) :: string
 !arrays
+ integer,intent(in) :: supercell_lattice(3,3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
@@ -157,9 +159,9 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,iatom,idir,iexit,ii,ipsp,irreducible,isym,itypat
- integer :: jsym,marr,mu,natfix,natrd,nobj,noncoll
- integer :: nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,mu,multiplicity,natom_uc,natfix,natrd
+ integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma
  integer :: txangst,txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,a2,aa,cc,cosang,ucvol,sumalch
@@ -169,7 +171,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
- real(dp) :: rprimd(3,3),rprimd_new(3,3),scalecart(3)
+ real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
  real(dp),allocatable :: tnons_cart(:,:),xangst_read(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
@@ -272,8 +274,28 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  rprim(:,3)=scalecart(:)*rprim(:,3)
  scalecart(:)=one
 
+!Compute the multiplicity of the supercell   
+ call mati3det(supercell_lattice,multiplicity)
+!Get the number of atom in the unit cell
+!Read natom from string
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
+!Might initialize natom from XYZ file
+ if(tread==0)then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
+ end if
+ if(tread==1)natom_uc=intarr(1)
+ 
+!Store the rprimd of the unit cell
+ call mkrdim(acell,rprim,rprimd_read) 
+!Multiply the rprim to get the rprim of the supercell
+ if(multiplicity > 1)then
+   rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
+   rprim(:,2) = rprim(:,2) * supercell_lattice(2,2)
+   rprim(:,3) = rprim(:,3) * supercell_lattice(3,3)
+ end if
+
 !Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
- call mkrdim(acell,rprim,rprimd)
+ call mkrdim(acell,rprim,rprimd) 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  tolsym=tol8
@@ -305,18 +327,33 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
 !This is the default
  natrd=natom
-
+ if(multiplicity > 1) natrd = natom_uc
+ 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natrd',tnatrd,'INT')
  if(tnatrd==1) natrd=intarr(1)
 
  if(natrd<1 .or. natrd>natom)then
-   write(message, '(3a,i0,a,i0,2a,a)' )&
+   if(natrd>1 .and. multiplicity > 1) then
+     if(natrd < natom)then
+       write(message, '(3a)' )&
+&       'The number of atoms to be read (natrd) can not be used with supercell_latt.',ch10,&
+&       'Action: Remove natrd or supercell_latt in your input file.'
+       MSG_ERROR(message)
+     else
+       write(message,'(3a,I0,a,I0,a,I0,2a)')&
+       ' The input variable supercell_latt is present',ch10,&
+&      ' thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
+&      ' ',supercell_lattice(3,3),' is generated',ch10     
+       MSG_WARNING(message)
+     end if
+   else
+     write(message, '(3a,i0,a,i0,2a,a)' )&
 &   'The number of atoms to be read (natrd) must be positive and not bigger than natom.',ch10,&
 &   'This is not the case: natrd=',natrd,', natom=',natom,ch10,&
 &   'Action: correct natrd or natom in your input file.'
-   MSG_ERROR(message)
+     MSG_ERROR(message)
+   end if
  end if
-
 
 !5) Read the type and initial spin of each atom in the primitive set--------
 
@@ -367,7 +404,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
 !if(nimage/=1 .and. iimage/=1)then
 !FIXME: should this be called outside the above end if?
- call randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat_read,xred_read(:,1:natrd),znucl,acell)
+ call randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd_read,typat_read,&
+&                   xred_read(:,1:natrd),znucl,acell)
 !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
 !end if
 
@@ -415,7 +453,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
  if(txred==1 .or. txrandom /=0 )then
    call wrtout(std_out,' ingeo: takes atomic coordinates from input array xred ','COLL')
-   call xred2xcart(natrd,rprimd,xcart_read,xred_read)
+   call xred2xcart(natrd,rprimd_read,xcart_read,xred_read)
  else
    if(txangst==1)then
      call wrtout(std_out,' ingeo: takes atomic coordinates from input array xangst','COLL')
@@ -453,6 +491,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 &   'This is not allowed.',ch10,&
 &   'Action: correct nsym in your input file.'
    MSG_ERROR(message)
+ end if
+ if (multiplicity>1) then
+   nsym = 1
+   write(message, '(a)' )&
+&   'Input nsym is now set to one due to the supercell_latt input'
+   MSG_WARNING(message)
  end if
 
 !Read symmorphi
@@ -504,7 +548,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  nobj=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nobj',tread,'INT')
  if(tread==1) nobj=intarr(1)
-
+ if(nobj /= 0 .and. multiplicity > 1)then
+   write(message, '(3a)' )&
+&       'nobj can not be used with supercell_latt.',ch10,&
+&       'Action: Remove nobj or supercell_latt in your input file.'
+   MSG_ERROR(message)
+ end if
 !If there are objects, chkprim will not be used immediately
 !But, if there are no objects, but a space group, it will be used directly.
  chkprim=1
@@ -563,8 +612,28 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
    if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
 
-!  Get xred
-   call xcart2xred(natrd,rprimd,xcart_read,xred)
+!  Compute xred/typat and spinat for the supercell
+   if(multiplicity > 1)then
+     iatom_supercell = 0
+     do i1 = 1, supercell_lattice(1,1)
+       do i2 = 1, supercell_lattice(2,2)
+         do i3 = 1, supercell_lattice(3,3)
+           do iatom = 1, natom_uc
+             iatom_supercell = iatom_supercell + 1
+             xcart(:,iatom_supercell) = xcart_read(:,iatom) &
+&            + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
+             spinat(1:3,iatom_supercell) = spinat(1:3,iatom)
+             typat(iatom_supercell) = typat_read(iatom)
+           end do
+         end do
+       end do
+     end do
+     call xcart2xred(natom,rprimd,xcart,xred)
+   else
+!    No supercell
+     call xcart2xred(natrd,rprimd,xcart_read,xred)
+   end if
+   
 
    spgroup=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spgroup',tread,'INT')
@@ -754,7 +823,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
      end if
 
-     if(natom/=natrd)then
+     if(natom/=natrd.and.multiplicity == 1)then
 !      Generate the full set of atoms from its knowledge in the irreducible part.
        call fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
      end if
@@ -770,8 +839,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !    the spatial group of symmetry. However, all the atom
 !    positions must be known, so the number
 !    of atoms to be read must equal the total number of atoms.
-     if(natrd/=natom)then
-
+     if(natrd/=natom .and. multiplicity== 1)then
        write(message, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a,a)' )&
 &       'The number of atoms to be read (natrd)= ',natrd,ch10,&
 &       'differs from the total number of atoms (natom)= ',natom,ch10,&
@@ -783,7 +851,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        MSG_ERROR(message)
      else
 
-       typat(:)=typat_read(:)
+       if (multiplicity==1) typat(:)=typat_read(:)
 !      Find the symmetry operations: nsym, symafm, symrel and tnons.
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1

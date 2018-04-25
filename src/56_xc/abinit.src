@@ -22,7 +22,6 @@ sources = [
 "m_kxc.F90",
 "m_xcdata.F90",
 "m_xc_vdw.F90",
-"calc_smeared_density.F90",
 "dfpt_mkvxc.F90",
 "dfpt_mkvxc_noncoll.F90",
 "dfpt_mkvxcgga.F90",

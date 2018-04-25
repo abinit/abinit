@@ -149,7 +149,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi
  integer :: rank_to_send
- real(dp) :: cutoff,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
+ real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients
@@ -244,17 +244,25 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(cutoff_in))then
    cutoff = cutoff_in
  end if
+!If the cutoff is set to zero, we define a default value
  if(abs(cutoff)<tol16)then
    do ii=1,3
-     cutoff = cutoff + eff_pot%supercell%rprimd(ii,ii) / 2.0
+     cutoff = cutoff + sqrt(eff_pot%supercell%rprimd(ii,1)**2+&
+&                           eff_pot%supercell%rprimd(ii,2)**2+&
+&                           eff_pot%supercell%rprimd(ii,3)**2)
    end do
-   cutoff = cutoff / 3.0
+   cutoff = cutoff / 3.0_dp
  end if
-
-!we get the size of the supercell in the hist
- do ii = 1, 3
-   sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
+!we get the size of the supercell in the hist file
+ do ii=1,3
+   sc_size(ii) = int(anint(sqrt(eff_pot%supercell%rprimd(ii,1)**2+&
+&                               eff_pot%supercell%rprimd(ii,2)**2+&
+&                               eff_pot%supercell%rprimd(ii,3)**2) / &
+&                          sqrt(eff_pot%crystal%rprimd(ii,1)**2+&
+&                               eff_pot%crystal%rprimd(ii,2)**2+&
+&                               eff_pot%crystal%rprimd(ii,3)**2)))
  end do
+
 
 !Get the list of coefficients to fit:
 !get from the eff_pot type (from the input)
@@ -421,6 +429,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  ntime    = hist%mxhist
  natom_sc = eff_pot%supercell%natom
  ncell    = eff_pot%supercell%ncells
+ factor   = 1._dp/natom_sc
 
 !Initialisation of arrays:
  ABI_ALLOCATE(energy_coeffs_tmp,(ncycle_max,ntime))
@@ -544,9 +553,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 !Print the standard deviation before the fit
  write(message,'(3a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) &
-&                    ' Mean Standard Deviation values at the begining of the fit process (meV/f.u.):',&
+&                   ' Mean Standard Deviation values at the begining of the fit process (meV/atm):',&
 &               ch10,'   Energy          : ',&
-&               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
+&               gf_values(4,1)*Ha_EV*1000*factor  ,ch10,&
 &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
 &                    '   Forces+Stresses : ',&
 &               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&
@@ -566,7 +575,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    if(need_verbose.and.ncycle > 0)then
      write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSDE","MSDFS","MSDF","MSDS"
      call wrtout(ab_out,message,'COLL')
-     write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
+     write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/atm)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
      call wrtout(ab_out,message,'COLL')
    end if
@@ -603,7 +612,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
        write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSDE","MSDFS","MSDF","MSDS"
        call wrtout(std_out,message,'COLL')
-       write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
+       write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/atm)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
        call wrtout(std_out,message,'COLL')
      end if!End if verbose
@@ -644,7 +653,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
            write (j_char, '(i7)') my_coeffindexes(icoeff)
            write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char),&
-&                                   gf_values(4,icoeff)* 1000*Ha_ev / ncell,&
+&                                   gf_values(4,icoeff)* 1000*Ha_ev *factor,&
 &                                   gf_values(1,icoeff)*HaBohr_meVAng**2,&
 &                                   gf_values(2,icoeff)*HaBohr_meVAng**2,&
 &                                   gf_values(3,icoeff)*HaBohr_meVAng**2
@@ -728,14 +737,14 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        call wrtout(std_out,message,'COLL')
 
        write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
-&                                        ' the iteration ',icycle_tmp,' (meV/f.u.): ',&
-&                         mingf(4)* Ha_eV *1000 / ncell
+&                                        ' the iteration ',icycle_tmp,' (meV/atm): ',&
+&                         mingf(4)* Ha_eV *1000 *factor
        call wrtout(std_out,message,'COLL')
 
        write (i_char, '(i3)') icycle
        write (j_char, '(i7)') list_coeffs(icycle)
        write(message, '(a,a,3x,a,3x,4ES18.10)') " ",adjustl(i_char),adjustl(j_char),&
-&                                    mingf(4)* 1000*Ha_eV / ncell,&
+&                                    mingf(4)* 1000*Ha_eV *factor,&
 &                                    mingf(1)*HaBohr_meVAng**2,&
 &                                    mingf(2)*HaBohr_meVAng**2,&
 &                                    mingf(3)*HaBohr_meVAng**2
@@ -747,9 +756,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !    Check the stopping criterion
      converge = .false.
      if(tolMSDE  > zero)then
-       if(abs(tolMSDE) > abs(mingf(4)*1000*Ha_eV / ncell))then
+       if(abs(tolMSDE) > abs(mingf(4)*1000*Ha_eV *factor))then
          write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
-&                                                mingf(4)*1000*Ha_eV / ncell ," < ",tolMSDE,&
+&                                                mingf(4)*1000*Ha_eV * factor ," < ",tolMSDE,&
 &                                              ' for MSDE'
          converge = .true.
        end if
@@ -814,7 +823,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,2x,a,9x,a,14x,a,13x,a,14x,a)') ch10," Iteration ","MSDE","MSDFS","MSDF","MSdS"
      call wrtout(std_out,message,'COLL')
-     write(message,'(a,5x,a,8x,a,8x,a,8x,a)') "              ","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
+     write(message,'(a,5x,a,8x,a,8x,a,8x,a)') "              ","(meV/atm)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
      call wrtout(std_out,message,'COLL')
 
@@ -863,7 +872,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
          ncycle_tot = icycle_tmp
 
          write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char),&
-&                                   gf_values(4,1)* 1000*Ha_ev / ncell,&
+&                                   gf_values(4,1)* 1000*Ha_ev *factor,&
 &                                   gf_values(1,1)*HaBohr_meVAng**2,&
 &                                   gf_values(2,1)*HaBohr_meVAng**2,&
 &                                   gf_values(3,1)*HaBohr_meVAng**2
@@ -963,9 +972,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    if(need_verbose) then
 !  Print the standard deviation after the fit
      write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
-&                    ' Mean Standard Deviation values at the end of the fit process (meV/f.u.):',&
+&                    ' Mean Standard Deviation values at the end of the fit process (meV/atm):',&
 &               ch10,'   Energy          : ',&
-&               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
+&               gf_values(4,1)*Ha_EV*1000*factor ,ch10,&
 &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
 &                    '   Forces+Stresses : ',&
 &               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&

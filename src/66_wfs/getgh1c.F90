@@ -813,12 +813,12 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 
  use m_pawfgr, only : pawfgr_type
  use m_kg,     only : mkkin, kpgstr
+ use m_fft,    only : fftpac
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf_transgrid_and_pack'
- use interfaces_53_ffts
  use interfaces_65_paw
 !End of the abilint section
 

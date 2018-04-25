@@ -39,6 +39,7 @@ module m_elphon
  use m_hdr
  use m_ebands
 
+ use m_fstrings,        only : int2char4
  use m_io_tools,        only : open_file, is_open, get_unit
  use m_time,            only : timein
  use m_numeric_tools,   only : wrap2_pmhalf, simpson, simpson_int
@@ -51,7 +52,9 @@ module m_elphon
  use m_nesting,         only : mknesting, bfactor
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_eliashberg_1d,   only : eliashberg_1d
- use m_iogkk,           only : read_el_veloc
+ use m_iogkk,           only : read_el_veloc,  read_gkk
+ use m_bz_mesh,         only : make_path
+ use m_fstab,           only : mkqptequiv
 
  implicit none
 
@@ -3123,6 +3126,1505 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  ABI_DEALLOCATE(wtq)
 
 end subroutine ep_setupqpt
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mkph_linwid
+!!
+!! NAME
+!! mkph_linwid
+!!
+!! FUNCTION
+!!  Calculate the phonon linewidths on a trajectory in q space
+!!
+!! COPYRIGHT
+!! Copyright (C) 2004-2018 ABINIT group (MVer)
+!! This file is distributed under the terms of the
+!! GNU General Public Licence, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  Cryst<crystal_t>=Info on the unit cell and symmetries.
+!!  Ifc<ifc_type>=Object containing the interatomic force constants.
+!!  elph_ds = datastructure with phonon matrix elements
+!!  nqpath = dimension of qpath_vertices
+!!  qpath_vertices = vertices of reciprocal space trajectory
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      ftgam,ftgam_init,gam_mult_displ,ifc_fourq,make_path,phdispl_cart2red
+!!      wrap2_pmhalf,wrtout,zgemm
+!!
+!! SOURCE
+
+subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkph_linwid'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqpath
+ type(crystal_t),intent(in) :: Cryst
+ type(ifc_type),intent(in) :: ifc
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ real(dp),intent(in) :: qpath_vertices(3,nqpath)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ibranch,natom,ii,indx,ipoint,nbranch,nqbz,nsppol,nrpt
+ integer :: isppol,jbranch,qtor,unit_bs,unit_lambda,unit_lwd,npt_tot
+ real(dp) :: diagerr,res
+ character(len=500) :: msg
+ character(len=fnlen) :: fname,base_name
+!arrays
+ integer :: ndiv(nqpath-1)
+ integer, allocatable :: indxprtqpt(:)
+ real(dp),parameter :: c0(2)=(/0._dp,0._dp/),c1(2)=(/1._dp,0._dp/)
+ real(dp) :: displ_cart(2,3*Cryst%natom,3*Cryst%natom)
+ real(dp) :: displ_red(2,3*Cryst%natom,3*Cryst%natom)
+ real(dp) :: eigval(3*Cryst%natom)
+ real(dp) :: gam_now(2,(3*Cryst%natom)**2)
+ real(dp) :: imeigval(3*Cryst%natom)
+ real(dp) :: lambda(3*Cryst%natom)
+ real(dp) :: pheigvec(2*3*Cryst%natom*3*Cryst%natom),phfrq_tmp(3*Cryst%natom)
+ real(dp) :: qpt(3),redkpt(3)
+ real(dp) :: tmpgam1(2,3*Cryst%natom,3*Cryst%natom)
+ real(dp) :: tmpgam2(2,3*Cryst%natom,3*Cryst%natom)
+ real(dp), allocatable :: coskr(:,:), sinkr(:,:),finepath(:,:)
+
+! *********************************************************************
+
+ DBG_ENTER("COLL")
+
+ natom     = Cryst%natom
+ nbranch   = elph_ds%nbranch
+ nsppol    = elph_ds%nsppol
+ base_name = elph_ds%elph_base_name
+ nrpt = ifc%nrpt
+
+!===================================================================
+!Definition of the q path along which ph linwid will be interpolated
+!===================================================================
+ call make_path(nqpath,qpath_vertices,Cryst%gmet,'G',20,ndiv,npt_tot,finepath)
+ ABI_ALLOCATE(indxprtqpt,(npt_tot))
+ indxprtqpt = 0
+
+!==========================================================
+!Open _LWD file and write header
+!==========================================================
+ fname=trim(base_name) // '_LWD'
+ if (open_file(fname,msg,newunit=unit_lwd,status="unknown") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ write (unit_lwd,'(a)')       '#'
+ write (unit_lwd,'(a)')       '# ABINIT package : Phonon linewidth file'
+ write (unit_lwd,'(a)')       '#'
+ write (unit_lwd,'(a,i10,a)') '#  Phonon linewidths calculated on ',npt_tot,' points along the qpath'
+ write (unit_lwd,'(a)')       '#  Description of the Q-path :'
+ write (unit_lwd, '(a,i10)')  '#  Number of line segments = ',nqpath-1
+ write (unit_lwd,'(a)')       '#  Vertices of the Q-path and corresponding index = '
+
+ indx=1
+ indxprtqpt(1) = 1
+ indxprtqpt(npt_tot) = 1
+
+ do ii=1,nqpath
+   write (unit_lwd,'(a,3(e16.6,1x),i8)')'#  ',qpath_vertices(:,ii),indx
+   if (ii<nqpath) then
+     indx=indx+ndiv(ii)
+     indxprtqpt(indx) = 1
+   end if
+ end do
+
+ write (unit_lwd,'(a)')'#'
+
+!==========================================================
+!Open _BST file and write header
+!==========================================================
+ fname=trim(base_name) // '_BST'
+ if (open_file(fname,msg,newunit=unit_bs,status="unknown") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ write (unit_bs, '(a)')      '#'
+ write (unit_bs, '(a)')      '# ABINIT package : Phonon band structure file'
+ write (unit_bs, '(a)')      '#'
+ write (unit_bs, '(a,i10,a)')'# Phonon BS calculated on ', npt_tot,' points along the qpath'
+ write (unit_bs, '(a,i10)')  '# Number of line segments = ', nqpath-1
+ indx=1
+ do ii=1,nqpath
+   write (unit_bs,'(a,3(E16.6,1x),i8)')'#  ',qpath_vertices(:,ii),indx
+   if (ii<nqpath) indx=indx+ndiv(ii)
+ end do
+ write (unit_bs,'(a)')'#'
+
+!MG20060606
+!==========================================================
+!open _LAMBDA file and write header
+!contains \omega(q,n) and \lambda(q,n) and can be plotted using xmgrace
+!==========================================================
+ fname=trim(base_name) // '_LAMBDA'
+ if (open_file(fname,msg,newunit=unit_lambda,status="unknown") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ write (unit_lambda,'(a)')      '#'
+ write (unit_lambda,'(a)')      '# ABINIT package : Lambda file'
+ write (unit_lambda,'(a)')      '#'
+ write (unit_lambda,'(a,i10,a)')'#  Lambda(q,nu) calculated on ',npt_tot,' Q-points'
+ write (unit_lambda,'(a)')      '# Description of the Q-path :'
+ write (unit_lambda,'(a,i10)')  '# Number of line segments = ',nqpath-1
+ write (unit_lambda,'(a)')      '# Vertices of the Q-path and corresponding index = '
+
+ indx=1
+ do ii=1,nqpath
+   write (unit_lambda,'(a,3(E16.6,1x),i8)')'#  ',qpath_vertices(:,ii),indx
+   if (ii<nqpath) indx=indx+ndiv(ii)
+ end do
+ write (unit_lambda,'(a)')'#'
+ write (unit_lambda,'(a)')'# index frequency lambda(q,n) frequency lambda(q,n) .... lambda_tot'
+ write (unit_lambda,'(a)')'#'
+
+!real space to q space
+ qtor=0
+
+!initialize the maximum phonon frequency
+ elph_ds%omega_min = zero
+ elph_ds%omega_max = zero
+
+ ABI_ALLOCATE(coskr, (npt_tot,nrpt))
+ ABI_ALLOCATE(sinkr, (npt_tot,nrpt))
+ call ftgam_init(ifc%gprim, npt_tot, nrpt, finepath, ifc%rpt, coskr, sinkr)
+
+ write (std_out,*) ' mkph_linwid : shape(elph_ds%gamma_qpt) = ',shape(elph_ds%gamma_qpt)
+ nqbz =  SIZE(elph_ds%gamma_qpt,DIM=4)
+ write(std_out,*) " nqbz =  SIZE(elph_ds%gamma_qpt,DIM=4) = ",nqbz
+!
+!Big do loop over spin polarizations
+!could put in locally, so phonon stuff is not done twice...
+!
+ do isppol=1,nsppol
+   indx=1
+
+!  Output to the main output file
+   write(msg,'(a,a)')ch10,&
+&   ' Output of the linewidths for the first point of each segment. Linewidths are given in Hartree.'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+
+   write (std_out,*) ' mkph_linwid : elph_ds%ep_scalprod = ', elph_ds%ep_scalprod
+
+   qtor = 0
+
+!  Interpolation along specified path in q space
+   do ipoint=1,npt_tot
+
+!    Get qpoint along the path from qpath_vertices
+     qpt(:) = finepath(:,ipoint)
+
+     call wrap2_pmhalf(qpt(1),redkpt(1),res)
+     call wrap2_pmhalf(qpt(2),redkpt(2),res)
+     call wrap2_pmhalf(qpt(3),redkpt(3),res)
+     qpt(:) = redkpt(:)
+!
+!    This reduced version of ftgkk supposes the kpoints have been integrated
+!    in integrate_gamma. Do FT from real-space gamma grid to 1 qpt.
+     call ftgam(ifc%wghatm,gam_now,elph_ds%gamma_rpt(:,:,isppol,:),natom,1,ifc%nrpt,qtor, &
+&     coskr(ipoint,:), sinkr(ipoint,:))
+!
+!    get phonon freqs and eigenvectors anyway
+!
+     call ifc_fourq(ifc,cryst,qpt,phfrq_tmp,displ_cart,out_eigvec=pheigvec)
+!
+!    additional frequency factor for some cases
+!
+!    If the matrices do not contain the scalar product with the displ_cart vectors yet do it now
+     if (elph_ds%ep_scalprod == 0) then
+
+       call phdispl_cart2red(natom,Cryst%gprimd,displ_cart,displ_red)
+
+       tmpgam2 = reshape (gam_now, (/2,nbranch,nbranch/))
+       call gam_mult_displ(nbranch, displ_red, tmpgam2, tmpgam1)
+
+       do jbranch=1,nbranch
+         eigval(jbranch) = tmpgam1(1, jbranch, jbranch)
+         imeigval(jbranch) = tmpgam1(2, jbranch, jbranch)
+
+         if (abs(imeigval(jbranch)) > tol8) then
+           write (msg,'(a,i0,a,es16.8)')' imaginary values for branch = ',jbranch,' imeigval = ',imeigval(jbranch)
+           MSG_WARNING(msg)
+         end if
+       end do
+
+     else if (elph_ds%ep_scalprod == 1) then
+!
+!      Diagonalize gamma matrix at qpoint (complex matrix).
+!      MJV NOTE: gam_now is recast implicitly here to matrix
+       call ZGEMM ( 'N', 'N', 3*natom, 3*natom, 3*natom, c1, gam_now, 3*natom,&
+&       pheigvec, 3*natom, c0, tmpgam1, 3*natom)
+
+       call ZGEMM ( 'C', 'N', 3*natom, 3*natom, 3*natom, c1, pheigvec, 3*natom,&
+&       tmpgam1, 3*natom, c0, tmpgam2, 3*natom)
+
+       diagerr = zero
+       do ibranch=1,nbranch
+
+         eigval(ibranch) = tmpgam2(1,ibranch,ibranch)
+
+         do jbranch=1,ibranch-1
+           diagerr = diagerr + abs(tmpgam2(1,jbranch,ibranch))+abs(tmpgam2(2,jbranch,ibranch))
+         end do
+         do jbranch=ibranch+1,nbranch
+           diagerr = diagerr + abs(tmpgam2(1,jbranch,ibranch))+abs(tmpgam2(2,jbranch,ibranch))
+         end do
+         diagerr = diagerr + abs(tmpgam2(2,ibranch,ibranch))
+       end do
+
+       if (diagerr > tol12) then
+         write (msg,'(a,es14.6)')' Numerical error in diagonalization of gamma with phon eigenvectors: ', diagerr
+         MSG_WARNING(msg)
+       end if
+
+     else
+       write (msg,'(a,i0)')' Wrong value for elph_ds%ep_scalprod = ',elph_ds%ep_scalprod
+       MSG_BUG(msg)
+     end if ! end elph_ds%ep_scalprod if
+!
+!    ==========================================================
+!    write data to files for each q point
+!    ==========================================================
+     write (unit_lwd,'(i5)', advance='no') indx
+     do ii=1, nbranch
+       write (unit_lwd,'(E16.5)',advance='no') eigval(ii)
+     end do
+     write (unit_lwd,*)
+
+!    only print phonon BS for isppol 1: independent of electron spins
+     if (isppol==1) then
+       write (unit_bs,'(i5)', advance='no') indx
+       do ii=1, nbranch
+         write (unit_bs,'(E16.5)',advance='no') phfrq_tmp(ii)
+       end do
+       write (unit_bs,*)
+     end if
+
+     write (unit_lambda,'(i5)', advance='no') indx
+     do ii=1,nbranch
+       lambda(ii)=zero
+       if (abs(phfrq_tmp(ii)) > tol10) lambda(ii)=eigval(ii)/(pi*elph_ds%n0(isppol)*phfrq_tmp(ii)**2)
+       write (unit_lambda,'(es16.8)',advance='no')phfrq_tmp(ii),lambda(ii)
+     end do
+     write (unit_lambda,'(es16.8)',advance='no') sum(lambda)
+     write (unit_lambda,*)
+
+!    MG NOTE: I wrote a piece of code to output all these quantities using units
+!    chosen by the user, maybe in version 5.2?
+!    In this version the output of lambda(q,\nu) has been added
+
+!    Output to the main output file, for first point in segment
+     if(indxprtqpt(ipoint)==1)then
+       write(msg,'(a,a,3es16.6,a,i4,a,a)')ch10,&
+&       ' Q point =',qpt(:),'   isppol = ',isppol,ch10,&
+&       ' Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       do ii=1,nbranch
+         write(msg,'(i8,es20.6,2es16.6)' )ii,phfrq_tmp(ii),eigval(ii),lambda(ii)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+       end do
+     end if
+
+!    find max/min phonon frequency along path chosen
+!    presumed to be representative of full BZ to within 10 percent
+     elph_ds%omega_min = min(elph_ds%omega_min,1.1_dp*phfrq_tmp(1))
+     elph_ds%omega_max = max(elph_ds%omega_max,1.1_dp*phfrq_tmp(nbranch))
+
+     indx = indx+1
+   end do !  end ipoint do
+
+!  add blank lines to output files between sppol
+   write(msg,'(a)' ) ''
+   call wrtout(unit_lwd,msg,'COLL')
+   call wrtout(unit_lambda,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end do ! isppol
+
+ ABI_DEALLOCATE(coskr)
+ ABI_DEALLOCATE(sinkr)
+
+ close(unit=unit_lwd)
+ close(unit=unit_bs)
+ close(unit=unit_lambda)
+
+ ABI_DEALLOCATE(finepath)
+ ABI_DEALLOCATE(indxprtqpt)
+
+ write(std_out,*) ' elph_linwid : omega_min, omega_max = ',elph_ds%omega_min, elph_ds%omega_max
+
+ DBG_EXIT("COLL")
+
+end subroutine mkph_linwid
+!!***
+
+!!****f* ABINIT/get_fs_bands
+!!
+!! NAME
+!! get_fs_bands
+!!
+!! FUNCTION
+!! This routine determines the bands which contribute to the Fermi surface
+!!
+!! INPUTS
+!!  eigenGS = ground state eigenvalues
+!!  hdr = header from input GS file
+!!  ep_b_min, ep_b_max=A non-zero value is used to impose certain bands.
+!!  fermie=Fermi level.
+!!  eigenGS(hdr%nband(1),hdr%nkpt,hdr%nsppol)=Energies.
+!!
+!! OUTPUT
+!!  minFSband,maxFSband=Minimun and maximum index for the bands that cross the Fermi level
+!!  nkptirr=Number of irreducible points for which there exist at least one band that crosses the Fermi level.
+!!
+!! TODO
+!!  1) Indeces and dimensions should should be spin dependent.
+!!  2) In the present status of the code, all the k-points in the IBZ are used!
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband,nkptirr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_fs_bands'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: ep_b_min, ep_b_max
+ integer,intent(out) :: minFSband,maxFSband,nkptirr
+ real(dp),intent(in) :: fermie
+ type(hdr_type),intent(in) :: hdr
+!arrays
+ real(dp),intent(in) :: eigenGS(hdr%nband(1),hdr%nkpt,hdr%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iband,ikpt,isppol,nband
+ real(dp) :: epsFS,gausstol,gaussig
+ character(len=500) :: message
+ integer :: kpt_phonflag(hdr%nkpt)
+
+! *************************************************************************
+
+!supposes nband is equal for all kpts
+ nband = hdr%nband(1)
+
+!gausstol = minimum weight value for integration weights on FS
+!should be set to reproduce DOS at Ef (Ref. PRB 34, 5065 p. 5067)
+ gausstol = 1.0d-10
+
+!use same band indices in both spin channels
+ maxFSband=1
+ minFSband=nband
+
+!window of states around fermi Energy is contained in +/- epsFS
+!should be adjusted to take into account a minimal but sufficient
+!fraction of the kpoints: see the loop below.
+!The 1000 is purely empirical!!!
+!Should also take into account the density of kpoints.
+!gaussig = width of gaussian energy window around fermi energy
+!needed to get a good fraction of kpoints contributing to the FS
+
+ gaussig = (maxval(eigenGS)-minval(eigenGS))/1000.0_dp
+
+ write (message,'(a,f11.8,2a)')' get_fs_bands : initial energy window = ',gaussig,ch10,&
+& ' The window energy will be increased until the full k-grid is inside the range'
+ call wrtout(std_out,message,'COLL')
+
+!NOTE: could loop back to here and change gaussig until we have
+!a certain fraction of the kpoints in the FS region...
+ nkptirr = 0
+
+!Do not use restricted fermi surface: include all kpts -> one
+ do while (nkptirr < hdr%nkpt)
+   gaussig = gaussig*1.05_dp
+
+!  we must take into account kpoints with states within epsFS:
+   epsFS = gaussig*sqrt(log(one/(gaussig*sqrt(pi)*gausstol)))
+
+!  check if there are eigenvalues close to the Fermi surface
+!  (less than epsFS from it)
+   kpt_phonflag(:) = 0
+
+!  do for each sppol channel
+   do isppol=1,hdr%nsppol
+     do ikpt=1,hdr%nkpt
+       do iband=1,nband
+         if (abs(eigenGS(iband,ikpt,isppol) - fermie) < epsFS) then
+           kpt_phonflag(ikpt) = 1
+           if (iband > maxFSband) maxFSband = iband
+           if (iband < minFSband) minFSband = iband
+         end if
+       end do
+     end do
+   end do ! isppol
+
+!  if user imposed certain bands for e-p, make sure they are kept
+   if (ep_b_min /= 0 .and. ep_b_min < minFSband) then
+     minFSband = ep_b_min
+   end if
+   if (ep_b_max /= 0 .and. ep_b_max > maxFSband) then
+     maxFSband = ep_b_max
+   end if
+
+!  number of irreducible kpoints (by all sym) contributing to the Fermi surface (to be completed by symops).
+   nkptirr = sum(kpt_phonflag(:))
+ end do
+
+ write(std_out,*) ' Energy window around Fermi level= ',epsFS,' nkptirr= ',nkptirr
+
+end subroutine get_fs_bands
+!!***
+
+!!****f* ABINIT/get_all_gkk2
+!! NAME
+!! get_all_gkk2
+!!
+!! FUNCTION
+!! This routine determines where to store gkk2 matrix elements (disk or RAM)
+!! and calls interpolate_gkk to calculate them.
+!! This is the most time consuming step.
+!!
+!! INPUTS
+!!   acell = lengths of unit cell vectors
+!!   amu = masses of atoms
+!!   atmfrc = atomic force constants
+!!   dielt = dielectric tensor
+!!   dipdip = dipole-dipole contribution flag
+!!   dyewq0 =
+!!   elph_ds = datastructure for elphon data and dimensions
+!!   kptirr_phon = irreducible set of fermi-surface kpoints
+!!   kpt_phon = full set of fermi-surface kpoints
+!!   ftwghtgkk = weights for FT of matrix elements
+!!   gmet = metric in reciprocal space
+!!   indsym = indirect mapping of atoms under symops
+!!   mpert = maximum number of perturbations
+!!   msym = maximum number of symmetries (usually nsym)
+!!   nsym = number of symmetries
+!!   ntypat = number of types of atoms
+!!   onegkksize = size of one gkk record, in bytes
+!!   rmet = real-space metric
+!!   rprim = unit cell lattice vectors (dimensionless)
+!!   rprimd = real-space unit-cell lattice vectors
+!!   rpt = points in real space for FT, in canonical coordinates
+!!   symrel = symmetry operations in reduced real space
+!!   trans = Atomic translations : xred = rcan + trans
+!!   typat = array of types of atoms
+!!   ucvol = unit cell volume
+!!   xred = reduced coordinates of atoms
+!!   zeff = Born effective charges
+!!
+!! OUTPUT
+!!   elph_ds = calculated |gkk|^2 are in elph_ds%gkk2
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      interpolate_gkk
+!!
+!! SOURCE
+
+subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_all_gkk2'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: crystal
+ type(ifc_type),intent(in) :: ifc
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ real(dp),intent(in) :: kpt_phon(3,elph_ds%k_phon%nkpt)
+ real(dp),intent(in) :: kptirr_phon(3,elph_ds%k_phon%nkptirr)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iost,onediaggkksize,sz1,sz2,sz3,sz4
+ real(dp) :: realdp_ex
+ !character(len=500) :: msg
+
+! *************************************************************************
+
+ if (elph_ds%nsppol /= 1) then
+   MSG_ERROR('get_all_gkk2: nsppol>1 not coded yet!')
+ end if
+
+ onediaggkksize = elph_ds%nbranch*elph_ds%k_phon%nkpt*kind(realdp_ex)
+
+ elph_ds%unit_gkk2 = 37
+ if (elph_ds%gkk2write == 0) then
+   write(std_out,*) 'get_all_gkk2 : keep gkk2 in memory. Size = ',&
+&   4.0*dble(elph_ds%k_phon%nkpt)*dble(onediaggkksize)/&
+&   1024.0_dp/1024.0_dp, " Mb"
+   sz1=elph_ds%nbranch
+   sz2=elph_ds%ngkkband
+   sz3=elph_ds%ngkkband
+   sz4=elph_ds%k_phon%nkpt
+   ABI_ALLOCATE(elph_ds%gkk2,(sz1,sz2,sz3,sz4,elph_ds%k_phon%nkpt,1))
+   elph_ds%gkk2(:,:,:,:,:,:) = zero
+
+ else if (elph_ds%gkk2write == 1) then
+   write(std_out,*) 'get_all_gkk2 : About to open gkk2 file : '
+   write(std_out,*) elph_ds%unit_gkk2,onediaggkksize
+   open (unit=elph_ds%unit_gkk2,file='gkk2file',access='direct',&
+&   recl=onediaggkksize,form='unformatted',status='new',iostat=iost)
+   if (iost /= 0) then
+     MSG_ERROR('error opening gkk2file as new')
+   end if
+!  rewind (elph_ds%unit_gkk2)
+   write(std_out,*) 'get_all_gkk2 : disk file with gkk^2 created'
+   write(std_out,*) '  calculate from real space gkk and phonon modes'
+   write(std_out,*) '  gkk2write = 1 is forced: can take a lot of time! '
+   write(std_out,*) ' size = ', 4.0*dble(onediaggkksize)*dble(elph_ds%k_phon%nkpt)/&
+&   1024.0_dp/1024.0_dp, ' Mb'
+ else
+   MSG_ERROR('bad value of gkk2write')
+ end if
+
+!here do the actual calculation of |g_kk|^2
+ MSG_ERROR("MGNOTE: interpolate_gkk is broken")
+ ABI_UNUSED(kptirr_phon(1,1))
+ call interpolate_gkk (crystal,ifc,elph_ds,kpt_phon)
+
+ !MG: This was the old coding in version 7.6.2:
+
+! call interpolate_gkk (elph_ds,kptirr_phon,kpt_phon,natom,nrpt,phon_ds,rcan,wghatm)
+!
+! and interpolate_gkk had the prototype:
+!
+!subroutine interpolate_gkk(elph_ds,kpt_phon,gprim,natom,nrpt,phon_ds,rpt,wghatm)
+
+! hence we were associating kpt_phon to gprim!
+
+end subroutine get_all_gkk2
+!!***
+
+!!****f* ABINIT/interpolate_gkk
+!! NAME
+!! interpolate_gkk
+!!
+!! FUNCTION
+!! This routine interpolates the gkk matrices for all q vectors
+!! between points on the full kpt_phon grid.
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!   kpt_phon = coordinates of all kpoints close to the FS
+!!
+!! OUTPUT
+!!   elph_ds = modified gkq
+!!
+!! NOTES
+!!  inspired to some extent by epcouple.f from the DecAFT package by J. Kay Dewhurst
+!!  most inputs taken from mkifc.f
+!!  in anaddb set ifcflag 1 such that the IFC are calculated in atmfrc prior to calling elphon
+!!
+!! PARENTS
+!!      get_all_gkk2
+!!
+!! CHILDREN
+!!      ftgkk,ifc_fourq,wrap2_pmhalf,zhpev
+!!
+!! SOURCE
+
+subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'interpolate_gkk'
+ use interfaces_77_ddb
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: crystal
+ type(ifc_type),intent(in) :: ifc
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ real(dp),intent(in) :: kpt_phon(3,elph_ds%k_phon%nkpt)
+
+!Local variables-------------------------------
+  ! output variables for dfpt_phfrq
+! variables for zhpev
+! variables for phonon interpolation
+!scalars
+ integer :: i1,i2,ikpt_phon2,iFSqpt,ib1,ib2,ier,ii
+ integer :: iost,isppol,qtor,natom
+ integer :: sz1,sz2,sz3,sz4,unit_gkkp
+ real(dp) :: qphnrm,res
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: gprim(3,3)
+ real(dp) :: displ(2,elph_ds%nbranch,elph_ds%nbranch),eigval(3*crystal%natom)
+ real(dp) :: eigvec(3*3*crystal%natom*3*crystal%natom)
+ real(dp) :: pheigvec(2*elph_ds%nbranch*elph_ds%nbranch)
+ real(dp) :: phfrq_tmp(elph_ds%nbranch),qphon(3),redkpt(3)
+ real(dp),allocatable :: gkk2_diag_tmp(:,:,:,:),gkk2_tmp(:,:,:,:,:,:,:)
+ real(dp),allocatable :: matrx(:,:),zhpev1(:,:)
+ real(dp),allocatable :: zhpev2(:)
+
+! *************************************************************************
+
+!
+!NOTE: mjv 18/5/2008 reverted to old style of ftgkk with all kpt done together.
+!may want to modify this later to use the new cleaner format with 1 FT at a
+!time.
+!
+ write(std_out,*) 'interpolate_gkk : enter'
+
+ natom = crystal%natom
+ gprim = ifc%gprim
+
+ if (elph_ds%nsppol /= 1) then
+   MSG_ERROR("interpolate_gkk not coded with nsppol>1 yet")
+ end if
+ isppol = 1
+
+
+!------------------------------------------------------
+!complete dynamical matrices for all qpts between points
+!on full kpt grid (interpolation from IFC)
+!------------------------------------------------------
+
+ sz1=elph_ds%ngkkband;sz2=elph_ds%nbranch
+ sz3=elph_ds%k_phon%nkpt;sz4=elph_ds%nFSband
+!allocate (gkk_tmp(2,sz1,sz1,sz2,sz2,1,1))
+!DEBUG
+!allocate (gkk_tmp_full(2,sz1,sz1,sz2,elph_ds%nFSband,sz3))
+!allocate (gkk_tmp_full(2,s2,sz4,sz4,sz3))
+!ENDDEBUG
+ ABI_ALLOCATE(gkk2_tmp,(2,sz1,sz1,sz2,sz2,sz3,1))
+ ABI_ALLOCATE(gkk2_diag_tmp,(sz1,sz1,sz2,sz3))
+ ABI_ALLOCATE(zhpev1,(2,2*3*natom-1))
+ ABI_ALLOCATE(zhpev2,(3*3*natom-2))
+ ABI_ALLOCATE(matrx,(2,(3*natom*(3*natom+1))/2))
+
+ qphnrm = one
+!in this part use the inverse Fourier transform to get 1 (arbitrary) qpt at a
+!time
+ ii = 0
+ qtor = 0
+ unit_gkkp = 150
+ open (unit=unit_gkkp,file='gkkp_file_ascii',form='formatted',status='unknown',iostat=iost)
+ if (iost /= 0) then
+   MSG_ERROR("error opening gkkpfile as new")
+ end if
+
+!loop over all FS pairs.
+!do ikpt1=1,elph_ds%k_phon%nkptirr
+!do iFSqpt=1,elph_ds%k_phon%nkpt
+
+!
+!this should run through the sparse mesh of 2x2x2 kpoints
+!
+ do iFSqpt=1,elph_ds%k_phon%nkpt
+   res = 2.0_dp*(kpt_phon(1,iFSqpt)+one)
+   if (abs(res-int(res)) > tol10) cycle
+   res = 2.0_dp*(kpt_phon(2,iFSqpt)+one)
+   if (abs(res-int(res)) > tol10) cycle
+   res = 2.0_dp*(kpt_phon(3,iFSqpt)+one)
+   if (abs(res-int(res)) > tol10) cycle
+
+!  do ikpt1=1,1
+!
+!  NOTE: should be very easy to parallelize!
+!
+!  write(std_out,*) ' interpolate_gkk : ikpt1 = ',ikpt1, ' / ', elph_ds%k_phon%nkptirr
+   write(std_out,*) ' interpolate_gkk : ikpt1 = ',iFSqpt, ' / ', elph_ds%k_phon%nkpt
+
+!  DEBUG
+!  write(std_out,*) ' interpolate_gkk : Warning debug version'
+!  cycle
+!  ENDDEBUG
+
+   gkk2_tmp(:,:,:,:,:,:,:) = zero
+
+!  qphon = 1 - 2    ie.  1 = 2+qphon
+   qphon(:) = kpt_phon(:,iFSqpt)
+
+!  shouldnt be necessary here, but oh well
+   call wrap2_pmhalf(qphon(1),redkpt(1),res)
+   call wrap2_pmhalf(qphon(2),redkpt(2),res)
+   call wrap2_pmhalf(qphon(3),redkpt(3),res)
+
+   qphon(:) = redkpt(:)
+   redkpt(1) = qphon(1)*gprim(1,1)+qphon(2)*gprim(1,2)+qphon(3)*gprim(1,3)
+   redkpt(2) = qphon(1)*gprim(2,1)+qphon(2)*gprim(2,2)+qphon(3)*gprim(2,3)
+   redkpt(3) = qphon(1)*gprim(3,1)+qphon(2)*gprim(3,2)+qphon(3)*gprim(3,3)
+   write (unit_gkkp,*) 'qp= ', redkpt
+
+   call ifc_fourq(ifc,crystal,qphon,phfrq_tmp,displ,out_eigvec=pheigvec)
+   write (unit_gkkp,*) phfrq_tmp(:)*Ha_cmm1
+
+   ii = ii+1
+!  if(ii > 0 .and. ii < 1000) write(std_out,'(a,i5,3E16.6,2x)') &
+!  &   ' wrote phfrq_tmp for time ', ii, phfrq_tmp
+!  end if
+
+!  phonon eigenvectors are in eigvec
+!  real and imaginary parts
+!  phonon displacements = eigvec/sqrt(M_i) are in displ
+!  real and imaginary parts
+
+!  DEBUG
+!  test: uniform phonon frequency
+!  phfrq_tmp(:) = 0.0001_dp
+!  ENDDEBUG
+
+!  FT gamma matrices for all kpt_phon points, and
+!  for qpoint = qphon(:) = kpt_phon(ikpt_phon)
+
+   call ftgkk(ifc%wghatm,gkk2_tmp,elph_ds%gkk_rpt,elph_ds%gkqwrite,&
+&   elph_ds%gkk_rptwrite,gprim,1,&
+&   natom,elph_ds%k_phon%nkpt,elph_ds%ngkkband,elph_ds%k_phon%nkpt,1,ifc%nrpt,elph_ds%nsppol,&
+&   qtor,ifc%rpt,qphon,elph_ds%unit_gkk_rpt,elph_ds%unitgkq)
+
+!  NOTE: Normally the eigenvectors of the gkk2_tmp should be the same as eigvec
+
+!  Diagonalize gamma matrices at qpoint (complex matrix) for all kpt_phon.
+!  Copied from dfpt_phfrq
+   do ikpt_phon2=1,elph_ds%k_phon%nkpt
+     res = 8.0_dp*(kpt_phon(1,ikpt_phon2)+one)
+     if (abs(res-int(res)) > tol10) cycle
+     res = 8.0_dp*(kpt_phon(2,ikpt_phon2)+one)
+     if (abs(res-int(res)) > tol10) cycle
+     res = 8.0_dp*(kpt_phon(3,ikpt_phon2)+one)
+     if (abs(res-int(res)) > tol10) cycle
+
+     write (unit_gkkp,*) 'kp= ', kpt_phon(:,ikpt_phon2)
+
+     do ib1=1,elph_ds%ngkkband
+       do ib2=1,elph_ds%ngkkband
+         ier=0
+         ii=1
+         do i2=1,3*natom
+           do i1=1,i2
+             matrx(1,ii)=gkk2_tmp(1,ib1,ib2,i1,i2,ikpt_phon2,1)
+             matrx(2,ii)=gkk2_tmp(2,ib1,ib2,i1,i2,ikpt_phon2,1)
+             ii=ii+1
+           end do
+         end do
+         call ZHPEV ('N','U',3*natom,matrx,eigval,eigvec,3*natom,zhpev1,&
+&         zhpev2,ier)
+
+         gkk2_diag_tmp(ib2,ib1,:,ikpt_phon2) = eigval(:)
+         do i1=1,3*natom
+           write (unit_gkkp,*) elph_ds%minFSband-1+ib1,elph_ds%minFSband-1+ib2,i1,&
+&           eigval(i1)
+         end do
+       end do
+     end do
+   end do
+
+   if (elph_ds%gkk2write == 1) then
+     write(std_out,*) 'WARNING COMMENTED WRITE TO BINARY FILE!!!'
+!    write (elph_ds%unit_gkk2,REC=iFSqpt) gkk2_diag_tmp(:,:,:,:)
+     write(std_out,'(a,i4,4(2E16.6,2x))') ' gkk2 loop ', &
+&     iFSqpt,gkk2_diag_tmp(1,1,:,1:2),gkk2_diag_tmp(1,1,:,elph_ds%k_phon%nkpt-1:elph_ds%k_phon%nkpt)
+!    &    ikpt1,gkk2_tmp(:,1,1,1,1,1:2),gkk2_tmp(:,1,1,elph_ds%k_phon%nkpt-1:elph_ds%k_phon%nkpt)
+   else if (elph_ds%gkk2write == 0) then
+     elph_ds%gkk2(:,:,:,:,iFSqpt,isppol) = gkk2_diag_tmp(:,:,:,:)
+!    elph_ds%gkk2(:,:,:,:,ikpt1) = gkk2_tmp
+     write(std_out,*) ' interpolate_gkk : gkk2(b=1,b=1,:,kpt=1,iFSqpt) = '
+     write(std_out,*) gkk2_diag_tmp(1,1,:,1)
+   end if
+
+ end do
+!end do on iFSqpt
+
+ ABI_DEALLOCATE(matrx)
+ ABI_DEALLOCATE(zhpev1)
+ ABI_DEALLOCATE(zhpev2)
+
+end subroutine interpolate_gkk
+!!***
+
+!!****f* ABINIT/get_all_gkq
+!!
+!! NAME
+!! get_all_gkq
+!!
+!! FUNCTION
+!! This routine determines what to do with the initial qspace
+!!   matrix elements of the electron phonon coupling (to disk or in memory),
+!!   then reads those given in the gkk file and completes them
+!!   (for kpts, then perturbations)
+!!   01/2010: removed completion on qpoints here (MJV)
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!   Cryst<crystal_t>=Info on the unit cell and on its symmetries.
+!!   Ifc<ifc_type>=Object containing the interatomic force constants.
+!!   Bst<ebands_t>=GS energies, occupancies and Fermi level.
+!!   FSfullpqtofull = mapping of k+q to another k
+!!   kphon_full2full = mapping of FS kpoints under symops
+!!   kpt_phon = fermi surface kpoints
+!!   %k_phon%wtk = integration weights for bands and kpoints near the FS
+!!   gkk_flag = flag to
+!!   nband = number of bands
+!!   n1wf = number of file headers from perturbation calculations
+!!      which are present in the initial gkk input file.
+!!   onegkksize = size of one record of the new gkk output file, in bytes
+!!   qpttoqpt = mapping of qpoints onto each other under symmetries
+!!   unitgkk = fortran unit for initial gkk input file
+!!   xred = reduced coordinates of atoms
+!!
+!! OUTPUT
+!!   elph_ds%gkq = recip space elphon matrix elements.
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      complete_gkk,int2char4,read_gkk,wrtout
+!!
+!! SOURCE
+
+subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksize,&
+&    qpttoqpt,ep_prt_yambo,unitgkk,ifltransport)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_all_gkq'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: n1wf,nband,onegkksize,unitgkk,ep_prt_yambo,ifltransport
+ type(crystal_t),intent(in) :: Cryst
+ type(ifc_type),intent(in) :: ifc
+ type(ebands_t),intent(in) :: Bst
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ integer,intent(in) :: qpttoqpt(2,Cryst%nsym,elph_ds%nqpt_full)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iost,ierr,me,sz2,sz3,sz4,sz5,sz6
+ character(len=10) :: procnum
+ character(len=500) :: message
+ character(len=fnlen) :: fname
+!arrays
+ integer,allocatable :: gkk_flag(:,:,:,:,:)
+
+! *************************************************************************
+
+!attribute file unit number
+ elph_ds%unitgkq = get_unit()
+
+!============================================
+!save gkk for all qpts in memory or to disk
+!============================================
+
+!DEBUG
+!write(std_out,*) ' 4 bytes / ??'
+!write(std_out,*) ' kind(real) = ', kind(one)
+!write(std_out,*) ' elph_ds%ngkkband = ', elph_ds%ngkkband, '^2'
+!write(std_out,*) ' elph_ds%nbranch = ', elph_ds%nbranch, '^2'
+!write(std_out,*) ' elph_ds%k_phon%nkpt = ', elph_ds%k_phon%nkpt
+!write(std_out,*) ' elph_ds%nsppol = ', elph_ds%nsppol
+!write(std_out,*) ' elph_ds%nqptirred ', elph_ds%nqptirred
+!ENDDEBUG
+
+ write(message,'(a,f14.4,a)')&
+& ' get_all_gkq : gkq file/array size = ',&
+ 4.0*dble(onegkksize)*dble(elph_ds%k_phon%my_nkpt)*dble(elph_ds%nqptirred)/1024.0_dp/1024.0_dp/1024.0_dp,' Gb'
+ call wrtout(std_out,message,'COLL')
+
+ if (elph_ds%gkqwrite == 0) then !calculate gkk(q) keeping all in memory
+
+   call wrtout(std_out,' get_all_gkq : keep gkk(q) in memory ','COLL')
+
+   sz2=elph_ds%ngkkband*elph_ds%ngkkband
+   sz3=elph_ds%nbranch*elph_ds%nbranch
+   sz4=elph_ds%k_phon%my_nkpt
+   sz5=elph_ds%nsppol
+   if (ifltransport == 3) then
+     sz6=elph_ds%nqpt_full
+   else
+     sz6=elph_ds%nqptirred
+   end if
+   ABI_STAT_ALLOCATE(elph_ds%gkk_qpt,(2,sz2,sz3,sz4,sz5,sz6), ierr)
+   ABI_CHECK(ierr==0, 'Trying to allocate array elph_ds%gkk_qpt')
+
+   elph_ds%gkk_qpt = zero
+
+ else if (elph_ds%gkqwrite == 1) then !calculate gkk(q) and write to file
+   me = xmpi_comm_rank(xmpi_world)
+   call int2char4(me,procnum)
+   ABI_CHECK((procnum(1:1)/='#'),'Bug: string length too short!')
+   fname=trim(elph_ds%elph_base_name) // "_P" // trim(procnum) // '_GKKQ'
+
+   iost=open_file(file=fname,iomsg=message,newunit=elph_ds%unitgkq,access='direct',&
+&   recl=onegkksize,form='unformatted')
+   if (iost /= 0) then
+     write (message,'(2a)')' get_all_gkq : ERROR- opening file ',trim(fname)
+     MSG_ERROR(message)
+   end if
+
+   write (message,'(5a)')&
+&   ' get_all_gkq : gkq matrix elements  will be written to file : ',trim(fname),ch10,&
+&   ' Nothing is in files yet',ch10
+   call wrtout(std_out,message,'COLL')
+
+ else
+   write(message,'(a,i0)')' gkqwrite must be 0 or 1 while it is : ',elph_ds%gkqwrite
+   MSG_BUG(message)
+ end if !if gkqwrite
+
+!=====================================================
+!read in g_kk matrix elements for all bands, kpoints,
+!and calculated qpoints
+!=====================================================
+ call wrtout(std_out,' get_all_gkq : calling read_gkk to read in the g_kk matrix elements',"COLL")
+
+ sz2=elph_ds%nbranch;sz3=elph_ds%k_phon%my_nkpt
+ sz4=elph_ds%nsppol;sz5=elph_ds%nqpt_full
+ ABI_STAT_ALLOCATE(gkk_flag,(sz2,sz2,sz3,sz4,sz5), ierr)
+ ABI_CHECK(ierr==0, "allocating gkk_flag")
+
+ call read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
+
+!if (elph_ds%symgkq ==1) then
+!MJV 01/2010 removed the completion on qpt here: it should be done after FS integration
+!so that everything is lighter in memory etc... (only irred qpt)
+! if (0==1) then
+ if (ifltransport == 3) then !  bxu, complete gkk is necessary
+
+!  ==============================================================
+!  complete gkk matrices for other qpoints on the full grid qpt_full
+!  inspired and cannibalized from symdm9.f
+!  FIXME: should add the possibility to copy over to other qpoints,
+!  without full symmetrization, for testing purposes.
+!  ==============================================================
+
+   write(message,'(4a)')ch10,&
+&   ' get_all_gkq : calling complete_gkk to complete ',ch10,&
+&   ' gkk matrices for other qpoints on the full grid'
+   call wrtout(std_out,message,'COLL')
+
+   call complete_gkk(elph_ds,gkk_flag,Cryst%gprimd,Cryst%indsym,&
+&   Cryst%natom,Cryst%nsym,qpttoqpt,Cryst%rprimd,Cryst%symrec,Cryst%symrel)
+
+   call wrtout(std_out,' get_all_gkq : out of complete_gkk','COLL')
+
+ end if !symgkq
+
+!TODO Do we need gkk_flag in elphon?
+ ABI_DEALLOCATE(gkk_flag)
+
+end subroutine get_all_gkq
+!!***
+
+!!****f* ABINIT/get_all_gkr
+!! NAME
+!! get_all_gkr
+!!
+!! FUNCTION
+!! This routine determines what to do with the rspace
+!!   matrix elements of the el phon coupling (to disk or in memory),
+!!   then reads those given in the gkq file and Fourier Transforms them
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!   gprim = reciprocal space lattice vectors
+!!   natom = number of atoms
+!!   nrpt = number of real-space points used for FT
+!!   onegkksize = size of one record of the new gkk output file, in bytes
+!!   rpt = positions of real-space points for FT
+!!   qpt_full = qpoint coordinates
+!!   wghatm = weights for real-space rpt in FT
+!!
+!! OUTPUT
+!!   elph_ds%gkr = real space elphon matrix elements.
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      ftgkk
+!!
+!! SOURCE
+
+subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_all_gkr'
+ use interfaces_77_ddb
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nrpt,onegkksize
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt_full(3,elph_ds%nqpt_full)
+ real(dp),intent(in) :: wghatm(natom,natom,nrpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon0,iost,qtor,sz2,sz3,sz4,sz5
+
+! *************************************************************************
+
+!
+!WARNING : disk file used for large arrays gkk_rpt and
+!(eventually) gkk2
+!
+!allocate (gkk_rpt(2,elph_ds%nbranch,elph_ds%nFSband,elph_ds%nFSband,&
+!&  elph_ds%k_phon%nkpt,nrpt))
+ elph_ds%unit_gkk_rpt = 36
+!see if the gkk_rpt should be written to a file (only available option now)
+ if (elph_ds%gkk_rptwrite == 1) then
+!  file is not present : we need to do the FT
+   open (unit=elph_ds%unit_gkk_rpt,file='gkk_rpt_file',access='direct',&
+&   recl=onegkksize,form='unformatted',&
+&   status='new',iostat=iost)
+   if (iost /= 0) then
+     MSG_ERROR('get_all_gkr : error opening gkk_rpt_file as new')
+   end if
+   write(std_out,*) ' get_all_gkr : will write real space gkk to a disk file.'
+   write(std_out,*) ' size = ', 4.0*dble(onegkksize)*dble(nrpt)/&
+&   1024.0_dp/1024.0_dp, ' Mb'
+
+!  else if (elph_ds%gkk_rptwrite  == 0) then
+ else
+   write(std_out,*) ' get_all_gkr : will keep real space gkk in memory.'
+   write(std_out,*) ' size = ', 4.0*dble(onegkksize)*dble(nrpt)/&
+&   1024.0_dp/1024.0_dp, ' Mb'
+   sz2=elph_ds%ngkkband*elph_ds%ngkkband
+   sz3=elph_ds%nbranch*elph_ds%nbranch
+   sz4=elph_ds%k_phon%nkpt
+   sz5=elph_ds%nsppol
+   ABI_ALLOCATE(elph_ds%gkk_rpt,(2,sz2,sz3,sz4,sz5,nrpt))
+!  write(std_out,*) ' get_all_gkr: invalid value for gkk_rptwrite'
+!  stop
+ end if
+ write(std_out,*) '    about to FT the recip space gkk to real space '
+ qtor = 1
+
+!
+!NOTE: should be very easy to parallelize!
+!
+ ikpt_phon0 = 1
+ call ftgkk (wghatm,elph_ds%gkk_qpt,elph_ds%gkk_rpt,&
+& elph_ds%gkqwrite,elph_ds%gkk_rptwrite,gprim,1,natom,&
+& elph_ds%k_phon%nkpt,elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nqpt_full,&
+& nrpt,elph_ds%nsppol,qtor,rpt,qpt_full,elph_ds%unit_gkk_rpt,elph_ds%unitgkq)
+
+!call ftgkk (elph_ds,gprim,ikpt_phon0,natom,nrpt,qtor,rpt,qpt_full,wghatm)
+ write(std_out,*) ' get_all_gkr : done with FT of gkk to real space'
+
+!No longer need the gkk_qpt?
+!if (elph_ds%gkqwrite == 0) deallocate (elph_ds%gkk_qpt)
+
+!!DEBUG
+!Test the FT of the gkk elements.
+!call test_ftgkk(elph_ds,gprim,natom,nrpt,rpt,qpt_full,wghatm)
+!!ENDDEBUG
+
+!DEBUG
+!do irpt=1,nrpt
+!do ipert1=1,elph_ds%nbranch
+!write(std_out,'(6(F16.5,1x))') elph_ds%gkk_rpt(:,ipert1,1,1,1,irpt)
+!end do
+!end do
+!ENDDEBUG
+
+end subroutine get_all_gkr
+!!***
+
+!!****f* ABINIT/complete_gkk
+!!
+!! NAME
+!! complete_gkk
+!!
+!! FUNCTION
+!! Use the set of special q points calculated by the Monkhorst &
+!! Pack Technique.
+!! Check if all the informations for the q points are present in
+!! the DDB to determine the elphon interaction matrices
+!! Generate the gkk matrices of the set of q points which
+!! samples homogeneously the entire Brillouin zone.
+!!
+!! INPUTS
+!! elph_ds = datastructure for elphon information (mainly
+!!      matrix elements and dimensions)
+!!   elph_ds%k_phon%full2full = kpt_phon index mapping under symops
+!! gkk_flag = flag for existence of matrix element
+!! gprimd(3,3)=dimensionful primitive translations in reciprocal space
+!! indsym = map of atoms by inverses of symrels
+!! natom=number of atoms in unit cell
+!! nsym=number of space group symmetries
+!! qpttoqpt = qpoint index mapping under symops
+!! rprimd(3,3)=dimensionful primitive translations in real space
+!! symrec(3,3,nsym)=3x3 matrices of the group symmetries (recip space)
+!! symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
+!! tnons(3,nsym)=nonsymmorphic translations associated to symrel
+!!
+!! OUTPUT
+!! elph_ds%gkk_qpt = gkk matrices for all qpts on a full mesh
+!!
+!! PARENTS
+!!      get_all_gkq
+!!
+!! CHILDREN
+!!      xmpi_sum,zgemm
+!!
+!! SOURCE
+
+subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprimd,symrec,symrel)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'complete_gkk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nsym
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom)
+ integer,intent(in) :: qpttoqpt(2,nsym,elph_ds%nqpt_full),symrec(3,3,nsym)
+ integer,intent(in) :: symrel(3,3,nsym)
+ integer,intent(inout) :: gkk_flag(elph_ds%nbranch,elph_ds%nbranch,elph_ds%k_phon%my_nkpt,elph_ds%nsppol,elph_ds%nqpt_full)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: rprimd(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ib1,ibranch,ieqqpt,ii, ierr,comm
+ integer :: iqpt,isppol,isym
+ integer :: itim,jbranch,jj,kk,ll
+ integer :: neqqpt,symikpt_phon
+ integer :: iatom,ancestor_iatom
+ integer :: ik_this_proc, me,sz1,sz2
+
+ real(dp),parameter :: tol=2.d-8
+!arrays
+ integer :: symmetrized_qpt(elph_ds%nqpt_full)
+ real(dp) :: ss(3,3)
+ real(dp) :: tmp_mat(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: tmp_mat2(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp),allocatable :: gkk_qpt_new(:,:,:,:,:),gkk_qpt_tmp(:,:,:,:,:)
+
+ real(dp) :: ss_allatoms(2,elph_ds%nbranch,elph_ds%nbranch)
+ real(dp) :: c_one(2), c_zero(2)
+
+
+! *********************************************************************
+
+ c_one = (/one,zero/)
+ c_zero = (/zero,zero/)
+
+!Generation of the gkk matrices relative to the q points
+!of the set which samples the entire Brillouin zone
+
+ comm = xmpi_world
+ me = xmpi_comm_rank(comm)
+
+ symmetrized_qpt(:) = -1
+
+!FIXME bxu, why set it to 1?
+!isppol=1
+
+ sz1=elph_ds%ngkkband*elph_ds%ngkkband
+ sz2=elph_ds%nbranch*elph_ds%nbranch
+
+!these arrays are not parallelized, to enable symmetrization: syms swap k-points.
+ ABI_ALLOCATE(gkk_qpt_new,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+ ABI_ALLOCATE(gkk_qpt_tmp,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+
+ do iqpt=1,elph_ds%nqpt_full
+
+!  Already symmetrized?
+   if (symmetrized_qpt(iqpt) == 1) cycle
+
+   gkk_qpt_new(:,:,:,:,:) = zero
+!   gkk_qpt_tmp(:,:,:,:,:) = zero
+
+!  loop over qpoints equivalent to iqpt
+   neqqpt=0
+!  do not use time reversal symmetry to complete the qpoints:
+!  do not know what happens to the gamma matrices
+!  itim=1
+
+   do itim=1,2
+     do isym=1,nsym
+!      ieqqpt is sent onto iqpt by itim/isym
+       ieqqpt = qpttoqpt(itim,isym,iqpt)
+       gkk_qpt_tmp(:,:,:,:,:) = zero
+
+
+       if (gkk_flag(1,1,1,1,ieqqpt) == -1) cycle
+!      if we have information on this qpt
+!      iqpt is equivalent to ieqqpt: get it from file or memory
+       do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+         ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+         if (elph_ds%gkqwrite == 0) then
+           gkk_qpt_tmp(:,:,:,ikpt_phon,:) = elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,ieqqpt)
+         else if (elph_ds%gkqwrite == 1) then
+           read(elph_ds%unitgkq,REC=((ieqqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc)) gkk_qpt_tmp(:,:,:,ikpt_phon,:)
+         end if
+       end do
+
+!      condense everything
+       call xmpi_sum (gkk_qpt_tmp, comm, ierr)
+
+       neqqpt=neqqpt+1
+
+       if (elph_ds%ep_scalprod==1) then
+         do ii=1,3
+           do jj=1,3
+             ss(ii,jj)=0.0_dp
+             do kk=1,3
+               do ll=1,3
+                 ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
+               end do
+             end do
+           end do
+         end do
+       else
+         do ii=1,3
+           do jj=1,3
+             ss(ii,jj) = symrec(jj,ii,isym)
+           end do
+         end do
+       end if
+
+       ss_allatoms(:,:,:) = zero
+       do iatom=1,natom
+         ancestor_iatom = indsym(4,isym,iatom)
+!        do jatom=1,natom
+!        ancestor_jatom = indsym(4,isym,jatom)
+         ss_allatoms(1,(ancestor_iatom-1)*3+1:(ancestor_iatom-1)*3+3,&
+&         (iatom-1)*3+1:         (iatom-1)*3+3) = ss(1:3,1:3)
+!        end do
+       end do
+
+
+!      NOTE   ssinv(ii,jj)=ssinv(ii,jj)+gprimd(ii,kk)*rprimd(jj,ll)*symrec(ll,kk,isym)
+
+       do isppol=1,elph_ds%nsppol
+         do ikpt_phon=1,elph_ds%k_phon%nkpt
+!          symikpt_phon is sent onto ikpt_phon by itim/isym
+           symikpt_phon=elph_ds%k_phon%full2full(itim,isym,ikpt_phon)
+
+!          Do each element band1, band2 separately...
+           do ib1=1,elph_ds%ngkkband*elph_ds%ngkkband
+
+!            multiply by the ss matrices
+             tmp_mat2(:,:,:) = zero
+             tmp_mat(:,:,:) = reshape(gkk_qpt_tmp(:,ib1,:,ikpt_phon,isppol),&
+&             (/2,elph_ds%nbranch,elph_ds%nbranch/))
+             call ZGEMM ('N','N',elph_ds%nbranch,elph_ds%nbranch,elph_ds%nbranch,&
+&             c_one,ss_allatoms,elph_ds%nbranch,tmp_mat,elph_ds%nbranch,c_zero,&
+&             tmp_mat2,elph_ds%nbranch)
+             call ZGEMM ('N','T',elph_ds%nbranch,elph_ds%nbranch,elph_ds%nbranch,&
+&             c_one,tmp_mat2,elph_ds%nbranch,ss_allatoms,elph_ds%nbranch,c_zero,&
+&             tmp_mat,elph_ds%nbranch)
+
+!            add to gkk_qpt_new
+             do ibranch =1,elph_ds%nbranch
+               do jbranch =1,elph_ds%nbranch
+                 gkk_qpt_new(:,ib1,(jbranch-1)*elph_ds%nbranch+ibranch,symikpt_phon,isppol) = &
+&                 gkk_qpt_new(:,ib1,(jbranch-1)*elph_ds%nbranch+ibranch,symikpt_phon,isppol) + &
+&                 tmp_mat(:,jbranch,ibranch)
+               end do
+             end do
+
+           end do ! end ib1 do
+         end do ! end ikpt_phon do
+       end do ! end isppol do
+
+     end do ! end isym do
+   end do ! itim
+
+   if (neqqpt > 1) then
+     write(std_out,*) ' found several equiv qpts and am symmetrizing them ', neqqpt
+   end if
+
+!  divide by number of equivalent qpts found
+   gkk_qpt_new(:,:,:,:,:) = gkk_qpt_new(:,:,:,:,:)/neqqpt
+
+!  copy the symmetrized version into all the equivalent qpoints, appropriately transformed
+!  See above
+!  itim=1
+   do itim=1,2
+     do isym=1,nsym
+!      ieqqpt is sent onto iqpt by itim/isym
+       ieqqpt = qpttoqpt(itim,isym,iqpt)
+
+       if (symmetrized_qpt(ieqqpt) /= -1) cycle
+       gkk_qpt_tmp(:,:,:,:,:) = zero
+
+!      use symrec matrices to get inverse transform from isym^{-1}
+       if (elph_ds%ep_scalprod==1) then
+         do ii=1,3
+           do jj=1,3
+             ss(ii,jj)=0.0_dp
+             do kk=1,3
+               do ll=1,3
+!                Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
+                 ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
+               end do
+             end do
+           end do
+         end do
+       else
+         do ii=1,3
+           do jj=1,3
+             ss(ii,jj) = symrel(ii,jj,isym)
+           end do
+         end do
+       end if
+
+       ss_allatoms(:,:,:) = zero
+       do iatom=1,natom
+         ancestor_iatom = indsym(4,isym,iatom)
+!        do jatom=1,natom
+!        ancestor_jatom = indsym(4,isym,jatom)
+         ss_allatoms(1,(ancestor_iatom-1)*3+1:(ancestor_iatom-1)*3+3,&
+&         (iatom-1)*3+1:          (iatom-1)*3+3) = ss(1:3,1:3)
+!        end do
+       end do
+
+!      ! Use inverse of symop matrix here to get back to ieqqpt
+!      ssinv(ii,jj)=ssinv(ii,jj)+gprimd(ii,kk)*rprimd(jj,ll)*symrel(kk,ll,isym)
+
+       do isppol=1,elph_ds%nsppol
+         do ikpt_phon=1,elph_ds%k_phon%nkpt
+!          symikpt_phon is sent onto ikpt_phon by itim/isym
+           symikpt_phon=elph_ds%k_phon%full2full(itim,isym,ikpt_phon)
+
+           do ib1=1,elph_ds%ngkkband*elph_ds%ngkkband
+
+!            multiply by the ss^{-1} matrices
+             tmp_mat2(:,:,:) = zero
+             tmp_mat(:,:,:) = reshape(gkk_qpt_new(:,ib1,:,ikpt_phon,isppol),&
+&             (/2,elph_ds%nbranch,elph_ds%nbranch/))
+             call ZGEMM ('N','N',elph_ds%nbranch,elph_ds%nbranch,elph_ds%nbranch,&
+&             c_one,ss_allatoms,elph_ds%nbranch,tmp_mat,elph_ds%nbranch,c_zero,&
+&             tmp_mat2,elph_ds%nbranch)
+             call ZGEMM ('N','T',elph_ds%nbranch,elph_ds%nbranch,elph_ds%nbranch,&
+&             c_one,tmp_mat2,elph_ds%nbranch,ss_allatoms,elph_ds%nbranch,c_zero,&
+&             tmp_mat,elph_ds%nbranch)
+
+             do ibranch =1,elph_ds%nbranch
+               do jbranch =1,elph_ds%nbranch
+                 gkk_qpt_tmp(:,ib1,(jbranch-1)*elph_ds%nbranch+ibranch,symikpt_phon,isppol) =&
+&                 tmp_mat(:,jbranch,ibranch)
+               end do
+             end do
+
+             do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+               if (elph_ds%k_phon%my_ikpt(ik_this_proc) == symikpt_phon) then
+                 if (gkk_flag (1,1,ik_this_proc,isppol,ieqqpt) == -1) gkk_flag (:,:,ik_this_proc,isppol,ieqqpt) = 0
+                 exit
+               end if
+             end do
+!             if (gkk_flag (1,1,symikpt_phon,isppol,ieqqpt) == -1) then
+!               gkk_flag (:,:,symikpt_phon,isppol,ieqqpt) = 0
+!             end if
+
+           end do ! end ib1 do
+         end do ! end ikpt_phon do
+       end do ! end isppol do
+
+
+!      save symmetrized matrices for qpt ieqqpt
+       do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+         ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+         if (elph_ds%gkqwrite == 0) then
+           elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,ieqqpt) = gkk_qpt_tmp(:,:,:,ikpt_phon,:)
+         else if (elph_ds%gkqwrite == 1) then
+           write(elph_ds%unitgkq,REC=((ieqqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc)) gkk_qpt_tmp(:,:,:,ikpt_phon,:)
+         end if
+       end do
+
+       symmetrized_qpt(ieqqpt) = 1
+
+     end do ! end isym do
+   end do ! end itim do
+
+ end do
+!end iqpt do
+
+ ABI_DEALLOCATE(gkk_qpt_new)
+ ABI_DEALLOCATE(gkk_qpt_tmp)
+
+end subroutine complete_gkk
 !!***
 
 end module m_elphon

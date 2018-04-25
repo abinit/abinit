@@ -72,7 +72,7 @@ program anaddb
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
- use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_dynmat,         only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_elphon,         only : elphon
  use m_harmonic_thermo,only : harmonic_thermo
  use m_thmeig,         only : thmeig
@@ -84,7 +84,6 @@ program anaddb
 #define ABI_FUNC 'anaddb'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -492,8 +491,8 @@ program anaddb
 
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_ALLOCATE(thm_scells, (inp%ntemper))
-   call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
-   call thermal_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
+   call zacharias_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   call zacharias_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
  end if
 
  ! Phonon density of states calculation, Start if interatomic forces have been calculated
@@ -876,6 +875,10 @@ program anaddb
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
 
+ if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
+   ABI_DEALLOCATE(thm_scells)
+ end if
+ 
  ! Close files
  if (iam_master) then
 #ifdef HAVE_NETCDF

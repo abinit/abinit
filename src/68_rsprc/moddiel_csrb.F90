@@ -9,7 +9,7 @@
 !! PRB 47, nb 15, p. 9892 (by C, S, R and B)
 !! - formulas for kf and qtf are from
 !! J. phys.: condens. matter 2 (1990) 7597-7611
-!! - The plasmon frequency/pulsation is from 
+!! - The plasmon frequency/pulsation is from
 !! Theory of the inhomogeneous electron gas (ed. Lundqvist and march) P327
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
@@ -50,12 +50,13 @@ subroutine moddiel_csrb(dielar,dtset,gprimd,mpi_enreg,rdiemac,rhor_in)
  use defs_abitypes
  use m_profiling_abi
 
+ use m_spacepar, only : laplacian
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'moddiel_csrb'
  use interfaces_53_ffts
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -70,7 +71,7 @@ subroutine moddiel_csrb(dielar,dtset,gprimd,mpi_enreg,rdiemac,rhor_in)
 
 !Local variables -------------------------
   !real(dp) :: invqtf2(2)
-  !real(dp) :: kf(2),wp2(2)  
+  !real(dp) :: kf(2),wp2(2)
 !scalars
  integer :: ifft
  real(dp) :: alpha
@@ -90,8 +91,6 @@ subroutine moddiel_csrb(dielar,dtset,gprimd,mpi_enreg,rdiemac,rhor_in)
 !presently works only with nspden=1
  rhor=rhor_in
  call laplacian(gprimd,mpi_enreg,dtset%nfft,dtset%nspden,dtset%ngfft,dtset%paral_kgb,g2cart_out=g2cart)
- 
-
 
  call fourdp(1, rhog(:,:,1), rhor(:,1),-1,mpi_enreg,dtset%nfft,dtset%ngfft,dtset%paral_kgb,0) !
 

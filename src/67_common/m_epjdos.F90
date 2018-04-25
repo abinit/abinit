@@ -52,6 +52,8 @@ module m_epjdos
  use m_kpts,           only : tetra_from_kptrlatt
  use m_kg,             only : ph1d3d
  use m_fftcore,        only : sphereboundary
+ use m_fft,            only : fftpac
+
 
  implicit none
 

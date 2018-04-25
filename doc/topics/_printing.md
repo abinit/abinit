@@ -2,6 +2,7 @@
 description: How to print some useful quantities
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to print some useful quantities with the ABINIT package.
 
