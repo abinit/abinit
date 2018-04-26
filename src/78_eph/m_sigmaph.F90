@@ -438,7 +438,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
- integer :: ik_bz, ikq_bz, iq_bz
+ integer :: ik_bz, ikq_bz
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
@@ -793,11 +793,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    mod(nint((kq(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
                    mod(nint((kq(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
                    mod(nint((kq(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
- 
-         iq_bz  = eph_dg%indexes_to_coarse(&
-                   mod(nint((qpt(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
-                   mod(nint((qpt(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
-                   mod(nint((qpt(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
  
          ik_bz_fine  = eph_dg%coarse_to_dense(ik_bz,1)
          ik_ibz_fine = eph_dg%bz2ibz_dense(ik_bz_fine)
