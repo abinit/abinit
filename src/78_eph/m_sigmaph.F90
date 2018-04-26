@@ -59,6 +59,7 @@ module m_sigmaph
  use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_be
+ use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
  use m_pawang,         only : pawang_type
@@ -79,6 +80,59 @@ module m_sigmaph
  public :: sigmaph   ! Main entry point to compute self-energy matrix elements
 !!***
 
+ ! Double grid datatype for electron-phonon
+ type,public :: eph_double_grid_t
+   type(ebands_t)       :: ebands_dense
+
+   real(dp),allocatable :: kpts_coarse(:,:)
+   real(dp),allocatable :: kpts_dense(:,:)
+   real(dp),allocatable :: kpts_dense_ibz(:,:)
+   integer :: coarse_nbz, dense_nbz, dense_nibz
+   
+   real(dp),allocatable :: weights_dense(:)
+   !weights in the dense grid
+
+   integer,allocatable  :: bz2ibz_coarse(:)
+   ! map full Brillouin zone to ibz (in the coarse grid)
+
+   integer,allocatable  :: bz2ibz_dense(:)
+   ! map full Brillouin zone to ibz (in the dense grid)
+
+   integer :: nkpt_coarse(3), nkpt_dense(3)
+   ! size of the coarse and dense meshes
+
+   integer :: interp_kmult(3)
+   ! multiplicity of the meshes
+
+   integer :: ndiv
+   ! interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
+
+   ! the integer indexes for the coarse grid are calculated for kk(3) with:
+   ! [nint(kk(1)*nkpt_coarse(1))+1,
+   !  nint(kk(2)*nkpt_coarse(2))+1,
+   !  nint(kk(3)*nkpt_coarse(3))+1]
+
+   integer,allocatable :: indexes_to_coarse(:,:,:)
+   ! given integer indexes get the array index of the kpoint (coarse)
+   integer,allocatable :: coarse_to_indexes(:,:)
+   ! given the array index get the integer indexes of the kpoints (coarse)
+
+   integer,allocatable :: indexes_to_dense(:,:,:)
+   ! given integer indexes get the array index of the kpoint (dense)
+   integer,allocatable :: dense_to_indexes(:,:)
+   ! given the array index get the integer indexes of the kpoint (dense)
+
+   integer,allocatable :: coarse_to_dense(:,:)
+   ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
+
+   real(dp),allocatable :: phfrq_dense(:,:)
+   ! phonon frequencies calculated on the dense mesh
+
+
+
+ end type eph_double_grid_t 
+ 
+ 
  ! Tables for degenerated KS states.
  type bids_t
    integer, allocatable :: vals(:)
@@ -339,7 +393,8 @@ contains  !=====================================================
 !! SOURCE
 
 subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,&
+                   eph_dg)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -367,6 +422,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
  type(mpi_type),intent(in) :: mpi_enreg
+ type(eph_double_grid_t),optional,intent(in) :: eph_dg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
@@ -378,9 +434,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in,ndeg !,ib,nstates
+ integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,jj,im,in,ndeg !,ib,nstates
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
+ integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
+ integer :: ik_bz, ikq_bz, iq_bz
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
@@ -389,8 +447,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
- real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2
- complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff
+ real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,alpha,beta,gmod2,hmod2,weight
+ complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,my_ieta,cplx_ediff
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -398,12 +456,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(rf_hamiltonian_type) :: rf_hamkq
  type(sigmaph_t) :: sigma
  type(gspline_t) :: gspl
+ type(ebands_t) :: ebands_dense
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
- integer :: indkk_kq(1,6)
+ integer :: indkk_kq(1,6), nkpt_coarse(3), nkpt_dense(3)
+ integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
+ integer,allocatable :: eph_dg_mapping(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: lf(2),rg(2),res(2)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
@@ -488,6 +549,14 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
+
+ ! Double grid stuff
+ if (present(eph_dg)) then
+   nkpt_coarse = eph_dg%nkpt_coarse
+   nkpt_dense  = eph_dg%nkpt_dense
+   ebands_dense = eph_dg%ebands_dense
+   ABI_MALLOC(sigma%cweights,(1, 1, nbcalc_ks, natom3))
+ end if
 
  ! TODO FOR PAW
  usecprj = 0
@@ -713,6 +782,56 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          MSG_ERROR(msg)
        end if
 
+       ! Double grid stuff
+       if (present(eph_dg)) then
+         ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
+         ik_bz  = eph_dg%indexes_to_coarse(&
+                   mod(nint((kk(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
+                   mod(nint((kk(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
+                   mod(nint((kk(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
+ 
+         ikq_bz = eph_dg%indexes_to_coarse(&
+                   mod(nint((kq(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
+                   mod(nint((kq(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
+                   mod(nint((kq(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
+ 
+         iq_bz  = eph_dg%indexes_to_coarse(&
+                   mod(nint((qpt(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
+                   mod(nint((qpt(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
+                   mod(nint((qpt(3)+1)*nkpt_coarse(3)),nkpt_coarse(3))+1)
+ 
+         ik_bz_fine  = eph_dg%coarse_to_dense(ik_bz,1)
+         ik_ibz_fine = eph_dg%bz2ibz_dense(ik_bz_fine)
+         !fine grid around kq
+         do jj=1,eph_dg%ndiv
+
+           ikq_bz_fine = eph_dg%coarse_to_dense(ikq_bz,jj)
+           ikq_ibz_fine = eph_dg%bz2ibz_dense(ikq_bz_fine)
+           weight = eph_dg%weights_dense(ikq_bz_fine)
+
+           !get q such that k->k'+q 
+           !calculate indexes of k and k'
+           indexes_jk = eph_dg%dense_to_indexes(:,ik_bz_fine) !k
+           indexes_ik = eph_dg%dense_to_indexes(:,ikq_bz_fine) !k'
+           !calcualte indexes of q 
+           indexes_qq = indexes_jk - indexes_ik !q = k - k'
+           !bring to first bz
+           indexes_qq(1) = mod(indexes_qq(1)+nkpt_dense(1),nkpt_dense(1))+1
+           indexes_qq(2) = mod(indexes_qq(2)+nkpt_dense(2),nkpt_dense(2))+1
+           indexes_qq(3) = mod(indexes_qq(3)+nkpt_dense(3),nkpt_dense(3))+1
+           !calculate given two indexes of k and k' give index of q such that k -> k'+q
+           iq_bz_fine = eph_dg%indexes_to_dense(indexes_qq(1),&
+                                                indexes_qq(2),&
+                                                indexes_qq(3))
+           iq_ibz_fine = eph_dg%bz2ibz_dense(iq_bz_fine)
+
+           eph_dg_mapping(:, jj) = &
+             [ik_bz_fine,  ikq_bz_fine,  iq_bz_fine,&
+              ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
+         enddo
+       endif
+       !
+       
        ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
@@ -900,8 +1019,30 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! TODO: In principle mu_e(T) (important if semimetal) but need to treat T --> 0 in new_occ
                !f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
-               cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                        (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               if (present(eph_dg)) then
+                 cfact = 0
+                 do jj=1,eph_dg%ndiv
+                   ! Double Grid shared points weights
+                   ikq_bz_fine  = eph_dg_mapping(1, jj)
+                   weight = eph_dg%weights_dense(ikq_bz_fine)
+
+                   ! Electronic eigenvalue
+                   ikq_ibz_fine = eph_dg_mapping(5, jj)
+                   eig0mkq = ebands_dense%eig(band,ikq_ibz_fine,spin)
+
+                   ! Phonon frequency
+                   iq_ibz_fine  = eph_dg_mapping(6, jj)
+                   wqnu = eph_dg%phfrq_dense(nu,iq_ibz_fine)
+                   if (wqnu < tol6) cycle
+                   nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
+                   
+                   cfact = ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) )*weight
+                 enddo
+               else
+                 cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                          (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               endif
 
                if (sigma%imag_only) then
                   ! Accumulate imaginary part at w = eKS
@@ -951,7 +1092,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * cfact_wr(:)
                  end if
                end if ! imag_only
-
              end do ! it
            end do ! ib_k
          end do ! nu
@@ -977,6 +1117,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_FREE(gkk_atm)
      ABI_FREE(gkk_nu)
      ABI_FREE(distrib_bq)
+     if (allocated(eph_dg_mapping)) then
+       ABI_FREE(eph_dg_mapping)
+     endif
 
      ! =========================
      ! Compute Debye-Waller term

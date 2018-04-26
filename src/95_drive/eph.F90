@@ -112,8 +112,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph
+ use m_sigmaph,         only : sigmaph, eph_double_grid_t
  use m_ephwg,           only : ephwg_test
+ use m_kpts,            only : listkk
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -140,27 +141,31 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0
+ integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
  integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
 !while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
+ integer :: interp_kmult(3), interp_side(3), nkpt_coarse(3), nkpt_dense(3), band_block(2)
+ integer :: intp_kptrlatt(3,3), intp_nshiftk
+ integer :: ii,jj,kk,i1,i2,i3,i_coarse,i_dense,i_subdense,this_dense
+ integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
+ real(dp):: params(3), intp_shiftk(3)
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk,use_wfq,use_dvdb
+ logical :: use_wfk,use_wfq,use_dvdb,use_dg
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path,wfk_fname_dense
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands, ebands_kq
+ type(ebands_t) :: ebands, ebands_kq, ebands_dense
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
  type(ddk_t) :: ddk
@@ -168,13 +173,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
+ type(hdr_type) :: hdr_wfk_dense
+ type(eph_double_grid_t) :: eph_dg
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  integer :: count_wminmax(2)
- real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
  real(dp) :: wminmax(2)
+ integer,allocatable :: indqq(:,:)
+ real(dp),parameter :: k0(3)=zero
+ real(dp) :: dksqmax
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
+ real(dp),pointer :: energies_dense(:,:,:), displ_cart(:,:,:,:), kq_kpts(:,:)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -218,6 +228,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
  use_dvdb = (dtset%eph_task /= 0)
+ use_dg = .false.
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -576,6 +587,373 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
 & pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
+ ! =======================================
+ ! === Prepare Double grid integration ===
+ ! =======================================
+
+ ! 1. Read kpoints and eig from a WFK/EIG/GSR file
+ ! 2. Initialize a double grid object for the claculations
+ ! of the integration weights on a coarse grid using the
+ ! values of energy in a fine grid
+ !
+ ! -------------------
+ ! |. . .|. . .|. . .| 
+ ! |. x .|. x .|. x .| 
+ ! |. . .|. . .|. . .|
+ ! -------------------
+ ! . = double grid
+ ! x = coarse grid
+ !
+ ! The fine grid is used to evaluate the weights on the coarse grid
+ ! The points of the fine grid are associated to the points of the
+ ! coarse grid according to proximity
+ ! The integration weights are returned on the coarse grid.
+ !
+ ! Steps of the implementation
+ ! 1. Load the fine k grid from file
+ ! 2. Find the matching between the k_coarse and k_dense using the double_grid object
+ ! 3. Calculate the phonon frequencies on the dense mesh and store them on a array
+ ! 4. Create an array to bring the points in the full brillouin zone to the irreducible brillouin zone
+ ! 5. Create a scatter array between the points in the fine grid
+ ! 
+
+ !1.
+ if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
+     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
+
+   wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
+   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense),"COLL")
+
+   if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
+   call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
+   ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
+   eph_dg%ebands_dense = ebands_dense
+
+   !TODO add a check for consistency
+   ! number of bands and kpoints (comensurability)
+   ABI_CHECK(hdr_wfk_dense%mband == wfk0_hdr%mband, 'Inconsistent number of bands for the fine and dense grid')
+
+   nkpt_coarse = [wfk0_hdr%kptrlatt(1,1),&
+                  wfk0_hdr%kptrlatt(2,2),&
+                  wfk0_hdr%kptrlatt(3,3)]
+   nkpt_dense  = [hdr_wfk_dense%kptrlatt(1,1),&
+                  hdr_wfk_dense%kptrlatt(2,2),&
+                  hdr_wfk_dense%kptrlatt(3,3)]
+   interp_kmult = nkpt_dense/nkpt_coarse
+   use_dg = .true.
+
+ !read bs_interpmult
+ else if (dtset%bs_interp_kmult(1) /= 0 .or.&
+          dtset%bs_interp_kmult(2) /= 0 .or.&
+          dtset%bs_interp_kmult(3) /= 0 ) then
+
+   call wrtout(std_out,"EPH Interpolation: will use star functions interpolation","COLL")
+
+   nkpt_coarse = [wfk0_hdr%kptrlatt(1,1),&
+                  wfk0_hdr%kptrlatt(2,2),&
+                  wfk0_hdr%kptrlatt(3,3)]
+   interp_kmult = dtset%bs_interp_kmult
+   nkpt_dense = nkpt_coarse*interp_kmult
+
+   ! Interpolate band energies with star-functions
+   params = 0; params(1) = 1; params(2) = 5
+   !TODO: mband should be min of nband
+   band_block = [1, ebands%mband]
+   intp_kptrlatt = reshape([nkpt_dense(1), 0, 0, 0, nkpt_dense(2), 0, 0, 0, nkpt_dense(3)], [3, 3])
+   intp_shiftk = zero
+   intp_nshiftk = 1
+   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt,&
+                                      intp_nshiftk, intp_shiftk, band_block, comm)
+   eph_dg%ebands_dense = ebands_dense
+   use_dg = .true.
+ end if
+
+ if (use_dg) then
+ !2.
+
+   !debug
+   write(std_out,*) 'dense ngkpt:',ebands_dense%nkpt
+   write(std_out,*) 'dense mband:',ebands_dense%mband
+   !end debug
+
+   eph_dg%dense_nbz = nkpt_dense(1)*nkpt_dense(2)*nkpt_dense(3)
+   eph_dg%coarse_nbz = nkpt_coarse(1)*nkpt_coarse(2)*nkpt_coarse(3)
+   eph_dg%interp_kmult = interp_kmult
+   eph_dg%nkpt_coarse = nkpt_coarse
+   eph_dg%nkpt_dense = nkpt_dense
+   
+   ! microzone is the set of points in the fine grid belonging to a certain coarse point
+   ! we have to consider a side of a certain size around the coarse point
+   ! to make sure the microzone is centered around it point.
+   ! The fine points shared by multiple microzones should have weights
+   ! according to in how many microzones they appear
+   !
+   ! double grid:
+   ! ----------------- interp_kmult 2
+   ! |. .|.|.|.|. . .| side 1
+   ! |. x|.|x|.|. x .| size 3 (2*side+1)
+   ! |. .|.|.|.|. . .|
+   ! -----------------
+   !
+   ! triple grid:
+   ! ------------------- interp_kmult 3
+   ! |. . .|. . .|. . .| side 1
+   ! |. x .|. x .|. x .| size 3 (2*side+1)
+   ! |. . .|. . .|. . .|
+   ! -------------------
+   !
+   ! quadruple grid:
+   ! --------------------------- interp_kmult 4
+   ! |. . . .|.|. . .|.|. . . .| side 2
+   ! |. . . .|.|. . .|.|. . . .| size 5  (2*side+1)
+   ! |. . x .|.|. x .|.|. x . .|
+   ! |. . . .|.|. . .|.|. . . .|
+   ! |. . . .|.|. . .|.|. . . .|
+   ! ---------------------------
+   !
+   ! and so on
+   ! this is integer division
+   interp_side = interp_kmult/2
+
+   eph_dg%ndiv = (2*interp_side(1)+1)*&
+                 (2*interp_side(2)+1)*&
+                 (2*interp_side(3)+1)
+
+   write(std_out,*) 'coarse:      ', nkpt_coarse
+   write(std_out,*) 'dense:       ', nkpt_dense
+   write(std_out,*) 'interp_kmult:', interp_kmult
+   write(std_out,*) 'ndiv:        ', eph_dg%ndiv
+
+   ABI_MALLOC(eph_dg%kpts_coarse,(3,eph_dg%coarse_nbz))
+   ABI_MALLOC(eph_dg%kpts_dense,(3,eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%coarse_to_dense,(eph_dg%coarse_nbz,eph_dg%ndiv))
+
+   ABI_MALLOC(eph_dg%dense_to_indexes,(3,eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%indexes_to_dense,(nkpt_dense(1),nkpt_dense(2),nkpt_dense(3)))
+
+   ABI_MALLOC(eph_dg%coarse_to_indexes,(3,eph_dg%dense_nbz))
+   ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
+
+   ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
+
+   write(std_out,*) 'create dense to coarse mapping'
+   ! generate mapping of points in dense bz to the dense bz
+   ! coarse loop
+   i_dense = 0
+   i_coarse = 0
+   do kk=1,nkpt_coarse(3)
+     do jj=1,nkpt_coarse(2)
+       do ii=1,nkpt_coarse(1)
+         i_coarse = i_coarse + 1
+         !calculate reduced coordinates of point in coarse mesh
+         eph_dg%kpts_coarse(:,i_coarse) = [dble(ii-1)/nkpt_coarse(1),&
+                                           dble(jj-1)/nkpt_coarse(2),&
+                                           dble(kk-1)/nkpt_coarse(3)]
+         !create the fine mesh
+         do i3=1,interp_kmult(3)
+           do i2=1,interp_kmult(2)
+             do i1=1,interp_kmult(1)
+               i_dense = i_dense + 1
+               !calculate reduced coordinates of point in dense mesh
+               eph_dg%kpts_dense(:,i_dense) =  &
+                    [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
+                     dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
+                     dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
+               !integer indexes mapping
+               eph_dg%indexes_to_dense((ii-1)*interp_kmult(1)+i1,&
+                                       (jj-1)*interp_kmult(2)+i2,&
+                                       (kk-1)*interp_kmult(3)+i3) = i_dense
+               eph_dg%dense_to_indexes(:,i_dense) = [(ii-1)*interp_kmult(1)+i1,&
+                                                     (jj-1)*interp_kmult(2)+i2,&
+                                                     (kk-1)*interp_kmult(3)+i3]
+             enddo
+           enddo
+         enddo
+         eph_dg%indexes_to_coarse(ii,jj,kk) = i_coarse
+         eph_dg%coarse_to_indexes(:,i_coarse) = [ii,jj,kk]
+       enddo
+     enddo
+   enddo 
+
+   ! here we need to iterate again because we can have points of the dense grid
+   ! belonging to multiple coarse points
+   i_coarse = 0
+   do kk=1,nkpt_coarse(3)
+     do jj=1,nkpt_coarse(2)
+       do ii=1,nkpt_coarse(1)
+         i_coarse = i_coarse + 1
+
+         !create a mapping from coarse to dense
+         i_subdense = 0
+         do i3=-interp_side(3),interp_side(3)
+           do i2=-interp_side(2),interp_side(2)
+             do i1=-interp_side(1),interp_side(1)
+               i_subdense = i_subdense + 1
+               !integer indexes mapping
+               this_dense = eph_dg%indexes_to_dense(&
+                      mod((ii-1)*interp_kmult(1)+i1+nkpt_dense(1),nkpt_dense(1))+1,&
+                      mod((jj-1)*interp_kmult(2)+i2+nkpt_dense(2),nkpt_dense(2))+1,&
+                      mod((kk-1)*interp_kmult(3)+i3+nkpt_dense(3),nkpt_dense(3))+1)
+
+               !array indexes mapping
+               eph_dg%coarse_to_dense(i_coarse,i_subdense) = this_dense
+             enddo
+           enddo
+         enddo
+       enddo
+     enddo
+   enddo 
+
+   ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete') 
+
+   !calculate the weights of each fine point
+   !different methods to distribute the weights might lead to better convergence
+   !loop over coarse points
+   eph_dg%weights_dense = 0
+   do ii=1,eph_dg%coarse_nbz
+     !loop over points in the microzone
+     do jj=1,eph_dg%ndiv
+       i_dense = eph_dg%coarse_to_dense(ii,jj)
+       eph_dg%weights_dense(i_dense) = eph_dg%weights_dense(i_dense) + 1
+     end do
+   end do
+   !weights_dense is array, ndiv is scalar
+   eph_dg%weights_dense = 1/eph_dg%weights_dense/(interp_kmult(1)*interp_kmult(2)*interp_kmult(3))
+
+ !5.
+#if 0
+   write(std_out,*) 'calculate scatering'
+   !from any two k and k' find q such that k - k' = q (in bz) k -> k'+q
+   do ii=1,eph_dg%dense_nbz !k'
+     do jj=1,eph_dg%dense_nbz !k
+       !calculate indexes of k and k'
+       indexes_jk = eph_dg%dense_to_indexes(:,jj) !k
+       indexes_ik = eph_dg%dense_to_indexes(:,ii) !k'
+       !calcualte indexes of q 
+       indexes_qq = indexes_jk - indexes_ik !q = k - k'
+       !bring to first bz
+       indexes_qq(1) = mod(indexes_qq(1)+nkpt_dense(1),nkpt_dense(1))+1
+       indexes_qq(2) = mod(indexes_qq(2)+nkpt_dense(2),nkpt_dense(2))+1
+       indexes_qq(3) = mod(indexes_qq(3)+nkpt_dense(3),nkpt_dense(3))+1
+       !calculate given two indexes of k and k' give index of q such that k -> k'+q
+       eph_dg%scatter_dense(jj,ii) = eph_dg%indexes_to_dense(indexes_qq(1),&
+                                                             indexes_qq(2),&
+                                                             indexes_qq(3))
+     enddo
+   enddo
+#endif
+ !3.
+   eph_dg%kpts_dense_ibz = ebands_dense%kptns
+   eph_dg%dense_nibz = ebands_dense%nkpt
+   write(std_out,*) 'calculate phonon frequencies'
+   !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
+   ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
+
+#if 1
+   !ibz version (HM: I noticed that the fourier interpolation sometimes breaks the symmetries)
+   ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nibz))
+   do ii=1,eph_dg%dense_nibz
+     qpt = eph_dg%kpts_dense_ibz(:,ii)
+     ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+     call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
+   enddo
+#else
+   !bz version
+   ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nbz))
+   do ii=1,eph_dg%dense_nbz
+     qpt = eph_dg%kpts_dense(:,ii)
+     ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+     call ifc_fourq(ifc, cryst, qpt, eph_dg%phfrq_dense(:,ii), displ_cart )
+   enddo
+#endif
+   ABI_FREE(displ_cart)
+
+ 
+ !4. 
+   write(std_out,*) 'map bz -> ibz'
+   ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
+   ABI_MALLOC(indqq,(eph_dg%dense_nbz,6))
+   call listkk(dksqmax,cryst%gmet,    indqq,&
+               eph_dg%kpts_dense_ibz, eph_dg%kpts_dense,&
+               eph_dg%dense_nibz,     eph_dg%dense_nbz, &
+               cryst%nsym,sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+   ABI_CHECK(dksqmax < tol6, 'Problem creating a bz to ikbz kpoint mapping')
+   eph_dg%bz2ibz_dense(:) = indqq(:,1)
+
+#if 0
+   !debug
+   open (unit = 2, file = "ibz.dat")
+   do ii=1,eph_dg%dense_nibz
+     write(2,*) eph_dg%kpts_dense_ibz(:,ii)
+   end do
+
+   open (unit = 2, file = "bz.dat")
+   do ii=1,eph_dg%dense_nbz
+     write(2,*) eph_dg%kpts_dense(:,ii), eph_dg%bz2ibz_dense(ii)
+   end do
+
+   ABI_MALLOC(phfreq_bz,(cryst%natom*3))
+   ABI_MALLOC(phfreq_ibz,(cryst%natom*3))
+   open (unit = 2, file = "phbz.dat")
+   open (unit = 3, file = "phibz.dat")
+   do ii=1,eph_dg%dense_nbz
+     call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,ii), phfreq_bz, displ_cart )
+     call ifc_fourq(ifc, cryst, eph_dg%kpts_dense_ibz(:,eph_dg%bz2ibz_dense(ii)), phfreq_ibz, displ_cart )
+     write(2,*) phfreq_bz
+     write(3,*) phfreq_ibz 
+   end do
+#endif
+
+   open (unit = 2, file = "coarse2dense.dat")
+   do ii=1,eph_dg%coarse_nbz
+     write(2,*)
+     write(2,*)
+     write(2,*) eph_dg%kpts_coarse(:,ii)
+     do jj=1,eph_dg%ndiv
+       i_dense = eph_dg%coarse_to_dense(ii,jj)
+       write(2,*) eph_dg%kpts_dense(:,i_dense), eph_dg%weights_dense(i_dense)
+     end do
+   end do
+
+   open (unit = 2, file = "coarse.dat")
+   do ii=1,eph_dg%coarse_nbz
+     write(2,*) eph_dg%kpts_coarse(:,ii)
+   end do
+   close(2)
+
+   open (unit = 2, file = "dense.dat")
+   do ii=1,eph_dg%dense_nbz
+     write(2,*) eph_dg%kpts_dense(:,ii)
+   end do
+   close(2)
+   !end debug
+
+
+ !6. we will call sigmaph here for testing purposes only
+   if (dtset%eph_task == 4) then
+     call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+                  pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_dg)
+   endif
+
+   ABI_FREE(eph_dg%weights_dense)
+   ABI_FREE(eph_dg%phfrq_dense)
+   ABI_FREE(eph_dg%bz2ibz_dense)
+   ABI_FREE(eph_dg%kpts_coarse)
+   ABI_FREE(eph_dg%kpts_dense)
+   ABI_FREE(eph_dg%coarse_to_dense)
+   ABI_FREE(eph_dg%dense_to_indexes)
+   ABI_FREE(eph_dg%indexes_to_dense)
+   ABI_FREE(eph_dg%coarse_to_indexes)
+   ABI_FREE(eph_dg%indexes_to_coarse)
+
+ end if
+
+ ! end double grid stuff
+
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
  ! ====================================================
@@ -606,8 +984,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (4)
    ! Compute electron self-energy (phonon contribution)
-   call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   if ( .not. use_dg) then
+     call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   endif
 
  case (5)
    ! Interpolate the phonon potential
