@@ -552,10 +552,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  ! Double grid stuff
  if (present(eph_dg)) then
+   ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
    nkpt_coarse = eph_dg%nkpt_coarse
    nkpt_dense  = eph_dg%nkpt_dense
    ebands_dense = eph_dg%ebands_dense
-   ABI_MALLOC(sigma%cweights,(1, 1, nbcalc_ks, natom3))
  end if
 
  ! TODO FOR PAW
@@ -784,7 +784,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
        ! Double grid stuff
        if (present(eph_dg)) then
-         ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
          ik_bz  = eph_dg%indexes_to_coarse(&
                    mod(nint((kk(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
                    mod(nint((kk(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
@@ -1117,9 +1116,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_FREE(gkk_atm)
      ABI_FREE(gkk_nu)
      ABI_FREE(distrib_bq)
-     if (allocated(eph_dg_mapping)) then
-       ABI_FREE(eph_dg_mapping)
-     endif
 
      ! =========================
      ! Compute Debye-Waller term
@@ -1350,6 +1346,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (sigma%gfw_nomega > 0) then
    ABI_FREE(dt_weights)
  end if
+
+ if (present(eph_dg)) then
+   ABI_FREE(eph_dg_mapping)
+ endif
+
 
  call gspline_free(gspl)
  call destroy_hamiltonian(gs_hamkq)
