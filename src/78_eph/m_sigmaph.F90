@@ -1022,7 +1022,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
                    ! Electronic eigenvalue
                    ikq_ibz_fine = eph_dg_mapping(5, jj)
-                   eig0mkq = ebands_dense%eig(band,ikq_ibz_fine,spin)
+                   eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
 
                    ! Phonon frequency
                    iq_ibz_fine  = eph_dg_mapping(6, jj)
@@ -1030,8 +1030,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    if (wqnu < tol6) cycle
                    nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                    
-                   cfact = ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) )*weight
+                   cfact = cfact + &
+                          ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                           (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) )*weight
                  enddo
                else
                  cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
