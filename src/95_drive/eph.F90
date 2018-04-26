@@ -141,11 +141,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0
- integer,parameter :: brav1=-1 ! WARNING. This choice is only to insure backwards compatibility with the tests,
-!while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
- integer :: iblock,ddb_nqshift,ierr
+ integer :: iblock,ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem !,ug_mem,ur_mem,cprj_mem
 #ifdef HAVE_NETCDF
@@ -432,6 +430,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Read the DDB file.
  ABI_CALLOC(dummy_atifc, (dtset%natom))
 
+ ! WARNING. This choice is only to insure backwards compatibility with the tests,
+ ! while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
+ brav1 = 1; if (dtset%eph_transport > 0) brav1 = -1
+
  if (use_wfk) then
    call ddb_from_file(ddb,ddb_path,brav1,dtset%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
    call crystal_free(cryst_ddb)
@@ -458,8 +460,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if
 
- ! Build the inter-atomic force constants.
- ! WARNING : brav1 has been set to -1 at the initialisation of eph.F90, see the message there. Should be turned to 1 as soon as possible.
  call ifc_init(ifc,cryst,ddb,&
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)

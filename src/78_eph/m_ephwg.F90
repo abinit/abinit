@@ -145,9 +145,9 @@ type, public :: ephwg_t
  public :: ephwg_new             ! Basic Constructor
  public :: ephwg_from_ebands     ! Build object from ebands_t
  public :: ephwg_setup_kpoint    ! Prepare tetrahedron method for given external k-point.
- public :: ephwg_get_deltas      ! Compute weights for $ \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
- public :: ephwg_get_dweights    ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
- public :: ephwg_zinv_weights
+ public :: ephwg_get_deltas      ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+ public :: ephwg_get_dweights    ! Compute weights for a set of frequencies.
+ public :: ephwg_zinv_weights    ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
  public :: ephwg_free            ! Free memory
  public :: ephwg_test
 
@@ -591,7 +591,7 @@ subroutine ephwg_get_dweights(self, iqlk, nw, wvals, band, spin, bcorr, deltaw_p
      pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
    end do
    do ii = 1, 2
-     call tetra_get_onewk_wvals(self%tetra_k, iqlk, bcorr, nw, wvals, self%nq_k, pme_k(:, ii), weights)
+     call tetra_get_onewk_wvals(self%tetra_k, iqlk, bcorr, nw, wvals, self%nq_k, pme_k(:, ii), weights, wtol=tol12)
      deltaw_pm(:, ii, nu) = weights(:, 1)
    end do
  end do

@@ -178,6 +178,7 @@ MODULE m_crystal
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
+ public :: crystal_without_symmetries ! Return new object without symmetries (actually nsym = 1 and identity operation)
  public :: crystal_free            ! Free memory.
  public :: crystal_print           ! Print dimensions and basic info stored in the object
  public :: print_symmetries        ! Helper function to print symmetries in a nice format.
@@ -411,6 +412,47 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 
 end subroutine crystal_init
 !!***
+
+!!****f* m_crystal/crystal_without_symmetries
+!! NAME
+!!  crystal_without_symmetries
+!!
+!! FUNCTION
+!!  Return new crystal_t object without symmetries (actually nsym = 1 and identity operation)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(crystal_t) function crystal_without_symmetries(self) result(new)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'crystal_without_symmetries'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(crystal_t), intent(in) :: self
+
+!Local variables-------------------------------
+ integer,parameter :: timrev1 = 1, new_symafm(1) = 1
+ real(dp),parameter :: new_tnons(3,1) = zero
+! *************************************************************************
+
+ call crystal_init(self%amu, new, 1, self%natom, self%npsp, self%ntypat, 1, self%rprimd, self%typat, &
+  self%xred, self%zion, self%znucl, timrev1, .False., .False., self%title, &
+  symrel=identity_3d, tnons=new_tnons, symafm=new_symafm)
+
+end function crystal_without_symmetries
 
 !----------------------------------------------------------------------
 
