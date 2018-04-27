@@ -159,6 +159,7 @@
  use m_fftcore,  only : kgindex
  use m_kg,       only : getph
  use m_dtset,    only : testsusmat
+ use m_spacepar, only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

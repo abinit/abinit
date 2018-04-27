@@ -43,6 +43,7 @@ module m_tddft
  use m_io_tools, only : get_unit
  use m_time,     only : timab
  use m_fftcore,  only : sphereboundary
+ use m_spacepar, only : hartre
 
  implicit none
 

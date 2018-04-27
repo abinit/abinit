@@ -111,6 +111,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use m_cgtools,  only : dotprod_vn
  use m_pawrhoij, only : pawrhoij_type
  use m_inwffil,  only : inwffil
+ use m_spacepar, only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
