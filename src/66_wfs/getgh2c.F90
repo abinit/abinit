@@ -446,13 +446,6 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      end if
      nullify(cwaveprj_ptr)
 
-     if (associated(enl_ptr)) then
-       nullify(enl_ptr)
-     end if
-     if (allocated(enl_temp)) then
-       ABI_DEALLOCATE(enl_temp)
-     end if
-
    end if
 
 !No non-local part
@@ -472,6 +465,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      end do
    end if
 
+ end if
+
+ if (associated(enl_ptr)) then
+   nullify(enl_ptr)
+ end if
+ if (allocated(enl_temp)) then
+   ABI_DEALLOCATE(enl_temp)
  end if
 
 !======================================================================

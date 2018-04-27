@@ -11,7 +11,7 @@
 !! Remember: for each atom, rho_ij=Sum_{n,k} {occ(n,k)*<Cnk|p_i><p_j|Cnk>}
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 2018-2018 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,23 +136,6 @@
    message = 'Wrong inputs. Necessary conditions on ipert1 or ipert2 : 0 <= ipert <= natom+2'
    MSG_BUG(message)
  end if
-
-! ncpgr=0
-! if (option==2.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4)) ncpgr=1
-! if (option==3) ncpgr=cwaveprj(1,1)%ncpgr
-!!Tests
-! if(option==2.and.(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11)) then
-!   message = ' not relevant for ipert=natom+1 or ipert=natom+10 or ipert=natom+11 !'
-!   MSG_BUG(message)
-! end if
-! if(option==2.and.cwaveprj(1,1)%ncpgr<ncpgr) then
-!   message = ' Error on cwaveprj1 factors derivatives !'
-!   MSG_BUG(message)
-! end if
-! if(option==3.and.cwaveprj(1,1)%ncpgr/=ncpgr) then
-!   message = ' Error on cwaveprj factors derivatives !'
-!   MSG_BUG(message)
-! end if
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))

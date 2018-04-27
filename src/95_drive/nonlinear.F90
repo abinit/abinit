@@ -168,6 +168,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
  real(dp) :: rdum,residm,ucvol,vxcavg
  character(len=500) :: message
+ character(len=30) :: small_msg
  character(len=fnlen) :: dscrpt
  type(pawang_type) :: pawang1
  type(ebands_t) :: bstruct
@@ -1087,71 +1088,27 @@ end if
 &       d3cart_1(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
        d3cart_2(:,:,i1pert,:,i1pert,:,i1pert) = &
 &       d3cart_2(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
-       d3cart_3(:,:,i1pert,:,i1pert,:,i1pert) = &
-&       d3cart_3(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
-       d3cart_4(:,:,i1pert,:,i1pert,:,i1pert) = &
-&       d3cart_4(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
-       d3cart_5(:,:,i1pert,:,i1pert,:,i1pert) = &
-&       d3cart_5(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
-       d3cart_6(:,:,i1pert,:,i1pert,:,i1pert) = &
-&       d3cart_6(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
-       d3cart_7(:,:,i1pert,:,i1pert,:,i1pert) = &
-&       d3cart_7(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
        d3cart_8(:,:,i1pert,:,i1pert,:,i1pert) = &
 &       d3cart_8(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
        d3cart_9(:,:,i1pert,:,i1pert,:,i1pert) = &
 &       d3cart_9(:,:,i1pert,:,i1pert,:,i1pert)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
 
        theunit = ab_out
-       write(theunit,'(2a)') ch10,' ** Total :'
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
-           end do
-         end do
-       end do
 
-       write(theunit,'(2a)') ch10,' ** sum_psi1H1psi1 :'
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_1(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_1(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
-           end do
-         end do
-       end do
+       write(small_msg,'(a)') ' ** Total :'
+       call print_chi2(d3cart,i1pert,small_msg,theunit)
 
-       write(theunit,'(2a)') ch10,' ** sum_lambda1psi1psi1 :'
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_2(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_2(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
-            end do
-         end do
-       end do
+       write(small_msg,'(a)') ' ** sum_psi1H1psi1 :'
+       call print_chi2(d3cart_1,i1pert,small_msg,theunit)
 
-       write(theunit,'(2a)') ch10,' ** exc3 :'
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_8(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_8(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
-           end do
-         end do
-       end do
+       write(small_msg,'(a)') ' ** sum_lambda1psi1psi1 :'
+       call print_chi2(d3cart_2,i1pert,small_msg,theunit)
 
-       write(theunit,'(2a)') ch10,' ** exc3_paw :'
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
-             write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,&
-  &           d3cart_9(1,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert),d3cart_9(2,i1dir,i1pert,i2dir,i1pert,i3dir,i1pert)
-           end do
-         end do
-       end do
+       write(small_msg,'(a)') ' ** exc3 :'
+       call print_chi2(d3cart_8,i1pert,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** exc3_paw :'
+       call print_chi2(d3cart_9,i1pert,small_msg,theunit)
 
      end if ! nonlinear_info > 0
 
@@ -1219,116 +1176,36 @@ end if
 
      if (pead==0.and.(dtset%nonlinear_info>0)) then
        theunit = ab_out
-       write(theunit,'(a)') ' ** Total :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** sum_psi1H1psi1 :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_1(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_1(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_1(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_1(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_1(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_1(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** sum_lambda1psi1psi1 :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_2(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_2(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_2(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_2(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_2(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_2(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** sum_lambda1psi0S1psi1 :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_3(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_3(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_3(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_3(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_3(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_3(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** sum_psi0H2psi1a :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_4(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_4(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_4(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_4(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_4(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_4(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** sum_psi0H2psi1b :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_5(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_5(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_5(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_5(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_5(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_5(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** eHxc21_paw :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_6(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_6(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_6(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_6(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_6(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_6(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** eHxc21_nhat :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_7(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_7(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_7(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_7(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_7(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_7(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** exc3 :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_8(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_8(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_8(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_8(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_8(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_8(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
-       write(theunit,'(a)') ' ** exc3_paw :'
-       do i1pert = 1,natom
-         do i1dir = 1,3
-           write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
-  &         d3cart_9(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart_9(2,i1dir,i1pert,1,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_9(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart_9(2,i1dir,i1pert,2,natom+2,:,natom+2)
-           write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
-  &         d3cart_9(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart_9(2,i1dir,i1pert,3,natom+2,:,natom+2)
-         end do
-       end do
+
+       write(small_msg,'(a)') ' ** Total :'
+       call print_dchidtau(d3cart,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** sum_psi1H1psi1 :'
+       call print_dchidtau(d3cart_1,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** sum_lambda1psi1psi1 :'
+       call print_dchidtau(d3cart_2,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** sum_lambda1psi0S1psi1 :'
+       call print_dchidtau(d3cart_3,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** sum_psi0H2psi1a :'
+       call print_dchidtau(d3cart_4,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** sum_psi0H2psi1b :'
+       call print_dchidtau(d3cart_5,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** eHxc21_paw :'
+       call print_dchidtau(d3cart_6,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** eHxc21_nhat :'
+       call print_dchidtau(d3cart_7,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** exc3 :'
+       call print_dchidtau(d3cart_8,small_msg,theunit)
+
+       write(small_msg,'(a)') ' ** exc3_paw :'
+       call print_dchidtau(d3cart_9,small_msg,theunit)
 
      end if ! nonlinear_info > 0
 
@@ -1431,5 +1308,51 @@ end if
 
  DBG_EXIT("COLL")
 
+ contains
+
+   subroutine print_chi2(d3cart0,ipert,msg,theunit)
+
+     integer,intent(in) :: theunit,ipert
+     character(len=30) :: msg
+     real(dp) :: elem1,elem2
+     real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
+
+     write(theunit,'(2a)') ch10,msg
+     do i1dir = 1, 3
+       do i2dir = 1, 3
+         do i3dir = 1, 3
+           elem1 = d3cart0(1,i1dir,ipert,i2dir,ipert,i3dir,ipert)
+           elem2 = d3cart0(2,i1dir,ipert,i2dir,ipert,i3dir,ipert)
+           write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,elem1,elem2
+         end do
+       end do
+     end do
+
+   end subroutine print_chi2
+
+   subroutine print_dchidtau(d3cart0,msg,theunit)
+
+     integer,intent(in) :: theunit
+     character(len=30) :: msg
+     real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
+
+     write(theunit,'(a)') msg
+     do i1pert = 1,natom
+       do i1dir = 1,3
+         write(theunit,'(1x,i4,9x,i2,3(3x,f16.9),3(3x,f16.9))')i1pert,i1dir,&
+  &      d3cart0(1,i1dir,i1pert,1,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,1,natom+2,:,natom+2)
+         write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &      d3cart0(1,i1dir,i1pert,2,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,2,natom+2,:,natom+2)
+         write(theunit,'(16x,3(3x,f16.9),3(3x,f16.9))')&
+  &      d3cart0(1,i1dir,i1pert,3,natom+2,:,natom+2),d3cart0(2,i1dir,i1pert,3,natom+2,:,natom+2)
+       end do
+     end do
+
+  end subroutine print_dchidtau
+
+
 end subroutine nonlinear
+!!***
+
+
 !!***

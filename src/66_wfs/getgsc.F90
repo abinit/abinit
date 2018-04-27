@@ -124,7 +124,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Prepare some data
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
  ABI_ALLOCATE(scwavef,(2,npw_k*my_nspinor))
- if (mcprj>0) then
+ if (gs_ham%usecprj==1) then
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor))
    call pawcprj_alloc(cwaveprj,0,gs_ham%dimcprj)
  end if
