@@ -145,7 +145,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 #define ABI_FUNC 'setup_positron'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => setup_positron
 !End of the abilint section

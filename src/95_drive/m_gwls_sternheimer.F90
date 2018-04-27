@@ -91,7 +91,7 @@ use m_time,      only : timab
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gwls_sternheimer'
- use interfaces_95_drive, except_this_one => gwls_sternheimer
+ use interfaces_95_drive
 !End of the abilint section
 
 implicit none

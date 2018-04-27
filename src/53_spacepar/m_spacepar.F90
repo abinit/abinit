@@ -98,6 +98,7 @@ contains
 subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
 &  divgq0,qpt) ! Optional argument
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
