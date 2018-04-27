@@ -45,62 +45,12 @@ module m_classify_bands
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_wfd,            only : wfd_get_ur, wfd_t, wfd_ug2cprj, wfd_change_ngfft, wfd_paw_get_aeur
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  implicit none
 
  private
 !!***
 
- !public :: classify_bands
+ public :: classify_bands
 !!***
 
 contains
@@ -199,13 +149,13 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 & Cryst,BSt,Pawtab,Pawrad,Pawang,Psps,tolsym,BSym,&
 & EDIFF_TOL) ! optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'classify_bands'
  use interfaces_32_util
  use interfaces_65_paw
- use interfaces_69_wfdesc, except_this_one => classify_bands
 !End of the abilint section
 
  implicit none
@@ -634,6 +584,7 @@ end subroutine classify_bands
 
 subroutine rotate_cprj(kpoint,isym,nspinor,nbnds,natom,nsym,typat,indsym,Cprj_in,Cprj_out)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -723,6 +674,7 @@ end subroutine rotate_cprj
 !! SOURCE
 
 function paw_phirotphj(nspinor,natom,typat,zarot_isym,Pawtab,Psps,Cprj_b1,Cprj_b2,conjg_left) result(omat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

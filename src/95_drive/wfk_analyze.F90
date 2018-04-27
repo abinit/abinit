@@ -113,7 +113,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use interfaces_51_manage_mpi
  use interfaces_64_psp
  use interfaces_65_paw
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none

@@ -148,6 +148,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_slater,    only : paw_mkdijexc_core, paw_dijhf
  use m_paw_dmft,      only : paw_dmft_type
+ use m_classify_bands,only : classify_bands
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -3208,7 +3208,6 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 #define ABI_FUNC 'dvdb_list_perts'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -3859,7 +3858,6 @@ subroutine dvdb_test_v1complete(db_path, dump_path, comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1complete'
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -4309,7 +4307,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 #define ABI_FUNC 'dvdb_interpolate_and_write'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
