@@ -19,12 +19,10 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "calc_optical_mels.F90",
- "m_classify_bands.F90",
  "m_io_kss.F90",
  "m_oscillators.F90",
  "m_wfd.F90",
  "m_shirley.F90",
- "wfd_mkrho.F90",
  "wfd_pawrhoij.F90",
  "wfd_vnlpsi.F90",
 ]

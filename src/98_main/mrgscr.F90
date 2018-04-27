@@ -92,6 +92,7 @@ program mrgscr
  use m_levenberg_marquardt, only : lmdif1, lm_fit_print_info
  use m_screening,           only : mkdump_er, em1results_free, em1results_print,decompose_epsm1,&
 &                                  init_er_from_file, Epsilonm1_results
+ use m_wfd,                 only : test_charge
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

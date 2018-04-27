@@ -30,6 +30,7 @@ sources = [
  "cchi0q0.F90",
  "cchi0q0_intraband.F90",
  "cohsex_me.F90",
+ "m_classify_bands.F90",
  "m_gwls_hamiltonian.F90",
  "m_gwls_wf.F90",
  "m_gwls_valenceWavefunctions.F90",

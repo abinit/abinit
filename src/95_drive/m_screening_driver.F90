@@ -67,7 +67,7 @@ module m_screening_driver
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
  use m_wfd,           only : wfd_init, wfd_free,  wfd_nullify, wfd_print, wfd_t, wfd_rotate, wfd_test_ortho,&
-                             wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft
+                             wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft, wfd_mkrho, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
  use m_chi0,          only : output_chi0sumrule
