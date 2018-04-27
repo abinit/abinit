@@ -801,7 +801,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
            ikq_bz_fine = eph_dg%coarse_to_dense(ikq_bz,jj)
            ikq_ibz_fine = eph_dg%bz2ibz_dense(ikq_bz_fine)
-           weight = eph_dg%weights_dense(ikq_bz_fine)
 
            !get q such that k->k'+q 
            !calculate indexes of k and k'
@@ -1017,7 +1016,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  cfact = 0
                  do jj=1,eph_dg%ndiv
                    ! Double Grid shared points weights
-                   ikq_bz_fine  = eph_dg_mapping(1, jj)
+                   ikq_bz_fine  = eph_dg_mapping(2, jj)
                    weight = eph_dg%weights_dense(ikq_bz_fine)
 
                    ! Electronic eigenvalue
