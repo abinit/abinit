@@ -209,7 +209,7 @@ logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
-integer :: iapp,hmc_iacc
+integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
 type(crystal_t) :: crystal
 logical :: file_exists
@@ -849,7 +849,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (24)
          call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (25)
-         call pred_hmc(ab_mover,hist,itime,icycle,ntime,scfcv_args%dtset%hmctt,DEBUG,iexit,hmc_iacc)
+         call pred_hmc(ab_mover,hist,itime,icycle,ntime,scfcv_args%dtset%hmctt,DEBUG,iexit)
        case (27)
          !In case of ionmov 27, all the atomic configurations have been computed at the
          !begining of the routine in generate_training_set, thus we just need to increase the indexes

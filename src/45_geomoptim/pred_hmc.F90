@@ -29,7 +29,6 @@
 !!
 !! OUTPUT
 !!  hist  = ionic positions, lattice parameters etc. are updated
-!!  fiacc = acceptance decision made at the end of the sweep
 !!
 !! SIDE EFFECTS
 !!
@@ -49,7 +48,7 @@
 
 #include "abi_common.h"
 
-subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
+subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
  use defs_basis
  use m_errors
@@ -79,14 +78,13 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
  integer,intent(in)          :: ntime
  integer,intent(in)          :: ncycle
  integer,intent(in)          :: iexit
- integer,intent(out)         :: fiacc
  logical,intent(in)          :: zDEBUG
 
 !Local variables-------------------------------
 
  integer       :: seed                                                         ! seed for rnd generator
  integer       :: ii,jj,iacc                                                   ! dummy integers for loop indexes and acceptance decision flag
- real(dp)      :: etotal,epot,ekin,de                                          ! total, potential (electronic), kinetic (ionic) energies and energy difference between initial and proposed states
+ real(dp)      :: etotal,epot,ekin,de                                          ! total, potential (electronic), kinetic (ionic) energies and energy difference
  real(dp)      :: mv2tot,factor                                                ! dummies used for rescaling of velocities
  real(dp)      :: rnd
  real(dp)      :: xred(3,ab_mover%natom)                                       ! reduced coordinates of all ions
@@ -104,8 +102,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
  real(dp),save :: rprimd_original(3,3)                                         ! initial lattice vectors <= itime=1,icycle=1
  real(dp),allocatable,save :: xred_hmc_prev(:,:)                               ! reduced coordinates of the ions corresponding to the initial state
  real(dp),allocatable,save :: fcart_hmc_prev(:,:)                              ! reduced coordinates of the ions corresponding to the initial state
-!real(dp),save :: strten_hmc_prev(6)                                           !
-!real(dp),save :: entropy_hmc_prev                                             ! total energy of the initial state
 
  logical,save  :: strain_updated
  logical,save  :: xred_updated
@@ -142,6 +138,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
    if (allocated(fcart_hmc_prev))  then
      ABI_DEALLOCATE(fcart_hmc_prev)
    end if
+   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! this is needed to deallocate vel_prev array allocated in pred_velverlet
    return
  end if
 
@@ -195,8 +192,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
        de = etotal - etotal_hmc_prev
        call metropolis_check(seed,de,kbtemp,iacc)
      endif
-
-     fiacc=iacc;
 
      if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates and energies
        xred(:,:)= xred_hmc_prev(:,:)

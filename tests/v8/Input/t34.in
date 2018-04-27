@@ -25,11 +25,11 @@
 
   ionmov  25       # HMC sampling (NVT ensemble)
   mdtemp  300 300  # Strarting and final temperature values
-  hmctt   3        # number of steps per MC trial trajectory (use at least 3 steps per sweep, preferably >= 5)
-  dtion   250      # md step magnitude in a.u. (should be chosen to keep acceptance ration ~ 80% to 100%)
+  hmctt   3        # number of steps per MC trial trajectory
+  dtion   250      # md step magnitude in a.u.
   optcell 0        # no optimization of cell geometry 
   hmcsst  0        # number of strain steps (optimization of unit cell geometry)
-  ntime   6        # number of HMC sweeps
+  ntime   3        # number of HMC sweeps
 
   kptopt   1
   ngkpt    2 2 2
