@@ -206,18 +206,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  type(esymm_t),allocatable :: esymm(:,:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
 
-!SHIRLEY
- integer :: min_bsize,nbounds,ndivsm,intp_mband
- real(dp) :: sh_coverage
- !integer,allocatable :: intp_nband(:,:)
- real(dp) :: ewin(2,dtset%nsppol)
- real(dp),allocatable :: kptbounds(:,:)
- !type(ebands_t) :: obands
- type(kpath_t) :: kpath
- character(len=fnlen) :: sh_fname
- !type(wfd_t) :: owsh
-!END SHIRLEY
-
 !************************************************************************
 
  DBG_ENTER('COLL')
@@ -494,85 +482,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  !case ("paw_aeden")
  !case ("outqmc")
- !subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
-
- case (WFK_TASK_SHIRLEY)
-   ! Work in progress.
-
-   call read_wfd()
-
-   ! Energy window
-   !ABI_CHECK(dtset%gwpara==1,"Must use gwpara==1 for shirley")
-   ewin(1,:) = smallest_real; ewin(2,:) = greatest_real
-   if (dtset%userrc > dtset%userrb) then
-     ewin(1,:) = dtset%userrb
-     ewin(2,:) = dtset%userrc
-     write(std_out,*)"Using energy window",ewin*Ha_eV," [eV]"
-   end if
-
-   ! Select the list k-points and bands for the interpolation.
-   nbounds = 7; ndivsm=20
-   ABI_MALLOC(kptbounds, (3,nbounds))
-
-   kptbounds = reshape([half,zero,zero, &
-   zero,zero,zero, &
-   zero,half,half, &
-   half,zero,zero, &
-   half,zero,half, &
-   zero,zero,half, &
-   zero,zero,zero], [3,nbounds])
-
-   kptbounds = reshape([zero, zero, zero,   & !Gamma
-   half, zero, zero,   & !M
-   one/3, one/3, zero, & !K
-   one/3, one/3, half, & !H
-   half, zero, half,   & !L
-   zero, zero, half,   & !A
-   zero, zero, zero], [3,nbounds])
-
-   kpath = kpath_new(kptbounds,cryst%gprimd,ndivsm)
-   ABI_FREE(kptbounds)
-
-   intp_mband=dtset%nband(1); min_bsize=intp_mband; sh_coverage=dtset%userra
-
-   sh_fname = strcat(dtfil%filnam_ds(4),"_SHBANDS_GSR.nc")
-#if 0
-   if (dtset%userie==-667) then
-     ! Interpolate bands directly
-     call wrtout(std_out," Calling shirley_bands","COLL")
-
-     ! Bands on path
-     call shirley_bands(wfd,dtset,cryst,kmesh,ebands,psps,pawtab,pawang,pawrad,pawfgr,pawrhoij,paw_ij,&
-     sh_coverage,ewin,ngfftc,ngfftf,nfftf,ks_vtrial,intp_mband,kpath%points,[(zero, ii=1,kpath%npts)],sh_fname,obands,owsh)
-
-   else if (dtset%userie==-666) then
-     ! Use energy window, then interpolate bands.
-     call wrtout(std_out," Calling shirley_window","COLL")
-
-     call shirley_window(wfd,dtset,cryst,kmesh,ebands,psps,pawtab,pawang,pawrad,pawfgr,pawrhoij,paw_ij,&
-     sh_coverage,ewin,ngfftc,ngfftf,nfftf,ks_vtrial,owsh)
-
-     ABI_MALLOC(intp_nband, (kpath%npts,Wfd%nsppol))
-     intp_nband=intp_mband
-
-     ! Energies only
-     call shirley_interp(owsh,"N",dtset,cryst,psps,pawtab,pawfgr,pawang,pawrad,&
-     pawrhoij,paw_ij,ngfftc,ngfftf,nfftf,ks_vtrial,&
-     intp_nband,intp_mband,kpath%npts,kpath%points,sh_fname,obands)
-
-     ABI_FREE(intp_nband)
-   end if
-
-   ! Write Shirley wavefunctions to file.
-   !call wfd_mkheader(oWfd,Crystal,oBands,Psps,Pawtab,KS_Pawrhoij,iHdr,pawecutdg,ngfftdg,shHdr)
-   !call wfd_write_wfk(oWsh,shHdr,oBands,"shirley_WFK")
-   !call hdr_clean(shHdr)
-
-   ! Free memory
-   call kpath_free(kpath)
-   call ebands_free(obands)
-   call wfd_free(owsh)
-#endif
 
  case default
    MSG_ERROR(sjoin("Wrong task:",itoa(dtset%wfk_task)))

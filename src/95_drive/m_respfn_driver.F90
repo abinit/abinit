@@ -1,17 +1,92 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/respfn
+!!****m* ABINIT/m_respfn_driver
+!! NAME
+!!  m_respfn_driver
+!!
+!! FUNCTION
+!!  Subdriver for DFPT calculations.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XG, DRH, MT, MKV)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_respfn_driver
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_efmas_defs
+ use m_profiling_abi
+ use m_xmpi
+ use m_exit
+ use m_wffile
+ use m_errors
+ use m_ebands
+ use m_results_respfn
+ use m_hdr
+ use m_crystal
+ use m_xcdata
+
+ use m_time,        only : timab
+ use m_fstrings,    only : strcat
+ use m_kpts,        only : symkchk
+ use m_geometry,    only : irreducible_set_pert
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph
+ use m_ddb,         only : DDB_VERSION
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_occ,         only : newocc
+ use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
+ use m_wfk,         only : wfk_read_eigenvalues
+ use m_ioarr,       only : read_rhor
+ use m_pawang,      only : pawang_type
+ use m_pawrad,      only : pawrad_type
+ use m_pawtab,      only : pawtab_type,pawtab_get_lsize
+ use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+ use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+ use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
+&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_get_nspden
+ use m_pawdij,      only : pawdij, symdij
+ use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_paw_finegrid,only : pawexpiqr
+ use m_paw_dmft,    only : paw_dmft_type
+ use m_kg,          only : getcut, getph, kpgio
+ use m_eig2d,       only : eig2tot, elph2_fanddw
+ use m_inwffil,     only : inwffil
+ use m_spacepar,    only : hartre
+
+ implicit none
+
+ private
+!!***
+
+ public :: respfn
+!!***
+
+contains
+!!***
+
+!!****f* m_respfn_driver/respfn
 !! NAME
 !! respfn
 !!
 !! FUNCTION
 !! Primary routine for conducting DFT calculations of Response functions.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MT, MKV)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  codvsn=code version
@@ -102,58 +177,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &  mkmems,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_efmas_defs
- use m_profiling_abi
- use m_xmpi
- use m_exit
- use m_wffile
- use m_errors
- use m_ebands
- use m_results_respfn
- use m_hdr
- use m_crystal
- use m_xcdata
-
- use m_time,        only : timab
- use m_fstrings,    only : strcat
- use m_kpts,        only : symkchk
- use m_geometry,    only : irreducible_set_pert
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph
- use m_ddb,         only : DDB_VERSION
- use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
- use m_occ,         only : newocc
- use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
- use m_wfk,         only : wfk_read_eigenvalues
- use m_ioarr,       only : read_rhor
- use m_pawang,      only : pawang_type
- use m_pawrad,      only : pawrad_type
- use m_pawtab,      only : pawtab_type,pawtab_get_lsize
- use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
- use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
- use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
- use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_get_nspden
- use m_pawdij,      only : pawdij, symdij
- use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_paw_finegrid,only : pawexpiqr
- use m_paw_dmft,    only : paw_dmft_type
- use m_kg,          only : getcut, getph, kpgio
- use m_eig2d,       only : eig2tot, elph2_fanddw
- use m_inwffil,     only : inwffil
- use m_spacepar,    only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1825,10 +1850,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  DBG_EXIT("COLL")
 
-contains
+end subroutine respfn
 !!***
 
-!!****f* ABINIT/wrtloctens
+!!****f* m_respfn_driver/wrtloctens
 !! NAME
 !! wrtloctens
 !!
@@ -2010,5 +2035,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 end subroutine wrtloctens
 !!***
 
-end subroutine respfn
+
+
+end module m_respfn_driver
 !!***

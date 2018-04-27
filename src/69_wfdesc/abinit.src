@@ -22,7 +22,6 @@ sources = [
  "m_io_kss.F90",
  "m_oscillators.F90",
  "m_wfd.F90",
- "m_shirley.F90",
  "wfd_pawrhoij.F90",
  "wfd_vnlpsi.F90",
 ]

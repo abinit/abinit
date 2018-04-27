@@ -34,7 +34,7 @@ sources = [
  "mover_effpot.F90",
  "m_argparse.F90",
  "nonlinear.F90",
- "respfn.F90",
+ "m_respfn_driver.F90",
  "m_screening_driver.F90",
  "m_sigma_driver.F90",
  "testfi.F90",
