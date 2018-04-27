@@ -83,7 +83,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -638,12 +637,12 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawtab,      only : pawtab_type
  use m_paw_numeric, only : paw_splint
+ use m_geometry,    only : strconv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_alt'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
