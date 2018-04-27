@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-module m_foo
+module m_eph_driver
 
  use defs_basis
  use m_errors
@@ -685,5 +685,5 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 end subroutine eph
 !!***
 
-end subroutine m_eph_driver
+end module m_eph_driver
 !!***
