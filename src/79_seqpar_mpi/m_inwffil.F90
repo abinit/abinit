@@ -40,8 +40,8 @@ module m_inwffil
  use mpi
 #endif
 
- use m_time,     only : timab, get_unit
- use m_io_tools, only : file_exists
+ use m_time,     only : timab
+ use m_io_tools, only : file_exists, get_unit
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
  use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg
  use m_kg,       only : kpgio
@@ -176,6 +176,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
 &           wffnow,unwff1,wffnm,wvl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -183,7 +184,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_67_common
- use interfaces_79_seqpar_mpi, except_this_one => inwffil
+ use interfaces_79_seqpar_mpi
 !End of the abilint section
 
  implicit none
@@ -1129,6 +1130,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                  nspinor0,nsppol,nsppol0,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,squeeze,symrel,tnons,wff1)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1862,13 +1864,14 @@ end subroutine wfsinp
 subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 &  spin,mcg,mpi_enreg,nband_k,nkpt,npw,nspinor,occ_k,wff1)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initwf'
  use interfaces_14_hidewrite
  use interfaces_56_io_mpi
- use interfaces_62_iowfdenpot, except_this_one => initwf
+ use interfaces_62_iowfdenpot
 !End of the abilint section
 
  implicit none

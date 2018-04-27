@@ -171,7 +171,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response
- use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => respfn
 !End of the abilint section
 
