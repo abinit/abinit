@@ -300,6 +300,7 @@ type dataset_type
  integer :: gw_sctype
  integer :: gwmem
  integer :: gwpara
+ integer :: hmcsst
  integer :: hmctt
  integer :: iboxcut
  integer :: icoulomb

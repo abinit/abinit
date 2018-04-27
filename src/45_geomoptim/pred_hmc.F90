@@ -56,7 +56,8 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
  use m_profiling_abi
  use m_abimover
  use m_abihist
-
+ use m_io_tools
+ use m_hmc
  use m_geometry,  only : xred2xcart
  use m_numeric_tools,  only : uniformrandom
 
@@ -64,6 +65,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_hmc'
+ use interfaces_14_hidewrite
  use interfaces_45_geomoptim, except_this_one => pred_hmc
 !End of the abilint section
 
@@ -95,15 +97,22 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
  real(dp)      :: rprimd(3,3)                                                  ! lattice vectors
 
  real(dp),save :: etotal_hmc_prev,epot_hmc_prev                                ! total energy of the initial state
- real(dp),save :: entropy_hmc_prev                                             ! total energy of the initial state
  real(dp),save :: acell_hmc_prev(3)                                            !
  real(dp),save :: rprimd_hmc_prev(3,3)                                         !
- real(dp),save :: strten_hmc_prev(6)                                           !
- real(dp),allocatable,save :: xcart_hmc_prev(:,:)                              ! Cart. coordinates of the ions corresponding to the initial state
+ real(dp),save :: strain_hmc_prev(3,3)                                         !
+ real(dp),save :: strain(3,3),dstrain                                          ! strain tensor
+ real(dp),save :: rprimd_original(3,3)                                         ! initial lattice vectors <= itime=1,icycle=1
  real(dp),allocatable,save :: xred_hmc_prev(:,:)                               ! reduced coordinates of the ions corresponding to the initial state
  real(dp),allocatable,save :: fcart_hmc_prev(:,:)                              ! reduced coordinates of the ions corresponding to the initial state
+!real(dp),save :: strten_hmc_prev(6)                                           !
+!real(dp),save :: entropy_hmc_prev                                             ! total energy of the initial state
 
+ logical,save  :: strain_updated
+ logical,save  :: xred_updated
+ integer,save  :: strain_steps
+ logical       :: strain_sweep
 
+ character(len=500) :: message
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -124,11 +133,9 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
 
  DBG_EXIT("COLL")
 
+ strain_sweep=.FALSE.
 
  if(iexit/=0)then  !icycle=ncycle and itime=ntime
-   if (allocated(xcart_hmc_prev))  then
-     ABI_DEALLOCATE(xcart_hmc_prev)
-   end if
    if (allocated(xred_hmc_prev))  then
      ABI_DEALLOCATE(xred_hmc_prev)
    end if
@@ -146,19 +153,9 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
  epot       = hist%etot(hist%ihist)                   ! electronic sub-system energy, not needed
  ekin       = hist%ekin(hist%ihist)                   ! kinetic energy, not needed
 
+ kbtemp=(ab_mover%mdtemp(1)+((ab_mover%mdtemp(2)-ab_mover%mdtemp(1))/dble(ntime-1))*(itime-1))*kb_HaK ! correct temperature taking into account the possible heating/cooling
 
- kbtemp=(ab_mover%mdtemp(1)*kb_HaK)  ! get target temperature in energy units
-
- if(icycle==1)then
-
-  !write(239117,*) ' entering first cycle of HMC iteration ',itime
-
-   if(itime==1)then
-     seed=-239
-
-     if (allocated(xcart_hmc_prev))  then
-       ABI_DEALLOCATE(xcart_hmc_prev)
-     end if
+ if(itime==1.and.icycle==1) then
      if (allocated(xred_hmc_prev))  then
        ABI_DEALLOCATE(xred_hmc_prev)
      end if
@@ -166,131 +163,200 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
        ABI_DEALLOCATE(fcart_hmc_prev)
      end if
 
-     ABI_ALLOCATE(xcart_hmc_prev,(3,ab_mover%natom))
      ABI_ALLOCATE(xred_hmc_prev,(3,ab_mover%natom))
      ABI_ALLOCATE(fcart_hmc_prev,(3,ab_mover%natom))
-   end if
 
- !generate new set of velocities and get rid of the possible overall momentum
-   mtot=sum(ab_mover%amass(:))         ! total mass to eventually get rid of total center of mass (CoM) momentum
+     seed=-239
 
-  ! generate velocities from normal distribution with zero mean and correct standard deviation
-   do ii=1,ab_mover%natom
-     do jj=1,3
-       vel(jj,ii)=sqrt(kbtemp/ab_mover%amass(ii))*cos(two_pi*uniformrandom(seed))
-       vel(jj,ii)=vel(jj,ii)*sqrt(-2.0*log(uniformrandom(seed)))
-     end do
-   end do
-  !since number of atoms is most probably not big enough to obtain overall zero CoM momentum, shift the velocities
-  !and then renormalize
-   mvtot=zero ! total momentum
-   do ii=1,ab_mover%natom
-     do jj=1,3
-       mvtot(jj)=mvtot(jj)+ab_mover%amass(ii)*vel(jj,ii)
-     end do
-   end do
-   do ii=1,ab_mover%natom
-     do jj=1,3
-       vel(jj,ii)=vel(jj,ii)-(mvtot(jj)/mtot)
-     end do
-   end do
-  !now the total cell momentum is zero
-   mv2tot=0.0
-   do ii=1,ab_mover%natom
-     do jj=1,3
-       mv2tot=mv2tot+ab_mover%amass(ii)*vel(jj,ii)**2
-     end do
-   end do
-   factor = mv2tot/(dble(3*ab_mover%natom))
-   factor = sqrt(kbtemp/factor)
-   vel(:,:)=vel(:,:)*factor
-   hist%vel(:,:,hist%ihist)=vel(:,:)
+     rprimd_original(:,:)=rprimd(:,:)
+     strain(:,:) = 0.0_dp
+     strain_steps=0
+     dstrain=0.001
+
+     strain_updated=.FALSE.
+     xred_updated=.FALSE.
+ endif
 
 
-  !save the starting values of ionic positions (before an update attempt is performed)
-   call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred_hmc_prev,zDEBUG)
-   call xred2xcart(ab_mover%natom,rprimd_hmc_prev,xcart_hmc_prev,xred_hmc_prev)
-   fcart_hmc_prev(:,:)=hist%fcart(:,:,hist%ihist)
-   strten_hmc_prev(:)=hist%strten(:,hist%ihist)
-   entropy_hmc_prev=hist%entropy(hist%ihist)
+ !IN CASE THE SWEEP IS FOR UPDATE OF ATOMIC COORDINATES************************************************
+ !if(.NOT.strain_sweep) then
 
-  !also save the initial total energy
-   ekin=0.0
-   do ii=1,ab_mover%natom
-     do jj=1,3
-       ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
-     end do
-   end do
-   epot = hist%etot(hist%ihist)                     ! electronic sub-system energy
-   etotal_hmc_prev = epot + ekin                    ! total energy before an attempt of variables update is performed
-   epot_hmc_prev = epot
+   ! *---->* 
+   ! 1     n
 
-   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
+   if (icycle==1) then
 
-  !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-  !write(std_out,*) '  xcart_after_update:'
-  !write(std_out,*) '  ',xcart(1,:)
-  !write(std_out,*) '  ',xcart(2,:)
-  !write(std_out,*) '  ',xcart(3,:)
-
-
-
- else if(icycle<ncycle)then
-
-   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
-  !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-  !vel(:,:)   = hist%vel(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
-
- else !icycle==ncycle
-
-  !the only thing left to do, is to compute the difference of the total energies and decide whether to accept the new state
-   vel(:,:)=hist%vel(:,:,hist%ihist)
-   ekin=0.0
-   do ii=1,ab_mover%natom
-     do jj=1,3
-       ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
-     end do
-   end do
-   epot = hist%etot(hist%ihist)      ! electronic sub-system energy
-   etotal = epot + ekin
-   de = etotal - etotal_hmc_prev
-
-   iacc=0
-   rnd=uniformrandom(seed)
-   if(de<0)then
-     iacc=1
-   else
-     if(exp(-de/kbtemp)>rnd)then
+     if(itime==1) then
        iacc=1
+       etotal = epot + ekin
+     else
+       etotal = epot + ekin
+       de = etotal - etotal_hmc_prev
+       call metropolis_check(seed,de,kbtemp,iacc)
+     endif
+
+     fiacc=iacc;
+
+     if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates and energies
+       xred(:,:)= xred_hmc_prev(:,:)
+       epot     = epot_hmc_prev
+       hist%fcart(:,:,hist%ihist) = fcart_hmc_prev(:,:)
+     else
+       xred_hmc_prev(:,:)=xred(:,:)
+       fcart_hmc_prev(:,:) = hist%fcart(:,:,hist%ihist)
+       epot_hmc_prev   = epot         !update reference potential energy
      end if
-   end if
-  !write(238,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
-  !write(239,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
-  !write(239,*) 'ekin= ',ekin,'  epot= ',epot,'  e_start= ',etotal_hmc_prev,'  e_end= ',etotal,'  iacc=',iacc, '  dekT=',-de/kbtemp
-   fiacc=iacc;
 
-   call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
-  !call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+     write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
+&                                            epot,' ekin=',ekin,' de=',de                                    
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
 
-   hist%ihist=abihist_findIndex(hist,+1)
-   if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates
-    !write(std_out,*) '  the proposed state was not accepted, roll back the configuration'
-    !xcart(:,:)=xcart_hmc_prev(:,:)
-    !no need to roll back xcart any longer, everything is stored in xred now (v8.3.1)
-     xred(:,:)=xred_hmc_prev(:,:)
-     acell(:)=acell_hmc_prev(:)
-     rprimd(:,:)=rprimd_hmc_prev(:,:)
-     hist%fcart(:,:,hist%ihist)=fcart_hmc_prev(:,:)
-     hist%etot(hist%ihist)=epot_hmc_prev
-     hist%entropy(hist%ihist)=entropy_hmc_prev
-     hist%strten(:,hist%ihist)=strten_hmc_prev(:)
-   end if
+     call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
+     hist%vel(:,:,hist%ihist)=vel(:,:)
+     etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
 
-   call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+     call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
+ 
+   else !icycle/=1
 
- end if
+    call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
 
-! note: add update of lattice vectors and parameters in case optcell/=0
+   end if  
+ 
+ !end if
+ !END OF ATOMIC COORDINATES SWEEP************************************************
+
+! else if(icycle>ncycle) then ! strain update
+!   strain_updated = .TRUE.
+!   strain_steps   = strain_steps + 1
+ ! Metropolis update of lattice vectors and parameters in case optcell/=0
+!   if(icycle==ncycle+1.and.xred_updated) then
+!     !save rprimd_hmc_prev and total electronic energy etotal_hmc_prev
+!     call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
+!     etotal_hmc_prev = hist%etot(hist%ihist)
+!     strain_hmc_prev(:,:) = strain(:,:)
+
+!     select case (ab_mover%optcell)
+!     case (1) !volume optimization only
+!       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case (2,3,7,8,9) !full geometry optimization
+!       !suggest new strain tensor values
+!       do ii=1,3
+!         do jj=ii,3
+!           strain(ii,jj) = strain(ii,jj)+ 2.0_dp*dstrain*(uniformrandom(seed)-0.5_dp)
+!           strain(jj,ii) = strain(ii,jj)
+!         enddo
+!       enddo
+!       if(ab_mover%optcell==3) then !eliminate volume change if optcell==3
+!         do ii=1,3
+!           strain(ii,ii) = strain(ii,ii) -(strain(1,1)+strain(2,2)+strain(3,3))
+!         enddo
+!       endif
+!       do jj=1,3    ! sum over three lattice vectors
+!         do ii=1,3  ! sum over Cart components
+!           rprimd(ii,jj)=rprimd_original(ii,jj)+&
+!&                        rprimd_original(1,jj)*strain(ii,1)+&
+!&                        rprimd_original(2,jj)*strain(ii,2)+&
+!&                        rprimd_original(3,jj)*strain(ii,3)
+!         enddo
+!       enddo
+!       if(ab_mover%optcell==7) then
+!         rprimd(:,1)=rprimd_original(:,1)
+!       else if (ab_mover%optcell==8) then
+!         rprimd(:,2)=rprimd_original(:,2)
+!       else if (ab_mover%optcell==9) then
+!         rprimd(:,3)=rprimd_original(:,3)
+!       endif
+!     case(4) 
+!       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case(5) 
+!       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case(6) 
+!       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case default
+!     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
+!     !  MSG_ERROR(message)
+!     end select
+! 
+!     !update the new suggested rprimd and or acell in the history record
+!     hist%ihist=abihist_findIndex(hist,+1)
+!     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+!   else
+!
+!     etotal = hist%etot(hist%ihist)
+!     de = etotal - etotal_hmc_prev
+! 
+!     iacc=0
+!     rnd=uniformrandom(seed)
+!     if(de<0)then
+!       iacc=1
+!     else
+!       if(exp(-de/kbtemp)>rnd)then
+!         iacc=1
+!       end if
+!     end if
+
+!     if(iacc==0) then
+!      strain(:,:)=strain_hmc_prev(:,:)
+!      acell(:)=acell_hmc_prev(:)
+!     else
+!      call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
+!      strain_hmc_prev(:,:) = strain(:,:)
+!      etotal_hmc_prev=etotal
+!     endif 
+
+     !suggest new acell/rprimd values depending on the optcell value
+!     select case (ab_mover%optcell)
+!     case (1) !volume optimization only
+!       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case (2,3,7,8,9) !full geometry optimization
+!       !suggest new strain tensor values
+!       do ii=1,3
+!         do jj=ii,3
+!           strain(ii,jj) = strain(ii,jj)+ 2.0_dp*dstrain*(uniformrandom(seed)-0.5_dp)
+!           strain(jj,ii) = strain(ii,jj)
+!         enddo
+!       enddo
+!       if(ab_mover%optcell==3) then !eliminate volume change if optcell==3
+!         do ii=1,3
+!           strain(ii,ii) = strain(ii,ii) -(strain(1,1)+strain(2,2)+strain(3,3))
+!         enddo
+!       endif
+!       do jj=1,3    ! sum over three lattice vectors
+!         do ii=1,3  ! sum over Cart components
+!           rprimd(ii,jj)=rprimd_original(ii,jj)+&
+!&                        rprimd_original(1,jj)*strain(ii,1)+&
+!&                        rprimd_original(2,jj)*strain(ii,2)+&
+!&                        rprimd_original(3,jj)*strain(ii,3)
+!         enddo
+!       enddo
+!       if(ab_mover%optcell==7) then
+!         rprimd(:,1)=rprimd_original(:,1)
+!       else if (ab_mover%optcell==8) then
+!         rprimd(:,2)=rprimd_original(:,2)
+!       else if (ab_mover%optcell==9) then
+!         rprimd(:,3)=rprimd_original(:,3)
+!       endif
+!     case(4) 
+!       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case(5) 
+!       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case(6) 
+!       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+!     case default
+!     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
+!     !  MSG_ERROR(message)
+!     end select
+! 
+!     !update the new suggested rprimd/acell in the history record
+!     hist%ihist=abihist_findIndex(hist,+1)
+!     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+!
+!   endif
+!
+! end if
+
 
 end subroutine pred_hmc
 !!***
