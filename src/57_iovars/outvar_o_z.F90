@@ -84,6 +84,7 @@
 
  use defs_basis
  use defs_abitypes
+ use m_errors
  use m_results_out
  use m_profiling_abi
  use m_xmpi
@@ -95,7 +96,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvar_o_z'
- use interfaces_57_iovars, except_this_one => outvar_o_z
 !End of the abilint section
 
  implicit none
@@ -1546,6 +1546,7 @@ contains
 !! SOURCE
 
 subroutine prtocc(dtsets,iout,jdtset_,ndtset_alloc,prtvol_glob,results_out)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
