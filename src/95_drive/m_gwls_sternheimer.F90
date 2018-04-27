@@ -1,17 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_gwls_sternheimer
+!! NAME
+!!   m_gwls_sternheimer
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_gwls_sternheimer
+
+ implicit none
+
+ private
+!!***
+
+ public :: gwls_sternheimer
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/gwls_sternheimer
 !! NAME
 !! gwls_sternheimer
 !!
 !! FUNCTION
 !! .
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! dtset <type(dataset_type)>=all input variables in this dataset
@@ -31,13 +62,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
 &                           fred_img,iexit,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
 &                           pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
@@ -48,7 +72,7 @@ use m_gwls_utility,                   only : master_debug, files_status_new, fil
 use m_gwls_hamiltonian,               only : destroy_H, exchange, g_to_r, eig
 use m_gwls_TimingLog
 use m_gwls_valenceWavefunctions
-use m_gwls_ComputeCorrelationEnergy  
+use m_gwls_ComputeCorrelationEnergy
 use m_gwls_GenerateEpsilon
 
 use defs_basis
@@ -121,14 +145,14 @@ integer :: GWLS_TIMAB, OPTION_TIMAB
  master_debug = .false.
 !master_debug = .true.
 
-!Governs the status of all opened files formerly with the status 'new' harcoded. 
+!Governs the status of all opened files formerly with the status 'new' harcoded.
 !It is initialized in the m_gwls_utility module as 'new'; this default is overriden here if desired.
  files_status_new = 'unknown'
-!Governs the status of all opened files formerly with the status 'old' harcoded. 
+!Governs the status of all opened files formerly with the status 'old' harcoded.
 !It is initialized in the m_gwls_utility module as 'old'; this default is overriden here if desired.
  files_status_old = 'unknown'
 
-! Test the input to make sure it is consistent with what 
+! Test the input to make sure it is consistent with what
 ! the code can do
 !call test_input(dtset2,psps2)
 
@@ -149,7 +173,7 @@ integer :: GWLS_TIMAB, OPTION_TIMAB
 
 
 ! tabulate the valence wavefunctions, to be used throughout the code!
-! TODO : put in build_H and destroy_H 
+! TODO : put in build_H and destroy_H
  GWLS_TIMAB   = 1522
  OPTION_TIMAB = 1
  call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -246,6 +270,8 @@ integer :: GWLS_TIMAB, OPTION_TIMAB
  12 format(A,I6)
  14 format(A,ES24.16,A,F16.8,A)
 
-
 end subroutine gwls_sternheimer
+!!***
+
+end module m_gwls_sternheimer
 !!***

@@ -26,7 +26,7 @@ sources = [
  "m_eph_driver.F90",
  "gstate.F90",
  "gstateimg.F90",
- "gwls_sternheimer.F90",
+ "m_gwls_sternheimer.F90",
  "iofn1.F90",
  "dfptnl_loop.F90",
  "dfpt_looppert.F90",

@@ -99,7 +99,6 @@ sources = [
  "setup_positron.F90",
  "setup1.F90",
  "setvtr.F90",
- "spatialchempot.F90",
  "m_spin_current.F90",
  "stress.F90",
  "strhar.F90",
