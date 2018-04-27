@@ -1981,11 +1981,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'usepead',dt%usepead,1,(/0/),iout)
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'nsppol',nsppol,1,(/1/),iout)
+     cond_string(1)='usepaw'    ; cond_values(1)=usepaw
+     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'nsppol',nsppol,1,(/1/),iout)
+     cond_string(1)='usepaw'    ; cond_values(1)=usepaw
+     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
    end if
    if(dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',nspinor,1,(/1/),iout)
    end if
 

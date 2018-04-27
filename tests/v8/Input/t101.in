@@ -142,13 +142,13 @@ optdriver7    5 # for nonlinear calculation
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t101.out,  tolnlines =11, tolabs =1.0E-7, tolrel = 1.0E-6 ;
+#%%    t101.out,  tolnlines =11, tolabs =5.0E-5, tolrel = 5.0E-3, fld_options = -medium;
 #%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
-#%% keywords = PAW, DFPT
+#%% keywords = PAW, DFPT, NONLINEAR
 #%% description = 
 #%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
