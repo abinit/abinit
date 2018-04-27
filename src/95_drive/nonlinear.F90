@@ -88,6 +88,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_pawrhoij, only : pawrhoij_type
  use m_kg,       only : getcut, kpgio
  use m_kpts,     only : getkgrid
+ use m_inwffil,  only : inwffil
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
