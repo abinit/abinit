@@ -1644,7 +1644,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_symmetrize'
- use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_67_common
 !End of the abilint section
@@ -3711,7 +3710,6 @@ subroutine dvdb_test_v1rsym(db_path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1rsym'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

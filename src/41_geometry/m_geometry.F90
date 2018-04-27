@@ -796,6 +796,7 @@ end subroutine phdispl_cart2red
 
 subroutine getspinrot(rprimd,spinrot,symrel_conv)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3306,12 +3307,12 @@ end subroutine strainsym
 
 subroutine stresssym(gprimd,nsym,stress,sym)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'stresssym'
  use interfaces_32_util
- use interfaces_41_geometry, except_this_one => stresssym
 !End of the abilint section
 
  implicit none
@@ -3421,6 +3422,7 @@ end subroutine stresssym
 !! SOURCE
 
 subroutine strconv(frac,gprimd,cart)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3532,12 +3534,12 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 &    rfmeth,symafm,symaf1,symq,symrec,symrel,symrl1,syuse,tnons,tnons1, &
 &    unit) ! Optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'littlegroup_pert'
  use interfaces_14_hidewrite
- use interfaces_41_geometry, except_this_one => littlegroup_pert
 !End of the abilint section
 
  implicit none

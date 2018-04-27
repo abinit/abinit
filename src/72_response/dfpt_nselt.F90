@@ -137,7 +137,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 #define ABI_FUNC 'dfpt_nselt'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_72_response, except_this_one => dfpt_nselt
 !End of the abilint section
 

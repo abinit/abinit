@@ -77,7 +77,7 @@ module m_supercell
  public :: getPBCIndexes_supercell
  public :: destroy_supercell
 
- public ::   !  computes atomic positons, magnetic ordering of supercell
+ public :: mksupercell  !  computes atomic positons, magnetic ordering of supercell
 !!***
 
 CONTAINS  !===========================================================================================
@@ -896,6 +896,7 @@ end subroutine destroy_supercell
 !! SOURCE
 
 subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_sc,rprimd_sc,ext,prtvol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
