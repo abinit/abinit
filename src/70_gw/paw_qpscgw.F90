@@ -89,7 +89,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 #define ABI_FUNC 'paw_qpscgw'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none

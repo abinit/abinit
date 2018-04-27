@@ -180,6 +180,7 @@ contains
 subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &  mkmems,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -198,7 +199,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response
- use interfaces_95_drive, except_this_one => respfn
+ use interfaces_95_drive
 !End of the abilint section
 
  implicit none

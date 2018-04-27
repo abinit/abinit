@@ -60,7 +60,7 @@ MODULE m_wfd
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
  use m_paw_io,         only : pawio_print_ij
- use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free
+ use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
 
  implicit none
 
@@ -432,6 +432,7 @@ MODULE m_wfd
  !public :: wfd_get_socpert
  public :: wfd_mkrho               ! Calculate the charge density on the fine FFT grid in real space.
  public :: test_charge
+ public :: wfd_pawrhoij
 !!***
 
 CONTAINS  !==============================================================================
@@ -7213,6 +7214,7 @@ end subroutine test_charge
 !! SOURCE
 
 subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
