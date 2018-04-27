@@ -160,7 +160,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_69_wfdesc
  use interfaces_70_gw
 !End of the abilint section
 

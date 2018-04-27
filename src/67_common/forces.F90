@@ -555,6 +555,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  call timab(69,2,tsec)
 
 contains
+!!***
 
 !!****f* ABINIT/sygrad
 !!

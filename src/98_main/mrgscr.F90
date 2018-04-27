@@ -101,7 +101,6 @@ program mrgscr
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none

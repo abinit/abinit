@@ -189,7 +189,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none

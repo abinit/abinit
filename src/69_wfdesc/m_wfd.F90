@@ -431,6 +431,7 @@ MODULE m_wfd
  public :: wfd_from_wfk            ! Simplified interface to initialize the object from a WFK file.
  !public :: wfd_get_socpert
  public :: wfd_mkrho               ! Calculate the charge density on the fine FFT grid in real space.
+ public :: test_charge
 !!***
 
 CONTAINS  !==============================================================================
@@ -6839,6 +6840,7 @@ end subroutine wfd_plot_ur
 subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 &                    optcalc) ! optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -7079,6 +7081,7 @@ end subroutine wfd_mkrho
 
 subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 & usepaw,usexcnhat,usefinegrid,compch_sph,compch_fft,omegaplasma)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

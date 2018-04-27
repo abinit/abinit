@@ -1825,7 +1825,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  DBG_EXIT("COLL")
 
 contains
-
+!!***
 
 !!****f* ABINIT/wrtloctens
 !! NAME
