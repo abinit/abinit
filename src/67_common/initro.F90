@@ -7,7 +7,7 @@
 !! FUNCTION
 !! Initialize the density using either:
 !!  - a gaussian of adjustable decay length (norm-conserving psp)
-!!  - PS atomic valence density from psp file (PAW or NC psps with valence change in the pp file) 
+!!  - PS atomic valence density from psp file (PAW or NC psps with valence change in the pp file)
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA,XG,MT)
@@ -131,7 +131,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  ABI_ALLOCATE(work,(nfft))
  ABI_ALLOCATE(spinat_indx,(3,natom))
 
- ! Get the distrib associated with this fft_grid 
+ ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Transfer the spinat array to an array in which the atoms have the proper order, type by type.
@@ -263,8 +263,8 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    rhoat=xnorm*exp(-gsquar*alf2pi2)
 !                  Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
-                   rhog(im,ii)=rhog(im,ii)+sfi*rhoat        
-                 else 
+                   rhog(im,ii)=rhog(im,ii)+sfi*rhoat
+                 else
                    gmag=sqrt(gsquar)
                    jj=1+int(gmag*dqm1)
                    diff=gmag-qgrid(jj)
@@ -279,7 +279,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.') 
+                     MSG_BUG('Initialization of density is non consistent.')
                    end if
 !                  Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
@@ -370,7 +370,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 !                Charge density integrating to one
                  if (use_gaussian(itypat)) then
                    rhoat=xnorm*exp(-gsquar*alf2pi2)
-                 else 
+                 else
                    gmag=sqrt(gsquar)
                    jj=1+int(gmag*dqm1)
                    diff=gmag-qgrid(jj)
@@ -385,7 +385,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.') 
+                     MSG_BUG('Initialization of density is non consistent.')
                    end if
                  end if
 

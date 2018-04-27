@@ -1,16 +1,55 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/out_acknowl
+!!****m* ABINIT/m_out_acknowl
 !! NAME
-!! out_acknowl
+!!  m_out_acknowl
 !!
 !! FUNCTION
 !! Echo acknowledgments for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
+!!  Copyright (C) 2008-2018 ABINIT group (XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_out_acknowl
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_profiling_abi
+
+ use m_fstrings,     only : prep_dash
+
+ implicit none
+
+ private
+!!***
+
+ public :: out_acknowl
+!!***
+
+contains
+!!***
+
+!!****f* m_out_acknowl/out_acknowl
+!! NAME
+!! out_acknowl
+!!
+!! FUNCTION
+!! Echo acknowledgments for the ABINIT code.
 !!
 !! INPUTS
 !!  iout=unit number for echoed output
@@ -32,20 +71,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads) 
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- 
- use m_fstrings,     only : prep_dash
+subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -73,14 +99,14 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 ! *************************************************************************
 
 !Allocate and initialize, for each possible reference, the flag for citation,
-!the priority of the citation, the reference, and the comment. 
+!the priority of the citation, the reference, and the comment.
  nrefs=40
  ABI_ALLOCATE(cite,(nrefs))
  ABI_ALLOCATE(ref,(nrefs))
  ABI_ALLOCATE(comment,(nrefs))
 
  ABI_ALLOCATE(priority,(nrefs))
-!The highest, the best, except that one from -1 and -2 should be cited. 
+!The highest, the best, except that one from -1 and -2 should be cited.
 !0 means, cite if there are less than five papers total, otherwise forget, and any case, mention that it is optional.
 !1-19 means specific papers, that must be cited. However, they might not appear in the top list of papers.
 !20 means papers that should appear in the top list (usually, the most specific papers).
@@ -93,10 +119,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  ref(1)=' Recent developments in the ABINIT software package.'//ch10//&
 & ' Computer Phys. Comm. 205, 106 (2016).'//ch10//&
 & ' X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,'//ch10//&
-& ' C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval'//ch10//& 
+& ' C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval'//ch10//&
 & ' D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,'//ch10//&
 & ' B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,'//ch10//&
-& ' Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,'//ch10//& 
+& ' Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,'//ch10//&
 & ' A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,'//ch10
  ref(1)=trim(ref(1))//&
 & ' M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,'//ch10//&
@@ -128,7 +154,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,'//ch10//&
 & ' L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.'
  comment(3)=' Comment : the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
-& ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//& 
+& ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//&
 & ' of this part are not in the list of authors of the first or third paper.'//ch10//&
 & ' The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.'//ch10//&
 & ' Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,'//ch10//&
@@ -204,7 +230,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  comment(15)=' Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.'
  priority(15)=18
 
- ref(16)=' Preconditioning of self-consistent-field cycles in density functional theory : the extrapolar method'//ch10//& 
+ ref(16)=' Preconditioning of self-consistent-field cycles in density functional theory : the extrapolar method'//ch10//&
 & ' P.-M. Anglade, X. Gonze, Phys. Rev. B 78, 045126 (2008).'
  comment(16)=' Comment : to be cited in case the extrapolar conditioner is used, i.e. non-vanishing iprcel.'
  priority(16)=10
@@ -243,7 +269,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' Applied Magnetic Resonance 33, 447-456 (2008).'
  comment(21)=' Comment : to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.'
  priority(21)=20
- 
+
  ref(22)=' Computation of Moessbauer isomer shifts from first principles.'//ch10//&
 & ' J.W. Zwanziger, '// &
 & ' J. Phys. Conden. Matt. 21, 15024-15036 (2009).'
@@ -337,7 +363,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  priority(34)=20
 
  ref(35)= ' Temperature dependence of the electronic structure of semiconductors and insulators '//ch10//&
-& ' S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)' 
+& ' S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)'
  comment(35)=&
 & ' Comment : the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).'//ch10//&
 & ' Strong suggestion to cite this paper in your publications.'
@@ -388,7 +414,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If ucrpa/=0, cite Amadon2014
    if(dtsets(idtset)%ucrpa/=0) cite(26)=1
 
-!  If usedmft/=0, cite Amadon2008b 
+!  If usedmft/=0, cite Amadon2008b
    if(dtsets(idtset)%usedmft/=0)cite(20)=1
 
 !  If usedmft/=0, cite Amadon2012
@@ -462,7 +488,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !  If FHI pseudopotential, cite Fuchs 1999
    if(pspheads(ipsp)%pspcod==6)cite(9)=1
-!  If psp8, cite Hamann 2013   
+!  If psp8, cite Hamann 2013
    if(pspheads(ipsp)%pspcod==8)cite(27)=1
  end do
 
@@ -483,7 +509,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' of the ABINIT implementation.',ch10,&
 & ' For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.'
 
- ncited=0 
+ ncited=0
  print_optional=1
 
  do iprior=20,0,-1
@@ -521,4 +547,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  ABI_DEALLOCATE(priority)
 
 end subroutine out_acknowl
+!!***
+
+end module m_out_acknowl
 !!***
