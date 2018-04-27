@@ -1872,7 +1872,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphbs'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -3799,6 +3798,12 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 &         qphon, rprimd, typat, xcart, znucl)
 
 
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'freeze_displ_allmodes'
+!End of the abilint section
+
+!This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'freeze_displ_allmodes'
