@@ -39,7 +39,7 @@
 !!  qp_compch_sph=QP compensation charge integral inside spheres computed over spherical meshes.
 !!  qp_compch_fft=QP compensation charge inside spheres computed over fine fft grid.
 !!  QP_paw_ij(Cryst%natom)<Paw_ij_type>=Non-local D_ij strengths of the QP Hamiltonian.
-!!  QP_paw_an(Cryst%natom)<Paw_an_type>=Various arrays related to the Hamiltonian given 
+!!  QP_paw_an(Cryst%natom)<Paw_an_type>=Various arrays related to the Hamiltonian given
 !!   on ANgular mesh or ANgular moments.
 !!
 !! SIDE EFFECTS
@@ -81,7 +81,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_nullify
  use m_pawfgrtab,     only : pawfgrtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_unpack, pawrhoij_get_nspden, symrhoij
- use m_wfd,           only : wfd_t
+ use m_wfd,           only : wfd_t, wfd_pawrhoij
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
