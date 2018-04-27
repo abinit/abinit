@@ -192,13 +192,13 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &                       pawrhoij_mpisum_unpacked
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawfgr,   only : pawfgr_type
+ use m_fft,      only : fftpac
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtorho'
  use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common

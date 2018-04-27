@@ -146,22 +146,17 @@ program optic
  type(crystal_t) :: cryst
  type(eprenorms_t) :: Epren
 !arrays
- integer,allocatable :: istwfk(:), npwarr(:)
- integer,allocatable :: nband(:), symrel(:,:,:), symrec(:,:,:)
- real(dp) :: tsec(2)
- real(dp) :: gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
- real(dp),allocatable :: symcart(:,:,:)
- real(dp),allocatable :: kpt(:,:),wmesh(:)
- real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:)
- real(dp),allocatable :: eig0tmp(:), eigen0(:)
+ integer,allocatable :: istwfk(:), npwarr(:), nband(:), symrel(:,:,:), symrec(:,:,:)
+ real(dp) :: tsec(2), gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
+ real(dp),allocatable :: symcart(:,:,:), kpt(:,:),wmesh(:)
+ real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:), eig0tmp(:), eigen0(:)
  real(dp),target,allocatable :: eigen11(:),eigen12(:),eigen13(:)
- real(dp),pointer :: outeig(:)
  real(dp),allocatable :: occ(:),wtk(:),eigtmp(:)
+ real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncddk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
  character(len=fnlen) :: infiles(0:3)
-
 ! for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp

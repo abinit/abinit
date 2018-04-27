@@ -54,7 +54,7 @@ MODULE m_paral_pert
 
 !private procedures.
  private :: get_exchatom_list
- private :: get_exchatom_list1 
+ private :: get_exchatom_list1
 !!***
 
 CONTAINS
@@ -741,14 +741,14 @@ end  subroutine unset_pert_paw
  nbgroup=0;
  nproc_max=0
  ranks(:)=-1;group(:)=-1;sizecomm(:)=-1;master_commout(:)=-1
- 
+
  do ii=1,nproc_in
    ranks(ii)=buf_int_all(3*ii-2)    !me_out
    master_commout(ii)=buf_int_all(3*ii-1) !rank of me_out=0 of mpicomm_out expressed in mpicomm_in
-   
+
    if (ranks(ii)==0) then
      nbgroup=nbgroup+1
-     sizecomm(nbgroup)=buf_int_all(3*ii) !nproc_out   
+     sizecomm(nbgroup)=buf_int_all(3*ii) !nproc_out
      group(master_commout(ii))=nbgroup
      if (sizecomm(nbgroup)>nproc_max) nproc_max=sizecomm(nbgroup)
    end if
@@ -765,7 +765,7 @@ end  subroutine unset_pert_paw
    ranks1(igroup,me_in_out)=ii-1 !numbering of procs
  enddo
 
-!Send 
+!Send
  nbsend=0
  if (my_natom_in>0) then
    ABI_ALLOCATE(SendAtomList,(my_natom_in*nbgroup))
@@ -884,12 +884,12 @@ subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,
  call xmpi_bcast(nproc_in,0,mpicomm_out,ier)
  ABI_ALLOCATE(ranks_in_out,(0:nproc_in-1))
 
-!All atoms are distributed among each mpicomm_in 
-!redistribute the atoms of one mpicomm_in among mpicomm_out 
+!All atoms are distributed among each mpicomm_in
+!redistribute the atoms of one mpicomm_in among mpicomm_out
 
-!Look for the communicator mpicomm_in from which me_out=0 belong 
+!Look for the communicator mpicomm_in from which me_out=0 belong
 !Get ranks of all processors of mpicomm_in expressed in mpicomm_out
- if (me_out==0) then  
+ if (me_out==0) then
    ABI_ALLOCATE(ranks_in,(0:nproc_in-1))
    ranks_in=(/ (i1,i1=0,nproc_in-1 )/)
    call xmpi_comm_translate_ranks(mpicomm_in,nproc_in,ranks_in,mpicomm_out,ranks_in_out)
@@ -909,19 +909,19 @@ subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,
 
 !Send
  if (my_natom_in>0.and.sender) then
-   ABI_ALLOCATE(SendAtomList,(my_natom_in)) 
+   ABI_ALLOCATE(SendAtomList,(my_natom_in))
    ABI_ALLOCATE(SendAtomProc,(my_natom_in))
    SendAtomList(:)=my_atmtab_in(:)
 !  The atoms are put in increasing order,see get_my_atmtab
 !  so the procs are sorted by growing process
-   call get_atm_proc(SendAtomList,natom,nproc_out,SendAtomProc) 
+   call get_atm_proc(SendAtomList,natom,nproc_out,SendAtomProc)
  else
-   ABI_ALLOCATE(SendAtomList,(0)) 
+   ABI_ALLOCATE(SendAtomList,(0))
    ABI_ALLOCATE(SendAtomProc,(0))
  end if
 
 !Recv
- if (my_natom_out>0) then 
+ if (my_natom_out>0) then
    ABI_ALLOCATE(RecvAtomProc,(my_natom_out))
    ABI_ALLOCATE(RecvAtomList,(my_natom_out))
    RecvAtomList(:)=my_atmtab_out(:)

@@ -348,7 +348,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
      MSG_ERROR(msg)
    end if
 
- else 
+ else
    ! Old format
    if(use_f90==1)then
      read (unitwf,iostat=ios) npwso1,nband_disk
@@ -392,7 +392,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        MSG_BUG(msg)
      end if
    end if ! headform
-!  
+!
  end if ! option==1.or.option==2
 
 !---------------------------------------------------------------------------
@@ -420,7 +420,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        call xderiveRRecEnd(wff,ios)
 
 #ifdef HAVE_NETCDF
-     else if (wff%iomode == IO_MODE_ETSF) then 
+     else if (wff%iomode == IO_MODE_ETSF) then
        ! Read reduced_coordinates_of_plane_waves for this k point (npw1 is npw_disk).
        ! TODO: spinor parallelism
        NCF_CHECK(nf90_inq_varid(wff%unwff, "reduced_coordinates_of_plane_waves", kg_varid))
@@ -489,7 +489,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
    end if
 
 #ifdef HAVE_NETCDF
-   if (wff%iomode == IO_MODE_ETSF) then  
+   if (wff%iomode == IO_MODE_ETSF) then
      ! get eigenvalues and occupations
      NCF_CHECK(nf90_inq_varid(wff%unwff, "eigenvalues", eig_varid))
      ncerr = nf90_get_var(wff%unwff, eig_varid, eigen, start=[1,ikpt,isppol], count=[nband1,1,1])
@@ -546,7 +546,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
      end if
 
 #ifdef HAVE_NETCDF
-     if (wff%iomode == IO_MODE_ETSF) then 
+     if (wff%iomode == IO_MODE_ETSF) then
        ! The coefficients_of_wavefunctions on file have shape [cplex, mpw, nspinor, mband, nkpt, nsppol]
        NCF_CHECK(nf90_inq_varid(wff%unwff, "coefficients_of_wavefunctions", cg_varid))
        if (npw == npw1) then
@@ -631,7 +631,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
          end if
        end do ! iband
 
-     else 
+     else
 #ifdef HAVE_NETCDF
         ! ETSF-IO
        if (any(option == [1, 3, -4])) then
@@ -968,7 +968,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
          if(option/=5)then
            write(unitwf) cg(1:2,ipw+1:ipw+npwso) ! VALGRIND complains some elements of cg are not initialized, but written
          else
-           write(unitwf) 
+           write(unitwf)
          end if
        end do
      else if(wff%iomode==IO_MODE_MPI)then

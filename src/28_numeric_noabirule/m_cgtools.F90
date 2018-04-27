@@ -25,6 +25,9 @@
 !!    b) Any compiler would complain about type mismatch (REAL,COMPLEX)
 !!       if an explicit interface is given.
 !!
+!! 3) The use of mpi_type is not allowed here. MPI parallelism should be handled in a generic
+!!    way by passing the MPI communicator so that the caller can decide how to handle MPI.
+!!
 
 #if defined HAVE_CONFIG_H
 #include "config.h"

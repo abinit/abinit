@@ -58,6 +58,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  use m_geometry,   only : phdispl_cart2red
  use m_dynmat,     only : ftgam_init, ftgam
  use m_crystal,    only : crystal_t
+ use m_fstab,      only : mkqptequiv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

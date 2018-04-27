@@ -245,6 +245,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_pawfgr,           only : pawfgr_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
+ use m_spin_current,     only : spin_current
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
