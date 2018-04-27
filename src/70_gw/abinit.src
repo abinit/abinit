@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "calc_rpa_functional.F90",
  "calc_sigc_cd.F90",
  "calc_sigc_pole_cd.F90",
  "calc_sig_ppm_comp.F90",
@@ -63,7 +62,6 @@ sources = [
  "m_sigma.F90",
  "paw_qpscgw.F90",
  "prep_calc_ucrpa.F90",
- "random_stopping_power.F90",
  "read_plowannier.F90",
  "setup_sigma.F90",
  ]

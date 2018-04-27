@@ -7,7 +7,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf)
+!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2358,6 +2358,417 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
  end select
 
 end subroutine chi0_bksmask
+!!***
+
+!!****f* m_screening_driver/random_stopping_power
+!! NAME
+!! random_stopping_power
+!!
+!! FUNCTION
+!! Calculate the electronic random stopping power
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      screening
+!!
+!! CHILDREN
+!!      get_bz_item,spline,splint,wrtout
+!!
+!! SOURCE
+
+subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cryst,Dtfil,epsm1,rspower)
+
+ use m_splines
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'random_stopping_power'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit  none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)                    :: iqibz,npvel
+ real(dp),intent(in)                   :: pvelmax(3)
+
+ type(em1params_t),intent(in) :: Ep
+ type(gsphere_t),intent(in)            :: Gsph_epsG0
+ type(kmesh_t),intent(in)              :: Qmesh
+ type(vcoul_t),intent(in)              :: Vcp
+ type(crystal_t),intent(in)            :: Cryst
+ type(Datafiles_type),intent(in)       :: Dtfil
+
+ complex(gwpc),intent(in)              :: epsm1(Ep%npwe,Ep%npwe,Ep%nomega)
+
+ real(dp),intent(inout)                :: rspower(npvel)
+
+!Local variables ------------------------------
+ integer :: ipvel,ig
+ integer :: iq_bz,iq_ibz,isym_q,itim_q
+ integer :: iomega,iomegap,nomega_re
+ integer :: unt_rsp
+ integer,allocatable :: iomega_re(:)
+
+ real(dp),parameter :: zp=1.0_dp              ! Hard-coded charge of the impinging particle
+ real(dp) :: omega_p
+ real(dp) :: im_epsm1_int(1)
+ real(dp) :: qbz(3),qpgcart(3),qpgred(3)
+ real(dp) :: pvel(3,npvel),pvel_norm(npvel)
+ real(dp) :: ypp_i(Ep%nomega)
+ real(dp) :: vcoul(Ep%npwe)
+ real(dp),allocatable :: im_epsm1_diag_qbz(:,:),tmp_data(:)
+ real(dp),allocatable :: omega_re(:)
+
+ character(len=500)     :: msg
+ character(len=fnlen+4) :: fname
+
+!************************************************************************
+
+ !
+ ! First set up the velocities array from the input variables npvel and pvelmax(3)
+ ! Remember pvelmax is in Cartesian coordinates and so is pvel
+ do ipvel=1,npvel
+   pvel(:,ipvel)    = REAL(ipvel,dp) / REAL(npvel,dp) * pvelmax(:)
+   pvel_norm(ipvel) = SQRT( SUM( pvel(:,ipvel)**2 ) )
+ enddo
+ !
+ ! Select the purely real frequency in Ep%omega
+ nomega_re=0
+ do iomega=1,Ep%nomega
+   if( AIMAG(Ep%omega(iomega)) < 1.0e-4_dp ) then
+     nomega_re=nomega_re+1
+   endif
+ enddo
+ ABI_ALLOCATE(omega_re,(nomega_re))
+ ABI_ALLOCATE(iomega_re,(nomega_re))
+ ABI_ALLOCATE(im_epsm1_diag_qbz,(Ep%npwe,Ep%nomega))
+ ABI_ALLOCATE(tmp_data,(Ep%nomega))
+
+ iomegap=0
+ do iomega=1,Ep%nomega
+   if( AIMAG(Ep%omega(iomega)) < 1.0e-4_dp ) then
+     iomegap=iomegap+1
+     iomega_re(iomegap)=iomega
+     omega_re(iomegap)=REAL(Ep%omega(iomega),dp)
+   endif
+ enddo
+
+ !
+ ! Loop over all the q-points in the full Brillouin zone and select only the
+ ! ones that corresponds to the correct q-point in the irreducible wedge we are
+ ! currently treating (index iqibz)
+ do iq_bz=1,Qmesh%nbz
+
+   ! Perform the check and obtain the symmetry information
+   call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+   if( iqibz /= iq_ibz ) cycle
+
+   ! Apply the symmetry operation to the diagonal of epsm1
+   do iomega=1,nomega_re
+     do ig=1,Ep%npwe
+       im_epsm1_diag_qbz(Gsph_epsG0%rottb(ig,itim_q,isym_q),iomega)= AIMAG( epsm1(ig,ig,iomega_re(iomega)) )
+     enddo
+   enddo
+   ! Apply the symmetry operation to the Coulomb interaction
+   do ig=1,Ep%npwe
+     vcoul(Gsph_epsG0%rottb(ig,itim_q,isym_q))=Vcp%vc_sqrt(ig,iqibz)**2
+   enddo
+
+   !
+   ! Sum over G vectors
+   do ig=1,Ep%npwe
+     !
+     ! Loop over velocities
+     do ipvel=1,npvel
+
+       qpgred(:) = qbz(:) + Gsph_epsG0%gvec(:,ig)
+       ! Transform q + G from reduced to cartesian with the symmetry operation
+       qpgcart(:) = two_pi * Cryst%gprimd(:,1) * qpgred(1) &
+&                 + two_pi * Cryst%gprimd(:,2) * qpgred(2) &
+&                 + two_pi * Cryst%gprimd(:,3) * qpgred(3)
+
+       ! omega_p = ( q + G ) . v
+       omega_p =  DOT_PRODUCT( qpgcart(:) , pvel(:,ipvel) )
+
+       ! Check that the calculated frequency omega_p is within the omega
+       ! range of epsm1 and thus that the interpolation will go fine
+       if ( ABS(omega_p) > omega_re(nomega_re) ) then
+         write(msg,'(a,e16.4,2a,e16.4)') ' freqremax is currently ',omega_re(nomega_re),ch10,&
+&                                        ' increase it to at least ',omega_p
+         MSG_WARNING(msg)
+       endif
+
+       ! Perform the spline interpolation to obtain epsm1 at the desired omega = omega_p
+       tmp_data = im_epsm1_diag_qbz(ig,:)
+
+       call spline( omega_re, tmp_data, nomega_re, 1.0e+32_dp, 1.0e+32_dp, ypp_i)
+       call splint( nomega_re, omega_re, tmp_data, ypp_i, 1, (/ ABS(omega_p) /),  im_epsm1_int )
+
+       !
+       ! Apply the odd parity of Im epsm1 in  omega to recover the causal response function
+       if (omega_p<zero) im_epsm1_int(1)=-im_epsm1_int(1)
+
+       !
+       ! Calculate 4 * pi / |q+G|**2 * omega_p * Im{ epsm1_GG(q,omega_p) }
+       !
+       im_epsm1_int(1) = omega_p * vcoul(ig) * im_epsm1_int(1)
+
+       ! Accumulate the final result without the prefactor
+       ! (It will be included at the very end)
+       rspower(ipvel) = rspower(ipvel) + im_epsm1_int(1)
+
+     end do ! end of velocity loop
+   end do ! end G-loop
+
+ enddo ! end of q loop in the full BZ
+
+ ! If it is the last q, write down the result in the main output file and in a
+ ! separate file _RSP (for Random Stopping Power)
+ if (iqibz == Qmesh%nibz ) then
+
+   ! Multiply by the prefactors
+   ! Note that this expression differs from Eq. (3.11) in Campillo PRB 58, 10309 (1998).
+   ! A factor one half is missing in the paper.
+   rspower(:) = - zp**2 / ( Cryst%ucvol * Qmesh%nbz * pvel_norm(:) ) * rspower(:)
+
+   write(msg,'(2a)')         ch10,' ==== Random stopping power along Cartesian direction  === '
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a,3(f12.4,2x),a)') ' ====  ',pvelmax(:),'===='
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a)')               '#  |v| (a.u.) , RSP (a.u.) '
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   do ipvel=1,npvel
+     write(msg,'(f16.8,4x,f16.8)') pvel_norm(ipvel),rspower(ipvel)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   enddo
+   write(msg,'(2a)')              ' ========================================================= ',ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+
+   fname=TRIM(Dtfil%filnam_ds(4))//'_RSP'
+   if (open_file(fname,msg,newunit=unt_rsp,status='unknown',form='formatted') /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   write(msg,'(a)')               '# ==== Random stopping power along Cartesian direction  === '
+   call wrtout(unt_rsp,msg,'COLL')
+   write(msg,'(a,3(f12.4,2x))')   '# ====  ',pvelmax(:)
+   call wrtout(unt_rsp,msg,'COLL')
+   write(msg,'(a)')               '#  |v| (a.u.) , RSP (a.u.) '
+   call wrtout(unt_rsp,msg,'COLL')
+   do ipvel=1,npvel
+     write(msg,'(f16.8,4x,f16.8)') pvel_norm(ipvel),rspower(ipvel)
+     call wrtout(unt_rsp,msg,'COLL')
+   enddo
+   close(unt_rsp)
+ end if
+
+ ABI_DEALLOCATE(omega_re)
+ ABI_DEALLOCATE(iomega_re)
+ ABI_DEALLOCATE(im_epsm1_diag_qbz)
+ ABI_DEALLOCATE(tmp_data)
+
+end subroutine random_stopping_power
+!!***
+
+!!****f* m_screening_driver/calc_rpa_functional
+!! NAME
+!! calc_rpa_functional
+!!
+!! FUNCTION
+!!  Routine used to calculate the RPA approximation to the correlation energy
+!!  from the irreducible polarizability.
+!!
+!! INPUTS
+!!  iq=index of the q-point in the array Qmesh%ibz where epsilon^-1 has to be calculated
+!!  Ep<em1params_t>=Structure with parameters and dimensions related to the inverse dielectric matrix.
+!!  Pvc<vcoul_t>=Structure gathering data on the Coulombian interaction
+!!  Qmesh<kmesh_t>=Data type with information on the q-sampling
+!!  Dtfil<Datafiles_type)>=variables related to files
+!!  spaceComm=MPI communicator.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      screening
+!!
+!! CHILDREN
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa)
+
+ use m_abilasi,       only : xginv, xheev
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'calc_rpa_functional'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqcalc,iq,gwrpacorr,spaceComm
+ type(kmesh_t),intent(in) :: Qmesh
+ type(vcoul_t),intent(in) :: Pvc
+ type(Datafiles_type),intent(in) :: Dtfil
+ type(em1params_t),intent(in) :: Ep
+!arrays
+ real(dp),intent(in) :: gmet(3,3)
+ real(dp),intent(inout) :: ec_rpa(gwrpacorr)
+ complex(gwpc),intent(inout) :: chi0(Ep%npwe,Ep%npwe,Ep%nomega)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr
+ real(dp) :: ecorr
+ real(dp) :: lambda
+ logical :: qeq0
+ character(len=500) :: msg
+!arrays
+ real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
+ complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:)
+ real(gwpc),allocatable :: eig(:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+! initialize MPI data
+ master=0
+ rank   = xmpi_comm_rank(spaceComm)
+ nprocs = xmpi_comm_size(spaceComm)
+
+ !if (rank==master) then ! presently only master has chi0 in screening
+
+ ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff
+ qeq0=(normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0)
+
+ ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
+ ABI_ALLOCATE(zw,(Ep%nomegaei))
+ ABI_ALLOCATE(z,(Ep%nomegaei))
+ call coeffs_gausslegint(zero,one,z,zw,Ep%nomegaei)
+
+ ! Calculate Gauss-Legendre quadrature knots and weights for the lambda integration
+ ABI_ALLOCATE(zlw,(gwrpacorr))
+ ABI_ALLOCATE(zl,(gwrpacorr))
+ call coeffs_gausslegint(zero,one,zl,zlw,gwrpacorr)
+
+
+ ABI_ALLOCATE(chi0_diag,(Ep%npwe))
+ ABI_STAT_ALLOCATE(chitmp,(Ep%npwe,Ep%npwe), ierr)
+ ABI_CHECK(ierr==0, "out-of-memory in chitmp")
+
+ do io=2,Ep%nomega
+
+   if(gwrpacorr==1) then ! exact integration over the coupling constant
+
+     if(modulo(io-2,nprocs)/=rank) cycle ! distributing the workload
+
+     do ig2=1,Ep%npwe
+       do ig1=1,Ep%npwe
+         chitmp(ig1,ig2) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig2,iq) * chi0(ig1,ig2,io)
+       end do !ig1
+     end do !ig2
+     ABI_ALLOCATE(eig,(Ep%npwe))
+     call xheev('V','U',Ep%npwe,chitmp,eig)
+
+     do ig1=1,Ep%npwe
+       ec_rpa(:) = ec_rpa(:) &
+&         - zw(io-1) / ( z(io-1) * z(io-1) ) &
+&              * Qmesh%wt(iq) * (-log( 1.0_dp-eig(ig1) )  - eig(ig1) ) / (2.0_dp * pi )
+     end do
+     ABI_DEALLOCATE(eig)
+
+   else ! numerical integration over the coupling constant
+
+      if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
+
+     do ilambda=1,gwrpacorr
+       lambda=zl(ilambda)
+       do ig1=1,Ep%npwe
+         chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)
+       end do
+
+       do ig2=1,Ep%npwe
+         do ig1=1,Ep%npwe
+           chitmp(ig1,ig2) = - lambda * Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+         end do !ig1
+         chitmp(ig2,ig2) = chitmp(ig2,ig2) + 1.0_dp
+       end do !ig2
+       call xginv(chitmp(:,:),Ep%npwe)
+       chitmp(:,:) = matmul( chi0(:,:,io) , chitmp(:,:) )
+
+       do ig1=1,Ep%npwe
+         chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp(ig1,ig1) - chi0_diag(ig1)
+       end do
+
+       do ig1=1,Ep%npwe
+         ec_rpa(ilambda) = ec_rpa(ilambda) &
+&           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag(ig1) ) / (2.0_dp * pi )
+       end do
+
+     end do ! ilambda
+
+   end if ! exact or numerical integration over the coupling constant
+
+ end do ! io
+
+
+ ! Output the correlation energy when the last q-point to be calculated is reached
+ ! This would allow for a manual parallelization over q-points
+ if(iqcalc==Ep%nqcalc) then
+
+   call xmpi_sum_master(ec_rpa,master,spaceComm,ierr)
+
+   if(rank==master) then
+     ecorr = sum( zlw(:)*ec_rpa(:) )
+     if (open_file(dtfil%fnameabo_rpa, msg, newunit=unt) /=0) then
+       MSG_ERROR(msg)
+     end if
+     write(unt,'(a,(2x,f14.8))') '#RPA',ecorr
+     write(msg,'(2a,(2x,f14.8))') ch10,' RPA energy [Ha] :',ecorr
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     if(gwrpacorr>1) then
+       do ilambda=1,gwrpacorr
+         write(unt,'(i6,2x,f10.6,2x,e13.6)') ilambda,zl(ilambda),ec_rpa(ilambda)
+         write(msg,'(i6,2x,f10.6,2x,e13.6)') ilambda,zl(ilambda),ec_rpa(ilambda)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+       end do
+     end if
+     close(unt)
+   end if
+
+ end if
+
+ ABI_DEALLOCATE(chi0_diag)
+ ABI_DEALLOCATE(chitmp)
+ ABI_DEALLOCATE(zl)
+ ABI_DEALLOCATE(zlw)
+ ABI_DEALLOCATE(z)
+ ABI_DEALLOCATE(zw)
+
+ DBG_EXIT("COLL")
+
+end subroutine calc_rpa_functional
 !!***
 
 end module m_screening_driver
