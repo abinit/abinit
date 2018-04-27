@@ -60,7 +60,6 @@ sources = [
  "m_screening.F90",
  "m_screen.F90",
  "m_sigma.F90",
- "paw_qpscgw.F90",
  "prep_calc_ucrpa.F90",
  "read_plowannier.F90",
  "setup_sigma.F90",

@@ -176,6 +176,7 @@ contains
 
 subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,converged)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2498,13 +2499,13 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &  Pawang,Pawrad,Pawtab,Pawfgrtab,prev_Pawrhoij,&
 &  QP_pawrhoij,QP_paw_ij,QP_paw_an,QP_energies,qp_nhat,nhatgrdim,qp_nhatgr,qp_compch_sph,qp_compch_fft)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_qpscgw'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none
