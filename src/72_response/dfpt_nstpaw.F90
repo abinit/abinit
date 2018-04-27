@@ -189,6 +189,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
  use m_kg,       only : mkkin, kpgstr, mkkpg
+ use m_fft,      only : fftpac
+ use m_spacepar, only : hartrestr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -198,7 +200,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
- use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp

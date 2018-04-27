@@ -1,6 +1,48 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/jellium
+!!****m* ABINIT/m_jellium
+!! NAME
+!!  m_jellium
 !!
+!! FUNCTION
+!!  Routines related to jellium
+!!
+!! COPYRIGHT
+!! Copyright (C) 2007-2018 ABINIT group (SC)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_jellium
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: jellium
+!!***
+
+contains
+!!***
+
+!!****f* m_jellium/jellium
 !! NAME
 !! jellium
 !!
@@ -9,13 +51,6 @@
 !!  option=1 : local ionic (external) potential due to jellium background
 !!  option=2 : contribution to the initial density taking into account
 !!                the jellium slab
-!!
-!! COPYRIGHT
-!! Copyright (C) 2007-2018 ABINIT group (SC)
-!! This file is distributed under the terms of the 
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~ABINIT/Infos/contributors.txt .
 !!
 !! INPUTS
 !!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
@@ -46,19 +81,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 &  option,paral_kgb,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -195,7 +220,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  if(option==1) then
    ABI_DEALLOCATE(vjelg)
  end if
- 
+
 !DEBUG
 !write(std_out,*)' jellium : exit '
 !stop
@@ -220,4 +245,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  end function gsq_jel
 
 end subroutine jellium
+!!***
+
+end module m_jellium
 !!***

@@ -236,6 +236,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_tddft,              only : tddft
  use m_kg,                 only : mkkin, mkkpg
  use m_suscep_stat,        only : suscep_stat
+ use m_fft,                only : fftpac
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
@@ -247,7 +248,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_62_wvl_wfs
  use interfaces_65_paw

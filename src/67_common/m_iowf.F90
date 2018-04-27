@@ -29,7 +29,7 @@ MODULE m_iowf
  use m_errors
  use m_xmpi
  use m_wffile
- use m_abi_etsf 
+ use m_abi_etsf
  use m_nctk
  use m_wfk
 #ifdef HAVE_NETCDF
@@ -49,9 +49,9 @@ MODULE m_iowf
 
  implicit none
 
- private 
+ private
 
- public :: outwf 
+ public :: outwf
 
 !!***
 
@@ -328,7 +328,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      !call crystal_free(crystal)
      !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
      !NCF_CHECK(ncerr)
-#else 
+#else
      MSG_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
 #endif
@@ -670,7 +670,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,fform2=2
- integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k 
+ integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
  integer :: comm_cell,comm_fft,comm_bandfft,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
  integer :: timrev,paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
@@ -705,7 +705,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  me_kpt = mpi_enreg%me_kpt; me_band = mpi_enreg%me_band; me_spinor = mpi_enreg%me_spinor
  iam_master = (me_kpt == master)
 
- paral_kgb = dtset%paral_kgb 
+ paral_kgb = dtset%paral_kgb
  nproc_band = mpi_enreg%nproc_band
  bandpp     = mpi_enreg%bandpp
  nproc_spinor = mpi_enreg%nproc_spinor
@@ -735,7 +735,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
  ! TODO
  ! Be careful with response == 1.
- ! gs_ebands contains the GS eigenvalues and occupation and will be written if this is a 
+ ! gs_ebands contains the GS eigenvalues and occupation and will be written if this is a
  ! GS wfk. If we have a DFPT file, eigen stores the GKK matrix element, in this case
  ! we don't write gs_ebands but we define new variables in the netcdf file to store the GKK
  ABI_MALLOC(occ3d, (mband,nkpt,nsppol))
@@ -751,7 +751,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    formeig = 1
  end if
 
- ! same_layout is set to True if the interal representation of the cgs 
+ ! same_layout is set to True if the interal representation of the cgs
  ! is compatible with the representation on file.
  iomode = IO_MODE_ETSF
  if (response == 0) then
@@ -762,7 +762,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    ABI_CHECK(nproc_band==1, "nproc_band != 1 not coded")
    ABI_CHECK(nproc_spinor==1, "nproc_spinor != 1 not coded")
 
-   ! Note: It would be possible to use collective IO if the cg1 are block-distributed 
+   ! Note: It would be possible to use collective IO if the cg1 are block-distributed
    same_layout = .True.
    spin_loop: do spin=1,nsppol
      do ikpt=1,nkpt
@@ -808,7 +808,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        else
          call ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
-       
+
        NCF_CHECK(nf90_close(ncid))
      end if
 
@@ -821,7 +821,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          nband_k = nband(ikpt + (spin-1)*nkpt)
          npw_k = npwarr(ikpt)
          if (.not. proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,spin,me_kpt)) then
-           ! FIXME v2[01], v3[6], with 4 procs  
+           ! FIXME v2[01], v3[6], with 4 procs
            ! v6[7] and v7[68], v7[69] fail but due to a extra line with nprocs
            ! v7[96] with np=4 seems to be more serious but it crashes also in trunk.
            ! v2[88] is slow likely due to outscfv
@@ -868,7 +868,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        do ii=0,nproc_cell-1
          if (rank_has_cg(ii) == 1) then
            cnt = cnt + 1
-           ranks_io(cnt) = ii 
+           ranks_io(cnt) = ii
          end if
        end do
        !write(std_out,*)"nranks, ranks_io:", nranks, ranks_io
@@ -967,7 +967,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      call cwtime(cpu,wall,gflops,"stop")
      write(msg,'(2(a,f8.2))')" collective ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
-#endif 
+#endif
 ! HAVE_NETCDF
    else ! single_writer
      if (nproc_cell > 1) then
@@ -1134,7 +1134,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        end if
        ABI_FREE(kg_k)
 
-       ! gblock contains block-distributed G-vectors inside comm_fft 
+       ! gblock contains block-distributed G-vectors inside comm_fft
        !call kg2seqblocks(npwtot_k,npw_k,kg(:,ikg+1:),ind_cg_mpi_to_seq,comm_fft,start_pwblock,count_pwblock,gblock)
        !write(std_out,*)"gblock(:,2)",gblock(:,2)
        !ncerr = nf90_put_var(ncid, kg_varid, gblock, start=[1,start_pwblock,ikpt], count=[3,count_pwblock,1])
@@ -1235,7 +1235,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      call cwtime(cpu,wall,gflops,"stop")
      write(msg,'(2(a,f8.2))')"scattered ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
-#endif 
+#endif
 ! HAVE_NETCDF
    end if !nctk_has_mpiio
  end if
@@ -1267,11 +1267,11 @@ end subroutine cg_ncwrite
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  eigen((2*mband**2*nkpt*nsppol)= eigenvalues (hartree) for all bands at each k point
 !!  occ3d(mband*nkpt*nsppol)=occupations for all bands at each k point
-!!    Note that occ3d differes from the occ arrays used in the rest of the code. 
+!!    Note that occ3d differes from the occ arrays used in the rest of the code.
 !!    occ3d is an array with constant stride `mband` whereas abinit (for reasons that are not clear to me)
 !!    packs the occupations in a 1d vector with a k-dependent separation (nband_k).
 !!    occ and occ3d differ only if nband is k-dependent but you should never assume this, hence
-!!    remember to *convert* occ into occ3d before calling this routine. 
+!!    remember to *convert* occ into occ3d before calling this routine.
 !!
 !! PARENTS
 !!      m_iowf
@@ -1304,12 +1304,12 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
  integer :: idx,spin,ikpt,nband_k,ib2,ib1
  integer :: ncerr,occ_varid,h1mat_varid
 !arrays
- real(dp),allocatable :: h1mat(:,:,:,:,:) 
+ real(dp),allocatable :: h1mat(:,:,:,:,:)
 
 ! *************************************************************************
 
- ! Declare h1 array with abinit conventions 
- ! Cannot use a 3D array since eigen1 are packed and one could have different number of bands 
+ ! Declare h1 array with abinit conventions
+ ! Cannot use a 3D array since eigen1 are packed and one could have different number of bands
  ! per k-points. (this is not an official etsf-io variable)!
  ! elements in eigen are packed in the first positions.
  ! Remember that eigen are not MPI-distributed so no communication is needed
@@ -1347,7 +1347,7 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 end subroutine ncwrite_eigen1_occ
 !!***
 
-#endif 
+#endif
 ! HAVE_NETCDF
 
 !----------------------------------------------------------------------
@@ -1424,7 +1424,7 @@ subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,coun
 
  do rank=0,nproc_fft-1
    start_pwblock = igstart_rank(rank)
-   count_pwblock = igstart_rank(rank+1) - igstart_rank(rank)  
+   count_pwblock = igstart_rank(rank+1) - igstart_rank(rank)
 
    gbuf = 0
    do ig=1,npw_k
@@ -1439,13 +1439,13 @@ subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,coun
 
    if (me_fft == rank) then
      ABI_STAT_MALLOC(gblock, (3, count_pwblock), ierr)
-     ABI_CHECK(ierr==0, "oom in gblock") 
+     ABI_CHECK(ierr==0, "oom in gblock")
      gblock = gbuf(:, :count_pwblock)
-   end if 
+   end if
  end do
 
  start_pwblock = igstart_rank(me_fft)
- count_pwblock = igstart_rank(me_fft+1) - igstart_rank(me_fft)  
+ count_pwblock = igstart_rank(me_fft+1) - igstart_rank(me_fft)
 
  ABI_FREE(gbuf)
  ABI_FREE(igstart_rank)
@@ -1531,14 +1531,14 @@ subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,b
  ABI_STAT_MALLOC(cgbuf, (2, npwtot_k, nbmax), ierr)
  ABI_CHECK(ierr==0, "oom cgbuf")
 
- nbb = bstart_rank(me+1) - bstart_rank(me)  
+ nbb = bstart_rank(me+1) - bstart_rank(me)
  ABI_STAT_MALLOC(my_cgblock, (2, npwtot_k, nbb), ierr)
  ABI_CHECK(ierr==0, "oom my_cgblock")
 
  ! TODO: This should be replaced by gatherv but premature optimization....
  do rank=0,nprocs-1
    bstart = bstart_rank(rank)
-   bcount = bstart_rank(rank+1) - bstart_rank(rank)  
+   bcount = bstart_rank(rank+1) - bstart_rank(rank)
 
    do band=bstart, bstart+bcount-1
      ib = band - bstart + 1
@@ -1554,7 +1554,7 @@ subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,b
  end do ! rank
 
  bstart = bstart_rank(me)
- bcount = bstart_rank(me+1) - bstart_rank(me)  
+ bcount = bstart_rank(me+1) - bstart_rank(me)
 
  ABI_FREE(cgbuf)
  ABI_FREE(bstart_rank)

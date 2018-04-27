@@ -119,7 +119,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
        end do
      end do
    end do
- end do 
+ end do
 
  ! Construct the Born effective charge tensor
  ipert2 = natom + 2
@@ -135,7 +135,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
        end if
      end do
    end do
- end do 
+ end do
 
  ! TODO: also store the dielectric matrix
 
@@ -194,7 +194,6 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  NCF_CHECK(nf90_close(ncid))
 
  ! Deallocate stuff
-
  ABI_FREE(dynmat)
  ABI_FREE(dynmat_mask)
  ABI_FREE(born_effective_charge_tensor)
@@ -205,7 +204,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 #endif
 
  contains
-   integer function vid(vname) 
+   integer function vid(vname)
 
 
 !This section has been created automatically by the script Abilint (TD).

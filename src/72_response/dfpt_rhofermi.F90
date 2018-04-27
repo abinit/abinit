@@ -162,13 +162,13 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawdij,      only : pawdijfr
  use m_pawfgr,      only : pawfgr_type
  use m_kg,          only : mkkin, kpgstr, mkkpg
+ use m_fft,         only : fftpac
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_rhofermi'
  use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common
