@@ -163,7 +163,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 #define ABI_FUNC 'newkpt'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_io_mpi
  use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section

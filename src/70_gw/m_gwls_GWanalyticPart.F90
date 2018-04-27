@@ -32,17 +32,17 @@ module m_gwls_GWanalyticPart
 !----------------------------------------------------------------------------------------------------
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_GWlanczos
-use gwls_GenerateEpsilon
-use gwls_LanczosBasis
-use gwls_model_polarisability
-use gwls_polarisability
-!use gwls_ComplementSpacePolarizability
-use gwls_GWlanczos
-use gwls_TimingLog
+use m_gwls_wf
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_GWlanczos
+use m_gwls_GenerateEpsilon
+use m_gwls_LanczosBasis
+use m_gwls_model_polarisability
+use m_gwls_polarisability
+!use m_gwls_ComplementSpacePolarizability
+use m_gwls_GWlanczos
+use m_gwls_TimingLog
 
 ! abinit modules
 use defs_basis

@@ -4464,7 +4464,6 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
 #define ABI_FUNC 'wfk_prof'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_io_mpi
 !End of the abilint section
 
  implicit none

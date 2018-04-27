@@ -44,12 +44,12 @@ subroutine gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img
 &                           filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
 
 use m_gwls_utility,                   only : master_debug, files_status_new, files_status_old
-! use gwls_wf,                        only : norm_k
-use gwls_hamiltonian,               only : destroy_H, exchange, g_to_r, eig
-use gwls_TimingLog
-use gwls_valenceWavefunctions
-use gwls_ComputeCorrelationEnergy  
-use gwls_GenerateEpsilon
+! use m_gwls_wf,                        only : norm_k
+use m_gwls_hamiltonian,               only : destroy_H, exchange, g_to_r, eig
+use m_gwls_TimingLog
+use m_gwls_valenceWavefunctions
+use m_gwls_ComputeCorrelationEnergy  
+use m_gwls_GenerateEpsilon
 
 use defs_basis
 use defs_datatypes

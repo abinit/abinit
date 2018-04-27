@@ -213,7 +213,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_paw_dmft,         only : paw_dmft_type
  use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_common_destroy,&
 &                               fock_BZ_destroy,fock_update_exc,fock_updatecwaveocc
- use gwls_hamiltonian,   only : build_vxc
+ use m_gwls_hamiltonian, only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif

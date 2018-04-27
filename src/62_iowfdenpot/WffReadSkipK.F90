@@ -58,7 +58,6 @@ subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'WffReadSkipK'
- use interfaces_56_io_mpi
 !End of the abilint section
 
  implicit none

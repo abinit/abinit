@@ -112,7 +112,6 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 #define ABI_FUNC 'uderiv'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_io_mpi
  use interfaces_67_common, except_this_one => uderiv
 !End of the abilint section
 

@@ -83,7 +83,7 @@ subroutine setup_timing_log()
 !--------------------------------------------------------------------------------
 ! This routine opens the timing log file.
 !--------------------------------------------------------------------------------
-use gwls_hamiltonian, only: mpi_enreg
+use m_gwls_hamiltonian, only: mpi_enreg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -286,7 +286,7 @@ subroutine write_block_lanczos_timing_log(list_time,ntime)
 !--------------------------------------------------------------------------------
 ! This routine writes the timing for the block lanczos routine.
 !--------------------------------------------------------------------------------
-use gwls_hamiltonian, only: mpi_enreg
+use m_gwls_hamiltonian, only: mpi_enreg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
