@@ -37,10 +37,10 @@ sources = [
  "pawuj_drive.F90",
  "respfn.F90",
  "m_screening_driver.F90",
- "sigma.F90",
+ "m_sigma_driver.F90",
  "testfi.F90",
  "timana.F90",
- "wfk_analyze.F90",
+ "m_wfk_analyze.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_wfk_analyze
+!! NAME
+!!  m_wfk_analyze
+!!
+!! FUNCTION
+!!  Post-processing tools for WFK file
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_wfk_analyze
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: wfk_analyze
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/wfk_analyze
 !! NAME
 !!  wfk_analyze
@@ -11,13 +53,6 @@
 !!   - No interactive prompt.
 !!   - Run the analysis once, store all the important results in netcdf files
 !!     and use python tools to analyze data
-!!
-!! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! acell(3)=Length scales of primitive translations (bohr)
@@ -620,4 +655,7 @@ subroutine read_wfd()
  end subroutine read_wfd
 
 end subroutine wfk_analyze
+!!***
+
+end module m_wfk_analyze
 !!***

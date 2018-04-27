@@ -1,17 +1,52 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/sigma
+!!****m* ABINIT/m_sigma_driver
 !! NAME
-!! sigma
+!!  m_sigma_driver
 !!
 !! FUNCTION
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!  Copyright (C) 1999-2018 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_sigma_driver
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: sigma
+!!***
+
+contains
+!!***
+
+!!****f* m_sigma_driver/sigma
+!! NAME
+!! sigma
+!!
+!! FUNCTION
+!! Calculate the matrix elements of the self-energy operator.
 !!
 !! INPUTS
 !! acell(3)=length scales of primitive translations (bohr)
@@ -2418,4 +2453,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  DBG_EXIT('COLL')
 
 end subroutine sigma
+!!***
+
+end module m_sigma_driver
 !!***
