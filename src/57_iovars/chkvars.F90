@@ -275,7 +275,7 @@ subroutine chkvars (string)
 
  call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
 
-contains
+end subroutine chkvars
 !!***
 
 
@@ -307,6 +307,9 @@ contains
 !! SOURCE
 
 subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
+
+ use defs_basis
+ use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -416,7 +419,4 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
  end do
 
 end subroutine chkvars_in_string
-!!***
-
-end subroutine chkvars
 !!***
