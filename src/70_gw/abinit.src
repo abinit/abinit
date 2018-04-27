@@ -25,7 +25,6 @@ sources = [
  "calc_sigx_me.F90",
  "calc_ucrpa.F90",
  "calc_vhxc_me.F90",
- "calc_wf_qp.F90",
  "cchi0.F90",
  "cchi0q0.F90",
  "cchi0q0_intraband.F90",

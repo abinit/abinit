@@ -39,7 +39,7 @@ module m_efmas_defs
 !! SOURCE
 
  type efmasfr_type
-   
+
    !For k-point
    complex(dpc),allocatable :: ch2c(:,:,:,:)
 
@@ -56,7 +56,7 @@ module m_efmas_defs
 !! SOURCE
 
  type efmasdeg_type
-   
+
    !For k-point
    integer :: ndegs
    integer, allocatable :: degs_bounds(:,:)
