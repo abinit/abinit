@@ -182,11 +182,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: wminmax(2)
  integer,allocatable :: indqq(:,:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, dksqmin, dksqmean, maxfreq, error
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
  real(dp),pointer :: energies_dense(:,:,:), displ_cart(:,:,:,:), kq_kpts(:,:)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
- real(dp),allocatable :: ddb_qshifts(:,:)
+ real(dp),allocatable :: ddb_qshifts(:,:), phfreq_bz(:), phfreq_ibz(:)
  !real(dp) :: tsec(2)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
@@ -854,7 +854,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
 
 #if 1
-   !ibz version (HM: I noticed that the fourier interpolation sometimes breaks the symmetries)
+   !ibz version
+   ! HM: I noticed that the fourier interpolation sometimes breaks the symmetries
+   !     for low q-point sampling
    ABI_MALLOC(eph_dg%phfrq_dense,(3*cryst%natom,eph_dg%dense_nibz))
    do ii=1,eph_dg%dense_nibz
      qpt = eph_dg%kpts_dense_ibz(:,ii)
@@ -898,15 +900,30 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    ABI_MALLOC(phfreq_bz,(cryst%natom*3))
    ABI_MALLOC(phfreq_ibz,(cryst%natom*3))
+   ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
    open (unit = 2, file = "phbz.dat")
    open (unit = 3, file = "phibz.dat")
+   dksqmax = 0
+   dksqmin = 1e8
+   maxfreq = 0
    do ii=1,eph_dg%dense_nbz
      call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,ii), phfreq_bz, displ_cart )
      call ifc_fourq(ifc, cryst, eph_dg%kpts_dense_ibz(:,eph_dg%bz2ibz_dense(ii)), phfreq_ibz, displ_cart )
      write(2,*) phfreq_bz
-     write(3,*) phfreq_ibz 
+     write(3,*) phfreq_ibz
+     do jj=1,cryst%natom*3
+       error = abs(phfreq_bz(jj)-phfreq_ibz(jj))
+       if (dksqmax < error) dksqmax = error
+       if (dksqmin > error) dksqmin = error
+       if (maxfreq < phfreq_bz(jj)) maxfreq = phfreq_bz(jj)
+       dksqmean = dksqmean + error
+     enddo
    end do
-#endif
+   write(*,*) 'bz2ibz phonon error min: ', dksqmin
+   write(*,*) 'bz2ibz phonon error max: ', dksqmax, dksqmax/maxfreq
+   write(*,*) 'bz2ibz phonon error mean:', dksqmean/eph_dg%dense_nbz, &
+                                           dksqmean/eph_dg%dense_nbz/maxfreq
+   ABI_FREE(displ_cart)
 
    open (unit = 2, file = "coarse2dense.dat")
    do ii=1,eph_dg%coarse_nbz
@@ -931,6 +948,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end do
    close(2)
    !end debug
+#endif
 
 
  !6. we will call sigmaph here for testing purposes only
