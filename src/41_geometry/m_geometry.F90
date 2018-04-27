@@ -63,6 +63,7 @@ MODULE m_geometry
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
  public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
  public  :: symredcart        ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
+ public :: strainsym          ! Symmetrize the strain tensor.
 
  interface normv
   module procedure normv_rdp_vector

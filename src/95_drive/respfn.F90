@@ -1823,8 +1823,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  DBG_EXIT("COLL")
 
-end subroutine respfn
-!!***
+contains
+
 
 !!****f* ABINIT/wrtloctens
 !! NAME
@@ -1859,6 +1859,7 @@ end subroutine respfn
 !! SOURCE
 
 subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2005,4 +2006,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
  end if
 
 end subroutine wrtloctens
+!!***
+
+end subroutine respfn
 !!***

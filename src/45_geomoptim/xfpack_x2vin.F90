@@ -70,7 +70,6 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
 #undef ABI_FUNC
 #define ABI_FUNC 'xfpack_x2vin'
  use interfaces_32_util
- use interfaces_45_geomoptim, except_this_one => xfpack_x2vin
 !End of the abilint section
 
  implicit none
