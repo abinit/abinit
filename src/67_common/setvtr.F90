@@ -754,6 +754,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  call timab(91,2,tsec)
 
 contains
+!!***
 
 !!****m* ABINIT/spatialchempot
 !! NAME
