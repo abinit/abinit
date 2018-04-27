@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_LanczosBasis 
+!!****m* ABINIT/m_gwls_LanczosBasis 
 !! NAME
-!! gwls_LanczosBasis
+!! m_gwls_LanczosBasis
 !!
 !! FUNCTION
 !!  .
@@ -25,16 +25,16 @@
 #include "abi_common.h"
 
 
-module gwls_LanczosBasis 
+module m_gwls_LanczosBasis 
 !----------------------------------------------------------------------------------------------------
 ! This module contains the static Lanczos basis, which should be computed once and for all,
 ! and then be made available to other modules.
 !----------------------------------------------------------------------------------------------------
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_hamiltonian
-use gwls_GenerateEpsilon
+use m_gwls_wf
+use m_gwls_hamiltonian
+use m_gwls_GenerateEpsilon
 
 ! Abinit modules
 use defs_basis
@@ -344,5 +344,5 @@ ABI_DEALLOCATE(psikg_e )
 end subroutine modify_Lbasis_Coulomb
 !!***
 
-end module gwls_LanczosBasis 
+end module m_gwls_LanczosBasis 
 !!***

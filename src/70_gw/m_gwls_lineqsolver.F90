@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_lineqsolver
+!!****m* ABINIT/m_gwls_lineqsolver
 !! NAME
-!! gwls_lineqsolver
+!! m_gwls_lineqsolver
 !!
 !! FUNCTION
 !!  .
@@ -32,7 +32,7 @@
 !---------------------------------------------------------------------
 
 
-module gwls_lineqsolver
+module m_gwls_lineqsolver
 !----------------------------------------------------------------------------------------------------
 ! This module contains routines to solve A x = b interatively to solve the Sternheimer equation
 ! in various contexts...
@@ -41,8 +41,8 @@ module gwls_lineqsolver
 
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_hamiltonian
+use m_gwls_wf
+use m_gwls_hamiltonian
 
 ! abinit modules
 use defs_basis
@@ -853,5 +853,6 @@ end if
 
 end subroutine qmr
 !!***
-end module gwls_lineqsolver
+
+end module m_gwls_lineqsolver
 !!***

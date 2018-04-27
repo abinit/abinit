@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_QR_factorization
+!!****m* ABINIT/m_gwls_QR_factorization
 !! NAME
-!! gwls_QR_factorization
+!! m_gwls_QR_factorization
 !!
 !! FUNCTION
 !!  .
@@ -26,7 +26,7 @@
 
 
 
-module gwls_QR_factorization
+module m_gwls_QR_factorization
 !----------------------------------------------------------------------------------------------------
 ! This module implements the QR factorization using various algorithms, for the specific
 ! data distribution corresponding to FFT parallelism.
@@ -37,9 +37,9 @@ module gwls_QR_factorization
 !----------------------------------------------------------------------------------------------------
 !local modules
 use m_gwls_utility
-use gwls_TimingLog
-use gwls_wf
-use gwls_hamiltonian
+use m_gwls_TimingLog
+use m_gwls_wf
+use m_gwls_hamiltonian
 
 !abinit modules
 use defs_basis
@@ -891,5 +891,5 @@ end subroutine extract_QR_Householder
 
 
 
-end module gwls_QR_factorization
+end module m_gwls_QR_factorization
 !!***

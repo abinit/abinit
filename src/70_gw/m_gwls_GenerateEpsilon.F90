@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_GenerateEpsilon
+!!****m* ABINIT/m_gwls_GenerateEpsilon
 !! NAME
-!! gwls_GenerateEpsilon
+!! m_gwls_GenerateEpsilon
 !!
 !! FUNCTION
 !!  .
@@ -25,8 +25,7 @@
 #include "abi_common.h"
 
 
-
-module gwls_GenerateEpsilon
+module m_gwls_GenerateEpsilon
 !----------------------------------------------------------------------------------------------------
 ! This module contains routines to compute and store the dielectric matrix, which plays a
 ! central role in the self energy computations. In particular, global arrays are used to store
@@ -34,13 +33,13 @@ module gwls_GenerateEpsilon
 !----------------------------------------------------------------------------------------------------
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_TimingLog
-use gwls_polarisability
-use gwls_model_polarisability
-use gwls_GWlanczos
+use m_gwls_wf
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_TimingLog
+use m_gwls_polarisability
+use m_gwls_model_polarisability
+use m_gwls_GWlanczos
 ! Abinit modules
 use m_profiling_abi
 use defs_basis
@@ -71,7 +70,7 @@ public :: Driver_GeneratePrintDielectricEigenvalues
 
 contains
 
-!!****f* gwls_GenerateEpsilon/driver_generate_dielectric_matrix
+!!****f* m_gwls_GenerateEpsilon/driver_generate_dielectric_matrix
 !! NAME
 !!  driver_generate_dielectric_matrix
 !!
@@ -169,7 +168,7 @@ ABI_DEALLOCATE(beta)
 end subroutine driver_generate_dielectric_matrix
 !!***
 
-!!****f* gwls_GenerateEpsilon/GeneratePrintDielectricEigenvalues
+!!****f* m_gwls_GenerateEpsilon/GeneratePrintDielectricEigenvalues
 !! NAME
 !!  GeneratePrintDielectricEigenvalues
 !!
@@ -181,7 +180,7 @@ end subroutine driver_generate_dielectric_matrix
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_GenerateEpsilon
+!!      m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      cpu_time,diagonalize_lanczos_banded
@@ -400,7 +399,7 @@ ABI_DEALLOCATE(epsilon_eigenvalues)
 end subroutine GeneratePrintDielectricEigenvalues
 !!***
 
-!!****f* gwls_GenerateEpsilon/Driver_GeneratePrintDielectricEigenvalues
+!!****f* m_gwls_GenerateEpsilon/Driver_GeneratePrintDielectricEigenvalues
 !! NAME
 !!  Driver_GeneratePrintDielectricEigenvalues
 !!
@@ -772,5 +771,5 @@ ABI_DEALLOCATE(model_epsilon_matrix)
 end subroutine Driver_GeneratePrintDielectricEigenvalues
 !!***
 
-end module gwls_GenerateEpsilon
+end module m_gwls_GenerateEpsilon
 !!***

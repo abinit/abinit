@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_GWlanczos
+!!****m* ABINIT/m_gwls_GWlanczos
 !! NAME
-!! gwls_GWlanczos
+!! m_gwls_GWlanczos
 !!
 !! FUNCTION
 !!  .
@@ -25,19 +25,18 @@
 #include "abi_common.h"
 
 
-
-module gwls_GWlanczos
+module m_gwls_GWlanczos
 !----------------------------------------------------------------------------------------------------
 ! This module implements the Lanczos scheme to band diagonalize an implicit operator.
 !----------------------------------------------------------------------------------------------------
 !local modules
 use m_gwls_utility
-use gwls_TimingLog
-use gwls_wf
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_polarisability
-use gwls_QR_factorization
+use m_gwls_TimingLog
+use m_gwls_wf
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_polarisability
+use m_gwls_QR_factorization
 
 !abinit modules
 use defs_basis
@@ -67,7 +66,7 @@ public :: get_seeds
 contains
 
 
-!!****f* gwls_GWlanczos/get_seeds
+!!****f* m_gwls_GWlanczos/get_seeds
 !! NAME
 !!  get_seeds
 !!
@@ -176,7 +175,7 @@ ABI_DEALLOCATE(psig_s)
 end subroutine get_seeds
 !!***
 
-!!****f* gwls_GWlanczos/block_lanczos_algorithm
+!!****f* m_gwls_GWlanczos/block_lanczos_algorithm
 !! NAME
 !!  block_lanczos_algorithm
 !!
@@ -486,7 +485,7 @@ ABI_DEALLOCATE(list_time)
 end subroutine block_lanczos_algorithm
 !!***
 
-!!****f* gwls_GWlanczos/diagonalize_lanczos_banded
+!!****f* m_gwls_GWlanczos/diagonalize_lanczos_banded
 !! NAME
 !!  diagonalize_lanczos_banded
 !!
@@ -786,5 +785,5 @@ ABI_DEALLOCATE(saved_band_storage_matrix)
 end subroutine diagonalize_lanczos_banded
 !!***
 
-end module gwls_GWlanczos
+end module m_gwls_GWlanczos
 !!***

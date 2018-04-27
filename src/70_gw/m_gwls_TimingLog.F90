@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_TimingLog
+!!****m* ABINIT/m_gwls_TimingLog
 !! NAME
-!! gwls_TimingLog
+!! m_gwls_TimingLog
 !!
 !! FUNCTION
 !!  .
@@ -25,8 +25,7 @@
 #include "abi_common.h"
 
 
-
-module gwls_TimingLog
+module m_gwls_TimingLog
 !----------------------------------------------------------------------------------------------------
 ! This module will control the opening, writing and closing of a log file which will contain
 ! timing information. By making this a module, which can be called from anywhere, existing
@@ -365,5 +364,5 @@ end if
 end subroutine write_block_lanczos_timing_log
 !!***
 
-end module gwls_TimingLog
+end module m_gwls_TimingLog
 !!***

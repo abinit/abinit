@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_Projected_BT
+!!****m* ABINIT/m_gwls_Projected_BT
 !! NAME
-!! gwls_Projected_BT
+!! m_gwls_Projected_BT
 !!
 !! FUNCTION
 !!  .
@@ -25,21 +25,21 @@
 #include "abi_common.h"
 
 
-module gwls_Projected_BT
+module m_gwls_Projected_BT
 !----------------------------------------------------------------------------------------------------
 ! This module contains routines to compute the projections of the Sternheimer equations for the 
 ! BT operator, which appears in the Numerical integral.
 !----------------------------------------------------------------------------------------------------
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_TimingLog
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_GWlanczos
-use gwls_LanczosBasis 
-use gwls_DielectricArray
-use gwls_LanczosResolvents
+use m_gwls_wf
+use m_gwls_TimingLog
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_GWlanczos
+use m_gwls_LanczosBasis 
+use m_gwls_DielectricArray
+use m_gwls_LanczosResolvents
 ! abinit modules
 use defs_basis
 use m_profiling_abi
@@ -876,11 +876,5 @@ ABI_DEALLOCATE(matrix_elements_resolvent)
 end subroutine compute_projected_BT_shift_Lanczos_DISTRIBUTED
 !!***
 
-
-
-end module gwls_Projected_BT
-
-
-
-
+end module m_gwls_Projected_BT
 !!***

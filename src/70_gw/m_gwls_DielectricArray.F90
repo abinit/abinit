@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_DielectricArray
+!!****m* ABINIT/m_gwls_DielectricArray
 !! NAME
-!! gwls_DielectricArray
+!! m_gwls_DielectricArray
 !!
 !! FUNCTION
 !!  .
@@ -25,7 +25,7 @@
 #include "abi_common.h"
 
 
-module gwls_DielectricArray
+module m_gwls_DielectricArray
 !----------------------------------------------------------------------------------------------------
 ! This module generates and stores the arrays
 !
@@ -38,16 +38,16 @@ module gwls_DielectricArray
 
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_valenceWavefunctions
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_polarisability
-use gwls_model_polarisability
-use gwls_GenerateEpsilon
-use gwls_TimingLog
-use gwls_QR_factorization
-use gwls_LanczosBasis
+use m_gwls_wf
+use m_gwls_valenceWavefunctions
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_polarisability
+use m_gwls_model_polarisability
+use m_gwls_GenerateEpsilon
+use m_gwls_TimingLog
+use m_gwls_QR_factorization
+use m_gwls_LanczosBasis
 
 ! abinit modules
 use defs_basis
@@ -2287,5 +2287,5 @@ end subroutine ProjectedSternheimerEpsilon
 !!***
 
 
-end module gwls_DielectricArray
+end module m_gwls_DielectricArray
 !!***

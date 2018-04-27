@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_valenceWavefunctions
+!!****m* ABINIT/m_gwls_valenceWavefunctions
 !! NAME
-!! gwls_valenceWavefunctions
+!! m_gwls_valenceWavefunctions
 !!
 !! FUNCTION
 !!  .
@@ -25,11 +25,11 @@
 #include "abi_common.h"
 
 
-module gwls_valenceWavefunctions
+module m_gwls_valenceWavefunctions
 
 ! local modules
 use m_gwls_utility
-use gwls_hamiltonian
+use m_gwls_hamiltonian
 
 ! abinit modules
 use defs_basis
@@ -221,5 +221,5 @@ exchange_energy    = exchange(e_index)
 end subroutine compute_Exchange_and_Correlation_energies
 !!***
 
-end module gwls_valenceWavefunctions
+end module m_gwls_valenceWavefunctions
 !!***

@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_GWanalyticPart
+!!****m* ABINIT/m_gwls_GWanalyticPart
 !! NAME
-!! gwls_GWanalyticPart
+!! m_gwls_GWanalyticPart
 !!
 !! FUNCTION
 !!  .
@@ -25,8 +25,7 @@
 #include "abi_common.h"
 
 
-
-module gwls_GWanalyticPart
+module m_gwls_GWanalyticPart
 !----------------------------------------------------------------------------------------------------
 ! This module contains routines to compute the contribution to the GW correlation energy coming
 ! from the analytic integral of the trial frequency function.
@@ -155,5 +154,5 @@ band_index_above = band_index_above - 1
 end subroutine get_projection_band_indices
 !!***
 
-end module gwls_GWanalyticPart
+end module m_gwls_GWanalyticPart
 !!***

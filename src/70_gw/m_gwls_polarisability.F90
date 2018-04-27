@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_polarisability
+!!****m* ABINIT/m_gwls_polarisability
 !! NAME
-!! gwls_polarisability
+!! m_gwls_polarisability
 !!
 !! FUNCTION
 !!  .
@@ -25,13 +25,13 @@
 #include "abi_common.h"
 
 
-module gwls_polarisability
+module m_gwls_polarisability
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_valenceWavefunctions
-use gwls_hamiltonian
-use gwls_lineqsolver
+use m_gwls_wf
+use m_gwls_valenceWavefunctions
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
 
 ! abinit modules
 use defs_basis
@@ -799,6 +799,5 @@ vector_out = cmplx_1*psik2(1,:)+cmplx_i*psik2(2,:)
 end subroutine matrix_function_epsilon_k
 !!***
 
-end module gwls_polarisability
-
+end module m_gwls_polarisability
 !!***

@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_Projected_AT
+!!****m* ABINIT/m_gwls_Projected_AT
 !! NAME
-!! gwls_Projected_AT
+!! m_gwls_Projected_AT
 !!
 !! FUNCTION
 !!  .
@@ -25,22 +25,22 @@
 #include "abi_common.h"
 
 
-module gwls_Projected_AT
+module m_gwls_Projected_AT
 !----------------------------------------------------------------------------------------------------
 ! This module contains routines to compute the matrix elements of the so-called A operator,
 ! which accounts for the Static correlation energy term.
 !----------------------------------------------------------------------------------------------------
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_TimingLog
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_GWlanczos
-use gwls_LanczosBasis 
-use gwls_LanczosResolvents
+use m_gwls_wf
+use m_gwls_TimingLog
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_GWlanczos
+use m_gwls_LanczosBasis 
+use m_gwls_LanczosResolvents
 
-use gwls_GWanalyticPart, only : get_projection_band_indices
+use m_gwls_GWanalyticPart, only : get_projection_band_indices
 ! abinit modules
 use defs_basis
 use m_profiling_abi
@@ -499,7 +499,5 @@ end subroutine compute_AT_shift_Lanczos
 !!***
 
 
-end module gwls_Projected_AT
-
-
+end module m_gwls_Projected_AT
 !!***

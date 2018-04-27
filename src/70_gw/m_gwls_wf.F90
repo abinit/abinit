@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_wf
+!!****m* ABINIT/m_gwls_wf
 !! NAME
-!! gwls_wf
+!! m_gwls_wf
 !!
 !! FUNCTION
 !!  .
@@ -25,13 +25,12 @@
 #include "abi_common.h"
 
 
-
 !---------------------------------------------------------------------
 !  Modules to handle low-level Abinit entities, like the Hamiltonian
 !  and wavefunctions.
 !---------------------------------------------------------------------
 
-module gwls_wf
+module m_gwls_wf
 
 ! local modules
 use m_gwls_utility
@@ -424,5 +423,5 @@ call xmpi_sum(scprod_k,cbf,i) ! sum on all processors
 end function scprod_k
 !!***
 
-end module gwls_wf
+end module m_gwls_wf
 !!***

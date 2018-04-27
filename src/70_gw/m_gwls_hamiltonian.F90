@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_hamiltonian
+!!****m* ABINIT/m_gwls_hamiltonian
 !! NAME
-!! gwls_hamiltonian
+!! m_gwls_hamiltonian
 !!
 !! FUNCTION
 !!
@@ -25,19 +25,15 @@
 #include "abi_common.h"
 
 
-
-module gwls_hamiltonian
+module m_gwls_hamiltonian
 
 ! local modules
 use m_gwls_utility
-use gwls_wf
-
-use m_bandfft_kpt
-use m_cgtools
-
-
+use m_gwls_wf
 
 ! abinit modules
+use m_bandfft_kpt
+use m_cgtools
 use defs_basis
 use defs_datatypes
 use defs_abitypes
@@ -186,14 +182,10 @@ public :: pc_k_valence_kernel
 ! public :: CleanupSQMRKernel
 !!***
 
-
-
-
-
 contains
 
 
-!!****f* gwls_hamiltonian/DistributeValenceWavefunctions
+!!****f* m_gwls_hamiltonian/DistributeValenceWavefunctions
 !! NAME
 !!  DistributeValenceWavefunctions
 !!
@@ -205,7 +197,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_hamiltonian
+!!      m_gwls_hamiltonian
 !!
 !! CHILDREN
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
@@ -296,7 +288,7 @@ ABI_DEALLOCATE(psik_v_alltoall)
 end subroutine DistributeValenceWavefunctions
 !!***
 
-!!****f* gwls_hamiltonian/DistributeValenceKernel
+!!****f* m_gwls_hamiltonian/DistributeValenceKernel
 !! NAME
 !!  DistributeValenceKernel
 !!
@@ -308,7 +300,7 @@ end subroutine DistributeValenceWavefunctions
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_hamiltonian
+!!      m_gwls_hamiltonian
 !!
 !! CHILDREN
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
@@ -392,7 +384,7 @@ ABI_DEALLOCATE(psik_n_alltoall)
 end subroutine DistributeValenceKernel
 !!***
 
-!!****f* gwls_hamiltonian/pc_k_valence_kernel
+!!****f* m_gwls_hamiltonian/pc_k_valence_kernel
 !! NAME
 !!  pc_k_valence_kernel
 !!
@@ -495,7 +487,7 @@ ABI_DEALLOCATE( psi_projected)
 end subroutine pc_k_valence_kernel
 !!***
 
-!!****f* gwls_hamiltonian/wf_block_distribute
+!!****f* m_gwls_hamiltonian/wf_block_distribute
 !! NAME
 !!  wf_block_distribute
 !!
@@ -635,7 +627,7 @@ end subroutine wf_block_distribute
 
 
 
-!!****f* gwls_hamiltonian/exchange
+!!****f* m_gwls_hamiltonian/exchange
 !! NAME
 !!  exchange
 !!
@@ -784,7 +776,7 @@ end function exchange
 !!***
 
 
-!!****f* gwls_hamiltonian/dft_xc_energy
+!!****f* m_gwls_hamiltonian/dft_xc_energy
 !! NAME
 !!  dft_xc_energy
 !!
@@ -888,7 +880,7 @@ ABI_DEALLOCATE(psik_out)
 end function dft_xc_energy
 !!***
 
-!!****f* gwls_hamiltonian/set_precondition
+!!****f* m_gwls_hamiltonian/set_precondition
 !! NAME
 !!  set_precondition
 !!
@@ -1017,7 +1009,7 @@ end do
 end subroutine set_precondition
 !!***
 
-!!****f* gwls_hamiltonian/unset_precondition
+!!****f* m_gwls_hamiltonian/unset_precondition
 !! NAME
 !!  unset_precondition
 !!
@@ -1056,7 +1048,7 @@ pcon = one
 end subroutine unset_precondition
 !!***
 
-!!****f* gwls_hamiltonian/precondition
+!!****f* m_gwls_hamiltonian/precondition
 !! NAME
 !!  precondition
 !!
@@ -1102,7 +1094,7 @@ end do
 end subroutine precondition
 !!***
 
-!!****f* gwls_hamiltonian/precondition_cplx
+!!****f* m_gwls_hamiltonian/precondition_cplx
 !! NAME
 !!  precondition_cplx
 !!
@@ -1147,7 +1139,7 @@ end do
 end subroutine precondition_cplx
 !!***
 
-!!****f* gwls_hamiltonian/sqrt_vc_k
+!!****f* m_gwls_hamiltonian/sqrt_vc_k
 !! NAME
 !!  sqrt_vc_k
 !!
@@ -1198,7 +1190,7 @@ end do
 end subroutine sqrt_vc_k
 !!***
 
-!!****f* gwls_hamiltonian/Hpsik
+!!****f* m_gwls_hamiltonian/Hpsik
 !! NAME
 !!  Hpsik
 !!
@@ -1290,7 +1282,7 @@ end if
 end subroutine Hpsik
 !!***
 
-!!****f* gwls_hamiltonian/Hpsikc
+!!****f* m_gwls_hamiltonian/Hpsikc
 !! NAME
 !!  Hpsikc
 !!
@@ -1343,7 +1335,7 @@ if(present(cte)) psi_out = psi_out - cte*psi_in
 end subroutine Hpsikc
 !!***
 
-!!!****f* gwls_hamiltonian/pc_k
+!!!****f* m_gwls_hamiltonian/pc_k
 !!! NAME
 !!!  pc_k
 !!!
@@ -1432,7 +1424,7 @@ end subroutine Hpsikc
 !end subroutine pc_k
 !!!***
 
-!!****f* gwls_hamiltonian/g_to_r
+!!****f* m_gwls_hamiltonian/g_to_r
 !! NAME
 !!  g_to_r
 !!
@@ -1514,7 +1506,7 @@ end if
 end subroutine g_to_r
 !!***
 
-!!****f* gwls_hamiltonian/gr_to_g
+!!****f* m_gwls_hamiltonian/gr_to_g
 !! NAME
 !!  gr_to_g
 !!
@@ -1586,7 +1578,7 @@ ngfft,npw_g,npw_g,n4,n5,n6,option,dtset%paral_kgb,tim_fourwf,weight,weight)
 end subroutine gr_to_g
 !!***
 
-!!****f* gwls_hamiltonian/kbkb_to_kb
+!!****f* m_gwls_hamiltonian/kbkb_to_kb
 !! NAME
 !!  kbkb_to_kb
 !!
@@ -1651,7 +1643,7 @@ call wf_block_distribute(psik_out, psig2,2)
 end subroutine kbkb_to_kb
 !!***
 
-!!****f* gwls_hamiltonian/build_vxc
+!!****f* m_gwls_hamiltonian/build_vxc
 !! NAME
 !!  build_vxc
 !!
@@ -1698,7 +1690,7 @@ vxc_dg = vxc2
 end subroutine build_vxc
 !!***
 
-!!****f* gwls_hamiltonian/destroy_H
+!!****f* m_gwls_hamiltonian/destroy_H
 !! NAME
 !!  destroy_H
 !!
@@ -1861,7 +1853,7 @@ end if
 end subroutine destroy_H
 !!***
 
-!!****f* gwls_hamiltonian/build_H
+!!****f* m_gwls_hamiltonian/build_H
 !! NAME
 !!  build_H
 !!
@@ -2408,6 +2400,5 @@ if (mpi_enreg%me == 0) close(io_unit)
 end subroutine build_H
 !!***
 
-
-end module gwls_hamiltonian
+end module m_gwls_hamiltonian
 !!***

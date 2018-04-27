@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_ComputeCorrelationEnergy
+!!****m* ABINIT/m_gwls_ComputeCorrelationEnergy
 !! NAME
-!! gwls_ComputeCorrelationEnergy
+!! m_gwls_ComputeCorrelationEnergy
 !!
 !! FUNCTION
 !!  .
@@ -26,25 +26,24 @@
 
 
 
-module gwls_ComputeCorrelationEnergy
+module m_gwls_ComputeCorrelationEnergy
 
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_polarisability
-use gwls_model_polarisability
-use gwls_DielectricArray
-use gwls_ComputePoles
-use gwls_Projected_AT
-use gwls_Projected_BT
-!use gwls_ComplementSpacePolarizability
-use gwls_GWlanczos
-use gwls_GenerateEpsilon
-use gwls_GWanalyticPart
-use gwls_TimingLog
-use gwls_LanczosBasis
+use m_gwls_wf
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_polarisability
+use m_gwls_model_polarisability
+use m_gwls_DielectricArray
+use m_gwls_ComputePoles
+use m_gwls_Projected_AT
+use m_gwls_Projected_BT
+use m_gwls_GWlanczos
+use m_gwls_GenerateEpsilon
+use m_gwls_GWanalyticPart
+use m_gwls_TimingLog
+use m_gwls_LanczosBasis
 
 ! abinit modules
 use defs_basis
@@ -74,7 +73,7 @@ public :: compute_correlations_no_model_shift_lanczos
 !!***
 contains
 
-!!****f* gwls_ComputeCorrelationEnergy/compute_correlations_shift_lanczos
+!!****f* m_gwls_ComputeCorrelationEnergy/compute_correlations_shift_lanczos
 !! NAME
 !!  compute_correlations_shift_lanczos
 !!
@@ -86,7 +85,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!
@@ -901,16 +900,13 @@ write(timing_string,'(A)')  "               TOTAL TIME                          
 call write_timing_log(timing_string,total_time)
 
 
-
-
-
 10 format(A)
 14 format(A,ES24.16,A,F16.8,A)
 
 end subroutine compute_correlations_shift_lanczos
 !!***
 
-!!****f* gwls_ComputeCorrelationEnergy/compute_correlations_no_model_shift_lanczos
+!!****f* m_gwls_ComputeCorrelationEnergy/compute_correlations_no_model_shift_lanczos
 !! NAME
 !!  compute_correlations_no_model_shift_lanczos
 !!
@@ -1441,7 +1437,7 @@ call write_timing_log(timing_string,total_time)
 end subroutine compute_correlations_no_model_shift_lanczos
 !!***
 
-!!****f* gwls_ComputeCorrelationEnergy/compute_integrands_shift_lanczos
+!!****f* m_gwls_ComputeCorrelationEnergy/compute_integrands_shift_lanczos
 !! NAME
 !!  compute_integrands_shift_lanczos
 !!
@@ -1569,7 +1565,7 @@ call write_timing_log(timing_string,time)
 end subroutine compute_integrands_shift_lanczos
 !!***
 
-!!****f* gwls_ComputeCorrelationEnergy/output_results
+!!****f* m_gwls_ComputeCorrelationEnergy/output_results
 !! NAME
 !!  output_results
 !!
@@ -1707,7 +1703,7 @@ end if
 end subroutine output_results
 !!***
 
-!!****f* gwls_ComputeCorrelationEnergy/output_epsilon_eigenvalues
+!!****f* m_gwls_ComputeCorrelationEnergy/output_epsilon_eigenvalues
 !! NAME
 !!  output_epsilon_eigenvalues
 !!
@@ -1791,9 +1787,7 @@ end subroutine output_epsilon_eigenvalues
 !!***
 
 
-
-
-!!****f* gwls_ComputeCorrelationEnergy/output_Sigma_A_by_eigenvalues
+!!****f* m_gwls_ComputeCorrelationEnergy/output_Sigma_A_by_eigenvalues
 !! NAME
 !!  output_Sigma_A_by_eigenvalues
 !!
@@ -1946,6 +1940,5 @@ end subroutine output_Sigma_A_by_eigenvalues
 !!***
 
 
-
-end module gwls_ComputeCorrelationEnergy
+end module m_gwls_ComputeCorrelationEnergy
 !!***

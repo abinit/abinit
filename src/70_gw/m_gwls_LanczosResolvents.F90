@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_LanczosResolvents
+!!****m* ABINIT/m_gwls_LanczosResolvents
 !! NAME
-!! gwls_LanczosResolvents
+!! m_gwls_LanczosResolvents
 !!
 !! FUNCTION
 !!  .
@@ -25,7 +25,7 @@
 #include "abi_common.h"
 
 
-module gwls_LanczosResolvents
+module m_gwls_LanczosResolvents
 !----------------------------------------------------------------------------------------------------
 ! This module contains routines to compute the matrix elements of the resolent, namely
 !
@@ -37,11 +37,11 @@ module gwls_LanczosResolvents
 ! local modules
 
 use m_gwls_utility
-use gwls_wf
-use gwls_TimingLog
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_GWlanczos
+use m_gwls_wf
+use m_gwls_TimingLog
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_GWlanczos
 
 use defs_basis
 use m_profiling_abi
@@ -625,11 +625,9 @@ if ( info /= 0) then
 end if
 
 
-
-
 end subroutine invert_general_matrix
 !!***
 
 
-end module gwls_LanczosResolvents
+end module m_gwls_LanczosResolvents
 !!***

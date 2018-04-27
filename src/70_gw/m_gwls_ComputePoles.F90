@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/gwls_ComputePoles
+!!****m* ABINIT/m_gwls_ComputePoles
 !! NAME
-!! gwls_ComputePoles
+!! m_gwls_ComputePoles
 !!
 !! FUNCTION
 !!  .
@@ -26,20 +26,19 @@
 
 
 
-module gwls_ComputePoles
+module m_gwls_ComputePoles
 
 ! local modules
 use m_gwls_utility
-use gwls_wf
-use gwls_hamiltonian
-use gwls_lineqsolver
-use gwls_polarisability
-!use gwls_ComplementSpacePolarizability
-use gwls_GWlanczos
-use gwls_GenerateEpsilon
-use gwls_GWanalyticPart
-use gwls_TimingLog
-use gwls_LanczosBasis
+use m_gwls_wf
+use m_gwls_hamiltonian
+use m_gwls_lineqsolver
+use m_gwls_polarisability
+use m_gwls_GWlanczos
+use m_gwls_GenerateEpsilon
+use m_gwls_GWanalyticPart
+use m_gwls_TimingLog
+use m_gwls_LanczosBasis
 
 
 ! abinit modules
@@ -78,7 +77,7 @@ public :: clean_degeneracy_table_for_poles
 CONTAINS
 !!***
 
-!!****f* gwls_ComputePoles/generate_degeneracy_table_for_poles
+!!****f* m_gwls_ComputePoles/generate_degeneracy_table_for_poles
 !! NAME
 !!  generate_degeneracy_table_for_poles
 !!
@@ -274,7 +273,7 @@ end if
 end subroutine generate_degeneracy_table_for_poles
 !!***
 
-!!****f* gwls_ComputePoles/clean_degeneracy_table_for_poles
+!!****f* m_gwls_ComputePoles/clean_degeneracy_table_for_poles
 !! NAME
 !!  clean_degeneracy_table_for_poles
 !!
@@ -316,7 +315,7 @@ end if
 end subroutine clean_degeneracy_table_for_poles
 !!***
 
-!!****f* gwls_ComputePoles/compute_Poles
+!!****f* m_gwls_ComputePoles/compute_Poles
 !! NAME
 !!  compute_Poles
 !!
@@ -638,7 +637,7 @@ end if
 end function compute_Poles
 !!***
 
-!!****f* gwls_ComputePoles/compute_pole_contribution
+!!****f* m_gwls_ComputePoles/compute_pole_contribution
 !! NAME
 !! compute_pole_contribution
 !!
@@ -778,5 +777,5 @@ ABI_DEALLOCATE(epsilon_eigenvalues)
 
 end function compute_pole_contribution
 
-end module gwls_ComputePoles
+end module m_gwls_ComputePoles
 !!***
