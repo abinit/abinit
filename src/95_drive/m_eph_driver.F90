@@ -1,5 +1,47 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/eph
+!!****m* ABINIT/m_eph_driver
+!! NAME
+!!  m_eph_driver
+!!
+!! FUNCTION
+!!   Driver for EPH calculations
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2009-2018 ABINIT group (MG, MVer,GA)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_foo
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: eph
+!!***
+
+contains
+!!***
+
+!!****f* m_eph_driver/eph
 !! NAME
 !!  eph
 !!
@@ -7,13 +49,6 @@
 !! Main routine to compute electron phonon coupling matrix elements and
 !! calculate related properties - superconductin Tc, phonon linewidths, electronic renormalization
 !! due to phonons and temperature effects...
-!!
-!! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, MVer,GA)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! acell(3)=Length scales of primitive translations (bohr)
@@ -65,12 +100,6 @@
 !!      pspini,sigmaph,wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_end
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
@@ -654,4 +683,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  DBG_EXIT('COLL')
 
 end subroutine eph
+!!***
+
+end subroutine m_eph_driver
 !!***

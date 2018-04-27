@@ -114,6 +114,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma
  use m_bethe_salpeter,   only : bethe_salpeter
+ use m_eph_driver        only : eph
  use m_wfk_analyze,      only : wfk_analyze
 
 #if defined HAVE_BIGDFT
