@@ -45,7 +45,7 @@ MODULE m_dvdb
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
- use m_geometry,      only : littlegroup_pert
+ use m_geometry,      only : littlegroup_pert, irreducible_set_pert
  use m_copy,          only : alloc_copy
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_fftcore,       only : ngfft_seq
