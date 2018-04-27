@@ -2,6 +2,7 @@
 # bcc Fe, low ecut, coars kpt grid
 
   chksymbreak 0
+  nsym    1
 
   ntypat  1
   natom   2
@@ -29,7 +30,7 @@
   dtion   250      # md step magnitude in a.u.
   optcell 0        # no optimization of cell geometry 
   hmcsst  0        # number of strain steps (optimization of unit cell geometry)
-  ntime   3        # number of HMC sweeps
+  ntime   4        # number of HMC sweeps
 
   kptopt   1
   ngkpt    2 2 2

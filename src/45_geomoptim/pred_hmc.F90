@@ -210,6 +210,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
      call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
      hist%vel(:,:,hist%ihist)=vel(:,:)
+     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
      etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
 
      call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
