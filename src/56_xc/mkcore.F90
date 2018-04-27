@@ -75,6 +75,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  use m_errors
  use m_linalg_interfaces
 
+ use m_geometry,   only : strconv
  use m_time,       only : timab
  use m_mpinfo,     only : ptabs_fourdp
 
@@ -173,7 +174,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  nfftot=n1*n2*n3
  me_fft = mpi_enreg%me_fft
 
- ! Get the distrib associated with this fft_grid 
+ ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
  delta=one/(n1xccc-1)
@@ -187,7 +188,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
    if (nspden>=2) then
      ifft=1
      do i3=1,n3
-       if(me_fft==fftn3_distrib(i3)) then 
+       if(me_fft==fftn3_distrib(i3)) then
          do i2=1,n2
            do i1=1,n1
              work(i1,i2,i3)=half*(vxc(ifft,1)+vxc(ifft,2))
@@ -199,7 +200,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
    else
      ifft=1
      do i3=1,n3
-       if(me_fft==fftn3_distrib(i3)) then 
+       if(me_fft==fftn3_distrib(i3)) then
          do i2=1,n2
            do i1=1,n1
              work(i1,i2,i3)=vxc(ifft,1)
@@ -473,7 +474,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !  strdia = (1/N) Sum(r) [mu_xc_avg(r) * rho_core(r)]
    ifft=0 ; strdia=zero
    do i3=1,n3
-     if(me_fft==fftn3_distrib(i3)) then 
+     if(me_fft==fftn3_distrib(i3)) then
        do i2=1,n2
          do i1=1,n1
            ifft=ifft+1

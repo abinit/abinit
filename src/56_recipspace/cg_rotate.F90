@@ -54,6 +54,7 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,  only : getspinrot
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere
  use m_kg,        only : ph1d3d, getph

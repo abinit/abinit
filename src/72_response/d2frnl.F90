@@ -116,7 +116,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_wfk
 
  use m_time,     only : timab
- use m_geometry, only : metric
+ use m_geometry, only : metric, strconv
  use m_efmas,    only : check_degeneracies
  use m_io_tools, only : file_exists
  use m_hdr,      only : hdr_skip

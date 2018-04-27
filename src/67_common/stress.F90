@@ -138,7 +138,7 @@
  use m_errors
 
  use m_time,             only : timab
- use m_geometry,         only : metric
+ use m_geometry,         only : metric, stresssym
  use m_fock,             only : fock_type
  use m_ewald,            only : ewald2
  use defs_datatypes,     only : pseudopotential_type

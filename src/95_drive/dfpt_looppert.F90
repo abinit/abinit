@@ -157,7 +157,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_io_tools,   only : file_exists
  use m_time,       only : timab
  use m_fstrings,   only : strcat
- use m_geometry,   only : mkrdim, metric
+ use m_geometry,   only : mkrdim, metric, littlegroup_pert
  use m_exit,       only : exit_check, disable_timelimit
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
