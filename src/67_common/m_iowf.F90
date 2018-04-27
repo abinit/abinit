@@ -46,6 +46,7 @@ MODULE m_iowf
  use m_cgtools,        only : cg_zcopy
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite, crystal_from_hdr
+ use m_rwwf,           only : rwwf
 
  implicit none
 

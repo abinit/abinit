@@ -47,6 +47,7 @@ module m_inwffil
  use m_kg,       only : kpgio
  use m_kpts,     only : listkk
  use m_occ,      only : pareigocc
+ use m_rwwf,     only : rwwf
 
  implicit none
 

@@ -104,6 +104,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
  use m_hdr
 
  use m_abilasi,   only : dzgedi, dzgefa
+ use m_rwwf,      only : rwwf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

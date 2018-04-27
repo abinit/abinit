@@ -85,14 +85,15 @@ MODULE m_wfk
  use m_fftcore,      only : get_kg, ngfft_seq
  use m_distribfft,   only : init_distribfft_seq
  use m_mpinfo,       only : destroy_mpi_enreg
+ use m_rwwf,         only : rwwf
 
  implicit none
+
+ private
 
 #ifdef HAVE_MPI1
  include 'mpif.h'
 #endif
-
- private
 
  integer,private,parameter :: WFK_NOMODE    = 0
  integer,private,parameter :: WFK_READMODE  = 1

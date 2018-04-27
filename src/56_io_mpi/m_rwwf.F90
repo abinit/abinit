@@ -1,5 +1,64 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/rwwf
+!!****m* ABINIT/m_rwwf
+!! NAME
+!!  m_rwwf
+!!
+!! FUNCTION
+!!   Read/Write wavefunctions.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_rwwf
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_wffile
+ use m_profiling_abi
+ use m_xmpi
+#if defined HAVE_MPI2
+ use mpi
+#endif
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+
+ use m_time,   only : timab
+
+ implicit none
+
+ private
+
+#if defined HAVE_MPI1
+ include 'mpif.h'
+#endif
+
+!!***
+
+ public :: rwwf
+!!***
+
+contains
+!!***
+
+!!****f* m_rwwf/rwwf
 !! NAME
 !! rwwf
 !!
@@ -11,12 +70,6 @@
 !!  If called with option -2, only the wavefunctions are read.
 !!  The disk file unitwf should have been prepared
 !!  outside of this routine, in order to read or write the correct records.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  formeig=format of the eigenvalues
@@ -82,28 +135,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &               nband,nband_disk,npw,nspinor,occ,option,optkg,tim_rwwf,wff)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_wffile
- use m_profiling_abi
-#if defined HAVE_MPI2 && !defined FC_G95
- use mpi
-#endif
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
-
- use m_time,             only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -113,10 +146,6 @@ subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enr
 !End of the abilint section
 
  implicit none
-
-#if defined HAVE_MPI1 || (defined HAVE_MPI && defined FC_G95)
- include 'mpif.h'
-#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
@@ -172,7 +201,7 @@ end subroutine rwwf
 
 ! -------------------------------------------------------------------------------------------------
 
-!!****f* ABINIT/readwf
+!!****f* m_rwwf/readwf
 !! NAME
 !! readwf
 !!
@@ -180,12 +209,6 @@ end subroutine rwwf
 !!  This subroutine reads the block of records related to one k point, and one spin-polarization, that
 !!  contains the wavefunctions (as well as the eigenvalues).
 !!  The disk file unitwf should have been prepared outside of this routine, in order to read the correct records.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  formeig=format of the eigenvalues
@@ -229,28 +252,8 @@ end subroutine rwwf
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                 nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_wffile
- use m_nctk
-#ifdef HAVE_MPI2
- use mpi
-#endif
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -259,10 +262,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 !End of the abilint section
 
  implicit none
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
@@ -692,7 +691,7 @@ end subroutine readwf
 
 ! -------------------------------------------------------------------------------------------------
 
-!!****f* ABINIT/writewf
+!!****f* m_rwwf/writewf
 !! NAME
 !! writewf
 !!
@@ -702,12 +701,6 @@ end subroutine readwf
 !!  contains the wavefunctions (as well as the eigenvalues and occupations).
 !!  The disk file unitwf should have been prepared
 !!  outside of this routine, in order to write the correct records.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  cg(2,npw*nspinor*mband)=planewave coefficients of wavefunctions,
@@ -750,28 +743,8 @@ end subroutine readwf
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                  nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_wffile
- use m_profiling_abi
- use m_nctk
-#ifdef HAVE_MPI2
- use mpi
-#endif
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -780,10 +753,6 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 !End of the abilint section
 
  implicit none
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,icg,ikpt,isppol,mband,mcg,nband,nband_disk,npw,nspinor,option,optkg
@@ -1040,4 +1009,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  ABI_UNUSED((/ii,mpi_enreg%me/))
 
 end subroutine writewf
+!!***
+
+end module m_rwwf
 !!***

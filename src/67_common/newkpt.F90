@@ -155,6 +155,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  use m_time,       only : timab
  use m_pptools,    only : prmat
  use m_occ,        only : pareigocc
+ use m_rwwf,       only : rwwf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
