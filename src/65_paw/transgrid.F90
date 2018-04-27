@@ -76,7 +76,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
  use m_errors
 
  use m_pawfgr, only : pawfgr_type
- use m_fft,    only : zerosym
+ use m_fft,    only : zerosym, indirect_parallel_Fourier
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
