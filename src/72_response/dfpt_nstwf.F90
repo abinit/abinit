@@ -104,7 +104,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 #define ABI_FUNC 'dfpt_nstwf'
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_72_response, except_this_one => dfpt_nstwf
 !End of the abilint section
 
  implicit none

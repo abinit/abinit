@@ -189,6 +189,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit,fiacc)
      if(itime==1) then
        iacc=1
        etotal = epot + ekin
+       de=zero
      else
        etotal = epot + ekin
        de = etotal - etotal_hmc_prev
