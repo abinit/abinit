@@ -64,7 +64,6 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  use m_initcuda, only : Get_ndevice
 #endif
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

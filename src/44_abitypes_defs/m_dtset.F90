@@ -1600,7 +1600,6 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 #undef ABI_FUNC
 #define ABI_FUNC 'get_npert_rbz'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

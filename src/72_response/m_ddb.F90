@@ -1151,7 +1151,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rdddb9'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

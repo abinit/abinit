@@ -90,7 +90,6 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memory_eval'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

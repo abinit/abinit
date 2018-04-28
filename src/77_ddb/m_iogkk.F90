@@ -104,7 +104,6 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 #undef ABI_FUNC
 #define ABI_FUNC 'read_gkk'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_77_ddb
 !End of the abilint section
 
