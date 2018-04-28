@@ -144,6 +144,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 #endif
 
  use m_psp1,       only : psp1in
+ use m_psp5,       only : psp5in
  use m_psp6,       only : psp6in
  use m_psp8,       only : psp8in
  use m_psp9,       only : psp9in

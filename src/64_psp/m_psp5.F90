@@ -1,4 +1,47 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_psp5
+!! NAME
+!!  m_psp5
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_psp5
+
+ use defs_basis
+ use m_splines
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: psp5in
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/psp5in
 !! NAME
 !! psp5in
@@ -7,13 +50,6 @@
 !! Initialize pspcod=5 ("Phoney pseudopotentials" with Hamman grid):
 !! continue to read the corresponding file, then compute the
 !! local and non-local potentials.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  lloc=angular momentum choice of local pseudopotential
@@ -68,28 +104,18 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &                  lloc,lmax,lmnmax,lnmax,mmax,mpsang,mpssoang,mqgrid,&
 &                  nproj,n1xccc,pspso,qchrg,qgrid,rcpsp,rms,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
 
- use defs_basis
- use m_splines
- use m_errors
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp5in'
  use interfaces_14_hidewrite
- use interfaces_64_psp, except_this_one => psp5in
+ use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -586,4 +612,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
  MSG_ERROR(errmsg)
 
 end subroutine psp5in
+!!***
+
+end module m_psp5
 !!***

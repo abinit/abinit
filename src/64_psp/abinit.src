@@ -29,7 +29,7 @@ sources = [
  "psp2in.F90",
  "psp2lo.F90",
  "psp3in.F90",
- "psp5in.F90",
+ "m_psp5.F90",
  "psp5lo.F90",
  "psp5nl.F90",
  "m_psp6.F90",
