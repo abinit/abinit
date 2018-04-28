@@ -36,7 +36,7 @@ module m_dynmat
 
  use m_fstrings,        only : itoa, sjoin
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
- use m_symtk,           only : mati3inv, matr3inv
+ use m_symtk,           only : mati3inv, matr3inv, littlegroup_q
  use m_cgtools,         only : fxphas_seq
  use m_ewald,           only : ewald9
 

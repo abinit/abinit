@@ -48,10 +48,11 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_cgtools, only :dotprod_g
  use m_fock
- use m_hamiltonian, only : gs_hamiltonian_type
- use defs_datatypes, only: pseudopotential_type
+
+ use m_cgtools,      only : dotprod_g
+ use m_hamiltonian,  only : gs_hamiltonian_type
+ use defs_datatypes, only : pseudopotential_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

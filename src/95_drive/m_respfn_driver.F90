@@ -44,7 +44,7 @@ module m_respfn_driver
 
  use m_time,        only : timab
  use m_fstrings,    only : strcat
- use m_symtk,       only : matr3inv
+ use m_symtk,       only : matr3inv, littlegroup_q
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph

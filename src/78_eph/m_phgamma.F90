@@ -43,6 +43,7 @@ module m_phgamma
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm, get_diag
  use m_io_tools,       only : open_file
+ use m_symtk,          only : littlegroup_q
  use m_geometry,       only : normv
  use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq
