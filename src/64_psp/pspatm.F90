@@ -143,6 +143,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  use BigDFT_API, only : dictionary, atomic_info, dict_init, dict_free, UNINITIALIZED
 #endif
 
+ use m_psp1,     only : psp1in
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
