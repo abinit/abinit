@@ -125,10 +125,10 @@ class FortranFile(object):
     def to_string(self, verbose=0, width=90):
         w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         lines = []; app = lines.append
-        app("%s:\n\t%s" % (self.__class__.__name__, os.path.relpath(self.path)))
+        app("%s:\n\t%s\n" % (self.__class__.__name__, os.path.relpath(self.path)))
         app("Required modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.required_mods)))
-        app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.children_mods)))
         app("Includes:\n%s\n" % w.fill(", ".join(self.includes)))
+        app("Used by modules:\n%s\n" % w.fill(", ".join(mod.name for mod in self.children_mods)))
 
         for a in ["programs", "modules", "subroutines", "functions"]:
             plist = getattr(self, a)
@@ -467,9 +467,9 @@ class AbinitProject(object):
             for ffile in fort_files:
                 parents_outside_dir.extends(ffile.required_mods)
 
-    def get_graphviz_dir(self, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
+    def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
-        Generate dependency graph for this file in the DOT language
+        Generate dependency graph for this directory in the DOT language
         (only parents and children modules of this file).
 
         Args:
@@ -485,3 +485,31 @@ class AbinitProject(object):
         fg = Digraph("Abinit project", engine="dot" if engine == "automatic" else engine)
 
         return fg
+
+    def get_graphviz_dir(self, name, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
+        """
+        Generate dependency graph for this file in the DOT language
+        (only parents and children modules of this file).
+
+        Args:
+            engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']
+            graph_attr: Mapping of (attribute, value) pairs for the graph.
+            node_attr: Mapping of (attribute, value) pairs set for all nodes.
+            edge_attr: Mapping of (attribute, value) pairs set for all edges.
+
+        Returns: graphviz.Digraph <https://graphviz.readthedocs.io/en/stable/api.html#digraph>
+        """
+        obj = self.find_public_entity(name)
+        if obj is None:
+            print("Cannot find public entity `%s`" % str(name))
+            return None
+
+        # https://www.graphviz.org/doc/info/
+        from graphviz import Digraph
+        fg = Digraph("Abinit project", engine="dot" if engine == "automatic" else engine)
+
+        #print(obj.to_string(verbose=options.verbose))
+        #graph = obj.get_graphviz(engine=options.engine)
+
+        return fg
+

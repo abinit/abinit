@@ -27,13 +27,14 @@ Usage example:
 ########
 
   abisrc.py graph 41_geometry/m_crystal.F90   => Plot dependency graph for module.
-  abisrc.py graph fourdp                      => Plot dependecy graph for function.
+  abisrc.py graph fourdp                      => Plot dependency graph for function.
 
 #############
 # Developers
 #############
 
   abisrc.py makemake              => Generate files required by build system.
+  abisrc.py abirules              =>
 """
 
 def get_parser():
@@ -76,8 +77,8 @@ def get_parser():
              "See https://graphviz.readthedocs.io/."))
     p_graph.add_argument("-e", "--engine", type=str, default="automatic",
         help=("graphviz engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']. "
-            "Default: automatic i.e. the engine is automatically selected. See http://www.graphviz.org/pdf/dot.1.pdf "
-            "Use `conda install python-graphviz` or `pip install graphviz` to install the python package"))
+              "Default: automatic i.e. the engine is automatically selected. See http://www.graphviz.org/pdf/dot.1.pdf "
+              "Use `conda install python-graphviz` or `pip install graphviz` to install the python package"))
     #p_graph.add_argument("-d", '--dirtree', default=False, action="store_true",
     #    help='Visualize files and directories in workdir instead of tasks/works.')
     p_graph.add_argument("what", nargs="?", default=None, help="File of directory to visualize")
@@ -124,7 +125,7 @@ def main():
         proj = AbinitProject(".", verbose=options.verbose)
         proj.pickle_dump()
 
-    # FIXME
+    # FIXME: F90 files in main are not parsed.
     #node = proj.fort_files["abinit"]
     #print("abinit parents", node.parents)
 
@@ -169,14 +170,11 @@ def main():
             graph = fort_file.get_graphviz(engine=options.engine)
 
         else:
-            obj = proj.find_public_entity(options.what)
-            if obj is not None:
-                #print(obj.to_string(verbose=options.verbose))
-                graph = obj.get_graphviz(engine=options.engine)
-            else:
-                print("Cannot find public entity `%s`" % str(options.what))
+            graph = proj.get_graphviz_dir(options.what, engine=options.engine)
+            if graph is None:
                 return 1
 
+        # Visualize graph
         import tempfile
         directory = tempfile.mkdtemp()
         print("Producing source files in:", directory)
@@ -207,6 +205,9 @@ def main():
     #   paths = sorted(set(p.path for p in plist))
     #   from pymods.tools import Editor
     #   return Editor().edit_files(paths, ask_for_exit=True)
+
+    #elif options.command == "stats":
+    #   proj.stats()
 
     #elif options.command == "abirules":
     #   proj.abirules()
