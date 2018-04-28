@@ -32,6 +32,7 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
+ use m_symtk,          only : matr3inv, chkgrp, symrelrot
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
  use m_abilasi,        only : xgeev, xginv

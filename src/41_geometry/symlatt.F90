@@ -79,6 +79,8 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,       only : matr3inv, symrelrot
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -653,13 +655,13 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !      Try to find a vector that belongs to the mediator plane, or the binary vector.
 !      There must be one such vector, if centered monoclinic and no pair of vectors of equal length,
 !      either among the three vectors, or among one of their differences or sums.
-!      And there must be, among the two other vectors, one vector whose projection 
+!      And there must be, among the two other vectors, one vector whose projection
 !      on this vector is half the length of this vector.
        vecta(:)=minim(:,ia)
        vectb(:)=minim(:,ib)
 !      Try the different possibilities for the vector on which the projection will be half ...
        do ii=1,5
-         if(ii==1)vectc(:)=minim(:,itrial) 
+         if(ii==1)vectc(:)=minim(:,itrial)
          if(ii==2)vectc(:)=minim(:,itrial)+vecta(:)
          if(ii==3)vectc(:)=minim(:,itrial)-vecta(:)
          if(ii==4)vectc(:)=minim(:,itrial)+vectb(:)
@@ -671,18 +673,18 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          found=0
          if(abs(abs(reduceda)-0.5d0)<tolsym)then
            vin1(:)=vectc(:)
-           vin2(:)=2.0d0*(vecta(:)-reduceda*vectc(:))  
+           vin2(:)=2.0d0*(vecta(:)-reduceda*vectc(:))
            vext(:)=vectb(:)
            found=1
          else if(abs(abs(reducedb)-0.5d0)<tolsym)then
            vin1(:)=vectc(:)
-           vin2(:)=2.0d0*(vectb(:)-reduceda*vectc(:))  
-           vext(:)=vecta(:)     
+           vin2(:)=2.0d0*(vectb(:)-reduceda*vectc(:))
+           vext(:)=vecta(:)
            found=1
          end if
          if(found==1)exit
        end do
-!      Now, vin1 and vin2 are perpendicular to each other, and in the plane that contains the binary vector. 
+!      Now, vin1 and vin2 are perpendicular to each other, and in the plane that contains the binary vector.
 !      One of them must be the binary vector if any.
 !      On the other hand, vext is out-of-plane. Might belong to the mediator plane or not.
 !      If C monoclinc, then the projection of this vext on the binary vector will be either 0 or +1/2 or -1/2.
@@ -703,7 +705,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
            cell_base(:,1)=vin2(:)
            cell_base(:,2)=vin1(:)
            cell_base(:,3)=vext(:)-reduceda*vin1(:)+vin2(:)*half
-         else 
+         else
 !          Test vin2 being the binary axis
            norm2trial=vin2(1)**2+vin2(2)**2+vin2(3)**2
            reduceda=(vext(1)*vin2(1)+vext(2)*vin2(2)+vext(3)*vin2(3))/norm2trial
@@ -758,7 +760,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  if(metmin(1,2)**2<tolsym**2*metmin(1,1)*metmin(2,2))ang90(3)=1
  if(metmin(1,3)**2<tolsym**2*metmin(1,1)*metmin(3,3))ang90(2)=1
  if(metmin(2,3)**2<tolsym**2*metmin(2,2)*metmin(3,3))ang90(1)=1
- equal(:)=0  
+ equal(:)=0
  if(abs(metmin(1,1)-metmin(2,2))<tolsym*half*(metmin(1,1)+metmin(2,2)))equal(3)=1
  if(abs(metmin(1,1)-metmin(3,3))<tolsym*half*(metmin(1,1)+metmin(3,3)))equal(2)=1
  if(abs(metmin(2,2)-metmin(3,3))<tolsym*half*(metmin(2,2)+metmin(3,3)))equal(1)=1
@@ -894,7 +896,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      norm2trial=sum(rprimd(:,ia)**2)
      scprods(:,ia)=scprods(:,ia)/sqrt(norm2trial)
    end do
-   
+
 !  One should now try all the generators of the
 !  proper rotations of each Bravais lattice, coupled with change of
 !  signs of each vector. This is not done systematically in what follows ...
@@ -1014,7 +1016,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  gen2z(:,:)=0 ; gen2z(1,1)=-1; gen2z(2,2)=-1; gen2z(3,3)=1
 
 !--------------------------------------------------------------------------
- 
+
 !Define the generators for each holohedry (inversion is already included)
  if(iholohedry==6)then
    ngen=2

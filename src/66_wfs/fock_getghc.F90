@@ -56,6 +56,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
  use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab
+ use m_symtk,        only : matr3inv
  use m_cgtools,      only : dotprod_g
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac

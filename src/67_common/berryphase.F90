@@ -137,8 +137,9 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
  use m_profiling_abi
  use m_hdr
 
- use m_geometry,         only : xred2xcart
- use m_abilasi,          only : dzgedi, dzgefa
+ use m_geometry,    only : xred2xcart
+ use m_abilasi,     only : dzgedi, dzgefa
+ use m_symtk,       only : matr3inv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

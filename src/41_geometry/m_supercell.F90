@@ -30,6 +30,7 @@ module m_supercell
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,    only : matr3inv
  use m_copy,     only : alloc_copy
  use m_io_tools, only : open_file
  use m_fstrings, only : int2char4, write_num

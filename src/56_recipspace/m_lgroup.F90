@@ -44,6 +44,7 @@ module m_lgroup
  use m_crystal
 
  use m_fstrings,   only : ftoa, ktoa, sjoin
+ use m_symtk,      only : chkgrp
 
  implicit none
 

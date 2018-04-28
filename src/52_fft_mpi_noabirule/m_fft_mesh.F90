@@ -35,6 +35,7 @@ MODULE m_fft_mesh
 
  use defs_fftdata,     only : size_goed_fft
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
+ use m_symtk,          only : mati3inv
  use m_crystal,        only : crystal_t
 
  implicit none

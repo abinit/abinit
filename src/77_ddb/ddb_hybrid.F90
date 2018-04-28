@@ -68,6 +68,7 @@ subroutine ddb_hybrid(acell,asr,atmfrc,dielt,dipdip,dyew,dyewq0,&
  use m_errors
 
  use m_io_tools, only : open_file
+ use m_symtk,    only : matr3inv
  use m_dynmat,   only : q0dy3_calc, asrif9, canct9
  use m_ewald,    only : ewald9
 

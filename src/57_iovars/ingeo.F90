@@ -115,6 +115,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  use m_errors
  use m_atomdata
 
+ use m_symtk,    only : mati3inv, chkorthsy, symrelrot
  use m_geometry, only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
  use m_parser,   only : intagm
 
@@ -277,7 +278,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  rprim(:,3)=scalecart(:)*rprim(:,3)
  scalecart(:)=one
 
-!Compute the multiplicity of the supercell   
+!Compute the multiplicity of the supercell
  call mati3det(supercell_lattice,multiplicity)
 !Get the number of atom in the unit cell
 !Read natom from string
@@ -287,9 +288,9 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
  end if
  if(tread==1)natom_uc=intarr(1)
- 
+
 !Store the rprimd of the unit cell
- call mkrdim(acell,rprim,rprimd_read) 
+ call mkrdim(acell,rprim,rprimd_read)
 !Multiply the rprim to get the rprim of the supercell
  if(multiplicity > 1)then
    rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
@@ -298,7 +299,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
 
 !Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
- call mkrdim(acell,rprim,rprimd) 
+ call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  tolsym=tol8
@@ -331,7 +332,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !This is the default
  natrd=natom
  if(multiplicity > 1) natrd = natom_uc
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natrd',tnatrd,'INT')
  if(tnatrd==1) natrd=intarr(1)
 
@@ -346,7 +347,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        write(message,'(3a,I0,a,I0,a,I0,2a)')&
        ' The input variable supercell_latt is present',ch10,&
 &      ' thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
-&      ' ',supercell_lattice(3,3),' is generated',ch10     
+&      ' ',supercell_lattice(3,3),' is generated',ch10
        MSG_WARNING(message)
      end if
    else
@@ -636,7 +637,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !    No supercell
      call xcart2xred(natrd,rprimd,xcart_read,xred)
    end if
-   
+
 
    spgroup=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spgroup',tread,'INT')

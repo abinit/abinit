@@ -66,6 +66,7 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  use m_errors
 
  use m_time,          only : timab
+ use m_symtk,         only : mati3inv, setsym, chkgrp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

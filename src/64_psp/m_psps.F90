@@ -39,6 +39,7 @@ module m_psps
 
  use m_fstrings,      only : itoa, sjoin, yesno
  use m_io_tools,      only : open_file
+ use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
  use defs_abitypes,   only : dataset_type
  use m_paw_numeric,   only : paw_spline

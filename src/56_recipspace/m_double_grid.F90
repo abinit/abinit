@@ -34,6 +34,7 @@ MODULE m_double_grid
  use m_kptrank
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
+ use m_symtk,          only : matr3inv
 
  implicit none
 

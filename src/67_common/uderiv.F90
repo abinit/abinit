@@ -103,6 +103,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
  use m_profiling_abi
  use m_hdr
 
+ use m_symtk,     only : matr3inv
  use m_abilasi,   only : dzgedi, dzgefa
  use m_rwwf,      only : rwwf
 

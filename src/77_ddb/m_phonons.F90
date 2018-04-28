@@ -43,6 +43,7 @@ module m_phonons
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
+ use m_symtk,           only : matr3inv
  use m_time,            only : cwtime
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type

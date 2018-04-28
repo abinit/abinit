@@ -36,6 +36,7 @@ module m_fstab
  use m_time,           only : cwtime
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : bisect
+ use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_special_funcs,  only : dirac_delta

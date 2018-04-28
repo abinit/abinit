@@ -74,6 +74,8 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
  use m_xmpi
  use m_tetrahedron
 
+ use m_symtk,           only : matr3inv
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

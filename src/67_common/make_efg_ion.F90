@@ -63,6 +63,7 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
  use defs_basis
  use m_profiling_abi
 
+ use m_symtk,          only : matr3inv
  use m_geometry,       only : xred2xcart
  use m_special_funcs,  only : abi_derfc
 

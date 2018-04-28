@@ -63,6 +63,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,      only : matr3inv
  use m_geometry,   only : mkrdim, metric, strainsym
 
 !This section has been created automatically by the script Abilint (TD).

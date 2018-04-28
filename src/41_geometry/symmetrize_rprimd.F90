@@ -50,6 +50,7 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,        only : matr3inv, chkorthsy
  use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).

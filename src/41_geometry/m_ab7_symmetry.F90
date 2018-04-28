@@ -26,7 +26,8 @@ module m_ab7_symmetry
   use defs_basis
   use m_profiling_abi
 
- use m_geometry,     only : metric
+  use m_symtk,     only : mati3inv, mati3det
+  use m_geometry,  only : metric
 
   implicit none
 
@@ -46,7 +47,7 @@ module m_ab7_symmetry
      real(dp) :: field(3)
 
      logical :: withJellium
- 
+
      integer :: nzchempot
 
      integer :: withSpin

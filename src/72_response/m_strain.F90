@@ -30,6 +30,8 @@ module m_strain
  use m_profiling_abi
  use m_xmpi
 
+ use m_symtk,         only : matr3inv
+
  implicit none
 
  private :: strain_def2strain

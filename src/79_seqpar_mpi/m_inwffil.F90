@@ -42,6 +42,7 @@ module m_inwffil
 
  use m_time,     only : timab
  use m_io_tools, only : file_exists, get_unit
+ use m_symtk,    only : matr3inv
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
  use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg
  use m_kg,       only : kpgio

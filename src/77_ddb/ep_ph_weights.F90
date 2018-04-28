@@ -59,6 +59,8 @@ subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrl
  use m_tetrahedron
  use m_xmpi
 
+ use m_symtk,           only : matr3inv
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -30,6 +30,7 @@ MODULE m_geometry
 
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : uniformrandom, isinteger, set2unit
+ use m_symtk,          only : mati3inv, mati3det, matr3inv, symdet
  use m_abilasi,        only : matr3eigval
  use m_pptools,        only : prmat
  use m_numeric_tools,  only : wrap2_pmhalf

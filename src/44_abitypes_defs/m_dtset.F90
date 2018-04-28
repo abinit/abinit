@@ -28,6 +28,7 @@ MODULE m_dtset
  use m_errors
  use m_xmpi
 
+ use m_symtk,        only : mati3inv
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm
  use defs_abitypes,  only : dataset_type

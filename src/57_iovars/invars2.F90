@@ -83,6 +83,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_symtk,     only : matr3inv
  use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu

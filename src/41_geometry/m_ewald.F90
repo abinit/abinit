@@ -32,6 +32,7 @@ module m_ewald
  use m_splines
 
  use m_special_funcs,  only : abi_derfc
+ use m_symtk,          only : matr3inv
 
  implicit none
 

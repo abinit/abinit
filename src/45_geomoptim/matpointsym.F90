@@ -50,6 +50,7 @@ subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
  use m_linalg_interfaces
 
  use m_abilasi,         only : matrginv
+ use m_symtk,           only : mati3inv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

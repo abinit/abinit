@@ -53,6 +53,8 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  use m_profiling_abi
  use m_errors
 
+ use m_symtk,       only : matr3inv, symrelrot
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

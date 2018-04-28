@@ -62,6 +62,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,&
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,   only : chkgrp
  use m_crystal, only : print_symmetries
 
 !This section has been created automatically by the script Abilint (TD).

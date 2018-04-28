@@ -30,6 +30,8 @@ module m_raman
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,           only : matr3inv
+
  implicit none
 
  private

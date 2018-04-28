@@ -41,6 +41,7 @@ MODULE m_ddk
 #endif
 
  use m_fstrings,      only : sjoin, itoa, endswith
+ use m_symtk,         only : matr3inv
  use m_io_tools,      only : iomode_from_fname
  use defs_abitypes,   only : hdr_type
  use m_geometry,      only : mkradim

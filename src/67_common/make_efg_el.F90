@@ -62,6 +62,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
  use defs_abitypes
  use m_profiling_abi
 
+ use m_symtk,    only : matr3inv
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
  use m_xmpi,     only : xmpi_sum
