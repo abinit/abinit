@@ -50,7 +50,6 @@ module m_psptk
 contains
 !!***
 
-
 !!****f* ABINIT/psp1cc
 !! NAME
 !! psp1cc
@@ -186,7 +185,6 @@ subroutine psp1cc(fchrg,n1xccc,xccc1d)
    call spline(yy,ff,n1xccc,der1,dern,ff2)
    xccc1d(:,ider+1)=ff(:)
    xccc1d(:,ider+3)=ff2(:)
-
  end do
 
  xccc1d(:,6)=zero
@@ -254,8 +252,7 @@ subroutine gg1cc(gg1cc_xx,xx)
  real(dp),intent(out) :: gg1cc_xx
 
 !Local variables -------------------------------------------
-!The c s are coefficients for Taylor expansion of the analytic
-!form near xx=0, 1/2, and 1.
+!The c s are coefficients for Taylor expansion of the analytic form near xx=0, 1/2, and 1.
 !scalars
  real(dp) :: c21=4.d0/9.d0,c22=-40.d0/27.d0,c23=20.d0/3.d0-16.d0*pi**2/27.d0
  real(dp) :: c24=-4160.d0/243.d0+160.d0*pi**2/81.d0,c31=1.d0/36.d0
@@ -511,7 +508,6 @@ subroutine gpp1cc(gpp1cc_xx,xx)
 end subroutine gpp1cc
 !!***
 
-
 !!****f* ABINIT/psp5lo
 !! NAME
 !! psp5lo
@@ -685,7 +681,6 @@ subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 end subroutine psp5lo
 !!***
 
-
 !!****f* ABINIT/psp5nl
 !! NAME
 !! psp5nl
@@ -758,9 +753,6 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
  real(dp),intent(out) :: ekb(mpsang),ffspl(mqgrid,2,mpsang)
 
 !Local variables-------------------------------
-!DEBUG
-!real(dp) :: norm,wf
-!ENDDEBUG
 !scalars
  integer,parameter :: dpsang=5
  integer :: iq,ir,lp1
@@ -1242,7 +1234,6 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 end subroutine psp5nl
 !!***
 
-
 !!****f* ABINIT/psp8lo
 !! NAME
 !! psp8lo
@@ -1280,7 +1271,6 @@ end subroutine psp5nl
 !!      ctrap,splfit,spline
 !!
 !! SOURCE
-
 
 subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 
@@ -1409,7 +1399,6 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 end subroutine psp8lo
 !!***
 
-
 !!****f* ABINIT/psp8nl
 !! NAME
 !! psp8nl
@@ -1468,8 +1457,7 @@ end subroutine psp8lo
 !!
 !! SOURCE
 
-subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,&
-&                 mqgrid,qgrid,rad,vpspll)
+subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vpspll)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1651,7 +1639,6 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,&
 end subroutine psp8nl
 !!***
 
-
 !!****f* ABINIT/cc_derivatives
 !! NAME
 !! cc_derivatives
@@ -1684,7 +1671,7 @@ end subroutine psp8nl
 !! Test version by DRH - requires very smooth model core charge
 !!
 !! SOURCE
-  
+
 subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
 
 
@@ -1711,7 +1698,7 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
 !arrays
  real(dp),allocatable :: ff3(:),ff4(:),gg(:),gg1(:),gg2(:)
  real(dp),allocatable :: gg3(:),gg4(:),work(:),xx(:)
-  
+
 ! *************************************************************************
  ABI_ALLOCATE(ff3,(mmax))
  ABI_ALLOCATE(ff4,(mmax))
@@ -1723,7 +1710,7 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  ABI_ALLOCATE(work,(mmax))
  ABI_ALLOCATE(xx,(n1xccc))
 
- write(std_out,*) 'cc_derivatives : enter'
+ !write(std_out,*) 'cc_derivatives : enter'
 
 !calculate third derivative ff3 on logarithmic grid
  der1=ff2(1)
@@ -1773,7 +1760,6 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  der1=0.0d0
  dern=0.0d0
  call spline(xx,gg2,n1xccc,der1,dern,gg4)
-
 
 !now calculate second to fourth derivative by forward differences
 !to avoid numerical noise uses a smoothing function

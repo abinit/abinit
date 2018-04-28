@@ -1,10 +1,10 @@
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp9
 !! NAME
-!!
+!! m_psp9
 !!
 !! FUNCTION
-!!
+!! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2018 ABINIT group (JJ, MVer, YP)
@@ -33,7 +33,6 @@ module m_psp9
 #if defined HAVE_PSML
  use m_psml
 #endif
-
 
  use defs_datatypes,  only : nctab_t
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
@@ -105,7 +104,7 @@ contains
 !!  xccc1d(n1xccc,6)=1D core charge function and five derivatives, from psp file
 !!  nctab<nctab_t>=NC tables
 !!    %has_tvale=True if the pseudo contains the pseudo valence charge
-!!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid 
+!!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
 !!
 !! PARENTS
 !!      pspatm
@@ -148,7 +147,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  real(dp),intent(inout) :: xccc1d(n1xccc,6) !vz_i
 
 !Local variables-------------------------------
-!no_abirules
 !scalars
 #if defined HAVE_PSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
@@ -215,7 +213,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! z      = ps_AtomicNumber(psxml)
 !
 ! The difference between the number of protons in the nucleus and the
-! sum of the populations of the core shells is the effective atomic number 
+! sum of the populations of the core shells is the effective atomic number
 ! of the pseudo-atom, Zval (in Abinit), z-pseudo in the header of the
 ! PSML file.
 ! zval   = ps_Zpseudo(psxml)
@@ -270,7 +268,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  call ps_ValenceConfiguration_Get(psxml, nshells=nshells)
  has_tvale = (nshells > 0)
 
-! Compute the valence charge of the reference configuration used to 
+! Compute the valence charge of the reference configuration used to
 ! generate the pseudopotential
  chgvps = 0.0_dp
 ! Loop on all the shells included in the valence
@@ -384,7 +382,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! is relativistic or not
 
 !DEBUG
-!write(std_out,*)' psp9in : pseudopotential generation relativity ', ps_Relativity(psxml) 
+!write(std_out,*)' psp9in : pseudopotential generation relativity ', ps_Relativity(psxml)
 !write(std_out,*)' psp9in : SOC pseudopotential? (1=yes, 0 =no) '
 !write(std_out,*)' psp9in : irelt = ', irelt
 !write(ab_out,*)' psp9in : irelt = ', irelt
@@ -408,7 +406,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  write(message, '(a,i5,es16.6,es16.6)')'  psp9in : mmax, amesh, rad(mmax) = ', mmax, amesh, rad(mmax)
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
- 
+
 !Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)
  damesh=zero
@@ -487,15 +485,15 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Read and process vlocal:
 !The local potential is given by a <radfunc> element under the <local-potential>
 !element.
-!After reading, this is a copy of the treatment to the 
-!local part carry out in psp8 
+!After reading, this is a copy of the treatment to the
+!local part carry out in psp8
 !i.e. (as in Hamann pseudopotential)
 !
 !Read the local component of the pseudopotential
  vloc = zero
  do ir = 1, mmax
    vloc(ir) = ps_LocalPotential_Value(psxml, rad(ir))
- end do 
+ end do
 
  call psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
@@ -506,11 +504,11 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  vlspl(:,2)=work_spl(:)
  ABI_DEALLOCATE(work_spl)
 
-!!  DEBUG         
+!!  DEBUG
 ! write(std_out,*)'# Vlocal = '
 ! write(std_out,*)' amesh  = ', amesh
 ! write(std_out,*)' epsatm = ', epsatm
-! write(std_out,*)' mmax   = ', mmax  
+! write(std_out,*)' mmax   = ', mmax
 ! write(std_out,*)' mqgrid = ', mqgrid
 ! do ir = 1, mqgrid
 !   write(std_out,*)'   qgrid = ', ir, qgrid(ir)
@@ -527,7 +525,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! write(std_out,*)' ypn    = ', ypn
 ! write(std_out,*)' zion   = ', zion
 ! stop
-!!  ENDDEBUG      
+!!  ENDDEBUG
 
 
 !--------------------------------------------------------------------
@@ -553,14 +551,14 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
      do ir = 1, mmax
        vpspll(ir, indlmn(5,ii)) = ps_Projector_Value(psxml, idx_sr(indlmn(5,ii)), rad(ir))
        vpspll(ir, indlmn(5,ii)) = rad(ir) * vpspll(ir, indlmn(5,ii))
-     end do 
+     end do
    else if (indlmn(6,ii) == 2) then
      do ir = 1, mmax
        vpspll(ir, indlmn(5,ii)) = ps_Projector_Value(psxml, idx_so(indlmn(5,ii)), rad(ir))
        vpspll(ir, indlmn(5,ii)) = rad(ir) * vpspll(ir, indlmn(5,ii))
-     end do 
+     end do
    end if
- end do 
+ end do
 
 !Allow for option of no nonlocal corrections (lloc=lmax=0)
  if (lloc==0.and.lmax==0) then
@@ -577,7 +575,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  end if
 
-!!  DEBUG         
+!!  DEBUG
 ! write(std_out,*)'# KB Projectors = '
 ! write(std_out,*)' amesh  = ', amesh
 ! do ir = 1, mqgrid
@@ -604,7 +602,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !   enddo
 ! enddo
 ! stop
-!!  ENDDEBUG      
+!!  ENDDEBUG
 
 ! Read pseudo valence charge in real space on the linear mesh
 ! and transform it to reciprocal space on a regular grid. Use vloc as workspace.
@@ -681,7 +679,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 end subroutine psp9in
 !!***
 
-
 !!****f* ABINIT/psp9cc
 !! NAME
 !! psp9cc
@@ -755,7 +752,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
    write(message, '(5a)' )&
 &   'Pseudopotential input file requires linear radial mesh',ch10,&
 &   'starting at zero.',ch10,&
-&   'Action : check your pseudopotential input file.'
+&   'Action: check your pseudopotential input file.'
    MSG_ERROR(message)
  end if
 
@@ -849,7 +846,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
    write(message, '(5a)' )&
 &   'Pseudopotential input file core charge mesh',ch10,&
 &   'is inconsistent with rchrg in header.',ch10,&
-&   'Action : check your pseudopotential input file.'
+&   'Action: check your pseudopotential input file.'
    MSG_ERROR(message)
  end if
 

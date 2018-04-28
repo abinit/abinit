@@ -40,7 +40,6 @@ module m_upf2abinit
  use m_paw_numeric,   only : jbessel => paw_jbessel
  use m_psptk,         only : cc_derivatives
 
-
  implicit none
 
  private
@@ -64,8 +63,7 @@ contains
 !!
 !! INPUTS
 !!  filpsp = name of file with UPF data
-!!  psps = sturcture with global dimension data for pseudopotentials, header
-!!     info ...
+!!  psps = sturcture with global dimension data for pseudopotentials, header info ...
 !!
 !! OUTPUT
 !!  pspxc = index of xc functional for this pseudo

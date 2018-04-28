@@ -132,6 +132,9 @@ def main():
     if options.command == "makemake":
         proj.write_buildsys_files()
 
+    #elif options.command == "touch":
+    #    print(proj.touch_deps(verbose=options.verbose))
+
     elif options.command == "print":
 
         if options.what is None:

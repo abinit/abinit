@@ -9,7 +9,7 @@
 !! from the list of symmetries (including magnetic characteristics), and lattice parameters
 !! Warning: the recognition of the space group might not yet work for the
 !! Shubnikov group of type IV
-!! 
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (XG, RC)

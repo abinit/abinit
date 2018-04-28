@@ -6,7 +6,7 @@
 !! FUNCTION
 !! From the list of symmetry operations, and the lattice vectors,
 !! determine the Bravais information (including the holohedry, the centering,
-!! the coordinate of the primitive vectors in the conventional vectors), 
+!! the coordinate of the primitive vectors in the conventional vectors),
 !! as well as the point group.
 !!
 !! COPYRIGHT
@@ -166,7 +166,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      if(iholohedry>1)problem=2
    end select
 
-!  This is the usual situation, in which the lattice belong to the same holohedry 
+!  This is the usual situation, in which the lattice belong to the same holohedry
 !  as the lattice+atoms (+electric field + ...)
    if(problem==0)exit
 
@@ -266,7 +266,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
    if(invariant==0)then
 !    Not a single axis was invariant with respect to all operations ?!
-!    do isym=1,nsym; write(std_out, '(a,10i4)' )' isym,symrelconv=',isym,symrelconv(:,:,isym); enddo 
+!    do isym=1,nsym; write(std_out, '(a,10i4)' )' isym,symrelconv=',isym,symrelconv(:,:,isym); enddo
      write(message, '(3a,3i3,2a,i3,2a,i3)' )&
 &     'Could not succeed to determine the bravais lattice (not a single invariant)',ch10,&
 &     'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
@@ -284,14 +284,14 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &   axis_red(3)*rprimdnow(:,3)
    norm=sum(axis_cart(:)**2)
 !  Expand by a uniform, quite arbitrary, dilatation, along the invariant axis
-!  Note : make these dilatation different, according to ideform 
+!  Note : make these dilatation different, according to ideform
 !  XG 20151221  : Still, the interplay between the size of the deformation and the tolsym is not easy to address.
 !  Indeed the deformation must be sufficiently large to be perceived by symlatt as a real breaking of the
 !  symmetry of the lattice. In order to deal with all the small values od tolsym, it has been set at a minimum of tol3,
 !  but it must also be larger than tolsym. Moreover, for some axis choice, the deformation is not aligned with the axis, decreasing
 !  the effective deformation length. An additional factor of three is thus included, actually increased to six just to be sure...
    do ii=1,3
-     scprod=axis_cart(1)*rprimdnow(1,ii)+axis_cart(2)*rprimdnow(2,ii)+axis_cart(3)*rprimdnow(3,ii) 
+     scprod=axis_cart(1)*rprimdnow(1,ii)+axis_cart(2)*rprimdnow(2,ii)+axis_cart(3)*rprimdnow(3,ii)
      rprimdtry(:,ii)=rprimdnow(:,ii)+ideform*(max(tol3,six*tolsym)-tol6)*scprod/norm*axis_cart(:)
    end do
 

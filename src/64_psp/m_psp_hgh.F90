@@ -1,10 +1,10 @@
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp_hgh
 !! NAME
-!!
+!!  m_psp_hgh
 !!
 !! FUNCTION
-!!
+!! Initialize pspcod=2, 3, 10 pseudopotentials (GTH)
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, FD, PT)
@@ -37,7 +37,6 @@ module m_psp_hgh
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atomic_info
 #endif
-
 
  implicit none
 
@@ -172,20 +171,17 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
  write(message, '(a,f12.7)' ) ' rloc=',rloc
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
- write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )&
-& '  cc1=',cc1,'; cc2=',cc2,'; cc3=',cc3,'; cc4=',cc4
+ write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )'  cc1=',cc1,'; cc2=',cc2,'; cc3=',cc3,'; cc4=',cc4
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
  read (tmp_unit,*, err=10, iomsg=errmsg) rrs,h1s,h2s
- write(message, '(a,f12.7,a,f12.7,a,f12.7)' )&
-& '  rrs=',rrs,'; h1s=',h1s,'; h2s=',h2s
+ write(message, '(a,f12.7,a,f12.7,a,f12.7)' )'  rrs=',rrs,'; h1s=',h1s,'; h2s=',h2s
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
  read (tmp_unit,*, err=10, iomsg=errmsg) rrp,h1p
- write(message, '(a,f12.7,a,f12.7)' )&
-& '  rrp=',rrp,'; h1p=',h1p
+ write(message, '(a,f12.7,a,f12.7)' )'  rrp=',rrp,'; h1p=',h1p
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
@@ -213,7 +209,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
      write(message, '(a,i5,a,e12.4,a,a,a,a)' )&
 &     'Input lmax=',lmax,' disagree with input h1p=',h1p,'.',&
 &     'Your pseudopotential is incoherent.',ch10,&
-&     'Action : correct your pseudopotential file.'
+&     'Action: correct your pseudopotential file.'
      MSG_ERROR(message)
    end if
  end if
@@ -246,11 +242,6 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
  call psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,psps%mqgrid_vl,psps%qgrid_vl,&
 & vlspl(:,1),rloc,psps%vlspl_recipSpace,yp1,ypn,zion)
 
-!DEBUG
-!write(std_out,*)' psp2in : after psp2lo '
-!stop
-!ENDDEBUG
-
 !Fit spline to (q^2)V(q) or V(r)
  ABI_ALLOCATE(work_space,(psps%mqgrid_vl))
  ABI_ALLOCATE(work_spl,(psps%mqgrid_vl))
@@ -261,6 +252,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
    call spline (psps%qgrid_vl,dvlspl(:,1),psps%mqgrid_vl,yp1,ypn,work_spl)
    dvlspl(:,2)=work_spl(:)
  end if
+
  ABI_DEALLOCATE(work_space)
  ABI_DEALLOCATE(work_spl)
  ABI_DEALLOCATE(dvloc)
@@ -423,7 +415,6 @@ subroutine psp2nl(ekb,ffspl,h1p,h1s,h2s,lnmax,mqgrid,qgrid,rrp,rrs)
 end subroutine psp2nl
 !!***
 
-
 !!****f* ABINIT/psp2lo
 !! NAME
 !! psp2lo
@@ -532,7 +523,7 @@ subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
    write(message, '(a)' ) '-  Local part computed in real space.'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
-   
+
 !  Compute derivatives for splines computations
    yp1 = 0.d0
    rq2 = (qgrid(mqgrid) / rloc) ** 2
@@ -688,63 +679,50 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  rrf=zero
  nproj(1:psps%mpssoang)=0
 
-!DEBUG
-!write(std_out,*) ' psp3in : enter '
-!ENDDEBUG
-
 !Read and write different lines of the pseudopotential file
 
  read (tmp_unit,*,err=10,iomsg=errmsg) rloc,cc1,cc2,cc3,cc4
  write(message, '(a,f12.7)' ) ' rloc=',rloc
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
- write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )&
-& ' cc1 =',cc1,'; cc2 =',cc2,'; cc3 =',cc3,'; cc4 =',cc4
+ write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' cc1 =',cc1,'; cc2 =',cc2,'; cc3 =',cc3,'; cc4 =',cc4
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
 !For the time being, the s state line must be present and is read,
 !even for local pseudopotentials (zero must appear)
  read (tmp_unit,*,err=10,iomsg=errmsg) rrs,h11s,h22s,h33s
- write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )&
-& ' rrs =',rrs,'; h11s=',h11s,'; h22s=',h22s,'; h33s=',h33s
+ write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrs =',rrs,'; h11s=',h11s,'; h22s=',h22s,'; h33s=',h33s
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
  if (lmax > 0) then
 
    read (tmp_unit,*,err=10,iomsg=errmsg) rrp,h11p,h22p,h33p
-   write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )&
-&   ' rrp =',rrp,'; h11p=',h11p,'; h22p=',h22p,'; h33p=',h33p
+   write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrp =',rrp,'; h11p=',h11p,'; h22p=',h22p,'; h33p=',h33p
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    read (tmp_unit,*,err=10,iomsg=errmsg) k11p,k22p,k33p
-   write(message, '(a,f12.7,a,f12.7,a,f12.7)' )&
-&   '                    k11p=',k11p,'; k22p=',k22p,'; k33p=',k33p
+   write(message, '(a,f12.7,a,f12.7,a,f12.7)' )'                    k11p=',k11p,'; k22p=',k22p,'; k33p=',k33p
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
  end if
 
  if (lmax > 1) then
-
    read (tmp_unit,*,err=10,iomsg=errmsg) rrd,h11d,h22d,h33d
-   write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )&
-&   ' rrd =',rrd,'; h11d=',h11d,'; h22d=',h22d,'; h33d=',h33d
+   write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrd =',rrd,'; h11d=',h11d,'; h22d=',h22d,'; h33d=',h33d
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
    read (tmp_unit,*,err=10,iomsg=errmsg) k11d,k22d,k33d
-   write(message, '(a,f12.7,a,f12.7,a,f12.7)' )&
-&   '                    k11d=',k11d,'; k22d=',k22d,'; k33d=',k33d
+   write(message, '(a,f12.7,a,f12.7,a,f12.7)' )'                    k11d=',k11d,'; k22d=',k22d,'; k33d=',k33d
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
-
  end if
 
  if (lmax > 2) then
-
    read (tmp_unit,*,err=10,iomsg=errmsg) rrf,h11f
    write(message, '(a,f12.7,a,f12.7)' )' rrf =',rrf,'; h11f=',h11f
    call wrtout(ab_out,message,'COLL')
@@ -754,7 +732,6 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    write(message, '(a,f12.7)' )'                    k11f=',k11f
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
-
  end if
 
  if (abs(h11s)>1.d-08) nproj(1)=1
@@ -786,7 +763,6 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
      lmax=1
    end if
  end if
-
 
  if (abs(h33p)>1.d-08) then
    nproj(2)=3
@@ -993,8 +969,7 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
 
  ABI_ALLOCATE(dvlspl,(psps%mqgrid_ff))
 !First, the local potential --  compute on q grid and fit spline
- call psp2lo(cc1,cc2,cc3,cc4,dvlspl,epsatm,psps%mqgrid_ff,psps%qgrid_ff,&
-& vlspl(:,1),rloc,.true.,yp1,ypn,zion)
+ call psp2lo(cc1,cc2,cc3,cc4,dvlspl,epsatm,psps%mqgrid_ff,psps%qgrid_ff,vlspl(:,1),rloc,.true.,yp1,ypn,zion)
  ABI_DEALLOCATE(dvlspl)
 
 !DEBUG
@@ -1049,7 +1024,6 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    ABI_DEALLOCATE(ffspl_sr)
    ABI_DEALLOCATE(ekb_so)
    ABI_DEALLOCATE(ffspl_so)
-
  end if
 
  return
@@ -1135,11 +1109,6 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
  real(dp),allocatable :: ppspl(:,:,:,:),uu(:,:),work(:),zz(:,:,:)
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' psp3nl : enter '
-!stop
-!ENDDEBUG
 
  ABI_ALLOCATE(ppspl,(mqgrid,2,mpsang,mproj))
  ABI_ALLOCATE(work,(mqgrid))
@@ -1230,14 +1199,7 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
    ABI_DEALLOCATE(uu)
    ABI_DEALLOCATE(zz)
-
-!  End condition on nproj(/=0)
- end if
-
-!DEBUG
-!write(std_out,*)' psp3nl : after s channel '
-!stop
-!ENDDEBUG
+ end if !  End condition on nproj(/=0)
 
 !--------------------------------------------------------------------
 !Now treat p channel
@@ -1322,14 +1284,7 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
    ABI_DEALLOCATE(uu)
    ABI_DEALLOCATE(zz)
-
-!  End condition on nproj(/=0)
- end if
-
-!DEBUG
-!write(std_out,*)' psp3nl : after p channel '
-!stop
-!ENDDEBUG
+ end if !  End condition on nproj(/=0)
 
 !-----------------------------------------------------------------------
 !Now treat d channel.
@@ -1349,7 +1304,7 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
  if ( abs(h33d) >= 1.0d-8 ) then
    write(message, '(a,a,a)' )&
 &   '  only two d-projectors are allowed ',ch10,&
-&   '  Action : check your pseudopotential file.'
+&   '  Action: check your pseudopotential file.'
    MSG_ERROR(message)
 !  nproj=3 ; ldz=3 ; ap(1,6)=h33d
 !  ap(1,4)= 0.5d0*sqrt(63.d0/143.d0)*h33d
@@ -1407,14 +1362,7 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
    ABI_DEALLOCATE(uu)
    ABI_DEALLOCATE(zz)
-
-!  End condition on nproj(/=0)
- end if
-
-!DEBUG
-!write(std_out,*)' psp3nl : after d channel '
-!stop
-!ENDDEBUG
+ end if !  End condition on nproj(/=0)
 
 !-----------------------------------------------------------------------
 !Treat now f channel (max one projector ! - so do not use ppspl)
@@ -1439,11 +1387,6 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 
  ABI_DEALLOCATE(ppspl)
  ABI_DEALLOCATE(work)
-
-!DEBUG
-!write(std_out,*)' psp3nl : exit '
-!stop
-!ENDDEBUG
 
 end subroutine psp3nl
 !!***
@@ -1556,18 +1499,13 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
  rloc=zero ; cc(:)=zero
  nproj(1:psps%mpssoang)=0
 
-!DEBUG
-!write(std_out,*) ' psp10in : enter '
-!ENDDEBUG
-
 !Read and write different lines of the pseudopotential file
 
  read (tmp_unit,*,err=10,iomsg=errmsg) rloc,nn,(cc(jj),jj=1,nn)
  write(message, '(a,f12.7)' ) ' rloc=',rloc
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
- write(message, '(a,i1,a,4f12.7)' )&
-& ' cc(1:',nn,')=',(cc(jj),jj=1,nn)
+ write(message, '(a,i1,a,4f12.7)' )' cc(1:',nn,')=',(cc(jj),jj=1,nn)
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
@@ -1613,7 +1551,7 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end do prjloop
- 
+
  if(pspso/=0) then
 
 !  MJV 10/2008: is this correct? For the normal HGH psp there are cases
@@ -1671,10 +1609,6 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 & vlspl(:,1),rloc,.true.,yp1,ypn,zion)
  ABI_DEALLOCATE(dvlspl)
 
-!DEBUG
-!write(std_out,*)' psp10in : after psp2lo '
-!ENDDEBUG
-
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
  ABI_ALLOCATE(work_space,(psps%mqgrid_ff))
  ABI_ALLOCATE(work_spl,(psps%mqgrid_ff))
@@ -1729,14 +1663,13 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
    ABI_DEALLOCATE(ffspl_sr)
    ABI_DEALLOCATE(ekb_so)
    ABI_DEALLOCATE(ffspl_so)
-
  end if
 
  ABI_DEALLOCATE(rr)
  ABI_DEALLOCATE(hij)
  ABI_DEALLOCATE(kij)
 
- return 
+ return
 
  ! Handle IO error
  10 continue
@@ -1744,7 +1677,6 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 
 end subroutine psp10in
 !!***
-
 
 !!****f* m_psp_hgh/psp10nl
 !! NAME
@@ -1825,8 +1757,8 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 !  Fill up the matrix in packed storage
    prjloop: do jproj=1,numproj
      priloop: do iproj=1,jproj
-       ipack=iproj+(jproj-1)*jproj/2 
-       if(mod((jproj-1)*jproj,2)/=0) then 
+       ipack=iproj+(jproj-1)*jproj/2
+       if(mod((jproj-1)*jproj,2)/=0) then
          MSG_ERROR("odd")
        end if
        ap(1,ipack)=hij(ll,iproj,jproj)
@@ -1927,7 +1859,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
        if ( numproj>2 ) then
          write(message, '(3a)' )&
 &         ' only two d-projectors are allowed ',ch10,&
-&         ' Action : check your pseudopotential file.'
+&         ' Action: check your pseudopotential file.'
          MSG_ERROR(message)
        end if
 
@@ -1961,8 +1893,8 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 !      If there is a second projector. Warning : only one projector is allowed.
        if ( numproj>1 ) then
          write(message, '(a,a,a)' )&
-&         '  only one f-projector is allowed ',ch10,&
-&         '  Action : check your pseudopotential file.'
+&         'only one f-projector is allowed ',ch10,&
+&         'Action: check your pseudopotential file.'
          MSG_ERROR(message)
        end if
 
@@ -1980,7 +1912,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
        call spline(qgrid,ppspl(:,1,4,1),mqgrid,&
 &       yp1j(1),ypnj(1),ppspl(:,2,4,1))
 
-     else 
+     else
        MSG_ERROR("lmax>3?")
      end if
 

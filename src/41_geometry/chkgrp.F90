@@ -7,7 +7,7 @@
 !! Checks that a set of input symmetries constitutes a group.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -141,7 +141,6 @@ subroutine chkgrp(nsym,symafm,symrel,ierr)
 
 end subroutine chkgrp
 !!***
-
 
 !!****f* ABINIT/sg_multable
 !! NAME

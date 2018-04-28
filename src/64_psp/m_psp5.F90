@@ -4,7 +4,7 @@
 !!  m_psp5
 !!
 !! FUNCTION
-!!
+!! Initialize pspcod=5 ("Phoney pseudopotentials" with Hamman grid):
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
@@ -151,10 +151,6 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
  real(dp),allocatable :: work_space(:),work_spl(:)
 
 ! ***************************************************************************
-
-!DEBUG
-!write(std_out,*)' psp5in : enter '
-!ENDDEBUG
 
 !File format of formatted Phoney psp input (the 3 first lines
 !have already been read in calling -pspatm- routine) :
@@ -602,11 +598,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
  ABI_DEALLOCATE(rad)
  ABI_DEALLOCATE(vloc)
 
-!DEBUG
-!write(std_out,*)' psp5in : vlspl(1,2)= ',vlspl(1,2)
-!ENDDEBUG
-
- return 
+ return
 
  ! Handle IO error
  10 continue

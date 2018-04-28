@@ -290,14 +290,14 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp
      pspdat = psphead%pspdat
-     pspcod = psphead%pspcod 
+     pspcod = psphead%pspcod
      pspxc =  psphead%pspxc
      lmax = psphead%lmax
      !lloc   = 0 ! does this mean s? in psml case the local potential can be different from any l channel
      lloc = -1
      mmax = -1
      r2well = 0
-     
+
      write(message,'(a,1x,a3,3x,a)') "-",atmsymb,trim(creator)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
@@ -922,12 +922,10 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  close(dump)
 
  return
-
  10 continue
 
  if ( ierr /= 0 ) then
-   write(msg,'(a,a,a,i8)') "Error writing pseudopotential information", &
-&   ch10, "IOSTAT=", ierr
+   write(msg,'(a,a,a,i8)') "Error writing pseudopotential information", ch10, "IOSTAT=", ierr
    MSG_WARNING(msg)
  end if
 

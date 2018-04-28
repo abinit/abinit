@@ -71,7 +71,7 @@ subroutine matr3inv(aa,ait)
  t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
  t2 = aa(3,2) * aa(1,3) - aa(1,2) * aa(3,3)
  t3 = aa(1,2) * aa(2,3) - aa(2,2) * aa(1,3)
- det  = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3 
+ det  = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
 
 !Make sure matrix is not singular
  if (abs(det)>tol16) then

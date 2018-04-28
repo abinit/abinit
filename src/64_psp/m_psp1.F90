@@ -6,7 +6,6 @@
 !! FUNCTION
 !!  Initialize pspcod=1 or 4 pseudopotential (Teter format)
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, MT)
 !!  This file is distributed under the terms of the
@@ -224,22 +223,20 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
  end do
 
  read (tmp_unit,*,err=10,iomsg=errmsg) rchrg,fchrg,qchrg
- write(message, '(3f20.14,t64,a)' ) rchrg,fchrg,qchrg,&
-& 'rchrg,fchrg,qchrg'
+ write(message, '(3f20.14,t64,a)' ) rchrg,fchrg,qchrg,'rchrg,fchrg,qchrg'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,  message,'COLL')
 
-!Generate core charge function and derivatives, if needed
+ ! Generate core charge function and derivatives, if needed
  if(fchrg>1.0d-15)then
    if(pspcod==1)then
      call psp1cc(fchrg,n1xccc,xccc1d)
-!    The core charge function for pspcod=1
-!    becomes zero beyond 3*rchrg only. Thus xcccrc must be set
-!    equal to 3*rchrg .
+     ! The core charge function for pspcod=1 becomes zero beyond 3*rchrg only.
+     ! Thus xcccrc must be set equal to 3*rchrg .
      xcccrc=3*rchrg
    else if(pspcod==4)then
      call psp4cc(fchrg,n1xccc,xccc1d)
-!    For pspcod=4, the core charge cut off exactly beyond rchrg
+     ! For pspcod=4, the core charge cut off exactly beyond rchrg
      xcccrc=rchrg
    end if
  else
@@ -265,22 +262,12 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
  do ipsang=1,lmax+1
    read (tmp_unit,*,err=10,iomsg=errmsg) ll
    read (tmp_unit,*,err=10,iomsg=errmsg) (vpspll(ii,ipsang),ii=1,mmax)
-!  DEBUG
-!  write(std_out,*) 'END OF READING PSP',ll,'OK'
-!  ENDDEBUG
-
  end do
 
 !Copy appropriate nonlocal psp for use as local one
  vloc( 1:mmax ) = vpspll( 1:mmax , lloc+1 )
 
-!DEBUG
-!write(std_out,*) 'VLOC=',vloc(1),vloc(2),vloc(3)
-!write(std_out,*) 'VLOC=',vloc(4),vloc(5),vloc(6)
-!ENDDEBUG
-
 !(2) Create radial grid, and associated quantities
-
  ABI_ALLOCATE(rad,(mmax))
  ABI_ALLOCATE(drad,(mmax))
  ABI_ALLOCATE(wksincos,(mmax,2,2))
@@ -292,12 +279,8 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
    drad(ii+1)=500.d0*(xx+.01d0)**4/dble(mmax-1)
  end do
 
-!DEBUG
-!write(std_out,*) 'RADIAL GRID CREATED'
-!ENDDEBUG
-
 !here compute sin(r(:)*dq) and cos(r(:)*dq)
-!NOTE : also invert dr !!
+!NOTE: also invert dr !!
  dq2pi=2.0d0*pi*dq
  do ii=1,mmax
    arg=dq2pi*rad(ii)
@@ -307,8 +290,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
  end do
 
 !(3)Carry out calculations for local (lloc) pseudopotential.
-!Obtain Fourier transform (1-d sine transform)
-!to get q^2 V(q).
+!Obtain Fourier transform (1-d sine transform) to get q^2 V(q).
  ABI_ALLOCATE(work_space,(mqgrid))
  ABI_ALLOCATE(work_spl1,(mqgrid))
  ABI_ALLOCATE(work_spl2,(mqgrid))
@@ -328,24 +310,18 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 
 !Zero out all Kleinman-Bylander energies to initialize
  ekb(:)=0.0d0
-
-!DEBUG
 !write(std_out,*)' psp1in : before nonlocal corrections '
 !write(std_out,*)' psp1in : lloc, lmax = ',lloc,lmax
-!if(.true.)stop
-!ENDDEBUG
 
 !Allow for option of no nonlocal corrections (lloc=lmax=0)
  if (lloc==0.and.lmax==0) then
-
    write(message, '(a,f5.1)' ) ' Note: local psp for atom with Z=',znucl
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
  else
 
-!  Proceed to make Kleinman-Bylander form factors for
-!  each l up to lmax
+!  Proceed to make Kleinman-Bylander form factors for each l up to lmax
 
 !  Read wavefunctions for each l up to lmax
    ABI_ALLOCATE(wfll,(mmax,mpsang))
@@ -374,10 +350,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 !  nlmax is highest l for which a nonlocal correction is being computed
    nlmax=lmax
    if (lloc==lmax) nlmax=lmax-1
-
-!  DEBUG
 !  write(std_out,*)' psp1in : lmax,lloc=',lmax,lloc
-!  ENDDEBUG
    ABI_ALLOCATE(ekb_tmp,(mpsang,2))
    ABI_ALLOCATE(ffspl_tmp,(mqgrid,2,nlmax+1,2))
 
@@ -385,9 +358,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &   nlmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfll,wksincos)
 
 !  Read second wavefunction for second projection operator
-!  (only read cases where nproj(ll)=2)
-!  --also find highest l for which nproj(l)=2
-
+!  (only read cases where nproj(ll)=2) --also find highest l for which nproj(l)=2
    lhigh=-1
    do ipsang=1,min(lmax+1,mpsang)
      if (nproj(ipsang)==2) then
@@ -423,9 +394,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
      if (kk>iln) then
        iln=kk
        ekb(kk)=ekb_tmp(1+indlmn(1,ii),indlmn(3,ii))
-!      DEBUG
 !      write(std_out,*)' psp1in : lmnmax,ii,indlmn(1,ii)=',lmnmax,ii,indlmn(1,ii)
-!      ENDDEBUG
        ffspl(:,:,kk)=ffspl_tmp(:,:,1+indlmn(1,ii),indlmn(3,ii))
      end if
    end do
@@ -433,7 +402,6 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
    ABI_DEALLOCATE(ekb_tmp)
    ABI_DEALLOCATE(ffspl_tmp)
    ABI_DEALLOCATE(wfll)
-
  end if
 
  ABI_DEALLOCATE(vpspll)
@@ -520,11 +488,6 @@ subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)' psp1lo : enter '
-!if(.true.)stop
-!ENDDEBUG
-
 !Do q=0 separately (compute epsatm)
 !Set up integrand for q=0: Int[r^2 (V(r)+Zv/r) dr]
 !Treat r=0 by itself
@@ -534,9 +497,7 @@ subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 !  (at large r do not want prefactor of r^2 and should see
 !  V(r)+Zv/r go to 0 at large r)
    test=vloc(ir)+zion/rad(ir)
-!  DEBUG
 !  write(std_out,'(i4,3es20.10)' )ir,rad(ir),test,rad(ir)*test
-!  ENDDEBUG
 !  In this routine, NO cut-off radius is imposed : the input
 !  vloc MUST be in real(dp) to obtain numerically
 !  accurate values. The error can be on the order of 0.001 Ha !
@@ -550,11 +511,6 @@ subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 !(need numerical derivatives to do integral)
 !Use mmax-1 to convert to Teter s dimensioning starting at 0
  call der_int(wk,wk2,rad,drad,mmax-1,result)
-
-!DEBUG
-!write(std_out,*)' psp1lo : result ',result
-!stop
-!ENDDEBUG
 
  epsatm=4.d0*pi*(result)
 !q=0 value of integral is -zion/Pi + q^2 * epsatm = -zion/Pi
@@ -706,11 +662,6 @@ subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
  real(dp),allocatable :: work_spl(:)
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' psp1nl : enter'
-!stop
-!ENDDEBUG
 
 !Zero out Kleinman-Bylander energies ekb
  ekb(:)=0.0d0
@@ -912,23 +863,18 @@ subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
        ABI_DEALLOCATE(work4)
 
      else
-
 !      KB energy is zero, put nonlocal correction at l=0 to 0
        ffspl(:,:,lp1)=0.0d0
-
      end if
 
-!    End loop on angular momenta
-   end do
+   end do !    End loop on angular momenta
 
    ABI_DEALLOCATE(work1)
    ABI_DEALLOCATE(work2)
    ABI_DEALLOCATE(work_spl)
    ABI_DEALLOCATE(work5)
    ABI_DEALLOCATE(besjx)
-
-!  End of lmax/=-1 condition
- end if
+ end if !  End of lmax/=-1 condition
 
 end subroutine psp1nl
 !!***
@@ -1164,7 +1110,6 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
 end subroutine sincos
 !!***
 
-
 !!****f* m_psp1/psp4cc
 !! NAME
 !! psp4cc
@@ -1263,8 +1208,8 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
      end do
 !    Complete with derivatives at end points
      der1=0.0d0
-!    dern=fchrg*gp(1.0d0) 
-     dern=fchrg*gp_psp4(1.0d0) 
+!    dern=fchrg*gp(1.0d0)
+     dern=fchrg*gp_psp4(1.0d0)
    else if(ider==1)then
 !    Generate spline fitting for the function gp
      do i1xccc=1,n1xccc
@@ -1293,7 +1238,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
    call spline(xx,ff,n1xccc,der1,dern,ff2)
    xccc1d(:,ider+1)=ff(:)
    xccc1d(:,ider+3)=ff2(:)
-
  end do
 
  xccc1d(:,6)=zero
@@ -1322,7 +1266,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 !ENDDEBUG
 
  contains
- 
+
    function gg_psp4(x)
 !Expression of 7 May 1992
 
@@ -1412,7 +1356,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 &   x**2*(a18+x**2*a20                               &
 &   ))))))))))*(1.0d0-3.d0*x**2)*(-4.d0)
  end function gpp_3_psp4
- 
+
 end subroutine psp4cc
 !!***
 

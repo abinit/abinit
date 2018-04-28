@@ -98,6 +98,5 @@ subroutine mati3inv(mm,mit)
    MSG_BUG(message)
  end if
 
-
 end subroutine mati3inv
 !!***

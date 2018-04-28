@@ -4,7 +4,7 @@
 !!  m_psp6
 !!
 !! FUNCTION
-!!
+!! Initialize pspcod=6 (Pseudopotentials from the fhi98pp code):
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2018 ABINIT group (XG, AF, GJ,FJ,MT, DRH)
@@ -44,7 +44,6 @@ module m_psp6
 
 contains
 !!***
-
 
 !!****f* m_psp6/psp6in
 !! NAME
@@ -207,10 +206,6 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    end if
    do irad=1,mmax
      read(tmp_unit,*, err=10, iomsg=errmsg)jj,rad(irad),wfll(irad,ipsang),vpspll(irad,ipsang)
-!    DEBUG
-!    Maybe the normalization is different
-!    wfll(irad,ipsang)=wfll(irad,ipsang)/rad(irad)
-!    ENDDEBUG
    end do
  end do
 
@@ -226,9 +221,8 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
      call psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
    end if
 
-!  The core charge function for pspcod=6
-!  becomes zero beyond rchrg. Thus xcccrc must be set
-!  equal to rchrg .
+! The core charge function for pspcod=6 becomes zero beyond rchrg.
+! Thus xcccrc must be set equal to rchrg.
    xcccrc=rchrg
  else
    xccc1d(:,:)=zero
@@ -239,19 +233,6 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  ratio=rad(mmax)/rad(1)
  al=log(ratio)/dble(mmax-1)
 
-!DEBUG
-!write(std_out,*)' psp6in : al ; al_announced =',al,al_announced
-!allocate(radbis(mmax))
-!write(std_out,*)' psp6in : lloc  ',lloc
-!do ipsang=1,lmax+1
-!write(std_out,*)' psp6in : ipsang  ',ipsang
-!do irad=1,mmax
-!write(std_out,*)irad,rad(irad),wfll(irad,ipsang),vpspll(irad,ipsang)
-!end do
-!end do
-!deallocate(radbis)
-!ENDDEBUG
-
 !vloc(:)=Vlocal(r), lloc=0, 1, or 2 or -1 for avg.
  ABI_ALLOCATE(vloc,(mmax))
 !Copy appropriate nonlocal psp for use as local one
@@ -259,8 +240,7 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !--------------------------------------------------------------------
 !Carry out calculations for local (lloc) pseudopotential.
-!Obtain Fourier transform (1-d sine transform)
-!to get q^2 V(q).
+!Obtain Fourier transform (1-d sine transform) to get q^2 V(q).
 
  call psp5lo(al,epsatm,mmax,mqgrid,qgrid,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
@@ -293,8 +273,7 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !  ----------------------------------------------------------------------
 !  Compute KB form factors and fit splines
 
-   call psp5nl(al,ekb_tmp,ffspl_tmp,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,&
-&   vpspll,wfll)
+   call psp5nl(al,ekb_tmp,ffspl_tmp,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc, vpspll,wfll)
 
  end if
 
@@ -346,15 +325,6 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  ABI_DEALLOCATE(ekb_tmp)
  ABI_DEALLOCATE(ffspl_tmp)
-
-!DEBUG
-!write(std_out,*)' psp6in : exit '
-!write(std_out,*)' psp6in : indlmn(1:6,jj)'
-!do jj=1,lmnmax
-!write(std_out,*)indlmn(1:6,jj)
-!end do
-!ENDDEBUG
-
  ABI_DEALLOCATE(vpspll)
  ABI_DEALLOCATE(rad)
  ABI_DEALLOCATE(vloc)
@@ -443,7 +413,6 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
  ABI_ALLOCATE(work,(n1xccc))
  ABI_ALLOCATE(xx,(n1xccc))
 
-!
 !read from pp file the model core charge (ff) and first (ff1) and
 !second (ff2) derivative on logarithmic mesh mmax; rad is the radial grid
 !the input functions contain the 4pi factor, it must be rescaled.
@@ -477,9 +446,7 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
    xx(i1xccc)=(i1xccc-1)* rchrg/dble(n1xccc-1)
  end do
 
-!
 !now interpolate core charge and derivatives on the uniform grid
-!
 !core charge, input=ff,  output=gg
  call splint(mmax,rad,ff,ff2,n1xccc,xx,gg)
 
@@ -525,7 +492,6 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 !WARNING : fifth derivative not yet computed
  xccc1d(:,6)=zero
 
-!DEBUG
 !note: the normalization condition is the following:
 !4pi rchrg /dble(n1xccc-1) sum xx^2 xccc1d(:,1) = qchrg
 !
@@ -712,7 +678,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
  gg(1:mesh)=fpir(1:mesh)*ff(1:mesh)
  call ctrap(mesh,gg(1:mesh),step,norm1)
  if (ilog==1) norm1=norm1+half*gg(1)
- write(std_out,*) 'psden: tild_nc integral= ',norm1
+ !write(std_out,*) 'psden: tild_nc integral= ',norm1
  ABI_DEALLOCATE(gg)
 
  ABI_DEALLOCATE(fpir)
@@ -904,9 +870,7 @@ subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
 !second (ff2) derivative on logarithmic mesh mmax; rad is the radial grid
 !the input functions contain the 4pi factor, it must be rescaled.
 
-!***drh test
- write(std_out,'(a,2i6)') 'drh:psp6cc_drh - mmax,n1xccc',mmax,n1xccc
-!***end drh test
+ !write(std_out,'(a,2i6)') 'drh:psp6cc_drh - mmax,n1xccc',mmax,n1xccc
  do irad=1,mmax
    read(tmp_unit,*,err=10,iomsg=errmsg) rad(irad),ff(irad),ff1(irad),ff2(irad)
    ff(irad)=ff(irad)/4.d0/pi

@@ -13,12 +13,10 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!! mm = integer matrix 
+!! mm = integer matrix
 !!
 !! OUTPUT
 !! det = determinant of the matrix
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      get_kpt_fullbz,getspinrot,m_ab7_symmetry,m_anaddb_dataset,symdet

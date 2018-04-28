@@ -4,7 +4,7 @@
 !! mlwfovlp_pw
 !!
 !! FUNCTION
-!! Routine which computes PW part of overlap M_{mn}(k,b) 
+!! Routine which computes PW part of overlap M_{mn}(k,b)
 !! for Wannier code (www.wannier.org f90 version).
 !!
 !! COPYRIGHT
@@ -94,7 +94,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  integer :: ispinor,isppol,iunit,me,n1,n2,n3,npoint,npoint2,npw_k,npw_k2
  integer :: nprocs,spaceComm
  integer,allocatable::indpwk(:,:),kg_k(:,:)
- integer,allocatable :: invpwk(:,:)   
+ integer,allocatable :: invpwk(:,:)
  character(len=500) :: message
  character(len=fnlen) ::  cg_file  !file containing cg info used in case of MPI
  logical::lfile
@@ -105,7 +105,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  write(message, '(a,a)' ) ch10,&
 & '** mlwfovlp_pw : compute pw part of overlap'
  call wrtout(std_out,  message,'COLL')
- 
+
 !initialize flags
  lfile=.false.
 !mpi initialization
@@ -147,12 +147,12 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !  so we just do it once
    ikg=0
    do ikpt=1,nkpt
-!    
+!
 !    MPI:cycle over k-points not treated by this node
-!    
+!
      if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-me)  /=0) CYCLE
 
-!    
+!
 !    write(std_out,*)'me',me,'ikpt',ikpt,'isppol',isppol
      do npoint=1,nfft
        if(invpwk(ikpt,npoint)/=0 )then
@@ -225,7 +225,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 
 
 
- 
+
 !
 !Deallocate unused variables
 !
@@ -252,11 +252,11 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
    if(spin.ne.0 .and. spin.ne.isppol) cycle
    imntot=0
    do ikpt1=1,nkpt
-!    
+!
 !    MPI:cycle over k-points not treated by this node
-!    
+!
      if ( ABS(MPI_enreg%proc_distrb(ikpt1,1,isppol)-me)  /=0) CYCLE
-!    
+!
      write(message, '(a,i6,a,i6,a,i6)' ) &
 &     '     Processor',me,' computes k-point',ikpt1,' and spin=',isppol
      call wrtout(std_out,  message,'COLL')
@@ -268,13 +268,13 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
        ikpt2= ovikp(ikpt1,intot)
 !      write(std_out,*)'me',me,'ikpt1',ikpt1,'ikpt2',ikpt2,'intot',intot,'isppol',isppol
 
-!      
+!
 !      MPI: if ikpt2 not found in this processor then
 !      read info from an unformatted file
-!      
+!
        if ( ABS(MPI_enreg%proc_distrb(ikpt2,1,isppol)-me)  /=0) then
          lfile=.true.
-         write(cg_file,'(a,I5.5,".",I1)') trim(seed_name),ikpt2,isppol 
+         write(cg_file,'(a,I5.5,".",I1)') trim(seed_name),ikpt2,isppol
          iunit=1000+ikpt2+ikpt2*(isppol-1)
          npw_k2=npwarr(ikpt2)
          open (unit=iunit, file=cg_file,form='unformatted',status='old',iostat=ios)
@@ -282,7 +282,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
            write(message,*) " mlwfovlp_pw: file",trim(cg_file), "not found"
            MSG_ERROR(message)
          end if
-!        
+!
          do iband2=1,mband
            do ipw=1,npw_k2*nspinor
              index=ipw+(iband2-1)*npw_k2*nspinor
@@ -293,7 +293,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
          end do
          close(iunit)
        end if
-!      
+!
        npw_k=npwarr(ikpt1)
        npw_k2=npwarr(ikpt2)
        do ig3=1,n3
@@ -322,8 +322,8 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
                MSG_ERROR("Aborting now")
              end if
              igk1=invpwk(ikpt1,npoint)
-             igk2=invpwk(ikpt2,npoint2) 
-             
+             igk2=invpwk(ikpt2,npoint2)
+
 !            if(intot==10) write(std_out,*)'Before igk1 and igk2',ikpt1,ikpt2,isppol
 
              if(igk1/=0.and.igk2/=0) then
@@ -337,10 +337,10 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 
 !                    Here the igks is to include the spinor component missing in igk
                      if(lfile) index=igks2+npw_k2*nspinor*(iband2-1) !In case of MPI, see below
-!                    
+!
 !                    If MPI sometimes the info was read from an unformatted file
 !                    If that is the case lfile==.true.
-!                    
+!
                      if(lfile) then
                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
 &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)&
@@ -348,7 +348,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
                        cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
 &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(2,index)&
 &                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)
-!                      
+!
                      else
                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
 &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))&
