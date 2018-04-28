@@ -18,15 +18,15 @@
 !!
 !! NOTES
 !!
-!! * Routines tagged with "@type_name" are strongly connected to the definition of the data type. 
-!!   Strongly connected means that the proper functioning of the implementation relies on the 
+!! * Routines tagged with "@type_name" are strongly connected to the definition of the data type.
+!!   Strongly connected means that the proper functioning of the implementation relies on the
 !!   assumption that the tagged procedure is consistent with the type declaration.
-!!   Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure 
-!!   that all the strongly connected routines are changed accordingly to accomodate the modification of the data type. 
+!!   Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure
+!!   that all the strongly connected routines are changed accordingly to accomodate the modification of the data type.
 !!   Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
 !! PARENTS
-!!     
+!!
 !!
 !! CHILDREN
 !!
@@ -49,7 +49,7 @@ module m_rec
  implicit none
 
  private ::           &
-   find_maxmin_proc,  &  !--To calculate max and min pt for any cpu  
+   find_maxmin_proc,  &  !--To calculate max and min pt for any cpu
    H_D_distrib
 
  public ::            &
@@ -69,19 +69,19 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !! Calculate the number of point,GPU,for any proc
 !!
-!! INPUTS   
+!! INPUTS
 !!  rset<recursion_type>= recursion variables
 !!  cpu (-1 if there are not gpu)
 !!  nfft=nuber of point of the fine grid
 !!  ngfftrec=nuber of point of one edge of the coarse grid
 !!  gratio=recgratio ratio between the fine and coarse grid
 !!  beta_coeff=estimated time ratio between CPU_time and GPU_time
-!!  
+!!
 !! OUTPUT
-!!  proc_pt_dev(2,0:nproc-1) which device and how many points 
+!!  proc_pt_dev(2,0:nproc-1) which device and how many points
 !!  that proc has to compute: proc_pt_dev(1,iproc) which device
-!!  associated to proc i (-1 if none), proc_pt_dev(2,iproc) how 
-!!  many points 
+!!  associated to proc i (-1 if none), proc_pt_dev(2,iproc) how
+!!  many points
 !!
 !! PARENTS
 !!      m_rec
@@ -107,7 +107,7 @@ subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,&
 !Arguments ------------------------------------
  integer, intent(in) :: nfft,gratio
  real(dp),intent(in) :: beta_coeff
- integer,pointer :: proc_pt_dev(:,:)  
+ integer,pointer :: proc_pt_dev(:,:)
  type(recursion_type),intent(inout) :: rset
 !Local ---------------------------
  integer :: me,icpu,resto,ntot,ngpu
@@ -149,7 +149,7 @@ subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,&
    if(ndev(icpu)>-1) proc_pt_dev(2,icpu) = n_per_gpu
  end do
 
- !--Distribute the rest 
+ !--Distribute the rest
  resto = ntot-sum(proc_pt_dev(2,:))
  icpu = 0
  !write(std_out,*)'rest',resto,ngpu
@@ -170,13 +170,13 @@ subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,&
        resto = resto-1
        icpu = mod(icpu+1,rset%mpi%nproc)
      enddo
-     return 
+     return
    endif
  endif
 
  !--Printing GPU and load distribution on procs
  write(msg,'(3a)')&
-      & ' -Load on procs------------',ch10,& 
+      & ' -Load on procs------------',ch10,&
       & '   me  device        points'
  call wrtout(std_out,msg,'COLL')
  do icpu=0,rset%mpi%nproc-1
@@ -186,7 +186,7 @@ subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,&
 
 end subroutine H_D_distrib
 !!***
- 
+
 
 
 !!****f* m_rec/find_maxmin_proc
@@ -194,7 +194,7 @@ end subroutine H_D_distrib
 !! find_maxmin_proc
 !!
 !! FUNCTION
-!! To calculate max and min pt for any cpu, it is useful for 
+!! To calculate max and min pt for any cpu, it is useful for
 !! recgratio!=1
 !!
 !! INPUTS
@@ -208,12 +208,12 @@ end subroutine H_D_distrib
 !! recpar%pt0<type(vec_int)>=Intial point for this proc in x,y,z
 !! recpar%pt1<type(vec_int)>=Final point for this proc in x,y,z
 !! recpar%min_pt=Intial point for this proc
-!! recpar%max_pt=Final point for this proc 
+!! recpar%max_pt=Final point for this proc
 !!
 !! SIDE EFFECTS
-!! recpar%ntranche=number of pts computed by the proc me on the fine grid. 
+!! recpar%ntranche=number of pts computed by the proc me on the fine grid.
 !!
-!! 
+!!
 !! So when  recgratio!=1, ntranche will  not correspond to the npt!
 !!
 !! PARENTS
@@ -226,7 +226,7 @@ end subroutine H_D_distrib
 subroutine find_maxmin_proc(recpar,nproc,me,gratio,&
   &                         ngfft,proc_pt_dev)
 
-  
+
   use m_rec_tools,only  :get_pt0_pt1
 
 !This section has been created automatically by the script Abilint (TD).
@@ -235,7 +235,7 @@ subroutine find_maxmin_proc(recpar,nproc,me,gratio,&
 #define ABI_FUNC 'find_maxmin_proc'
 !End of the abilint section
 
- implicit none  
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)   :: nproc,me,gratio
@@ -254,20 +254,20 @@ subroutine find_maxmin_proc(recpar,nproc,me,gratio,&
  ntot = nfft/(gratio*gratio*gratio)
  pointoncpu = ntot/nproc
 
- proc_limit = (/(sum(proc_pt_dev(2,:ii)),ii=0,nproc-1)/) 
+ proc_limit = (/(sum(proc_pt_dev(2,:ii)),ii=0,nproc-1)/)
 
  if(gratio==1)then
    recpar%ntranche = proc_limit(me)
    if(me/=0) recpar%ntranche = recpar%ntranche-proc_limit(me-1)
  endif
 
- inf=0 
+ inf=0
  if(me/=0) inf = proc_limit(me-1)
  sup = proc_limit(me)
- 
- 
+
+
  call get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
- 
+
  recpar%npt = sup-inf
 
  !write(std_out,*)'exit find_maxmin_proc'
@@ -316,24 +316,24 @@ end subroutine find_maxmin_proc
 
  implicit none
 
-!Arguments ------------------------------------ 
+!Arguments ------------------------------------
  integer,intent(in)  :: gratio,calc_type
  real(dp),intent(in) :: beta_coeff
  integer,intent(in)  :: ngfft(3)
- type(recursion_type),intent(inout),target :: rset  
+ type(recursion_type),intent(inout),target :: rset
 !Local ---------------------------
  integer :: ii,nfft,ierr
  integer,pointer :: proc_pt_dev(:,:)
  type(recparall_type),pointer :: recpar
  character(500) :: msg
 ! *********************************************************************
- 
+
  ! write(std_out,*)'start cpu_distribution'
 
  nullify(proc_pt_dev)
  ABI_ALLOCATE(proc_pt_dev,(2,0:rset%mpi%nproc-1))
 
- nfft = product(ngfft) 
+ nfft = product(ngfft)
  call H_D_distrib(rset,nfft,gratio,proc_pt_dev,beta_coeff)
 
  nullify(recpar)
@@ -350,7 +350,7 @@ end subroutine find_maxmin_proc
    recpar => rset%GPU%par
 #endif
  endif
- 
+
  recpar%ntranche = nfft/(rset%mpi%nproc)!equipartitioned point
 
  call find_maxmin_proc(recpar,rset%mpi%nproc,&
@@ -364,9 +364,9 @@ end subroutine find_maxmin_proc
  endif
 
  call xmpi_sum(recpar%vcount,rset%mpi%comm_bandfft,ierr)
-   
+
  recpar%displs = 0
- if(rset%mpi%nproc>1) recpar%displs(1:) = (/(sum(recpar%vcount(:ii)),ii=0,rset%mpi%nproc-2)/) 
+ if(rset%mpi%nproc>1) recpar%displs(1:) = (/(sum(recpar%vcount(:ii)),ii=0,rset%mpi%nproc-2)/)
 
  !--INITALIZATION OF CUDA FOR RECURSION
 #if defined HAVE_GPU_CUDA
@@ -376,7 +376,7 @@ end subroutine find_maxmin_proc
   ierr = calc_type !only of abirule when there is not HAVE_GPU_CUDA
 #endif
 
- 
+
 ! if(rset%debug ) then
  write(msg,'(a,i7,2(2a,3i7),8(2a,i7),2(2a,3i7),(2a,e14.6))')&
    & ' me                 ',  rset%mpi%me,ch10,&
@@ -441,7 +441,7 @@ end subroutine cpu_distribution
 !! SOURCE
 
 subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
-  
+
  use defs_abitypes
  use m_errors
  use m_pawfgr, only : pawfgr_nullify, indgrid
@@ -488,34 +488,34 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
  rset%quitrec   = 0
  rset%min_nrec  = dtset%recnrec
  rset%efermi    = dtset%recefermi !initial guess for fermie
- 
+
  rset%nfftrec   = 0
- rset%ngfftrec  = 0        
- 
+ rset%ngfftrec  = 0
+
  rset%tronc = .False.
 
  rset%mpi => mpi_ab
 
  !--Are all pseudo-potentials local?
- rset%nl%nlpsp = (mproj/=0) 
+ rset%nl%nlpsp = (mproj/=0)
  !--Some initialisation concerning the metrics
  !  If non-local psps then it allocates the atoms positions
  !   on the grid
- if(rset%nl%nlpsp)  then 
+ if(rset%nl%nlpsp)  then
   ABI_ALLOCATE(rset%inf%gcart,(3,dtset%natom))
- else 
+ else
   ABI_ALLOCATE(rset%inf%gcart,(0,0))
  end if
  rset%inf%gcart = 0
 
  !----------------------------------------------------------
- !--TRONCATION OF THE BOX 
- !! determines new dimensions the method is similar to the one used 
- !! in getng  (except that ecut and xboxcutmin give no constraint, 
- !!  and symmetries are not handled)   
-   
- call getngrec(dtset%ngfft,rmet,rset%ngfftrec,rset%nfftrec,dtset%recrcut,0.25d0*sqrt(beta/rtrotter),rset%tronc) 
- !  1/4*sqrt(beta/trotter) for guess - should be modified     
+ !--TRONCATION OF THE BOX
+ !! determines new dimensions the method is similar to the one used
+ !! in getng  (except that ecut and xboxcutmin give no constraint,
+ !!  and symmetries are not handled)
+
+ call getngrec(dtset%ngfft,rmet,rset%ngfftrec,rset%nfftrec,dtset%recrcut,0.25d0*sqrt(beta/rtrotter),rset%tronc)
+ !  1/4*sqrt(beta/trotter) for guess - should be modified
 
  !------------------------------------------------------------
  !--DETERMINING WHICH POINT WILL COMPUTE THAT PROC
@@ -526,10 +526,10 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
 
  rset%ngpu = 0       !--Initial guess no GPU at all
  rset%gpudevice = -1 !--Inital guess no GPU associated
- rset%load = 0       !--Inital homogeneous work load 
+ rset%load = 0       !--Inital homogeneous work load
  rset%tp = 0         !--Initial guess 1 cpu, 0 gpu
 
-  
+
 #ifdef HAVE_GPU_CUDA
  !--Initialise GPU variables for recursion
  call InitRecGPU_0(rset%GPU,mpi_ab)
@@ -538,7 +538,7 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
  call find_set_gpu(mpi_ab%nproc,mpi_ab%comm_bandfft,rset%GPU%map,rset%ngpu)
 
  !--Get the topology of the machine
- call get_topo(rset%mpi%nproc,rset%ngpu,rset%tp) 
+ call get_topo(rset%mpi%nproc,rset%ngpu,rset%tp)
  if(rset%tp>4)then
    msg = 'm_rec: number of gpu>number of cpu is not implemented'
    MSG_ERROR(msg)
@@ -548,18 +548,18 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
  !--For the moment cuda doesnt take into account non-local psp
  if(rset%nl%nlpsp) then
    rset%tp = 0;if(rset%mpi%nproc>1)rset%tp = 1
-   rset%GPU%map = -1 
+   rset%GPU%map = -1
  endif
 #else
  if(rset%mpi%nproc>1)rset%tp = 1
 #endif
- 
+
  !--Basic initialization for recursion metric (only needed for printing)
  do ii=1,3
    rset%inf%rmet(ii,:) = rmet(ii,:)/(real(dtset%ngfft(1:3)*dtset%ngfft(ii),dp))
  end do
  rset%inf%tr(:) = sqrt((/(rset%inf%rmet(ii,ii),ii=1,3)/)) !grid step
- 
+
  !--Compute the work loqd distribution on devices (gpu,cpu)
  call cpu_distribution(dtset%recgratio,rset,dtset%ngfft(:3),1.d0,0)
 
@@ -605,15 +605,15 @@ end subroutine InitRec
 !!
 !! FUNCTION
 !! Initialise the rset<recursion_type>=Data type concerning recursion.
-!! In particular, the information on the infinitesimal metric. 
-!! Also other variable are initialized  
+!! In particular, the information on the infinitesimal metric.
+!! Also other variable are initialized
 !!
 !! INPUTS
 !! rmet: metrics
 !! ucvol=unit cell volume in bohr**3.
 !! ngfft(1:3)=fine grid used in recursion
-!! rprimd=Real space PRIMitive translations, Dimensional 
-!! xred=vectors (X) of atom positions in reduced coordinates 
+!! rprimd=Real space PRIMitive translations, Dimensional
+!! xred=vectors (X) of atom positions in reduced coordinates
 !! natom=number of atoms
 !! debug=debug variable
 !!
@@ -629,7 +629,7 @@ end subroutine InitRec
 !! SOURCE
 subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,&
 &                        natom,debug)
- 
+
  use m_per_cond,only     :  per_cond
 
 !This section has been created automatically by the script Abilint (TD).
@@ -656,7 +656,7 @@ subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,&
  character(500) :: msg
 ! *********************************************************************
 
- !--Intialisation of variables concerning the infinitesimal metric  
+ !--Intialisation of variables concerning the infinitesimal metric
  do ii=1,3
    metrec%rmet(ii,:) = rmet(ii,:)/(real(ngfft(1:3)*ngfft(ii),dp))
  end do
@@ -683,7 +683,7 @@ subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,&
 
 
 end subroutine Init_MetricRec
-!!***          
+!!***
 
 
 !!****f* m_rec/Init_nlpspRec
@@ -692,7 +692,7 @@ end subroutine Init_MetricRec
 !!
 !! FUNCTION
 !! Initialise the rset<recursion_type>=Data type concerning recursion.
-!! In particular, the non-local part of pseudo-potential. 
+!! In particular, the non-local part of pseudo-potential.
 !!
 !! INPUTS
 !! tempe=temperature
@@ -729,7 +729,7 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
 !Arguments ------------------------------------
 ! scalars
  logical,intent(in) :: debug
- real(dp), intent(in) :: tempe 
+ real(dp), intent(in) :: tempe
  type(pseudopotential_type),intent(in) ::psps
  type(metricrec_type),intent(inout) :: metrec
  type(nlpsprec_type),intent(inout) :: nlrec
@@ -739,7 +739,7 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
  integer :: ii,jj
  character(500) :: msg
 ! *********************************************************************
- !!--Routine for the calcul of the non-local pseudo 
+ !!--Routine for the calcul of the non-local pseudo
  if(any(psps%pspcod/=3) .and. nlrec%nlpsp ) then
    msg = "The non-local part of psp is used in Recursion only for hgh-psp"
    MSG_WARNING(msg)
@@ -750,7 +750,7 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
  end if
 
  if(any(psps%pspcod==3) .and.  nlrec%nlpsp) then
- 
+
   nlrec%nlpsp = .True.
   nlrec%npsp  = psps%npsp
   nlrec%lmnmax = count(psps%indlmn(3,:,psps%npsp)/=0)
@@ -767,7 +767,7 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
   nlrec%radii(:,:) = zero
   nlrec%pspinfo(:,:) = 0
 
-  !--Get the exponential of the strength times the projectors overlap 
+  !--Get the exponential of the strength times the projectors overlap
   !  of the non-local part of psp(hgh):
   !  h_ij=strength; g_ij=ovelap => (exp(-h.g/temp/4p)-Identity).g^(-1)
   !  And the diagonalisation of the projectors and associated eigenvectors
@@ -787,7 +787,7 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
     end do
    end do
   end if
-   
+
   !--Now it calculates the matrix of the exp(V_NL)
   call pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 
@@ -845,7 +845,7 @@ subroutine CleanRec(rset)
  type(recursion_type),intent(inout) :: rset
 ! arrays
 ! *********************************************************************
- 
+
  ! @recursion_type
 
  if (allocated(rset%ZT_p))  then
@@ -885,7 +885,7 @@ subroutine CleanRec(rset)
  call pawfgr_destroy(rset%pawfgr)
 
  ! No is needed deallocate rset%mpi: it is a copy of mpi_enreg which
- ! pointers are deallocated in gstate 
+ ! pointers are deallocated in gstate
 
 #ifdef HAVE_GPU_CUDA
   call CleanRecGPU(rset%GPU,rset%load)
@@ -944,12 +944,12 @@ subroutine Calcnrec(rset,b2)
  loc_nrec = rset%min_nrec
  do ii=1,rset%par%ntranche
   !--Use to lbound because b2 passed as argument
-  !  doesn't have the same bounds as in the calling 
+  !  doesn't have the same bounds as in the calling
   !  subroutine, the +1 because b2(lbound,ii)=1.
   jj = lbound(b2,dim=1)+1
   do while (b2(jj,ii)>tol10 .and.  jj<=rset%min_nrec-1)
    jj = jj+1
-   kk = max(jj,kk)   
+   kk = max(jj,kk)
   end do
  enddo
  call xmpi_max(kk,rset%min_nrec,rset%mpi%comm_bandfft,ierr)

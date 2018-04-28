@@ -320,11 +320,11 @@ subroutine vtorhorec(dtset,&
 
    call cudarec( rset, exppot,an_dev,bn2_dev,&
 &   beta,trotter,tolrec,dtset%recgratio,dtset%ngfft(:3),max_rec)
-   
+
    max_rec = min(max_rec,nrec)
    a_wrk(0:max_rec,1:recpar%npt)  = transpose(an_dev(0:,0:max_rec))
    b2_wrk(0:max_rec,1:recpar%npt) = transpose(bn2_dev(0:,0:max_rec))
-   
+
    ABI_DEALLOCATE(an_dev)
    ABI_DEALLOCATE(bn2_dev)
    call timab(607,2,tsec2)
@@ -423,7 +423,7 @@ subroutine vtorhorec(dtset,&
      end do graou2
      ABI_DEALLOCATE(exppotloc)
    end if
-   
+
  end if
  write(msg,'( a12,i12)')'ipointlocal',ipointlocal
  call wrtout(std_out,msg,'PERS')
@@ -479,12 +479,12 @@ subroutine vtorhorec(dtset,&
 
    call xredistribute(a_hyb,vcount_1,displs_1,&
 &   alocal,vcount_0,displs_0,&
-&   rset%mpi%me,rset%mpi%nproc,& 
+&   rset%mpi%me,rset%mpi%nproc,&
 &   rset%mpi%comm_bandfft,ierr)
 
    call xredistribute(b2_hyb,vcount_1,displs_1,&
 &   b2local,vcount_0,displs_0,&
-&   rset%mpi%me,rset%mpi%nproc,& 
+&   rset%mpi%me,rset%mpi%nproc,&
 &   rset%mpi%comm_bandfft,ierr)
 
    nullify(rho_wrk,a_wrk,b2_wrk)
@@ -666,7 +666,7 @@ subroutine vtorhorec(dtset,&
 &       gran_pot_v_2(ipoint,1),&
 &       gran_pot_v_2(ipoint,2),&
 &       gran_pot_v_2(ipoint,3),&
-&       gran_pot_v_2(ipoint,4))           
+&       gran_pot_v_2(ipoint,4))
      end do
      ABI_DEALLOCATE(aloc_copy)
      ABI_DEALLOCATE(b2loc_copy)
@@ -683,10 +683,10 @@ subroutine vtorhorec(dtset,&
      do ii1 = 0,dim_entro
        call xmpi_allgatherv(entropy_v_2(:,ii1),bufsize(rset%mpi%me),&
 &       entropy_v_c(:,ii1),bufsize,bufdispl,&
-&       rset%mpi%comm_bandfft,ierr)   
+&       rset%mpi%comm_bandfft,ierr)
        call xmpi_allgatherv(gran_pot_v_2(:,ii1),bufsize(rset%mpi%me),&
 &       gran_pot_v_c(:,ii1),bufsize,bufdispl,&
-&       rset%mpi%comm_bandfft,ierr)   
+&       rset%mpi%comm_bandfft,ierr)
 
        if(maxval(abs(entropy_v_c(:,ii1))) > tol10) then
          rhogf = zero; rhogc = zero
