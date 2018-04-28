@@ -149,6 +149,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  use m_psp8,       only : psp8in
  use m_psp9,       only : psp9in
  use m_upf2abinit, only : upf2abinit
+ use m_psp_hgh,    only : psp2in, psp3in, psp10in
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
