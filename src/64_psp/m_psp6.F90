@@ -1,5 +1,52 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/psp6in
+!!****m* ABINIT/m_psp6
+!! NAME
+!!  m_psp6
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XG, AF, GJ,FJ,MT, DRH)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_psp6
+
+ use defs_basis
+ use m_splines
+ use m_errors
+ use m_profiling_abi
+
+ use m_numeric_tools,  only : smooth, ctrap
+
+
+ implicit none
+
+ private
+!!***
+
+ public :: psp6in
+!!***
+
+contains
+!!***
+
+
+!!****f* m_psp6/psp6in
 !! NAME
 !! psp6in
 !!
@@ -7,13 +54,6 @@
 !! Initialize pspcod=6 (Pseudopotentials from the fhi98pp code):
 !! continue to read the corresponding file, then compute the
 !! local and non-local potentials.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG, AF, GJ,FJ,MT, DRH)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  lloc=angular momentum choice of local pseudopotential
@@ -63,27 +103,17 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mqgrid,nproj,n1xccc,optnlxccc,positron,qchrg,qgrid,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
 
- use defs_basis
- use m_splines
- use m_errors
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp6in'
  use interfaces_14_hidewrite
- use interfaces_64_psp, except_this_one => psp6in
+ use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -340,7 +370,7 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 end subroutine psp6in
 !!***
 
-!!****f* ABINIT/psp6cc
+!!****f* m_psp6/psp6cc
 !! NAME
 !! psp6cc
 !!
@@ -373,17 +403,11 @@ end subroutine psp6in
 subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 &                 vh_tnzc) ! optional argument
 
- use defs_basis
- use m_splines
- use m_profiling_abi
-
- use m_numeric_tools,  only : smooth
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp6cc'
- use interfaces_64_psp, except_this_one => psp6cc
 !End of the abilint section
 
  implicit none
@@ -552,7 +576,7 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 end subroutine psp6cc
 !!***
 
-!!****f* ABINIT/psden
+!!****f* m_psp6/psden
 !! NAME
 !! psden
 !!
@@ -587,11 +611,6 @@ end subroutine psp6cc
 
 subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
 
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_numeric_tools, only : ctrap
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -702,7 +721,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
 end subroutine psden
 !!***
 
-!!****f* ABINIT/vhtnzc
+!!****f* m_psp6/vhtnzc
 !! NAME
 !! vhtnzc
 !!
@@ -729,10 +748,6 @@ end subroutine psden
 
 subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
 
- use defs_basis
- use m_profiling_abi
-
- use m_numeric_tools, only : ctrap
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -823,7 +838,7 @@ subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
 end subroutine vhtnzc
 !!***
 
-!!****f* ABINIT/psp6cc_drh
+!!****f* m_psp6/psp6cc_drh
 !! NAME
 !! psp6cc_drh
 !!
@@ -855,15 +870,12 @@ end subroutine vhtnzc
 
 subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
 
- use defs_basis
- use m_profiling_abi
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp6cc_drh'
- use interfaces_64_psp, except_this_one => psp6cc_drh
+ use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -919,4 +931,7 @@ subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
  MSG_ERROR(errmsg)
 
 end subroutine psp6cc_drh
+!!***
+
+end module m_psp6
 !!***

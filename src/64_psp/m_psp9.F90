@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_psp9
+!! NAME
+!!
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (JJ, MVer)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_psp9
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: psp9in
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/psp9in
 !! NAME
 !! psp9in
@@ -7,13 +49,6 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !! continue to read the corresponding file, then compute the
 !! local and non-local potentials.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (JJ, MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  filpsp=filename of the PSML pseudopotential
@@ -73,12 +108,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
@@ -101,7 +130,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 #undef ABI_FUNC
 #define ABI_FUNC 'psp9in'
  use interfaces_14_hidewrite
- use interfaces_64_psp, except_this_one => psp9in
+ use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -653,4 +682,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 #endif
 
 end subroutine psp9in
+!!***
+
+end module m_psp9
 !!***
