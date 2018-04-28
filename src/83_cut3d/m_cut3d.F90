@@ -507,7 +507,6 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_planeint'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1003,7 +1002,6 @@ subroutine reduce(r,rcart,rprimd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'reduce'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1220,7 +1218,6 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_volumeint'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

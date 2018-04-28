@@ -1749,7 +1749,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_write'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

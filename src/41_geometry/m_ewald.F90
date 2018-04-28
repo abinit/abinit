@@ -380,7 +380,6 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ewald2'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -652,7 +651,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ewald9'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

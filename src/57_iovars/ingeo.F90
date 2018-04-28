@@ -115,7 +115,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  use m_errors
  use m_atomdata
 
- use m_symtk,    only : mati3inv, chkorthsy, symrelrot
+ use m_symtk,    only : mati3inv, chkorthsy, symrelrot, mati3det
  use m_geometry, only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
  use m_parser,   only : intagm
 
@@ -124,7 +124,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeo'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_57_iovars, except_this_one => ingeo
 !End of the abilint section

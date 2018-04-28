@@ -65,7 +65,6 @@ subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrl
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_ph_weights'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

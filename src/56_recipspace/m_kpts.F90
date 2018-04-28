@@ -971,7 +971,6 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getkgrid'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -1439,7 +1438,6 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_full_kgrid'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1538,7 +1536,6 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_kpt_fullbz'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1721,7 +1718,6 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 #undef ABI_FUNC
 #define ABI_FUNC 'smpbz'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2309,7 +2305,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 #define ABI_FUNC 'testkgrid'
  use interfaces_14_hidewrite
  use interfaces_16_hideleave
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

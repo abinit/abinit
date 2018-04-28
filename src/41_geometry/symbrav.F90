@@ -59,7 +59,6 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symbrav'
- use interfaces_32_util
  use interfaces_41_geometry, except_this_one => symbrav
 !End of the abilint section
 

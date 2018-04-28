@@ -70,7 +70,6 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xfpack_x2vin'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

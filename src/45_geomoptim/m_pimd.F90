@@ -2715,7 +2715,6 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_apply_constraint'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

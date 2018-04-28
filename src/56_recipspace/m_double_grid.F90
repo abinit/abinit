@@ -181,7 +181,6 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'double_grid_init'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

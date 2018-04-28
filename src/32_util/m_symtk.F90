@@ -84,6 +84,7 @@ contains
 
 subroutine mati3inv(mm, mit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -158,6 +159,7 @@ end subroutine mati3inv
 
 subroutine mati3det(mm, det)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -211,6 +213,7 @@ end subroutine mati3det
 !! SOURCE
 
 subroutine matr3inv(aa, ait)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -284,11 +287,11 @@ end subroutine matr3inv
 
 subroutine symdet(determinant, nsym, sym)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symdet'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -349,11 +352,11 @@ end subroutine symdet
 
 subroutine chkgrp(nsym,symafm,symrel,ierr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkgrp'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -484,6 +487,7 @@ end subroutine chkgrp
 !! SOURCE
 
 subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -623,6 +627,7 @@ end subroutine sg_multable
 
 subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -757,6 +762,7 @@ end subroutine chkorthsy
 
 subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -849,11 +855,11 @@ end subroutine chkprimit
 
 subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symrelrot'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

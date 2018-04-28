@@ -86,7 +86,6 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_npt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

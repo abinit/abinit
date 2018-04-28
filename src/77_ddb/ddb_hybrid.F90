@@ -76,7 +76,6 @@ subroutine ddb_hybrid(acell,asr,atmfrc,dielt,dipdip,dyew,dyewq0,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_hybrid'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

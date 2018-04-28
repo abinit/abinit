@@ -99,7 +99,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonic_thermo'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

@@ -86,7 +86,6 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 #undef ABI_FUNC
 #define ABI_FUNC 'symlatt'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry, except_this_one => symlatt
 !End of the abilint section
 

@@ -71,7 +71,6 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_ion'
- use interfaces_32_util
  use interfaces_45_geomoptim
 !End of the abilint section
 

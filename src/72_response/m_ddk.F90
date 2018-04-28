@@ -181,7 +181,6 @@ subroutine ddk_init(ddk, paths, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddk_init'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

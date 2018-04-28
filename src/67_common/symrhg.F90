@@ -80,7 +80,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symrhg'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 

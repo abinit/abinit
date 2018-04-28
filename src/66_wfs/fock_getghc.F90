@@ -69,7 +69,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_getghc'
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal

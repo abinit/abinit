@@ -81,7 +81,6 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_fs_weights'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

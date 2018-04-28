@@ -77,7 +77,6 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ep_el_weights'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

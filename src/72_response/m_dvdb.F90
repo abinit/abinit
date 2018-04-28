@@ -1508,7 +1508,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_rotate'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
