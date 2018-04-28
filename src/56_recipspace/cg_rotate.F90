@@ -54,6 +54,7 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
  use m_errors
  use m_profiling_abi
 
+ use m_symtk,     only : mati3inv
  use m_geometry,  only : getspinrot
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere
@@ -63,7 +64,6 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_rotate'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

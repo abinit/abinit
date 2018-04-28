@@ -42,6 +42,7 @@ module m_effective_potential
  use m_xmpi
 
  use m_io_tools,       only : open_file,get_unit
+ use m_symtk,          only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
  use m_special_funcs,  only : factorial
@@ -649,7 +650,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_generateDipDip'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

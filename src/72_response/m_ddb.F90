@@ -38,6 +38,7 @@ MODULE m_ddb
 
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
+ use m_symtk,          only : mati3inv, matr3inv, littlegroup_q
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
@@ -1150,7 +1151,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 #undef ABI_FUNC
 #define ABI_FUNC 'rdddb9'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

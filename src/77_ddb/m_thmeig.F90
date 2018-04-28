@@ -36,6 +36,7 @@ module m_thmeig
  use m_sort
 
  use m_geometry,       only : mkrdim, xred2xcart, metric
+ use m_symtk,          only : mati3inv, matr3inv
  use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq
@@ -87,7 +88,6 @@ subroutine thmeig(inp, ddb, crystal, &
 #undef ABI_FUNC
 #define ABI_FUNC 'thmeig'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

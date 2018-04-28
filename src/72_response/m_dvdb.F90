@@ -45,6 +45,7 @@ MODULE m_dvdb
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
+ use m_symtk,         only : mati3inv, littlegroup_q
  use m_geometry,      only : littlegroup_pert, irreducible_set_pert
  use m_copy,          only : alloc_copy
  use m_mpinfo,        only : destroy_mpi_enreg
@@ -289,7 +290,6 @@ subroutine dvdb_init(db, path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_init'
- use interfaces_32_util
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -1167,7 +1167,6 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_complete'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -1507,7 +1506,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_rotate'
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
@@ -2237,7 +2235,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_qpt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2730,7 +2727,6 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_get_v1scf_qpt'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3207,7 +3203,6 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_list_perts'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3857,7 +3852,6 @@ subroutine dvdb_test_v1complete(db_path, dump_path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1complete'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -4306,7 +4300,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_interpolate_and_write'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

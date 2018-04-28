@@ -1,4 +1,55 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_psp9
+!! NAME
+!! m_psp9
+!!
+!! FUNCTION
+!! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (JJ, MVer, YP)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_psp9
+
+ use defs_basis
+ use m_splines
+ use m_errors
+ use m_profiling_abi
+#if defined HAVE_PSML
+ use m_psml
+#endif
+
+ use defs_datatypes,  only : nctab_t
+ use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
+ use m_psps,          only : nctab_eval_tvalespl
+ use m_psptk,         only : psp8lo, psp8nl
+
+ implicit none
+
+ private
+!!***
+
+ public :: psp9in
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/psp9in
 !! NAME
 !! psp9in
@@ -7,13 +58,6 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !! continue to read the corresponding file, then compute the
 !! local and non-local potentials.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (JJ, MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  filpsp=filename of the PSML pseudopotential
@@ -60,7 +104,7 @@
 !!  xccc1d(n1xccc,6)=1D core charge function and five derivatives, from psp file
 !!  nctab<nctab_t>=NC tables
 !!    %has_tvale=True if the pseudo contains the pseudo valence charge
-!!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid 
+!!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
 !!
 !! PARENTS
 !!      pspatm
@@ -73,35 +117,16 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
 
- use defs_basis
- use m_splines
- use m_errors
- use m_profiling_abi
-
- use defs_datatypes,  only : nctab_t
- use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
- use m_psps,          only : nctab_eval_tvalespl
-
-#if defined HAVE_PSML
- use m_psml
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp9in'
  use interfaces_14_hidewrite
- use interfaces_64_psp, except_this_one => psp9in
 !End of the abilint section
 
  implicit none
@@ -122,7 +147,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  real(dp),intent(inout) :: xccc1d(n1xccc,6) !vz_i
 
 !Local variables-------------------------------
-!no_abirules
 !scalars
 #if defined HAVE_PSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
@@ -189,7 +213,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! z      = ps_AtomicNumber(psxml)
 !
 ! The difference between the number of protons in the nucleus and the
-! sum of the populations of the core shells is the effective atomic number 
+! sum of the populations of the core shells is the effective atomic number
 ! of the pseudo-atom, Zval (in Abinit), z-pseudo in the header of the
 ! PSML file.
 ! zval   = ps_Zpseudo(psxml)
@@ -244,7 +268,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  call ps_ValenceConfiguration_Get(psxml, nshells=nshells)
  has_tvale = (nshells > 0)
 
-! Compute the valence charge of the reference configuration used to 
+! Compute the valence charge of the reference configuration used to
 ! generate the pseudopotential
  chgvps = 0.0_dp
 ! Loop on all the shells included in the valence
@@ -358,7 +382,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! is relativistic or not
 
 !DEBUG
-!write(std_out,*)' psp9in : pseudopotential generation relativity ', ps_Relativity(psxml) 
+!write(std_out,*)' psp9in : pseudopotential generation relativity ', ps_Relativity(psxml)
 !write(std_out,*)' psp9in : SOC pseudopotential? (1=yes, 0 =no) '
 !write(std_out,*)' psp9in : irelt = ', irelt
 !write(ab_out,*)' psp9in : irelt = ', irelt
@@ -382,7 +406,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  write(message, '(a,i5,es16.6,es16.6)')'  psp9in : mmax, amesh, rad(mmax) = ', mmax, amesh, rad(mmax)
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
- 
+
 !Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)
  damesh=zero
@@ -461,15 +485,15 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Read and process vlocal:
 !The local potential is given by a <radfunc> element under the <local-potential>
 !element.
-!After reading, this is a copy of the treatment to the 
-!local part carry out in psp8 
+!After reading, this is a copy of the treatment to the
+!local part carry out in psp8
 !i.e. (as in Hamann pseudopotential)
 !
 !Read the local component of the pseudopotential
  vloc = zero
  do ir = 1, mmax
    vloc(ir) = ps_LocalPotential_Value(psxml, rad(ir))
- end do 
+ end do
 
  call psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
@@ -480,11 +504,11 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  vlspl(:,2)=work_spl(:)
  ABI_DEALLOCATE(work_spl)
 
-!!  DEBUG         
+!!  DEBUG
 ! write(std_out,*)'# Vlocal = '
 ! write(std_out,*)' amesh  = ', amesh
 ! write(std_out,*)' epsatm = ', epsatm
-! write(std_out,*)' mmax   = ', mmax  
+! write(std_out,*)' mmax   = ', mmax
 ! write(std_out,*)' mqgrid = ', mqgrid
 ! do ir = 1, mqgrid
 !   write(std_out,*)'   qgrid = ', ir, qgrid(ir)
@@ -501,7 +525,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! write(std_out,*)' ypn    = ', ypn
 ! write(std_out,*)' zion   = ', zion
 ! stop
-!!  ENDDEBUG      
+!!  ENDDEBUG
 
 
 !--------------------------------------------------------------------
@@ -527,14 +551,14 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
      do ir = 1, mmax
        vpspll(ir, indlmn(5,ii)) = ps_Projector_Value(psxml, idx_sr(indlmn(5,ii)), rad(ir))
        vpspll(ir, indlmn(5,ii)) = rad(ir) * vpspll(ir, indlmn(5,ii))
-     end do 
+     end do
    else if (indlmn(6,ii) == 2) then
      do ir = 1, mmax
        vpspll(ir, indlmn(5,ii)) = ps_Projector_Value(psxml, idx_so(indlmn(5,ii)), rad(ir))
        vpspll(ir, indlmn(5,ii)) = rad(ir) * vpspll(ir, indlmn(5,ii))
-     end do 
+     end do
    end if
- end do 
+ end do
 
 !Allow for option of no nonlocal corrections (lloc=lmax=0)
  if (lloc==0.and.lmax==0) then
@@ -551,7 +575,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  end if
 
-!!  DEBUG         
+!!  DEBUG
 ! write(std_out,*)'# KB Projectors = '
 ! write(std_out,*)' amesh  = ', amesh
 ! do ir = 1, mqgrid
@@ -578,7 +602,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !   enddo
 ! enddo
 ! stop
-!!  ENDDEBUG      
+!!  ENDDEBUG
 
 ! Read pseudo valence charge in real space on the linear mesh
 ! and transform it to reciprocal space on a regular grid. Use vloc as workspace.
@@ -653,4 +677,227 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 #endif
 
 end subroutine psp9in
+!!***
+
+!!****f* ABINIT/psp9cc
+!! NAME
+!! psp9cc
+!!
+!! FUNCTION
+!! Compute the core charge density, for use in the XC core
+!! correction, following the function definition valid
+!! for format 9 of the pseudopotentials (PSML).
+!!
+!! INPUTS
+!!  mmax=maximum number of points in real space grid in the psp file
+!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!
+!! OUTPUT
+!!  rchrg=cut-off radius for the core density
+!!  xccc1d(n1xccc,6)= 1D core charge function and its four first derivatives
+!!
+!! NOTES
+!!  This routine will be built only if PSML support is enabled.
+!!
+!! PARENTS
+!!      psp9in
+!!
+!! CHILDREN
+!!      dgesv
+!!
+!! SOURCE
+
+#if defined HAVE_PSML
+
+subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'psp9cc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mmax,n1xccc
+ real(dp),intent(out) :: rchrg
+ type(ps_t),intent(in) :: psxml
+!arrays
+ real(dp),intent(in) :: rad(mmax)
+ real(dp),intent(inout) :: xccc1d(n1xccc,6) !vz_i
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1xccc,idum,irad,jj
+ real(dp) :: amesh,c1,c2,c3,c4,damesh,dri,pi4i,tff,xp,xpm1,xpm2,xpp1,xx,twelvth
+ character(len=500) :: message
+!arrays
+ integer :: iwork(8)
+ real(dp) :: rscale(5),dpoly(6,6),vpoly(6)
+ real(dp),allocatable :: ff(:,:)
+
+!**********************************************************************
+
+!Check that rad grid is linear starting at zero
+ amesh=rad(2)-rad(1)
+ damesh=zero
+ do irad=2,mmax-1
+   damesh=max(damesh,abs(rad(irad)+amesh-rad(irad+1)))
+ end do
+
+ if(damesh>tol8 .or. rad(1)/=zero) then
+   write(message, '(5a)' )&
+&   'Pseudopotential input file requires linear radial mesh',ch10,&
+&   'starting at zero.',ch10,&
+&   'Action: check your pseudopotential input file.'
+   MSG_ERROR(message)
+ end if
+
+ ABI_ALLOCATE(ff,(mmax,5))
+
+ dri = one / amesh
+ pi4i = quarter / pi
+ twelvth = one / 12.0_dp
+
+!Read from pp file the model core charge and calculate its first 4 derivatives
+!assumed to be on a linear grid starting at zero.
+!The input functions contain the 4pi factor, and must be rescaled.
+
+!Store the value of the pseudo-core charge.
+ ff(:,:) = zero
+ do jj=1,mmax
+   ff(jj,1) = ps_CoreCharge_Value(psxml,rad(jj))
+ end do
+
+!Calculate 4 first derivatives with 5-point stencil, except borders
+ do irad=3,mmax-2
+   ff(irad,2) = (-ff(irad+2,1) + 8.0d0*ff(irad+1,1) - &
+&   8.0d0*ff(irad-1,1) + ff(irad-2,1)) * twelvth * dri
+   ff(irad,3) = (-ff(irad+2,1) + 16.0d0*ff(irad+1,1) - 30.0d0*ff(irad,1) + &
+&   16.0d0*ff(irad-1,1) - ff(irad-2,1)) * twelvth * dri * dri
+   ff(irad,4) = (ff(irad+2,1) - 2.0d0*ff(irad+1,1) + &
+&   2.0d0*ff(irad-1,1) - ff(irad-2,1)) * half * dri * dri * dri
+   ff(irad,5) = (ff(irad+2,1) - 4.0d0*ff(irad+1,1) + 6.0d0*ff(irad,1) - &
+&   4.0d0*ff(irad-1,1) + ff(irad-2,1)) * dri * dri * dri * dri
+ end do
+
+!Add border near zero using polynomial fit
+ dpoly(:,:) = zero
+ dpoly(:,1) = one
+ vpoly(:) = zero
+ vpoly(1) = ff(1,1)
+ do irad=2,6
+   do jj=1,6
+     dpoly(irad,jj) = rad(irad)**(jj-1)
+   end do
+   vpoly(irad) = ff(irad,1)
+ end do
+ call dgesv(6,1,dpoly,6,iwork,vpoly,6,idum)
+
+ do irad=1,2
+   ff(irad,2) = &
+&   vpoly(2) + 2.0d0*vpoly(3)*rad(irad) + &
+&   3.0d0*vpoly(4)*rad(irad)*rad(irad) + &
+&   4.0d0*vpoly(5)*rad(irad)*rad(irad)*rad(irad) + &
+&   5.0d0*vpoly(6)*rad(irad)*rad(irad)*rad(irad)*rad(irad)
+   ff(irad,3) = &
+&   2.0d0*vpoly(3)*rad(irad) + &
+&   6.0d0*vpoly(4)*rad(irad) + &
+&   12.0d0*vpoly(5)*rad(irad)*rad(irad) + &
+&   20.0d0*vpoly(6)*rad(irad)*rad(irad)*rad(irad)
+   ff(irad,4) = &
+&   6.0d0*vpoly(4) + &
+&   24.0d0*vpoly(5)*rad(irad) + &
+&   60.0d0*vpoly(6)*rad(irad)*rad(irad)
+   ff(irad,5) = 24.0d0*vpoly(5) + &
+&   120.0d0*vpoly(6)*rad(irad)
+ end do
+
+!Make linear approximation for the tail near mmax
+ do irad=1,2
+   ff(mmax-2+irad,2) = ff(mmax-2,2) + irad * (ff(mmax-2,2) - ff(mmax-3,2))
+   ff(mmax-2+irad,3) = ff(mmax-2,3) + irad * (ff(mmax-2,3) - ff(mmax-3,3))
+   ff(mmax-2+irad,4) = ff(mmax-2,4) + irad * (ff(mmax-2,4) - ff(mmax-3,4))
+   ff(mmax-2+irad,5) = ff(mmax-2,5) + irad * (ff(mmax-2,5) - ff(mmax-3,5))
+ end do
+
+!Renormalize core charge
+! ff(:,:) = ff(:,:) * pi4i
+
+!determine xcccrc where the pseudocore becomes 0
+!This is a difference with respect the Hamann's treatment of the core
+!charge when reading PSP8.
+!In Hamann's case (PSP8), xcccrc = rchrg, and this value is
+!introduced in the pseudopotential input file.
+!rchrg is not included in the PSML format
+ rchrg = zero
+ do jj=mmax,1,-1
+   if (ff(jj,1) > tol13) then
+     rchrg=rad(jj)
+     exit
+   end if
+ end do
+
+!Check that input rchrg is consistent with last grid point
+ if(rchrg>rad(mmax)) then
+   write(message, '(5a)' )&
+&   'Pseudopotential input file core charge mesh',ch10,&
+&   'is inconsistent with rchrg in header.',ch10,&
+&   'Action: check your pseudopotential input file.'
+   MSG_ERROR(message)
+ end if
+
+!Factors for unit range scaling
+ do jj = 1, 5
+   rscale(jj)=rchrg**(jj-1)
+ end do
+
+!Generate uniform mesh xx in the box cut by rchrg
+!and interpolate the core charge and derivatives
+!Cubic polynomial interpolation is used which is consistent
+!with the original interpolation of these functions from
+!a log grid to the input linear grid.
+
+ dri=1.d0/amesh
+ do i1xccc=1,n1xccc
+   xx=(i1xccc-1)* rchrg/dble(n1xccc-1)
+
+!  index to find bracketing input mesh points
+   irad = int(dri * xx) + 1
+   irad = max(irad,2)
+   irad = min(irad,mmax-2)
+!  interpolation coefficients
+   xp = dri * (xx - rad(irad))
+   xpp1 = xp + one
+   xpm1 = xp - one
+   xpm2 = xp - two
+   c1 = -xp * xpm1 * xpm2 * sixth
+   c2 = xpp1 * xpm1 * xpm2 * half
+   c3 = - xp * xpp1 * xpm2 * half
+   c4 = xp * xpp1 * xpm1 * sixth
+!  Now do the interpolation on all derivatives for this grid point
+!  Include 1/4pi normalization and unit range scaling
+   do jj=1,5
+     tff =  c1 * ff(irad - 1, jj) &
+&     + c2 * ff(irad    , jj) &
+&     + c3 * ff(irad + 1, jj) &
+&     + c4 * ff(irad + 2, jj)
+     xccc1d(i1xccc,jj)=pi4i*rscale(jj)*tff
+   end do
+ end do
+
+!5th derivative is apparently not in use, so set to zero
+ xccc1d(:,6)=zero
+
+ ABI_DEALLOCATE(ff)
+
+end subroutine psp9cc
+!!***
+
+#endif
+
+end module m_psp9
 !!***

@@ -1,4 +1,49 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_psp5
+!! NAME
+!!  m_psp5
+!!
+!! FUNCTION
+!! Initialize pspcod=5 ("Phoney pseudopotentials" with Hamman grid):
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_psp5
+
+ use defs_basis
+ use m_splines
+ use m_errors
+ use m_profiling_abi
+
+ use m_psptk,           only : psp1cc, psp5lo, psp5nl
+
+ implicit none
+
+ private
+!!***
+
+ public :: psp5in
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/psp5in
 !! NAME
 !! psp5in
@@ -7,13 +52,6 @@
 !! Initialize pspcod=5 ("Phoney pseudopotentials" with Hamman grid):
 !! continue to read the corresponding file, then compute the
 !! local and non-local potentials.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  lloc=angular momentum choice of local pseudopotential
@@ -68,28 +106,17 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &                  lloc,lmax,lmnmax,lnmax,mmax,mpsang,mpssoang,mqgrid,&
 &                  nproj,n1xccc,pspso,qchrg,qgrid,rcpsp,rms,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
 
- use defs_basis
- use m_splines
- use m_errors
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp5in'
  use interfaces_14_hidewrite
- use interfaces_64_psp, except_this_one => psp5in
 !End of the abilint section
 
  implicit none
@@ -124,10 +151,6 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
  real(dp),allocatable :: work_space(:),work_spl(:)
 
 ! ***************************************************************************
-
-!DEBUG
-!write(std_out,*)' psp5in : enter '
-!ENDDEBUG
 
 !File format of formatted Phoney psp input (the 3 first lines
 !have already been read in calling -pspatm- routine) :
@@ -575,15 +598,14 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
  ABI_DEALLOCATE(rad)
  ABI_DEALLOCATE(vloc)
 
-!DEBUG
-!write(std_out,*)' psp5in : vlspl(1,2)= ',vlspl(1,2)
-!ENDDEBUG
-
- return 
+ return
 
  ! Handle IO error
  10 continue
  MSG_ERROR(errmsg)
 
 end subroutine psp5in
+!!***
+
+end module m_psp5
 !!***

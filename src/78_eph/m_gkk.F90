@@ -44,6 +44,7 @@ module m_gkk
  use m_time,           only : cwtime, sec2str
  use m_io_tools,       only : iomode_from_fname
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
+ use m_symtk,          only : littlegroup_q
  use m_fftcore,        only : ngfft_seq, get_kg, kpgsph, sphere
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t

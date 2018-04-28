@@ -30,6 +30,7 @@ MODULE m_geometry
 
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : uniformrandom, isinteger, set2unit
+ use m_symtk,          only : mati3inv, mati3det, matr3inv, symdet
  use m_abilasi,        only : matr3eigval
  use m_pptools,        only : prmat
  use m_numeric_tools,  only : wrap2_pmhalf
@@ -801,7 +802,6 @@ subroutine getspinrot(rprimd,spinrot,symrel_conv)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getspinrot'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1261,7 +1261,6 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'metric'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1529,7 +1528,6 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkdilatmx'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1714,7 +1712,6 @@ subroutine xcart2xred(natom,rprimd,xcart,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcart2xred'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3010,7 +3007,6 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 #undef ABI_FUNC
 #define ABI_FUNC 'remove_inversion'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -3218,7 +3214,6 @@ subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'strainsym'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -3312,7 +3307,6 @@ subroutine stresssym(gprimd,nsym,stress,sym)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'stresssym'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

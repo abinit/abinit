@@ -43,6 +43,7 @@ module m_phonons
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
+ use m_symtk,           only : matr3inv
  use m_time,            only : cwtime
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
@@ -3558,7 +3559,6 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_symph'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

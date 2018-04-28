@@ -4,7 +4,7 @@
 !! mlwfovlp_radial
 !!
 !! FUNCTION
-!! Calculates the radial part of the initial functions given to Wannier90 
+!! Calculates the radial part of the initial functions given to Wannier90
 !! as an starting point for the minimization.
 !! The trial functions are a set of solutions to the radial part of the hydrogenic
 !! Schrodinger equation as it is explained in Table 3.3 of the Wannier90 user guide.
@@ -19,7 +19,7 @@
 !!  alpha= Z/a = zona
 !!  lmax= maximum value of l
 !!  rvalue= integer defining the choice for radial functions R(r).
-!!   It can take values from 1-3. 
+!!   It can take values from 1-3.
 !!   It is associted to the radial part of the hydrogenic Schrodinger equation for l=0,
 !!   See the manual of Wannier90 for more information. (www.wannier.org)
 !!  xx= scalar number used to calculate the spherical bessel function. J_il(xx)
@@ -33,7 +33,7 @@
 !! NOTES
 !!  Calculates the radial part of the initial functions given as an initial
 !!  guess by the user to construct the MLWF.
-!!  
+!!
 !! PARENTS
 !!      mlwfovlp_proj
 !!
@@ -84,8 +84,8 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
  real(dp),allocatable :: sinr(:)
 
 ! *************************************************************************
- 
-!Radial functions in the form of hydrogenic orbitals as defined in the 
+
+!Radial functions in the form of hydrogenic orbitals as defined in the
 !wannier90 manual.
  if(( rvalue > 0 ).and.(rvalue < 4)) then
 
@@ -136,7 +136,7 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
    ABI_DEALLOCATE(cosr)
    ABI_DEALLOCATE(sinr)
 
-!  Radial part in the form of Gaussian functions of a given width 
+!  Radial part in the form of Gaussian functions of a given width
 !  Taken by code of made by drh.
  elseif ( rvalue == 4) then
    aa=1._dp/alpha

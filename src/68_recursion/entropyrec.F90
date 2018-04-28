@@ -2,11 +2,11 @@
 !!****f* ABINIT/entropyrec
 !! NAME
 !! entropyrec
-!! 
+!!
 !! FUNCTION
-!! This routine computes the local part of the entropy at a point using a path integral, 
+!! This routine computes the local part of the entropy at a point using a path integral,
 !! in the recursion method.
-!! 
+!!
 !! COPYRIGHT
 !! Copyright (C) 2008-2018 ABINIT group ( ).
 !! This file is distributed under the terms of the
@@ -20,13 +20,13 @@
 !!  trotter=trotter parameter
 !!  multce=a multiplicator for computing entropy ; 2 for non-spin-polarized system
 !!  debug_rec=debug variable
-!!  n_pt_integ=number of points of integration for the path integral 
+!!  n_pt_integ=number of points of integration for the path integral
 !!  xmax =max point of integration on the real axis
 
 !! OUTPUT
 !!  ent_out=entropy at the point
 !!  ent_out1,ent_out2,ent_out3,ent_out4=debug entropy at the point
-!!  
+!!
 !! PARENTS
 !!      vtorhorec
 !!
@@ -36,7 +36,7 @@
 !! NOTES
 !!  at this time :
 !!       - multce should be not used
-!!       - the routine should be integraly rewrited and use the routine recursion. 
+!!       - the routine should be integraly rewrited and use the routine recursion.
 !!       - only modified for p /= 0
 !!
 !! SOURCE
@@ -66,7 +66,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 !End of the abilint section
 
  implicit none
-  
+
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: n_pt_integ,nrec,trotter
@@ -75,7 +75,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
  real(dp),intent(out) :: ent_out,ent_out1,ent_out2,ent_out3,ent_out4
 !arrays
  real(dp),intent(in) :: an(0:nrec),bn2(0:nrec)
- 
+
 !Local variables-------------------------------
 !scalars
  integer, parameter :: level = 7
@@ -96,18 +96,18 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 
 
  call timab(610,1,tsec)
- 
+
 !structured debugging if debug_rec=T : print detailled result the first time we enter entropyrec
- 
+
  if(debug_rec .and. first_en==1)then
-   write(msg,'(a)')' ' 
+   write(msg,'(a)')' '
    call wrtout(std_out,msg,'PERS')
-   write(msg,'(a)')' entropyrec : enter ' 
+   write(msg,'(a)')' entropyrec : enter '
    call wrtout(std_out,msg,'PERS')
    write(msg,'(a,i6)')'n_pt_integ ' , n_pt_integ
    call wrtout(std_out,msg,'COLL')
  end if
- 
+
  ent_out = zero
  ent_out1 = zero
  ent_out2 = zero
@@ -119,7 +119,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
  ent_acc3 = czero
  ent_acc4 = czero
 
-!path parameters 
+!path parameters
  twotrotter = max(two*real(trotter,dp),one)
  if(trotter==0)then
    factor = tol5
@@ -141,15 +141,15 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
  path1:  do ii = 0,n_pt_integ
    z_path = cmplx(xmin+real(ii,dp)*(xmax-xmin)*dr_step,epsilo,dp)
    dz_path = -cmplx((xmax-xmin)*dr_step,zero,dp)
-   
+
    Nold = czero
    Dold = cone
    N = cone
    D = z_path - cmplx(an(0),zero,dp)
-   
+
    do kk=1,nrec
      Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
-     Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold   
+     Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
 
      Nold = N
      Dold = D
@@ -171,7 +171,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
      ent_acc1 = ent_acc1 + delta_calc
    end if
  end do path1
- 
+
 
 !####################################################################
 ![1/2zj,0]
@@ -207,7 +207,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 !      <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
        if(abs(z_path)**twotrotter>tiny(one)) then
          funczero = func1_rec(z_path**twotrotter)
-       else 
+       else
          funczero = czero
        end if
        delta_calc = funczero*N/D*dz_path
@@ -216,7 +216,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
          if(debug_rec) ent_acc3 = ent_acc3 + half*delta_calc
        else
          ent_acc  = ent_acc  + funczero*delta_calc
-         if(debug_rec) ent_acc3 = ent_acc3 + funczero*delta_calc 
+         if(debug_rec) ent_acc3 = ent_acc3 + funczero*delta_calc
        end if
      end if
    end do path5
@@ -247,8 +247,8 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 !      <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
        delta_calc = func1_rec(z_path**twotrotter) * N/D * dz_path
        if(ii==0.or.ii==n_pt_integ_path3)then
-         ent_acc  = ent_acc + half*delta_calc 
-         if(debug_rec) ent_acc3 = ent_acc3 + half*delta_calc 
+         ent_acc  = ent_acc + half*delta_calc
+         if(debug_rec) ent_acc3 = ent_acc3 + half*delta_calc
        else
          ent_acc  = ent_acc + delta_calc    !<r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
          if(debug_rec) ent_acc3 = ent_acc3 + delta_calc  !<r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
@@ -300,10 +300,10 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
    delta_calc = func1_rec(z_path**twotrotter)*N/D*dz_path
    if(ii==0.or.ii==n_pt_integ_path2)then
 
-     ent_acc =  ent_acc  + half*delta_calc 
-     if(debug_rec) ent_acc2 = ent_acc2 + half*delta_calc 
+     ent_acc =  ent_acc  + half*delta_calc
+     if(debug_rec) ent_acc2 = ent_acc2 + half*delta_calc
    else
-     ent_acc  = ent_acc  + delta_calc      
+     ent_acc  = ent_acc  + delta_calc
      if(debug_rec) ent_acc2 = ent_acc2 + delta_calc
    end if
  end do path4
@@ -347,6 +347,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
    func1_rec =   z/(cone+z)*log(cone+cone/z)+ cone/(cone+z)*log(cone+z)
 
  end function func1_rec
- 
+
 end subroutine entropyrec
 !!***

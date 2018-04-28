@@ -42,11 +42,12 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
  use m_profiling_abi
  use m_errors
 
+ use m_symtk,    only : symdet
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symptgroup'
- use interfaces_41_geometry, except_this_one => symptgroup
 !End of the abilint section
 
  implicit none

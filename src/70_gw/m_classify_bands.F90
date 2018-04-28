@@ -34,6 +34,7 @@ module m_classify_bands
  use m_errors
 
  use m_numeric_tools,  only : get_trace
+ use m_symtk,          only : mati3inv
  use m_blas,           only : xdotc, xdotu, xcopy
  use m_fft_mesh,       only : rotate_FFT_mesh, calc_ceigr
  use m_crystal,        only : crystal_t
@@ -154,7 +155,6 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'classify_bands'
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 
