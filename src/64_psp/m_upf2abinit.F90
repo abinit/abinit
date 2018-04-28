@@ -38,6 +38,7 @@ module m_upf2abinit
  use m_numeric_tools, only : smooth, nderiv, ctrap
  use m_pspheads,      only : upfxc2abi
  use m_paw_numeric,   only : jbessel => paw_jbessel
+ use m_psptk,         only : cc_derivatives
 
 
  implicit none
@@ -105,7 +106,6 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 #undef ABI_FUNC
 #define ABI_FUNC 'upf2abinit'
  use interfaces_11_qespresso_ext
- use interfaces_64_psp
 !End of the abilint section
 
   implicit none

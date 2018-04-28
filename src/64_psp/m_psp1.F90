@@ -33,6 +33,7 @@ module m_psp1
  use m_splines
 
  use m_special_funcs,   only : besjm
+ use m_psptk,           only : psp1cc
 
  implicit none
 
@@ -126,7 +127,6 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 #undef ABI_FUNC
 #define ABI_FUNC 'psp1in'
  use interfaces_14_hidewrite
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none

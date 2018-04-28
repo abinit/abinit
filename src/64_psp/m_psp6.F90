@@ -32,7 +32,7 @@ module m_psp6
  use m_profiling_abi
 
  use m_numeric_tools,  only : smooth, ctrap
-
+ use m_psptk,          only : psp5lo, psp5nl, cc_derivatives
 
  implicit none
 
@@ -113,7 +113,6 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 #undef ABI_FUNC
 #define ABI_FUNC 'psp6in'
  use interfaces_14_hidewrite
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -875,7 +874,6 @@ subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp6cc_drh'
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none

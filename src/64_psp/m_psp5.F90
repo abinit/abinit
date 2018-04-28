@@ -31,6 +31,8 @@ module m_psp5
  use m_errors
  use m_profiling_abi
 
+ use m_psptk,           only : psp1cc, psp5lo, psp5nl
+
  implicit none
 
  private
@@ -115,7 +117,6 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 #undef ABI_FUNC
 #define ABI_FUNC 'psp5in'
  use interfaces_14_hidewrite
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none
