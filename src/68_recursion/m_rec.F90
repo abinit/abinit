@@ -240,6 +240,7 @@ end subroutine H_D_distrib
 
 subroutine find_maxmin_proc(recpar,nproc,me,gratio,ngfft,proc_pt_dev)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -630,6 +631,7 @@ end subroutine InitRec
 !! SOURCE
 
 subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,natom,debug)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

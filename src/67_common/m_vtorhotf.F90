@@ -348,6 +348,7 @@ end subroutine tf
    entropy=(eektf-feektf)/dtset%tphysel
    ABI_DEALLOCATE(betamumoinsV)
  end subroutine tfek
+!!***
 
 !!****f* ABINIT/zfermim12
 !! NAME

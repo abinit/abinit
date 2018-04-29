@@ -104,7 +104,6 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'upf2abinit'
- use interfaces_11_qespresso_ext
 !End of the abilint section
 
   implicit none
