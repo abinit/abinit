@@ -14,6 +14,11 @@
 #include "config.h"
 #endif
 
+module m_read_upf_pwscf
+
+  private
+  public :: read_pseudo
+
 !---------------------------------------------------------------------
 !program read_ps
 !  !---------------------------------------------------------------------
@@ -433,4 +438,7 @@ subroutine read_pseudo_rhoatom (is, iunps)
 100 call errore ('read_pseudo_rhoatom','Reading pseudo file',abs(ios))
 
 end subroutine read_pseudo_rhoatom
+!!***
 
+end module m_read_upf_pwscf
+!!***

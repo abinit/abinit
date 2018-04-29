@@ -2,11 +2,11 @@
 !!****f* ABINIT/green_kernel
 !! NAME
 !! green_kernel
-!! 
+!!
 !! FUNCTION
-!! this routine compute the fourrier transform of the Green kernel for the 
-!! recursion method  
-!! 
+!! this routine compute the fourrier transform of the Green kernel for the
+!! recursion method
+!!
 !! COPYRIGHT
 !! Copyright (C) 2008-2018 ABINIT group ( ).
 !! This file is distributed under the terms of the
@@ -22,20 +22,20 @@
 !!  ngfft=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nfft=total number of fft grid points
 !!  debug_rec=debugging variable
-!! 
+!!
 !! OUTPUT
 !!  ZT_p=fourier transforme of the Green kernel
-!!  
+!!
 !! PARENTS
 !!      first_rec
 !!
 !! CHILDREN
 !!      fourdp,timab,wrtout
 !!
-!! NOTES 
+!! NOTES
 !!  at this time :
 !!       - need a rectangular box
-!! 
+!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -45,7 +45,7 @@
 #include "abi_common.h"
 
 subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
- 
+
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
@@ -61,7 +61,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -71,7 +71,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: inf_rmet(3,3)
  real(dp),intent(out) :: ZT_p(1:2,0:nfft-1)
- 
+
 !Local variables-------------------------------
 !scalars
  integer,parameter :: n_green_max=5
@@ -83,13 +83,13 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  real(dp),allocatable :: T_p(:)
 
 ! *************************************************************************
- 
+
  call timab(603,1,tsec)
- 
+
  norme = (mult/pi)**(onehalf)
 
  ABI_ALLOCATE(T_p,(0:nfft-1))
- 
+
 !n_green should be better chosen for non rectangular cell
  do xx=1, n_green_max
    n_green = xx
@@ -97,31 +97,31 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 &   .and. exp(-mult*dsq_green(0,xx*ngfft(2),0,inf_rmet))<tol14 &
 &   .and. exp(-mult*dsq_green(0,0,xx*ngfft(3),inf_rmet))<tol14 ) exit
  end do
- 
+
  acc = zero
  T_p = zero
  do kk = 0,ngfft(3)-1
    do jj = 0,ngfft(2)-1
      do ii = 0,ngfft(1)-1
-       
+
        do xx=-n_green,n_green-1
          do yy=-n_green,n_green-1
            do zz=-n_green,n_green-1
-             
-             T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk) = T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk)+ & 
+
+             T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk) = T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk)+ &
 &             exp(-mult*dsq_green(ii+xx*ngfft(1),jj+yy*ngfft(2),kk+zz*ngfft(3),inf_rmet))
-             
+
            end do
          end do
        end do
-       
+
        T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk) = norme*T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk)
        acc = acc + inf_ucvol* T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk)
-       
+
      end do
    end do
  end do
- 
+
  T_p(:)= (one/acc)*T_p(:)
 
 !if(debug_rec)then
@@ -139,14 +139,14 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  call wrtout(std_out,msg,'COLL')
 !endif
 
- 
+
  isign = -1
  call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,ngfft,1,0)
- 
+
  ABI_DEALLOCATE(T_p)
 
  ZT_p(:,:) = real(nfft,dp)*ZT_p
- 
+
 
  call timab(603,2,tsec)
 
@@ -171,6 +171,6 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 &   +inf_rmet(2,3)*dble(jj*kk)&
 &   +inf_rmet(3,1)*dble(kk*ii))
  end function dsq_green
- 
+
 end subroutine green_kernel
 !!***

@@ -2,12 +2,12 @@
 !!****f* ABINIT/vn_nl_rec
 !! NAME
 !! vn_nl_rec
-!! 
+!!
 !! FUNCTION
 !! this routine computes the contribution to the vector vn, during
 !! recursion, due to the non-local psp.
 !!
-!! 
+!!
 !! COPYRIGHT
 !! Copyright (C) 2008-2018 ABINIT group ( ).
 !! This file is distributed under the terms of the
@@ -21,21 +21,21 @@
 !!  natom=number of atoms
 !!  typat(natom)=the type of psps associated to the atoms
 !!  ngfftrec(3)=first 3 components of ngfftrec (truncated box, if different from ngfft) for the real-space grid
-!!  nlrec<type(nlpsprec_type)> in recursion_type containing information concerning psp 
-!!  projec(ngfftrec(1),ngfftrec(2),ngfftrec(3),lmnmax,natom) is the  vector, on the ngfftrec grid containing 
+!!  nlrec<type(nlpsprec_type)> in recursion_type containing information concerning psp
+!!  projec(ngfftrec(1),ngfftrec(2),ngfftrec(3),lmnmax,natom) is the  vector, on the ngfftrec grid containing
 !!  the non-lacal projector $Y_{lm}(r-R_A)f_{lk}(r-R_A)
 !!
 !! OUTPUT
 !! vn_nl(:,:,:)=the non_local contribution to vn
-!!  
+!!
 !! PARENTS
 !!      recursion,recursion_nl
 !!
 !! CHILDREN
 !!      timab
 !!
-!! NOTES 
-!! 
+!! NOTES
+!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -64,7 +64,7 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,&
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -80,7 +80,7 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,&
  integer :: jlmn,il,in,jn
  integer :: ipsp,ilmn
  integer :: npsp,lmnmax
- real(dp):: vn_nl_loc 
+ real(dp):: vn_nl_loc
 !arrays
  real(dp):: vn_nl(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1)
  real(dp):: vtempo(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1)
@@ -89,7 +89,7 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,&
 
  call timab(615,1,tsec)
 !--Initialisation
- 
+
  vn_nl = zero
  npsp = nlrec%npsp
  lmnmax = nlrec%lmnmax
@@ -101,9 +101,9 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,&
    ipsp = typat(natom)
 
 !  --If psp(typat(iatom)) is local then cycle
-   if(all(nlrec%pspinfo(:,ipsp)==0))  cycle 
+   if(all(nlrec%pspinfo(:,ipsp)==0))  cycle
 
-   
+
 !  write(std_out,*)'lmnmax',nlrec%lmnmax,lmnmax
 
    do ilmn = 1, lmnmax

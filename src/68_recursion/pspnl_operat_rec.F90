@@ -4,8 +4,7 @@
 !! pspnl_operat_rec
 !!
 !! FUNCTION
-!! It calculates the non-local projectors used in recursion for any
-!! psp non-local:
+!! It calculates the non-local projectors used in recursion for any psp non-local:
 !! The nl interaction in recursion is $$exp{-V_{NL}/beta}=\sum_A\sum_{lm}
 !! \sum{ij}Y_{lm}(\hat{r-R_A}')f^l_i(r-R_A)D^l_{i,j}Y_{lm}(\hat{r-R_A})f^l_j{r-R_A}$$
 !! where $D^_{i,j}$ is a matrix  previously (see pspnl_operat_rec).
@@ -14,7 +13,7 @@
 !! rset%nl%projec(nfftrec,lmnmax,nlrec%npsp)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (the_author)
+!!  Copyright (C) 2009-2018 ABINIT group (MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +21,7 @@
 !! INPUTS
 !! metrec<metricrec_type>=contains information concerning metric in
 !!         recursion: grid_step, metric, infinitesimal volume
-!! ngfftrec(18)=is the ngfft grid (truncated if different from ngfft) of recursion 
+!! ngfftrec(18)=is the ngfft grid (truncated if different from ngfft) of recursion
 !! debug=debug variable
 !!
 !!
@@ -155,7 +154,7 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 !#####################################################################
 !--CALCULATE E(q,q')
 !--Cration of the exponential*projectors*ylm matrix
- 
+
 !--Initialisation
  ABI_ALLOCATE(nlrec%projec,(nfftrec,lmnmax,nlrec%npsp))
  nlrec%projec = zero
@@ -165,10 +164,10 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
  nrm = zero
 
 !--Loop on pseudo types
- pseudodo: do ipsp = 1, nlrec%npsp 
+ pseudodo: do ipsp = 1, nlrec%npsp
 !  --Control if the psp is non-local, else continue
-   if(all(nlrec%pspinfo(:,ipsp)==0)) cycle 
-!  --Vector which stores localy the upper part of symmetrical 
+   if(all(nlrec%pspinfo(:,ipsp)==0)) cycle
+!  --Vector which stores localy the upper part of symmetrical
 !  matrix of the exponential of the non-local operator
    mpsang = maxval(nlrec%indlmn(1,:,ipsp))+1
    ABI_ALLOCATE(proj_arr,(nfftrec,maxval(nlrec%pspinfo(:,ipsp)),mpsang))
@@ -201,7 +200,7 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
        end do  !--End 3-loop on coordinates
      end do
    end do
-   
+
 
 !  -------------------------------------------------------------
 !  --Calculate the spherical harmonics (Verified: it works well)
@@ -213,12 +212,12 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
      ilm = nlrec%indlmn(4,ilmn,ipsp)
      il = nlrec%indlmn(1,ilmn,ipsp)+1
      in = nlrec%indlmn(3,ilmn,ipsp)
-     write(msg,'(2a,i3,2i2)')ch10,'lm,l,n',ilm,il,in  
+     write(msg,'(2a,i3,2i2)')ch10,'lm,l,n',ilm,il,in
      call wrtout(std_out,msg,'COLL')
 
      nlrec%projec(:,ilmn,ipsp) = ylmr(ilm,:)*proj_arr(:,in,il)
    end do
-   
+
    ABI_DEALLOCATE(ylmr)
    ABI_DEALLOCATE(proj_arr)
  end do pseudodo !--end loop on pseudo types
@@ -234,7 +233,7 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 
  contains
 
-   function project_prec(raggio,iproj,iangol,rloc) 
+   function project_prec(raggio,iproj,iangol,rloc)
 !--Analytical expression of the projectors in hgh-pspeudopotential
 !--The gamma function at denominator is missing
 
@@ -244,7 +243,7 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 #define ABI_FUNC 'project_prec'
 !End of the abilint section
 
-   real(dp) :: project_prec 
+   real(dp) :: project_prec
    integer,intent(in) :: iproj,iangol
    real(dp),intent(in) :: raggio,rloc
 

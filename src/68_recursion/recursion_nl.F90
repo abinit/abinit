@@ -2,13 +2,13 @@
 !!****f* ABINIT/recursion_nl
 !! NAME
 !! recursion_nl
-!! 
+!!
 !! FUNCTION
 !! Given a $|un>$ vector on the real-space grid this routine calculates
 !! the density in  $|un>$ by recursion method.
-!! 
+!!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group ( ).
+!! Copyright (C) 2008-2018 ABINIT group (MM).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,18 +21,18 @@
 !!  tsmear=temperature (Hartree)
 !!  tol=tolerance criteria for stopping recursion_nl
 !!  ngfft=information about FFT(dtset%ngfft a priori different from ngfftrec)
-!!  rset<recursion_type> contains all parameter of recursion 
+!!  rset<recursion_type> contains all parameter of recursion
 !!  typat(natom)=type of pseudo potential associated to any atom
 !!  natom=number of atoms
-!!  projec(ngfftrec(1),ngfftrec(2),ngfftrec(3),lmnmax,natom) is the  vector, on the ngfftrec grid containing 
+!!  projec(ngfftrec(1),ngfftrec(2),ngfftrec(3),lmnmax,natom) is the  vector, on the ngfftrec grid containing
 !!  the non-lacal projector $Y_{lm}(r-R_A)f_{lk}(r-R_A)
 !!
 !! OUTPUT
 !!  rho_out=result of the continued fraction multiplied by a multiplicator
-!! 
+!!
 !! SIDE EFFECTS
 !!  un(:,:,:)=initial vector on the grid. it is changed in output
-!! 
+!!
 !! PARENTS
 !!      nlenergyrec
 !!
@@ -56,7 +56,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
   &                     tsmear,trotter,dim_trott,tol,typat,&
   &                     natom,projec)
 
- 
+
  use defs_basis
  use defs_abitypes
  use defs_rectypes
@@ -117,7 +117,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
    msg=' '
    call wrtout(std_out,msg,'COLL')
  end if
- 
+
 !##############################################################
  beta = one/tsmear
 
@@ -148,8 +148,8 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
  cinv2rtrotter = cmplx(one/twortrotter,zero,dp)
  coeef_mu = cmplx(one/exp2,zero,dp)
 
-!--Initialisation of accumulated density 
- acc_rho = czero  
+!--Initialisation of accumulated density
+ acc_rho = czero
 !--Initialisation of estimated error
  prod_b2 = twortrotter/exp1
  errold = zero
@@ -158,11 +158,11 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 !--Main loop
  maindo : do irec = 0, rset%min_nrec
 !  --Get an and bn2 coef by the lanczos method
-   
+
 !  --Computation of exp(-beta*V/8*p)*un
-   vn = exppot * un   
-   
-!  --First Non-local psp contribution: (Id+sum_atom E(r,r1))vn   
+   vn = exppot * un
+
+!  --First Non-local psp contribution: (Id+sum_atom E(r,r1))vn
    call timab(608,2,tsec)
    call vn_nl_rec(vn,natom,typat,rset%ngfftrec(:3),inf_ucvol,rset%nl,projec)
    call timab(608,1,tsec)
@@ -190,7 +190,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 !  --Computation of exp(-beta*V/2*p)*vn
    vn = inf_ucvol * exppot * vn
 
-!  --Second Non-local psp contribution: (Id+sum_atom E(r,r1))vn   
+!  --Second Non-local psp contribution: (Id+sum_atom E(r,r1))vn
    call timab(608,2,tsec)
    call vn_nl_rec(vn,natom,typat,rset%ngfftrec(:3),inf_ucvol,rset%nl,projec)
    call timab(608,1,tsec)
@@ -199,12 +199,12 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
    vn = exppot * vn
 
 
-!  --Multiplication of a and b2 coef by exp(beta*fermie/(2.d0*rtrotter)) must be done in the continued fraction computation  
+!  --Multiplication of a and b2 coef by exp(beta*fermie/(2.d0*rtrotter)) must be done in the continued fraction computation
 !  --Computation of a and b2
-   an(irec) = inf_ucvol*ddot(rset%nfftrec,vn,1,un,1)      !--an must be positive real 
+   an(irec) = inf_ucvol*ddot(rset%nfftrec,vn,1,un,1)      !--an must be positive real
 
 !  --We must compute bn2 and prepare for the next iteration
-   if(irec<rset%min_nrec)then    
+   if(irec<rset%min_nrec)then
      do ii = 0,rset%nfftrec-1
        switchu = un(ii)
        un(ii) = vn(ii)-an(irec)*un(ii)-bb*unold(ii)

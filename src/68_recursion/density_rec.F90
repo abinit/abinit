@@ -2,11 +2,11 @@
 !!****f* ABINIT/density_rec
 !! NAME
 !! density_rec
-!! 
+!!
 !! FUNCTION
 !! This routine computes the density using  the coefficients corresponding to
-!! continued fraction at a point from a fixed potential. 
-!! 
+!! continued fraction at a point from a fixed potential.
+!!
 !! COPYRIGHT
 !! Copyright (C) 2008-2018 ABINIT group (SLeroux,MMancini).
 !! This file is distributed under the terms of the
@@ -24,12 +24,12 @@
 !!  tol=tolerance criteria for stopping density_rec
 !!  inf_ucvol=infinitesimal unit cell volume
 !!  dim_trott = max(0,2*trotter-1)
-!! 
+!!
 !! OUTPUT
 !!  rho_out=result of the continued fraction multiplied by a multiplicator
-!! 
+!!
 !! SIDE EFFECTS
-!! 
+!!
 !! PARENTS
 !!      fermisolverec
 !!
@@ -95,9 +95,9 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !**************************************************************************
 
  call timab(605,1,tsec)
- 
+
 !##############################################################
-!--Initialisation of metrics 
+!--Initialisation of metrics
  mult = two/inf_ucvol   !non-spined system
  beta = one/tsmear
 
@@ -112,17 +112,17 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
  N = czero;  D = cone
  facrec0 = cone
  Nold = czero; Dold = czero
-!--Initialisation of accumulated density 
- acc_rho = czero  
+!--Initialisation of accumulated density
+ acc_rho = czero
 !--Initialisation of estimated error
  prod_b2 = twortrotter/exp1
  errold = zero
- 
+
 
 !##############################################################
 !--Main loop
  maindo : do irec = 0, nrec
-   
+
 !  ######################################################
 !  --Density computation
 !  !--using the property that: sum_i(bi*c)^2|(z-ai*c)=1/c*sum_i(bi)^2|(z/c-ai)
@@ -132,7 +132,7 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 &   facrec0,coeef_mu,exp1,&
 &   an(irec),bn2(irec),&
 &   N,D,Nold,Dold)
-   
+
    if(irec/=nrec .and. irec>=minrec)then
      if((bn2(irec+1)<tol14).or.(mult*error<tol.and.errold<tol)) exit maindo
    end if
@@ -140,9 +140,9 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
  end do maindo
 !--Accumulated density
  rho_out = mult*real(cone-sum(N/D)*cinv2rtrotter,dp)
- 
+
  call timab(605,2,tsec)
- 
+
  end subroutine density_rec
 !!***
- 
+

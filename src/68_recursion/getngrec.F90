@@ -5,10 +5,10 @@
 !!
 !! FUNCTION
 !! This routine computes the fft box for the recursion method, accordingly to the troncation radius.
-!! It is quite similar to getng, but : 
+!! It is quite similar to getng, but :
 !!     - there is no xboxcut and ecut consistency
 !!     - ngfft (the initial fft box) is the maximum fft box
-!! 
+!!
 !! COPYRIGHT
 !! Copyright (C) 2008-2018 ABINIT group ( ).
 !! This file is distributed under the terms of the
@@ -25,11 +25,11 @@
 !!
 !! OUTPUT
 !!  ngfftrec=truncated fft box
-!!  nfftrec= truncated nfft 
-!!  tronc=True if truncation is made 
+!!  nfftrec= truncated nfft
+!!  tronc=True if truncation is made
 !!
 !! SIDE EFFECTS
-!! 
+!!
 !! PARENTS
 !!      m_rec
 !!
@@ -84,12 +84,12 @@ real(dp) :: inf_rmet(3,3)
 
  call timab(602,1,tsec)
 
- ngfftrec(:) = ngfft(:) 
+ ngfftrec(:) = ngfft(:)
 
- if (recrcut>tol14) then  !default value dtset%recrcut = zero means no troncation 
+ if (recrcut>tol14) then  !default value dtset%recrcut = zero means no troncation
    rtroncat = recrcut+delta
    get_ngfftrec(:)=1
-   plane = 1 
+   plane = 1
 
    do ii=1,3
      inf_rmet(ii,:) = rmet(ii,:)/(real(ngfft(1:3)*ngfft(ii),dp))
@@ -164,9 +164,9 @@ real(dp) :: inf_rmet(3,3)
            end if
          end do
          do jj=minsrch(ii),mmsrch
-           if(srch(jj)>ngfft(ii))then 
-!            since ngfftrec(ii)<ngfft(ii) for get_ngfftrec(ii)==1, 
-!            and srch(mmsrch)maxval(ngfft(1:3)), 
+           if(srch(jj)>ngfft(ii))then
+!            since ngfftrec(ii)<ngfft(ii) for get_ngfftrec(ii)==1,
+!            and srch(mmsrch)maxval(ngfft(1:3)),
 !            that will appens in the range minsrch(ii),mmsrch
              maxsrch(ii)=jj-1
              exit
@@ -174,7 +174,7 @@ real(dp) :: inf_rmet(3,3)
          end do
        end if
 !      since ngfft(ii) is in srch, we have here srch(maxsrch(ii))=ngfft(ii)
-!      minsrch(ii), maxsrch(ii) is the range of index of srch in which we can 
+!      minsrch(ii), maxsrch(ii) is the range of index of srch in which we can
 !      search ngfftrec(ii)
 
        if(ngfftrec(ii)>=ngfft(ii))then
@@ -184,13 +184,13 @@ real(dp) :: inf_rmet(3,3)
      end do
    end if
 
-!  verify that the entiere truncation sphere is in the fft box ; 
+!  verify that the entiere truncation sphere is in the fft box ;
 !  but only in the dimension in which we do not consider the entiere fft box
    do while(sum(get_ngfftrec)/=0)  !again...
 
-!    determining the minimum distance between 0 and the boundary 
+!    determining the minimum distance between 0 and the boundary
 !    of the fft box
-!    quite similar to the subroutine "bound", but only over the plane which 
+!    quite similar to the subroutine "bound", but only over the plane which
 !    are not the whole fft box
      dsqmin=dsq_rec(ngfftrec(1)/2,-ngfftrec(2)/2,-ngfftrec(3)/2,inf_rmet)+0.01d0
 
@@ -307,7 +307,7 @@ real(dp) :: inf_rmet(3,3)
 
  end if
 
-!--For now, recursion method doesn't use paralelism on FFT - which would require a great number of processors 
+!--For now, recursion method doesn't use paralelism on FFT - which would require a great number of processors
  nfftrec = product(ngfftrec(1:3))
  ngfftrec(9:11) = (/0,1,0/)   !--(/ paral, nproc, %me \)
  ngfftrec(12:13) = ngfftrec(2:3)   ! n2proc ! n3proc
