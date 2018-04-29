@@ -1,4 +1,50 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_vtorhotf
+!! NAME
+!!  m_vtorhotf
+!!
+!! FUNCTION
+!! Computes the new density from a fixed potential (vtrial) using the Thomas-Fermi functional
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_vtorhotf
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+
+ use m_time,           only : timab
+
+ implicit none
+
+ private
+!!***
+
+ public :: vtorhotf
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/vtorhotf
 !! NAME
 !! vtorhotf
@@ -6,13 +52,6 @@
 !! FUNCTION
 !! This routine computes the new density from a fixed potential (vtrial)
 !! using the Thomas-Fermi functional
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtfil <type(datafiles_type)>=variables related to files
@@ -49,22 +88,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 &  irrzon,mpi_enreg,natom,nfft,nspden,nsppol,nsym,phnons,rhog,rhor,rprimd,ucvol,vtrial)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
-
- use m_time,           only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -162,7 +187,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  call timab(21,2,tsec)
 !End thomas fermi
 
- contains
+! contains
 !!***
 
 !!****f* vtorhotf/tf
@@ -255,7 +280,8 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !  we also have the spin-up density, symmetrized, in rhor(:,2).
 
    call timab(70,2,tsec)
- end subroutine tf
+
+end subroutine tf
 !!***
 
 !!****f* vtorhotf/tfek
@@ -323,9 +349,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
    ABI_DEALLOCATE(betamumoinsV)
  end subroutine tfek
 
-end subroutine vtorhotf
-!!***
-
 !!****f* ABINIT/zfermim12
 !! NAME
 !! zfermim12
@@ -355,15 +378,12 @@ end subroutine vtorhotf
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
- function zfermim12(xx)
 
- use defs_basis
+ function zfermim12(xx)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -444,10 +464,8 @@ end function zfermim12
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -458,7 +476,6 @@ end function zfermim12
 !..reference: antia apjs 84,101 1993
 !..
 !..declare
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -540,10 +557,8 @@ end function zfermi12
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -554,7 +569,6 @@ end function zfermi12
 !..reference: antia  priv comm. 11sep94
 !..
 !..declare
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -633,15 +647,12 @@ end function zfermi1
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
- function zfermi32(xx)
 
- use defs_basis
+ function zfermi32(xx)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -726,16 +737,12 @@ end function zfermi32
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
  function zfermi2(xx)
-
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -814,15 +821,13 @@ end function zfermi2
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
+
  function zfermi52(xx)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -906,15 +911,12 @@ end function zfermi52
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
- function zfermi3(xx)
 
- use defs_basis
+ function zfermi3(xx)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -994,15 +996,12 @@ end function zfermi3
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
- function ifermim12(ff)
 
- use defs_basis
+ function ifermim12(ff)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1084,9 +1083,8 @@ end function ifermim12
 !! CHILDREN
 !!
 !! SOURCE
- function ifermi12(ff)
 
-   use defs_basis
+ function ifermi12(ff)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1168,8 +1166,6 @@ end function ifermi12
 
  function ifermi32(ff)
 
-  use defs_basis
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1247,8 +1243,8 @@ end function ifermi32
 !! CHILDREN
 !!
 !! SOURCE
+
  function ifermi52(ff)
-   use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1325,9 +1321,8 @@ end function ifermi52
 !! CHILDREN
 !!
 !! SOURCE
- function fp12a1 (x)
 
-   use defs_basis
+ function fp12a1 (x)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1379,15 +1374,12 @@ end function ifermi52
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
- function fp32a1 (x)
 
-   use defs_basis
+ function fp32a1 (x)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1444,9 +1436,8 @@ end function ifermi52
 !! CHILDREN
 !!
 !! SOURCE
- function xp12a1 (y)
 
-   use defs_basis
+ function xp12a1 (y)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1500,15 +1491,12 @@ end function ifermi52
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
- function fm12a1 (x)
 
-   use defs_basis
+ function fm12a1 (x)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1568,8 +1556,6 @@ end function ifermi52
 
  subroutine fm12a1t (cktf,rtnewt,tphysel,vtrial,rhor_middx,rhor_mid,nfft)
 
- use defs_basis
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1618,4 +1604,7 @@ end function ifermi52
 !
 !**********************************************************************
  end subroutine fm12a1t
+!!***
+
+end subroutine vtorhotf
 !!***

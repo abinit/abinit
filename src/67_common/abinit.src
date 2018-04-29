@@ -107,7 +107,7 @@ sources = [
  "update_e_field_vars.F90",
  "vdw_dftd2.F90",
  "vdw_dftd3.F90",
- "vtorhotf.F90",
+ "m_vtorhotf.F90",
  "wf_mixing.F90",
  "wvl_initro.F90",
  "wvl_mkrho.F90"]
