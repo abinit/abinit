@@ -361,11 +361,9 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  call ab7_mixing_eval_allocate(mix, istep)
 !Copy current step arrays.
  if (moved_atm_inside == 1) then
-   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, &
-&   arr_respc = nrespc, arr_atm = grhf)
+   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc, arr_atm = grhf)
  else
-   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, &
-&   arr_respc = nrespc)
+   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc)
  end if
  if (errid /= AB7_NO_ERROR) then
    MSG_ERROR(message)
