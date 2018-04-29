@@ -240,6 +240,7 @@ end subroutine H_D_distrib
 
 subroutine find_maxmin_proc(recpar,nproc,me,gratio,ngfft,proc_pt_dev)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -311,6 +312,7 @@ end subroutine find_maxmin_proc
 !! SOURCE
 
  subroutine cpu_distribution(gratio,rset,ngfft,beta_coeff,calc_type)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -457,7 +459,6 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'InitRec'
- use interfaces_68_recursion
 !End of the abilint section
 
  implicit none
@@ -631,6 +632,7 @@ end subroutine InitRec
 
 subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,natom,debug)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -711,12 +713,12 @@ end subroutine Init_MetricRec
 
 subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'Init_nlpspRec'
  use interfaces_14_hidewrite
- use interfaces_68_recursion
 !End of the abilint section
 
  implicit none
@@ -820,6 +822,7 @@ end subroutine Init_nlpspRec
 !! SOURCE
 
 subroutine CleanRec(rset)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -985,6 +988,7 @@ end subroutine Calcnrec
 !! SOURCE
 
 subroutine getngrec(ngfft,rmet,ngfftrec,nfftrec,recrcut,delta,tronc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1317,6 +1321,7 @@ end subroutine getngrec
 
 
 subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

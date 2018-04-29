@@ -151,6 +151,7 @@ end subroutine prt_mem_usage
 
 subroutine InitRecGPU_0(recgpu,mpi_ab)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -201,6 +202,7 @@ end subroutine InitRecGPU_0
 #if defined HAVE_GPU_CUDA
 
 subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -307,6 +309,7 @@ end subroutine InitRecGPU
 #if defined HAVE_GPU_CUDA
 
 subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

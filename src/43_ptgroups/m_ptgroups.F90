@@ -125,7 +125,6 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_point_group'
- use interfaces_43_ptgroups
 !End of the abilint section
 
  implicit none

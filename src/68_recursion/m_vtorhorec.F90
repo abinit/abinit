@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (SLeroux,MMancini).
+!!  Copyright (C) 2008-2018 ABINIT group (SLeroux, MMancini).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,6 +116,7 @@ subroutine vtorhorec(dtset,&
 &  grnl,initialized,irrzon,nfftf,phnons,&
 &  rhog, rhor, vtrial,rset,deltastep,rprimd,gprimd)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -123,7 +124,7 @@ subroutine vtorhorec(dtset,&
  use interfaces_14_hidewrite
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_68_recursion, except_this_one => vtorhorec
+ use interfaces_68_recursion
 !End of the abilint section
 
  implicit none
@@ -973,6 +974,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 &                     n_pt_integ,xmax,&
 &                     ent_out1,ent_out2,ent_out3,ent_out4)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1313,12 +1315,12 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
   &                      long_tranche,mpi_enreg,&
   &                      inf_ucvol,gputopo)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fermisolverec'
  use interfaces_14_hidewrite
- use interfaces_68_recursion, except_this_one => fermisolverec
 !End of the abilint section
 
  implicit none
@@ -1610,6 +1612,7 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 &                     fermie,tsmear,rtrotter, &
 &                     dim_trott,tol,inf_ucvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1737,6 +1740,7 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 &                     debug_rec,n_pt_integ,xmax,&
 &                     ene_out1,ene_out2,ene_out3,ene_out4)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2042,12 +2046,13 @@ end subroutine gran_potrec
 
 subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nlenergyrec'
  use interfaces_14_hidewrite
- use interfaces_68_recursion, except_this_one => nlenergyrec
+ use interfaces_68_recursion
 !End of the abilint section
 
  implicit none
@@ -2211,4 +2216,7 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  call timab(612,2,tsec)  !--stop  time-counter: nlenergyrec
 
 end subroutine nlenergyrec
+!!***
+
+end module m_vtorhorec
 !!***

@@ -57,7 +57,6 @@ subroutine read_pseudo (is, iunps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'read_pseudo'
- use interfaces_11_qespresso_ext, except_this_one => read_pseudo
 !End of the abilint section
 
   implicit none
@@ -246,7 +245,6 @@ subroutine read_pseudo_mesh (is, iunps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'read_pseudo_mesh'
- use interfaces_11_qespresso_ext, except_this_one => read_pseudo_mesh
 !End of the abilint section
 
   implicit none
@@ -279,7 +277,6 @@ subroutine read_pseudo_nl (is, iunps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'read_pseudo_nl'
- use interfaces_11_qespresso_ext, except_this_one => read_pseudo_nl
 !End of the abilint section
 
   implicit none
