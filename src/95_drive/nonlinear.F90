@@ -1349,6 +1349,8 @@ end if
      real(dp) :: elem1,elem2
      real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
 
+! *************************************************************************
+
      write(theunit,'(2a)') ch10,msg
      do i1dir = 1, 3
        do i2dir = 1, 3
@@ -1399,6 +1401,8 @@ end if
      integer,intent(in) :: theunit
      character(len=30) :: msg
      real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
+
+! *************************************************************************
 
      write(theunit,'(a)') msg
      do i1pert = 1,natom
