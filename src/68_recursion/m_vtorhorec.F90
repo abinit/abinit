@@ -27,6 +27,7 @@ module m_vtorhorec
 
  use defs_basis
  use defs_abitypes
+ use defs_datatypes
  use defs_rectypes
  use m_xmpi
  use m_pretty_rec
@@ -34,9 +35,10 @@ module m_vtorhorec
  use m_profiling_abi
  use m_per_cond
 
- use m_time,           only : timab
- use m_rec,            only : Calcnrec
- use m_rec_tools,      only : reshape_pot, trottersum
+ use m_time,           only : timein, timab
+ use m_rec,            only : Calcnrec, init_nlpsprec, cpu_distribution
+ use m_rec_tools,      only : reshape_pot, trottersum, get_pt0_pt1
+
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,       only : cudap
  use m_hidecudarec
@@ -49,6 +51,7 @@ module m_vtorhorec
 !!***
 
  public :: vtorhorec
+ public :: first_rec
 !!***
 
 contains
@@ -124,7 +127,6 @@ subroutine vtorhorec(dtset,&
  use interfaces_14_hidewrite
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_68_recursion
 !End of the abilint section
 
  implicit none
@@ -2052,7 +2054,6 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 #undef ABI_FUNC
 #define ABI_FUNC 'nlenergyrec'
  use interfaces_14_hidewrite
- use interfaces_68_recursion
 !End of the abilint section
 
  implicit none
@@ -2216,6 +2217,999 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  call timab(612,2,tsec)  !--stop  time-counter: nlenergyrec
 
 end subroutine nlenergyrec
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/first_rec
+!! NAME
+!! first_rec
+!!
+!! FUNCTION
+!! When recursion method is used, in the first step this routine
+!! compute some quantities which are used in the rest of the calculation.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2009-2018 ABINIT group (MMancini)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset:
+!!   | recgratio =fine/coarse grid ratio
+!!   | recptrott =trotter parameter
+!!   | tsmear    =temperature
+!!   | recrcut   =tut radius in recursion (range of iteration)
+!!   | ngfft(18) =FFT grid used as real (fine) grid in recursion
+!!  psps <type(pseudopotential_type)>=variables related to pseudo-potentials
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  rset <type(recursion_type)>=variables related to recursion method
+!!   | debug<logical> = T if debugging is used
+!!   | inf <type(metricrec_type)>=information concerning the infinitesimal metrics
+!!   | ngfftrec(18) =truncated (or not, if not ngfftrec=ngfft)FFT grid used as real grid in recursion.
+!!   | nfftrec =product(ngfftrec(1:3))
+!!   | tronc<logical> = T if truncation is effectively used
+!!   | ZT_p = fourier transform of the green_kernel calculated on the fine grid
+!!
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      scfcv
+!!
+!! CHILDREN
+!!      cpu_distribution,cudarec,get_pt0_pt1,green_kernel,init_nlpsprec
+!!      random_number,recursion,reshape_pot,timab,timein,wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine first_rec(dtset,psps,rset)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'first_rec'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+! scalars
+ type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+ type(recursion_type),intent(inout) :: rset
+!Local variables-------------------------------
+!scalars
+ integer  :: nfftrec,trotter,ii,dim_trott
+ real(dp) :: tsmear,beta,rtrotter
+ character(len=500) :: msg
+!arrays
+ integer  :: ngfftrec(18)
+ real(dp) :: tsec(2)
+#ifdef HAVE_GPU_CUDA
+ integer  :: max_rec,ierr,testpts,swt_tm
+ real(dp) :: rho,tm_ratio
+ real(dp) :: time_cu,time_f
+ type(recursion_type) :: rset_test
+ type(recparall_type) :: parold
+ integer :: trasl(3)
+ real(dp) :: tsec2(2),tsec3(2)
+ real(dp) :: aloc(0,1),b2loc(0,1)
+ real(dp) :: dm_projec(0,0,0,1,1)
+ real(dp) :: exppot(0:dtset%nfft-1)
+ real(dp),allocatable :: exppotloc(:)
+ real(cudap),allocatable :: aloc_cu(:),b2loc_cu(:)
+#endif
+
+! *************************************************************************
+
+ call timab(601,1,tsec)  !!--Start time-counter: initialisation
+
+ MSG_WARNING("RECURSION")
+ if(dtset%recgratio>1) then
+   write(msg,'(a)')'COARSE GRID IS USED'
+   call wrtout(std_out,msg,'COLL')
+ end if
+
+!--Initialisation
+ trotter = dtset%recptrott  !--Trotter parameter
+ tsmear  = dtset%tsmear     !--Temperature
+ beta    = one/tsmear       !--Inverse of temperature
+
+!--Rewriting the trotter parameter
+ dim_trott = max(0,2*trotter-1)
+ rtrotter  = max(half,real(trotter,dp))
+
+ write (msg,'(2a)')ch10,'==== FIRST CYCLE RECURSION ========================='
+ call wrtout(std_out,msg,'COLL')
+
+
+ ngfftrec = rset%ngfftrec
+ nfftrec = rset%nfftrec
+!------------------------------------------------
+!--TRONCATION OF THE BOX: determines new dimensions
+!--Now in InitRec
+!--------------------------------------------------------
+!--DEFINITION PAW VARIABLES COARSE-FINE GRID  TO USE TRANSGRID--INGRID FUNCTIONS
+!--Now these variables are defined into gstate by InitRec
+
+!--------------------------------------------------------
+!--COMPUTATION OF THE FOURIER TRANSFORM OF THE GREEN KERNEL (only once)
+ write (msg,'(a)')' - green kernel calculation -----------------------'
+ call wrtout(std_out,msg,'COLL')
+ ABI_ALLOCATE(rset%ZT_p,(1:2,0: nfftrec-1))
+ call timab(601,2,tsec)
+ call green_kernel(rset%ZT_p,rset%inf%rmet,rset%inf%ucvol,rtrotter/beta,rset%mpi,ngfftrec,nfftrec)
+ call timab(601,1,tsec)
+ write(msg,'(a,50a)')' ',('-',ii=1,50)
+ call wrtout(std_out,msg,'COLL')
+!!--end computation of the fourier transform of the Green kernel
+
+!!-----------------------------------
+!!--ROUTINE FOR THE CALCULATION OF THE NON-LOCAL PSEUDO
+!--Now these variables here by  Init_nlpspRec
+ call Init_nlpspRec(four*tsmear*rtrotter,psps,rset%nl,rset%inf,rset%ngfftrec,rset%debug)
+
+!!-----------------------------------
+!--Load distribution on procs when GPU are present
+#if defined HAVE_GPU_CUDA
+
+!--Test timing only if exists GPU and they are not equal to the cpus
+ if(rset%tp == 4) then
+   parold = rset%par
+   ii = 0
+   time_f = zero
+   time_cu = zero
+   call random_number(exppot)  !   exppot = one
+
+   if(rset%gpudevice == -1) then
+!    --Test CPUS
+     swt_tm = 0
+     testpts = min(rset%par%npt, 20)
+     call timein(tsec2(1),tsec2(2))
+     if(rset%tronc) then
+       ABI_ALLOCATE(exppotloc,(0:nfftrec-1))
+       do while(ii< testpts)
+         trasl = -(/1,2,3/)+ngfftrec(:3)/2
+         call reshape_pot(trasl,dtset%nfft,nfftrec,dtset%ngfft(:3),ngfftrec(:3),&
+&         exppot,exppotloc)
+         call recursion(exppotloc,0,0,0, &
+&         aloc, &
+&         b2loc, &
+&         rho,&
+&         0, rset%efermi,tsmear,rtrotter,dim_trott, &
+&         rset%ZT_p, &
+&         dtset%rectolden,dtset%typat, &
+&         rset%nl,&
+&         rset%mpi,nfftrec,ngfftrec,rset%inf,&
+&         6,dtset%natom,dm_projec,0)
+         ii=ii+1
+       end do
+       ABI_DEALLOCATE(exppotloc)
+     else
+       do while(ii< testpts)
+         call recursion(exppot,0,0,0, &
+&         aloc, &
+&         b2loc, &
+&         rho,&
+&         0, rset%efermi,tsmear,rtrotter,dim_trott, &
+&         rset%ZT_p, &
+&         dtset%rectolden,dtset%typat, &
+&         rset%nl,&
+&         rset%mpi,nfftrec,ngfftrec,rset%inf,&
+&         6,dtset%natom,dm_projec,0)
+         ii=ii+1
+       end do
+     end if
+     call timein(tsec3(1),tsec3(2))
+     time_f = (tsec3(1)-tsec2(1))/real(testpts,dp)
+     time_f = time_f*time_f
+   else
+!    --Test GPUS
+     swt_tm = 1
+     rset_test = rset
+     rset_test%GPU%par%npt = max(rset%GPU%nptrec,100)
+     rset_test%min_nrec = 0
+     call get_pt0_pt1(dtset%ngfft(:3),dtset%recgratio,0,&
+&     rset_test%GPU%par%npt,rset_test%GPU%par)
+
+
+     ABI_ALLOCATE(aloc_cu,(rset_test%GPU%par%npt))
+     ABI_ALLOCATE(b2loc_cu,(rset_test%GPU%par%npt))
+     call timein(tsec2(1),tsec2(2))
+     call cudarec(rset_test, exppot,aloc_cu,b2loc_cu,&
+&     beta,trotter,dtset%rectolden,dtset%recgratio,dtset%ngfft,max_rec)
+     call timein(tsec3(1),tsec3(2))
+     ABI_DEALLOCATE(aloc_cu)
+     ABI_DEALLOCATE(b2loc_cu)
+
+     time_cu = (tsec3(1)-tsec2(1))/real(rset_test%GPU%par%npt,dp)
+     time_cu = time_cu*time_cu
+   end if
+
+
+!  --Get Total Times
+   call xmpi_sum(time_f,rset%mpi%comm_bandfft,ierr)
+   call xmpi_sum(time_cu,rset%mpi%comm_bandfft,ierr)
+
+!  --Average Total Times
+   time_f   = sqrt(time_f/real(rset%mpi%nproc-rset%ngpu,dp))
+   time_cu  = sqrt(time_cu/real(rset%ngpu,dp))
+   tm_ratio = time_f/time_cu
+
+
+   write(msg,'(3(a25,f10.5,a))')&
+&   ' Time for cpu recursion ',time_f,ch10,&
+&   ' Time for gpu recursion ',time_cu,ch10,&
+&   ' Time ratio             ',tm_ratio,ch10
+   call wrtout(std_out,msg,'COLL')
+
+
+!  tm_ratio =1.20d2! 0.d0! 1.21d0
+   rset%par = parold
+!  --Compute the work-load distribution on devices (gpu,cpu)
+   if(tm_ratio>1.5d0 .and. time_cu>zero)then
+     rset%load = 1
+     call cpu_distribution(dtset%recgratio,rset,dtset%ngfft(:3),tm_ratio,1)
+   else
+     rset%gpudevice = -1
+   end if
+ end if
+
+#endif
+
+
+!------------------------------------------------------------
+!--DETERMINING WHICH POINT WILL COMPUTE THAT PROC
+!--Now these variables are defined into gstate by Init_rec
+
+ write (msg,'(2a)')ch10,'==== END FIRST CYCLE RECURSION ====================='
+ call wrtout(std_out,msg,'COLL')
+ call timab(601,2,tsec) !!--stop time-counter: initialisation
+
+end subroutine first_rec
+!!***
+
+
+!!****f* ABINIT/green_kernel
+!! NAME
+!! green_kernel
+!!
+!! FUNCTION
+!! this routine compute the fourrier transform of the Green kernel for the
+!! recursion method
+!!
+!! INPUTS
+!!  inf_rmet=define the  infinitesimal metric : rprimd*(transpose(rprimd)) divided 
+!!    by the number of discretisation point
+!!  inf_ucvol=volume of infinitesimal cell
+!!  mult=variance of the Gaussian (=rtrotter/beta)
+!!  mpi_enreg=information about MPI parallelization
+!!  ngfft=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nfft=total number of fft grid points
+!!  debug_rec=debugging variable
+!!
+!! OUTPUT
+!!  ZT_p=fourier transforme of the Green kernel
+!!
+!! PARENTS
+!!      first_rec
+!!
+!! CHILDREN
+!!      fourdp,timab,wrtout
+!!
+!! NOTES
+!!  at this time :
+!!       - need a rectangular box
+!!
+!! SOURCE
+
+
+subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'green_kernel'
+ use interfaces_14_hidewrite
+ use interfaces_53_ffts
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: nfft
+ real(dp),intent(in) :: inf_ucvol,mult
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: inf_rmet(3,3)
+ real(dp),intent(out) :: ZT_p(1:2,0:nfft-1)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: n_green_max=5
+ integer :: ii,isign,jj,kk,n_green,xx,yy,zz
+ real(dp) :: acc, norme
+ character(len=500) :: msg
+!arrays
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: T_p(:)
+
+! *************************************************************************
+
+ call timab(603,1,tsec)
+
+ norme = (mult/pi)**(onehalf)
+
+ ABI_ALLOCATE(T_p,(0:nfft-1))
+
+!n_green should be better chosen for non rectangular cell
+ do xx=1, n_green_max
+   n_green = xx
+   if(exp(-mult*dsq_green(xx*ngfft(1),0,0,inf_rmet))<tol14 &
+&   .and. exp(-mult*dsq_green(0,xx*ngfft(2),0,inf_rmet))<tol14 &
+&   .and. exp(-mult*dsq_green(0,0,xx*ngfft(3),inf_rmet))<tol14 ) exit
+ end do
+
+ acc = zero
+ T_p = zero
+ do kk = 0,ngfft(3)-1
+   do jj = 0,ngfft(2)-1
+     do ii = 0,ngfft(1)-1
+
+       do xx=-n_green,n_green-1
+         do yy=-n_green,n_green-1
+           do zz=-n_green,n_green-1
+
+             T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk) = T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk)+ &
+&             exp(-mult*dsq_green(ii+xx*ngfft(1),jj+yy*ngfft(2),kk+zz*ngfft(3),inf_rmet))
+
+           end do
+         end do
+       end do
+
+       T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk) = norme*T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk)
+       acc = acc + inf_ucvol* T_p(ii+ngfft(1)*jj+ngfft(1)*ngfft(2)*kk)
+
+     end do
+   end do
+ end do
+
+ T_p(:)= (one/acc)*T_p(:)
+
+!if(debug_rec)then
+ write(msg,'(a,d12.3,2(2a,i8),2(2a,3d12.3),2a,d16.6)')&
+& ' on the boundary    ', exp(-mult*dsq_green(ngfft(1),0,0,inf_rmet)),ch10, &
+& ' no zero            ', count(T_p>tol14),ch10, &
+& ' n_green            ', n_green,ch10, &
+& ' erreur_n_green     ', exp(-mult*dsq_green(n_green*ngfft(1),0,0,inf_rmet)), &
+& exp(-mult*dsq_green(0,n_green*ngfft(2),0,inf_rmet)), &
+& exp(-mult*dsq_green(0,0,n_green*ngfft(3),inf_rmet)),ch10,&
+& ' erreur_troncat     ', T_p(ngfft(1)/2),  &
+& T_p(ngfft(1)*(ngfft(2)/2)), &
+& T_P(ngfft(1)*ngfft(2)*(ngfft(3)/2)),ch10, &
+& ' erreurT_p          ',abs(acc-1.d0)
+ call wrtout(std_out,msg,'COLL')
+!endif
+
+
+ isign = -1
+ call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,ngfft,1,0)
+
+ ABI_DEALLOCATE(T_p)
+
+ ZT_p(:,:) = real(nfft,dp)*ZT_p
+
+
+ call timab(603,2,tsec)
+
+ contains
+
+   function dsq_green(ii,jj,kk,inf_rmet)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dsq_green'
+!End of the abilint section
+
+   real(dp) :: dsq_green
+   integer,intent(in) :: ii,jj,kk
+   real(dp),intent(in) :: inf_rmet(3,3)
+   dsq_green= inf_rmet(1,1)*dble(ii**2)&
+&   +inf_rmet(2,2)*dble(jj**2)&
+&   +inf_rmet(3,3)*dble(kk**2)&
+&   +two*(inf_rmet(1,2)*dble(ii*jj)&
+&   +inf_rmet(2,3)*dble(jj*kk)&
+&   +inf_rmet(3,1)*dble(kk*ii))
+ end function dsq_green
+
+end subroutine green_kernel
+!!***
+
+
+!!****f* ABINIT/recursion
+!! NAME
+!! recursion
+!! 
+!! FUNCTION
+!! This routine computes the recursion coefficients and the corresponding 
+!! continued fraction to get the density at a point from a fixed potential. 
+!! 
+!! INPUTS
+!!  exppot=exponential of -1/tsmear*vtrial (computed only once in vtorhorec)
+!!  coordx, coordy, coordz=coordonnees of the computed point
+!!  nrec=order of recursion
+!!  fermie=fermi energy (Hartree)
+!!  tsmear=temperature (Hartree)
+!!  dim_trott=dimension of the partial fraction decomposition
+!!  rtrotter=trotter parameter (real)
+!!  ZT_p=fourier transform of the Green krenel (computed only once in vtorhorec)
+!!  typat(:)=type of psp associated to any atom
+!!  tol=tolerance criteria for stopping recursion
+!!  debug=debugging variable
+!!  mpi_enreg=information about MPI paralelisation
+!!  nfft=number of points in FFT grid
+!!  ngfft=information about FFT
+!!  metrec<type(metricrec_type)>=information concerning the infinitesimal metrics
+!!  inf_ucvol=infinitesimal unit cell volume
+!!  tim_fourdp=time counter for fourdp
+!!  natom=number of atoms
+!!  projec(ngfftrec(1),ngfftrec(2),ngfftrec(3),lmnmax,natom) is the  vector, on the ngfftrec grid containing 
+!!  the non-lacal projector $Y_{lm}(r-R_A)f_{lk}(r-R_A)
+!!  tim= 0 if the time spent in the routine is not taken into account,1 otherwise. For example 
+!!  when measuring time for loading  balancing, we don't want to add the time spent in this to the
+!!  total time calculation
+!! 
+!! OUTPUT
+!!  rho_out=result of the continued fraction multiplied by a multiplicator
+!!  an, bn2 : coefficient given by recursion. 
+!!
+!! SIDE EFFECTS
+!! 
+!! PARENTS
+!!      first_rec,vtorhorec
+!!
+!! CHILDREN
+!!      fourdp,timab,trottersum,vn_nl_rec
+!!
+!! NOTES
+!!  at this time :
+!!       - exppot should be replaced by ?
+!!       - coord should be replaced by ?
+!!       - need a rectangular box (rmet diagonal matrix)
+!!
+!! SOURCE
+
+subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
+&                    nrec,fermie,tsmear,rtrotter,dim_trott, &
+&                    ZT_p, tol,typat, &
+&                    nlrec,mpi_enreg,&
+&                    nfft,ngfft,metrec,&
+&                    tim_fourdp,natom,projec,tim)
+
+
+ use m_linalg_interfaces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'recursion'
+ use interfaces_53_ffts
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: coordx,coordy,coordz,nfft,nrec,tim
+ integer,intent(in) :: tim_fourdp,natom,dim_trott
+ real(dp),intent(in) :: fermie,tol,tsmear,rtrotter
+ real(dp), intent(out) :: rho_out
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(nlpsprec_type),intent(in) :: nlrec
+ type(metricrec_type),intent(in) :: metrec
+!arrays
+ integer, intent(in) :: ngfft(18)
+ integer, intent(in) :: typat(natom)
+ real(dp), intent(in) :: ZT_p(1:2, 0:nfft-1)
+ real(dp), intent(in) :: exppot(0:nfft-1)
+ real(dp), intent(in) :: projec(0:,0:,0:,1:,1:)
+ real(dp), intent(out) :: an(0:nrec),bn2(0:nrec)
+!Local variables-------------------------------
+!not used, debugging purpose only
+!for debugging purpose, detailled printing only once for density and ekin
+!scalars
+ integer, parameter :: level = 7, minrec = 3
+ integer  :: irec,isign,timab_id,ii
+ real(dp) :: switchimu,switchu
+ real(dp) :: bb,beta,mult,prod_b2,error,errold
+ real(dp) :: inf_ucvol,pi_on_rtrotter,twortrotter,exp1,exp2
+ complex(dpc) :: cinv2rtrotter,coeef_mu,facrec0
+! character(len=500) :: msg
+!arrays
+ real(dp) :: tsec(2)
+ real(dp) :: inf_tr(3)
+ real(dp) :: Zvtempo(1:2, 0:nfft-1)
+ real(dp) :: unold(0:nfft-1),vn(0:nfft-1),un(0:nfft-1)
+ complex(dpc) :: acc_rho(0:nrec)
+ complex(dpc) :: D(0:dim_trott),Dold(0:dim_trott)
+ complex(dpc) :: N(0:dim_trott),Nold(0:dim_trott)
+
+! *************************************************************************
+
+!--If count time or not
+ timab_id = 616; if(tim/=0) timab_id = 606;
+
+ call timab(timab_id,1,tsec)
+ 
+!##############################################################
+!--Initialisation of metrics
+ inf_ucvol = metrec%ucvol
+ inf_tr = metrec%tr
+ mult = two/inf_ucvol    !non-spined system
+
+ beta = one/tsmear
+!--Variables for optimisation
+ pi_on_rtrotter = pi/rtrotter
+ twortrotter = two*rtrotter
+ exp1 = exp((beta*fermie)/(rtrotter))
+ exp2 = exp(beta*fermie/(twortrotter))
+ cinv2rtrotter = cmplx(one/twortrotter,zero,dp)
+ coeef_mu = cmplx(one/exp2,zero,dp)
+
+!--Initialisation of  an,bn,un....
+ N = czero;  D = cone
+ facrec0 = cone
+ Nold = czero; Dold = czero
+
+ an = zero; bn2 = zero;  bn2(0) = one
+ bb = zero; vn  = zero;  unold  = zero
+!--u0 is a Dirac function
+ un = zero
+ un(coordx+ngfft(1)*(coordy+ngfft(2)*coordz)) = one/sqrt(inf_ucvol)
+
+!--Initialisation of accumulated density 
+ acc_rho = czero  
+!--Initialisation of estimated error
+ prod_b2 = twortrotter/exp1
+ errold = zero
+
+!##############################################################
+!--Main loop
+ maindo : do irec = 0, nrec
+   
+!  --Get an and bn2 coef by the lanczos method
+   
+!  --Computation of exp(-beta*V/8*p)*un or exp(-beta*V/4*p)*un
+!  depending on if nl part has to be calculated or not.
+   vn = exppot * un   
+   
+!  --First Non-local psp contribution: (Id+sum_atom int dr1(E(r,r1))vn(r1))
+!  --Computation of exp(-beta*V_NL/4*p)*vn
+   if(nlrec%nlpsp) then
+     call timab(timab_id,2,tsec)
+     call vn_nl_rec(vn,natom,typat,ngfft(:3),inf_ucvol,nlrec,projec)
+     call timab(timab_id,1,tsec)
+
+!    --Computation of exp(-beta*V/8*p)*vn in nonlocal case
+     vn = exppot * vn
+   end if !--End if on nlrec%nlpsp
+   
+!  --Convolution with the Green kernel
+!  --FFT of vn
+   isign = -1
+   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,ngfft,1,tim_fourdp)
+
+!  --F(T)F(vn)
+   do ii = 0,nfft-1
+     switchu   = Zvtempo(1,ii)
+     switchimu = Zvtempo(2,ii)
+     Zvtempo(1,ii) = switchu*ZT_p(1,ii) - switchimu*ZT_p(2,ii)
+     Zvtempo(2,ii) = switchu*ZT_p(2,ii) + switchimu*ZT_p(1,ii)
+   end do
+   
+!  --F^-1(F(T)F(vn))
+   isign = 1
+   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,ngfft,1,tim_fourdp)
+
+!  --Computation of exp(-beta*V/8*p)*un or exp(-beta*V/4*p)*un
+!  depending on if nl part has to be calculated or not.
+
+   vn = inf_ucvol * exppot * vn
+
+!  --Second Non-local psp contribution: (Id+sum_atom E(r,r1))vn   
+   if(nlrec%nlpsp) then
+     call timab(timab_id,2,tsec)
+     call vn_nl_rec(vn,natom,typat,ngfft(:3),inf_ucvol,nlrec,projec)
+     call timab(timab_id,1,tsec)
+
+!    --Computation of exp(-beta*V/8*p)*vn in nonlocal case
+     vn = exppot * vn
+   end if !--End if on nlrec%nlpsp
+
+!  --Multiplication of a and b2 coef by exp(beta*fermie/(two*rtrotter)) must be done in the continued fraction computation  
+!  --Computation of a and b2
+   an(irec) = inf_ucvol*ddot(nfft,vn,1,un,1)
+
+!  --an must be positive real       
+!  --We must compute bn2 and prepare for the next iteration
+   if(irec<nrec)then     
+     do ii = 0,nfft-1
+       switchu = un(ii)
+       un(ii) = vn(ii)-an(irec)*un(ii)-bb*unold(ii)
+       unold(ii) = switchu
+       bn2(irec+1) = bn2(irec+1)+inf_ucvol*un(ii)*un(ii)
+     end do
+     bb = sqrt(bn2(irec+1))
+     un = (one/bb)*un
+   end if
+
+!  ######################################################
+!  --Density computation
+!  density computation is done inside the main looping, juste after the calculus of a and b2, in order to make 
+!  it possible to stop the recursion at the needed accuracy, without doing more recursion loop than needed - 
+!  further developpement
+
+!  !--using the property that: sum_i(bi*c)^2|(z-ai*c)=1/c*sum_i(bi)^2|(z/c-ai)
+!  !and for c =exp(-beta*fermie/(two*rtrotter)
+
+   
+   call trottersum(dim_trott,error,prod_b2,pi_on_rtrotter,&
+&   facrec0,coeef_mu,exp1,&
+&   an(irec),bn2(irec),&
+&   N,D,Nold,Dold)
+   
+
+   if(irec/=nrec .and. irec>=minrec)then
+     if((bn2(irec+1)<tol14).or.(mult*error<tol.and.errold<tol)) exit
+   end if
+   errold = mult*error
+ end do maindo
+!--Accumulated density
+ rho_out = mult*real(cone-sum(N/D)*cinv2rtrotter,dp)
+
+ 
+ call timab(timab_id,2,tsec)
+
+ end subroutine recursion
+!!***
+
+
+!!****f* ABINIT/recursion_nl
+!! NAME
+!! recursion_nl
+!!
+!! FUNCTION
+!! Given a $|un>$ vector on the real-space grid this routine calculates
+!! the density in  $|un>$ by recursion method.
+!!
+!! INPUTS
+!!  exppot=exponential of -1/tsmear*vtrial (computed only once in vtorhorec)
+!!  trotter=trotter parameter
+!!  dim_trott=dimension of the partial fraction decomposition
+!!  tsmear=temperature (Hartree)
+!!  tol=tolerance criteria for stopping recursion_nl
+!!  ngfft=information about FFT(dtset%ngfft a priori different from ngfftrec)
+!!  rset<recursion_type> contains all parameter of recursion
+!!  typat(natom)=type of pseudo potential associated to any atom
+!!  natom=number of atoms
+!!  projec(ngfftrec(1),ngfftrec(2),ngfftrec(3),lmnmax,natom) is the  vector, on the ngfftrec grid containing
+!!  the non-lacal projector $Y_{lm}(r-R_A)f_{lk}(r-R_A)
+!!
+!! OUTPUT
+!!  rho_out=result of the continued fraction multiplied by a multiplicator
+!!
+!! SIDE EFFECTS
+!!  un(:,:,:)=initial vector on the grid. it is changed in output
+!!
+!! PARENTS
+!!      nlenergyrec
+!!
+!! CHILDREN
+!!      fourdp,timab,trottersum,vn_nl_rec,wrtout
+!!
+!! NOTES
+!!  at this time :
+!!       - need a rectangular box (rmet diagonal matrix)
+!!
+!! SOURCE
+
+subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
+  &                     tsmear,trotter,dim_trott,tol,typat,&
+  &                     natom,projec)
+
+
+ use m_linalg_interfaces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'recursion_nl'
+ use interfaces_14_hidewrite
+ use interfaces_53_ffts
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: trotter,natom,dim_trott
+ real(dp),intent(in) :: tol,tsmear
+ type(recursion_type),intent(in) :: rset
+ real(dp), intent(out) :: rho_out
+!arrays
+ integer,intent(in) ::  typat(natom),ngfft(18)
+ real(dp),intent(in) :: exppot(0:ngfft(1)*ngfft(2)*ngfft(3)-1)
+ real(dp),intent(inout) :: un(0:rset%nfftrec-1)
+ real(dp),pointer :: projec(:,:,:,:,:)
+!Local variables-------------------------------
+!scalars
+ integer, parameter ::  minrec = 3
+ integer  :: irec,isign,ii
+ real(dp) :: bb,beta,mult,prod_b2,rtrotter
+ real(dp) :: inf_ucvol,pi_on_rtrotter,twortrotter,exp1
+ real(dp) :: exp2,error,errold
+ real(dp) :: switchu,switchimu
+ complex(dpc) :: facrec0,cinv2rtrotter,coeef_mu
+ character(len=500) :: msg
+ type(mpi_type),pointer:: mpi_loc
+!arrays
+ real(dp):: tsec(2)
+ real(dp):: inf_tr(3)
+ real(dp):: an(0:rset%min_nrec),bn2(0:rset%min_nrec)
+ real(dp):: vn(0:rset%nfftrec-1)
+ real(dp):: unold(0:rset%nfftrec-1)
+ real(dp):: Zvtempo(1:2,0:rset%nfftrec-1)
+ complex(dpc) :: acc_rho(0:rset%min_nrec)
+ complex(dpc) :: D(0:dim_trott),Dold(0:dim_trott)
+ complex(dpc) :: N(0:dim_trott),Nold(0:dim_trott)
+
+! *************************************************************************
+
+ call timab(608,1,tsec) !--start time-counter: recursion_nl
+ if(rset%debug)then
+   msg=' '
+   call wrtout(std_out,msg,'COLL')
+ end if
+
+!##############################################################
+ beta = one/tsmear
+
+!--Rewriting the trotter parameter
+ rtrotter  = max(half,real(trotter,dp))
+
+!--Initialisation of mpi
+ mpi_loc => rset%mpi
+
+!--Initialisation of metrics
+ inf_ucvol = rset%inf%ucvol
+ inf_tr = rset%inf%tr
+ mult = one   !--In the case of the calculus of the NL-energy
+
+!--Initialisation of  an,bn,un....
+ N = czero;  D = cone
+ facrec0 = cone
+ Nold = czero; Dold = czero
+
+ an = zero; bn2 = zero;  bn2(0) = one
+ bb = zero; vn  = zero;  unold  = zero
+
+!--Variables for optimisation
+ pi_on_rtrotter = pi/rtrotter
+ twortrotter = two*rtrotter
+ exp1 = exp((beta*rset%efermi)/(rtrotter))
+ exp2 = exp(beta*rset%efermi/(twortrotter))
+ cinv2rtrotter = cmplx(one/twortrotter,zero,dp)
+ coeef_mu = cmplx(one/exp2,zero,dp)
+
+!--Initialisation of accumulated density
+ acc_rho = czero
+!--Initialisation of estimated error
+ prod_b2 = twortrotter/exp1
+ errold = zero
+
+!##############################################################
+!--Main loop
+ maindo : do irec = 0, rset%min_nrec
+!  --Get an and bn2 coef by the lanczos method
+
+!  --Computation of exp(-beta*V/8*p)*un
+   vn = exppot * un
+
+!  --First Non-local psp contribution: (Id+sum_atom E(r,r1))vn
+   call timab(608,2,tsec)
+   call vn_nl_rec(vn,natom,typat,rset%ngfftrec(:3),inf_ucvol,rset%nl,projec)
+   call timab(608,1,tsec)
+
+!  --Computation of exp(-beta*V/8*p)*un
+   vn = exppot * vn
+
+!  --Convolution with the Green kernel
+!  --FFT of vn
+   isign = -1
+   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,rset%ngfftrec,1,6)
+
+!  --F(T)F(vn)
+   do ii = 0,rset%nfftrec-1
+     switchu   = Zvtempo(1,ii)
+     switchimu = Zvtempo(2,ii)
+     Zvtempo(1,ii) = switchu*rset%ZT_p(1,ii) - switchimu*rset%ZT_p(2,ii)
+     Zvtempo(2,ii) = switchu*rset%ZT_p(2,ii) + switchimu*rset%ZT_p(1,ii)
+   end do
+
+!  --F^-1(F(T)F(vn))
+   isign = 1
+   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,rset%ngfftrec,1,6)
+
+!  --Computation of exp(-beta*V/2*p)*vn
+   vn = inf_ucvol * exppot * vn
+
+!  --Second Non-local psp contribution: (Id+sum_atom E(r,r1))vn
+   call timab(608,2,tsec)
+   call vn_nl_rec(vn,natom,typat,rset%ngfftrec(:3),inf_ucvol,rset%nl,projec)
+   call timab(608,1,tsec)
+
+!  --Computation of exp(-beta*V/8*p)*vn
+   vn = exppot * vn
+
+
+!  --Multiplication of a and b2 coef by exp(beta*fermie/(2.d0*rtrotter)) must be done in the continued fraction computation
+!  --Computation of a and b2
+   an(irec) = inf_ucvol*ddot(rset%nfftrec,vn,1,un,1)      !--an must be positive real
+
+!  --We must compute bn2 and prepare for the next iteration
+   if(irec<rset%min_nrec)then
+     do ii = 0,rset%nfftrec-1
+       switchu = un(ii)
+       un(ii) = vn(ii)-an(irec)*un(ii)-bb*unold(ii)
+       unold(ii) = switchu
+       bn2(irec+1) = bn2(irec+1)+inf_ucvol*un(ii)*un(ii)
+     end do
+     bb = sqrt(bn2(irec+1))
+     un = (one/bb)*un
+   end if
+
+!  ######################################################
+!  --Density computation
+!  in order to make it possible to stop the recursion_nl at the
+!  needed accuracy, without doing more recursion_nl loop than needed further developpement
+
+   call trottersum(dim_trott,error,&
+&   prod_b2,pi_on_rtrotter,&
+&   facrec0,coeef_mu,exp1,&
+&   an(irec),bn2(irec),&
+&   N,D,Nold,Dold)
+
+
+   if(irec/=rset%min_nrec .and. irec>=minrec)then
+     if((bn2(irec+1)<tol14).or.(mult*error<tol.and.errold<tol)) exit
+   end if
+   errold = mult*error
+ end do maindo
+!--Accumulated density
+ rho_out = mult*real(cone-sum(N/D)*cinv2rtrotter,dp)
+
+ call timab(608,2,tsec) !--stop time-counter: recursion_nl
+
+end subroutine recursion_nl
+!!***
+
+
+!!****f* ABINIT/vn_nl_rec
+!! NAME
+!! vn_nl_rec
+!!
+!! FUNCTION
+!! this routine computes the contribution to the vector vn, during
+!! recursion, due to the non-local psp.
+!!
+!! INPUTS
+!!  vn(:,:,:)=the vector on the real-space grid.
+!!  inf_ucvol=volume of infinitesimal cell
+!!  natom=number of atoms
+!!  typat(natom)=the type of psps associated to the atoms
+!!  ngfftrec(3)=first 3 components of ngfftrec (truncated box, if different from ngfft) for the real-space grid
+!!  nlrec<type(nlpsprec_type)> in recursion_type containing information concerning psp
+!!  projec(ngfftrec(1),ngfftrec(2),ngfftrec(3),lmnmax,natom) is the  vector, on the ngfftrec grid containing
+!!  the non-lacal projector $Y_{lm}(r-R_A)f_{lk}(r-R_A)
+!!
+!! OUTPUT
+!! vn_nl(:,:,:)=the non_local contribution to vn
+!!
+!! PARENTS
+!!      recursion,recursion_nl
+!!
+!! CHILDREN
+!!      timab
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine vn_nl_rec(vn,natom,typat,ngfftrec,inf_ucvol,nlrec,projec)
+
+
+ use m_linalg_interfaces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'vn_nl_rec'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom
+ real(dp),intent(in) :: inf_ucvol
+ type(nlpsprec_type),intent(in) :: nlrec
+!arrays
+ integer,intent(in) :: ngfftrec(3),typat(natom)
+ real(dp),intent(in) :: projec(0:,0:,0:,1:,1:)
+ real(dp),intent(inout):: vn(0:ngfftrec(1)*ngfftrec(2)*ngfftrec(3)-1)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,nfftrec
+ integer :: jlmn,il,in,jn
+ integer :: ipsp,ilmn
+ integer :: npsp,lmnmax
+ real(dp):: vn_nl_loc
+!arrays
+ real(dp):: vn_nl(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1)
+ real(dp):: vtempo(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1)
+ real(dp):: tsec(2)
+! *************************************************************************
+
+ call timab(615,1,tsec)
+!--Initialisation
+
+ vn_nl = zero
+ npsp = nlrec%npsp
+ lmnmax = nlrec%lmnmax
+ nfftrec = product(ngfftrec)
+ vtempo(:,:,:) = reshape(source=vn,shape=ngfftrec(:3))
+
+!--Sum_iatom \int dr1 E(r-r_a,r1-r_a)vn(r1) *infucvol
+ do iatom=1,natom !--Loop on atoms
+   ipsp = typat(natom)
+
+!  --If psp(typat(iatom)) is local then cycle
+   if(all(nlrec%pspinfo(:,ipsp)==0))  cycle
+
+
+!  write(std_out,*)'lmnmax',nlrec%lmnmax,lmnmax
+
+   do ilmn = 1, lmnmax
+     do jlmn = 1,lmnmax
+       if(nlrec%indlmn(4,ilmn,ipsp)==nlrec%indlmn(4,jlmn,ipsp)) then
+         il = 1+nlrec%indlmn(1,jlmn,ipsp)
+         in = nlrec%indlmn(3,ilmn,ipsp)
+         jn = nlrec%indlmn(3,jlmn,ipsp)
+         vn_nl_loc = ddot(nfftrec,projec(:,:,:,jlmn,iatom),1,vtempo,1)
+         vn_nl = vn_nl+projec(:,:,:,ilmn,iatom)*vn_nl_loc*nlrec%mat_exp_psp_nl(in,jn,il,ipsp)
+       end if
+     end do
+   end do
+ end do !--End loop on atoms
+ vtempo = vtempo + vn_nl*inf_ucvol
+
+ vn = reshape(source=vtempo,shape=(/nfftrec/))
+
+ call timab(615,2,tsec)
+
+end subroutine vn_nl_rec
 !!***
 
 end module m_vtorhorec
