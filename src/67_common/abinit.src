@@ -26,8 +26,6 @@ sources = [
  "chern_number.F90",
  "m_conducti.F90",
  "constrf.F90",
- "dielmt.F90",
- "dieltcel.F90",
  "emispec_paw.F90",
  "energy.F90",
  "etotfor.F90",
@@ -75,11 +73,9 @@ sources = [
  "mlwfovlp_setup.F90",
  "mlwfovlp_ylmfac.F90",
  "mlwfovlp_ylmfar.F90",
- "moddiel.F90",
  "m_eprenorms.F90",
  "m_plowannier.F90",
  "m_vcoul.F90",
- "newkpt.F90",
  "nres2vres.F90",
  "odamix.F90",
  "optics_vloc.F90",
@@ -107,10 +103,11 @@ sources = [
  "update_e_field_vars.F90",
  "vdw_dftd2.F90",
  "vdw_dftd3.F90",
- "vtorhotf.F90",
+ "m_vtorhotf.F90",
  "wf_mixing.F90",
  "wvl_initro.F90",
- "wvl_mkrho.F90"]
+ "wvl_mkrho.F90",
+]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

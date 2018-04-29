@@ -878,7 +878,7 @@ program anaddb
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_DEALLOCATE(thm_scells)
  end if
- 
+
  ! Close files
  if (iam_master) then
 #ifdef HAVE_NETCDF

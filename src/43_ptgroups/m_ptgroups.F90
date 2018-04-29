@@ -32,6 +32,40 @@ module m_ptgroups
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
  use m_symtk,          only : mati3inv
 
+! Import group tables
+ use m_ptg_C1
+ use m_ptg_Ci
+ use m_ptg_C2
+ use m_ptg_Cs
+ use m_ptg_C2h
+ use m_ptg_D2
+ use m_ptg_C2v
+ use m_ptg_D2h
+ use m_ptg_C4
+ use m_ptg_S4
+ use m_ptg_C4h
+ use m_ptg_D4
+ use m_ptg_C4v
+ use m_ptg_D2d
+ use m_ptg_D4h
+ use m_ptg_C3
+ use m_ptg_C3i
+ use m_ptg_D3
+ use m_ptg_C3v
+ use m_ptg_D3d
+ use m_ptg_C6
+ use m_ptg_C3h
+ use m_ptg_C6h
+ use m_ptg_D6
+ use m_ptg_C6v
+ use m_ptg_D3h
+ use m_ptg_D6h
+ use m_ptg_T
+ use m_ptg_Th
+ use m_ptg_O
+ use m_ptg_Td
+ use m_ptg_Oh
+
  implicit none
 
  private
@@ -91,7 +125,6 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_point_group'
- use interfaces_43_ptgroups
 !End of the abilint section
 
  implicit none

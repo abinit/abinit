@@ -110,8 +110,8 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%comm_cell           = xmpi_comm_self
  mpi_enreg%comm_cell_pert      = xmpi_comm_self
  mpi_enreg%comm_fft            = xmpi_comm_self
- mpi_enreg%comm_hf             = xmpi_comm_self 
- mpi_enreg%comm_img            = xmpi_comm_self 
+ mpi_enreg%comm_hf             = xmpi_comm_self
+ mpi_enreg%comm_img            = xmpi_comm_self
  mpi_enreg%comm_kpt            = xmpi_comm_self
  mpi_enreg%comm_kptband        = xmpi_comm_self
  mpi_enreg%comm_pert           = xmpi_comm_self
@@ -123,7 +123,7 @@ subroutine initmpi_seq(mpi_enreg)
  call nullify_mpi_enreg(mpi_enreg)
 
 !Allocate and nullify distribfft datastructure
-! This is not good since distribfft is not initialized here (even with 0s). 
+! This is not good since distribfft is not initialized here (even with 0s).
 ! It can be dangerous if use with no care (Valgrind might complain)
  ABI_DATATYPE_ALLOCATE(mpi_enreg%distribfft,)
 

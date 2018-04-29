@@ -220,6 +220,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_io_kss,           only : gshgg_mkncwrite
  use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
  use m_kg,               only : getcut, getmpw, kpgio, getph
+ use m_vtorhorec,        only : first_rec, vtorhorec
+ use m_vtorhotf,         only : vtorhotf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -239,7 +241,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
- use interfaces_68_recursion
  use interfaces_68_rsprc
  use interfaces_79_seqpar_mpi
  use interfaces_94_scfcv, except_this_one => scfcv

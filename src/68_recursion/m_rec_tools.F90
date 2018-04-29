@@ -28,7 +28,6 @@
 
 #include "abi_common.h"
 
-
 module m_rec_tools
 
  use defs_basis
@@ -77,8 +76,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
 
-
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -118,8 +115,6 @@ subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
   end do
 end subroutine get_pt0_pt1
 !!***
-
-
 
 !!****f* m_rec_tools/reshape_pot
 !! NAME
@@ -184,8 +179,6 @@ subroutine reshape_pot(trasl,nfft,nfftrec,ngfft,ngfftrec,pot,potloc)
 
 end subroutine reshape_pot
 !!***
-
-
 
 !!****f* m_rec_tools/trottersum
 !! NAME
@@ -277,4 +270,4 @@ end subroutine trottersum
 !!***
 
 end module m_rec_tools
-
+!!***

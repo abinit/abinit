@@ -32,6 +32,7 @@ module m_upf2abinit
  use m_errors
  use m_atomdata
  use pseudo_pwscf ! pwscf module with all data explicit!
+ use m_read_upf_pwscf, only : read_pseudo
 
  use defs_datatypes,  only : pseudopotential_type
  use m_io_tools,      only : open_file

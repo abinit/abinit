@@ -39,8 +39,7 @@ MODULE m_pretty_rec
 
  private
 
- public ::           &
-&         prtwork                ! calculate the work done during recursion
+ public ::  prtwork                ! calculate the work done during recursion
 
  interface prtwork
   module procedure prtworksim
@@ -206,7 +205,6 @@ subroutine prtworkadv(work_now,adv)
    work_done = 0
   end if
  endif
-
 
 end subroutine prtworkadv
 !!***
