@@ -517,6 +517,8 @@ class AbinitProject(object):
                 print("[%s] Found subroutines or functions not inside module!" % fort_file.name)
                 retcode += 1
 
+        print("retcode", retcode)
+
         return retcode
 
     #def edit_connections(self, name, relation):

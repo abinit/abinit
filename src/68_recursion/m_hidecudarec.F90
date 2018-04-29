@@ -41,7 +41,6 @@ module m_hidecudarec
 
  implicit none
 
-
  private
 
 #if defined HAVE_GPU_CUDA
@@ -124,6 +123,7 @@ subroutine prt_mem_usage(nptrec,nfft)
   write(msg,'(a,80a)')' ',('_',ii=1,80)
   call wrtout(std_out,msg,'COLL')
 end subroutine prt_mem_usage
+
 #endif
 !!***
 
@@ -148,8 +148,8 @@ end subroutine prt_mem_usage
 !!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
-subroutine InitRecGPU_0(recgpu,mpi_ab)
 
+subroutine InitRecGPU_0(recgpu,mpi_ab)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -172,7 +172,6 @@ subroutine InitRecGPU_0(recgpu,mpi_ab)
 end subroutine InitRecGPU_0
 !!***
 #endif
-
 
 !!****f* m_hidecudarec/InitRecGPU
 !! NAME
@@ -200,8 +199,8 @@ end subroutine InitRecGPU_0
 !!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
-subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
 
+subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -282,11 +281,10 @@ subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
    end if
  endif
  call CleanGPU(gpuinfo)
+
 end subroutine InitRecGPU
 !!***
 #endif
-
-
 
 !!****f* m_hidecudarec/cudarec
 !! NAME
@@ -297,9 +295,7 @@ end subroutine InitRecGPU
 !!
 !! INPUTS
 !!
-!!
 !! OUTPUT
-!!
 !!
 !! PARENTS
 !!      first_rec,vtorhorec
@@ -309,8 +305,8 @@ end subroutine InitRecGPU
 !!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
-subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 
+subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -393,8 +389,6 @@ end subroutine cudarec
 !!***
 #endif
 
-
-
 !!****f* m_hidecudarec/CleanRecGPU
 !! NAME
 !! CleanRecGPU
@@ -447,7 +441,6 @@ subroutine CleanRecGPU(recgpu,load)
    end if
  endif
  call unset_dev()
-
 
 end subroutine CleanRecGPU
 !!***

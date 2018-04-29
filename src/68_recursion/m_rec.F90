@@ -41,16 +41,23 @@
 module m_rec
 
  use defs_basis
+ use defs_datatypes
+ use defs_abitypes
  use defs_rectypes
  use m_profiling_abi
  use m_errors
  use m_xmpi
  use m_sort
 
- use m_time,        only : timab
- use m_rec_tools,    only  :get_pt0_pt1
+ use m_exp_mat,         only : exp_mat
+ use m_numeric_tools,   only : set2unit
+ use m_pawfgr,          only : pawfgr_nullify, indgrid, pawfgr_destroy
+ use m_paw_sphharm,     only : initylmr
+ use m_time,            only : timab
+ use m_rec_tools,       only : get_pt0_pt1
+ use m_per_cond,        only : per_cond
 #ifdef HAVE_GPU_CUDA
- use m_hidecudarec,only   :InitRecGPU
+ use m_hidecudarec,     only : InitRecGPU, CleanRecGPU
 #endif
 
 
@@ -99,8 +106,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,&
-     &                    beta_coeff)
+subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,beta_coeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -231,6 +237,7 @@ end subroutine H_D_distrib
 !!      wrtout,xmpi_max
 !!
 !! SOURCE
+
 subroutine find_maxmin_proc(recpar,nproc,me,gratio,ngfft,proc_pt_dev)
 
 !This section has been created automatically by the script Abilint (TD).
@@ -278,14 +285,12 @@ subroutine find_maxmin_proc(recpar,nproc,me,gratio,ngfft,proc_pt_dev)
 end subroutine find_maxmin_proc
 !!***
 
-
 !!****f* m_rec/cpu_distribution
 !! NAME
 !! cpu_distribution
 !!
 !! FUNCTION
 !! Calculate the number of point,GPU,for any proc
-!!
 !!
 !! INPUTS
 !!  ngfft(3)=nuber of point of the grid
@@ -441,10 +446,6 @@ end subroutine cpu_distribution
 !! SOURCE
 
 subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
-
- use defs_abitypes
- use m_errors
- use m_pawfgr, only : pawfgr_nullify, indgrid
 
 #ifdef HAVE_GPU_CUDA
  use m_gpu_detect,only    :get_topo,find_set_gpu
@@ -627,10 +628,8 @@ end subroutine InitRec
 !!      wrtout,xmpi_max
 !!
 !! SOURCE
-subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,&
-&                        natom,debug)
 
- use m_per_cond,only     :  per_cond
+subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,natom,debug)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -680,11 +679,8 @@ subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,&
    end if
  end if
 
-
-
 end subroutine Init_MetricRec
 !!***
-
 
 !!****f* m_rec/Init_nlpspRec
 !! NAME
@@ -712,10 +708,8 @@ end subroutine Init_MetricRec
 !!      wrtout,xmpi_max
 !!
 !! SOURCE
-subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
 
- use defs_datatypes
- use defs_abitypes
+subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -800,10 +794,9 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
   ABI_ALLOCATE(nlrec%indlmn,(0,0,0))
   ABI_ALLOCATE(nlrec%projec,(0,0,0))
  endif
+
 end subroutine Init_nlpspRec
 !!***
-
-
 
 !!****f* m_rec/CleanRec
 !! NAME
@@ -825,12 +818,8 @@ end subroutine Init_nlpspRec
 !!      wrtout,xmpi_max
 !!
 !! SOURCE
-subroutine CleanRec(rset)
 
- use m_pawfgr, only : pawfgr_destroy
-#ifdef HAVE_GPU_CUDA
- use m_hidecudarec,only     : CleanRecGPU
-#endif
+subroutine CleanRec(rset)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -959,6 +948,7 @@ subroutine Calcnrec(rset,b2)
  call wrtout(std_out,msg,'COLL')
  write(msg,'(51a)')' ',('-',ii=1,50)
  call wrtout(std_out,msg,'COLL')
+
 end subroutine Calcnrec
 !!***
 
@@ -1286,8 +1276,6 @@ real(dp) :: inf_rmet(3,3)
 end subroutine getngrec
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/pspnl_operat_rec
 !! NAME
 !! pspnl_operat_rec
@@ -1300,12 +1288,6 @@ end subroutine getngrec
 !! In this routine  the projectors $Y_{lm}(\hat{r-R_A}')f^l_i(r-R_A)$
 !! are calculated. So an array of dimensions
 !! rset%nl%projec(nfftrec,lmnmax,nlrec%npsp)
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MM)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! metrec<metricrec_type>=contains information concerning metric in
@@ -1333,19 +1315,8 @@ end subroutine getngrec
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
-
- use defs_basis
- use defs_rectypes
- use m_profiling_abi
-
- use m_paw_sphharm, only : initylmr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1543,29 +1514,19 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 end subroutine pspnl_operat_rec
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/pspnl_hgh_rec
 !! NAME
 !! pspnl_hgh_rec
 !!
 !! FUNCTION
 !! This routine computes the matrices S_kk'^{l,A} of the projectors
-!! (it is the exponential of the overlap matrix).
-!! it coorresponds to the matrix:
+!! (it is the exponential of the overlap matrix). It coorresponds to the matrix:
 !!   $$\left[(U_l)^{-1}*Exp(-temperature D_l )*U_l* (g_l)^{-1} -Identity\right]_kk'
 !!   where (U_l)^-1* D_l* U_l = h^lg_l.
 !! $g_l = <f^l_k|f^l_{k'}>$ is the overlap matrix between projectors
 !! and $h^l_{kk'}$ is the strength matrix of the projectors.
 !! It calulates also the strength eigenvalues and eigenvectors of $h$,
 !! used in the calculus of non-local energy
-!!
-!! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group ( ).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  temperature=4*rtrotter/beta=4*rtrotter*tsmear: the effective temp. in  recursion
@@ -1592,26 +1553,10 @@ end subroutine pspnl_operat_rec
 !! CHILDREN
 !!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
-!! NOTES
-!!  at this time :
-!!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 
- use m_profiling_abi
-
- use defs_basis
- use defs_datatypes
- use defs_rectypes
- use m_exp_mat,       only : exp_mat
- use m_numeric_tools, only : set2unit
  use m_linalg_interfaces
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1804,10 +1749,8 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
    call wrtout(std_out,msg,'COLL')
  end if
 
-
 end subroutine pspnl_hgh_rec
 !!***
-
 
 end module m_rec
 !!***

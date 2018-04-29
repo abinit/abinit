@@ -30,9 +30,6 @@ module defs_rectypes
  use m_pawfgr, only : pawfgr_type
 
  implicit none
-
-
-!Structures
 !!***
 
 !!****t* defs_rectypes/vec_int

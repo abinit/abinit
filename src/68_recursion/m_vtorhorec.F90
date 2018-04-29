@@ -1,4 +1,59 @@
-!!{\src2tex{textfont=tt}}
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_vtorhorec
+!! NAME
+!!  m_vtorhorec
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (SLeroux,MMancini).
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_vtorhorec
+
+ use defs_basis
+ use defs_abitypes
+ use defs_rectypes
+ use m_xmpi
+ use m_pretty_rec
+ use m_errors
+ use m_profiling_abi
+ use m_per_cond
+
+ use m_time,           only : timab
+ use m_rec,            only : Calcnrec
+ use m_rec_tools,      only : reshape_pot, trottersum
+#ifdef HAVE_GPU_CUDA
+ use m_initcuda,       only : cudap
+ use m_hidecudarec
+ use m_xredistribute
+#endif
+
+ implicit none
+
+ private
+!!***
+
+ public :: vtorhorec
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/vtorhorec
 !! NAME
 !! vtorhorec
@@ -6,13 +61,6 @@
 !! FUNCTION
 !! This routine computes the new density from a fixed potential (vtrial)
 !! using a recursion method
-!!
-!! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (SLeroux,MMancini).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  deltastep= if 0 the iteration step is equal to dtset%nstep
@@ -63,33 +111,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine vtorhorec(dtset,&
 &  ek,enl,entropy,e_eigenvalues,fermie,&
 &  grnl,initialized,irrzon,nfftf,phnons,&
 &  rhog, rhor, vtrial,rset,deltastep,rprimd,gprimd)
-
- use defs_basis
- use defs_abitypes
- use defs_rectypes
- use m_xmpi
- use m_pretty_rec
- use m_errors
- use m_profiling_abi
-
- use m_time,           only : timab
- use m_rec,            only : Calcnrec
- use m_rec_tools,      only : reshape_pot
-#ifdef HAVE_GPU_CUDA
- use m_initcuda,       only : cudap
- use m_hidecudarec
- use m_xredistribute
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -910,8 +935,6 @@ subroutine vtorhorec(dtset,&
 end subroutine vtorhorec
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/entropyrec
 !! NAME
 !! entropyrec
@@ -920,14 +943,6 @@ end subroutine vtorhorec
 !! This routine computes the local part of the entropy at a point using a path integral,
 !! in the recursion method.
 !!
-!! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group ( ).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
 !!  an, bn2 : coefficient given by the recursion.
 !!  nrec=order of recursion
 !!  trotter=trotter parameter
@@ -954,22 +969,9 @@ end subroutine vtorhorec
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 &                     n_pt_integ,xmax,&
 &                     ent_out1,ent_out2,ent_out3,ent_out4)
-
-
- use defs_basis
- use m_profiling_abi
-
- use m_time,             only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1264,8 +1266,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 end subroutine entropyrec
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/fermisolverec
 !! NAME
 !! fermisolverec
@@ -1273,13 +1273,6 @@ end subroutine entropyrec
 !! FUNCTION
 !! This routine computes the fermi energy in order to have a given number of
 !! valence electrons in the recursion method, using a Ridder s Method
-!!
-!! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group ( ).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  debug_rec=debugging variable
@@ -1314,30 +1307,11 @@ end subroutine entropyrec
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
   &                      temperature,trotter,nelect, &
   &                      acc, max_it, &
   &                      long_tranche,mpi_enreg,&
   &                      inf_ucvol,gputopo)
-
- use defs_basis
- use defs_abitypes
- use defs_rectypes
- use m_xmpi
- use m_errors
- use m_profiling_abi
-
- use m_time,         only : timab
-#ifdef HAVE_GPU_CUDA
- use m_initcuda,only    : cudap
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1590,13 +1564,10 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
  call timab(613+swt_tm,2,tsec2)  !!--stop time-counter: sync gpu-cpu
 #endif
 
-
  call timab(609,2,tsec)
 end subroutine fermisolverec
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/density_rec
 !! NAME
 !! density_rec
@@ -1604,13 +1575,6 @@ end subroutine fermisolverec
 !! FUNCTION
 !! This routine computes the density using  the coefficients corresponding to
 !! continued fraction at a point from a fixed potential.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (SLeroux,MMancini).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  coordx, coordy, coordz=coordonnees of the computed point
@@ -1642,22 +1606,9 @@ end subroutine fermisolverec
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine density_rec(an,bn2,rho_out,nrec, &
 &                     fermie,tsmear,rtrotter, &
 &                     dim_trott,tol,inf_ucvol)
-
- use defs_basis
- use m_profiling_abi
-
- use m_time,     only : timab
- use m_rec_tools,only : trottersum
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1744,8 +1695,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
  end subroutine density_rec
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/gran_potrec
 !! NAME
 !! gran_potrec
@@ -1753,13 +1702,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !! FUNCTION
 !! This routine computes the local part of the grand-potential at a point using a path integral,
 !! in the recursion method.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group ( ).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  an, bn2 : coefficient given by the recursion.
@@ -1777,7 +1719,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !!  In reality it is not the gren potential but the
 !!  grand-potential (omega=-PV) divided by -T
 !!
-!!
 !! PARENTS
 !!      vtorhorec
 !!
@@ -1793,21 +1734,9 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 &                     debug_rec,n_pt_integ,xmax,&
 &                     ene_out1,ene_out2,ene_out3,ene_out4)
-
- use defs_basis
- use m_profiling_abi
-
- use m_time,        only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2077,20 +2006,12 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 end subroutine gran_potrec
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/nlenergyrec
 !! NAME
 !! nlenergyrec
 !!
 !! FUNCTION
 !! During recursion, it computes the non-local energy
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (the_author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  rset<recursion_type>=contains all recursion parameters
@@ -2119,23 +2040,7 @@ end subroutine gran_potrec
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,&
- &                      tsmear,trotter,tol)
-
- use defs_basis
- use defs_rectypes
- use m_profiling_abi
- use m_xmpi
- use m_per_cond
-
- use m_time,       only : timab
- use m_rec_tools,  only : reshape_pot
+subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2304,5 +2209,6 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,&
  end if
 
  call timab(612,2,tsec)  !--stop  time-counter: nlenergyrec
+
 end subroutine nlenergyrec
 !!***

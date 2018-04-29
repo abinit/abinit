@@ -27,7 +27,7 @@ sources = [
  "recursion.F90",
  "recursion_nl.F90",
  "vn_nl_rec.F90",
- "vtorhorec.F90",
+ "m_vtorhorec.F90",
 ]
 
 
