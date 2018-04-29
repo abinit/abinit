@@ -46,6 +46,7 @@ MODULE m_pspheads
  use m_time,     only : timab
  use m_io_tools, only : open_file
  use m_fstrings, only : basename, lstrip, sjoin, startswith
+ use m_read_upf_pwscf,  only : read_pseudo
  use m_pawpsp,   only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps, only : paw_setup, paw_setuploc, npsp_pawxml, ipsp2xml, rdpawpsxml, &
 &                       paw_setup_copy, paw_setup_free, getecutfromxml, paw_setup_t

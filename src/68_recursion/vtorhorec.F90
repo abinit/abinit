@@ -909,3 +909,1400 @@ subroutine vtorhorec(dtset,&
 
 end subroutine vtorhorec
 !!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/entropyrec
+!! NAME
+!! entropyrec
+!!
+!! FUNCTION
+!! This routine computes the local part of the entropy at a point using a path integral,
+!! in the recursion method.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2008-2018 ABINIT group ( ).
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  an, bn2 : coefficient given by the recursion.
+!!  nrec=order of recursion
+!!  trotter=trotter parameter
+!!  multce=a multiplicator for computing entropy ; 2 for non-spin-polarized system
+!!  debug_rec=debug variable
+!!  n_pt_integ=number of points of integration for the path integral
+!!  xmax =max point of integration on the real axis
+
+!! OUTPUT
+!!  ent_out=entropy at the point
+!!  ent_out1,ent_out2,ent_out3,ent_out4=debug entropy at the point
+!!
+!! PARENTS
+!!      vtorhorec
+!!
+!! CHILDREN
+!!      timab,wrtout
+!!
+!! NOTES
+!!  at this time :
+!!       - multce should be not used
+!!       - the routine should be integraly rewrited and use the routine recursion.
+!!       - only modified for p /= 0
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
+&                     n_pt_integ,xmax,&
+&                     ent_out1,ent_out2,ent_out3,ent_out4)
+
+
+ use defs_basis
+ use m_profiling_abi
+
+ use m_time,             only : timab
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'entropyrec'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: n_pt_integ,nrec,trotter
+ logical,intent(in) :: debug_rec
+ real(dp), intent(in) :: multce,xmax
+ real(dp),intent(out) :: ent_out,ent_out1,ent_out2,ent_out3,ent_out4
+!arrays
+ real(dp),intent(in) :: an(0:nrec),bn2(0:nrec)
+
+!Local variables-------------------------------
+!scalars
+ integer, parameter :: level = 7
+ integer, save :: first_en = 1
+ integer :: ii,kk,n_pt_integ_path2,n_pt_integ_path3
+ real(dp) :: arg,epsilo,step,twotrotter,xmin,dr_step
+ complex(dpc) :: D,Dnew,Dold,N,Nnew,Nold,dz_path,ent_acc,ent_acc1,ent_acc2
+ complex(dpc) :: ent_acc3,ent_acc4
+ complex(dpc) :: funczero,z_path,zj
+ complex(dpc) ::delta_calc
+ character(len=500) :: msg
+!arrays
+ real(dp) :: tsec(2)
+ real(dp) :: iif,factor
+
+
+! *************************************************************************
+
+
+ call timab(610,1,tsec)
+
+!structured debugging if debug_rec=T : print detailled result the first time we enter entropyrec
+
+ if(debug_rec .and. first_en==1)then
+   write(msg,'(a)')' '
+   call wrtout(std_out,msg,'PERS')
+   write(msg,'(a)')' entropyrec : enter '
+   call wrtout(std_out,msg,'PERS')
+   write(msg,'(a,i6)')'n_pt_integ ' , n_pt_integ
+   call wrtout(std_out,msg,'COLL')
+ end if
+
+ ent_out = zero
+ ent_out1 = zero
+ ent_out2 = zero
+ ent_out3 = zero
+ ent_out4 = zero
+ ent_acc = czero
+ ent_acc1 = czero
+ ent_acc2 = czero
+ ent_acc3 = czero
+ ent_acc4 = czero
+
+!path parameters
+ twotrotter = max(two*real(trotter,dp),one)
+ if(trotter==0)then
+   factor = tol5
+   arg =pi*three_quarters
+   zj = cmplx(-one,one-sin(arg),dp)
+ else
+   factor = xmax/ten
+   arg = pi/twotrotter
+   zj = cmplx( cos(arg) , sin(arg),dp )
+ end if
+
+ epsilo = factor*sin( arg )
+ xmin = factor*cos( arg )
+ step = (xmax-xmin)/real(n_pt_integ,dp)
+
+!####################################################################
+![xmax + i*epsilo,xmin + i*epsilo]
+ dr_step = one/real(n_pt_integ,dp)
+ path1:  do ii = 0,n_pt_integ
+   z_path = cmplx(xmin+real(ii,dp)*(xmax-xmin)*dr_step,epsilo,dp)
+   dz_path = -cmplx((xmax-xmin)*dr_step,zero,dp)
+
+   Nold = czero
+   Dold = cone
+   N = cone
+   D = z_path - cmplx(an(0),zero,dp)
+
+   do kk=1,nrec
+     Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+     Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+
+     Nold = N
+     Dold = D
+     N = Nnew
+     D = Dnew
+
+     if(kk/=nrec)then
+       if((bn2(kk+1)<tol14))exit
+     end if
+   end do
+
+!  <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+   delta_calc = func1_rec(z_path**twotrotter)*(N/D)*dz_path
+   if(ii==0.or.ii==n_pt_integ)then
+     ent_acc  = ent_acc  + half*delta_calc
+     ent_acc1 = ent_acc1 + half*delta_calc
+   else
+     ent_acc  = ent_acc  + delta_calc
+     ent_acc1 = ent_acc1 + delta_calc
+   end if
+ end do path1
+
+
+!####################################################################
+![1/2zj,0]
+ if(epsilo/step>100.d0)then
+   n_pt_integ_path2 = int((factor*abs(zj))/step)+1
+ else
+   n_pt_integ_path2 = 100
+ end if
+
+ if(trotter/=0)then
+   n_pt_integ_path3 = 0
+   dr_step = one/real(n_pt_integ_path2,dp)
+   dz_path = -cmplx(xmin,epsilo,dp)*dr_step
+   path5:  do ii = 0,n_pt_integ_path2
+     z_path = cmplx(real(ii,dp)*xmin,real(ii,dp)*epsilo,dp)*dr_step
+     if(abs(z_path)>tol14)then
+       Nold = czero
+       Dold = cone
+       N = cone
+       D = z_path - cmplx(an(0),zero,dp)
+       do kk=1,nrec
+         Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+         Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+         Nold = N
+         Dold = D
+         N = Nnew
+         D = Dnew
+         if(kk/=nrec)then
+           if((bn2(kk+1)<tol14))exit
+         end if
+       end do
+
+!      <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+       if(abs(z_path)**twotrotter>tiny(one)) then
+         funczero = func1_rec(z_path**twotrotter)
+       else
+         funczero = czero
+       end if
+       delta_calc = funczero*N/D*dz_path
+       if(ii==0.or.ii==n_pt_integ_path2)then
+         ent_acc  = ent_acc  + half*delta_calc
+         if(debug_rec) ent_acc3 = ent_acc3 + half*delta_calc
+       else
+         ent_acc  = ent_acc  + funczero*delta_calc
+         if(debug_rec) ent_acc3 = ent_acc3 + funczero*delta_calc
+       end if
+     end if
+   end do path5
+
+ else  ! trotter==0
+
+   n_pt_integ_path3 = max(100,int((epsilo*half*pi)/real(step,dp))+1)
+   dr_step = one/real(n_pt_integ_path3,dp)
+   path6:  do ii = 0,n_pt_integ_path3
+     iif=half*pi*real(ii,dp)*dr_step
+     z_path = epsilo*cmplx(-cos(iif),1-sin(iif),dp)
+     dz_path = epsilo*cmplx(sin(iif),-cos(iif),dp)*half*pi*dr_step
+     if(abs(z_path)**twotrotter>tol14)then
+       Nold = czero
+       Dold = cone
+       N = cone
+       D = z_path - cmplx(an(0),zero,dp)
+       do kk=1,nrec
+         Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+         Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+         Nold = N
+         Dold = D
+         N = Nnew
+         D = Dnew
+         if(kk/=nrec .and. bn2(kk+1)<tol14) exit !-EXIT
+       end do
+
+!      <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+       delta_calc = func1_rec(z_path**twotrotter) * N/D * dz_path
+       if(ii==0.or.ii==n_pt_integ_path3)then
+         ent_acc  = ent_acc + half*delta_calc
+         if(debug_rec) ent_acc3 = ent_acc3 + half*delta_calc
+       else
+         ent_acc  = ent_acc + delta_calc    !<r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+         if(debug_rec) ent_acc3 = ent_acc3 + delta_calc  !<r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+       end if
+     end if
+   end do path6
+
+ end if
+
+ if(first_en==1 .and. debug_rec) then
+   write(msg,'(a,i5,2a,i5,2a,i5,2a,es11.4,2a,es11.4,2a,es11.4)')&
+&   'n_pt_path  =',n_pt_integ,ch10,&
+&   'n_pt_path2 =',n_pt_integ_path2,ch10,&
+&   'n_pt_path3 =',n_pt_integ_path3,ch10,&
+&   'xmin       =',xmin,ch10,&
+&   'xmax       =',xmax,ch10,&
+&   'epsilon    =',epsilo
+   call wrtout(std_out,msg,'COLL')
+   first_en = 0
+ end if
+
+!####################################################################
+![xmax,xmax+i*epsilo]
+ dr_step = one/real(n_pt_integ_path2,dp)
+ dz_path = cmplx(zero,epsilo*dr_step,dp)
+ path4:  do ii = 0,n_pt_integ_path2
+   z_path = cmplx(xmax,real(ii,dp)*epsilo*dr_step,dp)
+
+   Nold = czero
+   Dold = cone
+   N = cone
+   D = z_path - cmplx(an(0),zero,dp)
+
+   do kk=1,nrec
+     Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+     Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+
+     Nold = N
+     Dold = D
+     N = Nnew
+     D = Dnew
+
+     if(kk/=nrec)then
+       if((bn2(kk+1)<tol14))exit
+     end if
+   end do
+
+!  <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+   delta_calc = func1_rec(z_path**twotrotter)*N/D*dz_path
+   if(ii==0.or.ii==n_pt_integ_path2)then
+
+     ent_acc =  ent_acc  + half*delta_calc
+     if(debug_rec) ent_acc2 = ent_acc2 + half*delta_calc
+   else
+     ent_acc  = ent_acc  + delta_calc
+     if(debug_rec) ent_acc2 = ent_acc2 + delta_calc
+   end if
+ end do path4
+
+
+ ent_out  = multce*real(ent_acc*cmplx(zero,-piinv,dp),dp)
+ if(debug_rec) then
+   ent_out1 = multce*real(ent_acc1*cmplx(zero,-piinv,dp),dp)
+   ent_out2 = multce*real(ent_acc2*cmplx(zero,-piinv,dp),dp)
+   ent_out3 = multce*real(ent_acc3*cmplx(zero,-piinv,dp),dp)
+   ent_out4 = multce*real(ent_acc4*cmplx(zero,-piinv,dp),dp)
+ end if
+
+ call timab(610,2,tsec)
+
+ contains
+
+!function to integrate over the path
+!func1_rec(z_path,twotrotter) =  ( z_path**twotrotter/(1+z_path**twotrotter)*log(1+1/z_path**twotrotter)+&    !- f*ln(f)
+!&1/(1+z_path**twotrotter)*log(1+z_path**twotrotter))       !- (1-f)*ln(1-f)
+
+!func1_rec(z_path_pow) =   z_path_pow/(cone+z_path_pow)*log(cone+cone/z_path_pow)+&    !- f*ln(f)
+!&cone/(cone+z_path_pow)*log(cone+z_path_pow)       !- (1-f)*ln(1-f)
+
+!other expression of func for a path like ro(t)*exp(2*i*pi/(2*p)*(j+1/2))
+
+   function func1_rec(z)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'func1_rec'
+!End of the abilint section
+
+   implicit none
+
+   complex(dpc) :: func1_rec
+   complex(dpc),intent(in) :: z
+
+   func1_rec =   z/(cone+z)*log(cone+cone/z)+ cone/(cone+z)*log(cone+z)
+
+ end function func1_rec
+
+end subroutine entropyrec
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/fermisolverec
+!! NAME
+!! fermisolverec
+!!
+!! FUNCTION
+!! This routine computes the fermi energy in order to have a given number of
+!! valence electrons in the recursion method, using a Ridder s Method
+!!
+!! COPYRIGHT
+!! Copyright (C) 2008-2018 ABINIT group ( ).
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  debug_rec=debugging variable
+!!  nb_rec=order of recursion
+!!  nb_point=number of discretization point in one dimension (=n1=n2=n3)
+!!  temperature=temperature (Hartree)
+!!  trotter=trotter parameter
+!!  nelect=number of valence electrons (dtset%nelect)
+!!  acc=accuracy for the fermi energy
+!!  max_it=maximum number of iteration for the Ridder's Method
+!!  long_tranche=number of point computed by thi proc
+!!  mpi_enreg=information about MPI parallelization
+!!  inf_ucvol=infinitesimal unit cell volume
+!!  gputopo=true if topology gpu-cpu= 2 or 3
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  fermie=fermi energy
+!!  rho=density, recomputed for the new fermi energy
+!!  a, b2 : coefficient given by recursion recomputed for the new fermi energy
+!!
+!! PARENTS
+!!      vtorhorec
+!!
+!! CHILDREN
+!!      alloc_dens_cuda,dealloc_dens_cuda,density_cuda,density_rec,timab,wrtout
+!!      xmpi_barrier,xmpi_sum
+!!
+!! NOTES
+!!  at this time :
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
+  &                      temperature,trotter,nelect, &
+  &                      acc, max_it, &
+  &                      long_tranche,mpi_enreg,&
+  &                      inf_ucvol,gputopo)
+
+ use defs_basis
+ use defs_abitypes
+ use defs_rectypes
+ use m_xmpi
+ use m_errors
+ use m_profiling_abi
+
+ use m_time,         only : timab
+#ifdef HAVE_GPU_CUDA
+ use m_initcuda,only    : cudap
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fermisolverec'
+ use interfaces_14_hidewrite
+ use interfaces_68_recursion, except_this_one => fermisolverec
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+ !scalars
+ integer,intent(in) :: long_tranche,max_it,nb_rec,trotter
+ logical,intent(in) :: debug_rec,gputopo
+ real(dp),intent(in) :: acc,inf_ucvol,nelect,temperature
+ real(dp), intent(inout) :: fermie
+ type(MPI_type),intent(in) :: mpi_enreg
+ !arrays
+ real(dp), intent(inout) :: a(0:nb_rec,long_tranche), b2(0:nb_rec,long_tranche)
+ real(dp), intent(inout) :: rho(long_tranche)
+
+!Local variables-------------------------------
+ !scalars
+ integer  ::  ierr,ii,ipointlocal,nn,dim_trott
+ real(dp) :: beta,fermieh,fermiel,fermiem,fermienew,nelecth,nelectl,nelectm
+ real(dp) :: nelectnew,res_nelecth,res_nelectl,res_nelectm,res_nelectnew
+ real(dp) :: rtrotter,ss,fermitol
+ character(len=500) :: msg
+ !arrays
+ real(dp) :: tsec(2)
+ real(dp) :: rhotry(long_tranche)
+ !no_abirules
+#ifdef HAVE_GPU_CUDA
+ integer :: swt_tm,npitch
+ real(cudap) :: rhocu(long_tranche)
+ real(dp) :: tsec2(2)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_GPU_CUDA
+ swt_tm = 0
+#endif
+
+ call timab(609,1,tsec)
+
+ beta = one/temperature
+ rtrotter  = max(half,real(trotter,dp))
+ dim_trott = max(0,2*trotter-1)
+
+ write(msg,'(a)')' -- fermisolverec ---------------------------------'
+ call wrtout(std_out,msg,'COLL')
+ if(debug_rec) then
+   write (msg,'(a,d10.3)')' nelect= ',nelect
+   call wrtout(std_out,msg,'COLL')
+ end if
+!initialisation of fermiel
+ fermiel = fermie
+ call timab(609,2,tsec)
+
+!initialisation fermitol
+ fermitol = acc
+#ifdef HAVE_GPU_CUDA_SP
+ if(gputopo)  fermitol = 1.d-3
+#endif
+
+ if(gputopo) then
+#ifdef HAVE_GPU_CUDA
+   swt_tm = 1
+!  allocate array an and bn2 on gpu for computation of trotter formula
+   call alloc_dens_cuda(long_tranche,nb_rec,dim_trott,npitch,&
+&   real(a,cudap),real(b2,cudap))
+
+   call timab(617,1,tsec)
+   call density_cuda(npitch,long_tranche,nb_rec,dim_trott,&
+&   real(fermiel,cudap),real(temperature,cudap),&
+&   real(rtrotter,cudap),real(inf_ucvol,cudap),&
+&   real(tol14,cudap),&
+&   rhocu)
+   rhotry = real(rhocu,dp)
+   call timab(617,2,tsec)
+#endif
+ else
+   do ipointlocal = 1,long_tranche
+     call density_rec(a(:,ipointlocal),&
+&     b2(:,ipointlocal),&
+&     rhotry(ipointlocal),&
+&     nb_rec,fermiel,temperature,rtrotter,dim_trott, &
+&     tol14,inf_ucvol)
+   end do
+ end if
+
+ call timab(609,1,tsec)
+ nelectl = sum(rhotry)
+ call xmpi_sum( nelectl,mpi_enreg%comm_bandfft,ierr)
+ res_nelectl = inf_ucvol*nelectl - nelect
+
+ if (res_nelectl /= zero) then
+!  initialisation of fermih
+!  excess of electrons -> smaller fermi
+   res_nelecth = zero
+   ii = 1
+   fermieh = fermie - ten*sign(one,res_nelectl)*temperature
+   do while(ii<6 .and. res_nelecth*res_nelectl>=0)
+     fermieh = fermieh - ten*sign(one,res_nelectl)*temperature
+     call timab(609,2,tsec)
+
+     if(gputopo) then
+#ifdef HAVE_GPU_CUDA
+       call timab(617,1,tsec)
+       call density_cuda(npitch,long_tranche,nb_rec,dim_trott,&
+&       real(fermieh,cudap),real(temperature,cudap),&
+&       real(rtrotter,cudap),real(inf_ucvol,cudap),&
+&       real(tol14,cudap),&
+&       rhocu)
+       rhotry = real(rhocu,dp)
+       call timab(617,2,tsec)
+#endif
+     else
+       do ipointlocal = 1,long_tranche
+         call density_rec(a(:,ipointlocal),  &
+&         b2(:,ipointlocal), &
+&         rhotry(ipointlocal), &
+&         nb_rec,fermieh,temperature,rtrotter,dim_trott, &
+&         tol14,inf_ucvol)
+       end do
+     end if
+     call timab(609,1,tsec)
+     nelecth = sum(rhotry)
+     call xmpi_sum( nelecth,mpi_enreg%comm_bandfft ,ierr);
+     res_nelecth = inf_ucvol*nelecth - nelect
+
+     if(debug_rec) then
+       write (msg,'(a,es11.4e2,a,es11.4e2)') ' Fermi energy interval',fermieh,' ',fermiel
+       call wrtout(std_out,msg,'COLL')
+     end if
+     ii = ii +1
+   end do
+
+   if (res_nelecth*res_nelectl>0) then
+     write (msg,'(4a)')' fermisolverec : ERROR- ',ch10,&
+&     ' initial guess for fermi energy doesnt permit to  find solutions in solver',ch10
+     MSG_ERROR(msg)
+   end if
+
+!  MAIN LOOP   ------------------------------------------------------
+   main : do nn=1,max_it
+!    fermiem computation
+     fermiem = 0.5d0*(fermiel+fermieh)
+
+!    nelectm = zero
+     call timab(609,2,tsec)
+
+     if(gputopo) then
+#ifdef HAVE_GPU_CUDA
+       call timab(617,1,tsec)
+       call density_cuda(npitch,long_tranche,nb_rec,dim_trott,&
+&       real(fermiem,cudap),real(temperature,cudap),&
+&       real(rtrotter,cudap),real(inf_ucvol,cudap),&
+&       real(tol14,cudap),&
+&       rhocu)
+       rhotry = real(rhocu,dp)
+       call timab(617,2,tsec)
+#endif
+     else
+       do ipointlocal = 1,long_tranche
+         call density_rec(a(:,ipointlocal),  &
+&         b2(:,ipointlocal), &
+&         rhotry(ipointlocal), &
+&         nb_rec,fermiem,temperature,rtrotter,dim_trott, &
+&         tol14,inf_ucvol)
+       end do
+     end if
+
+     call timab(609,1,tsec)
+     nelectm = sum(rhotry)
+     call xmpi_sum( nelectm,mpi_enreg%comm_bandfft,ierr)
+     res_nelectm = inf_ucvol*nelectm - nelect
+
+!    new guess
+     ss = sqrt(res_nelectm**two-res_nelectl*res_nelecth)
+     fermienew = fermiem + (fermiem-fermiel)*sign(one, res_nelectl-res_nelecth)*res_nelectm/ss
+
+     call timab(609,2,tsec)
+     if(gputopo) then
+#ifdef HAVE_GPU_CUDA
+       call timab(617,1,tsec)
+       call density_cuda(npitch,long_tranche,nb_rec,dim_trott,&
+&       real(fermienew,cudap),real(temperature,cudap),&
+&       real(rtrotter,cudap),real(inf_ucvol,cudap),&
+&       real(tol14,cudap),&
+&       rhocu)
+       rhotry = real(rhocu,dp)
+       call timab(617,2,tsec)
+#endif
+     else
+       do ipointlocal = 1,long_tranche
+         call density_rec(a(:,ipointlocal),  &
+&         b2(:,ipointlocal), &
+&         rhotry(ipointlocal), &
+&         nb_rec,fermienew,temperature,rtrotter,dim_trott, &
+&         tol14,inf_ucvol)
+       end do
+     end if
+
+     call timab(609,1,tsec)
+     nelectnew = sum(rhotry)
+     call xmpi_sum( nelectnew,mpi_enreg%comm_bandfft ,ierr);
+     res_nelectnew = inf_ucvol*nelectnew - nelect
+
+!    fermiel et fermieh for new iteration
+     if (sign(res_nelectm,res_nelectnew) /= res_nelectm) then
+       fermiel = fermiem
+       res_nelectl = res_nelectm
+       fermieh = fermienew
+       res_nelecth = res_nelectnew
+     else if (sign(res_nelectl,res_nelectnew) /= res_nelectl) then
+       fermieh = fermienew
+       res_nelecth = res_nelectnew
+     else if (sign(res_nelecth,res_nelectnew) /= res_nelecth) then
+       fermiel = fermienew
+       res_nelectl = res_nelectnew
+     end if
+
+!    are we within the tolerance ?
+     if ((abs(res_nelectnew) < fermitol).or.(nn == max_it)) then
+       fermie = fermienew
+       rho = rhotry
+       if(debug_rec) then
+         write (msg,'(a,es11.4e2,a,i4)')' err, num_iter ', res_nelectnew, ' ',nn
+         call wrtout(std_out,msg,'COLL')
+         write(msg,'(a,50a)')' ',('-',ii=1,50)
+         call wrtout(std_out,msg,'COLL')
+       end if
+       exit main
+     end if
+
+   end do main
+
+ end if
+
+#ifdef HAVE_GPU_CUDA
+!deallocate array on GPU
+ if(gputopo) then
+   call dealloc_dens_cuda()
+ end if
+ call timab(613+swt_tm,1,tsec2)  !!--start time-counter: sync gpu-cpu
+ call xmpi_barrier(mpi_enreg%comm_bandfft)
+ call timab(613+swt_tm,2,tsec2)  !!--stop time-counter: sync gpu-cpu
+#endif
+
+
+ call timab(609,2,tsec)
+end subroutine fermisolverec
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/density_rec
+!! NAME
+!! density_rec
+!!
+!! FUNCTION
+!! This routine computes the density using  the coefficients corresponding to
+!! continued fraction at a point from a fixed potential.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2008-2018 ABINIT group (SLeroux,MMancini).
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  coordx, coordy, coordz=coordonnees of the computed point
+!!  an, bn2 : coefficient given by density_rec. Input if get_rec_coef=0, output else
+!!  nrec=order of density_rec
+!!  fermie=fermi energy (Hartree)
+!!  tsmear=temperature (Hartree)
+!!  rtrotter=real trotter parameter
+!!  tol=tolerance criteria for stopping density_rec
+!!  inf_ucvol=infinitesimal unit cell volume
+!!  dim_trott = max(0,2*trotter-1)
+!!
+!! OUTPUT
+!!  rho_out=result of the continued fraction multiplied by a multiplicator
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      fermisolverec
+!!
+!! CHILDREN
+!!      timab,trottersum
+!!
+!! NOTES
+!!  at this time :
+!!       - exppot should be replaced by ?
+!!       - coord should be replaced by ?
+!!       - need a rectangular box (rmet diagonal matrix)
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine density_rec(an,bn2,rho_out,nrec, &
+&                     fermie,tsmear,rtrotter, &
+&                     dim_trott,tol,inf_ucvol)
+
+ use defs_basis
+ use m_profiling_abi
+
+ use m_time,     only : timab
+ use m_rec_tools,only : trottersum
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'density_rec'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: nrec
+ integer,intent(in) :: dim_trott
+ real(dp),intent(in) :: fermie,tol,tsmear,inf_ucvol,rtrotter
+ real(dp), intent(out) :: rho_out
+!arrays
+ real(dp),intent(in) :: an(0:nrec),bn2(0:nrec)
+!Local variables-------------------------------
+!not used, debugging purpose only
+!for debugging purpose, detailled printing only once for density and ekin
+!scalars
+ integer, parameter :: minrec = 3
+ integer  :: irec
+ real(dp) :: beta,mult,prod_b2,error,errold
+ real(dp) :: pi_on_rtrotter,twortrotter,exp1,exp2
+ complex(dpc) :: cinv2rtrotter,coeef_mu,facrec0
+! character(len=500) :: msg
+!arrays
+ real(dp) :: tsec(2)
+ complex(dpc) :: acc_rho(0:nrec)
+ complex(dpc) :: D(0:dim_trott),Dold(0:dim_trott)
+ complex(dpc) :: N(0:dim_trott),Nold(0:dim_trott)
+!**************************************************************************
+
+ call timab(605,1,tsec)
+
+!##############################################################
+!--Initialisation of metrics
+ mult = two/inf_ucvol   !non-spined system
+ beta = one/tsmear
+
+!--Variables for optimisation
+ pi_on_rtrotter = pi/rtrotter
+ twortrotter = two*rtrotter
+ exp1 = exp((beta*fermie)/(rtrotter))
+ exp2 = exp(beta*fermie/(twortrotter))
+ cinv2rtrotter = cmplx(one/twortrotter,zero,dp)
+ coeef_mu = cmplx(one/exp2,zero,dp)
+
+ N = czero;  D = cone
+ facrec0 = cone
+ Nold = czero; Dold = czero
+!--Initialisation of accumulated density
+ acc_rho = czero
+!--Initialisation of estimated error
+ prod_b2 = twortrotter/exp1
+ errold = zero
+
+
+!##############################################################
+!--Main loop
+ maindo : do irec = 0, nrec
+
+!  ######################################################
+!  --Density computation
+!  !--using the property that: sum_i(bi*c)^2|(z-ai*c)=1/c*sum_i(bi)^2|(z/c-ai)
+!  !and for c =exp(-beta*fermie/(two*rtrotter)
+
+   call trottersum(dim_trott,error,prod_b2,pi_on_rtrotter,&
+&   facrec0,coeef_mu,exp1,&
+&   an(irec),bn2(irec),&
+&   N,D,Nold,Dold)
+
+   if(irec/=nrec .and. irec>=minrec)then
+     if((bn2(irec+1)<tol14).or.(mult*error<tol.and.errold<tol)) exit maindo
+   end if
+   errold = mult*error
+ end do maindo
+!--Accumulated density
+ rho_out = mult*real(cone-sum(N/D)*cinv2rtrotter,dp)
+
+ call timab(605,2,tsec)
+
+ end subroutine density_rec
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/gran_potrec
+!! NAME
+!! gran_potrec
+!!
+!! FUNCTION
+!! This routine computes the local part of the grand-potential at a point using a path integral,
+!! in the recursion method.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2008-2018 ABINIT group ( ).
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  an, bn2 : coefficient given by the recursion.
+!!  nrec=order of recursion
+!!  trotter=trotter parameter
+!!  mult=a multiplicator for computing grand-potential (2 for non-spin-polarized system)
+!!  debug_rec=debugging variable
+!!  n_pt_integ=points for computation of path integral
+!!  xmax= maximum point on the x-axis for integration
+!!
+!! OUTPUT
+!!  ene_out=grand-potential at the point
+!!  if debug_rec=T then ene_out1,ene_out2,ene_out3,ene_out4 are
+!!  the different path branch contriubutions to the grand-potential.
+!!  In reality it is not the gren potential but the
+!!  grand-potential (omega=-PV) divided by -T
+!!
+!!
+!! PARENTS
+!!      vtorhorec
+!!
+!! CHILDREN
+!!      timab,wrtout
+!!
+!! NOTES
+!!  in reality it is not the gren potential but the grand-potential (omega=-PV) divided by -T
+!!  at this time :
+!!       - mult should be not used
+!!       - the routine should be integraly rewrited and use the routine recursion.
+!!       - only modified for p /= 0
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
+&                     debug_rec,n_pt_integ,xmax,&
+&                     ene_out1,ene_out2,ene_out3,ene_out4)
+
+ use defs_basis
+ use m_profiling_abi
+
+ use m_time,        only : timab
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'gran_potrec'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: n_pt_integ,nrec,trotter
+ logical,intent(in) :: debug_rec
+ real(dp), intent(in) :: mult,xmax
+ real(dp),intent(inout) :: ene_out,ene_out1,ene_out2,ene_out3,ene_out4 !vz_i
+!arrays
+ real(dp), intent(in) :: an(0:nrec),bn2(0:nrec)
+
+!Local variables-------------------------------
+!scalars
+ integer, parameter :: level = 7
+ integer, save :: first = 1
+ integer :: ii,kk,n_pt_integ_path2
+ real(dp) :: epsilon,step,twotrotter,xmin,dr_step
+ complex(dpc) :: D,Dnew,Dold,N,Nnew,Nold,dz_path,ene_acc,ene_acc1,ene_acc2
+ complex(dpc) :: ene_acc3,ene_acc4
+ complex(dpc) :: z_path,delta_calc
+ character(len=500) :: message
+!arrays
+ real(dp) :: tsec(2)
+
+! *************************************************************************
+
+
+ call timab(611,1,tsec)
+
+!structured debugging if debug_rec=T : print detailled result the first time we enter gran_potrec
+ if(debug_rec .and. first==1)then
+   write(message,'(a)')' '
+   call wrtout(std_out,message,'PERS')
+   write(message,'(a)')' gran_potrec : enter '
+   call wrtout(std_out,message,'PERS')
+   write(message,'(a,i8)')'n_pt_integ ' , n_pt_integ
+   call wrtout(std_out,message,'COLL')
+   first=0
+ end if
+
+ ene_out = zero
+ ene_acc = czero
+ ene_acc1 = czero
+ ene_acc2 = czero
+ ene_acc3 = czero
+ ene_acc4 = czero
+
+
+!path parameters
+!n_pt_integ = 2500
+ xmin = -half
+ step = (xmax-xmin)/real(n_pt_integ,dp)
+ if(trotter==0)then
+   twotrotter = one
+   epsilon = .5d-1
+ else
+   twotrotter = two*real(trotter,dp)
+   epsilon = half*sin( pi/twotrotter)
+ end if
+
+!xmin = -abs(xmin)**(1.d0/twotrotter)
+
+!####################################################################
+![xmax + i*epsilon,xmin + i*epsilon]
+ dr_step = one/real(n_pt_integ,dp)
+ dz_path = -cmplx((xmax-xmin)*dr_step,zero,dp)
+ path1:  do ii = 0,n_pt_integ
+!  z_path = cmplx(xmin + real(ii,dp)*(xmax-xmin)*dr_step,epsilon,dp)
+   z_path = cmplx(xmin,epsilon,dp) - real(ii,dp)*dz_path
+   Nold = czero
+   Dold = cone
+   N = cone
+   D = z_path - cmplx(an(0),zero,dp)
+
+   do kk=1,nrec
+     Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+     Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+
+     Nold = N
+     Dold = D
+     N = Nnew
+     D = Dnew
+
+     if(kk/=nrec)then
+       if((bn2(kk+1)<tol14))exit
+     end if
+
+   end do
+
+!  <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+   delta_calc = func_rec(z_path,twotrotter)* N/D *dz_path
+   if(ii==0.or.ii==n_pt_integ)then
+     ene_acc = ene_acc + half*delta_calc
+     if(debug_rec)  ene_acc1 = ene_acc1 + half*delta_calc
+   else
+     ene_acc = ene_acc + delta_calc
+     if(debug_rec)  ene_acc1 = ene_acc1 + delta_calc
+   end if
+ end do path1
+
+!####################################################################
+![xmin + i*epsilon,xmin]
+ if(epsilon/step>4.d0)then
+   n_pt_integ_path2 = int(epsilon/step)+1
+ else
+   n_pt_integ_path2 = 5
+ end if
+ n_pt_integ_path2 = n_pt_integ
+ dr_step = one/real(n_pt_integ_path2,dp)
+ dz_path = -cmplx(zero,epsilon*dr_step,dp)
+ path2:  do ii = 0,n_pt_integ_path2
+!  z_path = cmplx(xmin,real(ii,dp)*epsilon*dr_step,dp)
+   z_path = cmplx(xmin,zero,dp)-dz_path*real(ii,dp)
+   Nold = czero
+   Dold = cone
+   N = cone
+   D = z_path - cmplx(an(0),zero,dp)
+
+   do kk=1,nrec
+     Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+     Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+
+     Nold = N
+     Dold = D
+     N = Nnew
+     D = Dnew
+
+     if(kk/=nrec)then
+       if((bn2(kk+1)<tol14))exit
+     end if
+
+   end do
+
+!  <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+   delta_calc = func_rec(z_path,twotrotter)* N/D *dz_path
+   if(ii==0.or.ii==n_pt_integ_path2)then
+     ene_acc = ene_acc + half*delta_calc
+     if(debug_rec) ene_acc3 = ene_acc3 + half*delta_calc
+   else
+     ene_acc = ene_acc + delta_calc
+     if(debug_rec) ene_acc3 = ene_acc3 + delta_calc
+   end if
+ end do path2
+
+
+
+!####################################################################
+![xmin,0]
+ if(xmin/=czero)then
+   dr_step = one/real(n_pt_integ,dp)
+   dz_path = cmplx(xmin*dr_step,zero,dp)
+   path3:  do ii = 1,n_pt_integ !the integrand is 0 at 0
+!    z_path = cmplx(real(ii,dp)*xmin*dr_step,zero,dp)
+     z_path = real(ii,dp)*dz_path
+
+     Nold = czero
+     Dold = cone
+     N = cone
+     D = z_path - cmplx(an(0),zero,dp)
+
+     do kk=1,nrec
+       Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+       Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+
+       Nold = N
+       Dold = D
+       N = Nnew
+       D = Dnew
+
+       if(kk/=nrec)then
+         if((bn2(kk+1)<tol14))exit
+       end if
+     end do
+
+!    <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+     delta_calc = func_rec(z_path,twotrotter) * N/D *dz_path
+     if(ii==n_pt_integ)then
+       ene_acc = ene_acc +half*delta_calc
+       if(debug_rec) ene_acc4 = ene_acc4 + half*delta_calc
+     else
+       ene_acc = ene_acc + delta_calc
+       if(debug_rec) ene_acc4 = ene_acc4 +delta_calc
+     end if
+   end do path3
+ end if
+
+!####################################################################
+![xmax,xmax+i*epsilon]
+ dr_step = one/real(n_pt_integ_path2,dp)
+ dz_path = cmplx(zero,epsilon*dr_step,dp)
+ path4:  do ii = 0,n_pt_integ_path2
+!  z_path = cmplx(xmax,real(ii,dp)*epsilon*dr_step,dp)
+   z_path = cmplx(xmax,0,dp)+real(ii,dp)*dz_path
+
+   Nold = czero
+   Dold = cone
+   N = cone
+   D = z_path - cmplx(an(0),zero,dp)
+
+   do kk=1,nrec
+     Nnew = (z_path - cmplx(an(kk),zero,dp))*N - cmplx(bn2(kk),zero,dp)*Nold
+     Dnew = (z_path - cmplx(an(kk),zero,dp))*D - cmplx(bn2(kk),zero,dp)*Dold
+
+     Nold = N
+     Dold = D
+     N = Nnew
+     D = Dnew
+
+     if(kk/=nrec)then
+       if((bn2(kk+1)<tol14))exit
+     end if
+
+   end do
+
+!  <r|1/(z-e**(-beta/(2p)*(H-mu)))|r> dz
+   delta_calc = func_rec(z_path,twotrotter) * N/D *dz_path
+   if(ii==0.or.ii==n_pt_integ_path2)then
+     ene_acc = ene_acc + half*delta_calc
+     if(debug_rec) ene_acc2 = ene_acc2 + half*delta_calc
+   else
+     ene_acc = ene_acc + delta_calc
+     if(debug_rec) ene_acc2 = ene_acc2 + delta_calc
+   end if
+ end do path4
+
+ ene_out = mult*real(ene_acc*cmplx(zero,-piinv,dp),dp)
+ if(debug_rec) then
+   ene_out1 = mult*real(ene_acc1*cmplx(zero,-piinv,dp),dp)
+   ene_out2 = mult*real(ene_acc2*cmplx(zero,-piinv,dp),dp)
+   ene_out3 = mult*real(ene_acc3*cmplx(zero,-piinv,dp),dp)
+   ene_out4 = mult*real(ene_acc4*cmplx(zero,-piinv,dp),dp)
+ end if
+
+ call timab(611,2,tsec)
+
+ contains
+
+!func_rec(z_path,twotrotter) = log(cone+z_path**twotrotter)
+
+   function func_rec(z,x)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'func_rec'
+!End of the abilint section
+
+   implicit none
+
+   complex(dpc) :: func_rec
+   complex(dpc),intent(in) :: z
+   real(dp),intent(in) :: x
+
+   func_rec = log(cone+z**x)
+
+ end function func_rec
+
+end subroutine gran_potrec
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/nlenergyrec
+!! NAME
+!! nlenergyrec
+!!
+!! FUNCTION
+!! During recursion, it computes the non-local energy
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2009-2018 ABINIT group (the_author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  rset<recursion_type>=contains all recursion parameters
+!!  exppot=exponential of -1/tsmear*vtrial (computed only once in vtorhorec)
+!!  tsmear=temperature (Hartree)
+!!  trotter=trotter parameter
+!!  tol=tolerance criteria for stopping recursion_nl
+!!  ngfft=information about FFT(dtset%ngfft a priori different from ngfftrec)
+!!  mpi_enreg=information about MPI paralelisation
+!!  rset<recursion_type> contains all parameter of recursion
+!!  typat(natom)=type of pseudo potential associated to any atom
+!!  natom=number of atoms
+!!
+!! OUTPUT
+!!  enl=non-local energy
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      vtorhorec
+!!
+!! CHILDREN
+!!      recursion_nl,reshape_pot,timab,wrtout,xmpi_sum
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,&
+ &                      tsmear,trotter,tol)
+
+ use defs_basis
+ use defs_rectypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_per_cond
+
+ use m_time,       only : timab
+ use m_rec_tools,  only : reshape_pot
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nlenergyrec'
+ use interfaces_14_hidewrite
+ use interfaces_68_recursion, except_this_one => nlenergyrec
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!Scalar
+ integer , intent(in)  :: natom,trotter
+ real(dp), intent(in)  :: tsmear,tol
+ type(recursion_type),intent(in) :: rset
+ real(dp), intent(out) :: enl
+!Arrays
+ integer , intent(in)  :: typat(natom),ngfft(18)
+ real(dp), intent(in)  :: exppot(0:ngfft(1)*ngfft(2)*ngfft(3)-1)
+!Local variables-------------------------------
+ integer :: iatom,jatom
+ integer :: ii,ipsp,dim_trott
+ integer :: ierr,me_count
+ integer :: ilmn,jlmn,ilm,jlm,in,jn,il
+ character(len=500) :: msg
+ logical  :: tronc
+ real(dp) :: rho_nl,normali,mult
+ type(mpi_type):: mpi_loc
+!Arrays
+ integer  :: gcart_loc(3,natom)
+ integer  :: ngfftrec(3),trasl(3)
+ real(dp) :: tsec(2)
+ real(dp) :: un0(0:rset%nfftrec)
+ real(dp),pointer :: projec(:,:,:,:,:)
+ real(dp),allocatable ::  exppotloc(:)
+ real(dp) :: proj_arr(0:rset%ngfftrec(1)-1,0:rset%ngfftrec(2)-1,0:rset%ngfftrec(3)-1)
+
+! *************************************************************************
+
+
+ call timab(612,1,tsec) !!--start time-counter: nlenergyrec
+
+ if(rset%debug)then
+   write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,' nlenergyrec : enter'
+   call wrtout(std_out,msg,'PERS')
+ end if
+
+ write(msg,'(a)')' -- nlenergyrec -----------------------------------'
+ call wrtout(std_out,msg,'COLL')
+
+!--Initialisation variables
+ enl = zero
+ mult = two !--is twice for non-spinned systems
+ ngfftrec = rset%ngfftrec(:3)
+ gcart_loc = rset%inf%gcart
+ mpi_loc = rset%mpi
+ me_count = 0
+ dim_trott = max(0,2*trotter-1)
+ nullify(projec)
+ ABI_ALLOCATE(projec,(0:rset%ngfftrec(1)-1,0:rset%ngfftrec(2)-1,0:rset%ngfftrec(3)-1,rset%nl%lmnmax,natom))
+ projec = zero
+
+ tronc = rset%tronc  !--True if troncation is used
+ if(tronc)   then
+   ABI_ALLOCATE(exppotloc,(0:rset%nfftrec-1))
+ end if
+
+
+!--LOOP ON ATOMS to create projectors-vector
+ atomloop1: do iatom = 1, natom
+   ipsp = typat(iatom)
+!  --Aquisition,reshape,translation,rotation of the projectors vector
+   do ilmn = 1,rset%nl%lmnmax
+     in = rset%nl%indlmn(3,ilmn,ipsp)
+!    --Projectors vector in 3-composant vector
+     projec(:,:,:,ilmn,iatom) = reshape(rset%nl%projec(:,ilmn,ipsp),shape=shape(projec(:,:,:,1,1)))
+!    --Moving the projectors vector on the center of the grid
+     do ii=1,3
+       projec(:,:,:,ilmn,iatom) = cshift(projec(:,:,:,ilmn,iatom),shift=ngfftrec(ii)/2-gcart_loc(ii,iatom),dim=ii)
+     end do
+   end do
+
+ end do atomloop1
+
+
+!##################################################################
+!--LOOP ON ATOMS (MAIN LOOP)
+ atomloop: do iatom = 1, natom
+   ipsp = typat(iatom)
+
+!  --If troncation is present, the considered atom has to be in the
+!  center of the grid so atoms, potential and projectors have to be translated
+   if(tronc) then
+     trasl = -rset%inf%gcart(:,iatom)+ngfftrec/2
+!    --Translation of atoms
+     do jatom=1,natom
+       gcart_loc(:,jatom) = rset%inf%gcart(:,jatom)+trasl
+       gcart_loc(:,jatom) = modulo(gcart_loc(:,jatom),ngfft(:3))
+!      --Translation of non-local projectors
+       do ilmn = 1,rset%nl%lmnmax
+         projec(:,:,:,ilmn,jatom) = reshape(rset%nl%projec(:,ilmn,typat(jatom)),shape=shape(projec(:,:,:,1,1)))
+         do ii=1,3
+           projec(:,:,:,ilmn,jatom) = eoshift(projec(:,:,:,ilmn,jatom),shift=ngfftrec(ii)/2-gcart_loc(ii,jatom),dim=ii)
+         end do
+       end do
+     end do
+
+!    --Translation of the potential
+     call reshape_pot(trasl,ngfft(1)*ngfft(2)*ngfft(3),rset%nfftrec,ngfft(:3),ngfftrec,exppot,exppotloc)
+   end if
+
+!  --Loop on projectors
+   projloop: do ilmn = 1,rset%nl%lmnmax
+     me_count = iatom+ilmn*natom-2 !--counter of the number of iteration
+!    --Only the proc me compute
+     if(mpi_loc%me==mod(me_count,mpi_loc%nproc)) then
+       ilm = rset%nl%indlmn(4,ilmn,ipsp)
+       proj_arr = zero
+       do jlmn = 1,rset%nl%lmnmax
+         jlm = rset%nl%indlmn(4,jlmn,ipsp)
+         if(ilm==jlm) then
+           in = rset%nl%indlmn(3,ilmn,ipsp)
+           jn = rset%nl%indlmn(3,jlmn,ipsp)
+           il = rset%nl%indlmn(1,ilmn,ipsp)+1
+           proj_arr(:,:,:) = proj_arr(:,:,:) + rset%nl%eivec(jn,in,il,ipsp)*projec(:,:,:,jlmn,iatom)
+!          write(std_out,*)'l,m,lm,n,n',il-1,rset%nl%indlmn(2,ilmn,ipsp),ilm,in,jn
+!          write(std_out,*)'eigevectors',rset%nl%eivec(jn,in,il,ipsp)
+
+         end if
+       end do
+
+       un0 = pack(proj_arr(:,:,:),mask=.true.)
+       normali = sum(un0*un0)*rset%inf%ucvol
+       un0 = (one/sqrt(normali))*un0
+
+       if(tronc)then
+         call recursion_nl(exppotloc,un0,rho_nl,rset,rset%ngfftrec,&
+&         tsmear,trotter,dim_trott,tol,typat,&
+&         natom,projec)
+       else
+         call recursion_nl(exppot,un0,rho_nl,rset,rset%ngfftrec,&
+&         tsmear,trotter,dim_trott,tol,typat,&
+&         natom,projec)
+       end if
+
+       enl = enl+mult*rho_nl*rset%nl%eival(in,il,ipsp)*normali
+     end if
+
+   end do projloop
+ end do atomloop
+
+!--Sum the contribution to the non-local energy computed by any procs
+ call xmpi_sum(enl,mpi_loc%comm_bandfft,ierr)
+
+ if(associated(projec))  then
+   ABI_DEALLOCATE(projec)
+ end if
+ if(tronc)  then
+   ABI_DEALLOCATE(exppotloc)
+ end if
+
+ if(rset%debug)then
+   write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,' nlenergyrec : exit'
+   call wrtout(std_out,msg,'PERS')
+ end if
+
+ call timab(612,2,tsec)  !--stop  time-counter: nlenergyrec
+end subroutine nlenergyrec
+!!***
