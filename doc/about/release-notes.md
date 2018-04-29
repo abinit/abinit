@@ -83,8 +83,9 @@ B.6 The Chern number can be computed, in the norm-conserving case as well as in 
     See the theory in [[cite:Ceresoli2006]].
     Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
-    thanks to converted nucdipmom_k to complex type and explicit BLAS call. Tutorial nuc is nightly tested.
-    By J. Zwanziger (tutorial nuc testing by X. Gonze).
+    this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call. 
+    Lesson [[lesson:nuc|nuc]] is nightly tested.
+    By J. Zwanziger ([[lesson:nuc|nuc]] testing by X. Gonze).
 
 * * *
 
