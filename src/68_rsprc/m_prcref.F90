@@ -1379,6 +1379,7 @@ end subroutine prcref_PMA
 
 subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral_kgb,qphon,rprimd,vresid,vrespc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1625,6 +1626,7 @@ end subroutine moddiel
 !! SOURCE
 
 subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1997,6 +1999,7 @@ end subroutine dielmt
 
 subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 &  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

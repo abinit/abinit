@@ -118,7 +118,6 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_newvtr'
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

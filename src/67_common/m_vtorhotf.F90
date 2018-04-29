@@ -98,7 +98,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 #define ABI_FUNC 'vtorhotf'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

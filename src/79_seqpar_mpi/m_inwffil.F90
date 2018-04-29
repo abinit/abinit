@@ -186,7 +186,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 #define ABI_FUNC 'inwffil'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_67_common
  use interfaces_79_seqpar_mpi
 !End of the abilint section
 
@@ -2114,6 +2113,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &                  ngfft1,ngfft2,nkpt1,nkpt2,npwarr1,npwarr2,nspinor1,nspinor2,&
 &                  nsppol1,nsppol2,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
