@@ -91,12 +91,14 @@ contains
 subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 &  irrzon,mpi_enreg,natom,nfft,nspden,nsppol,nsym,phnons,rhog,rhor,rprimd,ucvol,vtrial)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorhotf'
  use interfaces_14_hidewrite
  use interfaces_32_util
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -187,7 +189,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  call timab(21,2,tsec)
 !End thomas fermi
 
-! contains
+ contains
 !!***
 
 !!****f* vtorhotf/tf
@@ -310,7 +312,6 @@ end subroutine tf
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tfek'
- use interfaces_67_common
 !End of the abilint section
 
   implicit none
@@ -384,6 +385,7 @@ end subroutine tf
 !! SOURCE
 
  function zfermim12(xx)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -654,6 +656,7 @@ end function zfermi1
 
  function zfermi32(xx)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -743,6 +746,7 @@ end function zfermi32
 !! SOURCE
 
  function zfermi2(xx)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -918,6 +922,7 @@ end function zfermi52
 
  function zfermi3(xx)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1003,6 +1008,7 @@ end function zfermi3
 
  function ifermim12(ff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1086,6 +1092,7 @@ end function ifermim12
 
  function ifermi12(ff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1165,6 +1172,7 @@ end function ifermi12
 !! SOURCE
 
  function ifermi32(ff)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1246,6 +1254,7 @@ end function ifermi32
 
  function ifermi52(ff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1324,6 +1333,7 @@ end function ifermi52
 
  function fp12a1 (x)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1380,6 +1390,7 @@ end function ifermi52
 !! SOURCE
 
  function fp32a1 (x)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1438,6 +1449,7 @@ end function ifermi52
 !! SOURCE
 
  function xp12a1 (y)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1498,6 +1510,7 @@ end function ifermi52
 
  function fm12a1 (x)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1556,6 +1569,7 @@ end function ifermi52
 
  subroutine fm12a1t (cktf,rtnewt,tphysel,vtrial,rhor_middx,rhor_mid,nfft)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1607,4 +1621,7 @@ end function ifermi52
 !!***
 
 end subroutine vtorhotf
+!!***
+
+end module m_vtorhotf
 !!***
