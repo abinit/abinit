@@ -76,7 +76,6 @@ sources = [
  "m_eprenorms.F90",
  "m_plowannier.F90",
  "m_vcoul.F90",
- "newkpt.F90",
  "nres2vres.F90",
  "odamix.F90",
  "optics_vloc.F90",
