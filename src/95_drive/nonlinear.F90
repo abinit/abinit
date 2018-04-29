@@ -1096,19 +1096,19 @@ end if
        theunit = ab_out
 
        write(small_msg,'(a)') ' ** Total :'
-       call print_chi2(d3cart,i1pert,small_msg,theunit)
+       call print_chi2(d3cart,small_msg,theunit)
 
        write(small_msg,'(a)') ' ** sum_psi1H1psi1 :'
-       call print_chi2(d3cart_1,i1pert,small_msg,theunit)
+       call print_chi2(d3cart_1,small_msg,theunit)
 
        write(small_msg,'(a)') ' ** sum_lambda1psi1psi1 :'
-       call print_chi2(d3cart_2,i1pert,small_msg,theunit)
+       call print_chi2(d3cart_2,small_msg,theunit)
 
        write(small_msg,'(a)') ' ** exc3 :'
-       call print_chi2(d3cart_8,i1pert,small_msg,theunit)
+       call print_chi2(d3cart_8,small_msg,theunit)
 
        write(small_msg,'(a)') ' ** exc3_paw :'
-       call print_chi2(d3cart_9,i1pert,small_msg,theunit)
+       call print_chi2(d3cart_9,small_msg,theunit)
 
      end if ! nonlinear_info > 0
 
@@ -1310,8 +1310,30 @@ end if
 
  contains
 
-   subroutine print_chi2(d3cart0,ipert,msg,theunit)
+!!****f* nonlinear/print_chi2
+!! NAME
+!! print_chi2
+!!
+!! FUNCTION
+!! Print a third derivative tensor. Used only in nonlinear
+!!
+!! INPUTS
+!!  d3cart0 = the tensor to print
+!!  msg = a short message printed before the tensor
+!!  theunit = unit where the tensor is written
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      nonlinear
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
+   subroutine print_chi2(d3cart0,msg,theunit)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1319,7 +1341,9 @@ end if
 #define ABI_FUNC 'print_chi2'
 !End of the abilint section
 
-     integer,intent(in) :: theunit,ipert
+     implicit none
+
+     integer,intent(in) :: theunit
      character(len=30) :: msg
      real(dp) :: elem1,elem2
      real(dp),intent(in) :: d3cart0(2,3,mpert,3,mpert,3,mpert)
@@ -1328,23 +1352,48 @@ end if
      do i1dir = 1, 3
        do i2dir = 1, 3
          do i3dir = 1, 3
-           elem1 = d3cart0(1,i1dir,ipert,i2dir,ipert,i3dir,ipert)
-           elem2 = d3cart0(2,i1dir,ipert,i2dir,ipert,i3dir,ipert)
+           elem1 = d3cart0(1,i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
+           elem2 = d3cart0(2,i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
            write(theunit,'(3(5x,i2),5x,f16.9,2x,f16.9)') i1dir,i2dir,i3dir,elem1,elem2
          end do
        end do
      end do
 
    end subroutine print_chi2
+!!***
+
+!!****f* nonlinear/print_dchidtau
+!! NAME
+!! print_dchidtau
+!!
+!! FUNCTION
+!! Print a third derivative tensor. Used only in nonlinear
+!!
+!! INPUTS
+!!  d3cart0 = the tensor to print
+!!  msg = a short message printed before the tensor
+!!  theunit = unit where the tensor is written
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      nonlinear
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
    subroutine print_dchidtau(d3cart0,msg,theunit)
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_dchidtau'
 !End of the abilint section
+
+     implicit none
 
      integer,intent(in) :: theunit
      character(len=30) :: msg
@@ -1363,10 +1412,7 @@ end if
      end do
 
   end subroutine print_dchidtau
-
-
-end subroutine nonlinear
 !!***
 
-
+end subroutine nonlinear
 !!***
