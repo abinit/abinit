@@ -2996,5 +2996,530 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 end subroutine prcrskerker2
 !!***
 
+!!****f* ABINIT/cgpr
+!! NAME
+!! cgpr
+!!
+!! FUNCTION
+!! perform Polak-Ribiere conjugate gradient on a function f
+!! implementation based on the cg recipe of "numerical recipe"
+!!
+!! INPUTS
+!! dp_dum_vdp: function  to be minimized (return a dp from a vector of dp)
+!! vdp_dum_vdp: derivative of f
+!! dtol: precision precision required for the minimization
+!! itmax: number of iterations allowed (each linmin will be done with at max 10 times
+!! this number
+!!
+!! OUTPUT
+!! fmin: value of f at the minimum
+!! lastdelta: absolute value of the last delta between steps
+!! SIDE EFFECTS
+!! v: vector on which minimization is to be performed, starting point
+!! and resulting min
+!!
+!! PARENTS
+!!      prcrskerker1,prcrskerker2
+!!
+!! CHILDREN
+!!      linmin
+!!
+!! SOURCE
+
+subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cgpr'
+ use interfaces_62_cg_noabirule, except_this_one => cgpr
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+#include "dummy_functions.inc"
+!scalars
+ integer,intent(in) :: itmax,nv1,nv2
+ real(dp),intent(in) :: dtol
+ real(dp),intent(out) :: delta,fmin
+!arrays
+ real(dp),intent(inout) :: v(nv1,nv2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iiter
+ real(dp) :: fv,gam,gscal,gscal2,sto
+!arrays
+ real(dp) :: grad0(nv1,nv2),grad1(nv1,nv2),grad2(nv1,nv2),grad3(nv1,nv2)
+!no_abirules
+
+!************************************************************************
+ fv = dp_dum_v2dp(nv1,nv2,v(:,:))
+ grad0(:,:) = -v2dp_dum_v2dp(nv1,nv2,v(:,:))
+ grad1(:,:) = grad0(:,:)
+ grad2(:,:) = grad0(:,:)
+ do iiter=1,itmax
+  call linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad0,fmin)
+! return if the min is reached
+  sto=dtol*(abs(fmin)+abs(fv)+tol14)
+  delta=abs(fv-fmin)
+  delta=abs(delta)
+  if((delta.lt.sto).or.(iiter==itmax)) then
+!  DEBUG
+!  write(std_out,*) 'cgpr (01cg) : stop cond for cgpr:',sto,'delta:',delta,'fv:',fv,'fmin:',fmin
+!  ENDDEBUG
+   return
+  end if
+! a new step
+  fv=fmin
+  grad0(:,:)=v2dp_dum_v2dp(nv1,nv2,v(:,:))
+  gscal=dotproduct(nv1,nv2,grad1(:,:),grad1(:,:))
+  grad3(:,:)=grad0(:,:)+grad1(:,:)
+  gscal2=dotproduct(nv1,nv2,grad3(:,:),grad0(:,:))
+  gam=gscal2/gscal
+  grad1(:,:)=-grad0(:,:)
+  grad2(:,:)=grad1(:,:)+gam*grad2(:,:)
+  grad0(:,:)=grad2(:,:)
+! DEBUG
+! write(std_out,*) 'cgpr (01cg) :================================================================================='
+! write(std_out,*) 'cgpr (01cg) : step',iiter,'delta:',delta ,'fv',fv,'fmin',fmin
+! write(std_out,*) 'cgpr (01cg) :================================================================================='
+! ENDDEBUG
+ end do
+
+end subroutine cgpr
+!!***
+
+!!****f* ABINIT/linmin
+!! NAME
+!! linmin
+!!
+!! FUNCTION
+!! minimizes a function along a gradient line:
+!! first bracket the minimum then perform the minimization
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~ABINIT/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~ABINIT/Infos/contributors .
+!!
+!! INPUTS
+!! dp_dum_vdp: function  to be minimized (return a dp from a vector of dp)
+!! vdp_dum_vdp: derivative of f
+!!
+!! OUTPUT
+!! fmin: minimun value reached for dp_dum_vdp
+!!
+!! SIDE EFFECTS
+!! grad: the gradient line along which the minimization is performed (not changed)
+!! v: the starting and then ending point of the minimization
+!!
+!! PARENTS
+!!      cgpr
+!!
+!! CHILDREN
+!!      bracketing
+!!
+!! SOURCE
+
+subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'linmin'
+ use interfaces_62_cg_noabirule, except_this_one => linmin
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+#include "dummy_functions.inc"
+!scalars
+ integer,intent(in) :: nv1,nv2
+ real(dp),intent(out) :: fmin
+!arrays
+ real(dp),intent(inout) :: grad(nv1,nv2),v(nv1,nv2)
+
+!Local variables-------------------------------
+!scalars
+ real(dp),parameter :: maglimit=10000.0_dp,tol=tol8*tol8*tol8
+ real(dp) :: a,b,fa,fb,fx,x,xmin
+!no_abirules
+
+!************************************************************************
+ a=zero
+ x=ninth*real(1e-4,dp)
+ call bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
+!DEBUG
+!write(std_out,*) 'linmin (01cg) : linmin after bracketing'
+!write(std_out,*) 'linmin (01cg) : point',a,x,b,'value',fa,fx,fb
+!ENDDEBUG
+ fmin =brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,6,v,grad,a,x,b,tol,xmin)
+
+end subroutine linmin
+!!***
+
+!!****f* ABINIT/bracketing
+!! NAME
+!! bracketing
+!!
+!! FUNCTION
+!! bracket a minimun of a function f
+!!
+!! INPUTS
+!! dp_dum_vdp: the function of which the mimimum should be bracketted
+!!
+!!
+!! OUTPUT
+!! b= last member of the bracketing triplet a < x < b
+!! fa,fx,fb= value of the function at dp_dum_vdp(v(:)+y*grad(:))
+!!
+!!
+!! SIDE EFFECTS
+!! v: the initial vector for the function (return unchanged)
+!! grad: the direction on which the bracketting is to be performed (return unchanged)
+!! a,x: two members of the bracketing triplet (see b)
+!!
+!! PARENTS
+!!      linmin
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'bracketing'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+#include "dummy_functions.inc"
+!scalars
+ integer,intent(in) :: nv1,nv2
+ real(dp),intent(inout) :: a,x
+ real(dp),intent(out) :: b,fa,fb,fx
+!arrays
+ real(dp),intent(inout) :: grad(nv1,nv2),v(nv1,nv2)
+
+!Local variables-------------------------------
+!scalars
+ real(dp),parameter :: maglimit=10000.0_dp
+ real(dp) :: c,fu,q,r,u,ulim
+
+! *************************************************************************
+
+ fa=dp_dum_v2dp(nv1,nv2,v(:,:)+(a*grad(:,:)))
+ fx=dp_dum_v2dp(nv1,nv2,(x*grad(:,:))+v(:,:))
+ if(fx > fa) then
+  c=a
+  a=x
+  x=c
+  c=fa
+  fa=fx
+  fx=c
+ end if
+ b=x+gold*(x-a)
+ fb=dp_dum_v2dp(nv1,nv2,(b*grad(:,:))+v(:,:))
+ do
+  if (fx <= fb) return
+  r=(x-a)*(fx-fb)
+  q=(x-b)*(fx-fa)
+  u=x-((x-b)*q-(x-a)*r)/(two*sign(max(abs(q-r),smallest_real),q-r))
+  ulim=x+maglimit*(b-x)
+  if((x-u)*(u-b) > zero) then
+   fu=dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:))
+   if(fu < fb) then
+    a=x
+    fa=fx
+    x=u
+    fx=fu
+    return
+   else if (fx < fu) then
+    b=u
+    fb=fu
+    return
+   end if
+   u=b+gold*(b-x)
+   fu=dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:))
+  else if((b-u)*(u-ulim) > zero) then
+   fu=dp_dum_v2dp(nv1,nv2,u*grad(:,:)+v(:,:))
+   if(fu<fb) then
+    x=b
+    b=u
+    u=b+gold*(b-x)
+    fx=fb
+    fb=fu
+    fu=dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:))
+   end if
+  else if((u-ulim)*(ulim-b) >= zero) then
+   u=ulim
+   fu=dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:))
+  else
+   u=b+gold*(b-x)
+   fu=dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:))
+  end if
+  a=x
+  x=b
+  b=u
+  fa=fx
+  fx=fb
+  fb=fu
+ end do
+
+end subroutine bracketing
+!!***
+
+!!****f* ABINIT/brent
+!! NAME
+!! brent
+!!
+!! FUNCTION
+!! minimizes a function along a line
+!!
+!! INPUTS
+!! dp_dum_vdp: function  to be minimized (return a dp from a vector of dp)
+!! vdp_dum_vdp: derivative of the function (return a vector of dp from a vector of dp)
+!! itmax: number of iterations allowed
+!! tol: tolerance on error. It depend on the precision of the numbers
+!! (usualy chosen as sqrt(max precision available with your floating point reresentation))
+!! ax,xx,bx: a bracketing triplet around the minimum to be find
+!! OUTPUT
+!! xmin: value such that dp_dum_vdp(v(:)+xmin*grad(:)) is minimum
+!! brent:  dp_dum_vdp(v(:)+xmin*grad(:))
+!!
+!! SIDE EFFECTS
+!! grad(:): direction along which the minimization is performed
+!! v(:): starting and ending point of the minimization
+!!
+!! PARENTS
+!! linmin
+!!
+!! CHILDREN
+!! dotproduct
+!!
+!! SOURCE
+
+function brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,itmax,v,grad,ax,xx,bx,tol,xmin)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'brent'
+ use interfaces_62_cg_noabirule, except_this_one => brent
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+#include "dummy_functions.inc"
+!scalars
+ integer,intent(in) :: itmax,nv1,nv2
+ real(dp) :: brent
+ real(dp),intent(in) :: ax,bx,tol,xx
+ real(dp),intent(out) :: xmin
+!arrays
+ real(dp),intent(inout) :: grad(nv1,nv2),v(nv1,nv2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iter
+ real(dp) :: a,b,d,d1,d2,du,dv,dw,dx,e,fu,fv,fw,fx,olde,tol1,tol2,u,u1,u2,vv,w
+ real(dp) :: x,xm,zeps
+ logical :: ok1,ok2,ok3,ok4
+
+!************************************************************************
+ zeps=epsilon(ax*real(1e-2,dp))
+ a=min(ax,bx)
+ b=max(ax,bx)
+ vv=xx
+ w=xx
+ x=xx
+ e=zero
+ fx=dp_dum_v2dp(nv1,nv2,x*grad(:,:)+v(:,:))
+ fv=fx
+ fw=fx
+!the function sub_dum_dp_v2dp_v2dp must do the equivalent of
+!v(:,:)=v(:,:)+(grad(:,:)*x)
+!but for instance renormilizing the density if brent is used on a density...
+!vp(:,:) = v(:,:)
+!sub_dum_dp_v2dp_v2dp(x,grad(:,:),vp(:,:)
+!dx=dotproduct(v2dp_dum_v2dp(vp(:,:)),grad(:,:))
+ dx=dotproduct(nv1,nv2,v2dp_dum_v2dp(nv1,nv2,v(:,:)+x*grad(:,:)),grad(:,:))
+ dv=dx
+ dw=dx
+ do iter=1,itmax
+  xm=half*(a+b)
+  tol1=tol*abs(x)+zeps
+  tol2=two*tol1
+  if(abs(x-xm) <= (tol2-half*(b-a))) then
+   exit
+  end if
+  if(abs(e) > tol1) then
+   d1=two*(b-a)
+   d2=d1
+   if(dw /= dx) d1=(w-x)*dx/(dx-dw)
+   if(dv /= dx) d2=(vv-x)*dx/(dx-dv)
+   u1=x+d1
+   u2=x+d2
+   ok1=((a-u1)*(u1-b)>zero).and.(dx*d1<=zero)
+   ok2=((a-u2)*(u2-b)>zero).and.(dx*d2<=zero)
+   olde=e
+   e=d
+   if(ok1.or.ok2) then
+    if(ok1.and.ok2) then
+     d=merge(d1,d2,abs(d1)<abs(d2))
+    else
+     d=merge(d1,d2,ok1)
+    end if
+    if(abs(d)<=abs(half*olde)) then
+     u=x+d
+     if(((u-a)<tol2).or.((b-u)<tol2)) d=sign(tol1,xm-x)
+    else
+     e=merge(a,b,dx>=zero)-x
+     d=half*e
+    end if
+   else
+    e=merge(a,b,dx>=zero)-x
+    d=half*e
+   end if
+  else
+   e=merge(a,b,dx>=zero)-x
+   d=half*e
+  end if
+
+  if(abs(d) >=tol1)then
+   u=x+d
+   fu=dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:))
+  else
+   u=x+sign(tol1,d)
+   fu=dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:))
+   if(fu>fx) then
+    exit
+   end if
+  end if
+  du=dotproduct(nv1,nv2,v2dp_dum_v2dp(nv1,nv2,(u*grad(:,:))+v(:,:)),grad(:,:))
+  if(fu<=fx)then
+   if(u>=x)then
+    a=x
+   else
+    b=x
+   end if
+   vv=w
+   fv=fw
+   dv=dw
+   w=x
+   fw=fx
+   dw=dx
+   x=u
+   dx=du
+   fx=fu
+  else
+   if(u<x) then
+    a=u
+   else
+    b=u
+   end if
+   ok3=(w==x).or.(fu.le.fw)
+   ok4=(vv==w).or.(vv==x).or.(fu.lt.fv)
+   if(ok3) then
+    vv=w
+    fv=fw
+    dv=dw
+    w=u
+    fw=fu
+    dw=du
+   else if( ok4 ) then
+    vv=u
+    fv=fu
+    dv=du
+   end if
+  end if
+ end do
+ xmin=x
+!the function sub_dum_dp_v2dp_v2dp must do the equivalent of
+!v(:,:)=v(:,:)+(grad(:,:)*x)
+!but for instance renormilizing the density if brent is used on a density...
+ call sub_dum_dp_v2dp_v2dp(nv1,nv2,x,grad(:,:),v(:,:))
+ brent=fx
+
+end function brent
+!!***
+
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/dotproduct
+!! NAME
+!! dotproduct
+!!
+!! FUNCTION
+!! scalar product of two vectors
+!!
+!! INPUTS
+!! v1 and v2: two real(dp) vectors
+!!
+!! OUTPUT
+!! scalar product of the two vectors
+!!
+!! SIDE EFFECTS
+!!
+!! WARNINGS
+!! vector size is not checked
+!!
+!! NOTES
+!! I've benchmarked this to be speedier than the intrinsic dot_product even on
+!! big vectors. The point is that less check is performed.
+!!
+!! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
+!! Now I dont' have time to update ref files
+!!
+!! PARENTS
+!! cgpr,brent
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+function dotproduct(nv1,nv2,v1,v2)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dotproduct'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nv1,nv2
+ real(dp) :: dotproduct
+!arrays
+ real(dp),intent(in) :: v1(nv1,nv2),v2(nv1,nv2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i,j
+
+! *************************************************************************
+ dotproduct=zero
+ do j=1,nv2
+  do i=1,nv1
+   dotproduct=dotproduct+v1(i,j)*v2(i,j)
+  end do
+ end do
+end function dotproduct
+
+!!***
+
 end module m_prcref
 !!***
