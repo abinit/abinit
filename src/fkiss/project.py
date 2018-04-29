@@ -392,8 +392,11 @@ class AbinitProject(object):
         # Return immediately if new files have been added...
 
         # Compare time of most recent content modification.
-        return any(fort_file.stat.st_mtime != os.stat(fort_file.path).st_mtime
-                   for fort_file in self.fort_files.values())
+        try:
+            return any(fort_file.stat.st_mtime != os.stat(fort_file.path).st_mtime
+                       for fort_file in self.fort_files.values())
+        except FileNotFoundError:
+            return True
 
     def groupby_dirname(self):
         """Dictionary dirname --> List of FortranFile."""
