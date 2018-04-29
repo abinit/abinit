@@ -61,7 +61,7 @@ class FortranFile(object):
 
     modules:
     programs:
-    subroutine
+    subroutines
     functions
     """
 
@@ -137,7 +137,8 @@ class FortranFile(object):
             for p in plist:
                 app(p.to_string(verbose=verbose, width=width))
 
-        app(self.stree())
+        if verbose:
+            app(self.stree())
 
         return "\n".join(lines)
 
@@ -157,7 +158,7 @@ class FortranFile(object):
                     yield e
 
     def find_public_entity(self, name):
-        """Find and returh public procedure with `name` or None if not found"""
+        """Find and return the public procedure with `name` or None if not found"""
         for a in ["modules", "programs", "subroutines", "functions"]:
             for p in getattr(self, a):
                 for e in p.public_procedures:
@@ -262,6 +263,7 @@ class FortranFile(object):
 
         return fg
 
+
 class AbinitProject(object):
 
     DEFAULT_PICKLE_FILE = "_project.pickle"
@@ -270,6 +272,7 @@ class AbinitProject(object):
 
     @classmethod
     def pickle_load(cls, filepath=None):
+        """Reconstruct object from pickle file."""
         if filepath is None: filepath = cls.DEFAULT_PICKLE_FILE
         with open(filepath, "rb") as fh:
             return pickle.load(fh)
@@ -278,30 +281,34 @@ class AbinitProject(object):
         # Find directories with abinit.src files inside srcdir
         # and get list of files treated by the build system.
         self.srcdir = os.path.abspath(srcdir)
-
-        # FIXME: 98_main does not provide abinit.src so abinit and other exec are not in project
         self.dirpaths = self.get_dirpaths()
 
         import imp
         def filter_fortran(files):
             return [f for f in files if f.endswith(".f") or f.endswith(".F90")]
 
-        # basename --> FortranFile
+        # Build dict basename --> FortranFile
         print("Analyzing directories...")
         self.fort_files = OrderedDict()
         for d in self.dirpaths:
             if verbose: print("Analyzing directory:", d)
-            # Source files
-            abinit_src = os.path.join(d, "abinit.src")
-            #abinit_amf = os.path.join(d, "abinit.amf")
-            mod = imp.load_source(abinit_src, abinit_src)
-            for basename in filter_fortran(mod.sources):
-                if basename in self.IGNORED_FILES: continue
-                path = os.path.abspath(os.path.join(d, basename))
-                fort_file = FortranFile.from_path(path, verbose=verbose)
-                if basename in self.fort_files:
-                    raise RuntimeError("Found two fortran files with same basename `%s`" % basename)
-                self.fort_files[basename] = fort_file
+            if os.path.basename(d) == "98_main":
+                # Treat executables
+                for basename in filter_fortran(os.listdir(d)):
+                    path = os.path.join(d, basename)
+                    self.fort_files[basename] = FortranFile.from_path(path, verbose=verbose)
+            else:
+                # Source files
+                abinit_src = os.path.join(d, "abinit.src")
+                #abinit_amf = os.path.join(d, "abinit.amf")
+                mod = imp.load_source(abinit_src, abinit_src)
+                for basename in filter_fortran(mod.sources):
+                    if basename in self.IGNORED_FILES: continue
+                    path = os.path.abspath(os.path.join(d, basename))
+                    fort_file = FortranFile.from_path(path, verbose=verbose)
+                    if basename in self.fort_files:
+                        raise RuntimeError("Found two fortran files with same basename `%s`" % basename)
+                    self.fort_files[basename] = fort_file
 
         # Build dependency graph and check for cyclic dependencies.
         for fort_file in self.fort_files.values():
@@ -330,14 +337,14 @@ class AbinitProject(object):
                         miss.append(child_name)
 
         def is_internal(name):
-            return any(name.startswith(s) for s in
-                       ["mpi_", "fftw_", "mkl_", "papif_", "plasma_", "etsf_io_"])
+            return not any(name.startswith(s) for s in
+                          ("mpi_", "dfftw_", "mkl_", "papif_", "plasma_", "etsf_io_"))
 
         miss = filter(is_internal, miss)
         if miss:
             miss = sorted(set(miss))
-            print("Cannot find %d callees" % len(miss))
-            #pprint(miss)
+            print("Cannot find %d callees. Use --verbose to show list." % len(miss))
+            if verbose: pprint(miss)
 
     def __str__(self):
          return self.to_string()
@@ -361,17 +368,26 @@ class AbinitProject(object):
         return omods
 
     def pickle_dump(self, filepath=None):
+        """Save the object in pickle format."""
         if filepath is None: filepath = self.DEFAULT_PICKLE_FILE
         with open(filepath, "wb") as fh:
             return pickle.dump(self, fh)
 
     def get_dirpaths(self):
-        return sorted([d for d in os.listdir(self.srcdir) if os.path.isdir(d) and
-                       os.path.isfile(os.path.join(d, "abinit.src"))])
+        l = sorted([d for d in os.listdir(self.srcdir) if os.path.isdir(d) and
+                    os.path.isfile(os.path.join(d, "abinit.src"))])
+
+        # 98_main does not contain abinit.src so we have to add it explicitely
+        return l + [os.path.join(self.srcdir, "98_main")]
 
     def needs_reload(self):
-        if set(self.dirpaths) != set(self.get_dirpaths()): return True
+        """
+        Returns True if source tree must be parsed again because:
 
+            1. new files/directories have been added
+            2. source files have been changed
+        """
+        if set(self.dirpaths) != set(self.get_dirpaths()): return True
         # TODO
         # Return immediately if new files have been added...
 
@@ -422,7 +438,6 @@ class AbinitProject(object):
     #            if this in fort_file.parents:
     #                print(fort_file.basename)
     #                #parents.append(fort_file)
-
     #    else:
     #        raise NotImplementedError()
 
@@ -454,7 +469,7 @@ class AbinitProject(object):
 #
 # This file has been generated by abigraph.py.
 # Do not edit this file. All changes will be lost.
-# Use abigraph.py makemake to regenerate the file.
+# Use `abigraph.py makemake` to regenerate the file.
 
 """
         for dirname, fort_files in dir2files.items():
@@ -466,6 +481,54 @@ class AbinitProject(object):
             parents_outside_dir = []
             for ffile in fort_files:
                 parents_outside_dir.extends(ffile.required_mods)
+
+    def touch_alldeps(self, what_list=None, verbose=0):
+        """
+        Touch all files that depend on the list of modules in what_list.
+        If what_list is None, the list of files is automatically detected.
+        """
+        def touch(fname):
+            """Emulate unix touch."""
+            try:
+                open(fname, "w").close()
+                return 0
+            except:
+                raise IOError("trying to create file = %s" % fname)
+
+        if not what_list:
+            # Find all files that have been changed since the last backup
+            print(what_list)
+        else:
+            # what_list may contain modules or Fortran datatypes.
+            print(what_list)
+            #for w in what_list:
+            #obj = self.find_public_entity(w)
+
+        for bname in what_list:
+            for fort_file in self.iter_deps(bname):
+                print("Touching", fort_file.path)
+                touch(fort_file.path)
+
+    def validate(self, verbose=0):
+        """Validate project. Return exit status."""
+        retcode = 0
+        for fort_file in self.fort_files.values():
+            if fort_file.subroutines or fort_file.functions:
+                print("[%s] Found subroutines or functions not inside module!" % fort_file.name)
+                retcode += 1
+
+        return retcode
+
+    #def edit_connections(self, name, relation):
+    #   obj = proj.find_public_entity(name)
+    #   if obj is None
+    #       print("Cannot find public entity `%s`" % str(name))
+    #       return 1
+    #   # Find files with procedures.
+    #   plist = dict(parents=obj.parents, children=obj.children)[relation]
+    #   paths = sorted(set(p.path for p in plist))
+    #   from pymods.tools import Editor
+    #   return Editor().edit_files(paths, ask_for_exit=True)
 
     def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -486,7 +549,7 @@ class AbinitProject(object):
 
         return fg
 
-    def get_graphviz_dir(self, name, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
+    def get_graphviz_pubname(self, name, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
         Generate dependency graph for this file in the DOT language
         (only parents and children modules of this file).
@@ -512,4 +575,3 @@ class AbinitProject(object):
         #graph = obj.get_graphviz(engine=options.engine)
 
         return fg
-

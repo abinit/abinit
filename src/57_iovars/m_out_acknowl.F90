@@ -129,7 +129,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,'//ch10//&
 & ' A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,'//ch10//&
 & ' M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,'//ch10//&
-& ' B.Xue, A.Zhou, J.W.Zwanziger.'
+& ' B.Xu, A.Zhou, J.W.Zwanziger.'
  comment(1)=' Comment : the fourth generic paper describing the ABINIT project.'//ch10//&
 & ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
 & ' is available at https://www.abinit.org/about/ABINIT16.pdf .'//ch10//&
