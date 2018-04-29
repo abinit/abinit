@@ -3192,7 +3192,7 @@ Variable(
     text="""
 Turns on effective mass tensor calculations. Such calculations requires the
 non-self-consistent calculation of derivatives with respect to k, in the same
-dataset. It must therefore be used with [[rfelfd]]=2.
+dataset. It must therefore be used with [[rfelfd]]=2 (or 1).
 
   * 0 --> no effective mass tensor calculation
   * 1 --> effective mass tensor calculation
