@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.8.0 is for production
+The present release ABINITv8.8.1 is for production
 0. List of platforms
 1. Batteries of tests
 2. List of known problems
@@ -13,7 +13,7 @@ The present release ABINITv8.8.0 is for production
 ================================================================
 0. Platforms
 
-For ABINITv8.8.0, list closed on 2018 04 21
+For ABINITv8.8.1, list closed on 2018 04 28
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -28,11 +28,8 @@ but there is no check on the ABINIT testfarm that ABINIT should run correctly.
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v4.7, v4.9, v5.3, v5.4, v6.3, v6.4, v7.2)
+GNU Fortran compiler (presently tested : v4.9, v5.3, v5.4, v6.3, v6.4, v7.2)
 All are mostly OK
-With gnu 4.7 (+GPU), it has been observed that the option fast-math causes troubles : it gives numerically
-erroneous results for the test v67mbpt#16. Disactivating it for directory 71_bse (especially routine m_exc_itdiago.F90)
-allows to get correct results. 
 gnu 4.9 and 5.4: libxc#82 is disactivated on tikal
 gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi, and abiref_gnu_5.3_XX
 
