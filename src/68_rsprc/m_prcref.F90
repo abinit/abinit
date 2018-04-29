@@ -41,7 +41,7 @@ module m_prcref
  use mod_prc_memory
 
  use m_geometry, only : xcart2xred, metric
- use m_cgtools, only : dotprod_vn
+ use m_cgtools,  only : dotprod_vn, mean_fftr
  use m_mpinfo,   only : ptabs_fourdp
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
@@ -191,6 +191,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -199,7 +200,6 @@ subroutine prcref(atindx,dielar,dielinv,&
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_67_common
- use interfaces_68_rsprc, except_this_one => prcref
 !End of the abilint section
 
  implicit none
@@ -845,6 +845,7 @@ end subroutine prcref
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
 &  etotal,pawtab,wvl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -853,7 +854,6 @@ end subroutine prcref
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_67_common
- use interfaces_68_rsprc, except_this_one => prcref_PMA
 !End of the abilint section
 
  implicit none
@@ -1370,6 +1370,7 @@ end subroutine prcref_PMA
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1594,6 +1595,7 @@ end subroutine prcrskerker1
 !! SOURCE
 
 subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vrespc,natom,xred,mpi_enreg,ucvol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
