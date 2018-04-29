@@ -50,6 +50,11 @@
 
 #include "abi_common.h"
 
+
+module m_contistr01
+contains
+!!**
+
 subroutine contistr01(istr,rank,gm,gprimd,eisnl,aa,bb)
 
  use defs_basis
@@ -1744,4 +1749,6 @@ subroutine contistr01(istr,rank,gm,gprimd,eisnl,aa,bb)
  ABI_DEALLOCATE(cm)
 
 end subroutine contistr01
+!!***
+end module m_contistr01
 !!***

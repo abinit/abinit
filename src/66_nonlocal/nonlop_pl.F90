@@ -152,6 +152,14 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_contistr01
+ use m_contistr03
+ use m_contistr12
+ use m_contstr21
+ use m_contstr23
+ use m_contstr25
+ use m_contstr25a
+ use m_contstr26
 
  use m_geometry,   only : strconv
  use m_kg,         only : ph1d3d

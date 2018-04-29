@@ -51,11 +51,18 @@
 
 #include "abi_common.h"
 
+
+module m_contstr25
+contains
+!!**
+
+
+
 subroutine contstr25(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
 
+ use defs_basis
  use m_profiling_abi
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2000,4 +2007,7 @@ subroutine contstr25(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
  ABI_DEALLOCATE(cm)
 
 end subroutine contstr25
+!!***
+
+end module m_contstr25
 !!***

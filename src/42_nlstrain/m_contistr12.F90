@@ -50,11 +50,17 @@
 
 #include "abi_common.h"
 
+module m_contistr12
+contains
+!!**
+
+
+
 subroutine contistr12(istr,rank,gm,gprimd,eisnl,aa,bb)
 
+ use defs_basis
  use m_profiling_abi
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2984,4 +2990,7 @@ subroutine contistr12(istr,rank,gm,gprimd,eisnl,aa,bb)
  ABI_DEALLOCATE(cm)
 
 end subroutine contistr12
+!!***
+
+end module m_contistr12
 !!***
