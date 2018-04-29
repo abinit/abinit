@@ -39,9 +39,10 @@ module m_prcref
  use frskerker2
  use mod_prc_memory
 
+ use m_time,     only : timab
  use m_geometry, only : xcart2xred, metric
  use m_cgtools,  only : dotprod_vn, mean_fftr
- use m_mpinfo,   only : ptabs_fourdp
+ use m_mpinfo,   only : ptabs_fourdp, destroy_mpi_enreg
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_fftcore,  only : kgindex
@@ -49,6 +50,7 @@ module m_prcref
  use m_kg,       only : getph
  use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian
+ use m_distribfft, only : init_distribfft_seq
 
  implicit none
 
@@ -1582,6 +1584,863 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
  end if
 
 end subroutine moddiel
+!!***
+
+!!****f* ABINIT/dielmt
+!! NAME
+!! dielmt
+!!
+!! FUNCTION
+!! Compute dielectric matrix from susceptibility matrix
+!! Diagonalize it, then invert it.
+!!
+!! INPUTS
+!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
+!!  kg_diel(3,npwdiel)=reduced planewave coordinates for the dielectric matrix.
+!!  npwdiel=size of the dielinv and susmat arrays.
+!!  nspden=number of spin-density components
+!!  occopt=option for occupancies
+!!  prtvol=control print volume and debugging output
+!!  susmat(2,npwdiel,nspden,npwdiel,nspden)=
+!!   the susceptibility (or density-density response) matrix in reciprocal space
+!!
+!! OUTPUT
+!!  dielinv(2,npwdiel,(nspden+4)/3,npwdiel,(nspden+4)/3)=inverse of the (non-hermitian)
+!!      TC dielectric matrix in reciprocal space.
+!!
+!! NOTES
+!! Warning : will not work in the spin-polarized, metallic case.
+!! Output (not cleaned)
+!! !!! Spin behaviour is not obvious !!!
+!!
+!! TODO
+!! Write equation below (hermitian matrix)
+!!
+!! PARENTS
+!!      prcref,prcref_PMA
+!!
+!! CHILDREN
+!!      timab,wrtout,zhpev
+!!
+!! SOURCE
+
+subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dielmt'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npwdiel,nspden,occopt,prtvol
+!arrays
+ integer,intent(in) :: kg_diel(3,npwdiel)
+ real(dp),intent(in) :: gmet(3,3)
+ real(dp),intent(in) :: susmat(2,npwdiel,nspden,npwdiel,nspden)
+ real(dp),intent(out) :: dielinv(2,npwdiel,nspden,npwdiel,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ieig,ier,ii,index,ipw,ipw1,ipw2,isp,jj,npwsp
+ real(dp) :: ai1,ai2,ar1,ar2,eiginv,gfact,gfactinv,gred1,gred2,gred3,gsquar
+ real(dp) :: tpisq
+ character(len=500) :: message
+!arrays
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: dielh(:),dielmat(:,:,:,:,:),dielvec(:,:,:)
+ real(dp),allocatable :: eig_diel(:),zhpev1(:,:),zhpev2(:)
+!no_abirules
+!integer :: ipw3
+!real(dp) :: elementi,elementr
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,*)' dielmt : enter '
+!if(.true.)stop
+!ENDDEBUG
+
+!tpisq is (2 Pi) **2:
+ tpisq=(two_pi)**2
+
+ call timab(90,1,tsec)
+
+!-Compute now the hermitian dielectric matrix------------------------------
+!Following remarks are only valid within RPA approximation (Kxc=0):
+
+!for the spin-unpolarized case, 1 - 4pi (1/G) chi0(G,Gp) (1/Gp)
+
+!for the spin-polarized case,
+!( 1  0 ) - 4pi ( 1/G  1/G )   ( chi0 upup  chi0 updn )   ( 1/Gp 1/Gp )
+!( 0  1 )       ( 1/G  1/G )   ( chi0 dnup  chi0 dndn )   ( 1/Gp 1/Gp )
+!which is equal to
+!( 1  0 ) - 4pi (1/G  0 ) (chi0 upup+dndn+updn+dnup  chi0 upup+dndn+updn+dnup) (1/Gp 0  )
+!( 0  1 )       ( 0  1/G) (chi0 upup+dndn+updn+dnup  chi0 upup+dndn+updn+dnup) ( 0  1/Gp)
+!So, if spin-polarized, sum all spin contributions
+!Note: chi0 updn = chi0 dnup = zero for non-metallic systems
+
+!In the case of non-collinear magnetism, within RPA, this is the same because:
+!chi0_(s1,s2),(s3,s4) = delta_s1,s2 * delta_s3,s4 * chi0_(s1,s1),(s3,s3)
+!Only chi_upup,upup, chi_dndn,dndn, chi_upup,dndn and chi_dndn,upup
+!have to be taken into account (stored, susmat(:,ipw1,1:2,ipw2,1:2)
+
+ ABI_ALLOCATE(dielmat,(2,npwdiel,min(nspden,2),npwdiel,min(nspden,2)))
+
+ if(nspden/=1)then
+   if (occopt<3) then
+     do ipw2=1,npwdiel
+       do ipw1=1,npwdiel
+         dielmat(1,ipw1,1,ipw2,1)=susmat(1,ipw1,1,ipw2,1)+susmat(1,ipw1,2,ipw2,2)
+         dielmat(2,ipw1,1,ipw2,1)=susmat(2,ipw1,1,ipw2,1)+susmat(2,ipw1,2,ipw2,2)
+       end do
+     end do
+   else
+     do ipw2=1,npwdiel
+       do ipw1=1,npwdiel
+         dielmat(1,ipw1,1,ipw2,1)=susmat(1,ipw1,1,ipw2,1)+susmat(1,ipw1,2,ipw2,2)+susmat(1,ipw1,1,ipw2,2)+susmat(1,ipw1,2,ipw2,1)
+         dielmat(2,ipw1,1,ipw2,1)=susmat(2,ipw1,1,ipw2,1)+susmat(2,ipw1,2,ipw2,2)+susmat(2,ipw1,1,ipw2,2)+susmat(2,ipw1,2,ipw2,1)
+       end do
+     end do
+   end if
+ else
+   do ipw2=1,npwdiel
+     do ipw1=1,npwdiel
+       dielmat(1,ipw1,1,ipw2,1)=susmat(1,ipw1,1,ipw2,1)
+       dielmat(2,ipw1,1,ipw2,1)=susmat(2,ipw1,1,ipw2,1)
+     end do
+   end do
+ end if
+!Compute 1/G factors and include them in the dielectric matrix
+ do ipw1=1,npwdiel
+   gred1=dble(kg_diel(1,ipw1))
+   gred2=dble(kg_diel(2,ipw1))
+   gred3=dble(kg_diel(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
+&   +two*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
+&   gmet(2,3)*gred2*gred3)                        )
+!  Distinguish G=0 from other elements
+   if(gsquar>tol12)then
+!    !$ gfact=\sqrt (4.0_dp \pi/gsquar/dble(nspden))$
+     gfact=sqrt(four_pi/gsquar)
+     do ipw2=1,npwdiel
+!      Must multiply both rows and columns, and also changes the sign
+       dielmat(1,ipw2,1,ipw1,1)=-dielmat(1,ipw2,1,ipw1,1)*gfact
+       dielmat(2,ipw2,1,ipw1,1)=-dielmat(2,ipw2,1,ipw1,1)*gfact
+       dielmat(1,ipw1,1,ipw2,1)= dielmat(1,ipw1,1,ipw2,1)*gfact
+       dielmat(2,ipw1,1,ipw2,1)= dielmat(2,ipw1,1,ipw2,1)*gfact
+     end do
+   else
+!    Zero the G=0 elements, head and wings
+     do ipw2=1,npwdiel
+       dielmat(1,ipw2,1,ipw1,1)=zero
+       dielmat(2,ipw2,1,ipw1,1)=zero
+       dielmat(1,ipw1,1,ipw2,1)=zero
+       dielmat(2,ipw1,1,ipw2,1)=zero
+     end do
+   end if
+ end do
+
+!Complete the matrix in the spin-polarized case
+!should this be nspden==2??
+ if(nspden/=1)then
+   do ipw1=1,npwdiel
+     do ipw2=1,npwdiel
+       dielmat(1,ipw1,1,ipw2,2)=dielmat(1,ipw1,1,ipw2,1)
+       dielmat(2,ipw1,1,ipw2,2)=dielmat(2,ipw1,1,ipw2,1)
+       dielmat(1,ipw1,2,ipw2,1)=dielmat(1,ipw1,1,ipw2,1)
+       dielmat(2,ipw1,2,ipw2,1)=dielmat(2,ipw1,1,ipw2,1)
+       dielmat(1,ipw1,2,ipw2,2)=dielmat(1,ipw1,1,ipw2,1)
+       dielmat(2,ipw1,2,ipw2,2)=dielmat(2,ipw1,1,ipw2,1)
+     end do
+   end do
+ end if
+
+!DEBUG
+!write(std_out,*)' dielmt : make dielmat equal to identity matrix '
+!do ipw1=1,npwdiel
+!do ipw2=1,npwdiel
+!dielmat(1,ipw1,1,ipw2,1)=0.0_dp
+!dielmat(2,ipw1,1,ipw2,1)=0.0_dp
+!end do
+!end do
+!ENDDEBUG
+
+!Add the diagonal part
+ do isp=1,min(nspden,2)
+   do ipw=1,npwdiel
+     dielmat(1,ipw,isp,ipw,isp)=one+dielmat(1,ipw,isp,ipw,isp)
+   end do
+ end do
+
+!-The hermitian dielectric matrix is computed ------------------------------
+!-Now, diagonalize it ------------------------------------------------------
+
+!In RPA, everything is projected on the spin-symmetrized
+!space. This was coded here (for the time being).
+
+!Diagonalize the hermitian dielectric matrix
+
+!npwsp=npwdiel*nspden
+ npwsp=npwdiel
+
+ ABI_ALLOCATE(dielh,(npwsp*(npwsp+1)))
+ ABI_ALLOCATE(dielvec,(2,npwsp,npwsp))
+ ABI_ALLOCATE(eig_diel,(npwsp))
+ ABI_ALLOCATE(zhpev1,(2,2*npwsp-1))
+ ABI_ALLOCATE(zhpev2,(3*npwsp-2))
+ ier=0
+!Store the dielectric matrix in proper mode before calling zhpev
+ index=1
+ do ii=1,npwdiel
+   do jj=1,ii
+     dielh(index  )=dielmat(1,jj,1,ii,1)
+     dielh(index+1)=dielmat(2,jj,1,ii,1)
+     index=index+2
+   end do
+ end do
+!If spin-polarized and non RPA, need to store other parts of the matrix
+!if(nspden/=1)then
+!do ii=1,npwdiel
+!Here, spin-flip contribution
+!do jj=1,npwdiel
+!dielh(index  )=dielmat(1,jj,1,ii,2)
+!dielh(index+1)=dielmat(2,jj,1,ii,2)
+!index=index+2
+!end do
+!Here spin down-spin down upper matrix
+!do jj=1,ii
+!dielh(index  )=dielmat(1,jj,2,ii,2)
+!dielh(index+1)=dielmat(2,jj,2,ii,2)
+!index=index+2
+!end do
+!end do
+!end if
+
+ call ZHPEV ('V','U',npwsp,dielh,eig_diel,dielvec,npwdiel,zhpev1,&
+& zhpev2,ier)
+ ABI_DEALLOCATE(zhpev1)
+ ABI_DEALLOCATE(zhpev2)
+
+ if(prtvol>=10)then
+   write(message, '(a,a,a,5es12.4)' )ch10,&
+&   ' Five largest eigenvalues of the hermitian RPA dielectric matrix:',&
+&   ch10,eig_diel(npwdiel:npwdiel-4:-1)
+   call wrtout(ab_out,message,'COLL')
+ end if
+
+ write(message, '(a,a)' )ch10,&
+& ' dielmt : 15 largest eigenvalues of the hermitian RPA dielectric matrix'
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  1-5  :',eig_diel(npwdiel:npwdiel-4:-1)
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  6-10 :',eig_diel(npwdiel-5:npwdiel-9:-1)
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  11-15:',eig_diel(npwdiel-10:npwdiel-14:-1)
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,a)' )ch10,&
+& ' dielmt : 5 smallest eigenvalues of the hermitian RPA dielectric matrix'
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  1-5  :',eig_diel(1:5)
+ call wrtout(std_out,message,'COLL')
+
+!Invert the hermitian dielectric matrix,
+!Should use a BLAS call !
+ do ipw2=1,npwdiel
+   do ipw1=ipw2,npwdiel
+     dielinv(1,ipw1,1,ipw2,1)=zero
+     dielinv(2,ipw1,1,ipw2,1)=zero
+   end do
+ end do
+ do ieig=1,npwdiel
+   eiginv=one/eig_diel(ieig)
+   do ipw2=1,npwdiel
+     do ipw1=ipw2,npwdiel
+       ar1=dielvec(1,ipw1,ieig)
+       ai1=dielvec(2,ipw1,ieig)
+       ar2=dielvec(1,ipw2,ieig)
+       ai2=dielvec(2,ipw2,ieig)
+       dielinv(1,ipw1,1,ipw2,1)=dielinv(1,ipw1,1,ipw2,1)+&
+&       (ar1*ar2+ai1*ai2)*eiginv
+       dielinv(2,ipw1,1,ipw2,1)=dielinv(2,ipw1,1,ipw2,1)+&
+&       (ai1*ar2-ar1*ai2)*eiginv
+     end do
+   end do
+ end do
+ do ipw2=1,npwdiel-1
+   do ipw1=ipw2+1,npwdiel
+     dielinv(1,ipw2,1,ipw1,1)= dielinv(1,ipw1,1,ipw2,1)
+     dielinv(2,ipw2,1,ipw1,1)=-dielinv(2,ipw1,1,ipw2,1)
+   end do
+ end do
+
+ ABI_DEALLOCATE(dielh)
+ ABI_DEALLOCATE(dielvec)
+ ABI_DEALLOCATE(eig_diel)
+
+!DEBUG
+!Checks whether the inverse of the hermitian dielectric matrix
+!has been correctly generated
+!do ipw1=1,npwdiel
+!do ipw2=1,npwdiel
+!elementr=0.0_dp
+!elementi=0.0_dp
+!do ipw3=1,npwdiel
+!elementr=elementr+dielinv(1,ipw1,1,ipw3,1)*dielmat(1,ipw3,1,ipw2,1)&
+!&                    -dielinv(2,ipw1,1,ipw3,1)*dielmat(2,ipw3,1,ipw2,1)
+!elementi=elementi+dielinv(1,ipw1,1,ipw3,1)*dielmat(2,ipw3,1,ipw2,1)&
+!&                    +dielinv(2,ipw1,1,ipw3,1)*dielmat(1,ipw3,1,ipw2,1)
+!end do
+!if(elementr**2+elementi**2 > 1.0d-12)then
+!if( ipw1 /= ipw2 .or. &
+!&        ( abs(elementr-1.0_dp)>1.0d-6 .or. abs(elementi)>1.0d-6 ))then
+!write(std_out,*)' dielmt : the inversion procedure is not correct '
+!write(std_out,*)' ipw1, ipw2 =',ipw1,ipw2
+!write(std_out,*)' elementr,elementi=',elementr,elementi
+!stop
+!end if
+!end if
+!end do
+!end do
+!write(std_out,*)'dielmt : matrix has been inverted successfully '
+!stop
+!ENDDEBUG
+
+!Then get the inverse of the asymmetric
+!dielectric matrix, as required for the preconditioning.
+
+!Inverse of the dielectric matrix : ( 1 - 4pi (1/G^2) chi0(G,Gp) )^(-1)
+!In dielinv there is now (1 - 4pi (1/G) chi0(G,Gp) (1/Gp) )^(-1)
+!So, evaluate dielinv_after(G,Gp) =
+!(4pi/G^2)^(1/2) dielinv_before(G,Gp) (4pi/Gp^2)^(-1/2)
+!In RPA, can focus on the spin-averaged quantities
+ do ipw1=1,npwdiel
+   gred1=dble(kg_diel(1,ipw1))
+   gred2=dble(kg_diel(2,ipw1))
+   gred3=dble(kg_diel(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
+&   +two*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
+&   gmet(2,3)*gred2*gred3)                        )
+!  Distinguish G=0 from other elements
+   if(gsquar>tol12)then
+     gfact=sqrt(four_pi/gsquar)
+     gfactinv=one/gfact
+     do ipw2=1,npwdiel
+!      Must multiply both rows and columns
+       dielinv(1,ipw2,1,ipw1,1)=dielinv(1,ipw2,1,ipw1,1)*gfactinv
+       dielinv(2,ipw2,1,ipw1,1)=dielinv(2,ipw2,1,ipw1,1)*gfactinv
+       dielinv(1,ipw1,1,ipw2,1)=dielinv(1,ipw1,1,ipw2,1)*gfact
+       dielinv(2,ipw1,1,ipw2,1)=dielinv(2,ipw1,1,ipw2,1)*gfact
+     end do
+   else
+!    Zero the G=0 elements, head
+     do ipw2=1,npwdiel
+       if (ipw2/=ipw1) dielinv(1:2,ipw1,1,ipw2,1)=zero
+     end do
+   end if
+ end do
+
+ ABI_DEALLOCATE(dielmat)
+
+ call timab(90,2,tsec)
+
+end subroutine dielmt
+!!***
+
+
+!!****f* ABINIT/dieltcel
+!! NAME
+!! dieltcel
+!!
+!! FUNCTION
+!! Compute either test charge or electronic dielectric matrices
+!! from susceptibility matrix
+!! Diagonalize it, then invert it.
+!!
+!! INPUTS
+!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
+!!  kg_diel(3,npwdiel)=reduced planewave coordinates for the dielectric matrix.
+!!  kxc(nfft,nkxc)=exchange-correlation kernel,
+!!       needed if the electronic dielectric matrix is computed
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
+!!  npwdiel=size of the dielinv and susmat arrays.
+!!  nspden=number of spin-density components
+!!  occopt=option for occupancies
+!!  option=1 for Test Charge dielectric matrix, 2 for electronic dielectric matrix
+!!  prtvol=control print volume and debugging output
+!!  susmat(2,npwdiel,nspden,npwdiel,nspden)=
+!!   the susceptibility (or density-density response) matrix in reciprocal space
+!!
+!! OUTPUT
+!!  dielinv(2,npwdiel,nspden,npwdiel,nspden)=inverse of the (non-hermitian)
+!!      TC dielectric matrix in reciprocal space.
+!!
+!! NOTES
+!! Output (not cleaned)
+!! !!! Spin behaviour is not obvious !!!
+!! Will not work in the spin-polarized, metallic case.
+!!
+!! PARENTS
+!!      prcref,prcref_PMA
+!!
+!! CHILDREN
+!!      destroy_mpi_enreg,fourdp,init_distribfft_seq,initmpi_seq,timab,wrtout
+!!      zhpev
+!!
+!! SOURCE
+
+subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
+&  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dieltcel'
+ use interfaces_14_hidewrite
+ use interfaces_51_manage_mpi
+ use interfaces_53_ffts
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb
+ integer,intent(in) :: prtvol
+!arrays
+ integer,intent(in) :: kg_diel(3,npwdiel),ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),kxc(nfft,nkxc)
+ real(dp),intent(in) :: susmat(2,npwdiel,nspden,npwdiel,nspden)
+ real(dp),intent(out) :: dielinv(2,npwdiel,nspden,npwdiel,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,i3,ieig,ier,ifft,ii,index,ipw0,ipw1,ipw2,ispden,j1
+ integer :: j2,j3,jj,k1,k2,k3,n1,n2,n3
+ real(dp) :: ai,ai2,ar,ar2,eiginv,gred1,gred2,gred3,gsquar,si
+ real(dp) :: sr,tpisq
+ character(len=500) :: message
+ type(MPI_type) :: mpi_enreg_seq
+!arrays
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: eig_msusinvsqr(:),eig_msussqr(:)
+ real(dp),allocatable :: eig_sus(:),eig_sym(:),invsqrsus(:,:,:,:,:)
+ real(dp),allocatable :: khxc(:,:,:,:,:),kxcg(:,:),sqrsus(:,:,:,:,:),sush(:)
+ real(dp),allocatable :: susvec(:,:,:),symdielmat(:,:,:,:,:),symh(:)
+ real(dp),allocatable :: symvec(:,:,:,:,:),wkxc(:),work(:,:,:,:,:)
+ real(dp),allocatable :: work2(:,:,:,:,:),zhpev1(:,:),zhpev2(:)
+!no_abirules
+!integer :: ipw3
+!real(dp) :: elementi,elementr
+!DEBUG
+!Used to moderate divergence effect near rho=0 of the Kxc
+!this limit value is truly empirical (exprmt on small Sr cell).
+!real(dp) :: kxc_min=-200.0
+!ENDDEBUG
+
+! *************************************************************************
+
+ call timab(96,1,tsec)
+
+!tpisq is (2 Pi) **2:
+ tpisq=(two_pi)**2
+
+ if(nspden/=1 .and. (occopt>=3 .and. occopt<=8) )then
+   write(message, '(a,a,a)' )&
+&   'In the present version of the code, one cannot produce',ch10,&
+&   'the dielectric matrix in the metallic, spin-polarized case.'
+   MSG_BUG(message)
+ end if
+
+ if(nspden==4)then
+   write(message,'(a,a,a)')&
+&   'In the present version of the code, one cannot produce',ch10,&
+&   'the dielectric matrix in the non-collinear spin-polarized case.'
+   MSG_ERROR(message)
+ end if
+
+
+!-Diagonalize the susceptibility matrix
+
+ ABI_ALLOCATE(sush,(npwdiel*(npwdiel+1)))
+ ABI_ALLOCATE(susvec,(2,npwdiel,npwdiel))
+ ABI_ALLOCATE(eig_msusinvsqr,(npwdiel))
+ ABI_ALLOCATE(eig_msussqr,(npwdiel))
+ ABI_ALLOCATE(eig_sus,(npwdiel))
+ ABI_ALLOCATE(zhpev1,(2,2*npwdiel-1))
+ ABI_ALLOCATE(zhpev2,(3*npwdiel-2))
+ ABI_ALLOCATE(work,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_ALLOCATE(work2,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_ALLOCATE(sqrsus,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_ALLOCATE(invsqrsus,(2,npwdiel,nspden,npwdiel,nspden))
+
+!At some time, should take care of different spin channels
+ do ispden=1,nspden
+
+   if(nspden/=1)then
+     MSG_ERROR('dieltcel : stop, nspden/=1')
+   end if
+
+!  Store the susceptibility matrix in proper mode before calling zhpev
+   index=1
+   do ii=1,npwdiel
+     do jj=1,ii
+       sush(index  )=susmat(1,jj,1,ii,1)
+       sush(index+1)=susmat(2,jj,1,ii,1)
+       index=index+2
+     end do
+   end do
+
+   ier=0
+   call ZHPEV ('V','U',npwdiel,sush,eig_sus,susvec,npwdiel,zhpev1,zhpev2,ier)
+
+!  DEBUG
+!  write(std_out,*)' dieltcel : print eigenvalues of the susceptibility matrix'
+!  do ii=1,npwdiel
+!  write(std_out,'(i5,es16.6)' )ii,eig_sus(ii)
+!  end do
+!  ENDDEBUG
+
+   do ii=1,npwdiel
+     if(-eig_sus(ii)>1.d-12)then
+       eig_msussqr(ii)=sqrt(-eig_sus(ii))
+       eig_msusinvsqr(ii)=1._dp/eig_msussqr(ii)
+     else if(-eig_sus(ii)< -1.d-12)then
+       message = "Found positive eigenvalue of susceptibility matrix."
+       MSG_BUG(message)
+     else
+!      Set the eigenvalue corresponding to a constant potential change to 1,
+!      while it will be set to zero in Khx.
+       eig_msussqr(ii)=1._dp
+       eig_msusinvsqr(ii)=1._dp
+     end if
+   end do
+
+!  Compute square root of minus susceptibility matrix
+!  and inverse square root of minus susceptibility matrix
+   do ii=1,npwdiel
+     work(:,:,1,ii,1)=susvec(:,:,ii)*eig_msussqr(ii)
+     work2(:,:,1,ii,1)=susvec(:,:,ii)*eig_msusinvsqr(ii)
+   end do
+   do ipw2=1,npwdiel
+     do ipw1=ipw2,npwdiel
+       ar=0._dp ; ai=0._dp ; ar2=0._dp ; ai2=0._dp
+       do ii=1,npwdiel
+         sr=susvec(1,ipw2,ii) ; si=susvec(2,ipw2,ii)
+         ar =ar  +work(1,ipw1,1,ii,1)*sr  +work(2,ipw1,1,ii,1)*si
+         ai =ai  +work(2,ipw1,1,ii,1)*sr  -work(1,ipw1,1,ii,1)*si
+         ar2=ar2 +work2(1,ipw1,1,ii,1)*sr +work2(2,ipw1,1,ii,1)*si
+         ai2=ai2 +work2(2,ipw1,1,ii,1)*sr -work2(1,ipw1,1,ii,1)*si
+       end do
+       sqrsus(1,ipw1,1,ipw2,1)=ar
+       sqrsus(2,ipw1,1,ipw2,1)=ai
+       invsqrsus(1,ipw1,1,ipw2,1)=ar2
+       invsqrsus(2,ipw1,1,ipw2,1)=ai2
+       if(ipw1/=ipw2)then
+         sqrsus(1,ipw2,1,ipw1,1)=ar
+         sqrsus(2,ipw2,1,ipw1,1)=-ai
+         invsqrsus(1,ipw2,1,ipw1,1)=ar2
+         invsqrsus(2,ipw2,1,ipw1,1)=-ai2
+       end if
+     end do
+   end do
+
+!  DEBUG
+!  Checks whether sqrsus and invsqrsus are inverse of each other.
+!  do ipw1=1,npwdiel
+!  do ipw2=1,npwdiel
+!  elementr=0.0_dp
+!  elementi=0.0_dp
+!  do ipw3=1,npwdiel
+!  elementr=elementr+sqrsus(1,ipw1,1,ipw3,1)*invsqrsus(1,ipw3,1,ipw2,1)&
+!  &                    -sqrsus(2,ipw1,1,ipw3,1)*invsqrsus(2,ipw3,1,ipw2,1)
+!  elementi=elementi+sqrsus(1,ipw1,1,ipw3,1)*invsqrsus(2,ipw3,1,ipw2,1)&
+!  &                    +sqrsus(2,ipw1,1,ipw3,1)*invsqrsus(1,ipw3,1,ipw2,1)
+!  end do
+!  if(elementr**2+elementi**2 > 1.0d-12)then
+!  if( ipw1 /= ipw2 .or. &
+!  &        ( abs(elementr-1.0_dp)>1.0d-6 .or. abs(elementi)>1.0d-6 ))then
+!  write(std_out,*)' dieltcel : sqrsus and invsqrsus are not (pseudo)',&
+!  &        'inverse of each other'
+!  write(std_out,*)' ipw1, ipw2 =',ipw1,ipw2
+!  write(std_out,*)' elementr,elementi=',elementr,elementi
+!  stop
+!  end if
+!  end if
+!  end do
+!  end do
+!  ENDDEBUG
+
+!  End loop over spins
+ end do
+
+ ABI_DEALLOCATE(eig_msusinvsqr)
+ ABI_DEALLOCATE(eig_msussqr)
+ ABI_DEALLOCATE(eig_sus)
+ ABI_DEALLOCATE(sush)
+ ABI_DEALLOCATE(susvec)
+
+!-Compute the Hxc kernel
+
+ ABI_ALLOCATE(khxc,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_ALLOCATE(symdielmat,(2,npwdiel,nspden,npwdiel,nspden))
+
+ khxc(:,:,:,:,:)=0.0_dp
+
+!Compute Hartree kernel
+ do ipw1=1,npwdiel
+   gred1=dble(kg_diel(1,ipw1))
+   gred2=dble(kg_diel(2,ipw1))
+   gred3=dble(kg_diel(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
+&   +2.0_dp*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
+&   gmet(2,3)*gred2*gred3)                        )
+!  Distinguish G=0 from other elements
+   if(gsquar>1.0d-12)then
+     khxc(1,ipw1,1,ipw1,1)= 4.0_dp*pi/gsquar
+   else
+!    G=0
+     ipw0=ipw1
+   end if
+ end do
+
+!Eventually add the xc part
+ if(option>=2)then
+
+   ABI_ALLOCATE(wkxc,(nfft))
+   ABI_ALLOCATE(kxcg,(2,nfft))
+   wkxc(:)=kxc(:,1)
+!  DEBUG
+!  Used to moderate divergenc effect near rho=0 of the Kxc (see above).
+!  wkxc(:)=merge(kxc(:,1), kxc_min, kxc(:,1) > kxc_min)
+!  ENDDEBUG
+   call initmpi_seq(mpi_enreg_seq)
+   call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+   call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,ngfft,paral_kgb,0) ! trsfrm R to G
+   call destroy_mpi_enreg(mpi_enreg_seq)
+
+!  Compute difference in G vectors
+   n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+   do ipw2=1,npwdiel
+     if(ipw2/=ipw0)then
+
+       j1=kg_diel(1,ipw2) ; j2=kg_diel(2,ipw2) ; j3=kg_diel(3,ipw2)
+!      Fills diagonal
+       khxc(1,ipw2,1,ipw2,1)=khxc(1,ipw2,1,ipw2,1)+kxcg(1,1)
+       khxc(2,ipw2,1,ipw2,1)=khxc(2,ipw2,1,ipw2,1)+kxcg(2,1)
+
+       if(ipw2/=npwdiel)then
+!        Fills off-diagonal part of the matrix, except G=0
+         do ipw1=ipw2+1,npwdiel
+           if(ipw1/=ipw0)then
+             i1=kg_diel(1,ipw1) ; i2=kg_diel(2,ipw1) ; i3=kg_diel(3,ipw1)
+!            Use of two mod calls handles both i1-j1>=ndiel1 AND i1-j1<0
+             k1=mod(n1+mod(i1-j1,n1),n1)
+             k2=mod(n2+mod(i2-j2,n2),n2)
+             k3=mod(n3+mod(i3-j3,n3),n3)
+             ifft=k1+1+n1*(k2+n2*k3)
+!            The signs of imaginary contributions have been checked
+             khxc(1,ipw1,1,ipw2,1)=kxcg(1,ifft)
+             khxc(2,ipw1,1,ipw2,1)=kxcg(2,ifft)
+             khxc(1,ipw2,1,ipw1,1)=kxcg(1,ifft)
+             khxc(2,ipw2,1,ipw1,1)=-kxcg(2,ifft)
+           end if
+         end do
+       end if
+
+     end if
+   end do
+
+   ABI_DEALLOCATE(wkxc)
+   ABI_DEALLOCATE(kxcg)
+
+!  Endif option 2
+ end if
+
+!Now, get the symmetric dielectric matrix
+!Premultiplication by square root of minus susceptibility matrix
+ do ipw2=1,npwdiel
+   do ipw1=1,npwdiel
+     ar=0._dp ; ai=0._dp
+     do ii=1,npwdiel
+       ar=ar+sqrsus(1,ipw1,1,ii,1)*khxc(1,ii,1,ipw2,1) &
+&       -sqrsus(2,ipw1,1,ii,1)*khxc(2,ii,1,ipw2,1)
+       ai=ai+sqrsus(2,ipw1,1,ii,1)*khxc(1,ii,1,ipw2,1) &
+&       +sqrsus(1,ipw1,1,ii,1)*khxc(2,ii,1,ipw2,1)
+     end do
+     work(1,ipw1,1,ipw2,1)=ar
+     work(2,ipw1,1,ipw2,1)=ai
+   end do
+ end do
+!Postmultiplication by square root of minus susceptibility matrix
+ do ipw2=1,npwdiel
+!  do ipw1=ipw2,npwdiel
+   do ipw1=1,npwdiel
+     ar=0._dp ; ai=0._dp
+     do ii=1,npwdiel
+       ar=ar+work(1,ipw1,1,ii,1)*sqrsus(1,ii,1,ipw2,1) &
+&       -work(2,ipw1,1,ii,1)*sqrsus(2,ii,1,ipw2,1)
+       ai=ai+work(2,ipw1,1,ii,1)*sqrsus(1,ii,1,ipw2,1) &
+&       +work(1,ipw1,1,ii,1)*sqrsus(2,ii,1,ipw2,1)
+     end do
+     symdielmat(1,ipw1,1,ipw2,1)=ar
+     symdielmat(2,ipw1,1,ipw2,1)=ai
+!    if(ipw1/=ipw2)then
+!    symdielmat(1,ipw2,1,ipw1,1)=ar
+!    symdielmat(2,ipw2,1,ipw1,1)=-ai
+!    end if
+   end do
+!  Add the unity matrix
+   symdielmat(1,ipw2,1,ipw2,1)=1._dp+symdielmat(1,ipw2,1,ipw2,1)
+ end do
+
+ ABI_DEALLOCATE(khxc)
+
+ ABI_ALLOCATE(symh,(npwdiel*(npwdiel+1)))
+ ABI_ALLOCATE(symvec,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_ALLOCATE(eig_sym,(npwdiel))
+
+!Store the symmetrized dielectric matrix in proper mode before calling zhpev
+ index=1
+ do ii=1,npwdiel
+   do jj=1,ii
+     symh(index  )=symdielmat(1,jj,1,ii,1)
+     symh(index+1)=symdielmat(2,jj,1,ii,1)
+     index=index+2
+   end do
+ end do
+
+ ier=0
+ call ZHPEV ('V','U',npwdiel,symh,eig_sym,symvec,npwdiel,zhpev1,&
+& zhpev2,ier)
+
+ if(prtvol>=10)then
+   write(message, '(a,a,a,5es12.4)' )ch10,&
+&   ' Five largest eigenvalues of the symmetrized dielectric matrix:',&
+&   ch10,eig_sym(npwdiel:npwdiel-4:-1)
+   call wrtout(ab_out,message,'COLL')
+ end if
+
+ write(message, '(a,a)' )ch10,&
+& ' dieltcel : 15 largest eigenvalues of the symmetrized dielectric matrix'
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(npwdiel:npwdiel-4:-1)
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  6-10 :',eig_sym(npwdiel-5:npwdiel-9:-1)
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  11-15:',eig_sym(npwdiel-10:npwdiel-14:-1)
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,a)' )ch10,&
+& ' dieltcel : 5 smallest eigenvalues of the symmetrized dielectric matrix'
+ call wrtout(std_out,message,'COLL')
+ write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(1:5)
+ call wrtout(std_out,message,'COLL')
+
+!Invert the hermitian dielectric matrix,
+ work(:,:,:,:,:)=0.0_dp
+ do ieig=1,npwdiel
+   eiginv=1.0_dp/eig_sym(ieig)
+   do ipw2=1,npwdiel
+!    do ipw1=ipw2,npwdiel
+     do ipw1=1,npwdiel
+       work(1,ipw1,1,ipw2,1)=work(1,ipw1,1,ipw2,1)+&
+&       (symvec(1,ipw1,1,ieig,1)*symvec(1,ipw2,1,ieig,1)+ &
+&       symvec(2,ipw1,1,ieig,1)*symvec(2,ipw2,1,ieig,1) ) * eiginv
+       work(2,ipw1,1,ipw2,1)=work(2,ipw1,1,ipw2,1)+&
+&       (symvec(2,ipw1,1,ieig,1)*symvec(1,ipw2,1,ieig,1)- &
+&       symvec(1,ipw1,1,ieig,1)*symvec(2,ipw2,1,ieig,1) ) * eiginv
+     end do
+   end do
+ end do
+!if(npwdiel>1)then
+!do ipw2=2,npwdiel
+!do ipw1=1,ipw2-1
+!work(1,ipw1,1,ipw2,1)= work(1,ipw2,1,ipw1,1)
+!work(2,ipw1,1,ipw2,1)=-work(2,ipw2,1,ipw1,1)
+!end do
+!end do
+!end if
+
+ ABI_DEALLOCATE(eig_sym)
+ ABI_DEALLOCATE(symh)
+ ABI_DEALLOCATE(symvec)
+
+!DEBUG
+!Checks whether the inverse of the symmetric dielectric matrix
+!has been correctly generated
+!do ipw1=1,npwdiel
+!do ipw2=1,npwdiel
+!elementr=0.0_dp
+!elementi=0.0_dp
+!do ipw3=1,npwdiel
+!elementr=elementr+work(1,ipw1,1,ipw3,1)*symdielmat(1,ipw3,1,ipw2,1)&
+!&                    -work(2,ipw1,1,ipw3,1)*symdielmat(2,ipw3,1,ipw2,1)
+!elementi=elementi+work(1,ipw1,1,ipw3,1)*symdielmat(2,ipw3,1,ipw2,1)&
+!&                    +work(2,ipw1,1,ipw3,1)*symdielmat(1,ipw3,1,ipw2,1)
+!end do
+!if(elementr**2+elementi**2 > 1.0d-12)then
+!if( ipw1 /= ipw2 .or. &
+!&        ( abs(elementr-1.0_dp)>1.0d-6 .or. abs(elementi)>1.0d-6 ))then
+!write(std_out,*)' dieltcel : the inversion procedure is not correct '
+!write(std_out,*)' ipw1, ipw2 =',ipw1,ipw2
+!write(std_out,*)' elementr,elementi=',elementr,elementi
+!stop
+!end if
+!end if
+!end do
+!end do
+!write(std_out,*)'dieltcel : matrix has been inverted successfully '
+!ENDDEBUG
+
+ ABI_DEALLOCATE(symdielmat)
+
+!Then get the inverse of the asymmetric
+!dielectric matrix, as required for the preconditioning.
+!Premultiplication by square root of minus susceptibility matrix
+ do ipw2=1,npwdiel
+   do ipw1=1,npwdiel
+     ar=0._dp ; ai=0._dp
+     do ii=1,npwdiel
+       ar=ar+invsqrsus(1,ipw1,1,ii,1)*work(1,ii,1,ipw2,1) &
+&       -invsqrsus(2,ipw1,1,ii,1)*work(2,ii,1,ipw2,1)
+       ai=ai+invsqrsus(2,ipw1,1,ii,1)*work(1,ii,1,ipw2,1) &
+&       +invsqrsus(1,ipw1,1,ii,1)*work(2,ii,1,ipw2,1)
+     end do
+     work2(1,ipw1,1,ipw2,1)=ar
+     work2(2,ipw1,1,ipw2,1)=ai
+   end do
+ end do
+!Postmultiplication by square root of minus susceptibility matrix
+ do ipw2=1,npwdiel
+   do ipw1=1,npwdiel
+     ar=0._dp ; ai=0._dp
+     do ii=1,npwdiel
+       ar=ar+work2(1,ipw1,1,ii,1)*sqrsus(1,ii,1,ipw2,1) &
+&       -work2(2,ipw1,1,ii,1)*sqrsus(2,ii,1,ipw2,1)
+       ai=ai+work2(2,ipw1,1,ii,1)*sqrsus(1,ii,1,ipw2,1) &
+&       +work2(1,ipw1,1,ii,1)*sqrsus(2,ii,1,ipw2,1)
+     end do
+     dielinv(1,ipw1,1,ipw2,1)=ar
+     dielinv(2,ipw1,1,ipw2,1)=ai
+   end do
+ end do
+
+ ABI_DEALLOCATE(invsqrsus)
+ ABI_DEALLOCATE(sqrsus)
+ ABI_DEALLOCATE(work)
+ ABI_DEALLOCATE(work2)
+ ABI_DEALLOCATE(zhpev1)
+ ABI_DEALLOCATE(zhpev2)
+
+ call timab(96,2,tsec)
+
+end subroutine dieltcel
 !!***
 
 !!****f* ABINIT/prcrskerker1
