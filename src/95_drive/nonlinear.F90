@@ -1312,6 +1312,13 @@ end if
 
    subroutine print_chi2(d3cart0,ipert,msg,theunit)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'print_chi2'
+!End of the abilint section
+
      integer,intent(in) :: theunit,ipert
      character(len=30) :: msg
      real(dp) :: elem1,elem2
@@ -1331,6 +1338,13 @@ end if
    end subroutine print_chi2
 
    subroutine print_dchidtau(d3cart0,msg,theunit)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'print_dchidtau'
+!End of the abilint section
 
      integer,intent(in) :: theunit
      character(len=30) :: msg
