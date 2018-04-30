@@ -32,7 +32,7 @@ MODULE m_bfgs
  use m_errors
  use m_abimover
 
- use m_io_tools,  only : open_file
+ use m_io_tools,       only : open_file
  use m_numeric_tools,  only : findmin
 
  implicit none

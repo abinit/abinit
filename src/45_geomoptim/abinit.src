@@ -50,7 +50,6 @@ sources = [
  "pred_steepdesc.F90",
  "pred_velverlet.F90",
  "pred_verlet.F90",
- "predict_copy.F90",
  "predictimg.F90",
  "predict_neb.F90",
  "predict_pimd.F90",

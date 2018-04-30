@@ -611,7 +611,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
  ab_mover%iatfix=>iatfix(:,1:natom)
 !SYMmetry in REaL space
  ab_mover%symrel=>symrel
-!Phonon q grid in the DDB (ionmov 26 and 27) 
+!Phonon q grid in the DDB (ionmov 26 and 27)
  ab_mover%ph_ngqpt=>ph_ngqpt
  ab_mover%ph_nqshift=>ph_nqshift
  ab_mover%ph_qshift=>ph_qshift
@@ -918,7 +918,7 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !  This is the initialization for ionmov==27
 !  -------------------------------------------
  case (27)                ! Generation of the training set for effective potential
-   specs%ncycle = 1       ! Number of internal cycles 
+   specs%ncycle = 1       ! Number of internal cycles
    specs%isFconv=.FALSE.  ! Convergence is not used
    specs%isVused=.FALSE.   ! Velocities are not used for update of atomic positions
 !  Values use in XML Output
