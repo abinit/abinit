@@ -211,6 +211,7 @@ end subroutine calc_b_matrix
 subroutine dbond_length_d1(r1,r2,bb)
 
  use defs_basis
+ use m_abimover, only : bond_length
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -257,6 +258,7 @@ subroutine dang_d1(r1,r2,r3,bb)
  use defs_basis
 
  use m_geometry,  only : acrossb
+ use m_abimover, only : bond_length
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -333,6 +335,7 @@ subroutine dang_d2(r1,r2,r3,bb)
  use defs_basis
 
  use m_geometry,  only : acrossb
+ use m_abimover, only : bond_length
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

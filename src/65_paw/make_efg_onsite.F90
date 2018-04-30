@@ -79,7 +79,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_onsite'
- use interfaces_45_geomoptim
  use interfaces_65_paw, except_this_one => make_efg_onsite
 !End of the abilint section
 
