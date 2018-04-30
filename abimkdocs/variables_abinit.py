@@ -3418,7 +3418,7 @@ Variable(
     abivarname="enunit",
     varset="gstate",
     vartype="integer",
-    topics=['Output_useful'],
+    topics=['Output_useful','ElecBandStructure_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="ENergy UNITs",
