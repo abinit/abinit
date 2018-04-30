@@ -490,12 +490,12 @@ CONTAINS
      if(mdim>1) then
        write(io_unit,'(a)') '   are DEGENERATE (effective mass is therefore not defined).'
        if(mdim==3) then
-         write(io_unit,'(a)') '   See Section IIIB Eqs. (66)-(71) and Appendix E of PRB XX XXX (2015).'
+         write(io_unit,'(a)') '   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).'
        elseif(mdim==2) then
          write(io_unit,'(a)') ' - Also, 2D requested (perpendicular to Z axis).'
-         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F11)-(F13) of PRB XX XXX (2015).'
+         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).'
        end if
-       write(io_unit,'(a,i7,a)') ' - Associated theta integrals calculated with nthteta=',ntheta,' points.'
+       write(io_unit,'(a,i7,a)') ' - Associated theta integrals calculated with ntheta=',ntheta,' points.'
      else
        write(io_unit,'(a)') '   are DEGENERATE.' 
        write(io_unit,'(a)') ' - Also, 1D requested (parallel to X axis).'

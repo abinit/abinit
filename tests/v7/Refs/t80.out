@@ -1381,8 +1381,8 @@ NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate,
 COMMENTS: 
  - At k-point ( 0.000, 0.000, 0.000), bands     2 through     4
    are DEGENERATE (effective mass is therefore not defined).
-   See Section IIIB Eqs. (66)-(71) and Appendix E of PRB XX XXX (2015).
- - Associated theta integrals calculated with nthteta=    100 points.
+   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).
+ - Associated theta integrals calculated with ntheta=    100 points.
 
 K-point ( 0.000, 0.000, 0.000) | band =     2
 Transport equivalent effective mass:
@@ -1649,7 +1649,7 @@ COMMENTS:
  - At k-point ( 0.000, 0.000, 0.000), bands     2 through     4
    are DEGENERATE (effective mass is therefore not defined).
  - Also, 2D requested (perpendicular to Z axis).
-   See Section IIIB and Appendix F, Eqs. (F11)-(F13) of PRB XX XXX (2015).
+   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).
  - Associated theta integrals calculated with nthteta=    100 points.
 
 K-point ( 0.000, 0.000, 0.000) | band =     2
