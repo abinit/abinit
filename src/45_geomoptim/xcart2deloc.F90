@@ -17,8 +17,7 @@
 !! see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
-!! deloc <type(delocint)>=Important variables for
-!!   |                           pred_delocint
+!! deloc <type(delocint)>=Important variables for pred_delocint
 !!   |
 !!   | nang     = Number of angles
 !!   | nbond    = Number of bonds
@@ -70,8 +69,7 @@
 
 #include "abi_common.h"
 
-subroutine xcart2deloc(deloc,natom,rprimd,xcart,&
-& bt_inv_matrix,u_matrix,deloc_int,prim_int)
+subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
 
  use defs_basis
  use m_errors
@@ -148,13 +146,6 @@ end subroutine xcart2deloc
 !!
 !! FUNCTION
 !!
-!! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MJV).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -212,8 +203,7 @@ end subroutine xcart2deloc
  ABI_ALLOCATE(work,(lwork))
  s_matrix(:,:) = f_matrix(:,:)
 
- call dsyev('V','L',3*natom,s_matrix,3*natom,&
-& f_eigs,work,lwork,info)
+ call dsyev('V','L',3*natom,s_matrix,3*natom,f_eigs,work,lwork,info)
 
  ABI_DEALLOCATE(work)
 
@@ -282,7 +272,6 @@ end subroutine calc_btinv_matrix
  subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
 
  use defs_basis
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

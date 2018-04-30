@@ -211,8 +211,6 @@ end subroutine calc_b_matrix
 subroutine dbond_length_d1(r1,r2,bb)
 
  use defs_basis
- use m_profiling_abi
- use m_abimover
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -257,8 +255,6 @@ end subroutine dbond_length_d1
 subroutine dang_d1(r1,r2,r3,bb)
 
  use defs_basis
- use m_profiling_abi
- use m_abimover
 
  use m_geometry,  only : acrossb
 
@@ -335,8 +331,6 @@ end subroutine dang_d1
 subroutine dang_d2(r1,r2,r3,bb)
 
  use defs_basis
- use m_profiling_abi
- use m_abimover
 
  use m_geometry,  only : acrossb
 
@@ -415,7 +409,7 @@ end subroutine dang_d2
 subroutine ddihedral_d1(r1,r2,r3,r4,bb)
 
  use defs_basis
- use m_profiling_abi
+
  use m_geometry,  only : acrossb
 
 !This section has been created automatically by the script Abilint (TD).
@@ -533,7 +527,6 @@ end subroutine ddihedral_d1
 subroutine ddihedral_d2(r1,r2,r3,r4,bb)
 
  use defs_basis
- use m_profiling_abi
 
  use m_geometry,  only : acrossb
 
@@ -634,7 +627,6 @@ subroutine ddihedral_d2(r1,r2,r3,r4,bb)
 !write(std_out,*) -cp1232(:)*(n23-sp1232/n23)/n1/n1, -cp3432(:)*sp3432/n23/n2/n2
 !end if
  bb(:) = rpt(:)
-
 
 end subroutine ddihedral_d2
 !!***

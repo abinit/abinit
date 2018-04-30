@@ -30,7 +30,6 @@ sources = [
  "m_mep.F90",
  "m_pimd.F90",
  "m_use_ga.F90",
- "matpointsym.F90",
  "pimd_langevin_npt.F90",
  "pimd_langevin_nvt.F90",
  "pimd_nosehoover_npt.F90",
