@@ -13,7 +13,7 @@ module m_spin_model
   use m_xmpi
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spin_terms, only: spin_terms_t, spin_terms_t_finalize
+  use m_spin_terms, only: spin_terms_t, spin_terms_t_finalize, spin_terms_t_set_external_hfield
   use m_spin_model_primitive, only: spin_model_primitive_t, &
        & spin_model_primitive_t_initialize, &
        & spin_model_primitive_t_print_terms, &
@@ -100,6 +100,9 @@ contains
     ! set parameters to hamiltonian and mover
     self%nmatoms= self%spin_calculator%nmatoms
 
+    call spin_model_t_set_params(self)
+
+
     !TODO hexu: mxhist, has_latt, natom should be input with their true values when lattice part also added
     call spin_hist_t_init(hist=self%spin_hist, nmatom=self%nmatoms, mxhist=3, has_latt=.False.)
     call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
@@ -126,7 +129,6 @@ contains
   ! finalize
   subroutine spin_model_t_finalize(self)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -142,6 +144,23 @@ contains
     call spin_ncfile_t_close(self%spin_ncfile)
     ! TODO: finalize others
   end subroutine spin_model_t_finalize
+
+
+  subroutine spin_model_t_set_params(self)
+    class(spin_model_t), intent(inout) :: self
+    real(dp):: mfield(3, self%nmatoms)
+    integer ::  i 
+    ! params -> mover
+    ! params -> calculator
+    do i=1, self%nmatoms
+      mfield(:, i)=self%params%spin_mag_field(:)
+    end do
+    call spin_terms_t_set_external_hfield(self%spin_calculator, mfield)
+    ! params -> hist
+          
+  end subroutine
+
+
 
   ! read xml file and set primitive cell parameters.
   subroutine spin_model_t_read_xml(self, xml_fname)

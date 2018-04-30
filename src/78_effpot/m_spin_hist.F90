@@ -5,25 +5,26 @@
 !! m_spin_hist
 !!
 !! FUNCTION
-!! This module contains definition the type spin_hist
+!! This module contains definition the type spin_hist_t
 !! and its related routines
 !!
 !! Datatypes:
 !!
-!! * spin_hist: Historical record of spin orientations and amplitudes
+!! * spin_hist_t: Historical record of spin orientations and amplitudes
 !!
 !! Subroutines:
 !!
-!! * abispinhist_init
-!! * abispinhist_free
-!! * abispinhist_bcast
-!! * abispinhist_compare
-!! * spinhist2var
-!! * var2spinhist
-!! * dSdt2spinhist
+!! * spin_hist_t_init
+!! * spin_hist_t_free
+!! * spin_hist_t
+!! * spin_hist_t_get_S
+!! * spin_hist_t_findIndex
+!! * spin_hist_t_set_vars
+!! * spin_hist_t_set_params
+!!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2017 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +34,8 @@
 ! TODO hexu:
 ! sync ihist_latt when with lattice dynamics
 ! add average , variance, etc (should they be here?)
+! structural information and some parameters are no longer 
+! used here. They should be removed form this file.
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
