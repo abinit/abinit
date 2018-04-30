@@ -37,6 +37,15 @@
 
 module m_psxml2ab
 
+ use defs_basis
+ use defs_datatypes
+ use m_profiling_abi
+ use m_errors
+#ifdef HAVE_PSML
+ use m_psml
+ use m_psml_api
+#endif
+
  use m_fstrings,     only : yesno
 
 implicit none
@@ -49,15 +58,7 @@ public :: psxml2abheader
 
 CONTAINS
 
-
 subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
-
- use defs_basis
- use defs_datatypes
- use m_profiling_abi
- use m_errors
- use m_psml
- use m_psml_api
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -382,38 +383,8 @@ end subroutine psxml2abheader
 ! end test on compiling with LIBPSML enabled
 #endif
 
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/psxml2abfull
-!! NAME
-!! psxml2abfull
-!!
-!! FUNCTION
-!!  read in all data from psml file. Call header reader first, then local potential and NL projectors
-!!
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MJV).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
-!!   str = string with error message
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-
-
-
-!!***
 end module m_psxml2ab
+!!***
 
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/psml_die
@@ -441,21 +412,23 @@ end module m_psxml2ab
 !! CHILDREN
 !!
 !! SOURCE
-subroutine psml_die(str)
-  use m_errors
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psml_die'
-!End of the abilint section
-
-  implicit none
-
-  character(len=*), intent(in) :: str
-
-  MSG_BUG(str)
-
-end subroutine psml_die
+!subroutine psml_die(str)
+!
+!  use m_errors
+!
+!!This section has been created automatically by the script Abilint (TD).
+!!Do not modify the following lines by hand.
+!#undef ABI_FUNC
+!#define ABI_FUNC 'psml_die'
+!!End of the abilint section
+!
+!  implicit none
+!
+!  character(len=*), intent(in) :: str
+!
+!  MSG_BUG(str)
+!
+!end subroutine psml_die
 !!***
 

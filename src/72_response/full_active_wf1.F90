@@ -74,8 +74,8 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
  use m_errors
  use m_profiling_abi
  use m_cgtools
- use m_time, only : timab
 
+ use m_time,    only : timab
  use m_pawcprj, only : pawcprj_type, pawcprj_copy, pawcprj_zaxpby
 
 !This section has been created automatically by the script Abilint (TD).
