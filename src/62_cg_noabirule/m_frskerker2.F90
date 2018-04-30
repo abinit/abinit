@@ -81,6 +81,7 @@ contains
 
 subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdielng_in,deltaW_in,gprimd_in,mat_in )
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -142,6 +143,7 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 
   subroutine frskerker2__end()
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -185,6 +187,7 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 
 subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -225,11 +228,11 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
   function frskerker2__pf(nv1,nv2,vrespc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'frskerker2__pf'
- use interfaces_62_cg_noabirule
 !End of the abilint section
 
  implicit none
@@ -283,6 +286,7 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 !! SOURCE
 
 function frskerker2__dpf(nv1,nv2,vrespc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

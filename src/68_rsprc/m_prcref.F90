@@ -2491,7 +2491,6 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcrskerker1'
- use interfaces_62_cg_noabirule
 !End of the abilint section
 
  implicit none
@@ -2717,7 +2716,6 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcrskerker2'
- use interfaces_62_cg_noabirule
 !End of the abilint section
 
  implicit none
@@ -3029,17 +3027,17 @@ end subroutine prcrskerker2
 
 subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cgpr'
- use interfaces_62_cg_noabirule, except_this_one => cgpr
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
-#include "dummy_functions.inc"
+include "dummy_functions.inc"
 !scalars
  integer,intent(in) :: itmax,nv1,nv2
  real(dp),intent(in) :: dtol
@@ -3128,17 +3126,17 @@ end subroutine cgpr
 
 subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linmin'
- use interfaces_62_cg_noabirule, except_this_one => linmin
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
-#include "dummy_functions.inc"
+include "dummy_functions.inc"
 !scalars
  integer,intent(in) :: nv1,nv2
  real(dp),intent(out) :: fmin
@@ -3194,6 +3192,7 @@ end subroutine linmin
 
 subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3203,7 +3202,7 @@ subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
  implicit none
 
 !Arguments ------------------------------------
-#include "dummy_functions.inc"
+include "dummy_functions.inc"
 !scalars
  integer,intent(in) :: nv1,nv2
  real(dp),intent(inout) :: a,x
@@ -3311,17 +3310,17 @@ end subroutine bracketing
 
 function brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,itmax,v,grad,ax,xx,bx,tol,xmin)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'brent'
- use interfaces_62_cg_noabirule, except_this_one => brent
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
-#include "dummy_functions.inc"
+include "dummy_functions.inc"
 !scalars
  integer,intent(in) :: itmax,nv1,nv2
  real(dp) :: brent

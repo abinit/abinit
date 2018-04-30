@@ -6881,6 +6881,7 @@ end subroutine kramerskronig
 
 function dotproduct(nv1,nv2,v1,v2)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
