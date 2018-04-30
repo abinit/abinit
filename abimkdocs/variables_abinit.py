@@ -3260,8 +3260,8 @@ Variable(
     requires="[[efmas]] > 0",
     text="""
 Activate (==1) or not (==0) the treatment of degenerate bands (within a
-criterion [[efmas_deg_tol]]) using the transport equivalent effective mass
-idea (see [[cite:Mecholsky2014]]).
+criterion [[efmas_deg_tol]]). Also computed the transport equivalent effective mass
+(see [[cite:Mecholsky2014]]).
 """,
 ),
 
@@ -3351,7 +3351,9 @@ When a band is degenerate, the usual definition of effective mass becomes
 invalid. However, it is still possible to define a 'transport equivalent mass
 tensor' that reproduces the contribution of the band to the conductivity
 tensor. To obtain this tensor, an integration over the solid sphere is
-required. The default value gives a tensor accurate to the 4th decimal in Ge.
+required. The angular variables are sampled using [[ntheta]] points for the theta coordinate,
+and twice [[ntheta]] points for the phi coordinate. 
+The default value gives a tensor accurate to the 4th decimal in Ge.
 """,
 ),
 
