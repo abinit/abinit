@@ -339,7 +339,7 @@ program multibinit
      else if (option==1.or.option==2)then
 !      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateTerm,&
+&       inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
 &       inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
 &       inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
 &       initialize_data=inp%fit_initializeData==1,&
