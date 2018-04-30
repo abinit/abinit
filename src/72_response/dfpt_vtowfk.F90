@@ -649,6 +649,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 &               iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,&
 &               nspinor,timcount,usepaw)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

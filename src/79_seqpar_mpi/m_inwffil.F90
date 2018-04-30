@@ -1139,7 +1139,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #define ABI_FUNC 'wfsinp'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -1872,7 +1871,6 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 #undef ABI_FUNC
 #define ABI_FUNC 'initwf'
  use interfaces_14_hidewrite
- use interfaces_62_iowfdenpot
 !End of the abilint section
 
  implicit none
@@ -2121,7 +2119,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 #define ABI_FUNC 'newkpt'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section
 

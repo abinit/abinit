@@ -84,12 +84,12 @@ contains
 
 subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, prefix, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_interpolate'
  use interfaces_14_hidewrite
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
