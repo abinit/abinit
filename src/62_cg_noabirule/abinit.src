@@ -18,8 +18,8 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "frskerker1.F90",
- "frskerker2.F90",
+ "m_frskerker1.F90",
+ "m_frskerker2.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -94,6 +94,9 @@ MODULE m_numeric_tools
  public :: findmin               ! Compute the minimum of a function whose value and derivative are known at two points.
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
 
+ !MG FIXME: deprecated: just to avoid updating refs while refactoring.
+ public :: dotproduct
+
  interface arth
    module procedure arth_int
    module procedure arth_rdp
@@ -6841,6 +6844,70 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  call wrtout(std_out,msg,'COLL')
 
 end subroutine kramerskronig
+!!***
+
+!!****f* ABINIT/dotproduct
+!! NAME
+!! dotproduct
+!!
+!! FUNCTION
+!! scalar product of two vectors
+!!
+!! INPUTS
+!! v1 and v2: two real(dp) vectors
+!!
+!! OUTPUT
+!! scalar product of the two vectors
+!!
+!! SIDE EFFECTS
+!!
+!! WARNINGS
+!! vector size is not checked
+!!
+!! NOTES
+!! I've benchmarked this to be speedier than the intrinsic dot_product even on
+!! big vectors. The point is that less check is performed.
+!!
+!! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
+!! Now I dont' have time to update ref files
+!!
+!! PARENTS
+!! cgpr,brent
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+function dotproduct(nv1,nv2,v1,v2)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dotproduct'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nv1,nv2
+ real(dp) :: dotproduct
+!arrays
+ real(dp),intent(in) :: v1(nv1,nv2),v2(nv1,nv2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i,j
+
+! *************************************************************************
+ dotproduct=zero
+ do j=1,nv2
+  do i=1,nv1
+   dotproduct=dotproduct+v1(i,j)*v2(i,j)
+  end do
+ end do
+end function dotproduct
 !!***
 
 END MODULE m_numeric_tools

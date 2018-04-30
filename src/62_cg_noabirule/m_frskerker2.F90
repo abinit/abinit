@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/frskerker2
+!!****m* ABINIT/m_frskerker2
 !! NAME
-!! frskerker2
+!! m_frskerker2
 !!
 !! FUNCTION
 !! provide the ability to compute the
@@ -31,7 +31,7 @@
 
 #include "abi_common.h"
 
-module frskerker2
+module m_frskerker2
 
   use defs_basis
   use defs_abitypes
@@ -41,7 +41,7 @@ module frskerker2
   use interfaces_56_recipspace  ! THIS IS MANDATORY TO CALL LAPLACIAN
 
   use m_spacepar, only : laplacian
-
+ use m_numeric_tools, only : dotproduct
 
   implicit none
 
@@ -58,7 +58,7 @@ module frskerker2
 contains
 !!***
 
-!!****f* frskerker2/frskerker2__init
+!!****f* m_frskerker2/frskerker2__init
 !! NAME
 !! frskerker2__init
 !!
@@ -78,8 +78,8 @@ contains
 !!      laplacian
 !!
 !! SOURCE
-  subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdielng_in,deltaW_in,gprimd_in,mat_in )
 
+subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdielng_in,deltaW_in,gprimd_in,mat_in )
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -87,14 +87,15 @@ contains
 #define ABI_FUNC 'frskerker2__init'
 !End of the abilint section
 
-    implicit none
+ implicit none
+
 !Arguments ------------------------------------
-    type(dataset_type),target,intent(in) :: dtset_in
-    integer,intent(in)  :: nfft_in,ngfft_in(18),nspden_in
-    real(dp),intent(in) :: deltaW_in(nfft_in,nspden_in),mat_in(nfft_in,nspden_in)
-    real(dp),intent(in) :: rdielng_in(nfft_in)
-    real(dp),intent(in)  :: gprimd_in(3,3)
-    type(MPI_type),target,intent(in)  :: mpi_enreg_in
+ type(dataset_type),target,intent(in) :: dtset_in
+ integer,intent(in)  :: nfft_in,ngfft_in(18),nspden_in
+ real(dp),intent(in) :: deltaW_in(nfft_in,nspden_in),mat_in(nfft_in,nspden_in)
+ real(dp),intent(in) :: rdielng_in(nfft_in)
+ real(dp),intent(in)  :: gprimd_in(3,3)
+ type(MPI_type),target,intent(in)  :: mpi_enreg_in
 
 ! *************************************************************************
 ! !allocation and data transfer
@@ -115,10 +116,11 @@ contains
    gprimd=gprimd_in
    ok = .true.
   end if
+
  end subroutine frskerker2__init
 !!***
 
-!!****f* frskerker2/frskerker2__end
+!!****f* m_frskerker2/frskerker2__end
 !! NAME
 !! frskerker2__end
 !!
@@ -137,9 +139,8 @@ contains
 !!      laplacian
 !!
 !! SOURCE
+
   subroutine frskerker2__end()
-    use defs_basis
-    use defs_abitypes
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -147,10 +148,7 @@ contains
 #define ABI_FUNC 'frskerker2__end'
 !End of the abilint section
 
-    implicit none
-!Arguments ------------------------------------
-
-!Local variables-------------------------------
+ implicit none
 
 ! *************************************************************************
   if(ok) then
@@ -161,10 +159,11 @@ contains
    ABI_DEALLOCATE(mat)
    ABI_DEALLOCATE(rdielng)
   end if
+
  end subroutine frskerker2__end
 !!***
 
-!!****f* frskerker2/frskerker2__newvres2
+!!****f* m_frskerker2/frskerker2__newvres2
 !! NAME
 !! frskerker2__newvres2
 !!
@@ -183,8 +182,8 @@ contains
 !!      laplacian
 !!
 !! SOURCE
-  subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
+subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -192,41 +191,39 @@ contains
 #define ABI_FUNC 'frskerker2__newvres2'
 !End of the abilint section
 
-    implicit none
-!Arguments ------------------------------------
+ implicit none
 
-    integer,intent(in)    :: nv1,nv2
-    real(dp),intent(in)   :: x
-    real(dp),intent(inout)::grad(nv1,nv2)
-    real(dp),intent(inout)::vrespc(nv1,nv2)
-!Local variables-------------------------------
+!Arguments ------------------------------------
+ integer,intent(in)    :: nv1,nv2
+ real(dp),intent(in)   :: x
+ real(dp),intent(inout)::grad(nv1,nv2)
+ real(dp),intent(inout)::vrespc(nv1,nv2)
 
 ! *************************************************************************
   grad(:,:)=x*grad(:,:)
   vrespc(:,:)=vrespc(:,:)+grad(:,:)
+
  end subroutine frskerker2__newvres2
 !!***
 
-!!****f* frskerker2/frskerker2__pf
+!!****f* m_frskerker2/frskerker2__pf
 !! NAME
 !! frskerker2__pf
 !!
 !! FUNCTION
-!! penalty function associated with the preconditionned residuals    !!
+!! penalty function associated with the preconditionned residuals
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
-  function frskerker2__pf(nv1,nv2,vrespc)
 
+  function frskerker2__pf(nv1,nv2,vrespc)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -235,18 +232,17 @@ contains
  use interfaces_62_cg_noabirule
 !End of the abilint section
 
-    implicit none
+ implicit none
+
 !Arguments ------------------------------------
-    integer,intent(in)    :: nv1,nv2
-    real(dp),intent(in) ::vrespc(nv1,nv2)
-    real(dp)            ::frskerker2__pf
+ integer,intent(in)    :: nv1,nv2
+ real(dp),intent(in) ::vrespc(nv1,nv2)
+ real(dp)            ::frskerker2__pf
+
 !Local variables-------------------------------
-
-    real(dp)            :: buffer1(nv1,nv2),buffer2(nv1,nv2)
-    integer             :: ispden
+ real(dp)            :: buffer1(nv1,nv2),buffer2(nv1,nv2)
+ integer             :: ispden
 ! *************************************************************************
-
-! Added by YP [HAVE_FORTRAN_INTERFACES]
 
   if(ok) then
    buffer1=vrespc
@@ -263,7 +259,7 @@ contains
  end function frskerker2__pf
 !!***
 
-!!****f* frskerker2/frskerker2__dpf
+!!****f* m_frskerker2/frskerker2__dpf
 !! NAME
 !! frskerker2__dpf
 !!
@@ -281,14 +277,12 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
-  function frskerker2__dpf(nv1,nv2,vrespc)
 
+function frskerker2__dpf(nv1,nv2,vrespc)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -296,15 +290,16 @@ contains
 #define ABI_FUNC 'frskerker2__dpf'
 !End of the abilint section
 
-    implicit none
-!Arguments ------------------------------------
-    integer,intent(in) :: nv1,nv2
-    real(dp),intent(in)::vrespc(nv1,nv2)
-    real(dp)           :: frskerker2__dpf(nv1,nv2)
-!Local variables-------------------------------
+ implicit none
 
-    real(dp):: buffer1(nv1,nv2),buffer2(nv1,nv2)
-    integer :: ispden
+!Arguments ------------------------------------
+ integer,intent(in) :: nv1,nv2
+ real(dp),intent(in)::vrespc(nv1,nv2)
+ real(dp)           :: frskerker2__dpf(nv1,nv2)
+
+!Local variables-------------------------------
+ real(dp):: buffer1(nv1,nv2),buffer2(nv1,nv2)
+ integer :: ispden
 
 ! *************************************************************************
 
@@ -317,7 +312,9 @@ contains
   else
    frskerker2__dpf = zero
   end if
- end function frskerker2__dpf
 
-end module frskerker2
+end function frskerker2__dpf
+!!***
+
+end module m_frskerker2
 !!***

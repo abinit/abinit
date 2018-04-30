@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/frskerker1
+!!****m* ABINIT/m_frskerker1
 !! NAME
-!! frskerker1
+!! m_frskerker1
 !!
 !! FUNCTION
 !! provide the ability to compute the
@@ -31,7 +31,7 @@
 
 #include "abi_common.h"
 
-module frskerker1
+module m_frskerker1
 
   use defs_basis
   use defs_abitypes
@@ -41,6 +41,7 @@ module frskerker1
   use interfaces_56_recipspace  ! THIS IS MANDATORY TO CALL LAPLACIAN
 
   use m_spacepar,  only : laplacian
+ use m_numeric_tools, only : dotproduct
 
   implicit none
   !! common variables copied from input
@@ -55,7 +56,7 @@ module frskerker1
 contains
 !!***
 
-!!****f* frskerker1/frskerker1__init
+!!****f* m_frskerker1/frskerker1__init
 !! NAME
 !! frskerker1__init
 !!
@@ -75,6 +76,7 @@ contains
 !!      laplacian
 !!
 !! SOURCE
+
 subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,dielng_in,deltaW_in,gprimd_in,mat_in,g2cart_in )
 
 
@@ -84,15 +86,15 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
 #define ABI_FUNC 'frskerker1__init'
 !End of the abilint section
 
-    implicit none
+ implicit none
+
 !Arguments ------------------------------------
-    integer,intent(in)                  :: nfft_in,ngfft_in(18),nspden_in
-    real(dp),intent(in)                 :: deltaW_in(nfft_in,nspden_in),mat_in(nfft_in,nspden_in),g2cart_in(nfft_in)
-    real(dp),dimension(3,3),intent(in)  :: gprimd_in
-    real(dp),intent(in)                 :: dielng_in
-    type(dataset_type),target,intent(in) :: dtset_in
-    type(MPI_type),target,intent(in)  :: mpi_enreg_in
-!Local variables-------------------------------
+ integer,intent(in)                  :: nfft_in,ngfft_in(18),nspden_in
+ real(dp),intent(in)                 :: deltaW_in(nfft_in,nspden_in),mat_in(nfft_in,nspden_in),g2cart_in(nfft_in)
+ real(dp),dimension(3,3),intent(in)  :: gprimd_in
+ real(dp),intent(in)                 :: dielng_in
+ type(dataset_type),target,intent(in) :: dtset_in
+ type(MPI_type),target,intent(in)  :: mpi_enreg_in
 
 ! *************************************************************************
 
@@ -118,7 +120,7 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
  end subroutine frskerker1__init
 !!***
 
-!!****f* frskerker1/frskerker1__end
+!!****f* m_frskerker1/frskerker1__end
 !! NAME
 !! frskerker1__end
 !!
@@ -137,9 +139,8 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
 !!      laplacian
 !!
 !! SOURCE
+
 subroutine frskerker1__end()
-    use defs_basis
-    use defs_abitypes
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -147,10 +148,7 @@ subroutine frskerker1__end()
 #define ABI_FUNC 'frskerker1__end'
 !End of the abilint section
 
-    implicit none
-!Arguments ------------------------------------
-
-!Local variables-------------------------------
+  implicit none
 
 ! *************************************************************************
   if(ok) then
@@ -161,10 +159,11 @@ subroutine frskerker1__end()
    ABI_DEALLOCATE(mat)
    ABI_DEALLOCATE(g2cart)
   end if
+
  end subroutine frskerker1__end
 !!***
 
-!!****f* frskerker1/frskerker1__newvres
+!!****f* m_frskerker1/frskerker1__newvres
 !! NAME
 !! frskerker1__newvres
 !!
@@ -183,8 +182,8 @@ subroutine frskerker1__end()
 !!      laplacian
 !!
 !! SOURCE
-subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 
+subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -192,41 +191,40 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 #define ABI_FUNC 'frskerker1__newvres'
 !End of the abilint section
 
-    implicit none
+ implicit none
+
 !Arguments ------------------------------------
-    integer,intent(in) :: nv1,nv2
-    real(dp),intent(in):: x
-    real(dp),intent(inout)::grad(nv1,nv2)
-    real(dp),intent(inout)::vrespc(nv1,nv2)
-!Local variables-------------------------------
+ integer,intent(in) :: nv1,nv2
+ real(dp),intent(in):: x
+ real(dp),intent(inout)::grad(nv1,nv2)
+ real(dp),intent(inout)::vrespc(nv1,nv2)
 
 ! *************************************************************************
 
   grad(:,:)=x*grad(:,:)
   vrespc(:,:)=vrespc(:,:)+grad(:,:)
- end subroutine frskerker1__newvres
+
+end subroutine frskerker1__newvres
 !!***
 
-!!****f* frskerker1/frskerker1__pf
+!!****f* m_frskerker1/frskerker1__pf
 !! NAME
 !! frskerker1__pf
 !!
 !! FUNCTION
-!! penalty function associated with the preconditionned residuals    !!
+!! penalty function associated with the preconditionned residuals
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
-  function frskerker1__pf(nv1,nv2,vrespc)
 
+function frskerker1__pf(nv1,nv2,vrespc)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -235,16 +233,16 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
  use interfaces_62_cg_noabirule
 !End of the abilint section
 
-    implicit none
-!Arguments ------------------------------------
-    integer,intent(in) :: nv1,nv2
-    real(dp),intent(in)::vrespc(nv1,nv2)
-    real(dp)           ::frskerker1__pf
-!Local variables-------------------------------
+ implicit none
 
-    real(dp):: buffer1(nv1,nv2),buffer2(nv1,nv2)
+!Arguments ------------------------------------
+ integer,intent(in) :: nv1,nv2
+ real(dp),intent(in)::vrespc(nv1,nv2)
+ real(dp)           ::frskerker1__pf
+
+!Local variables-------------------------------
+ real(dp):: buffer1(nv1,nv2),buffer2(nv1,nv2)
 ! *************************************************************************
-! Added by YP [HAVE_FORTRAN_INTERFACES]
 
   if(ok) then
    buffer1=vrespc
@@ -255,10 +253,11 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
   else
    frskerker1__pf=zero
   end if
+
  end function frskerker1__pf
 !!***
 
-!!****f* frskerker1/frskerker1__dpf
+!!****f* m_frskerker1/frskerker1__dpf
 !! NAME
 !! frskerker1__dpf
 !!
@@ -274,14 +273,12 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 !! OUTPUT
 !!
 !! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
-  function frskerker1__dpf(nv1,nv2,vrespc)
 
+function frskerker1__dpf(nv1,nv2,vrespc)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -294,9 +291,9 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
  integer,intent(in) :: nv1,nv2
  real(dp),intent(in):: vrespc(nv1,nv2)
  real(dp) ::frskerker1__dpf(nv1,nv2)
-!Local variables-------------------------------
 
-    real(dp) :: buffer1(nv1,nv2),buffer2(nv1,nv2)
+!Local variables-------------------------------
+ real(dp) :: buffer1(nv1,nv2),buffer2(nv1,nv2)
 ! *************************************************************************
 
   if(ok) then
@@ -307,7 +304,9 @@ subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
   else
    frskerker1__dpf = zero
   end if
- end function frskerker1__dpf
 
-end module frskerker1
+end function frskerker1__dpf
+!!***
+
+end module m_frskerker1
 !!***
