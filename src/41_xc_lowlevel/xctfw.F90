@@ -62,7 +62,6 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xctfw'
- use interfaces_41_xc_lowlevel, except_this_one => xctfw
 !End of the abilint section
 
  implicit none

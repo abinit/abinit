@@ -81,7 +81,6 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcpositron'
- use interfaces_41_xc_lowlevel, except_this_one => xcpositron
 !End of the abilint section
 
  implicit none

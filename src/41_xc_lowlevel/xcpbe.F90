@@ -124,7 +124,6 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcpbe'
- use interfaces_41_xc_lowlevel, except_this_one => xcpbe
 !End of the abilint section
 
  implicit none

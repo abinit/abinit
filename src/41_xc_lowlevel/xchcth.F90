@@ -74,7 +74,6 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xchcth'
- use interfaces_41_xc_lowlevel, except_this_one => xchcth
 !End of the abilint section
 
  implicit none
