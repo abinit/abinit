@@ -3192,7 +3192,7 @@ Variable(
     text="""
 Turns on effective mass tensor calculations. Such calculations requires the
 non-self-consistent calculation of derivatives with respect to k, in the same
-dataset. It must therefore be used with [[rfelfd]]=2.
+dataset. It must therefore be used with [[rfelfd]]=2 (or 1).
 
   * 0 --> no effective mass tensor calculation
   * 1 --> effective mass tensor calculation
@@ -3261,7 +3261,7 @@ Variable(
     text="""
 Activate (==1) or not (==0) the treatment of degenerate bands (within a
 criterion [[efmas_deg_tol]]) using the transport equivalent effective mass
-idea (see [PRB 89 155131 (2014)](https://doi.org/10.1103/PhysRevB.89.155131)).
+idea (see [[cite:Mecholsky2014]]).
 """,
 ),
 
