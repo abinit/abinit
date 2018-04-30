@@ -68,7 +68,6 @@ subroutine vdw_dftd3_data(vdw_dftd3_r0,vdw_dftd3_c6,index_c6,vdw_dftd3_cni,index
 #define ABI_FUNC 'vdw_dftd3_data'
 !End of the abilint section
 
-
  real(dp),intent(out) :: vdw_dftd3_r0(4465)
  real(dp),intent(out):: vdw_dftd3_c6(32385)
  integer,intent(out):: index_c6(254)
