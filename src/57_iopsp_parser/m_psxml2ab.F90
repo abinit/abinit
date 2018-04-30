@@ -413,22 +413,22 @@ end module m_psxml2ab
 !!
 !! SOURCE
 
-!subroutine psml_die(str)
-!
-!  use m_errors
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'psml_die'
-!!End of the abilint section
-!
-!  implicit none
-!
-!  character(len=*), intent(in) :: str
-!
-!  MSG_BUG(str)
-!
-!end subroutine psml_die
+subroutine psml_die(str)
+
+  use m_errors
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'psml_die'
+!End of the abilint section
+
+  implicit none
+
+  character(len=*), intent(in) :: str
+
+  MSG_BUG(str)
+
+end subroutine psml_die
 !!***
 

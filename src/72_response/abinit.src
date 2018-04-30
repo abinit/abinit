@@ -65,7 +65,6 @@ sources = [
  "eigen_meandege.F90",
  "eltxccore.F90",
  "elt_ewald.F90",
- "full_active_wf1.F90",
  "getshell.F90",
  "m_ddb.F90",
  "m_ddb_hdr.F90",
