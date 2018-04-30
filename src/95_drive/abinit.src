@@ -34,8 +34,6 @@ sources = [
  "m_respfn_driver.F90",
  "m_screening_driver.F90",
  "m_sigma_driver.F90",
- "testfi.F90",
- "timana.F90",
  "m_wfk_analyze.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

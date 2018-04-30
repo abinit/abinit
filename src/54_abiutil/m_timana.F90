@@ -1,4 +1,50 @@
-! {\src2tex{textfont=tt}}
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_timana
+!! NAME
+!!  m_timana
+!!
+!! FUNCTION
+!! Analyse the timing, and print in unit ab_out. Some discussion of the
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG, GMR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_timana
+
+ use defs_basis
+ use m_profiling_abi
+ use m_xmpi
+ use m_xomp
+
+ use m_time,        only : time_accu, timab, TIMER_SIZE
+ use defs_abitypes, only : MPI_type
+
+ implicit none
+
+ private
+!!***
+
+ public :: timana
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/timana
 !! NAME
 !! timana
@@ -8,13 +54,6 @@
 !! number of calls to different routines is also provided, as comments,
 !! at the end of the routine, as well as, in the single dataset mode (ndtset<2),
 !! a detailed analysis of the time-consuming routines.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  mpi_enreg=information about MPI parallelization
@@ -98,21 +137,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_profiling_abi
- use m_xomp
-
- use m_time,       only : time_accu, timab, TIMER_SIZE
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1757,4 +1782,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  ABI_DEALLOCATE(list)
 
 end subroutine timana
+!!***
+
+end module m_timana
 !!***

@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_builtin_tests
+!! NAME
+!!  m_builtin_tests
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_builtin_tests
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ use m_io_tools,     only : open_file
+
+ implicit none
+
+ private
+!!***
+
+ public :: testfi
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/testfi
 !!
 !! NAME
@@ -6,16 +50,9 @@
 !!
 !! FUNCTION
 !! Routine "Final test" for generation of the test report in the status file:
-!! if it appears that the run was a "Build-in Test", then
+!! if it appears that the run was a "Built-in Test", then
 !! compare the final values of different quantities to the reference
 !! values, here hard-coded.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  builtintest=number of the builtintest, from the input file.
@@ -36,20 +73,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_io_tools,     only : open_file
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -306,4 +330,7 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
  end if !  End of the choice between produce a report, and produce no report
 
 end subroutine testfi
+!!***
+
+end module m_builtin_tests
 !!***
