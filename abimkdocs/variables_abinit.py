@@ -3261,7 +3261,7 @@ Variable(
     text="""
 Activate (==1) or not (==0) the treatment of degenerate bands (within a
 criterion [[efmas_deg_tol]]) using the transport equivalent effective mass
-idea (see [[Mecholsky2014]]).
+idea (see [[cite:Mecholsky2014]]).
 """,
 ),
 
