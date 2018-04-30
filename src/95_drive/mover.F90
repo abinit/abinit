@@ -151,6 +151,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
+ use m_dtfile,             only : dtfil_init_time
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -911,7 +912,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ###     acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
-     
+
      if(ab_mover%optcell/=0)then
 
        call matr3inv(rprimd,gprimd)
@@ -937,7 +938,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
 
      end if
-     
+
      vel(:,:)=hist%vel(:,:,hist%ihist)
 
 !    vel_cell(3,3)= velocities of cell parameters

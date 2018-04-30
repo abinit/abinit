@@ -157,6 +157,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type
+ use m_dtfile,       only : dtfil_init
 
 #if defined  HAVE_BIGDFT
  use BigDFT_API, only: mpi_environment_set

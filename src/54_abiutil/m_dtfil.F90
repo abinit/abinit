@@ -1,4 +1,53 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dtfil
+!! NAME
+!!  m_dtfil
+!!
+!! FUNCTION
+!!   object and procedures dealing with input/output filenames
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (XG, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dtfil
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+
+ use m_fstrings, only : int2char4
+
+ implicit none
+
+ private
+!!***
+
+ public :: dtfil_init
+ public :: dtfil_init_img
+ public :: dtfil_init_time
+ public :: mkfilename
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dtfil_init
 !!
 !! NAME
@@ -8,13 +57,6 @@
 !! Initialize most of the dtfil structured variable
 !! (what is left should be initialized inside the itimimage,
 !! iimage and itime loops).
-!!
-!! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! dtset=<type datasets_type>contain all input variables for the current dataset
@@ -48,22 +90,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset,&
 &                      image_index) ! optional argument
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
-
- use m_fstrings, only : int2char4
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -560,4 +588,464 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  DBG_EXIT("COLL")
 
 end subroutine dtfil_init
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/dtfil_init_time
+!!
+!! NAME
+!! dtfil_init_time
+!!
+!! FUNCTION
+!! Inside the itimimage, iimage and itime loops (this is only needed for optdriver=0),
+!! initialize the remaining parts of dtfil.
+!!
+!! INPUTS
+!! iapp=indicates the eventual suffix to be appended to the generic output root
+!!         if 0 : no suffix to be appended (called directly from gstate)
+!!         if positive : append "_TIM//iapp" (called from move or brdmin)
+!!         if -1 : append "_TIM0" (called from brdmin)
+!!         if -2, -3, -4, -5: append "_TIMA", ... ,"_TIMD", (called from move)
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! dtfil=<type datafiles_type>infos about file names, file unit numbers
+!!  (part of which were initialized previously)
+!!
+!! PARENTS
+!!      gstate,mover
+!!
+!! CHILDREN
+!!      fappnd
+!!
+!! SOURCE
+
+subroutine dtfil_init_time(dtfil,iapp)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dtfil_init_time'
+ use interfaces_95_drive, except_this_one => dtfil_init_time
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: iapp
+ type(datafiles_type),intent(inout) :: dtfil
+
+!Local variables-------------------------------
+!scalars
+ character(len=fnlen) :: filapp,filprot
+
+!******************************************************************
+
+ DBG_ENTER("COLL")
+
+!--------------------------------------------------------
+!Names based on dtfil%filnam_ds(4)+iapp
+
+!Prepare the name of the auxiliary files DOS, EIG...
+ call fappnd(filapp,dtfil%filnam_ds(4),iapp)
+ dtfil%fnameabo_app=trim(filapp)
+ dtfil%fnameabo_app_atmden_core=trim(filapp)//'_ATMDEN_CORE'
+ dtfil%fnameabo_app_atmden_val=trim(filapp)//'_ATMDEN_VAL'
+ dtfil%fnameabo_app_atmden_full=trim(filapp)//'_ATMDEN_FULL'
+ dtfil%fnameabo_app_n_tilde=trim(filapp)//'_N_TILDE'
+ dtfil%fnameabo_app_n_one=trim(filapp)//'_N_ONE'
+ dtfil%fnameabo_app_nt_one=trim(filapp)//'_NT_ONE'
+ dtfil%fnameabo_app_bxsf=trim(filapp)//'_BXSF'
+ dtfil%fnameabo_app_cif=trim(filapp)//'.cif'
+ dtfil%fnameabo_app_den=trim(filapp)//'_DEN'
+ dtfil%fnameabo_app_dos=trim(filapp)//'_DOS'
+ dtfil%fnameabo_app_eig=trim(filapp)//'_EIG'
+ dtfil%fnameabo_app_elf=trim(filapp)//'_ELF'
+ dtfil%fnameabo_app_elf_down=trim(filapp)//'_ELF_DOWN'
+ dtfil%fnameabo_app_elf_up=trim(filapp)//'_ELF_UP'
+ dtfil%fnameabo_app_fatbands=trim(filapp)//'_FATBANDS'
+ dtfil%fnameabo_app_gden1=trim(filapp)//'_GDEN1'
+ dtfil%fnameabo_app_gden2=trim(filapp)//'_GDEN2'
+ dtfil%fnameabo_app_gden3=trim(filapp)//'_GDEN3'
+ dtfil%fnameabo_app_geo=trim(filapp)//'_GEO'
+ dtfil%fnameabo_app_kden=trim(filapp)//'_KDEN'
+ dtfil%fnameabo_app_lden=trim(filapp)//'_LDEN'
+ dtfil%fnameabo_app_nesting=trim(filapp)//'_NEST'
+ dtfil%fnameabo_app_opt=trim(filapp)//'_OPT'
+ dtfil%fnameabo_app_opt2=trim(filapp)//'_OPT2'
+ dtfil%fnameabo_app_pawden=trim(filapp)//'_PAWDEN'
+ dtfil%fnameabo_app_pot=trim(filapp)//'_POT'
+ dtfil%fnameabo_app_stm=trim(filapp)//'_STM'
+ dtfil%fnameabo_app_vclmb=trim(filapp)//'_VCLMB'
+ dtfil%fnameabo_app_vha=trim(filapp)//'_VHA'
+ dtfil%fnameabo_app_vhxc=trim(filapp)//'_VHXC'
+ dtfil%fnameabo_app_vpsp=trim(filapp)//'_VPSP'
+ dtfil%fnameabo_app_vxc=trim(filapp)//'_VXC'
+ dtfil%fnameabo_app_wfk=trim(filapp)//'_WFK'
+ dtfil%fnameabo_app_vha_1dm=trim(filapp)//'_VHA_1DM'
+ dtfil%fnameabo_app_vclmb_1dm=trim(filapp)//'_VCLMB_1DM'
+ dtfil%fnameabo_app_1dm=trim(filapp)//'_1DM'
+
+!--------------------------------------------------------
+!Names based on dtfil%filnam_ds(5)+iapp
+
+!Prepare the name of the auxiliary files for protection
+ call fappnd(filprot,dtfil%filnam_ds(5),iapp)
+ dtfil%fnametmp_app_den=trim(filprot)//'_DEN'
+ dtfil%fnametmp_app_kden=trim(filprot)//'_KDEN'
+
+ DBG_EXIT("COLL")
+
+end subroutine dtfil_init_time
+!!***
+
+!!****f* ABINIT/fappnd
+!!
+!! NAME
+!! fappnd
+!!
+!! FUNCTION
+!! Create the modified root name to be used for output of density, potential,
+!! and geometry files. See the description of the iapp input variable.
+!!
+!! INPUTS
+!! filnam= generic output root name
+!! iapp=indicates the eventual suffix to be appended to the generic output root
+!!      (the suffixe depends on the presence of the suff (optional) argument.
+!!        if 0 : no suffix to be appended (called directly from gstate)
+!!        if positive : append "_SUF//iapp" (called from move or brdmin)
+!!        if -1 : append "_SUF0" (called from brdmin)
+!!        if -2, -3, -4, -5: append "_SUFA", ... ,"_SUFD", (called from move)
+!!      SUF can be TIM (default) or IMG
+!! suff= --optional argument--indicates the suffixe to be appended:
+!!       SUF=TIM (default) or SUF=IMG or ...
+!!
+!! OUTPUT
+!! filapp= filename with appended string
+!!
+!! PARENTS
+!!      dtfil_init_time
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fappnd(filapp,filnam,iapp,&
+&                 suff) ! optional argument
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fappnd'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iapp
+ character(len=fnlen),intent(in) :: filnam
+ character(len=fnlen),intent(out) :: filapp
+ character(len=3),optional,intent(in) :: suff
+
+!Local variables-------------------------------
+!scalars
+ integer :: ndig
+ character(len=3) :: suffixe
+ character(len=8) :: nchar
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ if(iapp==0)then
+   filapp=trim(filnam)
+ else
+   suffixe="TIM"
+   if (present(suff)) suffixe=trim(suff(1:3))
+   if(iapp>0)then
+!    Create character string for filename. Determine the number of digits in iapp.
+     ndig=int(log10(dble(iapp)+0.5_dp))+1
+!    Make integer format field of exact size (internal write)
+!    for assumed nchar string of 8 characters
+     write(nchar, '(i8)' ) iapp
+     if (ndig>8) then
+       write(msg,'(5a,i0,2a,i0,2a)')&
+&       'Requested file name extension has more than the allowed 8 digits.',ch10,&
+&       'Action: resubmit the job with smaller value for ntime.',ch10,&
+&       'Value computed here was ndig=',ndig,ch10,&
+&       'iapp= ',iapp,' filnam=',TRIM(filnam)
+       MSG_ERROR(msg)
+     end if
+!    Concatenate into character string, picking off exact number of digits
+!    The potential or density label will be appended in ioarr
+     filapp=trim(filnam)//'_'//suffixe(1:3)//nchar(9-ndig:8)
+   else if(iapp==-1)then
+     filapp=trim(filnam)//'_'//suffixe(1:3)//'0'
+   else if(iapp==-2)then
+     filapp=trim(filnam)//'_'//suffixe(1:3)//'A'
+   else if(iapp==-3)then
+     filapp=trim(filnam)//'_'//suffixe(1:3)//'B'
+   else if(iapp==-4)then
+     filapp=trim(filnam)//'_'//suffixe(1:3)//'C'
+   else if(iapp==-5)then
+     filapp=trim(filnam)//'_'//suffixe(1:3)//'D'
+   end if
+ end if
+
+end subroutine fappnd
+!!***
+
+!!****f* ABINIT/dtfil_init_img
+!! NAME
+!! dtfil_init_img
+!!
+!! FUNCTION
+!! Initialize few scalars in the dtfil structured variable
+!! when an alogrithm using image of the cell is selected.
+!! (initialize index of images from which read files)
+!!
+!! INPUTS
+!!  dtset=<type datasets_type>=input variables for the current dataset
+!!  dtsets(0:ndtset_alloc)=<type datasets_type>=input variables for all datasets
+!!  idtset=number of the dataset
+!!  jdtset(0:ndtset)=actual index of the datasets
+!!  ndtset=number of datasets
+!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! dtfil=<type datafiles_type>= only getxxx_from_image flags are modified
+!!
+!! PARENTS
+!!      driver
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dtfil_init_img'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: idtset,ndtset,ndtset_alloc
+ type(datafiles_type),intent(out) :: dtfil
+ type(dataset_type),intent(in) :: dtset
+!arrays
+ integer :: jdtset(0:ndtset)
+ type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
+
+!Local variables -------------------------
+!scalars
+ integer :: iget
+!arrays
+
+! *********************************************************************
+
+ DBG_ENTER("COLL")
+
+!Default values
+ dtfil%getwfk_from_image   =0 ! Get standard WFK from previous dataset
+ dtfil%getden_from_image   =0 ! Get standard DEN from previous dataset
+ dtfil%getpawden_from_image=0 ! Get standard PAWDEN from previous dataset
+
+ if (dtset%optdriver==RUNL_GSTATE.and.dtset%nimage>1) then
+
+!  Define getwfk_from_image
+   if (dtset%getwfk/=0.or.dtset%irdwfk/=0) then
+     iget=-1
+     if(dtset%getwfk<0) iget=jdtset(idtset+dtset%getwfk)
+     if(dtset%getwfk>0) iget=dtset%getwfk
+     if(dtset%irdwfk>0) iget=0
+     if (iget>=0) then
+       if (iget==0.or.dtsets(iget)%nimage==dtset%nimage) then
+         dtfil%getwfk_from_image=-1     ! Get WFK from the same image of previous dataset
+       else if (dtsets(iget)%nimage>1) then
+         dtfil%getwfk_from_image=1      ! Get WFK from the first image of previous dataset
+       end if
+     end if
+   end if
+
+!  Define getden_from_image
+   if (dtset%getden/=0.or.dtset%irdden/=0) then
+     iget=-1
+     if(dtset%getden<0) iget=jdtset(idtset+dtset%getden)
+     if(dtset%getden>0) iget=dtset%getden
+     if(dtset%irdden>0) iget=0
+     if (iget>=0) then
+       if (iget==0.or.dtsets(iget)%nimage==dtset%nimage) then
+         dtfil%getden_from_image=-1     ! Get DEN from the same image of previous dataset
+       else if (dtsets(iget)%nimage>1) then
+         dtfil%getden_from_image=1      ! Get DEN from the first image of previous dataset
+       end if
+     end if
+   end if
+
+!  Define getpawden_from_image
+   if (dtset%getpawden/=0.or.dtset%irdpawden/=0) then
+     iget=-1
+     if(dtset%getpawden<0) iget=jdtset(idtset+dtset%getpawden)
+     if(dtset%getpawden>0) iget=dtset%getpawden
+     if(dtset%irdpawden>0) iget=0
+     if (iget>=0) then
+       if (iget==0.or.dtsets(iget)%nimage==dtset%nimage) then
+         dtfil%getpawden_from_image=-1     ! Get PAWDEN from the same image of previous dataset
+       else if (dtsets(iget)%nimage>1) then
+         dtfil%getpawden_from_image=1      ! Get PAWDEN from the first image of previous dataset
+       end if
+     end if
+   end if
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine dtfil_init_img
+!!***
+
+!!****f* ABINIT/mkfilename
+!!
+!! NAME
+!! mkfilename
+!!
+!! FUNCTION
+!! From the root (input or output) file names, produce a real file name.
+!!
+!! INPUTS
+!! character(len=fnlen):: filnam(5)=the root file names
+!!  (only filnam(3) and filnam(4) are really needed)
+!! get=input 'get variable', if 1, must get the file from another dataset
+!! idtset=number of the dataset
+!! ird=input 'iread variable', if 1, must get the file from the input root
+!! jdtset_(0:ndtset)=actual index of the dataset
+!! ndtset=number of datasets
+!! stringfil character(len=*)=the string of characters to be appended e.g. '_WFK' or '_DEN'
+!! stringvar tcharacter(len=*)=the string of characters to be appended
+!!   that defines the 'get' or 'ird' variables, e.g. 'wfk' or 'ddk'
+!!
+!! OUTPUT
+!! character(len=fnlen):: filnam_out=the new file name
+!! will_read=1 if the file must be read ; 0 otherwise (ird and get were zero)
+!!
+!! PARENTS
+!!      dtfil_init,finddistrproc
+!!
+!! CHILDREN
+!!      appdig,wrtout
+!!
+!! SOURCE
+
+subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkfilename'
+ use interfaces_14_hidewrite
+ use interfaces_32_util
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: get,idtset,ird,ndtset
+ integer,intent(out) :: will_read
+ character(len=*),intent(in) :: stringfil
+ character(len=*),intent(in) :: stringvar
+ character(len=fnlen),intent(out) :: filnam_out
+!arrays
+ integer,intent(in) :: jdtset_(0:ndtset)
+ character(len=fnlen),intent(in) :: filnam(5)
+
+!Local variables-------------------------------
+!scalars
+ integer :: jdtset,jget
+ character(len=4) :: appen
+ character(len=500) :: message
+ character(len=fnlen) :: filnam_appen
+
+! *************************************************************************
+
+!Here, defaults if no get variable
+ will_read=ird
+
+ filnam_appen=trim(filnam(3))
+ if(ndtset>0)then
+   jdtset=jdtset_(idtset)
+   call appdig(jdtset,'',appen)
+   filnam_appen=trim(filnam_appen)//'_DS'//appen
+ end if
+ filnam_out=trim(filnam_appen)//trim(stringfil)
+
+!Treatment of the multi-dataset case  (get is not relevant otherwise)
+ if(ndtset/=0)then
+
+   if(ndtset==1.and.get<0.and.(jdtset_(1)+get>0))then
+     write(message, '(7a,i3,a,i3,5a)' )&
+&     'You cannot use a negative value of get',trim(stringvar),' with only 1 dataset!',ch10, &
+&     ' If you want to refer to a previously computed dataset,',ch10, &
+&     ' you should give the absolute index of it (i.e. ', &
+&     jdtset_(idtset)+get,' instead of ',get,').',ch10, &
+&     'Action: correct get',trim(stringvar),' in your input file.'
+     MSG_ERROR(message)
+   end if
+
+   if(idtset+get<0)then
+     write(message, '(a,a,a,a,a,i3,a,a,a,i3,a,a,a,a)' )&
+&     'The sum of idtset and get',trim(stringvar),' cannot be negative,',ch10,&
+&     'while they are idtset=',idtset,', and get',trim(stringvar),'=',get,ch10,&
+&     'Action: correct get',trim(stringvar),' in your input file.'
+     MSG_ERROR(message)
+   end if
+
+   if(get>0 .or. (get<0 .and. idtset+get>0) )then
+
+     if(ird/=0 .and. get/=0)then
+       write(message, '(a,a,a,a,a,a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a,a)' )&
+&       'The input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
+&       'simultaneously non-zero, while for idtset=',idtset,',',ch10,&
+&       'they are ',ird,', and ',get,'.',ch10,&
+&       'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
+       MSG_ERROR(message)
+     end if
+
+     will_read=1
+
+!    Compute the dataset from which to take the file, and the corresponding index
+     if(get<0 .and. idtset+get>0) jget=jdtset_(idtset+get)
+     if(get>0) jget=get
+     call appdig(jget,'',appen)
+
+!    Note use of output filename (filnam(4))
+     filnam_out=trim(filnam(4))//'_DS'//trim(appen)//trim(stringfil)
+
+     if(jdtset>=100)then
+       write(message, '(a,a,a,a,a,i5,a,a)' )&
+&       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
+&       ' from output of DATASET ',jget,'.',ch10
+     else
+       write(message, '(a,a,a,a,a,i3,a,a)' )&
+&       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
+&       ' from output of DATASET ',jget,'.',ch10
+     end if
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   end if ! conditions on get and idtset
+
+ end if ! ndtset/=0
+
+end subroutine mkfilename
+!!***
+
+end module m_dtfil
 !!***
