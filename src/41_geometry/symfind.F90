@@ -64,7 +64,7 @@
 #include "abi_common.h"
 
  subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&  nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+&  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  nucdipmom)
 
  use defs_basis
@@ -83,6 +83,7 @@
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
+ integer,intent(in) :: prtvol
  integer,intent(out) :: nsym
  real(dp),intent(in) :: tolsym
 !arrays
@@ -110,6 +111,7 @@
 !**************************************************************************
 
 !DEBUG
+ if (prtvol>1) message="remove me later"
 ! write(std_out,*)' symfind : enter'
 ! call flush(6)
 ! write(std_out,*)' symfind : nzchempot= ',nzchempot
