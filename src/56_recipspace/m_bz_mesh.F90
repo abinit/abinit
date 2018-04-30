@@ -12,7 +12,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,6 +56,7 @@ MODULE m_bz_mesh
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
+ use m_kpts,           only : getkgrid
 
  implicit none
 
@@ -415,7 +416,6 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  integer :: ik_bz,ik_ibz,isym,nkbz,nkbzX,nsym,timrev,itim
  real(dp) :: shift1,shift2,shift3
  logical :: ltest,do_wrap,do_hack
- character(len=500) :: msg
 !arrays
  integer,allocatable :: ktab(:),ktabi(:),ktabo(:)
  real(dp) :: rm1t(3),kbz_wrap(3)
@@ -1465,7 +1465,6 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_mesh'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1486,7 +1485,6 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  integer,parameter :: chksymbreak0=0
  integer :: iscf,nkbz,nkibz,nkpt_computed,my_nshiftk
  real(dp) :: kptrlen
- character(len=500) :: msg
  logical :: my_break_symmetry
 !arrays
  integer :: my_vacuum(3)

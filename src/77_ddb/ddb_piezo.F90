@@ -12,7 +12,7 @@
 !! displacement field boundary conditions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XW)
+!! Copyright (C) 1999-2018 ABINIT group (XW)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,6 +63,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  use m_errors
 
  use m_fstrings,       only : sjoin, itoa
+ use m_abilasi,        only : matrginv
  use m_anaddb_dataset, only : anaddb_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -70,7 +71,6 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_piezo'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

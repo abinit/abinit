@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2017 ABINIT group (TRangel)
+!!  Copyright (C) 2012-2018 ABINIT group (TRangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,6 +52,7 @@ subroutine wvl_initro(&
  use defs_wvltypes
  use m_sort
 
+ use m_geometry,   only : xred2xcart, metric
  use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab, only : pawtab_type
 #if defined HAVE_BIGDFT
@@ -63,7 +64,6 @@ subroutine wvl_initro(&
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_initro'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
 !End of the abilint section
 
@@ -109,8 +109,8 @@ subroutine wvl_initro(&
  real(dp),allocatable:: raux(:),raux2(:)
  real(dp),allocatable:: rr(:)!,rred(:,:)
 #endif
- 
-! ************************************************************************* 
+
+! *************************************************************************
 
  DBG_ENTER("COLL")
 
@@ -161,7 +161,7 @@ subroutine wvl_initro(&
  n3pi=wvl_den%denspot%dpbox%n3pi
  i3s=wvl_den%denspot%dpbox%nscatterarr(me,3)+1-wvl_den%denspot%dpbox%nscatterarr(me,4)
  shift=n1i*n2i*wvl_den%denspot%dpbox%nscatterarr(me,4)
- 
+
 !Compute xcart from xred
  call xred2xcart(natom,rprimd,xcart,xred)
 
@@ -174,7 +174,7 @@ subroutine wvl_initro(&
  perz=(geocode /= 'F')
 
 !Compute values of external buffers
- call ext_buffers(perx,nbl1,nbr1) 
+ call ext_buffers(perx,nbl1,nbr1)
  call ext_buffers(pery,nbl2,nbr2)
  call ext_buffers(perz,nbl3,nbr3)
 
@@ -190,7 +190,7 @@ subroutine wvl_initro(&
    msz=pawtab(itypat)%tnvale_mesh_size
    call pawrad_init(vale_mesh,mesh_size=msz,mesh_type=pawrad(itypat)%mesh_type,&
 &   rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
-!  
+!
 !  Set radius size:
    rshp=vale_mesh%rmax
    r2shp=1.0000001_dp*rshp**2
@@ -208,7 +208,7 @@ subroutine wvl_initro(&
    else
      ncmax=1
    end if
-!  
+!
    ABI_ALLOCATE(ifftsph_tmp,(ncmax))
    ABI_ALLOCATE(iindex,(ncmax))
    ABI_ALLOCATE(rr,(ncmax))
@@ -217,50 +217,50 @@ subroutine wvl_initro(&
      ABI_ALLOCATE(raux2,(ncmax))
    end if
 
-!  Big loop on atoms  
+!  Big loop on atoms
    do iat=1,nattyp(itypat)
      iatm=iatm+1;iatom=atindx1(iatm)
      iatom_tot=iatom; !if (mpi_enreg%nproc_atom>1) iatom_tot=mpi_enreg%atom_indx(iatom)
 
 !    Spin
-     if(nspden==2) then 
+     if(nspden==2) then
        fact0=half/zion(itypat)
        fact=fact0*(zion(itypat)+spinat(3,iatom))
      end if
 
-!    
+!
 !    Define a "box" around each atom
      rx=xcart(1,iatom_tot)
      ry=xcart(2,iatom_tot)
      rz=xcart(3,iatom_tot)
-!    
+!
      isx=floor((rx-cutoff)/hh(1))
      isy=floor((ry-cutoff)/hh(2))
      isz=floor((rz-cutoff)/hh(3))
-     
+
      iex=ceiling((rx+cutoff)/hh(1))
      iey=ceiling((ry+cutoff)/hh(2))
      iez=ceiling((rz+cutoff)/hh(3))
-!    
+!
      do i3=isz,iez
        zz=real(i3,kind=8)*hh(3)-rz
        call ind_positions(perz,i3,n3,j3,goz)
        j3=j3+nbl3+1
-!      
+!
        do i2=isy,iey
          yy=real(i2,kind=8)*hh(2)-ry
          call ind_positions(pery,i2,n2,j2,goy)
-!        
+!
 !        Initialize counters
          nfgd=0
 !        nfgd_r0=0
-!        
+!
          do i1=isx,iex
            xx=real(i1,kind=8)*hh(1)-rx
            call ind_positions(perx,i1,n1,j1,gox)
            rr2=xx**2+yy**2+zz**2
            if (j3 >= i3s .and. j3 <= i3s+n3pi-1  .and. goy  .and. gox ) then
-!            
+!
              if(rr2<=r2shp) then
                if(rr2>tol5) then
                  ind=j1+1+nbl1+(j2+nbl2)*n1i+(j3-i3s)*n1i*n2i
@@ -268,14 +268,14 @@ subroutine wvl_initro(&
                  rcart=[xx,yy,zz]
                  rr(nfgd)=(rr2)**0.5
                  ifftsph_tmp(nfgd)=shift+ind
-!                DEBUG     
+!                DEBUG
 !                write(itmp,'(i10,3(f13.7,x))')ind,xx+rx,yy+ry,zz+rz
 !                write(itmp,'(6(f13.7,x))')rcart,rred(:,nfgd)
 !                ENDDEBUG
 !                else
-!                !              We save r=0 vectors 
+!                !              We save r=0 vectors
 !                ind=j1+1+nbl1+(j2+nbl2)*n1i+(j3-i3s)*n1i*n2i
-!                !              We reuse the same variable "ifftshp_tmp", 
+!                !              We reuse the same variable "ifftshp_tmp",
 !                !              but we start from the higher index
 !                nfgd_r0=nfgd_r0+1
 !                ifftsph_tmp(ncmax-nfgd_r0+1)=shift+ind

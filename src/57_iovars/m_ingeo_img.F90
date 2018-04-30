@@ -14,7 +14,7 @@
 !! with intermediate points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (XG, MT)
+!! Copyright (C) 2012-2018 ABINIT group (XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,6 +58,8 @@ MODULE m_ingeo_img
  use m_profiling_abi
  use m_errors
 
+ use m_parser,    only : intagm
+
  implicit none
 
  private
@@ -98,7 +100,6 @@ subroutine ingeo_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,t
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeo_img_1D'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -241,7 +242,6 @@ subroutine ingeo_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,t
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeo_img_2D'
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none

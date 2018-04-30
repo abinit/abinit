@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 #
-#    Copyright (C) 2003-2017 ABINIT group
+#    Copyright (C) 2003-2018 ABINIT group
 #
 #    Written by Gabriel Antonius in python (compatible v2.7).
 #    This is free software, and you are welcome to redistribute it
@@ -139,5 +139,5 @@ def interactive_merge_gkk_nc():
 # =========================================================================== #
 
 if __name__ == '__main__':
-    interactive_merge_ddb_nc()
+    interactive_merge_gkk_nc()
 

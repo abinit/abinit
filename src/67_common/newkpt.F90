@@ -12,7 +12,7 @@
 !! or input as argument.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, ZL, AR, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, ZL, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,17 +152,17 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  use m_wffile
  use m_xmpi
 
+ use m_time,       only : timab
  use m_pptools,    only : prmat
+ use m_occ,        only : pareigocc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newkpt'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_56_io_mpi
- use interfaces_61_occeig
  use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section
@@ -223,14 +223,13 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  if((nsppol1==2.and.nspinor2==2).or.(nspinor1==2.and. nsppol2==2))then
 !  This is not yet possible. See later for a message about where to make the needed modifs.
 !  EDIT MT 20110707: these modifs are no more needed as they are now done in inwffil
-   write(message, '(a,a,a,a,a,a,a,a,a,i2,a,i2,a,a,i2,a,i2,a,a,a,a)' )ch10,&
-&   ' newkpt : ERROR -',ch10,&
-&   '  The wavefunction translator is (still) unable to interchange',ch10,&
-&   '  spin-polarized wfs and spinor wfs. However,',ch10,&
-&   '  the input  variables are nsppol1=',nsppol1,', and nspinor1=',nspinor1,ch10,&
-&   '  the output variables are nsppol2=',nsppol2,', and nspinor2=',nspinor2,ch10,&
-&   '  Action : use a non-spin-polarized wf to start a spinor wf,',ch10,&
-&   '           and a non-spinor wf to start a spin-polarized wf.'
+   write(message, '(5a,i2,a,i2,2a,i2,a,i2,4a)' ) &
+&   'The wavefunction translator is (still) unable to interchange',ch10,&
+&   'spin-polarized wfs and spinor wfs. However,',ch10,&
+&   'the input  variables are nsppol1=',nsppol1,', and nspinor1=',nspinor1,ch10,&
+&   'the output variables are nsppol2=',nsppol2,', and nspinor2=',nspinor2,ch10,&
+&   'Action: use a non-spin-polarized wf to start a spinor wf,',ch10,&
+&   '        and a non-spinor wf to start a spin-polarized wf.'
    MSG_ERROR(message)
  end if
 
@@ -246,8 +245,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
    end if
    if(mcg<mband2*mpw2*my_nspinor2)then
      write(message,'(a,i0,a,a,a,i0,a,i0,a,i2)' )&
-&     '  The dimension mcg=',mcg,', should be larger than',ch10,&
-&     '  the product of mband2=',mband2,', mpw2=',mpw2,', and nspinor2=',my_nspinor2
+&     'The dimension mcg= ',mcg,', should be larger than',ch10,&
+&     'the product of mband2= ',mband2,', mpw2= ',mpw2,', and nspinor2= ',my_nspinor2
      MSG_BUG(message)
    end if
  end if
@@ -365,8 +364,9 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          kg2_k(:,1:npw2)=kg2(:,1+ikg2:npw2+ikg2)
        else if(mkmem2==0)then
 !        Read the first line of a block and performs some checks on the unkg file.
+         MSG_ERROR("mkmem2 == 0 and rdnpw are not supported anymore.")
          nsp=nspinor2
-         call rdnpw(ikpt2,isppol2,nbd2,npw2,nsp,0,unkg2)
+         !call rdnpw(ikpt2,isppol2,nbd2,npw2,nsp,0,unkg2)
 !        Read k+g data
          read (unkg2) kg2_k(1:3,1:npw2)
        end if
@@ -392,8 +392,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
            call wrtout(iout,message,'PERS')
          end if
        else if(ikpt2==nkpt_eff+1)then
-         write(message,'(a)')'- newkpt : prtvol=0 or 1, do not print more k-points.'
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out, '- newkpt : prtvol=0 or 1, do not print more k-points.', 'PERS')
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
            call wrtout(iout,message,'PERS')
          end if
@@ -417,16 +416,17 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    Prepare the reading of the wavefunctions: the correct record is selected
 !    WARNING : works only for GS - for RF the number of record differs
      if(restart==2 .and. mkmem1==0)then
+       MSG_ERROR("mkmem1 == 0 has been removed.")
 
        if(debug>0)then
          write(message, '(a,a,a,a,i5,a,i5,a,a,i5,a,i5)' ) ch10,&
-&         ' newkpt : about to call randac',ch10,&
-&         '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
-&         '  and isppol1=',isppol1,', isppol2=',isppol2
+         ' newkpt : about to call randac',ch10,&
+         '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
+         '  and isppol1=',isppol1,', isppol2=',isppol2
          call wrtout(std_out,message,'PERS')
        end if
 
-       call randac(debug,headform1,ikptsp_prev,ikpt1,isppol1,nband1,nkpt1,nsppol1,wffinp)
+       !call randac(debug,headform1,ikptsp_prev,ikpt1,isppol1,nband1,nkpt1,nsppol1,wffinp)
      end if
 
 !    Read the data for nbd2 bands at this k point
@@ -459,8 +459,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !      Checks that nbd1 and nbd1_rd are equal if eig and occ are input
        if(nbd1/=nbd1_rd)then
          write(message,'(a,a,a,i6,a,i6)')&
-&         '  When mkmem1/=0, one must have nbd1=nbd1_rd, while',ch10,&
-&         '  nbd1=',nbd1,', and nbd1_rd=',nbd1_rd
+&         'When mkmem1/=0, one must have nbd1=nbd1_rd, while',ch10,&
+&         'nbd1 = ',nbd1,', and nbd1_rd = ',nbd1_rd
          MSG_BUG(message)
        end if
 !      Need to put eigenvalues in eig_k, same for occ
@@ -542,7 +542,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    write(std_out,*)' newkpt: mkmem2=',mkmem2
 !    stop
 !    ENDDEBUG
-     
+
      call timab(783,2,tsec)
      call timab(784,1,tsec)
 
@@ -610,7 +610,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  end do ! isppol2
 
  call timab(786,1,tsec)
- 
+
  if(xmpi_paral==1)then
 !  Transmit eigenvalues (not yet occupation numbers)
 !  newkpt.F90 is not yet suited for RF format

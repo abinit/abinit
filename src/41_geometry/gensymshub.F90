@@ -5,8 +5,7 @@
 !!
 !! FUNCTION
 !! Analyse the Shubnikov space group, from the input of the
-!! the Fedorov space group number, and the Shubnikov
-!! space group number :
+!! the Fedorov space group number, and the Shubnikov space group number:
 !! 1) determine the type (III or IV)
 !! 2) for type (IV), determine the translation generating
 !!   the anti-ferromagnetic operations
@@ -15,7 +14,7 @@
 !! orientation of the symmetry group (spgaxor).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (RC,XG)
+!! Copyright (C) 1999-2018 ABINIT group (RC,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

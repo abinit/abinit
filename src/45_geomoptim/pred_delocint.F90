@@ -30,7 +30,7 @@
 !!    S matrix is eigenvectors of F = B^{T}B
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,14 +75,14 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
 
- use m_bfgs, only : hessinit, hessupdt, brdene
+ use m_geometry,  only : fcart2fred, xcart2xred, xred2xcart, metric
+ use m_bfgs,      only : hessinit, hessupdt, brdene
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_delocint'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_delocint
 !End of the abilint section
 

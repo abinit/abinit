@@ -10,7 +10,7 @@
 !!  bands near the Fermi surface)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MVer)
+!! Copyright (C) 2004-2018 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,6 @@ subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtoful
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nmsq_gam'
- use interfaces_77_ddb, except_this_one => nmsq_gam
 !End of the abilint section
 
  implicit none

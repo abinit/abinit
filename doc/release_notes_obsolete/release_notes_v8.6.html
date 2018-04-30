@@ -1,0 +1,245 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<hr>
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+May 2017 and October 2017. These release notes
+are relative to modifications/improvements of ABINITv8.6 with respect to v8.4.
+
+The list of contributors includes :
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet,
+M. Giantomassi, O. Gingras, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, J. Junquera, A. Martin, 
+F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, M. Torrent , M. Verstraete, J. Wiktor, J. Zwanziger
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 8.6, released on November 3, 2017.
+
+Changes with respect to version 8.4 :
+
+A. Warnings and important remarks 
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  Warnings and important remarks
+
+A.1 The interface between ABINIT and TRIQS has been changed, such that TRIQS 1.4 is used now instead of TRIQS 1.3.
+    No backward compatibility with TRIQS 1.3 has been coded, sorry. See D.4.
+    
+A.2 Some changes of names : 
+     - input variable gwls_sternheimer_kmax has become gwls_stern_kmax;
+     - input variable gwls_dielectric_model has become gwls_diel_model;
+     - input variable prt_effpot has become prt_model (multibinit input variable);
+     - input variable effmass has become erffmass_free;            
+     - lesson tlda has become tdftu;
+    Also, the input variable gwls_second_model_parameter, not used, has been suppressed.
+
+A.3 The definition of Hund's coupling J as computed within cRPA has changed: it now uses the same convention as
+    the convention used (for the variable jpawu) in DFT+U and DFT+DMFT in ABINIT (automatic tests, and tutorial
+    are accordingly changed).
+    By B. Amadon
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The whole ABINIT documentation has been significantly improved by the introduction of "Topics", replacing the
+    previous "lists of ABINIT features". All the capabilities of ABINIT are now presented in about 70 short topic Web pages.
+    Those topic web pages usually have :
+    - a brief introduction;
+    - the list of related tutorial lessons -if any-; 
+    - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
+    - possibly example input files;
+    - list of references. 
+    Entry point : see the new header of any ABINIT documentation file (e.g. the new user's guide)
+    By F. Jollet and X. Gonze (also tests/fixes by B. Amadon, M. Torrent). 
+
+B.2 A central bibliography database abiref.bib has been created, and linked to the
+    above-mentioned topics (B.1) but also to other parts of the ABINIT documentation (e.g. input variable list,
+    the lessons of the tutorial, the theory documents, the acknowledgments ...).
+    More than 200 bibliographical references are present.  Not all bibliographical references of the doc have been entered in this
+    central bibliographic database, though.
+    By X. Gonze and F. Jollet.
+ 
+B.3 The list of input variables has been restructured, and is now searchable.
+    The input variables for anaddb, aim and optic have been included in the database.
+    By J. Bieder, X. Gonze and F. Jollet.
+
+B.4 The frequency of usage of each input variable (in the set of automatic tests) is now automatically 
+    computed, and mentioned in the documentation for this input variable. Examples input files are also now mentioned in the documentation.
+    The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the lessons of the tutorial.
+    By. X. Gonze and F. Jollet.
+
+B.5 Several important developments related to electron-phonon matrix element computation have been made. 
+    The Frohlich interpolation procedure for electron-phonon matrix elements, as explained in PRL 115, 176401 (2015), has been implemented. 
+    The long-range part of the phonon coupling potential is modeled with the Born effective charges and the dielectric tensor. 
+    This long-range part is substracted from the potential before the Fourier interpolation then added after the interpolation. 
+    The resulting potential is in much better agreement with the full calculation, as can be verified from the el-ph matrix elements.
+    Also, a functionality has been added in the eph driver (eph_task=5) to only interpolate the phonon potential onto a fine q-point grid.
+    The interpolation is performed one perturbation at a time, and is thus more memory efficient than the previous procedures.
+    There is additional testing of the new "driver" optdrive=7 specifically dealing with electron-phonon
+    related computations (including zero-point renormalisation), especially the interpolation.
+    The symmetries have been fixed.
+    See new tests v8#61-65.
+    By  G. Antonius and M. Giantomassi.
+
+B.6 ABINIT can now read pseudopotentials in the PSML 1.1 format, as described in https://arxiv.org/abs/1707.08938. This XML-based format is
+    produced by ONCVPSP 3.2 and 3.3, as well as SIESTA's ATOM 4.2, and allows to perform calculations with the exact same pseudopotential files
+    in both ABINIT and SIESTA. See the new directory ~abinit/tests/psml, tests #1 to 14.
+    Note: patches are provided at https://launchpad.net/pspgenpatch to enable PSML output in ONCVPSP.
+    By Y. Pouillon, M. Verstraete, J. Junquera and A. Garcia.
+
+B.7 ABINIT is now interfaced with Libxc 3.0. The interface with Libxc 4.0 is in preparation.
+    Tests libxc#06,07,17,18,20, 21 have been modified, because some functionals of libxc v2.0 have changed category in v3.0.
+    By M. Torrent.
+
+B.8 A new lesson of the tutorial, called "Electron-positron annihilation" has been created.
+    By J. Wiktor and M. Torrent.
+
+B.9 The new input variable chkdilatmx has been introduced, to allow expert users to make
+    ABINIT bypass the stopping criterion related to dilatmx. In practice, if the condition related 
+    to dilatmx is not met, ABINIT continues, and delivers an (approximate) optimized geometry and energy,
+    that might be used by external drivers like e.g. USPEX to continue the search for global optimized structures.
+    See input variable chkdilatmx, and test v3#42 .
+    By X. Gonze.
+
+B.10 Implementation of the LDA-1/2 methodology.
+     Tests to be provided.
+     By F. Jollet.
+    
+__________________________________________________________________
+
+C. Changes for the developers (also compilers)
+
+C.1 There are large changes of the procedure to document ABINIT, for most of the documentation files.
+    The HTML files are now produced from YAML files, under the control of the script ~abinit/doc/generate_doc.py .
+    The documentation that describes this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc . 
+    This is directly linked to the modifications in the doc presented in B1-B4.
+    In particular, the Dokuwiki syntax is used for the hyperlinks.
+    By F. Jollet and X. Gonze.
+
+__________________________________________________________________
+
+D.  Other changes (or on-going developments, not yet finalized)
+
+D.1 The "Adaptively Compressed Operator" approach for the fast application of the Fock operator has been implemented,
+    and replaces the traditional way to apply the Fock operator in hybrid functionals (e.g. HSE06, PBE0, ...).
+    Hybrid functionals are not yet to be considered in production, though (see D.6), but likely for ABINITv8.8.  
+    See tests libxc 51, 52, 53, 67, 68, 69, 70, 71, and also v7#65, 66, 70.
+    By F. Jollet and X. Gonze.
+
+D.2 A set of 6 input files and accompanying references (from 32 to 2048 procs), for benchmarking high-performance computing
+    is available in the new directory ~abinit/tests/hpc .
+    Not yet tested automatically, but this future capability is prepared.
+    By M. Torrent.
+
+D.3 The tutorial on the temperature-dependent electronic structure has been imported from the ABINIT wiki to the
+    usual location ~abinit/doc/tutorial and suppressed from the Wiki. However, it is not yet operational.
+    Work is also going on on tutorial fold2bloch.
+    By X. Gonze.
+
+D.4 Interfacing with TRIQS 1.4 (instead of 1.3).
+    By O. Gingras, B. Amadon and J.-M. Beuken.
+
+D.5 Anaddb can now interpolate and print out the DDB onto an arbitrary set of q-point.
+    The same procedure was used to produce the phonon band structure.
+    Now, with the input variable prtddb, anaddb will produce both the _DDB file and the _DDB.nc files, the latter being separated for each q-point.
+    By G. Antonius.
+
+D.6 On-going work on hybrid functionals : speed-up of the SCF loop, computation of stresses, 
+    joint computation of forces and stresses, downsampling the wavevectors. 
+    By X. Gonze and F. Jollet.
+
+D.7 On-going work on the implementation of the TDEP algorithm (temperature dependent sampling).
+    By J. Bieder, F. Bottin and Y. Bouchet.
+    
+D.8 Replacements of http:// by https:// in many documentation files.
+    By J.M. Beuken.
+
+D.9 Test of non-magnetic LDA+U and LDA+U+SO.
+    See the new test v5#16 
+    By M. Torrent.
+
+D.10 Make LDA+U and local EX-exchange compatible with nspden=1/nspinor=2
+     By M. Torrent.
+
+D.11 Test of the Velocity Verlet algorithm ionmov=24 
+     See the new test v8#13
+     By S. Prokhorenko.
+
+D.12 Make thermally occupied supercell of a given size, with input variable thermal_supercell.
+     See test v8#46
+     By M. Giantomassi 
+
+D.13 Write dielectric tensor to anaddb.nc when only perturbations w.r.t. electric field are present; Test for nlflag=2,3
+     Test the computation of the nonlinear coefficients and first change of dielectric tensor.
+     See test v8#47-50
+     By F. Naccarato.
+
+D.14 Ongoing work : Raman intensities, in the PAW case, using DFPT.
+     By L. Baguet and M. Torrent.
+
+D.15 Ongoing work on the multibinit project.
+     New hist storage.
+     New tests paral#101-102, to test the anharmonic part.
+     Rationalization of supercell treatment with multibinit
+     By A. Martin, M. Verstraete and Ph. Ghosez.
+
+D.16 On-going work on the extension of DFPT within non-collinear magnetism.
+     By F. Ricci, S. Prokhorenko, M. Verstraete, M. Torrent and E. Bousquet.
+
+D.17 On-going work on DFPT with magnetic field perturbation (Zeeman field).
+     By S. Prokhorenko and E. Bousquet.
+
+D.18 Begin transport epc calculations within the eph part of the code.
+     By M. Verstraete.
+
+D.19 Improvements for the reading and initialization of density (esp. nspden=4).
+     By M. Torrent.
+
+D.20 New interface to the build system and new ac8 config file format.
+     By Y. Pouillon.
+
+D.21 Store fold2bloch results in NetCDF format.
+     Add new option to cut3d to convert DEN/POT from Fortran to netcdf
+     By M. Giantomassi.
+
+D.22 Add mdtemp in the _HIST file. This can be useful (mandatory) for post processing MD/PIMD
+     Add imgmov in the _HIST file. Convenient to know if it is PIMD or NEB/string for postprocessing
+     By J. Bieder.
+
+D.23 Use inversion symmetry if nspden == 4 and NC
+     By M. Giantomassi.
+
+D.24 Update elastic tutorial
+     By J. Zwanziger.
+
+D.25 Add LO-TO terms to netcdf files
+     By M. Giantomassi.
+
+D.26 Numerous miscellaneous additional bug fixes and improvements of documentation by :
+     G. Antonius, J. Bieder, M. Giantomassi, F. Jollet,
+     G. Petretto, N. Pike, Y. Pouillon, M. Verstraete, M. Torrent.
+
+</pre>
+

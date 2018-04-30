@@ -8,7 +8,7 @@
 !! (some are initialized earlier, see indefo1 routine)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MM,FF)
+!! Copyright (C) 1999-2018 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -417,6 +417,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ixc=1
    dtsets(idtset)%ixc_sigma=1
    dtsets(idtset)%ixcpositron=1
+   dtsets(idtset)%ixcrot=3
 !  J
    dtsets(idtset)%f4of2_sla(:)=-one
    dtsets(idtset)%f6of2_sla(:)=-one
@@ -541,6 +542,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
+   dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
 !    dtsets(idtset)%ortalg=999
@@ -576,6 +578,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
+   dtsets(idtset)%ph_nqshift = 0
+   if(dtsets(idtset)%ph_nqshift > 0)then
+     dtsets(idtset)%ph_qshift = zero
+   end if
    dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
@@ -616,6 +622,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0
+   dtsets(idtset)%prtfull1wf=0
    dtsets(idtset)%prtfsurf=0
    dtsets(idtset)%prtgden=0
    dtsets(idtset)%prtgeo=0
@@ -700,13 +707,13 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%string_algo=1
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
-   dtsets(idtset)%supercell(:)=1
    dtsets(idtset)%symchi=1
    dtsets(idtset)%symsigma=0
 !  T
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
    dtsets(idtset)%tfw_toldfe=0.000001_dp
+   dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
    dtsets(idtset)%tl_radius = zero
    dtsets(idtset)%tphysel=zero
@@ -719,6 +726,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+   dtsets(idtset)%tmesh=[5._dp, 59._dp, 6._dp]
    dtsets(idtset)%tsmear=0.01_dp
 !  U
    dtsets(idtset)%ucrpa_bands(:)=-1

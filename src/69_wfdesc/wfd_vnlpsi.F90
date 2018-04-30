@@ -7,7 +7,7 @@
 !!  Evaluates Vnl |psi> in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MG)
+!! Copyright (C) 2010-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,6 +54,7 @@ subroutine wfd_vnlpsi(Wfd,band,ik_ibz,spin,npw_k,Cryst,GS_hamk,vnl_psi,opaw_psi,
  use m_profiling_abi
 
  use m_crystal,        only : crystal_t
+ use m_kg,             only : mkkpg
  use m_wfd,            only : wfd_t, kdata_t, wfd_get_cprj
  use m_hamiltonian,    only : gs_hamiltonian_type, load_k_hamiltonian
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_free

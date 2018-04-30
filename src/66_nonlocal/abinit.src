@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -37,7 +37,6 @@ sources = [
  "metstr.F90",
  "mkffkg.F90",
  "mkffnl.F90",
- "mkkpg.F90",
  "m_vkbr.F90",
  "m_fock.F90",
  "m_gemm_nonlop.F90",
@@ -55,9 +54,6 @@ sources = [
  "opernlb_ylm.F90",
  "opernlc_ylm.F90",
  "opernld_ylm.F90",
- "scalewf_nonlop.F90",
- "strsocv.F90",
- "trace2.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

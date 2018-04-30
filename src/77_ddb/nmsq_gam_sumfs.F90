@@ -9,7 +9,7 @@
 !!  elements averaging over bands near the Fermi surface
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MVer)
+!! Copyright (C) 2004-2018 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,6 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nmsq_gam_sumFS'
- use interfaces_77_ddb, except_this_one => nmsq_gam_sumFS
 !End of the abilint section
 
  implicit none

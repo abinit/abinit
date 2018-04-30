@@ -9,7 +9,7 @@
 !! (initialize index of images from which read files)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (MT)
+!! Copyright (C) 2011-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

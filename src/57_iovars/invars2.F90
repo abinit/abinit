@@ -11,7 +11,7 @@
 !! and were used to dimension the arrays needed here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use netcdf
 #endif
 
- use m_fstrings,  only : sjoin, itoa, tolower, rmquotes
+ use m_time,      only : timab
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
@@ -91,10 +93,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_42_parser
- use interfaces_56_recipspace
  use interfaces_57_iovars, except_this_one => invars2
 !End of the abilint section
 
@@ -113,7 +112,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !scalars
  integer :: bantot,berryopt,dmatsize,ndim,getocc
  integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
- integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
+ integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key
  integer :: itol, itol_gen, ds_input, ifreq,ncerr !nkpt_fullbz,
@@ -623,6 +622,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dfpt_sciss',tread,'ENE')
  if(tread==1) dtset%dfpt_sciss=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'tmesh',tread,'DPR')
+ if(tread==1) dtset%tmesh=dprarr(1:3)
+ ABI_CHECK(all(dtset%tmesh >= zero), sjoin("Invalid tmesh:", ltoa(dtset%tmesh)))
+ ABI_CHECK(dtset%tmesh(2) >= dtset%tmesh(1), "tmesh(2) < tmesh(1)")
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tsmear',tread,'ENE')
  if(tread==1) dtset%tsmear=dprarr(1)
 
@@ -736,11 +740,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) dtset%ecuteps=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsigx',tread,'ENE')
- if(tread==1) then
-   dtset%ecutsigx=dprarr(1)
-!  else
-!  if(dtset%optdriver==RUNL_SIGMA) dtset%ecutsigx=dtset%ecut
- end if
+ if(tread==1) dtset%ecutsigx=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutwfn',tread,'ENE')
  if(tread==1) then
    dtset%ecutwfn=dprarr(1)
@@ -1316,6 +1317,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
  ixc_current=dtset%ixc
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixcrot',tread,'INT')
+ if(tread==1) dtset%ixcrot=intarr(1)
+
 !Read the ixc for an advanced functional
 !If present, and relevant (only specific values for gcalctyp), the other internal variable will be adjusted to this other functional)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_sigma',tread,'INT')
@@ -1335,10 +1339,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
 !Now take care of the parameters for hybrid functionals
- if(dtset%usefock==1)then 
+ if(dtset%usefock==1)then
 
-   if(ixc_current ==40 .or. ixc_current ==41 .or. ixc_current ==42)then 
-     dtset%hyb_mixing_sr=zero 
+   if(ixc_current ==40 .or. ixc_current ==41 .or. ixc_current ==42)then
+     dtset%hyb_mixing_sr=zero
      dtset%hyb_range_dft=zero ; dtset%hyb_range_fock=zero
      if(ixc_current==40)dtset%hyb_mixing=one
      if(ixc_current==41)dtset%hyb_mixing=quarter
@@ -1399,7 +1403,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      end if
      dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
    end if
-   
+
    if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
    if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft
 
@@ -1602,7 +1606,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 .and. dtset%nbandkss==0) dtset%usepawu = 10
+ if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
+  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1752,6 +1759,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
+   if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
+     write(message, '(a,a,a)' )&
+&     'usepawu==4 and usedmft=1, dmft_dc should be equal to 5  ',ch10,&
+&     'impose dmft_dc = 5'
+     MSG_WARNING(message)
+     dtset%dmft_dc=5
+   endif
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
@@ -2041,6 +2055,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'orbmag',tread,'INT')
+ if(tread==1) dtset%orbmag=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ortalg',tread,'INT')
  if(tread==1) then
    dtset%ortalg=intarr(1)
@@ -2090,6 +2107,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
  if(tread==1) dtset%prtfc=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfull1wf',tread,'INT')
+ if(tread==1) dtset%prtfull1wf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfsurf',tread,'INT')
  if(tread==1) dtset%prtfsurf=intarr(1)
@@ -2209,6 +2229,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strprecon',tread,'DPR')
  if(tread==1) dtset%strprecon=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tim1rev',tread,'INT')
+ if (tread==1) dtset%tim1rev=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xc_denpos',tread,'DPR')
  if(tread==1) dtset%xc_denpos=dprarr(1)
@@ -2429,9 +2452,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
- if(tread==1) dtset%toldfe=dprarr(1)
+ if(tread==1) dtset%focktoldfe=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrde',tread,'DPR')
  if(tread==1) dtset%tolrde=dprarr(1)
 
 !find which tolXXX are defined generically and for this jdtset
@@ -3049,6 +3072,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  ABI_DEALLOCATE(dprarr)
 
  call timab(191,2,tsec)
- 
+
 end subroutine invars2
 !!***

@@ -12,7 +12,7 @@
 !! an estimation of the velocities, stress and new cell at time t+dtion
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (GG,MT)
+!! Copyright (C) 2011-2018 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,17 +67,17 @@
 subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &                            rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
 
- use m_profiling_abi
-
  use defs_basis
  use m_errors
  use m_pimd
+ use m_profiling_abi
+
+ use m_geometry,  only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_langevin_nvt'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

@@ -19,7 +19,7 @@
 !!   optdyfr=1: computes contribution of atomic pot./dens. to frozen part of dyn. matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -161,9 +161,11 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  use m_errors
  use m_xmpi
 
+ use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
  use m_pawtab,      only : pawtab_type
  use m_distribfft,  only : distribfft_type
+ use m_fft,         only : zerosym
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft
 
 !This section has been created automatically by the script Abilint (TD).
@@ -171,7 +173,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 #undef ABI_FUNC
 #define ABI_FUNC 'atm2fft'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
 !End of the abilint section

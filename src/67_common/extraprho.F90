@@ -10,7 +10,7 @@
 !! Use algorithm proposed by D. Alfe in Comp. Phys. Comm. 118 (1999), 31-33
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (MT)
+!! Copyright (C) 1998-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,6 +89,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
  use m_atomdata, only : atom_length
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc
+ use m_jellium,  only : jellium
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

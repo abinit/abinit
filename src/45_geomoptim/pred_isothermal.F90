@@ -24,7 +24,7 @@
 !!            control.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,13 +68,14 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  use m_abihist
  use m_linalg_interfaces
 
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_isothermal'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_isothermal
 !End of the abilint section
 

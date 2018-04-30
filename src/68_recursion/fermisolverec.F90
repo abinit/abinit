@@ -8,7 +8,7 @@
 !! valence electrons in the recursion method, using a Ridder s Method
 !! 
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group ( ).
+!! Copyright (C) 2008-2018 ABINIT group ( ).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,6 +67,7 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
  use m_errors
  use m_profiling_abi
 
+ use m_time,         only : timab
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,only    : cudap
 #endif
@@ -76,7 +77,6 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
 #undef ABI_FUNC
 #define ABI_FUNC 'fermisolverec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_recursion, except_this_one => fermisolverec
 !End of the abilint section
 

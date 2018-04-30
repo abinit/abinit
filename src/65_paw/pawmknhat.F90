@@ -9,7 +9,7 @@
 !! Can also compute first-order compensation charge density (RF calculations)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,6 +84,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  use m_xmpi
  use m_cgtools
 
+ use m_time,         only : timab
  use defs_abitypes,  only : mpi_type
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
@@ -92,13 +93,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  use m_paw_finegrid, only : pawgylm, pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
  use m_mpinfo,       only : set_mpi_enreg_fft, unset_mpi_enreg_fft
+ use m_fft,          only : zerosym
  use m_distribfft,   only : distribfft_type, init_distribfft_seq, destroy_distribfft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmknhat'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_65_paw, except_this_one => pawmknhat

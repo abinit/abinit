@@ -1745,6 +1745,10 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
      endif
    end if
 
+#else
+   ABI_UNUSED(hyb_mixing)
+   ABI_UNUSED(hyb_mixing_sr)
+   ABI_UNUSED(hyb_range)
 #endif
 
  end do

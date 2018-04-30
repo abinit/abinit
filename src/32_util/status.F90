@@ -9,7 +9,7 @@
 !! and close the file. The output rate and shift are governed by istat
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG,TD)
+!! Copyright (C) 1998-2018 ABINIT group (XG,TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,12 +57,12 @@ subroutine status(counter,filstat,istat,level,routine)
  use m_errors
 
  use m_io_tools,   only : open_file
+ use m_time,       only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'status'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

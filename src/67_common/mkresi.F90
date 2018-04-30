@@ -7,7 +7,7 @@
 !! Make residuals from knowledge of wf in G space and application of Hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,6 +53,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  use m_xmpi
  use m_cgtools
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type
 
@@ -60,7 +61,6 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkresi'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_66_wfs
 !End of the abilint section

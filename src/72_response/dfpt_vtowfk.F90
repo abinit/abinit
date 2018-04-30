@@ -8,7 +8,7 @@
 !! for a given spin-polarization, from a fixed potential (vlocal1).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT)
+!! Copyright (C) 1999-2018 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -143,18 +143,18 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  use m_wfk
  use m_rf2
 
+ use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get,pawcprj_copy
  use m_hamiltonian,  only : gs_hamiltonian_type,rf_hamiltonian_type,KPRIME_H_KPRIME
+ use m_spacepar,     only : meanvalue_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_vtowfk'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_53_spacepar
  use interfaces_66_wfs
  use interfaces_72_response, except_this_one => dfpt_vtowfk
 !End of the abilint section
@@ -412,9 +412,17 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !    of the first-order wavefunction, to give cwave1.
 !    PAW: note that dcwavef (1st-order change of WF due to overlap change)
 !         remains in the subspace orthogonal to cgq
-       call corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc_k,eig1_k,fermie1,gh0c1,&
-&       iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
-&       occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
+       if (dtset%prtfull1wf>0) then
+         call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1_k,fermie1,&
+&         eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
+&         0,gs_hamkq%usepaw)
+         edocc_k=zero
+         tocceig=1
+       else
+         call corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc_k,eig1_k,fermie1,gh0c1,&
+&         iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
+&         occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
+       end if
      else
        tocceig=0
        call cg_zcopy(npw1_k*nspinor,cwavef,cwave1)

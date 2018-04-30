@@ -13,7 +13,7 @@
 !! H^(i) is the ith derivative of the Hamiltonian with respect to one or several perturbation(s).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017-2017 ABINIT group (MT)
+!! Copyright (C) 2017-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,6 +83,8 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_paw_ij
  use m_pawcprj
  use m_cgtools
+
+ use m_kg,             only : mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

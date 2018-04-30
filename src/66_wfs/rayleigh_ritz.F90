@@ -18,7 +18,7 @@
 !! hamiltonian/overlap matrices in full and calling the subdiago method
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,6 +50,7 @@
 !! SOURCE
 
 subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
+
  use defs_basis
  use defs_abitypes
  use m_cgtools
@@ -58,12 +59,13 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  use m_profiling_abi
  use m_abi_linalg
 
+ use m_time,     only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rayleigh_ritz_subdiago'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs, except_this_one => rayleigh_ritz_subdiago
 !End of the abilint section
 
@@ -260,7 +262,7 @@ end subroutine rayleigh_ritz_subdiago
 !! hamiltonian/overlap matrices directly, and calling the ScaLapack routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -295,6 +297,7 @@ end subroutine rayleigh_ritz_subdiago
 !!
 !! SOURCE
 subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
+
  use defs_basis
  use defs_abitypes
  use m_errors
@@ -303,11 +306,12 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  use m_abi_linalg
  use m_slk
 
+ use m_time,     only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rayleigh_ritz_distributed'
- use interfaces_18_timing
  use interfaces_66_wfs, except_this_one => rayleigh_ritz_distributed
 !End of the abilint section
 
@@ -565,7 +569,7 @@ end subroutine rayleigh_ritz_distributed
 !! Fills block_cyclic_mat with the columns of full_mat owned by iproc, using a 1D block-cyclic distribution
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -638,7 +642,7 @@ end subroutine from_mat_to_block_cyclic
 !! Fills the columns of full_mat owned by iproc with block_cyclic_mat, using a 1D block-cyclic distribution
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -712,7 +716,7 @@ end subroutine from_block_cyclic_to_mat
 !! Packs a matrix into hermitian format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

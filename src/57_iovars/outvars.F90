@@ -7,7 +7,7 @@
 !! Echo variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,6 +83,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 #if defined HAVE_NETCDF
  use netcdf
 #endif
+
+ use m_nctk,      only : create_nc_file
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -168,7 +170,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 
 #ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
- ! otherwise v6[34] crashes with errmess: 
+ ! otherwise v6[34] crashes with errmess:
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
  ! because we keep on creating dimensions in write_var_netcdf.
  ! one should use groups for this kind of operations!!

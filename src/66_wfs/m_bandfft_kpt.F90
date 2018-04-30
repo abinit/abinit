@@ -8,7 +8,7 @@
 !!  used for kgb parallelization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (FJ,MT)
+!! Copyright (C) 2011-2018 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,8 @@ MODULE m_bandfft_kpt
  use m_profiling_abi
  use m_errors
  use m_xmpi
+
+ use m_fftcore,   only : sphereboundary
 
  implicit none
 
@@ -202,7 +204,6 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_init1'
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none

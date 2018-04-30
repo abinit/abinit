@@ -10,7 +10,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MMancini)
+!! Copyright (C) 2002-2018 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -366,7 +366,7 @@ end subroutine find_maxmin_proc
  call xmpi_sum(recpar%vcount,rset%mpi%comm_bandfft,ierr)
    
  recpar%displs = 0
- if(rset%mpi%nproc>1) recpar%displs(1:) = (/(sum(recpar%vcount(:ii)),ii=0,rset%mpi%nproc-1)/) 
+ if(rset%mpi%nproc>1) recpar%displs(1:) = (/(sum(recpar%vcount(:ii)),ii=0,rset%mpi%nproc-2)/) 
 
  !--INITALIZATION OF CUDA FOR RECURSION
 #if defined HAVE_GPU_CUDA

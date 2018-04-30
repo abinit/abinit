@@ -9,7 +9,7 @@
 !! to the next generation. Those are chosen from ga_opt_percent% best fit and (1-ga_opt_percent)% from Genetic rules
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (XG, AHR)
+!! Copyright (C) 2009-2018 ABINIT group (XG, AHR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,20 +69,23 @@ MODULE m_use_ga
  use m_ga
  use m_sort
 
- use m_results_img, only : results_img_type,gather_array_img
+ use m_geometry,       only : mkradim, mkrdim, metric, dist2
+ use m_results_img,    only : results_img_type,gather_array_img
+ use m_numeric_tools,  only : uniformrandom
+
  use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 
  implicit none
 
- private 
+ private
 
  public :: predict_ga
 
 
 CONTAINS
 
-subroutine predict_ga(itimimage,itimimage_eff,idum,ga_param,natom,nimage,&
+subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 &                     ntimimage_stored,results_img)
 
 
@@ -90,15 +93,13 @@ subroutine predict_ga(itimimage,itimimage_eff,idum,ga_param,natom,nimage,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'predict_ga'
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)     :: itimimage,itimimage_eff,natom,nimage,ntimimage_stored
+ integer,intent(in)     :: itimimage_eff,natom,nimage,ntimimage_stored
  integer,intent(inout)  :: idum
 !arrays
  type(results_img_type) :: results_img(nimage,ntimimage_stored)
@@ -491,12 +492,12 @@ INTEGER FUNCTION choosefather(fitf,n,idum)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'choosefather'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
 
- integer,intent(in) :: n,idum
+ integer,intent(in) :: n
+ integer,intent(inout) :: idum
  real(dp), dimension(:), intent(in) :: fitf
 
  real(dp) :: x1
@@ -574,12 +575,12 @@ SUBROUTINE randomize_parent(parent,natom,idum)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'randomize_parent'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
 implicit none
 
-integer,intent(in)     :: natom,idum
+integer,intent(in)     :: natom
+integer,intent(inout)     :: idum
 real(dp),intent(inout) :: parent(3,natom)
 
 real(dp)               :: tmp(3),rot(3,3)
@@ -720,7 +721,6 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'checkatomicdist'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -795,12 +795,11 @@ DOUBLE PRECISION FUNCTION gaussian_random(idum,sigma)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gaussian_random'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
   implicit none
 
-  integer,intent(in) :: idum
+  integer,intent(inout) :: idum
   real(dp), intent(in) :: sigma
 
   real(dp) :: r1,r2,w

@@ -11,7 +11,7 @@
 !!  (4) pseudo-core contrib. to frozen-wf part the dynamical matrix (part 2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,13 +75,13 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  use m_errors
  use m_linalg_interfaces
 
+ use m_time,       only : timab
  use m_mpinfo,     only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore'
- use interfaces_18_timing
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -560,7 +560,7 @@ end subroutine mkcore
 !! This routine is an alternative to mkcore, to be used for PAW and/or WVL.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TRangel,MT)
+!! Copyright (C) 1998-2018 ABINIT group (TRangel,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -631,6 +631,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  use m_errors
  use m_linalg_interfaces
 
+ use m_time,        only : timab
  use m_mpinfo,      only : ptabs_fourdp
  use m_sort,        only : sort_dp
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
@@ -641,7 +642,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_alt'
- use interfaces_18_timing
  use interfaces_41_geometry
 !End of the abilint section
 

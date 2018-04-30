@@ -10,7 +10,7 @@
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MJV)
+!! Copyright (C) 2010-2018 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -321,7 +321,6 @@ end subroutine init_supercell
 
 subroutine order_supercell_typat (scell)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -386,7 +385,6 @@ end subroutine order_supercell_typat
 
 subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -411,7 +409,8 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
  complex(dpc) :: zdispl(3,scell%natom_primcell)
 ! *************************************************************************
 
- zdispl = reshape(cmplx(displ), (/3,scell%natom_primcell/))
+ zdispl = (cmplx(reshape(displ(1,:), (/3,scell%natom_primcell/)),&
+&                reshape(displ(2,:), (/3,scell%natom_primcell/))))
 
  ! fix gauge by imposing real displacement for first atom in first direction 
  ! multiply by normalized complex conjugate of first element
@@ -467,7 +466,6 @@ end subroutine freeze_displ_supercell
 
 subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -536,7 +534,6 @@ end subroutine prt_supercell_for_qpt
 
 subroutine prt_supercell (filename, scell, title1, title2)
 
-  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -856,7 +853,7 @@ subroutine destroy_supercell (scell)
 
 !Arguments ------------------------------------
 !scalars
-  type(supercell_type), intent(inout) :: scell !vz_i
+  type(supercell_type), intent(inout) :: scell 
 
 ! *************************************************************************
 

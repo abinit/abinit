@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,7 @@ use m_xmpi
 use m_bandfft_kpt
 use m_cgtools
 
+use m_time,      only : timab
 use m_io_tools,  only : get_unit
 
 implicit none
@@ -130,7 +131,6 @@ subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'sqmr'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

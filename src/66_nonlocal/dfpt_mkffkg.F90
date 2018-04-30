@@ -6,10 +6,10 @@
 !! FUNCTION
 !! Prepare the application of the projectors to the shifted wavefunctions,
 !! by precomputing the k+G factors and their product with the form factors
-!! Do this on a block of plane wave.
+!! Do this on a block of plane waves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, MT, DRH)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -95,7 +95,6 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
  integer :: iffkg,ig,ii,ilang,ilang2,ilangx,ilmn,iln,iln0,iproj,ipw,jj
  integer :: nffkge
  real(dp) :: ffkg_now,kpg_x,kpg_y,kpg_z
-!arrays
 
 ! *************************************************************************
 

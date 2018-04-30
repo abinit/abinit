@@ -19,7 +19,7 @@
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,6 +76,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  use m_errors
  use m_fftcore
  
+ use m_time,        only : timab
  use m_mpinfo,      only : ptabs_fourdp
  use m_sgfft,       only : sg_fft_rc
  use m_sg2002,      only : sg2002_mpifourdp, sg2002_back, sg2002_forw
@@ -87,7 +88,6 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourdp'
- use interfaces_18_timing
  use interfaces_53_ffts, except_this_one => fourdp
 !End of the abilint section
 

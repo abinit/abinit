@@ -10,7 +10,7 @@
 !!  The later quantity is required in case of GW calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,6 @@
 !!  vxc(nfftf,nspden)= xc potential in real space on the fine FFT grid
 !!  Wfd <type (wfd_t)>=Structure gathering information on the wavefunctions.
 !!  rhor(nfftf,nspden)=density in real space (smooth part if PAW).
-!!  rhog(2,nfftf)=density in reciprocal space (smooth part if PAW).
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
 !!  kstab(2,Wfd%nkibz,Wfd%nsppol)=Table temporary used to be compatible with the old implementation.
@@ -84,7 +83,7 @@
 
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
-&  rhor,rhog,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
+&  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
 &  taug,taur) ! optional arguments
 
  use defs_basis
@@ -93,6 +92,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_profiling_abi
  use m_errors
  use m_xcdata
+ use libxc_functionals
 
  use m_pawang,      only : pawang_type
  use m_pawtab,      only : pawtab_type
@@ -106,7 +106,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
  use m_dtset,       only : dtset_copy, dtset_free
  use m_mpinfo,      only : destroy_mpi_enreg
- use libxc_functionals
+ use m_kg,          only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -114,7 +114,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 #define ABI_FUNC 'calc_vhxc_me'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section
@@ -135,7 +134,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer,intent(in) :: ngfftf(18)
  integer,intent(in) :: kstab(2,Wfd%nkibz,Wfd%nsppol)
  real(dp),intent(in) :: vhartr(nfftf),vxc(nfftf,Wfd%nspden),vtrial(nfftf,Wfd%nspden)
- real(dp),intent(in) :: rhor(nfftf,Wfd%nspden),rhog(2,nfftf)
+ real(dp),intent(in) :: rhor(nfftf,Wfd%nspden)
  real(dp),intent(in) :: nhat(nfftf,Wfd%nspden*Wfd%usepaw)
  real(dp),intent(in) :: nhatgr(nfftf,Wfd%nspden,3*nhatgrdim)
  real(dp),intent(in),optional :: taur(nfftf,Wfd%nspden*Dtset%usekden),taug(2,nfftf*Dtset%usekden)
@@ -152,12 +151,11 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc
- integer :: rank,comm,master,nprocs
+ integer :: rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
- real(dp) :: omega ! HSE Fock exchange screening parameter
  complex(dpc) :: cdot
- logical :: ltest
+ logical :: ltest,non_magnetic_xc
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata,xcdata_hybrid
@@ -189,6 +187,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ! Usually FFT meshes for wavefunctions and potentials are not equal. Two approaches are possible:
  ! Either we Fourier interpolate potentials on the coarse WF mesh or we FFT the wfs on the dense mesh.
  ! The later approach is used, more CPU demanding but more accurate.
+ non_magnetic_xc=(Dtset%usepawu==4).or.(Dtset%usepawu==14)
+
  if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
 
  ! Fake MPI_type for sequential part
@@ -248,7 +248,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call xcdata_init(xcdata,dtset=Dtset)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  ! FABIEN's development
@@ -274,21 +274,21 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      end if
    end if
 
-   write(msg, '(a, f4.2)') ' Fock fraction = ', max(Dtset%hyb_mixing,Dtset%hyb_mixing_sr)
+   write(msg, '(a, f4.2)') ' Fock fraction = ', max(abs(Dtset%hyb_mixing),abs(Dtset%hyb_mixing_sr))
    call wrtout(std_out,msg,'COLL')
-   write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',Dtset%hyb_range_dft, ' (bohr^-1)'
+   write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ',abs(Dtset%hyb_range_dft), ' (bohr^-1)'
    call wrtout(std_out,msg,'COLL')
 
    ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
    if(ixc_sigma<0)then
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
    else
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
    end if
 

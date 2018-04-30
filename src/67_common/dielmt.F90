@@ -10,7 +10,7 @@
 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,16 +55,17 @@
 subroutine dielmt(dielinv,gmet,kg_diel,&
 &  npwdiel,nspden,occopt,prtvol,susmat)
 
- use m_profiling_abi
 
  use defs_basis
+ use m_profiling_abi
+
+ use m_time,     only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dielmt'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

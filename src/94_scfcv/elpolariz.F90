@@ -8,7 +8,7 @@
 !! electric field with or without Berry phases (berryopt keyword)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (XG)
+!! Copyright (C) 2005-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,6 +96,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
  use m_errors
  use m_efield
 
+ use m_geometry, only : metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawcprj,  only : pawcprj_type
@@ -105,7 +106,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 #undef ABI_FUNC
 #define ABI_FUNC 'elpolariz'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_67_common
 !End of the abilint section
 

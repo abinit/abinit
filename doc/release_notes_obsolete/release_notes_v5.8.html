@@ -1,0 +1,196 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2009-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between January 2009 and May 2009. These release notes
+are relative to improvements of ABINITv5.8 with respect to v5.7.
+
+WARNING : This file is still rudimentary. Style and description
+of contributions should be improved...
+
+The list of contributors includes :
+B. Amadon, P.M. Anglade, J.-M. Beuken, M. Boulanger, F. Bruneval, 
+D. Caliste, T. Deutsch, G.A. Franco, L. Genovese, M. Giantomassi, 
+F. Jollet, A. Lherbier, D. Hamann, M. Mancini,
+S. Pesant, Y. Pouillon, T. Rangel, G.-M. Rignanese, M. Verstraete, 
+M. Torrent, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.8, released on May 7, 2009.
+
+Changes with respect to version 5.7 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A.1 The default value for kptopt has been changed from 0 to 1 .
+    So, if you are interested in doing Gamma only calculations
+    (nkpt 1  kpt 0 0 0) you have to insert
+    kptopt 0 
+    in your input file. On the contrary, 
+    kptopt 1
+    is not needed anymore when calculations are done on the basis of
+    a grid of k point (with ngkpt or kptrlatt).
+    
+A.2 The default value for kptrlen has been changed from 20 to 30.
+    With the above-mentioned kptopt default change, the calculation
+    for a solid will proceed by default with a reasonable k point grid.
+
+A.3 The default value for awtr has been changed from 0 to 1.
+    This only applies to GW calculations, when the screening is generated (optdriver=3).
+
+A.4 In order to improve the portability of the reference tests,
+    the procedure to select the q points connecting two k points,
+    in the GW part of ABINIT, has been slightly modified. Now,
+    the coordinates of the q wavevectors that might be either 0.5 or -0.5
+    are preferably chosen to be 0.5, while this was undefined previously
+    (and in several cases, -0.5 was obtained). This induced a large modification
+    in all the GW reference files, although usually not at the level of the
+    quasiparticule energies. This is not always true, and modifications
+    as large as 0.01 eV were seen.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.0 Note : several core developers have been working on the preparation of ABINITv6.0 ,
+    hence the noticeable achievements of the present v5.8. appear to be quite light.
+
+B.1 The kinetic energy density is available, as well as the electron localisation function. 
+    Availability for Norm-conserving pseudopotentials only, for
+    non-spin-polarized and spin-collinear cases (but not yet non-spin-collinear
+    case).
+    Input variables : prtkden, prtelf .
+    Test cases : v1#21 and v5#31 (for prtken  - no test available for prtelf in v5.8.3)
+    Other documentation in doc/theory is available, see the ELF and KDEN subdirectories.
+    (Contribution from A. Lherbier)
+
+B.2 In the PAW case, the band structure with band linewidth proportional to the projection of the
+    wavefunction on atomic partial waves (either L-decomposed or L,M-decomposed)
+    can be generated (fat-band band structure). See the input variable pawfatbnd.
+    Test v5#20.
+    (Contribution by B. Amadon)
+
+B.3 Automatic calculation of the processor distribution for a parallel calculation:
+    determination of npkpt, npband, npfft and bandpp, by F. Jollet.
+    Documentation, automatic tests to be provided... (not easy for the last one).
+    The work on the band-FFT parallelism continues, a new preconditioner is available (F. Bottin).
+    Scalapack and MPI-IO improvements.
+
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 A script to check whether the input variables are documented (in doc/input_variables/*html),
+    of tested (in tests/*/Input/*in) has been written by Joe Zwanziger, 
+    and can be activated by issuing
+    make abirules
+    in the tests directory.
+
+C.2 There has been a complete renaming of the subdirectories of the src directory. 
+    New adopted labelling scheme : xy_name  , where xy is a two-digit integer number,
+    with the meaning of a level.
+    The directories are strictly ordered, the higher level ones calling
+    the lower level ones, excluding subdirectories with the same level.
+    Separate subdirectories have been created to isolated the routines
+    related to hiding the "write" operation, the "stop" operation, and the "timing"
+    operation. The definition of the global datastructures dtset and mpi_enreg
+    is now done at level 50 (50_abitypes).
+
+C.3 The systematic constitution of modules containing the definition of objects and associated
+    methods has been started, by M. Giantomassi .
+    See the directory 27_toolbox_oop, as well as several m_* files in src/* 
+
+C.4 A new testing directory tests/gwdp has been defined. It holds reference
+    files obtained with GW calculations with double precision arithmetics (enable_gw_dpc).
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 The computation of Raman scattering intensities, in the spin-polarized LDA case,
+    is under development. Work by Fabiana Da Pieve.
+
+D.2 The use of Density Functional Perturbation Theory with PAW 
+    (phonons, ddk, electric field, and magnetic field) is in preparation,
+     by M. Torrent, F. Jollet and J. Zwanziger.
+
+D.3 Tests for the temperature dependence of the electronic structure (including the gap).
+    have been provided by P. Boulanger. See tests v5 #26,27,28 .
+
+D.4 Self-consistent phonon calculations calculations have been implemented, by M. Verstraete.
+    Implemented is working, but portable tests and documentation should be provided.
+    Test (not yet portable) v5 #90
+    Input variables : scphon_temp and scphon_supercell
+
+D.5 Continued work on GW by Matteo Giantomassi : 
+     improvement of the treatment of the GW singularity, treatment of G0W0 on top of LDA+U,
+     treatment of the optical limit, Arnaud-Alouani treatment of exact expansion for 
+     oscillators in sigma.F90
+    New input variables, not yet documented : gw_nqlwl, gw_qlwl , nomegasi, omegasimax.
+    No test either.
+    Additional improvement on GW (memory saving) by F Bruneval.
+
+D.6 New test : v5#71, for one-shot GW with contour deformation technique.
+    (prepared by M. Giantomassi).
+
+D.7 New test : v5#43, for very large grid in x, from PM Anglade.
+
+D.8 New example configuration files, for MacOSX , Intel XEON, IBM, from JM Beuken.
+
+D.9 New version of the BigDFT library (1.2.0.1) , from D. Caliste.
+    Work by D. Caliste, L. Genovese, T. Deutsch.
+
+D.10 A new version of the build system, in which MPI is treated like the other libraries,
+    is in preparation, by Y. Pouillon
+
+D.11 Work on the Python bindings, by D. Caliste
+
+D.12 Improvements of the use of the Wannier90 library and associated doc (T. Rangel, M. Giantomassi)
+     In particular, now other file names than wannier90.win can be used.
+
+D.13 Improvement of the interfacing with Wan-T going on. Use of Wan-T
+     in the many-body perturbation case (T. Rangel and G.-M. Rignanese).
+
+D.14 M. Verstraete introduced the new input variable tsymgkq for anaddb. Test+ documentation to be provided.
+
+D.15 New input variable for anaddb : tprt_yambo. Test + documentation + author to be provided.
+
+D.16 Occupation matrix can be imposed within PBE0 (on-site), from FJollet.
+
+D.17 Work on the recursion approach to high-temperature DFT calculations, by M. Mancini.
+
+D.18 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
+     and improvements of documentation by B. Amadon, P.M. Anglade, J.-M. Beuken,
+     M. Boulanger, F. Bruneval, D. Caliste, G.A. Franco, M. Giantomassi, F. Jollet, D. Hamann, M. Mancini,
+     S. Pesant, Y. Pouillon, T. Rangel, M. Verstraete, M. Torrent, J. Zwanziger
+</pre>
+

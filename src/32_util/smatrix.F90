@@ -9,7 +9,7 @@
 !! its inverse and the product of its inverse with the wavefunctions at k.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT  group (MVeithen)
+!! Copyright (C) 2000-2018 ABINIT  group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,7 +94,7 @@
 !!    for a group of valence bands defined by minbd and maxbd.
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,getcgqphase,make_grad_berry
+!!      berryphase_new,cgwf,chern_number,getcgqphase,make_grad_berry
 !!
 !! CHILDREN
 !!      dzgedi,dzgefa,overlap_g
@@ -115,12 +115,13 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
  use m_profiling_abi
  use m_errors
 
+ use m_cgtools,   only : overlap_g
+ use m_abilasi,   only : dzgedi, dzgefa
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'smatrix'
- use interfaces_28_numeric_noabirule
- use interfaces_32_util, except_this_one => smatrix
 !End of the abilint section
 
  implicit none
@@ -250,7 +251,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !end do
 !end if
 !
-!!    
+!!
 !if (npw_k1*nspinor < mpw*nspinor) vect1(:,npw_k1*nspinor+1:mpw*nspinor) = zero
 !
 !do jband = 1, nband_occ
@@ -311,10 +312,10 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
      pwmin = (iband-1)*npw_k1*nspinor*shiftbd
      pwmax = pwmin + npw_k1*nspinor
-!    
+!
 !    old version  (*** multiply by nspinor missing??? ***)
 !    vect1(:,1:npw_k1) = cg(:,icg + 1 + pwmin:icg + pwmax)
-!    
+!
 
 !    Multiply the bra wave function by the phase factor
      if (itrs==1.or.itrs==11) then  ! take complex conjugate of bra
@@ -339,7 +340,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
        end do
      end if
 
-!    
+!
      if (npw_k1*nspinor < mpw*nspinor) vect1(:,npw_k1*nspinor+1:mpw*nspinor) = zero
 
      do jband = 1, nband_occ
@@ -467,14 +468,14 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
              do ipw = 1, npw_k1
 
                jpw = pwind_k(ipw)
-               
+
                if (jpw > 0) then
-                 
+
                  wfr = cgq(1,icg1+(iband-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(3,jpw)&
 &                 -cgq(2,icg1+(iband-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(4,jpw)
                  wfi = cgq(1,icg1+(iband-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(4,jpw)&
 &                 +cgq(2,icg1+(iband-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(3,jpw)
-                 
+
                  cg1_k(1,(jband1-1)*npw_k1*nspinor + spnshft_k1 + ipw) = &
 &                 cg1_k(1,(jband1-1)*npw_k1*nspinor + spnshft_k1 + ipw) + &
 &                 smat_inv(1,iband,jband)*wfr + smat_inv(2,iband,jband)*wfi
@@ -531,9 +532,9 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
    end if
 
- end if         ! 
+ end if         !
 
- if(job == 20 .or. job == 21) then ! special case transfering cgq to cg1_k without use of S^{-1}, used in 
+ if(job == 20 .or. job == 21) then ! special case transfering cgq to cg1_k without use of S^{-1}, used in
 !  magnetic field case
 
    cg1_k(:,:) = zero
@@ -548,7 +549,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
          spnshft_k2 = (ispinor-1)*npw_k2
          do ipw = 1, npw_k1
            jpw = pwind_k(ipw)
-           
+
            if (jpw > 0) then
              wfr = cgq(1,icg1+(jband1-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(3,jpw)&
 &             -cgq(2,icg1+(jband1-1)*npw_k2*nspinor+spnshft_k2+jpw)*pwnsfac_k(4,jpw)

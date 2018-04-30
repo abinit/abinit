@@ -7,7 +7,7 @@
 !!  This module contains the declaration of the wfd_t object and its methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (MG)
+!! Copyright (C) 2008-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,9 +45,10 @@ MODULE m_wfd
  use m_blas,           only : xcopy, xdotc
  use m_pptools,        only : printxsf
  use m_cgtools,        only : cg_zdotc
- use m_fftcore,        only : print_ngfft
+ use m_fftcore,        only : print_ngfft, kgindex, sphereboundary
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
+ use m_kg,             only : getph, ph1d3d, mkkpg
  use m_gsphere,        only : kg_map, make_istwfk_table
  use m_crystal_io,     only : crystal_from_hdr
  use m_fftcore,        only : kpgsph, get_kg
@@ -457,8 +458,6 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kdata_init'
- use interfaces_52_fft_mpi_noabirule
- use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
@@ -877,7 +876,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
 #define ABI_FUNC 'wfd_init'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -5057,7 +5055,6 @@ subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_change_ngfft'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

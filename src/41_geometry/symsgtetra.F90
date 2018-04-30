@@ -8,7 +8,7 @@
 !! according to the International Tables of Crystallography, 1983.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (RC,XG)
+!! Copyright (C) 1999-2018 ABINIT group (RC,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

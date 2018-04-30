@@ -11,7 +11,7 @@
 !! (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MVeithen)
+!! Copyright (C) 1999-2018 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,9 +30,9 @@
 !!  i1pert,i3pert = type of perturbation that has to be computed
 !!  i1dir,i3dir=directions of the corresponding perturbations
 !!  kneigh(30,nkpt2) = index of the neighbours of each k-point
-!!  kg_neigh(30,nkpt2,3) = necessary to construct the vector joining a k-point 
-!!                         to its nearest neighbour in case of a single k-point, 
-!!                         a line of k-points or a plane of k-points. 
+!!  kg_neigh(30,nkpt2,3) = necessary to construct the vector joining a k-point
+!!                         to its nearest neighbour in case of a single k-point,
+!!                         a line of k-points or a plane of k-points.
 !!                         See getshell.F90 for details
 !!  kptindex(2,nkpt3)= index of the k-points in the reduced BZ
 !!                     related to a k-point in the full BZ
@@ -96,17 +96,17 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  use defs_basis
  use defs_abitypes
  use m_xmpi
-
 #if defined HAVE_MPI2
  use mpi
 #endif
+
+ use m_abilasi,          only : dzgedi, dzgefa
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_mv'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
 !End of the abilint section
 
@@ -202,7 +202,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  call wrtout(std_out,  message,'COLL')
 
 
-!fab: I think that the following restriction must be eliminated: 
+!fab: I think that the following restriction must be eliminated:
 !isppol = 1
 
  ikpt_loc = 0
@@ -226,7 +226,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  end do
 
 !fab: I think here I have to add the loop over spin
- 
+
  do isppol = 1, nsppol
 
 !  Loop over k-points
@@ -324,7 +324,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
              ABI_DEALLOCATE(buffer)
 
            end if
-           
+
          else if (ikpt_loc <= mpi_enreg%mkmem(dest)) then  ! dest != me and the dest has a k-point to treat
 
            jkpt=mpi_enreg%kpt_loc2ibz_sp(dest, ikpt_loc,1)
@@ -332,7 +332,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
            jkpt_rbz = kptindex(1,jkpt2)   ! index of the k-point in the reduced BZ
 
            his_source = mpi_enreg%proc_distrb(jkpt_rbz,1,1)
-           
+
            if (his_source == mpi_enreg%me) then
 
              jcg = cgindex(jkpt_rbz,isppol)
@@ -353,64 +353,64 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
          end if
 
        end do
-!      
+!
 !      do jkpt = 1, nkpt2
-!      
+!
 !      if ((jkpt == ikpt_rbz).and.(source /= mpi_enreg%me).and.&
 !      &         (ikpt_loc <= mkmem)) then
-!      
+!
 !      tag = jkpt
-!      
+!
 !      allocate(buffer(2,3*count))
 !      call MPI_RECV(buffer,2*3*count,MPI_DOUBLE_PRECISION,&
 !      source,tag,spaceComm,status1,ierr)
-!      
+!
 !      cgq(:,1:count)  = buffer(:,1:count)
 !      cg1q(:,1:count) = buffer(:,count+1:2*count)
 !      cg3q(:,1:count) = buffer(:,2*count+1:3*count)
 !      deallocate(buffer)
-!      
+!
 !      end if
-!      
+!
 !      !        ----------------------------------------------------------------------------
 !      !        --------------- Here: send the WF to all the cpus that need it -------------
 !      !        ----------------------------------------------------------------------------
-!      
+!
 !      do dest = 1, mpi_enreg%nproc
-!      
+!
 !      if ((minval(abs(mpi_enreg%proc_distrb(jkpt,1:mband,1:dtset%nsppol) &
 !      &           - mpi_enreg%me)) == 0).and.&
 !      &           (mpi_enreg%kptdstrb(dest,ineigh,ikpt_loc) == jkpt)) then
-!      
-!      
-!      
+!
+!
+!
 !      jcg = cgindex(jkpt,isppol)
-!      
+!
 !      if (((dest-1) == mpi_enreg%me)) then
-!      
+!
 !      cgq(:,1:count)  = cg(:,jcg+1:jcg+count)
 !      cg1q(:,1:count) = cg1(:,jcg+1:jcg+count)
 !      cg3q(:,1:count) = cg3(:,jcg+1:jcg+count)
-!      
+!
 !      else
-!      
+!
 !      tag = jkpt
 !      count1 = npwarr(jkpt)*mband*nspinor
 !      allocate(buffer(2,3*count1))
 !      buffer(:,1:count1)            = cg(:,jcg+1:jcg+count1)
 !      buffer(:,count1+1:2*count1)   = cg1(:,jcg+1:jcg+count1)
 !      buffer(:,2*count1+1:3*count1) = cg3(:,jcg+1:jcg+count1)
-!      
+!
 !      call MPI_SEND(buffer,2*3*count1,MPI_DOUBLE_PRECISION,(dest-1),tag,spaceComm,ierr)
-!      
+!
 !      deallocate(buffer)
-!      
+!
 !      end if
-!      
+!
 !      end if
-!      
+!
 !      end do          ! loop over dest
-!      
+!
 !      end do          ! loop over jkpt
 
        if (ikpt_loc > mkmem) then
@@ -602,11 +602,11 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 
    end do      ! End loop over k-points
 
- end do  ! fab: end loop over spin 
+ end do  ! fab: end loop over spin
 
 
 
- 
+
  call xmpi_sum(d3_aux,spaceComm,ierr)
 
 
@@ -622,7 +622,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 
 !fab: I think that in the following we have to make a distinction:
 !for the spin unpolarized case we leave the PEAD expression as it is, while
-!in the spin polarized case we have simply to divide by 2 
+!in the spin polarized case we have simply to divide by 2
 !(see eq.19 di PRB 63,155107, eq. 7 di PRB 71,125107 and eq 13 di PRB 71, 125107...
 !in this latter equation the 2 must be simply replaced by the sum over the spin components...
 !and indeed we have inserted the loop over the spin,
@@ -638,13 +638,13 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 
    d3_berry(2,:) = 0_dp
 
- else 
+ else
 
    d3_berry(1,:) = -1_dp*d3_aux(2,:)/2._dp
    d3_berry(2,:) = d3_aux(1,:)/2._dp
 
    d3_berry(2,:) = 0_dp/2._dp
-   
+
  end if
 
 

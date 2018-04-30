@@ -8,7 +8,7 @@
 !! using the ChebFi method (see paper by A. Levitt and M. Torrent)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,6 +86,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  use mpi
 #endif
 
+ use m_time, only : timab
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type
 
@@ -94,7 +95,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 #undef ABI_FUNC
 #define ABI_FUNC 'chebfi'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs, except_this_one => chebfi
 !End of the abilint section
 
@@ -589,7 +589,7 @@ end subroutine chebfi
 !! Computes the value of the Chebyshev polynomial of degree n on the interval [a,b] at x
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -656,7 +656,7 @@ end function cheb_poly
 !! Here as in the rest of the code, the convention is that residuals are squared (||Ax-lx||^2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (AL)
+!! Copyright (C) 2014-2018 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

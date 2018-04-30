@@ -7,7 +7,7 @@
 !! Do various initializations for the positron lifetime calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (GJ,MT)
+!! Copyright (C) 1998-2018 ABINIT group (GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,7 +135,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_pawfgr,   only : pawfgr_type
  use m_fock,     only : fock_type
-
+ use m_kg,       only : getcut
  use defs_wvltypes, only : wvl_data
 
 !This section has been created automatically by the script Abilint (TD).
@@ -144,7 +144,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 #define ABI_FUNC 'setup_positron'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => setup_positron

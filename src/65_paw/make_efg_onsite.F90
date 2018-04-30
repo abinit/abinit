@@ -7,7 +7,7 @@
 !! Compute the electric field gradient due to onsite densities
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (JZ,MT)
+!! Copyright (C) 2005-2018 ABINIT group (JZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

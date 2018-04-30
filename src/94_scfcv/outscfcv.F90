@@ -7,7 +7,7 @@
 !! Output routine for the scfcv.F90 routine
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (XG)
+!! Copyright (C) 2005-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,6 @@
 !!  elfr(nfft,nspden(+1))=electron localization function, real space.
 !!   (+1) if spin-polarized in order to get total, spin up and spin down elf
 !!  etotal=total energy
-!!  fermie= Fermi energy
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  grhor(nfft,nspden,3)= gradient of electron density in electrons/bohr**4, real space
@@ -126,7 +125,7 @@
 #include "abi_common.h"
 
 subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,dtset,&
-& ecut,eigen,electronpositron,elfr,etotal,fermie,gmet,gprimd,grhor,hdr,kg,&
+& ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,kg,&
 & lrhor,mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpsang,mpw,my_natom,natom,&
 & nattyp,nfft,ngfft,nhat,nkpt,npwarr,nspden,nsppol,nsym,ntypat,n3xccc,occ,&
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
@@ -137,7 +136,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use defs_datatypes
  use defs_wvltypes
  use defs_abitypes
- use defs_parameters
  use m_profiling_abi
  use m_sort
  use m_efield
@@ -154,14 +152,17 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_splines
  use m_ebands
 
+ use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith
+ use m_geometry,         only : bonds_lgth_angles
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
- use m_crystal,          only : crystal_init, crystal_free, crystal_t
+ use m_crystal,          only : crystal_init, crystal_free, crystal_t, prt_cif
  use m_crystal_io,       only : crystal_ncwrite
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
+ use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
  use m_pawtab,           only : pawtab_type
@@ -176,21 +177,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_epjdos,           only : dos_calcnwrite, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
+ use m_io_kss,           only : outkss
+ use m_multipoles,       only : multipoles_out, out1dm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outscfcv'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_28_numeric_noabirule
- use interfaces_41_geometry
  use interfaces_54_abiutil
- use interfaces_62_iowfdenpot
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_69_wfdesc
  use interfaces_70_gw
 !End of the abilint section
 
@@ -200,7 +198,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfftc,mkmem,mpsang,mpw,n3xccc,my_natom,natom,nfft
  integer,intent(in) :: nkpt,nspden,nsppol,nsym,ntypat,prtvol,usecprj
- real(dp),intent(in) :: compch_fft,compch_sph,ecut,fermie,ucvol
+ real(dp),intent(in) :: compch_fft,compch_sph,ecut,ucvol
  real(dp),intent(inout) :: etotal
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -355,7 +353,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(951,1,tsec)
  if (dtset%prtwant==2) then
 
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,hdr,kg,&
+   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -370,7 +368,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
 
 !  Call Wannier90
-   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,hdr,kg,&
+   call mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
 &   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 &   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 &   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -593,7 +591,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    nradint = 1000 ! radial integration grid density
    ABI_ALLOCATE(vpaw,(nfft,nspden))
    vpaw(:,:)=zero
-   if (me == master .and. my_natom > 0) then  
+   if (me == master .and. my_natom > 0) then
      if (paw_an(1)%cplex > 1) then
        MSG_WARNING('cplex = 2 : complex hartree potential in PAW spheres. This is not coded yet. Imag part ignored')
      end if
@@ -612,7 +610,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
        ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
        ! vh1 vht1 contain the spherical first moments of the Hartree potentials, so re-divide by Y_00 = sqrt(four_pi)
-       vh1_corrector(:) = (paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)) / sqrt(four_pi) 
+       vh1_corrector(:) = (paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)) / sqrt(four_pi)
 
        ! get end point derivatives
        call bound_deriv(vh1_corrector, pawrad(itypat), pawrad(itypat)%mesh_size, yp1, ypn)
@@ -828,7 +826,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
 &     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1). 
+!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1).
 !      For the moment comment it out. Only DS2 of mpiio test 27 fails
 !     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
 !&         rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)

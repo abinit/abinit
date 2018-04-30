@@ -14,7 +14,7 @@
 !!   from input wavefunctions, band occupations, and k point wts.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,7 +68,7 @@
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!
 !! PARENTS
-!!      afterscfloop,energy,gstate,respfn,vtorho
+!!      afterscfloop,energy,gstate,respfn,scfcv,vtorho
 !!
 !! CHILDREN
 !!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn
@@ -93,6 +93,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  use m_xmpi
  use m_errors
 
+ use m_time,         only : timab
+ use m_fftcore,      only : sphereboundary
+ use m_fft,          only : fftpac
  use m_hamiltonian,  only : gs_hamiltonian_type
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type
@@ -102,9 +105,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 #undef ABI_FUNC
 #define ABI_FUNC 'mkrho'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_66_wfs
  use interfaces_67_common, except_this_one => mkrho
@@ -171,8 +172,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  if(ioption/=0.and.paw_dmft%use_sc_dmft==1) then
-   message = ' option argument value of this routines should be 0 if usedmft=1. '
-   MSG_ERROR(message)
+   MSG_ERROR('option argument value of this routines should be 0 if usedmft=1.')
  end if
  if(paw_dmft%use_sc_dmft/=0) then
    nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
@@ -217,7 +217,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    nbeta = 3
    ABI_ALLOCATE(taur_alphabeta,(dtset%nfft,dtset%nspden,3,3))
  case default
-   MSG_BUG(' ioption argument value should be 0,1 or 2.')
+   MSG_BUG('ioption argument value should be 0,1 or 2.')
  end select
 
 !Init me
@@ -230,21 +230,18 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    end do
  end do
 
-!WVL - Branching with a separate mkrho procedure
-!in wavelet.
+!WVL - Branching with a separate mkrho procedure in wavelet.
  if (dtset%usewvl == 1) then
    select case(ioption)
    case (0)
      call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
      return
    case (1)
-!      call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     message = ' Sorry, kinetic energy density (taur) is not yet implemented in wavelet formalism.'
-     MSG_ERROR(message)
+     !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
+     MSG_ERROR("kinetic energy density (taur) is not yet implemented in wavelet formalism.")
    case (2)
-!      call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     message = '  Sorry, kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.'
-     MSG_BUG(message)
+     !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
+     MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.')
    end select
  end if
 !WVL - Following is done in plane waves.
@@ -351,8 +348,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      end do
                    end do
                  else if(ioption==2)then
-                   message = ' Sorry, kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.'
-                   MSG_ERROR(message)
+                   MSG_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
                  end if
 
 !                Non diag occupation in DMFT.
@@ -438,8 +434,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      ABI_DEALLOCATE(cwavefb_y)
 
                    end if ! dtset%nspden/=4
-
-
                  end if
 
                else
@@ -505,8 +499,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end do
                end do
              else if(ioption==2)then
-               message = '  Sorry, kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.'
-               MSG_ERROR(message)
+               MSG_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
 
              call timab(538,1,tsec)
@@ -572,9 +565,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            ikg=ikg+npw_k
          end if
 
-!        End loop on ikpt:
-       end do
-
+       end do ! ikpt
 
        if(mpi_enreg%paral_kgb == 1) then
          call bandfft_kpt_set_ikpt(-1,mpi_enreg)
@@ -609,7 +600,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          ABI_DEALLOCATE(rhoaug_my)
        end if
 
-     end do !  isppol=1,dtset%nsppol
+     end do ! isppol
 
      if(allocated(cwavef))  then
        ABI_DEALLOCATE(cwavef)
@@ -665,7 +656,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
  select case (ioption)
- case(0,1)
+ case(0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
    if(ioption==1)then
@@ -678,11 +669,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      end do
    end if
  case(2)
-   message = ' Sorry, kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.'
-   MSG_BUG(message)
-
-!    call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-!    dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+   MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+   !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
+   !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
  end select
 
  call timab(549,2,tsec)

@@ -1,0 +1,37 @@
+==============================================================================
+
+Additional keywords for developers
+
+robodoc      makes compressed tar file with ROBODOC-processed sources
+infos_html   makes the tar.gz file for the Web site
+run_abilint  run abilint - needed to recompile after change of args
+check_list   echoes the check list
+dist         prepares a tar.gz package with all sources + prepared makefiles
+                (same as after makemake)
+
+Former possibilities (to be suppressed ?!)
+binary_package  prepares a tgz package with sources/makefile/binaries/...
+             (does not work yet : use the two next lines instead)
+bin_seq      prepares a binary package, with only sequential executables
+bin_seqpar   prepares two binary packages, one with only sequential
+              executables, and one with both seq and paral executables
+
+(the next two should be activated from the doc directory, using make pdf-docs)
+theory       compiles the *.tex in doc/theory, and produces *.pdf.gz
+             (note : two compilations are done, to resolve the references)
+presentation compiles the *.tex in doc/presentation, and produces *.pdf.gz
+             (note : two compilations are done, to resolve the references)
+
+-------------------------------------------------------------------------------
+ 
+Not all "make" type actions are governed by the `make` command.
+In order to "make" the documentation, use
+
+     `./mksite.py serve --dirtyreload`
+
+then open http://127.0.0.1:8000/ in your browser, 
+and you will see the default home page being displayed.
+More information at https://docs.abinit.org/developers/abimkdocs/
+
+==============================================================================
+[This file can be found at doc/help_make/help_make_top_dev.txt]

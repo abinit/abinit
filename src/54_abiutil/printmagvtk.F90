@@ -8,7 +8,7 @@
 !!  Output file name is DEN.vtk
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (SPr)
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 !scalars
  integer :: denvtk,denxyz,denxyz_im,nfields
  integer :: nx,ny,nz,nfft_tot
- integer :: ii,jj,kk,ind,jfft,ispden
+ integer :: ii,jj,kk,ind,ispden
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
  real    :: rx,ry,rz
  integer :: nproc_fft,ir

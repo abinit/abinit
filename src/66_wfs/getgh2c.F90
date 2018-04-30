@@ -12,7 +12,7 @@
 !! If required, <G|S^(2)|C> is returned in gs2c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2017 ABINIT group (MT,JLJ)
+!! Copyright (C) 2015-2018 ABINIT group (MT,JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

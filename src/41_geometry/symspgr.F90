@@ -11,7 +11,7 @@
 !! The identification is not unambiguous still ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (RC, XG)
+!! Copyright (C) 2000-2018 ABINIT group (RC, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,6 +74,8 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  use m_profiling_abi
  use m_numeric_tools, only : OPERATOR(.x.)
 
+ use m_geometry,   only : xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -102,7 +104,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  character(len=15) :: intsb,ptintsb,ptschsb,schsb
  character(len=35) :: intsbl
  character(len=500) :: message
- character(len = 128) :: label
+ character(len=128) :: label
 !arrays
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
  integer :: uniaxis(3),uniaxis_try(3)
@@ -392,7 +394,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
    found=0
    do isym=1,nsym
 !    Proper rotations
-     if( minval( abs( t_axes(isym)-(/10,12,14,22,23,24,25,26,27,28,29,30,31/) ))==0) then 
+     if( minval( abs( t_axes(isym)-(/10,12,14,22,23,24,25,26,27,28,29,30,31/) ))==0) then
        found=1 ; exit
 !   Improper symmetry operations
      else if( minval( abs( t_axes(isym)-(/1,2,3/) ))==0) then

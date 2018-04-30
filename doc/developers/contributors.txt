@@ -3,7 +3,7 @@ Contributors
 
 The ABINIT package : list of contributors.
 
-Copyright (C) 2000-2017 ABINIT group (XG)
+Copyright (C) 2000-2018 ABINIT group (XG)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .
@@ -12,11 +12,10 @@ For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 *******************************************************************
 
 The ABINIT project has been initiated by the Universite Catholique
-de Louvain (X. Gonze) and Corning Incorporated (D.C. Allan),
-see ~abinit/doc/users/context .
+de Louvain (X. Gonze) and Corning Incorporated (D.C. Allan).
 
 Seven other institutions have also clearly shown their implication
-in the ABINIT project :
+in the ABINIT project in the past or currently :
 - l'Universite de Liege (Ph. Ghosez, M. Verstraete),
 - le Commissariat a l'Energie Atomique, Bruyeres-le-chatel (F. Jollet, M. Torrent, B. Amadon),
 - Mitsubishi Chemical Corp (M. Mikami).
@@ -24,11 +23,11 @@ in the ABINIT project :
 - Rutgers University (D. Hamann, D. Vanderbilt)
 - U. de Montr\'{e}al (M. Cot\'{e})
 - le Commissariat a l'Energie Atomique, Grenoble (T. Deutsch, D. Caliste),
-- CINVESTAV, Queretaro, Mexico (A. Romero),
+- University of West Virginia (A. Romero),
 
 Coming now to individuals,
 
-recent direct contributors to ABINIT (versions 8.0 to 8.6) are :
+recent direct contributors to ABINIT (versions 8.0 to 8.8) are :
 name                      email
 Flavio Abreu Araujo       flavio.abreuaraujo@uclouvain.be
 Florian Altvater          altvater@berkeley.edu
@@ -39,7 +38,7 @@ Lucas Baguet              lucas.baguet@cea.fr
 Jean-Michel Beuken        jean-michel.beuken@uclouvain.be
 Jordan Bieder             jordan.bieder@cea.fr
 Anton Bokhanchuk          antonbokhanchuk@gmail.com
-Fran\c{c}ois Bottin           francois.bottin@cea.fr
+Fran\c{c}ois Bottin       francois.bottin@cea.fr
 Yohann Bouchet            yohann.bouchet@cea.fr
 Eric Bousquet             eric.Bousquet@ulg.ac.be
 Fabien Bruneval           fabien.bruneval@cea.fr
@@ -62,6 +61,7 @@ Javier Junquera           javier.junquera@unican.es
 R. Laasner
 Alexandre Martin          alexandre.martin@ulg.ac.be
 Cyril Martins             cyril.martins@cea.fr
+Henrique Miranda          miranda.henrique@gmail.com
 Francesco Naccarato       fnaccarato89@gmail.com
 Alfredo Pasquarello       Alfredo.Pasquarello@epfl.ch
 Guido Petretto            guido.petretto@uclouvain.be

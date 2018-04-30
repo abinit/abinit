@@ -7,7 +7,7 @@
 !! calculation of the energy from the term \Omega E \cdot P
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (XW).
+!! Copyright (C) 2004-2018 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,11 +65,12 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
  use m_profiling_abi
  use m_efield
 
+ use m_cgtools,   only : overlap_g
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptff_ebp'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -250,7 +251,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
        do jband=1,dtefield%mband_occ
          e0 = e0 + 4_dp*(umat(1,iband,jband,1)*qmat(2,jband,iband,ikpt,1,idir)&
 &         +       umat(2,iband,jband,1)*qmat(1,jband,iband,ikpt,1,idir))
-         
+
        end do
      end do
 

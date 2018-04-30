@@ -6,7 +6,7 @@
 !! Loop over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB, XW, MT,SPr)
+!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MB, XW, MT,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,16 +152,20 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_hdr
  use m_ebands
 
+ use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
+ use m_time,       only : timab
  use m_fstrings,   only : strcat
+ use m_geometry,   only : mkrdim, metric
  use m_exit,       only : exit_check, disable_timelimit
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
-                        & gkk_t, gkk_init, gkk_ncwrite,gkk_free
+                          gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main
+ use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
  use m_ioarr,      only : read_rhor
@@ -175,26 +179,26 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &                         pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
  use m_pawfgr,     only : pawfgr_type
- use m_rf2,       only : rf2_getidirs
+ use m_rf2,        only : rf2_getidirs
+ use m_iogkk,      only : outgkk
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_looppert'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common
  use interfaces_72_response
  use interfaces_79_seqpar_mpi
+ use interfaces_95_drive, except_this_one => dfpt_looppert
 !End of the abilint section
 
  implicit none
@@ -315,9 +319,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: rhor1_save(:,:,:)
  real(dp),allocatable :: rhor1(:,:),rho1wfg(:,:),rho1wfr(:,:),tnons1(:,:),tnons1_tmp(:,:)
  real(dp),allocatable :: rhor1_pq(:,:),rhor1_mq(:,:),rhog1_pq(:,:),rhog1_mq(:,:)          !+q/-q duplicates
- real(dp),allocatable :: cg_mq(:,:),cg1_pq(:,:),cg1_mq(:,:),resid_mq(:)                   ! 
- real(dp),allocatable :: cg1_active_pq(:,:),cg1_active_mq(:,:),occk_mq(:)                 !
- real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_pq(:,:),gh0c1_set_mq(:,:)        !
+ real(dp),allocatable :: cg_mq(:,:),cg1_mq(:,:),resid_mq(:)                   !
+ real(dp),allocatable :: cg1_active_mq(:,:),occk_mq(:)                 !
+ real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_mq(:,:)        !
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
  real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
@@ -351,6 +355,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  nsppol = dtset%nsppol; nspinor = dtset%nspinor
 
  kramers_deg=.true.
+ if (dtset%tim1rev==0) then
+   kramers_deg=.false.
+ end if
 
 !Obtain dimensional translations in reciprocal space gprimd,
 !metrics and unit cell volume, from rprimd. Also output rprimd, gprimd and ucvol
@@ -620,6 +627,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  call set_pert_comm(mpi_enreg,dtset%nppert)
 
 !*Redistribute PAW on-site data
+ nullify(old_atmtab,pawfgrtab_pert,pawrhoij_pert,paw_an_pert,paw_ij_pert)
  if (paral_pert_inplace) then
    call set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &   paw_an,paw_ij,pawfgrtab,pawrhoij)
@@ -882,7 +890,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &     dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&     ipert==dtset%natom+5) timrev_pert=0
+&     ipert==dtset%natom+5 .or. &
+&     dtset%prtfull1wf==1) timrev_pert=0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
      nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
    end if
@@ -1093,7 +1102,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          choice=1; iorder_cprj=0; idir0=0
        end if
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
-&       kg,kpt_rbz,dtset%mband,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
+&       kg,kpt_rbz,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
 &       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
 &       rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
@@ -1204,7 +1213,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      !ABI_STAT_ALLOCATE(cg_pq,(2,mcgq), ierr)
      !ABI_CHECK(ierr==0, "out-of-memory in cgmq")
      !ABI_ALLOCATE(eigen_pq,(dtset%mband*nkpt_rbz*dtset%nsppol))
-     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol 
+     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
      ABI_STAT_ALLOCATE(cg_mq,(2,mcgmq), ierr)
      ABI_CHECK(ierr==0, "out-of-memory in cgmq")
      ABI_ALLOCATE(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
@@ -1266,7 +1275,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (ipert<=dtset%natom.and.(sum(dtset%qptn(1:3)**2)>=1.d-14)) then ! phonons at non-zero q
          choice=1 ; iorder_cprj=0 ; idir0=0
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
-&         kg1,kpq_rbz,dtset%mband,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
+&         kg1,kpq_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
 &         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
@@ -1405,7 +1414,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
      ABI_STAT_ALLOCATE(cg1_mq,(2,mcg1mq), ierr)
      ABI_CHECK(ierr==0, "out of memory in cg1_mq")
-   end if   
+   end if
 
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
@@ -1714,7 +1723,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
          
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-         
+
          if(.not.kramers_deg) then
            rhor1_pq=rhor1
            call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
@@ -2454,3 +2463,210 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 end subroutine dfpt_looppert
 !!***
 
+!!****f* ABINIT/getcgqphase
+!! NAME
+!! getcgqphase
+!!
+!! FUNCTION
+!! extract phases from wave functions, to cancel contributions to gkk matrix elements
+!!
+!! COPYRIGHT
+!! Copyright (C) 2011-2018 ABINIT group (MJV)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  timrev = flag for use of time reversal symmetry
+!!  cg = input wavefunctions
+!!  mcg = dimension of cg = nspinor*mband*mpw*mkmem
+!!  cgq = input wavefunctions at k+q
+!!  mcgq = dimension of cgq = nspinor*mband*mpw*mkmem
+!!  mpi_enreg = datastructure for mpi communication
+!!  nkpt_rbz = number of k-points in reduced zone for present q point
+!!  npwarr = array of numbers of plane waves for each k-point
+!!  npwar1 = array of numbers of plane waves for each k+q point
+!!
+!! OUTPUT
+!!  phasecg = phase of different wavefunction products <k,n | k+q,n'>
+!!
+!! PARENTS
+!!      dfpt_looppert
+!!
+!! CHILDREN
+!!      smatrix,wrtout,xmpi_barrier,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
+
+ use m_profiling_abi
+ use defs_basis
+ use defs_abitypes
+ use m_xmpi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getcgqphase'
+ use interfaces_14_hidewrite
+ use interfaces_32_util
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+ ! scalars
+ integer, intent(in) :: mcg, mcgq, timrev
+ integer, intent(in) :: nkpt_rbz
+ type(dataset_type), intent(in) :: dtset
+
+ ! arrays
+ integer, intent(in) :: npwarr(nkpt_rbz)
+ integer, intent(in) :: npwar1(nkpt_rbz)
+ real(dp), intent(in) :: cg(2,mcg)
+ real(dp), intent(in) :: cgq(2,mcgq)
+ type(MPI_type), intent(in) :: mpi_enreg
+ real(dp),intent(out) :: phasecg(2, dtset%mband*dtset%mband*nkpt_rbz&
+&     *dtset%nsppol)
+
+!Local variables -------------------------
+ ! local vars
+ integer :: icg, icgq, isppol, ikpt, ipw
+ integer :: istate, iband1, iband2
+ integer :: npw_k, npw_q
+ integer :: me, ierr, master, spaceComm, nprocs
+ integer :: usepaw
+ integer :: ddkflag, itrs, job, maxbd, mcg1_k, minbd, shiftbd
+ real(dp) :: normsmat
+
+ integer, allocatable :: sflag_k(:)
+ integer, allocatable :: pwind_k(:)
+
+ real(dp) :: cg1_dummy(1,1)
+ real(dp) :: smat_inv_dummy(1,1,1)
+ real(dp) :: smat_k_paw_dummy(1,1,1)
+ real(dp) :: dtm_k_dummy(2)
+ real(dp), allocatable :: smat_k(:,:,:)
+ real(dp), allocatable :: pwnsfac_k(:,:)
+ logical, allocatable :: my_kpt(:,:)
+ character(len=500) :: message
+
+! *********************************************************************
+
+ ABI_ALLOCATE(smat_k,(2,dtset%mband,dtset%mband))
+ ABI_ALLOCATE(sflag_k,(dtset%mband))
+
+!dummy use of timrev so abirules stops complaining.
+ icg = timrev
+
+!!MPI data for future use
+ spaceComm=mpi_enreg%comm_cell
+ nprocs=xmpi_comm_size(spaceComm)
+ master=0
+ me=mpi_enreg%me_kpt
+
+ ABI_ALLOCATE(my_kpt, (nkpt_rbz, dtset%nsppol))
+ my_kpt = .true.
+ if (mpi_enreg%nproc_kpt > 1) then
+   do isppol = 1, dtset%nsppol
+     do ikpt = 1, nkpt_rbz
+       my_kpt(ikpt, isppol) = .not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,&
+&       dtset%nband(ikpt),isppol,me))
+     end do
+   end do
+ end if
+
+
+!make trivial association of G vectors: we just want <psi_k| psi_k+q>
+!TODO: check this is correct wrt arrangement of kg vectors for k+q
+!looks ok : usually made in initberry, from the translations associated
+!to the symops, scalar product with the G vectors. The symop is the one
+!used to go from the irreducible k to the full zone k. In present context
+!we should be using only the reduced zone, and anyhow have the same k-grid
+!for the gkk matrix elements and for the cg here...
+ ABI_ALLOCATE(pwind_k,(dtset%mpw))
+ ABI_ALLOCATE(pwnsfac_k,(4,dtset%mpw))
+ do ipw = 1, dtset%mpw
+   pwind_k(ipw) = ipw
+   pwnsfac_k(1,ipw) = one
+   pwnsfac_k(2,ipw) = zero
+   pwnsfac_k(3,ipw) = one
+   pwnsfac_k(4,ipw) = zero
+ end do
+
+!flags for call to smatrix
+ usepaw = 0 ! for now
+ ddkflag = 0
+ itrs = 0
+ job = 0
+ maxbd = 1
+ mcg1_k = 1
+ minbd = 1
+ shiftbd = 1
+
+!from overlap matrix for each wavefunction, extract phase
+ icg = 0
+ icgq = 0
+ istate = 0
+
+ phasecg = zero
+ do isppol = 1, dtset%nsppol
+   do ikpt = 1, nkpt_rbz
+!    each proc only has certain k
+     if (.not. my_kpt(ikpt, isppol)) then
+       istate = istate +  dtset%nband(ikpt)*dtset%nband(ikpt)
+       cycle
+     end if
+
+     npw_k = npwarr(ikpt)
+     npw_q= npwar1(ikpt)
+
+!    TODO: question: are the k-points in the ibz correctly ordered in cg and cgq? if not the icg below have to be adapted.
+     sflag_k = 0 ! make sure all elements are calculated
+     smat_k = zero
+
+     call smatrix(cg, cgq, cg1_dummy, ddkflag, dtm_k_dummy, icg, icgq,&
+&     itrs, job, maxbd, mcg, mcgq, mcg1_k, minbd,dtset%mpw, dtset%mband, dtset%mband,&
+&     npw_k, npw_q, dtset%nspinor, pwind_k, pwnsfac_k, sflag_k, shiftbd,&
+&     smat_inv_dummy, smat_k, smat_k_paw_dummy, usepaw)
+
+     icg  = icg  + npw_k*dtset%nspinor*dtset%nband(ikpt)
+     icgq = icgq + npw_q*dtset%nspinor*dtset%nband(ikpt)
+
+     do iband1 = 1, dtset%nband(ikpt)
+       do iband2 = 1, dtset%nband(ikpt)
+         istate = istate + 1
+!        normalise the overlap matrix element to get just the phase difference phi_k - phi_k+q
+         normsmat = sqrt(smat_k(1,iband2, iband1)**2 &
+&         + smat_k(2,iband2, iband1)**2)
+         if (normsmat > tol12) then
+           phasecg(:,istate) = smat_k(:,iband2, iband1) / normsmat
+!          NOTE: 21/9/2011 these appear to be always 1, i, or -i, to within 1.e-5 at worst!
+         end if
+       end do
+     end do
+   end do
+ end do
+
+!eventually do an mpi allreduce over the k-points for phasecg
+ if (nprocs>1) then
+   call xmpi_barrier(spaceComm)
+   call xmpi_sum_master(phasecg,master,spaceComm,ierr)
+   call xmpi_barrier(spaceComm)
+   if (1==1) then
+     write(message,'(a)') '  In getcgqphase - contributions to phasecg collected'
+     call wrtout(std_out,message,'PERS')
+   end if
+ end if
+
+ ABI_DEALLOCATE(sflag_k)
+ ABI_DEALLOCATE(smat_k)
+ ABI_DEALLOCATE(pwind_k)
+ ABI_DEALLOCATE(pwnsfac_k)
+ ABI_DEALLOCATE(my_kpt)
+
+end subroutine getcgqphase
+!!***

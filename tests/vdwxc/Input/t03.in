@@ -56,10 +56,11 @@ prtvdw               1
 #%% [files]
 #%% files_to_test =
 #%%   t03.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% psp_files = 18ar.revpbe
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Yann Pouillon, Camilo Espejo
+#%% authors = Y. Pouillon, C. Espejo
 #%% keywords = vdwxc
 #%% description =
 #%%   Fake test to ensure abirules compliance of vdW-DF input variables.

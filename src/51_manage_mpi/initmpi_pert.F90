@@ -7,7 +7,7 @@
 !!  Creates group for Parallelization over Perturbations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2017 ABINIT group (FJ,MT)
+!!  Copyright (C) 2005-2018 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,11 +45,12 @@ subroutine initmpi_pert(dtset,mpi_enreg)
  use m_profiling_abi
  use m_xmpi
 
+ use m_dtset,        only : get_npert_rbz
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initmpi_pert'
- use interfaces_51_manage_mpi, except_this_one => initmpi_pert
 !End of the abilint section
 
  implicit none

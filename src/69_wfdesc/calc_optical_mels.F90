@@ -6,7 +6,7 @@
 !!  Calculate all optical matrix elements in the BZ.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +19,7 @@
 !! inclvkb=if different from 0, [Vnl,r] is included in the calculation of the matrix element of the velocity operator
 !!   No meaning for PAW (except for LDA+U)
 !! qpt(3)
-!! Kmesh<kmesh_t>=Info on the k-point sampling for wave functions. 
+!! Kmesh<kmesh_t>=Info on the k-point sampling for wave functions.
 !! Cryst<crystal_t>=Structure defining the crystalline structure.
 !! KS_Bst<ebands_t>
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
@@ -33,7 +33,7 @@
 !!   comm=MPI Communicator.
 !!
 !! OUTPUT
-!! opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol)=Matrix elements <c k|e^{+iqr}|v k> 
+!! opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol)=Matrix elements <c k|e^{+iqr}|v k>
 !!
 !! PARENTS
 !!      m_exc_spectra,m_haydock
@@ -59,6 +59,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  use m_xmpi
 
  use defs_datatypes,      only : ebands_t, pseudopotential_type
+ use m_abilasi,           only : matrginv
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
  use m_crystal,           only : crystal_t
  use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
@@ -72,7 +73,6 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_optical_mels'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -117,7 +117,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  comm = Wfd%comm
  my_rank = Wfd%my_rank
 
- nsppol  = Wfd%nsppol   
+ nsppol  = Wfd%nsppol
  nspinor = Wfd%nspinor
  usepaw  = Wfd%usepaw
 
@@ -143,7 +143,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
     !
     ! Distribute the (b,b') entries.
     bbp_mask=.FALSE.; bbp_mask(lomo_spin(spin):max_band,lomo_spin(spin):max_band)=.TRUE.
-    call wfd_distribute_bbp(Wfd,ik_ibz,spin,"All",my_nbbp,bbp_distrb,bbp_mask=bbp_mask) 
+    call wfd_distribute_bbp(Wfd,ik_ibz,spin,"All",my_nbbp,bbp_distrb,bbp_mask=bbp_mask)
     if (ALL(bbp_distrb/=my_rank)) CYCLE
 
     istwf_k = Wfd%istwfk(ik_ibz)
@@ -168,11 +168,11 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
        if (bbp_distrb(ib_v,ib_c)/=my_rank) CYCLE
        ug_c => Wfd%Wave(ib_c,ik_ibz,spin)%ug
 
-       if (usepaw==0) then  
-         ! Calculate matrix elements of i[H,r] for NC pseudopotentials.        
-         ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug_c,ug_v,kg_k) 
+       if (usepaw==0) then
+         ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
+         ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug_c,ug_v,kg_k)
 
-       else 
+       else
          ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,ib_c,ik_ibz,spin,Cryst,Cp_c,sorted=.FALSE.)
 
@@ -209,10 +209,10 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  !
  ! Symmetrization of the matrix elements of the position operator.
  ! <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
- !   where S is one of the symrec operations in reciprocal space, R is the 
+ !   where S is one of the symrec operations in reciprocal space, R is the
  !   corresponding operation in real space, \tau being the associated fractional translations.
  !
- ! q.Mcv( Sk) =  S^{-1}q. Mcv(k) 
+ ! q.Mcv( Sk) =  S^{-1}q. Mcv(k)
  ! q.Mcv(-Sk) = -S^{-1}q. CONJG(Mcv(k)) if time-reversal is used.
 
  b1=Cryst%gprimd(:,1)*two_pi
@@ -225,14 +225,14 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
     !
     ! * Get ik_ibz, and symmetries index from ik_bz.
     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
-    
+
     mat_dp = DBLE(Cryst%symrec(:,:,isym_k))
     call matrginv(mat_dp,3,3) ! Invert
     qrot = (3-2*itim_k) * MATMUL(mat_dp,qpoint)
 
     do ib_v=lomo_spin(spin),max_band !  Loops over the bands C and V start
       do ib_c=lomo_spin(spin),max_band
-        !if (ib_c==ib_v) CYCLE 
+        !if (ib_c==ib_v) CYCLE
         emcvk = pdtqrc(qrot,ir_kibz(:,ib_c,ib_v,ik_ibz,spin),b1,b2,b3)
         if (itim_k==2) emcvk = CONJG(emcvk)
         opt_cvk(ib_c,ib_v,ik_bz,spin) = emcvk

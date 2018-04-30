@@ -13,7 +13,7 @@
 !! both the real and imaginary parts.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (VR, PGhosh)
+!! Copyright (C) 2002-2018 ABINIT group (VR, PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,15 +55,16 @@
  use m_profiling_abi
  use m_hdr
 
+ use m_geometry,     only : metric
  use m_io_tools,   only : open_file, get_unit
+ use m_abilasi,    only : matrginv
  use m_mpinfo,     only : destroy_mpi_enreg, nullify_mpi_enreg
+ use m_numeric_tools,  only : kramerskronig
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'linear_optics_paw'
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -102,7 +103,7 @@
 !This routine should not be parallelized as communicating gbig and other
 !tables takes more time than recalculating them in sequential.
  call initmpi_seq(MPI_enreg_seq)
- 
+
 !write(std_out,'(a)')' Give the name of the output file ...'
 !read(std_in, '(a)') filnam_out
 !write(std_out,'(a)')' The name of the output file is :',filnam_out
@@ -201,7 +202,7 @@
    bdtot_index = 0
 !  loop over k points
    do ikpt=1,nkpt
-!    
+!
 !    number of bands for this k point
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      ABI_ALLOCATE(eig0_k,(nband_k))
@@ -214,7 +215,7 @@
      psinablapsi=zero
      read(wfunt)((psinablapsi(1:2,1,iband,jband),iband=1,nband_k),jband=1,nband_k)
      read(wfunt)((psinablapsi(1:2,2,iband,jband),iband=1,nband_k),jband=1,nband_k)
-     read(wfunt)((psinablapsi(1:2,3,iband,jband),iband=1,nband_k),jband=1,nband_k) 
+     read(wfunt)((psinablapsi(1:2,3,iband,jband),iband=1,nband_k),jband=1,nband_k)
 
 !    occupation numbers for k-point
      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
@@ -280,7 +281,7 @@
 
  if (open_file(trim(filnam_out)//'_imag',msg,newunit=reunt,form='formatted') /= 0) then
    MSG_ERROR(msg)
- end if 
+ end if
 
  if (open_file(trim(filnam_out)//'_real',msg,unit=imunt,form='formatted') /= 0) then
    MSG_ERROR(msg)

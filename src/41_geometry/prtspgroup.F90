@@ -7,7 +7,7 @@
 !! Print the space group (first, the dataset)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (XG)
+!! Copyright (C) 2002-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,8 +26,6 @@
 !!  spgroup=space group number
 !!
 !! OUTPUT
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      memory_eval
@@ -49,6 +47,8 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
  use defs_basis
  use m_errors
  use m_profiling_abi
+
+ use m_geometry,  only : xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2018 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,8 @@ module m_anaddb_dataset
  use m_profiling_abi
  use m_errors
 
- use m_fstrings,  only : next_token, rmquotes, sjoin
+ use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
+ use m_parser,    only : intagm
  use m_ddb,       only : DDB_QTOL
 
  implicit none
@@ -316,7 +317,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 #define ABI_FUNC 'invars9'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -394,10 +394,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%brav=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
  if(tread==1) anaddb_dtset%brav=intarr(1)
- if(anaddb_dtset%brav<=0.or.anaddb_dtset%brav>=5)then
+ if(anaddb_dtset%brav<=-2.or.anaddb_dtset%brav>=5 .or. anaddb_dtset%brav==0)then
    write(message, '(a,i0,a5)' )&
 &   'brav is ',anaddb_dtset%brav,', but the only allowed values',ch10,&
-&   'are 1,2,3 or 4 .',ch10,'Action: correct brav in your input file.'
+&   'are -1, 1,2,3 or 4 .',ch10,'Action: correct brav in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -2173,7 +2173,6 @@ subroutine anaddb_chkvars(string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'anaddb_chkvars'
- use interfaces_32_util
  use interfaces_57_iovars
 !End of the abilint section
 

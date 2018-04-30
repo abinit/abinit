@@ -13,7 +13,7 @@
 !! Cracknell, Clarendon Press, Oxford.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (RC)
+!! Copyright (C) 2000-2018 ABINIT group (RC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,8 +36,10 @@
 !! NOTES
 !! brvsb, intsb, and schsb have been extensively checked, while
 !! more checking should be done for the others
-!! XG20160612 : in particular, at present it might be that spgaxor and spgorig are indetermined (e.g. spgaxor=-1;spgorig=-1) at input.
-!! When this has a bearing on some of the output variables (even brvsb or intsb !), these are mentioned as being X, unknown, or to be determined.
+!! XG20160612 : in particular, at present it might be that spgaxor and spgorig are indetermined 
+!! (e.g. spgaxor=-1;spgorig=-1) at input.
+!! When this has a bearing on some of the output variables (even brvsb or intsb !), 
+!! these are mentioned as being X, unknown, or to be determined.
 !!
 !! PARENTS
 !!      m_ab7_symmetry,prt_cif,prtspgroup,symsgcube,symsghexa,symsgmono
@@ -75,9 +77,6 @@ subroutine spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,&
  character(len=1),intent(out) :: brvsb
  character(len=15),intent(out) :: intsb,ptintsb,ptschsb,schsb
  character(len=35),intent(out) :: intsbl
-
-!Local variables-------------------------------
-!character(len=500) :: message
 
 ! *************************************************************************
 

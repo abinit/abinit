@@ -20,7 +20,7 @@
 !! or "UPF PWSCF format" (pspcod=11)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FrD, AF, DRH)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, AF, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -131,6 +131,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  use m_xmpi
  use m_psps
 
+ use m_time,     only : timab
  use m_io_tools, only : open_file
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -147,7 +148,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 #undef ABI_FUNC
 #define ABI_FUNC 'pspatm'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_43_wvl_wrappers
  use interfaces_64_psp, except_this_one => pspatm
 !End of the abilint section

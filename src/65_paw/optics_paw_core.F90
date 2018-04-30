@@ -8,7 +8,7 @@
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2017 ABINIT group (SM,MT)
+!! Copyright (C) 2005-2018 ABINIT group (SM,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,6 +62,7 @@
  use m_wffile
  use m_hdr
 
+ use m_time,      only : timab
  use m_io_tools,  only : get_unit
  use m_pawpsp,    only : pawpsp_read_corewf
  use m_pawtab,    only : pawtab_type
@@ -75,7 +76,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optics_paw_core'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_65_paw, except_this_one => optics_paw_core
 !End of the abilint section

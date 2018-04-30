@@ -8,7 +8,7 @@
 !! using a recursion method
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (SLeroux,MMancini).
+!! Copyright (C) 2008-2018 ABINIT group (SLeroux,MMancini).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,6 +82,7 @@ subroutine vtorhorec(dtset,&
  use m_errors
  use m_profiling_abi
 
+ use m_time,           only : timab
  use m_rec,            only : Calcnrec
  use m_rec_tools,      only : reshape_pot
 #ifdef HAVE_GPU_CUDA
@@ -95,7 +96,6 @@ subroutine vtorhorec(dtset,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorhorec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_68_recursion, except_this_one => vtorhorec

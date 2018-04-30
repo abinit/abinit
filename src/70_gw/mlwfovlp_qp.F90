@@ -9,7 +9,7 @@
 !! LDA bloch function representation for Wannier code (www.wannier.org f90 version).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (DRH)
+!!  Copyright (C) 2008-2018 ABINIT group (DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,8 +78,10 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim
  use m_numeric_tools,  only : isordered
+ use m_geometry,       only : metric
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_from_hdr
+ use m_kpts,           only : listkk
  use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
  use m_ebands,         only : ebands_init, ebands_free
  use m_qparticles,     only : rdqps, rdgw
@@ -90,9 +92,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_qp'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
  use interfaces_70_gw, except_this_one => mlwfovlp_qp
 !End of the abilint section
 

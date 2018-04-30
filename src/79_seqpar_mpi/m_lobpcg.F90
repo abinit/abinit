@@ -8,15 +8,11 @@
 !!  They permit to hide the complex/real form of the WFs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (FBottin,CS,FDahm,MT)
+!! Copyright (C) 2009-2018 ABINIT group (FBottin,CS,FDahm,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! PARENTS
 !!
@@ -42,6 +38,8 @@ MODULE m_lobpcg
  use m_abi_linalg
  use m_cgtools
 
+ use m_time,              only : timab
+
  implicit none
 
  private
@@ -62,7 +60,7 @@ CONTAINS
 !!  for a block of band (band-FFT parallelisation)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (FBottin,CS)
+!! Copyright (C) 1998-2018 ABINIT group (FBottin,CS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,7 +105,6 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xprecon'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

@@ -9,7 +9,7 @@
 !! Matrix elements = <Phi_i|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2010-2018 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,13 +62,13 @@
  use m_xmpi
  use m_hdr
 
+ use m_time,         only : timab
  use m_io_tools,     only : get_unit
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'optics_vloc'
- use interfaces_18_timing
  use interfaces_32_util
 !End of the abilint section
 

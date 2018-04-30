@@ -8,7 +8,7 @@
 !! Uses Gaussians for fully nonlocal form, analytic expressions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, FRD, XG, GMR, PT, SC)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, FRD, XG, GMR, PT, SC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

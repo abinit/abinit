@@ -13,7 +13,7 @@
 !!    4) Fermi Dirac smearing, follows gaussian with a different smearing function
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MVer)
+!! Copyright (C) 2010-2018 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

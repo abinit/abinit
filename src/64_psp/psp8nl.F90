@@ -11,7 +11,7 @@
 !!  0 to lmax may be represented.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, FrD, GZ)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, FrD, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,11 +77,13 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,&
  use m_splines
  use m_profiling_abi
 
+ use m_special_funcs,  only : sbf8
+ use m_numeric_tools, only : ctrap
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp8nl'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

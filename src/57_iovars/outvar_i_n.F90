@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,11 +88,12 @@ subroutine outvar_i_n (dtsets,iout,&
  use m_results_out
  use m_errors
 
+ use m_parser,  only : prttagm, prttagm_images
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvar_i_n'
- use interfaces_57_iovars, except_this_one => outvar_i_n
 !End of the abilint section
 
  implicit none
@@ -461,6 +462,10 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%ixcpositron
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixcpositron','INT',0)
 
+!ixcrot
+ intarr(1,:)=dtsets(:)%ixcrot
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixcrot','INT',0)
+
 !ixc_sigma
  intarr(1,:)=dtsets(:)%ixc_sigma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixc_sigma','INT',0)
@@ -566,7 +571,7 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptgw','DPR',multivals%nkptgw)
 
 
-!kptns_hf 
+!kptns_hf
  if(sum(dtsets(1:ndtset_alloc)%usefock)/=0)then
    tnkpt=0
    dprarr(:,0)=0

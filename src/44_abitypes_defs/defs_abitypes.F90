@@ -30,7 +30,7 @@
 !! * macro_uj_type : TO BE COMPLETED
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (XG)
+!! Copyright (C) 2001-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -337,6 +337,7 @@ type dataset_type
  integer :: ixc
  integer :: ixc_sigma
  integer :: ixcpositron
+ integer :: ixcrot
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
  integer :: kptopt
@@ -433,6 +434,7 @@ type dataset_type
  integer :: optforces
  integer :: optnlxccc
  integer :: optstress
+ integer :: orbmag
  integer :: ortalg
  integer :: paral_atom
  integer :: paral_kgb
@@ -488,6 +490,7 @@ type dataset_type
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
+ integer :: prtfull1wf
  integer :: prtfsurf
  integer :: prtgsr=1
  integer :: prtgden
@@ -552,6 +555,7 @@ type dataset_type
  integer :: symsigma
  integer :: td_mexcit
  integer :: tfkinfunc
+ integer :: tim1rev
  integer :: timopt
  integer :: tl_nprccg
  integer :: ucrpa
@@ -620,6 +624,7 @@ type dataset_type
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
  integer :: supercell(3)
+ integer :: supercell_latt(3,3)
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
  integer :: vdw_typfrag(100)
@@ -927,6 +932,7 @@ type dataset_type
  integer :: nkpath=0
  real(dp) :: einterp(4)=zero
  real(dp),allocatable :: kptbounds(:,:)
+ real(dp) :: tmesh(3) ! = [10._dp, 300._dp, 5._dp] This triggers a bug in the bindings
 
  end type dataset_type
 !!***

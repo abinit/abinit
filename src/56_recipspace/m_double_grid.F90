@@ -4,12 +4,12 @@
 !!  m_double_grid
 !!
 !! FUNCTION
-!! This module defines the double grid object. This object contains the coarse mesh 
+!! This module defines the double grid object. This object contains the coarse mesh
 !! and the dense mesh used for the interpolation of the BSE Hamiltonian,
 !! and contains the mapping between the two meshes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2017 ABINIT group (YG)
+!! Copyright (C) 2008-2018 ABINIT group (YG, SP, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,14 +27,17 @@
 MODULE m_double_grid
 
  use defs_basis
- use m_errors 
+ use m_errors
  use m_profiling_abi
- use m_bz_mesh
  use m_blas
+ use m_bz_mesh
+ use m_kptrank
+
+ use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
 
  implicit none
 
- private 
+ private
 !!***
 
 !!****t* m_double_grid/double_grid_t
@@ -70,23 +73,23 @@ MODULE m_double_grid
   ! Number of k-point inside the dense BZ (open mesh)
   ! = PROD(maxcomp_coarse.*kmult)
 
-  integer, allocatable :: inttoik_coarse(:) 
-  ! inttoik_coarse(nbz_closedcoarse)  
+  integer, allocatable :: inttoik_coarse(:)
+  ! inttoik_coarse(nbz_closedcoarse)
   ! Index of the kpoint in the coarse BZ.
 
-  integer, allocatable :: iktoint_coarse(:) 
+  integer, allocatable :: iktoint_coarse(:)
   ! iktoint_coarse(nbz_coarse)
   ! Index of int by kpoint
 
-  integer, allocatable :: inttoik_dense(:) 
+  integer, allocatable :: inttoik_dense(:)
 
-  integer, allocatable :: iktoint_dense(:) 
+  integer, allocatable :: iktoint_dense(:)
 
-  integer,allocatable :: indices_coarse(:,:) 
+  integer,allocatable :: indices_coarse(:,:)
   ! indices_coarse(3,nbz_closedcoarse)
   ! Indices (i1,i2,i3) for each point, ordinated by the integer coord
 
-  integer,allocatable :: indices_dense(:,:) 
+  integer,allocatable :: indices_dense(:,:)
   ! indices_dense(6,nbz_dense)
   ! Indices (i1,i2,i3);(j1,j2,j3) for each point, ordinated by integer coord
 
@@ -116,17 +119,17 @@ MODULE m_double_grid
   ! Shifts of the coarse mesh.
 
   ! Coarse lattice
-  integer, allocatable :: g0_coarse(:,:)   
-  integer, allocatable :: g0_dense(:,:)   
-  ! g0_dense/coarse(3,nkpt_closedcoarse/dense) 
+  integer, allocatable :: g0_coarse(:,:)
+  integer, allocatable :: g0_dense(:,:)
+  ! g0_dense/coarse(3,nkpt_closedcoarse/dense)
   ! G0 vector between the kpt obtained with indices
   ! and the kpt obtained insize bz
 
-  integer, allocatable :: dense_to_coarse(:) 
+  integer, allocatable :: dense_to_coarse(:)
   ! dense_to_coarse(nbz_dense)
   ! Give the ibz_coarse corresponding to the dense mesh (the (0,0,0) point)
 
-  integer, allocatable :: coarse_to_dense(:,:) 
+  integer, allocatable :: coarse_to_dense(:,:)
   ! coarse_to_dense(nbz_coarse,ndiv)
   ! Give all the ibz_dense corresponding to the (0,0,0) coarse point
 
@@ -137,6 +140,9 @@ MODULE m_double_grid
  public :: get_kpt_from_indices_coarse  ! Returns the k-point index and g0 vector associated to the set of indices
  public :: compute_corresp              ! Compute correspondance data between k-dense and k-coarse
  !public :: get_kpt_from_indices_dense
+
+ public :: kptfine_av                   ! Find the k-points of a fine grid that are around a k-point of a coarse mesh.
+ public :: k_neighbors                  ! Find 8 neighbors of given k-point on a coarse grid, and return
 !!***
 
 !----------------------------------------------------------------------
@@ -150,7 +156,7 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !! Initialize the double_grid datatype "grid" from coarse and dense mesh
-!! 
+!!
 !! INPUTS
 !!  Kmesh_coarse = descriptor of the coarse BZ sampling
 !!  Kmesh_dense = descriptor of the dense BZ sampling
@@ -191,7 +197,7 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
  integer :: ii, info
 !arrays
  integer :: ipiv(3)
- real(dp) :: rlatt_coarse(3,3),klatt_coarse(3,3),curmat(3,3)    
+ real(dp) :: rlatt_coarse(3,3),klatt_coarse(3,3),curmat(3,3)
 
 !*********************************************
 
@@ -277,7 +283,7 @@ end subroutine double_grid_init
 !!  bz(3,nbz) = k-points in the Brillouin Zone
 !!  nbz = number of k-points
 !!  klatt(3,3) = reciprocal space vectors defining the reciprocal cell
-!!  nshiftk = Number of shifts 
+!!  nshiftk = Number of shifts
 !!  shiftk(3,nshiftk) = Shiftks of the Brillouin Zone
 !!  maxcomp(3) = Maximum int along each direction
 !!  nbz_closed = Number of k-points inside the closed Brillouin Zone (adding periodic images)
@@ -374,7 +380,7 @@ end subroutine create_indices_coarse
 !!  inttoik(nkpt) = mapping between int indices and k-points in the bz
 !!  allg0(3,nkpt) = g vectors between k-point inside bz and k-point given by indices
 !!  nkpt = number of k-points
-!!  
+!!
 !! OUTPUT
 !!  ikpt = index of k-point we search
 !!  g0(3) = g-vector obtained
@@ -433,7 +439,7 @@ end subroutine get_kpt_from_indices_coarse
 !!  maxcomp(3) = Maximum int along each direction
 !!  bz_dense(3,nbz_dense) = k-points in the dense BZ
 !!  nbz_dense = number of k-points in the dense BZ
-!!  nshiftk = Number of shifts 
+!!  nshiftk = Number of shifts
 !!  shiftk(3,nshiftk) = Shiftks of the Brillouin Zone
 !!  kmult(3) = multiplication factors
 !!  nbz_coarse = number of k-points in the coarse BZ
@@ -650,7 +656,7 @@ subroutine compute_neighbours(nbz_dense, iktoint_dense, indices_dense, maxcomp_c
 !scalars
  integer :: ik_dense, iorder, ik_coarse
 !arrays
- integer :: curindex(nbz_coarse) 
+ integer :: curindex(nbz_coarse)
  integer :: curindices_dense(6), curindices_coarse(3)
  integer :: g0(3)
 
@@ -739,7 +745,7 @@ subroutine compute_corresp(double_grid, div2kdense, kdense2div)
  curindex = 1
 
  do ik_dense = 1,double_grid%nbz_dense
-   
+
    ! From ik_ibz in the dense mesh -> indices_dense
    iorder = double_grid%iktoint_dense(ik_dense)
    !g01 = double_grid%g0_dense(:,iorder)
@@ -773,7 +779,7 @@ end subroutine compute_corresp
 !! grid<double_grid>=The datatype to be freed.
 !!
 !! SIDE EFFECTS
-!! All allocated memory is released. 
+!! All allocated memory is released.
 !!
 !! PARENTS
 !!      bethe_salpeter
@@ -849,6 +855,276 @@ end subroutine double_grid_free
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_double_grid/kptfine_av
+!! NAME
+!! kptfine_av
+!!
+!! FUNCTION
+!! Find the k-points of a fine grid that are around a k-point of a coarse mesh.
+!!
+!! INPUTS
+!!  center(3) = the point of the coarse mesh around which you want know which
+!!              k-points of the fine mesh belong to.
+!!  qptrlatt(3,3) = qptrlatt of the considered calculation (this is obtained
+!!              from the input variable ngqpt and shiftq.
+!!  kpt_fine(3,nkpt_fine) = this table contain all the k-points of the fine grid
+!!              in the full BZ (no sym op. allowed) and is read from the header
+!!              of the dense WF file.
+!!  nkpt_fine = number of k-points of the fine grid read from the header of the
+!!              dense WF file.
+!!
+!! OUTPUT
+!!  kpt_fine_sub(nkpt_sub) = k-points of the fine grid that are around center(3)
+!!  nkpt_sub = number of k-points of the fine grid that are around center(3)
+!!  wgt_sub(nkpt_sub) = weight of the k-points of the fine grid that are around center(3).
+!!
+!! PARENTS
+!!      eig2stern,eig2tot
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,wgt_sub)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kptfine_av'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)   :: nkpt_fine
+ integer,intent(out)  :: nkpt_sub
+!arrays
+ integer,intent(in)   :: qptrlatt(3,3)
+ real(dp),intent(in)  :: kpt_fine(3,nkpt_fine)
+ real(dp),intent(in)  :: center(3)
+ integer,pointer      :: kpt_fine_sub(:)
+ real(dp),pointer     :: wgt_sub(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt,aa,bb,cc
+ integer :: ii,jj
+!arrays
+ real(dp) :: center_ref(3)
+ real(dp) :: kpt_fine_ref(3)
+ real(dp) :: kpt_tmp(3),kpt_tmp2(3)
+ integer,allocatable  :: kpt_fine_sub_tmp(:)
+ real(dp),allocatable :: wgt_sub_tmp(:)
+ logical :: found(3)
+
+! *************************************************************************
+
+ ABI_ALLOCATE(kpt_fine_sub_tmp,(nkpt_fine))
+ ABI_ALLOCATE(wgt_sub_tmp,(nkpt_fine))
+
+!It is easier to work in real space using the qptrlatt matrices because in this
+!referential any k-points sampling will be cast into an orthorhombic shape.
+!In that space we can simply take all k-points of the fine grid that between
+!center_ref-0.5 and center_ref+0.5
+
+ center_ref = MATMUL(qptrlatt,center)
+
+!When considering points center(3) that lying close or on a BZ edge we need to
+!take the k-points of the fine grid taking into account unklamp vectors. This
+!is done with the aa, bb and cc loops.
+
+ ii = 1
+ do ikpt=1,nkpt_fine
+   kpt_tmp = kpt_fine(:,ikpt)
+   do aa=-1,1
+     kpt_tmp2(1) = kpt_tmp(1)+aa
+     do bb=-1,1
+       kpt_tmp2(2) = kpt_tmp(2)+bb
+       do cc=-1,1
+         kpt_tmp2(3) = kpt_tmp(3)+cc
+         kpt_fine_ref = MATMUL(qptrlatt,kpt_tmp2)
+         if((kpt_fine_ref(1)>=center_ref(1)-0.5-tol8).and.&
+&         (kpt_fine_ref(1)<=center_ref(1)+0.5+tol8)) then
+           if((kpt_fine_ref(2)>=center_ref(2)-0.5-tol8).and.&
+&           (kpt_fine_ref(2)<=center_ref(2)+0.5+tol8)) then
+             if((kpt_fine_ref(3)>=center_ref(3)-0.5-tol8).and.&
+&             (kpt_fine_ref(3)<=center_ref(3)+0.5+tol8)) then
+               kpt_fine_sub_tmp(ii) = ikpt
+               ii = ii +1
+             end if
+           end if
+         end if
+       end do
+     end do
+   end do
+ end do
+
+ nkpt_sub = ii-1
+ ABI_ALLOCATE(kpt_fine_sub,(nkpt_sub))
+ ABI_ALLOCATE(wgt_sub,(nkpt_sub))
+
+ do jj=1,nkpt_sub
+   kpt_fine_sub(jj) = kpt_fine_sub_tmp(jj)
+ end do
+
+!We then compute a weight function. This weight function is simply a
+!rectangular weight function that take the value 1 for k-points of the fine
+!grid inside the cube, 0.5 for k-points that are lying on one face of the cube,
+!0.25 for k-points that are lying on an edge of the cube and 0.125 for k-points
+!that are lying on a peak of the cube.
+
+ wgt_sub(:) = 1.0
+
+ do ikpt=1,nkpt_sub
+   found(:) = .True.
+   kpt_tmp = kpt_fine(:,kpt_fine_sub(ikpt))
+   do aa=-1,1
+     kpt_tmp2(1) = kpt_tmp(1)+aa
+     do bb=-1,1
+       kpt_tmp2(2) = kpt_tmp(2)+bb
+       do cc=-1,1
+         kpt_tmp2(3) = kpt_tmp(3)+cc
+         kpt_fine_ref = MATMUL(qptrlatt,kpt_tmp2)
+         if((ABS(kpt_fine_ref(1)-center_ref(1)-0.5)< tol8) .or.&
+&         (ABS(kpt_fine_ref(1)-center_ref(1)+0.5) < tol8)) then
+           if(found(1)) then
+             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5
+             found(1) = .False.
+           end if
+         end if
+         if((ABS(kpt_fine_ref(2)-center_ref(2)-0.5) < tol8) .or.&
+&         (ABS(kpt_fine_ref(2)-center_ref(2)+0.5) < tol8)) then
+           if(found(2)) then
+             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5
+             found(2) = .False.
+           end if
+         end if
+         if((ABS(kpt_fine_ref(3)-center_ref(3)-0.5)< tol8) .or.&
+&         (ABS(kpt_fine_ref(3)-center_ref(3)+0.5) < tol8)) then
+           if(found(3)) then
+             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5
+             found(3) = .False.
+           end if
+         end if
+       end do
+     end do
+   end do
+ end do
+
+ ABI_DEALLOCATE(kpt_fine_sub_tmp)
+ ABI_DEALLOCATE(wgt_sub_tmp)
+
+end subroutine kptfine_av
+!!***
+
+!!****f* m_double_grid/k_neighbors
+!!
+!! NAME
+!!   k_neighbors
+!!
+!! FUNCTION
+!!   find 8 neighbors of given k-point on a coarse grid, and return
+!!   them along with relative k-shift within coarse grid cell
+!!
+!! INPUTS
+!!   kpt        = k-point to be interpolated to, in full BZ
+!!   kptrlatt   = lattice vectors for coarse k-grid
+!!   invrankkpt = rank list to find k-points
+!!
+!! OUTPUT
+!!   rel_kpt = k-point coordinates renormalized to coarse grid cell
+!!   kpt_phon_indices = indices of k-points on corners of cell
+!!
+!! TODO
+!!  This routine is not used anymore. Deprecate or Remove?
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      get_rank_1kpt,interpol3d_indices,wrap2_zero_one
+!!
+!! SOURCE
+
+subroutine k_neighbors (kpt, kptrlatt,kptrank_t, rel_kpt, kpt_phon_indices)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'k_neighbors'
+!End of the abilint section
+
+ implicit none
+
+! inputs
+ real(dp), intent(in) :: kpt(3)
+ integer, intent(in) :: kptrlatt(3,3)
+ type(kptrank_type), intent(in) :: kptrank_t
+
+! outputs
+ real(dp), intent(out) :: rel_kpt(3)
+ integer, intent(out) :: kpt_phon_indices(8)
+
+! local vars
+ integer :: symrankkpt
+ integer :: ir1,ir2,ir3, pr1,pr2,pr3
+ real(dp) :: redkpt(3), cornerkpt(3), res
+
+! *************************************************************************
+
+!wrap fine kpt to [0,1]
+ call wrap2_zero_one(kpt(1),redkpt(1),res)
+ call wrap2_zero_one(kpt(2),redkpt(2),res)
+ call wrap2_zero_one(kpt(3),redkpt(3),res)
+!find 8 indices of points neighboring ikpt_phon, for interpolation
+ call interpol3d_indices (redkpt,kptrlatt(1,1),kptrlatt(2,2),kptrlatt(3,3), &
+& ir1,ir2,ir3, pr1,pr2,pr3)
+
+!transpose ir pr to ikpt_phon indices
+!order of kpt_phons:
+!ir1 ir2 ir3
+ cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(1) = kptrank_t%invrank(symrankkpt)
+!pr1 ir2 ir3
+ cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(2) = kptrank_t%invrank(symrankkpt)
+!ir1 pr2 ir3
+ cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(3) = kptrank_t%invrank(symrankkpt)
+!pr1 pr2 ir3
+ cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(4) = kptrank_t%invrank(symrankkpt)
+!ir1 ir2 pr3
+ cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(5) = kptrank_t%invrank(symrankkpt)
+!pr1 ir2 pr3
+ cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(6) = kptrank_t%invrank(symrankkpt)
+!ir1 pr2 pr3
+ cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(7) = kptrank_t%invrank(symrankkpt)
+!pr1 pr2 pr3
+ cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
+ call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
+ kpt_phon_indices(8) = kptrank_t%invrank(symrankkpt)
+
+!retrieve the gkq matrix for all q, at the neighbor k vectors
+ rel_kpt(1) = redkpt(1)*kptrlatt(1,1)-real(ir1-1)
+ rel_kpt(2) = redkpt(2)*kptrlatt(2,2)-real(ir2-1)
+ rel_kpt(3) = redkpt(3)*kptrlatt(3,3)-real(ir3-1)
+
+end subroutine k_neighbors
+!!***
 
 END MODULE m_double_grid
 !!***

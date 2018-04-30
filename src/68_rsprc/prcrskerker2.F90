@@ -10,7 +10,7 @@
 !! use of a linear response approach
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (PMA)
+!! Copyright (C) 1998-2018 ABINIT group (PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,14 +59,14 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
  use m_profiling_abi
  use frskerker2
 
+ use m_cgtools, only : dotprod_vn
  use m_mpinfo,  only : ptabs_fourdp
+ use m_spacepar, only : laplacian
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcrskerker2'
- use interfaces_53_spacepar
- use interfaces_56_recipspace
  use interfaces_62_cg_noabirule
 !End of the abilint section
 

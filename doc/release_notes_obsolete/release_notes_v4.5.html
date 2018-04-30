@@ -1,0 +1,177 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2005-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between October 2004 and February 2005:
+
+M. Beland, F. Bottin, M. Cote, J.-F. Danel, T. Deutsch, D. Hamann,
+S. Hamel, L. Henrard, N. Hine, F. Jollet, G. Jomard,
+J. Junquera, L. Kazandjian, S. Latil, M. Marques, C. Morari, Mikami-san, J.-P. Minet,
+S. Pesant, Y. Pouillon, V. Recoules, G.-M. Rignanese, A. Roy, M. Torrent, M. Towler,
+M. Verstraete, G. Zerah, Y. Zhenhua.
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 4.5, released on February 14, 2004.
+
+Changes with respect to version 4.4 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Most noticeable changes in the package (for developers)
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. Bugs have been fixed in the treatment of negative occupation numbers (occopt=6) :
+    contributions of negatively occupied states were simply forgotten in the
+    pre-v4.5 version. All references of automatic tests with occopt=6 have been modified.
+    Bug discovered by MTorrent.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements, including interfacing with other codes
+
+    Note : in this version 4.5, there are four contributions
+    for the interfacing of ABINIT with other codes. They have been listed as most
+    noticeable achievements B5-B8. Interfacing ABINIT with complementary codes
+    opens new interesting capabilities ...
+
+B1. PAW : stresses and forces are available (M. Torrent, F. Jollet and
+    F. Bottin (CEA-Bruyeres-le-Chatel)). The efficiency of PAW
+    has also been improved. The PAW capabilities of ABINIT
+    are thus now very close to production level, for the ground state
+    calculations. Expert users might
+    want to test them, and report their experience to the developers.
+    It might still be a bit early to declare that everybody should
+    switch to PAW ...
+    (Note : response features and GW are not available in PAW)
+
+B2. The development of the features related to strain perturbation has been completed :
+    GGA functionals are available (by D. Hamann). Thus, elastic constants
+    and piezoelectric coefficients can be directly computed with GGA.
+    See Test_v4 #58 and 59 for GGA. See also the other tests
+    of the strain perturbation : Test_v4 #61-70
+    (Note : the only limitation left for this perturbation is the unability
+    to treat spin-orbit coupling. By the way, this same limitation
+    is still present for the response to electric fields.)
+
+B3. The algorithm "lobpcg" is available as an alternative to band-by-band
+    conjugate gradient, from Gilles Zerah. Use wfoptalg=4 . See Test_v4#93 and 94.
+    The band-by-band parallelization of this algorithm should be much
+    better than the one of the usual algorithm.
+
+B4. The lifetime of positrons can be computed (from Gerald Jomard and Francois Jollet).
+    See ~/Infos/positronmanual.txt . See also the input variables
+    "positron" and "ixcpositron", and the Tests_v4#95 and 96.
+
+B5. ABINIT has been interfaced with WanT (by Christi Morari, helped by Gian-Marco
+    Rignanese). See the input variable "prtwant", as well as
+    Test_v4#87 . WanT is available under the GNU General Public Licence.
+    See http://www.wannier-transport.org .
+    Computations of Wannier functions, as well as
+    transport properties of nanostructures are made possible.
+    By the way, N. Marzari informed us that interfacing with
+    his Wannier code (see http://www.wannier.org) is close to operational... see v4.6 ...
+
+B6. ABINIT has been interfaced with CASINO (QMC code developed by the
+    group of R. Needs), by N. Hine and M. Towler .
+    Use prtwf=2 . See the Test_v4#90.
+
+B7. XML pseudopotentials can be read (contribution from JJunquera).
+    The same pseudopotentials can be read by SIESTA.
+    In order to activate this possibility, you must :
+    (1) compile the XMLf90 library from Alberto Garcia
+    ("make xmlf90" should work on PCs where the PGI compiler is available)
+    (2) compile ABINIT with the -DXMLF90 option
+    The automatic test is executed thanks to "make testxmlf90".
+    This contribution opens the way towards common library of pseudopotentials
+    for different codes.
+
+B8. Cut3D can generate NetCDF output, that can be read by OpenDX.
+    Contribution by Simon Pesant and Michel Cote. Contact them
+    in case you want to use this feature.
+
+B9. An ABINIT manual in pdf has been produced by Yao Zhenhua : see
+    ~/Infos/Manual/abinit_433_manual.pdf .
+
+__________________________________________________________________
+
+C. Most noticeable changes for the developers
+
+C1. The use of NetCDF is progressing :
+    (1) makefile_macros files with the needed NETCDF parameters have been generated
+    for most platform, by JPMinet.
+    (2) a library of routines for use of NetCDF inside ABINIT has been
+    set up by Yann Pouillon, see Src_3ionetcdf
+    (3) improvements by MVerstraete and YPouillon.
+
+C2. The xmlf90 library of AGarcia can be compiled with "make xmlf90"
+    (PC, with the PGI compiler). It has been used to read XML pseudopotentials
+    from JJunquera, see B7.
+
+C3. The automatic generation of list of input files for a given input variable,
+    has been coded by TDeutsch. See the new script ~/Utilities/var-file-index.py .
+    This script is activated when "make infos_html" is issued.
+
+C4. Interfaces for all routines of ABINIT are automatically generated,
+    for improved checking of the code coherence at compile time.
+    See the script ~/Utilities/abilint.py, developed by TDeutsch.
+!To be tested for v4.5.2 ...
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. The treatment of nstep=0 has been improved by MTorrent :
+    it should work with metals, and forces should be correct.
+
+D2. The optimization of the parallel FFT has been improved by ARoy.
+
+D3. ionmov=12 has been introduced by JF Danel and Luc Kazandjian
+    (isokinetic ensemble).
+
+D4. conducti has been improved by VRecoules.
+
+D5. elphon has been improved by MVerstraete
+
+D6. YPouillon has introduced a new calculation for the frequency
+    grids in ACFD.
+
+D7. Mikami-san has improved the binary tar procedure
+
+D8. tddft.F90 was improved by MBeland, SHamel and MCote : restart and
+    improved parallelism.
+
+D9. The library "libxc" from Miguel Marques has been included in ABINIT.
+    At present, it compiles properly, except the util.c routine.
+    The different XC functionals should be adressed through the usual
+    "ixc" input variable, for which new values are allowed.
+
+D9. New "optstress" input variable, from MTorrent
+
+D10. Bug fixes : L. Henrard, S. Latil
+
+</pre>

@@ -9,7 +9,7 @@
 !!  [see for example Na Sai et al., PRB 66, 104108 (2002)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (MVeithen)
+!! Copyright (C) 2003-2018 ABINIT  group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,6 +125,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
  use m_numeric_tools, only : rhophi
  use m_io_tools, only : open_file
+ use m_geometry, only : xred2xcart
  use m_iowf,     only : outwf
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
@@ -164,7 +165,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  real(dp), intent(in) :: rprimd(3,3),zion(ntypat)
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(out) :: pel(3),pelev(3),pion(3)
- real(dp), intent(out) :: ptot(3),red_ptot(3) !!REC 
+ real(dp), intent(out) :: ptot(3),red_ptot(3) !!REC
  type(pawrhoij_type), intent(in) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
  type(pawcprj_type),intent(in) ::  cprj(natom,mcprj*usecprj)
@@ -277,7 +278,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
    MSG_BUG(message)
  end if
 
-! useful flags for various efield possibilities 
+! useful flags for various efield possibilities
  efield_flag = ( dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7 .or. &
 & dtset%berryopt ==14 .or. dtset%berryopt ==16 .or. dtset%berryopt ==17 )
  calc_epaw3_force = ( efield_flag .and. dtset%optforces /= 0 .and. usepaw == 1 )
@@ -333,11 +334,11 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
    if ( calc_epaw3_force ) then
      ABI_ALLOCATE(dsdr_sum,(natom,3,dtefield%fnkpt*nsppol))
      ABI_ALLOCATE(epawf3_str,(natom,3,3))
-   end if 
+   end if
    if ( calc_epaw3_stress ) then
      ABI_ALLOCATE(dsds_sum,(natom,6,dtefield%fnkpt*nsppol))
      ABI_ALLOCATE(epaws3_str,(natom,3,6))
-   end if 
+   end if
    ABI_ALLOCATE(dimlmn,(natom))
    call pawcprj_getdim(dimlmn,natom,nattyp_dum,ntypat,typat,pawtab,'R')
    ABI_DATATYPE_ALLOCATE(cprj_k,(natom,dtefield%nspinor*mband))
@@ -373,7 +374,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
          if (ikpt_loc < mkmem) ikpt1 = ikpt1 + 1
          if ((ikpt1 > nkpt).and.(ikpt_loc < mkmem)) exit
-         nband_k = dtset%nband(ikpt1) 
+         nband_k = dtset%nband(ikpt1)
 
          if ( (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt1,1,nband_k,isppol,me)) .and. &
 &         (ikpt_loc <= mkmem) ) cycle
@@ -427,7 +428,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !ket_end = ket_start + npw_k*my_nspinor - 1
 !ket(1:2,1:npw_k*my_nspinor) = cg(1:2,ket_start:ket_end)
 !
-!tot_r = 0.0; tot_i = 0.0     
+!tot_r = 0.0; tot_i = 0.0
 !do ispinor = 1, my_nspinor
 !ovlp_r = 0.0; ovlp_i = 0.0
 !spnshft = (ispinor-1)*npw_k
@@ -522,7 +523,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !  nfor = 2 : to compute the ddk, I need the WF at k + dk and k - dk
 !  dkinv    : +-1/2dk
 
-   
+
 !  default for polarization
    nfor = 1
    if (ddkflag == 1) then
@@ -593,7 +594,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
        ABI_ALLOCATE(dsdr,(2,natom,ncpgr,usepaw*dtefield%mband_occ,usepaw*dtefield%mband_occ))
        dsdr = zero
      end if
-     
+
 
 !    Loop on the values of ikpt_loc and ikpt1 :
 !    ikpt1 is incremented one by one, and number the k points in the FBZ
@@ -605,7 +606,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !    It means that the following loop is equivalent to a double loop :
 !    do isppol = 1, nsppol
 !    do ikpt1 =  1, dtefield%fmkmem
-!    
+!
      do ikpt_loc = 1, dtefield%fmkmem_max*nsppol
 
        ikpt1=mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc,1)
@@ -718,17 +719,17 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !        DEBUG
 !        write(std_out,'(a,4i4)' )' berryphase_new : sflag_k(:)=',sflag_k(:)
 !        ENDDEBUG
-         
+
 !        DEBUG
 !        write(std_out,'(a,7i4)')'me, idir,ifor, ikpt_loc, ikpt1, isppol = ',&
 !        & me,idir,ifor,ikpt_loc,ikpt1,isppol
 !        write(std_out,'(a,10i3)')'pwind_k(1:10) = ',pwind_k(1:10)
 !        ENDDEBUG
-         
+
          do istep=1,berrystep
            sflag_k_mult(:,istep) = sflag_k(:)
          end do
-         
+
        end if ! end check that ikpt1 > 0 and isppol > 0
 
 !      --------------------------------------------------------------------------------
@@ -817,7 +818,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
              end if
 
-           else if (dest /= me) then 
+           else if (dest /= me) then
 
 !            jkpt is the kpt which is being treated by dest
 !            jsppol is his isppol
@@ -917,8 +918,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &           mpw,dtefield%mband_occ,dtefield%nband_occ(isppol),&
 &           npw_k1,npw_k3(istep),my_nspinor,pwind_k_mult(:,istep),pwnsfac_k,sflag_k_mult(:,istep),&
 &           shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
-           
-! in finite electric field case with paw must save additional F3 term in forces 
+
+! in finite electric field case with paw must save additional F3 term in forces
            if(calc_epaw3_force) then
 ! when ncpgr = 3, gradients are wrt to atom displacements
 ! but when ncpgr = 9, first 6 gradients are wrt strains, last three are displacements
@@ -958,7 +959,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                  end do ! end sum over iband
                end do ! end sum over fdir
              end do ! end sum over iatom
-           end if ! end check on calc_epaw3_stress               
+           end if ! end check on calc_epaw3_stress
 
            if ((det_inv_smat == 10).or.(det_inv_smat == 11)) then
 
@@ -982,7 +983,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &             sflag_k_mult(:,1)
            end if
 
-! for IBZ k-points and first step, add 
+! for IBZ k-points and first step, add
            if ((ddkflag==1 .and.((det_inv_smat == 1).or.(det_inv_smat == 11))) .and. inibz == 1 .and. istep == 1) then
              cg1(:,icg + 1: icg + npw_k1*my_nspinor*nband_k) = &
              cg1(:,icg + 1:icg + npw_k1*my_nspinor*nband_k) + &
@@ -1028,7 +1029,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
        dsdr_sum(:,:,:) = reshape(buffer2(:),(/natom,3,dtefield%fnkpt*nsppol/))
        ABI_DEALLOCATE(buffer1)
        ABI_DEALLOCATE(buffer2)
-     end if 
+     end if
      if (calc_epaw3_stress) then
        count = natom*6*dtefield%fnkpt*nsppol
        ABI_ALLOCATE(buffer1,(count))
@@ -1038,7 +1039,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
        dsds_sum(:,:,:) = reshape(buffer2(:),(/natom,6,dtefield%fnkpt*nsppol/))
        ABI_DEALLOCATE(buffer1)
        ABI_DEALLOCATE(buffer2)
-     end if 
+     end if
    end if ! if parallel
 
 !  DEBUG
@@ -1061,7 +1062,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !  ENDDEBUG
 
 !  ===========================================================================
-!  in DDK case everything has been calculated above from finite difference 
+!  in DDK case everything has been calculated above from finite difference
 !  Now write the ddk WF to a file
 !  ===========================================================================
 
@@ -1471,17 +1472,17 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !      Polarization branch control  (start)
 !      -------------------------------------------------------------------------------------
 !      berrysav == 0,  for non fixed D/d calculation, polarizaion is in [-1,1],done above
-!      for fixed D/d calculation, choose polarization to minimize internal 
-!      energy, or minimize |red_efiled|. (red_dfield=red_efiled+red_ptot)  
+!      for fixed D/d calculation, choose polarization to minimize internal
+!      energy, or minimize |red_efiled|. (red_dfield=red_efiled+red_ptot)
 !      (d=e+p, as (26) of Stengel, Suppl.)
 !      This is default value.
-!      
+!
 !      berrysav == 1,  keep the polarization on the same branch, which saved in file POLSAVE
 !      ======================================================================================
 
 !      for fixed D/d calculation, choose polarization to minimize internal energy, or to minimize reduced electric field |red_efield|
-       if(dtset%berrysav ==0 .and. (dtset%berryopt == 6 .or. dtset%berryopt == 7 .or. & 
-&       dtset%berryopt == 16 .or. dtset%berryopt == 17))  then   
+       if(dtset%berrysav ==0 .and. (dtset%berryopt == 6 .or. dtset%berryopt == 7 .or. &
+&       dtset%berryopt == 16 .or. dtset%berryopt == 17))  then
 
          jump=-nint(dtset%red_dfield(idir) - poltot)   ! red_efield = red_dfield - poltot
 
@@ -1500,8 +1501,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
        end if
 
 
-!      keep the polarization on the same branch. 
-       if (dtset%berrysav == 1) then 
+!      keep the polarization on the same branch.
+       if (dtset%berrysav == 1) then
 
 !        use saved polarization to keep on same branch
          inquire(file='POLSAVE',exist=lexist)
@@ -1521,7 +1522,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
              end if
              call xmpi_bcast(pol0,0,spaceComm,ierr)
            end if
-         else   
+         else
            pol0(idir)=poltot
          end if
          jump=nint(poltot-pol0(idir))
@@ -1577,7 +1578,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
    if(mpi_enreg%me==0)then
      if (open_file('POLSAVE',message,newunit=unt,status='UNKNOWN') /= 0) then
        MSG_ERROR(message)
-     end if 
+     end if
      write(unt,'(3F20.12)') pol0
      close(unt)
    end if
@@ -1600,8 +1601,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !    discretized derivative operator. In the NCPP case no such
 !    terms exist anyway. Actually in the PAW formulation
 !    such terms are included to all orders, unlike in USPP where only
-!    zeroth and first-order terms are. In USPP the first-order term 
-!    is pelev. Here we compute pelev separately only for reporting 
+!    zeroth and first-order terms are. In USPP the first-order term
+!    is pelev. Here we compute pelev separately only for reporting
 !    purposes in polcart, it is not added into pel or used in the the
 !    PAW finite field code in make_grad_berry.F90
 !    13 June 2012 J Zwanziger
@@ -1647,7 +1648,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
    if (nproc>1) then
      call pawcprj_free(cprj_buf)
      ABI_DATATYPE_DEALLOCATE(cprj_buf)
-   end if 
+   end if
 
  end if
 

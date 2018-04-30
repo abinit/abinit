@@ -7,7 +7,7 @@
 !! During recursion, it computes the non-local energy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2017 ABINIT group (the_author)
+!!  Copyright (C) 2009-2018 ABINIT group (the_author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,21 +48,20 @@
 subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,&
  &                      tsmear,trotter,tol)
 
- use m_profiling_abi
-    
  use defs_basis
  use defs_rectypes
+ use m_profiling_abi
  use m_xmpi
  use m_per_cond
 
- use m_rec_tools,only         : reshape_pot
+ use m_time,       only : timab
+ use m_rec_tools,  only : reshape_pot
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nlenergyrec'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_68_recursion, except_this_one => nlenergyrec
 !End of the abilint section
 

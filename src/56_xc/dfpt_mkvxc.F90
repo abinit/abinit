@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (XG, DRH)
+!! Copyright (C) 2001-2018 ABINIT group (XG, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,11 +107,12 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  use m_errors
  use m_profiling_abi
 
+ use m_time,      only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxc'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_56_xc, except_this_one => dfpt_mkvxc
 !End of the abilint section

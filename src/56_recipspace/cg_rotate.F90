@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2017 ABINIT group (MG)
+!! Copyright (C) 2014-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,13 +56,13 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere
+ use m_kg,        only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_rotate'
  use interfaces_32_util
- use interfaces_56_recipspace, except_this_one => cg_rotate
 !End of the abilint section
 
  implicit none

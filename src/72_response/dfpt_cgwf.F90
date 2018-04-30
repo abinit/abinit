@@ -15,7 +15,7 @@
 !! by contributions from the active space in the calling routine, if needed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!! Copyright (C) 1999-2018 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,6 +122,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  use m_cgtools
  use m_rf2
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type,KPRIME_H_KPRIME
 
@@ -130,7 +131,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_cgwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -410,7 +410,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  call cg_zcopy(npw1*nspinor,gh1c,gh1c_n)
 
-!Projecting out all bands (this could be avoided)
+!Projecting out all bands
+!While we could avoid calculating all the eig1_k to obtain the perturbed density,
+!we do need all of the matrix element when outputing the full 1st-order wfn.
 !Note the subtlety:
 !-For the generalized eigenPb, S|cgq> is used in place of |cgq>,
 !in order to apply P_c+ projector (see PRB 73, 235101 (2006), Eq. (71), (72))

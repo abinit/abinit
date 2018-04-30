@@ -7,7 +7,7 @@
 !! Calculate chi0 in the limit q-->0
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (MG)
+!! Copyright (C) 2010-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,6 +93,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  use m_numeric_tools,   only : print_arr
  use m_crystal,         only : crystal_t
  use m_fft_mesh,        only : rotate_FFT_mesh
+ use m_occ,             only : getnel
  use m_ebands,          only : pack_eneocc, unpack_eneocc
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_BZ_item, &
 &                              littlegroup_t, littlegroup_print, littlegroup_free, littlegroup_init
@@ -113,7 +114,6 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 #undef ABI_FUNC
 #define ABI_FUNC 'chi0q0_intraband'
  use interfaces_14_hidewrite
- use interfaces_61_occeig
  use interfaces_65_paw
 !End of the abilint section
 

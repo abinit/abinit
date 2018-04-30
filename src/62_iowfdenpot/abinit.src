@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -21,11 +21,8 @@ sources = [
  "initwf.F90",
  "m_io_screening.F90",
  "m_wfk.F90",
- "out1dm.F90",
- "outwant.F90",
- "randac.F90",
- "rdnpw.F90",
- "WffReadEigK.F90",
+ "m_outqmc.F90",
+ "m_outwant.F90",
  "WffReadSkipK.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

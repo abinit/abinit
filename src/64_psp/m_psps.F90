@@ -8,7 +8,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2018 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,6 +44,8 @@ module m_psps
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_pawpsp,        only : pawpsp_cg
+ use m_parser,        only : chkint_eq
+ use m_memeval,       only : getdim_nloc, setmqgrid
 
  implicit none
 
@@ -283,8 +285,6 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 #undef ABI_FUNC
 #define ABI_FUNC 'psps_init_from_dtset'
  use interfaces_32_util
- use interfaces_56_recipspace
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none
@@ -539,7 +539,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver,m_ddb_hdr,mover_effpot
+!!      driver,m_ddb_hdr
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -836,7 +836,6 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
 #undef ABI_FUNC
 #define ABI_FUNC 'psps_print'
  use interfaces_14_hidewrite
- use interfaces_57_iovars
 !End of the abilint section
 
  implicit none
@@ -1644,7 +1643,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: amesh,yp1,ypn 
+ real(dp) :: amesh,yp1,ypn
  type(pawrad_type) :: core_mesh
 
 ! *************************************************************************

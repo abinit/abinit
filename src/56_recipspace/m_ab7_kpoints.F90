@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (DC)
+!!  Copyright (C) 2008-2018 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +25,8 @@ module m_ab7_kpoints
   use defs_basis
   use m_ab7_symmetry
   use m_profiling_abi
+
+ use m_kpts,      only : getkgrid, testkgrid
 
   implicit none
 
@@ -133,7 +135,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpoints_binding_mp_k_1'
- use interfaces_56_recipspace
 !End of the abilint section
 
     integer, intent(in)  :: symid
@@ -198,7 +199,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpoints_binding_mp_k_2'
- use interfaces_56_recipspace
 !End of the abilint section
 
     integer, intent(in)  :: symid
@@ -316,7 +316,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpoints_binding_auto_k_1'
- use interfaces_56_recipspace
 !End of the abilint section
 
     integer, intent(in)  :: symid
@@ -389,7 +388,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpoints_binding_auto_k_2'
- use interfaces_56_recipspace
 !End of the abilint section
 
     integer, intent(in)  :: symid

@@ -1,0 +1,28 @@
+
+# Developement files
+mytests
+tags
+TODO
+dev
+
+# Temporary files
+*.swp
+tmp
+
+# Files produced by the setup script
+*.pyc
+ElectronPhononCoupling.egg-info
+build
+build/*
+dist
+dist/*/
+dist/*.egg
+
+# Files produced by the tests and the examples
+ElectronPhononCoupling/data/inputs-for-tests/output
+
+Examples/Calculations/*/odat*
+Examples/Calculations/*/*.out*
+Examples/Calculations/*/*log*
+Examples/Calculations/*/*fort*
+Examples/Out/*

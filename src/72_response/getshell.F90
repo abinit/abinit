@@ -9,7 +9,7 @@
 !! of Marzari and Vanderbilt (see PRB 56, 12847 (1997)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MVeithen)
+!! Copyright (C) 1999-2018 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,12 +96,13 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  use m_errors
  use m_linalg_interfaces
 
+ use m_kpts,            only : getkgrid
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getshell'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

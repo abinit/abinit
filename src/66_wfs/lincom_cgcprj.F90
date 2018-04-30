@@ -22,7 +22,7 @@
 !! that are detrimental for performance...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017 ABINIT group (XG)
+!! Copyright (C) 2017-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,8 +55,10 @@
 !!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors 
 !!
 !! PARENTS
+!!      cgcprj_cholesky,wf_mixing
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_lincom,zgemm
 !!
 !! SOURCE
 
@@ -108,31 +110,32 @@
 !DEBUG
 !write(std_out,*)' lincom_cgcprj : enter '
 !write(std_out,*)' lincom_cgcprj : npw, nspinor=',npw,nspinor
+!write(std_out,*)' lincom_cgcprj : icgout=',icgout
 !ENDDEBUG
 
  if(inplace==0)then
    if(.not.present(cgout))then
      MSG_ERROR(' inplace==0 while .not.present(cgout) is not permitted ')
-   endif
+   end if
    if(usepaw==1) then
      if(.not.present(cprjout))then 
        MSG_ERROR(' inplace==0 and usepaw==1 while .not.present(cprjout) is not permitted ')
-     endif
-   endif
- endif
+     end if
+   end if
+ end if
 
 !Take care of the plane wave part
  ABI_ALLOCATE(cgout_,(2,npw*nspinor*nband_out))
 
  call zgemm('N','N',npw*nspinor,nband_out,nband_in,dcmplx(1._dp), &
-&  cg(:,icg+1:icg+npw*nspinor*nband_in),npw*nspinor, &
-&  alpha_mn,nband_in,dcmplx(0._dp),cgout_,npw*nspinor)
+& cg(:,icg+1:icg+npw*nspinor*nband_in),npw*nspinor, &
+& alpha_mn,nband_in,dcmplx(0._dp),cgout_,npw*nspinor)
 
  if(inplace==1)then
    cg(:,icg+1:icg+npw*nspinor*nband_out)=cgout_
  else
    cgout(:,icgout+1:icgout+npw*nspinor*nband_out)=cgout_
- endif
+ end if
  ABI_DEALLOCATE(cgout_)
 
 !Take care of the cprj part
@@ -146,20 +149,20 @@
      do iband_in=1,nband_in
        al(1,iband_in)=alpha_mn(1,iband_in,iband_out)
        al(2,iband_in)=alpha_mn(2,iband_in,iband_out)
-     enddo
+     end do
      call pawcprj_lincom(al,cprj,cprjout_(:,ii+1:ii+nspinor),nband_in)
-   enddo
+   end do
    ABI_DEALLOCATE(al)
 
    if(inplace==1)then
      cprj=cprjout_
    else
      cprjout=cprjout_
-   endif
+   end if
    call pawcprj_free(cprjout_)
    ABI_DATATYPE_DEALLOCATE(cprjout_)
 
- endif
+ end if
 
 end subroutine lincom_cgcprj
 !!***

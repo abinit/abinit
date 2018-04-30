@@ -8,7 +8,7 @@
 !!  for sharing the jobs on k-points, spins and bands.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2017 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2000-2018 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

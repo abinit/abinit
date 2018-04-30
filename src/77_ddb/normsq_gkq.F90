@@ -11,7 +11,7 @@
 !!   and puts them in a uniform (atom,icart) basis
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group (MVer)
+!! Copyright (C) 2004-2018 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

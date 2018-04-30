@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,6 +38,8 @@ use defs_basis
 use m_errors
 use m_profiling_abi
 use m_bandfft_kpt
+
+use m_time,      only : timab
 
 implicit none
 save
@@ -106,7 +108,6 @@ subroutine Pk(psi_inout,omega)
 #undef ABI_FUNC
 #define ABI_FUNC 'Pk'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

@@ -12,7 +12,7 @@
 !! (pair-wise force field) to the conventional Kohn-Sham DFT energy.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2017 ABINIT group (MT)
+!! Copyright (C) 2012-2018 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,12 +68,13 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  use m_errors
  use m_atomdata
 
+ use m_geometry,         only : metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_dftd2'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -309,7 +310,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
                          do ii=1,3
                            dyn_vdw_dftd2(1,1:3,ia,ii,ia)=dyn_vdw_dftd2(1,1:3,ia,ii,ia)+mat(1:3,ii)
                            dyn_vdw_dftd2(1,1:3,ja,ii,ja)=dyn_vdw_dftd2(1,1:3,ja,ii,ja)+mat(1:3,ii)
-                           dyn_vdw_dftd2(1,1:3,ia,ii,ja)=dyn_vdw_dftd2(1,1:3,ia,ii,ja)-mat(1:3,ii)*ph1r                           
+                           dyn_vdw_dftd2(1,1:3,ia,ii,ja)=dyn_vdw_dftd2(1,1:3,ia,ii,ja)-mat(1:3,ii)*ph1r
                            dyn_vdw_dftd2(2,1:3,ia,ii,ja)=dyn_vdw_dftd2(2,1:3,ia,ii,ja)-mat(1:3,ii)*ph1i
                            dyn_vdw_dftd2(1,1:3,ja,ii,ia)=dyn_vdw_dftd2(1,1:3,ja,ii,ia)-mat(1:3,ii)*ph1r
                            dyn_vdw_dftd2(2,1:3,ja,ii,ia)=dyn_vdw_dftd2(2,1:3,ja,ii,ia)+mat(1:3,ii)*ph1i
@@ -318,7 +319,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
                          do ii=1,3
                            dyn_vdw_dftd2(1,1:3,ia,ii,ia)=dyn_vdw_dftd2(1,1:3,ia,ii,ia) &
 &                           +two*mat(1:3,ii)*(one-ph1r)
-                         end do                       
+                         end do
                        end if
                      end if
 
@@ -470,7 +471,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 
  DBG_EXIT("COLL")
 
- contains 
+ contains
 !!***
 
 !!****f* vdw_dftd2/grad_cart2red

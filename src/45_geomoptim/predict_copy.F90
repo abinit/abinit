@@ -8,14 +8,13 @@
 !! Here, simple copy of the previous image.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (XG)
+!! Copyright (C) 2009-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! itimimage=time index for image propagation (itimimage+1 is to be predicted here)
 !! itimimage_eff=time index in the history
 !! list_dynimage(nimage)=list of dynamical images. The non-dynamical ones will not change.
 !!       Example : in the NEB of string method, one expect the two end images to be fixed.
@@ -59,7 +58,7 @@
 #include "abi_common.h"
 
 
-subroutine predict_copy(itimimage,itimimage_eff,list_dynimage,ndynimage,nimage,&
+subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &                       ntimimage_stored,results_img)
 
  use defs_basis
@@ -77,7 +76,7 @@ subroutine predict_copy(itimimage,itimimage_eff,list_dynimage,ndynimage,nimage,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: itimimage,itimimage_eff,ndynimage,nimage,ntimimage_stored
+ integer,intent(in) :: itimimage_eff,ndynimage,nimage,ntimimage_stored
 !arrays
  integer,intent(in) :: list_dynimage(ndynimage)
  type(results_img_type),intent(inout) :: results_img(nimage,ntimimage_stored)

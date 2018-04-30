@@ -1,0 +1,244 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+September 2010 and February 2011. These release notes
+are relative to improvements of ABINITv6.6 with respect to v6.4.
+
+The list of contributors includes :
+D. Adams, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin, 
+P. Boulanger, F. Bruneval, D. Caliste, M. Delaveau, C. Espejo, Don Fanucci,
+G.A. Franco, M. Giantomassi, X. Gonze, I. Hamada, N. Holzwarth, A. Jacques, F. Jollet, S. Le Roux,
+A. Lherbier, M. Mancini, T. Nishimatsu, M. Oliveira, S. Ponce, Y. Pouillon, 
+P.-Y. Prodhomme, M. Rampp, T. Rangel,
+G.-M. Rignanese, AH Romero, M. Stankovski, M. Torrent, M. Verstraete, D. Waroquiers, 
+Z. Zanolli, J. Zwanziger .
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+(Please note the WARNINGS !)
+
+Xavier
+
+__________________________________________________________________
+
+Version 6.6, released on February 7, 2011.
+
+Changes with respect to version 6.4 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.1 The user interface of the build system has changed.
+    The plugins are currently being replaced by a mechanism of
+    connectors / fallbacks. As a consequence, a few options of the
+    configure script have changed:
+      - a new --with-dft-flavor option allows for the detection and
+        possible build of AtomPAW, BigDFT, LibXC, and Wannier90;
+      - a new --with-trio-flavor option allows for the detection and
+        possible build of ETSF_IO, FoX, and NetCDF;
+      - the --enable-* options related to the above plugins have been
+        removed, but their --with-* options have been kept;
+      - the --enable-all-plugins has been removed, and its former
+        outcome can be reproduced by using both:
+          --with-dft-flavor="atompaw+bigdft+libxc+wannier90"
+          --with-trio-flavor="etsf_io+fox+netcdf"
+        or by setting these two options to "none" to disable all
+        plugins.
+    Please have a look at ~abinit/doc/build/config-template.ac for
+    complete details. The output of configure contains as well useful
+    information about changed options at its beginning.
+    In order to facilitate the transition, you'll find the
+    extras/build/upgrade-build-config script. Call it using -h or --help
+    for documentation.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The PAW atomic dataset generator ATOMPAW, from Natalie Holzwarth and coworkers,
+    has been adapted as a plugin for ABINIT. The interface with ABINIT is tested
+    automatically, thanks to tests in tests/atompaw. 
+    ATOMPAW compiles correctly on all the standard testing platforms of ABINIT,
+    so that it is considered as being part of the 
+    standard reference configuration of the ABINIT package.
+    The executable is generated in plugins/atompaw .
+    Also, the ability to use libxc with atompaw is present, and the pseudopotentials that have
+    been generated can be used without mentioning the ixc value (that is passed to
+    ABINIT transparently for the user).
+    Tests are tests/atompaw #01 and #02 (generation of the PAW dataset by PAW then use by ABINIT),
+    and tests/libxc #10 (use of a PAW dataset for PBEsol).
+    Plugin set-up and interfacing with ABINIT
+    done by Yann Pouillon, Jean-Michel Beuken, Marc Torrent, Joe Zwanziger and XG, in collaboration 
+    with N. Holzwarth.
+    ATOMPAW from Natalie Holzwarth and Alan Tackett.
+
+B.2 Two new tutorials are available : 
+    - lesson_detu.html, for the determination of the U and J values from the method by Coccochioni and de Gironcoli
+         (see the release_notes of v6.4, section B.4, for the announcement of the related input variables and automatic tests).
+    - lesson_paw3.html, for the testing of Atomic dataset, compared to the ELK code.
+    Work by D. Adams and B. Amadon (for the U+J tutorial), and M. Stankovski for the PAW3 tutorial.
+
+B.3 The usage of MPIIO can be now considered in production for the FFT/Band parallelism of ABINIT.
+    Automatic tests in tests/mpiio have been shown to work on all platforms of the ABINIT test farm,
+    except with the pathscale compiler, and under Windows.
+    Build system tuning, and then testing by Y. Pouillon, Jean-Michel Beuken, M. Giantomassi, XG.
+    Initial MPIIO implementation by M. Boulet, F. Bottin and G. Zerah, improved by M. Delaveau and M. Torrent.
+
+B.4 The plasmon-pole models 2-3-4 can now be used in GW+PAW.
+    By M. Giantomassi 
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 Max and littlebuda are two new slaves for the test farm : 
+    - max tests the parallelism up to 10 procs using Myrinet; 
+    - littlebuda tests the compilation and links with GPU turned on. No tests activated yet, though.
+    By J.-M. Beuken, Y. Pouillon, X. Gonze
+
+C.2 Build systems tests have been set-up . They are activated on the "inca" slave.
+    By Y. Pouillon.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+
+D.1 The two-phonon DOS sum and difference spectra can now be computed.
+    See test v2#15. 
+    By A. Romero.
+
+D.2 Analysis of GW wavefunctions with cut3d now possible
+    By F. Bruneval
+
+D.3 The capability to split the generation of dielectric matrices for the contour deformation GW technique
+    in different bunches of frequencies has been implemented, allowing a much better flexibility.
+    Then they can be merged using mrgscr .
+    Related input variable : freqremin.
+    Work by M. Stankovski and M. Giantomassi.
+
+D.4 The input variable esmear has been defined, to be used for the computation of electron lifetimes.
+    Test v6#60.
+    By P. Boulanger.
+
+D.5 Capability to output the total PAW density on the fine grid has been improved (parallelism).
+    By M. Stankovski and J. Zwanziger.
+
+D.6 Libxc 1.0 is now used.
+    Upgrade for ABINIT was done by Y. Pouillon
+
+D.7 ANADDB uses now much less memory for computation of the temperature dependence of the electronic structure.
+     By S. Ponce
+
+D.8 On-going big restructuration of the routines involved in the change
+    of the atomic coordinates and cell parameters (called by gstate.F90, linke brdmin.F90), also coupled with on-going
+    changes to accomodate the images (above gstate.F90).
+    Defines the use of NETCDF files, also ETSF-IO , for the restarts.
+    See section C.3 of v6.4 release notes.
+    By G.A. Franco .
+
+D.9 On-going large improvement of the parallelism for GW, including MPIIO,
+    also based on the standard _WFK files,
+    by M. Giantomassi, with testing done at the Barcelona Supercomputing Center by G. Huhs (formerly A. Soba),
+    and M. Stankovski, D. Waroquiers, G.-M. Rignanese and XG.
+
+D.10 The use of Density Functional Perturbation Theory with PAW
+     (phonons and electric field) is in progress,
+     See section D.2 of v6.4 release notes.
+     by M. Torrent, F. Jollet and J. Zwanziger.
+
+D.11 The use of an extrapolation scheme to decrease the number of k-points needed for Berry phase
+     calculations, finite electric fields and Raman intensity is in progress.
+     Test v6#20 . Input variable berrystep.
+     By S. Le Roux.
+
+D.12 Work in progress concerning the EET method for GW calculations.
+     By A. Berger.
+
+D.13 GW numerous small improvements. Also, working on the intraband contrib.
+     By M. Giantomassi
+
+D.14 The use of LDA+Dynamical Mean Field Theory is in progress.
+     (see D.6 of the 6.4 release notes)
+     Test v6#51.
+     A new input variable "dmft_dc" has been introduced.
+     By B. Amadon
+
+D.15 Work in progress for the implementation of the Path Integral Molecular Dynamics algorithm for the 
+     ionic degrees of freedom, combined with DFT for the electronic degrees of freedom.
+     Input variable pitransform
+     Allowed by imgmov=9 (Langevin dynamics), imgmov=13 (chain of thermostats).
+     Test (fake at present) : Tv6#26
+     (see D.7 of the 6.4 release notes)
+     No merge with the trunk at present.
+     By G. Geneste and X. Gonze.
+
+D.16 On-going effort to provide vdW functionals for ABINIT.
+     Silvestrelli approach is working.
+     See input variables vdw_xc (=10 for Silvestrelli approach), vdw_nwan and vdw_supercell .
+     Also, the XC functional C09 (ixc 24), for use with the Silvestrelli approach, has been coded.
+     Available in v6#12, 13.
+     Also, a new directory to test vdwxc has been created. At present Tvdwxc#10 is working.
+     (see D.7 of the 6.4 release notes)
+     Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
+
+D.17 On going effort to have all mGGA from Libxc available.
+     By M. Oliveira, A. Lherbier and X. Gonze.
+
+D.18 Work in progress : addition of Zeeman field (non-collinear), using the zeemanfield
+     input variable. The documentation of the latter is still incomplete.
+     A fake test has been set up v6#17.
+     (see D.11 of the 6.4 release notes)
+     By K. Delaney and E. Bousquet.
+
+D.19 A slave for the production of .exe for Windows is nearly operational.
+     The tests of the FFTW3 library are in progress.
+
+D.20 A genetic algorithm to find new structures is under development.
+     (see D.13 of the 6.4 release notes)
+     By AH. Romero and X. Gonze
+
+D.21 New input variables for the file handling (restart) in the BSE case have been defined :
+     getbsreso, getbscoup, gethaydock, irdbscoup, irdbsreso, irdhaydock .
+     Other improvements for BSE : BSE+Spin, use of model dielectric functions,
+     DOS calculations with Haydock. CG algo for resonant BSE calculations.
+     MPI-IO+scalapack capabilities.
+     Generalized eigenvalue problem for BSE with coupling (more stable, can use Scalapack)
+     By M. Giantomassi.
+
+D.22 New input variables, undocumented : use_slk. Likely from F. Bottin. Related to scalapack.
+
+D.23 On-going work on the link of the XC kernels from libxc to ABINIT.
+     By F. Liu, L. He and G.-M. Rignanese .
+
+D.24 Work on SCPhonons going on.
+     By M. Verstraete
+
+D.25 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
+     and improvements of documentation by
+     B. Amadon, A. Berger, J.-M. Beuken, D. Caliste, Don Fanucci, 
+     G.A. Franco, M. Giantomassi, X. Gonze, I. Hamada, A. Jacques, F. Jollet, S. Le Roux, 
+     A. Lherbier, M. Mancini, T. Nishimatsu, S. Ponce, Y. Pouillon, P.-Y. Prodhomme, M. Rampp, T. Rangel,
+     G.-M. Rignanese, M. Torrent, M. Stankovski, M. Verstraete, Z. Zanolli, J. Zwanziger .
+</pre>

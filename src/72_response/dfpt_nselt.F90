@@ -9,7 +9,7 @@
 !! mixed strain derivatives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DRH, XG, DCA, GMR, MM, AR, MV, MB)
+!! Copyright (C) 1998-2018 ABINIT group (DRH, XG, DCA, GMR, MM, AR, MV, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,8 +125,10 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_cgtools,    only : dotprod_vn
  use m_pawtab,     only : pawtab_type
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
+ use m_spacepar,   only : hartrestr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -135,7 +137,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_72_response, except_this_one => dfpt_nselt
 !End of the abilint section
 

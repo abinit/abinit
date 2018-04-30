@@ -16,7 +16,7 @@
 !!  See notes below for more info.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (MG)
+!! Copyright (C) 2009-2018 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,6 +77,7 @@ MODULE m_wfk
  use defs_abitypes,  only : hdr_type, dataset_type, MPI_type
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_wvltypes,  only : wvl_internal_type
+ use m_geometry,     only : metric
  use m_time,         only : cwtime, asctime
  use m_fstrings,     only : sjoin, strcat, endswith, itoa
  use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, open_file, close_unit, delete_file, file_exists
@@ -4667,7 +4668,6 @@ subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_create_wfkfile'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

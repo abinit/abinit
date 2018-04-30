@@ -13,7 +13,7 @@
 !! with the original vectors in order.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG)
+!! Copyright (C) 2000-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,11 +51,12 @@ subroutine smallprim(metmin,minim,rprimd)
  use m_errors
  use m_profiling_abi
 
+ use m_geometry,     only : metric
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'smallprim'
- use interfaces_41_geometry, except_this_one => smallprim
 !End of the abilint section
 
  implicit none

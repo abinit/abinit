@@ -10,7 +10,7 @@
 !!  Determine best choice of parameters for Scalapack and/or Magma Linear Algebra routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (FD)
+!! Copyright (C) 1999-2018 ABINIT group (FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

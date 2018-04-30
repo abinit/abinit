@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,6 +56,7 @@ use m_xmpi
 use m_pawang
 use m_errors
 
+use m_time,             only : timab
 use m_io_tools,         only : get_unit,open_file
 use m_paw_dmft,         only : paw_dmft_type
 use m_ebands,           only : ebands_init, ebands_free
@@ -104,7 +105,6 @@ subroutine compute_correlations_shift_lanczos(dtset, Sigma_x,Vxc_energy,debug)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_correlations_shift_lanczos'
- use interfaces_18_timing
 !End of the abilint section
 
 implicit none

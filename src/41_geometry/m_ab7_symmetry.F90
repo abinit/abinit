@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2017 ABINIT group (DC)
+!!  Copyright (C) 2008-2018 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +25,8 @@ module m_ab7_symmetry
 
   use defs_basis
   use m_profiling_abi
+
+ use m_geometry,     only : metric
 
   implicit none
 
@@ -393,7 +395,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_set_lattice'
- use interfaces_41_geometry
 !End of the abilint section
 
     integer, intent(in) :: id

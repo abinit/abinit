@@ -8,7 +8,7 @@
 !! non linear response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2017 ABINIT group (MVeithen, MB)
+!! Copyright (C) 2002-2018 ABINIT group (MVeithen, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,20 +78,22 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_ebands
  use m_xcdata
 
+ use m_time,     only : timab
  use m_dynmat,   only : d3sym, sytens
- use m_ddb,      only : nlopt, DDB_VERSION
+ use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_kg,       only : getcut, kpgio
+ use m_kpts,     only : getkgrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts
@@ -110,6 +112,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !scalars
  integer,intent(in) :: iexit,mband,mgfft,mkmem,mpw,nfft
  integer,intent(in) :: natom,nkpt,nspden,nspinor,nsppol,nsym
+ logical :: non_magnetic_xc
  real(dp),intent(inout) :: etotal
  character(len=6),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -160,6 +163,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  comm_cell = mpi_enreg%comm_cell
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check if the perturbations asked in the input file can be computed
 
@@ -343,7 +349,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 !Open and read pseudopotential files
  ecore = 0_dp
  call status(0,dtfil%filstat,iexit,level,'call pspini   ')
- call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,level,&
+ call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,&
 & pawrad,pawtab,psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 !Initialize band structure datatype
@@ -437,7 +443,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(work,(0))
  call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfft,dtset%ngfft,&
-& work,0,work,0,nkxc,nk3xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
+& work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc,1,&
 & vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
  ABI_DEALLOCATE(work)
 

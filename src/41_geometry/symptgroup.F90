@@ -5,10 +5,10 @@
 !!
 !! FUNCTION
 !! Derive the name of the point group (+holohedry), from symrel.
-!! Warning : might have to change the holohedry hR to hP, if hexagonal axes
+!! Warning: might have to change the holohedry hR to hP, if hexagonal axes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (XG)
+!! Copyright (C) 2000-2018 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

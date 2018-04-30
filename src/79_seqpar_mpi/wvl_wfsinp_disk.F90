@@ -13,7 +13,7 @@
 !! When initialised from memory (reformating), wvl%wfs%[h]psi will be reallocated.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DC)
+!! Copyright (C) 1998-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

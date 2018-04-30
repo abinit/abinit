@@ -10,7 +10,7 @@
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,6 @@
 !!   |              main routine, for each type of atom
 !!  gsqcut=cutoff for G^2 based on ecut for basis sphere (bohr^-2)
 !!  gsqcutdg=PAW only - cutoff for G^2 based on ecutdg (fine grid) for basis sphere (bohr^-2)
-!!  level= level of the calling routine
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!   used to estimate real space mesh (if necessary)
 !!
@@ -69,7 +68,7 @@
 
 #include "abi_common.h"
 
-subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,psps,rprimd,comm_mpi)
+subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
 
  use defs_basis
  use defs_datatypes
@@ -78,6 +77,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,          only : timab
  use m_psps,          only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch
  use m_pawrad,        only : pawrad_type
  use m_pawtab,        only : pawtab_type, pawtab_set_flags
@@ -87,7 +87,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_64_psp, except_this_one => pspini
 !End of the abilint section
 
@@ -95,7 +94,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: level
  integer, optional,intent(in) :: comm_mpi
  integer,intent(out) :: gencond
  real(dp),intent(in) :: gsqcut,gsqcutdg
@@ -448,7 +446,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
 
        psps%vlspl(:,:,itypat)=vlspl(:,:)
        if (.not.psps%vlspl_recipSpace) psps%dvlspl(:, :, itypat) = dvlspl(:, :)
-       if (psps%usepaw==0) then 
+       if (psps%usepaw==0) then
          psps%xccc1d(:,:,itypat)=xccc1d(:,:)
        end if
        psps%xcccrc(itypat)=xcccrc
@@ -486,7 +484,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
                        psps%indlmn(6,ilmn,itypat)=ispin
                        ! The two lines below do not work for PAW
                        if (psps%usepaw==0) then
-                         psps%ekb(ilmn,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(ilmn0,ipspalch) 
+                         psps%ekb(ilmn,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(ilmn0,ipspalch)
                        end if
                        psps%ffspl(:,:,ilmn,itypat)=ffspl_alch(:,:,ilmn0,ipspalch)
                      end if ! ilang is OK
@@ -601,4 +599,71 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
  DBG_EXIT("COLL")
 
 end subroutine pspini
+!!***
+
+!!****f* ABINIT/pspcor
+!! NAME
+!! pspcor
+!!
+!! FUNCTION
+!! Compute ecore pseudoion-pseudoion correction energy from epsatm for
+!! different types of atoms in unit cell.
+!!
+!! INPUTS
+!!  natom=number of atoms in cell
+!!  ntypat=number of types of atoms
+!!  typat(natom)=integer label of 'typat' for each atom in cell
+!!  epsatm(ntypat)=pseudoatom energy for each type of atom
+!!  zion(ntypat)=valence charge on each type of atom in cell
+!!
+!! OUTPUT
+!!  ecore=resulting psion-psion energy in Hartrees
+!!
+!! PARENTS
+!!      pspini
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
+
+ use defs_basis
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pspcor'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat
+ real(dp),intent(out) :: ecore
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: epsatm(ntypat),zion(ntypat)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ia
+ real(dp) :: charge,esum
+
+! *************************************************************************
+
+ charge = 0.d0
+ esum = 0.d0
+ do ia=1,natom
+!  compute pseudocharge:
+   charge=charge+zion(typat(ia))
+!  add pseudocore energies together:
+   esum = esum + epsatm(typat(ia))
+ end do
+
+ ecore=charge*esum
+
+end subroutine pspcor
 !!***

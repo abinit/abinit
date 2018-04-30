@@ -8,7 +8,7 @@
 !! the proper symmetries 2,2_1,3,3_1,3_2,4,4_1,4_2,4_3,6,6_1,...6_5
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (RC, XG)
+!! Copyright (C) 2000-2018 ABINIT group (RC, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

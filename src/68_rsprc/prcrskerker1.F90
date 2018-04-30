@@ -8,7 +8,7 @@
 !! using a model dielectric function in real space
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (PMA)
+!! Copyright (C) 1998-2018 ABINIT group (PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,11 +61,12 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
  use mod_prc_memory
  use m_profiling_abi
 
+ use m_spacepar, only : laplacian
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcrskerker1'
- use interfaces_56_recipspace
  use interfaces_62_cg_noabirule
 !End of the abilint section
 

@@ -8,7 +8,7 @@
 !! Module with the datatype polynomial coefficients
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2017 ABINIT group (AM)
+!! Copyright (C) 2010-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,7 @@ module m_polynomial_coeff
  use m_sort,only : sort_dp
  use m_crystal,only : crystal_t,symbols_crystal
  use m_supercell, only: getPBCIndexes_supercell,distance_supercell,findBound_supercell
+ use m_geometry, only: xcart2xred,metric
  use m_xmpi
 #ifdef HAVE_MPI2
  use mpi
@@ -813,7 +814,7 @@ end subroutine polynomial_coeff_MPIrecv
 !! This routine print the coefficents into XML format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2017 ABINIT group (AM)
+!! Copyright (C) 2000-2018 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1271,9 +1272,9 @@ end subroutine polynomial_coeff_evaluate
 !!
 !! INPUTS
 !! cell(3,nrpt) = indexes of the cells into the supercell (-1 -1 -1, 0 0 0 ...)
-!! cutoff = cut-off for the inter atomic forces constants
-!! dist(natom,natom,nrpt) = distance between atoms atm1 is in the cell 0 0 0
-!!                                                 atm2 is in the nrpt cell (see cell(3,nrpt))
+!! dist(3,natom,natom,nrpt) = distance between atoms atm1 is in the cell 0 0 0
+!!                                                   atm2 is in the nrpt cell (see cell(3,nrpt))
+!!                            for each component x,y and z
 !! crystal<type(crystal_t)> = datatype with all the information for the crystal
 !! natom = number of atoms in the unit cell
 !! nrpt  = number of cell in the supercell
@@ -1292,6 +1293,7 @@ end subroutine polynomial_coeff_evaluate
 !! list_symstr(nstr_sym,nsym) = array with the list of the strain  and the symmetrics
 !! nstr_sym = number of coefficient for the strain
 !! ncoeff_sym = number of coefficient for the IFC
+!! range_ifc(3) = maximum cut-off for the inter atomic forces constants in each direction
 !! sc_size(3) = optional,size of the supercell used for the fit.
 !!               For example if you want to fit 2x2x2 cell the interation
 !!               Sr-Ti and Sr-Ti[2 0 0] will be identical for the fit process
@@ -1306,8 +1308,8 @@ end subroutine polynomial_coeff_evaluate
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_symstr,&
-&                                   natom,nstr_sym,ncoeff_sym,nrpt,sc_size)
+subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
+&                                   natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1323,13 +1325,13 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 !scalars
  integer,intent(in) :: natom,nrpt
  integer,intent(out) :: ncoeff_sym,nstr_sym
- real(dp),intent(in):: cutoff
 !arrays
  integer,intent(in) :: cell(3,nrpt)
- real(dp),intent(in):: dist(natom,natom,nrpt)
+ real(dp),intent(in):: dist(3,natom,natom,nrpt)
  type(crystal_t), intent(in) :: crystal
- integer,allocatable,intent(out) :: list_symcoeff(:,:,:),list_symstr(:,:)
+ integer,allocatable,intent(out) :: list_symcoeff(:,:,:),list_symstr(:,:,:)
  integer,optional,intent(in) :: sc_size(3)
+ real(dp),intent(in):: range_ifc(3)
 !Local variables-------------------------------
 !scalar
  integer :: ia,ib,icoeff,icoeff2,icoeff_tot,icoeff_tmp,idisy1,idisy2,ii
@@ -1338,15 +1340,15 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  integer :: ncoeff,ncoeff2,ncoeff_max,nu
  integer :: nsym,shift_atm1(3)
  integer :: shift_atm2(3)
- real(dp):: tolsym8
- logical :: found,check_pbc
+ real(dp):: dist_orig,dist_sym,tolsym8
+ logical :: found,check_pbc,possible
 !arrays
- integer :: sym(3,3),sc_size_in(3)
+ integer :: isym_rec(3,3),isym_rel(3,3),sc_size_in(3)
  integer :: transl(3),min_range(3),max_range(3)
  integer,allocatable :: blkval(:,:,:,:,:),list(:),list_symcoeff_tmp(:,:,:),list_symcoeff_tmp2(:,:,:)
- integer,allocatable :: list_symstr_tmp(:,:),indsym(:,:,:) ,symrec(:,:,:)
+ integer,allocatable :: list_symstr_tmp(:,:,:),indsym(:,:,:) ,symrec(:,:,:),symrel(:,:,:)
  real(dp),allocatable :: tnons(:,:)
- real(dp),allocatable :: wkdist(:),xcart(:,:),xred(:,:)
+ real(dp),allocatable :: wkdist(:),xcart(:,:),xred(:,:),distance(:,:,:)
  real(dp) :: difmin(3)
  real(dp) :: rprimd(3,3)
  real(dp) :: tratom(3)
@@ -1388,11 +1390,13 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 !Obtain a list of rotated atom labels:
  ABI_ALLOCATE(indsym,(4,nsym,natom))
  ABI_ALLOCATE(symrec,(3,3,nsym))
+ ABI_ALLOCATE(symrel,(3,3,nsym))
  ABI_ALLOCATE(tnons,(3,nsym))
  symrec = crystal%symrec
+ symrel = crystal%symrel
  tnons  = crystal%tnons
 
- tolsym8=tol8
+ tolsym8=tol20
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,crystal%typat,crystal%xred)
  ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
@@ -1401,10 +1405,10 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  ABI_ALLOCATE(wkdist,(natom*nrpt))
 
 !1-Fill strain list
- ABI_ALLOCATE(list_symstr_tmp,(6,nsym))
+ ABI_ALLOCATE(list_symstr_tmp,(6,nsym,2))
  list_symstr_tmp = 1
  do ia=1,6
-   if(list_symstr_tmp(ia,1)==0)cycle
+   if(list_symstr_tmp(ia,1,1)==0)cycle
 !  Transform the voigt notation
    if(ia<=3)then
      mu=ia;nu=ia
@@ -1419,83 +1423,116 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
      end select
    end if
    do isym=1,nsym
-!  Get the symmetry matrix
-     sym(:,:) = crystal%symrel(:,:,isym)
+!    Get the symmetry matrix
+     isym_rel(:,:) = crystal%symrel(:,:,isym)
      do idisy1=1,3
        do idisy2=1,3
-         if((sym(mu,idisy1)/=0.and.sym(nu,idisy2)/=0).or.&
-&           (sym(mu,idisy2)/=0.and.sym(nu,idisy1)/=0))then
+         if((isym_rel(mu,idisy1)/=0.and.isym_rel(nu,idisy2)/=0)) then
 !          Transform to the voig notation
            if(idisy1==idisy2)then
-             list_symstr_tmp(ia,isym) = idisy1
+             list_symstr_tmp(ia,isym,1) = idisy1
+             list_symstr_tmp(ia,isym,2) = isym_rel(mu,idisy1)
            else
              if(idisy1==1.or.idisy2==1)then
                if(idisy1==2.or.idisy2==2)then
-                 list_symstr_tmp(ia,isym) = 6
+                 list_symstr_tmp(ia,isym,1) = 6
                end if
                if(idisy1==3.or.idisy2==3)then
-                 list_symstr_tmp(ia,isym) = 5
+                 list_symstr_tmp(ia,isym,1) = 5
                end if
              else
-               list_symstr_tmp(ia,isym) = 4
+               list_symstr_tmp(ia,isym,1) = 4
              end if
-           end if
+           end if           
+           list_symstr_tmp(ia,isym,2) = isym_rel(mu,idisy1) * isym_rel(nu,idisy2)
          end if
        end do
      end do
 !    Remove the symetric
-     if(list_symstr_tmp(ia,isym) > ia) then
-       list_symstr_tmp(list_symstr_tmp(ia,isym),:) = 0
-     end if
+!     if(list_symstr_tmp(ia,isym,1) > ia) then
+!       list_symstr_tmp(list_symstr_tmp(ia,isym,1),:,1) = 0
+!     end if
    end do
-  end do
+ end do
 
 !Count the number of strain and transfert into the final array
   nstr_sym = 0
   do ia=1,6
-    if(list_symstr_tmp(ia,1)/=0) nstr_sym = nstr_sym + 1
+    if(list_symstr_tmp(ia,1,1)/=0) nstr_sym = nstr_sym + 1
   end do
 
  if(allocated(list_symstr))then
    ABI_DEALLOCATE(list_symstr)
  end if
- ABI_ALLOCATE(list_symstr,(nstr_sym,nsym))
+ ABI_ALLOCATE(list_symstr,(nstr_sym,nsym,2))
 
  icoeff_tmp = 1
  do ia=1,6
-   if(list_symstr_tmp(ia,1)/=0) then
-     list_symstr(icoeff_tmp,:) = list_symstr_tmp(ia,:)
+   if(list_symstr_tmp(ia,1,1)/=0) then
+     list_symstr(icoeff_tmp,:,:) = list_symstr_tmp(ia,:,:)
      icoeff_tmp = icoeff_tmp + 1
    end if
  end do
 !END STRAIN
 
+!Compute the distance between each atoms. Indeed the dist array contains the difference of
+!cartesian coordinate for each direction 
+ ABI_ALLOCATE(distance,(natom,natom,nrpt))
+ do ia=1,natom
+   do ib=1,natom
+     do irpt=1,nrpt
+       distance(ia,ib,irpt) = ((dist(1,ia,ib,irpt))**2+(dist(2,ia,ib,irpt))**2+&
+&                              (dist(3,ia,ib,irpt))**2)**0.5
+     end do
+   end do
+ end do
+
+ 
 !Set to one blkval, all the coeff have to be compute
  blkval = 1
  icoeff = 1
  icoeff_tot = 1
  list_symcoeff_tmp = 0
-
  
 !2-Fill atom list
 !Big loop over generic atom 
  do ia=1,natom
-   wkdist(:)=reshape(dist(ia,:,:),(/natom*nrpt/))
+   wkdist(:)=reshape(distance(ia,:,:),(/natom*nrpt/))
    do ii=1,natom*nrpt
      list(ii)=ii
    end do
    call sort_dp(natom*nrpt,wkdist,list,tol8)
    do ii=1,natom*nrpt
 !    Get the irpt and ib
-     irpt=(list(ii)-1)/natom+1     
+     irpt=(list(ii)-1)/natom+1
      ib=list(ii)-natom*(irpt-1)
-     if(dist(ia,ib,irpt) >= cutoff) then
-!      If this distance is superior to the cutoff, we don't compute
+     possible = .true.
+!Old way with the cut off     
+!     if(((dist(1,ia,ib,irpt)**2+dist(2,ia,ib,irpt)**2+dist(3,ia,ib,irpt)**2)**0.5) > 9)then
+!       possible = .false.
+!     end if
+     do jj=1,3
+!        if(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj)  > tol10.or.&
+! &          abs(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj))  < tol10)then
+        if(abs(dist(jj,ia,ib,irpt)) - range_ifc(jj)  > tol10)then
+       possible = .false.
+       end if
+     end do
+
+!    If this distance is superior to the cutoff, we don't compute that term
+     if(.not.possible)then
        blkval(:,ia,:,ib,irpt)= 0
        if(irpt==irpt_ref)blkval(:,ib,:,ia,irpt)= 0
-!      Stop the loop
-       exit
+!        Stop the loop
+       cycle
      end if
+
+!    If this coefficient is not possible, we cycle...
+     if (all(blkval(:,ia,:,ib,irpt)==0)) cycle
+
+!    Save the distance between the two atoms for futur checks
+     dist_orig = (dist(1,ia,ib,irpt)**2+dist(2,ia,ib,irpt)**2+dist(3,ia,ib,irpt)**2)**0.5
+     
      do mu=1,3
        do nu=1,3
 !      Check if : - The coefficient is not yet compute
@@ -1512,21 +1549,22 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
            blkval(nu,ib,mu,ia,irpt)=0
            cycle
          end if
-         
          if(blkval(mu,ia,nu,ib,irpt)==1)then
 !          Loop over symmetries 
            do isym=1,nsym
-!            Get the symmetry matrix 
-             sym(:,:) = crystal%symrel(:,:,isym)
+!            Get the symmetry matrix for this sym
+             isym_rec(:,:)  = crystal%symrec(:,:,isym)
+             isym_rel(:,:) = crystal%symrel(:,:,isym)
 !            Get the corresponding atom and shift with the symetries 
 !            For atom 1
              ipesy1 = indsym(4,isym,ia)
              shift_atm1 = indsym(1:3,isym,ia)
 !            And atom 2
              do jj=1,3 ! Apply transformation to original coordinates.
-               tratom(jj) = dble(sym(1,jj))*(xred(1,ib)+cell(1,irpt)-tnons(1,isym))&
-&                          +dble(sym(2,jj))*(xred(2,ib)+cell(2,irpt)-tnons(2,isym))&
-&                          +dble(sym(3,jj))*(xred(3,ib)+cell(3,irpt)-tnons(3,isym))
+              tratom(jj) = dble(isym_rec(1,jj))*(xred(1,ib)+cell(1,irpt)-tnons(1,isym))&
+&                         +dble(isym_rec(2,jj))*(xred(2,ib)+cell(2,irpt)-tnons(2,isym))&
+&                         +dble(isym_rec(3,jj))*(xred(3,ib)+cell(3,irpt)-tnons(3,isym))
+
              end do
 
 !            Find symmetrically equivalent atom
@@ -1535,7 +1573,6 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 
 !            Put information into array indsym: translations and label
              shift_atm2(:)= transl(:) - shift_atm1(:)
-             
              found = .false.
              do irpt3=1,nrpt
                if(cell(1,irpt3)==shift_atm2(1).and.&
@@ -1545,6 +1582,19 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
                  irpt_sym = irpt3
                end if
              end do
+             
+!            Check the distance
+             dist_sym = (dist(1,ipesy1,ipesy2,irpt_sym)**2+&
+&                        dist(2,ipesy1,ipesy2,irpt_sym)**2+&
+&                        dist(3,ipesy1,ipesy2,irpt_sym)**2)**0.5
+             if(abs(dist_orig - dist_sym) > tol10)then
+               write(message, '(a,i0,2a,I0,a,es15.8,2a,es15.8,2a)' )&
+&                'The distance between the atoms for the coefficient number ',icoeff,ch10,&
+&                'with the symmetry ',isym,' is ',dist_sym,ch10,'but the original distance is',&
+&                   dist_orig,ch10,&
+&                'Action: Contact abinit group'
+               MSG_BUG(message)
+             end if
 !            Now that a symmetric perturbation has been obtained,
 !            including the expression of the symmetry matrix, see
 !            if the symmetric perturbations are available
@@ -1557,7 +1607,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
                    blkval(idisy2,ipesy1,idisy1,ipesy2,irpt_sym) = 0
                    cycle
                  else
-                   if(sym(mu,idisy1)/=0.and.sym(nu,idisy2)/=0)then
+                   if(isym_rel(mu,idisy1)/=0.and.isym_rel(nu,idisy2)/=0)then
                      if(.not.found.or.(irpt_sym==irpt_ref.and.ipesy1==ipesy2)) then
 !                      Remove this term (is not computed) Sr-Sr or not include in the cell
 !                      Also remove oposite term... (Srx-Tix) = (Ti-Srx)
@@ -1565,9 +1615,17 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
                        blkval(idisy2,ipesy2,idisy1,ipesy1,irpt_sym) = 0
                        cycle
                      else
-!                      Fill the list with the coeff and symetric (need all symetrics)
+!                      Fill the list with the coeff and symmetric (need all symmetrics)
                        list_symcoeff_tmp(1:4,icoeff,isym)=(/idisy1,ipesy1,ipesy2,irpt_sym/)
-                       list_symcoeff_tmp(5,icoeff,isym)= sym(mu,idisy1)
+!                      Check the sign
+                       if(isym_rel(mu,idisy1)/=isym_rel(nu,idisy2))then
+                         write(message, '(a,i0,a,I0,4a)' )&
+&                        'The sign of coefficient number ',icoeff,' with the symmetry ',isym,ch10,&
+&                        'can not be found... Something is going wrong',ch10,&
+&                        'Action: Contact abinit group'
+                         MSG_BUG(message)                         
+                       end if
+                       list_symcoeff_tmp(5,icoeff,isym)= isym_rel(nu,idisy2)
                      end if
                    end if
                  end if
@@ -1588,6 +1646,8 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
    ABI_DEALLOCATE(list_symcoeff)
  end if
 
+ ABI_DEALLOCATE(distance)
+ 
 !Transfert the final array with all the coefficients
 !With this array, we can access to all the terms presents
 !ncoeff1 + symetrics
@@ -1632,7 +1692,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 &                               list_symcoeff_tmp2(3,icoeff,isym),&
 &                               list_symcoeff_tmp2(4,icoeff,isym),&
 &                               list_symcoeff_tmp2(1,icoeff,isym),&
-&                               real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
+&                               ncoeff)
      list_symcoeff_tmp2(6,icoeff,isym) = icoeff2
    end do
  end do
@@ -1716,7 +1776,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 &                                 list_symcoeff_tmp2(2,icoeff,isym),&
 &                                 list_symcoeff_tmp2(4,icoeff,isym),&
 &                                 list_symcoeff_tmp2(1,icoeff,isym),&
-&                                 real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
+&                                 ncoeff)
        if (icoeff2> icoeff)then
          list_symcoeff_tmp2(:,icoeff2,1) = 0
        end if
@@ -1766,7 +1826,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
 &                               list_symcoeff(3,icoeff,isym),&
 &                               list_symcoeff(4,icoeff,isym),&
 &                               list_symcoeff(1,icoeff,isym),&
-&                               real(list_symcoeff(5,icoeff,isym),dp),ncoeff)
+&                               ncoeff)
      list_symcoeff(6,icoeff,isym) = icoeff2
    end do
  end do
@@ -1782,6 +1842,7 @@ subroutine polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_
  ABI_DEALLOCATE(list_symstr_tmp)
  ABI_DEALLOCATE(indsym) 
  ABI_DEALLOCATE(symrec)
+ ABI_DEALLOCATE(symrel)
  ABI_DEALLOCATE(tnons)
  ABI_DEALLOCATE(xcart)
  ABI_DEALLOCATE(xred )
@@ -1804,9 +1865,10 @@ end subroutine polynomial_coeff_getList
 !! cutoff = cut-off for the inter atomic forces constants
 !! crystal<type(crystal_t)> = datatype with all the information for the crystal
 !! power_disps(2) = array with the minimal and maximal power_disp to be computed
+!! max_power_strain = maximum power of the strain
 !! option = 0 compute all terms
 !!          1 still in development
-!! sc_size(3) = optional,size of the supercell used for the fit.
+!! sc_size(3) = size of the supercell used for the fit.
 !!               For example if you want to fit 2x2x2 cell the interation
 !!               Sr-Ti and Sr-Ti[2 0 0] will be identical for the fit process
 !!               If check_pbc is true we remove these kind of terms
@@ -1834,8 +1896,8 @@ end subroutine polynomial_coeff_getList
 !! SOURCE
 
 subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_tot,power_disps,&
-&                                     option,sc_size,comm,anharmstr,spcoupling,distributed,&
-&                                     only_odd_power,only_even_power,verbose)
+&                                     max_power_strain,option,sc_size,comm,anharmstr,spcoupling,&
+&                                     distributed,only_odd_power,only_even_power,verbose)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1849,7 +1911,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: option,comm
+ integer,intent(in) :: max_power_strain,option,comm
  integer,intent(out):: ncoeff,ncoeff_tot
  real(dp),intent(in):: cutoff
  logical,optional,intent(in) :: anharmstr,spcoupling,distributed,verbose
@@ -1865,17 +1927,18 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer :: master,my_rank,my_ncoeff,my_newncoeff,natom,ncombinaison,ncoeff_max,ncoeff_sym
  integer :: ncoeff_alone,ndisp_max,nproc,nrpt,nsym,nterm,nstr_sym,r1,r2,r3,my_size
  integer :: my_icoeff,rank_to_send,rank_to_receive,rank_to_send_save
+ real(dp):: norm
  logical :: iam_master,need_anharmstr,need_spcoupling,need_distributed,need_verbose
  logical :: need_only_odd_power,need_only_even_power
 !arrays
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
- integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:),list_coeff(:),list_combinaison(:,:)
+ integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combinaison(:,:)
  integer,allocatable :: list_combinaison_tmp(:,:)
  integer,allocatable  :: my_coefflist(:),my_coeffindexes(:),my_newcoeffindexes(:)
- real(dp) :: rprimd(3,3)
- real(dp),allocatable :: dist(:,:,:),rpt(:,:)
+ real(dp) :: rprimd(3,3),range_ifc(3)
+ real(dp),allocatable :: dist(:,:,:,:),rpt(:,:)
  real(dp),allocatable :: xcart(:,:),xred(:,:)
  character(len=5),allocatable :: symbols(:)
  character(len=200):: name
@@ -1920,6 +1983,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  need_only_even_power = .FALSE.
  if(present(only_even_power)) need_only_even_power = only_even_power
 
+ if(need_only_odd_power.and.need_only_even_power)then
+      write(message, '(3a)' )&
+&       'need_only_odd_power and need_only_even_power are both true',ch10,&
+&       'Action: contact abinit group'
+   MSG_ERROR(message)
+ end if
+
  natom  = crystal%natom
  nsym   = crystal%nsym
  rprimd = crystal%rprimd
@@ -1929,10 +1999,15 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  xcart(:,:) = crystal%xcart(:,:)
  xred(:,:)  = crystal%xred(:,:)
 
- ncell =  (/int(anint(cutoff/rprimd(1,1))+1),&
-&          int(anint(cutoff/rprimd(2,2))+1),&
-&          int(anint(cutoff/rprimd(3,3))+1)/)
+!Compute the max range of the ifc with respect to the trainning set
+ range_ifc(:) = zero
+ do ii=1,3
+   norm = sqrt(rprimd(ii,1)**2+ rprimd(ii,2)**2+rprimd(ii,3)**2)
+   range_ifc(ii) = range_ifc(ii) + norm * sc_size(ii) / 2.0
+ end do
 
+!compute new ncell
+ ncell = sc_size
  lim1=((ncell(1)/2)) + 1
  lim2=((ncell(2)/2)) + 1
  lim3=((ncell(3)/2)) + 1 
@@ -1941,7 +2016,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  if(mod(ncell(3),2)/=0) lim3=lim3+1
  nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
 
-!compute new ncell
  ncell(1) = 2*lim1+1
  ncell(2) = 2*lim2+1
  ncell(3) = 2*lim3+1
@@ -1978,15 +2052,15 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 &                     symbols,crystal%typat,crystal%znucl)
 
 !Compute the distances between atoms
-!Now dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
- ABI_ALLOCATE(dist,(natom,natom,nrpt))
+!Now dist(3,ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
+ ABI_ALLOCATE(dist,(3,natom,natom,nrpt))
  dist = zero
  do ia=1,natom
    do ib=1,natom
      do irpt=1,nrpt
-       dist(ia,ib,irpt) = ((xcart(1,ib)-xcart(1,ia)+rpt(1,irpt))**2+&
-&                          (xcart(2,ib)-xcart(2,ia)+rpt(2,irpt))**2+&
-&                          (xcart(3,ib)-xcart(3,ia)+rpt(3,irpt))**2)**0.5
+       dist(1,ia,ib,irpt) = xcart(1,ib)-xcart(1,ia)+rpt(1,irpt)
+       dist(2,ia,ib,irpt) = xcart(2,ib)-xcart(2,ia)+rpt(2,irpt)
+       dist(3,ia,ib,irpt) = xcart(3,ib)-xcart(3,ia)+rpt(3,irpt)
      end do
    end do
  end do
@@ -1995,8 +2069,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    write(message,'(1a)')' Generation of the list of all the possible coefficients'
    call wrtout(std_out,message,'COLL')
  end if
- call polynomial_coeff_getList(cell,crystal,cutoff,dist,list_symcoeff,list_symstr,&
-&                              natom,nstr_sym,ncoeff_sym,nrpt,sc_size=sc_size)
+ call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
+&                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size=sc_size)
 
  ABI_DEALLOCATE(dist)
  ABI_DEALLOCATE(rpt)
@@ -2018,10 +2092,10 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
    do icoeff=1,ncoeff_tot
      do icoeff2=1,ncoeff_tot     
-!    Select case:
-!    if both icoeff are displacement => check the distance
-!    if both icoeff are strain => check the flag
-!    Otherwise cycle (we keep the term)
+!      Select case:
+!      if both icoeff are displacement => check the distance
+!      if both icoeff are strain => check the flag
+!      Otherwise cycle (we keep the term)
        if(icoeff>ncoeff_sym.and.icoeff2<=ncoeff_sym)cycle
        if(icoeff2<=ncoeff_sym.and.icoeff2>ncoeff_sym)cycle
        if((icoeff>ncoeff_sym.or.icoeff2>ncoeff_sym).and.&
@@ -2042,8 +2116,10 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 &                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
 &                  cell(:,list_symcoeff(4,icoeff,1)),&
 &                  cell(:,list_symcoeff(4,icoeff2,1)))>=cutoff)then
+!TEST_AM
            compatibleCoeffs(icoeff,icoeff2) = 0
            compatibleCoeffs(icoeff2,icoeff) = 0
+!TEST_AM           
          end if
        end if
      end do
@@ -2061,8 +2137,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    icoeff  = 1
    icoeff2 = 0
    call computeCombinaisonFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
-&                   list_coeff,list_combinaison,icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,icoeff,nrpt,&
-&                   nsym,1,power_disps(1),power_disps(2),symbols,nbody=option,&
+&                   list_coeff,list_combinaison,icoeff,max_power_strain,icoeff2,natom,ncoeff_sym,&
+&                   nstr_sym,icoeff,nrpt,nsym,1,power_disps(1),power_disps(2),symbols,nbody=option,&
 &                   compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
    ncombinaison  = icoeff2
@@ -2082,8 +2158,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    icoeff2 = 0
    list_combinaison_tmp = 0
    call computeCombinaisonFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
-&                   list_coeff,list_combinaison_tmp,icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,&
-&                   ncombinaison,nrpt,nsym,1,power_disps(1),power_disps(2),&
+&                   list_coeff,list_combinaison_tmp,icoeff,max_power_strain,icoeff2,natom,&
+&                   ncoeff_sym,nstr_sym,ncombinaison,nrpt,nsym,1,power_disps(1),power_disps(2),&
 &                   symbols,nbody=option,compute=.true.,&
 &                   anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
@@ -2350,6 +2426,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 end subroutine polynomial_coeff_getNorder
 !!***
 
+
 !!****f* m_polynomial_coeff/computeNorder
 !! NAME
 !! computeNorder
@@ -2429,7 +2506,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
  integer,optional,intent(in) :: nbody
 !arrays
  integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff+nstr,ncoeff+nstr)
- integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(nstr,nsym)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(nstr,nsym,2)
  integer,intent(in) :: index_coeff_in(power_disp-1)
  type(polynomial_coeff_type),intent(inout) :: coeffs_out(ncoeff_out)
  character(len=5),intent(in) :: symbols(natom)
@@ -2621,6 +2698,7 @@ end subroutine computeNorder
 !! list_str(nstr_sym,nsym) = array with the list of the strain  and the symmetrics
 !! index_coeff_in(power_disp-1) = list of previous coefficients computed (start with 0)
 !! icoeff = current indexes of the combinaison (start we 1)
+!! max_power_strain = maximum order of the strain
 !! nmodel_tot = current number of combinaison already computed (start we 0)
 !! natom = number of atoms in the unit cell
 !! ncoeff = number of coefficient for related to the atomic displacment into list_symcoeff
@@ -2659,8 +2737,8 @@ end subroutine computeNorder
 !! SOURCE
 
 recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff,list_str,&
-&                                  index_coeff_in,list_combinaison,icoeff,nmodel_tot,natom,ncoeff,nstr,&
-&                                  nmodel,nrpt,nsym,power_disp,power_disp_min,&
+&                                  index_coeff_in,list_combinaison,icoeff,max_power_strain,nmodel_tot,&
+&                                  natom,ncoeff,nstr,nmodel,nrpt,nsym,power_disp,power_disp_min,&
 &                                  power_disp_max,symbols,nbody,only_odd_power,only_even_power,&
 &                                  compute,anharmstr,spcoupling)
 
@@ -2675,14 +2753,15 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
 
 !Arguments ---------------------------------------------
 !scalar 
- integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max,nmodel,nsym,nrpt,nstr
+ integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max
+ integer,intent(in) :: max_power_strain,nmodel,nsym,nrpt,nstr
  integer,intent(inout) :: icoeff,nmodel_tot
  logical,optional,intent(in) :: compute,anharmstr,spcoupling
  integer,optional,intent(in) :: nbody
  logical,optional,intent(in) :: only_odd_power,only_even_power
 !arrays
  integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff+nstr,ncoeff+nstr)
- integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(nstr,nsym)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(nstr,nsym,2)
  integer,intent(in) :: index_coeff_in(power_disp-1)
  integer,intent(out) :: list_combinaison(power_disp_max,nmodel)
  character(len=5),intent(in) :: symbols(natom)
@@ -2753,6 +2832,11 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
        compatible = need_spcoupling
      end if
 
+     if(count(index_coeff > ncoeff) > max_power_strain)then
+       possible = .false.
+       compatible = .false.
+     end if
+
      if(power_disp >= power_disp_min) then
 
 !      count the number of body
@@ -2768,10 +2852,10 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
        end do
 
 !      check the only_odd and only_even flags
-       if(any(mod(powers(1:power_disp-count(powers==0)),2) /=0) .and. need_only_even_power) then
+       if(any(mod(powers(1:power_disp),2) /=0) .and. need_only_even_power) then
          possible = .false.
        end if
-       if(any(mod(powers(1:power_disp-count(powers==0)),2) ==0) .and. need_only_odd_power)then
+       if(any(mod(powers(1:power_disp),2) ==0) .and. need_only_odd_power)then
          possible = .false.
        end if
 !      Check the nbody flag
@@ -2794,8 +2878,8 @@ recursive subroutine computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff
 !    If the model is still compatbile with the input flags, we continue.
      if(compatible)then
        call computeCombinaisonFromList(cell,compatibleCoeffs,list_coeff,list_str,&
-&                                     index_coeff,list_combinaison,icoeff1,nmodel_tot,natom,&
-&                                     ncoeff,nstr,nmodel,nrpt,nsym,power_disp+1,&
+&                                     index_coeff,list_combinaison,icoeff1,max_power_strain,&
+&                                     nmodel_tot,natom,ncoeff,nstr,nmodel,nrpt,nsym,power_disp+1,&
 &                                     power_disp_min,power_disp_max,symbols,nbody=nbody_in,&
 &                                     compute=need_compute,anharmstr=need_anharmstr,&
 &                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
@@ -2831,7 +2915,6 @@ end subroutine computeCombinaisonFromList
 !! ib = index of the atom 1
 !! irpt = indexes of the cell of the second atom 
 !! mu = direction of the IFC 
-!! weight =  weight of the term (-1 or 1) 
 !! ncoeff = number of total coefficients in the list
 !!
 !! OUTPUT
@@ -2844,7 +2927,7 @@ end subroutine computeCombinaisonFromList
 !!
 !! SOURCE
 
-function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
+function getCoeffFromList(list_coeff,ia,ib,irpt,mu,ncoeff) result(coeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2858,7 +2941,6 @@ function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
 !Arguments ------------------------------------
 !scalar
  integer,intent(in) :: ia,ib,irpt,mu,ncoeff
- real(dp),intent(in):: weight
  integer :: coeff
 !arrays
  integer,intent(in) :: list_coeff(6,ncoeff)
@@ -2943,7 +3025,7 @@ subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndi
 !arrays
  integer,intent(in) :: index_coeff(ndisp_max)
  integer,intent(in) :: cell(3,nrpt),list_coeff(6,ncoeff,nsym)
- integer,intent(in) :: list_str(nstr,nsym)
+ integer,intent(in) :: list_str(nstr,nsym,2)
  type(polynomial_term_type),intent(out) :: terms(nsym)
 !Local variables-------------------------------
 !scalar
@@ -2982,8 +3064,9 @@ subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndi
      else
        nstrain = nstrain + 1
        icoeff_str = index_coeff(idisp)-ncoeff
-       strain(nstrain) = list_str(icoeff_str,isym)
+       strain(nstrain) = list_str(icoeff_str,isym,1)
        power_strain(nstrain)  = 1
+       weight = weight*list_str(icoeff_str,isym,2)
      end if
    end do         
    nterm = nterm + 1

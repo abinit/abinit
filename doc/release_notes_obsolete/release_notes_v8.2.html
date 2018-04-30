@@ -1,0 +1,211 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<hr>
+<h5>Copyright (C) 2010-2018 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project between
+June 2016 and January 2017. These release notes
+are relative to modifications/improvements of ABINITv8.2 with respect to v8.0.
+
+Moreover, most of them are also described in the Computer Physics Communications 2016 ABINIT paper, 
+doi:10.1016/j.cpc.2016.04.003
+
+The list of contributors includes :
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval,
+W. Chen, M. Giantomassi, Y. Gillet, X. Gonze, G. Petretto, F. Jollet, A. Martin,
+V. Planes, Y. Pouillon, T. Rangel, F. Ricci, M. Torrent , M. Verstraete
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+__________________________________________________________________
+
+Version 8.2, released on February 16, 2017.
+
+Changes with respect to version 8.0 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS AND IMPORTANT REMARKS
+
+A.0 The 2016 article by the ABINIT group is now mentioned in the acknowledgments :
+    "Recent developments in the ABINIT software package. 
+    Computer. Phys. Communications 205, 106 (2016)".
+    See https://www.abinit.org/doc/helpfiles/for-v8.2/users/acknowledgments.html , as well as
+    the notice at the end of ABINIT runs.
+   
+A.1 inclvkb 1 has been removed. Now the possible values are either 0 or 2
+
+A.2 The default strategy of so_psp has been changed 
+    (see the description of the input variable so_psp).
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 Implementation of the Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS) 
+    minimization algorithm.  Activate this algorithm using ionmov=22. 
+    From the tests that have been run, this algorithm can be much better
+    than the native implementation of BFGS in ABINIT when one approaches convergence, 
+    perhaps because of better treatment of numerical details. 
+    This algorithm might become the default in ABINIT, if the better behaviour is confirmed.
+    Test case : v8#02 .
+    The working routines were based on the original implementation of J. Nocera 
+    available on netlib.org.  They have been reshaped and translated into modern fortran, 
+    then interfaced to ABINIT by F. Bruneval (sources in 45_geomoptim/m_lbfgs.F90).
+
+B.2 A new tutorial is available : a lesson on the calculation of the effective interactions U and J 
+    using constrained Random Phase Approximation (cRPA) for DFT+DMFT (or DFT+U) calculations.
+    See doc/tutorial/lesson_ucalc_crpa.html as well as the automatic tests tutorial/tucrpa#1-5 .
+    This lesson was prepared by B. Amadon.
+
+B.3 Implementation of temperature-dependent spectral functions 
+    (electronic spectral function, with electron-phonon interactions),
+    as well as real part of phonon self-energy (Pi) for gapped systems.
+    Also, automatic test for spectral function, v7#89, and improved documentation.
+    Work by G. Antonius.
+
+B.4 The RPA one-shot bootstrap fxc kernel has been implemented for GW calculations (gwgamma=-8).
+    See Rigamonti et al PRL 114, 146402 (2014) and Berger PRL 115, 137402 (2015).
+    The test v67mbpt#36 has been updated.
+    Work by W. Chen.
+__________________________________________________________________
+
+C. Changes for the developers (also compilers)
+
+C.1 The version control system that is used for the development of ABINIT has been changed : 
+    the whole ABINIT project
+    has been ported from bzr to git.
+    Work by J.-M. Beuken, Y. Pouillon, M. Giantomassi, X. Gonze, 
+    with discussions with many developers.
+
+C.2 New versions of Fortran compilers have been integrated in the test farm:
+    - intel 16.0
+    - gnu 6.1 and 6.2
+    - IBM xlf compiler 14.1
+    - NAG 5.3
+    Corresponding examples are available in doc/config/build-examples.
+    On the contrary, g95 is not tested anymore.
+    Work by J.-M. Beuken
+
+C.3 The v8 directory for tests has been initialized.
+    By Matteo Giantomassi.
+
+C.4 Python 3 >= 3.4 is now supported in build system scripts 
+    (compatibility with py2_ version >= is maintained).
+    By Matteo Giantomassi.
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 The main executable "multibinit" has been created.
+    Its goal is to perform "second-principles calculations", building model Hamiltonians
+    using the data provided by the DDB (or other info from ABINIT).
+    Tests v7#120-124 (should be renamed) as well as paral#95-98.
+    Work by A. Martin.
+
+D.2 A new "driver" within ABINIT has been defined, specifically dealing with electron-phonon 
+    related computations (including zero-point renormalisation). 
+    Set optdriver=7 . 
+    New input variables : ddb_shiftq, eph_task, eph_transport, prtphdos, prtphsurf.
+    See tests v7#88 and 89.
+    Work by M. Giantomassi and G. Antonius.
+
+D.3 The generation of k-point meshes with kptrlatt and shiftk is now tested.
+    See test v8#03 .
+    Work by M. Giantomassi
+
+D.4 As a follow-up of the Achievement B3 in the release notes of ABINITv8.0 (DMFT + TRIQS),
+    new input variables have been defined for DMFT : dmft_tolfreq and dmftctqmc_triqs_nleg.
+    Automatic tests have been set-up, tests v8#01 and paral#99.
+    Work by B. Amadon and V. Planes
+
+D.5 More systematic tests of the IO in parallel (different files) have been set up,
+    in the norm-conserving, PAW and PAW + spin-orbit cases.
+    See tests mpiio#26, 27 and 28.
+    Also, the case paral_kgb=0 is now tested with idle processors. See test paral#62.
+    Work by M. Giantomassi
+
+D.6 The load balancing for the repartition of the plane waves among procs is now monitored,
+    and a dynamical equilibration is made possible thanks to the new input variable pw_unbal_thresh.
+    See test mpiio#26.
+    Work by M. Torrent
+
+D.7 The capability to output spin-resolved DOS in case of spin-orbit NC pseudopotential
+    calculations has been checked, and a test has been set-up (test v7#17).
+    Work by M. Giantomassi
+
+D.8 Files generated by ABINIT, and used by BOLTZTRAP are now tested.
+    See v6#11.
+    Work by M. Giantomassi
+
+D.9 Unit tests (fftprof) have been set up for the use of the MKL-DFTI routines : 
+    unitary#tfftmkl_03 and 04.
+    Work by M. Giantomassi
+
+D.10 Ongoing work : Raman intensities, in the PAW case, using DFPT. 
+     By L. Baguet and M. Torrent
+
+D.11 prtvcbm working with all parallelizations.
+     Tests mpiio 26:28 have been reactivated on 4 processors.
+     By M. Torrent
+
+D.12 On going work related to non-collinear DFPT.
+     By F. Ricci, S. Prokhorenko, and E. Bousquet
+
+D.13 MBPT : support for the commutator [Vnl r] in the case of NC pseudos 
+     with more than one projector per l-channel has been added. 
+     Tests in v67mbpt[40] (GW run with psp8 files).
+     SOC is not yet available, though.
+     The KSS file continues to use the old implementation to maintain backward compatibility 
+     hence outkss won't produce the file if multiple-projectors are detected
+     inclvkb 1 has been removed. Now the possible values are either 0 or 2
+     By M Giantomassi
+
+D.14 For Hirshfeld and Bader : doc and warning.
+     For Hirshfeld charges the output was unclear: the density integral (electrons only) 
+     was called the hirshfeld charge, as opposed to the net one. 
+     For Bader there was no check that the core charge file 
+     corresponded to the pseudopotential used. 
+     Now checks at least that it integrates to znucl-zion, which is a first step. 
+     Important as the default fc files on the web do not have semicore electrons, 
+     whereas many of the psp8 will.
+     Contribution by M. Verstraete.
+     
+D.15 Updated acknowledgments, including the 2016 paper.
+     By X. Gonze
+
+D.16 Ongoing work on forces and stresses for hybrid functionals.
+     By F. Jollet 
+
+D.17 Ongoing work concerning weights for the Fourier interpolation inside ANADDB.
+     By G. Petretto
+
+D.18 Numerous miscellaneous additional bug fixes 
+     (to the sources, as well as to the build system, including patches for the fallbacks), 
+     and improvements of documentation by :
+     G. Antonius, L. Baguet, J. Bieder, F. Bruneval,
+     M. Giantomassi, Y. Gillet, G. Petretto, Y. Pouillon,
+     M. Verstraete, M. Torrent (in particular, for DFPT+PAW).
+
+</pre>
+

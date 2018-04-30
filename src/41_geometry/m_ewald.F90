@@ -7,7 +7,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2017 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2018 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,11 +102,15 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  integer :: ia,ib,ig1,ig2,ig3,ir1,ir2,ir3,newg,newr,ng,nr
  real(dp) :: arg,c1i,ch,chsq,derfc_arg,direct,drdta1,drdta2,drdta3,eta,fac
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
+ real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
  real(dp) :: t1,term
  character(len=500) :: message
 
 ! *************************************************************************
+
+!This is the minimum argument of an exponential, with some safety
+ minexparg=log(tiny(0._dp))+five
 
 !Add up total charge and sum of $charge^2$ in cell
 
@@ -162,7 +166,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              arg=fac*gsq
 
 !            Larger arg gives 0 contribution because of exp(-arg)
-             if (arg <= 80._dp) then
+             if (arg <= -minexparg ) then
 !              When any term contributes then include next shell
                newg=1
                term=exp(-arg)/gsq
@@ -201,7 +205,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
                  grewtn(3,ia)=grewtn(3,ia)-c1i*ig3
                end do
 
-             end if ! End condition of not larger than 80.0
+             end if ! End condition of not larger than -minexparg
            end if ! End skip g=0
          end if ! End triple loop over G s and associated new shell condition
 
@@ -395,6 +399,7 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
  integer :: ia,ib,ig1,ig2,ig3,ir1,ir2,ir3,newg,newr,ng,nr
  real(dp) :: arg1,arg2,arg3,ch,dderfc,derfc_arg,direct,eta,fac,fraca1
  real(dp) :: fraca2,fraca3,fracb1,fracb2,fracb3,g1,g2,g3,gsq,r1,r1c,r2,r2c
+ real(dp) :: minexparg
  real(dp) :: r3,r3c,recip,reta,rmagn,rsq,summi,summr,t1,t2,t3,t4,t5,t6,term1
  real(dp) :: term2,term3,term4
 !arrays
@@ -405,6 +410,9 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 !Define dimensional reciprocal space primitive translations gprimd
 !(inverse transpose of rprimd)
  call matr3inv(rprimd,gprimd)
+
+!This is the minimum argument of an exponential, with some safety
+ minexparg=log(tiny(0._dp))+five
 
 !Add up total charge and sum of charge^2 in cell
  ch=0._dp
@@ -453,7 +461,7 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
              arg1=fac*gsq
 
 !            larger arg1 gives 0 contribution because of exp(-arg1)
-             if (arg1<=80._dp) then
+             if (arg1<= -minexparg) then
 !              When any term contributes then include next shell
                newg=1
                term1=exp(-arg1)/arg1
@@ -485,7 +493,7 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
                strg(5)=strg(5)+t5*term3
                strg(6)=strg(6)+t6*term3
 
-             end if ! End condition not being larger than 80.0
+             end if ! End condition not being larger than -minexparg
            end if ! End skip g=0
 
          end if ! End triple loop and condition of new shell
@@ -666,6 +674,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp),parameter :: y2max=64.0_dp, y2min=1.0d-24
  real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,detdlt,inv_detdlt
  real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
+ real(dp) :: minexparg
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
  character(len=500) :: message
 !arrays
@@ -693,6 +702,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  if (all(zeff == zero)) then
    dyew = zero; return
  end if
+
+!This is the minimum argument of an exponential, with some safety
+ minexparg=log(tiny(0._dp))+five
 
 #ifdef DEV_USESPLINE
  step = (0.1_dp + y2max - y2min) / (ny2_spline - 1)
@@ -822,7 +834,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
              arg1=(two_pi**2)*gsq* inv4eta
 
 !            Larger arg gives 0 contribution:
-             if (arg1<=80._dp) then
+             if (arg1<= -minexparg ) then
                newg=1
 
 !              Here calculate the term
@@ -863,7 +875,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  end do
                end do
 
-             end if ! endif exp() argument is smaller than 80
+             end if ! endif exp() argument is smaller than -minexparg
            end if ! Endif g/=0 :
          end if ! End triple summation over Gs:
        end do

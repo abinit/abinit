@@ -16,7 +16,7 @@
 !!  is also activable using vdw_xc=7
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2017 ABINIT group (BVT)
+!! Copyright (C) 2015-2018 ABINIT group (BVT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,8 +87,9 @@ subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
  use m_profiling_abi
  use m_errors
  use m_atomdata
+
  use m_special_funcs,  only : abi_derfc
-!
+ use m_geometry,     only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -96,7 +97,6 @@ subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 #define ABI_FUNC 'vdw_dftd3'
  use interfaces_14_hidewrite
  use interfaces_20_datashare
- use interfaces_41_geometry
 !End of the abilint section
 
 implicit none

@@ -13,7 +13,7 @@
 !! to deallocate all stuff (descriptors and arrays).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DC)
+!! Copyright (C) 1998-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,6 +53,8 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
  use defs_wvltypes
  use m_profiling_abi
  use m_errors
+
+ use m_geometry, only : xred2xcart
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: createWavefunctionsDescriptors, orbitals_descriptors, &
        & orbitals_communicators, allocate_diis_objects, &
@@ -65,7 +67,6 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_wfs_set'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -167,7 +168,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 & wvl_crmult, wvl_frmult, wfs%ks%lzd%Glr)
 !The memory is not allocated there for memory occupation optimisation reasons.
 
- call orbitals_communicators(me,nproc,wfs%ks%lzd%Glr,wfs%ks%orbs,wfs%ks%comms)  
+ call orbitals_communicators(me,nproc,wfs%ks%lzd%Glr,wfs%ks%orbs,wfs%ks%comms)
 
  write(message, '(a,2I8)' ) &
 & '  | all orbitals have coarse segments, elements:', &
@@ -229,7 +230,7 @@ end subroutine wvl_wfs_set
 !! Some wrappers for BigDFT which uses different names for the same routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DC)
+!! Copyright (C) 1998-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -281,7 +282,7 @@ end subroutine derfcf
 !! Some wrappers for BigDFT which uses different names for the same routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DC)
+!! Copyright (C) 1998-2018 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
