@@ -75,6 +75,8 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
  use m_errors
  use m_profiling_abi
 
+ use m_numeric_tools,      only : invcb
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -125,7 +127,7 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
  need_dvxce=present(dvxce)
  need_dvxcp=present(dvxcp)
 
- if (gga.and.ixcpositron==2) then 
+ if (gga.and.ixcpositron==2) then
    msg = 'xcpositron: GGA not yet implemented for ixcpositron=2 !'
    MSG_ERROR(msg)
  end if
@@ -236,7 +238,7 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
      kf=(three*pi*pi*rhoe)**third
      nqtf2=(rhoe*sqrt(four*kf/pi))**2
      eps=grhoe2(ipt)/nqtf2
-     if (eps<zero) then 
+     if (eps<zero) then
        MSG_ERROR('xcpositron: problem, negative GGA espilon !')
      end if
      expgga=exp(-alpha_gga*eps*third)
@@ -250,12 +252,12 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
      dnqtf2=two*(sqr+rhoe*dsqr)*rhoe*sqr
      d2nqtf2=two*(rhoe*sqr*(two*dsqr+rhoe*d2sqr) &
 &     +sqr*(sqr+rhoe*dsqr) &
-&     +rhoe*(sqr+rhoe*dsqr) ) 
+&     +rhoe*(sqr+rhoe*dsqr) )
      deps=-grhoe2(ipt)*dnqtf2/(nqtf2**two)
      d2eps=-grhoe2(ipt)/(nqtf2*nqtf2*dnqtf2)*(d2nqtf2*nqtf2*nqtf2-two*nqtf2*dnqtf2*dnqtf2)
      dexpgga=-alpha_gga*third*deps*expgga
      d2expgga=-alpha_gga*third*(d2eps*expgga+deps*dexpgga)
-     
+
      exc   = exc  *expgga
      dexc=(dexc*expgga+exc*dexpgga)
      if (need_dvxce) d2exc=d2exc*expgga+two*dexc*dexpgga+exc*d2expgga

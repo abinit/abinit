@@ -22,7 +22,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  ixc=number of the XC functional : 16 for HCTH-93, 17 for HCTH-120, 26 for HCTH-147 and 27 for HCTH-407.  
+!!  ixc=number of the XC functional : 16 for HCTH-93, 17 for HCTH-120, 26 for HCTH-147 and 27 for HCTH-407.
 !!  npts= number of points to be computed
 !!  nspden=1 for unpolarized, 2 for spin-polarized
 !!  grho2_updn(npts,2*nspden-1)=square of the gradient of the spin-up,
@@ -67,6 +67,8 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
  use defs_basis
  use m_errors
  use m_profiling_abi
+
+ use m_numeric_tools,      only : invcb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -149,7 +151,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 !  an error in tables III of JCP 112, 1670 (2000) and JCP 114, 5497 (2001) for the coefficient ccab1
    cxsig0=1.09320_dp ; cxsig1=-0.744056_dp ; cxsig2=5.59920_dp   ; cxsig3=-6.78549_dp ; cxsig4=4.49357_dp
    ccsig0=0.222601_dp; ccsig1=-0.0338622_dp; ccsig2=-0.0125170_dp; ccsig3=-0.802496_dp; ccsig4=1.55396_dp
-   ccab0=0.729974_dp ; ccab1=3.35287_dp   ; ccab2=-11.543_dp    ; ccab3=8.08564_dp   ; ccab4=-4.47857_dp 
+   ccab0=0.729974_dp ; ccab1=3.35287_dp   ; ccab2=-11.543_dp    ; ccab3=8.08564_dp   ; ccab4=-4.47857_dp
  else if(ixc==17)then
 !  HCTH-120 parameters from table III of JCP 112, 1670 (2000)
 !  Note the correction of the sign of cxsig1 and ccsig1, as there is a misprint in the HCTH paper !
@@ -278,9 +280,9 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    call invcb(zetp,zetpm1_3,npts)
    call invcb(zetm,zetmm1_3,npts)
  end if
- 
+
  if (nspden==1) then
-   
+
    if(order==-2) then
 
      do ipts=1,npts
@@ -540,7 +542,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
        rs=rsfac*rhotmot
        sqr_rs=sq_rsfac*rhotmo6
        rsm1_2=sq_rsfac_inv*rhoto6
-       
+
 !      Formulas A6-A8 of PW92LSD
        ec0_q0=-2.0d0*ec0_aa*(one+ec0_a1*rs)
        ec0_q1=2.0d0*ec0_aa*(ec0_b1*sqr_rs+ec0_b2*rs+ec0_b3*rs*sqr_rs+ec0_b4*rs*rs)
@@ -738,7 +740,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    end if
 
  else if(nspden==2) then
-   
+
    if(order**2>1) then
 
      do ipts=1,npts

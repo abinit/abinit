@@ -50,8 +50,8 @@
 !!   calculated if order==3
 !!   In case of local energy functional (option=1,-1 or 3):
 !!    d2vxci(npts,nd2vxc)=              (Hartree*bohr^3)
-!!     if(nspden=1): d2vxci(:,1)=-(2/3)*dvxci/d$\rho$ 
-!!                                  (dvxci is the second derivative, see below)                      
+!!     if(nspden=1): d2vxci(:,1)=-(2/3)*dvxci/d$\rho$
+!!                                  (dvxci is the second derivative, see below)
 !!     if(nspden=2): d2vxci(:,1)=3rd order derivative of XC energy with respect to rhouprhouprhoup,
 !!                   d2vxci(:,2)=3rd order derivative of XC energy with respect to rhouprhouprhodn
 !!                   d2vxci(:,3)=3rd order derivative of XC energy with respect to rhodnrhouprhodn
@@ -118,6 +118,8 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
  use m_profiling_abi
  use m_errors
 
+ use m_numeric_tools,      only : invcb
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -142,7 +144,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 ! The "accurate" value of mu is taken from the PBE code.
 ! The value of mu_c09 is taken from the paper (see above) in order to recover
 ! the GEA behaviour of the enhancement factor for small values of s rather than
-! the LSD linear response limit used in revPBE. 
+! the LSD linear response limit used in revPBE.
 !scalars
  integer,save :: initialized=0
  integer :: exexch_,ipts,ispden
@@ -162,7 +164,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 !real(dp),parameter :: kappa_pbe=0.804_dp
 !GMR
  real(dp),parameter :: kappa_revpbe=1.245_dp,mu=0.2195149727645171_dp
- real(dp),parameter :: kappa_c09=1.245_dp, mu_c09=0.0617_dp 
+ real(dp),parameter :: kappa_c09=1.245_dp, mu_c09=0.0617_dp
  real(dp),parameter :: mu_divkappa_pbe=mu/kappa_pbe
  real(dp),parameter :: mu_divkappa_revpbe=mu/kappa_revpbe
  real(dp),parameter :: rsfac=0.6203504908994000_dp,tolgrad=tol10
@@ -216,7 +218,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
  real(dp),allocatable :: rho_updnm1_3(:,:),rhoarr(:),rhom1_3(:),zetm(:)
  real(dp),allocatable :: zetmm1_3(:),zetp(:),zetpm1_3(:)
 !no_abirules
-!integer :: debug 
+!integer :: debug
 !real(dp) :: delta,factor,grr,rho_dn,rho_dnm,rho_dnp,rho_up,rho_upm,rho_upp,zeta_mean
 !real(dp), allocatable :: wecrsz(:,:),d1wecrsz(:,:),d2wecrsz(:,:),d3wecrsz(:,:)
 !real(dp) :: d3ecrs_drho3,d3ecrs_drhodndrho2,d3ecrs_drhoupdrho2
@@ -340,7 +342,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
    mu_divkappa=mu_divkappa_revpbe
  end if
  if(option==-4)then
-   kappa=kappa_c09  
+   kappa=kappa_c09
  end if
 !DEBUG
 !Finite-difference debugging, do not take away
@@ -954,7 +956,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          rho   =rho_updn(ipts,ispden)
          rhomot=rho_updnm1_3(ipts,ispden)
          ex_lsd= - threefourth_divpi * sixpi2_1_3*rhomot*rhomot*rho
-!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed 
+!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed
 !        to use together with vdw-DF (see above).
          rho_inv=rhomot*rhomot*rhomot
          coeffss=quarter*sixpi2m1_3*sixpi2m1_3*rho_inv*rho_inv*rhomot*rhomot
@@ -972,9 +974,9 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          fx    = one+mu_c09*ss*exp(-alphs2)+kappa*(one-exp(-alphs2/two))
          ex_gga= ex_lsd*fx
          dssdn=-eight*third*ss*rho_inv
-         dfxdn  = dfxdss*dssdn 
-         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn) 
-!        
+         dfxdn  = dfxdss*dssdn
+         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn)
+!
 !        The new definition (v3.3) includes the division by the norm of the gradient
          dssdg =two*coeffss
          dfxdg=dfxdss*dssdg
@@ -993,8 +995,8 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          dvxcdgr(ipts,2)=dvxcdgr(ipts,1)
 
        end do
-       
-       
+
+
      else if(option==1)then
 
 
@@ -1870,7 +1872,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          rho   =rho_updn(ipts,ispden)
          rhomot=rho_updnm1_3(ipts,ispden)
          ex_lsd= - threefourth_divpi * sixpi2_1_3*rhomot*rhomot*rho
-!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed 
+!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed
 !        to use together with vdw-DF (see above).
          rho_inv=rhomot*rhomot*rhomot
          coeffss=quarter*sixpi2m1_3*sixpi2m1_3*rho_inv*rho_inv*rhomot*rhomot
@@ -1886,15 +1888,15 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          fx    = one+mu_c09*ss*exp(-alphs2)+kappa*(one-exp(-alphs2/two))
          ex_gga= ex_lsd*fx
          dssdn=-eight*third*ss*rho_inv
-         dfxdn  = dfxdss*dssdn 
-         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn) 
+         dfxdn  = dfxdss*dssdn
+         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn)
 !        The new definition (v3.3) includes the division by the norm of the gradient
          dssdg =two*coeffss
          dfxdg=dfxdss*dssdg
-         dvxcdgr(ipts,ispden)=ex_lsd*rho*dfxdg 
+         dvxcdgr(ipts,ispden)=ex_lsd*rho*dfxdg
          exc=exc+ex_gga*rho
 
-!        Cooper C09x GGA exchange 
+!        Cooper C09x GGA exchange
 !        Components 3 or 4
          dvxci(ipts,2+ispden)=dvxcdgr(ipts,ispden)
 !        Components 1 or 2
@@ -2886,7 +2888,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          rho   =rho_updn(ipts,ispden)
          rhomot=rho_updnm1_3(ipts,ispden)
          ex_lsd= - threefourth_divpi * sixpi2_1_3*rhomot*rhomot*rho
-!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed 
+!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed
 !        to use together with vdw-DF (see above).
          rho_inv=rhomot*rhomot*rhomot
          coeffss=quarter*sixpi2m1_3*sixpi2m1_3*rho_inv*rho_inv*rhomot*rhomot
@@ -2902,15 +2904,15 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          fx    = one+mu_c09*ss*exp(-alphs2)+kappa*(one-exp(-alphs2/two))
          ex_gga= ex_lsd*fx
          dssdn=-eight*third*ss*rho_inv
-         dfxdn  = dfxdss*dssdn 
-         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn) 
+         dfxdn  = dfxdss*dssdn
+         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn)
 !        The new definition (v3.3) includes the division by the norm of the gradient
          dssdg =two*coeffss
          dfxdg=dfxdss*dssdg
-         dvxcdgr(ipts,ispden)=ex_lsd*rho*dfxdg 
+         dvxcdgr(ipts,ispden)=ex_lsd*rho*dfxdg
          exc=exc+ex_gga*rho
 
-!        Cooper C09x GGA exchange 
+!        Cooper C09x GGA exchange
 !        Components 3 or 4
          dvxci(ipts,2+ispden)=dvxcdgr(ipts,ispden)
 !        Components 1 or 2
@@ -3858,7 +3860,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          rho   =rho_updn(ipts,ispden)
          rhomot=rho_updnm1_3(ipts,ispden)
          ex_lsd= - threefourth_divpi * sixpi2_1_3*rhomot*rhomot*rho
-!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed 
+!        VALENTINO R. COOPER C09x GGA, This is an exchange term proposed
 !        to use together with vdw-DF (see above).
          rho_inv=rhomot*rhomot*rhomot
          coeffss=quarter*sixpi2m1_3*sixpi2m1_3*rho_inv*rho_inv*rhomot*rhomot
@@ -3874,15 +3876,15 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
          fx    = one+mu_c09*ss*exp(-alphs2)+kappa*(one-exp(-alphs2/two))
          ex_gga= ex_lsd*fx
          dssdn=-eight*third*ss*rho_inv
-         dfxdn  = dfxdss*dssdn 
-         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn) 
+         dfxdn  = dfxdss*dssdn
+         vxci(ipts,ispden)=ex_lsd*(four_thirds*fx+rho*dfxdn)
 !        The new definition (v3.3) includes the division by the norm of the gradient
          dssdg =two*coeffss
          dfxdg=dfxdss*dssdg
-         dvxcdgr(ipts,ispden)=ex_lsd*rho*dfxdg 
+         dvxcdgr(ipts,ispden)=ex_lsd*rho*dfxdg
          exc=exc+ex_gga*rho
 
-!        Cooper C09x GGA exchange 
+!        Cooper C09x GGA exchange
 !        Components 3 or 4
          dvxci(ipts,2+ispden)=dvxcdgr(ipts,ispden)
 !        Components 1 or 2
@@ -4115,11 +4117,11 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
            vxci(ipts,ispden)=four_thirds*ex_lsd
            if(present(dvxcdgr)) dvxcdgr(ipts,ispden)=0.0_dp
            exc=exc+ex_lsd*rho
-         else          
+         else
            rho_inv=rhomot*rhomot*rhomot
            coeffss=quarter*sixpi2m1_3*sixpi2m1_3*rho_inv*rho_inv*rhomot*rhomot
            ss=grho2_updn(ipts,ispden)*coeffss
-           if(option==7) then ! This is WC          
+           if(option==7) then ! This is WC
              expss=exp(-ss)
              p1_wc=b_wc+(mu-b_wc)*(one-ss)*expss+two*c_wc*ss/(one+c_wc*ss*ss)
              p2_wc=d_wc*(ss-two)*expss+two*c_wc/(one+c_wc*ss*ss)-&
@@ -4359,11 +4361,11 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
            vxci(ipts,ispden)=four_thirds*ex_lsd
            if(present(dvxcdgr)) dvxcdgr(ipts,ispden)=0.0_dp
            exc=exc+ex_lsd*rho
-         else          
+         else
            rho_inv=rhomot*rhomot*rhomot
            coeffss=quarter*sixpi2m1_3*sixpi2m1_3*rho_inv*rho_inv*rhomot*rhomot
-           ss=grho2_updn(ipts,ispden)*coeffss       
-           if(option==7) then ! This is WC          
+           ss=grho2_updn(ipts,ispden)*coeffss
+           if(option==7) then ! This is WC
              expss=exp(-ss)
              p1_wc=b_wc+(mu-b_wc)*(one-ss)*expss+two*c_wc*ss/(one+c_wc*ss*ss)
              p2_wc=d_wc*(ss-two)*expss+two*c_wc/(one+c_wc*ss*ss)-&
@@ -4410,8 +4412,8 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
              d2vxci(ipts,3*ispden-2) = -2._dp*dvxci(ipts,2*ispden-1)*(rhomot*rhomot*rhomot)/3._dp
 
-!            mixed thir order derivatives of the exchange energy with respect to rho of 
-!            different spin polarization are zero 
+!            mixed thir order derivatives of the exchange energy with respect to rho of
+!            different spin polarization are zero
              d2vxci(ipts,2)=zero
              d2vxci(ipts,3)=zero
 
@@ -4574,7 +4576,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
 
 !          fab : INGREDIENTS NEEDED
-           
+
            a1fa=-third*(threefourth_divpi**(third))*((rhotot)**(-4._dp/3._dp))
            a2fa=(1._dp-zeta)/rhotot
            b2fa=(-2._dp/3._dp)*((threefourth_divpi)**(third))*((7._dp/3._dp)*(-1._dp+zeta)/((rhotot)**(7._dp/3._dp)))
@@ -4598,7 +4600,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
 
 !          TERMS APPEARING IN THE THIRD ORDER DERIVATIVES
-!          terms appearing in the third order derivatives of the spin polarized 
+!          terms appearing in the third order derivatives of the spin polarized
 !          correlation energy with respect to spin densities
 
 
@@ -4609,7 +4611,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 !          &           ((-ec1_q1p**2)*(4._dp*ec1_aa*ec1_a1)+ec1_q0*ec1_q1pp*ec1_q1+ec1_q0p*(ec1_q1p**2)+ &
 !          &           2._dp*ec1_q0*ec1_q1p*ec1_q1pp)*(ec1_den**2)*(2._dp*ec1_q1+1._dp)- &
 !          &           (2._dp*ec1_q0*(ec1_q1p**3)*((2._dp*ec1_q1+1._dp)**2))*(ec1_den**3)+  &
-!          &           (2._dp*ec1_q0*(ec1_q1p**3))*(ec1_den**2)      
+!          &           (2._dp*ec1_q0*(ec1_q1p**3))*(ec1_den**2)
 
            ec1_q1ppp = 0.75_dp*ec1_aa*(rsm1_2**5)*(ec1_b1-ec1_b3*rs)
            ec1_f1 = 1._dp/(ec1_q1*ec1_q1*(1._dp + ec1_q1))
@@ -4620,15 +4622,15 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 &           ec1_f2*(3._dp*ec1_q1p*(-2._dp*ec1_aa*ec1_a1*ec1_q1p + ec1_q0*ec1_q1pp) + &
 &           ec1_f2*2._dp*ec1_q0*(ec1_q1p**3)*(1._dp + 3._dp*ec1_q1*(1._dp + ec1_q1))))
 
-           
+
 !          mac_q0p=-2.0_dp*mac_aa*mac_a1
-!          mac_q1ppp=(3._dp/4._dp)*mac_aa*(mac_b1*((rsm1_2)**5)-mac_b3*((rsm1_2)**3))     
+!          mac_q1ppp=(3._dp/4._dp)*mac_aa*(mac_b1*((rsm1_2)**5)-mac_b3*((rsm1_2)**3))
 !          This must be erroneous ...
 !          d3macrs_drs3=(mac_q1pp*(4._dp*mac_aa*mac_a1-mac_q0p)-mac_q0*mac_q1ppp)*mac_den+ &
 !          &           ((-mac_q1p**2)*(4._dp*mac_aa*mac_a1)+mac_q0*mac_q1pp*mac_q1+mac_q0p*(mac_q1p**2)+ &
 !          &           2._dp*mac_q0*mac_q1p*mac_q1pp)*(mac_den**2)*(2._dp*mac_q1+1._dp)- &
 !          &           (2._dp*mac_q0*(mac_q1p**3)*((2._dp*mac_q1+1._dp)**2))*(mac_den**3)+  &
-!          &           (2._dp*mac_q0*(mac_q1p**3))*(mac_den**2)         
+!          &           (2._dp*mac_q0*(mac_q1p**3))*(mac_den**2)
 
            mac_q1ppp = 0.75_dp*mac_aa*(rsm1_2**5)*(mac_b1-mac_b3*rs)
            mac_f1 = 1._dp/(mac_q1*mac_q1*(1._dp + mac_q1))
@@ -4639,20 +4641,20 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 &           mac_f2*(3._dp*mac_q1p*(-2._dp*mac_aa*mac_a1*mac_q1p + mac_q0*mac_q1pp) + &
 &           mac_f2*2._dp*mac_q0*(mac_q1p**3)*(1._dp + 3._dp*mac_q1*(1._dp + mac_q1))))
 
-           d3gcrs_drs3=d3ecrs1_drs3-d3ecrs0_drs3+d3macrs_drs3*fsec_inv      
-           d3ecrs_drs3=d3ecrs0_drs3+f_zeta*(zeta4*d3gcrs_drs3-d3macrs_drs3*fsec_inv)   
-           factfppp_zeta=-two*third*factfpp_zeta*alpha_zeta2                   
-           fppp_zeta=factfppp_zeta*(((zetpm1_3(ipts))**5)-((zetmm1_3(ipts))**5))   
+           d3gcrs_drs3=d3ecrs1_drs3-d3ecrs0_drs3+d3macrs_drs3*fsec_inv
+           d3ecrs_drs3=d3ecrs0_drs3+f_zeta*(zeta4*d3gcrs_drs3-d3macrs_drs3*fsec_inv)
+           factfppp_zeta=-two*third*factfpp_zeta*alpha_zeta2
+           fppp_zeta=factfppp_zeta*(((zetpm1_3(ipts))**5)-((zetmm1_3(ipts))**5))
 
            d3ecrs_dzeta3=(24._dp*zeta*f_zeta+36._dp*(zeta**2)*fp_zeta+  &
 &           12._dp*(zeta**3)*fpp_zeta+(zeta**4)*fppp_zeta)*gcrs+   &
-&           fppp_zeta*(-macrs)*fsec_inv                                   
+&           fppp_zeta*(-macrs)*fsec_inv
 
            d3ecrs_drs2dzeta=dfzeta4_dzeta*(d2gcrs_drs2)+   &
-&           fp_zeta*(-d2macrs_drs2)*fsec_inv                        
+&           fp_zeta*(-d2macrs_drs2)*fsec_inv
 
            d3ecrs_dzeta2drs=d2fzeta4_dzeta2*dgcrs_drs+  &
-&           fpp_zeta*(-dmacrs_drs)*fsec_inv                               
+&           fpp_zeta*(-dmacrs_drs)*fsec_inv
 
 
 
@@ -4672,10 +4674,10 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 !          &           a2fa*((-8._dp*pi/27._dp)*(rs**4)*d2ecrs_drsdzeta+ &
 !          &           (4._dp*pi/27._dp)*(rs**5)*d3ecrs_drs2dzeta)
 
-           
+
 !          d3ecrs_drhodndrho2=d3ecrs_drho3+ &
 !          &           g2fa*((-8._dp*pi/27._dp)*(rs**4)*d2ecrs_drsdzeta+ &
-!          &           (4._dp*pi/27._dp)*(rs**5)*d3ecrs_drs2dzeta)    
+!          &           (4._dp*pi/27._dp)*(rs**5)*d3ecrs_drs2dzeta)
 
 
 !          third order derivatives of the exchange-correlation part
@@ -4747,7 +4749,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 !        dvxci(ipts,3)=dvxci(ipts,3)+d2ecrs_drdn2
 
 
-!        fab: however, here the thing seems a bit strange...option=3 doesn't seem to be completely implemented 
+!        fab: however, here the thing seems a bit strange...option=3 doesn't seem to be completely implemented
 !        (the second derivatives of ec1_q and ec0_q are the derived only in correspondance of the first derivative in the case option !=3 and !=4)
 !        so..I think that here the case "or option==3 should be cancelled
 
@@ -5008,7 +5010,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 !      -----------------------------------------------------------------------------
 
      end do
-   end if 
+   end if
 
 !  fab: this should be the else on nspden
  else
@@ -5143,7 +5145,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 
 !DEBUG
 !deallocate(wecrsz,d1wecrsz,d2wecrsz,d3wecrsz)
-!ENDDEBUG 
+!ENDDEBUG
 
 !DEBUG
 !write(std_out,*)' xcpbe : exit'
