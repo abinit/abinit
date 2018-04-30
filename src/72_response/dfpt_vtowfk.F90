@@ -593,6 +593,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  DBG_EXIT('COLL')
 
 contains
+!!***
 
 !!****f* ABINIT/full_active_wf1
 !!

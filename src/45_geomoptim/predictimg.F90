@@ -191,6 +191,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  end select
 
 contains
+!!***
 
 !!****f* ABINIT/predict_copy
 !! NAME
