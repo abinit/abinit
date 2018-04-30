@@ -1193,7 +1193,7 @@ Effective mass:
 COMMENTS: 
  - At k-point ( 0.000, 0.000, 0.000), bands     2 through     4
    are DEGENERATE (effective mass is therefore not defined).
-   See Section IIIB Eqs. (66)-(71) and Appendix E of PRB XX XXX (2015).
+   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).
  - Associated theta integrals calculated with nthteta=    100 points.
 
 K-point ( 0.000, 0.000, 0.000) | band =     2

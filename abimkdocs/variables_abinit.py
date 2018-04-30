@@ -3192,7 +3192,7 @@ Variable(
     text="""
 Turns on effective mass tensor calculations. Such calculations requires the
 non-self-consistent calculation of derivatives with respect to k, in the same
-dataset. It must therefore be used with [[rfelfd]]=2.
+dataset. It must therefore be used with [[rfelfd]]=2 (or 1).
 
   * 0 --> no effective mass tensor calculation
   * 1 --> effective mass tensor calculation
@@ -3260,8 +3260,8 @@ Variable(
     requires="[[efmas]] > 0",
     text="""
 Activate (==1) or not (==0) the treatment of degenerate bands (within a
-criterion [[efmas_deg_tol]]) using the transport equivalent effective mass
-idea (see [PRB 89 155131 (2014)](https://doi.org/10.1103/PhysRevB.89.155131)).
+criterion [[efmas_deg_tol]]). Also computed the transport equivalent effective mass
+(see [[cite:Mecholsky2014]]).
 """,
 ),
 
@@ -3351,7 +3351,9 @@ When a band is degenerate, the usual definition of effective mass becomes
 invalid. However, it is still possible to define a 'transport equivalent mass
 tensor' that reproduces the contribution of the band to the conductivity
 tensor. To obtain this tensor, an integration over the solid sphere is
-required. The default value gives a tensor accurate to the 4th decimal in Ge.
+required. The angular variables are sampled using [[ntheta]] points for the theta coordinate,
+and twice [[ntheta]] points for the phi coordinate. 
+The default value gives a tensor accurate to the 4th decimal in Ge.
 """,
 ),
 
@@ -3416,7 +3418,7 @@ Variable(
     abivarname="enunit",
     varset="gstate",
     vartype="integer",
-    topics=['Output_useful'],
+    topics=['Output_useful','ElecBandStructure_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="ENergy UNITs",
