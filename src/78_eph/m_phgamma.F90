@@ -2414,7 +2414,8 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 
  call cwtime(cpu,wall,gflops,"start")
 
- write (900,*) 'do_qintp ', do_qintp
+ open (unit=900, file="a2fvals_ee.dat")
+ write (900,*) '# do_qintp ', do_qintp
  ! Loop over spins and qpoints in the IBZ
  cnt = 0
  do spin=1,nsppol
