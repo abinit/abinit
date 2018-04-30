@@ -18,8 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "calc_b_matrix.F90",
- "fred2fdeloc.F90",
  "isotemp.F90",
  "m_abihist.F90",
  "m_abimover.F90",
@@ -56,12 +54,12 @@ sources = [
  "predict_steepest.F90",
  "predict_string.F90",
  "prtxfase.F90",
- "xcart2deloc.F90",
  "xfh_recover_new.F90",
  "xfh_recover_deloc.F90",
  "xfh_update.F90",
  "xfpack_f2vout.F90",
  "xfpack_vin2x.F90",
- "xfpack_x2vin.F90"]
+ "xfpack_x2vin.F90",
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
