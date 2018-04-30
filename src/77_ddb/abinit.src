@@ -25,7 +25,7 @@ sources = [
  "defs_elphon.F90",
  "ddb_diel.F90",
  "ddb_elast.F90",
- "ddb_interpolate.F90",
+ "m_ddb_interpolate.F90",
  "m_eliashberg_1d.F90",
  "m_elphon.F90",
  "ep_el_weights.F90",
