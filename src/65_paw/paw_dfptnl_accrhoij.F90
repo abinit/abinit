@@ -5,11 +5,10 @@
 !! paw_dfptnl_accrhoij
 !!
 !! FUNCTION
-!! Accumulate the PAW quantities rhoij (augmentation occupancies)
-!! or their 1-st order change or their gradient vs r
-!! Add the contribution of a given k-point and band
-!! Remember: for each atom, rho_ij=Sum_{n,k} {occ(n,k)*<Cnk|p_i><p_j|Cnk>}
-!!
+!! Accumulate the 2nd order PAW quantities rhoij^(2) (augmentation occupancies)
+!! This routine is similar to pawaccrhoij.F90 but is implemented independently
+!! in order to not overload the original routine.
+
 !! COPYRIGHT
 !! Copyright (C) 2018-2018 ABINIT group (LB)
 !! This file is distributed under the terms of the
@@ -20,14 +19,20 @@
 !! INPUTS
 !!  atindx(natom)=index table for atoms (sorted-->random), inverse of atindx.
 !!  cplex: if 1, WFs (or 1st-order WFs) are REAL, if 2, COMPLEX
-!!  cwaveprj(natom,nspinor)= LEFT wave function at given n,k
-!!                         projected with non-local projectors: cwaveprj=<p_i|Cnk>
-!!  cwaveprj1(natom,nspinor)= RIGHT wave function at n,k,q
-!!                          projected with non-local projectors: cwaveprj1=<p_i|C1nk,q>
-!!                          * USED for RF  : C1nk is the first-order wave function
-!!                          * USED for DMFT: C1nk is the RIGHT wave function
-!!                          * NOT USED in usual GS case; can be set to cwaveprj in that case
-!!  ipert=index of perturbation (RF only, i.e. option=2)
+!!  cwaveprj0_pert1(natom,nspinor) = wave function at given n,k projected with non-local projectors:
+!!                                  cwaveprj0%cp    =<p_i|Cnk>
+!!                                  cwaveprj0%dcp(1)=<p_i^(pert1)|Cnk>
+!!  cwaveprj0_pert2(natom,nspinor) = wave function at given n,k projected with non-local projectors:
+!!                                  cwaveprj0%cp    =<p_i|Cnk>
+!!                                  cwaveprj0%dcp(1)=<p_i^(pert1)|Cnk>
+!!  cwaveprj1_pert12(natom,nspinor)= 1st order wave function at given n,k projected with non-local projectors:
+!!                                  cwaveprj1%cp    =<p_i|Cnk^(pert1)>
+!!                                  cwaveprj1%dcp(1)=<p_i^(pert2)|Cnk^(pert1)>
+!!  cwaveprj1_pert21(natom,nspinor)= 1st order wave function at given n,k projected with non-local projectors:
+!!                                  cwaveprj1%cp    =<p_i|Cnk^(pert2)>
+!!                                  cwaveprj1%dcp(1)=<p_i^(pert1)|Cnk^(pert2)>
+!!  ipert1=index of the first perturbation
+!!  ipert2=index of the second perturbation
 !!  isppol=index of current spin component
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
@@ -35,32 +40,15 @@
 !!  natom=number of atoms in cell
 !!  nspinor=number of spinorial components (on current proc)
 !!  occ_k=occupation number for current band n,k
-!!  option: choice of calculation:
-!!          1: update rhoij (Ground-State)
-!!          2: update 1-st order rhoij (Response Function) according to ipert
-!!          3: update gradients of rhoij with respect to r,strain of both
 !!  wtk_k=weight assigned to current k-point
 !!
 !! SIDE EFFECTS
-!!  pawrhoij(natom) <type(pawrhoij_type)>= GS: paw rhoij occupancies and related data
-!!                                         RF: 1-st order paw rhoij occupancies and related data
+!!  pawrhoij(natom) <type(pawrhoij_type)>= 2-nd order paw rhoij occupancies and related data
 !!  On output, has been updated with the contribution of current n,k
-!!    === option=1:
-!!        pawrhoij(:)%rhoij_(lmn2_size,nspden)=      (non symetrized)
-!!            Sum_{n,k} {occ(n,k)*conjugate[cprj_nk(ii)].cprj_nk(jj)}
-!!    === option=2:
-!!        pawrhoij(:)%rhoij_(lmn2_size,nspden)=      (non symetrized)
-!!            Sum_{n,k} {occ(n,k)*(conjugate[cprj_nk(ii)].cprj1_nk,q(jj)
-!!                                 conjugate[cprj_nk(jj)].cprj1_nk,q(ii)}
-!!          + Sum_{n,k} {occ(n,k)*(conjugate[dcprj_nk(ii)/dlambda].cprj_nk(jj)
-!!                                +conjugate[cprj_nk(ii)].dcprj_nk(jj)/dlambda)}
-!!    === option=3:
-!!        pawrhoij(:)%grhoij(lmn2_size,mu,nspden)=   (non symetrized)
-!!            Sum_{n,k} {occ(n,k)*(conjugate[dcprj_nk(ii)/dr_mu].cprj_nk(jj)
-!!                                +conjugate[cprj_nk(ii)].dcprj_nk(jj)/dr_mu)}
+!!        pawrhoij(:)%rhoij_(lmn2_size,nspden) (non symetrized)
 !!
 !! PARENTS
-!!      d2frnl,dfpt_accrho,energy,pawmkrhoij,posdoppler,wfd_pawrhoij
+!!      paw_dfptnl_pert
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab
@@ -154,7 +142,7 @@
  compute_impart=(pawrhoij(1)%cplex==2)
  compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
 
-! NOT USED FOR PAWRHO21! => only for PAWRHO2
+! NOT USED FOR PAWRHO21! => only for PAWRHO2 (full second derivative)
 !!Accumulate :   < Psi^(pert1) | p_i^(0) > < p_j^(0) | Psi^(pert2) >
 !!             + < Psi^(pert2) | p_i^(0) > < p_j^(0) | Psi^(pert1) >
 ! if (nspinor==1) then

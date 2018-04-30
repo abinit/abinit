@@ -185,7 +185,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  character(len=1000) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
-! real(dp) :: buffer(2)
  real(dp) :: buffer(10),eHxc21_paw(2),eHxc21_nhat(2),exc3(2),exc3_paw(2),kpt(3),eig0_k(mband)
  real(dp) :: enlout1(2),enlout2(2)
  real(dp) :: rmet(3,3),wtk_k
@@ -199,7 +198,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:)
  real(dp),allocatable :: xc_tmp(:,:)
-! type(pawcprj_type),allocatable :: cwaveprj(:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:),cwaveprj1(:,:)
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),allocatable,target :: cprj_jband(:,:)
@@ -437,13 +435,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
        end if
      end if
 
-!!    Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
-!     call getgh1c_setup(gs_hamkq,rf_hamkq_i2pert,dtset,psps,&                       ! In
-!     kpt,kpt,i2dir,i2pert,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&        ! In
-!     npw_k,npw1_k,useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                      ! In
-!     dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                 ! Out
-!     dummy_array,dummy_array,rf_ham_dum)                                            ! Out
-
 !    Compute (k+G) vectors
      nkpg=0;if(i2pert>=1.and.i2pert<=natom) nkpg=3*dtset%nloalg(3)
      ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
@@ -464,12 +455,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
      !-- Atomic displacement perturbation
      if (i2pert<=natom) then
        ider=0;idir0=0
-!     !-- k-point perturbation (1st-derivative)
-!     else if (i2pert==natom+1) then
-!       ider=1;idir0=idir
-!     !-- k-point perturbation (2nd-derivative)
-!     else if (i2pert==natom+10.or.i2pert==natom+11) then
-!       ider=2;idir0=4
      !-- Electric field perturbation
      else if (i2pert==natom+2) then
        if (psps%usepaw==1) then
@@ -477,11 +462,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
        else
          ider=0;idir0=0
        end if
-     !-- Strain perturbation
-!     else if (i2pert==natom+3.or.i2pert==natom+4) then
-!       if (ipert==natom+3) istr=idir
-!       if (ipert==natom+4) istr=idir+3
-!       ider=1;idir0=-istr
      end if
      if (compute_rho21) then ! compute_rho21 implies i2pert==natom+2
        ider=1; idir0=4
@@ -897,36 +877,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !      Compute E_xc^(3) (NOTE : E_H^(3) = 0)
 ! **************************************************************************************************
 
-!      Compute the third-order xc energy
-!      take into account the contribution of the term
-!$
-!      \frac{d}{d \lambda}
-!      \frac{\delta^2 E_{Hxc}}{\delta n(r) \delta n(r\prim)}
-!$
-!      (seventh term of Eq. (110) of X. Gonze, PRA 52, 1096 (1995)).
-
-!      the following are essentially the 4th and the 3rd terms of PRB 71,125107, but the
-!      multiplication for rho1 will be done by dotprod_vn later
-
-!!     in the non spin polarized case xc_tmp has only 1 component
-
  ABI_ALLOCATE(xc_tmp,(cplex*nfftf,nspden))
  ABI_ALLOCATE(rho1r1_tot,(cplex*nfftf,nspden))
  if (nspden==1)then
-
-!   if (cplex==1) then
-!!    This, and the next lines, have to be changed in case cplex=2
-!     do ifft=1,nfftf
-!       xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,1)+3*xccc3d2(ifft))*rho3r1(ifft,1)
-!     end do
-!   else
-!     do ifft=1,nfftf   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
-!       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,1) &
-!&      -( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft,1))
-!       xc_tmp(2*ifft,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft,1) &
-!&      +( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft-1,1))
-!     end do
-!   end if
 
    if (cplex==1) then
      do ifft=1,nfftf
@@ -1154,6 +1107,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  d3etot_5(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sum_psi0H2psi1b_i
  d3etot_6(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = half * eHxc21_paw(2)
  d3etot_7(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = half * eHxc21_nhat(2)
+ d3etot_8(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sixth * exc3(2)
  d3etot_9(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sixth * exc3_paw(2)
 
  if (compute_rho21) then

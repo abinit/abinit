@@ -4,12 +4,15 @@
 !! paw_dfptnl_energy
 !!
 !! FUNCTION
-!! This routine compute the XC PAW on-site contributions to a 3rd-order energy.
+!! Compute the XC PAW on-site contributions to a 3rd-order energy.
 !! It is equal to:
-!!    E_onsite= 
-!!
-!! This routine is similar to pawdfptenergy.F90
-!!
+!!    E_onsite= \sum_at [ E_at(kxc,rho1,rho2,rho3) - E_at(tkxc,trho1,trho2,trho3) ]
+!! where E_at(...) is computed in paw_dfptnl_xc.F90.
+!! The atomic densities are computed from pawrhoij1,pawrhoij2 and pawrhoij3.
+!! This routine is similar to pawdfptenergy.F90 but is implemented independently
+!! in order to not overload the original routine.
+!! LDA ONLY - USE THE DENSITY OVER A WHOLE SPHERICAL GRID (r,theta,phi)
+
 !! COPYRIGHT
 !! Copyright (C) 2018-2018 ABINIT group (LB)
 !! This file is distributed under the terms of the
@@ -18,52 +21,29 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
-!!  ipert1,ipert2=indexes of perturbations (j1) and (j2)
-!!                if ipert2<=0, we compute a first-order energy
-!!                if ipert2> 0, we compute a second-order energy
 !!  ixc= choice of exchange-correlation scheme
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
 !!  ntypat=number of types of atoms in unit cell.
-!!  nzlmopt_a= For the n1_a density:
-!!            if -1, compute all LM-moments of the density and use non-zero LM-moments
-!!            if  0, compute all LM-moments of the density and use all LM-moments
-!!            if +1, compute only non-zero LM-moments of the density (stored before)
-!!  nzlmopt_b= For the n1_b density:
-!!            if -1, compute all LM-moments of the density and use non-zero LM-moments
-!!            if  0, compute all LM-moments of the density and use all LM-moments
-!!            if +1, compute only non-zero LM-moments of the density (stored before)
 !!  paw_an0(natom) <type(paw_an_type)>=paw arrays for 0th-order quantities given on angular mesh
 !!  paw_an1(natom) <type(paw_an_type)>=paw arrays for 1st-order quantities given on angular mesh
-!!                                     This corresponds to (j1) perturbation
-!!  paw_ij1(natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!                                     This corresponds to (j1) perturbation
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawprtvol=control print volume and debugging output for PAW
 !!  pawrad(ntypat) <type(pawrad_type)>=paw radial mesh and related data
-!!  pawrhoij_a(natom) <type(pawrhoij_type)>= paw rhoij 1st-order occupancies for the (j1) perturbation
-!!  pawrhoij_b(natom) <type(pawrhoij_type)>=
-!!    if ipert2> 0: paw rhoij 1st-order occupancies for the (j2) perturbation corrsponding to n1_b^(j2)[r]
-!!    if ipert2<=0: paw rhoij occupancies corresponding to n1_b[r]
+!!  pawrhoij_1-2-3(natom) <type(pawrhoij_type)>= paw rhoij 1st-order occupancies
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
-!!  xclevel= XC functional level
 !!
 !! OUTPUT
-!!  delta_energy(2)= real and imaginary parts of contributions to non-stationary expression for the
-!!              second derivative of the total energy
+!!  d3exc= real and imaginary parts of the contribution to the third derivative of the total energy
 !!
 !! SIDE EFFECTS
-!!    ==== if paw_an1(:)%has_vxc<2, compute 1st-order XC potentials
-!!      paw_an1(natom)%vxc1(cplex_a*mesh_size,:,nspden) =AE 1st-order XC potential Vxc^(j1)
-!!      paw_an1(natom)%vxct1(cplex_a*mesh_size,:,nspden)=PS 1st-order XC potential tVxc^(j1)
-!!    ==== if paw_ij1(:)%has_dijhartree<2, compute 1st-order Dij_hartree
-!!      paw_ij1(natom)%dijhartree(cplex_a*lmn2_size)=Hartree contribution to Dij^(j1)
 !!
 !! PARENTS
-!!      dfpt_nstpaw,newfermie1
+!!      dfptnl_pert
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijhartree,pawxc_dfpt,pawxcm3
@@ -96,7 +76,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  use m_paw_ij,     only : paw_ij_type
  use m_pawrhoij,   only : pawrhoij_type
  use m_pawdij,     only : pawdijhartree
-! use m_pawxc,      only : pawxc_dfpt, pawxcm_dfpt
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).
@@ -111,15 +90,13 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ixc,my_natom,natom,ntypat
- integer,intent(in) :: pawprtvol,pawxcdev!,xclevel
+ integer,intent(in) :: pawprtvol,pawxcdev
  integer,optional,intent(in) :: comm_atom
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(out) :: d3exc(2)
  type(paw_an_type),intent(in) :: paw_an0(my_natom)
-! type(paw_an_type),intent(inout) :: paw_an1(my_natom)
-! type(paw_ij_type),intent(inout) :: paw_ij1(my_natom)
  type(pawrad_type),intent(in) :: pawrad(ntypat)
  type(pawrhoij_type),intent(in) :: pawrhoij_1(natom)
  type(pawrhoij_type),intent(in) :: pawrhoij_2(natom)
@@ -137,7 +114,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_1(:),lmselect_2(:),lmselect_3(:),lmselect_tmp(:)
- real(dp),allocatable :: nhat1_1(:,:,:),rho1_1(:,:,:),trho1_1(:,:,:) ! kxc_dum(:,:,:),
+ real(dp),allocatable :: nhat1_1(:,:,:),rho1_1(:,:,:),trho1_1(:,:,:)
  real(dp),allocatable :: nhat1_2(:,:,:),rho1_2(:,:,:),trho1_2(:,:,:)
  real(dp),allocatable :: nhat1_3(:,:,:),rho1_3(:,:,:),trho1_3(:,:,:)
 
@@ -145,7 +122,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 
  DBG_ENTER("COLL")
 
- nzlmopt = 0
+ nzlmopt = 0 ! compute all LM-moments of the density and use all LM-moments
 
  if (pawxcdev/=0) then
    MSG_BUG("paw_dfptnl_energy is not implemented for pawxcdev /=0")
@@ -178,11 +155,8 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    cplex_3=pawrhoij_3(iatom)%cplex
    lm_size_all=paw_an0(iatom)%lm_size
 
-!!  If Vxc potentials are not in memory, compute them
-!   if (paw_an1(iatom)%has_vxc/=2) then
    ABI_ALLOCATE(lmselect_tmp,(lm_size_all))
    lmselect_tmp(:)=.true.
-!   if (nzlmopt_a==1) lmselect_tmp(:)=lmselect_a(:)
 
 !  Compute on-site 1st-order densities (pert1)
    ABI_ALLOCATE(lmselect_1,(lm_size_all))

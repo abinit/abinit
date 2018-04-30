@@ -8,7 +8,8 @@
 !! It is equal to:
 !!   E_at(kxc,rho1,rho2,rho3) = Int_{Om_a} dr kxc(r) * rho1(r) * rho2(r) * rho3(r)
 !! where kxc,rho1,rho2 and rho3 are inputs.
-!! This routine is similar to m_pawxc.F90:pawxc_dfpt()
+!! This routine is similar to m_pawxc.F90:pawxc_dfpt(...) but is implemented independently
+!! in order to not overload the original routine.
 !! LDA ONLY - USE THE DENSITY OVER A WHOLE SPHERICAL GRID (r,theta,phi)
 !!
 !! COPYRIGHT
