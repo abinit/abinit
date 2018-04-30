@@ -192,7 +192,7 @@ implicit none
    sc_size(:) = (/1,1,1/)
  else
 !  Normal dynamics
-   sc_size(:) = inp%n_cell
+   sc_size(:) = inp%ncell
  end if
 
  if(option/=0)then
@@ -209,7 +209,7 @@ implicit none
 &   effective_potential%crystal%xcart,xred)
    call xred2xcart(effective_potential%crystal%natom, rprimd, xcart, xred)
 !  Generate supercell for the simulation
-   call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
+   call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
 
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xcart)
@@ -616,7 +616,7 @@ implicit none
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
 &           -1,1,comm,verbose=.true.,positive=.false.)
-           call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
+           call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
            call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
@@ -801,7 +801,7 @@ implicit none
 &                 ncoeff+ii)
                  call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
 &                 -1,1,comm,verbose=.false.,positive=.false.)
-                 call effective_potential_setSupercell(effective_potential,comm,n_cell=sc_size)
+                 call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
                  acell(:) = one
                  call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&

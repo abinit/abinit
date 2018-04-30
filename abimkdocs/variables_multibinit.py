@@ -78,6 +78,35 @@ or not specified in the XML file), (by default in Hartree).
 ),
 
 Variable(
+    abivarname="ncoeff@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeModel_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of anharmonic COEFFicients",
+    text="""
+Set the number of anharmonic coefficients in the model. This number have to be in agreement with the number of coefficients present in the XML file.
+
+If ncoeff /= 0, [[multibinit:coefficients]] have to be present in the input files
+""",
+),
+
+Variable(
+    abivarname="coefficients@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['LatticeModel_useful'],
+    dimensions=['[[multibinit:ncoeff]]'],
+    defaultval=0.0,
+    mnemonics="values of the COEFFICIENTS",
+    text="""
+Set the values of the coefficients present in the XML file
+""",
+),
+
+    
+Variable(
     abivarname="ngqpt@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -322,7 +351,7 @@ Variable(
     varset="multibinit",
     vartype="integer",
     topics=['FitProcess_expert'],
-    dimensions="fit_nfixcoeff",
+    dimensions=['[[multibinit:fit_nfixcoeff]]'],
     defaultval=0,
     mnemonics="FIT FIXed COEFFicients",
     text="""
@@ -353,11 +382,11 @@ Variable(
     varset="multibinit",
     vartype="integer",
     topics=['FitProcess_expert'],
-    dimensions="fit_nbancoeff",
+    dimensions=['[[multibinit:fit_nbancoeff]]'],
     defaultval=0,
     mnemonics="FIT BANed COEFFicients",
     text="""
-Indexes of the banned coefficients during the fit process of the model: 
+Indexes of the banned coefficients during the fit process of the model
 """,
 ),
 
@@ -385,7 +414,7 @@ Variable(
     defaultval=0,
     mnemonics="BOUND COEFFicient",
     text="""
-flag to activate the bound process:
+Flag to activate the bound process:
 
 * 0 --> no bound process 
 
@@ -417,7 +446,7 @@ Variable(
     defaultval="6,6",
     mnemonics="BOUND RANGE POWER",
     text="""
-range of the power for the additional coefficients in the bound process
+Range of the power for the additional coefficients in the bound process
 """,
 ),
 
@@ -497,6 +526,165 @@ Variable(
     mnemonics="BOUND",
     text="""
 Set the maximum number of MD step during the bound process
+""",
+),
+
+Variable(
+    abivarname="dynamics@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamics option for Multibinit",
+    text="""
+Set the Dynamics option for Multibinit. This option is equivalent to [[abinit:ionmov]]:
+
+* 0 --> do nothing
+
+* 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)], as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)]. The conservation of the kinetic energy is obtained within machine precision, at each step.
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]]=0 only)
+**Related variables:**
+
+* 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat and a barostat are solved with the algorithm proposed by Martyna, Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].
+If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in
+addition.
+**Purpose:** Molecular dynamics
+**Cell optimization:** Yes (if [[optcell]]/=0)
+**Related variables:** The time step ([[dtion]]), the temperatures
+([[mdtemp]]), the number of thermostats ([[nnos]]), and the masses of
+thermostats ([[qmass]]).
+""",
+),
+
+Variable(
+    abivarname="dtion@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=100,
+    mnemonics="Delta Time for IONs",
+    text="""
+See [[abinit:dtion]]
+""",
+),
+
+Variable(
+    abivarname="nnos@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of NOSe masses",
+    text="""
+See [[abinit:nnos]]
+""",
+),
+
+Variable(
+    abivarname="qmass@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=['[[abinit:nnos]]'],
+    defaultval=0,
+    mnemonics="Q thermostat MASS",
+    text="""
+See [[abinit:qmass]]
+""",
+),
+
+Variable(
+    abivarname="nctime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="NetCdf TIME between output of molecular dynamics informations ",
+    text="""
+Set the number of step between output the molecular dynamics informations in the NetCDF file
+""",
+),
+
+Variable(
+    abivarname="temperature@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=325,
+    mnemonics="molecular dynamics TEMPERATURE (in Kelvin)",
+    text="""
+Give the temperature of the dynamics in Kelvin
+""",
+),
+
+Variable(
+    abivarname="ncell@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[6,6,6],
+    mnemonics="Number of Cell",
+    text="""
+Give the size of the supercell for the dynamics
+""",
+),
+
+Variable(
+    abivarname="strtarget@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[6],
+    defaultval=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    mnemonics="STRess TARGET",
+    text="""
+See [[abinit:strtarget]]
+""",
+),
+
+Variable(
+    abivarname="bmass@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=10,
+    mnemonics="Barostat MASS",
+    text="""
+See [[abinit:bmass]]
+""",
+),
+
+Variable(
+    abivarname="optcell@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="OPTimize the CELL shape and dimensions",
+    text="""
+See [[abinit:optcell]]
+""",
+),
+
+Variable(
+    abivarname="restartxf@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="RESTART from (X,F) history",
+    text="""
+See [[abinit:restartxf]]
 """,
 ),
 

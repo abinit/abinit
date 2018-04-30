@@ -345,7 +345,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  else
 !   call init_supercell(eff_pot%crystal%natom, (/1,0,0, 0,1,0,  0,0,1/), eff_pot%crystal%rprimd,&
 !&                      eff_pot%crystal%typat, eff_pot%crystal%xcart, eff_pot%crystal%znucl, eff_pot%supercell)
-   call effective_potential_setSupercell(eff_pot,comm,n_cell=(/1,1,1/))
+   call effective_potential_setSupercell(eff_pot,comm,ncell=(/1,1,1/))
  end if
 
 !Set the confinement potential
@@ -626,7 +626,7 @@ end subroutine effective_potential_freempi
 !! eff_pot = effective potential datatype
 !! option  =  0 Just generate supercell and fill effective potential
 !!            1 Regenerate the dipole dipo;le interaction
-!! n_cell(3) = number of cell in the direction x, y and z
+!! ncell(3) = number of cell in the direction x, y and z
 !! comm=MPI communicator
 !!
 !! OUTPUT
@@ -640,7 +640,7 @@ end subroutine effective_potential_freempi
 !!
 !! SOURCE
 
-subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
+subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
  use m_ewald
 
@@ -659,7 +659,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  integer,intent(in) :: option,asr
  integer,intent(in) :: comm
 !array
- integer,intent(in) :: n_cell(3)
+ integer,intent(in) :: ncell(3)
  type(effective_potential_type),intent(inout) :: eff_pot
 !Local variables-------------------------------
 !scalar
@@ -693,23 +693,23 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !0 Check the size of the cell
  do ia=1,3
-   if(n_cell(ia)<0.or.n_cell(ia)>100)then
+   if(ncell(ia)<0.or.ncell(ia)>100)then
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'n_cell(',ia,') is ',n_cell(ia),', which is lower than 0 of superior than 50.',&
-&     ch10,'Action: correct n_cell(',ia,').'
+&     'ncell(',ia,') is ',ncell(ia),', which is lower than 0 of superior than 50.',&
+&     ch10,'Action: correct ncell(',ia,').'
      MSG_ERROR(msg)
    end if
  end do
 
  call init_supercell(eff_pot%crystal%natom, &
-&   (/n_cell(1),0,0,  0,n_cell(2),0,  0,0,n_cell(3)/),&
+&   (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/),&
 &   eff_pot%crystal%rprimd,&
 &   eff_pot%crystal%typat,&
 &   eff_pot%crystal%xcart,&
 &   eff_pot%crystal%znucl,&
 &   supercell)
 
- ncell = product(n_cell(:))
+ ncell = product(ncell(:))
 
 !set variables
  natom_uc = eff_pot%crystal%natom
@@ -730,8 +730,8 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  max3 = maxval(eff_pot%harmonics_terms%ifcs%cell(3,:))
 
  if(option==0) then
-   if(((max1-min1+1)/=n_cell(1).and.&
-&    (max2-min2+1)/=n_cell(2).and.(max3-min3+1)/=n_cell(3))) then
+   if(((max1-min1+1)/=ncell(1).and.&
+&    (max2-min2+1)/=ncell(2).and.(max3-min3+1)/=ncell(3))) then
      write(msg, '(90a,3I3,5a,3I3,3a)' )ch10,('-',i1=1,80),ch10,ch10,&
 &      ' --- !WARNING:',ch10,&
 &      '     dipdip is set to zero, the longe range interation might be wrong',ch10,&
@@ -739,7 +739,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &      '     The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
 &,     ' cell.',ch10,&
 &      '     Be sure than the dipole-dipole interation is correct ',ch10,&
-&      '     for the supercell: ',n_cell(:),' or set dipdip to 1',ch10,&
+&      '     for the supercell: ',ncell(:),' or set dipdip to 1',ch10,&
 &      ' ---'
      call wrtout(std_out,msg,"COLL")
    else
@@ -756,7 +756,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call wrtout(std_out,msg,'COLL')
 
 !4-Adapt harmonic part
- else if (option>=1.and.all(n_cell(:)>0)) then
+ else if (option>=1.and.all(ncell(:)>0)) then
 
    write(msg,'(a,(80a),3a)') ch10,('=',i1=1,80),ch10,' Generation of new ifc',ch10
    call wrtout(ab_out,msg,'COLL')
@@ -768,9 +768,9 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    min2_cell = 0; max2_cell = 0
    min3_cell = 0; max3_cell = 0
 
-   call findBound_supercell(min1_cell,max1_cell,n_cell(1))
-   call findBound_supercell(min2_cell,max2_cell,n_cell(2))
-   call findBound_supercell(min3_cell,max3_cell,n_cell(3))
+   call findBound_supercell(min1_cell,max1_cell,ncell(1))
+   call findBound_supercell(min2_cell,max2_cell,ncell(2))
+   call findBound_supercell(min3_cell,max3_cell,ncell(3))
 
    write(msg, '(2a)' )&
 &        ' dipdip is set to one, the dipole-dipole interation is recompute.'
@@ -1424,7 +1424,7 @@ end subroutine effective_potential_setConfinement
 !! INPUTS
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !! comm = MPI communicator
-!! n_cell(3) = optional, size of the supercell
+!! ncell(3) = optional, size of the supercell
 !! supercell = optional, supercell type to set to eff_pot
 !!
 !! OUTPUT
@@ -1438,7 +1438,7 @@ end subroutine effective_potential_setConfinement
 !!
 !! SOURCE
 
-subroutine effective_potential_setSupercell(eff_pot,comm,n_cell,supercell)
+subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1454,7 +1454,7 @@ subroutine effective_potential_setSupercell(eff_pot,comm,n_cell,supercell)
  integer,intent(in) :: comm
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
- integer,optional,intent(in) :: n_cell(3)
+ integer,optional,intent(in) :: ncell(3)
  type(supercell_type),optional,intent(in) :: supercell
 !Local variables-------------------------------
 !scalar
@@ -1464,8 +1464,8 @@ subroutine effective_potential_setSupercell(eff_pot,comm,n_cell,supercell)
 ! *************************************************************************
 
 !Checks
- if (.not.present(supercell).and..not.present(n_cell)) then
-   write(msg,'(a,a)')' You should at least set n_cell of supercell type'
+ if (.not.present(supercell).and..not.present(ncell)) then
+   write(msg,'(a,a)')' You should at least set ncell of supercell type'
    MSG_ERROR(msg)
  end if
 
@@ -1474,7 +1474,7 @@ subroutine effective_potential_setSupercell(eff_pot,comm,n_cell,supercell)
  if(present(supercell))then
    call copy_supercell(supercell,eff_pot%supercell)
  else
-   call init_supercell(eff_pot%crystal%natom, (/n_cell(1),0,0,  0,n_cell(2),0,  0,0,n_cell(3)/), &
+   call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), &
 &                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
 &                      eff_pot%crystal%znucl, eff_pot%supercell)
  end if
@@ -2437,7 +2437,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>50)then
       write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
-&     ', which is lower than 0 of superior than 10.',ch10,'Action: correct n_cell(',ii,').'
+&     ', which is lower than 0 of superior than 10.',ch10,'Action: correct ncell(',ii,').'
       MSG_ERROR(msg)
     end if
   end do
@@ -3107,7 +3107,7 @@ end function effective_potential_compare
 ! !!
 ! !! SOURCE
 
-! subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,option,qph1l)
+! subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,ncell,nph1l,option,qph1l)
 
 
 ! !This section has been created automatically by the script Abilint (TD).
@@ -3124,7 +3124,7 @@ end function effective_potential_compare
 ! !scalars
 !   integer,intent(in) :: nph1l,option
 ! !array
-!   integer,intent(in) :: n_cell(3)
+!   integer,intent(in) :: ncell(3)
 !   real(dp),intent(in):: qph1l(3,nph1l)
 !   type(effective_potential_type),intent(inout) :: eff_pot
 !   type(ddb_type),intent(out) :: ddb
@@ -3284,7 +3284,7 @@ end function effective_potential_compare
 ! !!
 ! !! SOURCE
 
-! subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qph1l)
+! subroutine effective_potential_printPDOS(eff_pot,filename,ncell,nph1l,option,qph1l)
 
 
 ! !This section has been created automatically by the script Abilint (TD).
@@ -3299,7 +3299,7 @@ end function effective_potential_compare
 ! !scalars
 !   integer,intent(in) :: nph1l,option
 ! !array
-!   integer,intent(in) :: n_cell(3)
+!   integer,intent(in) :: ncell(3)
 !   real(dp),intent(in):: qph1l(3,nph1l)
 !   type(effective_potential_type),intent(inout) :: eff_pot
 !   character(len=fnlen),intent(in) :: filename
@@ -3318,7 +3318,7 @@ end function effective_potential_compare
 !  if (option > 0) then
 
 ! !  First: transfer into ddb datatype:
-!    call effective_potential_effpot2ddb(ddb,Crystal,eff_pot,n_cell,nph1l,option,qph1l)
+!    call effective_potential_effpot2ddb(ddb,Crystal,eff_pot,ncell,nph1l,option,qph1l)
 
 ! !  Setup fake anaddb_dataset
 ! !   string = ''
@@ -3368,7 +3368,7 @@ end function effective_potential_compare
 !!
 !! SOURCE
 
-subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_cell,option,comm)
+subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,ncell,option,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3384,7 +3384,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
  integer,intent(in) :: natom,option,comm
  real(dp),intent(in) :: delta
 !array
- integer,intent(in) :: n_cell(3)
+ integer,intent(in) :: ncell(3)
  type(effective_potential_type),intent(inout) :: eff_pot
  real(dp),intent(out) :: fcart_out(3,natom)
 !Local variables-------------------------------
@@ -3401,8 +3401,8 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,n_c
 
 !Do Some check
  do ii=1,3
-   if(abs(eff_pot%supercell%qphon(ii)-n_cell(ii)) > tol16)then
-     call effective_potential_setSupercell(eff_pot,comm,n_cell)
+   if(abs(eff_pot%supercell%qphon(ii)-ncell(ii)) > tol16)then
+     call effective_potential_setSupercell(eff_pot,comm,ncell)
    end if
  end do
 

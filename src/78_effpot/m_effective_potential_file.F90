@@ -103,12 +103,12 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_readStrainCoupling(filename,natom,&
 &     nrpt,voigt,elastic3rd,elastic_displacement,&
-&     strain_coupling,phonon_strain_atmfrc,phonon_strain_cell)&
+&     strain_coupling,phonon_strain_atmfrc,phonon_straincell)&
 &                          bind(C,name="effpot_xml_readStrainCoupling")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      integer(C_INT) :: natom
      integer(C_INT) :: nrpt,voigt
-     integer(c_INT) :: phonon_strain_cell(3,nrpt)
+     integer(c_INT) :: phonon_straincell(3,nrpt)
      real(C_DOUBLE) :: elastic3rd(6,6),elastic_displacement(6,3,natom)
      real(C_DOUBLE) :: strain_coupling(3,natom)
      real(C_DOUBLE) :: phonon_strain_atmfrc(3,natom,3,natom,nrpt)
@@ -1396,7 +1396,7 @@ end subroutine system_getDimFromXML
  type(atomdata_t) :: atom
 #ifdef HAVE_LIBXML
  real(dp),allocatable :: phonon_strain_atmfrc(:,:,:,:,:)
- integer,allocatable  :: phonon_strain_cell(:,:)
+ integer,allocatable  :: phonon_straincell(:,:)
 #endif
 #ifndef HAVE_LIBXML
  real(dp),allocatable :: work2(:,:)
@@ -1500,22 +1500,22 @@ end subroutine system_getDimFromXML
 !  Get the Phonon Strain coupling
    do voigt = 1,6
      nrpt_scoupling = phonon_strain(voigt)%nrpt
-     ABI_ALLOCATE(phonon_strain_cell,(3,nrpt_scoupling))
+     ABI_ALLOCATE(phonon_straincell,(3,nrpt_scoupling))
      ABI_ALLOCATE(phonon_strain_atmfrc,(3,natom,3,natom,nrpt_scoupling))
 
 !      Get The value
        call effpot_xml_readStrainCoupling(char_f2c(trim(filename)),natom,nrpt_scoupling,(voigt-1),&
 &                                         elastic3rd(voigt,:,:),elastic_displacement(voigt,:,:,:),&
 &                                         strain_coupling(voigt,:,:),&
-&                                         phonon_strain_atmfrc,phonon_strain_cell)
+&                                         phonon_strain_atmfrc,phonon_straincell)
 
 !      Check if the 3rd order strain_coupling is present
        if(any(elastic3rd>tol10).or.any(elastic_displacement>tol10)) has_anharmonics = .TRUE.
        phonon_strain(voigt)%atmfrc(:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
-       phonon_strain(voigt)%cell(:,:)   = phonon_strain_cell(:,:)
+       phonon_strain(voigt)%cell(:,:)   = phonon_straincell(:,:)
        if(any(phonon_strain(voigt)%atmfrc > tol10)) has_anharmonics = .TRUE.
 
-       ABI_DEALLOCATE(phonon_strain_cell)
+       ABI_DEALLOCATE(phonon_straincell)
        ABI_DEALLOCATE(phonon_strain_atmfrc)
    end do
 #else
@@ -3564,7 +3564,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  logical :: revelant_factor,need_map,need_verbose
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
- integer :: n_cell(3)
+ integer :: ncell(3)
  integer,allocatable  :: blkval(:),list(:)
  real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
  character(len=500) :: msg
@@ -3605,11 +3605,11 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     n_cell(ia) = nint(factor)
+     ncell(ia) = nint(factor)
    end if
  end do
 
- ncell = product(n_cell)
+ ncell = product(ncell)
 
 !Check if the energy store in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
@@ -3632,7 +3632,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 
 !Set the new supercell datatype into the effective potential reference
- call effective_potential_setSupercell(eff_pot,comm,n_cell)
+ call effective_potential_setSupercell(eff_pot,comm,ncell)
 
 !allocation
  ABI_ALLOCATE(blkval,(natom_hist))
@@ -3648,7 +3648,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
  if(need_verbose) then
    write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
-&       ' The size of the supercell for the fit is ',n_cell(1),' ',n_cell(2),' ',n_cell(3)
+&       ' The size of the supercell for the fit is ',ncell(1),' ',ncell(2),' ',ncell(3)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if

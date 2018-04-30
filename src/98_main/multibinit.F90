@@ -397,7 +397,7 @@ program multibinit
 ! Print the Phonon dos/spectrum
 ! if(inp%prt_phfrq > 0) then
 !     call effective_potential_printPDOS(reference_effective_potential,filnam(2),&
-!&           inp%n_cell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
+!&           inp%ncell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
 !   end if
 
 !Intialisation of the effective potential type

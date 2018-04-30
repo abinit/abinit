@@ -21,7 +21,7 @@ qph1l  =      0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
               0.50000000E+00  0.50000000E+00  0.00000000E+00    1.000E+00
               0.50000000E+00  0.50000000E+00  0.50000000E+00    1.000E+00
 
-n_cell =   2 2 2
+ncell =   2 2 2
 dynamics =  12
 temperature = 1000
 ntime  = 50
@@ -43,5 +43,5 @@ ntime  = 50
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and generate effective potential in XML file
-#%% topics = LatticeModel
+#%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

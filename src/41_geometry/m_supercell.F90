@@ -669,14 +669,14 @@ end subroutine copy_supercell
 !!
 !! INPUTS
 !! index  = index of the cell into the supercell
-!! n_cell = number of total cell
+!! ncell = number of total cell
 !!
 !! OUTPUT
 !! index  = index of the cell into the supercell with PBC
 !!
 !! SOURCE
 
-subroutine getPBCIndexes_supercell(index,n_cell)
+subroutine getPBCIndexes_supercell(index,ncell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -689,17 +689,17 @@ subroutine getPBCIndexes_supercell(index,n_cell)
 
 !Arguments ---------------------------------------------
   integer, intent(inout)  :: index(3)
-  integer, intent(in) :: n_cell(3)
+  integer, intent(in) :: ncell(3)
 !Local variables ---------------------------------------
   integer :: ii
 ! *********************************************************************
 
   do ii=1,3
-    do while (index(ii) > n_cell(ii))
-      index(ii) = index(ii) - n_cell(ii)
+    do while (index(ii) > ncell(ii))
+      index(ii) = index(ii) - ncell(ii)
     end do
     do while (index(ii) <= 0)
-      index(ii) = index(ii) + n_cell(ii)
+      index(ii) = index(ii) + ncell(ii)
     end do
   end do
 
@@ -716,7 +716,7 @@ end subroutine getPBCIndexes_supercell
 !!  for example: (4 4 4) => min = -1 and max = 2
 !! 
 !! INPUTS
-!! n_cell(3) = size of the supercell (for example 3 3 3)   
+!! ncell(3) = size of the supercell (for example 3 3 3)   
 !!
 !! OUTPUT
 !! min = minimun of the range
@@ -729,7 +729,7 @@ end subroutine getPBCIndexes_supercell
 !!
 !! SOURCE
 
-subroutine findBound_supercell(min,max,n_cell)
+subroutine findBound_supercell(min,max,ncell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -742,12 +742,12 @@ subroutine findBound_supercell(min,max,n_cell)
 
 !Arguments ---------------------------------------------
   integer, intent(inout) :: min,max
-  integer, intent(in) :: n_cell
+  integer, intent(in) :: ncell
 !Local variables ---------------------------------------
   if(abs(max)>abs(min)) then
-    max=(n_cell)/2; min=-max;  if(mod(n_cell,2)==0) max = max -1
+    max=(ncell)/2; min=-max;  if(mod(ncell,2)==0) max = max -1
   else
-    min=-(n_cell)/2; max=-min; if(mod(n_cell,2)==0)  min= min +1
+    min=-(ncell)/2; max=-min; if(mod(ncell,2)==0)  min= min +1
   end if
 
 ! *********************************************************************

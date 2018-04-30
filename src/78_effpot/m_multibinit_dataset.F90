@@ -115,7 +115,7 @@ module m_multibinit_dataset
   integer :: fit_rangePower(2)
   integer :: bound_rangePower(2)
   integer :: bound_cell(3)
-  integer :: n_cell(3)
+  integer :: ncell(3)
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: ng2qpt(3)
   integer :: kptrlatt(3,3)
@@ -308,7 +308,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_rangePower(:)= (/3,4/)
  multibinit_dtset%bound_rangePower(:)= (/6,6/)
  multibinit_dtset%bound_cell(:)= (/6,6,6/)
- multibinit_dtset%n_cell(:)= 0
+ multibinit_dtset%ncell(:)= 0
  multibinit_dtset%ngqpt(:) = 0
  multibinit_dtset%ng2qpt(:)= 0
  multibinit_dtset%strtarget(1:6) = zero
@@ -802,14 +802,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end do
 
- multibinit_dtset%n_cell(:)= 1
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'n_cell',tread,'INT')
- if(tread==1) multibinit_dtset%n_cell(1:3)=intarr(1:3)
+ multibinit_dtset%ncell(:)= 1
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ncell',tread,'INT')
+ if(tread==1) multibinit_dtset%ncell(1:3)=intarr(1:3)
  do ii=1,3
-   if(multibinit_dtset%n_cell(ii)<0.or.multibinit_dtset%n_cell(ii)>100)then
+   if(multibinit_dtset%ncell(ii)<0.or.multibinit_dtset%ncell(ii)>100)then
      write(message, '(a,i0,a,i0,3a,i0,a)' )&
-&     'n_cell(',ii,') is ',multibinit_dtset%n_cell(ii),', which is lower than 0 of superior than 50.',&
-&     ch10,'Action: correct n_cell(',ii,') in your input file.'
+&     'ncell(',ii,') is ',multibinit_dtset%ncell(ii),', which is lower than 0 of superior than 50.',&
+&     ch10,'Action: correct ncell(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
  end do
@@ -1692,15 +1692,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end do
 
  do ii=1,3
-   if(multibinit_dtset%dipdip_range(ii) < multibinit_dtset%n_cell(ii)) then
+   if(multibinit_dtset%dipdip_range(ii) < multibinit_dtset%ncell(ii)) then
      write(message,'(4a,3I3,3a,3I3,6a)') ch10,&
 &                 ' --- !WARNING',ch10,&
 &                 '     The range of dipdip_range (',multibinit_dtset%dipdip_range(:),')',ch10,&
 &                 '     But the range of the cell for the simulation is',&
-&                       multibinit_dtset%n_cell(:),')',ch10,&
-&                 '     dipdip_range is set to n_cell.',ch10,&
+&                       multibinit_dtset%ncell(:),')',ch10,&
+&                 '     dipdip_range is set to ncell.',ch10,&
 &                 ' ---',ch10
-     multibinit_dtset%dipdip_range(:) =  multibinit_dtset%n_cell(:)
+     multibinit_dtset%dipdip_range(:) =  multibinit_dtset%ncell(:)
      call wrtout(std_out,message,'COLL')
      exit
    end if
@@ -1822,7 +1822,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    if (multibinit_dtset%nctime /=1)then
      write(nunit,'(3x,a9,3I10.1)')'   nctime',multibinit_dtset%nctime
    end if
-   write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
+   write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%ncell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
    if (multibinit_dtset%restartxf/=0) then
      write(nunit,'(3x,a9,3i10)')  'restartxf',multibinit_dtset%restartxf
