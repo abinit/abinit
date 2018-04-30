@@ -202,6 +202,7 @@ ABI_TOPICS = [
     "GWls",
     "Hybrids",
     "k-points",
+    "LatticeModel",
     "LDAminushalf",
     "LOTF",
     "MagField",

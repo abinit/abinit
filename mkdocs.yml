@@ -49,6 +49,7 @@ pages:
     - topics/Berry.md
     - topics/BandOcc.md
     - topics/BSE.md
+    - topics/BoundProcess.md
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md
@@ -79,6 +80,7 @@ pages:
     - topics/GWls.md
     - topics/Hybrids.md
     - topics/k-points.md
+    - topics/LatticeModel.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
     - topics/MagField.md

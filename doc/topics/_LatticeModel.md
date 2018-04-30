@@ -1,9 +1,9 @@
 ---
-description: How to bound a model in multibinit
+description: How to fit build a lattice model in Multibinit
 authors: AM
 ---
 
-This page gives hints on how to fit bound a model in multibinit.
+This page gives hints on how to a lattice model in multibinit.
 
 ## Introduction
 
