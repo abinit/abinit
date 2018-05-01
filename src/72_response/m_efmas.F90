@@ -450,7 +450,6 @@ CONTAINS
 
    !Local variables ------------------------------
    logical :: extras
-   logical, allocatable :: saddle_warn_(:)
    integer :: iband, adir
    character(len=22) :: format_eigvec
    character(len=500) :: msg, tmpstr
@@ -485,12 +484,12 @@ CONTAINS
        write(io_unit,'(a)') '   are DEGENERATE (effective mass tensor is therefore not defined).'
        if(mdim==3) then
          write(io_unit,'(a)') '   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).'
+         write(io_unit,'(a,i7,a)') &
+&          ' - Angular average effective mass for Frohlich model is to be averaged over degenerate bands. See later.'
        elseif(mdim==2) then
          write(io_unit,'(a)') ' - Also, 2D requested (perpendicular to Z axis).'
          write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).'
        end if
-       write(io_unit,'(a,i7,a)') &
-&        ' - Angular average effective mass for Frohlich model is to be averaged over degenerate bands. See later.'
        write(io_unit,'(a,i7,a)') ' - Associated theta integrals calculated with ntheta=',ntheta,' points.'
      else
        write(io_unit,'(a)') '   are DEGENERATE.'
@@ -568,7 +567,7 @@ CONTAINS
        endif
        if(abs(m_avg_frohlich(iband))>tol8)then
          write(io_unit,'(a,f14.10)') &
-&          ' Average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
+&          ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
        endif
      endif
 
