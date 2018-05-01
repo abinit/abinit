@@ -7,7 +7,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2018 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,6 +56,7 @@ module m_symtk
  public :: symmetrize_rprimd    ! Generate new rprimd on the basis of the expected characteristics of the conventional cell
  public :: symchk               ! Symmetry checker for atomic coordinates.
  public :: symatm               ! Build indsym table describing the action of the symmetry operations on the atomic positions.
+ public :: symcharac            ! Get the type of axis for the symmetry.
 !!***
 
 contains
@@ -2005,6 +2006,868 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
  end if
 
 end subroutine symatm
+!!***
+
+!!****f* m_symtk/symcharac
+!! NAME
+!! symcharac
+!!
+!! FUNCTION
+!! Get the type of axis for the symmetry.
+!!
+!! INPUTS
+!! center=bravais(2)
+!! determinant=the value of the determinant of sym
+!! iholohedry=bravais(1)
+!! isym=number of the symmetry operation that is currently analyzed
+!! order=the order of the symmetry
+!! symrel(3,3)= the symmetry matrix
+!! tnons(3)=nonsymmorphic translations
+!!
+!! OUTPUT
+!! label=a human readable text for the characteristic of the symmetry
+!! type_axis=an identifier for the type of symmetry
+!!
+!! PARENTS
+!!      m_ab7_symmetry,symspgr
+!!
+!! CHILDREN
+!!      symaxes,symplanes,wrtout
+!!
+!! SOURCE
+
+subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons, type_axis)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symcharac'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry, except_this_one => symcharac
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: determinant, center, iholohedry, isym
+ integer, intent(out) :: type_axis
+ character(len = 128), intent(out) :: label
+ !arrays
+ integer,intent(in) :: symrel(3,3)
+ real(dp),intent(in) :: tnons(3)
+
+ !Local variables-------------------------------
+ !scalars
+ logical,parameter :: verbose=.FALSE.
+ integer :: tnons_order, identified, ii, order, iorder
+ character(len=500) :: message
+ !arrays
+ integer :: identity(3,3),matrix(3,3),trial(3,3)
+ real(dp) :: reduced(3),trialt(3)
+
+ !**************************************************************************
+
+ identity(:,:)=0
+ identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
+ trial(:,:)=identity(:,:)
+ matrix(:,:)=symrel(:,:)
+
+ order=0
+ do iorder=1,6
+   trial=matmul(matrix,trial)
+   if(sum((trial-identity)**2)==0)then
+     order=iorder
+     exit
+   end if
+   if(sum((trial+identity)**2)==0)then
+     order=iorder
+     exit
+   end if
+ end do
+
+ if(order==0)then
+   type_axis = -2
+   return
+ end if
+
+!Determination of the characteristics of proper symmetries (rotations)
+ if(determinant==1)then
+
+!  Determine the translation vector associated to the rotations
+!  and its order : apply the symmetry operation
+!  then analyse the resulting vector.
+   identified=0
+   trialt(:)=zero
+   do ii=1,order
+     trialt(:)=matmul(symrel(:,:),trialt(:))+tnons(:)
+   end do
+!  Gives the associated translation, with components in the
+!  interval [-0.5,0.5] .
+   reduced(:)=trialt(:)-nint(trialt(:)-tol6)
+
+   if(sum(abs(reduced(:)))<tol6)identified=1
+   if( (center==1 .or. center==-3) .and. &
+&   sum(abs(reduced(:)-(/zero,half,half/)))<tol6 )identified=2
+   if( (center==2 .or. center==-3) .and. &
+&   sum(abs(reduced(:)-(/half,zero,half/)))<tol6 )identified=3
+   if( (center==3 .or. center==-3) .and. &
+&   sum(abs(reduced(:)-(/half,half,zero/)))<tol6 )identified=4
+   if(center==-1.and. sum(abs(reduced(:)-(/half,half,half/)))<tol6 )identified=5
+
+!  If the symmetry operation has not been identified, there is a problem ...
+   if(identified==0) then
+     type_axis = -1
+     return
+   end if
+
+!  Compute the translation vector associated with one rotation
+   trialt(:)=trialt(:)/order
+   trialt(:)=trialt(:)-nint(trialt(:)-tol6)
+
+!  Analyse the resulting vector.
+   identified=0
+   do ii=1,order
+     reduced(:)=ii*trialt(:)-nint(ii*trialt(:)-tol6)
+     if(sum(abs(reduced(:)))<tol6)identified=1
+     if( (center==1 .or. center==-3) .and. &
+&     sum(abs(reduced(:)-(/zero,half,half/)))<tol6 )identified=2
+     if( (center==2 .or. center==-3) .and. &
+&     sum(abs(reduced(:)-(/half,zero,half/)))<tol6 )identified=3
+     if( (center==3 .or. center==-3) .and. &
+&     sum(abs(reduced(:)-(/half,half,zero/)))<tol6 )identified=4
+     if(center==-1.and. sum(abs(reduced(:)-(/half,half,half/)))<tol6 )identified=5
+
+     if(identified/=0)then
+       tnons_order=ii
+       exit
+     end if
+   end do ! ii
+
+!  Determinant (here=+1, as we are dealing with proper symmetry operations),
+!  order, tnons_order and identified are enough to
+!  determine the kind of symmetry operation
+
+   select case(order)
+   case(1)                       ! point symmetry 1
+     if(identified==1) then
+       type_axis=8                 ! 1
+       write(label,'(a)') 'the identity'
+     else
+       type_axis=7                 ! t
+       write(label,'(a)') 'a pure translation '
+     end if
+
+     if (verbose) then
+       write(message,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(label)
+       call wrtout(std_out,message,'COLL')
+     end if
+
+   case(2,3,4,6)                 ! point symmetry 2,3,4,6 - rotations
+     call symaxes(center,iholohedry,isym,symrel,label,order,tnons_order,trialt,type_axis)
+   end select
+
+ else if (determinant==-1)then
+
+!  Now, take care of the improper symmetry operations.
+!  Their treatment is relatively easy, except for the mirror planes
+   select case(order)
+   case(1)                       ! point symmetry 1
+     type_axis=5                  ! -1
+     write(label,'(a)') 'an inversion'
+   case(2)                       ! point symmetry 2 - planes
+     call symplanes(center,iholohedry,isym,symrel,tnons,label,type_axis)
+   case(3)                       ! point symmetry 3
+     type_axis=3                  ! -3
+     write(label,'(a)') 'a -3 axis '
+   case(4)                       ! point symmetry 1
+     type_axis=2                  ! -4
+     write(label,'(a)') 'a -4 axis '
+   case(6)                       ! point symmetry 1
+     type_axis=1                  ! -6
+     write(label,'(a)') 'a -6 axis '
+   end select
+
+   if (order /= 2 .and. verbose) then
+     write(message,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(label)
+     call wrtout(std_out,message,'COLL')
+   end if
+
+ end if ! determinant==1 or -1
+
+end subroutine symcharac
+!!***
+
+!!****f* m_symtk/symaxes
+!! NAME
+!! symaxes
+!!
+!! FUNCTION
+!! Determines the type of symmetry operation, for
+!! the proper symmetries 2,2_1,3,3_1,3_2,4,4_1,4_2,4_3,6,6_1,...6_5
+!!
+!! INPUTS
+!! center=type of bravais lattice centering
+!!   	  center=0        no centering
+!!        center=-1       body-centered
+!!        center=-3       face-centered
+!!        center=1        A-face centered
+!!        center=2        B-face centered
+!!        center=3        C-face centered
+!! iholohedry=type of holohedry
+!!            iholohedry=1   triclinic      1bar
+!!            iholohedry=2   monoclinic     2/m
+!!            iholohedry=3   orthorhombic   mmm
+!!            iholohedry=4   tetragonal     4/mmm
+!!            iholohedry=5   trigonal       3bar m  (rhombohedral Bravais latt)
+!!            iholohedry=6   hexagonal      6/mmm
+!!            iholohedry=7   cubic          m3bar m
+!! isym=number of the symmetry operation that is currently analyzed
+!! isymrelconv=symrel matrix for the particular operation, in conv. axes
+!! ordersym=order of the symmetry operation
+!! tnons_order=order of the screw translation
+!! trialt(3)=screw translation associated with the symmetry operation
+!!           in conventional axes (all components in the range ]-1/2,1/2] )
+!!
+!! OUTPUT
+!! label=a user friendly label for the rotation
+!! type_axis=type of the symmetry operation
+!!
+!! NOTES
+!! It is assumed that the symmetry operations will be entered in the
+!! symrel tnonsconv arrays, for the CONVENTIONAL cell.
+!! For proper symmetries (rotations), the
+!! associated translation is determined.
+!!
+!! There is a subtlety with translations associated with rotations :
+!! all the rotations with axis
+!! parallel to the one analysed do not all have the
+!! same translation characteristics. This is clearly seen
+!! in the extended Hermann-Mauguin symbols, see the international
+!! table for crystallography, chapter 4.
+!! In the treatment that we adopt, one will distinguish
+!! the cases of primitive Bravais lattices, and centered
+!! bravais lattices. In the latter case, in the present routine,
+!! at the exception of the trigonal axis for the
+!! cubic system, we explicitely generate the correct ratio of different
+!! translations, so that their type can be explicitely assigned,
+!! without confusion. By contrast, for primitive lattices,
+!! the "tnons" that has been transmitted to the present routine
+!! might be one of the few possible translations vectors,
+!! nearly at random. We deal with this case by the explicit
+!! examination of the system classes, and the identification
+!! of such a possibility. In particular:
+!! (1) for the trigonal axis in the rhombohedral Bravais lattice,
+!! or in the cubic system, there is an equal number of 3, 3_1,
+!! and 3_2 axes parallel to each other, in a cell that
+!! is primitive (as well as conventional). In this particular case,
+!! in the present
+!! routine, all 3, 3_1 and 3_2 axes are assigned to be 3 axes,
+!! independently of the centering.
+!! (2) for the 4- or 6- axes, no confusion is possible :
+!! in the primitive cell, there is only one possible translation,
+!! while in the centered cells, the correct ratio of translation
+!! vectors will be generated
+!! (3) for the binary axes, there is no problem when the cell
+!! is centered, but there are problems
+!! (3a) for the tP Bravais lattice, for an axis in a tertiary direction,
+!! (see the description of the lattice symmetry directions
+!!  table 2.4.1 of the international tables for crystallography),
+!!  where the family of axes is made equally of 2 and 2_1 axis.
+!!  In this case, we attribute the binary axis to the specific class
+!!  of "tertiary 2-axis". We keep track of the 2 or 2_1
+!!  characteristics of all other binary axes
+!! (3b) for the tI Bravais lattice, in all the directions,
+!!  there is an equal number of 2 and 2_1 axes. We distinguish
+!!  the primary and secondary family from the tertiary family.
+!! (3c) for the hP Bravais lattice, each binary axis can present
+!!  no translation or be a screw axis (in the same direction).
+!!  For primary axes, one need the "2" and "2_1" classification,
+!!  while for secondary and tertiary axes, the associated
+!!  translation vector will have not importance.
+!!  However, one will need to distinguish secondary from
+!!  tertiary, and these from primary axes.
+!!  So, this is the most complicated case, for binary axes,
+!!  with the following sets of binary axes : "2", "2_1",
+!!  "secondary 2" and "tertiary 2".
+!! (3d) for the hR Bravais lattice, each binary axis can present
+!!  no translation or be a screw axis (in the same direction).
+!!  There is no distinction between tertiary axes and other, so that
+!!  we simply assign a binary axis to "2-axis"
+!! (3e) for the cP lattice, the binary axes along tertiary directions
+!!  can also have different translation vectors, while for the primary
+!!  direction, there is no such ambiguity. So, we will attribute
+!!  tertiary 2 axis to the "tertiary 2-axis" set (there are always 6),
+!!  and attribute 2 and 2_1 primary axes to the corresponding sets.
+!!
+!! PARENTS
+!!      symcharac
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order,trialt,type_axis)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symaxes'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: center,iholohedry,isym,ordersym,tnons_order
+ integer,intent(out) :: type_axis
+ character(len=128),intent(out) :: label
+!arrays
+ integer,intent(in) :: isymrelconv(3,3)
+ real(dp),intent(in) :: trialt(3)
+
+!Local variables-------------------------------
+!scalars
+ logical,parameter :: verbose=.FALSE.
+ character(len=500) :: message
+ integer :: direction,directiontype
+ real(dp),parameter :: nzero=1.0d-6
+
+!**************************************************************************
+
+!write(std_out,*)' symaxes : enter, isym=',isym
+!write(std_out,*)' symaxes : iholohedry, ',iholohedry
+!write(std_out,*)' symaxes : center, ',center
+
+ select case(ordersym)
+
+ case(2)                       ! point symmetry 2
+!    Must characterize directiontype for cP, tP, tI, and hP Bravais lattices
+   directiontype=1
+   if( iholohedry==4 .or. iholohedry==7) then ! tP or cP Bravais lattices
+     if(abs(isymrelconv(1,1))+ &
+&     abs(isymrelconv(2,2))+ &
+&     abs(isymrelconv(3,3))  ==1) directiontype=3
+   else if(iholohedry==6)then   ! hP Bravais lattice
+     if(sum(isymrelconv(:,:))/=-1 )directiontype=2
+     if(sum(isymrelconv(:,:))==0 .or. sum(isymrelconv(:,:))==-3 )&
+&     directiontype=3
+!      directiontype=1 corresponds to a primary axis
+!      directiontype=2 corresponds to a tertiary axis
+!      directiontype=3 corresponds to a secondary axis
+   end if
+
+!    DEBUG
+!    write(std_out,*)' directiontype=',directiontype
+!    write(std_out,'(a,3i6)' )' isymrelconv(1:3)=',isymrelconv(:,1)
+!    write(std_out,'(a,3i6)' )' isymrelconv(4:6)=',isymrelconv(:,2)
+!    write(std_out,'(a,3i6)' )' isymrelconv(7:9)=',isymrelconv(:,3)
+!    write(std_out,'(a,i)' )' tnons_order=',tnons_order
+!    ENDDEBUG
+
+!    Now, classify the 2 axes
+   if(directiontype==2)then
+     type_axis=4                 ! secondary 2  (only in the hP Bravais latt case)
+     write(label,'(a)') 'a secondary 2-axis '
+
+   else if(directiontype==3 .and. iholohedry==4)then
+     type_axis=21                ! tertiary 2
+     write(label,'(a)') 'a tertiary 2-axis '
+   else if(directiontype==3 .and. &
+&     center==0 .and. (iholohedry==6.or.iholohedry==7) )then
+     type_axis=21                ! tertiary 2
+     write(label,'(a)') 'a tertiary 2-axis '
+   else if(tnons_order==1 .or. (iholohedry==4 .and. center==-1) .or. &
+&     iholohedry==5)then
+     type_axis=9                 ! 2
+     write(label,'(a)') 'a 2-axis '
+   else
+     type_axis=20                ! 2_1
+     write(label,'(a)') 'a 2_1-axis '
+   end if
+
+ case(3)                       ! point symmetry 3
+   if(tnons_order==1)then
+     type_axis=10                ! 3
+     write(label,'(a)') 'a 3-axis '
+   else if(iholohedry==5 .or. iholohedry==7)then
+!      This is a special situation : in the same family of parallel 3-axis,
+!      one will have an equal number of 3, 3_1 and 3_2 axes, so that
+!      it is non-sense to try to classify one of them.
+     type_axis=10                ! 3, 3_1 or 3_2, undistinguishable
+     write(label,'(a)') 'a 3, 3_1 or 3_2 axis '
+   else
+!      DEBUG
+!      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
+!      write(std_out,*)'trialt=',trialt(:)
+!      ENDDEBUG
+!      Must recognize 3_1 or 3_2
+     if(isymrelconv(1,1)==0)then  ! 3+
+       if(abs(trialt(3)-third)<nzero)type_axis=22   ! 3_1
+       if(abs(trialt(3)+third)<nzero)type_axis=23   ! 3_2
+     else if(isymrelconv(1,1)==-1)then  ! 3-
+       if(abs(trialt(3)-third)<nzero)type_axis=23   ! 3_2
+       if(abs(trialt(3)+third)<nzero)type_axis=22   ! 3_1
+     end if
+     write(label,'(a)') 'a 3_1 or 3_2-axis '
+   end if
+
+ case(4)                       ! point symmetry 4
+   if(tnons_order==1)then
+     type_axis=12                ! 4
+     write(label,'(a)') 'a 4-axis '
+   else if(tnons_order==2)then
+     type_axis=25                ! 4_2
+     write(label,'(a)') 'a 4_2-axis '
+   else if(center/=0)then
+     type_axis=24                ! 4_1 or 4_3
+     write(label,'(a)') 'a 4_1 or 4_3-axis '
+   else
+!      DEBUG
+!      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
+!      write(std_out,*)'trialt=',trialt(:)
+!      ENDDEBUG
+!      Must recognize 4_1 or 4_3, along the three primary directions
+     do direction=1,3
+       if(isymrelconv(direction,direction)==1)then  !
+         if( (direction==1 .and. isymrelconv(2,3)==-1) .or. &
+&         (direction==2 .and. isymrelconv(3,1)==-1) .or. &
+&         (direction==3 .and. isymrelconv(1,2)==-1)       )then ! 4+
+           if(abs(trialt(direction)-quarter)<nzero)type_axis=24    ! 4_1
+           if(abs(trialt(direction)+quarter)<nzero)type_axis=26    ! 4_3
+         else if( (direction==1 .and. isymrelconv(2,3)==1) .or. &
+&           (direction==2 .and. isymrelconv(3,1)==1) .or. &
+&           (direction==3 .and. isymrelconv(1,2)==1)       )then ! 4-
+           if(abs(trialt(direction)-quarter)<nzero)type_axis=26    ! 4_3
+           if(abs(trialt(direction)+quarter)<nzero)type_axis=24    ! 4_1
+         end if
+       end if
+     end do
+     write(label,'(a)') 'a 4_1 or 4_3-axis '
+   end if
+
+ case(6)                       ! point symmetry 6
+   if(tnons_order==1)then
+     type_axis=14                ! 6
+     write(label,'(a)') 'a 6-axis '
+   else if(tnons_order==2)then
+     type_axis=29                ! 6_3
+     write(label,'(a)') 'a 6_3-axis '
+   else if(tnons_order==3)then
+!      DEBUG
+!      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
+!      write(std_out,*)'trialt=',trialt(:)
+!      ENDDEBUG
+!      Must recognize 6_2 or 6_4
+     if(isymrelconv(1,1)==1)then  ! 6+
+       if(abs(trialt(3)-third)<nzero)type_axis=28   ! 6_2
+       if(abs(trialt(3)+third)<nzero)type_axis=30   ! 6_4
+     else if(isymrelconv(1,1)==0)then  ! 6-
+       if(abs(trialt(3)-third)<nzero)type_axis=30   ! 6_4
+       if(abs(trialt(3)+third)<nzero)type_axis=28   ! 6_2
+     end if
+     write(label,'(a)') 'a 6_2 or 6_4-axis '
+   else
+!      DEBUG
+!      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
+!      write(std_out,*)'trialt=',trialt(:)
+!      ENDDEBUG
+!      Must recognize 6_1 or 6_5
+     if(isymrelconv(1,1)==1)then  ! 6+
+       if(abs(trialt(3)-sixth)<nzero)type_axis=27   ! 6_1
+       if(abs(trialt(3)+sixth)<nzero)type_axis=31   ! 6_5
+     else if(isymrelconv(1,1)==0)then  ! 6-
+       if(abs(trialt(3)-sixth)<nzero)type_axis=31   ! 6_5
+       if(abs(trialt(3)+sixth)<nzero)type_axis=27   ! 6_1
+     end if
+     write(label,'(a)') 'a 6_1 or 6_5-axis '
+   end if
+
+ end select
+
+ if (verbose) then
+   write(message,'(a,i3,a,a)')' symaxes : the symmetry operation no. ',isym,' is ', trim(label)
+   call wrtout(std_out,message,'COLL')
+ end if
+
+end subroutine symaxes
+!!***
+
+!!****f* m_symtk/symplanes
+!! NAME
+!! symplanes
+!!
+!! FUNCTION
+!! Determines the type of symmetry mirror planes: m,a,b,c,d,n,g.
+!! This is used (see symlist.f) to identify the space group.
+!!
+!! INPUTS
+!! center=type of bravais lattice centering
+!!   center=0        no centering
+!!   center=-1       body-centered
+!!   center=-3       face-centered
+!!   center=1        A-face centered
+!!   center=2        B-face centered
+!!   center=3        C-face centered
+!! iholohedry=type of holohedry
+!!   iholohedry=1   triclinic      1bar
+!!   iholohedry=2   monoclinic     2/m
+!!   iholohedry=3   orthorhombic   mmm
+!!   iholohedry=4   tetragonal     4/mmm
+!!   iholohedry=5   trigonal       3bar m
+!!   iholohedry=6   hexagonal      6/mmm
+!!   iholohedry=7   cubic          m3bar m
+!! isym=number of the symmetry operation that is currently analyzed
+!! isymrelconv=symrel matrix for the particular operation, in conv. coord.
+!! itnonsconv=tnons vector for the particular operation, in conv. coord
+!!
+!! OUTPUT
+!! label=user friendly label of the plane
+!! type_axis=type of the symmetry operation
+!!
+!! NOTES
+!! One follows the
+!! conventions explained in table 1.3 of the international tables for
+!! crystallography. In the case of the rhombohedral system,
+!! one takes into account the first footnote of this table 1.3 .
+!! In general, we will assign the different symmetries to
+!! the following numbers :  m -> 15 , (a, b or c) -> 16,
+!!  d -> 17, n -> 18 , g -> 19
+!! However, there is the same problem as for binary axes,
+!! namely, for parallel mirror planes, one can find different
+!! translation vectors, and these might be found at random,
+!! depending on the input tnons.
+!! (1) In the tP case, one will distinguish tertiary
+!!  mirror plane, for which it is important to know whether they are
+!!  m or c (for tertiary planes in tP, g is equivalent to m and n is equivalent to c).
+!!  On the other hand, it is important to distinguish among
+!!  primary and secondary mirror planes, those that are m,(a or b),c, or n.
+!!  To summarize, the number of the symmetry will be :
+!!  m (primary, secondary or tertiary) -> 15 ,
+!!  secondary (a or b) -> 16, secondary c -> 17,
+!!  primary or secondary n -> 18 , tertiary c -> 19
+!! (2) In the tI case, one will distinguish tertiary
+!!  mirror plane, for which it is important to know whether they are
+!!  m or d (for tertiary planes in tI, c is equivalent to m.
+!!  On the other hand, it is important to distinguish among
+!!  primary and secondary mirror planes, those that are m (equivalent to n),
+!!  or a,b or c.
+!!  To summarize, the number of the symmetry will be :
+!!  m (primary, secondary, tertiary) -> 15 ,
+!!  a,b or c (primary or secondary) -> 16, tertiary d -> 17
+!! (3) For hP and hR, a m plane is always coupled to a a or b plane,
+!!  while a c plane is always coupled to an n plane. On the other
+!!  hand, it is important to distinguish between primary or secondary
+!!  mirror planes, and tertiary mirror planes. So we will keep the
+!!  following sets : m non-tertiary (that includes a or b non-tertiary) -> 15,
+!!  c non-tertiary (that includes n non-tertiary) -> 16,
+!!  m tertiary (that includes a or b non-tertiary) -> 17,
+!!  c tertiary (that includes n non-tertiary) -> 18.
+!!  For hR, all mirror planes are secondary.
+!! (4) For the cP lattice, in the same spirit, one can see that
+!!  the tertiary m and g mirror planes are to be classified as "m" -> 15,
+!!  while n, a and c are to be classified as "n" -> 18. There is no need
+!!  to distinguish between primary, secondary or tertiary axes.
+!!
+!! PARENTS
+!!      symcharac
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_axis)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symplanes'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: center,iholohedry,isym
+ integer,intent(out) :: type_axis
+ character(len = 128), intent(out) :: label
+!arrays
+ integer,intent(in) :: isymrelconv(3,3)
+ real(dp),intent(in) :: itnonsconv(3)
+
+!Local variables-------------------------------
+!scalars
+ logical,parameter :: verbose=.FALSE.
+ character(len=500) :: message
+ integer :: directiontype,sum_elements
+ real(dp),parameter :: nzero=1.0d-6
+!arrays
+ integer :: identity(3,3),mirrormxy(3,3),mirrormyz(3,3),mirrormzx(3,3)
+ integer :: mirrorx(3,3),mirrorxy(3,3),mirrory(3,3),mirroryz(3,3),mirrorz(3,3)
+ integer :: mirrorzx(3,3)
+ real(dp) :: trialt(3)
+! real(dp) :: itnonsconv2(3),trialt2(3)
+
+!**************************************************************************
+
+!write(std_out,*)' symplanes : enter'
+!write(std_out,*)' center,iholohedry,isym,isymrelconv,itnonsconv=',center,iholohedry,isym,isymrelconv,itnonsconv
+
+ identity(:,:)=0
+ identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
+
+!Will be a mirror plane, but one must characterize
+!(1) the type of plane (primary, secondary or tertiary)
+!(2) the gliding vector. One now defines a few matrices.
+ mirrorx(:,:)=identity(:,:) ; mirrorx(1,1)=-1
+ mirrory(:,:)=identity(:,:) ; mirrory(2,2)=-1
+ mirrorz(:,:)=identity(:,:) ; mirrorz(3,3)=-1
+ mirrorxy(:,:)=0 ; mirrorxy(1,2)=1 ; mirrorxy(2,1)=1 ; mirrorxy(3,3)=1
+ mirrorzx(:,:)=0 ; mirrorzx(1,3)=1 ; mirrorzx(3,1)=1 ; mirrorzx(2,2)=1
+ mirroryz(:,:)=0 ; mirroryz(2,3)=1 ; mirroryz(3,2)=1 ; mirroryz(1,1)=1
+ mirrormxy(:,:)=0 ; mirrormxy(1,2)=-1 ; mirrormxy(2,1)=-1 ; mirrormxy(3,3)=1
+ mirrormzx(:,:)=0 ; mirrormzx(1,3)=-1 ; mirrormzx(3,1)=-1 ; mirrormzx(2,2)=1
+ mirrormyz(:,:)=0 ; mirrormyz(2,3)=-1 ; mirrormyz(3,2)=-1 ; mirrormyz(1,1)=1
+
+!Determine the type of plane. At the end,
+!directiontype=1 will correspond to a primary axis (or equivalent
+!axes for orthorhombic)
+!directiontype=2 will correspond to a secondary axis
+!directiontype=3 will correspond to a tertiary axis
+!See table 2.4.1, 11.2 and 11.3 of the international tables for crystallography
+ directiontype=0
+!The sum of elements of the matrices allow to characterize them
+ sum_elements=sum(isymrelconv(:,:))
+
+ if(sum_elements==1)then
+!  The mirror plane perpendicular to the c axis is always primary
+   if( sum(abs(isymrelconv(:,:)-mirrorz(:,:)))==0 )then
+     directiontype=1
+!    All the other planes with a symrel matrix whose sum of elements is 1
+!    are a or b planes. They are primary or
+!    secondary planes, depending the holohedry.
+   else if(sum(isymrelconv(:,:))==1)then
+     if( iholohedry==2 .or. iholohedry==3 .or. iholohedry==7 )then
+       directiontype=1
+     else if(iholohedry==4 .or. iholohedry==6)then
+       directiontype=2
+     end if
+   end if
+ end if
+
+!All the planes with a symrel matrix whose sum of elements
+!is 2 are secondary planes (table 11.3).
+ if( sum_elements==2 ) directiontype=2
+
+!The planes with a symrel matrix whose sum of elements
+!is 3 or 0 are tertiary planes
+ if( sum_elements==3 .or. sum_elements==0 )directiontype=3
+
+!One is left with sum_elements=-1, tertiary for tetragonal
+!or cubic, secondary for hexagonal
+ if( sum_elements==-1)then
+   if(iholohedry==4 .or. iholohedry==7)directiontype=3
+   if(iholohedry==6)directiontype=2
+ end if
+
+
+!Now, determine the gliding vector
+!First, apply the symmetry operation
+!to itnonsconv, in order to get the translation vector
+!under the application of twice the symmetry operation
+ trialt(:)=matmul(isymrelconv(:,:),itnonsconv(:)) +itnonsconv(:)
+!Get the translation associated with one application,
+!and force its components to be in the interval ]-0.5,0.5] .
+ trialt(:)=trialt(:)*half
+ trialt(:)=trialt(:)-nint(trialt(:)-nzero)
+
+!If there is a glide vector for the initial choice of itnonsconv,
+!it might be that it disappears if itnonsconv is translated by a
+!lattice vector of the conventional cell
+!if(trialt(1)**2+trialt(2)**2+trialt(3)**2>tol5)then
+!do ii=1,3
+!itnonsconv2(:)=itnonsconv(:)
+!itnonsconv2(ii)=itnonsconv(ii)+one
+!trialt2(:)=matmul(isymrelconv(:,:),itnonsconv2(:)) +itnonsconv2(:)
+!trialt2(:)=trialt2(:)*half
+!trialt2(:)=trialt2(:)-nint(trialt2(:)-nzero)
+!if(trialt2(1)**2+trialt2(2)**2+trialt2(3)**2<tol5)then
+!trialt(:)=trialt2(:)
+!endif
+!enddo
+!endif
+
+ write(message,'(a)') ' symplanes...'
+
+!Must use the convention of table 1.3 of the international
+!tables for crystallography, see also pp 788 and 789.
+!Often, one needs to specialize the selection according
+!to the Bravais lattice or the system.
+
+ if(sum(abs(trialt(:)))<nzero .and. iholohedry/=6)then
+   type_axis=15  ! m
+   write(label,'(a)') 'a mirror plane'
+ else if(iholohedry==4 .and. center==0)then    ! primitive tetragonal
+
+   if(directiontype==1)then
+     type_axis=18  ! primary n
+     write(label,'(a)') 'a primary n plane'
+   else if(directiontype==2)then
+     if(sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. &
+&     sum(abs(trialt(:)-(/zero,half,zero/)))<nzero       )then
+       type_axis=16  ! secondary a or b
+       write(label,'(a)') 'a secondary a or b plane'
+     else if(sum(abs(trialt(:)-(/zero,zero,half/)))<nzero)then
+       type_axis=17    ! secondary c
+       write(label,'(a)') 'a secondary c plane'
+     else
+       type_axis=18    ! secondary n
+       write(label,'(a)') 'a secondary n plane'
+     end if ! directiontype==2
+   else if(directiontype==3)then
+     if( abs(trialt(3))<nzero )then
+       type_axis=15    ! tertiary m
+       write(label,'(a)') 'a tertiary m plane'
+     else if( abs(trialt(3)-half)<nzero )then
+       type_axis=19    ! tertiary c
+       write(label,'(a)') 'a tertiary c plane'
+     end if
+   end if
+
+ else if(iholohedry==4 .and. center==-1)then    ! inner tetragonal
+
+   if(directiontype==1 .or. directiontype==2)then
+     if(sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. &
+&     sum(abs(trialt(:)-(/zero,half,zero/)))<nzero .or. &
+&     sum(abs(trialt(:)-(/zero,zero,half/)))<nzero      )then
+       type_axis=16    ! a, b, or c
+       write(label,'(a)') 'an a, b or c plane'
+     else if(sum(abs(trialt(:)-(/half,half,zero/)))<nzero .or. &
+&       sum(abs(trialt(:)-(/zero,half,half/)))<nzero .or. &
+&       sum(abs(trialt(:)-(/half,zero,half/)))<nzero       )then
+       type_axis=15    ! n plane, equivalent to m
+       write(label,'(a)') 'a m plane'
+     end if ! directiontype==1 or 2
+   else if(directiontype==3)then
+     if( abs(trialt(3))<nzero .or. abs(trialt(3)-half)<nzero )then
+       type_axis=15    ! tertiary c, equivalent to m
+       write(label,'(a)') 'a tertiary m plane'
+     else
+       type_axis=17    ! tertiary d
+       write(label,'(a)') 'a tertiary d plane'
+     end if
+   end if
+
+ else if(iholohedry==5)then    ! hR
+
+   if( abs(sum(abs(trialt(:)))-one) < nzero) then
+     type_axis=15    ! secondary m
+     write(label,'(a)') 'a secondary m plane'
+   else if( abs(sum(abs(trialt(:)))-half) < nzero .or. &
+&     abs(sum(abs(trialt(:)))-three*half) < nzero )then
+     type_axis=16    ! secondary c
+     write(label,'(a)') 'a secondary c plane'
+   end if
+
+ else if(iholohedry==6)then    ! hP
+
+   if(directiontype==1)then
+     if( abs(trialt(3)) <nzero )then
+       type_axis=15    ! primary m
+       write(label,'(a)') 'a primary m plane'
+     end if
+   else if(directiontype==2)then
+     if( abs(trialt(3)) <nzero )then
+       type_axis=15    ! secondary m
+       write(label,'(a)') 'a secondary m plane'
+     else if( abs(trialt(3)-half) < nzero ) then
+       type_axis=16    ! secondary c
+       write(label,'(a)') 'a secondary c plane'
+     end if
+   else if(directiontype==3)then
+     if( abs(trialt(3)) <nzero )then
+       type_axis=17    ! tertiary m
+       write(label,'(a)') 'a tertiary m plane'
+     else if( abs(trialt(3)-half) < nzero ) then
+       type_axis=18    ! tertiary c
+       write(label,'(a)') 'a tertiary c plane'
+     end if
+   end if ! directiontype
+
+!  else if(iholohedry==7 .and. center==0)then    ! cP
+ else if(iholohedry==7)then    ! cP
+
+   if(directiontype==1)then
+     if((sum(abs(isymrelconv(:,:)-mirrorx(:,:)))==0 .and.  &
+&     sum(abs(two*abs(trialt(:))-(/zero,half,half/)))<nzero   ).or. &
+&     (sum(abs(isymrelconv(:,:)-mirrory(:,:)))==0 .and.  &
+&     sum(abs(two*abs(trialt(:))-(/half,zero,half/)))<nzero   ).or. &
+&     (sum(abs(isymrelconv(:,:)-mirrorz(:,:)))==0 .and.  &
+&     sum(abs(two*abs(trialt(:))-(/half,half,zero/)))<nzero   )    ) then
+       type_axis=17     ! d
+       write(label,'(a)') 'a d plane'
+     else
+       type_axis=18    ! primary n
+       write(label,'(a)') 'a primary n plane'
+     end if
+   else if(directiontype==3)then
+     if(sum(abs(two*abs(trialt(:))-(/half,half,half/)))<nzero       )then
+       type_axis=17     ! d
+       write(label,'(a)') 'a d plane'
+     else if( abs(sum(abs(trialt(:)))-half) < nzero .or. &
+&       abs(sum(abs(trialt(:)))-three*half) < nzero ) then
+       type_axis=18    ! tertiary n
+       write(label,'(a)') 'a tertiary n plane'
+     else if( abs(sum(abs(trialt(:)))-one) < nzero )then
+       type_axis=15    ! tertiary m
+       write(label,'(a)') 'a tertiary m plane'
+     end if
+   end if
+
+!  Now, treat all other cases (including other centered Bravais lattices)
+ else if( sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. &
+&   sum(abs(trialt(:)-(/zero,half,zero/)))<nzero .or. &
+&   sum(abs(trialt(:)-(/zero,zero,half/)))<nzero       )then
+   type_axis=16     ! a, b or c
+   write(label,'(a)') 'an a,b, or c plane'
+ else if( (directiontype==1 .or. directiontype==2) .and. &
+&   (sum(abs(trialt(:)-(/half,half,zero/)))<nzero .or. &
+&   sum(abs(trialt(:)-(/zero,half,half/)))<nzero .or. &
+&   sum(abs(trialt(:)-(/half,zero,half/)))<nzero     ) )then
+   type_axis=18     ! n
+   write(label,'(a)') 'an n plane'
+ else if( directiontype==3 .and. &
+&   sum(abs(trialt(:)-(/half,half,half/)))<nzero )then
+   type_axis=18     ! n
+   write(label,'(a)') 'an n plane'
+ else if((sum(abs(isymrelconv(:,:)-mirrorx(:,:)))==0 .and.  &
+&   sum(abs(two*abs(trialt(:))-(/zero,half,half/)))<nzero   ).or. &
+&   (sum(abs(isymrelconv(:,:)-mirrory(:,:)))==0 .and.  &
+&   sum(abs(two*abs(trialt(:))-(/half,zero,half/)))<nzero   ).or. &
+&   (sum(abs(isymrelconv(:,:)-mirrorz(:,:)))==0 .and.  &
+&   sum(abs(two*abs(trialt(:))-(/half,half,zero/)))<nzero   )    ) then
+   type_axis=17     ! d
+   write(label,'(a)') 'a d plane'
+ else if( directiontype==3 .and. &
+&   sum(abs(two*abs(trialt(:))-(/half,half,half/)))<nzero       )then
+   type_axis=17     ! d
+   write(label,'(a)') 'a d plane'
+ else
+   type_axis=19     ! g (all other planes with
+!  unconventional glide vector)
+   write(label,'(a)') 'a g plane'
+ end if
+
+ if (verbose) then
+   write(message,'(a,i3,a,a)')' symplanes : the symmetry operation no. ',isym,' is ', trim(label)
+   call wrtout(std_out,message,'COLL')
+ end if
+
+end subroutine symplanes
 !!***
 
 end module m_symtk
