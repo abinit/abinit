@@ -1315,7 +1315,6 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'polynomial_coeff_getList'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

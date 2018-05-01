@@ -2038,12 +2038,12 @@ end subroutine symatm
 
 subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons, type_axis)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symcharac'
  use interfaces_14_hidewrite
- use interfaces_41_geometry, except_this_one => symcharac
 !End of the abilint section
 
  implicit none
@@ -2309,6 +2309,7 @@ end subroutine symcharac
 !! SOURCE
 
 subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order,trialt,type_axis)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2580,6 +2581,7 @@ end subroutine symaxes
 !! SOURCE
 
 subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_axis)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

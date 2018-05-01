@@ -1174,7 +1174,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_equivalent_atoms'
- use interfaces_41_geometry
 !End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
@@ -1244,7 +1243,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_get_type'
- use interfaces_41_geometry
 !End of the abilint section
 
     integer, intent(in)  :: id, iSym
