@@ -42,7 +42,7 @@ module m_symlist
 contains
 !!***
 
-!!****f* ABINIT/symlist_prim
+!!****f* m_symlist/symlist_prim
 !! NAME
 !! symlist_prim
 !!
@@ -486,7 +486,7 @@ subroutine symlist_prim(additional_info,nsym,n_axes,spgroup)
 end subroutine symlist_prim
 !!***
 
-!!****f* ABINIT/symlist_bcc
+!!****f* m_symlist/symlist_bcc
 !! NAME
 !! symlist_bcc
 !!
@@ -681,7 +681,7 @@ subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
 end subroutine symlist_bcc
 !!***
 
-!!****f* ABINIT/symlist_fcc
+!!****f* m_symlist/symlist_fcc
 !! NAME
 !! symlist_fcc
 !!
@@ -801,7 +801,7 @@ subroutine symlist_fcc(nsym,n_axes,spgroup)
 end subroutine symlist_fcc
 !!***
 
-!!****f* ABINIT/symlist_others
+!!****f* m_symlist/symlist_others
 !! NAME
 !! symlist_others
 !!
