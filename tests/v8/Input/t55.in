@@ -18,7 +18,7 @@
   # WFK calc. at requested k-point
   
     iscf2    -2
-    getden2    -2
+    getden2   1
   
                                                                                                           
   # Response Function calculation : d/dk
@@ -85,5 +85,13 @@ nstep 100
 #%% description =
 #%%  MgO
 #%%  MgO effective mass tensor at \Gamma and X. \Gamma effective masses are published in Nery2018.
+#%%  From present calculation, hole effective masses (ordered by increasing mass) are
+#%%  m*(100)= -0.382, -2.171, -2.171 to be compared with Nery2018 Table I, -0.387, -2.164 (two-fold degenerate)
+#%%  m*(111)= -0.331, -3.826, -3.826 to be compared with Nery2018 Table I, -0.335, -3.822 (two-fold degenerate)
+#%%  m*(110)= -0.342, -2.171, -6.181
+#%%  with angular average effective mass for Frohlich model is 1.923.
+#%%  From present calculation, electron effective mass is
+#%%  m*= 0.334 to be compared with Nery2018 Table I, -0.340.
+#%%  Setting kpt to 8 8 8 and ecut to 50 allows one to reproduce the published values.
 #%% topics = EffMass
 #%%<END TEST_INFO>
