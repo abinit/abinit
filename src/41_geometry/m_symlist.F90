@@ -36,7 +36,7 @@ module m_symlist
  public :: symlist_prim
  public :: symlist_bcc
  public :: symlist_fcc
- public :: symlist_other
+ public :: symlist_others
 !!***
 
 contains
@@ -74,6 +74,7 @@ contains
 !! SOURCE
 
 subroutine symlist_prim(additional_info,nsym,n_axes,spgroup)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -520,6 +521,7 @@ end subroutine symlist_prim
 
 subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -713,6 +715,7 @@ end subroutine symlist_bcc
 
 subroutine symlist_fcc(nsym,n_axes,spgroup)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -833,6 +836,7 @@ end subroutine symlist_fcc
 !! SOURCE
 
 subroutine symlist_others(brvltt,nsym,n_axes,spgroup)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -38,7 +38,7 @@ sources = [
  "symfind.F90",
  "symkpt.F90",
  "symlatt.F90",
- "m_symlist",
+ "m_symlist.F90",
  "symptgroup.F90",
  "symsgcube.F90",
  "symsghexa.F90",
