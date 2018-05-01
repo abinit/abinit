@@ -77,6 +77,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  use m_numeric_tools, only : OPERATOR(.x.)
  use m_geometry,      only : xred2xcart
  use m_symtk,         only : symdet, symrelrot, symcharac
+ use m_spgdata,       only : spgdata
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -48,6 +48,9 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
  use defs_basis
  use m_profiling_abi
 
+ use m_spgdata,   only : spgdata
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -460,8 +463,7 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
    call bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
  end if
 
- call spgdata(brvsb,intsb,intsbl,ptintsb,&
-& ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
+ call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
 !DEBUG
 !write(std_out,*)' symsgtetra : exit'

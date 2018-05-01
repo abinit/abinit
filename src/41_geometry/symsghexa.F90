@@ -51,6 +51,8 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
  use defs_basis
  use m_profiling_abi
 
+ use m_spgdata,     only : spgdata
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -339,8 +341,7 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
      end select
    end if
 
-   call spgdata(brvsb,intsb,intsbl,ptintsb,&
-&   ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
+   call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
 !  End HEXAGONAL groups
  end if

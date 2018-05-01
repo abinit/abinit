@@ -35,6 +35,7 @@ MODULE m_memeval
 
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
  use m_symtk,         only : mati3inv, littlegroup_q
+ use m_spgdata,       only : prtspgroup
  use m_fftcore,       only : getng
  use m_kg,            only : getmpw
  use m_libpaw_tools,  only : libpaw_write_comm_set

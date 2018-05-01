@@ -33,6 +33,7 @@ MODULE m_crystal
 
  use m_numeric_tools,  only : set2unit
  use m_symtk,          only : mati3inv, sg_multable, symatm
+ use m_spgdata,        only : spgdata
  use m_geometry,       only : metric, xred2xcart, remove_inversion, getspinrot
  use m_io_tools,       only : open_file
  use m_fstrings,       only : int2char10
@@ -1221,8 +1222,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
    write (unitcif,'(a)') '_symmetry_cell_setting             cubic'
  end if
 
- call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,&
-& schsb,spgaxor,spgroup,sporder,spgorig)
+ call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
 !print symmetry operations
  write (unitcif,'(a,I6)') "_symmetry_Int_Tables_number          ", spgroup

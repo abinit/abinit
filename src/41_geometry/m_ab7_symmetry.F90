@@ -28,6 +28,7 @@ module m_ab7_symmetry
 
   use m_symtk,     only : mati3inv, mati3det, symatm, symcharac
   use m_geometry,  only : metric
+  use m_spgdata,   only : spgdata
 
   implicit none
 

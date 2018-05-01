@@ -50,6 +50,8 @@ subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
  use m_profiling_abi
 
  use m_time,     only : timab
+ use m_spgdata,  only : spgdata
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -507,8 +509,7 @@ subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
 
  call timab(47,2,tsec)
 
- call spgdata(brvsb,intsb,intsbl,ptintsb,&
-& ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
+ call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
 end subroutine symsgcube
 
