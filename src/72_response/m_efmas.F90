@@ -533,8 +533,10 @@ CONTAINS
        do adir=1,mdim
          write(io_unit,'(3f26.10)') efmas_tensor(adir,:,iband)
        end do
-       write(io_unit,'(a)') trim(msg)//' eigenvalues:'
-       write(io_unit,'(3f26.10)') efmas_eigval(:,iband)
+       if(present(efmas_eigval))then
+         write(io_unit,'(a)') trim(msg)//' eigenvalues:'
+         write(io_unit,'(3f26.10)') efmas_eigval(:,iband)
+       endif
      else
        write(io_unit,'(a)') '     *** SADDLE POINT: TRANSPORT EQV. EFF. MASS NOT DEFINED (see WARNING above) ***'
      end if

@@ -35,7 +35,8 @@
     tolwfr    1.0d-22  # Must use tolwfr for non-self-consistent calculations.
   
     efmas3       1     # Triggers the calculation of effective mass tensors for the specified k-points.
-    efmas_bands  5 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
+    efmas_bands  6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
+                 7 9   
     efmas_calc_dirs3 1
     efmas_n_dirs3 7
     efmas_ntheta3 100
@@ -49,7 +50,7 @@
               1 1 0
    
 #######################################################################   
-acell 3*8.03647176899458
+acell 3*9.136
 xred
    0.0000000000    0.0000000000    0.0000000000
    0.5000000000    0.5000000000    0.5000000000
