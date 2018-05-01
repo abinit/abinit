@@ -218,7 +218,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 &           'number of electrons=',dtset%nelect,ch10,&
 &           'and spinmagntarget=',dtset%spinmagntarget,ch10,&
 &           'This combination is not possible, because of a lack of bands.',ch10,&
-&           'Action : modify input file ... ',ch10,&
+&           'Action: modify input file ... ',ch10,&
 &           '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
            MSG_ERROR(message)
          end if
@@ -240,7 +240,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 &       'Initialization of occ, with nspden=',dtset%nspden,ch10,&
 &       'and spinmagntarget=',dtset%spinmagntarget,ch10,&
 &       'This combination is not possible.',ch10,&
-&       'Action : modify input file ... ',ch10,&
+&       'Action: modify input file ... ',ch10,&
 &       '(check nspden, nspinor, nsppol and spinmagntarget)'
        MSG_ERROR(message)
      end if
@@ -331,7 +331,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
      MSG_WARNING(message)
 
      write(message, '(a,a,a,a,a,a)' ) &
-&     'Action : check input file for occ,wtk, and charge.',ch10,&
+&     'Action: check input file for occ,wtk, and charge.',ch10,&
 &     'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
 &     'but IS automatically normalized otherwise.',ch10
      call wrtout(std_out,message,'COLL')
@@ -1538,7 +1538,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 &       'The component number',idtset,' of the input variable ',trim(getname),',',&
 &       ' equal to',getvalue,',',ch10,&
 &       'does not correspond to an existing index.',ch10,&
-&       'Action : correct ',trim(getname),' or jdtset in your input file.'
+&       'Action: correct ',trim(getname),' or jdtset in your input file.'
        MSG_ERROR(message)
      end if
    end if
@@ -2210,7 +2210,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
      elseif(dtsets(idtset)%accuracy>6)then
        write(message, '(a,a,a)' )&
 &       'accuracy >6 is forbiden !',ch10,&
-&       'Action : check your input data file.'
+&       'Action: check your input data file.'
        MSG_ERROR(message)
      end if
    else

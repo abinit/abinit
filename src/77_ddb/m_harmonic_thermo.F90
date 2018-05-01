@@ -331,7 +331,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              write(msg, '(a,es16.6,a,a,a,i7,a,a,a)' )&
 &             'There is a phonon frequency,',phfrq(iii),' larger than the maximum one,',ch10,&
 &             'as defined by the number of channels of width 1 cm-1, nchan=',nchan,'.',ch10,&
-&             'Action : increase nchan (suggestion : double it).'
+&             'Action: increase nchan (suggestion : double it).'
              MSG_ERROR(msg)
            end if
 
@@ -363,7 +363,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              write(msg, '(a,a,a,a,a)' )&
 &             'Phonon frequencies larger than the maximum one,',ch10,&
 &             'as defined by the number of channels of width 1 cm-1.',ch10,&
-&             'Action : increase nchan (suggestion : double it).'
+&             'Action: increase nchan (suggestion : double it).'
              MSG_ERROR(msg)
            end if
 
@@ -985,7 +985,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &   'No thermodynamical function is printed out :',ch10,&
 &   'the tolerance level that was asked ',ch10,&
 &   'has not been match with the grids specified.',ch10,&
-&   'Action : in the input file, increase the resolution',ch10,&
+&   'Action: in the input file, increase the resolution',ch10,&
 &   'of grids ng2qpt, or decrease the accuracy requirement thmtol.'
    MSG_ERROR(msg)
  end if
@@ -995,7 +995,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &   'No atomic factor tensor is printed out :',ch10,&
 &   'the tolerance level that was asked ',ch10,&
 &   'has not been match with the grids specified.',ch10,&
-&   'Action : in the input file, increase the resolution',ch10,&
+&   'Action: in the input file, increase the resolution',ch10,&
 &   'of grids ng2qpt, or decrease the accuracy requirement thmtol.'
    MSG_WARNING(msg)
  end if

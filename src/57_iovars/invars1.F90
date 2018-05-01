@@ -331,11 +331,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'SpinPolarized',tread_alt,'LOG')
  if(tread_alt==1)then
    if(tread==1)then
-     write(message, '(a,a,a,a,a,a,a,a)' ) ch10,&
-&     ' invars1: ERROR -',ch10,&
-&     '  nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
-&     '  for the same dataset.',ch10,&
-&     '  Action : check the input file.'
+     write(message, '(5a)' )&
+&     'nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
+&     'for the same dataset.',ch10,&
+&     'Action: check the input file.'
      call wrtout(std_out,  message,'COLL')
      leave=1
    else
@@ -670,7 +669,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
 &   'This is not allowed.',ch10,&
-&   'Action : check the input file.'
+&   'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -713,7 +712,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  After inkpts, nkpt must be > 0, but was ',nkpt,ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,  message,'COLL')
    leave=1
  end if
@@ -724,7 +723,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  Input nsppol must be 1 or 2, but was ',nsppol,ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,message,'COLL')
    leave=1
  end if
@@ -735,7 +734,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  Input nspinor must be 1 or 2, but was ',nspinor,ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,message,'COLL')
    leave=1
  end if
@@ -746,7 +745,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   ' invars1: ERROR -',ch10,&
 &   '  nspinor and nsappol cannot be 2 together !',ch10,&
 &   '  This is not allowed.',ch10,&
-&   '  Action : check the input file.'
+&   '  Action: check the input file.'
    call wrtout(std_out,message,'COLL')
    leave=1
  end if

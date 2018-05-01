@@ -626,7 +626,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !  &   '  At k point number',ikpt,' k=',(kptns(mu,ikpt),mu=1,3),ch10,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
-!  &   '  Action : change either ecut or nband in input file.'
+!  &   '  Action: change either ecut or nband in input file.'
 !  MSG_ERROR(message)
 !  end if
 

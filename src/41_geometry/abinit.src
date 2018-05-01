@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "bldgrp.F90",
- "fillcell.F90",
  "gensymshub.F90",
  "gensymshub4.F90",
  "gensymspgr.F90",
@@ -33,7 +32,6 @@ sources = [
  "polcart.F90",
  "prtspgroup.F90",
  "ptgmadata.F90",
- "smallprim.F90",
  "spgdata.F90",
  "symanal.F90",
  "symbrav.F90",
