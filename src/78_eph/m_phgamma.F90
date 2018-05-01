@@ -2484,7 +2484,6 @@ end if
 
    end do ! iq_ibz
  end do ! spin
-
  close(900)
 
  if (intmeth == 2) then
@@ -4643,7 +4642,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  open (unit=800, file="wt_kq_en.dat")
  open (unit=801, file="wt_k_en.dat")
  open (unit=802, file="res_small.dat")
- open (unit=900, file="a2fvals_ee.dat")
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
    tgam = zero
