@@ -125,11 +125,6 @@ module m_sigmaph
    integer,allocatable :: coarse_to_dense(:,:)
    ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
 
-   real(dp),allocatable :: phfrq_dense(:,:)
-   ! phonon frequencies calculated on the dense mesh
-
-
-
  end type eph_double_grid_t 
  
  
@@ -483,6 +478,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:)
+ real(dp),allocatable :: phfrq_dense(:,:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -553,6 +549,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! Double grid stuff
  if (present(eph_dg)) then
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
+   ABI_MALLOC(phfrq_dense,(3*cryst%natom,eph_dg%ndiv))
    nkpt_coarse = eph_dg%nkpt_coarse
    nkpt_dense  = eph_dg%nkpt_dense
    ebands_dense = eph_dg%ebands_dense
@@ -821,6 +818,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            eph_dg_mapping(:, jj) = &
              [ik_bz_fine,  ikq_bz_fine,  iq_bz_fine,&
               ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
+
+           !calculate phonon frequencies
+           call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,iq_bz_fine), phfrq_dense, displ_cart )
          enddo
        endif
        !
@@ -1024,8 +1024,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
 
                    ! Phonon frequency
-                   iq_ibz_fine  = eph_dg_mapping(6, jj)
-                   wqnu = eph_dg%phfrq_dense(nu,iq_ibz_fine)
+                   wqnu = phfrq_dense(nu,jj)
                    if (wqnu < tol6) cycle
                    nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                    
@@ -1344,6 +1343,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  if (present(eph_dg)) then
    ABI_FREE(eph_dg_mapping)
+   ABI_FREE(phfrq_dense)
  endif
 
 

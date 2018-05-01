@@ -849,10 +849,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !3.
    eph_dg%kpts_dense_ibz = ebands_dense%kptns
    eph_dg%dense_nibz = ebands_dense%nkpt
+
+
+#if 0
    write(std_out,*) 'calculate phonon frequencies'
    !calculate the phonon frequencies at the q-points on the ibz of the dense q-grid
    ABI_MALLOC(displ_cart,(2,3,cryst%natom,3*cryst%natom))
-
 #if 1
    !ibz version
    ! HM: I noticed that the fourier interpolation sometimes breaks the symmetries
@@ -873,7 +875,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    enddo
 #endif
    ABI_FREE(displ_cart)
-
+#endif
  
  !4. 
    write(std_out,*) 'map bz -> ibz'
@@ -957,8 +959,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,eph_dg)
    endif
 
+   !ABI_FREE(eph_dg%phfrq_dense)
    ABI_FREE(eph_dg%weights_dense)
-   ABI_FREE(eph_dg%phfrq_dense)
    ABI_FREE(eph_dg%bz2ibz_dense)
    ABI_FREE(eph_dg%kpts_coarse)
    ABI_FREE(eph_dg%kpts_dense)
