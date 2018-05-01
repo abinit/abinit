@@ -58,7 +58,8 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
  use defs_basis
  use m_profiling_abi
 
- use m_symtk,  only : chkprimit
+ use m_symtk,   only : chkprimit
+ use m_spgdata, only : getptgroupma
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -94,12 +95,6 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
  real(dp),allocatable :: tnons_nomagn(:,:)
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' symanal : enter '
-!call flush(6)
-!stop
-!ENDDEBUG
 
 !This routine finds the Bravais characteristics, without actually
 !looking at the symmetry operations.
@@ -190,17 +185,12 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
        call symspgr(bravais,nsym_nomagn,spgroup,symrel_nomagn,tnons_nomagn,tolsym)
 
 !      The magnetic translation generator genafm has already been determined
-
-!      DEBUG
-!      write(std_out,*)' genafm =',genafm
-!      write(std_out,*)' spgroup=',spgroup
-!      ENDDEBUG
+!      write(std_out,*)' genafm =',genafm, ' spgroup=',spgroup
 
      end if
 
      ABI_DEALLOCATE(symrel_nomagn)
      ABI_DEALLOCATE(tnons_nomagn)
-
    end if ! Shubnikov groups
 
  end if

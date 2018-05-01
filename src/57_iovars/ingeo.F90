@@ -116,6 +116,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  use m_atomdata
 
  use m_symtk,    only : mati3inv, chkorthsy, symrelrot, mati3det, symmetrize_rprimd, symmetrize_xred, symatm
+ use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_geometry, only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
  use m_parser,   only : intagm
 

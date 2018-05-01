@@ -58,6 +58,7 @@ module m_symtk
  public :: symatm               ! Build indsym table describing the action of the symmetry operations on the atomic positions.
  public :: symcharac            ! Get the type of axis for the symmetry.
  public :: smallprim            ! Find the smallest possible primitive vectors for an input lattice
+ public :: print_symmetries     ! Helper function to print symmetries in a nice format.
 !!***
 
 contains
@@ -3116,6 +3117,76 @@ subroutine smallprim(metmin,minim,rprimd)
 !ENDDEBUG
 
 end subroutine smallprim
+!!***
+
+!!****f* m_symtk/print_symmetries
+!! NAME
+!! print_symmetries
+!!
+!! FUNCTION
+!!  Helper function to print the set of symmetries.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      gensymspgr,hdr_vs_dtset,m_crystal
+!!
+!! CHILDREN
+!!      mati3inv,sg_multable
+!!
+!! SOURCE
+
+subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'print_symmetries'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nsym
+ integer,optional,intent(in) :: unit
+ character(len=4),optional,intent(in) :: mode_paral
+!arrays
+ integer,intent(in) :: symrel(3,3,nsym),symafm(nsym)
+ real(dp),intent(in) :: tnons(3,nsym)
+
+!Local variables-------------------------------
+ integer :: my_unt,isym,isymin,isymend,ii,jj
+ character(len=500) :: msg
+ character(len=4) :: my_mode
+! *********************************************************************
+
+ my_unt =std_out; if (PRESENT(unit      )) my_unt =unit
+ my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
+
+ !write(msg,'(2a)')ch10,' Rotations                           Translations     Symafm '
+ !do isym=1,nsym
+ ! write(msg,'(1x,3(3i3,1x),4x,3(f11.7,1x),6x,i2)')symrel(:,:,isym),tnons(:,isym),symafm(isym)
+ ! call wrtout(my_unt,msg,my_mode)
+ !end do
+
+ write(msg,'(2a)')ch10,' Symmetry operations in real space (Rotation tnons AFM)'
+ call wrtout(my_unt,msg,my_mode)
+ do isymin=1,nsym,4
+   isymend=isymin+3
+   if (isymend>nsym) isymend=nsym
+   do ii=1,3
+     write(msg,'(4(3i3,f8.3,i3,3x))')((symrel(ii,jj,isym),jj=1,3),tnons(ii,isym),symafm(isym),isym=isymin,isymend)
+     call wrtout(my_unt,msg,my_mode)
+   end do
+   write(msg,'(a)')ch10
+   call wrtout(my_unt,msg,my_mode)
+ end do
+
+end subroutine print_symmetries
 !!***
 
 end module m_symtk

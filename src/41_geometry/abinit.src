@@ -20,10 +20,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_spgdata.F90",
  "bldgrp.F90",
- "gensymshub.F90",
- "gensymshub4.F90",
- "gensymspgr.F90",
- "getptgroupma.F90",
+ "m_spgbuilder.F90",
  "m_ab7_symmetry.F90",
  "m_crystal.F90",
  "m_dynmat.F90",
