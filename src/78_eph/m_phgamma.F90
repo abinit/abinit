@@ -4640,6 +4640,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_CHECK(ierr==0, 'out of memory in gvvvals_out_qibz')
  end if
 
+ open (unit=800, file="wt_kq_en.dat")
+ open (unit=801, file="wt_k_en.dat")
+ open (unit=802, file="res_small.dat")
+ open (unit=900, file="a2fvals_ee.dat")
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
    tgam = zero
