@@ -1653,6 +1653,87 @@ CONTAINS
         ABI_DEALLOCATE(prodc)
         ABI_DEALLOCATE(prodr)
 
+      elseif (degenerate .and. mdim==1) then
+
+        ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
+        ABI_ALLOCATE(unitary_tr,(deg_dim,deg_dim))
+        ABI_ALLOCATE(eigf3d,(deg_dim))
+        ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
+        ABI_ALLOCATE(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_ALLOCATE(m_avg,(deg_dim))
+        ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
+        ABI_ALLOCATE(saddle_warn,(deg_dim))
+
+
+        f3d=zero
+        unitary_tr=zero
+        eigf3d=zero
+        m_cart=zero
+        transport_eqv_m=zero
+        m_avg=zero
+        m_avg_frohlich=zero
+        saddle_warn=.false.
+
+        f3d(:,:) = eig2_diag(:,:,1,1)
+
+        !DIAGONALIZATION
+        eigenvec = f3d        !IN
+        lwork=-1
+        ABI_ALLOCATE(work,(1))
+        ABI_ALLOCATE(rwork,(3*deg_dim-2))
+        call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+        lwork=int(work(1))
+        ABI_DEALLOCATE(work)
+        eigenval = zero
+        ABI_ALLOCATE(work,(lwork))
+        work=zero; rwork=zero
+        call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+        ABI_DEALLOCATE(rwork)
+        ABI_DEALLOCATE(work)
+        unitary_tr = eigenvec !OUT
+        eigf3d = eigenval     !OUT
+
+        transport_eqv_m(1,1,:)=1._dp/eigf3d(:)
+
+        !Effective masses along directions.
+        do adir=1,ndirs
+          do iband=1,deg_dim
+            do jband=1,deg_dim
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag(iband,jband,:,:),dirs(:,adir)))
+            end do
+          end do
+          eigenvec = f3d        !IN
+          lwork=-1
+          ABI_ALLOCATE(work,(1))
+          ABI_ALLOCATE(rwork,(3*deg_dim-2))
+          call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+          lwork=int(work(1))
+          ABI_DEALLOCATE(work)
+          eigenval = zero
+          ABI_ALLOCATE(work,(lwork))
+          work=zero; rwork=zero
+          call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+          ABI_DEALLOCATE(rwork)
+          ABI_DEALLOCATE(work)
+          eigf3d = eigenval     !OUT
+          m_cart(adir,:)=1._dp/eigf3d(:)
+        end do
+
+        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+&          ntheta,m_avg,m_avg_frohlich,saddle_warn)
+        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+&          ntheta,m_avg,m_avg_frohlich,saddle_warn)
+
+        ABI_DEALLOCATE(f3d)
+        ABI_DEALLOCATE(unitary_tr)
+        ABI_DEALLOCATE(eigf3d)
+        ABI_DEALLOCATE(m_cart)
+        ABI_DEALLOCATE(transport_eqv_m)
+        ABI_DEALLOCATE(m_avg)
+        ABI_DEALLOCATE(m_avg_frohlich)
+        ABI_DEALLOCATE(saddle_warn)
+
+
       end if !(degenerate)
 
  !     !!! DEBUG
