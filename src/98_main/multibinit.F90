@@ -63,6 +63,7 @@ program multibinit
  use m_fstrings,   only : replace, inupper
  use m_time,       only : asctime, timein
  use m_parser,     only : instrng
+ use m_dtfil,      only : isfile
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

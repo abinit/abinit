@@ -60,6 +60,7 @@ subroutine iofn1(filnam,filstat,comm)
 
  use m_fstrings,     only : int2char4
  use m_io_tools,     only : open_file
+ use m_dtfil,        only : isfile
  use m_libpaw_tools, only : libpaw_log_flag_set
 
 !This section has been created automatically by the script Abilint (TD).
@@ -88,8 +89,8 @@ subroutine iofn1(filnam,filstat,comm)
 !*************************************************************************
 
  ! NOTE: In this routine it's very important to perform tests
- ! on possible IO errors (err=10, iomsg) because we are initializing the IO stuff 
- ! It there's some problem with the hardware or some misconfiguration, 
+ ! on possible IO errors (err=10, iomsg) because we are initializing the IO stuff
+ ! It there's some problem with the hardware or some misconfiguration,
  ! it's very likely that the code will crash here and we should try to give useful error messages.
 
  blank = ' '; tmpfil = ''
@@ -148,7 +149,7 @@ subroutine iofn1(filnam,filstat,comm)
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(tmpfil,message,unit=std_out,form='formatted',status='new',action="write") /= 0) then
        MSG_ERROR(message)
-     end if 
+     end if
 #endif
    else
 !    Redirect standard output to null

@@ -187,7 +187,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
    write(msg,'(5a)')&
 &    'Set of GW irreducible-zone kptgw in input file is inconsistent',ch10,&
 &    'with full-zone set being used for wannier90 setup.',ch10,&
-&    'Action : correct input data'
+&    'Action: correct input data'
    MSG_ERROR(msg)
  end if
  !
@@ -337,7 +337,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       write(msg,'(a,i0,7a)')&
 &       'Number of bands for k point ',ikpt,' is inconsistent with number',ch10,&
 &       'specified for wannier90 calculation',ch10,&
-&       'Action : correct input so all band numbers are equal for GW',ch10,&
+&       'Action: correct input so all band numbers are equal for GW',ch10,&
 &       'and wannier90 datasets.'
       MSG_ERROR(msg)
     end if
@@ -390,7 +390,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
     !  write(msg, '(3a,i4,a,i6,a,1p,e8.1,3a)' )&
     !&    '  orthonormality error for quasiparticle wave functions.',ch10,&
     !&    '  spin=',isppol,'  k point=',ikpt,'  ortho_err=',ortho_err,' >1E-6',ch10,&
-    !&    '  Action : Be sure input nband>=maxval(bndgw)'
+    !&    '  Action: Be sure input nband>=maxval(bndgw)'
     !  MSG_ERROR(msg)
     !end if
     !deallocate(ortho)

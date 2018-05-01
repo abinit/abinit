@@ -2002,7 +2002,7 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
    write(message,'(5a)')&
 &   'Largest error (above) is so large (0.01) that either input atomic coordinates (xred)',ch10,&
 &   'are wrong or space group symmetry data is wrong.',ch10,&
-&   'Action : correct your input file.'
+&   'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 

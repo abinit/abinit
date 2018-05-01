@@ -280,7 +280,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        write(message,'(5a)') &
 &       'When kptopt is negative, ndivsm or ndivk must be initialized ',ch10,&
 &       'in the input file, which is not the case.',ch10,&
-&       'Action : initialize ndivsm or ndivk in your input file, or change kptopt.'
+&       'Action: initialize ndivsm or ndivk in your input file, or change kptopt.'
        MSG_ERROR(message)
      end if
    end if
@@ -354,7 +354,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      write(message,  '(5a)' ) &
 &     'The input variables ngkpt and kptrlatt cannot both ',ch10,&
 &     'be defined in the input file.',ch10,&
-&     'Action : change one of ngkpt or kptrlatt in your input file.'
+&     'Action: change one of ngkpt or kptrlatt in your input file.'
      MSG_ERROR(message)
    else if(tread_ngkpt==1)then
      kptrlatt(:,:)=0

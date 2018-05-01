@@ -3691,15 +3691,13 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
-
    write(message, '(a,a,a,a,a)' )&
 &   'The initialisation mode of MRGDDB, that uses nddb=1,',&
 &   'has been disabled in version 2.1 of ABINIT.',&
-&   'Action : you should use DDBs that include the symmetry',&
+&   'Action: you should use DDBs that include the symmetry',&
 &   'information (and that can be used and merged without',&
 &   'initialisation), or you should use ABINITv2.0.'
    MSG_ERROR(message)
-
  end if
 
 !Evaluate the maximal dimensions of arrays
@@ -4043,15 +4041,13 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
-
    write(message, '(a,a,a,a,a)' )&
 &   'The initialisation mode of MRGDDB, that uses nddb=1,',&
 &   'has been disabled in version 2.1 of ABINIT.',&
-&   'Action : you should use DDBs that include the symmetry',&
+&   'Action: you should use DDBs that include the symmetry',&
 &   'information (and that can be used and merged without',&
 &   'initialisation), or you should use ABINITv2.0.'
    MSG_ERROR(message)
-
  end if
 
 !Evaluate the maximal dimensions of arrays

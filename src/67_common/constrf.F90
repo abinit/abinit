@@ -136,9 +136,9 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 
  if (info/=0) then
    write(message, '(a,a,a,a,a)' )&
-&   '  Constraint matrix is not positive definite,',ch10,&
-&   '  probably because constraints are linearly dependent.',ch10,&
-&   '  Action : Check for linear dependence of constraints.'
+&   'Constraint matrix is not positive definite,',ch10,&
+&   'probably because constraints are linearly dependent.',ch10,&
+&   'Action: Check for linear dependence of constraints.'
    MSG_ERROR(message)
  end if
 

@@ -69,6 +69,7 @@ program anaddb
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time,           only : asctime, timein
  use m_parser,         only : instrng
+ use m_dtfil,          only : isfile
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_ddb_interpolate, only : ddb_interpolate
  use m_crystal,        only : crystal_t, crystal_free

@@ -173,7 +173,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      write(message, '(a,i0,a,a,a,i0,a,a,a)' )&
 &     'Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
 &     'when',nproc_kpt,' processors are available.',ch10,&
-&     'Action : adjust number of processors and kpt_distrb file.'
+&     'Action: adjust number of processors and kpt_distrb file.'
      MSG_ERROR(message)
    end if
 
