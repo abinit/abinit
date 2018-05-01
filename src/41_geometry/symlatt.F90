@@ -79,14 +79,13 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  use m_errors
  use m_profiling_abi
 
- use m_symtk,       only : matr3inv, symrelrot, holocell
+ use m_symtk,       only : matr3inv, symrelrot, holocell, smallprim
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symlatt'
  use interfaces_14_hidewrite
- use interfaces_41_geometry, except_this_one => symlatt
 !End of the abilint section
 
  implicit none
