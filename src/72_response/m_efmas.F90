@@ -740,11 +740,6 @@ CONTAINS
 
  ! *********************************************************************
 
- !DEBUG
- write(std_out,*)' efmas_main : enter '
- call flush(std_out)
- !ENDDEBUG
-
   debug = .false. ! Prints additional info to std_out
   print_fsph = .false. ! Open a file and print the angle dependent curvature f(\theta,\phi) 
                        ! for each band & kpts treated; 1 file per degenerate ensemble of bands. 
@@ -816,12 +811,6 @@ CONTAINS
   icg2 = 0
   band2tot_index=0
   bandtot_index=0
-
- !DEBUG
- write(std_out,*)' efmas_main : before k point loop'
- call flush(std_out)
- !ENDDEBUG
-
 
   do ikpt=1,dtset%nkpt
     npw_k = npwarr(ikpt,ipert)
@@ -1000,12 +989,6 @@ CONTAINS
             ABI_DEALLOCATE(rwork)
             transport_eqv_eigvec(:,:,iband) = transpose(transport_eqv_eigvec(:,:,iband)) !So that lines contain eigenvectors.
 
-
-            !DEBUG
-            write(std_out,*)' efmas_main : before Frohlich average section '
-            call flush(std_out)
-            !ENDDEBUG
-
             !Frohlich average effective mass
             ABI_ALLOCATE(m_avg,(1))
             ABI_ALLOCATE(m_avg_frohlich,(1))
@@ -1058,11 +1041,6 @@ CONTAINS
 
             endif ! mdim==3
 
-            !DEBUG
-            write(std_out,*)' efmas_main : after Frohlich average section '
-            call flush(std_out)
-            !ENDDEBUG
-
             !EFMAS_DIRS
             ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
             m_cart=zero
@@ -1108,11 +1086,6 @@ CONTAINS
           end if !.not.degenerate
         end do !jband
       end do !iband
-
-      !DEBUG
-      write(std_out,*)' efmas_main : after iband loop, degenerate=',degenerate
-      call flush(std_out)
-      !ENDDEBUG
 
       !!! EQV_MASS
       if(degenerate .and. mdim==3) then
