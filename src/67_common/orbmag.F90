@@ -155,7 +155,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk,gs_hamk123
  !arrays
- integer,allocatable :: dimlmn(:),kg_k(:,:),kg_kb(:,:),kg_kg(:,:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
+ integer,allocatable :: dimlmn(:),kg_k(:,:),kg_kb(:,:),kg_kg(:,:),nattyp_dum(:)
+ integer,allocatable :: pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
  real(dp) :: dkb(3),dkg(3),dkbg(3),dtm_k(2),gamma_pt(3),gmet(3,3),gprimd(3,3)
  real(dp) :: kpg(3),kplusbg(3),kplusgg(3),kplusgb(3),kpoint(3),kpointb(3),kpointg(3)
  real(dp) :: orbmagvec(2,3),rhodum(1),rmet(3,3)
@@ -603,50 +604,30 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                             if(jpw .GT. 0) then
                                dotr=dotr+bra(1,ipw)*ghc(1,jpw)+bra(2,ipw)*ghc(2,jpw)
                                doti=doti+bra(1,ipw)*ghc(2,jpw)-bra(2,ipw)*ghc(1,jpw)
-
-                               ! if( (kg_kg(1,ipw).NE.kg_kb(1,jpw)).OR.&
-                               !      &(kg_kg(2,ipw).NE.kg_kb(2,jpw)).OR.&
-                               !      &(kg_kg(3,ipw).NE.kg_kb(3,jpw))) then
-                               !    write(std_out,'(a,5i4)')'JWZ debug ipw jpw ',ikptg,ikpt,ikptb,ipw,jpw
-                               !    write(std_out,'(a,3i4)')'JWZ debug bra ',kg_kg(1,ipw),kg_kg(2,ipw),kg_kg(3,ipw)
-                               !    write(std_out,'(a,3i4)')'JWZ debug keg ',kg_kb(1,jpw),kg_kb(2,jpw),kg_kb(3,jpw)
+                               ! keb=htpisq*dot_product((kpoint(:)+kg_kb(:,jpw)),MATMUL(gmet,(kpoint(:)+kg_kb(:,jpw))))
+                               ! if (keb < dtset%ecut) then
+                               !    dotr=dotr+bra(1,ipw)*keb*cwavef(1,jpw)+bra(2,ipw)*keb*cwavef(2,jpw)
+                               !    doti=doti+bra(1,ipw)*keb*cwavef(2,jpw)-bra(2,ipw)*keb*cwavef(1,jpw)
                                ! end if
-                               ! if( (kg_kg(1,ipw).EQ.kg_kb(1,jpw)).AND.&
-                               !      &(kg_kg(2,ipw).EQ.kg_kb(2,jpw)).AND.&
-                               !      &(kg_kg(3,ipw).EQ.kg_kb(3,jpw))) then
-                               !    dotr=dotr+bra(1,ipw)*ghc(1,jpw)+bra(2,ipw)*ghc(2,jpw)
-                               !    doti=doti+bra(1,ipw)*ghc(2,jpw)-bra(2,ipw)*ghc(1,jpw)
-                               ! end if
-                               
+                               if ( (kg_kg(1,ipw) .EQ. kg_kb(1,jpw)) .AND. &
+                                    & (kg_kg(2,ipw) .EQ. kg_kb(2,jpw)) .AND. &
+                                    & (kg_kg(3,ipw) .EQ. kg_kb(3,jpw)) ) then
+                                  keb=htpisq*dot_product((kpoint(:)+kg_kb(:,jpw)),MATMUL(gmet,(kpoint(:)+kg_kb(:,jpw))))
+                                  if (keb < dtset%ecut) then
+                                     dotr=dotr+bra(1,ipw)*keb*cwavef(1,jpw)+bra(2,ipw)*keb*cwavef(2,jpw)
+                                     doti=doti+bra(1,ipw)*keb*cwavef(2,jpw)-bra(2,ipw)*keb*cwavef(1,jpw)
+                                  end if
+                               endif
                             end if
                          end do
-                         ! ! apply kinetic energy
-                         ! do ipw=1,npw_kg
-                         !    jpw=pwind_bg(ipw)
-                         !    kplusbg(1:3)=kpoint(1:3)+dble(kg_kb(1:3,jpw))
-                         !    keb=htpisq*DOT_PRODUCT(kplusbg,MATMUL(gmet,kplusbg))
-                         !    ! kplusgg(1:3)=kpointg(1:3)+dble(kg_kg(1:3,ipw))
-                         !    ! keg=htpisq*DOT_PRODUCT(kplusgg,MATMUL(gmet,kplusgg))
-                         !    ! keb=0.5*(keb+keg)
-                         !    if (jpw .GT. 0) then
-                         !       dotr=dotr+bra(1,ipw)*keb*cwavef(1,jpw)+bra(2,ipw)*keb*cwavef(2,jpw)
-                         !       doti=doti+bra(1,ipw)*keb*cwavef(2,jpw)-bra(2,ipw)*keb*cwavef(1,jpw)
-                         !    end if
-                            ! if ( (kg_kg(1,ipw).EQ.kg_kb(1,jpw)).AND. &
-                            !      (kg_kg(2,ipw).EQ.kg_kb(2,jpw)).AND. &
-                            !      (kg_kg(3,ipw).EQ.kg_kb(3,jpw)) ) then
-                            !    dotr=dotr+bra(1,ipw)*keb*cwavef(1,jpw)+bra(2,ipw)*keb*cwavef(2,jpw)
-                            !    doti=doti+bra(1,ipw)*keb*cwavef(2,jpw)-bra(2,ipw)*keb*cwavef(1,jpw)
-                            ! end if
-                         ! end do
                          hmat(1,n1,nn,ikpt,gdx,bdx) = dotr
                          hmat(2,n1,nn,ikpt,gdx,bdx) = doti
-                         ! hmat123(1,nn,n1,ikptb,ikpt,ikptg) = dotr
-                         ! hmat123(2,nn,n1,ikptb,ikpt,ikptg) = -doti
+                         hmat(1,nn,n1,ikpt,bdx,gdx) = dotr
+                         hmat(2,nn,n1,ikpt,bdx,gdx) = -doti
                       end do
                    end do
                    has_hmat(ikpt,gdx,bdx) = .TRUE.
-                   ! has_hmat123(ikptb,ikpt,ikptg) = .TRUE.
+                   has_hmat(ikpt,bdx,gdx) = .TRUE.
 
                    ABI_DEALLOCATE(cwavef)
                    ABI_DEALLOCATE(bra)
