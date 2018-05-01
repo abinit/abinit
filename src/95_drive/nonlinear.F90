@@ -79,6 +79,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_xcdata
 
  use m_time,     only : timab
+ use m_symtk,    only : symmetrize_xred
  use m_dynmat,   only : d3sym, sytens
  use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
  use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
@@ -97,7 +98,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc

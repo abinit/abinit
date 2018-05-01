@@ -180,11 +180,14 @@ def main():
     elif options.command == "print":
         if options.what is None:
             print(proj.to_string(verbose=options.verbose))
+
         elif os.path.isdir(options.what):
             proj.print_dir(options.what, verbose=options.verbose)
+
         elif os.path.isfile(options.what):
             fort_file = proj.fort_files[os.path.basename(options.what)]
             print(fort_file.to_string(verbose=options.verbose))
+
         else:
             obj = proj.find_public_entity(options.what)
             if obj is not None:
@@ -196,14 +199,17 @@ def main():
     elif options.command == "graph":
         if options.what is None:
             graph = proj.get_graphviz(engine=options.engine)
+
         elif os.path.isdir(options.what):
             graph = proj.get_graphviz_dir(options.what, engine=options.engine)
+
         elif os.path.isfile(options.what):
             fort_file = proj.fort_files[os.path.basename(options.what)]
             print(fort_file.to_string(verbose=options.verbose))
             graph = fort_file.get_graphviz(engine=options.engine)
+
         else:
-            graph = proj.get_graphviz_dir(options.what, engine=options.engine)
+            graph = proj.get_graphviz_pubname(options.what, engine=options.engine)
             if graph is None:
                 return 1
 

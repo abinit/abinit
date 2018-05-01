@@ -24,7 +24,6 @@ sources = [
  "gensymshub4.F90",
  "gensymspgr.F90",
  "getptgroupma.F90",
- "holocell.F90",
  "m_ab7_symmetry.F90",
  "m_crystal.F90",
  "m_dynmat.F90",
@@ -37,11 +36,9 @@ sources = [
  "smallprim.F90",
  "spgdata.F90",
  "symanal.F90",
- "symatm.F90",
  "symaxes.F90",
  "symbrav.F90",
  "symcharac.F90",
- "symchk.F90",
  "symfind.F90",
  "symkpt.F90",
  "symlatt.F90",
@@ -57,7 +54,6 @@ sources = [
  "symsgortho.F90",
  "symsgtetra.F90",
  "symspgr.F90",
- "symmetrize_rprimd.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

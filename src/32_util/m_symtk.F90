@@ -49,7 +49,13 @@ module m_symtk
  public :: chkprimit            ! Check whether the cell is primitive or not.
  public :: symrelrot            ! Transform symmetry matrices to new new coordinate system.
  public :: littlegroup_q        ! Determines the symmetry operations by which reciprocal vector q is preserved.
- public :: matpointsym          ! ymmetrizes a 3x3 input matrix using the point symmetry of the input atom
+ public :: matpointsym          ! Symmetrizes a 3x3 input matrix using the point symmetry of the input atom
+ public :: holocell             ! Examine whether the trial conventional cell described by cell_base
+                                ! is coherent with the required holohedral group.
+ public :: symmetrize_xred      ! Symmetrize atomic coordinates using input symmetry matrices symrel
+ public :: symmetrize_rprimd    ! Generate new rprimd on the basis of the expected characteristics of the conventional cell
+ public :: symchk               ! Symmetry checker for atomic coordinates.
+ public :: symatm               ! Build indsym table describing the action of the symmetry operations on the atomic positions.
 !!***
 
 contains
@@ -1217,6 +1223,788 @@ subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
  call dgemm('N','N',3,3,3,one,rprimd,3,tmp_mat,3,zero,mat3,3)
 
 end subroutine matpointsym
+!!***
+
+!!****f* m_symtk/holocell
+!! NAME
+!! holocell
+!!
+!! FUNCTION
+!! Examine whether the trial conventional cell described by cell_base
+!! is coherent with the required holohedral group.
+!! Possibly enforce the holohedry and modify the basis vectors.
+!! Note: for iholohedry=4, the tetragonal axis is not required to be along the C axis.
+!!
+!! INPUTS
+!!  enforce= if 0, only check; if =1, enforce exactly the holohedry
+!!  iholohedry=required holohegral group
+!!  iholohedry=1   triclinic      1bar
+!!  iholohedry=2   monoclinic     2/m
+!!  iholohedry=3   orthorhombic   mmm
+!!  iholohedry=4   tetragonal     4/mmm
+!!  iholohedry=5   trigonal       3bar m
+!!  iholohedry=6   hexagonal      6/mmm
+!!  iholohedry=7   cubic          m3bar m
+!!  tolsym=tolerance for the symmetry operations
+!!
+!! OUTPUT
+!!  foundc=1 if the basis vectors supports the required holohedry ; =0 otherwise
+!!
+!! SIDE EFFECTS
+!!  cell_base(3,3)=basis vectors of the conventional cell  (changed if enforce==1, otherwise unchanged)
+!!
+!! PARENTS
+!!      symlatt,symmetrize_rprimd
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'holocell'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: enforce,iholohedry
+ integer,intent(out) :: foundc
+ real(dp),intent(in) :: tolsym
+!arrays
+ real(dp),intent(inout) :: cell_base(3,3)
+
+!Local variables ------------------------------
+!scalars
+ integer :: allequal,ii,jj,orth
+ real(dp):: aa,reldiff,scprod1
+ character(len=500) :: msg
+!arrays
+ integer :: ang90(3),equal(3)
+ real(dp) :: length(3),metric(3,3),norm(3),rbasis(3,3),rconv(3,3),rconv_new(3,3)
+ real(dp) :: rnormalized(3,3),symmetrized_length(3)
+
+!**************************************************************************
+
+ do ii=1,3
+   metric(:,ii)=cell_base(1,:)*cell_base(1,ii)+&
+&   cell_base(2,:)*cell_base(2,ii)+&
+&   cell_base(3,:)*cell_base(3,ii)
+ end do
+
+!Examine the angles and vector lengths
+ ang90(:)=0
+ if(metric(1,2)**2<tolsym**2*metric(1,1)*metric(2,2))ang90(3)=1
+ if(metric(1,3)**2<tolsym**2*metric(1,1)*metric(3,3))ang90(2)=1
+ if(metric(2,3)**2<tolsym**2*metric(2,2)*metric(3,3))ang90(1)=1
+ orth=0
+ if(ang90(1)==1 .and. ang90(2)==1 .and. ang90(3)==1) orth=1
+ equal(:)=0
+ if(abs(metric(1,1)-metric(2,2))<tolsym*half*(metric(1,1)+metric(2,2)))equal(3)=1
+ if(abs(metric(1,1)-metric(3,3))<tolsym*half*(metric(1,1)+metric(3,3)))equal(2)=1
+ if(abs(metric(2,2)-metric(3,3))<tolsym*half*(metric(2,2)+metric(3,3)))equal(1)=1
+ allequal=0
+ if(equal(1)==1 .and. equal(2)==1 .and. equal(3)==1) allequal=1
+
+ foundc=0
+ if(iholohedry==1)                                      foundc=1
+ if(iholohedry==2 .and. ang90(1)+ang90(3)==2 )          foundc=1
+ if(iholohedry==3 .and. orth==1)                        foundc=1
+ if(iholohedry==4 .and. orth==1 .and.          &
+& (equal(3)==1 .or. equal(2)==1 .or. equal(1)==1) ) foundc=1
+ if(iholohedry==5 .and. allequal==1 .and. &
+& (abs(metric(1,2)-metric(2,3))<tolsym*metric(2,2)) .and. &
+& (abs(metric(1,2)-metric(1,3))<tolsym*metric(1,1))         )      foundc=1
+ if(iholohedry==6 .and. equal(3)==1 .and. &
+& ang90(1)==1 .and. ang90(2)==1 .and. &
+& (2*metric(1,2)-metric(1,1))<tolsym*metric(1,1) )      foundc=1
+ if(iholohedry==7 .and. orth==1 .and. allequal==1)      foundc=1
+
+!-------------------------------------------------------------------------------------
+!Possibly enforce the holohedry (if it is to be enforced !)
+
+ if(foundc==1.and.enforce==1.and.iholohedry/=1)then
+
+!  Copy the cell_base vectors, and possibly fix the tetragonal axis to be the c-axis
+   if(iholohedry==4.and.equal(1)==1)then
+     rconv(:,3)=cell_base(:,1) ; rconv(:,1)=cell_base(:,2) ; rconv(:,2)=cell_base(:,3)
+   else if (iholohedry==4.and.equal(2)==1)then
+     rconv(:,3)=cell_base(:,2) ; rconv(:,2)=cell_base(:,1) ; rconv(:,1)=cell_base(:,3)
+   else
+     rconv(:,:)=cell_base(:,:)
+   end if
+
+!  Compute the length of the three conventional vectors
+   length(1)=sqrt(sum(rconv(:,1)**2))
+   length(2)=sqrt(sum(rconv(:,2)**2))
+   length(3)=sqrt(sum(rconv(:,3)**2))
+
+!  Take care of the first conventional vector aligned with rbasis(:,3) (or aligned with the trigonal axis if rhombohedral)
+!  and choice of the first normalized direction
+   if(iholohedry==5)then
+     rbasis(:,3)=third*(rconv(:,1)+rconv(:,2)+rconv(:,3))
+   else
+     rbasis(:,3)=rconv(:,3)
+   end if
+   norm(3)=sqrt(sum(rbasis(:,3)**2))
+   rnormalized(:,3)=rbasis(:,3)/norm(3)
+
+!  Projection of the first conventional vector perpendicular to rbasis(:,3)
+!  and choice of the first normalized direction
+   scprod1=sum(rnormalized(:,3)*cell_base(:,1))
+   rbasis(:,1)=rconv(:,1)-rnormalized(:,3)*scprod1
+   norm(1)=sqrt(sum(rbasis(:,1)**2))
+   rnormalized(:,1)=rbasis(:,1)/norm(1)
+
+!  Generation of the second vector, perpendicular to the third and first
+   rnormalized(1,2)=rnormalized(2,3)*rnormalized(3,1)-rnormalized(3,3)*rnormalized(2,1)
+   rnormalized(2,2)=rnormalized(3,3)*rnormalized(1,1)-rnormalized(1,3)*rnormalized(3,1)
+   rnormalized(3,2)=rnormalized(1,3)*rnormalized(2,1)-rnormalized(2,3)*rnormalized(1,1)
+
+!  Compute the vectors of the conventional cell, on the basis of iholohedry
+   if(iholohedry==2)then
+     rconv_new(:,3)=rconv(:,3)
+     rconv_new(:,1)=rconv(:,1)
+     rconv_new(:,2)=rnormalized(:,2)*length(2) ! Now, the y axis is perpendicular to the two others, that have not been changed
+   else if(iholohedry==3.or.iholohedry==4.or.iholohedry==7)then
+     if(iholohedry==7)then
+       symmetrized_length(1:3)=sum(length(:))*third
+     else if(iholohedry==4)then
+       symmetrized_length(3)=length(3)
+       symmetrized_length(1:2)=half*(length(1)+length(2))
+     else if(iholohedry==3)then
+       symmetrized_length(:)=length(:)
+     end if
+     do ii=1,3
+       rconv_new(:,ii)=rnormalized(:,ii)*symmetrized_length(ii)
+     end do
+   else if(iholohedry==5)then
+!    In the normalized basis, they have coordinates (a,0,c), and (-a/2,+-sqrt(3)/2*a,c)
+!    c is known, but a is computed from the knowledge of the average length of the initial vectors
+     aa=sqrt(sum(length(:)**2)*third-norm(3)**2)
+     rconv_new(:,1)=aa*rnormalized(:,1)+rbasis(:,3)
+     rconv_new(:,2)=aa*half*(-rnormalized(:,1)+sqrt(three)*rnormalized(:,2))+rbasis(:,3)
+     rconv_new(:,3)=aa*half*(-rnormalized(:,1)-sqrt(three)*rnormalized(:,2))+rbasis(:,3)
+   else if(iholohedry==6)then
+
+!    In the normalized basis, they have coordinates (a,0,0), (-a/2,+-sqrt(3)/2*a,0), and (0,0,c)
+!    c is known, but a is computed from the knowledge of the average length of the initial vectors
+     aa=half*(length(1)+length(2))
+     rconv_new(:,1)=aa*rnormalized(:,1)
+     rconv_new(:,2)=aa*half*(-rnormalized(:,1)+sqrt(three)*rnormalized(:,2))
+     rconv_new(:,3)=rconv(:,3)
+   end if
+
+!  Check whether the modification make sense
+   do ii=1,3
+     do jj=1,3
+       reldiff=(rconv_new(ii,jj)-rconv(ii,jj))/length(jj)
+!      Allow for twice tolsym
+       if(abs(reldiff)>two*tolsym)then
+         write(msg,'(a,6(2a,3es14.6))')&
+&         'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
+&         '  rconv    =',rconv(:,1),ch10,&
+&         '            ',rconv(:,2),ch10,&
+&         '            ',rconv(:,3),ch10,&
+&         '  rconv_new=',rconv_new(:,1),ch10,&
+&         '            ',rconv_new(:,2),ch10,&
+&         '            ',rconv_new(:,3)
+         MSG_ERROR_CLASS(msg, "TolSymError")
+       end if
+     end do
+   end do
+
+!  Copy back the cell_base vectors
+   if(iholohedry==4.and.equal(1)==1)then
+     cell_base(:,3)=rconv_new(:,2) ; cell_base(:,2)=rconv_new(:,1) ; cell_base(:,1)=rconv_new(:,3)
+   else if (iholohedry==4.and.equal(2)==1)then
+     cell_base(:,3)=rconv_new(:,1) ; cell_base(:,1)=rconv_new(:,2) ; cell_base(:,2)=rconv_new(:,3)
+   else
+     cell_base(:,:)=rconv_new(:,:)
+   end if
+
+ end if
+
+end subroutine holocell
+!!***
+
+!!****f* m_symtk/symmetrize_rprimd
+!! NAME
+!! symmetrize_rprimd
+!!
+!! FUNCTION
+!! Supposing the input rprimd does not preserve the length and angles
+!! following the symmetries, will generates a new set rprimd,
+!! on the basis of the expected characteristics of the conventional cell,
+!! as specified in bravais(:)
+!!
+!! INPUTS
+!! bravais(11): bravais(1)=iholohedry
+!!              bravais(2)=center
+!!              bravais(3:11)=coordinates of rprimd in the axes
+!!              of the conventional bravais lattice (*2 if center/=0)
+!! nsym=actual number of symmetries
+!! symrel(3,3,1:nsym)=symmetry operations in real space in terms of primitive translations
+!! tolsym=tolerance for the symmetry operations (only for checking purposes, the new set rprimd will
+!!     be coherent with the symmetry operations at a much accurate level).
+!!
+!! SIDE EFFECTS
+!! rprimd(3,3)=dimensional primitive translations for real space (bohr)
+!!
+!! PARENTS
+!!      ingeo
+!!
+!! CHILDREN
+!!      chkorthsy,holocell,matr3inv,metric
+!!
+!! SOURCE
+
+subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symmetrize_rprimd'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nsym
+ real(dp),intent(in) :: tolsym
+!arrays
+ integer,intent(in) :: bravais(11),symrel(3,3,nsym)
+ real(dp),intent(inout) :: rprimd(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: foundc,iexit,ii,jj
+ real(dp):: reldiff
+ character(len=500) :: msg
+!arrays
+ real(dp):: aa(3,3),ait(3,3),cell_base(3,3),gprimd(3,3),rmet(3,3),rprimd_new(3,3)
+
+! *************************************************************************
+
+!Build the conventional cell basis vectors in cartesian coordinates
+ aa(:,1)=bravais(3:5)
+ aa(:,2)=bravais(6:8)
+ aa(:,3)=bravais(9:11)
+!Inverse transpose
+ call matr3inv(aa,ait)
+ do ii=1,3
+   cell_base(:,ii)=ait(ii,1)*rprimd(:,1)+ait(ii,2)*rprimd(:,2)+ait(ii,3)*rprimd(:,3)
+ end do
+
+!Enforce the proper holohedry on the conventional cell vectors.
+ call holocell(cell_base,1,foundc,bravais(1),tolsym)
+
+!Reconstruct the dimensional primitive vectors
+ do ii=1,3
+   rprimd_new(:,ii)=aa(1,ii)*cell_base(:,1)+aa(2,ii)*cell_base(:,2)+aa(3,ii)*cell_base(:,3)
+ end do
+
+!Check whether the modification make sense
+ do ii=1,3
+   do jj=1,3
+     reldiff=(rprimd_new(ii,jj)-rprimd(ii,jj))/sqrt(sum(rprimd(:,jj)**2))
+!    Allow for twice tolsym
+     if(abs(reldiff)>two*tolsym)then
+       write(msg,'(a,6(2a,3es14.6))')&
+&       'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
+&       '  rprimd    =',rprimd(:,1),ch10,&
+&       '             ',rprimd(:,2),ch10,&
+&       '             ',rprimd(:,3),ch10,&
+&       '  rprimd_new=',rprimd_new(:,1),ch10,&
+&       '             ',rprimd_new(:,2),ch10,&
+&       '             ',rprimd_new(:,3)
+       MSG_ERROR_CLASS(msg, "TolSymError")
+     end if
+   end do
+ end do
+
+ rprimd(:,:)=rprimd_new(:,:)
+
+!Check whether the symmetry operations are consistent with the lattice vectors
+ rmet = MATMUL(TRANSPOSE(rprimd), rprimd)
+ call matr3inv(rprimd, gprimd)
+ !call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ iexit=1
+
+ call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+
+end subroutine symmetrize_rprimd
+!!***
+
+!!****f* m_symtk/symmetrize_xred
+!! NAME
+!! symmetrize_xred
+!!
+!! FUNCTION
+!! Symmetrize atomic coordinates using input symmetry matrices symrel
+!! which are expressed in terms of the basis of real space primitive
+!! translations (array elements are integers).
+!! Input array indsym(4,isym,iatom) gives label of atom into which iatom
+!! is rotated by INVERSE of symmetry element isym and also gives primitive
+!! translation to get back to unit cell.
+!! This version uses improvement in algorithm suggested by Andrew
+!! Horsfield (see symatm.f).
+!!
+!! INPUTS
+!! indsym(4,nsym,natom)=indirect indexing array giving label of atom
+!!   into which iatom is rotated by symmetry element isym
+!! natom=number of atoms
+!! nsym=number of symmetries in group
+!! symrel(3,3,nsym)=symmetry matrices in terms of real space
+!!   primitive translations
+!! tnons(3,nsym)=nonsymmorphic translations for symmetries
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!! Input/Output
+!! xred(3,natom)=
+!!  (input) atomic coordinates in terms of real space translations
+!!  (output) symmetrized atomic coordinates in terms
+!!    of real space translations
+!!
+!! PARENTS
+!!      ingeo,mover,nonlinear,respfn,scfcv
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symmetrize_xred'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nsym
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symrel(3,3,nsym)
+ real(dp),intent(in) :: tnons(3,nsym)
+ real(dp),intent(inout) :: xred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer  :: iatom,ib,isym
+ integer  :: ii,jj
+ real(dp) :: fc1,fc2,fc3
+ real(dp) :: diff
+ logical  :: dissimilar
+!arrays
+ real(dp) :: tsum(3),tt(3)
+ real(dp),allocatable :: xredsym(:,:)
+ real(dp) :: transl(3) ! translation vector
+
+! *************************************************************************
+!
+!Check whether group contains more than identity;
+!if not then simply return
+ if (nsym>1) then
+
+!  loop over atoms
+   ABI_ALLOCATE(xredsym,(3,natom))
+   do iatom=1,natom
+     tsum(1)=0.0d0
+     tsum(2)=0.0d0
+     tsum(3)=0.0d0
+!
+!    loop over symmetries
+     do isym=1,nsym
+!      atom ib is atom into which iatom is rotated by inverse of
+!      symmetry isym (inverse of symrel(mu,nu,isym))
+       ib=indsym(4,isym,iatom)
+!      Find the reduced coordinates after translation=t(indsym)+transl
+       fc1=xred(1,ib)+dble(indsym(1,isym,iatom))
+       fc2=xred(2,ib)+dble(indsym(2,isym,iatom))
+       fc3=xred(3,ib)+dble(indsym(3,isym,iatom))
+!      Compute [S * (x(indsym)+transl) ] + tnonsymmorphic
+       tt(:)=dble(symrel(:,1,isym))*fc1+&
+&       dble(symrel(:,2,isym))*fc2+&
+&       dble(symrel(:,3,isym))*fc3+ tnons(:,isym)
+
+!      Average over nominally equivalent atomic positions
+       tsum(:)=tsum(:)+tt(:)
+     end do
+!
+!    Set symmetrized result to sum over number of terms
+     xredsym(:,iatom)=tsum(:)/dble(nsym)
+
+!    End loop over iatom
+   end do
+
+   transl(:)=xredsym(:,1)-nint(xredsym(:,1))
+
+!  Compute the smallest translation to an integer
+   do jj=2,natom
+     do ii=1,3
+       diff=xredsym(ii,jj)-nint(xredsym(ii,jj))
+       if (diff<transl(ii)) transl(ii)=diff
+     end do
+   end do
+
+!  Test if the translation on each direction is small
+!  Tolerance 1E-13
+   do ii=1,3
+     if (abs(transl(ii))>1e-13) transl(ii)=0.0
+   end do
+
+!  Execute translation
+   do jj=1,natom
+     do ii=1,3
+       xredsym(ii,jj)=xredsym(ii,jj)-transl(ii)
+     end do
+   end do
+
+!  Test if xredsym is too similar to xred
+!  Tolerance 1E-15
+   dissimilar=.FALSE.
+   do jj=1,natom
+     do ii=1,3
+       if (abs(xredsym(ii,jj)-xred(ii,jj))>1E-15) dissimilar=.TRUE.
+     end do
+   end do
+
+   if (dissimilar) xred(:,:)=xredsym(:,:)
+   ABI_DEALLOCATE(xredsym)
+
+!  End condition of nsym/=1
+ end if
+
+end subroutine symmetrize_xred
+!!***
+
+!!****f* m_symtk/symchk
+!! NAME
+!! symchk
+!!
+!! FUNCTION
+!! Symmetry checker for atomic coordinates.
+!! Checks for translated atomic coordinate tratom(3) to agree
+!! with some coordinate xred(3,iatom) where atomic types agree too.
+!! All coordinates are "reduced", i.e. given in terms of primitive
+!! reciprocal translations.
+!!
+!! INPUTS
+!! natom=number of atoms in unit cell
+!! tratom(3)=reduced coordinates for a single atom which presumably
+!!   result from the application of a symmetry operation to an atomic
+!!   coordinate
+!! trtypat=type of atom (integer) translated to tratom
+!! typat(natom)=types of all atoms in unit cell (integer)
+!! xred(3,natom)=reduced coordinates for all atoms in unit cell
+!!
+!! OUTPUT
+!! difmin(3)=minimum difference between apparently equivalent atoms
+!!   (give value separately for each coordinate)--note that value
+!!   may be NEGATIVE so take abs later if needed
+!! eatom=atom label of atom which is SAME as tratom to within a primitive
+!!   cell translation ("equivalent atom")
+!! transl(3)=primitive cell translation to make iatom same as tratom (integers)
+!!
+!! PARENTS
+!!      m_polynomial_coeff,symatm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symchk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,trtypat
+ integer,intent(out) :: eatom
+!arrays
+ integer,intent(in) :: typat(natom)
+ integer,intent(out) :: transl(3)
+ real(dp),intent(in) :: tratom(3),xred(3,natom)
+ real(dp),intent(out) :: difmin(3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,jatom,trans1,trans2,trans3
+ real(dp) :: test,test1,test2,test3,testmn
+
+! *************************************************************************
+
+!Start testmn out at large value
+ testmn=1000000.d0
+
+!Loop through atoms--
+!when types agree, check for agreement after primitive translation
+ jatom=1
+ do iatom=1,natom
+   if (trtypat/=typat(iatom)) cycle
+
+!  Check all three components
+   test1=tratom(1)-xred(1,iatom)
+   test2=tratom(2)-xred(2,iatom)
+   test3=tratom(3)-xred(3,iatom)
+!  Find nearest integer part of difference
+   trans1=nint(test1)
+   trans2=nint(test2)
+   trans3=nint(test3)
+!  Check whether, after translation, they agree
+   test1=test1-dble(trans1)
+   test2=test2-dble(trans2)
+   test3=test3-dble(trans3)
+
+   test=abs(test1)+abs(test2)+abs(test3)
+   if (test<tol10) then
+!    Note that abs() is not taken here
+     difmin(1)=test1
+     difmin(2)=test2
+     difmin(3)=test3
+     jatom=iatom
+     transl(1)=trans1
+     transl(2)=trans2
+     transl(3)=trans3
+!    Break out of loop when agreement is within tolerance
+     exit
+   else
+!    Keep track of smallest difference if greater than tol10
+     if (test<testmn) then
+       testmn=test
+!      Note that abs() is not taken here
+       difmin(1)=test1
+       difmin(2)=test2
+       difmin(3)=test3
+       jatom=iatom
+       transl(1)=trans1
+       transl(2)=trans2
+       transl(3)=trans3
+     end if
+   end if
+
+!  End loop over iatom. Note a "cycle" and an "exit" inside the loop
+ end do
+
+ eatom=jatom
+
+end subroutine symchk
+!!***
+
+!!****f* m_symtk/symatm
+!! NAME
+!! symatm
+!!
+!! FUNCTION
+!! For each symmetry operation, find the number of the position to
+!! which each atom is sent in the unit cell by the INVERSE of the
+!! symmetry operation inv(symrel); i.e. this is the atom which, when acted
+!! upon by the given symmetry element isym, gets transformed into atom iatom.
+!! This routine uses the fact that inv(symrel)=trans(symrec),
+!! the inverse of the symmetry operation expressed in the basis of real
+!! space primitive translations equals the transpose of the same symmetry
+!! operation expressed in the basis of reciprocal space primitive transl.
+!! $xred(nu,indsym(4,isym,ia))=symrec(mu,nu,isym)*(xred(mu,ia)-tnons(mu,isym))
+!! - transl(mu)$ where $transl$ is also a set of integers and
+!! where translation transl places coordinates within unit cell (note sign).
+!! Note that symrec is the set of arrays which are actually input here.
+!! These arrays have integer elements.
+!! tnons is the nonsymmorphic translation or else is zero.
+!! If nsym=1 (i.e. only the identity symmetry is present) then
+!! indsym merely takes each atom into itself.
+!! The array of integer translations "transl" gets included within array "indsym" as seen below.
+!! This routine has been improved using ideas of p. 649 of notes,
+!! implementing suggestion of Andrew Horsfield: replace search for
+!! equivalent atoms using direct primitive cell translations by
+!! use of dot product relation which must produce an integer.
+!! Relation: $[inv(S(i))*(x(a)-tnons(i)) - x(inv(S)(i,a))] = integer$
+!! where $S(i) =$ symmetry matrix in real space, tnons=nonsymmorphic translation
+!! (may be 0 0 0), and $x(inv(S)(i,a))$ is sought atom into which $x(a)$ gets
+!! rotated by $inv(S)$.  Integer gives primitive translation coordinates to get
+!! back to original unit cell.
+!! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!! natom=number of atoms in cell.
+!! nsym=number of space group symmetries.
+!! symrec(3,3,nsym)=symmetries expressed in terms of their action on
+!!                  reciprocal space primitive translations (integer).
+!! tnons(3,nsym)=nonsymmorphic translations for each symmetry (would
+!!               be 0 0 0 each for a symmorphic space group)
+!! typat(natom)=integer identifying type of atom.
+!! xred(3,natom)=reduced coordinates of atoms in terms of real space
+!!               primitive translations
+!! tolsym=tolerance for the symmetries
+!!
+!! OUTPUT
+!! indsym(4,nsym,natom)=indirect indexing array described above: for each
+!!                      isym,iatom, fourth element is label of atom into
+!!                      which iatom is sent by INVERSE of symmetry operation
+!!                      isym; first three elements are the primitive
+!!                      translations which must be subtracted after the
+!!                      transformation to get back to the original unit cell.
+!!
+!! PARENTS
+!!      get_npert_rbz,ingeo,initberry,initorbmag,m_ab7_symmetry,m_crystal,m_ddb
+!!      m_polynomial_coeff,m_tdep_sym,setsym,thmeig
+!!
+!! CHILDREN
+!!      symchk,wrtout
+!!
+!! SOURCE
+
+
+subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symatm'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nsym
+ real(dp), intent(in) :: tolsym
+!arrays
+ integer,intent(in) :: symrec(3,3,nsym),typat(natom)
+ integer,intent(out) :: indsym(4,nsym,natom)
+ real(dp),intent(in) :: tnons(3,nsym),xred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: eatom,errout,iatom,ii,isym,mu
+ real(dp) :: difmax,err
+ character(len=500) :: message
+!arrays
+ integer :: transl(3)
+ real(dp) :: difmin(3),tratom(3)
+
+! *************************************************************************
+
+ err=zero
+ errout=0
+
+ do isym=1,nsym
+   do iatom=1,natom
+
+     do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
+       tratom(mu) = dble(symrec(1,mu,isym))*(xred(1,iatom)-tnons(1,isym))&
+&       +dble(symrec(2,mu,isym))*(xred(2,iatom)-tnons(2,isym))&
+&       +dble(symrec(3,mu,isym))*(xred(3,iatom)-tnons(3,isym))
+     end do
+!
+!    Find symmetrically equivalent atom
+     call symchk(difmin,eatom,natom,tratom,transl,typat(iatom),typat,xred)
+!
+!    Put information into array indsym: translations and label
+     indsym(1,isym,iatom)=transl(1)
+     indsym(2,isym,iatom)=transl(2)
+     indsym(3,isym,iatom)=transl(3)
+     indsym(4,isym,iatom)=eatom
+!
+!    Keep track of maximum difference between transformed coordinates and
+!    nearest "target" coordinate
+     difmax=max(abs(difmin(1)),abs(difmin(2)),abs(difmin(3)))
+     err=max(err,difmax)
+
+     if (difmax>tolsym) then ! Print warnings if differences exceed tolerance
+       write(message, '(3a,i3,a,i6,a,i3,a,a,3es12.4,3a)' )&
+&       'Trouble finding symmetrically equivalent atoms',ch10,&
+&       'Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
+&       'gives tratom=',tratom(1:3),'.',ch10,&
+&       'This is further away from every atom in crystal than the allowed tolerance.'
+       MSG_WARNING(message)
+
+       write(message, '(a,3i3,a,a,3i3,a,a,3i3)' ) &
+&       '  The inverse symmetry matrix is',symrec(1,1:3,isym),ch10,&
+&       '                                ',symrec(2,1:3,isym),ch10,&
+&       '                                ',symrec(3,1:3,isym)
+       call wrtout(std_out,message,'COLL')
+       write(message, '(a,3f13.7)' )'  and the nonsymmorphic transl. tnons =',(tnons(mu,isym),mu=1,3)
+
+       call wrtout(std_out,message,'COLL')
+       write(message, '(a,1p,3e11.3,a,a,i5)' ) &
+&       '  The nearest coordinate differs by',difmin(1:3),ch10,&
+&       '  for indsym(nearest atom)=',indsym(4,isym,iatom)
+       call wrtout(std_out,message,'COLL')
+!
+!      Use errout to reduce volume of error diagnostic output
+       if (errout==0) then
+         write(message,'(6a)') ch10,&
+&         '  This indicates that when symatm attempts to find atoms  symmetrically',ch10, &
+&         '  related to a given atom, the nearest candidate is further away than some',ch10,&
+&         '  tolerance.  Should check atomic coordinates and symmetry group input data.'
+         call wrtout(std_out,message,'COLL')
+         errout=1
+       end if
+
+     end if !difmax>tol
+   end do !iatom
+ end do !isym
+
+ if (.FALSE.) then
+   do iatom=1,natom
+     write(message, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
+     call wrtout(std_out,message,'COLL')
+     do ii=1,(nsym-1)/24+1
+       if(natom<100)then
+         write(message, '(1x,24i3)' ) (indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       else
+         write(message, '(1x,24i6)' ) (indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       end if
+       call wrtout(std_out,message,'COLL')
+     end do
+   end do
+ end if
+
+ if (err>tolsym) then
+   write(message, '(1x,a,1p,e14.5,a,e12.4)' )'symatm: maximum (delta t)=',err,' is larger than tol=',tolsym
+   call wrtout(std_out,message,'COLL')
+ end if
+
+!Stop execution if error is really big
+ if (err>0.01d0) then
+   write(message,'(5a)')&
+&   'Largest error (above) is so large (0.01) that either input atomic coordinates (xred)',ch10,&
+&   'are wrong or space group symmetry data is wrong.',ch10,&
+&   'Action : correct your input file.'
+   MSG_ERROR(message)
+ end if
+
+end subroutine symatm
 !!***
 
 end module m_symtk

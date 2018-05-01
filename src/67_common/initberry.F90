@@ -100,6 +100,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_efield
 
  use m_time,    only : timab
+ use m_symtk,   only : symatm
  use m_geometry,only : metric
  use m_kpts,    only : listkk, smpbz
  use m_fftcore, only : kpgsph

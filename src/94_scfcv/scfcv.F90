@@ -187,6 +187,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
+ use m_symtk,            only : symmetrize_xred
  use m_geometry,         only : metric
  use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
@@ -229,7 +230,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
  use interfaces_51_manage_mpi

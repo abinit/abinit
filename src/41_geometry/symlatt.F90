@@ -79,7 +79,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  use m_errors
  use m_profiling_abi
 
- use m_symtk,       only : matr3inv, symrelrot
+ use m_symtk,       only : matr3inv, symrelrot, holocell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

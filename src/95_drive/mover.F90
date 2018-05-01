@@ -142,7 +142,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #endif
 
  use m_fstrings,           only : strcat, sjoin, indent
- use m_symtk,              only : matr3inv
+ use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
@@ -159,7 +159,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #define ABI_FUNC 'mover'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_45_geomoptim
  use interfaces_56_recipspace
  use interfaces_59_ionetcdf
