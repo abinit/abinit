@@ -184,7 +184,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Action : try larger ngfft or smaller ecut.',ch10,&
+&       '  Actio: try larger ngfft or smaller ecut.',ch10,&
 &       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
        if(iout/=std_out) then
          call wrtout(iout,message,'COLL')
@@ -584,7 +584,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 &         '  of spin up and spin down bands, but input is :',ch10,&
 &         '  nband(up)=',nband_k,', nband(down)=',nband_down,',',ch10,&
 &         '  for ikpt=',ikpt,'.',ch10,&
-&         '  Action : correct nband in your input file.'
+&         '  Action: correct nband in your input file.'
 !        MG: Tests v3(10,11,17) and v6(67) fail if this test is enabled
 !        call wrtout(std_out,message,mode_paral)
        end if

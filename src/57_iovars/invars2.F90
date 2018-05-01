@@ -2374,9 +2374,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread_key==1) then
    if(dtset%nsym/=1) then
      write(message,"(a,i0,3a)")&
-&     '  Value of nsym different from 1 when ucrpa_bands is used is under test ',dtset%nsym,&
-&     '(because symmetry is not yet used)',ch10,&
-&     '  Action : check your calculation  with nsym=1'
+&     'Value of nsym different from 1 when ucrpa_bands is used is under test ',dtset%nsym,&
+&     ' (because symmetry is not yet used)',ch10,&
+&     'Action: check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_bands(1:2)=intarr(1:2)
@@ -2386,9 +2386,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) then
    if(dtset%nsym/=1) then
      write(message,*)&
-&     '  Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
-&     '  (because symmetry is not yet used)',ch10,&
-&     '  Action : check your calculation  with nsym=1'
+&     'Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
+&     ' (because symmetry is not yet used)',ch10,&
+&     'Action: check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_window(1:2)=dprarr(1:2)
@@ -2396,9 +2396,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  if(tread==1.and.tread_key==1) then
    write(message, '(a,a,a,a,a)' )&
-&   ' ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
-&   ' for the same dataset.',ch10,&
-&   ' Action : check the input file.'
+&   'ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
+&   'for the same dataset.',ch10,&
+&   'Action: check the input file.'
    MSG_ERROR(message)
  end if
 

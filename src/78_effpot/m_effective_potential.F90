@@ -37,11 +37,19 @@ module m_effective_potential
  use m_phonons
  use m_ddb
  use m_polynomial_conf
+ use m_polynomial_coeff
  use m_anharmonics_terms
  use m_harmonics_terms
  use m_xmpi
+ use m_ewald
+ use m_nctk
+#if defined HAVE_NETCDF
+ use netcdf
+#endif
 
+ use m_fstrings,       only : replace, ftoa, itoa,i nt2char4
  use m_io_tools,       only : open_file,get_unit
+ use m_dtfil,          only : isfile
  use m_symtk,          only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
@@ -50,6 +58,7 @@ module m_effective_potential
  use m_geometry,       only : fcart2fred, xcart2xred, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
+ use m_multibinit_dataset, only : multibinit_dtset_type
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
 
  implicit none
@@ -642,8 +651,6 @@ end subroutine effective_potential_freempi
 !! SOURCE
 
 subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
-
- use m_ewald
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1307,8 +1314,6 @@ end subroutine effective_potential_setStrainPhononCoupling
 
 subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
 
- use m_polynomial_coeff
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1808,9 +1813,6 @@ end subroutine effective_potential_printSupercell
 
 subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 
- use m_fstrings,   only : replace
- use m_multibinit_dataset, only : multibinit_dtset_type
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2152,9 +2154,6 @@ end subroutine effective_potential_writeXML
 
 subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
 
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_fstrings, only : ftoa,itoa,int2char4
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2487,7 +2486,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! Get displacement and the variation of the displacmeent wr to strain
   ABI_ALLOCATE(xcart,(3,natom))
   disp_tmp(:,:) = zero
-  du_delta_tmp(:,:,:) = zero  
+  du_delta_tmp(:,:,:) = zero
   if((.not.present(displacement).or..not.present(du_delta)).and.present(xred))then
 !   Compute the displacement
     call xred2xcart(natom, rprimd, xcart, xred)
@@ -3705,12 +3704,6 @@ end subroutine effective_potential_checkDEV
 !! SOURCE
 
 subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
-
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_nctk
-#if defined HAVE_NETCDF
- use netcdf
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

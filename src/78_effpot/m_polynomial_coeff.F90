@@ -40,6 +40,7 @@ module m_polynomial_coeff
  use m_crystal,   only : crystal_t,symbols_crystal
  use m_supercell, only : getPBCIndexes_supercell,distance_supercell,findBound_supercell
  use m_geometry,  only : xcart2xred,metric
+ use m_dtfil,     only : isfile
 
  implicit none
 

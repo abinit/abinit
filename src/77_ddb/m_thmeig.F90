@@ -353,8 +353,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
    if(found==0)then
      write(message,'(a,i3,2a)')&
-&     '  Was unable to find the blok for Gamma point in EIG2 DDB file, while thmflag= ',thmflag,ch10,&
-&     '  Action : compute the contribution from Gamma, and merge it in your EIG2 DDB file.'
+&     'Was unable to find the blok for Gamma point in EIG2 DDB file, while thmflag= ',thmflag,ch10,&
+&     'Action: compute the contribution from Gamma, and merge it in your EIG2 DDB file.'
      MSG_ERROR(message)
    end if
 
@@ -493,8 +493,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
    if(iblok==0) then
      write(message,'(a,3es16.6,2a)')&
-&     ' Was unable to find in DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
-&     ' Action : compute the contribution from this point, and merge it in your DDB file.'
+&     'Was unable to find in DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
+&     'Action: compute the contribution from this point, and merge it in your DDB file.'
      MSG_ERROR(message)
    end if
 
@@ -559,8 +559,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
      if(found==0)then
        write(message,'(a,3es16.6,2a)')&
-&       ' Was unable to find in EIG2 DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
-&       ' Action : compute the contribution from this point, and merge it in your EIG2 DDB file.'
+&       'Was unable to find in EIG2 DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
+&       'Action: compute the contribution from this point, and merge it in your EIG2 DDB file.'
        MSG_ERROR(message)
      end if
 
