@@ -7,16 +7,18 @@
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (MVeithen,MB)
+!! Copyright (C) 2018-2018 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol) = array for planewave coefficients of wavefunctions
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  eigen0(mband*nkpt_rbz*nsppol)=GS eigenvalues at k (hartree)
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!  gsqcut=Fourier cutoff on G^2 for "large sphere" of radius double
@@ -33,26 +35,60 @@
 !!  mpi_enreg=MPI-parallelisation information
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  natom = number of atoms in unit cell
-!!  nfftf  = (effective) number of FFT grid points (for this processor)
+!!  nattyp(ntypat)= # atoms of each type.
+!!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
+!!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid (see NOTES in respfn.F90)
+!!  nhat=compensation charge density on fine rectangular grid
 !!  nkpt  = number of k points
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
+!!  nk3xc=second dimension of the array k3xc
 !!  nspinor = number of spinorial components of the wavefunctions
 !!  nsppol = number of channels for spin-polarization (1 or 2)
 !!  npwarr(nkpt) = array holding npw for each k point
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
+!!  paw_an0(natom) <type(paw_an_type)>=paw arrays for 0th-order quantities given on angular mesh
+!!  paw_ij0(my_natom*usepaw) <type(paw_ij_type)>=paw arrays given on (i,j) channels for the GS
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawang1 <type(pawang_type)>=pawang datastructure containing only the symmetries preserving the perturbation
+!!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!!  pawfgrtab(natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid for the GS
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
+!!  pawrhoij(natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data for the GS
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
+!!  ph1df(2,3*(2*mgfftf+1)*natom)=one-dimensional structure factor information (fine grid)
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
 !!       that have to be computed
 !!       1   ->   element has to be computed explicitely
 !!      -1   ->   use symmetry operations to obtain the corresponding element
+!!  rhog(2,nfftf)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
 !!  ucvol = unit cell volume (bohr^3)
+!!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
+!!  vtrial(nfftf,nspden)=GS Vtrial(r).
+!!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
 !!  xred(3,natom) = reduced atomic coordinates
+!!  nsym1=number of symmetry elements in space group consistent with perturbation
+!!  indsy1(4,nsym1,natom)=indirect indexing array for atom labels
+!!  symaf1(nsym1)=anti(ferromagnetic) part of symmetry operations
+!!  symrc1(3,3,nsym1)=symmetry operations in reciprocal space
 !!
 !! OUTPUT
 !!  blkflg(3,mpert,3,mpert) = flags for each element of the 3DTE
 !!                             (=1 if computed)
-!!  d3etot(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
+!!  d3etot(2,3,mpert,3,mpert,3,mpert) = third derivatives of the energy tensor
+!!                                    = \sum_{i=1}^9 d3etot_i
+!!  d3etot_1(2,3,mpert,3,mpert,3,mpert) = 1st term of d3etot
+!!  d3etot_2(2,3,mpert,3,mpert,3,mpert) = 2nd term of d3etot
+!!  d3etot_3(2,3,mpert,3,mpert,3,mpert) = 3rd term of d3etot
+!!  d3etot_4(2,3,mpert,3,mpert,3,mpert) = 4th term of d3etot
+!!  d3etot_5(2,3,mpert,3,mpert,3,mpert) = 5th term of d3etot
+!!  d3etot_6(2,3,mpert,3,mpert,3,mpert) = 6th term of d3etot
+!!  d3etot_7(2,3,mpert,3,mpert,3,mpert) = 7th term of d3etot
+!!  d3etot_8(2,3,mpert,3,mpert,3,mpert) = 8th term of d3etot
+!!  d3etot_9(2,3,mpert,3,mpert,3,mpert) = 9th term of d3etot
 !!
 !! SIDE EFFECTS
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
@@ -297,15 +333,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    ABI_ALLOCATE(nhat1_i3pert,(cplex*nfftf,dtset%nspden))
    nhat1_i3pert=zero
 
-!  Projections of 1-st order WF on nl projectors
-!   ABI_DATATYPE_ALLOCATE(cprj1,(dtset%natom,dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*usecprj))
-!   if (usecprj==1.and.mk1mem/=0) then
-!     !cprj ordered by atom-type
-!     ABI_ALLOCATE(dimcprj,(dtset%natom))
-!     call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
-!     call pawcprj_alloc(cprj1,0,dimcprj)
-!     ABI_DEALLOCATE(dimcprj)
-!   end if
 !  1st-order arrays/variables related to the PAW spheres
    ABI_DATATYPE_ALLOCATE(paw_an1_i2pert,(natom))
    ABI_DATATYPE_ALLOCATE(paw_ij1_i2pert,(natom))
@@ -325,7 +352,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    ABI_ALLOCATE(nhat1_i1pert,(0,0))
    ABI_ALLOCATE(nhat1_i2pert,(0,0))
    ABI_ALLOCATE(nhat1_i3pert,(0,0))
-!   ABI_DATATYPE_ALLOCATE(cprj1,(0,0))
    ABI_DATATYPE_ALLOCATE(paw_an1_i2pert,(0))
    ABI_DATATYPE_ALLOCATE(paw_ij1_i2pert,(0))
  end if ! PAW
@@ -689,8 +715,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    call dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
 &                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
-&                   pawang,pawang1,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
-&                   paw_an0,paw_an1_i2pert,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,&
+&                   pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
+&                   paw_an0,paw_an1_i2pert,paw_ij1_i2pert,ph1d,psps,rho1r1,rho2r1,rho3r1,&
 &                   rprimd,symaf1,symrc1,ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,&
 &                   ddk_f,xccc3d1,xccc3d2,xccc3d3,xred,&
 &                   d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)

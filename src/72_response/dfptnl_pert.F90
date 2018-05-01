@@ -4,28 +4,37 @@
 !! dfptnl_pert
 !!
 !! FUNCTION
-!! Compute the linear response part to the 3dte
+!! Compute the linear response part to the 3dte. The main inputs are :
+!!   - GS WFs and Hamiltonian (cg,gs_hamkq)
+!!   - 1st-order WFs for three perturbations i1pert/i1dir,i2pert/i2dir,i3pert/i3dir (cg1,cg2,cg3)
+!!   - 1st-order potentials for i2pert (vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert)
+!!   - 1st-order WFs DDK,DDE and 2nd-order WF DKDE (ddk_f)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2016 ABINIT group (LB)
+!! Copyright (C) 2018-2018 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol) = array for planewave
 !!                                          coefficients of wavefunctions
-!!  cg1 = first-order wavefunction relative to the perturbations i1pert
-!!  cg3 = first-order wavefunction relative to the perturbations i3pert
+!!  cg1 = first derivative of cg with respect the perturbation i1pert
+!!  cg2 = first derivative of cg with respect the perturbation i2pert
+!!  cg3 = first derivative of cg with respect the perturbation i3pert
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!          if 2, COMPLEX
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  eigen0(mband*nkpt_rbz*nsppol)=GS eigenvalues at k (hartree)
+!!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
+!!  k3xc(nfftf,nk3xc)=third-order exchange-correlation kernel
+!!  indsy1(4,nsym1,natom)=indirect indexing array for atom labels
 !!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
 !!  i1pert,i2pert,i3pert = type of perturbation that has to be computed
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
-!!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
 !!  mband = maximum number of bands
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem = maximum number of k points which can fit in core memory
@@ -36,21 +45,65 @@
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  natom = number of atoms in unit cell
-!!  nfft  = (effective) number of FFT grid points (for this processor)
-!!  nkpt  = number of k points
+!!  nattyp(ntypat)= # atoms of each type.
+!!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
+!!  nfftotf=total number of real space fine grid points
+!!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid (see NOTES in respfn.F90)
+!!  nkpt = number of k points
+!!  nk3xc=second dimension of the array k3xc
 !!  nspden = number of spin-density components
 !!  nspinor = number of spinorial components of the wavefunctions
 !!  nsppol = number of channels for spin-polarization (1 or 2)
+!!  nsym1=number of symmetry elements in space group consistent with the perturbation
 !!  npwarr(nkpt) = array holding npw for each k point
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawang1 <type(pawang_type)>=pawang datastructure containing only the symmetries preserving the perturbation
+!!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!!  pawfgrtab(natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid for the GS
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  pawrhoij0(natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data for the GS
+!!  pawrhoij1_i1pert(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data (i1pert)
+!!  pawrhoij1_i2pert(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data (i2pert)
+!!  pawrhoij1_i3pert(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data (i3pert)
+!!  paw_an0(natom) <type(paw_an_type)>=paw arrays for 0th-order quantities given on angular mesh
+!!  paw_an1_i2pert(natom) <type(paw_an_type)>=paw arrays for 1st-order quantities given on angular mesh (i2pert)
+!!  paw_ij1_i2pert(natom) <type(paw_ij_type)>=1st-order paw arrays given on (i,j) channels (i2pert)
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  rho1r1(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3 (i1pert)
+!!  rho1r2(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3 (i2pert)
+!!  rho1r3(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3 (i3pert)
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
-!!  vtrial1(cplex*nfft,nspden)=firs-order local potential
+!!  symaf1(nsym)=(anti)ferromagnetic part of symmetry operations
+!!  symrc1(3,3,nsym)=symmetries of group in terms of operations on reciprocal space primitive translations
+!!  ucvol=volume of the unit cell
+!!  vtrial(nfftf,nspden)=GS Vtrial(r).
+!!  vhartr1_i2pert(cplex*nfftf,nspden)=firs-order hartree potential
+!!  vtrial1_i2pert(cplex*nfft,nspden)=firs-order local potential
+!!  vxc1_i2pert(cplex*nfft,nspden)=firs-order exchange-correlation potential
+!!  ddk_f = wf files
+!!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc (i1pert)
+!!  xccc3d2(cplex*n3xccc)=3D change in core charge density, see n3xccc (i2pert)
+!!  xccc3d3(cplex*n3xccc)=3D change in core charge density, see n3xccc (i3pert)
 !!  xred(3,natom) = reduced atomic coordinates
 !!
 !! OUTPUT
-!!  d3etot(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
+!!  d3etot(2,3,mpert,3,mpert,3,mpert) = third derivatives of the energy tensor
+!!                                    = \sum_{i=1}^9 d3etot_i
+!!  d3etot_1(2,3,mpert,3,mpert,3,mpert) = 1st term of d3etot
+!!  d3etot_2(2,3,mpert,3,mpert,3,mpert) = 2nd term of d3etot
+!!  d3etot_3(2,3,mpert,3,mpert,3,mpert) = 3rd term of d3etot
+!!  d3etot_4(2,3,mpert,3,mpert,3,mpert) = 4th term of d3etot
+!!  d3etot_5(2,3,mpert,3,mpert,3,mpert) = 5th term of d3etot
+!!  d3etot_6(2,3,mpert,3,mpert,3,mpert) = 6th term of d3etot
+!!  d3etot_7(2,3,mpert,3,mpert,3,mpert) = 7th term of d3etot
+!!  d3etot_8(2,3,mpert,3,mpert,3,mpert) = 8th term of d3etot
+!!  d3etot_9(2,3,mpert,3,mpert,3,mpert) = 9th term of d3etot
+!!
+!! SIDE EFFECTS
+!!  TO DO!
 !!
 !! PARENTS
 !!      dfptnl_loop
@@ -70,9 +123,9 @@
 
 subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,&
-& nspden,nspinor,nsppol,nsym1,npwarr,occ,pawang,pawang1,pawfgrtab,pawrad,pawtab,&
+& nspden,nspinor,nsppol,nsym1,npwarr,occ,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawtab,&
 & pawrhoij0,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
-& paw_an0,paw_an1_i2pert,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
+& paw_an0,paw_an1_i2pert,paw_ij1_i2pert,ph1d,psps,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
 & ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred,&
 & d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
 

@@ -46,7 +46,7 @@
 !!      dfptnl_pert
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijhartree,pawxc_dfpt,pawxcm3
+!!      free_my_atmtab,get_my_atmtab,pawdensities,pawxc_dfpt,pawxcm3
 !!      timab,xmpi_sum
 !!
 !! SOURCE
@@ -73,9 +73,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
  use m_paw_an,     only : paw_an_type
- use m_paw_ij,     only : paw_ij_type
  use m_pawrhoij,   only : pawrhoij_type
- use m_pawdij,     only : pawdijhartree
  use m_paral_atom, only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).

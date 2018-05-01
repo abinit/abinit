@@ -4,8 +4,7 @@
 !! nonlinear
 !!
 !! FUNCTION
-!! Primary routine for conducting DFT calculations of
-!! non linear response functions.
+!! Primary routine for conducting DFT calculations of non linear response functions.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2002-2018 ABINIT group (MVeithen,MB,LB)
