@@ -68,7 +68,7 @@ MODULE m_numeric_tools
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
  public :: print_arr             ! Print a vector/array
- public :: pade,dpade            ! Functions for Pade approximation (complex case)
+ public :: pade, dpade           ! Functions for Pade approximation (complex case)
  public :: newrap_step           ! Apply single step Newton-Raphson method to find root of a complex function
  public :: OPERATOR(.x.)         ! Cross product of two 3D vectors
  public :: l2norm                ! Return the length (ordinary L2 norm) of a vector
@@ -5351,7 +5351,6 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
    msg = "Wrong direction: "//TRIM(direction)
    MSG_ERROR(msg)
  END SELECT
-
 
 end function isordered_rdp
 !!***

@@ -46,6 +46,7 @@ module m_lgroup
 
  use m_fstrings,   only : ftoa, ktoa, sjoin
  use m_kpts,       only : listkk
+ use m_symtk,      only : chkgrp, littlegroup_q
 
  implicit none
 
@@ -157,7 +158,6 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lgroup_new'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

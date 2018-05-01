@@ -67,7 +67,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -112,7 +112,7 @@ CONTAINS
 !!      respfn
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -166,7 +166,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -226,7 +226,7 @@ CONTAINS
 !!      respfn
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -278,7 +278,7 @@ CONTAINS
 !!      d2frnl
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
+!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
 !!      zgetri,zheev
 !!
 !! SOURCE
@@ -426,8 +426,8 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine print_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,efmas_eigval,efmas_eigvec,ntheta, &
-&                       m_avg,saddle_warn,transport_tensor_scale)
+ subroutine print_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
+&                       m_avg,m_avg_frohlich,saddle_warn,efmas_eigval,efmas_eigvec,transport_tensor_scale)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -441,27 +441,22 @@ CONTAINS
    !Arguments ------------------------------------
    integer, intent(in) :: io_unit, band, deg_dim, mdim, ndirs
    real(dp), intent(in) :: m_cart(ndirs,deg_dim), kpt(3), dirs(3,ndirs), rprimd(3,3), efmas_tensor(mdim,mdim,deg_dim)
-   integer, intent(in), optional :: ntheta
+   integer, intent(in) :: ntheta
+   real(dp), intent(in) :: m_avg(deg_dim),m_avg_frohlich(deg_dim)
+   logical, intent(in) :: saddle_warn(deg_dim)
    real(dp), intent(in), optional :: efmas_eigval(mdim,deg_dim)
    real(dp), intent(in), optional :: efmas_eigvec(mdim,mdim,deg_dim)
-   real(dp), intent(in), optional :: m_avg(deg_dim)
-   logical, intent(in), optional :: saddle_warn(deg_dim)
    real(dp), intent(in), optional :: transport_tensor_scale(deg_dim)
 
    !Local variables ------------------------------
    logical :: extras
-   logical, allocatable :: saddle_warn_(:)
    integer :: iband, adir
    character(len=22) :: format_eigvec
    character(len=500) :: msg, tmpstr
    real(dp) :: vec(3)
 
-   ABI_ALLOCATE(saddle_warn_,(deg_dim))
-   saddle_warn_ = .false.
-
    if(deg_dim>1) then
-     extras = present(efmas_eigval) .and. present(efmas_eigvec) .and. present(ntheta) .and. present(m_avg) &
-&             .and. present(saddle_warn)
+     extras = present(efmas_eigval) .and. present(efmas_eigvec) 
      if(mdim==3 .and. .not. extras) then
        write(msg,'(a,l1,a,i1,a)') 'Subroutine print_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
@@ -481,31 +476,31 @@ CONTAINS
      end if
    end if
 
-   if(deg_dim>1 .and. mdim>1) saddle_warn_ = saddle_warn
-
    if(deg_dim>1) then
-     write(io_unit,'(2a)') ch10,'COMMENTS: '
+     write(io_unit,'(2a)') ch10,' COMMENTS: '
      write(io_unit,'(a,3(f6.3,a),i5,a,i5)') ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), bands ',band,' through ',&
 &          band+deg_dim-1
      if(mdim>1) then
-       write(io_unit,'(a)') '   are DEGENERATE (effective mass is therefore not defined).'
+       write(io_unit,'(a)') '   are DEGENERATE (effective mass tensor is therefore not defined).'
        if(mdim==3) then
-         write(io_unit,'(a)') '   See Section IIIB Eqs. (66)-(71) and Appendix E of PRB XX XXX (2015).'
+         write(io_unit,'(a)') '   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).'
+         write(io_unit,'(a,i7,a)') &
+&          ' - Angular average effective mass for Frohlich model is to be averaged over degenerate bands. See later.'
        elseif(mdim==2) then
          write(io_unit,'(a)') ' - Also, 2D requested (perpendicular to Z axis).'
-         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F11)-(F13) of PRB XX XXX (2015).'
+         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).'
        end if
-       write(io_unit,'(a,i7,a)') ' - Associated theta integrals calculated with nthteta=',ntheta,' points.'
+       write(io_unit,'(a,i7,a)') ' - Associated theta integrals calculated with ntheta=',ntheta,' points.'
      else
        write(io_unit,'(a)') '   are DEGENERATE.'
        write(io_unit,'(a)') ' - Also, 1D requested (parallel to X axis).'
      end if
    end if
 
-   if(ANY(saddle_warn_)) then
+   if(ANY(saddle_warn)) then
      write(msg,'(2a)') ch10,'Band(s)'
      do iband=1,deg_dim
-       if(saddle_warn_(iband)) then
+       if(saddle_warn(iband)) then
          write(tmpstr,'(i5)') band+iband-1
          msg = TRIM(msg)//' '//TRIM(tmpstr)//','
        end if
@@ -522,9 +517,9 @@ CONTAINS
    end if
 
    if(deg_dim>1 .and. mdim>1) then
-     write(msg,'(a)') 'Transport equivalent effective mass'
+     write(msg,'(a)') ' Transport equivalent effective mass'
    else
-     write(msg,'(a)') 'Effective mass'
+     write(msg,'(a)') ' Effective mass'
    end if
 
    if(mdim>1) then
@@ -532,9 +527,9 @@ CONTAINS
    end if
 
    do iband=1,deg_dim
-     write(io_unit,'(2a,3(f6.3,a),i5)') ch10,'K-point (',kpt(1),',',kpt(2),',',kpt(3),') | band = ',band+iband-1
+     write(io_unit,'(2a,3(f6.3,a),i5)') ch10,' K-point (',kpt(1),',',kpt(2),',',kpt(3),') | band = ',band+iband-1
      write(io_unit,'(a)') trim(msg)//':'
-     if(.not. saddle_warn_(iband)) then
+     if(.not. saddle_warn(iband)) then
        do adir=1,mdim
          write(io_unit,'(3f26.10)') efmas_tensor(adir,:,iband)
        end do
@@ -547,7 +542,7 @@ CONTAINS
          write(io_unit,'(a,f26.10)') 'Scaling of transport tensor (Eq. (FXX)) = ',transport_tensor_scale(iband)
        end if
        if(io_unit == std_out) then
-         if(.not. saddle_warn_(iband)) then
+         if(.not. saddle_warn(iband)) then
            write(io_unit,'(a)') trim(msg)//' eigenvalues:'
            write(io_unit,'(3f14.10)') efmas_eigval(:,iband)
            write(io_unit,'(a)') trim(msg)//' eigenvectors in cartesian / reduced coord.:'
@@ -561,9 +556,20 @@ CONTAINS
              end if
            end do
          end if
-         if(deg_dim>1) write(io_unit,'(a,f14.10)') 'Average effective mass = ',m_avg(iband)
        end if
      end if
+
+     if(mdim==3)then
+       !An exactly zero average effective masse is artificial (or from a saddle point with symmetry). Does not print.
+       if(abs(m_avg(iband))>tol8)then
+         write(io_unit,'(a,f14.10)') &
+&          ' Angular average effective mass 1/(<1/m>)= ',m_avg(iband)
+       endif
+       if(abs(m_avg_frohlich(iband))>tol8)then
+         write(io_unit,'(a,f14.10)') &
+&          ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)
+       endif
+     endif
 
      write(io_unit,'(a)') ' Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)'
      do adir=1,ndirs
@@ -573,7 +579,14 @@ CONTAINS
      end do
    end do
 
-   ABI_DEALLOCATE(saddle_warn_)
+   if(deg_dim>1 .and. mdim==3) then
+     write(io_unit,'(2a)') ch10,&
+&     ' Angular average effective mass for Frohlich model, averaged over degenerate bands.'
+     write(io_unit,'(a,es16.6)') &
+&     ' Value of     (<<m**0.5>>)**2 = ',(sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim)**2
+     write(io_unit,'(a,es16.6,a)') &
+&     ' Absolute Value of <<m**0.5>> = ', sum(abs(m_avg_frohlich(1:deg_dim))**0.5)/deg_dim,ch10
+   endif
 
  end subroutine print_efmas
 !!***
@@ -692,7 +705,7 @@ CONTAINS
   character(len=500) :: message, filename
   real(dp) :: deltae
   real(dp) :: dot2i,dot2r,dot3i,dot3r,doti,dotr
-  real(dp) :: theta, phi
+  real(dp) :: f3d_scal,theta, phi
   real(dp) :: weight
   real(dp) :: gprimd(3,3)
   !real(dp) :: A, B, C, R
@@ -702,7 +715,7 @@ CONTAINS
   real(dp), allocatable :: unit_r(:), dr_dth(:), dr_dph(:)
   real(dp), allocatable :: eigenval(:), rwork(:), eigen1val(:,:)
   real(dp), allocatable :: eigf3d(:)
-  real(dp), allocatable :: m_avg(:), m_cart(:,:)
+  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:),m_cart(:,:)
   real(dp), allocatable :: deigf3d_dth(:), deigf3d_dph(:)
   real(dp), allocatable :: unit_speed(:,:), transport_tensor(:,:,:)
   real(dp), allocatable :: cart_rotation(:,:), transport_tensor_eig(:)
@@ -728,14 +741,16 @@ CONTAINS
  ! *********************************************************************
 
   debug = .false. ! Prints additional info to std_out
-  print_fsph = .false. ! Open a file and print the angle dependent curvature f(\theta,\phi) for each band & kpts treated; 1 file per degenerate ensemble of bands. Angles are those used in the numerial integration.
+  print_fsph = .false. ! Open a file and print the angle dependent curvature f(\theta,\phi) 
+                       ! for each band & kpts treated; 1 file per degenerate ensemble of bands. 
+                       ! Angles are those used in the numerical integration.
 
   if(mpi_enreg%me/=0) return
 
-  write(std_out,'(2a)') ch10,'CALCULATION OF EFFECTIVE MASSES'
-  write(ab_out, '(2a)') ch10,'CALCULATION OF EFFECTIVE MASSES'
+  write(std_out,'(2a)') ch10,' CALCULATION OF EFFECTIVE MASSES'
+  write(ab_out, '(2a)') ch10,' CALCULATION OF EFFECTIVE MASSES'
   write(ab_out, '(a)' ) &
-&   'NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
+&   ' NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
 
   if(dtset%nsppol/=1)then
     write(message,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
@@ -838,7 +853,7 @@ CONTAINS
             end do
           end do
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
-            write(message,'(a,a)') 'Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
+            write(message,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
 &            'but gradient of band(s) was found to be nonzero.'
             MSG_ERROR(message)
           end if
@@ -974,6 +989,58 @@ CONTAINS
             ABI_DEALLOCATE(rwork)
             transport_eqv_eigvec(:,:,iband) = transpose(transport_eqv_eigvec(:,:,iband)) !So that lines contain eigenvectors.
 
+            !Frohlich average effective mass
+            ABI_ALLOCATE(m_avg,(1))
+            ABI_ALLOCATE(m_avg_frohlich,(1))
+            ABI_ALLOCATE(saddle_warn,(1))
+            ABI_ALLOCATE(unit_r,(mdim))
+            ABI_ALLOCATE(start_eigf3d_pos,(1))
+            ABI_ALLOCATE(gq_points_th,(ntheta))
+            ABI_ALLOCATE(gq_weights_th,(ntheta))
+            ABI_ALLOCATE(gq_points_ph,(nphi))
+            ABI_ALLOCATE(gq_weights_ph,(nphi))
+
+            m_avg=zero
+            m_avg_frohlich=zero
+            saddle_warn=.false.
+
+            if(mdim==3)then
+              !One has to perform the integral over the sphere
+              gq_points_th=zero
+              gq_weights_th=zero
+              gq_points_ph=zero
+              gq_weights_ph=zero
+              call cgqf(ntheta,1,0._dp,0._dp,0._dp,pi,gq_points_th,gq_weights_th)
+              call cgqf(nphi,1,0._dp,0._dp,0._dp,2*pi,gq_points_ph,gq_weights_ph)
+
+              do itheta=1,ntheta
+                theta=gq_points_th(itheta)
+                do iphi=1,nphi
+                  phi=gq_points_ph(iphi)
+                  weight=gq_weights_th(itheta)*gq_weights_ph(iphi)
+
+                  unit_r(1)=sin(theta)*cos(phi)
+                  unit_r(2)=sin(theta)*sin(phi)
+                  unit_r(3)=cos(theta)
+
+                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag(iband,jband,:,:),dp),unit_r(:))) 
+                  m_avg = m_avg + weight*sin(theta)*f3d_scal
+                  m_avg_frohlich = m_avg_frohlich + weight*sin(theta)/(abs(f3d_scal)**half)
+
+                  if(itheta==1 .and. iphi==1) start_eigf3d_pos = f3d_scal > 0
+                  if(start_eigf3d_pos(1) .neqv. (f3d_scal>0)) then
+                    saddle_warn(1)=.true.
+                  end if
+                enddo
+              enddo
+              m_avg = quarter/pi*m_avg
+              m_avg = one/m_avg
+              m_avg_frohlich = quarter/pi*m_avg_frohlich
+              m_avg_frohlich = m_avg_frohlich**2
+              m_avg_frohlich(1) = DSIGN(m_avg_frohlich(1),m_avg(1))
+
+            endif ! mdim==3
+
             !EFMAS_DIRS
             ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
             m_cart=zero
@@ -983,12 +1050,24 @@ CONTAINS
 
             !PRINTING RESULTS
             call print_efmas(std_out,kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
-&                            transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
+&             ntheta,m_avg,m_avg_frohlich,saddle_warn,&
+&             transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
             call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
-&                            transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
+&             ntheta,m_avg,m_avg_frohlich,saddle_warn,&
+&             transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
             ABI_DEALLOCATE(m_cart)
             ABI_DEALLOCATE(transport_eqv_eigvec)
             ABI_DEALLOCATE(transport_eqv_eigval)
+            ABI_DEALLOCATE(m_avg)
+            ABI_DEALLOCATE(m_avg_frohlich)
+            ABI_DEALLOCATE(unit_r)
+            ABI_DEALLOCATE(saddle_warn)
+            ABI_DEALLOCATE(start_eigf3d_pos)
+            ABI_DEALLOCATE(gq_points_th)
+            ABI_DEALLOCATE(gq_weights_th)
+            ABI_DEALLOCATE(gq_points_ph)
+            ABI_DEALLOCATE(gq_weights_ph)
+
             write(std_out,'(a,3f20.16)') 'Gradient of eigenvalues = ',&
 &            matmul(rprimd,eigen1(2*(degl+iband)-1+(degl+iband-1)*2*nband_k+band2tot_index,:,ipert))/two_pi
 
@@ -1023,6 +1102,7 @@ CONTAINS
         ABI_ALLOCATE(saddle_warn,(deg_dim))
         ABI_ALLOCATE(start_eigf3d_pos,(deg_dim))
         ABI_ALLOCATE(m_avg,(deg_dim))
+        ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
         ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
         ABI_ALLOCATE(deigf3d_dth,(deg_dim))
         ABI_ALLOCATE(deigf3d_dph,(deg_dim))
@@ -1050,6 +1130,7 @@ CONTAINS
         saddle_warn=.false.
         start_eigf3d_pos=.true.
         m_avg=zero
+        m_avg_frohlich=zero
         m_cart=zero
         deigf3d_dth=zero
         deigf3d_dph=zero
@@ -1157,6 +1238,7 @@ CONTAINS
             !f3dfd(2,iphi,:)=eigf3d(:)
 
             m_avg = m_avg + weight*sin(theta)*eigf3d
+            m_avg_frohlich = m_avg_frohlich + weight*sin(theta)/(abs(eigf3d))**half
 
             prodc=MATMUL_(f3d,unitary_tr,deg_dim,deg_dim) ; f3d=MATMUL_(unitary_tr,prodc,deg_dim,deg_dim,transa='c')
             !f3d = MATMUL(CONJG(TRANSPOSE(unitary_tr)),MATMUL(f3d,unitary_tr))
@@ -1214,8 +1296,11 @@ CONTAINS
         !Hack to print f(theta,phi)
         if(print_fsph) close(io_unit)
 
-        m_avg = 1.0_dp/4.0_dp/pi*m_avg
-        m_avg = 1.0_dp/m_avg
+        m_avg = quarter/pi*m_avg
+        m_avg = one/m_avg
+
+        m_avg_frohlich = quarter/pi*m_avg_frohlich
+        m_avg_frohlich = m_avg_frohlich**2
 
         transport_tensor = 1.0_dp/2.0_dp*transport_tensor
 
@@ -1274,6 +1359,8 @@ CONTAINS
           transport_eqv_m(2,2,iband) = transport_eqv_eigval(2,iband)
           transport_eqv_m(3,3,iband) = transport_eqv_eigval(3,iband)
 
+          m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
+
           prodr=MATMUL_(transport_eqv_m(:,:,iband),transport_eqv_eigvec(:,:,iband),mdim,mdim)
           transport_eqv_m(:,:,iband)=MATMUL_(transport_eqv_eigvec(:,:,iband),prodr,mdim,mdim,transa='t')
           !transport_eqv_m(:,:,iband) = MATMUL(TRANSPOSE(transport_eqv_eigvec(:,:,iband)), &
@@ -1282,9 +1369,9 @@ CONTAINS
         end do
 
         call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
-&                        transport_eqv_eigval,transport_eqv_eigvec,ntheta,m_avg,saddle_warn)
+&                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec)
         call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
-&                        transport_eqv_eigval,transport_eqv_eigvec,ntheta,m_avg,saddle_warn)
+&                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec)
 
         ABI_DEALLOCATE(unit_r)
         ABI_DEALLOCATE(dr_dth)
@@ -1297,6 +1384,7 @@ CONTAINS
         ABI_DEALLOCATE(saddle_warn)
         ABI_DEALLOCATE(start_eigf3d_pos)
         ABI_DEALLOCATE(m_avg)
+        ABI_DEALLOCATE(m_avg_frohlich)
         ABI_DEALLOCATE(m_cart)
         ABI_DEALLOCATE(deigf3d_dth)
         ABI_DEALLOCATE(deigf3d_dph)
@@ -1325,6 +1413,7 @@ CONTAINS
         ABI_ALLOCATE(saddle_warn,(deg_dim))
         ABI_ALLOCATE(start_eigf3d_pos,(deg_dim))
         ABI_ALLOCATE(m_avg,(deg_dim))
+        ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
         ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
         ABI_ALLOCATE(deigf3d_dph,(deg_dim))
         ABI_ALLOCATE(unit_speed,(mdim,deg_dim))
@@ -1348,6 +1437,7 @@ CONTAINS
         saddle_warn=.false.
         start_eigf3d_pos=.true.
         m_avg=zero
+        m_avg_frohlich=zero
         m_cart=zero
         deigf3d_dph=zero
         unit_speed=zero
@@ -1410,6 +1500,7 @@ CONTAINS
           end do
 
           m_avg = m_avg + weight*eigf3d
+          m_avg_frohlich = m_avg_frohlich + weight/(abs(eigf3d))**half
 
           prodc=MATMUL_(f3d,unitary_tr,deg_dim,deg_dim) ; f3d=MATMUL_(unitary_tr,prodc,deg_dim,deg_dim,transa='c')
           !f3d = MATMUL(CONJG(TRANSPOSE(unitary_tr)),MATMUL(f3d,unitary_tr))
@@ -1438,8 +1529,11 @@ CONTAINS
 
         !!!DEBUG
 
-        m_avg = 1.0_dp/2.0_dp/pi*m_avg
-        m_avg = 1.0_dp/m_avg
+        m_avg = half/pi*m_avg
+        m_avg = one/m_avg
+
+        m_avg_frohlich = half/pi*m_avg_frohlich
+        m_avg_frohlich = m_avg_frohlich**2
 
         transport_tensor = 1.0_dp/2.0_dp*transport_tensor
 
@@ -1496,6 +1590,8 @@ CONTAINS
           transport_eqv_m(2,2,iband) = transport_eqv_eigval(2,iband)
           transport_tensor_scale(iband) = sqrt(transport_tensor_eig(1)*transport_tensor_eig(2))/two_pi
 
+          m_avg_frohlich(iband) = SIGN(m_avg_frohlich(iband),m_avg(iband))
+
           prodr=MATMUL_(transport_eqv_m(:,:,iband),cart_rotation,mdim,mdim,transb='t')
           transport_eqv_m(:,:,iband)=MATMUL_(cart_rotation,prodr,mdim,mdim)
           !transport_eqv_m(:,:,iband) = MATMUL(cart_rotation,MATMUL(transport_eqv_m(:,:,iband),TRANSPOSE(cart_rotation)))
@@ -1503,9 +1599,9 @@ CONTAINS
         end do
 
         call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
-&                        transport_eqv_eigval,transport_eqv_eigvec,ntheta,m_avg,saddle_warn,transport_tensor_scale)
+&                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec,transport_tensor_scale)
         call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
-&                        transport_eqv_eigval,transport_eqv_eigvec,ntheta,m_avg,saddle_warn,transport_tensor_scale)
+&                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec,transport_tensor_scale)
 
         ABI_DEALLOCATE(unit_r)
         ABI_DEALLOCATE(dr_dph)
@@ -1516,6 +1612,7 @@ CONTAINS
         ABI_DEALLOCATE(saddle_warn)
         ABI_DEALLOCATE(start_eigf3d_pos)
         ABI_DEALLOCATE(m_avg)
+        ABI_DEALLOCATE(m_avg_frohlich)
         ABI_DEALLOCATE(m_cart)
         ABI_DEALLOCATE(deigf3d_dph)
         ABI_DEALLOCATE(unit_speed)
@@ -1538,11 +1635,19 @@ CONTAINS
         ABI_ALLOCATE(eigf3d,(deg_dim))
         ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
         ABI_ALLOCATE(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_ALLOCATE(m_avg,(deg_dim))
+        ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
+        ABI_ALLOCATE(saddle_warn,(deg_dim))
+
+
         f3d=zero
         unitary_tr=zero
         eigf3d=zero
         m_cart=zero
         transport_eqv_m=zero
+        m_avg=zero
+        m_avg_frohlich=zero
+        saddle_warn=.false.
 
         f3d(:,:) = eig2_diag(:,:,1,1)
 
@@ -1589,14 +1694,21 @@ CONTAINS
           m_cart(adir,:)=1._dp/eigf3d(:)
         end do
 
-        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m)
-        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m)
+        call print_efmas(std_out,kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+&          ntheta,m_avg,m_avg_frohlich,saddle_warn)
+        call print_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
+&          ntheta,m_avg,m_avg_frohlich,saddle_warn)
 
         ABI_DEALLOCATE(f3d)
         ABI_DEALLOCATE(unitary_tr)
         ABI_DEALLOCATE(eigf3d)
         ABI_DEALLOCATE(m_cart)
         ABI_DEALLOCATE(transport_eqv_m)
+        ABI_DEALLOCATE(m_avg)
+        ABI_DEALLOCATE(m_avg_frohlich)
+        ABI_DEALLOCATE(saddle_warn)
+
+
       end if !(degenerate)
 
  !     !!! DEBUG
@@ -1655,8 +1767,8 @@ CONTAINS
   ABI_DEALLOCATE(eff_mass)
   ABI_DEALLOCATE(dirs)
 
-  write(std_out,'(3a)') ch10,'END OF EFFECTIVE MASSES SECTION',ch10
-  write(ab_out, '(3a)') ch10,'END OF EFFECTIVE MASSES SECTION',ch10
+  write(std_out,'(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
+  write(ab_out, '(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
 
  end subroutine efmas_main
 !!***

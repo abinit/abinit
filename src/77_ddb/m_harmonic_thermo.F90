@@ -30,11 +30,11 @@ module m_harmonic_thermo
  use defs_basis
  use m_errors
  use m_profiling_abi
-
  use m_sortph
  use m_xmpi
 
  use m_io_tools,       only : open_file
+ use m_symtk,          only : matr3inv
  use m_dynmat,         only : gtdyn9
  use m_geometry,       only : mkrdim
  use m_crystal,        only : crystal_t
@@ -99,7 +99,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonic_thermo'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

@@ -116,7 +116,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_wfk
 
  use m_time,     only : timab
- use m_geometry, only : metric
+ use m_geometry, only : metric, strconv
  use m_efmas,    only : check_degeneracies
  use m_io_tools, only : file_exists
  use m_hdr,      only : hdr_skip
@@ -139,7 +139,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 #define ABI_FUNC 'd2frnl'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_65_paw
  use interfaces_66_nonlocal
 !End of the abilint section

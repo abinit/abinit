@@ -30,6 +30,8 @@ module m_strain
  use m_profiling_abi
  use m_xmpi
 
+ use m_symtk,         only : matr3inv
+
  implicit none
 
  private :: strain_def2strain
@@ -220,7 +222,6 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'strain_get'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

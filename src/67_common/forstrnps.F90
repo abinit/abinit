@@ -108,6 +108,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  use m_cgtools
 
  use m_time,             only : timab
+ use m_geometry,         only : stresssym
  use m_kg,               only : mkkpg
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
 &                               load_k_hamiltonian,gs_hamiltonian_type,load_kprime_hamiltonian!,K_H_KPRIME
@@ -124,7 +125,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 #undef ABI_FUNC
 #define ABI_FUNC 'forstrnps'
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section

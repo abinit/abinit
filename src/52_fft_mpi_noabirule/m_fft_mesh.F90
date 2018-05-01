@@ -35,6 +35,7 @@ MODULE m_fft_mesh
 
  use defs_fftdata,     only : size_goed_fft
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
+ use m_symtk,          only : mati3inv
  use m_crystal,        only : crystal_t
 
  implicit none
@@ -736,7 +737,6 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fft_check_rotrans'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -850,7 +850,6 @@ subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rotate_fft_mesh'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

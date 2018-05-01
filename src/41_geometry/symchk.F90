@@ -47,7 +47,6 @@
 
 #include "abi_common.h"
 
-
 subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
 
  use defs_basis

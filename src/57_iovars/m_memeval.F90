@@ -33,10 +33,11 @@ MODULE m_memeval
  use m_xmpi
  use m_errors
 
- use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
+ use m_symtk,         only : mati3inv, littlegroup_q
  use m_fftcore,       only : getng
  use m_kg,            only : getmpw
+ use m_libpaw_tools,  only : libpaw_write_comm_set
 
  implicit none
 
@@ -89,7 +90,6 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'memory_eval'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

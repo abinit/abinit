@@ -114,8 +114,8 @@ subroutine initmpi_grid(mpi_enreg)
 
 #if defined HAVE_MPI
 
- if (mpi_enreg%paral_hf==0) then 
-   ! either the option Fock exchange is not active or there is no parallelization on Fock exchange calculation. 
+ if (mpi_enreg%paral_hf==0) then
+   ! either the option Fock exchange is not active or there is no parallelization on Fock exchange calculation.
 
    if (mpi_enreg%nproc_spinor>1) mpi_enreg%paral_spinor=1
 
