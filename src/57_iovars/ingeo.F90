@@ -1451,9 +1451,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
      MSG_ERROR(message)
    end if
    axisa(1:3)=axisa(1:3)/sqrt(norma)
-
-!  End condition of existence of a first object
- end if
+ end if !  End condition of existence of a first object
 
  if(nobj==2)then
 
@@ -1610,9 +1608,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
        end if
      end do
    end do
-
-!  End condition of existence of a second object
- end if
+ end if !  End condition of existence of a second object
 
 !Check whether the number of atoms to be read obtained by relying
 !on natom, vacnum and the object definitions, or from natrd coincide
@@ -1677,8 +1673,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
      end do
    end if
 
-   write(std_out,'(a,i5,a,i2,i2,a)' ) &
-&   ' ingeobld : treating iatrd=',iatrd,', belong(a,b)=',belonga,belongb,'.'
+   !write(std_out,'(a,i5,a,i2,i2,a)' )' ingeobld : treating iatrd=',iatrd,', belong(a,b)=',belonga,belongb,'.'
 
 !  In case it does not belong to an object
    if(belonga==0 .and. belongb==0)then
@@ -1722,7 +1717,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 !            Here the rotation
              if(rotate==1)then
 !              Compute the angle of rotation
-               angle=objaro(1)+(irep1-1)*objaro(2)+                     &
+               angle=objaro(1)+(irep1-1)*objaro(2) + &
 &               (irep2-1)*objaro(3)+(irep3-1)*objaro(4)
                cosine=cos(angle/180.0*pi)
                sine=sin(angle/180.0*pi)
@@ -1738,8 +1733,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
              iatom=iatom+1
            end do
          end do
-!        End the repetition loop
-       end do
+       end do ! End the repetition loop
 
      else
 !      If the atom belong to object b
@@ -1773,7 +1767,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 !            Here the rotation
              if(rotate==1)then
 !              Compute the angle of rotation
-               angle=objbro(1)+(irep1-1)*objbro(2)+                      &
+               angle=objbro(1)+(irep1-1)*objbro(2) + &
 &               (irep2-1)*objbro(3)+ (irep3-1)*objbro(4)
                cosine=cos(angle/180.0*pi)
                sine=sin(angle/180.0*pi)
@@ -1789,17 +1783,10 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
              iatom=iatom+1
            end do
          end do
-!        End the repetition loop
-       end do
-
-!      End the condition of belonging to object b
-     end if
-
-!    End the condition of belonging to an object
-   end if
-
-!  End the loop on atoms
- end do
+       end do ! End the repetition loop
+     end if ! Condition of belonging to object b
+   end if ! Condition of belonging to an object
+ end do ! Loop on atoms
 
 !Create the vacancies here
  if(vacnum/=0)then
@@ -1818,8 +1805,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    end do
  end if
 
-!Transfer the content of xcart_full and typat_full to the proper
-!location
+!Transfer the content of xcart_full and typat_full to the proper location
  xcart(:,1:natom)=xcart_full(:,1:natom)
  typat(1:natom)=typat_full(1:natom)
 
@@ -1977,7 +1963,6 @@ subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym
      end if
 
    end do
-
  end do
 
 !DEBUG
@@ -1991,16 +1976,16 @@ subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym
    write(message, '(a,i3,a,a,i7,a,a,a,a)' )&
 &   'The number of atoms obtained from symmetries, ',curat,ch10,&
 &   'is greater than the input number of atoms, natom=',natom,ch10,&
-&   'This is not allowed.  ',ch10,&
+&   'This is not allowed.',ch10,&
 &   'Action: modify natom or the symmetry data in the input file.'
    MSG_ERROR(message)
  end if
 
  if (curat<natom) then
    write(message, '(a,i3,a,a,i7,a,a,a,a)' )&
-&   'fillcell : The number of atoms obtained from symmetries, ',curat,ch10,&
+&   'The number of atoms obtained from symmetries, ',curat,ch10,&
 &   'is lower than the input number of atoms, natom=',natom,ch10,&
-&   'This is not allowed.  ',ch10,&
+&   'This is not allowed.',ch10,&
 &   'Action: modify natom or the symmetry data in the input file.'
    MSG_ERROR(message)
  end if
