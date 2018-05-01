@@ -343,7 +343,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  priority(31)=20
 
  ref(32)= ' Precise effective masses from density functional perturbation theory'//ch10//&
-& ' J. Laflamme Janssen, Y. Gillet, S. Ponce, A. Martin, M. Torrent, and X. Gonze. Phys. Rev. B XX, YY (2016)'
+& ' J. Laflamme Janssen, Y. Gillet, S. Ponce, A. Martin, M. Torrent, and X. Gonze. Phys. Rev. B 93, 205147 (2016)'
  comment(32)=' Comment : in case the DFPT prediction of effective masses is used.'//ch10//&
 & ' Strong suggestion to cite this paper in your publications.'
  priority(32)=20

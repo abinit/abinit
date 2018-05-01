@@ -74,7 +74,7 @@ ndtset  9
   efmas_bands7   4 4
   efmas_dim7     1
   
-  # Dataset 8 & 9 is the fist conduction band at k-point 0.25 0.00 0.00 (reduced coordinates). We can calculate at that non-extremal point because the band is nondegenerate.
+  # Dataset 8 & 9 is the first conduction band at k-point 0.25 0.00 0.00 (reduced coordinates). We can calculate at that non-extremal point because the band is nondegenerate.
   kpt8           0.25 0.00 0.00
   iscf8         -2
   rfelfd8        0
