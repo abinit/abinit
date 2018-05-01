@@ -27,6 +27,7 @@
 module m_spgdata
 
  use defs_basis
+ use m_errors
 
  use m_geometry,  only : xred2xcart
 
@@ -72,12 +73,12 @@ contains
 
 subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtspgroup'
  use interfaces_14_hidewrite
- use interfaces_41_geometry, except_this_one => prtspgroup
 !End of the abilint section
 
  implicit none
@@ -397,6 +398,7 @@ end subroutine prtspgroup
 
 
 subroutine spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2152,6 +2154,7 @@ end subroutine spgdata
 !! SOURCE
 
 subroutine ptgmadata(ptgroupma,ptgrpmasb)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

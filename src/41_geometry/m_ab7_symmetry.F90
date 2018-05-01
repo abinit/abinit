@@ -1125,7 +1125,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_get_group'
- use interfaces_41_geometry
 !End of the abilint section
 
     integer, intent(in)            :: id

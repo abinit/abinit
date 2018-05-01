@@ -1108,7 +1108,6 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prt_cif'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

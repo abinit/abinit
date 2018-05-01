@@ -31,7 +31,6 @@ sources = [
  "m_geometry.F90",
  "m_supercell.F90",
  "polcart.F90",
- "prtspgroup.F90",
  "symanal.F90",
  "symbrav.F90",
  "symfind.F90",

@@ -50,7 +50,6 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
 
  use m_spgdata,   only : spgdata
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
