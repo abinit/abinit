@@ -571,8 +571,10 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
    gams%vals_out_qibz = zero
  end if
 
+#ifdef MJV_DEV
  ABI_STAT_MALLOC(gams%vals_ee,(2,gams%nene,gams%nene,gams%natom3,gams%natom3,gams%nqibz,gams%nsppol), ierr)
  ABI_CHECK(ierr==0, 'out of memory in gams%vals_ee')
+#endif
 
  ! Prepare Fourier interpolation.
  gams%gprim = ifc%gprim
@@ -861,6 +863,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
      end if
    end do
 
+#ifdef MJV_DEV
    if (present (gamma_ph_ee)) then
      do iene = 1, gams%nene
        do jene = 1, gams%nene
@@ -878,6 +881,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
        end do
      end do
    end if
+#endif
  case (1)
    ! Diagonalize gamma matrix at qpoint (complex matrix).
    ! MJV NOTE: gam_now is recast implicitly here to matrix
@@ -917,11 +921,14 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 
  do nu1=1,gams%natom3
    gamma_ph(nu1) =  gamma_ph(nu1) * pi * spinfact
+   lambda_ph(nu1) = zero
+   if (abs(phfrq(nu1)) > EPH_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
+
+#ifdef MJV_DEV
    if (present(gamma_ph_ee)) then
      gamma_ph_ee(:,:,nu1) =  gamma_ph_ee(:,:,nu1) * pi * spinfact
    end if
-   lambda_ph(nu1) = zero
-   if (abs(phfrq(nu1)) > EPH_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
+#endif
  end do
 
  ! This to avoid spurious results for the acoustic modes.
@@ -1008,6 +1015,7 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
  ! Compute internal tables used for Fourier interpolation.
  if (.not.allocated(gams%vals_bz)) call phgamma_interp_setup(gams,cryst,"INIT")
 
+#ifdef MJV_DEV
  if (present(gamma_ph_ee) .and. icall == 0) then
    gamma_ph_ee = zero
    write (msg,'(2a)') "For the moment gams_ee matrix elements are not FT interpolated wrt q,',&
@@ -1015,6 +1023,7 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
    MSG_WARNING(msg)
    icall = 1
  end if
+#endif
 
  !@phgamma_t
  natom3 = gams%natom3
@@ -2371,8 +2380,10 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  a2f%vals = zero
  ABI_CALLOC(a2f%lambdaw, (nomega,0:natom3, nsppol))
 
+#ifdef MJV_DEV
  ABI_CALLOC(a2f%vals_ee, (gams%nene,gams%nene,nomega,nsppol))
  a2f%vals_ee = zero
+#endif
 
  ABI_MALLOC(tmp_a2f, (nomega))
 
@@ -2412,8 +2423,10 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 
  call cwtime(cpu,wall,gflops,"start")
 
+#ifdef MJV_DEV
  open (unit=900, file="a2fvals_ee.dat")
  write (900,*) '# do_qintp ', do_qintp
+#endif
  ! Loop over spins and qpoints in the IBZ
  cnt = 0
  do spin=1,nsppol
@@ -2421,11 +2434,19 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
 
      ! Interpolate or evaluate gamma directly.
+#ifdef MJV_DEV
      if (do_qintp) then
        call phgamma_interp(gams,cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
      else
        call phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
      end if
+#else
+     if (do_qintp) then
+       call phgamma_interp(gams,cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart)
+     else
+       call phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart)
+     end if
+#endif
 
      select case (intmeth)
      case (1)
@@ -2442,6 +2463,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
          a2f%vals(:,mu,spin) = a2f%vals(:,mu,spin) + tmp_a2f * wtq(iq_ibz)
        end do
 
+#ifdef MJV_DEV
        ! reset phfrq for low freq modes to 
        invphfrq = zero
        do mu=1,natom3
@@ -2471,7 +2493,9 @@ if (iene == gams%nene/2 .and. jene == gams%nene/2) then
 end if
          end do
        end do
+#endif
        ABI_DEALLOCATE(tmp_gaussian)
+
 
      case (2)
        ! Tetra: store data.
@@ -2519,7 +2543,9 @@ end if
  call xmpi_sum(a2f%vals, comm, ierr)
  do spin=1,nsppol
    a2f%vals(:,0,spin) = sum(a2f%vals(:,1:natom3,spin), dim=2)
+#ifdef MJV_DEV
    a2f%vals_ee(:,:,:,spin) = a2f%vals_ee(:,:,:,spin) / (two * pi * gams%n0(spin))
+#endif
 
    ! previously would divide by g(eF, spin)
    !a2f%vals(:,:,spin) = a2f%vals(:,:,spin) / (two_pi*a2f%n0(spin))
@@ -2602,6 +2628,7 @@ end if
    end if
  end do
 
+#ifdef MJV_DEV
  ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013))
  if (my_rank == master) then
    ntemp = 100
@@ -2611,7 +2638,7 @@ end if
    ABI_ALLOCATE (a2feew_partial_int, (a2f%nene))
    ABI_ALLOCATE (a2feew_w, (nomega))
    ABI_ALLOCATE (a2feew_w_int, (nomega))
-   print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
+print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
    do spin=1,nsppol
      do itemp = 1, ntemp
        temp_el = min_temp + (itemp-1)*delta_temp
@@ -2620,11 +2647,9 @@ end if
        ! possible fix using local information on DOS variation near E_F...
        chempot = a2f%enemin + half * a2f%nene * a2f%deltaene
 
-       a2feew_partial = zero
        do iw=1,nomega
          omega = a2f%omega(iw)
          jene_jump = nint(omega/a2f%deltaene)
-
          a2feew_partial = zero
          do iene=1,a2f%nene
            ene1 = a2f%enemin + (iene-1)*a2f%deltaene
@@ -2632,7 +2657,7 @@ end if
            a2feew_partial(iene) = a2f%vals_ee(min(a2f%nene,iene+jene_jump), iene, iw, spin) * &
 &             (fermi_dirac(ene1, chempot, temp_el/Ha_K) - fermi_dirac(ene2, chempot, temp_el/Ha_K))
          end do
-         call simpson_int(a2f%nene,a2f%deltaene,a2feew_partial,a2feew_partial_int)
+         call simpson_int(a2f%nene, a2f%deltaene, a2feew_partial, a2feew_partial_int)
          a2feew_w(iw) = a2feew_partial_int(a2f%nene)
        end do
        call simpson_int(nomega,wstep,a2feew_w,a2feew_w_int)
@@ -2646,6 +2671,7 @@ end if
    ABI_DEALLOCATE (a2feew_w)
    ABI_DEALLOCATE (a2feew_w_int)
  end if
+#endif
 
  ABI_FREE(tmp_a2f)
  ABI_FREE(a2f_1mom)
@@ -4635,9 +4661,11 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_CHECK(ierr==0, 'out of memory in gvvvals_out_qibz')
  end if
 
+#ifdef MJV_DEV
  open (unit=800, file="wt_kq_en.dat")
  open (unit=801, file="wt_k_en.dat")
  open (unit=802, file="res_small.dat")
+#endif
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
    tgam = zero
@@ -4672,7 +4700,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
    ABI_CHECK(ierr==0, "oom vlocal1")
 
+#ifdef MJV_DEV
    gams%vals_ee = zero
+#endif
    do spin=1,nsppol
      fs => fstab(spin)
 
@@ -4928,6 +4958,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          call fstab_weights_ibz(fs, ebands, ikq_ibz, spin, sigmas, wt_kq_en(:,:,jene), iene=jene)
        end do
 
+#ifdef MJV_DEV
 write (800,*) wt_kq_en
 write (801,*) wt_k_en
        do ib2=1,nband_k
@@ -4952,6 +4983,7 @@ end if
            end do
          end do
        end do
+#endif
 
        if (dtset%eph_transport > 0) then
          ! TODO : could almost make this a BLAS call plus a reshape...
@@ -5007,8 +5039,9 @@ end if
      ABI_FREE(wt_kq_en)
 
      call xmpi_sum(tgam, comm, ierr)
+#ifdef MJV_DEV
      call xmpi_sum(gams%vals_ee, comm, ierr)
-
+#endif
 
      if (dtset%eph_transport > 0) then
        ABI_FREE(vv_kk)
@@ -5063,7 +5096,9 @@ close(802)
  do spin=1,nsppol
    !call xmpi_sum(gvals_qibz, comm_qpts, ierr) ! for the moment only split over k??
    gvals_qibz(:,:,:,:,:,spin) = gvals_qibz(:,:,:,:,:,spin) / fstab(spin)%nktot
+#ifdef MJV_DEV
    gams%vals_ee(:,:,:,:,:,:,spin) = gams%vals_ee(:,:,:,:,:,:,spin) / fstab(spin)%nktot 
+#endif
 
    if (dtset%eph_transport > 0) then
      gvvvals_in_qibz(:,:,:,:,:,:,spin) = gvvvals_in_qibz(:,:,:,:,:,:,spin) / fstab(spin)%nktot
@@ -5144,14 +5179,18 @@ close(802)
  call a2fw_init(a2fw,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
    dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qintp=.False.,qptopt=1)
  if (my_rank == master) call a2fw_write(a2fw, strcat(dtfil%filnam_ds(4), "_NOINTP"), "_qcoarse", ncid)
+#ifdef MJV_DEV
  if (my_rank == master) call a2fw_ee_write(a2fw, strcat(dtfil%filnam_ds(4), "_NOINTP"))
+#endif
  call a2fw_free(a2fw)
 
  ! Compute a2Fw using Fourier interpolation.
  call a2fw_init(a2fw,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
    dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=1)
  if (my_rank == master) call a2fw_write(a2fw, dtfil%filnam_ds(4), "_qintp", ncid)
+#ifdef MJV_DEV
  if (my_rank == master) call a2fw_ee_write(a2fw, dtfil%filnam_ds(4))
+#endif
 
  ! TODO: Use KT mesh instead of T but read T from input.
  ntemp = 6
