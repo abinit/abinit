@@ -55,6 +55,7 @@ EXTERN_MODS = {
     "libxc_functionals",
 }
 
+
 class FortranFile(object):
     """
     Base class for files containing Fortran source code.
@@ -109,6 +110,7 @@ class FortranFile(object):
     """
 
     def stree(self):
+        """Return string with textual representation of the tree."""
         lines = [repr(self)]; app = lines.append
         for a in ["programs", "modules", "subroutines", "functions"]:
             for p in getattr(self, a):
@@ -123,6 +125,10 @@ class FortranFile(object):
         return self.to_string()
 
     def to_string(self, verbose=0, width=90):
+        """
+        String representation with verbosity level `verbose`.
+        Text is wrapped at `width` columns
+        """
         w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         lines = []; app = lines.append
         app("%s:\n\t%s\n" % (self.__class__.__name__, os.path.relpath(self.path)))
@@ -154,11 +160,12 @@ class FortranFile(object):
         for a in ["modules", "programs", "subroutines", "functions"]:
             for p in getattr(self, a):
                 for e in p.public_procedures:
-                    #if e.name == "gstate": raise RuntimeError("Gstate")
                     yield e
 
     def find_public_entity(self, name):
-        """Find and return the public procedure with `name` or None if not found"""
+        """
+        Find and return the public procedure with `name` or None if not found
+        """
         for a in ["modules", "programs", "subroutines", "functions"]:
             for p in getattr(self, a):
                 for e in p.public_procedures:
@@ -272,7 +279,9 @@ class AbinitProject(object):
 
     @classmethod
     def pickle_load(cls, filepath=None):
-        """Reconstruct object from pickle file."""
+        """
+        Reconstruct object from pickle file.
+        """
         if filepath is None: filepath = cls.DEFAULT_PICKLE_FILE
         with open(filepath, "rb") as fh:
             return pickle.load(fh)
@@ -374,6 +383,7 @@ class AbinitProject(object):
             return pickle.dump(self, fh)
 
     def get_dirpaths(self):
+        """Return list of directory names with source files."""
         l = sorted([d for d in os.listdir(self.srcdir) if os.path.isdir(d) and
                     os.path.isfile(os.path.join(d, "abinit.src"))])
 
@@ -416,6 +426,7 @@ class AbinitProject(object):
         return d
 
     def find_public_entity(self, name):
+        """Find and return Procedure object with name `name`."""
         for f in self.fort_files.values():
             obj = f.find_public_entity(name)
             if obj is not None: return obj
@@ -425,7 +436,7 @@ class AbinitProject(object):
         dirname = os.path.basename(dirname).replace(os.sep, "")
         files = [f for f in self.fort_files.values() if os.path.basename(f.dirname) == dirname]
         for f in files:
-            print(f)
+            print(f.to_string(verbose=verbose))
             print("")
 
     #def find_parents(self, obj):
@@ -503,7 +514,7 @@ class AbinitProject(object):
         If what_list is None, the list of files is automatically detected.
         """
         def touch(fname):
-            """Emulate unix touch."""
+            """Emulate Unix touch."""
             try:
                 open(fname, "w").close()
                 return 0
@@ -519,6 +530,7 @@ class AbinitProject(object):
             #for w in what_list:
             #obj = self.find_public_entity(w)
 
+        #changed_list = what_list
         for bname in what_list:
             for fort_file in self.iter_deps(bname):
                 print("Touching", fort_file.path)
@@ -537,6 +549,7 @@ class AbinitProject(object):
         return retcode
 
     def edit_connections(self, name, relation, verbose=0):
+        """Edit all children of a public entity specified by name."""
         obj = self.find_public_entity(name)
         if obj is None:
             print("Cannot find public entity `%s`" % str(name))
@@ -590,9 +603,7 @@ class AbinitProject(object):
 
         #print(obj.to_string(verbose=options.verbose))
         #graph = obj.get_graphviz(engine=options.engine)
-
         # https://www.graphviz.org/doc/info/
         #from graphviz import Digraph
         #fg = Digraph("Abinit project", engine="dot" if engine == "automatic" else engine)
-
         #return fg
