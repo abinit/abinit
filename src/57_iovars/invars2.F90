@@ -1230,6 +1230,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if (dtset%paral_kgb==1) dtset%densfor_pred=6
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmcsst',tread,'INT')
+ if(tread==1) dtset%hmcsst=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmctt',tread,'INT')
+ if(tread==1) dtset%hmctt=intarr(1)
+
 !--For the moment LOTF does not use different from 2
  if(dtset%ionmov==23) then
 #ifdef HAVE_LOTF
