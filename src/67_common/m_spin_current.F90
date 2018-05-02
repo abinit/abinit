@@ -36,6 +36,7 @@ module m_spin_current
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart
  use m_fftcore,    only : sphereboundary
+ use m_special_funcs,   only : gamma_function
 
  implicit none
 

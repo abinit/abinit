@@ -51,6 +51,7 @@ module m_rec
 
  use m_exp_mat,         only : exp_mat
  use m_numeric_tools,   only : set2unit
+ use m_special_funcs,   only : gamma_function
  use m_pawfgr,          only : pawfgr_nullify, indgrid, pawfgr_destroy
  use m_paw_sphharm,     only : initylmr
  use m_time,            only : timab
