@@ -32,7 +32,8 @@ module m_vtorhotf
  use m_errors
  use m_xmpi
 
- use m_time,           only : timab
+ use m_time,     only : timab
+ use m_dtfil,    only : status
 
  implicit none
 

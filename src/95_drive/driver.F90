@@ -110,7 +110,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
  use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
- use m_dtfil,        only : dtfil_init, dtfil_init_img
+ use m_dtfil,        only : dtfil_init, dtfil_init_img, status
 
  use m_respfn_driver,    only : respfn
  use m_screening_driver, only : screening

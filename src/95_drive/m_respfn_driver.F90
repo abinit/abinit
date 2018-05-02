@@ -42,6 +42,7 @@ module m_respfn_driver
  use m_crystal
  use m_xcdata
 
+ use m_dtfil,       only : status
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred

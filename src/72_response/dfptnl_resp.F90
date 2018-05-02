@@ -81,6 +81,7 @@ subroutine dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  use m_profiling_abi
  use m_xmpi
 
+ use m_dtfil,      only : status
  use m_cgtools,    only : dotprod_g
  use m_kg,         only : mkkpg
  use m_pawtab,     only : pawtab_type

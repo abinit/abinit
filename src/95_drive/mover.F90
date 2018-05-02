@@ -141,6 +141,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_pred_lotf
 #endif
 
+
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx
@@ -151,7 +152,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time
+ use m_dtfil,              only : dtfil_init_time, status
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

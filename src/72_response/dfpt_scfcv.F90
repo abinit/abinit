@@ -226,6 +226,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use netcdf
 #endif
 
+ use m_dtfil,    only : status
  use m_cgtools,  only : mean_fftr
  use m_fstrings, only : int2char4, sjoin
  use m_geometry, only : metric

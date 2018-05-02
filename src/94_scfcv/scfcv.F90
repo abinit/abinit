@@ -185,6 +185,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_hdr
  use m_xcdata
 
+ use m_dtfil,            only : status
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
  use m_symtk,            only : symmetrize_xred

@@ -536,16 +536,20 @@ class AbinitProject(object):
 
         return retcode
 
-    #def edit_connections(self, name, relation):
-    #   obj = proj.find_public_entity(name)
-    #   if obj is None
-    #       print("Cannot find public entity `%s`" % str(name))
-    #       return 1
-    #   # Find files with procedures.
-    #   plist = dict(parents=obj.parents, children=obj.children)[relation]
-    #   paths = sorted(set(p.path for p in plist))
-    #   from pymods.tools import Editor
-    #   return Editor().edit_files(paths, ask_for_exit=True)
+    def edit_connections(self, name, relation, verbose=0):
+        obj = self.find_public_entity(name)
+        if obj is None:
+            print("Cannot find public entity `%s`" % str(name))
+            return 1
+        # Find files with procedures.
+        plist = dict(parents=obj.parents, children=obj.children)[relation]
+        paths = sorted(set(p.path for p in plist))
+        if verbose:
+           print(paths)
+        # TODO
+        #from pymods.tools import Editor
+        from fkiss.tools import Editor
+        return Editor().edit_files(paths, ask_for_exit=True)
 
     def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """

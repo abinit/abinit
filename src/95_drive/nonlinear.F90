@@ -78,6 +78,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_ebands
  use m_xcdata
 
+ use m_dtfil,    only : status
  use m_time,     only : timab
  use m_symtk,    only : symmetrize_xred
  use m_dynmat,   only : d3sym, sytens
