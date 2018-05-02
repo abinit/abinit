@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA)
+!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,10 +29,12 @@ MODULE m_geometry
  use m_sort
 
  use m_io_tools,       only : open_file
- use m_numeric_tools,  only : uniformrandom
+ use m_numeric_tools,  only : uniformrandom, isinteger, set2unit
+ use m_symtk,          only : mati3inv, mati3det, matr3inv, symdet
  use m_abilasi,        only : matr3eigval
  use m_pptools,        only : prmat
  use m_numeric_tools,  only : wrap2_pmhalf
+ use m_abilasi,        only : matrginv
 
  implicit none
 
@@ -43,6 +45,7 @@ MODULE m_geometry
  public :: acrossb            ! Cross product of two 3-vectors.
  public :: wigner_seitz       ! Find the grid of points falling inside the Wigner-Seitz cell.
  public :: phdispl_cart2red   ! Calculate the displacement vectors for all branches in reduced coordinates.
+ public :: getspinrot         ! Compute the components of the spinor rotation matrix
  public :: spinrot_cmat       ! Construct 2x2 complex matrix representing rotation operator in spin-space.
  public :: rotmat             ! Finds the rotation matrix.
  public :: fixsym             ! Check that iatfix does not break symmetry.
@@ -60,6 +63,13 @@ MODULE m_geometry
  public :: ioniondist         ! Compute ion-ion distances
  public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
+ public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
+ public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
+ public :: strainsym          ! Symmetrize the strain tensor.
+ public :: stresssym          ! Symmetrize the stress tensor.
+ public :: strconv            ! Convert from symmetric storage mode in reduced coords to cart coords.
+ public :: littlegroup_pert   ! Determines the set of symmetries that leaves a perturbation invariant.
+ public :: irreducible_set_pert  ! Determines a set of perturbations that form a basis
 
  interface normv
   module procedure normv_rdp_vector
@@ -748,6 +758,209 @@ end subroutine phdispl_cart2red
 
 !----------------------------------------------------------------------
 
+!!****f* m_geometry/getspinrot
+!! NAME
+!! getspinrot
+!!
+!! FUNCTION
+!! From the symmetry matrix symrel_conv expressed in the coordinate system rprimd,
+!! compute the components of the spinor rotation matrix
+!!
+!! INPUTS
+!! rprimd(3,3)=dimensional primitive translations for real space (bohr)
+!! symrel_conv(3,3)=symmetry operation in real space in terms
+!!  of primitive translations rprimd
+!!
+!! OUTPUT
+!! spinrot(4)=components of the spinor rotation matrix :
+!!  spinrot(1)=$\cos \phi / 2$
+!!  spinrot(2)=$\sin \phi / 2 \times u_x$
+!!  spinrot(3)=$\sin \phi / 2 \times u_y$
+!!  spinrot(4)=$\sin \phi / 2 \times u_z$
+!!  where $\phi$ is the angle of rotation, and
+!!  $(u_x,u_y,u_z)$ is the normalized direction of the rotation axis
+!!
+!! NOTES
+!! Only the proper part of the symmetry operation is taken into account:
+!! pure rotations, while the inversion part is taken away, if present.
+!!
+!! The whole collection of symmetry matrices is call symrel(3,3,nsym)
+!! symrel1 contains just one of those matrices symrel1(3,3)
+!!
+!! PARENTS
+!!      cg_rotate,m_crystal,wfconv
+!!
+!! CHILDREN
+!!      mati3det,matr3inv
+!!
+!! SOURCE
+
+subroutine getspinrot(rprimd,spinrot,symrel_conv)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getspinrot'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: symrel_conv(3,3)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(out) :: spinrot(4)
+
+!Local variables-------------------------------
+!scalars
+ integer :: det,ii
+ real(dp) :: cos_phi,norminv,phi,scprod,sin_phi
+ !character(len=500) :: message
+!arrays
+ integer :: identity(3,3),symrel1(3,3)
+ real(dp) :: axis(3),coord(3,3),coordinvt(3,3),matr1(3,3),matr2(3,3)
+ real(dp) :: rprimd_invt(3,3),vecta(3),vectb(3),vectc(3)
+
+!**************************************************************************
+
+ symrel1(:,:)=symrel_conv(:,:)
+
+!Compute determinant of the matrix
+ call mati3det(symrel1,det)
+
+!Produce a rotation from an improper symmetry
+ if(det==-1)symrel1(:,:)=-symrel1(:,:)
+
+!Test the possibility of the unit matrix
+ identity(:,:)=0
+ identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
+
+ if( sum((symrel1(:,:)-identity(:,:))**2)/=0)then
+
+!  Transform symmetry matrix in the system defined by rprimd
+   call matr3inv(rprimd,rprimd_invt)
+   do ii=1,3
+     coord(:,ii)=rprimd_invt(ii,:)
+   end do
+   call matr3inv(coord,coordinvt)
+   do ii=1,3
+     matr1(:,ii)=symrel1(:,1)*coord(1,ii)+&
+&     symrel1(:,2)*coord(2,ii)+&
+&     symrel1(:,3)*coord(3,ii)
+   end do
+   do ii=1,3
+     matr2(:,ii)=coordinvt(1,:)*matr1(1,ii)+&
+&     coordinvt(2,:)*matr1(2,ii)+&
+&     coordinvt(3,:)*matr1(3,ii)
+   end do
+
+!  Find the eigenvector with unit eigenvalue of the
+!  rotation matrix in cartesian coordinate, matr2
+
+   matr1(:,:)=matr2(:,:)
+   matr1(1,1)=matr1(1,1)-one
+   matr1(2,2)=matr1(2,2)-one
+   matr1(3,3)=matr1(3,3)-one
+
+!  Compute the axis of rotation and the cos and sin of rotation angle
+   if(matr1(1,1)**2 + matr1(2,1)**2 + matr1(3,1)**2 < tol8 )then
+!    The first direction is the axis
+     axis(1)=one ; axis(2)=zero ; axis(3)=zero
+     cos_phi=matr2(2,2)
+     sin_phi=matr2(3,2)
+   else if(matr1(1,2)**2 + matr1(2,2)**2 + matr1(3,2)**2 < tol8 )then
+!    The second direction is the axis
+     axis(1)=zero ; axis(2)=one ; axis(3)=zero
+     cos_phi=matr2(3,3)
+     sin_phi=matr2(1,3)
+   else
+!    In this case, try use the first and second vector to build the
+!    rotation axis : compute their cross product
+     axis(1)=matr1(2,1)*matr1(3,2)-matr1(2,2)*matr1(3,1)
+     axis(2)=matr1(3,1)*matr1(1,2)-matr1(3,2)*matr1(1,1)
+     axis(3)=matr1(1,1)*matr1(2,2)-matr1(1,2)*matr1(2,1)
+!    Then, try to normalize it
+     scprod=sum(axis(:)**2)
+     if(scprod<tol8)then
+!      The first and second vectors were linearly dependent
+!      Thus, use the first and third vectors
+       axis(1)=matr1(2,1)*matr1(3,3)-matr1(2,3)*matr1(3,1)
+       axis(2)=matr1(3,1)*matr1(1,3)-matr1(3,3)*matr1(1,1)
+       axis(3)=matr1(1,1)*matr1(2,3)-matr1(1,3)*matr1(2,1)
+!      Normalize the vector
+       scprod=sum(axis(:)**2)
+       if(scprod<tol8)then
+         MSG_BUG('Cannot find the rotation axis.')
+       end if
+     end if
+     norminv=one/sqrt(scprod)
+     axis(:)=axis(:)*norminv
+
+!    Project the axis vector out of the first unit vector,
+!    and renormalize the projected vector
+!    (the first vector cannot be the axis, as tested before)
+     vecta(1)=one-axis(1)**2
+     vecta(2)=-axis(1)*axis(2)
+     vecta(3)=-axis(1)*axis(3)
+     scprod=sum(vecta(:)**2)
+     norminv=one/sqrt(scprod)
+     vecta(:)=vecta(:)*norminv
+!    Rotate the vector A, to get vector B
+     vectb(:)=matr2(:,1)*vecta(1)+matr2(:,2)*vecta(2)+matr2(:,3)*vecta(3)
+!    Get dot product of vectors A and B, giving cos of the rotation angle
+     cos_phi=sum(vecta(:)*vectb(:))
+!    Compute the cross product of the axis and vector A
+     vectc(1)=axis(2)*vecta(3)-axis(3)*vecta(2)
+     vectc(2)=axis(3)*vecta(1)-axis(1)*vecta(3)
+     vectc(3)=axis(1)*vecta(2)-axis(2)*vecta(1)
+!    Get dot product of vectors B and C, giving sin of the rotation angle
+     sin_phi=sum(vectb(:)*vectc(:))
+   end if
+
+!  Get the rotation angle, then the parameters of the spinor rotation
+!  Here, treat possible inaccurate values of the cosine of phi
+   if(cos_phi>  one-tol8 )cos_phi=  one-tol8
+   if(cos_phi<-(one-tol8))cos_phi=-(one-tol8)
+   phi=acos(cos_phi)
+   if(sin_phi<zero)phi=-phi
+!  Rectify the angle, such that its absolute values corresponds to
+!  180, 120, 90, 60, or 0 degrees
+   phi=(nint(six*phi/pi))/six*pi
+!  Compute components of the spinor matrix
+   spinrot(1)=cos(half*phi)
+   spinrot(2)=axis(1)*sin(half*phi)
+   spinrot(3)=axis(2)*sin(half*phi)
+   spinrot(4)=axis(3)*sin(half*phi)
+
+ else
+
+!  Here, the case of the unit matrix
+   axis(:)=zero
+   phi=zero
+   spinrot(1)=one
+   spinrot(2)=zero
+   spinrot(3)=zero
+   spinrot(4)=zero
+
+ end if ! the case of the identity matrix
+
+!DEBUG
+!write(std_out,*)' getspinrot :'
+!write(std_out,*)' symrel_conv =',symrel_conv(:,:)
+!write(std_out,*)' symrel =',symrel1(:,:)
+!write(std_out,*)' rprimd =',rprimd(:,:)
+!write(std_out,*)' matr2 =',matr2(:,:)
+!write(std_out,*)' matr1 =',matr1(:,:)
+!write(std_out,*)' phi (degree)=',phi*180._dp/pi
+!write(std_out,'(a,3d16.6)' )' axis=',axis(:)
+!write(std_out,*)' vecta=',vecta(:)
+!stop
+!ENDDEBUG
+
+end subroutine getspinrot
+!!***
+
 !!****f* m_geometry/spinrot_cmat
 !! NAME
 !!  spinrot_cmat
@@ -1048,7 +1261,6 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'metric'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1316,7 +1528,6 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'chkdilatmx'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1501,7 +1712,6 @@ subroutine xcart2xred(natom,rprimd,xcart,xred)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcart2xred'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2755,6 +2965,869 @@ function dist2(v1,v2,rprimd,option)
  dist2=sqrt(min2)
 
 end function dist2
+!!***
+
+!!****f* m_geometry/remove_inversion
+!! NAME
+!! remove_inversion
+!!
+!! FUNCTION
+!!  Remove the inversion symmetry from a symmetry set as well
+!!  all the improper rotations (if present)
+!!
+!! INPUTS
+!!  nsym=initial number of symmetries
+!!  symrel(3,3,nsym)=Initial set of symmetry operarations in real space
+!!  tnons(3,nsym)=Initial fractional translations
+!!
+!! OUTPUT
+!!  nsym_out=Number of symmetries in the set without improper rotation
+!!  symrel_out(:,:) [pointer] = output symmetries without improper rotations
+!!  tnons_out(:) [pointer] = fractional translations associated to symrel_out
+!!  pinv=-1 if the inversion has been removed, 1 otherwise
+!!
+!! NOTES
+!!  Note the use of pointers, memory is allocated inside the procedure and passed back
+!!  to the caller. Thus memory deallocation is relegated to the caller. To be on the safe side
+!!  the pointers should be nullified before entering.
+!!
+!! PARENTS
+!!      m_crystal,m_io_kss,outkss
+!!
+!! CHILDREN
+!!      set2unit,symdet,wrtout
+!!
+!! SOURCE
+
+subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'remove_inversion'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nsym
+ integer,intent(out) :: nsym_out,pinv
+!arrays
+ integer,intent(in) :: symrel(3,3,nsym)
+ integer,pointer :: symrel_out(:,:,:)
+ real(dp),intent(in) :: tnons(3,nsym)
+ real(dp),pointer :: tnons_out(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: is,is2,is_discarded,is_inv,is_retained,nsym2
+ logical :: found
+ character(len=500) :: msg
+!arrays
+ integer :: determinant(nsym),inversion(3,3),symrel2(3,3,nsym)
+ real(dp) :: dtnons(3),tnons2(3,nsym)
+
+! *********************************************************************
+
+ MSG_WARNING('Removing inversion related symmetrie from initial set')
+
+ ! Find the occurence of the inversion symmetry.
+ call set2unit(inversion) ; inversion=-inversion
+
+ is_inv=0; found=.FALSE.
+ do while (is_inv<nsym .and. .not.found)
+   is_inv=is_inv+1; found=ALL(symrel(:,:,is_inv)==inversion)
+ end do
+ if (found) then
+   write(msg,'(a,i3)')' The inversion is symmetry operation no. ',is_inv
+ else
+   write(msg,'(a)')' The inversion was not found in the symmetries list.'
+ end if
+ call wrtout(std_out,msg,'COLL')
+
+ ! Find the symmetries that are related through the inversion symmetry
+ call symdet(determinant,nsym,symrel)
+ nsym2=0
+ do is=1,nsym-1
+   do is2=is+1,nsym
+
+     dtnons(:)=tnons(:,is2)-tnons(:,is)-tnons(:,is_inv)
+     found=ALL(symrel(:,:,is)==-symrel(:,:,is2)).and.isinteger(dtnons,tol8)
+
+     if (found) then
+       nsym2=nsym2+1
+       ! Retain symmetries with positive determinant
+       if (ALL(tnons(:,is2)<tol8).and.ALL(tnons(:,is)<tol8)) then
+         is_retained=is2 ; is_discarded=is
+         if (determinant(is)==1) then
+           is_retained=is  ; is_discarded=is2
+         end if
+       else if (ALL(tnons(:,is2)<tol8)) then
+         is_retained=is2 ; is_discarded=is
+       else
+         is_retained=is ;  is_discarded=is2
+       end if
+
+       symrel2(:,:,nsym2)=symrel(:,:,is_retained)
+       tnons2   (:,nsym2)=tnons   (:,is_retained)
+       write(msg,'(a,i3,a,i3,3a,i3,a)')&
+&       ' Symmetry operations no. ',is,' and no. ',is2,&
+&       ' are related through the inversion.',ch10,&
+&       ' Symmetry operation no. ',is_discarded,' will be suppressed.'
+       call wrtout(std_out,msg,'COLL')
+     end if ! found
+
+   end do !is2
+ end do !is
+
+ if (nsym2/=(nsym/2).or.nsym==1) then
+   call wrtout(std_out, ' Program uses the original set of symmetries ', 'COLL')
+   nsym_out=nsym
+   ABI_ALLOCATE(symrel_out,(3,3,nsym))
+   ABI_ALLOCATE(tnons_out,(3,nsym))
+   symrel_out(:,:,:)=symrel(:,:,1:nsym)
+   tnons_out(:,:)=tnons(:,1:nsym)
+   pinv=1
+ else
+   write(msg,'(a)')' Inversion related operations have been suppressed from symmetries list.'
+   call wrtout(std_out,msg,'COLL')
+   nsym_out=nsym2
+   ABI_ALLOCATE(symrel_out,(3,3,nsym2))
+   ABI_ALLOCATE(tnons_out,(3,nsym2))
+   symrel_out(:,:,:)=symrel2(:,:,1:nsym2)
+   tnons_out(:,:)=tnons(:,1:nsym2)
+   pinv=-1
+ end if
+
+end subroutine remove_inversion
+!!***
+
+!!****f* m_geometry/symredcart
+!! NAME
+!! symredcart
+!!
+!! FUNCTION
+!! Convert a symmetry operation from reduced coordinates (integers)
+!! to cartesian coordinates (reals). Can operate in real or reciprocal space
+!!
+!! INPUTS
+!! symred(3,3)=symmetry matrice in reduced coordinates (integers) (real or reciprocal space)
+!! aprim(3,3)=real or reciprocal space dimensional primitive translations (see below)
+!! bprim(3,3)=real or reciprocal space dimensional primitive translations (see below)
+!!
+!! OUTPUT
+!! symcart(3,3)=symmetry matrice in cartesian coordinates (reals)
+!!
+!! NOTES
+!! When aprim=rprimd and bprim=gprimd, the routine operates in real space (on a real space symmetry)
+!! When aprim=gprimd and bprim=rprimd, the routine operates in reciprocal space (on a real space symmetry)
+!!
+!! PARENTS
+!!      m_matlu,m_phonons,symrhg
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine symredcart(aprim,bprim,symcart,symred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symredcart'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: symred(3,3)
+ real(dp),intent(in) :: aprim(3,3),bprim(3,3)
+ real(dp),intent(out) :: symcart(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj,kk
+ real(dp) :: symtmp
+!arrays
+ real(dp) :: work(3,3)
+
+! *************************************************************************
+
+ work=zero
+ do kk=1,3
+   do jj=1,3
+     symtmp=dble(symred(jj,kk))
+     do ii=1,3
+       work(ii,jj)=work(ii,jj)+bprim(ii,kk)*symtmp
+     end do
+   end do
+ end do
+
+ symcart=zero
+ do kk=1,3
+   do jj=1,3
+     symtmp=work(jj,kk)
+     do ii=1,3
+       symcart(ii,jj)=symcart(ii,jj)+aprim(ii,kk)*symtmp
+     end do
+   end do
+ end do
+
+end subroutine symredcart
+!!***
+
+!!****f* m_geometry/strainsym
+!! NAME
+!! strainsym
+!!
+!! FUNCTION
+!! For given order of point group, symmetrizes the strain tensor,
+!! then produce primitive vectors based on the symmetrized strain.
+!!
+!! INPUTS
+!! nsym=order of group.
+!! rprimd(3,3)= primitive vectors, to be symmetrized
+!! rprimd0(3,3)= reference primitive vectors, already symmetrized
+!! symrel(3,3,nsym)=symmetry operators in terms of action on primitive translations
+!!
+!! OUTPUT
+!! rprimd_symm(3,3)= symmetrized primitive vectors
+!!
+!! PARENTS
+!!      xfpack_vin2x,xfpack_x2vin
+!!
+!! CHILDREN
+!!      dgemm,mati3inv,matrginv
+!!
+!! SOURCE
+
+subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
+
+ use m_linalg_interfaces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'strainsym'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nsym
+!arrays
+ integer,intent(in) :: symrel(3,3,nsym)
+ real(dp),intent(in) :: rprimd(3,3),rprimd0(3,3)
+ real(dp),intent(out) :: rprimd_symm(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: isym
+!arrays
+ integer :: symrel_it(3,3)
+ real(dp) :: rprimd0_inv(3,3),strain(3,3),strain_symm(3,3),tmp_mat(3,3)
+
+!**************************************************************************
+
+!copy initial rprimd input and construct inverse
+ rprimd0_inv = rprimd0
+ call matrginv(rprimd0_inv,3,3)
+
+!define strain as rprimd = strain * rprimd0 (in cartesian frame)
+!so strain = rprimd * rprimd0^{-1}
+!transform to triclinic frame with rprimd0^{-1} * strain * rprimd0
+!giving strain as rprimd0^{-1} * rprimd
+ call dgemm('N','N',3,3,3,one,rprimd0_inv,3,rprimd,3,zero,strain,3)
+
+!loop over symmetry elements to obtain symmetrized strain matrix
+ strain_symm = zero
+ do isym = 1, nsym
+
+!  this loop accumulates symrel^{-1}*strain*symrel into strain_symm
+
+!  mati3inv gives the inverse transpose of symrel
+   call mati3inv(symrel(:,:,isym),symrel_it)
+   call dgemm('N','N',3,3,3,one,strain,3,dble(symrel(:,:,isym)),3,zero,tmp_mat,3)
+   call dgemm('T','N',3,3,3,one,dble(symrel_it),3,tmp_mat,3,one,strain_symm,3)
+
+ end do
+
+!normalize by number of symmetry operations
+ strain_symm = strain_symm/dble(nsym)
+
+!this step is equivalent to r_new = r_old * strain * r_old^{-1} * r_old,
+!that is, convert strain back to cartesian frame and then multipy by r_old,
+!to get the r_new primitive vectors
+
+ call dgemm('N','N',3,3,3,one,rprimd0,3,strain_symm,3,zero,rprimd_symm,3)
+
+end subroutine strainsym
+!!***
+
+!!****f* m_geometry/stresssym
+!! NAME
+!! stresssym
+!!
+!! FUNCTION
+!! For given order of point group, symmetrizes the stress tensor,
+!! in symmetrized storage mode and cartesian coordinates, using input
+!! 3x3 symmetry operators in reduced coordinates.
+!! symmetrized tensor replaces input tensor.
+!!
+!! INPUTS
+!! gprimd(3,3)=dimensional primitive translations for reciprocal space (bohr**-1)
+!! nsym=order of group.
+!! sym(3,3,nsym)=symmetry operators (usually symrec=expressed in terms
+!!               of action on reciprocal lattice primitive translations);
+!!               integers.
+!!
+!! OUTPUT
+!! stress(6)=stress tensor, in cartesian coordinates, in symmetric storage mode
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      dfpt_nselt,dfpt_nstpaw,forstrnps,littlegroup_pert,pawgrnl,stress
+!!
+!! CHILDREN
+!!      matr3inv,strconv
+!!
+!! SOURCE
+
+subroutine stresssym(gprimd,nsym,stress,sym)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'stresssym'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nsym
+!arrays
+ integer,intent(in) :: sym(3,3,nsym)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(inout) :: stress(6)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,isym,mu,nu
+ real(dp) :: summ,tmp
+!arrays
+ real(dp) :: rprimd(3,3),rprimdt(3,3),strfrac(6),tensor(3,3),tt(3,3)
+
+!*************************************************************************
+
+!Obtain matrix of real space dimensional primitive translations
+!(inverse tranpose of gprimd), and its transpose
+ call matr3inv(gprimd,rprimd)
+ rprimdt=transpose(rprimd)
+
+!Compute stress tensor in reduced coordinates
+ call strconv(stress,rprimdt,strfrac)
+
+!Switch to full storage mode
+ tensor(1,1)=strfrac(1)
+ tensor(2,2)=strfrac(2)
+ tensor(3,3)=strfrac(3)
+ tensor(3,2)=strfrac(4)
+ tensor(3,1)=strfrac(5)
+ tensor(2,1)=strfrac(6)
+ tensor(2,3)=tensor(3,2)
+ tensor(1,3)=tensor(3,1)
+ tensor(1,2)=tensor(2,1)
+
+ do nu=1,3
+   do mu=1,3
+     tt(mu,nu)=tensor(mu,nu)/dble(nsym)
+     tensor(mu,nu)=0.0_dp
+   end do
+ end do
+
+!loop over all symmetry operations:
+ do isym=1,nsym
+   do mu=1,3
+     do nu=1,3
+       summ=0._dp
+       do ii=1,3
+         tmp=tt(ii,1)*sym(nu,1,isym)+tt(ii,2)*sym(nu,2,isym)+&
+&         tt(ii,3)*sym(nu,3,isym)
+         summ=summ+sym(mu,ii,isym)*tmp
+       end do
+       tensor(mu,nu)=tensor(mu,nu)+summ
+     end do
+   end do
+ end do
+
+!Switch back to symmetric storage mode
+ strfrac(1)=tensor(1,1)
+ strfrac(2)=tensor(2,2)
+ strfrac(3)=tensor(3,3)
+ strfrac(4)=tensor(3,2)
+ strfrac(5)=tensor(3,1)
+ strfrac(6)=tensor(2,1)
+
+!Convert back stress tensor (symmetrized) in cartesian coordinates
+ call strconv(strfrac,gprimd,stress)
+
+end subroutine stresssym
+!!***
+
+!!****f* m_geometry/strconv
+!! NAME
+!! strconv
+!!
+!! FUNCTION
+!! If original gprimd is input, convert from symmetric storage mode
+!! 3x3 tensor in reduced coordinates "frac" to symmetric storage mode
+!! symmetric tensor in cartesian coordinates "cart".
+!!
+!! INPUTS
+!!  frac(6)=3x3 tensor in symmetric storage mode, reduced coordinates
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations (bohr^-1)
+!!
+!! OUTPUT
+!!  cart(6)=symmetric storage mode for symmetric 3x3 tensor in cartesian coords.
+!!
+!! NOTES
+!! $cart(i,j)=G(i,a) G(j,b) frac(a,b)$
+!! "Symmetric" storage mode for 3x3 tensor is 6 element array with
+!! elements 11, 22, 33, 32, 31, and 21.
+!! "cart" may be same array as "frac".
+!! If rprimd transpose is input instead of gprimd, then convert tensor
+!! in cartesian coordinates to reduced coordinates
+!!
+!! PARENTS
+!!      ctocprj,d2frnl,mkcore,mkcore_paw,mkcore_wvl,nonlop_pl,nonlop_ylm
+!!      stresssym
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine strconv(frac,gprimd,cart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'strconv'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: frac(6),gprimd(3,3)
+ real(dp),intent(inout) :: cart(6) ! alias of frac   !vz_i
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj
+!arrays
+ real(dp) :: work1(3,3),work2(3,3)
+
+! *************************************************************************
+
+ work1(1,1)=frac(1)
+ work1(2,2)=frac(2)
+ work1(3,3)=frac(3)
+ work1(3,2)=frac(4) ; work1(2,3)=frac(4)
+ work1(3,1)=frac(5) ; work1(1,3)=frac(5)
+ work1(2,1)=frac(6) ; work1(1,2)=frac(6)
+
+ do ii=1,3
+   work2(:,ii)=zero
+   do jj=1,3
+     work2(:,ii)=work2(:,ii)+gprimd(ii,jj)*work1(:,jj)
+   end do
+ end do
+
+ do ii=1,3
+   work1(ii,:)=zero
+   do jj=1,3
+     work1(ii,:)=work1(ii,:)+gprimd(ii,jj)*work2(jj,:)
+   end do
+ end do
+
+ cart(1)=work1(1,1)
+ cart(2)=work1(2,2)
+ cart(3)=work1(3,3)
+ cart(4)=work1(2,3)
+ cart(5)=work1(1,3)
+ cart(6)=work1(1,2)
+
+end subroutine strconv
+!!***
+
+!!****f* m_geometry/littlegroup_pert
+!!
+!! NAME
+!! littlegroup_pert
+!!
+!! FUNCTION
+!! If syuse==0 and rfmeth==2, determines the set of symmetries that leaves a perturbation invariant.
+!! (Actually, all symmetries that leaves a q-wavevector invariant should be used to reduce the number
+!! of k-points for all perturbations. Unfortunately, one has to take into account the sign reversal of the
+!! perturbation under the symmetry operations, which makes GS routines not usable for the respfn code.
+!! The intermediate choice was to select only those that keep also the perturbation invariant.
+!! Note that the wavevector of the perturbation must also be invariant,
+!! a translation vector in real space is NOT allowed ).
+!!
+!! INPUTS
+!! gprimd(3,3)=dimensional primitive translations for reciprocal space (bohr**-1)
+!! idir=direction of the perturbation
+!! indsym(4,nsym,natom)=indirect indexing of atom labels--see subroutine symatm for definition (if nsym>1)
+!! iout=if non-zero, output on unit iout
+!! ipert=characteristics of the perturbation
+!! natom= number of atoms
+!! nsym=number of space group symmetries
+!! rfmeth =
+!!   1 if non-stationary block
+!!   2 if stationary block
+!!   3 if third order derivatives
+!! symq(4,2,nsym)= Table computed by littlegroup_q.
+!!   three first numbers define the G vector;
+!!   fourth number is zero if the q-vector is not preserved, is 1 otherwise
+!!   second index is one without time-reversal symmetry, two with time-reversal symmetry
+!! symafm(nsym)=(anti)ferromagnetic part of the symmetry operations
+!! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
+!! symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
+!! syuse= flag to use the symmetries or not. If 0 usei it, if 1 do not use it.
+!! tnons(3,nsym)=nonsymmorphic translations of space group in terms
+!!  of real space primitive translations (may be 0)
+!! [unit]=By default the routine writes to std_out and this is very annoying if we are inside a big loop.
+!!   Use unit=dev_null or a negative integer to disable writing.
+!!
+!! OUTPUT
+!! nsym1 =number of space group symmetries that leaves the perturbation invariant
+!! symaf1(nsym1)=(anti)ferromagnetic part of the corresponding symmetry operations
+!! symrl1(3,3,nsym1)=corresponding 3x3 matrices of the group symmetries (real space)
+!! tnons1(3,nsym1)=corresponding nonsymmorphic translations of space group in terms
+!!   of real space primitive translations (may be 0)!!
+!!
+!! PARENTS
+!!      dfpt_looppert,get_npert_rbz,m_dvdb,read_gkk
+!!
+!! CHILDREN
+!!      stresssym,wrtout
+!!
+!! SOURCE
+
+subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
+&    rfmeth,symafm,symaf1,symq,symrec,symrel,symrl1,syuse,tnons,tnons1, &
+&    unit) ! Optional
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'littlegroup_pert'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: idir,iout,ipert,natom,nsym,rfmeth,syuse
+ integer,intent(in),optional :: unit
+ integer,intent(out) :: nsym1
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symafm(nsym),symq(4,2,nsym)
+ integer,intent(in) :: symrec(3,3,nsym),symrel(3,3,nsym)
+ integer,intent(out) :: symaf1(nsym),symrl1(3,3,nsym)
+ real(dp),intent(in) :: gprimd(3,3),tnons(3,nsym)
+ real(dp),intent(out) :: tnons1(3,nsym)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,ii,istr,isym,jj,nsym_test,tok,ount
+ character(len=500) :: msg
+!arrays
+ integer :: sym_test(3,3,2)
+ real(dp) :: str_test(6)
+
+! *********************************************************************
+
+ ount = std_out; if (present(unit)) ount = unit
+
+ nsym1=0
+ if((ipert==natom+3 .or. ipert==natom+4) .and. syuse==0 .and. rfmeth==2) then
+!  Strain perturbation section
+!  Use ground state routine which symmetrizes cartesian stress as a quick
+!  and dirty test for the invariance of the strain (ipert,idir) under
+!  each candidate symmetry
+!  I am presently assuming that translations are acceptable because I dont
+!  see why not.
+
+   istr=3*(ipert-natom-3)+idir
+   nsym_test=2
+!  Store identity as first element for test
+   sym_test(:,:,1)=0
+   sym_test(1,1,1)=1; sym_test(2,2,1)=1; sym_test(3,3,1)=1
+   do isym=1,nsym
+     sym_test(:,:,2)=symrec(:,:,isym)
+     str_test(:)=0.0_dp
+     str_test(istr)=1.0_dp
+     call stresssym(gprimd,nsym_test,str_test,sym_test)
+     if(abs(str_test(istr)-1.0_dp)<tol8)then
+!      The test has been successful !
+       nsym1=nsym1+1
+       symaf1(nsym1)=symafm(isym)
+       do ii=1,3
+         tnons1(ii,nsym1)=tnons(ii,isym)
+         do jj=1,3
+           symrl1(ii,jj,nsym1)=symrel(ii,jj,isym)
+         end do
+       end do
+     end if
+   end do
+
+ else if(ipert>natom .or. syuse/=0 .or. rfmeth/=2)then
+
+!  Not yet coded for d/dk or electric field perturbations
+   nsym1=1
+   do ii=1,3
+     tnons1(ii,1)=0._dp
+     symaf1(1)=1
+     do jj=1,3
+       symrl1(ii,jj,1)=0
+       if(ii==jj)symrl1(ii,jj,1)=1
+     end do
+   end do
+
+ else
+
+   do isym=1,nsym
+!    Check that the symmetry operation preserves the wavevector
+!    (a translation is NOT allowed)
+     if(symq(4,1,isym)==1 .and.&
+&     symq(1,1,isym)==0 .and.&
+&     symq(2,1,isym)==0 .and.&
+&     symq(3,1,isym)==0          )then
+!      Check that the symmetry operation preserves the atom
+       if(ipert==indsym(4,isym,ipert))then
+!        Check if the direction is preserved
+         tok=1
+         do idir1=1,3
+           if((idir1==idir.and.symrec(idir,idir1,isym)/=1) .or.&
+&           (idir1/=idir.and.symrec(idir,idir1,isym)/=0))then
+             tok=0
+           end if
+         end do
+         if(tok==1)then
+!          All the tests have been successful !
+           nsym1=nsym1+1
+           symaf1(nsym1)=symafm(isym)
+           do ii=1,3
+             tnons1(ii,nsym1)=tnons(ii,isym)
+             do jj=1,3
+               symrl1(ii,jj,nsym1)=symrel(ii,jj,isym)
+             end do
+           end do
+         end if
+
+       end if
+     end if
+   end do
+ end if
+
+ if (nsym1<1) then
+   write(msg,'(a,i0,a)')&
+&   ' The number of selected symmetries should be > 0, while it is nsym=',nsym1,'.'
+   MSG_BUG(msg)
+ end if
+
+ if (nsym1 /= 1) then
+   if (iout /= ount .and. iout > 0) then
+     write(msg,'(a,i5,a)')' Found ',nsym1,' symmetries that leave the perturbation invariant.'
+     call wrtout(iout,msg,'COLL')
+   end if
+   write(msg,'(a,i5,a)')' littlegroup_pert : found ',nsym1,' symmetries that leave the perturbation invariant :'
+   call wrtout(ount,msg,'COLL')
+ else
+   if (iout /= ount .and. iout > 0) then
+     write(msg,'(a,a)')' The set of symmetries contains',' only one element for this perturbation.'
+     call wrtout(iout,msg,'COLL')
+   end if
+   write(msg,'(a)')' littlegroup_pert : only one element in the set of symmetries for this perturbation :'
+   call wrtout(ount,msg,'COLL')
+ end if
+
+ if (ount > 0) then
+   do isym=1,nsym1
+     write(msg, '(9i4)' )((symrl1(ii,jj,isym),ii=1,3),jj=1,3)
+     call wrtout(ount,msg,'COLL')
+   end do
+ end if
+
+end subroutine littlegroup_pert
+!!***
+
+!!****f* ABINIT/irreducible_set_pert
+!! NAME
+!! irreducible_set_pert
+!!
+!! FUNCTION
+!! Determines a set of perturbations that form a basis
+!! in that, using symmetry, they can be used to generate
+!! all other perturbations that are asked to be calculated (target).
+!!
+!! INPUTS
+!!  indsym(4,nsym,natom)=indirect indexing array described above: for each
+!!   isym,iatom, fourth element is label of atom into which iatom is sent by
+!!   INVERSE of symmetry operation isym; first three elements are the primitive
+!!   translations which must be subtracted after the transformation to get back
+!!   to the original unit cell.
+!!  mpert =maximum number of iper
+!!  natom= number of atoms
+!!  nsym=number of space group symmetries
+!!  rfdir(3)=direction for the perturbations
+!!  rfpert(mpert)=information on the perturbations
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
+!!  symq(4,2,nsym)= (integer) three first numbers define the G vector;
+!!   fourth number is 0 if the q-vector is not preserved, is 1 otherwise
+!!   second index is one without time-reversal symmetry, two with time-reversal symmetry
+!!
+!! OUTPUT
+!!   pertsy(3,mpert)= the target perturbation is described by the two last indices (idir, and ipert),
+!!                    the value is 0, 1 or -1, see notes.
+!!
+!! NOTES
+!! Output will be in the pertsy array,
+!!   0 for non-target perturbations
+!!   1 for basis perturbations
+!!  -1 for perturbations that can be found from basis perturbations
+!!
+!! PARENTS
+!!      get_npert_rbz,m_dvdb,respfn
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq,symrec,symrel)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'irreducible_set_pert'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,nsym
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),rfdir(3),rfpert(mpert)
+ integer,intent(in) :: symq(4,2,nsym),symrec(3,3,nsym),symrel(3,3,nsym)
+ integer,intent(out) :: pertsy(3,mpert)
+
+!Local variables -------------------------
+!scalars
+ integer :: found,idir1,idisy1,ii,ipert1,ipesy1,isign,isym,itirev,jj
+!arrays
+ integer :: sym1(3,3)
+
+! *********************************************************************
+
+!Zero pertsy
+ pertsy(:,:)=0
+
+ do ipert1=1,mpert
+   do idir1=1,3
+     if(rfpert(ipert1)==1.and.rfdir(idir1)==1)then
+!      write(std_out,*)' for candidate idir =',idir1,' ipert = ',ipert1
+
+!      Loop on all symmetries, including time-reversal
+       do isym=1,nsym
+         do itirev=1,2
+           isign=3-2*itirev
+
+           if(symq(4,itirev,isym)/=0)then
+
+             found=1
+
+!            Here select the symmetric of ipert1
+             if(ipert1<=natom)then
+               ipesy1=indsym(4,isym,ipert1)
+               do ii=1,3
+                 do jj=1,3
+                   sym1(ii,jj)=symrec(ii,jj,isym)
+                 end do
+               end do
+             else if(ipert1==(natom+2) .or. ipert1==(natom+6))then
+               ipesy1=ipert1
+               do ii=1,3
+                 do jj=1,3
+                   sym1(ii,jj)=symrel(ii,jj,isym)
+                 end do
+               end do
+             else
+               found=0
+             end if
+
+!            Now that a symmetric perturbation has been obtained,
+!            including the expression of the symmetry matrix, see
+!            if the symmetric perturbations are available
+             if( found==1 ) then
+
+               do idisy1=1,3
+                 if(sym1(idir1,idisy1)/=0)then
+                   if(pertsy(idisy1,ipesy1)==0)then
+                     found=0
+                     exit
+                   end if
+                 end if
+               end do
+             end if
+
+!            Now, if still found, then it is a symmetric
+!            of some linear combination of existing perturbations
+             if(found==1)then
+
+!              DEBUG
+!              write(std_out,*)' all found !  isym, isign= ',isym,isign
+!              write(std_out,1010)((sym1(ii,jj),ii=1,3),jj=1,3)
+!              write(std_out,1010)((sym2(ii,jj),ii=1,3),jj=1,3)
+!              write(std_out,*)sumr,sumi
+!              1010    format(9i4)
+!              ENDDEBUG
+
+               pertsy(idir1,ipert1)=-1
+               exit ! Exit loop on symmetry operations
+
+             end if
+
+           end if !  End loop on all symmetries + time-reversal
+         end do
+       end do
+
+!      Now that all symmetries have been examined,
+!      if still not symmetric of a linear combination
+!      of basis perturbations, then it is a basis perturbation
+       if(pertsy(idir1,ipert1)/=-1) pertsy(idir1,ipert1)=1
+!      write(std_out,'(a,3i5)' ) ' irreducible_set_pert :',idir1,ipert1,pertsy(idir1,ipert1)
+
+     end if ! End big loop on all elements
+   end do
+ end do
+
+end subroutine irreducible_set_pert
 !!***
 
 end module  m_geometry

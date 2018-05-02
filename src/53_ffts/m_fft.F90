@@ -8,7 +8,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, MM, GZ, MT)
+!! Copyright (C) 2009-2018 ABINIT group (MG, MM, GZ, MT, MF, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,6 +39,9 @@ MODULE m_fft
  use m_fftw3
  use m_dfti
  use iso_c_binding
+#if defined HAVE_MPI2
+ use mpi
+#endif
 
  use defs_abitypes,   only : MPI_type
  use defs_fftdata,    only : mg
@@ -48,24 +51,30 @@ MODULE m_fft
  use m_geometry,      only : metric
  use m_blas,          only : xscal
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft1, sphere, change_istwfk,&
-&                            fftalg_info, fftalg_has_mpi, print_ngfft
- use m_mpinfo,        only : destroy_mpi_enreg
+&                            fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
+ use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
  implicit none
 
  private
 
+#if defined HAVE_MPI1
+ include 'mpif.h'
+#endif
+
  public :: fftbox_execute       ! Driver for FFTs on the full box (complex-to-complex version, operated on complex arrays)
  public :: fft_ug               ! Driver for zero-padded FFTs u(g) --> u(r)
  public :: fft_ur               ! Driver for zero-padded FFTs u(r) --> u(g)
  public :: fftpad               ! Driver for (low-level) zero-padded FFTs, note that fft_ug is the preferred interface.
  public :: fft_poisson          ! Solve the poisson equation in G-space starting from n(r).
+ public :: fourdp_6d            ! Calculate a 6-dimensional Fast Fourier Transform
+ public :: fftpac               ! Copy to change the stride of a three-dimension array for more efficient FFT.
+ public :: indirect_parallel_Fourier
 
  public :: fft_use_lib_threads
  public :: fft_allow_ialltoall  ! Allow the use of non-blocking IALLOTOALL in MPI-FFTs algorithms
  public :: zerosym              ! Symmetrize an array on the FFT grid by vanishing some term on the boundaries.
- !public :: fftpac              ! Copy data and modify stride for more efficient three dimensional fft.
 
 ! Driver routines for MPI version.
  public :: fourdp_mpi           ! MPI FFT of densities/potentials on the full box.
@@ -1544,7 +1553,6 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 #define ABI_FUNC 'fftu_utests'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none
@@ -1984,7 +1992,6 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_mpi_utests'
  use interfaces_14_hidewrite
- use interfaces_52_fft_mpi_noabirule
 !End of the abilint section
 
  implicit none
@@ -3231,6 +3238,460 @@ subroutine zerosym(array,cplex,n1,n2,n3,&
  DBG_EXIT("COLL")
 
 end subroutine zerosym
+!!***
+
+!!****f* m_fft/fourdp_6d
+!! NAME
+!! fourdp_6d
+!!
+!! FUNCTION
+!!     Calculate a 6-dimensional Fast Fourier Transform
+!!
+!!     isign=-1 : A(G1,G2) = Sum(r1,r2) A(r1,r2) exp(-iG1.r1) exp(+iG2.r2)
+!!                                                  ^            ^
+!!     isign=+1 : A(r1,r2) = Sum(G1,G2) A(G1,G2) exp(+iG1.r1) exp(-iG2.r2)
+!!                                                  ^            ^
+!!     isign=-1 and isign=1 form a transform/inverse-transform pair: calling
+!!     one then the other will take you back to the original function,
+!!     multiplied by a factor of (nl*nm*nn)**2.
+!!     ------------------------------------------------------------------
+!!
+!!     input:
+!!      a: A(r1,r2) [overwritten]
+!!     output:
+!!      a: A(G1,G2) in the format IGFFT
+!!     ------------------------------------------------------------------
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_kxc
+!!
+!! CHILDREN
+!!      fourdp
+!!
+!! SOURCE
+
+subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fourdp_6d'
+ use interfaces_53_ffts
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,isign,nfft,paral_kgb,tim_fourdp
+ type(MPI_type),intent(in) :: MPI_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ complex(gwpc),intent(inout) :: matrix(nfft,nfft)
+
+!Local variables-------------------------------
+!scalars
+ !integer,parameter :: cplex=2
+ integer :: i1,i2,i3,ifft
+ integer :: n1,n2,n3
+!arrays
+ real(dp),allocatable :: fofg(:,:),fofr(:)
+
+! *************************************************************************
+
+!TODO check normalization factor, it is better if we use the GW conventions.
+ n1 = ngfft(1)
+ n2 = ngfft(2)
+ n3 = ngfft(3)
+
+ ABI_MALLOC(fofg,(2,nfft))
+ ABI_MALLOC(fofr,(cplex*nfft))
+
+ do i3=0,n3-1
+   do i2=0,n2-1
+     do i1=0,n1-1
+
+       ifft=1+i1+i2*n1+i3*n1*n2
+       if (isign==1) then
+         ! G1 -> r1 transform for each G2 to form A(r1,G2)
+         fofg(1,:)=REAL (matrix(:,ifft))
+         fofg(2,:)=AIMAG(matrix(:,ifft))
+       else if (isign==-1) then
+         ! r1 -> G1 transform for each r2 to form A(G1,r2)
+         fofr(1:nfft)       =REAL (matrix(:,ifft))
+         fofr(nfft+1:2*nfft)=AIMAG(matrix(:,ifft))
+       else
+         MSG_ERROR("Wrong isign")
+       end if
+
+       call fourdp(cplex,fofg,fofr,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+
+       if (isign==1) then ! Save A(r1,G2)
+         matrix(:,ifft)=CMPLX(fofr(1:nfft),fofr(nfft+1:2*nfft))
+       else if (isign==-1) then ! Save A(G1,r2)
+         matrix(:,ifft)=CMPLX(fofg(1,:),fofg(2,:))
+       end if
+
+     end do
+   end do
+ end do
+
+ do i3=0,n3-1
+   do i2=0,n2-1
+     do i1=0,n1-1
+
+       ifft=1+i1+i2*n1+i3*n1*n2
+       if (isign==1) then
+         ! Do the G2 -> r2 transform of A(r1,G2) to get A(r1,r2)
+         fofr(1:nfft       )=REAL (matrix(ifft,:))
+         fofr(nfft+1:2*nfft)=AIMAG(matrix(ifft,:))
+       else if (isign==-1) then
+         ! Do the r2 -> G2 transform of A(G1,r2) to get A(G1,G2)
+         fofg(1,:)=REAL (matrix(ifft,:))
+         fofg(2,:)=AIMAG(matrix(ifft,:))
+       end if
+
+       call fourdp(2,fofg,fofr,-isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+
+       if (isign==1) then
+         matrix(ifft,:)=CMPLX(fofg(1,:),fofg(2,:))
+       else if (isign==-1) then
+         matrix(ifft,:)=CMPLX(fofr(1:nfft),fofr(nfft+1:2*nfft))
+       end if
+
+     end do
+   end do
+ end do
+
+ ABI_FREE(fofg)
+ ABI_FREE(fofr)
+
+end subroutine fourdp_6d
+!!***
+
+!!****f* m_fft/fftpac
+!! NAME
+!! fftpac
+!!
+!! FUNCTION
+!! Allow for data copying to modify the stride (dimensioning) of a three-
+!! dimensional array, for more efficient three dimensional fft.
+!! NOTE that the arrays are in REAL space.
+!!
+!! Note that arrays aa and bb may be the same array (start at the same address).
+!! The array aa also incorporate a spin variable.
+!! MG FIXME: THIS IS **VERY BAD** AS FORTRAN DOES NOT ALLOW FOR ALIASING
+!!
+!! INPUTS
+!!  ispden=actual spin-density of interest
+!!  nspden=number of spin-density components
+!!  n1,n2,n3=actual data dimensions, dimensions of complex array a
+!!  nd1,nd2,nd3=array dimensions of (larger) array b
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  option= see description of side effects
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!!  aa & bb arrays are treated as input or output depending on option:
+!!  option=1  aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) real case
+!!  option=2  aa(n1*n2*n3,ispden) --> bb(nd1,nd2,nd3) real case
+!!  option=10 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 real part
+!!  option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
+!!
+!! PARENTS
+!!      dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,dfptnl_resp,energy
+!!      fock_getghc,getgh1c,gwls_hamiltonian,ks_ddiago,m_epjdos,m_io_kss,mkrho
+!!      suscep_stat,vtorho
+!!
+!! CHILDREN
+!!      ptabs_fourdp
+!!
+!! SOURCE
+
+subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,option)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fftpac'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ispden,n1,n2,n3,nd1,nd2,nd3,nspden,option
+ type(mpi_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(inout) :: aa(n1*n2*n3/ngfft(10),nspden),bb(nd1,nd2,nd3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,i3,index,me_fft,nproc_fft
+ character(len=500) :: message
+ !arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+
+! *************************************************************************
+
+ me_fft=ngfft(11); nproc_fft=ngfft(10)
+
+ if (option==1.or.option==2) then
+   if (nd1<n1.or.nd2<n2.or.nd3<n3) then
+     write(message,'(a,3i0,2a,3i0,a)')&
+&     'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,&
+&     'must be >=      n1, n2, n3 =',n1,n2,n3,'.'
+     MSG_BUG(message)
+   end if
+ else
+   if (2*nd1<n1.or.nd2<n2.or.nd3<n3) then
+     write(message,'(a,3i0,2a,3i0,a)')&
+&     'Each of 2*nd1,nd2,nd3=',2*nd1,nd2,nd3,ch10,&
+&     'must be >= (n1, n2, n3) =',n1,n2,n3,'.'
+     MSG_BUG(message)
+   end if
+ end if
+
+ ! Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ if (option==1) then
+   do i3=1,n3
+     if (me_fft==fftn3_distrib(i3)) then
+       do i2=1,n2
+         do i1=1,n1
+           aa(i1+n1*(i2-1+n2*(ffti3_local(i3)-1)),ispden)=bb(i1,i2,i3)
+         end do
+       end do
+     end if
+   end do
+
+ else if (option==2) then
+   !  Here we avoid corrupting the data in a while writing to b in the
+   !  case in which a and b are same array.
+   !  Also: replace "trash" data with 0 s to avoid floating point
+   !  exceptions when this data is actually manipulated in fft.
+   do i3=nd3,n3+1,-1
+     do i2=nd2,1,-1
+       do i1=nd1,1,-1
+         bb(i1,i2,i3)=0.d0
+       end do
+     end do
+   end do
+   do i3=n3,1,-1
+     if (me_fft==fftn3_distrib(i3)) then
+       do i2=nd2,n2+1,-1
+         do i1=nd1,1,-1
+           bb(i1,i2,i3)=0.d0
+         end do
+       end do
+       do i2=n2,1,-1
+         do i1=nd1,n1+1,-1
+           bb(i1,i2,i3)=0.d0
+         end do
+         do i1=n1,1,-1
+           bb(i1,i2,i3)=aa(i1+n1*(i2-1+n2*(ffti3_local(i3) - 1)),ispden)
+         end do
+       end do
+     end if
+   end do
+!  MF
+ else if (option==10 .or. option==11) then
+   index=1
+   if(option==11) index=2
+   do i3=1,n3
+     do i2=1,n2
+       do i1=1,n1/2
+         aa(index,ispden)=bb(i1,i2,i3)
+         index=index+2
+       end do
+     end do
+   end do
+!  MF
+ else
+   write(message,'(a,i0,a)')' Bad option =',option,'.'
+   MSG_BUG(message)
+ end if
+
+end subroutine fftpac
+!!***
+
+!!****f* m_fft/indirect_parallel_Fourier
+!! NAME
+!! indirect_parallel_Fourier
+!!
+!! FUNCTION
+!! The purpose of this routine is to transfer data from right to left right(:,index(i))=left(:,i)
+!! The difficulty is that right and left are distributed among processors
+!! We will suppose that the distribution is done as a density in Fourier space
+!! We first order the right hand side data according to the processor
+!! in which they are going to be located in the left hand side.
+!! This is done is a way such that  a mpi_alltoall put the data on the correct processor.
+!! We also transfer their future adress. A final ordering put everything in place
+!!
+!! INPUTS
+!!  index(sizeindex)= global adress for the transfer from right to left
+!!  left(2,nleft)=left hand side
+!!  mpi_enreg=information about MPI parallelization
+!!  ngleft(18)=contain all needed information about 3D FFT for the left hand side
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngright(18)=contain all needed information about 3D FFT for the right hand side
+!!  see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nleft=second dimension of left array (for this processor)
+!!  nright=second dimension of right array (for this processor)
+!!  sizeindex=size of the index array (different form nright, because it is global to all proccessors)
+!!
+!! OUTPUT
+!!  left(2,nleft)=the elements of the right hand side, at the correct palce in the correct processor
+!!
+!! NOTES
+!!  A lot of things to improve.
+!!
+!! PARENTS
+!!      prcref,prcref_PMA,transgrid
+!!
+!! CHILDREN
+!!      mpi_alltoall,ptabs_fourdp
+!!
+!! SOURCE
+
+subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,nright,paral_kgb,right,sizeindex)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'indirect_parallel_Fourier'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: ngleft(18),ngright(18),nleft,nright,paral_kgb,sizeindex
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: index(sizeindex)
+ real(dp),intent(in) :: right(2,nright)
+ real(dp),intent(inout) :: left(2,nleft)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ierr,i_global,ileft,iright,iright_global
+ integer :: j,j1,j2,j3,j_global,jleft_global
+ integer :: jleft_local,me_fft,n1l,n2l,n3l,n1r,n2r,n3r,nd2l,nd2r
+ integer :: nproc_fft,proc_dest,r2,siz_slice_max
+!arrays
+ integer,allocatable :: index_recv(:),index_send(:),siz_slice(:), ffti2r_global(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn2l_distrib(:),ffti2l_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3l_distrib(:),ffti3l_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn2r_distrib(:),ffti2r_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3r_distrib(:),ffti3r_local(:)
+ real(dp),allocatable :: right_send(:,:),right_recv(:,:)
+
+! *************************************************************************
+ n1r=ngright(1);n2r=ngright(2);n3r=ngright(3)
+ n1l=ngleft(1) ;n2l=ngleft(2) ;n3l=ngleft(3)
+ nproc_fft=mpi_enreg%nproc_fft; me_fft=mpi_enreg%me_fft
+ nd2r=n2r/nproc_fft; nd2l=n2l/nproc_fft
+
+ !Get the distrib associated with the left fft_grid
+ call ptabs_fourdp(mpi_enreg,n2l,n3l,fftn2l_distrib,ffti2l_local,fftn3l_distrib,ffti3l_local)
+
+ !Get the distrib associated with the right fft_grid
+ call ptabs_fourdp(mpi_enreg,n2r,n3r,fftn2r_distrib,ffti2r_local,fftn3r_distrib,ffti3r_local)
+
+ !Precompute local --> global corespondance
+ ABI_ALLOCATE(ffti2r_global,(nd2r))
+ ffti2r_global(:) = -1
+ do j2=1,n2r
+    if( fftn2r_distrib(j2) == me_fft ) then
+       ffti2r_global( ffti2r_local(j2) ) = j2
+    end if
+ end do
+
+
+ ABI_ALLOCATE(siz_slice,(nproc_fft))
+ siz_slice(:)=0
+ do i_global=1,sizeindex !look for the maximal size of slice of data
+  j_global=index(i_global)!; write(std_out,*) j_global,i_global
+  if(j_global /=0) then
+    !use the fact that (j-1)=i1 + n1l*(j2l-1 + n2l*(j3l-1))
+   proc_dest= fftn2l_distrib( modulo((j_global-1)/n1l,n2l) + 1)
+   siz_slice(proc_dest+1)=siz_slice(proc_dest+1)+1
+!DEBUG
+!write(std_out,*) 'in indirect proc',proc_dest,siz_slice(proc_dest+1)
+!ENDDEBUG
+  end if
+ end do
+ siz_slice_max=maxval(siz_slice) !This value could be made smaller by looking locally
+!and performing a allgather with a max
+!DEBUG
+!write(std_out,*) 'siz_slice,sizeindex,siz_slice',siz_slice(:),sizeindex,siz_slice_max
+!write(std_out,*) 'sizeindex,nright,nleft',sizeindex,nright,nleft
+!ENDDEBUG
+ ABI_ALLOCATE(right_send,(2,nproc_fft*siz_slice_max))
+ ABI_ALLOCATE(index_send,(nproc_fft*siz_slice_max))
+ siz_slice(:)=0; index_send(:)=0; right_send(:,:)=zero
+ do iright=1,nright
+  j=iright-1;j1=modulo(j,n1r);j2=modulo(j/n1r,nd2r);j3=j/(n1r*nd2r)
+  j2 = ffti2r_global(j2+1) - 1
+  iright_global=n1r*(n2r*j3+j2)+j1+1
+  jleft_global=index(iright_global)
+  if(jleft_global/=0)then
+     j=jleft_global-1;j1=modulo(j,n1l);j2=modulo(j/n1l,n2l);j3=j/(n1l*n2l); r2=ffti2l_local(j2+1)-1
+   jleft_local=n1l*(nd2l*j3+r2)+j1+1
+   proc_dest=fftn2l_distrib(j2+1)
+   siz_slice(proc_dest+1)=siz_slice(proc_dest+1)+1
+   right_send(:,proc_dest*siz_slice_max+siz_slice(proc_dest+1))=right(:,iright)
+   index_send(proc_dest*siz_slice_max+siz_slice(proc_dest+1))=jleft_local
+!DEBUG
+!   write(std_out,*) 'loop ir',jleft_local,jleft_global,iright_global,iright
+!ENDDEBUG
+  end if
+ end do
+ ABI_ALLOCATE(right_recv,(2,nproc_fft*siz_slice_max))
+ ABI_ALLOCATE(index_recv,(nproc_fft*siz_slice_max))
+#if defined HAVE_MPI
+  if(paral_kgb == 1) then
+    call mpi_alltoall (right_send,2*siz_slice_max, &
+&                          MPI_double_precision, &
+&                          right_recv,2*siz_slice_max, &
+&                          MPI_double_precision,mpi_enreg%comm_fft,ierr)
+    call mpi_alltoall (index_send,siz_slice_max, &
+&                          MPI_integer, &
+&                          index_recv,siz_slice_max, &
+&                          MPI_integer,mpi_enreg%comm_fft,ierr)
+  endif
+#endif
+ do ileft=1,siz_slice_max*nproc_fft
+!DEBUG
+!write(std_out,*)index_recv(ileft)
+!ENDEBUG
+ if(index_recv(ileft) /=0 ) left(:,index_recv(ileft))=right_recv(:,ileft)
+ end do
+ ABI_DEALLOCATE(right_recv)
+ ABI_DEALLOCATE(index_recv)
+ ABI_DEALLOCATE(right_send)
+ ABI_DEALLOCATE(index_send)
+ ABI_DEALLOCATE(siz_slice)
+ ABI_DEALLOCATE(ffti2r_global)
+
+end subroutine indirect_parallel_Fourier
 !!***
 
 END MODULE m_fft

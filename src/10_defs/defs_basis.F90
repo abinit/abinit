@@ -273,7 +273,6 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_FULLBZ    = 1
  integer,public,parameter :: WFK_TASK_CLASSIFY  = 2
  integer,public,parameter :: WFK_TASK_PAW_AEPSI = 3
- integer,public,parameter :: WFK_TASK_SHIRLEY   = 4
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -563,8 +562,6 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_CLASSIFY
  case ("paw_aepsi")
    wfk_task = WFK_TASK_PAW_AEPSI
- case ("shirley")
-   wfk_task = WFK_TASK_SHIRLEY
  case default
    wfk_task = WFK_TASK_NONE
  end select

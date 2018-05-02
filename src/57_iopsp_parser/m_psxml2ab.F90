@@ -4,7 +4,7 @@
 !! m_psxml2ab
 !!
 !! FUNCTION
-!!  From a SIESTA XML format pseudopotential file 
+!!  From a SIESTA XML format pseudopotential file
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
@@ -18,8 +18,8 @@
 !! psxml  = pseudopotential data structure
 !!
 !! OUTPUT
-!! psphead = psp information structure 
-!! atmsymb = atomic symbol 
+!! psphead = psp information structure
+!! atmsymb = atomic symbol
 !!
 !! PARENTS
 !!      inpspheads,pspatm_abinit
@@ -105,7 +105,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  psphead%pspdat = MODULO(dy,100) * 10000 + dm * 100 + dd
 
 10 continue
- 
+
  call ps_PseudoAtomSpec_Get(psxml, &
 &  atomic_symbol=atmsymb, atomic_label=label, &
 &  atomic_number=psphead%znuclpsp, z_pseudo=psphead%zionpsp, &
@@ -201,7 +201,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
        psphead%nproj(il) = psphead%nproj(il) + 1
      end do
    else
-     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors') 
+     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
    end if
  end if
 
@@ -380,7 +380,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 end subroutine psxml2abheader
 !!***
 ! end test on compiling with LIBPSML enabled
-#endif   
+#endif
 
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/psxml2abfull
@@ -389,7 +389,7 @@ end subroutine psxml2abheader
 !!
 !! FUNCTION
 !!  read in all data from psml file. Call header reader first, then local potential and NL projectors
-!!  
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 2005-2018 ABINIT group (MJV).

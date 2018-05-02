@@ -42,6 +42,7 @@ module m_effective_potential_file
  use m_io_tools,   only : open_file
  use m_geometry,   only : xcart2xred, metric
  use m_crystal,    only : crystal_t, crystal_init, crystal_free
+ use m_dynmat,     only : dfpt_prtph
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
 
 
@@ -2312,7 +2313,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -2455,7 +2455,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   chneut  = 1 ! The ASR for effective charges is imposed
   selectz = 0 ! No selection of some parts of the effective charge tensor
   iblok = ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
-  if (iblok /=0) then
+  if (iblok /=0 .and. maxval(abs(dielt)) < 10000) then
     effective_potential%harmonics_terms%epsilon_inf = dielt
     effective_potential%harmonics_terms%zeff = zeff
   else

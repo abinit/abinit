@@ -83,6 +83,7 @@
  use m_xmpi
 
  use m_io_tools, only : delete_file, get_unit
+ use m_fftcore,  only : sphereboundary
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -96,7 +97,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp'
  use interfaces_14_hidewrite
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => mlwfovlp
@@ -317,7 +317,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
  if(leig) then
-!  
+!
 !  Assign file unit numbers
    if(rank==master) then
      iun(1)=444
@@ -382,14 +382,14 @@
  iwav(:,:,:)=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
-!    
+!
 !    MPI:cycle over k-points not treated by this node
-!    
+!
 
      if (nprocs>1 ) then !sometimes we can have just one processor
        if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
      end if
-     
+
 !    write(std_out,*)'rank',rank,'ikpt',ikpt,'isppol',isppol
      nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
 !    write(std_out,*) ikpt+(isppol-1)*nkpt,nkpt
@@ -413,28 +413,28 @@
 !Shifts computed.
 !
  if( lmmn) then
-!  
+!
 !  In case of parallelization write out cg for all k-points
-!  
+!
    if (nprocs > 1) then
-!    
+!
      if(prtvol>0) then
        write(message, '(3a)' ) ch10,&
 &       '   mlwfovlp :  Creating temporary files with cg and cprj (PAW)',ch10
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,  message,'COLL')
      end if
-!    
+!
      do isppol=1,nsppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
        do ikpt=1,nkpt
-!        
+!
 !        MPI:cycle over k-points not treated by this node
-!        
+!
          if (nprocs>1 ) then !sometimes we can have just one processor
            if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
          end if
-         
+
 !        write(std_out,*)'writing kpt ',ikpt,'isppol',isppol,' by node ', rank
          write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cg),ikpt,isppol
          iun_plot=1000+ikpt+ikpt*(isppol-1)
@@ -449,37 +449,37 @@
          close(iun_plot)
        end do !ikpt
      end do !isppol
-!    
+!
 !    In the PAW case we also need to write out cprj into files
-!    
+!
      if(psps%usepaw==1) then
-!      
+!
 !      big loop on atoms, kpts, bands and lmn
-!      
+!
        ikpt2=0
        do isppol=1,nsppol
          if(spin.ne.0 .and. spin.ne.isppol) cycle
          do ikpt=1,nkpt
-!          
+!
 !          MPI:cycle over k-points not treated by this node
-!          
+!
            if (nprocs>1 ) then !sometimes we can have just one processor
              if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
            end if
-           
+
            ikpt2=ikpt2+1 !sums just on the k-points treated by this node
-!          
+!
            write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt,isppol
            iun_plot=1000+ikpt
            open (unit=iun_plot, file=wfnname,form='unformatted')
-!          
+!
            do iband=1,mband*dtset%nspinor
              ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
-!            
+!
              do iatom=1,natom
                itypat=dtset%typat(iatom)
                lmn_size=pawtab(itypat)%lmn_size
-!              
+!
                do ilmn=1,lmn_size
                  write(iun_plot) (( cprj(iatom,ig)%cp(i,ilmn)),i=1,2)
                end do !ilmn
@@ -491,13 +491,13 @@
        end do !isppol
      end if !usepaw==1
 
-!    
-!    
+!
+!
    end if !MPI nprocs>1
-!  
+!
 !  End of MPI preliminarities
 !  Calculate PW contribution of overlaps
-!  
+!
    ABI_ALLOCATE(cm1,(2,mband,mband,nntot,nkpt,nsppol))
    call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,&
 &   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
@@ -505,9 +505,9 @@
    write(message, '(a,a)' ) ch10,&
 &   '   mlwfovlp : PW part of overlap computed   '
    call wrtout(std_out,  message,'COLL')
-!  
+!
 !  compute PAW Contribution and add it to PW contribution
-!  
+!
    if(psps%usepaw==1) then
      write(message, '(a,a)' ) ch10,&
 &     '** smatrix_pawinit : PAW part of overlap  '
@@ -516,13 +516,13 @@
      do isppol=1,nsppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
        do ikpt1=1,nkpt
-!        
+!
 !        MPI:cycle over k-points not treated by this node
-!        
+!
          if (nprocs>1 ) then !sometimes we can have just one processor
            if ( ABS(MPI_enreg%proc_distrb(ikpt1,1,isppol)-rank)  /=0) CYCLE
          end if
-         
+
          write(message, '(a,i6,a,2i6)' ) &
 &         '   processor',rank,' computes PAW part for kpt and spin',ikpt1,isppol
          call wrtout(std_out,  message,'COLL')
@@ -551,12 +551,12 @@
 &     '   mlwfovlp : PAW part of overlap computed '
      call wrtout(std_out,  message,'COLL')
    end if ! usepaw
-!  
+!
    call xmpi_barrier(spaceComm)
    call xmpi_sum(cm1,spaceComm,ierr)
-!  
+!
 !  write overlap for separate calculation of wannier functions
-!  
+!
    if(rank==master) then
      do isppol=1,nsppol !we write separate output files for each isppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
@@ -598,21 +598,21 @@
        call wrtout(std_out,  message,'COLL')
      end if !rank==master
    end do !isppol
-!  
+!
    ABI_DEALLOCATE(cm1)
-!  
+!
 !  Write down part of the matrix to the output file
 !  This is for the automatic tests
-!  
+!
    if(rank==master) then
      write(message, '(4a)' ) ch10,&
 &     '   Writing top of the overlap matrix: M_mn(ikb,ik)',ch10,&
 &     '   m=n=1:3, ikb=1, ik=1'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
-!    
+!
 !    just write down the first 3 elements
-!    
+!
      do isppol=1,nsppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
        write(message, '( " " )')
@@ -633,15 +633,15 @@
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,  message,'COLL')
      end do
-!    
+!
 !    Now write down bottom of the matrix
-!    
+!
      write(message, '(4a)' ) ch10,&
 &     '   Writing bottom of the overlap matrix: M_mn(ikb,ik)',ch10,&
 &     '   m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
-!    
+!
      do isppol=1,nsppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
        write(message, '( " " )')
@@ -663,20 +663,20 @@
        call wrtout(std_out,  message,'COLL')
      end do !isppol
    end if !rank==master
-!  
+!
 !  erase temporary files created for parallel runs
-!  
+!
    if (nprocs > 1) then
-!    
+!
      if(prtvol>0) then
        write(message, '(3a)' ) ch10,&
 &       '   mlwfovlp :  Removing temporary files with cg and cprj (PAW)',ch10
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,  message,'COLL')
      end if
-!    
+!
 !    Just master  node will remove the files
-!    
+!
      if(rank==master) then
        do isppol=1,nsppol
          if(spin.ne.0 .and. spin.ne.isppol) cycle
@@ -691,7 +691,7 @@
        end do !isppol
      end if
    end if !MPI nprocs>1
-!  
+!
  end if !lmmn
 !if ( lmmn== .false. .and. lwannierun ) the
 !read .mmn file
@@ -708,17 +708,17 @@
  if(dtset%w90iniprj/=0 )  then
 
 
-!  
+!
 !  Set value for lproj (type of projections to be computed)
 !  In PAW, options 5 and 6 are not in use.
 !  5 means that there will be a contribution from inside the spheres and another from the PW part
 !  6 means that we take into account just the inside-spheres contribution
 !  2 means that PW part will be calculated
 
-!  
+!
    lproj=dtset%w90iniprj
    if(dtset%w90iniprj == 5 ) lproj=2 ! Necessary to calculate PW contribution
-!  
+!
    ABI_ALLOCATE(just_augmentation,(mwan,nsppol))
    just_augmentation(:,:)=.false.
 
@@ -728,10 +728,10 @@
        do isppol=1,nsppol
          if(spin.ne.0 .and. spin.ne.isppol) cycle
          do iwan=1,nwan(isppol)
-!          
+!
 !          Trick to skip the planewave contribution for some Wannier functions
 !          (Not in production).
-!          
+!
            if(proj_radial(iwan,isppol) > 4) then
              just_augmentation(iwan,isppol)=.true.
              proj_radial(iwan,isppol)=proj_radial(iwan,isppol)-3
@@ -743,9 +743,9 @@
        end do !isppol
      end if !w90iniprj == 5
    end if !paw
-!  
+!
 !  Call mlwfovlp_proj (plane waves part of projections)
-!  
+!
    if (dtset%w90iniprj/=6) then ! option 6 not yet in use
      call mlwfovlp_proj(A_matrix,band_in,cg,cprj,dtset,gprimd,just_augmentation,kg,&
 &     lproj,max_num_bands,mband,mkmem,mpi_enreg,mpw,mwan,natom,&
@@ -757,9 +757,9 @@
 &     '   Projectors computed.'
      call wrtout(std_out,  message,'COLL')
    end if !w90proj/=6
-!  
+!
 !  Calculate inside-sphere part of projections (PAW)
-!  
+!
    if (psps%usepaw ==1 .and. ( dtset%w90iniprj>4)) then
      ABI_ALLOCATE(A_paw,(max_num_bands,mwan,nkpt,nsppol))
      call mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,mband,mkmem,&
@@ -767,36 +767,36 @@
 &     dtset%nspinor,nsppol,dtset%ntypat,nwan,pawrad,pawtab,&
 &     proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,&
 &     rprimd,spin,dtset%typat,xred)
-!    
+!
      write(message, '(a,a,a,a)' ) ch10,&
 &     '   mlwfovlp:  mlwfovlp_proj_paw done -',ch10,&
 &     '   Inside-spheres part of projectors computed.'
      call wrtout(std_out,  message,'COLL')
-!    
+!
 !    Add in-sphere contribution to A_matrix
-!    
-!    
+!
+!
 !    w90iniprj==5. Plane waves + augmentation contributions
-!    
+!
      if(dtset%w90iniprj==5) A_matrix(:,:,:,:)=A_matrix(:,:,:,:)+A_paw(:,:,:,:)
-!    
+!
 !    w90iniprj==6. Just augmentation contribution
-!    
+!
      if(dtset%w90iniprj==6) A_matrix(:,:,:,:)=A_paw(:,:,:,:)
-!    
+!
 !    deallocations
-!    
+!
      ABI_DEALLOCATE(A_paw)
    end if !usepaw==1
 
    ABI_DEALLOCATE(just_augmentation)
-!  
+!
    call xmpi_barrier(spaceComm)
    call xmpi_sum(A_matrix,spaceComm,ierr)
 
-!  
+!
 !  write      projections  to a file
-!  
+!
    if(rank==master) then
      if(dtset%w90iniprj==1) then
        do isppol=1,nsppol
@@ -815,7 +815,7 @@
          write(iun(isppol),*) num_bands(isppol),nkpt,nwan(isppol)
        end do
      end if
-!    
+!
      do isppol=1,nsppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
        do ikpt=1,nkpt
@@ -830,7 +830,7 @@
          end do !iwan
        end do !ikpt
      end do !isppol
-!    
+!
      if(dtset%w90iniprj==1) then
        do isppol=1,nsppol
          if(spin.ne.0 .and. spin.ne.isppol) cycle
@@ -850,20 +850,20 @@
      end if
    end if !rank==master
 
-!  
-!  
+!
+!
 !  Write down part of the matrix to the output file
 !  This is for the automatic tests
-!  
+!
    if(rank==master) then
      write(message, '(4a)' ) ch10,&
 &     '   Writing top of the initial projections matrix: A_mn(ik)',ch10,&
 &     '   m=1:3, n=1:3, ik=1'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
-!    
+!
 !    just write down the first 3 elements
-!    
+!
      do isppol=1,nsppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
        write(message, '( " " )')
@@ -884,15 +884,15 @@
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,  message,'COLL')
      end do
-!    
+!
 !    Now write down bottom of the matrix
-!    
+!
      write(message, '(4a)' ) ch10,&
 &     '   Writing bottom of the initial projections matrix: A_mn(ik)',ch10,&
 &     '   m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
-!    
+!
      do isppol=1,nsppol
        if(spin.ne.0 .and. spin.ne.isppol) cycle
        write(message, '( " " )')
@@ -940,7 +940,7 @@
 &     "   However, these files can be used for plotting purposes",ch10
      call wrtout(std_out,  message,'COLL')
    end if
-!  
+!
    spacing = dtset%w90prtunk
    write(message, '( 8a,i3,2a)')ch10,&
 &   "   UNK files will be written.",ch10,&
@@ -948,7 +948,7 @@
 &   "   the wavefunctions are to be written ",ch10, &
 &   "   at every ", spacing," records.",ch10
    call wrtout(std_out,  message,'COLL')
-!  
+!
    ABI_ALLOCATE(kg_k,(3,mpw))
    n1=ngfft(1)
    n2=ngfft(2)
@@ -961,13 +961,13 @@
    do isppol=1,nsppol
      ikg=0
      do ikpt=1,nkpt
-!      
+!
 !      MPI:cycle over k-points not treated by this node
-!      
+!
        if (nprocs>1 ) then !sometimes we can have just one processor
          if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
        end if
-!      
+!
        if(spin.eq.0 .or. spin.eq.isppol) then
          npw_k=npwarr(ikpt)
          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
@@ -1035,7 +1035,7 @@
      end do  ! ikpt
    end do  ! nsppol
    ABI_DEALLOCATE(kg_k)
-!  
+!
    write(message, '(4a)' )ch10, &
 &   '   ','UNK files written',ch10
    call wrtout(std_out,  message,'COLL')
@@ -1059,7 +1059,7 @@
    lwindow(:,:,:)=.false.
    wann_centres(:,:,:)=zero
    wann_spreads(:,:)=zero
-!  
+!
 !  write(std_out,*) seed_name
 !  write(std_out,*) ngkpt
    ngkpt(1)=dtset%kptrlatt(1,1)
@@ -1102,7 +1102,7 @@
 &     '   Calculation is running         ',ch10,&
 &     '-  see ',trim(filew90_wout(isppol)),' for details.'
      call wrtout(std_out,  message,'COLL')
-!    
+!
      call wannier_run(trim(seed_name(isppol)),ngkpt,nkpt,&            !input
 &    real_lattice,recip_lattice,dtset%kpt,num_bands(isppol),& !input
 &    nwan(isppol),nntot,natom,atom_symbols,&                  !input
@@ -1135,8 +1135,8 @@
 
 !  CALL SILVESTRELLI'S APPROACH TO EVALUATE vdW INTERACTION ENERGY USING MLWF!!
 !  ----------------------------------------------------------------------------------------------
-   if (dtset%vdw_xc==10.or.dtset%vdw_xc==11.or.dtset%vdw_xc==12.or.dtset%vdw_xc==14.and.rank==master) then 
-!    vdw_xc==10,11,12,14 starts the 
+   if (dtset%vdw_xc==10.or.dtset%vdw_xc==11.or.dtset%vdw_xc==12.or.dtset%vdw_xc==14.and.rank==master) then
+!    vdw_xc==10,11,12,14 starts the
 !    vdW interaction using MLWFs
      write(std_out,*) 'nwan(nsppol)=',ch10
      do ii=1,nsppol
@@ -1149,18 +1149,18 @@
      ABI_ALLOCATE(tdocc_wan,(mwan,nsppol))
 
      occ_arr(:,:,:)=zero
-     occ_wan(:,:,:)=zero      
-     tdocc_wan(:,:)=zero 
+     occ_wan(:,:,:)=zero
+     tdocc_wan(:,:)=zero
      jj = 0
      do isppol=1,nsppol
        do ikpt=1,nkpt
-         do iband=1,num_bands(isppol)   
-           jj = jj + 1 
-           occ_arr(iband,ikpt,isppol) = occ(jj)  
+         do iband=1,num_bands(isppol)
+           jj = jj + 1
+           occ_arr(iband,ikpt,isppol) = occ(jj)
          end do
        end do
-     end do 
-     
+     end do
+
      do isppol=1,nsppol
        do ikpt=1,nkpt
          do iwan=1,nwan(isppol)
@@ -1168,13 +1168,13 @@
            caux2=czero
            caux3=czero
            do iband=1,num_bands(isppol) !nband_inc(isppol) !nwan(isppol)
-             do ii=1,nwan(isppol) 
+             do ii=1,nwan(isppol)
                caux=U_matrix(ii,iwan,ikpt,isppol)*U_matrix_opt(iband,ii,ikpt,isppol)
 !              DEBUG
 !              if(ISNAN(dble(caux))) then
 !              write(std_out,*) 'NaN: caux(ikpt,iwan,iband,ii):',ikpt,iwan,iband,ii,ch10
 !              end if
-!              END DEBUG 
+!              END DEBUG
                do kk=1,nwan(isppol)
                  caux2=conjg(U_matrix(kk,iwan,ikpt,isppol))*conjg(U_matrix_opt(iband,kk,ikpt,isppol))
                  caux3= caux3+caux*caux2*occ_arr(iband,ikpt,isppol) !take care here as exclude_bands case is not well
@@ -1185,23 +1185,23 @@
 !                if(ISNAN(dble(caux3))) then
 !                write(std_out,*) 'NaN: caux3(ikpt,iwan,iband,kk,jj):',ikpt,iwan,iband,kk,jj
 !                end if
-!                END DEBUG 
+!                END DEBUG
                end do
              end do
            end do
-           occ_wan(iwan,ikpt,isppol) = dble(caux3) 
+           occ_wan(iwan,ikpt,isppol) = dble(caux3)
 !          DEBUG
 !          write(std_out,*) occ_wan(iwan,ikpt,isppol)
-!          END DEBUG      
+!          END DEBUG
 !          end do
          end do
        end do
      end do
 
      write(std_out,*) ch10,'MLWFs Occupation Matrix diagonal terms:',ch10
-     
-     do jj=1,nsppol     
-       forall(iwan=1:nwan(jj)) tdocc_wan(iwan,jj) = sum(occ_wan(iwan,1:nkpt,jj)) / real(nkpt,dp) 
+
+     do jj=1,nsppol
+       forall(iwan=1:nwan(jj)) tdocc_wan(iwan,jj) = sum(occ_wan(iwan,1:nkpt,jj)) / real(nkpt,dp)
        write(std_out,*) 'tdocc_wan(iwan),isppol:',ch10
        write(std_out,*) (tdocc_wan(iwan,jj),iwan=1,nwan(jj)),jj
      end do

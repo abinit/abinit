@@ -77,14 +77,14 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  use defs_abitypes
  use m_errors
  use m_profiling_abi
-
  use m_xc_noncoll
+
+ use m_time,      only : timab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkvxc_noncoll'
- use interfaces_18_timing
  use interfaces_56_xc, except_this_one => dfpt_mkvxc_noncoll
 !End of the abilint section
 

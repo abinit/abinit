@@ -43,6 +43,7 @@ module m_phgamma
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm, get_diag
  use m_io_tools,       only : open_file
+ use m_symtk,          only : littlegroup_q
  use m_geometry,       only : normv
  use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq
@@ -54,8 +55,9 @@ module m_phgamma
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
- use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
  use m_special_funcs,  only : fermi_dirac
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
+ use defs_elphon,      only : gam_mult_displ
 
  implicit none
 
@@ -808,7 +810,6 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_eval_qibz'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -972,7 +973,6 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_interp'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -1360,7 +1360,6 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_vv_eval_qibz'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -1553,7 +1552,6 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_vv_interp'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4215,10 +4213,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phgamma'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_66_wfs
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none

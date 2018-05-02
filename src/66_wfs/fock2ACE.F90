@@ -5,8 +5,8 @@
 !!
 !! FUNCTION
 !! Compute nonlocal contribution to the Fock part of the hamiltonian in the ACE formalism.
-!! optionally contribution to Fock forces 
-!! 
+!! optionally contribution to Fock forces
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (FJ,XG,MT)
@@ -84,6 +84,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,&
 &  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
 
+
  use defs_basis
  use defs_datatypes
  use defs_abitypes
@@ -91,6 +92,10 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_xmpi
  use m_errors
  use m_fock
+ use m_cgtools
+
+ use m_time,             only : timab
+ use m_kg,               only : mkkpg
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
 &                               load_k_hamiltonian,gs_hamiltonian_type
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
@@ -98,13 +103,11 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
- use m_cgtools
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock2ACE'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => fock2ACE
@@ -308,11 +311,11 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
 !    blocksize= bandpp (JB 2016/04/16)
 !    Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
-!   
+!
      ABI_ALLOCATE(occblock,(blocksize))
      ABI_ALLOCATE(weight,(blocksize))
      occblock=zero;weight=zero
-     
+
      if (fockcommon%optfor) then
        fockcommon%forces_ikpt=zero
      end if
@@ -348,7 +351,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        if (mpi_enreg%paral_kgb==1) then
          msg='fock2ACE: Paral_kgb is not yet implemented for fock calculations'
          MSG_BUG(msg)
-       end if 
+       end if
        ndat=mpi_enreg%bandpp
        if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
 
@@ -364,7 +367,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
          if (fockcommon%optfor) then
            fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
          end if
-       end do 
+       end do
 
 
      end do ! End of loop on block of bands
@@ -425,7 +428,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
      ABI_DEALLOCATE(wi)
      ABI_DEALLOCATE(mkl)
-     
+
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)

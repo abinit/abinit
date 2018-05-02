@@ -9,6 +9,8 @@ module m_tdep_sym
  use defs_basis
  use m_profiling_abi
  use m_errors
+
+ use m_symtk,            only : mati3inv
  use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
  use m_tdep_readwrite,   only : Input_Variables_type
 
@@ -131,7 +133,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_SearchS_1at'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

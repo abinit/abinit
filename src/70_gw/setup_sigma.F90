@@ -89,7 +89,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_sigma'
  use interfaces_14_hidewrite
- use interfaces_56_io_mpi
  use interfaces_70_gw, except_this_one => setup_sigma
 !End of the abilint section
 

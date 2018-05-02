@@ -217,7 +217,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_parameters
  use defs_wvltypes
  use m_energies
  use m_errors
@@ -227,6 +226,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_ab7_mixing
  use m_hdr
 
+ use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
  use m_geometry,         only : xred2xcart, metric
  use m_crystal,          only : prtposcar
@@ -245,6 +245,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_pawfgr,           only : pawfgr_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
+ use m_spin_current,     only : spin_current
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -259,7 +260,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #undef ABI_FUNC
 #define ABI_FUNC 'afterscfloop'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
@@ -510,10 +510,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
- if(dtset%orbmag==1) then
-   call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
-&   mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
-&   symrec,usecprj,psps%usepaw,xred)
+ if(dtset%orbmag==1 .OR. dtset%orbmag==3) then
+    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
+         &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+         &            symrec,usecprj,psps%usepaw,xred)
+ end if
+ if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
+    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+     &            mcg,mcprj,mpi_enreg,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
+     &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
  end if
 
  call timab(252,2,tsec)

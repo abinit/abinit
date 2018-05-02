@@ -171,7 +171,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use defs_parameters
  use defs_rectypes
  use m_xmpi
  use m_profiling_abi
@@ -186,8 +185,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_hdr
  use m_xcdata
 
+ use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
  use m_geometry,         only : metric
+ use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_abi_etsf,         only : abi_etsf_init
@@ -212,26 +213,26 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_paw_dmft,         only : paw_dmft_type
  use m_fock,             only : fock_type,fock_init,fock_destroy,fock_ACE_destroy,fock_common_destroy,&
 &                               fock_BZ_destroy,fock_update_exc,fock_updatecwaveocc
- use gwls_hamiltonian,   only : build_vxc
+ use m_gwls_hamiltonian, only : build_vxc
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif
  use m_io_kss,           only : gshgg_mkncwrite
  use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
  use m_kg,               only : getcut, getmpw, kpgio, getph
+ use m_vtorhorec,        only : first_rec, vtorhorec
+ use m_vtorhotf,         only : vtorhotf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
@@ -240,7 +241,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
- use interfaces_68_recursion
  use interfaces_68_rsprc
  use interfaces_79_seqpar_mpi
  use interfaces_94_scfcv, except_this_one => scfcv
@@ -480,6 +480,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  dielop=0 ; strsxc=zero
  deltae=zero ; elast=zero ;
  vpotzero(:)=zero
+ ! JWZ April 12 2018: Intel 18 compiler seems to require maxfor initialized,
+ ! else it dies in scprqt in some scenarios
+ maxfor=zero
+ !
  results_gs%residm=zero;results_gs%res2=zero
  results_gs%deltae=zero;results_gs%diffor=zero
  call energies_init(energies)

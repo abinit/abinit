@@ -52,7 +52,7 @@
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! === optional inputs ===
-!! vxc(cplex*nfft,nspden)=XC GS potential 
+!! vxc(cplex*nfft,nspden)=XC GS potential
 !!
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
@@ -87,6 +87,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use m_pawtab,   only : pawtab_type
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_spacepar, only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -233,7 +234,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
        !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
 &       nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
-       ABI_DEALLOCATE(rhor0)  
+       ABI_DEALLOCATE(rhor0)
      end if
 
    else

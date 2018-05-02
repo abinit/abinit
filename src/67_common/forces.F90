@@ -134,6 +134,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  use m_efield
  use m_errors
 
+ use m_time,             only : timab
  use m_geometry,         only : fred2fcart, metric
  use m_fock,             only : fock_type
  use m_pawrad,           only : pawrad_type
@@ -146,7 +147,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forces'
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_64_psp
@@ -553,6 +553,105 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  end if
 
  call timab(69,2,tsec)
+
+contains
+!!***
+
+!!****f* ABINIT/sygrad
+!!
+!! NAME
+!! sygrad
+!!
+!! FUNCTION
+!! Symmetrize derivatives of energy with respect to coordinates.
+!! Unsymmetrized gradients are input as dedt; symmetrized grads are then placed in fred.
+!! If nsym=1 simply copy dedt into fred (only symmetry is identity).
+!!
+!! INPUTS
+!!  natom=number of atoms in cell
+!!  dedt(3,natom)=unsymmetrized gradients wrt dimensionless tn (hartree)
+!!  nsym=number of symmetry operators in group
+!!  symrec(3,3,nsym)=symmetries of group in terms of operations on
+!!    reciprocal space primitive translations--see comments below
+!!  indsym(4,nsym,natom)=label given by subroutine symatm, indicating atom
+!!   label which gets rotated into given atom by given symmetry
+!!   (first three elements are related primitive translation--
+!!   see symatm where this is computed)
+!!
+!! OUTPUT
+!! fred(3,3,natom)=symmetrized gradients wrt reduced coordinates (hartree)
+!!
+!! NOTES
+!! symmetrization of gradients with respect to reduced
+!! coordinates tn is conducted according to the expression
+!! $[d(e)/d(t(n,a))]_{symmetrized} = (1/Nsym)*Sum(S)*symrec(n,m,S)*
+!!              [d(e)/d(t(m,b))]_{unsymmetrized}$
+!! where $t(m,b)= (symrel^{-1})(m,n)*(t(n,a)-tnons(n))$ and tnons
+!! is a possible nonsymmorphic translation.  The label "b" here
+!! refers to the atom which gets rotated into "a" under symmetry "S".
+!! symrel is the symmetry matrix in real space, which is the inverse
+!! transpose of symrec.  symrec is the symmetry matrix in reciprocal
+!! space.  $sym_{cartesian} = R * symrel * R^{-1} = G * symrec * G^{-1}$
+!! where the columns of R and G are the dimensional primitive translations
+!! in real and reciprocal space respectively.
+!! Note the use of "symrec" in the symmetrization expression above.
+!!
+!! PARENTS
+!!      forces
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sygrad'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nsym
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym)
+ real(dp),intent(in) :: dedt(3,natom)
+ real(dp),intent(out) :: fred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ia,ind,isym,mu
+ real(dp),parameter :: tol=1.0d-30
+ real(dp) :: summ
+
+! *************************************************************************
+!
+ if (nsym==1) then
+!  only symmetry is identity so simply copy
+   fred(:,:)=dedt(:,:)
+ else
+!  actually conduct symmetrization
+   do ia=1,natom
+     do mu=1,3
+       summ=0._dp
+       do isym=1,nsym
+         ind=indsym(4,isym,ia)
+         summ=summ+dble(symrec(mu,1,isym))*dedt(1,ind)+&
+&         dble(symrec(mu,2,isym))*dedt(2,ind)+&
+&         dble(symrec(mu,3,isym))*dedt(3,ind)
+       end do
+       fred(mu,ia)=summ/dble(nsym)
+       if(abs(fred(mu,ia))<tol)fred(mu,ia)=0.0_dp
+     end do
+   end do
+ end if
+
+end subroutine sygrad
+!!***
 
 end subroutine forces
 !!***

@@ -38,6 +38,7 @@ MODULE m_cut3d
 
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
+ use m_symtk,            only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
@@ -48,6 +49,7 @@ MODULE m_cut3d
  use m_epjdos,           only : recip_ylm, dens_in_sph
  use m_dens,             only : dens_hirsh
  use m_kg,               only : kpgio, ph1d3d, getph
+ use m_fftcore,          only : sphereboundary
 
  implicit none
 
@@ -505,7 +507,6 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_planeint'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1001,7 +1002,6 @@ subroutine reduce(r,rcart,rprimd)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'reduce'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1218,7 +1218,6 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_volumeint'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1815,7 +1814,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
 !End of the abilint section

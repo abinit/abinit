@@ -38,6 +38,7 @@ MODULE m_haydock
  use netcdf
 #endif
 
+ use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
  use defs_abitypes,       only : Hdr_type
@@ -47,6 +48,7 @@ MODULE m_haydock
  use m_abilasi,           only : matrginv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_fft_mesh,          only : calc_ceigr
+ use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
  use m_crystal_io,        only : crystal_ncwrite
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
@@ -111,8 +113,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_haydock_driver'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_56_recipspace
  use interfaces_69_wfdesc
 !End of the abilint section
 
@@ -2147,7 +2147,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
 
    call haydock_bilanczos_optalgo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,hexc,hexc_i,&
-&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
 &    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
 
 
@@ -2261,7 +2261,7 @@ end subroutine haydock_bilanczos
 !! SOURCE
 
 subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
-&  factor,term_type,ep_renorms,aa,bb,cc,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
+&  factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
 &  green,inn,is_converged,comm)
 
 
@@ -2288,6 +2288,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  complex(dpc),intent(out) :: green(nomega)
  complex(dpc),intent(in) :: omega(nomega)
  complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
+ complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
  complex(dpc),intent(in) :: ep_renorms(hsize)
  complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
  complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)

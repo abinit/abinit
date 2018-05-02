@@ -4,11 +4,10 @@
 !! cgq_builder
 !!
 !! FUNCTION
-!! This routine locates cgq for efield calculations, especially
-!! for // case
+!! This routine locates cgq for efield calculations, especially for parallel case
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group 
+!! Copyright (C) 2003-2018 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +17,7 @@
 !!  berryflag = logical flag determining use of electric field variables
 !!  cg(2,mcg)=planewave coefficients of wavefunctions.
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  ikpt=index of current k kpt 
+!!  ikpt=index of current k kpt
 !!  ikpt_loc=index of k point on current processor (see vtorho.F90)
 !!  isspol=value of spin polarization currently treated
 !!  me_distrb=current value from spaceComm_distrb (see vtorho.F90)
@@ -72,11 +71,12 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  use m_efield
  use m_profiling_abi
 
+ use m_time, only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cgq_builder'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -89,7 +89,7 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  type(efield_type), intent(inout) :: dtefield
  type(MPI_type), intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: npwarr(dtset%nkpt) 
+ integer,intent(in) :: npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),pwnsfac(2,pwind_alloc)
  real(dp),intent(out) :: cgq(2,mcgq),pwnsfacq(2,mkgq)
 
@@ -110,7 +110,7 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 !DEBUG
 
  if (mcgq==0.or.mkgq==0) return
- 
+
  call timab(983,1,tsec)
 
 !Test compatbility of berryflag
@@ -126,7 +126,7 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  do idir = 1, 3
 
 !  skip idir values for which efield_dot(idir) = 0
-   if (berryflag .and. abs(dtefield%efield_dot(idir)) < tol12 ) cycle 
+   if (berryflag .and. abs(dtefield%efield_dot(idir)) < tol12 ) cycle
 
    do ifor = 1, 2
 
@@ -148,7 +148,7 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
          if ( my_source == me_distrb ) then
 !          I am destination and source
 
-           if(berryflag) then 
+           if(berryflag) then
              ikg1 = dtefield%fkgindex(ikpt1f)
              ikg2 = dtefield%cgqindex(3,ifor+2*(idir-1),ikpt+(isppol-1)*dtset%nkpt)
              icg1 = dtefield%cgindex(ikpt1i,isppol)
@@ -190,7 +190,7 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 
          if(jkpt > 0 .and. jsppol > 0) then
 
-           if(berryflag) then 
+           if(berryflag) then
              jkptf = dtefield%i2fbz(jkpt)
              jkpt1f = dtefield%ikpt_dk(jkptf,ifor,idir)
              jkpt1i = dtefield%indkk_f2ibz(jkpt1f,1)

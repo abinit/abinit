@@ -58,6 +58,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  use m_geometry,   only : phdispl_cart2red
  use m_dynmat,     only : ftgam_init, ftgam
  use m_crystal,    only : crystal_t
+ use m_fstab,      only : mkqptequiv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -656,7 +657,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  if (elph_ds%prtbltztrp == 1) then
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
-&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &
+&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,natom,nband,elph_ds%nelect,new_nkptirr, &
 &   elph_ds%nspinor,nsppol,Cryst%nsym,Cryst%rprimd,Cryst%symrel,tmp_tau_k)
  end if !prtbltztrp
  ABI_DEALLOCATE(tmp_eigenGS)

@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Helper functions to compute the XC kernel in reciprocal space.
-!! WARNING: At present (10/01/14) these routines are not tested 
+!! WARNING: At present (10/01/14) these routines are not tested
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
@@ -16,12 +16,12 @@
 !!
 !! NOTES:
 !!  libxc_functionals.F90 uses a global structure (funcs) to store the XC parameters.
-!!  This structure is initialized in driver with the value of ixc specified by the user in the input file. 
-!!  In order to change the value of ixc at run-time, we have to reinitialize the global structure 
+!!  This structure is initialized in driver with the value of ixc specified by the user in the input file.
+!!  In order to change the value of ixc at run-time, we have to reinitialize the global structure
 !!  with the new value of ixc before computing XC quantities.
 !!  Moreover one has to reinstate the old functional before returning so that the other routines
 !!  will continue to used the previous ixc. This task can be accomplished with the following pseudocode
-!!  
+!!
 !!   ! Reinitialize the libxc module with the overriden values
 !!   if (old_ixc<0)  call libxc_functionals_end()
 !!   if (new_ixc<0) call libxc_functionals_init(new_ixc,nspden)
@@ -56,11 +56,13 @@ MODULE m_kxc
  use m_pptools,       only : printxsf
  use m_numeric_tools, only : hermitianize
  use m_fft_mesh,      only : g2ifft
+ use m_fft,           only : fourdp_6d
  use m_mpinfo,        only : destroy_mpi_enreg
+ use m_spacepar,      only : hartre
 
  implicit none
 
- private 
+ private
 !!***
 
  public :: kxc_rpa         ! Hartree kernel
@@ -1103,7 +1105,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  real(dp) :: enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
  type(xcdata_type) :: xcdata
- type(MPI_type) :: MPI_enreg_seq 
+ type(MPI_type) :: MPI_enreg_seq
 !arrays
  real(dp) :: qphon(3),strsxc(6),dum(0)
  real(dp),allocatable :: kxcpw_g(:,:),kxcr(:,:),phas(:,:,:)
@@ -1154,8 +1156,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  ABI_MALLOC(vhartr,(nfft_tot))
  rhog(:,:)=zero
 !MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
-!should implement the non linear core correction 
- n3xccc=0       
+!should implement the non linear core correction
+ n3xccc=0
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vxclda,(nfft_tot,nspden))
 
@@ -1247,7 +1249,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
        gpqy=dble(gvec(2,ig))
        gpqz=dble(gvec(3,ig))
        do ir=1,nfft_tot
-         expo=gpqx*xx(1,ir)+gpqy*xx(2,ir)+gpqz*xx(3,ir)              
+         expo=gpqx*xx(1,ir)+gpqy*xx(2,ir)+gpqz*xx(3,ir)
          phas(2*ir-1,ig,1)= cos(two_pi*expo)
          phas(2*ir,ig,1) =  sin(two_pi*expo)
        end do
@@ -1373,7 +1375,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
  real(dp) :: difx,dify,difz,inv_kappa_sq
  character(len=500) :: msg,fname
- type(MPI_type) :: MPI_enreg_seq 
+ type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: qpg(3),qpgp(3),qphon(3),strsxc(6),q_point(3),dum(0)
@@ -1420,7 +1422,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
    MSG_ERROR(msg)
  end if
- 
+
  ngfft1=ngfft(1)
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
@@ -1432,7 +1434,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
    MSG_ERROR("GGA functional not implemented for ADA vertex")
  end if
- 
+
  ABI_MALLOC(kxcr,(nfft,nkxc))
 
 !gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
@@ -1442,8 +1444,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ABI_MALLOC(vhartr,(nfft))
  rhog(:,:)=zero
 !MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
-!should implement the non linear core correction 
- n3xccc=0       
+!should implement the non linear core correction
+ n3xccc=0
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vxclda,(nfft,nspden))
 
@@ -1477,7 +1479,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  my_rhor = rhor
 !do isp = 1,nsppol
 !call calc_smeared_density(my_rhor(:,isp),1,rhotilder(:,isp),nfft,ngfft,npw,&
-!&   gvec,Cryst%gprimd,Cryst%ucvol,MPI_enreg_seq,paral_kgb0,kappa_in=kappa) 
+!&   gvec,Cryst%gprimd,Cryst%ucvol,MPI_enreg_seq,paral_kgb0,kappa_in=kappa)
 !my_rhor(:,isp) = rhotilder(:,isp)
 !end do
 
@@ -1515,7 +1517,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !end do
 
 !DEBUG test with direct way of calculating Kxc
-!do i1=1,nfft  
+!do i1=1,nfft
 !rs = (three/(four_pi*my_rhor(i1,1)))**third
 !Kx = 16._dp/27._dp*0.3141592653589793e1_dp*(rs**2)*(-0.4581652_dp)
 !
@@ -1578,7 +1580,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ierr=0
  do iqbz=1,nqibz
    q_point(:) = qibz(:,iqbz)
-!  
+!
    do ig=1,npw
      do igp=1,npw
 !      Calculate |q+G| and |q+G'|
@@ -1586,17 +1588,17 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
        qpgp(:) = two_pi*MATMUL(Cryst%gprimd,q_point(:)+gvec(:,igp))
        abs_qpg_sq = 1.0_dp/(1.0_dp+dot_product(qpg,qpg)*inv_kappa_sq)
        abs_qpgp_sq = 1.0_dp/(1.0_dp+dot_product(qpgp,qpgp)*inv_kappa_sq)
-       
+
        gmgp_idx = g2ifft(gvec(:,ig)-gvec(:,igp),ngfft)
        if (gmgp_idx>0) then
          my_fxc_ADA_ggpq(ig,igp,iqbz) = half*CMPLX(my_kxcg(1,gmgp_idx), my_kxcg(2,gmgp_idx))*(abs_qpg_sq+abs_qpgp_sq)
-       else 
+       else
          ierr=ierr+1
          my_fxc_ADA_ggpq(ig,igp,iqbz) = czero
        end if
      end do
    end do
-   if (ierr/=0) then 
+   if (ierr/=0) then
      write(msg,'(a,i4,3a)')&
 &     ' Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &     ' Enlarge the FFT mesh to get rid of this problem. '
@@ -1604,7 +1606,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    end if
  end do
 
- fxc_ADA = my_fxc_ADA_ggpq 
+ fxc_ADA = my_fxc_ADA_ggpq
 
 !do iqbz=1,nqibz
 !call hermitianize(my_fxc_ADA_ggpq(:,:,iqbz),"All")
@@ -1626,7 +1628,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !  end do
 !  end do
 !  end do
-   
+
 !  write(std_out,*)"kxcr(r=0)",kxcr(1,1)
 !  write(std_out,*)"my_kxg(G=0)",my_kxcg(:,1)
 !  write(std_out,*)"SUM kxcr/nfft ",SUM(kxcr(:,1))/nfft
@@ -1642,7 +1644,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    ABI_MALLOC(rvec,(3,nfft))
    ABI_MALLOC(dummy,(nfft,nfft))
    my_fxc_ADA_rrp=zero; FT_fxc_ADA_ggpq=czero; dummy=czero; rvec=zero
-   
+
 !  First find coordinates of real-space fft points
    igrid = 0
    ngfft1 = ngfft(1)
@@ -1661,13 +1663,13 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
        end do
      end do
    end do
-   if (igrid/=nfft) then 
+   if (igrid/=nfft) then
      MSG_ERROR('kxc_ADA: igrid not equal to nfft')
    end if
-   
+
 !  Construct kernel in real space
    do ir=1,nfft
-     do irp=ir,nfft 
+     do irp=ir,nfft
        rmrp(:) = rvec(:,ir)-rvec(:,irp)
        abs_rmrp = sqrt(dot_product(rmrp,rmrp))
        my_fxc_ADA_rrp(ir,irp) = eighth*kappa*kappa*piinv* &
@@ -1679,7 +1681,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
      end do
    end do
 
-!  Find FFT index for all G   
+!  Find FFT index for all G
    n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 !  Use the following indexing (N means ngfft of the adequate direction)
 !  0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= kg
@@ -1738,7 +1740,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    ABI_FREE(rvec)
    ABI_FREE(my_fxc_ADA_rrp)
    ABI_FREE(FT_fxc_ADA_ggpq)
-   
+
    if (xcdata%xclevel==2) then
      MSG_ERROR(" GGA not implemented for kxc_ADA")
    end if !xclevel==2

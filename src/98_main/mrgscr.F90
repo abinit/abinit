@@ -65,11 +65,13 @@ program mrgscr
  use m_crystal
  use m_pawrhoij
 
+ use m_specialmsg,          only : specialmsg_getcount, herald
+ use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT
  use m_io_tools,            only : prompt, file_exists, flush_unit, open_file
  use m_fstrings,            only : int2char4, endswith, itoa, sjoin, strcat
  use m_fft_mesh,            only : g2ifft
- use m_fftcore,             only : get_cache_kb
+ use m_fftcore,             only : get_cache_kb, getng
  use m_numeric_tools,       only : iseven, cspint
  use m_mpinfo,              only : destroy_mpi_enreg
  use m_geometry,            only : normv, metric
@@ -90,17 +92,15 @@ program mrgscr
  use m_levenberg_marquardt, only : lmdif1, lm_fit_print_info
  use m_screening,           only : mkdump_er, em1results_free, em1results_print,decompose_epsm1,&
 &                                  init_er_from_file, Epsilonm1_results
+ use m_wfd,                 only : test_charge
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mrgscr'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_51_manage_mpi
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none

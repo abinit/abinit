@@ -2,6 +2,7 @@
 description: How to set parameters related to the electronic wavevectors (k-points)
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters related to the electronic wavevectors (k-points) with the ABINIT package.
 
@@ -29,7 +30,7 @@ such grids, see [[ngkpt]], [[nshiftk]], [[shiftk]] or even the more general
 [[kptrlatt]]. A list of interesting k point sets can be generated
 automatically, including a measure of their accuracy in term of integration
 within the Brillouin Zone, see [[prtkpt]], [[kptrlen]]. For metals, a joint
-convergenc study on [[tsmear]] AND the k-point grid is important.
+convergence study on [[tsmear]] AND the k-point grid is important.
 
 For the definition of a path of k-points, see [[topic:ElecBandStructure]].  
 

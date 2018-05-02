@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "calc_b_matrix.F90",
- "deloc2xcart.F90",
  "fred2fdeloc.F90",
  "isotemp.F90",
  "m_abihist.F90",
@@ -59,7 +58,6 @@ sources = [
  "predict_steepest.F90",
  "predict_string.F90",
  "prtxfase.F90",
- "strainsym.F90",
  "xcart2deloc.F90",
  "xfh_recover_new.F90",
  "xfh_recover_deloc.F90",

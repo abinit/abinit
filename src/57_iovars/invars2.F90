@@ -81,7 +81,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use netcdf
 #endif
 
+ use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_symtk,     only : matr3inv
  use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
@@ -92,9 +94,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_57_iovars, except_this_one => invars2
 !End of the abilint section
 
@@ -2109,6 +2108,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
  if(tread==1) dtset%prtfc=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfull1wf',tread,'INT')
+ if(tread==1) dtset%prtfull1wf=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfsurf',tread,'INT')
  if(tread==1) dtset%prtfsurf=intarr(1)
 
@@ -2450,9 +2452,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
- if(tread==1) dtset%toldfe=dprarr(1)
+ if(tread==1) dtset%focktoldfe=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrde',tread,'DPR')
  if(tread==1) dtset%tolrde=dprarr(1)
 
 !find which tolXXX are defined generically and for this jdtset

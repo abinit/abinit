@@ -26,9 +26,7 @@ module m_tdep_abitypes
   use m_crystal_io,       only : crystal_ncwrite
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
-
-
-
+  use m_kpts,             only : smpbz
 
   implicit none
 
@@ -190,7 +188,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_init_ddb'
- use interfaces_56_recipspace
 !End of the abilint section
 
   implicit none

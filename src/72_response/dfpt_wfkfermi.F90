@@ -96,6 +96,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  use m_xmpi
  use m_cgtools
 
+ use m_time,        only : timab
  use m_pawrhoij,    only : pawrhoij_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_axpby, pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
@@ -105,7 +106,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_wfkfermi'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_66_wfs
  use interfaces_72_response, except_this_one => dfpt_wfkfermi

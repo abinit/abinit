@@ -20,12 +20,15 @@
 #include "abi_common.h"
 
 module m_xgScalapack
+
   use defs_basis, only : std_err, std_out, dp
   use m_profiling_abi
   use m_xmpi 
   use m_errors
   use m_slk
   use m_xg
+
+  use m_time,     only: timab
 
 #ifdef HAVE_MPI2
  use mpi
@@ -100,7 +103,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_init'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -258,7 +260,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_heev'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -330,7 +331,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_hegv'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -408,7 +408,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_scatter'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(in   ) :: xgScalapack
@@ -462,7 +461,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_free'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack

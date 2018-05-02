@@ -19,9 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "appdig.F90",
- "fappnd.F90",
  "isfile.F90",
- "littlegroup_q.F90",
  "m_angles.F90",
  "m_atomdata.F90",
  "m_dummy.F90",
@@ -32,9 +30,7 @@ sources = [
  "m_pptools.F90",
  "m_special_funcs.F90",
  "m_wfutils.F90",
- "mati3det.F90",
- "mati3inv.F90",
- "matr3inv.F90",
+ "m_symtk.F90",
  "mknormpath.F90",
  "proc_distrb_cycle.F90",
  "radsintr.F90",

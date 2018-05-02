@@ -45,11 +45,13 @@ module m_fock
  use m_pawcprj
  use m_cgtools
 
- use m_mpinfo,          only : ptabs_fourdp
+ use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_symtk,           only : mati3inv, matr3inv
+ use m_fftcore,         only : sphereboundary
  use m_fft,             only : zerosym
  use m_kg,              only : ph1d3d, getph
- use m_paw_ij,          only : paw_ij_type
+ use m_kpts,            only : listkk
 
 
  implicit none
@@ -351,7 +353,7 @@ contains
 !!
 !! SOURCE
 
-subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
+subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -364,7 +366,7 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_A
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE
  type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
@@ -494,10 +496,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_init'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -692,7 +691,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
    fockcommon%use_ACE=use_ACE
-   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
+   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,use_ACE)
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -1595,7 +1594,6 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 
    ! Select only the occupied states (such that fock%occ_bz > 10^-8)
    if (abs(occ(iband))>tol8) then
-      fock_energy=fock_energy
 !     fock_energy=fock_energy + half*fock%eigen_ikpt(iband)*occ(iband)*dtset%wtk(ikpt)
      !* Sum the contribution of each occupied states at point k_i
      !* No need to multiply %wtk by ucvol since there is no factor 1/ucvol in the definition of %wtk
@@ -1717,7 +1715,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
@@ -2505,7 +2502,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'strfock'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

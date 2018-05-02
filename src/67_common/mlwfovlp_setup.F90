@@ -43,7 +43,7 @@
 !!  nband_inc(nsppol) = # of included bands
 !!  nntot            = number of k-point neighbour
 !!  ovikp(nkpt,nntot)= gives  nntot value of k2 (in the BZ) for each k1  (k2=k1+b mod(G))
-!!  
+!!
 !! SIDE EFFECTS
 !!  (only writing, printing)
 !!
@@ -176,7 +176,7 @@
    num_bands(:)=mband
 !  num_nnmax=12 !limit fixed for compact structure in wannier_setup.
    ovikp=0.d0
-!  "When nshiftk=1, kptrlatt is initialized as a diagonal (3x3) matrix, whose diagonal 
+!  "When nshiftk=1, kptrlatt is initialized as a diagonal (3x3) matrix, whose diagonal
 !  elements are the three values ngkpt(1:3)"
    ngkpt(1)=dtset%kptrlatt(1,1)
    ngkpt(2)=dtset%kptrlatt(2,2) !  have to verif kptrlatt is diagonal
@@ -184,7 +184,7 @@
    do iatom=1,natom
      itypat=dtset%typat(iatom)
      znucl1=dtset%znucl(itypat)
-     call atomdata_from_znucl(atom, znucl1) 
+     call atomdata_from_znucl(atom, znucl1)
      symbol=trim(adjustl(atom%symbol))
 !    write(309,*) symbol
      atom_symbols(iatom)=symbol
@@ -265,7 +265,7 @@
    if(spin.ne.0 .and. spin.ne.isppol) cycle
    band_in(:,isppol)=.true.
    do icb=1,mband
-     if(exclude_bands(icb,isppol).ne.0)  band_in(exclude_bands(icb,isppol),isppol)=.false. 
+     if(exclude_bands(icb,isppol).ne.0)  band_in(exclude_bands(icb,isppol),isppol)=.false.
    end do
    nband_inc(isppol)=0
    do icb=1, mband
@@ -278,7 +278,7 @@
    write(message, '(a,a)' )ch10,&
 &   '   Following bands are excluded from the calculation of wannier functions:'
    call wrtout(std_out,message,'COLL')
-   
+
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
      if(nsppol==2) then
@@ -301,7 +301,7 @@
    end if !nsppol
    write(message, '(a,i6,3a)' )ch10,&
 &   nwan(isppol),' wannier functions will be computed (see ',trim(filew90_win(isppol)),')'
-   call wrtout(std_out,message,'COLL') 
+   call wrtout(std_out,message,'COLL')
 !  write(std_out,*) exclude_bands(icb),band_in(icb)
 !  ^^^^^^^^^^^^^^^END OF READING
    write(message, '(a,i6,a)' )ch10,&

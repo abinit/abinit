@@ -251,7 +251,6 @@ end subroutine lprtmat
 subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
 
  use defs_basis
- use defs_parameters
  use m_profiling_abi
 
  use m_geometry, only : ioniondist

@@ -9,6 +9,8 @@ import numpy as np
 from numpy import zeros, einsum
 import netCDF4 as nc
 
+from .ddbfile import DdbFile
+
 from .mpi import MPI, comm, size, rank, mpi_watch
 
 from . import EpcFile
@@ -19,7 +21,7 @@ __all__ = ['GkkFile']
 class GkkFile(EpcFile):
     
     def read_nc(self, fname=None):
-        """Open the EIG2D.nc file and read it."""
+        """Open the GKK.nc file and read it."""
         fname = fname if fname else self.fname
 
         super(GkkFile, self).read_nc(fname)
@@ -49,7 +51,11 @@ class GkkFile(EpcFile):
             self.GKK = np.zeros((self.nkpt, self.nsppol*self.nband, 3, self.natom, self.nband), dtype=np.complex)
             self.GKK.real[...] = GKKtmp2[:, ::2, ...]
             self.GKK.imag[...] = GKKtmp2[:, 1::2, ...]
+
+            # Now the second band index "n" refers to the state at "k+q,n"
             self.GKK = np.reshape(self.GKK,(self.nkpt,self.nsppol,self.nband,3,self.natom,self.nband))
+
+            self.GKK_mode = None
 
     def get_gkk_squared(self):
         """
@@ -86,6 +92,76 @@ class GkkFile(EpcFile):
                                            self.GKK[ikpt,0,...].conjugate())
 
         return gkk2
+
+    def get_gkk_mode(self, ddb):
+        """
+        Convert the gkk from the cartesian/atomic basis to the mode basis.
+
+        The resulting gkk are aslo scaled by the root mean squared displacement
+        of the mode, that is sqrt(hbar/(M omega)).
+
+        Arguments
+        ---------
+        ddb:
+            DdbFile object.
+
+        Returns
+        -------
+
+        GKK_mode: [nkpt, nband, nband, nmode]
+        """
+        assert ddb.nmode == 3 * self.natom
+
+        self.GKK_mode = np.zeros((self.nkpt, self.nband, self.nband, ddb.nmode), dtype=np.complex)
+
+        polvec = ddb.get_reduced_displ()
+
+        self.GKK_mode = np.einsum('kniam,oia->knmo', self.GKK[:,0,...], polvec)
+
+        return self.GKK_mode
+
+    def get_gkk2_DW_mode(self, ddb):
+        """
+        Compute the squared gkk matrix elements for the Debye-Waller
+        self-energy.
+
+        The resulting gkk are aslo scaled by the mean squared displacement
+        of the mode, that is hbar/(M omega).
+
+        Note that, for a given q-point contribution,
+        this function must be called with the GKK at q=Gamma, and the DDB
+        and the given q-point.
+
+        Arguments
+        ---------
+        ddb:
+            DdbFile object.
+
+        Returns
+        -------
+
+        GKK2_DW_mode: [nkpt, nband, nband, nmode]
+        """
+        assert ddb.nmode == 3 * self.natom
+
+
+        self.GKK2_DW_mode = np.zeros((self.nkpt, self.nband, self.nband, ddb.nmode), dtype=np.complex)
+
+        polvec = ddb.get_reduced_displ()
+
+        g_r = np.einsum('kniam->knim', self.GKK[:,0,...])
+
+        for imode in range(ddb.nmode):
+
+            g_l1 = np.einsum('kniam,ia->knam', self.GKK[:,0,...], polvec[imode,...]) 
+
+            g_l2 = np.einsum('knam,ia->knim', np.conj(g_l1), polvec[imode,...]) 
+
+            g2 = np.einsum('knim,knim->knm', g_l2, g_r)
+
+            self.GKK2_DW_mode[...,imode] = np.real(g2)
+
+        return self.GKK2_DW_mode
 
 
     @mpi_watch

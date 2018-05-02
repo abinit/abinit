@@ -137,7 +137,8 @@
  use m_profiling_abi
  use m_errors
 
- use m_geometry,         only : metric
+ use m_time,             only : timab
+ use m_geometry,         only : metric, stresssym
  use m_fock,             only : fock_type
  use m_ewald,            only : ewald2
  use defs_datatypes,     only : pseudopotential_type
@@ -151,8 +152,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'stress'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_64_psp

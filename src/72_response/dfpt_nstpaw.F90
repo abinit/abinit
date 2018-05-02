@@ -172,7 +172,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_cgtools
  use m_nctk
 
+ use m_time,     only : timab
  use m_io_tools, only : file_exists
+ use m_geometry, only : stresssym
  use m_mpinfo,   only : destroy_mpi_enreg
  use m_hdr,      only : hdr_skip
  use m_occ,      only : occeig
@@ -187,19 +189,17 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawcprj,  only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
- use m_kg,       only : mkkin, kpgstr
- use m_cgtools,  only : dotprod_vn
+ use m_kg,       only : mkkin, kpgstr, mkkpg
+ use m_fft,      only : fftpac
+ use m_spacepar, only : hartrestr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstpaw'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
- use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
