@@ -47,8 +47,6 @@ sources = [
  "m_cgwf.F90",
  "m_epjdos.F90",
  "m_ksdiago.F90",
- "mag_constr.F90",
- "mag_constr_e.F90",
  "make_efg_el.F90",
  "make_efg_ion.F90",
  "make_grad_berry.F90",

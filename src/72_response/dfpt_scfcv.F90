@@ -247,6 +247,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
  use m_rf2,      only : rf2_getidirs
+ use m_dens,     only : calcdensph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -391,7 +392,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
  real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
-!real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density 
+!real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
@@ -751,7 +752,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
          vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
          vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-         vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case 
+         vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
          vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
          vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
        end do
@@ -778,7 +779,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         dtset%nsppol,dtset%typat,pawtab=pawtab,mpi_atmtab=mpi_enreg%my_atmtab,&
 &         comm_atom=mpi_enreg%comm_atom)
        end if
-       
+
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
 &       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
@@ -1087,7 +1088,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
            vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
            vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
            vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case 
+           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
            vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
            vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
          end do
@@ -1189,7 +1190,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  call timab(160,1,tsec)
 
-!Compute Dynamic magnetic charges (dmc) in case of rfphon, 
+!Compute Dynamic magnetic charges (dmc) in case of rfphon,
 !and magnetic susceptibility in case of rfmagn from first order density
 !(results to be comapred to dmc from d2e)
 !SPr deb
@@ -1208,7 +1209,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    call mean_fftr(rhor1(:,4),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
 !    write(*,*) '        1st order m_z    : ', mean_rhor1
 !  endif
-! 
+!
 !endif
 
 
@@ -1405,14 +1406,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      rdwrpaw=0
      ABI_ALLOCATE(vhartr1_tmp, (cplex*nfftf, dtset%nspden))
      vhartr1_tmp = zero
-     vhartr1_tmp(:,1) = vhartr1(:) 
+     vhartr1_tmp(:,1) = vhartr1(:)
      call appdig(pertcase,dtfil%fnameabo_vha,fi1o)
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_vhartree",fi1o,dtset%iomode,hdr,&
      ngfftf,cplex,nfftf,dtset%nspden,vhartr1_tmp,mpi_enreg)
      ABI_DEALLOCATE(vhartr1_tmp)
    end if
-   
+
 
 ! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
 !   if (dtset%prtvpsp > 0) then
@@ -1422,7 +1423,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
 !       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
 !   end if
-   
+
    if (dtset%prtvxc > 0) then
      rdwrpaw=0
      call appdig(pertcase,dtfil%fnameabo_vxc,fi1o)

@@ -33,7 +33,6 @@ sources = [
  "mknormpath.F90",
  "proc_distrb_cycle.F90",
  "radsintr.F90",
- "radsmear.F90",
  "smatrix.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
