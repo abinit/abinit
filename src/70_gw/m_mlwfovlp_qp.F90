@@ -1,5 +1,64 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/mlwfovlp_qp
+!!****m* ABINIT/m_mlwfovlp_qp
+!! NAME
+!!  m_mlwfovlp_qp
+!!
+!! FUNCTION
+!!  Interpolate GW corrections with Wannier functions
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (DRH)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mlwfovlp_qp
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wannier90
+ use m_errors
+ use m_profiling_abi
+
+ use m_mpinfo,         only : destroy_mpi_enreg
+ use m_pawtab,         only : pawtab_type
+ use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim, pawcprj_alloc, pawcprj_free
+ use m_numeric_tools,  only : isordered
+ use m_geometry,       only : metric
+ use m_crystal,        only : crystal_t, crystal_free
+ use m_crystal_io,     only : crystal_from_hdr
+ use m_kpts,           only : listkk
+ use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
+ use m_ebands,         only : ebands_init, ebands_free
+ use m_qparticles,     only : rdqps, rdgw
+ use m_sort,           only : sort_dp
+
+
+ implicit none
+
+ private
+!!***
+
+ public :: mlwfovlp_qp
+!!***
+
+contains
+!!***
+
+!!****f* m_mlwfovlp_qp/mlwfovlp_qp
 !! NAME
 !! mlwfovlp_qp
 !!
@@ -7,12 +66,6 @@
 !! Routine which computes replaces LDA wave functions and eigenvalues with
 !! GW quasiparticle ones using previously computed qp wave functions in
 !! LDA bloch function representation for Wannier code (www.wannier.org f90 version).
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (DRH)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -28,7 +81,7 @@
 !!  nspden=number of spin-density components
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!!  Hdr<Hdr_type>=The abinit header.
+!!  Hdr<Hdr_type>=The m_mlwfovlp_qp header.
 !!  MPI_enreg=information about MPI parallelization
 !!  Cprj_BZ(natom,nspinor*mband*mkmem*nsppol)= <p_lmn|Cnk> coefficients for each WF |Cnk> and each |p_lmn> non-local projector
 !!
@@ -58,34 +111,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,natom,&
 & nkpt,npwarr,nspden,nsppol,ntypat,Hdr,Pawtab,rprimd,MPI_enreg)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wannier90
- use m_errors
- use m_profiling_abi
-
- use m_mpinfo,         only : destroy_mpi_enreg
- use m_pawtab,         only : pawtab_type
- use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim
- use m_numeric_tools,  only : isordered
- use m_geometry,       only : metric
- use m_crystal,        only : crystal_t, crystal_free
- use m_crystal_io,     only : crystal_from_hdr
- use m_kpts,           only : listkk
- use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
- use m_ebands,         only : ebands_init, ebands_free
- use m_qparticles,     only : rdqps, rdgw
- use m_sort,           only : sort_dp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -513,12 +540,6 @@ end subroutine mlwfovlp_qp
 !! FUNCTION
 !!  Update the matrix elements of the PAW projectors in case of self-consistent GW.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  dimlmn(natom)=number of (l,m,n) components for each atom (only for PAW)
 !!  nkibz=number of k-points
@@ -545,11 +566,6 @@ end subroutine mlwfovlp_qp
 !!
 
 subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_lda_to_qp,dimlmn,Cprj_ibz)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -658,4 +674,7 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_lda_to_qp,dimlmn,Cprj_
  DBG_EXIT("COLL")
 
 end subroutine update_cprj
+!!***
+
+end module m_mlwfovlp_qp
 !!***
