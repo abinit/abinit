@@ -820,7 +820,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
               ik_ibz_fine, ikq_ibz_fine, iq_ibz_fine]
 
            !calculate phonon frequencies
-           call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,iq_bz_fine), phfrq_dense, displ_cart )
+           call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,iq_bz_fine), phfrq_dense(:,jj), displ_cart )
          enddo
        endif
        !
