@@ -58,6 +58,7 @@ MODULE m_kxc
  use m_fft_mesh,      only : g2ifft
  use m_fft,           only : fourdp_6d
  use m_mpinfo,        only : destroy_mpi_enreg
+ use m_spacepar,      only : hartre
 
  implicit none
 

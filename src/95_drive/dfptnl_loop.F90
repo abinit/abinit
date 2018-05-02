@@ -134,7 +134,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_time,     only : timab
  use m_io_tools,    only : file_exists
  use m_kg,       only : getph
- use m_cgtools,  only : dotprod_vn
+ use m_inwffil,  only : inwffil
+
  use m_ioarr,       only : read_rhor
  use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
                            init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
@@ -159,7 +160,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_72_response
- use interfaces_79_seqpar_mpi
 !End of the abilint section
 
  implicit none

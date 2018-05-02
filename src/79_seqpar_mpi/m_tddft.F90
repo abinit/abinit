@@ -41,8 +41,10 @@ module m_tddft
 #endif
 
  use m_io_tools, only : get_unit
+ use m_symtk,    only : matr3inv
  use m_time,     only : timab
  use m_fftcore,  only : sphereboundary
+ use m_spacepar, only : hartre
 
  implicit none
 
@@ -137,7 +139,6 @@ contains
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none

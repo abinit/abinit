@@ -62,6 +62,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
  use defs_abitypes
  use m_profiling_abi
 
+ use m_symtk,    only : matr3inv
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
  use m_xmpi,     only : xmpi_sum
@@ -70,7 +71,6 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_el'
- use interfaces_32_util
  use interfaces_45_geomoptim
  use interfaces_53_ffts
 !End of the abilint section

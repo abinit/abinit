@@ -19,7 +19,7 @@
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
 !!  dimcprj(natom)=number of lmn components in the <p_{lmn}^i|\psi> for the i-th atom
-!!  icg=shift in cg array to locate current k-point and spinpol 
+!!  icg=shift in cg array to locate current k-point and spinpol
 !!  ikpt=current k point index
 !!  isppol=current spin polarization index
 !!  istwf=input option parameter that describes the storage of wfs
@@ -79,7 +79,7 @@
  integer,intent(in) :: natom,nband,npw,nspinor,nsppol,ntypat,usepaw
 !arrays
  integer, intent(in) :: atindx1(natom),dimcprj(natom),nattyp(ntypat)
- real(dp), intent(inout) :: cg(2,mcg) 
+ real(dp), intent(inout) :: cg(2,mcg)
  type(pawcprj_type),intent(inout) :: cprj_k(natom,mcprj)
  type(MPI_type),intent(in) :: mpi_enreg
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
@@ -103,10 +103,10 @@
 !Cholesky factorization: O = U^H U with U upper triangle matrix.
  call ZPOTRF('U',nband,smn,nband,ierr)
 
-!Solve X U = 1. 
+!Solve X U = 1.
  dmn=zero
  do ii=1,nband
-   dmn(1,ii,ii)=one 
+   dmn(1,ii,ii)=one
  end do
  call ZTRSM('Right','Upper','Normal','Normal',nband,nband,cone,smn,nband,dmn,nband)
 

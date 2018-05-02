@@ -63,7 +63,7 @@ module m_bethe_salpeter
  use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj
+                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_mkrho, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
  use m_io_screening,    only : hscr_t, hscr_free, hscr_io, hscr_bcast, hscr_from_file, hscr_print
@@ -189,7 +189,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_69_wfdesc
 !End of the abilint section
 
  implicit none

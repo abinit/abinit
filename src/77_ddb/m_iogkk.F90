@@ -38,7 +38,8 @@ module m_iogkk
 
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
- use m_geometry,        only : phdispl_cart2red
+ use m_symtk,           only : mati3inv, littlegroup_q
+ use m_geometry,        only : phdispl_cart2red, littlegroup_pert
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_dynmat,          only : d2sym3
@@ -103,8 +104,6 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 #undef ABI_FUNC
 #define ABI_FUNC 'read_gkk'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_77_ddb
 !End of the abilint section
 

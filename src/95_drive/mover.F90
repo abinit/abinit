@@ -142,6 +142,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #endif
 
  use m_fstrings,           only : strcat, sjoin, indent
+ use m_symtk,              only : matr3inv
  use m_geometry,           only : fcart2fred, chkdilatmx
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path

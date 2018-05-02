@@ -26,7 +26,8 @@ module m_ab7_symmetry
   use defs_basis
   use m_profiling_abi
 
- use m_geometry,     only : metric
+  use m_symtk,     only : mati3inv, mati3det
+  use m_geometry,  only : metric
 
   implicit none
 
@@ -46,7 +47,7 @@ module m_ab7_symmetry
      real(dp) :: field(3)
 
      logical :: withJellium
- 
+
      integer :: nzchempot
 
      integer :: withSpin
@@ -1173,7 +1174,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_equivalent_atoms'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -1244,7 +1244,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symmetry_get_type'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

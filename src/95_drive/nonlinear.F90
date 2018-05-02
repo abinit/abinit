@@ -104,10 +104,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &                          pawrhoij_bcast, pawrhoij_nullify
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
- use m_kg,       only : getcut,kpgio,getph
- use m_kpts,     only : getkgrid
+ use m_kg,          only : getcut,kpgio,getph
+ use m_kpts,        only : getkgrid
  
  use m_paw_dmft,    only : paw_dmft_type
+ use m_inwffil,     only : inwffil
+ use m_spacepar,    only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -123,7 +125,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response
- use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => nonlinear
 !End of the abilint section
 

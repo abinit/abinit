@@ -152,15 +152,22 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_contistr01
+ use m_contistr03
+ use m_contistr12
+ use m_contstr21
+ use m_contstr23
+ use m_contstr25
+ use m_contstr25a
+ use m_contstr26
 
- use m_kg,  only : ph1d3d
+ use m_geometry,   only : strconv
+ use m_kg,         only : ph1d3d
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_pl'
- use interfaces_41_geometry
- use interfaces_42_nlstrain
  use interfaces_66_nonlocal, except_this_one => nonlop_pl
 !End of the abilint section
 

@@ -278,6 +278,7 @@ subroutine chkvars (string)
 end subroutine chkvars
 !!***
 
+
 !!****f* ABINIT/chkvars_in_string
 !! NAME
 !!  chkvars_in_string

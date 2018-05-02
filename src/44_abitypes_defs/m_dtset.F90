@@ -28,7 +28,8 @@ MODULE m_dtset
  use m_errors
  use m_xmpi
 
- use m_geometry,     only : mkrdim, metric
+ use m_symtk,        only : mati3inv, littlegroup_q
+ use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm
  use defs_abitypes,  only : dataset_type
 
@@ -1601,7 +1602,6 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 #undef ABI_FUNC
 #define ABI_FUNC 'get_npert_rbz'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 
