@@ -120,6 +120,7 @@ program abinit
  use m_pawxmlps,    only : paw_setup, paw_setup_free, npsp_pawxml,ipsp2xml
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
+ use m_dtfil,       only : iofn1
  use m_outxml,      only : outxml_open, outxml_finalise
  use m_parser,      only : parsefile
  use m_out_acknowl, only : out_acknowl
