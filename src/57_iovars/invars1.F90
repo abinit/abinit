@@ -93,7 +93,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 #undef ABI_FUNC
 #define ABI_FUNC 'invars1'
  use interfaces_14_hidewrite
- use interfaces_57_iovars, except_this_one => invars1
 !End of the abilint section
 
  implicit none

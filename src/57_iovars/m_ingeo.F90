@@ -147,13 +147,13 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 & ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeo'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_57_iovars, except_this_one => ingeo
 !End of the abilint section
 
  implicit none
@@ -1232,6 +1232,7 @@ end subroutine ingeo
 
 subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1893,6 +1894,7 @@ end subroutine ingeobld
 
 subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2048,6 +2050,7 @@ end subroutine fillcell
 !! SOURCE
 
 subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

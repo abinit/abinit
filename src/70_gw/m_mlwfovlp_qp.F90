@@ -114,13 +114,13 @@ contains
 subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,natom,&
 & nkpt,npwarr,nspden,nsppol,ntypat,Hdr,Pawtab,rprimd,MPI_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_qp'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_70_gw, except_this_one => mlwfovlp_qp
 !End of the abilint section
 
  implicit none
@@ -566,6 +566,7 @@ end subroutine mlwfovlp_qp
 !!
 
 subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_lda_to_qp,dimlmn,Cprj_ibz)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
