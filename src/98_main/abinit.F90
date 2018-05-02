@@ -128,6 +128,7 @@ program abinit
 #endif
  use m_outxml,      only : outxml_open, outxml_finalise
  use m_parser,      only : parsefile
+ use m_out_acknowl, only : out_acknowl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

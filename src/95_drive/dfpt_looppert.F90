@@ -157,7 +157,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_io_tools,   only : file_exists
  use m_time,       only : timab
  use m_fstrings,   only : strcat
- use m_geometry,   only : mkrdim, metric
+ use m_geometry,   only : mkrdim, metric, littlegroup_pert
  use m_exit,       only : exit_check, disable_timelimit
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
@@ -181,6 +181,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_pawfgr,     only : pawfgr_type
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
+ use m_inwffil,    only : inwffil
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -197,7 +198,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use interfaces_66_nonlocal
  use interfaces_67_common
  use interfaces_72_response
- use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => dfpt_looppert
 !End of the abilint section
 
@@ -1721,7 +1721,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          !Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
-         
+
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
 
          if(.not.kramers_deg) then

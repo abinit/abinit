@@ -66,9 +66,7 @@ sources = [
  "eltxccore.F90",
  "elt_ewald.F90",
  "full_active_wf1.F90",
- "gaugetransfo.F90",
  "getshell.F90",
- "hartrestr.F90",
  "m_ddb.F90",
  "m_ddb_hdr.F90",
  "m_ddk.F90",
@@ -81,11 +79,9 @@ sources = [
  "newfermie1.F90",
  "outddbnc.F90",
  "qmatrix.F90",
- "redgr.F90",
  "rf2_init.F90",
  "rotate_rho.F90",
  "vlocalstr.F90",
- "wrtloctens.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

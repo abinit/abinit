@@ -44,6 +44,7 @@
 !! ratsph(1:ntypat)=radius of the atomic sphere
 !! string*(*)=character string containing all the input data, used
 !!  only if choice=1 or 3. Initialized previously in instrng.
+!! supercell_latt(3,3)=supercell lattice
 !!
 !! OUTPUT
 !! acell(3)=length of primitive vectors
@@ -104,7 +105,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 & genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
 & msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
 & nucdipmom,nzchempot,pawspnorb,&
-& ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,symafm,&
+& ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
 
  use defs_basis
@@ -114,6 +115,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  use m_errors
  use m_atomdata
 
+ use m_symtk,    only : mati3inv, chkorthsy, symrelrot, mati3det
  use m_geometry, only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
  use m_parser,   only : intagm
 
@@ -122,7 +124,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ingeo'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_57_iovars, except_this_one => ingeo
 !End of the abilint section
@@ -140,6 +141,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  real(dp),intent(out) :: slabzbeg,slabzend,tolsym
  character(len=*),intent(in) :: string
 !arrays
+ integer,intent(in) :: supercell_lattice(3,3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
@@ -157,9 +159,9 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,iatom,idir,iexit,ii,ipsp,irreducible,isym,itypat
- integer :: jsym,marr,mu,natfix,natrd,nobj,noncoll
- integer :: nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,mu,multiplicity,natom_uc,natfix,natrd
+ integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma
  integer :: txangst,txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,a2,aa,cc,cosang,ucvol,sumalch
@@ -169,7 +171,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
- real(dp) :: rprimd(3,3),rprimd_new(3,3),scalecart(3)
+ real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
  real(dp),allocatable :: tnons_cart(:,:),xangst_read(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
@@ -275,6 +277,26 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  rprim(:,3)=scalecart(:)*rprim(:,3)
  scalecart(:)=one
 
+!Compute the multiplicity of the supercell
+ call mati3det(supercell_lattice,multiplicity)
+!Get the number of atom in the unit cell
+!Read natom from string
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
+!Might initialize natom from XYZ file
+ if(tread==0)then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
+ end if
+ if(tread==1)natom_uc=intarr(1)
+
+!Store the rprimd of the unit cell
+ call mkrdim(acell,rprim,rprimd_read)
+!Multiply the rprim to get the rprim of the supercell
+ if(multiplicity > 1)then
+   rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
+   rprim(:,2) = rprim(:,2) * supercell_lattice(2,2)
+   rprim(:,3) = rprim(:,3) * supercell_lattice(3,3)
+ end if
+
 !Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -308,18 +330,33 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
 !This is the default
  natrd=natom
+ if(multiplicity > 1) natrd = natom_uc
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natrd',tnatrd,'INT')
  if(tnatrd==1) natrd=intarr(1)
 
  if(natrd<1 .or. natrd>natom)then
-   write(message, '(3a,i0,a,i0,2a,a)' )&
+   if(natrd>1 .and. multiplicity > 1) then
+     if(natrd < natom)then
+       write(message, '(3a)' )&
+&       'The number of atoms to be read (natrd) can not be used with supercell_latt.',ch10,&
+&       'Action: Remove natrd or supercell_latt in your input file.'
+       MSG_ERROR(message)
+     else
+       write(message,'(3a,I0,a,I0,a,I0,2a)')&
+       ' The input variable supercell_latt is present',ch10,&
+&      ' thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
+&      ' ',supercell_lattice(3,3),' is generated',ch10
+       MSG_WARNING(message)
+     end if
+   else
+     write(message, '(3a,i0,a,i0,2a,a)' )&
 &   'The number of atoms to be read (natrd) must be positive and not bigger than natom.',ch10,&
 &   'This is not the case: natrd=',natrd,', natom=',natom,ch10,&
 &   'Action: correct natrd or natom in your input file.'
-   MSG_ERROR(message)
+     MSG_ERROR(message)
+   end if
  end if
-
 
 !5) Read the type and initial spin of each atom in the primitive set--------
 
@@ -370,7 +407,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
 !if(nimage/=1 .and. iimage/=1)then
 !FIXME: should this be called outside the above end if?
- call randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat_read,xred_read(:,1:natrd),znucl,acell)
+ call randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd_read,typat_read,&
+&                   xred_read(:,1:natrd),znucl,acell)
 !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
 !end if
 
@@ -418,7 +456,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
  if(txred==1 .or. txrandom /=0 )then
    call wrtout(std_out,' ingeo: takes atomic coordinates from input array xred ','COLL')
-   call xred2xcart(natrd,rprimd,xcart_read,xred_read)
+   call xred2xcart(natrd,rprimd_read,xcart_read,xred_read)
  else
    if(txangst==1)then
      call wrtout(std_out,' ingeo: takes atomic coordinates from input array xangst','COLL')
@@ -456,6 +494,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 &   'This is not allowed.',ch10,&
 &   'Action: correct nsym in your input file.'
    MSG_ERROR(message)
+ end if
+ if (multiplicity>1) then
+   nsym = 1
+   write(message, '(a)' )&
+&   'Input nsym is now set to one due to the supercell_latt input'
+   MSG_WARNING(message)
  end if
 
 !Read symmorphi
@@ -507,7 +551,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  nobj=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nobj',tread,'INT')
  if(tread==1) nobj=intarr(1)
-
+ if(nobj /= 0 .and. multiplicity > 1)then
+   write(message, '(3a)' )&
+&       'nobj can not be used with supercell_latt.',ch10,&
+&       'Action: Remove nobj or supercell_latt in your input file.'
+   MSG_ERROR(message)
+ end if
 !If there are objects, chkprim will not be used immediately
 !But, if there are no objects, but a space group, it will be used directly.
  chkprim=1
@@ -566,8 +615,28 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
    if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
 
-!  Get xred
-   call xcart2xred(natrd,rprimd,xcart_read,xred)
+!  Compute xred/typat and spinat for the supercell
+   if(multiplicity > 1)then
+     iatom_supercell = 0
+     do i1 = 1, supercell_lattice(1,1)
+       do i2 = 1, supercell_lattice(2,2)
+         do i3 = 1, supercell_lattice(3,3)
+           do iatom = 1, natom_uc
+             iatom_supercell = iatom_supercell + 1
+             xcart(:,iatom_supercell) = xcart_read(:,iatom) &
+&            + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
+             spinat(1:3,iatom_supercell) = spinat(1:3,iatom)
+             typat(iatom_supercell) = typat_read(iatom)
+           end do
+         end do
+       end do
+     end do
+     call xcart2xred(natom,rprimd,xcart,xred)
+   else
+!    No supercell
+     call xcart2xred(natrd,rprimd,xcart_read,xred)
+   end if
+
 
    spgroup=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spgroup',tread,'INT')
@@ -757,7 +826,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
      end if
 
-     if(natom/=natrd)then
+     if(natom/=natrd.and.multiplicity == 1)then
 !      Generate the full set of atoms from its knowledge in the irreducible part.
        call fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
      end if
@@ -773,8 +842,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !    the spatial group of symmetry. However, all the atom
 !    positions must be known, so the number
 !    of atoms to be read must equal the total number of atoms.
-     if(natrd/=natom)then
-
+     if(natrd/=natom .and. multiplicity== 1)then
        write(message, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a,a)' )&
 &       'The number of atoms to be read (natrd)= ',natrd,ch10,&
 &       'differs from the total number of atoms (natom)= ',natom,ch10,&
@@ -786,7 +854,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        MSG_ERROR(message)
      else
 
-       typat(:)=typat_read(:)
+       if (multiplicity==1) typat(:)=typat_read(:)
 !      Find the symmetry operations: nsym, symafm, symrel and tnons.
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
@@ -1097,4 +1165,678 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  ABI_DEALLOCATE(dprarr)
 
 end subroutine ingeo
+!!***
+
+!!****f* ABINIT/ingeobld
+!!
+!! NAME
+!! ingeobld
+!!
+!! FUNCTION
+!! The geometry builder.
+!! Start from the types and coordinates of the primitive atoms
+!! and produce the completed set of atoms, by using the definition
+!! of objects, then application of rotation, translation and repetition.
+!!
+!! INPUTS
+!! iout=unit number of output file
+!! jdtset=number of the dataset looked for
+!! lenstr=actual length of the string
+!! natrd=number of atoms that have been read in the calling routine
+!! natom=number of atoms
+!! nobj=the number of objects
+!! string*(*)=character string containing all the input data, used
+!!  only if choice=1 or 3. Initialized previously in instrng.
+!! typat_read(natrd)=type integer for each atom in the primitive set
+!! xcart_read(3,natrd)=cartesian coordinates of atoms (bohr), in the primitive set
+!!
+!! OUTPUT
+!! typat(natom)=type integer for each atom in cell
+!! xcart(3,natom)=cartesian coordinates of atoms (bohr)
+!!
+!! PARENTS
+!!      ingeo
+!!
+!! CHILDREN
+!!      intagm,wrtout
+!!
+!! SOURCE
+
+subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use m_parser,  only : intagm
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ingeobld'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iout,jdtset,lenstr,natom,natrd,nobj
+ character(len=*),intent(in) :: string
+!arrays
+ integer,intent(in) :: typat_read(natrd)
+ integer,intent(out) :: typat(natom)
+ real(dp),intent(in) :: xcart_read(3,natrd)
+ real(dp),intent(out) :: xcart(3,natom)
+
+!Local variables-------------------------------
+ character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
+ character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
+!scalars
+ integer :: belonga,belongb,iatom,iatrd,ii,irep,irep1,irep2,irep3,ivac,marr
+ integer :: natom_toberead,nread,objan,objbn,rotate,shift,tread,vacnum
+ real(dp) :: angle,cosine,norm2per,norma,normb,normper,project,sine
+ character(len=500) :: message
+!arrays
+ integer :: objarf(3),objbrf(3)
+ integer,allocatable :: objaat(:),objbat(:),vaclst(:)
+ real(dp) :: axis2(3),axis3(3),axisa(3),axisb(3),objaax(6),objaro(4),objatr(12)
+ real(dp) :: objbax(6),objbro(4),objbtr(12),parall(3),perpen(3),rotated(3)
+ real(dp) :: vectora(3),vectorb(3)
+ real(dp),allocatable :: typat_full(:),xcart_full(:,:)
+ integer,allocatable :: intarr(:)
+ real(dp),allocatable :: dprarr(:)
+
+! *************************************************************************
+
+ marr=max(12,3*natom)
+ ABI_ALLOCATE(intarr,(marr))
+ ABI_ALLOCATE(dprarr,(marr))
+
+!1) Set up the number of vacancies.
+
+!This is the default
+ vacnum=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vacnum',tread,'INT')
+ if(tread==1) vacnum=intarr(1)
+
+ if (vacnum>0)then
+   ABI_ALLOCATE(vaclst,(vacnum))
+!  Read list of atoms to be suppressed to create vacancies
+   call intagm(dprarr,intarr,jdtset,marr,vacnum,string(1:lenstr),'vaclst',tread,'INT')
+   if(tread==1) vaclst(:)=intarr(1:vacnum)
+   if(tread/=1)then
+     write(message, '(a,a,a,a,a)' )&
+&     'The array vaclst MUST be initialized in the input file',ch10,&
+&     'when vacnum is non-zero.',ch10,&
+&     'Action: initialize vaclst in your input file.'
+     MSG_ERROR(message)
+   end if
+ end if
+
+ natom_toberead=natom+vacnum
+
+!2) Set up list and number of atoms in objects, and the --------------
+!operations to be performed on objects.
+
+ write(message,'(80a,a)')('=',ii=1,80),ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(iout,message,'COLL')
+
+ write(message, '(a,a)' )&
+& '--ingeobld: echo values of variables connected to objects --------',ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(iout,message,'COLL')
+
+ if(vacnum>0)then
+   write(iout,format01110) 'vacnum',vacnum
+   write(std_out,format01110) 'vacnum',vacnum
+   write(iout,'(1x,a6,1x,(t9,20i3))') 'vaclst',vaclst(:)
+   write(std_out,'(1x,a6,1x,(t9,20i3))') 'vaclst',vaclst(:)
+   write(iout, '(a)' ) ' '
+   write(std_out,'(a)' ) ' '
+ end if
+
+ write(iout,format01110) 'nobj',nobj
+ write(std_out,format01110) 'nobj',nobj
+
+ if(nobj/=1 .and. nobj/=2)then
+   write(message, '(a,a,a,i8,a,a,a)' )&
+&   'The number of object (nobj) must be either 1 or 2,',ch10,&
+&   'while the input file has  nobj=',nobj,'.',ch10,&
+&   'Action: correct nobj in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ if(nobj==1 .or. nobj==2)then
+
+!  Read the number of atoms of the object a
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'objan',tread,'INT')
+   if(tread==1) objan=intarr(1)
+
+   if(tread/=1)then
+     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+&     'The number of atoms in object a (objan) must be initialized',ch10,&
+&     'in the input file, when nobj=',nobj,'.',ch10,&
+&     'This is not the case.',ch10,&
+&     'Action: correct objan in your input file.'
+     MSG_ERROR(message)
+   end if
+
+   write(iout, '(a)' ) ' '
+   write(std_out,'(a)' ) ' '
+   write(iout,format01110) 'objan',objan
+   write(std_out,format01110) 'objan',objan
+
+   if(objan<=1 .or. objan>natom)then
+     write(message, '(a,a,a,a,a,i8,a,a,a)' )&
+&     'The number of atoms in object a (objan) must be larger than 0',ch10,&
+&     'and smaller than natom.',ch10,&
+&     'It is equal to ',objan,', an unacceptable value.',ch10,&
+&     'Action: correct objan in your input file.'
+     MSG_ERROR(message)
+   end if
+
+!  Read list of atoms in object a
+   call intagm(dprarr,intarr,jdtset,marr,objan,string(1:lenstr),'objaat',tread,'INT')
+   ABI_ALLOCATE(objaat,(objan))
+   if(tread==1) objaat(1:objan)=intarr(1:objan)
+
+   if(tread/=1)then
+     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+&     'The list of atoms in object a (objaat) must be initialized',ch10,&
+&     'in the input file, when nobj=',nobj,'.',ch10,&
+&     'This is not the case.',ch10,&
+&     'Action: initialize objaat in your input file.'
+     MSG_ERROR(message)
+   end if
+
+   write(iout,'(1x,a6,1x,(t9,20i3))') 'objaat',objaat(:)
+   write(std_out,'(1x,a6,1x,(t9,20i3))') 'objaat',objaat(:)
+
+   do iatom=1,objan
+     if(objaat(iatom)<1 .or. objaat(iatom)>natom)then
+       write(message, '(a,i8,a,a,i8,4a)' )&
+&       'The input value of objaat for atom number ',iatom,ch10,&
+&       'is equal to ',objaat(iatom),', an unacceptable value :',ch10,&
+&       'it should be between 1 and natom. ',&
+&       'Action: correct the array objaat in your input file.'
+       MSG_ERROR(message)
+     end if
+   end do
+
+   if(objan>1)then
+     do iatom=1,objan-1
+       if( objaat(iatom)>=objaat(iatom+1) )then
+         write(message, '(a,i8,a,a,a,a,a,a)' )&
+&         'The input value of objaat for atom number ',iatom,ch10,&
+&         'is larger or equal to the one of the next atom,',ch10,&
+&         'while this list should be ordered, and an atom cannot be repeated.',ch10,&
+&         'Action: correct the array objaat in your input file.'
+         MSG_ERROR(message)
+       end if
+     end do
+   end if
+
+!  Read repetition factors
+   objarf(1:3)=1
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'objarf',tread,'INT')
+   if(tread==1) objarf(1:3)=intarr(1:3)
+   write(iout,'(1x,a6,1x,(t9,20i3))') 'objarf',objarf(:)
+   write(std_out,'(1x,a6,1x,(t9,20i3))') 'objarf',objarf(:)
+
+   if(tread==1)then
+     do irep=1,3
+       if(objarf(irep)<1)then
+         write(message, '(a,a,a,3i8,a,a,a)' )&
+&         'The input values of objarf(1:3) must be positive,',ch10,&
+&         'while it is ',objarf(1:3),'.',ch10,&
+&         'Action: correct objarf in your input file.'
+         MSG_ERROR(message)
+       end if
+     end do
+   end if
+
+!  Modify the number of atoms to be read
+   natom_toberead=natom_toberead-objan*(objarf(1)*objarf(2)*objarf(3)-1)
+
+!  Read rotations angles and translations
+   objaro(1:4)=0.0_dp
+   objatr(1:12)=0.0_dp
+   if (objarf(1)*objarf(2)*objarf(3) ==1) then
+     nread=1
+   else if (objarf(2)*objarf(3) ==1) then
+     nread=2
+   else if (objarf(3) ==1) then
+     nread=3
+   else
+     nread=4
+   end if
+   call intagm(dprarr,intarr,jdtset,marr,nread,string(1:lenstr),'objaro',tread,'DPR')
+   if(tread==1) objaro(1:nread)=dprarr(1:nread)
+
+   call intagm(dprarr,intarr,jdtset,marr,3*nread,string(1:lenstr),'objatr',tread,'LEN')
+
+   if(tread==1) objatr(1:3*nread)=dprarr(1:3*nread)
+   write(iout,format01160) 'objaro',objaro(1:4)
+   write(std_out,format01160) 'objaro',objaro(1:4)
+   write(iout,format01160) 'objatr',objatr(1:12)
+   write(std_out,format01160) 'objatr',objatr(1:12)
+!  If needed, read axes, but default to the x-axis to avoid errors later
+   objaax(1:6)=0.0_dp ; objaax(4)=1.0_dp
+
+   if(abs(objaro(1))+abs(objaro(2))+abs(objaro(3))+abs(objaro(4)) > 1.0d-10) then
+     call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'objaax',tread,'LEN')
+     if(tread==1) objaax(1:6)=dprarr(1:6)
+     if(tread/=1)then
+       write(message, '(a,a,a,a,a,a,a)' )&
+&       'The axis of object a (objaax) must be initialized',ch10,&
+&       'in the input file, when rotations (objaro) are present.',ch10,&
+&       'This is not the case.',ch10,&
+&       'Action: initialize objaax in your input file.'
+       MSG_ERROR(message)
+     end if
+     write(iout,format01160) 'objaax',objaax(1:6)
+     write(std_out,format01160) 'objaax',objaax(1:6)
+   end if
+
+   axisa(1:3)=objaax(4:6)-objaax(1:3)
+   norma=axisa(1)**2+axisa(2)**2+axisa(3)**2
+
+   if(norma<1.0d-10)then
+     write(message, '(5a)' )&
+&     'The two points defined by the input array objaax are too',ch10,&
+&     'close to each other, and will not be used to define an axis.',ch10,&
+&     'Action: correct objaax in your input file.'
+     MSG_ERROR(message)
+   end if
+   axisa(1:3)=axisa(1:3)/sqrt(norma)
+
+!  End condition of existence of a first object
+ end if
+
+ if(nobj==2)then
+
+!  Read the number of atoms of the object b
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'objbn',tread,'INT')
+   if(tread==1) objbn=intarr(1)
+
+   if(tread/=1)then
+     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+&     'The number of atoms in object b (objbn) must be initialized',ch10,&
+&     'in the input file, when nobj=',nobj,'.',ch10,&
+&     'This is not the case.',ch10,&
+&     'Action: initialize objbn in your input file.'
+     MSG_ERROR(message)
+   end if
+
+   write(iout, '(a)' ) ' '
+   write(std_out,'(a)' ) ' '
+   write(iout,format01110) 'objbn',objbn
+   write(std_out,format01110) 'objbn',objbn
+
+   if(objbn<=1 .or. objbn>natom)then
+     write(message, '(a,a,a,a,a,i8,a,a,a)' )&
+&     'The number of atoms in object b (objbn) must be larger than 0',ch10,&
+&     'and smaller than natom.',ch10,&
+&     'It is equal to ',objbn,', an unacceptable value.',ch10,&
+&     'Action: correct objbn in your input file.'
+     MSG_ERROR(message)
+   end if
+
+!  Read list of atoms in object b
+   call intagm(dprarr,intarr,jdtset,marr,objbn,string(1:lenstr),'objbat',tread,'INT')
+   ABI_ALLOCATE(objbat,(objbn))
+
+   if(tread==1) objbat(1:objbn)=intarr(1:objbn)
+   if(tread/=1)then
+     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+&     'The list of atoms in object b (objbat) must be initialized',ch10,&
+&     'in the input file, when nobj=',nobj,'.',ch10,&
+&     'This is not the case.',ch10,&
+&     'Action: initialize objbat in your input file.'
+     MSG_ERROR(message)
+   end if
+
+   write(iout,'(1x,a6,1x,(t9,20i3))') 'objbat',objbat(:)
+   write(std_out,'(1x,a6,1x,(t9,20i3))') 'objbat',objbat(:)
+
+   do iatom=1,objbn
+     if(objbat(iatom)<1 .or. objbat(iatom)>natom)then
+       write(message, '(a,i8,a,a,i8,a,a,a,a,a)' )&
+&       'The input value of objbat for atom number ',iatom,ch10,&
+&       'is equal to ',objbat(iatom),', an unacceptable value :',ch10,&
+&       'it should be between 1 and natom. ',ch10,&
+&       'Action: correct objbat in your input file.'
+       MSG_ERROR(message)
+     end if
+   end do
+
+   if(objbn>1)then
+     do iatom=1,objbn-1
+       if( objbat(iatom)>=objbat(iatom+1) )then
+         write(message, '(a,i8,a,a,a,a,a,a)' )&
+&         'The input value of objbat for atom number ',iatom,ch10,&
+&         'is larger or equal to the one of the next atom,',ch10,&
+&         'while this list should be ordered, and an atom cannot be repeated.',ch10,&
+&         'Action: correct the array objbat in the input file.'
+         MSG_ERROR(message)
+       end if
+     end do
+   end if
+
+!  Read repetition factors
+   objbrf(1:3)=1
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'objbrf',tread,'INT')
+   if(tread==1) objbrf(1:3)=intarr(1:3)
+   write(iout,'(1x,a6,1x,(t9,20i3))') 'objbrf',objbrf(:)
+   write(std_out,'(1x,a6,1x,(t9,20i3))') 'objbrf',objbrf(:)
+
+   if(tread==1)then
+     do irep=1,3
+       if(objbrf(irep)<1)then
+         write(message, '(a,a,a,3i8,a,a,a)' )&
+&         'The input values of objbrf(1:3) must be positive,',ch10,&
+&         'while it is ',objbrf(1:3),'.',ch10,&
+&         'Action: correct objbrf in your input file.'
+         MSG_ERROR(message)
+       end if
+     end do
+   end if
+
+!  Modify the number of atoms to be read
+   natom_toberead=natom_toberead-objbn*(objbrf(1)*objbrf(2)*objbrf(3)-1)
+!  Read rotations angles and translations
+   objbro(1:4)=0.0_dp
+   objbtr(1:12)=0.0_dp
+   if (objbrf(1)*objbrf(2)*objbrf(3) ==1) then
+     nread=1
+   else if (objbrf(2)*objbrf(3) ==1) then
+     nread=2
+   else if (objbrf(3) ==1) then
+     nread=3
+   else
+     nread=4
+   end if
+   call intagm(dprarr,intarr,jdtset,marr,nread,string(1:lenstr),'objbro',tread,'DPR')
+   if(tread==1) objbro(1:nread)=dprarr(1:nread)
+
+   call intagm(dprarr,intarr,jdtset,marr,3*nread,string(1:lenstr),'objbtr',tread,'LEN')
+   if(tread==1) objbtr(1:3*nread)=dprarr(1:3*nread)
+
+   write(iout,format01160) 'objbro',objbro(1:4)
+   write(std_out,format01160) 'objbro',objbro(1:4)
+   write(iout,format01160) 'objbtr',objbtr(1:12)
+   write(std_out,format01160) 'objbtr',objbtr(1:12)
+
+!  If needed, read axes, but default to the x-axis to avoid errors later
+   objbax(1:6)=0.0_dp ; objbax(4)=1.0_dp
+   if(abs(objbro(1))+abs(objbro(2))+abs(objbro(3))+abs(objbro(4)) > 1.0d-10) then
+     call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'objbax',tread,'LEN')
+     if(tread==1) objbax(1:6)=dprarr(1:6)
+     if(tread/=1)then
+       write(message, '(a,a,a,a,a,a,a)' )&
+&       'The axis of object b (objbax) must be initialized',ch10,&
+&       'in the input file, when rotations (objbro) are present.',ch10,&
+&       'This is not the case.',ch10,&
+&       'Action: initialize objbax in your input file.'
+       MSG_ERROR(message)
+     end if
+     write(iout,format01160) 'objbax',objbax(1:6)
+     write(std_out,format01160) 'objbax',objbax(1:6)
+   end if
+   axisb(1:3)=objbax(4:6)-objbax(1:3)
+   normb=axisb(1)**2+axisb(2)**2+axisb(3)**2
+   if(normb<1.0d-10)then
+     write(message, '(5a)' )&
+&     'The two points defined by the input array objbax are too',ch10,&
+&     'close to each other, and will not be used to define an axis.',ch10,&
+&     'Action: correct objbax in your input file.'
+     MSG_ERROR(message)
+   end if
+   axisb(1:3)=axisb(1:3)/sqrt(normb)
+
+!  Check whether both lists are disjoints. Use a very primitive algorithm.
+   do iatom=1,objan
+     do ii=1,objbn
+       if(objaat(iatom)==objbat(ii))then
+         write(message, '(6a,i8,a,i8,3a)' )&
+&         'The objects a and b cannot have a common atom, but it is',ch10,&
+&         'found that the values of objaat and objbat ',&
+&         ' are identical, for their',ch10,&
+&         'atoms number ',iatom,' and ',ii,'.',ch10,&
+&         'Action: change objaat and/or objbat so that they have no common atom anymore.'
+         MSG_ERROR(message)
+       end if
+     end do
+   end do
+
+!  End condition of existence of a second object
+ end if
+
+!Check whether the number of atoms to be read obtained by relying
+!on natom, vacnum and the object definitions, or from natrd coincide
+ if(natrd/=natom_toberead)then
+   write(message,'(11a,i0,a,i0,2a,i0,a)' )&
+&   ' ingeobld : ERROR -- ',ch10,&
+&   '  The number of atoms to be read (natrd) must be equal',ch10,&
+&   '  to the total number of atoms (natom), plus',ch10,&
+&   '  the number of vacancies (vacnum), minus',ch10,&
+&   '  the number of atoms added by the repetition of objects.',ch10,&
+&   '  This is not the case : natrd= ',natrd,', natom= ',natom,ch10,&
+&   ', vacnum= ',vacnum,';'
+   call wrtout(std_out,message,"COLL")
+
+   if(nobj==1 .or. nobj==2) then
+     write(message,'(a,i3,a,3i3,a,i5,a)' )&
+&     '   object a : objan=',objan,', objarf(1:3)=',objarf(1:3),&
+&     ' => adds ',objan*(objarf(1)*objarf(2)*objarf(3)-1),' atoms.'
+     call wrtout(std_out,message,"COLL")
+   end if
+
+   if(nobj==2) then
+     write(message,'(a,i3,a,3i3,a,i5,a)' )&
+&     '   object b : objbn=',objbn,', objbrf(1:3)=',objbrf(1:3),&
+&     ' => adds ',objbn*(objbrf(1)*objbrf(2)*objbrf(3)-1),' atoms.'
+     call wrtout(std_out,message,"COLL")
+   end if
+
+   write(message,'(3a)' )&
+&   '  Action : check the correspondence between natom+vacnum on one side,',ch10,&
+&   '           and natrd, objan, objbn, objarf and objbrf on the other side.'
+   MSG_ERROR(message)
+ end if
+
+!6) Produce full set of atoms
+
+!Print the initial atom coordinates if the geometry builder is used
+ write(iout, '(/,a)' )  ' Cartesian coordinates of the primitive atoms '
+ write(std_out,'(/,a)' )' Cartesian coordinates of the primitive atoms '
+ write(iout,format01160) '      ',xcart_read(:,:)
+ write(std_out,format01160) '      ',xcart_read(:,:)
+
+ ABI_ALLOCATE(typat_full,(natom+vacnum))
+ ABI_ALLOCATE(xcart_full,(3,natom+vacnum))
+
+!Use the work array xcart_full to produce full set of atoms,
+!including those coming from repeated objects.
+ iatom=1
+ do iatrd=1,natrd
+
+   belonga=0 ; belongb=0
+   if(nobj==1 .or. nobj==2)then
+!    Determine whether the atom belongs to object a
+     do ii=1,objan
+       if(iatrd==objaat(ii))belonga=ii
+     end do
+   end if
+   if(nobj==2)then
+!    Determine whether the atom belong to object b
+     do ii=1,objbn
+       if(iatrd==objbat(ii))belongb=ii
+     end do
+   end if
+
+   write(std_out,'(a,i5,a,i2,i2,a)' ) &
+&   ' ingeobld : treating iatrd=',iatrd,', belong(a,b)=',belonga,belongb,'.'
+
+!  In case it does not belong to an object
+   if(belonga==0 .and. belongb==0)then
+     xcart_full(1:3,iatom)=xcart_read(1:3,iatrd)
+     typat_full(iatom)=typat_read(iatrd)
+     iatom=iatom+1
+   else
+
+!    Repeat, rotate and translate this atom
+     if(belonga/=0)then
+
+!      Treat object a
+!      Compute the relative coordinate of atom with respect to first point of axis
+       vectora(1:3)=xcart_read(1:3,iatrd)-objaax(1:3)
+!      Project on axis
+       project=vectora(1)*axisa(1)+vectora(2)*axisa(2)+vectora(3)*axisa(3)
+!      Get the parallel part
+       parall(1:3)=project*axisa(1:3)
+!      Get the perpendicular part, to be rotated
+       perpen(1:3)=vectora(1:3)-parall(1:3)
+!      Compute the norm of the perpendicular part
+       norm2per=perpen(1)**2+perpen(2)**2+perpen(3)**2
+!      Initialisation to avoid warnings even if used behind if rotate == 1.
+       normper = 0
+!      It the norm is too small, there is not need to rotate
+       rotate=0
+       if(norm2per>=1.0d-18)then
+         rotate=1
+         normper=sqrt(norm2per)
+         axis2(1:3)=perpen(1:3)/normper
+!        Get the vector perpendicular to axisa and axisa2
+         axis3(1)=axisa(2)*axis2(3)-axisa(3)*axis2(2)
+         axis3(2)=axisa(3)*axis2(1)-axisa(1)*axis2(3)
+         axis3(3)=axisa(1)*axis2(2)-axisa(2)*axis2(1)
+       end if
+
+!      Here the repetition loop
+       do irep3=1,objarf(3)
+         do irep2=1,objarf(2)
+           do irep1=1,objarf(1)
+!            Here the rotation
+             if(rotate==1)then
+!              Compute the angle of rotation
+               angle=objaro(1)+(irep1-1)*objaro(2)+                     &
+&               (irep2-1)*objaro(3)+(irep3-1)*objaro(4)
+               cosine=cos(angle/180.0*pi)
+               sine=sin(angle/180.0*pi)
+               rotated(1:3)=objaax(1:3)+parall(1:3)+&
+&               normper*(cosine*axis2(1:3)+sine*axis3(1:3))
+             else
+               rotated(1:3)=vectora(1:3)
+             end if
+!            Here the translation
+             xcart_full(1:3,iatom)=rotated(1:3)+objatr(1:3)+&
+&             (irep1-1)*objatr(4:6)+(irep2-1)*objatr(7:9)+(irep3-1)*objatr(10:12)
+             typat_full(iatom)=typat_read(iatrd)
+             iatom=iatom+1
+           end do
+         end do
+!        End the repetition loop
+       end do
+
+     else
+!      If the atom belong to object b
+!      Compute the relative coordinate of atom with respect to first point of axis
+       vectorb(1:3)=xcart_read(1:3,iatrd)-objbax(1:3)
+!      Project on axis
+       project=vectorb(1)*axisb(1)+vectorb(2)*axisb(2)+vectorb(3)*axisb(3)
+!      Get the parallel part
+       parall(1:3)=project*axisb(1:3)
+!      Get the perpendicular part, to be rotated
+       perpen(1:3)=vectorb(1:3)-parall(1:3)
+!      Compute the norm of the perpendicular part
+       norm2per=perpen(1)**2+perpen(2)**2+perpen(3)**2
+!      Initialisation to avoid warnings even if used behind if rotate == 1.
+       normper = 0
+!      It the norm is too small, there is not need to rotate
+       rotate=0
+       if(norm2per>=1.0d-18)then
+         rotate=1
+         normper=sqrt(norm2per)
+         axis2(1:3)=perpen(1:3)/normper
+!        Get the vector perpendicular to axisb and axis2
+         axis3(1)=axisb(2)*axis2(3)-axisb(3)*axis2(2)
+         axis3(2)=axisb(3)*axis2(1)-axisb(1)*axis2(3)
+         axis3(3)=axisb(1)*axis2(2)-axisb(2)*axis2(1)
+       end if
+!      Here the repetition loop
+       do irep3=1,objbrf(3)
+         do irep2=1,objbrf(2)
+           do irep1=1,objbrf(1)
+!            Here the rotation
+             if(rotate==1)then
+!              Compute the angle of rotation
+               angle=objbro(1)+(irep1-1)*objbro(2)+                      &
+&               (irep2-1)*objbro(3)+ (irep3-1)*objbro(4)
+               cosine=cos(angle/180.0*pi)
+               sine=sin(angle/180.0*pi)
+               rotated(1:3)=objbax(1:3)+parall(1:3)+&
+&               normper*(cosine*axis2(1:3)+sine*axis3(1:3))
+             else
+               rotated(1:3)=vectorb(1:3)
+             end if
+!            Here the translation
+             xcart_full(1:3,iatom)=rotated(1:3)+objbtr(1:3)+&
+&             (irep1-1)*objbtr(4:6)+(irep2-1)*objbtr(7:9)+(irep3-1)*objbtr(10:12)
+             typat_full(iatom)=typat_read(iatrd)
+             iatom=iatom+1
+           end do
+         end do
+!        End the repetition loop
+       end do
+
+!      End the condition of belonging to object b
+     end if
+
+!    End the condition of belonging to an object
+   end if
+
+!  End the loop on atoms
+ end do
+
+!Create the vacancies here
+ if(vacnum/=0)then
+!  First label the vacant atoms as belonging to typat 0
+   do ivac=1,vacnum
+     typat_full(vaclst(ivac))=0
+   end do
+!  Then compact the arrays
+   shift=0
+   do iatom=1,natom
+     if(typat_full(iatom+shift)==0) shift=shift+1
+     if(shift/=0)then
+       xcart_full(1:3,iatom)=xcart_full(1:3,iatom+shift)
+       typat_full(iatom)=typat_full(iatom+shift)
+     end if
+   end do
+ end if
+
+!Transfer the content of xcart_full and typat_full to the proper
+!location
+ xcart(:,1:natom)=xcart_full(:,1:natom)
+ typat(1:natom)=typat_full(1:natom)
+
+ ABI_DEALLOCATE(typat_full)
+ ABI_DEALLOCATE(xcart_full)
+ if(allocated(objaat)) then
+   ABI_DEALLOCATE(objaat)
+ end if
+ if(allocated(objbat)) then
+   ABI_DEALLOCATE(objbat)
+ end if
+
+ ABI_DEALLOCATE(intarr)
+ ABI_DEALLOCATE(dprarr)
+ if (vacnum>0)  then
+   ABI_DEALLOCATE(vaclst)
+ end if
+
+end subroutine ingeobld
 !!***

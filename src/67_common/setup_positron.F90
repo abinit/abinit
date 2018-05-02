@@ -137,6 +137,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_fock,     only : fock_type
  use m_kg,       only : getcut
  use defs_wvltypes, only : wvl_data
+ use m_spacepar,    only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -144,7 +145,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 #define ABI_FUNC 'setup_positron'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => setup_positron
 !End of the abilint section
@@ -786,7 +786,7 @@ type(fock_type),pointer, intent(inout) :: fock
 !  Log message
    if (electronpositron%calctype==0) then
      message = 'Were are now performing an electronic ground-state calculation...'
-   else if (electronpositron%calctype==1) then    
+   else if (electronpositron%calctype==1) then
      message = 'Were are now performing a positronic ground-state calculation...'
    else if (electronpositron%calctype==2) then
      message = 'Were are now performing an electronic ground-state calculation in presence of a positron...'

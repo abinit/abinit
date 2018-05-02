@@ -66,6 +66,7 @@
 !!  DFT-D3(BJ) S. Grimme, S. Ehrlich and L. Goerigk
 !!  Effect of the damping function in dispersion corrected density functional theory
 !!  Comput. Chem. 32, 1456 (2011)
+!!
 !! PARENTS
 !!      respfn,setvtr,stress
 !!
@@ -89,7 +90,7 @@ subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
  use m_atomdata
 
  use m_special_funcs,  only : abi_derfc
- use m_geometry,     only : metric
+ use m_geometry,       only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

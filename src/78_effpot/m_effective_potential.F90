@@ -42,6 +42,7 @@ module m_effective_potential
  use m_xmpi
 
  use m_io_tools,       only : open_file,get_unit
+ use m_symtk,          only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
  use m_special_funcs,  only : factorial
@@ -649,7 +650,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_generateDipDip'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2486,6 +2486,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
 ! Get displacement and the variation of the displacmeent wr to strain
   ABI_ALLOCATE(xcart,(3,natom))
+  disp_tmp(:,:) = zero
+  du_delta_tmp(:,:,:) = zero  
   if((.not.present(displacement).or..not.present(du_delta)).and.present(xred))then
 !   Compute the displacement
     call xred2xcart(natom, rprimd, xcart, xred)
@@ -2494,15 +2496,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                    xcart_ref=eff_pot%supercell%xcart,&
 &                                    compute_displacement = .not.present(displacement),&
 &                                    compute_duDelta =  .not.present(du_delta))
-  else
-    disp_tmp(:,:) = zero
-    du_delta_tmp(:,:,:) = zero
   end if
 
 ! or set ftrom the arguments
   if(present(displacement)) disp_tmp(:,:)  = displacement(:,:)
   if(present(du_delta))du_delta_tmp(:,:,:) = du_delta(:,:,:)
-
 !Set to zero the outputs
   energy         = zero
   fcart(:,:)     = zero
@@ -2649,7 +2647,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 6 - Treat polynomial coefficient:
 !----------------------------------
   if(need_anharmonic.and.eff_pot%anharmonics_terms%ncoeff > zero)then
-
     energy_part = zero
     fcart_part(:,:)  = zero
     strten_part(:) = zero

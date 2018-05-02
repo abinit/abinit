@@ -2,6 +2,7 @@
 description: How to set parameters for a calculation with a positron in the system.
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters for a calculation with a positron in the system. with the ABINIT package.
 

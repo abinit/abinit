@@ -54,21 +54,22 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  use m_fock
  use m_pawcprj
 
+ use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab
+ use m_symtk,        only : matr3inv
  use m_cgtools,      only : dotprod_g
  use m_fftcore,      only : sphereboundary
+ use m_fft,          only : fftpac
  use m_hamiltonian,  only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian
  use m_pawdij,       only : pawdijhat
- use defs_datatypes, only : pseudopotential_type
  use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_alloc
+ use m_spacepar,     only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fock_getghc'
- use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_66_nonlocal
 !End of the abilint section
@@ -200,7 +201,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    ABI_ALLOCATE(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3)))
    ABI_ALLOCATE(gvnlc,(2,npw*nspinor))
    ABI_ALLOCATE(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim))
- end if 
+ end if
 
  if (fockcommon%usepaw==1.or.fockcommon%optstr) then
    ABI_ALLOCATE(gboundf,(2*mgfftf+8,2))
@@ -283,7 +284,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
 &   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
-   
+
 
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
@@ -293,7 +294,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 !*   occ = occupancy of jband at this k point
      occ=fockbz%occ_bz(jband+bdtot_jindex,my_jsppol)
-     if(occ<tol8) cycle 
+     if(occ<tol8) cycle
 
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
@@ -453,7 +454,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
          signs=2;choice=3;cpopt=4
 
-       ! first contribution 
+       ! first contribution
          dotr=zero
          do idir=1,6
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -463,7 +464,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
 &           dotr(idir)*occ*wtk/gs_ham%ucvol
          end do
-       ! second contribution 
+       ! second contribution
          str=zero
          do iatom=1,natom
            do idir=1,3

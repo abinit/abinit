@@ -39,6 +39,7 @@ module m_psps
 
  use m_fstrings,      only : itoa, sjoin, yesno
  use m_io_tools,      only : open_file
+ use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
  use defs_abitypes,   only : dataset_type
  use m_paw_numeric,   only : paw_spline
@@ -284,7 +285,6 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psps_init_from_dtset'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

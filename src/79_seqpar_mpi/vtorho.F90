@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -230,15 +230,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
- use m_abi2big,            only : wvl_occ_abi2big,wvl_rho_abi2big,wvl_occopt_abi2big
- use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
+ use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
+ use m_fock,               only : fock_type, fock_ACE_type, fock_updateikpt, fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_tddft,              only : tddft
  use m_kg,                 only : mkkin, mkkpg
  use m_suscep_stat,        only : suscep_stat
+ use m_fft,                only : fftpac
 
 #if defined HAVE_BIGDFT
- use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
+ use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
@@ -247,7 +248,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
@@ -1778,20 +1778,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!  Non-self-consistent field cycle in Wavelets
 !!  See also "wvl_nscf_loop_bigdft"
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  nnsclo= number of non-self consistent field iterations
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      vtorho
@@ -1803,13 +1793,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 subroutine wvl_nscf_loop()
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
-
- use m_errors
- use m_energies, only : energies_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1906,21 +1889,11 @@ subroutine wvl_nscf_loop()
 !!  It follows the BigDFT scheme.
 !!  See also "wvl_nscf_loop"
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel, D. Caliste)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  nnsclo= number of non-self consistent field iterations
 !!
 !! OUTPUT
 !!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      vtorho
@@ -1930,21 +1903,8 @@ subroutine wvl_nscf_loop()
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_nscf_loop_bigdft()
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_errors
-
- use m_energies, only : energies_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2024,12 +1984,6 @@ subroutine wvl_nscf_loop_bigdft()
 !! FUNCTION
 !!  Computes eigenvalues energy from eigen, occ, kpt, wtk
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  eigen(nkpt*nsppol)=eigenvalues
 !!  mband= maximum number of bands
@@ -2042,10 +1996,6 @@ subroutine wvl_nscf_loop_bigdft()
 !! OUTPUT
 !!  e_eigenvalues= eigenvalues energy
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      vtorho
 !!
@@ -2056,8 +2006,6 @@ subroutine wvl_nscf_loop_bigdft()
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
- use defs_basis
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2108,17 +2056,9 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! FUNCTION
 !!  Computes occupations for the wavelet case
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
@@ -2133,9 +2073,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
 subroutine wvl_occ()
 
- use defs_basis
- use m_errors
- use defs_wvltypes
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2178,12 +2115,6 @@ subroutine wvl_occ()
 !!  Computes occupations for the wavelet case
 !!  Using BigDFT routines
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -2203,8 +2134,6 @@ subroutine wvl_occ()
 
 subroutine wvl_occ_bigdft()
 
- use defs_basis
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2247,12 +2176,6 @@ subroutine wvl_occ_bigdft()
 !!  Computes occupations for the wavelet case
 !!  Using BigDFT routines
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -2272,13 +2195,6 @@ subroutine wvl_occ_bigdft()
 
 subroutine wvl_comm_eigen()
 
- use defs_basis
- use m_errors
-
- use m_abi2big, only : wvl_eigen_abi2big
-#if defined HAVE_BIGDFT
- use BigDFT_API, only: eigensystem_info
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

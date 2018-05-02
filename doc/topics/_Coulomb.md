@@ -2,6 +2,7 @@
 description: How to treat adequately the Coulomb interaction, especially in charged cells,
 authors: FB
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to treat adequately the Coulomb interaction, 
 especially in charged cells, with the ABINIT package.

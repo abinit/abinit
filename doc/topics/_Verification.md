@@ -2,6 +2,7 @@
 description: How to become convinced that results are numerically correct
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to become convinced that results are numerically correct with the ABINIT package.
 

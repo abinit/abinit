@@ -65,7 +65,7 @@ def run_script(name, title, cmdline, stop_on_error=True,
       indent_output=True):
 
   print("[%s]   %s" % (name, title))
-  #print(cmdline)
+
   (ret, msg) = getstatusoutput(cmdline)
   if ( msg != "" ):
     if ( indent_output ):
@@ -73,6 +73,7 @@ def run_script(name, title, cmdline, stop_on_error=True,
     else:
       sys.stderr.write(msg + "\n")
   if ( (ret != 0) and stop_on_error ):
+    sys.stderr.write("cmdline: %s\n" % cmdline)
     sys.stderr.write("[%s] Aborting now!\n" % (name))
     sys.exit(1)
 

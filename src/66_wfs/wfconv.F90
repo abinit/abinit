@@ -151,6 +151,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  use m_xmpi
 
  use m_time,     only : timab
+ use m_geometry, only : getspinrot
+ use m_symtk,    only : mati3inv
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_cgtools,  only : cg_envlop
  use m_kg,       only : ph1d3d, getph
@@ -160,8 +162,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfconv'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_66_wfs, except_this_one => wfconv
 !End of the abilint section
 
@@ -446,7 +446,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
 !      Take into account time-reversal symmetry, if needed, in the scalar case
        if(itimrev==1 .and. (nspinor1==1 .or. nspinor2==1))then
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
          do ipw=1,npw1
            wavef1(2,ipw)=-wavef1(2,ipw)
          end do
@@ -616,7 +616,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
  end if ! End of if convert/=0
 
- if(conv_tnons==1) then 
+ if(conv_tnons==1) then
    ABI_DEALLOCATE(phase1d)
    ABI_DEALLOCATE(phase3d)
  end if
@@ -647,7 +647,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
        do ispinor2=1,nspinor2_this_proc
          ispinor=ispinor2;if (nspinor2_this_proc/=nspinor2) ispinor=mpi_enreg2%me_spinor+1
          jsign=1;if (ispinor==2) jsign=-1
-         
+
          do ipw=1,npw2
            index=index+1
 !          Different seed for different planewave and band
@@ -660,7 +660,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
            else
              seed=jsign*(iband*(kg2(1,ipw)*npwtot*npwtot + kg2(2,ipw)*npwtot + kg2(3,ipw)))
            end if
-           
+
            if(randalg == 0) then
 !            For portability, use only integer numbers
 !            The series of couples (fold1,fold2) is periodic with a period of
@@ -698,11 +698,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
            end if
          end do
        end do
-       
+
 !      XG030513 : MPIWF need to impose cg to zero when at Gamma
 !      Time-reversal symmetry for k=gamma impose zero imaginary part at G=0
 !      XG : I do not know what happens for spin-orbit here :
-       if(istwf2_k==2 .and. mpi_enreg2%me_g0==1) then 
+       if(istwf2_k==2 .and. mpi_enreg2%me_g0==1) then
          cg2(2,1+(iband-1)*npw2*nspinor2_this_proc+icg2)=zero
        end if
      end do

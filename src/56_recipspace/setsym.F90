@@ -66,12 +66,12 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  use m_errors
 
  use m_time,          only : timab
+ use m_symtk,         only : mati3inv, chkgrp, symdet
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setsym'
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace, except_this_one => setsym
 !End of the abilint section

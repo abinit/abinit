@@ -21,7 +21,6 @@ sources = [
  "cg_rotate.F90",
  "initylmg.F90",
  "irrzg.F90",
- "laplacian.F90",
  "m_ab7_kpoints.F90",
  "m_bz_mesh.F90",
  "m_double_grid.F90",

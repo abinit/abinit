@@ -84,9 +84,9 @@ class Procedure(object):
         w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         lines = []; app = lines.append
 
-        app("%s: %s" % (self.__class__.__name__, self.name)),
+        app("%s: %s\n" % (self.__class__.__name__.upper(), self.name)),
         if self.ancestor is not None:
-            app("Ancestor: %s (%s)" % (self.ancestor.name, self.ancestor.ftype))
+            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.ftype))
         app("")
         if self.uses:
             app("USES:\n%s\n" % w.fill(", ".join(self.uses)))

@@ -59,6 +59,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use libxc_functionals
 
  use m_numeric_tools,  only : iseven
+ use m_symtk,          only : chkgrp, chkorthsy
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_dtset,          only : dtset_copy, dtset_free
@@ -70,7 +71,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 #undef ABI_FUNC
 #define ABI_FUNC 'chkinp'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1004,7 +1004,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-&   dt%ionmov,21,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,25/),iout)
+&   dt%ionmov,23,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,25,26,27/),iout)
 
 !  When optcell/=0, ionmov must be 2, 3, 13 or 22 (except if imgmov>0)
    if(dt%optcell/=0)then

@@ -2,6 +2,7 @@
 description: How to perform orbital-free calculations
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform orbital-free calculations with the ABINIT package.
 

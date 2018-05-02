@@ -103,7 +103,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  use m_xmpi
  use m_errors
 
- use m_geometry,     only : metric
+ use m_geometry,     only : metric, stresssym
  use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
@@ -116,7 +116,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawgrnl'
- use interfaces_41_geometry
  use interfaces_64_psp
  use interfaces_65_paw, except_this_one => pawgrnl
 !End of the abilint section
@@ -1338,7 +1337,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    end do
    iatshft=iatshft+nattyp(itypat)
  end do
- 
+
 !Reduction in case of parallelisation over atoms
  if (paral_atom) then
    bufsiz=3*natom*optgr+6*optstr
