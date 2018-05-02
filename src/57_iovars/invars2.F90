@@ -88,6 +88,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
+ use m_inkpts,    only : inkpts
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
