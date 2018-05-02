@@ -89,6 +89,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts
+ use m_ingeo,     only : invacuum
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
