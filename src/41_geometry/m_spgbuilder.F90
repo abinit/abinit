@@ -90,11 +90,12 @@ contains
 
 subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gensymspgr'
- use interfaces_41_geometry, except_this_one => gensymspgr
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -604,6 +605,7 @@ end subroutine gensymspgr
 !! SOURCE
 
 subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1318,6 +1320,7 @@ end subroutine gensymshub
 !! SOURCE
 
 subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

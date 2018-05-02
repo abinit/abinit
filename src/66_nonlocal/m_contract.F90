@@ -27,6 +27,7 @@
 module m_contract
 
  use defs_basis
+ use m_errors
 
  implicit none
 
@@ -1615,6 +1616,7 @@ end subroutine cont35
 
 subroutine metcon(rank,gmet,aa,bb)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1943,6 +1945,7 @@ end subroutine metcon
 
 subroutine metcon_so(rank,gmet,amet,aa,bb)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2236,6 +2239,7 @@ end subroutine metcon_so
 !! SOURCE
 
 subroutine metric_so(amet,gprimd,pauli)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
