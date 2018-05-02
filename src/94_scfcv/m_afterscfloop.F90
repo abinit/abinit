@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_afterscfloop
+!! NAME
+!!  m_afterscfloop
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_afterscfloop
+
+ !use defs_basis
+ !use m_errors
+ !use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: afterscfloop
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/afterscfloop
 !! NAME
 !! afterscfloop
@@ -7,12 +49,6 @@
 !! Perform all calculations needed after the SCF loop, independent of the
 !! call to scfcv (with or without atomic displacements), and exclusive
 !! of print or write purposes, or deallocations.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -194,12 +230,6 @@
 !!      wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
@@ -1041,4 +1071,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #endif
 
 end subroutine afterscfloop
+!!***
+
+end module m_afterscfloop
 !!***

@@ -1,16 +1,47 @@
-! {\src2tex{textfont=tt}}
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_outscfcv
+!! NAME
+!!  m_outscfcv
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2005-2018 ABINIT group (XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_outscfcv
+
+ implicit none
+
+ private
+!!***
+
+ public :: outscfcv
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/outscfcv
 !! NAME
 !! outscfcv
 !!
 !! FUNCTION
 !! Output routine for the scfcv.F90 routine
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -117,12 +148,6 @@
 !!      xmpi_sum_master
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,dtset,&
 & ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,kg,&
@@ -1189,4 +1214,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  DBG_EXIT("COLL")
 
 end subroutine outscfcv
+!!***
+
+end module m_outscfcv
 !!***

@@ -224,6 +224,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_kg,               only : getcut, getmpw, kpgio, getph
  use m_vtorhorec,        only : first_rec, vtorhorec
  use m_vtorhotf,         only : vtorhotf
+ use m_outscfcv,         only : outscfcv
+ use m_afterscfloop,     only : afterscfloop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
