@@ -3069,7 +3069,7 @@ end subroutine fftmpi_u
 !!
 !! INPUTS
 !!  cplex= if 1, input array is REAL, if 2, input array is COMPLEX
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  n1,n2,n3=FFT dimensions nfft=n1*n2*n3
 !!  ig1,ig2,ig3=optional arguments= indexes of unbalanced g-vectors to cancel
 !!              if not present, ig1=1+n1/2, ig2=1+n2/2, ig3=1+n3/2 for even n1,n2,n3

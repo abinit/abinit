@@ -23,11 +23,10 @@
 !!  nsppol = 1 for unpolarized, 2 for polarized
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg = informations about MPI parallelization
+!!  mpi_enreg = information about MPI parallelization
 !!   mpi_enreg%proc_distrb(nkpt,mband,nsppol)=number of the processor
 !!       that will treat each band in each k point.
 !!   mpi_enreg%nproc_kpt is set
-!!
 !!
 !! NOTES
 !!  For the time being, the band parallelisation works only

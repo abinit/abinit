@@ -53,7 +53,7 @@ contains
 !! information needed to run WanT as a post-processing program
 !! The resulting file is 'launch.dat'.
 !!
-!! The routine writes to the disk (unformatted file unitwnt) the following informations:
+!! The routine writes to the disk (unformatted file unitwnt) the following information:
 !!
 !!     alat - lattice parameter
 !!     rprim - primitive translation vectors

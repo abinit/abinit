@@ -24,12 +24,11 @@
 !! cpui=initial CPU time
 !! filnam(5)=character strings giving file names
 !! filstat=character strings giving name of status file
-!! mpi_enregs=informations about MPI parallelization
+!! mpi_enregs=information about MPI parallelization
 !! ndtset=number of datasets
-!! ndtset_alloc=number of datasets, corrected for allocation of at
-!!               least one data set.
+!! ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !! npsp=number of pseudopotentials
-!! pspheads(npsp)=<type pspheader_type>all the important information from the
+!! pspheads(npsp)=<type pspheader_type>all the important informatio from the
 !!   pseudopotential file header, as well as the psp file name
 !!
 !! OUTPUT
@@ -558,7 +557,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Nullify wvl_data. It is important to do so irregardless of the value of usewvl:
    call nullify_wvl_data(wvl)
 
-!  Set up mpi informations from the dataset
+!  Set up mpi information from the dataset
    if (dtset%usewvl == 1) then
 #if defined HAVE_BIGDFT
      call f_malloc_set_status(iproc=mpi_enregs(idtset)%me_wvl)

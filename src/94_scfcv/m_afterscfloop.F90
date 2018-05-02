@@ -26,10 +26,6 @@
 
 module m_afterscfloop
 
- !use defs_basis
- !use m_errors
- !use m_profiling_abi
-
  implicit none
 
  private
@@ -88,7 +84,7 @@ contains
 !!  mgfftf= - PAW only - maximum size of 1D FFTs for the "fine" grid (see NOTES at beginning of scfcv)
 !!  ngrvdw=size of grvdw(:,:); can be 0 or natom according to dtset%vdw_xc
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  nattyp(dtset%ntypat)=number of atoms of each type

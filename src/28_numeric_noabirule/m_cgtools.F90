@@ -1649,7 +1649,7 @@ end subroutine dotprod_v
 !! INPUTS
 !!  cplex=if 1, real space functions on FFT grid are REAL, if 2, COMPLEX
 !!  dens(cplex*nfft,nspden)=real space density on FFT grid
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft= (effective) number of FFT grid points (for this processor)
 !!  nfftot= total number of FFT grid points
 !!  nspden=number of spin-density components

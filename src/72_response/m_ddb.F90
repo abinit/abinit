@@ -3767,7 +3767,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  do iddb=2,nddb
 
 !  Open the corresponding input DDB,
-!  and read the database file informations
+!  and read the database file information
    write(message, '(a,a,i6)' )ch10,&
 &   ' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
@@ -4123,7 +4123,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  do iddb=2,nddb
 
 !  Open the corresponding input DDB,
-!  and read the database file informations
+!  and read the database file information
    write(message, '(a,a,i6)' )ch10,&
 &   ' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')

@@ -505,7 +505,7 @@ end subroutine mkkin
 !!  character(len=4) : mode_paral=either 'COLL' or 'PERS', tells whether
 !!   the loop over k points must be done by all processors or not,
 !!   in case of parallel execution.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol)=number of bands at each k point
 !!  nkpt=number of k points

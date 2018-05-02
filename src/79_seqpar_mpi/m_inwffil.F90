@@ -97,7 +97,7 @@ contains
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mkmem=number of k-points in core memory
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol)=number of bands at each k point
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -1059,8 +1059,8 @@ end subroutine inwffil
 !!  localrdwf=(for parallel case) if 1, the wff1%unwff file is local to each machine
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*nsppol
-!!  mpi_enreg=informations about MPI parallelization
-!!  mpi_enreg0=informations about MPI parallelization in set0
+!!  mpi_enreg=information about MPI parallelization
+!!  mpi_enreg0=information about MPI parallelization in set0
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  mpw0=maximum number of planewaves on disk file
 !!  nban_dp_rd(nkpt0*nsppol0)=number of bands to be read at each k point
@@ -1088,7 +1088,7 @@ end subroutine inwffil
 !!  symrel(3,3,nsym)=symmetry operations in real space in terms
 !!   of primitive translations
 !!  tnons(3,nsym)=nonsymmorphic translations for symmetry operations
-!!  wff1, structure informations for input and output files
+!!  wff1, structure information for input and output files
 !!
 !! OUTPUT
 !!  if ground state format (formeig=0):
@@ -2034,8 +2034,8 @@ end subroutine initwf
 !!    This is needed, in order to use the same pointer.
 !!  mkmem1= if 0, the input wf, eig, occ are available from disk
 !!  mkmem2= if 0, the output wf, eig, occ must be written onto disk
-!!  mpi_enreg1=informations about MPI parallelization, for the input wf file
-!!  mpi_enreg2=informations about MPI parallelization, for the output wf file
+!!  mpi_enreg1=information about MPI parallelization, for the input wf file
+!!  mpi_enreg2=information about MPI parallelization, for the output wf file
 !!  mpw1=maximum allowed number of planewaves at any k, for the input wf file
 !!  mpw2=maximum allowed number of planewaves at any k, for the output wf file
 !!  my_nkpt2= number of k points for the output wf file, handled by current processus

@@ -529,7 +529,7 @@ end subroutine meanvalue_g
 !!
 !! INPUTS
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=number of points of the fft grid
 !!  nfunc=number of functions on the grid for which the laplacian is to be calculated
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -885,7 +885,7 @@ end subroutine redgr
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!  idir=direction of the current perturbation
 !!  ipert=type of the perturbation
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=number of fft grid points (gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2))
 !!  ngfft(18)=contain all needed information about 3D FFT,

@@ -120,7 +120,7 @@ CONTAINS
 !!  lnmax=max number of (l,n) components
 !!  mqgrid=number of grid points for q grid
 !!  qgrid(mqgrid)=values at which form factors are returned
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  wfll(:,lnmax)=paw projector on radial grid
 !!
 !! OUTPUT
@@ -291,7 +291,7 @@ end subroutine pawpsp_nl
 !! INPUTS
 !!  mqgrid=number of grid points in q from 0 to qmax.
 !!  qgrid(mqgrid)=q grid values (bohr**-1).
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  vloc(:)=V(r) on radial grid.
 !!  zion=nominal valence charge of atom.
 !!
@@ -469,7 +469,7 @@ end subroutine pawpsp_lo
 !! INPUTS
 !!  mqgrid=number of grid points in q from 0 to qmax.
 !!  qgrid(mqgrid)=q grid values (bohr**-1).
-!!  radmesh <type(pawrad_type)>=data containing radial grid informations
+!!  radmesh <type(pawrad_type)>=data containing radial grid information
 !!  nr(:)=n(r) on radial grid.
 !!
 !! OUTPUT
@@ -1815,8 +1815,8 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==========================================================
 !Perfom tests on meshes
 
-! initialise logical 
- non_magnetic_xc=.false. 
+! initialise logical
+ non_magnetic_xc=.false.
 
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
@@ -2739,7 +2739,7 @@ subroutine pawpsp_vhar2rho(radmesh,rho,vv)
 
 !Calculate derivatives
  call nderiv_gen(dfdr(1:nr),vv,radmesh,der2=d2fdr(1:nr))
- 
+
  rho(2:nr)=d2fdr(2:nr) + 2._dp*dfdr(2:nr)/radmesh%rad(2:nr)
  call pawrad_deducer0(rho,nr,radmesh)
 
@@ -4768,7 +4768,7 @@ end subroutine pawpsp_bcast
 !!              (if density<xc_denpos, density=zero)
 !!
 !! OUTPUT
-!!  pawrad <type(pawrad_type)>=data containing PAW radial grid informations
+!!  pawrad <type(pawrad_type)>=data containing PAW radial grid information
 !!  pawtab <type(pawtab_type)>=data containing the PAW dataset (partial waves...)
 !!
 !! SIDE EFFECTS
@@ -4879,7 +4879,7 @@ subroutine pawpsp_main( &
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,  msg,'COLL')
 
-!    Return header informations
+!    Return header information
      call pawpsp_read_header_xml(lloc,lmax,pspcod,&
 &     pspxc,psxml,r2well,zion,znucl)
 !    Fill in pawpsp_header object:

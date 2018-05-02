@@ -3128,8 +3128,6 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 end subroutine ep_setupqpt
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mkph_linwid
 !!
 !! NAME
@@ -3137,13 +3135,6 @@ end subroutine ep_setupqpt
 !!
 !! FUNCTION
 !!  Calculate the phonon linewidths on a trajectory in q space
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  Cryst<crystal_t>=Info on the unit cell and symmetries.
@@ -4306,7 +4297,7 @@ end subroutine get_all_gkr
 !! FUNCTION
 !! Use the set of special q points calculated by the Monkhorst &
 !! Pack Technique.
-!! Check if all the informations for the q points are present in
+!! Check if all the information for the q points are present in
 !! the DDB to determine the elphon interaction matrices
 !! Generate the gkk matrices of the set of q points which
 !! samples homogeneously the entire Brillouin zone.

@@ -20,7 +20,7 @@
 !! TODO
 !! One should replace the 'pointer' by 'allocatable'. This was tried, in October 2014,
 !! but Petrus_nag complained (test v67mbpt t31...t34), and also max2 (paral#08 np=10).
-!! 
+!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -75,7 +75,7 @@ MODULE m_results_out
   integer :: nocc
    ! The number of occupations for this dataset
   integer :: npsp
-   ! The number of pseudopotentials 
+   ! The number of pseudopotentials
   integer :: ntypat
    ! The number of types of atoms
 
@@ -599,7 +599,7 @@ end subroutine copy_results_out
 !!  allgather= --optional, default=false--  if TRUE do ALL_GATHER instead of GATHER
 !!  dtsets(:)= <type datafiles_type> contains all input variables,
 !!  master= --optional, default=0-- index of master proc receiving gathered data (if allgather=false)
-!!  mpi_enregs=informations about MPI parallelization
+!!  mpi_enregs=information about MPI parallelization
 !!  only_one_per_img= --optional, default=true--  if TRUE, the gather operation
 !!                    is only done by one proc per image (master of the comm_cell)
 !!  results_out(:)=<type(results_out_type)>=results_out datastructure array on each proc
@@ -724,7 +724,7 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
        end if
      else
 
-!      Retrieve MPI informations for this dataset
+!      Retrieve MPI information for this dataset
 
        if ((.not.one_per_img).or.(mpi_enregs(ii)%me_cell==master_one_img)) then
 

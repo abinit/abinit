@@ -57,8 +57,8 @@
 !!  mband2=dimension of eig_k2 and occ_k2 arrays
 !!  mcg1=dimension of cg1 array (at least npw1*nspinor1*nbd1)
 !!  mcg2=dimension of cg2 array (at least npw2*nspinor2*nbd2)
-!!  mpi_enreg1=informations about MPI parallelization for set 1
-!!  mpi_enreg2=informations about MPI parallelization for set 2
+!!  mpi_enreg1=information about MPI parallelization for set 1
+!!  mpi_enreg2=information about MPI parallelization for set 2
 !!  mpw1=dimension of kg1, can be set to 0 if not needed
 !!  mpw2=dimension of kg2, can be set to 0 if not needed
 !!  nbd1=number of bands contained in cg1,eig_k1,occ_k1 at this k-point - spin (at input)

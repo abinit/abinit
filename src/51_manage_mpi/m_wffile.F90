@@ -4295,7 +4295,7 @@ end subroutine xderiveWrite_char
 !!  nsppol = number of channels for spin-polarization (1 or 2)
 !!  nband(nkpt*nsppol) = number of bands at each k point, for each polarization
 !!  npwarr(nkpt) = number of planewaves at each k point
-!!  mpi_enreg <type(MPI_type)> = informations about MPI parallelization
+!!  mpi_enreg <type(MPI_type)> = information about MPI parallelization
 !!
 !! OUTPUT
 !!  (no output)
