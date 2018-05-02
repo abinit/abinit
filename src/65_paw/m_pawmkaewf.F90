@@ -1,16 +1,77 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/pawmkaewf
+!!****m* ABINIT/m_pawmkaewf
 !! NAME
-!! pawmkaewf
+!!  m_pawmkaewf
 !!
 !! FUNCTION
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pawmkaewf
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_blas
+ use m_splines
+ use m_errors
+ use m_nctk
+ use m_hdr
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+
+ use m_io_tools,       only : flush_unit
+ use m_numeric_tools,  only : wrap2_zero_one
+ use m_fftcore,        only : sphereboundary
+ use m_geometry,       only : xcart2xred
+ use m_crystal,        only : crystal_t
+ use m_crystal_io,     only : crystal_ncwrite
+ use m_ebands,         only : ebands_ncwrite
+ use m_pawrad,         only : pawrad_type
+ use m_pawtab,         only : pawtab_type, pawtab_get_lsize
+ use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
+ use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
+ use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
+ use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
+
+ implicit none
+
+ private
+!!***
+
+ public :: pawmkaewf
+!!***
+
+contains
+!!***
+
+!!****f* m_pawmkaewf/pawmkaewf
+!! NAME
+!! pawmkaewf
+!!
+!! FUNCTION
+!! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! INPUTS
 !! crystal<crystal_t>=Crystalline structure
@@ -75,46 +136,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkmem,nsppol,nband,&
 & istwfk,npwarr,kpt,ngfftf,kg,dimcprj,Pawfgrtab,Pawrad,Pawtab,&
 & Hdr,Dtfil,cg,Cprj,MPI_enreg,ierr,pseudo_norms,set_k,set_band , &
 & mpi_atmtab,comm_atom) ! Optional arguments
-
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
- use m_xmpi
- use m_blas
- use m_splines
- use m_errors
- use m_nctk
- use m_hdr
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
-
- use m_io_tools,       only : flush_unit
- use m_numeric_tools,  only : wrap2_zero_one
- use m_fftcore,        only : sphereboundary
- use m_geometry,       only : xcart2xred
- use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
- use m_ebands,         only : ebands_ncwrite
- use m_pawrad,         only : pawrad_type
- use m_pawtab,         only : pawtab_type, pawtab_get_lsize
- use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
- use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
- use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -716,4 +741,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  DBG_EXIT("COLL")
 
 end subroutine pawmkaewf
+!!***
+
+end module m_pawmkaewf
 !!***
