@@ -106,6 +106,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_paw_finegrid,only : pawexpiqr
  use m_kg,          only : getcut,kpgio,getph
  use m_kpts,        only : getkgrid
+ use m_symtk,       only : littlegroup_q
  
  use m_paw_dmft,    only : paw_dmft_type
  use m_inwffil,     only : inwffil
