@@ -189,7 +189,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_xc_lowlevel
 #if defined HAVE_GPU_CUDA
  use interfaces_52_manage_cuda

@@ -138,7 +138,6 @@ program abinit
 #undef ABI_FUNC
 #define ABI_FUNC 'abinit'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_57_iovars
  use interfaces_95_drive
 !End of the abilint section

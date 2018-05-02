@@ -591,7 +591,6 @@ end subroutine ab7_invars_new_from_file
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ab7_invars_load'
- use interfaces_32_util
  use interfaces_57_iovars
 !End of the abilint section
 

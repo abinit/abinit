@@ -1235,6 +1235,7 @@ end subroutine isfile
 
 subroutine iofn1(filnam,filstat,comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

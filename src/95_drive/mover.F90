@@ -141,7 +141,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_pred_lotf
 #endif
 
-
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx
@@ -159,7 +158,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #undef ABI_FUNC
 #define ABI_FUNC 'mover'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_45_geomoptim
  use interfaces_56_recipspace
  use interfaces_59_ionetcdf

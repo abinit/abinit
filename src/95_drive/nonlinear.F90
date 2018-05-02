@@ -98,7 +98,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc

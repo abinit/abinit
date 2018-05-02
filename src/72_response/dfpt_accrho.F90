@@ -104,7 +104,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_accrho'
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal
