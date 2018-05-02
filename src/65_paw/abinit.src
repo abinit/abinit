@@ -49,7 +49,7 @@ sources = [
  "pawgrnl.F90",
  "pawgylmg.F90",
  "pawinit.F90",
- "pawmkaewf.F90",
+ "m_pawmkaewf.F90",
  "pawmknhat.F90",
  "pawmknhat_psipsi.F90",
  "pawmkrho.F90",

@@ -180,6 +180,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
+ use m_pawmkaewf,        only : pawmkaewf
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
