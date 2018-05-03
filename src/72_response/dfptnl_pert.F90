@@ -337,11 +337,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 &     (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2))
-   if(dtset%nsppol==1) then
-     call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
-   else
-     MSG_ERROR("nonlinear not implemented yet for nsppol>1...")
-   end if
+   call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
    call paw_ij_free(paw_ij_tmp)
    ABI_DATATYPE_DEALLOCATE(paw_ij_tmp)
  else
@@ -435,7 +431,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
    do ikpt = 1, nkpt
 
-     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,-1,mpi_enreg%me)) then
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,isppol,mpi_enreg%me)) then
        cycle ! Skip the rest of the k-point loop
      end if
 

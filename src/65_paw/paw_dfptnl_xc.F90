@@ -96,8 +96,8 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 
 !Local variables-------------------------------
 !scalars
- integer :: ilm,ipts,ispden,lm_size_eff,npts
- real(dp) :: d3exc1_int
+ integer :: ii,ilm,ipts,ispden,lm_size_eff,npts
+ real(dp) :: d3exc1_int,rho1u,rho1d,rho2u,rho2d,rho3u,rho3d
  character(len=500) :: msg
 !arrays
 ! real(dp) :: tsec(2)
@@ -131,10 +131,10 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
    MSG_BUG(msg)
  end if
 !Restriction : nspden must be 1
- if (nkxc>1) then
-   msg='nkxc must be one (<=> nspden=1) (for the moment...)'
-   MSG_BUG(msg)
- end if
+! if (nkxc>1) then
+!   msg='nkxc must be one (<=> nspden=1) (for the moment...)'
+!   MSG_BUG(msg)
+! end if
 
  ABI_ALLOCATE(ff,(nrad))
 
@@ -203,11 +203,28 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 !  ----- Accumulate and store 3nd-order change of XC energy
 !  ----------------------------------------------------------------------
 
-!  COLLINEAR MAGNETISM
    if (cplex_1==1.and.cplex_2==1.and.cplex_3==1) then ! all cplex are 1 :
-     ff(:)=kxc(:,ipts,nspden)*rho1arr(:,nspden)*rho2arr(:,nspden)*rho3arr(:,nspden)
-!     if (nspden==2) ff(:)=ff(:)+vxc1_(:,2)*(rho1arr(:,1)-rho1arr(:,2))
-!     if (need_impart) gg(:)=zero
+     if (nspden==1) then
+       ff(:)=kxc(:,ipts,1)*rho1arr(:,1)*rho2arr(:,1)*rho3arr(:,1)
+     else if (nspden==2) then
+       do ii=1,nrad
+         rho1u=rho1arr(ii,2)
+         rho1d=rho1arr(ii,1)-rho1arr(ii,2)
+         rho2u=rho2arr(ii,2)
+         rho2d=rho2arr(ii,1)-rho2arr(ii,2)
+         rho3u=rho3arr(ii,2)
+         rho3d=rho3arr(ii,1)-rho3arr(ii,2)
+         ff(ii)=&
+!          uuu                                uud
+&          kxc(ii,ipts,1)*rho1u*rho2u*rho3u + kxc(ii,ipts,2)*rho1u*rho2u*rho3d + &
+!          udu                                udd
+&          kxc(ii,ipts,2)*rho1u*rho2d*rho3u + kxc(ii,ipts,3)*rho1u*rho2d*rho3d + &
+!          duu                                dud
+&          kxc(ii,ipts,2)*rho1d*rho2u*rho3u + kxc(ii,ipts,3)*rho1d*rho2u*rho3d + &
+!          ddu                                ddd
+&          kxc(ii,ipts,3)*rho1d*rho2d*rho3u + kxc(ii,ipts,4)*rho1d*rho2d*rho3d
+       end do
+     end if
    end if
 
    ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
