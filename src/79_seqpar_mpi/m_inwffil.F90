@@ -44,7 +44,7 @@ module m_inwffil
  use m_io_tools, only : file_exists, get_unit
  use m_geometry, only : getspinrot
  use m_pptools,  only : prmat
- use m_symtk,    only : matr3inv
+ use m_symtk,    only : matr3inv, mati3inv
  use m_cgtools,  only : cg_envlop
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
@@ -1142,7 +1142,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #define ABI_FUNC 'wfsinp'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -2122,7 +2121,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 #define ABI_FUNC 'newkpt'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -2721,12 +2719,13 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 & mpw1,mpw2,nbd1,nbd2,ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,&
 & nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wfconv'
  use interfaces_14_hidewrite
- use interfaces_66_wfs, except_this_one => wfconv
+ use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

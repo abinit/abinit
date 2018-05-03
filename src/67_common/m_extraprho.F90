@@ -123,13 +123,13 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 & pawtab,ph1d,psps,qgrid,rhor,rprimd,scf_history,ucvol,usepaw,&
 & xred_new,xred_old,ylm,zion,znucl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'extraprho'
  use interfaces_14_hidewrite
  use interfaces_64_psp
- use interfaces_67_common, except_this_one => extraprho
 !End of the abilint section
 
  implicit none
@@ -544,6 +544,7 @@ end subroutine extraprho
 
 subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 & nattyp,ngfft,npwarr,ntypat,pawtab,psps,rprimd,scf_history,usepaw,xred_old,ylm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
