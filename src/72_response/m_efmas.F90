@@ -704,7 +704,7 @@ CONTAINS
   integer :: cdirs, ndirs
   integer :: ipiv(3)
   integer :: io_unit
-  character(len=500) :: message, filename
+  character(len=500) :: msg, filename
   real(dp) :: deltae
   real(dp) :: cosph,costh,sinph,sinth
   real(dp) :: dot2i,dot2r,dot3i,dot3r,doti,dotr
@@ -756,17 +756,17 @@ CONTAINS
 &   ' NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
 
   if(dtset%nsppol/=1)then
-    write(message,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
-    MSG_ERROR(message)
+    write(msg,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
+    MSG_ERROR(msg)
   end if
   if(dtset%nspden/=1)then
-    write(message,'(a,i3,a)') 'nspden=',dtset%nspden,' is not yet treated in m_efmas.'
-    MSG_ERROR(message)
+    write(msg,'(a,i3,a)') 'nspden=',dtset%nspden,' is not yet treated in m_efmas.'
+    MSG_ERROR(msg)
   end if
   if(dtset%efmas_deg==0) then
-    write(message,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
-    MSG_WARNING(message)
-    write(ab_out,'(6a)') ch10,'--- !WARNING',ch10,TRIM(message),ch10,'---'
+    write(msg,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
+    MSG_WARNING(msg)
+    write(ab_out,'(6a)') ch10,'--- !WARNING',ch10,TRIM(msg),ch10,'---'
   end if
 
   ipert = dtset%natom+1
@@ -876,9 +876,9 @@ CONTAINS
             end do
           end do
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
-            write(message,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
+            write(msg,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
 &            'but gradient of band(s) was found to be nonzero.'
-            MSG_ERROR(message)
+            MSG_ERROR(msg)
           end if
         end do !adir=1,3
       end if !degenerate(1)
@@ -1148,10 +1148,10 @@ CONTAINS
 
         !Hack to print f(theta,phi) & weights to a file
         if(print_fsph) then
-          write(message,*) degl+1
-          filename='f_band_'//TRIM(ADJUSTL(message))//'-'
-          write(message,*) degl+deg_dim
-          filename=TRIM(filename)//TRIM(ADJUSTL(message))//'.dat'
+          write(msg,*) degl+1
+          filename='f_band_'//TRIM(ADJUSTL(msg))//'-'
+          write(msg,*) degl+deg_dim
+          filename=TRIM(filename)//TRIM(ADJUSTL(msg))//'.dat'
           io_unit = get_unit()
           open(io_unit,file=TRIM(filename),status='replace')
           write(io_unit,*) 'ntheta=',ntheta,', nphi=',nphi
