@@ -2377,12 +2377,10 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  ABI_MALLOC(a2f%omega, (nomega))
  a2f%omega = arth(omega_min,wstep,nomega)
  ABI_CALLOC(a2f%vals, (nomega,0:natom3, nsppol))
- a2f%vals = zero
  ABI_CALLOC(a2f%lambdaw, (nomega,0:natom3, nsppol))
 
 #ifdef MJV_DEV
  ABI_CALLOC(a2f%vals_ee, (gams%nene,gams%nene,nomega,nsppol))
- a2f%vals_ee = zero
 #endif
 
  ABI_MALLOC(tmp_a2f, (nomega))
