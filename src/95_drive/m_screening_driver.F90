@@ -83,6 +83,7 @@ module m_screening_driver
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
 
  implicit none
 
@@ -178,7 +179,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_70_gw
 !End of the abilint section
 
  implicit none

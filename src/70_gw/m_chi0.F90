@@ -40,7 +40,7 @@ module m_chi0
  use m_numeric_tools,   only : imin_loc, print_arr
  use m_geometry,        only : normv, vdotw
  use m_crystal,         only : crystal_t
- use m_fft_mesh,        only : rotate_FFT_mesh
+ use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt
  use m_occ,             only : getnel
  use m_ebands,          only : pack_eneocc, unpack_eneocc
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_BZ_item, get_BZ_diff, &
@@ -69,6 +69,7 @@ module m_chi0
 
  public :: cchi0q0
  public :: cchi0
+ public :: chi0q0_intraband
 !!***
 
 contains
@@ -183,13 +184,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
 &  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cchi0q0'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_70_gw, except_this_one => cchi0q0
+ use interfaces_70_gw
 !End of the abilint section
 
  implicit none
@@ -1142,13 +1144,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
 & chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cchi0'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_70_gw, except_this_one => cchi0
+ use interfaces_70_gw
 !End of the abilint section
 
  implicit none
@@ -1991,6 +1994,7 @@ end subroutine cchi0
 
 subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,use_tr,usepawu,&
 &  ngfft_gw,chi0,chi0_head,chi0_lwing,chi0_uwing)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
