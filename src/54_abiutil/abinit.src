@@ -22,7 +22,6 @@ sources = [
  "m_dens.F90",
  "m_results_out.F90",
  "m_scf_history.F90",
- "printmagvtk.F90",
  "m_builtin_tests.F90",
  "m_timana.F90",
  ]
