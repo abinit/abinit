@@ -55,8 +55,8 @@ module m_sigma_driver
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt, setmesh
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_crystal,       only : crystal_free, crystal_t, crystal_from_hdr, crystal_print, idx_spatial_inversion
- use m_crystal_io,    only : crystal_ncwrite
+ use m_crystal,       only : crystal_free, crystal_t, crystal_print, idx_spatial_inversion
+ use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
 &                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              enclose_degbands, get_gaps, gaps_free, gaps_t, gaps_print
@@ -2506,7 +2506,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_sigma'
  use interfaces_14_hidewrite
- use interfaces_70_gw, except_this_one => setup_sigma
 !End of the abilint section
 
  implicit none
@@ -3477,6 +3476,7 @@ end subroutine setup_sigma
 
 subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3667,6 +3667,7 @@ end subroutine sigma_tables
 !! SOURCE
 
 subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_ur,ierr)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

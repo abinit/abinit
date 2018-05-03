@@ -165,13 +165,13 @@ contains
 subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_c,Vcp,&
 & Kmesh,Qmesh,Ltg_k,Pawtab,Pawang,Paw_pwff,Psps,Wfd,allQP_sym,gwc_ngfft,iomode,prtvol,sigcme_tmp)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cohsex_me'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_70_gw, except_this_one => cohsex_me
 !End of the abilint section
 
  implicit none
@@ -896,6 +896,7 @@ end subroutine cohsex_me
 !! SOURCE
 
 subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_sqrt,i_sz,iqibz,same_band,sigcohme)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
