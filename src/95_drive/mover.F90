@@ -215,7 +215,6 @@ logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
 real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
-
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
@@ -395,6 +394,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  iexit=0; timelimit_exit=0
  ncycle=specs%ncycle
 
+ if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0) then
+   ncycle=scfcv_args%dtset%hmctt
+   if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0) then
+     ncycle=ncycle+scfcv_args%dtset%hmcsst 
+   endif
+ endif
+
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
@@ -524,6 +530,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycles)
    do icycle=1,ncycle
+
      itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
 
 !    ###########################################################
@@ -611,11 +618,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          if (need_scfcv_cycle) then
+
            call dtfil_init_time(dtfil,iapp)
            call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
            if (conv_retcode == -1) then
-             message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
-             MSG_WARNING(message)
+               message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
+               MSG_WARNING(message)
            end if
 
          else
@@ -795,6 +803,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    do a double loop: 1- compute vel, 2- exit
      nloop=1
 
+     !write(message,'(a,i4,a,i4,a,i4)') ' DBGHMC itime= ',itime,' icycle= ',icycle,' ihist= ',hist%ihist
+     !call wrtout(ab_out,message,'COLL')
+
 
      if (scfcv_args%dtset%nctime>0.and.iexit==1) then
        iexit=0;nloop=2
@@ -837,7 +848,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (24)
          call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (25)
-         call pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,DEBUG,iexit)
+         call pred_hmc(ab_mover,hist,itime,icycle,ntime,scfcv_args%dtset%hmctt,DEBUG,iexit)
        case (27)
          !In case of ionmov 27, all the atomic configurations have been computed at the
          !begining of the routine in generate_training_set, thus we just need to increase the indexes
