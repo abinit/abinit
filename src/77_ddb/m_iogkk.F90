@@ -104,7 +104,6 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 #undef ABI_FUNC
 #define ABI_FUNC 'read_gkk'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -1512,12 +1511,12 @@ end subroutine completeperts
 subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &    h1_mat_el_sq,iqptirred,phfrq_tmp,qpt_irred,qdata)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'normsq_gkq'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => normsq_gkq
 !End of the abilint section
 
  implicit none
@@ -1706,13 +1705,6 @@ end subroutine normsq_gkq
 !!  from original h1_mat_el_sq matrix elements (no averaging over
 !!  bands near the Fermi surface)
 !!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!   displ_red = phonon mode displacement vectors, post-multiplied by gprim matrix
 !!     (ie. turned to reduced coordinates)
@@ -1737,6 +1729,7 @@ end subroutine normsq_gkq
 
 subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &  h1_mat_el_sq,iqptirred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1896,6 +1889,7 @@ end subroutine nmsq_gam
 
 subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2064,6 +2058,7 @@ end subroutine nmsq_gam_sumFS
 subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2201,6 +2196,7 @@ end subroutine nmsq_pure_gkk
 !! SOURCE
 
 subroutine nmsq_pure_gkk_sumfs(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,h1_mat_el_sq,iqptirred)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
