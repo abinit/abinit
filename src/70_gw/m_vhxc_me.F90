@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_vhxc_me
+!! NAME
+!! m_vhxc_me
+!!
+!! FUNCTION
+!!  Evaluate the matrix elements of $v_H$ and $v_{xc}$ and $v_U$
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_vhxc_me
+
+ implicit none
+
+ private
+!!***
+
+ public :: calc_vhxc_me
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/calc_vhxc_me
 !! NAME
 !!  calc_vhxc_me
@@ -8,12 +46,6 @@
 !!  both in case of NC pseudopotentials and PAW (LDA+U, presently, is only available in PAW)
 !!  The matrix elements of $v_{xc}$ are calculated with and without the core contribution.
 !!  The later quantity is required in case of GW calculations.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  Mflags
@@ -259,7 +291,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    ixc_sigma=Dtset%ixc_sigma
    call get_auxc_ixc(auxc_ixc,ixc_sigma)
    call xcdata_init(xcdata_hybrid,dtset=Dtset,auxc_ixc=auxc_ixc,ixc=ixc_sigma)
- 
+
    if(ixc_sigma<0)then
      if(libxc_functionals_check()) then
        call libxc_functionals_init(ixc_sigma,Dtset%nspden,xc_functionals=xc_funcs_hybrid)
@@ -803,4 +835,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  DBG_EXIT("COLL")
 
 end subroutine calc_vhxc_me
+!!***
+
+end module m_vhxc_me
 !!***

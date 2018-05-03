@@ -101,7 +101,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  use m_oscillators,     only : rho_tw_g
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
- use m_chi0,            only : assemblychi0_sym, symmetrize_afm_chi0
+ use m_chi0tk,          only : assemblychi0_sym, symmetrize_afm_chi0
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type

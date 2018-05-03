@@ -120,7 +120,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  use m_wfd,           only : wfd_get_ur, wfd_t, wfd_distribute_kb_kpbp, wfd_get_cprj, wfd_barrier, wfd_change_ngfft,&
 &                            wfd_paw_get_aeur, wfd_sym_ur
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_chi0,          only : hilbert_transform, setup_spectral, assemblychi0_sym, assemblychi0sf, symmetrize_afm_chi0,&
+ use m_chi0tk,        only : hilbert_transform, setup_spectral, assemblychi0_sym, assemblychi0sf, symmetrize_afm_chi0,&
 &                            approxdelta, completechi0_deltapart, accumulate_chi0sumrule, make_transitions, chi0_bbp_mask
 
  use m_pawang,        only : pawang_type

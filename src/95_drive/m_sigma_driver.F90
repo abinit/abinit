@@ -96,6 +96,7 @@ module m_sigma_driver
  use m_io_kss,        only : make_gvec_kss
  use m_cohsex,        only : cohsex_me
  use m_sigx,          only : calc_sigx_me
+ use m_vhxc_me,       only : calc_vhxc_me
 
  implicit none
 

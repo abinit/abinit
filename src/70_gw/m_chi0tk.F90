@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_chi0
+!!****m* ABINIT/m_chi0tk
 !! NAME
-!!  m_chi0
+!!  m_chi0tk
 !!
 !! FUNCTION
 !!  This module provides tools for the computation of the irreducible polarizability.
@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-MODULE m_chi0
+MODULE m_chi0tk
 
  use defs_basis
  use m_profiling_abi
@@ -67,7 +67,7 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/assemblychi0_sym
+!!****f* m_chi0tk/assemblychi0_sym
 !! NAME
 !! assemblychi0_sym
 !!
@@ -254,7 +254,7 @@ end subroutine assemblychi0_sym
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/mkrhotwg_sigma
+!!****f* m_chi0tk/mkrhotwg_sigma
 !! NAME
 !! mkrhotwg_sigma
 !!
@@ -319,7 +319,7 @@ end subroutine mkrhotwg_sigma
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/symmetrize_afm_chi0
+!!****f* m_chi0tk/symmetrize_afm_chi0tk
 !! NAME
 !! symmetrize_afm_chi0
 !!
@@ -596,7 +596,7 @@ end subroutine symmetrize_afm_chi0
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/accumulate_chi0_q0
+!!****f* m_chi0tk/accumulate_chi0_q0
 !! NAME
 !! accumulate_chi0_q0
 !!
@@ -855,7 +855,7 @@ end subroutine accumulate_chi0_q0
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/accumulate_sfchi0_q0
+!!****f* m_chi0tk/accumulate_sfchi0_q0
 !! NAME
 !! accumulate_sfchi0_q0
 !!
@@ -1105,7 +1105,7 @@ end subroutine accumulate_sfchi0_q0
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/assemblychi0sf
+!!****f* m_chi0tk/assemblychi0sf
 !! NAME
 !! assemblychi0sf
 !!
@@ -1325,7 +1325,7 @@ end subroutine assemblychi0sf
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/approxdelta
+!!****f* m_chi0tk/approxdelta
 !! NAME
 !!  approxdelta
 !!
@@ -1425,7 +1425,7 @@ end subroutine approxdelta
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/calc_kkweight
+!!****f* m_chi0tk/calc_kkweight
 !! NAME
 !!  calc_kkweight
 !!
@@ -1527,7 +1527,7 @@ end subroutine calc_kkweight
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/setup_spectral
+!!****f* m_chi0tk/setup_spectral
 !! NAME
 !!  setup_spectral
 !!
@@ -1693,7 +1693,7 @@ end subroutine setup_spectral
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/hilbert_transform
+!!****f* m_chi0tk/hilbert_transform
 !! NAME
 !!  hilbert_transform
 !!
@@ -1779,7 +1779,7 @@ end subroutine hilbert_transform
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/hilbert_transform_headwings
+!!****f* m_chi0tk/hilbert_transform_headwings
 !! NAME
 !!  hilbert_transform_headwings
 !!
@@ -1873,7 +1873,7 @@ end subroutine hilbert_transform_headwings
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/completechi0_deltapart
+!!****f* m_chi0tk/completechi0_deltapart
 !! NAME
 !! completechi0_deltapart
 !!
@@ -2017,7 +2017,7 @@ end subroutine completechi0_deltapart
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/output_chi0sumrule
+!!****f* m_chi0tk/output_chi0sumrule
 !! NAME
 !! output_chi0sumrule
 !!
@@ -2097,7 +2097,7 @@ end subroutine output_chi0sumrule
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/accumulate_chi0sumrule
+!!****f* m_chi0tk/accumulate_chi0sumrule
 !! NAME
 !! accumulate_chi0sumrule
 !!
@@ -2202,7 +2202,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 end subroutine accumulate_chi0sumrule
 !!***
 
-!!****f* m_chi0/make_transitions
+!!****f* m_chi0tk/make_transitions
 !! NAME
 !! make_transitions
 !!
@@ -2378,7 +2378,7 @@ end subroutine make_transitions
 
 !----------------------------------------------------------------------
 
-!!****f* m_chi0/chi0_bbp_mask
+!!****f* m_chi0tk/chi0_bbp_mask
 !! NAME
 !!  chi0_bbp_mask
 !!
@@ -2496,5 +2496,5 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
 end subroutine chi0_bbp_mask
 !!***
 
-END MODULE m_chi0
+END MODULE m_chi0tk
 !!***

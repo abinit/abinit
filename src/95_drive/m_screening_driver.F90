@@ -70,7 +70,7 @@ module m_screening_driver
                              wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft, wfd_mkrho, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
- use m_chi0,          only : output_chi0sumrule
+ use m_chi0tk,        only : output_chi0sumrule
  use m_pawang,        only : pawang_type
  use m_pawrad,        only : pawrad_type
  use m_pawtab,        only : pawtab_type, pawtab_print, pawtab_get_lsize
