@@ -1075,7 +1075,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,11,(/-3,-2,2,3,4,7,12,13,14,17,22/),iout)
    end if
 !  Mixing on density is only allowed for GS calculations or for drivers where it is not used.
-   if(optdriver /= RUNL_GSTATE .and. all(optdriver/=[RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_EPH,RUNL_WFK])) then
+   if(optdriver /= RUNL_GSTATE .and. all(optdriver/=[RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_EPH,&
+&     RUNL_WFK,RUNL_NONLINEAR])) then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
    end if
@@ -1948,7 +1949,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      ! Is optdriver compatible with PAW?
      cond_string(1)='usepaw' ; cond_values(1)=usepaw
      call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&     'optdriver',optdriver,6,[RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE, RUNL_WFK],iout)
+&     'optdriver',optdriver,7,[RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE, RUNL_WFK,RUNL_NONLINEAR],iout)
    end if
 
 !  Linear and Non-linear response calculations
@@ -1975,6 +1976,23 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(allow)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+   end if
+   if(usepaw==1.and.dt%optdriver==RUNL_NONLINEAR)then
+     cond_string(1)='usepaw'    ; cond_values(1)=usepaw
+     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'usepead',dt%usepead,1,(/0/),iout)
+     cond_string(1)='usepaw'    ; cond_values(1)=usepaw
+     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'nsppol',nsppol,1,(/1/),iout)
+     cond_string(1)='usepaw'    ; cond_values(1)=usepaw
+     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
+   end if
+   if(dt%optdriver==RUNL_NONLINEAR)then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',nspinor,1,(/1/),iout)
    end if
 
 !  optforces
