@@ -1,17 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_sigx
+!! NAME
+!!  m_six
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_sigx
+
+ implicit none
+
+ private
+!!***
+
+ public :: calc_sigx_me
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/calc_sigx_me
 !! NAME
 !! calc_sigx_me
 !!
 !! FUNCTION
 !! Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! sigmak_ibz=Index of the k-point in the IBZ.
@@ -93,12 +124,6 @@
 !!      wfd_paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
@@ -807,4 +832,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  DBG_EXIT("COLL")
 
 end subroutine calc_sigx_me
+!!***
+
+end module m_sigx
 !!***

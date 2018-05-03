@@ -1,4 +1,70 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_cohsex
+!! NAME
+!!  m_cohsex
+!!
+!! FUNCTION
+!! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_cohsex
+
+ use defs_basis
+ use defs_datatypes
+ use m_defs_ptgroups
+ use m_gwdefs !,        only : czero_gw, cone_gw, j_gw, sigparams_t, sigma_type_from_key, sigma_is_herm
+ use m_xmpi
+ use m_errors
+ use m_profiling_abi
+
+ use m_time,          only : timab
+ use m_fstrings,      only : sjoin, itoa
+ use m_blas,          only : xdotc, xgemv
+ use m_numeric_tools, only : hermitianize, imin_loc
+ use m_geometry,      only : normv
+ use m_crystal,       only : crystal_t
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
+ use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
+ use m_vcoul,         only : vcoul_t
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
+ use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_change_ngfft, wfd_get_many_ur, wfd_sym_ur
+ use m_oscillators,   only : rho_tw_g, calc_wfwfg
+ use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
+ use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_sigma,         only : sigma_t, sigma_distribute_bks
+ use m_pawang,        only : pawang_type
+ use m_pawtab,        only : pawtab_type
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+
+ implicit none
+
+ private
+!!***
+
+ public :: cohsex_me
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/cohsex_me
 !! NAME
 !! cohsex_me
@@ -96,41 +162,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_c,Vcp,&
 & Kmesh,Qmesh,Ltg_k,Pawtab,Pawang,Paw_pwff,Psps,Wfd,allQP_sym,gwc_ngfft,iomode,prtvol,sigcme_tmp)
-
- use defs_basis
- use defs_datatypes
- use m_defs_ptgroups
- use m_gwdefs !,        only : czero_gw, cone_gw, j_gw, sigparams_t, sigma_type_from_key, sigma_is_herm
- use m_xmpi
- use m_errors
- use m_profiling_abi
-
- use m_time,          only : timab
- use m_blas,          only : xdotc, xgemv
- use m_numeric_tools, only : hermitianize, imin_loc
- use m_geometry,      only : normv
- use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
- use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
- use m_vcoul,         only : vcoul_t
- use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
- use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_change_ngfft, wfd_get_many_ur, wfd_sym_ur
- use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
- use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
- use m_sigma,         only : sigma_t, sigma_distribute_bks
- use m_pawang,        only : pawang_type
- use m_pawtab,        only : pawtab_type
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -822,19 +855,12 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 end subroutine cohsex_me
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_coh
 !! NAME
 !! calc_coh
 !!
 !! FUNCTION
 !!  Calculates the partial contribution to the COH part of the COHSEX self-energy for a given q-point.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (FB,MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! iqibz=index of the irreducible q-point in the array qibz, point which is
@@ -869,20 +895,7 @@ end subroutine cohsex_me
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_sqrt,i_sz,iqibz,same_band,sigcohme)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_fstrings,  only : sjoin, itoa
- use m_gwdefs,    only : czero_gw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -970,4 +983,7 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  DBG_EXIT("COLL")
 
 end subroutine calc_coh
+!!***
+
+end module m_cohsex
 !!***
