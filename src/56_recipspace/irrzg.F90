@@ -21,6 +21,21 @@
 !! to generate irrzon(:,:,2) and phnons(:,:,2), while the
 !! full group is used to generate irrzon(:,:,1) and phnons(:,:,1)
 !!
+!! NOTES
+!! for reference in the near future (2018), some notes: this routine should be duplicated for
+!! magnetizations in spinorial formalism. The only main difference will
+!! be that the density is not simply transported to the image point under symrel
+!! but is a vector which has to be transformed as well
+!! $S \vec{m} (\vec{x}) = \sigma \vec{m} (S \vec{x} + \tau)$
+!! $S \vec{m} (\vec{G}) = \sigma exp(+ 2 \pi i \vec{G} \vec{tau}) \vec{m}(S^{-1 T} \vec{G})$
+!! S is a symop, sigma the AFM sign flip if any, tau the partial non symmorphic translation
+!! x a position, m the magnetization 3 vector
+!!
+!! The phase factor is the same as below for the density, but the collection of elements which 
+!! are equal is more complex: for a 3 or 6 axis the m vector could transform one component
+!! to a linear combination of several others (I think). Things are not necessarily aligned 
+!! with the z axis.
+!!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
