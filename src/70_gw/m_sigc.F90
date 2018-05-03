@@ -1,17 +1,79 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_sigc
+!! NAME
+!!  m_sigc
+!!
+!! FUNCTION
+!!  Compute matrix elements of the correlated part of the e-h self-energy
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_sigc
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_gwdefs
+ use m_profiling_abi
+ use m_xmpi
+ use m_xomp
+ use m_defs_ptgroups
+ use m_errors
+ use m_time
+ use m_splines
+
+ use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
+                      Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
+ use m_blas,          only : xdotc, xgemv, xgemm
+ use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
+ use m_fstrings,      only : sjoin, itoa
+ use m_geometry,      only : normv
+ use m_crystal,       only : crystal_t
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
+ use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
+ use m_vcoul,         only : vcoul_t
+ use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_barrier, wfd_change_ngfft, wfd_paw_get_aeur, &
+&                            wfd_get_many_ur,wfd_sym_ur
+ use m_oscillators,   only : rho_tw_g, calc_wfwfg
+ use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
+ use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
+ use m_sigma,         only : sigma_t, sigma_distribute_bks
+ use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_pawang,        only : pawang_type
+ use m_pawtab,        only : pawtab_type
+ use m_pawfgrtab,     only : pawfgrtab_type
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
+
+ implicit none
+
+ private
+!!***
+
+ public :: calc_sigc_me
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/calc_sigc_me
 !! NAME
 !! calc_sigc_me
 !!
 !! FUNCTION
 !! Calculate diagonal and off-diagonal matrix elements of the self-energy operator.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! sigmak_ibz=Index of the k-point in the IBZ.
@@ -112,50 +174,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 & Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
 & PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
 & gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_gwdefs
- use m_profiling_abi
- use m_xmpi
- use m_defs_ptgroups
- use m_errors
- use m_time
-
- use m_blas,          only : xdotc, xgemv
- use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
- use m_fstrings,      only : sjoin, itoa
- use m_geometry,      only : normv
- use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
- use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
- use m_vcoul,         only : vcoul_t
- use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_barrier, wfd_change_ngfft, wfd_paw_get_aeur, &
-&                            wfd_get_many_ur,wfd_sym_ur
- use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
- use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
- use m_sigma,         only : sigma_t, sigma_distribute_bks
- use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
- use m_pawang,        only : pawang_type
- use m_pawtab,        only : pawtab_type
- use m_pawfgrtab,     only : pawfgrtab_type
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
- use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
- use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1335,12 +1357,6 @@ end subroutine calc_sigc_me
 !!  reduce the number of empty states to be summed over in the Green
 !!  function entering the definition of the GW self-energy.
 !!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (FB,MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !! iqibz=index of the irreducible q-point in the array qibz, point which is
 !!  related by a symmetry operation to the point q summed over (see csigme).
@@ -1374,13 +1390,6 @@ end subroutine calc_sigc_me
 
 subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
 &  ngfft,nfftot,wfg2_jk,vc_sqrt,botsq,otq,sigcohme)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_fstrings,  only : sjoin, itoa
- use m_gwdefs,    only : czero_gw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1469,4 +1478,556 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  DBG_EXIT("COLL")
 
 end subroutine calc_coh_comp
+!!***
+
+!!****f* ABINIT/calc_sigc_cd
+!! NAME
+!! calc_sigc_cd
+!!
+!! FUNCTION
+!! Calculate contributions to the self-energy operator with the contour deformation method.
+!!
+!! INPUTS
+!!  nomega=Total number of frequencies where $\Sigma_c$ matrix elements are evaluated.
+!!  nomegae=Number of frequencies where $\epsilon^{-1}$ has been evaluated.
+!!  nomegaei=Number of imaginary frequencies for $\epsilon^{-1}$ (non zero).
+!!  nomegaer=Number of real frequencies for $\epsilon^{-1}$
+!!  npwc=Number of G vectors for the correlation part.
+!!  npwx=Number of G vectors in rhotwgp for each spinorial component.
+!!  nspinor=Number of spinorial components.
+!!  theta_mu_minus_e0i=1 if e0i is occupied, 0 otherwise. Fractional occupancy in case of metals.
+!!  omegame0i(nomega)=Contains $\omega-\epsilon_{k-q,b1,\sigma}$
+!!  epsm1q(npwc,npwc,nomegae)=Symmetrized inverse dielectric matrix (exchange part is subtracted).
+!!  omega(nomegae)=Set of frequencies for $\epsilon^{-1}$.
+!!  rhotwgp(npwx*nspinor)=Matrix elements: $<k-q,b1,\sigma|e^{-i(q+G)r} |k,b2,\sigma>*vc_sqrt$
+!!
+!! OUTPUT
+!! ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space.
+!!
+!! SIDE EFFECTS
+!! npoles_missing=Incremented with the number of poles whose contribution has not been taken into account due to
+!!  limited frequency mesh used for W.
+!!
+!! PARENTS
+!!      calc_sigc_me,m_screen
+!!
+!! CHILDREN
+!!      spline,splint,xgemm,xgemv
+!!
+!! SOURCE
+
+subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotwgp,&
+& omega,epsm1q,omegame0i,theta_mu_minus_e0i,ket,plasmafreq,npoles_missing,calc_poles,method)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'calc_sigc_cd'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nomega,nomegae,nomegaei,nomegaer,npwc,npwx,nspinor
+ integer,intent(inout) :: npoles_missing
+ real(dp),intent(in) :: theta_mu_minus_e0i,plasmafreq
+!arrays
+ real(dp),intent(in) :: omegame0i(nomega)
+ complex(dpc),intent(in) :: omega(nomegae)
+ complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae)
+ complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
+ complex(gwpc),intent(inout) :: ket(nspinor*npwc,nomega)
+ logical, intent(in), optional :: calc_poles(nomega)
+ integer, intent(in), optional :: method
+
+!Local variables-------------------------------
+!scalars
+ integer, parameter :: FABIEN=1,TRAPEZOID=2,NSPLINE=3
+ integer :: ii,ig,io,ios,ispinor,spadc,spadx,my_err,ierr,GK_LEVEL,INTMETHOD
+ integer :: i,j
+ real(dp) :: rt_imag,rt_real,local_one,local_zero
+ real(dp) :: intsign,temp1,temp2,temp3,temp4
+ real(dp) :: alph,inv_alph,beta,alphsq,betasq,inv_beta
+ real(dp) :: re_intG,re_intK,im_intG,im_intK,GKttab,tau,ttil
+ real(dp) :: ref,imf,r,s,r2,s2
+ complex(dpc) :: ct,domegaleft,domegaright
+ complex(gwpc) :: fact
+!arrays
+ real(dp) :: omegame0i_tmp(nomega),tmp_x(2),tmp_y(2)
+ real(dp) :: left(nomega),right(nomega)
+ real(dp) :: tbeta(nomega),tinv_beta(nomega),tbetasq(nomega)
+ real(dp) :: atermr(nomega),aterml(nomega),logup(nomega),logdown(nomega)
+ real(dp) :: rtmp_r(nomegaer),rtmp_i(nomegaer)
+ real(dp) :: ftab(nomegaei+2),ftab2(nomegaei+2),xtab(nomegaei+2),y(3,nomegaei+2)
+ real(dp) :: work(nomegaei+2),work2(nomegaei+2),y2(3,nomegaei+2)
+ complex(dpc) :: omega_imag(nomegaei+1)
+ complex(gwpc) :: epsrho(npwc,nomegae),epsrho_imag(npwc,nomegaei+1)
+ complex(gwpc) :: tfone(npwc,nomegaei+1),tftwo(npwc,nomegaei+1)
+ complex(gwpc) :: weight(nomegaei+1,nomega)
+ complex(gwpc) :: weight2(nomegaei,nomega)
+ logical :: my_calc_poles(nomega)
+ real(dp), allocatable :: KronN(:),KronW(:),GaussW(:),fint(:),fint2(:)
+!*************************************************************************
+
+ my_calc_poles=.TRUE.; my_err=0
+
+ ! Set integration method for imaginary axis
+ INTMETHOD = FABIEN
+ if (present(method)) then
+   if (method==1) INTMETHOD = FABIEN
+   if (method==2) INTMETHOD = TRAPEZOID
+   if (method>2) then
+     INTMETHOD = NSPLINE
+     if (method==3) then
+       GK_LEVEL = 15
+       ABI_ALLOCATE(KronN,(GK_LEVEL))
+       ABI_ALLOCATE(KronW,(GK_LEVEL))
+       ABI_ALLOCATE(GaussW,(GK_LEVEL-8))
+       ABI_ALLOCATE(fint,(GK_LEVEL))
+       ABI_ALLOCATE(fint2,(GK_LEVEL))
+       KronN(:) = Kron15N(:); KronW(:) = Kron15W(:); GaussW(:) = Gau7W(:)
+     else if (method==4) then
+       GK_LEVEL = 23
+       ABI_ALLOCATE(KronN,(GK_LEVEL))
+       ABI_ALLOCATE(KronW,(GK_LEVEL))
+       ABI_ALLOCATE(GaussW,(GK_LEVEL-12))
+       ABI_ALLOCATE(fint,(GK_LEVEL))
+       ABI_ALLOCATE(fint2,(GK_LEVEL))
+       KronN(:) = Kron23N(:); KronW(:) = Kron23W(:); GaussW(:) = Gau11W(:)
+     else if (method>4) then
+       GK_LEVEL = 31
+       ABI_ALLOCATE(KronN,(GK_LEVEL))
+       ABI_ALLOCATE(KronW,(GK_LEVEL))
+       ABI_ALLOCATE(GaussW,(GK_LEVEL-16))
+       ABI_ALLOCATE(fint,(GK_LEVEL))
+       ABI_ALLOCATE(fint2,(GK_LEVEL))
+       KronN(:) = Kron31N(:); KronW(:) = Kron31W(:); GaussW(:) = Gau15W(:)
+     end if
+   end if
+ end if
+
+ ! Avoid divergences in $\omega - \omega_s$.
+ omegame0i_tmp(:)=omegame0i(:)
+ do ios=1,nomega
+   if (ABS(omegame0i_tmp(ios))<tol6) omegame0i_tmp(ios)=sign(tol6,omegame0i_tmp(ios))
+ end do
+
+ do ispinor=1,nspinor
+   spadx=(ispinor-1)*npwx; spadc=(ispinor-1)*npwc
+
+   ! Calculate $ \sum_{Gp} (\epsilon^{-1}_{G Gp}(\omega)-\delta_{G Gp}) \rhotwgp(Gp) $
+!$omp parallel do
+   do io=1,nomegae
+     call XGEMV('N',npwc,npwc,cone_gw,epsm1q(:,:,io),npwc,rhotwgp(1+spadx:),1,czero_gw,epsrho(:,io),1)
+   end do
+
+   ! Integrand along the imaginary axis.
+   epsrho_imag(:,1)=epsrho(:,1)
+   epsrho_imag(:,2:nomegaei+1)=epsrho(:,nomegaer+1:nomegae)
+
+   ! Frequency mesh for integral along the imaginary axis.
+   omega_imag(1)=omega(1)
+   omega_imag(2:nomegaei+1)=omega(nomegaer+1:nomegae)
+
+   ! Original implementation -- saved here for reference during development
+   ! === Perform integration along the imaginary axis ===
+   !do io=1,nomegaei+1
+   !  if (io==1) then
+   !    domegaleft  = omega_imag(io)
+   !    domegaright =(omega_imag(io+1)-omega_imag(io  ))*half
+   !  else if (io==nomegaei+1) then
+   !    domegaleft  =(omega_imag(io  )-omega_imag(io-1))*half
+   !    domegaright =(omega_imag(io  )-omega_imag(io-1))*half
+   !  else
+   !    domegaleft  =(omega_imag(io  )-omega_imag(io-1))*half
+   !    domegaright =(omega_imag(io+1)-omega_imag(io  ))*half
+   !  end if
+   !  do ios=1,nomega
+   !    omg2 = -AIMAG(omega_imag(io)+domegaright)/REAL(omegame0i_tmp(ios))
+   !    omg1 = -AIMAG(omega_imag(io)-domegaleft )/REAL(omegame0i_tmp(ios))
+   !    fact = ATAN(omg2)-ATAN(omg1)
+   !    ket(spadc+1:spadc+npwc,ios)=ket(spadc+1:spadc+npwc,ios)+epsrho_imag(:,io)*fact
+   !  end do
+   !end do !io
+
+   !ket(spadc+1:spadc+npwc,:)=ket(spadc+1:spadc+npwc,:)/pi
+   ! ---------------- end of original implementation -----------------------
+
+   select case(INTMETHOD)
+   case(FABIEN)
+     ! Hopefully more effective implementation MS 04.08.2011
+     ! Perform integration along imaginary axis using BLAS
+     ! First calculate first and last weights
+     weight(1,:) = ATAN(-half*AIMAG(omega_imag(2))/REAL(omegame0i_tmp(:)))
+     domegaleft  = (three*omega_imag(nomegaei+1)-omega_imag(nomegaei))
+     domegaright = (omega_imag(nomegaei+1)+omega_imag(nomegaei))
+     right(:)    = -AIMAG(omega_imag(nomegaei+1)-omega_imag(nomegaei))*REAL(omegame0i_tmp(:))
+     left(:)     = quarter*AIMAG(domegaleft)*AIMAG(domegaright) &
+&                   +REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:))
+     weight(nomegaei+1,:) = ATAN(right(:)/left(:))
+     ! Calculate the rest of the weights
+     do io=2,nomegaei
+       domegaleft  = (omega_imag(io  )+omega_imag(io-1))
+       domegaright = (omega_imag(io+1)+omega_imag(io  ))
+       right(:)    = -half*AIMAG(omega_imag(io+1)-omega_imag(io-1))*REAL(omegame0i_tmp(:))
+       left(:)     = REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:)) &
+&       +quarter*AIMAG(domegaleft)*AIMAG(domegaright)
+       weight(io,:) = ATAN(right(:)/left(:))
+     end do
+
+     ! Use BLAS call to perform matrix-matrix multiplication and accumulation
+     fact = CMPLX(piinv,zero)
+
+     call xgemm('N','N',npwc,nomega,nomegaei+1,fact,epsrho_imag,npwc,&
+&     weight,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+
+   case(TRAPEZOID)
+!   Trapezoidal rule Transform omega coordinates
+     alph     = plasmafreq
+     alphsq   = alph*alph
+     inv_alph = one/alph
+
+     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
+     xtab(nomegaei+2)   = one
+
+!   Efficient trapezoidal rule with BLAS calls
+     tbeta(:)     = REAL(omegame0i_tmp(:))
+     tbetasq(:)   = tbeta(:)*tbeta(:)
+     tinv_beta(:) = one/tbeta(:)
+
+     do io=1,nomegaei
+       atermr(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io+1)-tbetasq(:))
+       aterml(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io  )-tbetasq(:))
+       right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
+       logup(:)     = ABS(((alphsq+tbetasq(:))*xtab(io+1)-two*tbetasq(:)) &
+&                     *xtab(io+1)+tbetasq(:))
+       logdown(:)   = ABS(((alphsq+tbetasq(:))*xtab(io  )-two*tbetasq(:)) &
+&                     *xtab(io  )+tbetasq(:))
+       ! Trapezoid integration weights
+       weight(io,:)  = CMPLX(-(half*alph*tbeta(:)*LOG(logup(:)/logdown(:)) + tbetasq(:) &
+&                         *right(:))/(alphsq+tbetasq(:)),zero)
+       weight2(io,:) = CMPLX(-right(:),zero)
+       ! Linear interpolation coefficients for each section (sum over ig)
+       tfone(:,io)   = (epsrho_imag(:,io+1)-epsrho_imag(:,io)) &
+&                      /(xtab(io+1)-xtab(io))
+       tftwo(:,io)   = epsrho_imag(:,io) - tfone(:,io)*xtab(io)
+     end do
+
+     ! Calculate weights for asymptotic behaviour
+     atermr(:)   = alph*tinv_beta(:)
+     aterml(:)   = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(nomegaei+1)-tbetasq(:))
+     logup(:)    = alphsq*xtab(nomegaei+1)*xtab(nomegaei+1)
+     logdown(:)  = ABS(((alphsq+tbetasq(:))*xtab(nomegaei+1)-two*tbetasq(:)) &
+&                   *xtab(nomegaei+1)+tbetasq(:))
+     right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
+     weight (nomegaei+1,:) = CMPLX(-(half*(alphsq*tinv_beta(:)*LOG(logdown(:)/logup(:)) &
+&     - tbeta(:)*LOG(xtab(nomegaei+1)*xtab(nomegaei+1))) - alph*right(:)),zero)
+     tfone(:,nomegaei+1) = -(zero-epsrho_imag(:,nomegaei+1)*AIMAG(omega_imag(nomegaei+1))) &
+                           /(one-xtab(nomegaei+1))
+
+     ! Use BLAS call to perform matrix-matrix multiplication and accumulation
+     fact = CMPLX(piinv,zero)
+
+     call xgemm('N','N',npwc,nomega,nomegaei+1,fact,tfone,npwc,&
+&     weight ,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+     call xgemm('N','N',npwc,nomega,nomegaei  ,fact,tftwo,npwc,&
+&     weight2,nomegaei  ,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+
+   case(NSPLINE)
+     ! Natural spline followed by Gauss-Kronrod
+     ! Transform omega coordinates
+     alph     = plasmafreq
+     alphsq   = alph*alph
+     inv_alph = one/alph
+
+     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
+     xtab(nomegaei+2)   = one
+
+! Gauss-Kronrod integration of spline fit of f(t)/(1-t) in transformed space
+! *** OPENMP SECTION *** Added by MS
+!!$OMP PARALLEL DO PRIVATE(ig,ftab,ftab2,s,s2,r,r2,y,y2,work,work2,beta,betasq,inv_beta, &
+!!$OMP  intsign,io,ii,i,j,re_intG,re_intK,im_intG,im_intK,temp1,temp2,temp3,temp4, &
+!!$OMP  ttil,tau,ref,fint,imf,fint2,GKttab)
+     do ig=1,npwc
+       ! Spline fit
+       ftab (1:nomegaei+1) =  REAL(epsrho_imag(ig,1:nomegaei+1))/(one-xtab(1:nomegaei+1))
+       ftab2(1:nomegaei+1) = AIMAG(epsrho_imag(ig,1:nomegaei+1))/(one-xtab(1:nomegaei+1))
+       ftab (nomegaei+2)   = zero; ftab2(nomegaei+2) = zero
+       ! Explicit calculation of spline coefficients
+       s  = zero; s2 = zero
+       do i = 1, nomegaei+2-1
+         r  = ( ftab (i+1) - ftab (i) ) / ( xtab(i+1) - xtab(i) )
+         r2 = ( ftab2(i+1) - ftab2(i) ) / ( xtab(i+1) - xtab(i) )
+         y (2,i) = r  - s; y2(2,i) = r2 - s2
+         s  = r; s2 = r2
+       end do
+       s = zero; s2 = zero
+       r = zero; r2 = zero
+       y(2,1) = zero; y2(2,1) = zero
+       y(2,nomegaei+2) = zero; y2(2,nomegaei+2) = zero
+       do i = 2, nomegaei+2-1
+         y (2,i) = y (2,i) + r  * y (2,i-1)
+         y2(2,i) = y2(2,i) + r2 * y2(2,i-1)
+         work (i) = two * ( xtab(i-1) - xtab(i+1) ) - r  * s
+         work2(i) = two * ( xtab(i-1) - xtab(i+1) ) - r2 * s2
+         s = xtab(i+1) - xtab(i)
+         s2 = s
+         r  = s  / work (i)
+         r2 = s2 / work2(i)
+       end do
+       do j = 2, nomegaei+2-1
+         i = nomegaei+2+1-j
+         y (2,i) = ( ( xtab(i+1) - xtab(i) ) * y (2,i+1) - y (2,i) ) / work (i)
+         y2(2,i) = ( ( xtab(i+1) - xtab(i) ) * y2(2,i+1) - y2(2,i) ) / work2(i)
+       end do
+       do i = 1, nomegaei+2-1
+         s = xtab(i+1) - xtab(i); s2 = s;
+         r = y(2,i+1) - y(2,i); r2 = y2(2,i+1) - y2(2,i);
+         y(3,i) = r / s; y2(3,i) = r2 / s2;
+         y(2,i) = three * y(2,i); y2(2,i) = three * y2(2,i);
+         y (1,i) = ( ftab (i+1) - ftab (i) ) / s  - ( y (2,i) + r  ) * s
+         y2(1,i) = ( ftab2(i+1) - ftab2(i) ) / s2 - ( y2(2,i) + r2 ) * s2
+       end do
+       ! End of spline interpolation
+       do ios=1,nomega
+         beta     = REAL(omegame0i_tmp(ios))
+         betasq   = beta*beta
+         inv_beta = one/beta
+         intsign = sign(half*piinv,beta)
+         beta = ABS(beta)
+         io = 1; re_intG = zero; re_intK = zero; im_intG = zero; im_intK = zero
+         do ii=1,GK_LEVEL
+           do
+             GKttab = two*alph*xtab(io+1)/(beta-(beta-alph)*xtab(io+1))-one
+             if (GKttab > KronN(ii)) EXIT
+             io = io + 1
+           end do
+           temp1     = half*(KronN(ii)+one)
+           temp2     = temp1 - half
+           temp3     = temp2*temp2
+           temp4     = half/(temp3 + quarter)
+           ttil      = beta*temp1/(alph-(alph-beta)*temp1)
+           tau       = ttil - xtab(io)
+           ref       = ftab (io) + tau*(y (1,io)+tau*(y (2,io)+tau*y (3,io)))
+           fint (ii) = -ref*(one-ttil)*temp4
+           imf       = ftab2(io) + tau*(y2(1,io)+tau*(y2(2,io)+tau*y2(3,io)))
+           fint2(ii) = -imf*(one-ttil)*temp4
+           re_intK   = KronW(ii)*fint (ii)
+           im_intK   = KronW(ii)*fint2(ii)
+           ket(spadc+ig,ios) = ket(spadc+ig,ios)+intsign*CMPLX(re_intK,im_intK)
+           end do ! ii
+       end do !ios
+     end do !ig
+!!$OMP END PARALLEL DO
+
+   end select !intmethod
+
+   local_one = one
+   local_zero = zero
+
+   ! ============================================
+   ! ==== Add contribution coming from poles ====
+   ! ============================================
+   ! First see if the contribution has been checked before the routine is entered
+   if (present(calc_poles)) then
+     my_calc_poles = calc_poles
+   else ! Otherwise check locally if there is a contribution
+     do ios=1,nomega
+       if (omegame0i_tmp(ios)>tol12) then
+         if ((local_one-theta_mu_minus_e0i)<tol12) my_calc_poles(ios) = .FALSE.
+       end if
+       if (omegame0i_tmp(ios)<-tol12) then
+         if (theta_mu_minus_e0i<tol12) my_calc_poles(ios) = .FALSE.
+       end if
+     end do !ios
+   end if
+
+   if (ANY(my_calc_poles(:))) then ! Make sure we only enter if necessary
+! *** OPENMP SECTION *** Added by MS
+!!OMP !write(std_out,'(a,i0)') ' Entering openmp loop. Number of threads: ',xomp_get_num_threads()
+!$OMP PARALLEL SHARED(npwc,nomega,nomegaer,theta_mu_minus_e0i,spadc,local_one,local_zero, &
+!$OMP                    omega,epsrho,omegame0i_tmp,ket,my_calc_poles) &
+!$OMP PRIVATE(ig,ios,rtmp_r,rtmp_i,tmp_x,tmp_y,rt_real,rt_imag,ct,ierr) REDUCTION(+:my_err)
+!!OMP $ write(std_out,'(a,i0)') ' Entering openmp loop. Number of threads: ',xomp_get_num_threads()
+!$OMP DO
+     do ig=1,npwc
+       ! Prepare the spline interpolation by filling at once the arrays rtmp_r, rtmp_i
+       call spline(DBLE(omega(1:nomegaer)),DBLE(epsrho(ig,1:nomegaer)),nomegaer,local_zero,local_zero,rtmp_r)
+       call spline(DBLE(omega(1:nomegaer)),DBLE(AIMAG(epsrho(ig,1:nomegaer))),nomegaer,local_zero,local_zero,rtmp_i)
+       ! call spline_complex( DBLE(omega(1:nomegaer)), epsrho(ig,1:nomegaer), nomegaer, zero, zero, rtmp )
+
+       do ios=1,nomega
+         if (.NOT.my_calc_poles(ios)) CYCLE
+
+         ! Interpolate real and imaginary part of epsrho at |omegame0i_tmp|.
+         tmp_x(1) = ABS(omegame0i_tmp(ios))
+         call splint(nomegaer,DBLE(omega(1:nomegaer)),DBLE(epsrho(ig,1:nomegaer)),rtmp_r,1,tmp_x,tmp_y,ierr=ierr)
+         if (ig==1.and.ispinor==1) my_err = my_err + ierr
+         rt_real = tmp_y(1)
+
+         tmp_x(1) = ABS(omegame0i_tmp(ios))
+         call splint(nomegaer,DBLE(omega(1:nomegaer)),DBLE(AIMAG(epsrho(ig,1:nomegaer))),rtmp_i,1,tmp_x,tmp_y)
+         rt_imag = tmp_y(1)
+         !!call splint_complex(nomegaer,DBLE(omega(1:nomegaer)),epsrho(ig,1:nomegaer),rtmp,1,tmp_x,yfit)
+
+         ct=DCMPLX(rt_real,rt_imag)
+
+         if (omegame0i_tmp(ios)>tol12) then
+           ket(spadc+ig,ios)=ket(spadc+ig,ios)+ct*(local_one-theta_mu_minus_e0i)
+         end if
+         if (omegame0i_tmp(ios)<-tol12) then
+           ket(spadc+ig,ios)=ket(spadc+ig,ios)-ct*theta_mu_minus_e0i
+         end if
+
+       end do !ios
+     end do !ig
+!$OMP END DO
+!$OMP END PARALLEL
+   end if ! ANY(my_calc_poles)
+ end do !ispinor
+
+ npoles_missing = npoles_missing + my_err
+
+ if (INTMETHOD>2) then
+   ABI_DEALLOCATE(KronN)
+   ABI_DEALLOCATE(KronW)
+   ABI_DEALLOCATE(GaussW)
+   ABI_DEALLOCATE(fint)
+   ABI_DEALLOCATE(fint2)
+ end if
+
+end subroutine calc_sigc_cd
+!!***
+
+!!****f* ABINIT/calc_sig_ppm_comp
+!!
+!! NAME
+!! calc_sig_ppm_comp
+!!
+!! FUNCTION
+!! Calculating contributions to self-energy operator using a plasmon-pole model
+!!
+!! INPUTS
+!!  nomega=number of frequencies to consider
+!!  npwc= number of G vectors in the plasmon pole
+!!  npwc1= 1 if ppmodel==3, =npwc if ppmodel== 4, 1 for all the other cases
+!!  npwc2= 1 if ppmodel==3, =1    if ppmodel== 4, 1 for all the other cases
+!!  npwx=number of G vectors in rhotwgp
+!!  ppmodel=plasmon pole model
+!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not
+!!  zcut=small imaginary part to avoid the divergence. (see related input variable)
+!!  omegame0i(nomega)=frequencies where evaluate \Sigma_c ($\omega$ - $\epsilon_i$
+!!  otq(npwc,npwc2)=plasmon pole parameters for this q-point
+!!  botsq(npwc,npwc1)=plasmon pole parameters for this q-point
+!!  eig(npwc,npwc)=the eigvectors of the symmetrized inverse dielectric matrix for this q point
+!!   (first index for G, second index for bands)
+!!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e
+!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$
+!!
+!! OUTPUT
+!!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
+!!
+!!  ket(npwc,nomega):
+!!
+!!  In case of ppmodel==1,2 it contains
+!!
+!!   ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
+!!                          ---------------------------------------------------
+!!                            2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
+!!
+!! NOTES
+!! Taken from old routine
+!!
+!! PARENTS
+!!      calc_sigc_me
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,theta_mu_minus_e0i,ket,ppmodel,npwx,npwc1,npwc2)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'calc_sig_ppm_comp'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nomega,npwc,npwc1,npwc2,npwx,ppmodel
+ real(dp),intent(in) :: omegame0i_io,theta_mu_minus_e0i,zcut
+!arrays
+ complex(gwpc),intent(in) :: botsq(npwc,npwc1),rhotwgp(npwx),otq(npwc,npwc2)
+ complex(gwpc),intent(inout) :: ket(npwc,nomega)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ig,igp,io
+ real(dp) :: den,otw,twofm1_zcut
+ complex(gwpc) :: num,rhotwgdp_igp
+ logical :: fully_occupied,totally_empty
+ character(len=500) :: msg
+!arrays
+ complex(gwpc),allocatable :: ket_comp(:)
+
+!*************************************************************************
+
+ if (ppmodel/=1.and.ppmodel/=2) then
+   write(msg,'(a,i0,a)')' The completeness trick cannot be used when ppmodel is ',ppmodel,' It should be set to 1 or 2. '
+   MSG_ERROR(msg)
+ end if
+
+ ABI_ALLOCATE(ket_comp,(npwc))
+ ket_comp(:)=0.d0
+
+ fully_occupied=(abs(theta_mu_minus_e0i-1.)<0.001)
+ totally_empty=(abs(theta_mu_minus_e0i)<0.001)
+
+ if(.not.(totally_empty)) then ! not totally empty
+   twofm1_zcut=zcut
+   do igp=1,npwc
+     rhotwgdp_igp=rhotwgp(igp)
+     do ig=1,npwc
+       otw=DBLE(otq(ig,igp)) ! in principle otw -> otw - ieta
+       num = botsq(ig,igp)*rhotwgdp_igp
+
+       den = omegame0i_io-otw
+       if (den**2>zcut**2) then
+         ket_comp(ig) = ket_comp(ig) - num/(den*otw)*theta_mu_minus_e0i
+       end if
+     end do !ig
+   end do !igp
+ end if ! not totally empty
+
+ if(.not.(fully_occupied)) then ! not fully occupied
+   twofm1_zcut=-zcut
+
+   do igp=1,npwc
+     rhotwgdp_igp=rhotwgp(igp)
+     do ig=1,npwc
+       otw=DBLE(otq(ig,igp)) ! in principle otw -> otw - ieta
+       num = botsq(ig,igp)*rhotwgdp_igp
+
+       den = omegame0i_io-otw
+       if (den**2>zcut**2) then
+         ket_comp(ig) = ket_comp(ig) - num/(den*otw)*(1.-theta_mu_minus_e0i)
+       end if
+     end do !ig
+   end do !igp
+ end if ! not fully occupied
+
+ do io=1,nomega
+   ket(:,io)=ket(:,io)+0.5*ket_comp(:)
+ end do
+
+ ABI_DEALLOCATE(ket_comp)
+
+end subroutine calc_sig_ppm_comp
+!!***
+
+end module m_sigc
 !!***

@@ -94,9 +94,10 @@ module m_sigma_driver
  use m_classify_bands,only : classify_bands
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
+ use m_vhxc_me,       only : calc_vhxc_me
  use m_cohsex,        only : cohsex_me
  use m_sigx,          only : calc_sigx_me
- use m_vhxc_me,       only : calc_vhxc_me
+ use m_sigc,          only : calc_sigc_me
 
  implicit none
 
