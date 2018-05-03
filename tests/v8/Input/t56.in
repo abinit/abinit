@@ -80,7 +80,7 @@ nstep 100
 #%%   t56.out, tolnlines = 3, tolabs = 1.1e-6, tolrel = 2.0e-4
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = DFPT
