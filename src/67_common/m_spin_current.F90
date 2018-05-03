@@ -627,7 +627,6 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vso_realspace_local'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

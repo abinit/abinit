@@ -437,12 +437,11 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                       mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
                       typat,Vmagconstr,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mag_constr'
- use interfaces_32_util
- use interfaces_54_abiutil
 !End of the abilint section
 
  implicit none
@@ -689,12 +688,12 @@ end subroutine mag_constr
 
 subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mag_constr_e'
  use interfaces_14_hidewrite
- use interfaces_54_abiutil
 !End of the abilint section
 
  implicit none
@@ -864,12 +863,12 @@ end subroutine mag_constr_e
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
 &    prtopt,cplex,intgden,dentot)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calcdensph'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1360,6 +1359,7 @@ end subroutine calcdensph
 !! SOURCE
 
 function radsmear(r, rsph, rsm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

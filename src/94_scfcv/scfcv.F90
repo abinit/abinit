@@ -245,7 +245,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_67_common
  use interfaces_68_rsprc
  use interfaces_79_seqpar_mpi
- use interfaces_94_scfcv, except_this_one => scfcv
 !End of the abilint section
 
  implicit none

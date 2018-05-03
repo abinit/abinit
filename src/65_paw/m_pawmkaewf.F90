@@ -141,6 +141,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 & Hdr,Dtfil,cg,Cprj,MPI_enreg,ierr,pseudo_norms,set_k,set_band , &
 & mpi_atmtab,comm_atom) ! Optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -148,7 +149,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_65_paw, except_this_one => pawmkaewf
+ use interfaces_65_paw
 !End of the abilint section
 
  implicit none

@@ -1329,7 +1329,6 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 #undef ABI_FUNC
 #define ABI_FUNC 'pspnl_operat_rec'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1570,7 +1569,6 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 #undef ABI_FUNC
 #define ABI_FUNC 'pspnl_hgh_rec'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

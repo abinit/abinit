@@ -145,7 +145,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs
- use interfaces_67_common, except_this_one => rhotov
 !End of the abilint section
 
  implicit none
