@@ -653,6 +653,7 @@ CONTAINS
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'efmas_main'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -691,6 +692,7 @@ CONTAINS
   integer :: ideg,jdeg
   integer :: ikpt
   integer :: istwf_k
+  integer :: master,me,spaceworld
   integer :: band2tot_index
   integer :: bandtot_index
   integer :: iband, jband, kband
@@ -741,19 +743,23 @@ CONTAINS
   complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
   complex(dpc),allocatable :: prodc(:,:)
 
- ! *********************************************************************
+! *********************************************************************
 
   debug = .false. ! Prints additional info to std_out
   print_fsph = .false. ! Open a file and print the angle dependent curvature f(\theta,\phi) 
                        ! for each band & kpts treated; 1 file per degenerate ensemble of bands. 
                        ! Angles are those used in the numerical integration.
 
-  if(mpi_enreg%me/=0) return
+! Init parallelism
+  master =0
+  spaceworld=mpi_enreg%comm_cell
+  me=mpi_enreg%me_kpt
 
-  write(std_out,'(2a)') ch10,' CALCULATION OF EFFECTIVE MASSES'
-  write(ab_out, '(2a)') ch10,' CALCULATION OF EFFECTIVE MASSES'
-  write(ab_out, '(a)' ) &
-&   ' NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
+  write(msg,'(4a)') ch10,&
+&  ' CALCULATION OF EFFECTIVE MASSES',ch10,&
+&  ' NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
 
   if(dtset%nsppol/=1)then
     write(msg,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
