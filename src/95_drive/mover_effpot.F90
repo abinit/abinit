@@ -266,6 +266,26 @@ implicit none
    dtset%usewvl = 0     !
    dtset%useylm = 0     !
 
+
+!   dtset%ph_freez_disp_option = 4
+!   dtset%ph_freez_disp_nampl = 6
+!   ABI_ALLOCATE(dtset%ph_freez_disp_ampl,(5,dtset%ph_freez_disp_nampl))
+
+!   dtset%ph_freez_disp_ampl = zero
+!   dtset%ph_freez_disp_ampl(1:3,1)=(/0.5,0.5,0.5/)
+!   dtset%ph_freez_disp_ampl(4,1) = 1 ; dtset%ph_freez_disp_ampl(5,1) = 100 
+!   dtset%ph_freez_disp_ampl(1:3,2) = (/0.5,0.5,0.5/)
+!   dtset%ph_freez_disp_ampl(4,2) = 2 ; dtset%ph_freez_disp_ampl(5,2) = 100
+!   dtset%ph_freez_disp_ampl(1:3,3) = (/0.5,0.5,0.5/)
+!   dtset%ph_freez_disp_ampl(4,3) = 3 ; dtset%ph_freez_disp_ampl(5,3) = 100
+   
+!   dtset%ph_freez_disp_ampl(1:3,4) = (/0.5,0.5,0.0/)
+!   dtset%ph_freez_disp_ampl(4,4) = 1 ; dtset%ph_freez_disp_ampl(5,4) = 100
+!   dtset%ph_freez_disp_ampl(1:3,5) = (/0.5,0.0,0.5/)
+!   dtset%ph_freez_disp_ampl(4,5) = 1 ; dtset%ph_freez_disp_ampl(5,5) = 100
+!   dtset%ph_freez_disp_ampl(1:3,6) = (/0.0,0.5,0.5/)
+!   dtset%ph_freez_disp_ampl(4,6) = 1 ; dtset%ph_freez_disp_ampl(5,6) = 100
+
 !    if(option == -3) then
 !      write(message,'(a)')' Read the DDB file to fill the dtset array'
 !      call wrtout(std_out,message,"COLL")

@@ -1367,9 +1367,21 @@ end subroutine zacharias_supercell_make
 !! INPUTS
 !!   Crystal = crystal object with rprim etc...
 !!   Ifc = interatomic force constants object from anaddb
+!!   option = option to deal with negative frequency -> Bose factor explodes (eg acoustic at Gamma)
+!!      several philosophies to be implemented for the unstable modes:
+!!      option == 1 =>  ignore
+!!      option == 2 =>  populate them according to a default amplitude
+!!      option == 3 =>  populate according to their modulus squared
+!!      option == 4 =>  USER defined value(s), require namplitude and amplitude
 !!   nconfig = numer of requested configurations
 !!   rlatt = matrix of conversion for supercell (3 0 0   0 3 0   0 0 3 for example)
 !!   temperature_K =  temperature in Kelvin
+!!   nqpt = number of q-point 
+!!   namplitude = number of amplitude provided by the user
+!!   amplitudes(namplitude) = list of the amplitudes of the unstable phonons
+!!                            amplitudes(1:3,iamplitude) = qpt
+!!                            amplitudes(4,iamplitude)   = mode
+!!                            amplitudes(5,iamplitude)   = amplitude
 !!
 !! OUTPUT
 !!   thm_scells = array of configurations with thermalized supercells
@@ -1384,8 +1396,8 @@ end subroutine zacharias_supercell_make
 !!
 !! SOURCE
 
-subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
-&    rlatt, temperature_K, thm_scells)
+subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
+&                                 rlatt, temperature_K, thm_scells)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1398,19 +1410,19 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: nconfig
+ integer, intent(in) :: option,nconfig
  integer, intent(in) :: rlatt(3,3)
  real(dp), intent(in) :: temperature_K
  type(crystal_t),intent(in) :: Crystal
  type(ifc_type),intent(in) :: Ifc
  type(supercell_type), intent(out) :: thm_scells(nconfig)
-
+ integer,intent(in) :: namplitude
 !Local variables-------------------------------
 !scalars
- integer :: iq, nqibz, nqbz, qptopt1, imode, ierr, iconfig,option
+ integer :: iq, nqibz, nqbz, qptopt1, iampl ,imode, ierr, iconfig
  real(dp) :: temperature, sigma, freeze_displ
  real(dp) :: rand !, rand1, rand2
-
+ real(dp),intent(in):: amplitudes(5,namplitude)
  !arrays
  real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
  real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
@@ -1420,10 +1432,8 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
  character (len=500) :: msg
 
 ! *************************************************************************
-
- ! check inputs
+! check inputs
 ! TODO: add check that all rlatt are the same on input
-
  if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
    write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
@@ -1501,15 +1511,13 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
    
        ! trick supercell object into using present q point
        thm_scells(iconfig)%qphon(:) = qibz(:,iq)
-   
+
        ! find thermal displacement amplitude eq 4 of Zacharias
        !   combined with l_nu,q expression in paragraph before
        if (phfrq_allq(imode, iq) > tol6) then
          sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq))
        else
          !Treat negative frequencies
-         !AM_2018 To do: move this option in argument
-         option = 1
          select case (option)
          case(1)
            !Do not populate
@@ -1518,13 +1526,30 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
            !Default amplitude for all the frequencies
            sigma = 100._dp
          case(3)
-           !absolute value of the frequencie 
+           !Absolute value of the frequencie 
            sigma=sqrt((bose_einstein(abs(phfrq_allq(imode,iq)),temperature)+half)/&
 &                abs(phfrq_allq(imode,iq)))
          case(4)
-           !USER defined value(s)
+           sigma = 0._dp
+           !Search if the amplitude of this unstable phonon is in the input argument amplitudes
+           do iampl=1,namplitude
+             if(abs(thm_scells(iconfig)%qphon(1) - amplitudes(1,iampl)) < tol8.and.&
+&               abs(thm_scells(iconfig)%qphon(2) - amplitudes(2,iampl)) < tol8.and.&
+&               abs(thm_scells(iconfig)%qphon(3) - amplitudes(3,iampl)) < tol8.and.&
+&               abs(imode - amplitudes(4,iampl)) < tol8) then
+               sigma = amplitudes(5,iampl)
+             end if
+           end do
+           !If not, the amplitude is zero
+           if(abs(sigma) < tol8)then
+             write (msg, '(a,I0,a,3es12.5,2a,I0)') ' The amplitude of the unstable mode ',&
+&                int(imode),' of the qpt ',thm_scells(iconfig)%qphon(:), ch10,&
+&                'is set to zero for the configuration ',iconfig
+             MSG_WARNING(msg)
+           end if
          end select
        end if
+
        ! add displacement for this mode to supercell positions eq 5 of Zacharias
        call RANDOM_NUMBER(rand)
        rand = two * rand - one
@@ -1542,7 +1567,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, nconfig,&
 
        freeze_displ =  rand * sigma
        
-       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))       
      end do !iconfig
    end do !imode
  end do !iq
