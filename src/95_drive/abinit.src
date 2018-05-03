@@ -31,6 +31,7 @@ sources = [
  "m_argparse.F90",
  "nonlinear.F90",
  "m_respfn_driver.F90",
+ "pead_nl_loop.F90",
  "m_screening_driver.F90",
  "m_sigma_driver.F90",
  "m_wfk_analyze.F90",

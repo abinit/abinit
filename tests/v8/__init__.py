@@ -65,4 +65,7 @@ inp_files = [
 "t91.in",
 "t92.in",
 "t93.in",
+#Nonlinear + Second order Sternheimer
+"t100.in",
+"t101.in",
 ]

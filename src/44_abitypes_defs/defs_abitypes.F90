@@ -395,6 +395,7 @@ type dataset_type
  integer :: nomegasf
  integer :: nomegasi
  integer :: nomegasrd
+ integer :: nonlinear_info
  integer :: npband
  integer :: npfft
  integer :: nphf
@@ -569,6 +570,7 @@ type dataset_type
  integer :: use_nonscf_gkk
  integer :: usepaw
  integer :: usepawu
+ integer :: usepead
  integer :: usepotzero
  integer :: userec
  integer :: useria=0
@@ -1293,10 +1295,12 @@ type dataset_type
   integer :: unscr   ! unit number for SCR file
   integer :: unwff1  ! unit number for wavefunctions, number one
   integer :: unwff2  ! unit number for wavefunctions, number two
+  integer :: unwff3  ! unit number for wavefunctions, number three
   integer :: unwffgs ! unit number for ground-state wavefunctions
   integer :: unwffkq ! unit number for k+q ground-state wavefunctions
   integer :: unwft1  ! unit number for wavefunctions, temporary one
   integer :: unwft2  ! unit number for wavefunctions, temporary two
+  integer :: unwft3  ! unit number for wavefunctions, temporary three
   integer :: unwftgs ! unit number for ground-state wavefunctions, temporary
   integer :: unwftkq ! unit number for k+q ground-state wavefunctions, temporary
   integer :: unylm   ! unit number for Ylm(k) data
