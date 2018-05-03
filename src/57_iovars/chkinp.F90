@@ -1957,7 +1957,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   if(dt%occopt/=1 .and. dt%occopt/=2)then
+   if(dt%occopt/=1)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
@@ -1976,6 +1976,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(allow)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+   end if
+!  occopt restricted to 1 for rf2_dkdk and rf2_dkde
+   if (dt%rf2_dkdk==1) then
+     cond_string(1)='rf2_dkdk' ; cond_values(1)=dt%rf2_dkdk
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
+   end if
+   if (dt%rf2_dkde==1) then
+     cond_string(1)='rf2_dkde' ; cond_values(1)=dt%rf2_dkde
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
    if(usepaw==1.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
@@ -2057,6 +2066,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       'ground-state or response function calculations !',ch10,&
 &       'Action: change paral_atom in input file.'
        MSG_ERROR_NOSTOP(message, ierr)
+     end if
+     if (dt%optdriver==RUNL_NONLINEAR) then
+       cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
      end if
      if (dt%usedmft==1) then
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft

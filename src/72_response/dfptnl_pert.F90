@@ -576,28 +576,30 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 ! **************************************************************************************************
 
      do iband = 1,nband_k
+       if (occ_k(iband)>tol10) then
 
-!      Read dude file
-       call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
-!      Copy eig1_k_i2pert in "eig1_k_stored"
-       eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_i2pert(:)
+!        Read dude file
+         call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+!        Copy eig1_k_i2pert in "eig1_k_stored"
+         eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_i2pert(:)
 
-       if (i2pert==natom+2) then
-!        Read dudk file
-         call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
-         offset_cgi = (iband-1)*size_wf+icg0
-         cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-!        Copy cwave_right in "dudk"
-         dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
+         if (i2pert==natom+2) then
+!          Read dudk file
+           call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           offset_cgi = (iband-1)*size_wf+icg0
+           cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
+!          Copy cwave_right in "dudk"
+           dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
 
-!        Read dudkde file
-         call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
-         offset_cgi = (iband-1)*size_wf+icg0
-         cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-!        Copy cwave_right in "dudkde"
-         dudkde(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
+!          Read dudkde file
+           call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           offset_cgi = (iband-1)*size_wf+icg0
+           cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
+!          Copy cwave_right in "dudkde"
+           dudkde(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
+         end if
+
        end if
-
      end do
 
      ABI_ALLOCATE(cgj,(2,size_wf))
