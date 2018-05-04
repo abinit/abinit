@@ -1,5 +1,5 @@
 
-.Version 8.5.3 of ABINIT 
+.Version 8.8.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Sep 2017.
-- ( at 16h31 )
+.Starting date : Fri  4 May 2018.
+- ( at 09h58 )
   
 - input  file    -> t85.in
 - output file    -> t85.out
@@ -1587,8 +1587,8 @@ P          mk1mem10       512
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1783,7 +1783,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  Perturbation : displacement of atom   1   along direction   1
  Found     4 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
- is reduced to    95 .
+ is reduced to   164 .
 
 --------------------------------------------------------------------------------
 
@@ -1796,37 +1796,37 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.14703689539815     -1.023E+01 1.729E-01 3.909E+00
- ETOT  2 -0.15317100028244     -6.134E-03 7.650E-03 3.445E-02
- ETOT  3 -0.15328717172266     -1.162E-04 1.270E-04 4.750E-04
- ETOT  4 -0.15328863161631     -1.460E-06 2.705E-04 1.365E-06
- ETOT  5 -0.15328862377771      7.839E-09 3.843E-05 2.864E-09
+-ETOT  1 -0.14707269413319     -1.023E+01 1.729E-01 3.909E+00
+ ETOT  2 -0.15320543531331     -6.133E-03 7.651E-03 3.448E-02
+ ETOT  3 -0.15332217881101     -1.167E-04 1.270E-04 4.759E-04
+ ETOT  4 -0.15332371393097     -1.535E-06 2.703E-04 1.368E-06
+ ETOT  5 -0.15332370775577      6.175E-09 3.843E-05 2.885E-09
 
- At SCF step    5       vres2   =  2.86E-09 < tolvrs=  1.00E-07 =>converged.
+ At SCF step    5       vres2   =  2.88E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -4.0000E-02; max=  3.8430E-05
+ Mean square residual over all n,k,spin=  -4.0000E-02; max=  3.8432E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   8.31474810E+00 eigvalue=  -3.90856236E-01  local=  -4.45434385E+00
+     kin0=   8.31445295E+00 eigvalue=  -3.90848448E-01  local=  -4.45433926E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   1.27409505E+01  Hartree=   2.95589542E-01     xc=  -2.62233792E-01
+ loc psp =   1.27412773E+01  Hartree=   2.95594488E-01     xc=  -2.62238795E-01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   5.95174622E-01     enl0=   6.14076132E+00   enl1=  -3.32178441E+01
+    edocc=   5.95170372E-01     enl0=   6.14075247E+00   enl1=  -3.32179100E+01
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -1.02380538E+01
+   erelax=  -1.02380889E+01
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=  -4.48303992E+00 fr.nonlo=   1.66287131E+01  Ewald=   0.00000000E+00
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.38344338E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=   -0.1532886238E+00 Ha. Also 2DEtotal=   -0.417119558299E+01 eV
-    (2DErelax=   -1.0238053831E+01 Ha. 2DEnonrelax=    1.0084765207E+01 Ha)
-    (  non-var. 2DEtotal :   -1.5368156181E-01 Ha)
+ 2DEtotal=   -0.1533237078E+00 Ha. Also 2DEtotal=   -0.417215026658E+01 eV
+    (2DErelax=   -1.0238088915E+01 Ha. 2DEnonrelax=    1.0084765207E+01 Ha)
+    (  non-var. 2DEtotal :   -1.5355113569E-01 Ha)
 
 ================================================================================
 
@@ -1840,21 +1840,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        -0.0339306419         0.0000000000
-   1    1   2    1        -0.0169653210         0.0000000000
-   1    1   3    1        -0.0169653210         0.0000000000
+   1    1   1    1        -0.0337998748         0.0000000000
+   1    1   2    1        -0.0168999374         0.0000000000
+   1    1   3    1        -0.0168999374         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0169653210         0.0000000000
-   2    1   2    1        -0.0339306419         0.0000000000
-   2    1   3    1        -0.0169653210         0.0000000000
+   2    1   1    1        -0.0168999374         0.0000000000
+   2    1   2    1        -0.0337998748         0.0000000000
+   2    1   3    1        -0.0168999374         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
   
-   3    1   1    1        -0.0169653210         0.0000000000
-   3    1   2    1        -0.0169653210         0.0000000000
-   3    1   3    1        -0.0339306419         0.0000000000
+   3    1   1    1        -0.0168999374         0.0000000000
+   3    1   2    1        -0.0168999374         0.0000000000
+   3    1   3    1        -0.0337998748         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
   
@@ -1873,23 +1873,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.0012064228         0.0000000000
+   1    1   1    1        -0.0012017733         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1        -0.0012064228         0.0000000000
+   2    1   2    1        -0.0012017733         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1        -0.0012064228         0.0000000000
+   3    1   3    1        -0.0012017733         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.566161E-04 -1.566161E-04 -1.566161E-04
+  -1.563140E-04 -1.563140E-04 -1.563140E-04
  Phonon frequencies in cm-1    :
-- -3.437326E+01 -3.437326E+01 -3.437326E+01
+- -3.430696E+01 -3.430696E+01 -3.430696E+01
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1914,8 +1914,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96751
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2122,8 +2122,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88496
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2328,8 +2328,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96843
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2487,8 +2487,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88399
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2740,8 +2740,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.97214
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2947,8 +2947,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88883
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3106,8 +3106,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.89270
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3313,8 +3313,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3655,7 +3655,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
               amu      2.69815390E+01
              ecut      6.00000000E+00 Hartree
            etotal1    -3.2697267983E+00
-           etotal2    -1.5328862378E-01
+           etotal2    -1.5332370776E-01
            etotal3    -1.0608611120E-01
            etotal4     1.3826283662E-02
            etotal5     2.4231192576E-01
@@ -5097,10 +5097,10 @@ P          mk1mem10       512
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=        123.3  wall=        124.8
+- Proc.   0 individual time (sec): cpu=        139.8  wall=        141.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered 126 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        123.3  wall=        124.8
+.Delivered 127 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=        139.8  wall=        141.8
