@@ -56,7 +56,7 @@ module m_phgamma
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
- use defs_elphon,      only : gam_mult_displ
+ use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
 
  implicit none
 

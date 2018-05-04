@@ -18,8 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "complete_gamma.F90",
- "complete_gamma_tr.F90",
  "m_epweights.F90",
  "defs_elphon.F90",
  "ddb_diel.F90",
