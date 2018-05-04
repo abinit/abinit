@@ -279,7 +279,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
        end if
        npw_k = npwarr(ikpt)
        kpoint(:) = dtset%kpt(:,ikpt)
-   
+
        write (unit_procar,'(a,I7,a,3F12.6,a,F12.6,a)') ' k-point ', ikpt, ' : ', kpoint(:), ' weight = ', dtset%wtk(ikpt), ch10
 
        ! make phkred for all atoms

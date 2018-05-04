@@ -27,14 +27,9 @@ sources = [
  "m_geometry.F90",
  "m_supercell.F90",
  "polcart.F90",
- "symanal.F90",
- "symbrav.F90",
- "symfind.F90",
- "symkpt.F90",
- "symlatt.F90",
  "m_symlist.F90",
  "m_symsg.F90",
- "symspgr.F90",
+ "m_symfind.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -191,7 +191,7 @@ module m_phgamma
   ! gamma matrices keeping full electron energy dependency
   real(dp),allocatable :: vals_ee(:,:,:,:,:,:,:)
   ! vals_eew(2, nene, nene, natom3, natom3, nqibz, nsppol)
- 
+
  end type phgamma_t
 
  public :: phgamma_free          ! Free memory.
@@ -870,7 +870,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
        do jene = 1, gams%nene
          tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2,natom3,natom3])
          call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-      
+
          do nu1=1,natom3
            gamma_ph_ee(jene,iene,nu1) = tmp_gam1(1, nu1, nu1)
            img(nu1) = tmp_gam1(2, nu1, nu1)
@@ -2462,7 +2462,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
        end do
 
 #ifdef DEV_MJV
-       ! reset phfrq for low freq modes to 
+       ! reset phfrq for low freq modes to
        invphfrq = zero
        do mu=1,natom3
          if (abs(phfrq(mu)) > EPH_WTOL) then
@@ -2504,7 +2504,9 @@ end if
 
    end do ! iq_ibz
  end do ! spin
+#ifdef DEV_MJV
  close(900)
+#endif
 
  if (intmeth == 2) then
    ! Collect results on each node.
@@ -2537,7 +2539,7 @@ end if
    call destroy_tetra(tetra)
  end if
 
- ! Collect final results on each node 
+ ! Collect final results on each node
  call xmpi_sum(a2f%vals, comm, ierr)
  do spin=1,nsppol
    a2f%vals(:,0,spin) = sum(a2f%vals(:,1:natom3,spin), dim=2)
@@ -2659,7 +2661,7 @@ print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
          a2feew_w(iw) = a2feew_partial_int(a2f%nene)
        end do
        call simpson_int(nomega,wstep,a2feew_w,a2feew_w_int)
-       G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) / cryst%ucvol 
+       G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) / cryst%ucvol
        ! conversion factor for G0 to SI units =  Ha_J / Time_Sec / (Bohr_meter)**3 ~ 1.2163049915755545e+30
        print *, temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
      end do
@@ -5083,18 +5085,18 @@ end if
    call wrtout(std_out, msg, do_flush=.True.)
  end do ! iq_ibz
 
-!DEBUG
+#ifdef DEV_MJV
 close(800)
 close(801)
 close(802)
-!ENDDEBUG
+#endif
 
  ! Collect gvals_qibz on each node and divide by the total number of k-points in the full mesh.
  do spin=1,nsppol
    !call xmpi_sum(gvals_qibz, comm_qpts, ierr) ! for the moment only split over k??
    gvals_qibz(:,:,:,:,:,spin) = gvals_qibz(:,:,:,:,:,spin) / fstab(spin)%nktot
 #ifdef DEV_MJV
-   gams%vals_ee(:,:,:,:,:,:,spin) = gams%vals_ee(:,:,:,:,:,:,spin) / fstab(spin)%nktot 
+   gams%vals_ee(:,:,:,:,:,:,spin) = gams%vals_ee(:,:,:,:,:,:,spin) / fstab(spin)%nktot
 #endif
 
    if (dtset%eph_transport > 0) then

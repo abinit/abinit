@@ -69,6 +69,7 @@ MODULE m_use_ga
  use m_ga
  use m_sort
 
+ use m_symfind,        only : symfind, symanal, symlatt
  use m_geometry,       only : mkradim, mkrdim, metric, dist2
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
