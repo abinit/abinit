@@ -34,7 +34,6 @@ sources = [
  "symkpt.F90",
  "symlatt.F90",
  "m_symlist.F90",
- "symptgroup.F90",
  "symsgcube.F90",
  "symsghexa.F90",
  "symsgmono.F90",

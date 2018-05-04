@@ -59,7 +59,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
  use m_profiling_abi
 
  use m_symtk,   only : chkprimit
- use m_spgdata, only : getptgroupma
+ use m_spgdata, only : getptgroupma, symptgroup
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
