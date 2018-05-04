@@ -1,0 +1,31 @@
+!!****d* ABINIT/63_ctqmc_offdiag
+!! NAME
+!! 63_ctqmc_offdiag
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_63_ctqmc_offdiag.F90
+!! m_BathOperatoroffdiag.F90
+!! m_Ctqmcoffdiag.F90
+!! m_CtqmcoffdiagInterface.F90
+!! m_FFTHyboffdiag.F90
+!! m_GreenHyboffdiag.F90
+!! m_ImpurityOperatoroffdiag.F90
+!! m_ListCdagCoffdiag.F90
+!! m_MapHyboffdiag.F90
+!! m_MatrixHyboffdiag.F90
+!! m_OurRngoffdiag.F90
+!! m_Statoffdiag.F90
+!! m_Vectoroffdiag.F90
+!! m_VectoroffdiagInt.F90
+!!
+!!***

@@ -1,0 +1,8 @@
+noinst_HEADERS = \
+                 defs.h  \
+                 BathOperatoroffdiag_hybrid.h \
+                 ListCdagCoffdiag_firstHigher.h
+
+EXTRA_DIST += BathOperatoroffdiag_hybrid ListCdagCoffdiag_firstHigher
+
+
