@@ -73,6 +73,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r
  use m_Ctqmc
  use m_CtqmcInterface
+ use m_Ctqmcoffdiag
+ use m_CtqmcoffdiagInterface
  use m_GreenHyb
  use m_data4entropyDMFT
  !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
@@ -114,7 +116,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
  integer :: ier,rot_type_vee
  complex(dpc) :: omega_current,integral(2,2)
- real(dp) :: omega
+ real(dp) :: doccsum,noise,omega
  real(dp) :: facd,facnd
  logical :: nondiaglevels
 ! arrays
@@ -146,6 +148,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  !type(self_type) :: self
 ! type(green_type) :: gw_loc
  type(CtqmcInterface) :: hybrid   !!! WARNING THIS IS A BACKUP PLAN
+ type(CtqmcoffdiagInterface) :: hybridoffdiag   !!! WARNING THIS IS A BACKUP PLAN
  type(green_type) :: greenlda
  type(matlu_type), allocatable  :: hybri_coeff(:)
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
@@ -250,9 +253,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !  opt_nondiag should be 0 by default
  opt_diag    = 1
  if(paw_dmft%dmft_solv>=6)  then
-   opt_nondiag = 1 ! Use cthyb in triqs
+   opt_nondiag = 1 ! Use cthyb in triqs or ctqmc in abinit with offdiag terms in F
  else
-   opt_nondiag = 0 ! use fast ctqmc in ABINIT without non diagonal terms.
+   opt_nondiag = 0 ! use fast ctqmc in ABINIT without off diagonal terms in F
  end if
 
  useylm=0
@@ -1327,13 +1330,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      endif
 
      if(paw_dmft%dmft_solv==8) then
-       call CtqmcInterfaceoffdiag_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
+       nomega=paw_dmft%dmftqmc_l
+       call CtqmcoffdiagInterface_init(hybridoffdiag,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &        paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
 &        paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
 &        std_out,paw_dmft%spacecomm,opt_nondiag)
 !    options
 ! =================================================================
-       call CtqmcInterfaceoffdiag_setOpts(hybrid,&
+       call CtqmcoffdiagInterface_setOpts(hybridoffdiag,&
        opt_Fk      =opt_fk,&
 &       opt_order   =paw_dmft%dmftctqmc_order ,&
 &       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
@@ -1400,9 +1404,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        else if (paw_dmft%dmft_solv==8) then
          ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
          docc(:,:) = zero
-         call CtqmcInterfaceoffdiag_run(hybrid,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
-&        Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
-&        Noise=Noise,matU=hu(itypat)%udens_atoms,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+         call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
+&        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
+&        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
          ABI_DEALLOCATE(docc)
        ! TODO: Handle de luj0 case for entropy
 
@@ -1798,13 +1802,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      !----------------------------------------
      ! </DEBUG>
      !----------------------------------------
-     if(paw_dmft%dmft_solv>=6) then
+     if(paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
      !Nothing just hybrid var problem
      else
        write(message,'(a,2x,a)') ch10,&
 &       " == Destroy CTQMC"
        call wrtout(std_out,message,'COLL')
-       call CtqmcInterface_finalize(hybrid)
+       if(paw_dmft%dmft_solv==5) call CtqmcInterface_finalize(hybrid)
+       if(paw_dmft%dmft_solv==8) call CtqmcoffdiagInterface_finalize(hybridoffdiag)
        write(message,'(a,2x,a)') ch10,&
 &       " == Destroy CTQMC done"
        call wrtout(std_out,message,'COLL')
