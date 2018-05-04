@@ -56,6 +56,7 @@ module m_elphon
  use m_bz_mesh,         only : make_path
  use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
+ use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova
 
  implicit none
 
