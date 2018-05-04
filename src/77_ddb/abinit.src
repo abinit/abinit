@@ -29,8 +29,6 @@ sources = [
  "m_elphon.F90",
  "ftgkk.F90",
  "get_veloc_tr.F90",
- "get_nv_fs_en.F90",
- "get_nv_fs_temp.F90",
  "get_tau_k.F90",
  "m_harmonic_thermo.F90",
  "ddb_hybrid.F90",
