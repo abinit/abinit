@@ -85,6 +85,7 @@ contains
 subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
   npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -4063,7 +4063,6 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_tofullbz'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

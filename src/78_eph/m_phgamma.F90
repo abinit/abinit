@@ -3865,7 +3865,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phgamma'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_wfs
 !End of the abilint section
 

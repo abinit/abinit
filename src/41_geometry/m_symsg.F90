@@ -80,11 +80,11 @@ contains
 
 subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symsgcube'
- use interfaces_41_geometry, except_this_one => symsgcube
 !End of the abilint section
 
  implicit none
@@ -575,11 +575,11 @@ end subroutine symsgcube
 
 subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symsghexa'
- use interfaces_41_geometry, except_this_one => symsghexa
 !End of the abilint section
 
  implicit none
@@ -922,6 +922,7 @@ end subroutine symsghexa
 !! SOURCE
 
 subroutine symsgmono(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1475,11 +1476,11 @@ end subroutine symsgmono
 subroutine symsgortho(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
 &   spgroupma,symafm,symrel,tnons)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symsgortho'
- use interfaces_41_geometry, except_this_one => symsgortho
 !End of the abilint section
 
  implicit none
@@ -1981,7 +1982,6 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,syma
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symsgtetra'
- use interfaces_41_geometry, except_this_one => symsgtetra
 !End of the abilint section
 
  implicit none
@@ -2434,6 +2434,7 @@ end subroutine symsgtetra
 !! SOURCE
 
 subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

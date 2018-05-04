@@ -3775,7 +3775,6 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'interpolate_gkk'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4204,7 +4203,6 @@ subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_all_gkr'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -5952,6 +5950,7 @@ subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
 &                  natom,nkpt_phon,ngkkband,nkpt_used,nqpt,nrpt,nsppol,&
 &                  qtor,rpt,qpt_full,unit_gkk_rpt,unitgkq)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -6190,11 +6189,11 @@ end subroutine ftgkk
 
 subroutine test_ftgkk(elph_ds,gprim,natom,nrpt,rpt,qpt_full,wghatm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'test_ftgkk'
- use interfaces_77_ddb, except_this_one => test_ftgkk
 !End of the abilint section
 
  implicit none
