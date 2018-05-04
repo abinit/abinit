@@ -54,7 +54,7 @@
 
 #include "abi_common.h"
 
-subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,gshift,indkk_f2ibz,ikpt,ikpt1,&
+subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & kg,kgindex,mpi_enreg,npw_k,pwind_k1,symrec)
 
  use defs_basis
@@ -85,7 +85,6 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,gshift,indkk_f2ibz,ikpt,ikpt1,&
  integer,intent(in) :: symrec(3,3,dtset%nsym)
  integer,intent(out) :: pwind_k1(dtset%mpw)
  real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
- real(dp),intent(out) :: gshift(3)
  
 !Local variables -------------------------
 !scalars
@@ -135,7 +134,6 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,gshift,indkk_f2ibz,ikpt,ikpt1,&
  iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
 
  dg(:) = iadum(:)
- gshift(:) = dg(:)
  
  !        Construct S(k)^{t,-1} S(b)^{t}
 
