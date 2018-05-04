@@ -1644,7 +1644,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_symmetrize'
  use interfaces_56_recipspace
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

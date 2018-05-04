@@ -31,7 +31,7 @@ module m_epjdos
  use m_errors
  use m_tetrahedron
  use m_splines
- !use m_cgtools
+ use m_cgtools
  use m_atomdata
  use m_crystal
  use m_crystal_io
@@ -53,7 +53,6 @@ module m_epjdos
  use m_special_funcs,  only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_kpts,           only : tetra_from_kptrlatt
  use m_kg,             only : ph1d3d, getph
- use m_cgtools,        only : cg_getspin
  use m_gsphere,        only : getkpgnorm
  use m_fftcore,        only : sphereboundary
  use m_fft,            only : fftpac
@@ -2028,6 +2027,7 @@ end subroutine fatbands_ncwrite
 
 subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2505,6 +2505,7 @@ end subroutine partial_dos_fractions
 !! SOURCE
 
 subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

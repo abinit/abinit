@@ -127,7 +127,6 @@ subroutine vtorhorec(dtset,&
 #define ABI_FUNC 'vtorhorec'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

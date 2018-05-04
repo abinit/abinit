@@ -6848,8 +6848,6 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_mkrho'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
