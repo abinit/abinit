@@ -133,7 +133,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
  character(len=500) :: message
  !arrays
  integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
- real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2)
+ real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2),gshift(3)
  real(dp),allocatable :: cg1_k(:,:),kk_paw(:,:,:),pwnsfac_k(:,:)
  real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:),smat_inv(:,:,:),smat_kk(:,:,:)
  logical,allocatable :: has_smat_indx(:,:,:)
@@ -339,8 +339,9 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                       & dtorbmag%lmn_size,dtset%mband,&
                       & dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
-                 call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,dtorbmag%indkk_f2ibz,ikptb,ikptg,&
-                      &             kg,dtorbmag%kgindex,mpi_enreg,npw_kb,pwind_bg,symrec)
+                 call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,gshift,&
+                      & dtorbmag%indkk_f2ibz,ikptb,ikptg,&
+                      & kg,dtorbmag%kgindex,mpi_enreg,npw_kb,pwind_bg,symrec)
 
                  sflag_k=0
                  call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icgb,icgg,itrs,job,nband_k,&
