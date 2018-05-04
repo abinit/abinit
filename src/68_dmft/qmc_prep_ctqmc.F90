@@ -1300,7 +1300,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 !    Main calls to CTQMC code in ABINIT
 ! =================================================================
-     if(paw_dmft%dmft_solv==5) then
+     if(paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
 
        write(message,'(a,2x,a)') ch10,&
 &       " == Initializing CTQMC"
@@ -1308,17 +1308,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 !    Initialisation
 ! =================================================================
+     if(paw_dmft%dmft_solv==5) then
        nomega=paw_dmft%dmftqmc_l
        call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
 &       std_out,paw_dmft%spacecomm)
-
-!  for non diagonal code
-!     call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
-!&         paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
-!&         paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-!&         std_out,paw_dmft%spacecomm,opt_nondiag)
-
 !    options
 ! =================================================================
        call CtqmcInterface_setOpts(hybrid,&
@@ -1330,6 +1324,26 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       opt_noise   =paw_dmft%dmftctqmc_grnns ,&
 &       opt_spectra =paw_dmft%dmftctqmc_mrka  ,&
 &       opt_gmove   =paw_dmft%dmftctqmc_gmove )
+     endif
+
+     if(paw_dmft%dmft_solv==8) then
+       call CtqmcInterfaceoffdiag_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
+&        paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,&
+&        paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
+&        std_out,paw_dmft%spacecomm,opt_nondiag)
+!    options
+! =================================================================
+       call CtqmcInterfaceoffdiag_setOpts(hybrid,&
+       opt_Fk      =opt_fk,&
+&       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
+&       opt_analysis=paw_dmft%dmftctqmc_correl,&
+&       opt_check   =paw_dmft%dmftctqmc_check ,&
+&       opt_noise   =paw_dmft%dmftctqmc_grnns ,&
+&       opt_spectra =paw_dmft%dmftctqmc_mrka  ,&
+&       opt_gmove   =paw_dmft%dmftctqmc_gmove )
+     endif
+
        write(message,'(a,2x,2a)') ch10,&
 &       " == Initialization CTQMC done", ch10
        call wrtout(std_out,message,'COLL')
@@ -1383,7 +1397,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 !    CTQMC run TRIQS
 ! =================================================================
-       else if (paw_dmft%dmft_solv>=6) then
+       else if (paw_dmft%dmft_solv==8) then
+         ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
+         docc(:,:) = zero
+         call CtqmcInterfaceoffdiag_run(hybrid,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
+&        Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
+&        Noise=Noise,matU=hu(itypat)%udens_atoms,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+         ABI_DEALLOCATE(docc)
+       ! TODO: Handle de luj0 case for entropy
+
+       else if (paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
 
        ! fw1_nd: Hybridation
        ! levels_ctqmc: niveaux

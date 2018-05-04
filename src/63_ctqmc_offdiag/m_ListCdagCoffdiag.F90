@@ -272,9 +272,9 @@ SUBROUTINE ListCdagCoffdiag_enlarge(list_1, size)
 END SUBROUTINE ListCdagCoffdiag_enlarge
 !!***
 
-!!****f* ABINIT/m_ListCdagCoffdiag/listCdagC_assign
+!!****f* ABINIT/m_ListCdagCoffdiag/listCdagCoffdiag_assign
 !! NAME
-!!  listCdagC_assign
+!!  listCdagCoffdiag_assign
 !!
 !! FUNCTION
 !!  assign routine
@@ -303,14 +303,14 @@ END SUBROUTINE ListCdagCoffdiag_enlarge
 !!
 !! SOURCE
 
-SUBROUTINE listCdagC_assign(list_1, list_2)
+SUBROUTINE listCdagCoffdiag_assign(list_1, list_2)
 
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'listCdagC_assign'
+#define ABI_FUNC 'listCdagCoffdiag_assign'
 !End of the abilint section
 
   TYPE(ListCdagCoffdiag), INTENT(INOUT) :: list_1
