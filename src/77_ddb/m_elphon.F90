@@ -55,6 +55,7 @@ module m_elphon
  use m_iogkk,           only : read_el_veloc,  read_gkk
  use m_bz_mesh,         only : make_path
  use m_fstab,           only : mkqptequiv
+ use m_epweights,       only : d2c_weights, ep_fs_weights
 
  implicit none
 
@@ -2092,6 +2093,7 @@ end subroutine mkFSkgrid
 subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
  use m_special_funcs,  only : fermi_dirac, bose_einstein
+ use m_epweights,      only : d2c_wtq, ep_ph_weights
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

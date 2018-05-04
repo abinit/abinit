@@ -59,6 +59,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  use m_dynmat,     only : ftgam_init, ftgam
  use m_crystal,    only : crystal_t
  use m_fstab,      only : mkqptequiv
+ use m_epweights,  only : ep_el_weights, ep_ph_weights
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

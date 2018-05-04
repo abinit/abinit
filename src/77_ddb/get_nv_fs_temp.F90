@@ -53,7 +53,7 @@
 #include "abi_common.h"
 
 subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
-    
+
 
  use defs_basis
  use defs_datatypes
@@ -62,6 +62,7 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
  use m_io_tools
 
  use m_ebands, only : ebands_update_occ
+ use m_epweights, only : ep_fs_weights
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -90,14 +91,14 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 !Local variables-------------------------------
 
  integer :: isppol!, ie1
- integer :: itemp, tmp_nenergy  
+ integer :: itemp, tmp_nenergy
 
  character(len=500) :: message
 
  real(dp) :: Temp, tmp_elphsmear, tmp_delta_e
 ! real(dp) :: xtr, e1
 ! real(dp),allocatable :: tmp_wtk(:,:)
- 
+
 ! *************************************************************************
 
  ABI_ALLOCATE(elph_tr_ds%dos_n0,(elph_ds%ntemper,elph_ds%nsppol))
@@ -107,10 +108,10 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 !else
 !ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt))
 !end if
- 
+
  elph_tr_ds%dos_n0 = zero
  elph_tr_ds%veloc_sq0 = zero
- 
+
  tmp_nenergy = 8
  do itemp=1,elph_ds%ntemper  ! runs over temperature in K
    Temp=elph_ds%tempermin + elph_ds%temperinc*dble(itemp)
@@ -143,12 +144,12 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 !    do ie1=-tmp_nenergy,tmp_nenergy ! use ie1 here, hope there is no confusion
 !    e1=Bst%fermie+ie1*tmp_delta_e
 !    xtr=(e1-Bst%fermie)/(2.0_dp*kb_HaK*Temp)
-!    
+!
 !    call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
 !    &       e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, &
 !    &       max_occ, elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
 !    &       elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
-!    
+!
 !    tmp_wtk(:,:) = tmp_wtk(:,:) + elph_ds%k_fine%wtk(:,:,isppol)* &
 !    &       tmp_delta_e/(4.0d0*kb_HaK*Temp)/(COSH(xtr)**2.0d0)
 !    end do ! ie1

@@ -67,7 +67,7 @@
 #include "abi_common.h"
 
 subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max)
-    
+
  use defs_basis
  use defs_elphon
  use m_io_tools
@@ -76,6 +76,8 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  use m_ifc
 
  use m_crystal,    only : crystal_t
+ use m_epweights,  only : d2c_weights, ep_el_weights, ep_fs_weights
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -95,7 +97,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  type(crystal_t),intent(in) :: crystal
  type(elph_type),intent(inout) :: elph_ds
  type(elph_tr_type),intent(inout) :: elph_tr_ds
-!Arrays 
+!Arrays
 
  real(dp), intent(in)  :: eigenGS(elph_ds%nband,elph_ds%k_fine%nkptirr,elph_ds%nsppol)
 
@@ -126,13 +128,13 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  ucvol = crystal%ucvol
 
  Temp             = elph_ds%tempermin+elph_ds%temperinc
- elph_ds%delta_e  = kb_HaK*Temp ! about 1000 cm^-1/100, no need to be omega_max 
+ elph_ds%delta_e  = kb_HaK*Temp ! about 1000 cm^-1/100, no need to be omega_max
  max_e            = elph_ds%nenergy*kb_HaK*Temp
  e_tiny           = kb_HaK*0.00001_dp ! this is the min. delta_e
  de0              = kb_HaK*Temp ! Kb*T
 
  in_nenergy = elph_ds%nenergy
- 
+
  ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,4))
  ABI_ALLOCATE(dos_e1,(elph_ds%nsppol,3))
 
@@ -179,7 +181,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
      low_T = 1
      if (omega_max*fine_range .lt. max_e) then
        low_T = 0
-       de0 = omega_max*fine_range/in_nenergy ! energy spacing within Ef +/- omega_max 
+       de0 = omega_max*fine_range/in_nenergy ! energy spacing within Ef +/- omega_max
        do while ((e1-elph_ds%fermie) .lt. max_e)
          e1 = e1 + elph_ds%delta_e
          out_nenergy = out_nenergy + 1
@@ -259,7 +261,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 &     e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
 &     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
-     
+
      elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
      do while ((e1-elph_ds%fermie) .lt. max_e)
        if (e1 .lt. e_cb_min .and. elph_ds%n0(isppol) .lt. tol9) then
@@ -279,7 +281,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 &         e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &         elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
 &         elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
-         
+
          elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
 
          e1 = e1 + de0
@@ -297,7 +299,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 
  ABI_DEALLOCATE(tmp_wtk)
 
- if (elph_ds%nenergy .lt. 2) then 
+ if (elph_ds%nenergy .lt. 2) then
    MSG_ERROR('There are too few energy levels for non-LOVA')
  end if
 
@@ -339,7 +341,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 &     enemin, enemax, elph_ds%nenergy+1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
 &     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine, tmp_wtk)
-     
+
      do isppol=1,elph_ds%nsppol
        do ie1 = 1, elph_ds%nenergy
          elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
@@ -375,7 +377,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
        do ie1 = 1, out_nenergy
          elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
          elph_tr_ds%de_all(isppol,ie1) = elph_ds%delta_e
-         
+
          elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:,isppol,ie1+1)
          elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
          elph_tr_ds%dos_n(ie1,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
@@ -408,7 +410,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
        do ie1 = out_nenergy+1, out_nenergy+in_nenergy*2+1
          elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
          elph_tr_ds%de_all(isppol,ie1) = de0
-         
+
          elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:,isppol,ie1-out_nenergy+1)
          elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
          elph_tr_ds%dos_n(ie1,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
@@ -442,7 +444,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
        do ie1 = out_nenergy+in_nenergy*2+2, in_nenergy*2+1+out_nenergy*2
          elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
          elph_tr_ds%de_all(isppol,ie1) = elph_ds%delta_e
-         
+
          elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:,isppol,ie1-out_nenergy-in_nenergy*2)
          elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
          elph_tr_ds%dos_n(ie1,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
@@ -462,7 +464,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
      ABI_DEALLOCATE(tmp_wtk)
    end if
 
-!semiconductor         
+!semiconductor
  else if (i_metal .eq. 0) then
    e1 = elph_ds%fermie - max_e
    ie_all = 1
@@ -471,7 +473,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 &   e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &   elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
 &   elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
-   
+
    elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
    do while ((e1-elph_ds%fermie) .lt. max_e)
      if (e1 .lt. e_cb_min .and. elph_ds%n0(isppol) .lt. tol9) then
@@ -484,7 +486,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 &       e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &       elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
 &       elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
-       
+
        elph_tr_ds%tmp_gkk_intweight(:,:,isppol,ie_all) = elph_ds%k_fine%wtk(:,:,isppol)
        elph_tr_ds%dos_n(ie_all,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
        elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
@@ -524,7 +526,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 &       e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &       elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
 &       elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
-       
+
        elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
 
        tmp_dos = (ucvol/2.0_dp/pi**2.0_dp)*(2.0_dp*eff_mass1)**1.5_dp*(e1-e_cb_min)**0.5_dp + &

@@ -75,6 +75,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_dynmat,          only : ftgam_init, ftgam
+ use m_epweights,       only : d2c_wtq, ep_ph_weights
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
