@@ -164,6 +164,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawfgr,      only : pawfgr_type
  use m_kg,          only : mkkin, kpgstr, mkkpg
  use m_fft,         only : fftpac
+ use m_spacepar,    only : symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -26,7 +26,8 @@ module m_ab7_kpoints
   use m_ab7_symmetry
   use m_profiling_abi
 
- use m_kpts,      only : getkgrid, testkgrid
+  use m_kpts,      only : getkgrid, testkgrid
+  use m_spacepar,  only : irrzg
 
   implicit none
 

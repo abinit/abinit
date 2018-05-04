@@ -34,6 +34,7 @@ module m_vtorhotf
 
  use m_time,     only : timab
  use m_dtfil,    only : status
+ use m_spacepar,  only : symrhg
 
  implicit none
 

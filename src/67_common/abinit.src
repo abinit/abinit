@@ -85,7 +85,6 @@ sources = [
  "m_spin_current.F90",
  "stress.F90",
  "strhar.F90",
- "symrhg.F90",
  "uderiv.F90",
  "update_e_field_vars.F90",
  "vdw_dftd2.F90",

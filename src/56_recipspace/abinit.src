@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "initylmg.F90",
- "irrzg.F90",
  "m_ab7_kpoints.F90",
  "m_bz_mesh.F90",
  "m_double_grid.F90",
