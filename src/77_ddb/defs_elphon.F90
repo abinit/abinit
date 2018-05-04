@@ -49,6 +49,8 @@ module defs_elphon
 !!***
 
  public :: gam_mult_displ
+ public :: complete_gamma
+ public :: complete_gamma_tr
 
 !----------------------------------------------------------------------
 !!****t* defs_elphon/elph_kgrid_type
@@ -849,6 +851,7 @@ end subroutine gam_mult_displ
 !! SOURCE
 
 subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

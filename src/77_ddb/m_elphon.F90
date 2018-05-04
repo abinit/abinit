@@ -2100,7 +2100,6 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 #undef ABI_FUNC
 #define ABI_FUNC 'mka2f'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4677,12 +4676,12 @@ end subroutine complete_gkk
 
 subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_nv_fs_en'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => get_nv_fs_en
 !End of the abilint section
 
  implicit none
@@ -5191,12 +5190,12 @@ end subroutine get_nv_fs_en
 
 subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_nv_fs_temp'
  use interfaces_14_hidewrite
- use interfaces_77_ddb, except_this_one => get_nv_fs_temp
 !End of the abilint section
 
  implicit none
@@ -5326,6 +5325,7 @@ end subroutine get_nv_fs_temp
 !! SOURCE
 
 subroutine get_veloc_tr(elph_ds,elph_tr_ds)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
