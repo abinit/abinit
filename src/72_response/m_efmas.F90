@@ -732,13 +732,13 @@ CONTAINS
   real(dp),allocatable :: prodr(:,:)
   !real(dp), allocatable :: f3dfd(:,:,:)
   complex(dpc) :: eig2_part(3,3)
-  complex(dpc) :: eig2_gh2c(3,3)
+  complex(dpc) :: eig2_ch2c(3,3)
   complex(dpc) :: eig2_paral(3,3)
   complex(dpc) :: eig2_gauge_change(3,3)
   complex(dpc) :: eig1a, eig1b, g_ch
   complex(dpc) :: matr2d(2,2)
   complex(dpc), allocatable :: eigen1_deg(:,:), identity(:,:), eigenvec(:,:), work(:), eigen1vec(:,:,:), dotprod(:,:)
-  complex(dpc), allocatable :: eig2_diag(:,:,:,:), unitary_tr_test(:,:,:,:)
+  complex(dpc), allocatable :: eig2_diag(:,:,:,:),eig2_diag_cart(:,:,:,:), unitary_tr_test(:,:,:,:)
   complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
   complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
   complex(dpc),allocatable :: prodc(:,:)
@@ -890,6 +890,7 @@ CONTAINS
       end if !degenerate(1)
 
       ABI_ALLOCATE(eig2_diag,(deg_dim,deg_dim,3,3))
+      ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
       eig2_diag = zero
       ABI_ALLOCATE(unitary_tr_test,(deg_dim,deg_dim,3,3))
 
@@ -898,7 +899,7 @@ CONTAINS
         cg0(:,:) = cg(:,1+(degl+iband-1)*npw_k*nspinor+icg2:(degl+iband)*npw_k*nspinor+icg2)
         do jband=1,deg_dim
           eig2_part = zero
-          eig2_gh2c = zero
+          eig2_ch2c = zero
           eig2_paral = zero
           eig2_gauge_change = zero
           eff_mass = zero
@@ -954,31 +955,49 @@ CONTAINS
               !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
               !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
 
-              eig2_gh2c(adir,bdir) = efmasfr(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
+              eig2_ch2c(adir,bdir) = efmasfr(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
 
             end do !bdir
           end do  !adir
 
           do adir=1,3
             do bdir=1,3
-              eig2_paral(adir,bdir) = eig2_part(adir,bdir) + eig2_part(bdir,adir) + eig2_gh2c(adir,bdir)
-              !eig2_paral(adir,bdir) = 0.5*(eig2_part(adir,bdir) + eig2_part(bdir,adir)) + eig2_gh2c(adir,bdir)   !DEBUG
-              !eig2_paral(adir,bdir) = eig2_part(adir,bdir) + conjg(eig2_part(adir,bdir)) + eig2_gh2c(adir,bdir)  !DEBUG
+              eig2_paral(adir,bdir) = eig2_part(adir,bdir) + eig2_part(bdir,adir) + eig2_ch2c(adir,bdir)
             end do
           end do
 
           eig2_diag(iband,jband,:,:) = eig2_paral - eig2_gauge_change
 
-          eig2_diag(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
-          eig2_paral                 = matmul(matmul(rprimd,eig2_paral),                transpose(rprimd))/two_pi**2
-          eig2_gauge_change          = matmul(matmul(rprimd,eig2_gauge_change),         transpose(rprimd))/two_pi**2
-          eig2_gh2c                  = matmul(matmul(rprimd,eig2_gh2c),                 transpose(rprimd))/two_pi**2
-          eig2_part                  = matmul(matmul(rprimd,eig2_part),                 transpose(rprimd))/two_pi**2
+          !!! Decomposition of the hessian in into its different contributions.
+          if(debug) then
+
+            eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+            eig2_paral                 = matmul(matmul(rprimd,eig2_paral),                transpose(rprimd))/two_pi**2
+            eig2_gauge_change          = matmul(matmul(rprimd,eig2_gauge_change),         transpose(rprimd))/two_pi**2
+            eig2_ch2c                  = matmul(matmul(rprimd,eig2_ch2c),                 transpose(rprimd))/two_pi**2
+            eig2_part                  = matmul(matmul(rprimd,eig2_part),                 transpose(rprimd))/two_pi**2
+
+            write(std_out,'(a)') 'Hessian of eigenvalues               = H. in parallel gauge - Gauge transformation'
+            do adir=1,3
+              write(std_out,'(3f12.8,2(a,3f12.8))')&
+&               real(eig2_diag_cart(iband,jband,adir,:),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
+            end do
+            write(std_out,'(a)') 'H. in parallel gauge  = Second der. of H     + First derivatives    + First derivatives^T'
+            do adir=1,3
+              write(std_out,'(3f12.8,2(a,3f12.8))') real(eig2_paral(adir,:),dp),' |',real(eig2_ch2c(adir,:),dp),' |', &
+&                                                   real(eig2_part(adir,:),dp)
+            end do
+          end if !debug
+
+!HERE
+
+          eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+
 
           if(.not. degenerate .and. iband==jband) then
 
             !Compute effective mass tensor from second derivative matrix. Simple inversion.
-            eff_mass(:,:) = eig2_diag(iband,jband,1:mdim,1:mdim)
+            eff_mass(:,:) = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
             call zgetrf(mdim,mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,info)
             ABI_ALLOCATE(work,(3))
             call zgetri(mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,work,3,info)
@@ -993,26 +1012,9 @@ CONTAINS
             lwork=-1
             ABI_ALLOCATE(rwork,(1))
             call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_eqv_eigval(:,iband),rwork,lwork,info)
-            lwork=int(rwork(1)) ! MG: OK but mkl does not like it see below.
-
-            ! The following line is needed for ubu_gnu_5.3_openmpi to avoid the following error in v7[80]
-            !    Program received signal SIGFPE: Floating-point exception - erroneous arithmetic operation.
-            !    Backtrace for this error:
-            !    #0 0x7F789ABBDE48
-            !    #1 0x7F789ABBCFD0
-            !    #2 0x7F7899E912EF
-            !    #3 0x7F789C09D4AC
-            !    #4 0x7F789E122E08
-            !    #5 0x6C9043 in __m_efmas_MOD_efmas_main at m_efmas.F90:927 (discriminator 26)
-            !    #6 0x4F99B7 in dfpt_looppert_ at dfpt_looppert.F90:1945 (discriminator 3)
-            !    #7 0x4553C4 in respfn_ at respfn.F90:1249
-            !    #8 0x4263D0 in driver_ at driver.F90:691 (discriminator 10)
-            !    #9 0x4146FC in MAIN__ at abinit.F90:475 (discriminator 12)
-            !    /usr/bin/timeout: the monitored command dumped core
-            !    Floating point exception
             lwork = max(1, 3*mdim-1) ! lwork >= max(1, 3*mdim-1)
-
             ABI_DEALLOCATE(rwork)
+
             ABI_ALLOCATE(rwork,(lwork))
             rwork=zero
             call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_eqv_eigval(:,iband),rwork,lwork,info)
@@ -1042,7 +1044,7 @@ CONTAINS
                   unit_r(2)=sinth*sinph
                   unit_r(3)=costh
 
-                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag(iband,jband,:,:),dp),unit_r(:))) 
+                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),unit_r(:))) 
                   m_avg = m_avg + weight*sinth*f3d_scal
                   m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d_scal)**half)
 
@@ -1064,7 +1066,7 @@ CONTAINS
             ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
             m_cart=zero
             do adir=1,ndirs
-              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag(iband,jband,:,:),dp),dirs(:,adir)))
+              m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag_cart(iband,jband,:,:),dp),dirs(:,adir)))
             end do
 
             !PRINTING RESULTS
@@ -1085,20 +1087,6 @@ CONTAINS
 
             write(std_out,'(a,3f20.16)') 'Gradient of eigenvalues = ',&
 &            matmul(rprimd,eigen1(2*(degl+iband)-1+(degl+iband-1)*2*nband_k+band2tot_index,:,ipert))/two_pi
-
-            !!! Decomposition of the hessian in into its different contributions.
-            if(debug) then
-              write(std_out,'(a)') 'Hessian of eigenvalues               = H. in parallel gauge - Gauge transformation'
-              do adir=1,3
-                write(std_out,'(3f12.8,2(a,3f12.8))')&
-&                real(eig2_diag(iband,jband,adir,:),dp),' |',real(eig2_paral(adir,:),dp),' |',real(eig2_gauge_change(adir,:),dp)
-              end do
-              write(std_out,'(a)') 'H. in parallel gauge  = Second der. of H     + First derivatives    + First derivatives^T'
-              do adir=1,3
-                write(std_out,'(3f12.8,2(a,3f12.8))') real(eig2_paral(adir,:),dp),' |',real(eig2_gh2c(adir,:),dp),' |', &
-&                                                     real(eig2_part(adir,:),dp)
-              end do
-            end if !debug
 
           end if !.not.degenerate
         end do !jband
@@ -1184,11 +1172,11 @@ CONTAINS
 
             do iband=1,deg_dim
               do jband=1,deg_dim
-                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag(iband,jband,:,:),unit_r))
-                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag(iband,jband,:,:),dr_dth))
-                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag(iband,jband,:,:),unit_r))+&
-&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag(iband,jband,:,:),dr_dph))
+                f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))
+                df3d_dth(iband,jband)=DOT_PRODUCT(dr_dth,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dth))
+                df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(eig2_diag_cart(iband,jband,:,:),unit_r))+&
+&                DOT_PRODUCT(unit_r,MATMUL(eig2_diag_cart(iband,jband,:,:),dr_dph))
               end do
             end do
             !DIAGONALIZATION
@@ -1298,10 +1286,10 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1445,7 +1433,7 @@ CONTAINS
 
           do iband=1,deg_dim
             do jband=1,deg_dim
-              matr2d = eig2_diag(iband,jband,1:mdim,1:mdim)
+              matr2d = eig2_diag_cart(iband,jband,1:mdim,1:mdim)
               f3d(iband,jband)=DOT_PRODUCT(unit_r,MATMUL(matr2d,unit_r))
               df3d_dph(iband,jband)=DOT_PRODUCT(dr_dph,MATMUL(matr2d,unit_r))+&
 &              DOT_PRODUCT(unit_r,MATMUL(matr2d,dr_dph))
@@ -1517,10 +1505,10 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
             end do
           end do
-          !f3d(:,:) = eig2_diag(:,:,adir,adir)
+          !f3d(:,:) = eig2_diag_cart(:,:,adir,adir)
           eigenvec = f3d        !IN
           lwork=-1
           ABI_ALLOCATE(work,(1))
@@ -1623,7 +1611,7 @@ CONTAINS
         m_avg_frohlich=zero
         saddle_warn=.false.
 
-        f3d(:,:) = eig2_diag(:,:,1,1)
+        f3d(:,:) = eig2_diag_cart(:,:,1,1)
 
         !DIAGONALIZATION
         eigenvec = f3d        !IN
@@ -1648,7 +1636,7 @@ CONTAINS
         do adir=1,ndirs
           do iband=1,deg_dim
             do jband=1,deg_dim
-              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag(iband,jband,:,:),dirs(:,adir)))
+              f3d(iband,jband) = dot_product(dirs(:,adir),matmul(eig2_diag_cart(iband,jband,:,:),dirs(:,adir)))
             end do
           end do
           eigenvec = f3d        !IN
@@ -1685,35 +1673,8 @@ CONTAINS
 
       end if !(degenerate)
 
- !     !!! DEBUG
- !     write(std_out,*) '2nd order eigenvalues, analysis of unitary transform for diagonalization.'
- !     write(std_out,*) 'adir, bdir, equivalent'
- !     do adir=1,9
- !       lwork=-1
- !       ABI_ALLOCATE(work,(1))
- !       call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
- !       lwork=int(work(1))
- !       ABI_DEALLOCATE(work)
- !
- !       eigenvec = eig2_diag(:,:,(adir-1)/3+1,MOD(adir-1,3)+1)
- !       eigenval = zero
- !       ABI_ALLOCATE(work,(lwork))
- !       work=zero; rwork=zero
- !       call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
- !       ABI_DEALLOCATE(work)
- !       unitary_tr_test(:,:,(adir-1)/3+1,MOD(adir-1,3)+1) = eigenvec
- !       do bdir=1,adir-1
- !         dotprod = MATMUL(CONJG(TRANSPOSE(eigenvec)),unitary_tr_test(:,:,(bdir-1)/3+1,MOD(bdir-1,3)+1))
- !           write(std_out,'(1x,a,i1,a,i1,a,2x,a,i1,a,i1,a,l12)') '(',(adir-1)/3+1,',',MOD(adir-1,3)+1,')','(',(bdir-1)/3+1,',',&
- !    &          MOD(bdir-1,3)+1,')',ALL(ABS(dotprod)<tol5.or.ABS(dotprod-one)<tol5)
- !           do iband=1,deg_dim
- !             write(std_out,'(26x,3f7.3)') ABS(dotprod(iband,:))
- !           end do
- !       end do !bdir
- !     end do !adir
- !     !!! END DEBUG
-
       ABI_DEALLOCATE(eig2_diag)
+      ABI_DEALLOCATE(eig2_diag_cart)
       ABI_DEALLOCATE(unitary_tr_test)
 
       ABI_DEALLOCATE(eigen1_deg)
