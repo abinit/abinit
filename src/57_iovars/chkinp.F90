@@ -1957,7 +1957,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   if(dt%occopt/=1)then
+   if(dt%occopt/=1 .and. dt%occopt/=2)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
@@ -1985,6 +1985,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (dt%rf2_dkde==1) then
      cond_string(1)='rf2_dkde' ; cond_values(1)=dt%rf2_dkde
      call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
+   end if
+   if(dt%usepead==0.and.dt%optdriver==RUNL_NONLINEAR)then
+     cond_string(1)='usepead'   ; cond_values(1)=dt%usepead
+     cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
    if(usepaw==1.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
