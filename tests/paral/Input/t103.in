@@ -87,10 +87,10 @@ jpawu2  0.5   eV
 #%% [NCPU_10]
 #%% files_to_test = 
 #%%   t103_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t103_MPI10o_DS2_atom_01_Gtau_02.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t103_MPI10o_DS2_atom_01_Gtau_offdiag_02.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = B. Amadon
 #%% keywords = DMFT, CTQMC, FAILS_IFMPI
-#%% description = DFT+DMFT for V using off diag CTQMC code
+#%% description = DFT+DMFT for Vanadium using off diag CTQMC code
 #%% topics = DMFT
 #%%<END TEST_INFO>

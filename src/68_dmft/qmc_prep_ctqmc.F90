@@ -1774,15 +1774,17 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
          close(unt)
        else
-         if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-           MSG_ERROR(message)
-         end if
-         do itau=1,paw_dmft%dmftqmc_l
-           write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
-           (gtmp(itau,iflavor), iflavor=1, nflavor)
-         end do
-         write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
-         close(unt)
+         if(paw_dmft%dmft_solv==5) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do itau=1,paw_dmft%dmftqmc_l
+             write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+             (gtmp(itau,iflavor), iflavor=1, nflavor)
+           end do
+           write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
+           close(unt)
+         endif
          if(paw_dmft%dmft_solv==8) then
            if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
              MSG_ERROR(message)
