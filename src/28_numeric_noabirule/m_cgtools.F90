@@ -4352,7 +4352,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !scalars
  integer :: iblocksize,ierr,ig,igs,ispinor
  real(dp) :: fac,poly,xx
- character(len=500) :: message
+ !character(len=500) :: message
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
@@ -4412,8 +4412,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
      do iblocksize=1,blocksize
        if(ek0(iblocksize)<1.0d-10)then
-         message = 'the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.'
-         MSG_WARNING(message)
+         MSG_WARNING('the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.')
          ek0(iblocksize)=0.1_dp
        end if
      end do
@@ -4765,15 +4764,13 @@ subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
 !Local variables-------------------------------
 !scalars
  integer :: ipw,ispinor,jpw,spnshft1,spnshft2
- character(len=500) :: message
 
 ! *************************************************************************
 
 !Check if vect1(:,0) = 0 and vect2(:,0) = 0
  if ((abs(vect1(1,0)) > tol12).or.(abs(vect1(2,0)) > tol12).or. &
 & (abs(vect2(1,0)) > tol12).or.(abs(vect2(2,0)) > tol12)) then
-   message = ' vect1(:,0) and/or vect2(:,0) are not equal to zero'
-   MSG_BUG(message)
+   MSG_BUG('vect1(:,0) and/or vect2(:,0) are not equal to zero')
  end if
 
 !Compute the scalar product

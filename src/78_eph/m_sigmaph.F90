@@ -53,6 +53,7 @@ module m_sigmaph
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
  use m_cgtools,        only : dotprod_g !set_istwfk
+ use m_cgtk,           only : cgtk_rotate
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
@@ -791,9 +792,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            ! Use cgwork as workspace array, results stored in bra_kq
            !g0_kq =  g0ibz_kq + g0bz_kq
            call wfd_copy_cg(wfd, ibsum_kq, ikq_ibz, spin, cgwork)
-           call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
-                          npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
-                          npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
+           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
+                            npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
+                            npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
            !bra_kq = zero
          end if
 

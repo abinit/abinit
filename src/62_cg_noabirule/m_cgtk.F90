@@ -1,16 +1,57 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/cg_rotate
+!!****m* ABINIT/m_cgtk
 !! NAME
-!!  cg_rotate
+!!  m_cgtk
 !!
 !! FUNCTION
 !!
+!!
 !! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (MG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_cgtk
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ use m_symtk,     only : mati3inv
+ use m_geometry,  only : getspinrot
+ use m_crystal,   only : crystal_t
+ use m_fftcore,   only : sphere
+ use m_kg,        only : ph1d3d, getph
+
+ implicit none
+
+ private
+!!***
+
+ public :: cgtk_rotate
+!!***
+
+contains
+!!***
+
+!!****f* ABINIT/cgtk_rotate
+!! NAME
+!!  cgtk_rotate
+!!
+!! FUNCTION
 !!
 !! INPUTS
 !!  isym
@@ -41,29 +82,13 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
+subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
   npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- use m_symtk,     only : mati3inv
- use m_geometry,  only : getspinrot
- use m_crystal,   only : crystal_t
- use m_fftcore,   only : sphere
- use m_kg,        only : ph1d3d, getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'cg_rotate'
+#define ABI_FUNC 'cgtk_rotate'
 !End of the abilint section
 
  implicit none
@@ -190,5 +215,8 @@ subroutine cg_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
    ABI_FREE(phase1d)
  end if
 
-end subroutine cg_rotate
+end subroutine cgtk_rotate
+!!***
+
+end module m_cgtk
 !!***

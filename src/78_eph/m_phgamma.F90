@@ -49,6 +49,7 @@ module m_phgamma
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
  !use m_cgtools,        only : set_istwfk
+ use m_cgtk,           only : cgtk_rotate
  use m_kg,             only : getph
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam, asrif9
  use defs_datatypes,   only : ebands_t
@@ -4408,9 +4409,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
            call wfd_copy_cg(wfd, band, ik_ibz, spin, h1kets_kq)
-           call cg_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1,&
-                          npw_kirr, wfd%kdata(ik_ibz)%kg_k,&
-                          npw_k, kg_k, istwf_kirr, istwf_k, h1kets_kq, kets_k(:,:,ib2), work_ngfft, work)
+           call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1,&
+                            npw_kirr, wfd%kdata(ik_ibz)%kg_k,&
+                            npw_k, kg_k, istwf_kirr, istwf_k, h1kets_kq, kets_k(:,:,ib2), work_ngfft, work)
          end do
        end if
 
@@ -4441,9 +4442,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
            call wfd_copy_cg(wfd, band, ikq_ibz, spin, h1kets_kq)
-           call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
-                          npw_kirr, wfd%kdata(ikq_ibz)%kg_k,&
-                          npw_kq, kg_kq, istwf_kirr, istwf_kq, h1kets_kq, bras_kq(:,:,ib1), work_ngfft, work)
+           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
+                            npw_kirr, wfd%kdata(ikq_ibz)%kg_k,&
+                            npw_kq, kg_kq, istwf_kirr, istwf_kq, h1kets_kq, bras_kq(:,:,ib1), work_ngfft, work)
          end do
        end if
 
