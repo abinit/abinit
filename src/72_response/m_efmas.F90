@@ -517,9 +517,9 @@ CONTAINS
    end if
 
    if(deg_dim>1 .and. mdim>1) then
-     write(msg,'(a)') ' Transport equivalent effective mass'
+     write(msg,'(a)') ' Transport equivalent effective mass tensor'
    else
-     write(msg,'(a)') ' Effective mass'
+     write(msg,'(a)') ' Effective mass tensor'
    end if
 
    if(mdim>1) then
@@ -533,6 +533,10 @@ CONTAINS
        do adir=1,mdim
          write(io_unit,'(3f26.10)') efmas_tensor(adir,:,iband)
        end do
+       if(present(efmas_eigval))then
+         write(io_unit,'(a)') trim(msg)//' eigenvalues:'
+         write(io_unit,'(3f26.10)') efmas_eigval(:,iband)
+       endif
      else
        write(io_unit,'(a)') '     *** SADDLE POINT: TRANSPORT EQV. EFF. MASS NOT DEFINED (see WARNING above) ***'
      end if
@@ -541,10 +545,8 @@ CONTAINS
        if(mdim==2 .and. deg_dim>1) then
          write(io_unit,'(a,f26.10)') 'Scaling of transport tensor (Eq. (FXX)) = ',transport_tensor_scale(iband)
        end if
-       if(io_unit == std_out) then
-         if(.not. saddle_warn(iband)) then
-           write(io_unit,'(a)') trim(msg)//' eigenvalues:'
-           write(io_unit,'(3f14.10)') efmas_eigval(:,iband)
+       if(.not. saddle_warn(iband)) then
+         if(io_unit == std_out) then
            write(io_unit,'(a)') trim(msg)//' eigenvectors in cartesian / reduced coord.:'
            do adir=1,mdim
              if( count( abs(efmas_eigval(adir,iband)-efmas_eigval(:,iband))<tol4 ) > 1 ) then
@@ -704,8 +706,9 @@ CONTAINS
   integer :: io_unit
   character(len=500) :: message, filename
   real(dp) :: deltae
+  real(dp) :: cosph,costh,sinph,sinth
   real(dp) :: dot2i,dot2r,dot3i,dot3r,doti,dotr
-  real(dp) :: f3d_scal,theta, phi
+  real(dp) :: f3d_scal
   real(dp) :: weight
   real(dp) :: gprimd(3,3)
   !real(dp) :: A, B, C, R
@@ -721,8 +724,8 @@ CONTAINS
   real(dp), allocatable :: cart_rotation(:,:), transport_tensor_eig(:)
   real(dp), allocatable :: transport_eqv_m(:,:,:), transport_eqv_eigval(:,:), transport_eqv_eigvec(:,:,:)
   real(dp), allocatable :: transport_tensor_scale(:)
-  real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
-  real(dp), allocatable :: gq_points_ph(:),gq_weights_ph(:)
+  real(dp), allocatable :: gq_points_th(:),gq_points_costh(:),gq_points_sinth(:),gq_weights_th(:)
+  real(dp), allocatable :: gq_points_ph(:),gq_points_cosph(:),gq_points_sinph(:),gq_weights_ph(:)
   real(dp), allocatable :: dirs(:,:)
   real(dp),allocatable :: prodr(:,:)
   !real(dp), allocatable :: f3dfd(:,:,:)
@@ -804,9 +807,29 @@ CONTAINS
     dirs(3,:) = cos(dtset%efmas_dirs(1,1:ndirs)*pi/180)
   end if
 
-  !!! Initializations for the degenerate case.
+  !!! Initialization of integrals for the degenerate case.
   ntheta   = dtset%efmas_ntheta
   nphi     = 2*ntheta
+  ABI_ALLOCATE(gq_points_th,(ntheta))
+  ABI_ALLOCATE(gq_points_costh,(ntheta))
+  ABI_ALLOCATE(gq_points_sinth,(ntheta))
+  ABI_ALLOCATE(gq_weights_th,(ntheta))
+  ABI_ALLOCATE(gq_points_ph,(nphi))
+  ABI_ALLOCATE(gq_points_cosph,(nphi))
+  ABI_ALLOCATE(gq_points_sinph,(nphi))
+  ABI_ALLOCATE(gq_weights_ph,(nphi))
+  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
+  !XG180501 : TODO : There is no need to make a Gauss-Legendre integral for the phi variable, 
+  !since the function to be integrated is periodic...
+  call cgqf(nphi,1,zero,zero,zero,2*pi,gq_points_ph,gq_weights_ph)
+  do itheta=1,ntheta
+    gq_points_costh(itheta)=cos(gq_points_th(itheta))
+    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
+  enddo
+  do iphi=1,nphi
+    gq_points_cosph(iphi)=cos(gq_points_ph(iphi))
+    gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
+  enddo
 
   icg2 = 0
   band2tot_index=0
@@ -948,6 +971,7 @@ CONTAINS
 
           if(.not. degenerate .and. iband==jband) then
 
+            !Compute effective mass tensor from second derivative matrix. Simple inversion.
             eff_mass(:,:) = eig2_diag(iband,jband,1:mdim,1:mdim)
             call zgetrf(mdim,mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,info)
             ABI_ALLOCATE(work,(3))
@@ -995,10 +1019,6 @@ CONTAINS
             ABI_ALLOCATE(saddle_warn,(1))
             ABI_ALLOCATE(unit_r,(mdim))
             ABI_ALLOCATE(start_eigf3d_pos,(1))
-            ABI_ALLOCATE(gq_points_th,(ntheta))
-            ABI_ALLOCATE(gq_weights_th,(ntheta))
-            ABI_ALLOCATE(gq_points_ph,(nphi))
-            ABI_ALLOCATE(gq_weights_ph,(nphi))
 
             m_avg=zero
             m_avg_frohlich=zero
@@ -1006,26 +1026,19 @@ CONTAINS
 
             if(mdim==3)then
               !One has to perform the integral over the sphere
-              gq_points_th=zero
-              gq_weights_th=zero
-              gq_points_ph=zero
-              gq_weights_ph=zero
-              call cgqf(ntheta,1,0._dp,0._dp,0._dp,pi,gq_points_th,gq_weights_th)
-              call cgqf(nphi,1,0._dp,0._dp,0._dp,2*pi,gq_points_ph,gq_weights_ph)
-
               do itheta=1,ntheta
-                theta=gq_points_th(itheta)
+                costh=gq_points_costh(itheta) ; sinth=gq_points_sinth(itheta)
                 do iphi=1,nphi
-                  phi=gq_points_ph(iphi)
+                  cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
                   weight=gq_weights_th(itheta)*gq_weights_ph(iphi)
 
-                  unit_r(1)=sin(theta)*cos(phi)
-                  unit_r(2)=sin(theta)*sin(phi)
-                  unit_r(3)=cos(theta)
+                  unit_r(1)=sinth*cosph
+                  unit_r(2)=sinth*sinph
+                  unit_r(3)=costh
 
                   f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag(iband,jband,:,:),dp),unit_r(:))) 
-                  m_avg = m_avg + weight*sin(theta)*f3d_scal
-                  m_avg_frohlich = m_avg_frohlich + weight*sin(theta)/(abs(f3d_scal)**half)
+                  m_avg = m_avg + weight*sinth*f3d_scal
+                  m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d_scal)**half)
 
                   if(itheta==1 .and. iphi==1) start_eigf3d_pos = f3d_scal > 0
                   if(start_eigf3d_pos(1) .neqv. (f3d_scal>0)) then
@@ -1063,10 +1076,6 @@ CONTAINS
             ABI_DEALLOCATE(unit_r)
             ABI_DEALLOCATE(saddle_warn)
             ABI_DEALLOCATE(start_eigf3d_pos)
-            ABI_DEALLOCATE(gq_points_th)
-            ABI_DEALLOCATE(gq_weights_th)
-            ABI_DEALLOCATE(gq_points_ph)
-            ABI_DEALLOCATE(gq_weights_ph)
 
             write(std_out,'(a,3f20.16)') 'Gradient of eigenvalues = ',&
 &            matmul(rprimd,eigen1(2*(degl+iband)-1+(degl+iband-1)*2*nband_k+band2tot_index,:,ipert))/two_pi
@@ -1112,10 +1121,6 @@ CONTAINS
         ABI_ALLOCATE(transport_eqv_m,(mdim,mdim,deg_dim))
         ABI_ALLOCATE(transport_eqv_eigval,(mdim,deg_dim))
         ABI_ALLOCATE(transport_eqv_eigvec,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(gq_points_th,(ntheta))
-        ABI_ALLOCATE(gq_weights_th,(ntheta))
-        ABI_ALLOCATE(gq_points_ph,(nphi))
-        ABI_ALLOCATE(gq_weights_ph,(nphi))
         ABI_ALLOCATE(prodc,(deg_dim,deg_dim))
         ABI_ALLOCATE(prodr,(mdim,mdim))
         !ABI_ALLOCATE(f3dfd,(2,nphi,deg_dim))
@@ -1140,14 +1145,6 @@ CONTAINS
         transport_eqv_m=zero
         transport_eqv_eigval=zero
         transport_eqv_eigvec=zero
-        gq_points_th=zero
-        gq_weights_th=zero
-        gq_points_ph=zero
-        gq_weights_ph=zero
-        !f3dfd = zero
-
-        call cgqf(ntheta,1,0._dp,0._dp,0._dp,pi,gq_points_th,gq_weights_th)
-        call cgqf(nphi,1,0._dp,0._dp,0._dp,2*pi,gq_points_ph,gq_weights_ph)
 
         !Hack to print f(theta,phi) & weights to a file
         if(print_fsph) then
@@ -1162,34 +1159,21 @@ CONTAINS
         end if
 
         do itheta=1,ntheta
-          !! Integration with rectangle method
-          !theta=(itheta-1)*pi/ntheta
-          ! Integration with Gauss-Legendre method
-          theta=gq_points_th(itheta)
-
-          !!!! Attempt to accelerate the code with uniform sampling on the sphere, but calling cgqf inside 'do itheta' outweights
-          !!!! the efficiency gain.
-          !nphi=ceiling(sin(theta)*2*ntheta)
-          !call cgqf(nphi,1,0._dp,0._dp,0._dp,2*pi,gq_points_ph,gq_weights_ph)
-
+          costh=gq_points_costh(itheta) ; sinth=gq_points_sinth(itheta)
           do iphi=1,nphi
-            !! Integration with rectangle method
-            !phi=(iphi-1)*two_pi/nphi
-            !weight=pi/ntheta*two_pi/nphi
-            ! Integration with Gauss-Legendre method
-            phi=gq_points_ph(iphi)
+            cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
             weight=gq_weights_th(itheta)*gq_weights_ph(iphi)
 
-            unit_r(1)=sin(theta)*cos(phi)
-            unit_r(2)=sin(theta)*sin(phi)
-            unit_r(3)=cos(theta)
+            unit_r(1)=sinth*cosph 
+            unit_r(2)=sinth*sinph 
+            unit_r(3)=costh
 
-            dr_dth(1)=cos(theta)*cos(phi)
-            dr_dth(2)=cos(theta)*sin(phi)
-            dr_dth(3)=-sin(theta)
+            dr_dth(1)=costh*cosph
+            dr_dth(2)=costh*sinph 
+            dr_dth(3)=-sinth
 
-            dr_dph(1)=-sin(phi) !sin(theta)*
-            dr_dph(2)=cos(phi) !sin(theta)*
+            dr_dph(1)=-sinph  !sin(theta)*
+            dr_dph(2)=cosph   !cos(theta)*
             dr_dph(3)=zero
 
             do iband=1,deg_dim
@@ -1225,7 +1209,7 @@ CONTAINS
             end do
 
             !Hack to print f(theta,phi)
-            if(print_fsph) write(io_unit,*) theta, phi, weight, eigf3d(:)
+            if(print_fsph) write(io_unit,*) gq_points_th(itheta), gq_points_ph(iphi), weight, eigf3d(:)
 
             !!DEBUG-Mech.
             !!A=-4.20449; B=0.378191; C=5.309  !Mech's fit
@@ -1237,8 +1221,8 @@ CONTAINS
             !!angular FD
             !f3dfd(2,iphi,:)=eigf3d(:)
 
-            m_avg = m_avg + weight*sin(theta)*eigf3d
-            m_avg_frohlich = m_avg_frohlich + weight*sin(theta)/(abs(eigf3d))**half
+            m_avg = m_avg + weight*sinth*eigf3d
+            m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(eigf3d))**half
 
             prodc=MATMUL_(f3d,unitary_tr,deg_dim,deg_dim) ; f3d=MATMUL_(unitary_tr,prodc,deg_dim,deg_dim,transa='c')
             !f3d = MATMUL(CONJG(TRANSPOSE(unitary_tr)),MATMUL(f3d,unitary_tr))
@@ -1276,15 +1260,15 @@ CONTAINS
             !  deigf3d_dth(:) = zero
             !end if
 
-            unit_speed(1,:) = 2._dp*sin(theta)*cos(phi)*eigf3d + cos(theta)*cos(phi)*deigf3d_dth - sin(phi)*deigf3d_dph!/sin(theta)
-            unit_speed(2,:) = 2._dp*sin(theta)*sin(phi)*eigf3d + cos(theta)*sin(phi)*deigf3d_dth + cos(phi)*deigf3d_dph!/sin(theta)
-            unit_speed(3,:) = 2._dp*cos(theta)         *eigf3d - sin(theta)         *deigf3d_dth
+            unit_speed(1,:) = 2._dp*sinth*cosph*eigf3d + costh*cosph*deigf3d_dth - sinph*deigf3d_dph      !/sin(theta)
+            unit_speed(2,:) = 2._dp*sinth*sinph*eigf3d + costh*sinph*deigf3d_dth + cosph*deigf3d_dph      !/sin(theta)
+            unit_speed(3,:) = 2._dp*costh*eigf3d - sinth*deigf3d_dth
 
             do jdeg=1,deg_dim
               do bdir=1,mdim
                 do adir=1,mdim
                   transport_tensor(adir,bdir,jdeg) = transport_tensor(adir,bdir,jdeg) + &
-&                weight*sin(theta)*unit_speed(adir,jdeg)*unit_speed(bdir,jdeg)/(ABS(eigf3d(jdeg))**2.5_dp)
+&                weight*sinth*unit_speed(adir,jdeg)*unit_speed(bdir,jdeg)/(ABS(eigf3d(jdeg))**2.5_dp)
                 end do
               end do
             end do
@@ -1394,10 +1378,6 @@ CONTAINS
         ABI_DEALLOCATE(transport_eqv_m)
         ABI_DEALLOCATE(transport_eqv_eigval)
         ABI_DEALLOCATE(transport_eqv_eigvec)
-        ABI_DEALLOCATE(gq_points_th)
-        ABI_DEALLOCATE(gq_weights_th)
-        ABI_DEALLOCATE(gq_points_ph)
-        ABI_DEALLOCATE(gq_weights_ph)
         ABI_DEALLOCATE(prodc)
         ABI_DEALLOCATE(prodr)
         !ABI_DEALLOCATE(f3dfd)
@@ -1424,8 +1404,6 @@ CONTAINS
         ABI_ALLOCATE(transport_eqv_eigval,(mdim,deg_dim))
         ABI_ALLOCATE(transport_eqv_eigvec,(mdim,mdim,deg_dim))
         ABI_ALLOCATE(transport_tensor_scale,(deg_dim))
-        ABI_ALLOCATE(gq_points_ph,(nphi))
-        ABI_ALLOCATE(gq_weights_ph,(nphi))
         ABI_ALLOCATE(prodc,(deg_dim,deg_dim))
         ABI_ALLOCATE(prodr,(mdim,mdim))
         unit_r=zero
@@ -1448,24 +1426,16 @@ CONTAINS
         transport_eqv_eigval=zero
         transport_eqv_eigvec=zero
         transport_tensor_scale=zero
-        gq_points_ph=zero
-        gq_weights_ph=zero
-
-        call cgqf(nphi,1,0._dp,0._dp,0._dp,2*pi,gq_points_ph,gq_weights_ph)
 
         do iphi=1,nphi
-          !! Integration with rectangle method
-          !phi=(iphi-1)*two_pi/nphi
-          !weight=two_pi/nphi
-          ! Integration with Gauss-Legendre method
-          phi=gq_points_ph(iphi)
+          cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
           weight=gq_weights_ph(iphi)
 
-          unit_r(1)=cos(phi)
-          unit_r(2)=sin(phi)
+          unit_r(1)=cosph 
+          unit_r(2)=sinph 
 
-          dr_dph(1)=-sin(phi)
-          dr_dph(2)=cos(phi)
+          dr_dph(1)=-sinph 
+          dr_dph(2)=cosph 
 
           do iband=1,deg_dim
             do jband=1,deg_dim
@@ -1513,8 +1483,8 @@ CONTAINS
             deigf3d_dph(iband) = real(df3d_dph(iband,iband),dp)
           end do
 
-          unit_speed(1,:) = 2._dp*cos(phi)*eigf3d - sin(phi)*deigf3d_dph
-          unit_speed(2,:) = 2._dp*sin(phi)*eigf3d + cos(phi)*deigf3d_dph
+          unit_speed(1,:) = 2._dp*cosph*eigf3d - sinph*deigf3d_dph
+          unit_speed(2,:) = 2._dp*sinph*eigf3d + cosph*deigf3d_dph
 
           do jdeg=1,deg_dim
             do bdir=1,mdim
@@ -1623,8 +1593,6 @@ CONTAINS
         ABI_DEALLOCATE(transport_eqv_eigval)
         ABI_DEALLOCATE(transport_eqv_eigvec)
         ABI_DEALLOCATE(transport_tensor_scale)
-        ABI_DEALLOCATE(gq_points_ph)
-        ABI_DEALLOCATE(gq_weights_ph)
         ABI_DEALLOCATE(prodc)
         ABI_DEALLOCATE(prodr)
 
@@ -1766,6 +1734,14 @@ CONTAINS
 
   ABI_DEALLOCATE(eff_mass)
   ABI_DEALLOCATE(dirs)
+  ABI_DEALLOCATE(gq_points_th)
+  ABI_DEALLOCATE(gq_points_costh)
+  ABI_DEALLOCATE(gq_points_sinth)
+  ABI_DEALLOCATE(gq_weights_th)
+  ABI_DEALLOCATE(gq_points_ph)
+  ABI_DEALLOCATE(gq_points_cosph)
+  ABI_DEALLOCATE(gq_points_sinph)
+  ABI_DEALLOCATE(gq_weights_ph)
 
   write(std_out,'(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
   write(ab_out, '(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10

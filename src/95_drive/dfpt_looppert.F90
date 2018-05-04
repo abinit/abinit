@@ -780,13 +780,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_DEALLOCATE(occ_pert)
        cycle
      end if
-     if (ipert==dtset%natom+11.and.minval(occ)<1.0d-6) then
-       write(message, '(3a)' ) ' ipert=natom+11 does not work with empty bands.',ch10,&
-       ' This perturbation will not be computed.'
-       MSG_WARNING(message)
-       ABI_DEALLOCATE(occ_pert)
-       cycle
-     end if
      ABI_DEALLOCATE(occ_pert)
    else if(ipert>dtset%natom+11 .or. ipert<=0 )then
      write(message, '(a,i4,a,a,a)' ) &
