@@ -51,7 +51,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_make_sym'
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -135,7 +134,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tdep_SearchS_1at'
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none

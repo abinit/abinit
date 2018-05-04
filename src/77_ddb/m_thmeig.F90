@@ -89,7 +89,6 @@ subroutine thmeig(inp, ddb, crystal, &
 #undef ABI_FUNC
 #define ABI_FUNC 'thmeig'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

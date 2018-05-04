@@ -104,11 +104,11 @@ contains
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  nucdipmom)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symfind'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -495,12 +495,12 @@ end subroutine symfind
 
 subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symanal'
  use interfaces_14_hidewrite
- use interfaces_41_geometry, except_this_one => symanal
 !End of the abilint section
 
  implicit none
@@ -669,11 +669,11 @@ end subroutine symanal
 
 subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symbrav'
- use interfaces_41_geometry, except_this_one => symbrav
 !End of the abilint section
 
  implicit none
@@ -1429,6 +1429,7 @@ end subroutine symspgr
 !! SOURCE
 
 subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

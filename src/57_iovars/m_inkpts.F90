@@ -32,7 +32,7 @@ module m_inkpts
 
  use m_time,      only : timab
  use m_geometry,  only : metric
- use m_symfind,   only : symfind
+ use m_symfind,   only : symfind, symlatt
  use m_cgtools,   only : set_istwfk
  use m_parser,    only : intagm
  use m_kpts,      only : getkgrid, testkgrid
@@ -555,7 +555,6 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'inqpt'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

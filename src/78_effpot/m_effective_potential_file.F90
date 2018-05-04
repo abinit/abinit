@@ -1348,7 +1348,6 @@ end subroutine system_getDimFromXML
 #undef ABI_FUNC
 #define ABI_FUNC 'system_xml2effpot'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -2313,7 +2312,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_77_ddb
 !End of the abilint section
 

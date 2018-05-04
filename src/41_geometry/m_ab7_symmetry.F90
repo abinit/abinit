@@ -769,7 +769,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_bravais'
- use interfaces_41_geometry
 !End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
@@ -837,7 +836,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_matrices'
- use interfaces_41_geometry
 !End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
