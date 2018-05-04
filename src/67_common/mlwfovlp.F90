@@ -33,7 +33,7 @@
 !!  mkmem =number of k points treated by this node.
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
-!   natom=number of atoms in cell.
+!!  natom=number of atoms in cell.
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this processor) (see NOTES at beginning of scfcv)
 !!  ngfft(18)=contain all needed information about 3D FFT (see NOTES at beginning of scfcv)
@@ -157,22 +157,15 @@
  integer,allocatable :: g1(:,:,:),gbound(:,:),icg(:,:)
  integer,allocatable:: iwav(:,:,:),kg_k(:,:),ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
+ integer,allocatable :: proj_s_loc(:)
  real(dp) :: real_lattice(3,3)
  real(dp) :: recip_lattice(3,3)
-#if defined HAVE_WANNIER90
- real(dp) :: spreadw(3)
-#endif
  real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),cwavef(:,:)
-#if defined HAVE_WANNIER90
- real(dp),allocatable :: csix(:,:,:,:)
-#endif
  real(dp),allocatable :: denpot(:,:,:)
  real(dp),allocatable :: eigenvalues_w(:,:,:),fofgout(:,:),fofr(:,:,:,:)
-#if defined HAVE_WANNIER90
- real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:),tdocc_wan(:,:)
-#endif
  real(dp),allocatable :: proj_site(:,:,:),proj_x(:,:,:),proj_z(:,:,:),proj_zona(:,:)
  real(dp),allocatable :: wann_centres(:,:,:),wann_spreads(:,:),xcart(:,:)
+ real(dp),allocatable :: proj_s_qaxis_loc(:,:)
  complex(dpc),allocatable :: A_paw(:,:,:,:)
  complex(dpc),allocatable :: M_matrix(:,:,:,:,:),U_matrix(:,:,:,:)
  complex(dpc),allocatable :: U_matrix_opt(:,:,:,:)
@@ -180,6 +173,12 @@
  logical,allocatable :: band_in(:,:),lwindow(:,:,:)
  character(len=3),allocatable :: atom_symbols(:)
  logical,allocatable::just_augmentation(:,:)
+#if defined HAVE_WANNIER90
+ real(dp) :: spreadw(3)
+ real(dp),allocatable :: csix(:,:,:,:)
+ real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
+ real(dp),allocatable :: tdocc_wan(:,:)
+#endif
 
 !************************************************************************
 
@@ -274,6 +273,8 @@
  ABI_ALLOCATE(proj_m,(mband,nsppol))
  ABI_ALLOCATE(proj_radial,(mband,nsppol))
  ABI_ALLOCATE(proj_x,(3,mband,nsppol))
+ ABI_ALLOCATE(proj_s_loc,(mband))
+ ABI_ALLOCATE(proj_s_qaxis_loc,(3,mband))
  ABI_ALLOCATE(proj_z,(3,mband,nsppol))
  ABI_ALLOCATE(proj_zona,(mband,nsppol))
 !
@@ -286,7 +287,7 @@
  call mlwfovlp_setup(atom_symbols,band_in,dtset,filew90_win,gamma_only,&
 & g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
 & nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
-& proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,&
+& proj_l,proj_m,proj_radial,proj_site,proj_s_loc, proj_s_qaxis_loc, proj_x,proj_z,proj_zona,&
 & real_lattice,recip_lattice,rprimd,seed_name,spin,spinors,xcart,xred)
 
 
@@ -924,6 +925,8 @@
  ABI_DEALLOCATE(proj_x)
  ABI_DEALLOCATE(proj_z)
  ABI_DEALLOCATE(proj_zona)
+ ABI_DEALLOCATE(proj_s_loc)
+ ABI_DEALLOCATE(proj_s_qaxis_loc)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !6) write files for wannier function plot

@@ -807,3 +807,6 @@ P871.1 (XG171106)
 Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correcty, because the difference 
 with the reference for this quantity can be very large, while the difference for the total energy and other quantities
 is very small.
+
+P890.1 (XG180504)
+Test v8#34 (Hybrid Monte-Carlo) from Serguei Prokhorenko gives randomly different results on nag@abiref.
