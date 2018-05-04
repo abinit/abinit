@@ -31,8 +31,7 @@ cpp_explicit = [
 cpp_ignored = [
   "HAVE_CONFIG_H",
   "HAVE_IBM6",
-  "LIBPAW_HAVE_FOX",
-  "MJV_DEV"
+  "LIBPAW_HAVE_FOX"
 ]
 
 cpp_keywords = ("#","endif","ifdef","ifndef","elif","if","else","defined","[<>=]=?[ ]*[0-9]*","\\|\\|","&&","\\(","\\)","!")
