@@ -1904,7 +1904,7 @@ SUBROUTINE BathOperatoroffdiag_printF(op,ostream)
     OPEN(UNIT=ostream_val, FILE="F.dat")
   END IF
 
-  WRITE(aflavor,'(I4)') op%flavors+1
+  WRITE(aflavor,'(I4)') (op%flavors*op%flavors+1)
   string = '(1x,'//TRIM(ADJUSTL(aflavor))//'E22.14)'
   DO sample = 1, op%sizeHybrid
     WRITE(ostream_val,string) (sample-1)*op%dt, ((op%F(sample,iflavor1,iflavor2),&

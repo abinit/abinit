@@ -9,11 +9,13 @@ getwfk -1
 
 ##### CONVERGENCE PARAMETERS
 nstep1   30
-nstep2   5
-ecut      24 # low cutoff !
+nstep2   2
+nline2 5
+nnsclo2 5
+ecut      16 # low cutoff !
 pawecutdg 60
 tolvrs 1.0d-7
-nband     54
+nband     22
 nbdbuf 4
 occopt 3 tsmear 2000 K
 
@@ -22,18 +24,15 @@ nspinor 2
 nsppol  1
 nspden  4
 pawspnorb 1
-natom 5 ntypat 3 typat 1 2 3 3 3 
-znucl  23.0 38.0 8.0
+natom 1 ntypat 1 typat 1
+znucl  23.0 
 # V Sr O*3
 xred 0.00 0.00 0.00
-     0.50 0.50 0.50 
-     0.50 0.00 0.00 
-     0.00 0.50 0.00 
-     0.00 0.00 0.50 
-acell   3*7.2605
-rprim 1.0 0.0 0.0
-      0.0 1.0 0.0
-      0.0 0.0 1.0 
+acell   3*7.00 # not physical
+pawovlp -1
+rprim 0.5 0.5 0.0
+      0.0 0.5 0.5
+      0.5 0.0 0.5 
 
 # == Points k and symetries
 kptopt 4
@@ -48,8 +47,8 @@ istwfk *1
 # == LDA+DMFT
 usedmft1 0
 usedmft2 1
-dmftbandi 41 # t2g bands only
-dmftbandf 50 # t2g bands only
+dmftbandi 9 
+dmftbandf 20 
 dmft_nwlo 100
 dmft_nwli 100000
 dmft_iter 1
@@ -60,7 +59,7 @@ dmft_dc 1
 
 # == CTQMC
 dmft_solv 8 # CTQMC
-dmftqmc_l 50
+dmftqmc_l 20
 dmftqmc_n 1.d6
 dmftqmc_therm 10000
 
@@ -68,11 +67,11 @@ dmftqmc_therm 10000
 # == LDA+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
-lpawu  2 -1 -1
-upawu1  0.00  0.0  0.0  eV
-upawu2  3.1333333333333333  0.0  0.0  eV
-f4of2_sla3  0.0  0.0  0.0 
-jpawu2  0.7583333333333333  0.0  0.0  eV
+lpawu  2 
+upawu1  0.0  eV
+upawu2  4.1   eV
+f4of2_sla3    0.0 
+jpawu2  0.5   eV
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -80,13 +79,18 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%                  t27.out,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
-#%% psp_files = 23v.paw, 38sr.paw, 8o.2.paw
+#%%                  t103.out,  tolnlines =0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
+#%% psp_files = 23v.paw
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
+#%% [NCPU_10]
+#%% files_to_test = 
+#%%   t103_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t103_MPI10o_DS2_atom_01_Gtau_02.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = B. Amadon
 #%% keywords = DMFT, CTQMC, FAILS_IFMPI
-#%% description = DFT+DMFT for VSrO3 using off diag CTQMC code
+#%% description = DFT+DMFT for V using off diag CTQMC code
 #%% topics = DMFT
 #%%<END TEST_INFO>

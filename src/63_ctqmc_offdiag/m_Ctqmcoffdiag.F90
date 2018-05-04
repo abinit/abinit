@@ -968,7 +968,7 @@ SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
   CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk)  ! mu is changed
   CALL BathOperatoroffdiag_setF(op%Bath, F)
- ! CALL BathOperatoroffdiag_printF(op%Bath,333)
+  CALL BathOperatoroffdiag_printF(op%Bath,333)
   FREE(F)
 
   op%inF = .TRUE.
@@ -3289,7 +3289,7 @@ include 'mpif.h'
     IF ( op%opt_order .GT. 0 ) &
       op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
                                     / SUM(op%meas_fullemptylines(:,iflavor))
-    write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
+    !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
 
     IF ( op%opt_analysis .EQ. 1 ) THEN
       op%measCorrelation (:,1,iflavor) = op%measCorrelation  (:,1,iflavor) &
@@ -4011,7 +4011,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
   CALL GreenHyboffdiag_destroy(F_tmp)
 
-  FREE(F_tmp%oper_w)
+  !FREE(F_tmp%oper_w)
 !  ==============================
 END SUBROUTINE Ctqmcoffdiag_getGreen
 !!***
