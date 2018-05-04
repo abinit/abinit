@@ -4277,10 +4277,8 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
 !First, take into account the permutations symmetry of
 !(i1pert,i1dir) and (i3pert,i3dir)
-
  do i1pert = 1, mpert
    do i2pert = 1, mpert
-
      do i3pert = 1, mpert
 
        do i1dir = 1, 3
@@ -4633,7 +4631,6 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
      end do
    end do
  end do
-
 
 !Now, take into account the permutation of (i1pert,i1dir)
 !and (i3pert,i3dir)

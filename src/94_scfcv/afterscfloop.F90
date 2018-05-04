@@ -478,7 +478,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &       occ,mpi_enreg%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
        ABI_DEALLOCATE(dimcprj_srt)
 !      3-Symetrize rhoij, compute nhat and add it to rhor
-       call pawmkrho(dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
+       call pawmkrho(1,dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
 &       dtset%ntypat,mpi_enreg%paral_kgb,pawang,pawfgr,pawfgrtab,dtset%pawprtvol,pawrhoij,pawrhoij,&
 &       pawtab,(/zero,zero,zero/),rhog,rhor,rhor,rprimd,dtset%symafm,symrec,dtset%typat,ucvol_local,&
 &       dtset%usewvl,xred,pawnhat=nhat)

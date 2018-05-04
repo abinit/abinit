@@ -795,6 +795,9 @@ end subroutine pawxc_mkdenpos_wrapper
 !!  == if nkxc>0 ==
 !!    kxc(nrad,pawang%angl_size,nkxc)=xc kernel
 !!        (see notes below for nkxc)
+!!  == if nk3xc>0 ==
+!!    k3xc(nrad,pawang%angl_size,nk3xc)= derivative of xc kernel
+!!        (see notes below for nk3xc)
 !!
 !! NOTES
 !!  Content of Kxc array:
@@ -836,6 +839,13 @@ end subroutine pawxc_mkdenpos_wrapper
 !!       kxc(:,19)=gradz(rho_dn)
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
+!!  Dimension of K3xc:
+!!   ===== if LDA (xclevel=1) :
+!!    if nspden==1: return  k3xc(:,1)=d3Exc/drho3
+!!    if nspden>=2, return  k3xc(:,1)=d3Exc/drho_up drho_up drho_up
+!!                          k3xc(:,2)=d3Exc/drho_up drho_up drho_dn
+!!                          k3xc(:,3)=d3Exc/drho_up drho_dn drho_dn
+!!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot
@@ -845,7 +855,7 @@ end subroutine pawxc_mkdenpos_wrapper
 !!
 !! SOURCE
 
-subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magnetic_xc,nrad,nspden,option,&
+subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,nrad,nspden,option,&
 &                pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
 
@@ -859,7 +869,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,lm_size,nkxc,nrad,nspden,option,usecore,usexcnhat,xclevel
+ integer,intent(in) :: ixc,lm_size,nkxc,nk3xc,nrad,nspden,option,usecore,usexcnhat,xclevel
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
@@ -871,6 +881,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
  real(dp),intent(in) :: nhat(nrad,lm_size,nspden*((usexcnhat+1)/2))
  real(dp),intent(in),target :: rhor(nrad,lm_size,nspden)
  real(dp),intent(out) :: kxc(nrad,pawang%angl_size,nkxc)
+ real(dp),intent(out) :: k3xc(nrad,pawang%angl_size,nk3xc)
  real(dp),intent(out),target :: vxc(nrad,pawang%angl_size,nspden)
 
 !Local variables-------------------------------
@@ -880,7 +891,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
  real(dp) :: dvdn,dvdz,enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:)
+ real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:),d2vxci(:,:)
  real(dp),allocatable :: dylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
  real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),vxci(:,:)
  real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:)
@@ -901,8 +912,12 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
    msg='Kxc for GGA not implemented!'
    MSG_ERROR(msg)
  end if
- if(nspden==4.and.nkxc>0) then
-   msg='Kxc for nspden=4 not implemented!'
+ if(nspden==4.and.nk3xc>0) then
+   msg='K3xc for nspden=4 not implemented!'
+   MSG_ERROR(msg)
+ end if
+ if(nk3xc>0.and.nkxc_updn==0) then
+   msg='nkxc must be non-zero if nk3xc is'
    MSG_ERROR(msg)
  end if
  if(nspden==4.and.xclevel==2) then
@@ -957,8 +972,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
  if (option==0.or.option==2) enxcdc=zero
  if (option/=3.and.option/=4) vxc(:,:,:)=zero
  if (nkxc>0) kxc(:,:,:)=zero
+ if (nk3xc>0) k3xc(:,:,:)=zero
  mgga=0 !metaGGA contributions are not taken into account here
- order=1;if (nkxc_updn>0) order=2 ! to which der. of the energy the computation must be done
+ order=1;if (nkxc_updn>0) order=2;if (nk3xc>0) order=3 ! to which der. of the energy the computation must be done
 
  if (xclevel==0.or.ixc==0) then
    msg='Note that no xc is applied (ixc=0).'
@@ -993,6 +1009,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
 !  Allocation of optional arguments of drivexc
    call pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcdgr,order)
    LIBPAW_ALLOCATE(dvxci,(nrad,ndvxc))
+   LIBPAW_ALLOCATE(d2vxci,(nrad,nd2vxc))
    LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
    LIBPAW_ALLOCATE(grho2_updn,(nrad,ngr2))
    LIBPAW_ALLOCATE(dnexcdn,(nrad,nspgrad))
@@ -1112,11 +1129,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
 
 !    Call to main XC driver
      call pawxc_drivexc_wrapper(exci,ixc,mgga,ndvxc,nd2vxc,ngr2,nrad,nspden_updn,nvxcdgr,order,rho_updn,vxci,xclevel, &
-&     dvxc=dvxci,grho2=grho2_updn,vxcgrho=dvxcdgr)
+&     dvxc=dvxci,d2vxc=d2vxci,grho2=grho2_updn,vxcgrho=dvxcdgr)
 
 
 !    ----------------------------------------------------------------------
-!    ----- Accumulate and store XC kernel
+!    ----- Accumulate and store XC kernel and its derivative
 !    ----------------------------------------------------------------------
      if (nkxc_updn>0.and.ndvxc>0) then
        if (nkxc==1.and.ndvxc==15) then
@@ -1170,6 +1187,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
        kxc(1:nrad,ipts,nkxc_updn+1)=rhonow(1:nrad,2,1)
        kxc(1:nrad,ipts,nkxc_updn+2)=rhonow(1:nrad,3,1)
        kxc(1:nrad,ipts,nkxc_updn+3)=rhonow(1:nrad,4,1)
+     end if
+
+!    kernel derivative :
+     if (nk3xc>0.and.nd2vxc>0) then
+       k3xc(1:nrad,ipts,1:min(nk3xc,nd2vxc))=d2vxci(1:nrad,1:min(nk3xc,nd2vxc))
      end if
 
 !    ----------------------------------------------------------------------
@@ -1252,6 +1274,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magne
    LIBPAW_DEALLOCATE(vxci)
    LIBPAW_DEALLOCATE(rho_updn)
    LIBPAW_DEALLOCATE(dvxci)
+   LIBPAW_DEALLOCATE(d2vxci)
    LIBPAW_DEALLOCATE(dvxcdgr)
    LIBPAW_DEALLOCATE(grho2_updn)
    LIBPAW_DEALLOCATE(dnexcdn)
@@ -5447,11 +5470,11 @@ end if
 !1) Pass dvxc, exexch, grho2 and vxcgrho
  if (present(exexch)) then
    call drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel,&
-&   dvxc=dvxc,exexch=exexch,grho2=grho2,vxcgrho=vxcgrho)
+&   dvxc=dvxc,d2vxc=d2vxc,exexch=exexch,grho2=grho2,vxcgrho=vxcgrho)
  else
 !2) Pass only dvxc, grho2 and vxcgrho
    call drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel,&
-&   dvxc=dvxc,grho2=grho2,vxcgrho=vxcgrho)
+&   dvxc=dvxc,d2vxc=d2vxc,grho2=grho2,vxcgrho=vxcgrho)
  end if
 
 end subroutine pawxc_drivexc_abinit

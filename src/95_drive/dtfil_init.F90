@@ -97,8 +97,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 !   std_in=5, ab_in=5, std_out=6, ab_out=7, tmp_unit=9, tmp_unit2=10
  integer,parameter :: unchi0=42,unddb=16,unddk=50,undkdk=54,undkde=55,unkg1=19,unkg=17,unkgq=18
  integer,parameter :: unpaw=26,unpaw1=27,unpawq=28,unpos=30
- integer,parameter :: unwff1=1,unwff2=2,unwffgs=3,unwfkq=4,unwft1=11
- integer,parameter :: unwft2=12,unwftgs=13,unwftkq=14,unylm=24,unylm1=25
+ integer,parameter :: unwff1=1,unwff2=2,unwff3=8,unwffgs=3,unwfkq=4,unwft1=11
+ integer,parameter :: unwft2=12,unwft3=15,unwftgs=13,unwftkq=14,unylm=24,unylm1=25
  integer,parameter :: unkss=40,unscr=41,unqps=43
  integer :: ii,iimage,ireadden,ireadkden,ireadwf,ixx,jdtset,will_read
  character(len=10) :: appen,tag
@@ -132,10 +132,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%unscr  =unscr
  dtfil%unwff1 =unwff1
  dtfil%unwff2 =unwff2
+ dtfil%unwff3 =unwff3
  dtfil%unwffgs=unwffgs
  dtfil%unwffkq=unwfkq
  dtfil%unwft1 =unwft1
  dtfil%unwft2 =unwft2
+ dtfil%unwft3 =unwft3
  dtfil%unwftgs=unwftgs
  dtfil%unwftkq=unwftkq
  dtfil%unylm  =unylm

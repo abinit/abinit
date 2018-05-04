@@ -496,6 +496,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    end if
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
+ if(tread==1) dtset%nonlinear_info=intarr(1)
+
 !NONLINEAR integer input variables (same definition as for rfarr)
 !Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
 !--Keep the old input variables for backward compatibility
@@ -568,6 +571,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'Action: change to the d3e_pertx_*** input parameters!'
      MSG_WARNING(message)
    end if
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepead',tread,'INT')
+   if(tread==1) dtset%usepead=intarr(1)
 
  end if
 
@@ -1229,6 +1235,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  else
    if (dtset%paral_kgb==1) dtset%densfor_pred=6
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmcsst',tread,'INT')
+ if(tread==1) dtset%hmcsst=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmctt',tread,'INT')
+ if(tread==1) dtset%hmctt=intarr(1)
 
 !--For the moment LOTF does not use different from 2
  if(dtset%ionmov==23) then

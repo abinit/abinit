@@ -596,6 +596,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
  dtout%hyb_range_dft   = dtin%hyb_range_dft
  dtout%hyb_range_fock  = dtin%hyb_range_fock
+ dtout%hmcsst             = dtin%hmcsst  
+ dtout%hmctt              = dtin%hmctt  
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -687,6 +689,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%nkpt               = dtin%nkpt
  dtout%nkpthf             = dtin%nkpthf
  dtout%nkptgw             = dtin%nkptgw
+ dtout%nonlinear_info     = dtin%nonlinear_info
  dtout%nline              = dtin%nline
  dtout%nnsclo             = dtin%nnsclo
  dtout%nnsclohf           = dtin%nnsclohf
@@ -871,6 +874,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%use_nonscf_gkk     = dtin%use_nonscf_gkk
  dtout%usepaw             = dtin%usepaw
  dtout%usepawu            = dtin%usepawu
+ dtout%usepead            = dtin%usepead
  dtout%usepotzero         = dtin%usepotzero
  dtout%userec             = dtin%userec
  dtout%useria             = dtin%useria
