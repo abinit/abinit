@@ -53,6 +53,7 @@ module m_a2ftr
 
  public :: mka2f_tr
  public :: mka2f_tr_lova
+ public :: get_tau_k
 !!***
 
 contains
@@ -106,6 +107,7 @@ contains
 !! SOURCE
 
 subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elph_tr_ds)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1069,6 +1071,7 @@ end subroutine mka2f_tr
 
 subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr_ds)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1695,6 +1698,7 @@ end subroutine mka2f_tr_lova
 !! SOURCE
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

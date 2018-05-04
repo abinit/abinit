@@ -56,7 +56,7 @@ module m_elphon
  use m_bz_mesh,         only : make_path
  use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
- use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova
+ use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
 
  implicit none
 
@@ -160,7 +160,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -5408,6 +5407,7 @@ end subroutine get_veloc_tr
 
 subroutine integrate_gamma(elph_ds,FSfullpqtofull)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -5543,6 +5543,7 @@ end subroutine integrate_gamma
 !! SOURCE
 
 subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,elph_tr_ds)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5717,6 +5718,7 @@ end subroutine integrate_gamma_tr
 !! SOURCE
 
 subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
