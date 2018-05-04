@@ -32,8 +32,8 @@ module m_efmas
  private
 
 !public procedures.
- public :: efmasfr_free
- public :: efmasfr_free_array
+ public :: efmasval_free
+ public :: efmasval_free_array
  public :: efmasdeg_free
  public :: efmasdeg_free_array
  public :: check_degeneracies
@@ -52,12 +52,12 @@ module m_efmas
 CONTAINS
 !===========================================================
 
-!!****f* m_efmas/efmasfr_free
+!!****f* m_efmas/efmasval_free
 !! NAME
-!! efmasfr_free
+!! efmasval_free
 !!
 !! FUNCTION
-!! This routine deallocates an efmasdeg_type.
+!! This routine deallocates an efmasval_type.
 !!
 !! INPUTS
 !!
@@ -72,37 +72,40 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine efmasfr_free(efmasfr)
+ subroutine efmasval_free(efmasval)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'efmasfr_free'
+#define ABI_FUNC 'efmasval_free'
 !End of the abilint section
 
    implicit none
 
    !Arguments ------------------------------------
-   type(efmasfr_type),intent(inout) :: efmasfr
+   type(efmasval_type),intent(inout) :: efmasval
 
    ! *********************************************************************
 
-   if(allocated(efmasfr%ch2c)) then
-     ABI_FREE(efmasfr%ch2c)
+   if(allocated(efmasval%ch2c)) then
+     ABI_FREE(efmasval%ch2c)
+   end if
+   if(allocated(efmasval%eig2_diag)) then
+     ABI_FREE(efmasval%eig2_diag)
    end if
 
- end subroutine efmasfr_free
+ end subroutine efmasval_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/efmasfr_free_array
+!!****f* ABINIT/efmasval_free_array
 !! NAME
-!! efmasfr_free_array
+!! efmasval_free_array
 !!
 !! FUNCTION
-!! This routine deallocates an efmasfr_type or, optionally, an array of efmasfr_type.
+!! This routine deallocates an efmasval_type or, optionally, an array of efmasval_type.
 !!
 !! INPUTS
 !!
@@ -117,36 +120,36 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine efmasfr_free_array(efmasfr)
+ subroutine efmasval_free_array(efmasval)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'efmasfr_free_array'
+#define ABI_FUNC 'efmasval_free_array'
 !End of the abilint section
 
    implicit none
 
    !Arguments ------------------------------------
-   type(efmasfr_type),allocatable,intent(inout) :: efmasfr(:,:)
+   type(efmasval_type),allocatable,intent(inout) :: efmasval(:,:)
 
    !!!Local variables-------------------------------
    integer :: i,j,n(2)
 
    ! *********************************************************************
 
-   if(allocated(efmasfr)) then
-     n=shape(efmasfr)
+   if(allocated(efmasval)) then
+     n=shape(efmasval)
      do i=1,n(1)
        do j=1,n(2)
-         call efmasfr_free(efmasfr(i,j))
+         call efmasval_free(efmasval(i,j))
        end do
      end do
-     ABI_DATATYPE_DEALLOCATE(efmasfr)
+     ABI_DATATYPE_DEALLOCATE(efmasval)
    end if
 
- end subroutine efmasfr_free_array
+ end subroutine efmasval_free_array
 !!***
 
 !----------------------------------------------------------------------
@@ -641,7 +644,7 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasfr,eigen0,&
+ subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0,&
 &   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,&
 &   kpt_rbz,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
 
@@ -675,7 +678,7 @@ CONTAINS
   real(dp), intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%nsppol*nkpt_rbz)
   real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
   type(efmasdeg_type), allocatable,intent(in) :: efmasdeg(:)
-  type(efmasfr_type),  allocatable,intent(in) :: efmasfr(:,:)
+  type(efmasval_type),  allocatable,intent(in) :: efmasval(:,:)
 
  !Local variables-------------------------------
   logical :: degenerate
@@ -955,7 +958,7 @@ CONTAINS
               !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
               !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
 
-              eig2_ch2c(adir,bdir) = efmasfr(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
+              eig2_ch2c(adir,bdir) = efmasval(ikpt,ideg)%ch2c(iband,jband,adir,bdir)
 
             end do !bdir
           end do  !adir

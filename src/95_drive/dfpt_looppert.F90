@@ -121,7 +121,7 @@
 
 subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde,&
 &  ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,&
-&  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasfr,eigbrd,eig2nkq,&
+&  dyfr_cplex,dyfr_nondiag,d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasval,eigbrd,eig2nkq,&
 &  eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &  etotal,fermie,iexit,indsym,kxc,&
 &  mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
@@ -245,7 +245,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(out) :: eigbrd(2,dtset%mband*dtset%nsppol,nkpt,3,dtset%natom,3,dtset%natom*dim_eigbrd)
  real(dp), intent(out) :: eig2nkq(2,dtset%mband*dtset%nsppol,nkpt,3,dtset%natom,3,dtset%natom*dim_eig2nkq)
  type(efmasdeg_type),allocatable,intent(in) :: efmasdeg(:)
- type(efmasfr_type),allocatable,intent(in) :: efmasfr(:,:)
+ type(efmasval_type),allocatable,intent(in) :: efmasval(:,:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
@@ -2363,7 +2363,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
  !Calculation of effective masses.
  if(dtset%efmas == 1) then
-   call efmas_main(cg0_pert,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasfr,eigen0_pert,&
+   call efmas_main(cg0_pert,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0_pert,&
 &   eigen1_pert,gh0c1_pert,gh1c_pert,istwfk_pert,&
 &   kpt_rbz_pert,mpert,mpi_enreg,&
 &   nkpt_rbz,npwarr_pert,rprimd)

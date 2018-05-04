@@ -98,7 +98,7 @@
 
 #include "abi_common.h"
 
-subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg,efmasfr,eigen,eltfrnl,&
+subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg,efmasval,eigen,eltfrnl,&
 &          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
 &          rprimd,rfphon,rfstrs,symrec,vtrial,vxc,xred,ylm,ylmgr)
@@ -173,7 +173,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  real(dp),intent(out) :: eltfrnl(6+3*natom,6)
  logical,intent(inout):: has_allddk
  type(efmasdeg_type),allocatable,intent(out):: efmasdeg(:)
- type(efmasfr_type),allocatable,intent(out):: efmasfr(:,:)
+ type(efmasval_type),allocatable,intent(out):: efmasval(:,:)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat)
@@ -354,7 +354,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  if(need_efmas) then
    ABI_MALLOC(enlout_efmas,(0))
    ABI_DATATYPE_ALLOCATE(efmasdeg,(dtset%nkpt))
-   ABI_DATATYPE_ALLOCATE(efmasfr,(dtset%nkpt,dtset%mband))
+   ABI_DATATYPE_ALLOCATE(efmasval,(dtset%nkpt,dtset%mband))
  end if
 
 !Initialize Hamiltonian (k-independent terms)
@@ -603,10 +603,13 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &       dtset%efmas_deg_tol)
        do ideg=1,efmasdeg(ikpt)%ndegs
          if(efmasdeg(ikpt)%treated(ideg)) then
-           ABI_MALLOC(efmasfr(ikpt,ideg)%ch2c,(efmasdeg(ikpt)%deg_dim(ideg),efmasdeg(ikpt)%deg_dim(ideg),3,3))
-           efmasfr(ikpt,ideg)%ch2c=zero
+           ABI_MALLOC(efmasval(ikpt,ideg)%ch2c,(efmasdeg(ikpt)%deg_dim(ideg),efmasdeg(ikpt)%deg_dim(ideg),3,3))
+           ABI_MALLOC(efmasval(ikpt,ideg)%eig2_diag,(efmasdeg(ikpt)%deg_dim(ideg),efmasdeg(ikpt)%deg_dim(ideg),3,3))
+           efmasval(ikpt,ideg)%ch2c=zero
+           efmasval(ikpt,ideg)%eig2_diag=zero
          else
-           ABI_MALLOC(efmasfr(ikpt,ideg)%ch2c,(0,0,0,0))
+           ABI_MALLOC(efmasval(ikpt,ideg)%ch2c,(0,0,0,0))
+           ABI_MALLOC(efmasval(ikpt,ideg)%eig2_diag,(0,0,0,0))
          end if
        end do
      end if
@@ -771,7 +774,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &                 mpi_enreg%comm_spinorfft)
                  isub = iband-efmasdeg(ikpt)%degl(ideg)
                  jsub = jband-efmasdeg(ikpt)%degl(ideg)
-                 efmasfr(ikpt,ideg)%ch2c(jsub,isub,mu,nu)=cmplx(dotprod(1),dotprod(2),kind=dpc)
+                 efmasval(ikpt,ideg)%ch2c(jsub,isub,mu,nu)=cmplx(dotprod(1),dotprod(2),kind=dpc)
                end do
              end do
            end do

@@ -51,7 +51,7 @@ module m_respfn_driver
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_occ,         only : newocc
- use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
+ use m_efmas,       only : efmasdeg_free_array, efmasval_free_array
  use m_wfk,         only : wfk_read_eigenvalues
  use m_ioarr,       only : read_rhor
  use m_pawang,      only : pawang_type
@@ -163,7 +163,7 @@ contains
 !!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1,dfpt_eltfrhar
 !!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
 !!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
-!!      efmasfr_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
+!!      efmasval_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
 !!      exit_check,fourdp,getcut,getph,hartre,hdr_free,hdr_init,hdr_update
 !!      initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q
 !!      matr3inv,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
@@ -290,7 +290,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
  real(dp),allocatable :: eigen0_pert(:),eigenq_pert(:),occ_rbz_pert(:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
- type(efmasfr_type),allocatable :: efmasfr(:,:)
+ type(efmasval_type),allocatable :: efmasval(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
  type(pawfgrtab_type),allocatable,save :: pawfgrtab(:)
@@ -989,7 +989,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Compute the nonlocal part of the elastic tensor and/or dynamical matrix
  if (rfstrs/=0.or.rfphon==1.or.dtset%efmas>0.or.pawbec==1.or.pawpiezo==1)then
    call d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,&
-&   dyfr_nondiag,efmasdeg,efmasfr,eigen0,eltfrnl,gsqcut,has_allddk,indsym,kg,mgfftf,&
+&   dyfr_nondiag,efmasdeg,efmasval,eigen0,eltfrnl,gsqcut,has_allddk,indsym,kg,mgfftf,&
 &   mpi_enreg,psps%mpsang,my_natom,natom,nfftf,ngfft,ngfftf,&
 &   npwarr,occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,&
 &   pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,rprimd,rfphon,&
@@ -1358,7 +1358,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  reduced set of k point, thanks to the use of symmetry operations.
    call dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde,&
 &   ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,dyfr_cplex,dyfr_nondiag,&
-&   d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasfr,eigbrd,eig2nkq,&
+&   d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasval,eigbrd,eig2nkq,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   etotal,fermie,iexit,indsym,kxc,&
 &   dtset%mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
@@ -1804,7 +1804,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_DEALLOCATE(becfrnl)
  ABI_DEALLOCATE(piezofrnl)
  call efmasdeg_free_array(efmasdeg)
- call efmasfr_free_array(efmasfr)
+ call efmasval_free_array(efmasval)
  ABI_DEALLOCATE(grxc)
  ABI_DEALLOCATE(indsym)
  ABI_DEALLOCATE(kxc)
