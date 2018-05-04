@@ -210,8 +210,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
-!1) set up unit cell : acell, rprim and rprimd ---------------------
-
+!1) set up unit cell: acell, rprim and rprimd ---------------------
  acell(1:3)=one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
  if(tacell==1) acell(1:3)=dprarr(1:3)
@@ -246,7 +245,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    call ingeo_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
 
    if(tangdeg==1)then
-     call wrtout(std_out,' ingeo : use angdeg to generate rprim.',"COLL")
+     call wrtout(std_out,' ingeo: use angdeg to generate rprim.',"COLL")
 
 !    Check that input angles are positive
      do mu=1,3
@@ -280,10 +279,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
        rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
        rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-!      DEBUG
 !      write(std_out,*)' ingeo : angdeg=',angdeg(1:3)
 !      write(std_out,*)' ingeo : aa,cc=',aa,cc
-!      ENDDEBUG
      else
 !      Treat all the other cases
        rprim(:,:)=0.0_dp
@@ -296,7 +293,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
      end if
 
    end if
-!  No problem if neither rprim nor angdeg are defined : use default rprim
+!  No problem if neither rprim nor angdeg are defined: use default rprim
  end if
 
 !Rescale rprim using scalecart (and set scalecart to one)
@@ -372,8 +369,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        MSG_ERROR(message)
      else
        write(message,'(3a,I0,a,I0,a,I0,2a)')&
-       ' The input variable supercell_latt is present',ch10,&
-&      ' thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
+       'The input variable supercell_latt is present',ch10,&
+&      'thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
 &      ' ',supercell_lattice(3,3),' is generated',ch10
        MSG_WARNING(message)
      end if
@@ -387,16 +384,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
 
 !5) Read the type and initial spin of each atom in the primitive set--------
-
-!Check for the use of the old name of this variable
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'type',tread,'INT')
- if(tread==1) then
-   write(message,'(a,a,a)')&
-&   'The use of the "type" input variable is forbidden since version 4.1 .',ch10,&
-&   'Action: replace "type" by "typat".'
-   MSG_ERROR(message)
- end if
-
  ABI_ALLOCATE(typat_read,(natrd))
  typat_read(1)=1
 
@@ -462,7 +449,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
 
  if (txred+txcart+txangst+txrandom==0) then
-   write(message, '(a,a,a)' )&
+   write(message, '(3a)' )&
 &   'Neither xred nor xangst nor xcart are present in input file. ',ch10,&
 &   'Action: define one of these in your input file.'
    MSG_ERROR(message)
@@ -504,7 +491,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
 !Take care of the symmetries
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsym',tread,'INT')
-
  if(tread==1) nsym=intarr(1)
 
 !Check that nsym is not negative
@@ -525,9 +511,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
  if (multiplicity>1) then
    nsym = 1
-   write(message, '(a)' )&
-&   'Input nsym is now set to one due to the supercell_latt input'
-   MSG_WARNING(message)
+   MSG_WARNING('Input nsym is now set to one due to the supercell_latt input')
  end if
 
 !Read symmorphi
@@ -566,7 +550,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !  Take care of symafm
    call intagm(dprarr,intarr,jdtset,marr,nsym,string(1:lenstr),'symafm',tread,'INT')
    if(tread==1) symafm(1:nsym)=intarr(1:nsym)
-
  end if
 
 
@@ -581,10 +564,11 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  if(tread==1) nobj=intarr(1)
  if(nobj /= 0 .and. multiplicity > 1)then
    write(message, '(3a)' )&
-&       'nobj can not be used with supercell_latt.',ch10,&
-&       'Action: Remove nobj or supercell_latt in your input file.'
+&    'nobj can not be used with supercell_latt.',ch10,&
+&    'Action: Remove nobj or supercell_latt in your input file.'
    MSG_ERROR(message)
  end if
+
 !If there are objects, chkprim will not be used immediately
 !But, if there are no objects, but a space group, it will be used directly.
  chkprim=1
@@ -592,7 +576,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  if(tread==1) chkprim=intarr(1)
 
  if(nobj/=0)then
-
 !  Spinat is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat',tread,'DPR')
    if(tread==1) then
@@ -942,7 +925,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        end if
 
      end if
-
    end if
 
 !  Finalize the computation of coordinates: produce xcart
@@ -1041,7 +1023,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    end do
    nsym=jsym
  end if
-
 
 !DEBUG
 !call symmultsg(nsym,symafm,symrel,tnons)
