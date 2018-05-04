@@ -31,6 +31,7 @@ module m_spgbuilder
  use m_profiling_abi
 
  use m_symtk,   only : chkgrp, print_symmetries
+ use m_symsg,   only : symsgcube, symsghexa, symsgmono, symsgortho, symsgtetra
 
  implicit none
 
