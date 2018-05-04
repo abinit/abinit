@@ -5377,5 +5377,512 @@ subroutine get_veloc_tr(elph_ds,elph_tr_ds)
 end subroutine get_veloc_tr
 !!***
 
+!!****f* ABINIT/integrate_gamma
+!!
+!! NAME
+!! integrate_gamma
+!!
+!! FUNCTION
+!! This routine integrates the electron phonon coupling matrix
+!! over the kpoints on the fermi surface. A dependency on qpoint
+!! remains for gamma_qpt
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!      elph_ds%qpt_full = qpoint coordinates
+!!      elph_ds%nqptirred = number of irred qpoints
+!!      elph_ds%qirredtofull = indexing of the GKK qpoints found
+!!   FSfullpqtofull = mapping of k+q to k
+!!
+!! OUTPUT
+!!   elph_ds = modified elph_ds%gamma_qpt and created elph_ds%gamma_rpt
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      get_rank_1kpt,wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine integrate_gamma(elph_ds,FSfullpqtofull)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'integrate_gamma'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+
+!Local variables-------------------------------
+!scalars
+ integer :: comm,ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,iqpt,iqpt_fullbz,isppol,ierr
+ integer :: irec, symrankkpt_phon,nbranch,nsppol,ngkkband, ik_this_proc
+ character(len=500) :: message
+ character(len=fnlen) :: fname
+!arrays
+ real(dp),allocatable :: tmp_gkk(:,:,:,:)
+
+! *************************************************************************
+
+ comm = xmpi_world
+
+ write (message,'(3a)')ch10,' entering integrate_gamma ',ch10
+ call wrtout(std_out,message,'COLL')
+
+ nsppol   = elph_ds%nsppol
+ nbranch  = elph_ds%nbranch
+ ngkkband = elph_ds%ngkkband
+
+ ABI_ALLOCATE(elph_ds%gamma_qpt,(2,nbranch**2,nsppol,elph_ds%nqpt_full))
+ elph_ds%gamma_qpt = zero
+
+ ABI_ALLOCATE(tmp_gkk ,(2,ngkkband**2,nbranch**2,nsppol))
+
+ if (elph_ds%gkqwrite == 0) then
+   call wrtout(std_out,' integrate_gamma : keeping gamma matrices in memory','COLL')
+ else if (elph_ds%gkqwrite == 1) then
+   fname=trim(elph_ds%elph_base_name) // '_GKKQ'
+   write (message,'(2a)')' integrate_gamma : reading gamma matrices from file ',trim(fname)
+   call wrtout(std_out,message,'COLL')
+ else
+   write (message,'(a,i0)')' Wrong value for gkqwrite = ',elph_ds%gkqwrite
+   MSG_BUG(message)
+ end if
+
+
+
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+   call get_rank_1kpt (elph_ds%k_phon%kpt(:,iqpt_fullbz),symrankkpt_phon, elph_ds%k_phon%kptrank_t)
+   write (std_out,*) ' iqpt_fullbz in qpt grid only,  rank ', iqpt_fullbz, symrankkpt_phon
+
+   do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     if (elph_ds%gkqwrite == 0) then
+       tmp_gkk = elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,iqpt)
+     else if (elph_ds%gkqwrite == 1) then
+       irec = (iqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc
+       if (ikpt_phon == 1) then
+         write (std_out,*) ' integrate_gamma  read record ', irec
+       end if
+       read (elph_ds%unitgkq,REC=irec) tmp_gkk(:,:,:,:)
+     end if
+
+     do isppol=1,nsppol
+       ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+!
+       do ib1=1,ngkkband
+         do ib2=1,ngkkband
+           ibeff = ib2+(ib1-1)*ngkkband
+           elph_ds%gamma_qpt(:,:,isppol,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,isppol,iqpt_fullbz) + &
+&           tmp_gkk(:,ibeff,:,isppol)&
+&           *elph_ds%gkk_intweight(ib1,ikpt_phon,isppol)*elph_ds%gkk_intweight(ib2,ikpt_phonq,isppol)
+!          NOTE: if ngkkband==1 we are using trivial weights since average
+!          over bands was done in normsq_gkk (nmsq_gam_sumFS or nmsq_pure_gkk)
+         end do ! ib2
+       end do ! ib1
+     end do ! isppol
+   end do ! ikpt_phon
+ end do ! iqpt
+
+ call xmpi_sum (elph_ds%gamma_qpt, comm, ierr)
+
+ ABI_DEALLOCATE(tmp_gkk)
+
+!need prefactor of 1/nkpt for each integration over 1 kpoint index. NOT INCLUDED IN elph_ds%gkk_intweight
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+!  elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) / elph_ds%k_phon%nkpt / n0(1) / n0(1)
+!  elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) / elph_ds%k_phon%nkpt / elph_ds%k_phon%nkpt
+   elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) * elph_ds%occ_factor / elph_ds%k_phon%nkpt
+ end do
+
+ call wrtout(std_out,' integrate_gamma: gamma matrices have been calculated for recip space and irred qpoints ',"COLL")
+
+end subroutine integrate_gamma
+!!***
+
+!!****f* ABINIT/integrate_gamma_tr
+!!
+!! NAME
+!! integrate_gamma_tr
+!!
+!! FUNCTION
+!! This routine integrates the TRANSPORT electron phonon coupling matrices
+!! over the kpoints on the fermi surface. A dependency on qpoint
+!! remains for gamma_qpt_in/out
+!! Copied from integrate_gamma
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!      elph_ds%qpt_full = qpoint coordinates
+!!   FSfullpqtofull = mapping of k+q to k
+!!   veloc_sq1 = mean square electronic velocity on constant energy surface
+!!   veloc_sq2 = mean square electronic velocity on constant energy surface
+!!
+!! OUTPUT
+!!   elph_tr_ds%gamma_qpt_tr and created elph_tr_ds%gamma_rpt_tr
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,elph_tr_ds)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'integrate_gamma_tr'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: s1,s2
+ type(elph_tr_type), intent(inout) :: elph_tr_ds
+ type(elph_type),intent(in) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ real(dp),intent(in) :: veloc_sq1(3,elph_ds%nsppol), veloc_sq2(3,elph_ds%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ierr,iqpt,iqpt_fullbz,isppol
+ integer :: itensor, icomp, jcomp,comm
+ integer :: fib1, fib2
+ integer :: ik_this_proc
+! integer :: ikpttemp
+ character(len=500) :: message
+ real(dp) :: wtk, wtkpq, interm
+ real(dp) :: veloc1_i, veloc1_j, veloc2_i, veloc2_j
+!arrays
+ real(dp) :: elvelock(3), elvelockpq(3)
+ real(dp) :: velocwtk(3), velocwtkpq(3)
+ real(dp) :: vvelocwtk(3,3), vvelocwtkpq(3,3)
+ real(dp),allocatable :: tmp_gkk(:,:,:,:)
+
+! *************************************************************************
+
+ comm = xmpi_world
+
+!information
+ if (elph_ds%gkqwrite == 0) then
+   write (message,'(a)')' integrate_gamma_tr : keeping gamma matrices in memory'
+   call wrtout(std_out,message,'COLL')
+ else if (elph_ds%gkqwrite == 1) then
+   write (message,'(a)')' integrate_gamma_tr : reading gamma matrices from disk'
+   call wrtout(std_out,message,'COLL')
+ else
+   write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
+&   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
+   MSG_BUG(message)
+ end if
+
+!allocate temp variables
+ ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+!  write(std_out,*)'iqpt, iqptfullbz  ',iqpt, iqpt_fullbz
+
+   do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     if (elph_ds%gkqwrite == 0) then
+       tmp_gkk = elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,iqpt)
+     else if (elph_ds%gkqwrite == 1) then
+       read(elph_ds%unitgkq,REC=((iqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc)) tmp_gkk
+     end if
+
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+
+     do isppol=1,elph_ds%nsppol
+       do ib1=1,elph_ds%ngkkband !FS bands
+         fib1=ib1+elph_ds%minFSband-1 ! full bands
+         elvelock(:)=elph_tr_ds%el_veloc(ikpt_phon,fib1,:,isppol)
+         wtk=elph_tr_ds%tmp_gkk_intweight1(ib1,ikpt_phon,isppol)
+         velocwtk(:)=elph_tr_ds%tmp_velocwtk1(ib1,ikpt_phon,:,isppol)
+         vvelocwtk(:,:)=elph_tr_ds%tmp_vvelocwtk1(ib1,ikpt_phon,:,:,isppol)
+
+         do ib2=1,elph_ds%ngkkband ! FS bands
+           ibeff=ib2+(ib1-1)*elph_ds%ngkkband ! full bands
+           fib2=ib2+elph_ds%minFSband-1
+           elvelockpq(:)= elph_tr_ds%el_veloc(ikpt_phonq,fib2,:,isppol)
+           wtkpq=elph_tr_ds%tmp_gkk_intweight2(ib2,ikpt_phonq,isppol)
+           velocwtkpq(:)=elph_tr_ds%tmp_velocwtk2(ib2,ikpt_phonq,:,isppol)
+           vvelocwtkpq(:,:)=elph_tr_ds%tmp_vvelocwtk2(ib2,ikpt_phonq,:,:,isppol)
+
+!          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
+!          see also Allen PRB 17 3725
+!          generalization to tensorial quantities is simple, by keeping the directional
+!          references of velock and velockpq as indices.
+           do icomp = 1, 3
+             do jcomp = 1, 3
+               itensor = (icomp-1)*3+jcomp
+!              FIXME: could use symmetry i <-> j
+
+               veloc1_i = sqrt(veloc_sq1(icomp,isppol))
+               veloc1_j = sqrt(veloc_sq1(jcomp,isppol))
+               veloc2_i = sqrt(veloc_sq2(icomp,isppol))
+               veloc2_j = sqrt(veloc_sq2(jcomp,isppol))
+               if (elph_ds%use_k_fine == 1) then
+                 interm = vvelocwtk(icomp,jcomp)*wtkpq/veloc1_i/veloc1_j + &
+&                 s1*s2*vvelocwtkpq(icomp,jcomp)*wtk/veloc2_i/veloc2_j - &
+&                 s1*velocwtk(jcomp)*velocwtkpq(icomp)/veloc1_j/veloc2_i - &
+&                 s2*velocwtk(icomp)*velocwtkpq(jcomp)/veloc1_i/veloc2_j
+
+                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) = &
+&                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) + &
+&                 tmp_gkk(:,ibeff,:,isppol)*interm
+               else
+                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) = &
+&                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) + &
+&                 tmp_gkk(:,ibeff,:,isppol) &
+&                 *(elvelock(icomp)/veloc1_i - s1*elvelockpq(icomp)/veloc2_i) &
+&                 *(elvelock(jcomp)/veloc1_j - s2*elvelockpq(jcomp)/veloc2_j) &
+&                 *wtk*wtkpq
+               end if
+             end do
+           end do
+
+         end do
+       end do
+     end do ! isppol
+
+   end do ! ik
+ end do ! iq
+
+ call xmpi_sum (elph_tr_ds%gamma_qpt_tr, comm, ierr)
+
+ ABI_DEALLOCATE(tmp_gkk)
+
+
+!need prefactor of 1/nkpt for each integration over 1 kpoint index.
+!NOT INCLUDED IN elph_ds%gkk_intweight
+!Add a factor of 1/2 for the cross terms of (v-v')(v-v')
+ elph_tr_ds%gamma_qpt_tr = elph_tr_ds%gamma_qpt_tr* elph_ds%occ_factor*0.5_dp / elph_ds%k_phon%nkpt
+
+ write (message,'(2a)')' integrate_gamma_tr : transport gamma matrices are calculated ',&
+& ' in recip space and for irred qpoints'
+!call wrtout(std_out,message,'COLL')
+
+end subroutine integrate_gamma_tr
+!!***
+
+!!****f* ABINIT/integrate_gamma_tr_lova
+!!
+!! NAME
+!! integrate_gamma_tr_lova
+!!
+!! FUNCTION
+!! This routine integrates the TRANSPORT electron phonon coupling matrices
+!! over the kpoints on the fermi surface. A dependency on qpoint
+!! remains for gamma_qpt_in/out
+!! Copied from integrate_gamma
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!      elph_ds%qpt_full = qpoint coordinates
+!!   FSfullpqtofull = mapping of k+q to k
+!!
+!! OUTPUT
+!!   elph_tr_ds%gamma_qpt_trout
+!!   elph_tr_ds%gamma_qpt_trin
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'integrate_gamma_tr_lova'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(elph_tr_type), intent(inout) :: elph_tr_ds
+ type(elph_type),intent(in) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ierr,iqpt,iqpt_fullbz,isppol
+ integer :: itensor, icomp, jcomp,comm
+ integer :: fib1, fib2
+ integer :: ik_this_proc
+ real(dp) :: etain, etaout
+ character(len=500) :: message
+!arrays
+ real(dp) :: elvelock(3), elvelockpq(3)
+ real(dp),allocatable :: tmp_gkk(:,:,:,:)
+
+! *************************************************************************
+
+ comm = xmpi_world
+
+ ib1=elph_ds%nbranch*elph_ds%nbranch ; ib2=elph_ds%nqpt_full
+ ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trin,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trin')
+ elph_tr_ds%gamma_qpt_trin = zero
+
+ ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trout,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trout')
+ elph_tr_ds%gamma_qpt_trout = zero
+
+!information
+ if (elph_ds%gkqwrite == 0) then
+   write (message,'(a)')' integrate_gamma_tr : keeping gamma matrices in memory'
+   call wrtout(std_out,message,'COLL')
+ else if (elph_ds%gkqwrite == 1) then
+   write (message,'(a)')' integrate_gamma_tr : reading gamma matrices from disk'
+   call wrtout(std_out,message,'COLL')
+ else
+   write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
+&   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
+   MSG_ERROR(message)
+ end if
+
+!allocate temp variables
+ ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+   write(std_out,*)'iqpt, iqptfullbz  ',iqpt, iqpt_fullbz
+
+   do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     if (elph_ds%gkqwrite == 0) then
+       tmp_gkk = elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,iqpt)
+     else if (elph_ds%gkqwrite == 1) then
+       read(elph_ds%unitgkq,REC=((iqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc)) tmp_gkk
+     end if
+
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+
+     do isppol=1,elph_ds%nsppol
+       do ib1=1,elph_ds%ngkkband
+         fib1=ib1+elph_ds%minFSband-1
+         elvelock(:)=elph_tr_ds%el_veloc(ikpt_phon,fib1,:,isppol)
+
+         do ib2=1,elph_ds%ngkkband
+           ibeff=ib2+(ib1-1)*elph_ds%ngkkband
+           fib2=ib2+elph_ds%minFSband-1
+           elvelockpq(:)= elph_tr_ds%el_veloc(ikpt_phonq,fib2,:,isppol)
+
+
+!          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
+!          see also Allen PRB 17 3725
+!          generalization to tensorial quantities is simple, by keeping the directional
+!          references of velock and velockpq as indices.
+           do icomp = 1, 3
+             do jcomp = 1, 3
+               itensor = (icomp-1)*3+jcomp
+!              FIXME: could use symmetry i <-> j
+
+               etain  = elvelock(icomp)*elvelockpq(jcomp)
+               etaout = elvelock(icomp)*elvelock(jcomp)
+
+
+               elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,iqpt_fullbz) = &
+&               elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,iqpt_fullbz) + &
+&               tmp_gkk(:,ibeff,:,isppol) &
+&               *etain &
+&               *elph_ds%gkk_intweight(ib1,ikpt_phon,isppol)*elph_ds%gkk_intweight(ib2,ikpt_phonq,isppol)
+
+               elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,iqpt_fullbz) = &
+&               elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,iqpt_fullbz) + &
+&               tmp_gkk(:,ibeff,:,isppol) &
+&               *etaout &
+&               *elph_ds%gkk_intweight(ib1,ikpt_phon,isppol)*elph_ds%gkk_intweight(ib2,ikpt_phonq,isppol)
+
+             end do
+           end do
+         end do
+       end do
+
+     end do ! isppol
+   end do ! ik
+
+ end do ! iq
+
+ ABI_DEALLOCATE(tmp_gkk)
+
+ call xmpi_sum (elph_tr_ds%gamma_qpt_trout, comm, ierr)
+ call xmpi_sum (elph_tr_ds%gamma_qpt_trin, comm, ierr)
+
+
+!
+!normalize tensor with 1/sqrt(v_x**2 * v_y**2)
+!
+!move the veloc into mka2f_tr_lova, where T dependence is dealt with
+!This will cause some slight difference to the results
+ if (.true.) then
+   do isppol=1, elph_ds%nsppol
+     do icomp = 1, 3
+       do jcomp = 1, 3
+         itensor = (icomp-1)*3+jcomp
+         if(abs(elph_tr_ds%FSelecveloc_sq(icomp,isppol))>tol14**2 .and. abs(elph_tr_ds%FSelecveloc_sq(jcomp,isppol))>tol14**2)then
+           elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,:) = elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,:) / &
+&           sqrt(elph_tr_ds%FSelecveloc_sq(icomp,isppol)*elph_tr_ds%FSelecveloc_sq(jcomp,isppol))
+           elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,:) = elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,:) / &
+&           sqrt(elph_tr_ds%FSelecveloc_sq(icomp,isppol)*elph_tr_ds%FSelecveloc_sq(jcomp,isppol))
+         else
+!          XG120528 Fixed problem with zero velocity
+           elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,:)=zero
+           elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,:)=zero
+         end if
+       end do
+     end do
+   end do ! isppol
+ end if
+
+!need prefactor of 1/nkpt for each integration over 1 kpoint index.
+!NOT INCLUDED IN elph_ds%gkk_intweight
+ elph_tr_ds%gamma_qpt_trout = elph_tr_ds%gamma_qpt_trout* elph_ds%occ_factor / elph_ds%k_phon%nkpt
+ elph_tr_ds%gamma_qpt_trin  = elph_tr_ds%gamma_qpt_trin * elph_ds%occ_factor / elph_ds%k_phon%nkpt
+
+ write (message,'(2a)')' integrate_gamma_tr : transport gamma matrices are calculated ',&
+& ' in recip space and for irred qpoints'
+ call wrtout(std_out,message,'COLL')
+
+!DEBUG
+!write(std_out,*)' integrate_gamma_tr_lova: end  elph_tr_ds%gamma_qpt_trin(1,9,1,1,1)=',elph_tr_ds%gamma_qpt_trin(1,9,1,1,1)
+!ENDDEBUG
+
+end subroutine integrate_gamma_tr_lova
+!!***
+
 end module m_elphon
 !!***
