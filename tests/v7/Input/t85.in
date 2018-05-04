@@ -19,7 +19,7 @@ tsmear 0.04
 # The kpoint grid is minimalistic to keep the calculation manageable.
 # Use a centered grid for the kpoints
 ngkpt        8 8 8 
-kptopt       3
+kptopt       2
 nshiftk      1
 shiftk       0.0 0.0 0.0
 
