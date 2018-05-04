@@ -54,7 +54,7 @@ MODULE m_dvdb
  use m_crystal,       only : crystal_t, crystal_free, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
- use m_spacepar,      only : symrhg !, irrzg
+ use m_spacepar,      only : symrhg, setsym
 
  implicit none
 
@@ -1643,7 +1643,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_symmetrize'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

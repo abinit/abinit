@@ -183,7 +183,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
  use m_inwffil,    only : inwffil
- use m_spacepar,   only : rotate_rho
+ use m_spacepar,   only : rotate_rho, setsym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -193,9 +193,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_abi_etsf,         only : abi_etsf_init
  use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar
- use m_ioarr,            only : ioarr, fftdatar_write_from_hdr
+ use m_ioarr,            only : fftdatar_write_from_hdr
  use m_results_gs ,      only : results_gs_type
  use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
  use m_energies,         only : energies_type, energies_init, energies_copy
@@ -227,6 +226,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_outscfcv,         only : outscfcv
  use m_afterscfloop,     only : afterscfloop
  use m_extraprho,        only : extraprho
+ use m_spacepar,         only : setsym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

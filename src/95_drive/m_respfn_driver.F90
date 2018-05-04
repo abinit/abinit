@@ -71,7 +71,7 @@ module m_respfn_driver
  use m_kg,          only : getcut, getph, kpgio
  use m_eig2d,       only : eig2tot, elph2_fanddw
  use m_inwffil,     only : inwffil
- use m_spacepar,    only : hartre
+ use m_spacepar,    only : hartre, setsym
 
  implicit none
 

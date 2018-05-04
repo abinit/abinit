@@ -62,7 +62,7 @@ module m_mlwfovlp
 contains
 !!***
 
-!!****f* ABINIT/mlwfovlp
+!!****f* m_mlwfovlp/mlwfovlp
 !! NAME
 !! mlwfovlp
 !!
@@ -403,8 +403,7 @@ contains
  call wrtout(std_out,  message,'COLL')
 !----------------------------------------------------------------------
 !Compute shifts for g points (icg,iwav)
-!(here mband is not used, because shifts are internal
-!variables of abinit)
+!(here mband is not used, because shifts are internal variables of abinit)
 !----------------------------------------------------------------------
 !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
  ABI_ALLOCATE(icg,(nsppol,nkpt))
@@ -1350,7 +1349,7 @@ end subroutine read_chkunit
 end subroutine mlwfovlp
 !!***
 
-!!****f* ABINIT/mlwfovlp_seedname
+!!****f* m_mlwfovlp/mlwfovlp_seedname
 !! NAME
 !! mlwfovlp_seedname
 !!
@@ -1528,7 +1527,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 end subroutine mlwfovlp_seedname
 !!***
 
-!!****f* ABINIT/mlwfovlp_setup
+!!****f* m_mlwfovlp/mlwfovlp_setup
 !! NAME
 !! mlwfovlp_setup
 !!
@@ -1840,7 +1839,7 @@ end subroutine mlwfovlp_seedname
 end subroutine mlwfovlp_setup
 !!***
 
-!!****f* ABINIT/mlwfovlp_pw
+!!****f* m_mlwfovlp/mlwfovlp_pw
 !! NAME
 !! mlwfovlp_pw
 !!
@@ -2196,7 +2195,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  end subroutine mlwfovlp_pw
 !!***
 
-!!****f* ABINIT/mlwfovlp_proj
+!!****f* m_mlwfovlp/mlwfovlp_proj
 !! NAME
 !! mlwfovlp_proj
 !!
@@ -2393,8 +2392,8 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
              jband=jband+1
              if(jband.gt.num_bands(isppol)) then
                write(message, '(3a)' )&
-&               '  Value of jband is above num_bands ',ch10,&
-&               '  Action : contact Abinit group'
+&               'Value of jband is above num_bands ',ch10,&
+&               'Action: contact Abinit group'
                MSG_ERROR(message)
              end if
              A_matrix(jband,iband2,ikpt,isppol)=cmplx(amn(1,iband1,iband2,ikpt,isppol),amn(2,iband1,iband2,ikpt,isppol))
@@ -2723,7 +2722,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 end subroutine mlwfovlp_proj
 !!***
 
-!!****f* ABINIT/mlwfovlp_projpaw
+!!****f* m_mlwfovlp/mlwfovlp_projpaw
 !! NAME
 !! mlwfovlp_projpaw
 !!
@@ -3125,7 +3124,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 end subroutine mlwfovlp_projpaw
 !!***
 
-!!****f* ABINIT/mlwfovlp_radial
+!!****f* m_mlwfovlp/mlwfovlp_radial
 !! NAME
 !! mlwfovlp_radial
 !!
@@ -3268,7 +3267,7 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
 end subroutine mlwfovlp_radial
 !!***
 
-!!****f* ABINIT/mlwfovlp_ylmfac
+!!****f* m_mlwfovlp/mlwfovlp_ylmfac
 !! NAME
 !! mlwfovlp_ylmfac
 !!
@@ -3531,7 +3530,7 @@ subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 end subroutine mlwfovlp_ylmfac
 !!***
 
-!!****f* ABINIT/mlwfovlp_ylmfar
+!!****f* m_mlwfovlp/mlwfovlp_ylmfar
 !! NAME
 !! mlwfovlp_ylmfar
 !!
