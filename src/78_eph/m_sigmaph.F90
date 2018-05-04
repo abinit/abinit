@@ -1790,7 +1790,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
-   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
+   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
    ncid = new%ncid
 
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
