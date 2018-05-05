@@ -47,7 +47,7 @@ module m_epjdos
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_occ,            only : dos_hdr_write
  use m_time,           only : cwtime, timab
- use m_io_tools,       only : open_file, get_unit
+ use m_io_tools,       only : open_file
  use m_numeric_tools,  only : simpson, simpson_int
  use m_fstrings,       only : int2char4, strcat
  use m_special_funcs,  only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
@@ -451,8 +451,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  ! Master opens the DOS files.
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
-     if (open_file(fildata, msg, newunit=unitdos, &
-         status='unknown', form='formatted', action="write") /= 0) then
+     if (open_file(fildata, msg, newunit=unitdos, status='unknown', form='formatted', action="write") /= 0) then
        MSG_ERROR(msg)
      end if
 
@@ -2055,6 +2054,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
 !Local variables-------------------------------
 !scalars
+ logical,parameter :: write_procar = .False.
  integer,parameter :: prtsphere0=0 ! do not output all the band by band details for projections.
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
@@ -2116,15 +2116,19 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
  call cwtime(cpu, wall, gflops, "start")
 
-! open file for each proc, and print header for master node
- unit_procar=get_unit()
- call int2char4(me_kpt, ikproc_str)
- filename = 'PROCAR_'//ikproc_str
- open(file=filename, unit=unit_procar)
- if(mpi_enreg%me==0) then
-   write (unit_procar,'(a)') 'PROCAR lm decomposed - need to concatenate files in parallel case'
-   write (unit_procar,'(a,I10,a,I10,a,I10,a)') '# of k-points: ', dtset%nkpt, &
-&     ' # of bands:', dtset%mband, ' # of ions:', dtset%natom, ch10
+ if (write_procar) then
+   ! open file for each proc, and print header for master node
+   unit_procar=get_unit()
+   call int2char4(me_kpt, ikproc_str)
+   filename = 'PROCAR_'//ikproc_str
+   if (open_file(filename, msg, newunit=unit_procar, form="formatted", action="write") /= 0) then
+      MSG_ERROR(msg)
+   end if
+   if(mpi_enreg%me==0) then
+     write (unit_procar,'(a)') 'PROCAR lm decomposed - need to concatenate files in parallel case'
+     write (unit_procar,'(a,I10,a,I10,a,I10,a)') '# of k-points: ', dtset%nkpt, &
+       ' # of bands:', dtset%mband, ' # of ions:', dtset%natom, ch10
+   end if
  end if
 
 !##############################################################
@@ -2219,7 +2223,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
        npw_k = npwarr(ikpt)
        kpoint(:) = dtset%kpt(:,ikpt)
 
-       write (unit_procar,'(a,I7,a,3F12.6,a,F12.6,a)') ' k-point ', ikpt, ' : ', kpoint(:), ' weight = ', dtset%wtk(ikpt), ch10
+       if (write_procar) then
+         write (unit_procar,'(a,I7,a,3F12.6,a,F12.6,a)') &
+           ' k-point ', ikpt, ' : ', kpoint(:), ' weight = ', dtset%wtk(ikpt), ch10
+       end if
 
        ! make phkred for all atoms
        do iat=1,natsph_tot
@@ -2276,8 +2283,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
          !write(std_out,*)"in band:",iband
          ! TODO: eventually import eig and occ down to here - a pain, but printing outside would imply saving a huge array in memory
-         write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
-&          eigen(abs_shift_b), ' # occ. ', occ(abs_shift_b), ch10
+         if (write_procar)
+           write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
+             eigen(abs_shift_b), ' # occ. ', occ(abs_shift_b), ch10
+         end if
 
          ! Select wavefunction in cg array
          shift_cg = shift_sk + shift_b
@@ -2311,20 +2320,21 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          !shift_b = shift_b + npw_k
          shift_b = shift_b + my_nspinor*npw_k
 
-! now we have both spinor components.
-         write (unit_procar,'(a)') 'ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
-         do ipauli= 1,dtset%nspinor**2
-!Contract with Pauli matrices to get projections for this k and band, all atoms and ilang
-           do iatom = 1, natsph_tot
-             write (unit_procar, '(I3)', advance='no') iatom
-             do ilang=1,min(dos%mbesslang**2,9)
-               write (unit_procar, '(F7.3)',advance='no') sum_1atom_1lm(ipauli,ilang,iatom)
+         ! now we have both spinor components.
+         if (write_procar) then
+           write (unit_procar,'(a)') 'ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
+           do ipauli= 1,dtset%nspinor**2
+             ! Contract with Pauli matrices to get projections for this k and band, all atoms and ilang
+             do iatom = 1, natsph_tot
+               write (unit_procar, '(I3)', advance='no') iatom
+               do ilang=1,min(dos%mbesslang**2,9)
+                 write (unit_procar, '(F7.3)',advance='no') sum_1atom_1lm(ipauli,ilang,iatom)
+               end do
+               write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,iatom))
              end do
-             write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,iatom))
            end do
-         end do
-         write (unit_procar,*)
-
+           write (unit_procar,*)
+        end if
 
        end do ! band
 
@@ -2441,7 +2451,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    MSG_WARNING('only partial_dos==1 or 2 is coded')
  end if
 
- close(unit_procar)
+ if (write_procar) close(unit_procar)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" partial_dos_fractions: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"

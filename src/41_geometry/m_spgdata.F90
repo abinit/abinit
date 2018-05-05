@@ -27,6 +27,7 @@
 module m_spgdata
 
  use defs_basis
+ use m_profiling_abi
  use m_errors
 
  use m_symtk,     only : symdet
