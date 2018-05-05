@@ -67,8 +67,6 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -115,8 +113,6 @@ CONTAINS
 !!      respfn
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -169,8 +165,6 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -229,8 +223,6 @@ CONTAINS
 !!      respfn
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -281,8 +273,6 @@ CONTAINS
 !!      d2frnl
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -424,8 +414,6 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_efmas,zgemm,zgetrf
-!!      zgetri,zheev
 !!
 !! SOURCE
 
@@ -678,7 +666,7 @@ CONTAINS
   real(dp), intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%nsppol*nkpt_rbz)
   real(dp), intent(in) :: kpt_rbz(3,nkpt_rbz)
   type(efmasdeg_type), allocatable,intent(in) :: efmasdeg(:)
-  type(efmasval_type),  allocatable,intent(in) :: efmasval(:,:)
+  type(efmasval_type),  allocatable,intent(inout) :: efmasval(:,:)
 
  !Local variables-------------------------------
   logical :: degenerate
@@ -721,7 +709,7 @@ CONTAINS
   real(dp), allocatable :: cg1_pert2(:,:),cg1_pert1(:,:)
   real(dp), allocatable :: gh1c_pert2(:,:),gh1c_pert1(:,:),gh0c1_pert1(:,:)
   real(dp), allocatable :: unit_r(:), dr_dth(:), dr_dph(:)
-  real(dp), allocatable :: eigenval(:), rwork(:), eigen1val(:,:)
+  real(dp), allocatable :: eigenval(:), rwork(:)
   real(dp), allocatable :: eigf3d(:)
   real(dp), allocatable :: m_avg(:), m_avg_frohlich(:),m_cart(:,:)
   real(dp), allocatable :: deigf3d_dth(:), deigf3d_dph(:)
@@ -740,8 +728,8 @@ CONTAINS
   complex(dpc) :: eig2_gauge_change(3,3)
   complex(dpc) :: eig1a, eig1b, g_ch
   complex(dpc) :: matr2d(2,2)
-  complex(dpc), allocatable :: eigen1_deg(:,:), identity(:,:), eigenvec(:,:), work(:), eigen1vec(:,:,:), dotprod(:,:)
-  complex(dpc), allocatable :: eig2_diag(:,:,:,:),eig2_diag_cart(:,:,:,:), unitary_tr_test(:,:,:,:)
+  complex(dpc), allocatable :: eigen1_deg(:,:), eigenvec(:,:), work(:)
+  complex(dpc), allocatable :: eig2_diag(:,:,:,:),eig2_diag_cart(:,:,:,:)
   complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
   complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
   complex(dpc),allocatable :: prodc(:,:)
@@ -782,7 +770,6 @@ CONTAINS
   isppol = 1
 
   mdim = dtset%efmas_dim
-  ABI_ALLOCATE(eff_mass,(mdim,mdim))
 
   gprimd = rprimd
   call dgetrf(mdim,mdim,gprimd,mdim,ipiv,info)
@@ -861,20 +848,7 @@ CONTAINS
       degl       = efmasdeg(ikpt)%degl(ideg)
       deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
 
-      !!! Allocations
-      ABI_ALLOCATE(identity,(deg_dim,deg_dim))
       ABI_ALLOCATE(eigen1_deg,(deg_dim,deg_dim))
-      ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
-      ABI_ALLOCATE(eigenval,(deg_dim))
-      ABI_ALLOCATE(eigen1vec,(deg_dim,deg_dim,3))
-      ABI_ALLOCATE(eigen1val,(deg_dim,3))
-      ABI_ALLOCATE(dotprod,(deg_dim,deg_dim))
-
-      identity = zero
-      do iband=1,deg_dim
-        identity(iband,iband) = one
-      end do
-
       !!! If treated band degenerate at 0th order, check that we are at extrema.
       if(degenerate) then
         do adir=1,3
@@ -891,11 +865,11 @@ CONTAINS
           end if
         end do !adir=1,3
       end if !degenerate(1)
+      ABI_DEALLOCATE(eigen1_deg)
 
       ABI_ALLOCATE(eig2_diag,(deg_dim,deg_dim,3,3))
       ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
       eig2_diag = zero
-      ABI_ALLOCATE(unitary_tr_test,(deg_dim,deg_dim,3,3))
 
       do iband=1,deg_dim
         write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
@@ -905,7 +879,6 @@ CONTAINS
           eig2_ch2c = zero
           eig2_paral = zero
           eig2_gauge_change = zero
-          eff_mass = zero
           do adir=1,3
             istwf_k = istwfk_pert(ikpt,adir,ipert)
             do bdir=1,3
@@ -970,6 +943,7 @@ CONTAINS
           end do
 
           eig2_diag(iband,jband,:,:) = eig2_paral - eig2_gauge_change
+          efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)=eig2_diag(iband,jband,:,:)
 
           !!! Decomposition of the hessian in into its different contributions.
           if(debug) then
@@ -991,10 +965,51 @@ CONTAINS
 &                                                   real(eig2_part(adir,:),dp)
             end do
           end if !debug
+        end do !jband
+      end do !iband
 
-!HERE
+      ABI_DEALLOCATE(eig2_diag)
+      ABI_DEALLOCATE(eig2_diag_cart)
 
-          eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag(iband,jband,:,:)),transpose(rprimd))/two_pi**2
+    end do !ideg
+
+    ABI_DEALLOCATE(cg1_pert2)
+    ABI_DEALLOCATE(cg1_pert1)
+    ABI_DEALLOCATE(gh1c_pert2)
+    ABI_DEALLOCATE(gh1c_pert1)
+    ABI_DEALLOCATE(gh0c1_pert1)
+    ABI_DEALLOCATE(cg0)
+
+    icg2=icg2+npw_k*dtset%nspinor*nband_k
+    bandtot_index=bandtot_index+nband_k
+    band2tot_index=band2tot_index+2*nband_k**2
+  end do ! ikpt
+
+!HERE ALLOCATE
+
+  ABI_ALLOCATE(eff_mass,(mdim,mdim))
+
+  do ikpt=1,dtset%nkpt
+    do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
+
+     degenerate = efmasdeg(ikpt)%degenerate(ideg) .and. (dtset%efmas_deg/=0)
+     degl       = efmasdeg(ikpt)%degl(ideg)
+     deg_dim    = efmasdeg(ikpt)%deg_dim(ideg)
+ 
+     !!! Allocations
+     ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
+     ABI_ALLOCATE(eigenval,(deg_dim))
+
+     ABI_ALLOCATE(eig2_diag_cart,(deg_dim,deg_dim,3,3))
+
+     do iband=1,deg_dim
+        write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
+        do jband=1,deg_dim
+
+          eff_mass=zero
+
+          eig2_diag_cart(iband,jband,:,:)=efmasval(ikpt,ideg)%eig2_diag(iband,jband,:,:)          
+          eig2_diag_cart(iband,jband,:,:) = matmul(matmul(rprimd,eig2_diag_cart(iband,jband,:,:)),transpose(rprimd))/two_pi**2
 
 
           if(.not. degenerate .and. iband==jband) then
@@ -1676,30 +1691,13 @@ CONTAINS
 
       end if !(degenerate)
 
-      ABI_DEALLOCATE(eig2_diag)
       ABI_DEALLOCATE(eig2_diag_cart)
-      ABI_DEALLOCATE(unitary_tr_test)
 
-      ABI_DEALLOCATE(eigen1_deg)
       ABI_DEALLOCATE(eigenval)
-      ABI_DEALLOCATE(identity)
-      ABI_DEALLOCATE(dotprod)
 
-      ABI_DEALLOCATE(eigen1vec)
-      ABI_DEALLOCATE(eigen1val)
       ABI_DEALLOCATE(eigenvec)
     end do !ideg
 
-    ABI_DEALLOCATE(cg1_pert2)
-    ABI_DEALLOCATE(cg1_pert1)
-    ABI_DEALLOCATE(gh1c_pert2)
-    ABI_DEALLOCATE(gh1c_pert1)
-    ABI_DEALLOCATE(gh0c1_pert1)
-    ABI_DEALLOCATE(cg0)
-
-    icg2=icg2+npw_k*dtset%nspinor*nband_k
-    bandtot_index=bandtot_index+nband_k
-    band2tot_index=band2tot_index+2*nband_k**2
   end do !ikpt
 
   ABI_DEALLOCATE(eff_mass)
