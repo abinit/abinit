@@ -33,14 +33,14 @@ AR_RECIPSPACE=[.src.56_recipspace]lib56_recipspace.olb
 AR_XC=[.src.56_xc]lib56_xc.olb
 AR_XML=[.src.47_xml]lib47_xml.olb
 AR_BADER=[.src.62_bader]lib62_bader.olb
-AR_ABIUTIL=[.src.55_abiutil]lib54_abiutil.olb
+AR_ABIUTIL=[.src.55_abiutil]lib55_abiutil.olb
 AR_NONLOCAL=[.src.13nonlocal]lib13nonlocal.olb
 AR_FFTS=[.src.53_ffts]lib53_ffts.olb
 AR_PSP=[.src.13psp]lib13psp.olb
 AR_GEOMETRY=[.src.42_geometry]lib42_geometry.olb
 AR_GEOMOPTIM=[.src.45_geomoptim]lib45_geomoptim.olb
 AR_PARSER=[.src.42_parser]lib42_parser.olb
-AR_SPACEPAR=[.src.54_spacepar]lib53_spacepar.olb
+AR_SPACEPAR=[.src.54_spacepar]lib54_spacepar.olb
 AR_MGMPI=[.src.51_manage_mpi]lib51_manage_mpi.olb
 AR_CONTRACT=[.src.32_contract]lib32_contract.olb
 AR_CG=[.src.62_cg_noabirule]lib62_cg_noabirule.olb
@@ -560,7 +560,7 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	$(MMS)
 	set default [--]
 
-[.src.54_spacepar]lib53_spacepar.olb :
+[.src.54_spacepar]lib54_spacepar.olb :
 	$(MMS) [.src.54_spacepar]descrip.mms
 	set default [.src.54_spacepar]
 	$(MMS)
@@ -572,7 +572,7 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	$(MMS)
 	set default [--]
 
-[.src.55_abiutil]lib54_abiutil.olb :
+[.src.55_abiutil]lib55_abiutil.olb :
         $(MMS) [.src.55_abiutil]descrip.mms
         set default [.src.55_abiutil]
         $(MMS)
