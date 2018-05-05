@@ -2368,12 +2368,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DEALLOCATE(gh1c_pert)
    ABI_DEALLOCATE(gh0c1_pert)
    ABI_DEALLOCATE(cg1_pert)
-   ABI_DEALLOCATE(kpt_rbz_pert)
    ABI_DEALLOCATE(istwfk_pert)
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
 
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
+
+   ABI_DEALLOCATE(kpt_rbz_pert)
+
  end if
 
 

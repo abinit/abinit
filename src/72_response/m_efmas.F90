@@ -615,7 +615,6 @@ CONTAINS
 !!            orthogonal to the active space.
 !!  istwfk_pert(nkpt_rbz,3,mpert) = integer for choice of storage of wavefunction at
 !!            each k point for each perturbation.
-!!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mpert = maximum number of perturbations.
 !!  mpi_enreg = informations about MPI parallelization.
 !!  nkpt_rbz = number of k-points for each perturbation.
@@ -639,8 +638,7 @@ CONTAINS
 !! SOURCE
 
  subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0,&
-&   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,&
-&   mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
+&   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
 
   use m_cgtools
   use m_gaussian_quadrature, only : cgqf
