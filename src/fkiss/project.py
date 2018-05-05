@@ -413,7 +413,7 @@ class AbinitProject(object):
         dir2files = defaultdict(list)
         for fort_file in self.fort_files.values():
             dir2files[fort_file.dirname].append(fort_file)
-        return dir2files
+        return OrderedDict(dir2files.items())
 
     def all_public_procedures(self):
         """name --> Procedure"""
@@ -474,7 +474,7 @@ class AbinitProject(object):
             abinit.dir --> Dependencies outside the directory
             abinit.amf --> File with EXTRA_DIST
         """
-        dir2files = self.groubpy_dirname()
+        dir2files = self.groupby_dirname()
 
         # Sort...
 
@@ -577,11 +577,23 @@ class AbinitProject(object):
 
         Returns: graphviz.Digraph <https://graphviz.readthedocs.io/en/stable/api.html#digraph>
         """
-        # https://www.graphviz.org/doc/info/
-        from graphviz import Digraph
-        fg = Digraph("Abinit project", engine="dot" if engine == "automatic" else engine)
+        dir2files = self.groupby_dirname()
+        dirname = os.path.join(self.srcdir, os.path.basename(dirname))
 
-        return fg
+        parent_dirs, child_dirs = [], []
+        for fort_file in dir2files[dirname]:
+            for use_name in fort_file.all_uses:
+                if use_name in EXTERN_MODS: continue
+                used_mod = self.all_modules[use_name]
+                parent_dirs.append(os.path.basename(used_mod.dirname))
+
+        parent_dirs = sorted(set(parent_dirs))
+        print(parent_dirs)
+
+        # https://www.graphviz.org/doc/info/
+        #from graphviz import Digraph
+        #fg = Digraph("Directory: %s" % dirname, engine="dot" if engine == "automatic" else engine)
+        #return fg
 
     def get_graphviz_pubname(self, name, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -601,9 +613,4 @@ class AbinitProject(object):
             print("Cannot find public entity `%s` in project" % str(name))
             return None
 
-        #print(obj.to_string(verbose=options.verbose))
-        #graph = obj.get_graphviz(engine=options.engine)
-        # https://www.graphviz.org/doc/info/
-        #from graphviz import Digraph
-        #fg = Digraph("Abinit project", engine="dot" if engine == "automatic" else engine)
-        #return fg
+        return obj.get_graphviz(engine=engine, graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr)
