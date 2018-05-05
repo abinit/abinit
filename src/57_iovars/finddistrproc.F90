@@ -87,6 +87,7 @@
 #define ABI_FUNC 'finddistrproc'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
+ use interfaces_55_abiutil
  use interfaces_57_iovars, except_this_one => finddistrproc
 !End of the abilint section
 

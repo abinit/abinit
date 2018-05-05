@@ -1,6 +1,6 @@
-!!****d* ABINIT/53_spacepar
+!!****d* ABINIT/54_spacepar
 !! NAME
-!! 53_spacepar
+!! 54_spacepar
 !!
 !! DESCRIPTION
 !! This directory contains level-2 routines used
@@ -22,7 +22,7 @@
 !!
 !! CHILDREN
 !! dotprod_vn.F90
-!! interfaces_53_spacepar.F90
+!! interfaces_54_spacepar.F90
 !! meanvalue_g.F90
 !! multipoles_fftr.F90
 !!
