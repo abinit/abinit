@@ -285,13 +285,13 @@ module m_sigmaph
   ! KS energies where QP corrections are wantend
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  complex(dpc),allocatable :: cweights(:,:,:,:)
-  ! (nz, 2, nbcalc_ks, natom3))
+  complex(dpc),allocatable :: cweights(:,:,:,:,:)
+  ! (nz, 2, nbcalc_ks, natom3i, ndiv))
   ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  real(dp),allocatable :: deltaw_pm(:,:,:)
-  ! (nbcalc_ks, 2, natom3))
+  real(dp),allocatable :: deltaw_pm(:,:,:,:)
+  ! (nbcalc_ks, 2, natom3, ndiv))
   ! Weights for the q-integration of the two delta (abs/emission) if imag_only
   ! This array is initialized inside the (ikcalc, spin) loop
 
@@ -441,7 +441,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: ik_bz, ikq_bz
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it !ipw
- integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu
+ integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,nu,ndiv
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
@@ -710,11 +710,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        sigma%e0vals(ib_k) = ebands%eig(band, ik_ibz, spin)
      end do
 
+     ndiv = 1; if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
      ! Weights for Re-Im with i.eta shift.
-     ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3))
-     ABI_MALLOC(zvals, (nz, nbcalc_ks))
+     ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, ndiv))
      ! Weights for Im (tethraedron, eta --> 0)
-     ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3))
+     ABI_MALLOC(sigma%deltaw_pm, (nbcalc_ks, 2, natom3, ndiv))
+     ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
@@ -786,6 +787,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          MSG_ERROR(msg)
        end if
 
+       ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
+       trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
+       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
+       kq_ibz = ebands%kptns(:,ikq_ibz)
+
        ! Double grid stuff
        if (sigma%use_doublegrid) then
          ik_bz  = eph_dg%indexes_to_coarse(&
@@ -830,13 +836,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,iq_bz_fine), phfrq_dense(:,jj), displ_cart )
          enddo
        endif
-       !
        
-       ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
-       trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
-       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
-       kq_ibz = ebands%kptns(:,ikq_ibz)
-
        ! Get npw_kq, kg_kq for k+q
        ! Be careful with time-reversal symmetry and istwf_kq
        if (isirr_kq) then
@@ -995,7 +995,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
          ! Precompute weigths with tetrahedron
          if (sigma%qint_method > 0) then
-           call sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, xmpi_comm_self)
+           if (sigma%use_doublegrid) then
+             call sigmaph_get_qweights_doublegrid(sigma, ikcalc, ikq_ibz, ibsum_kq, spin, xmpi_comm_self)
+           else
+             call sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, xmpi_comm_self)
+           end if
            ! The Nstar(q) / N_qbz factor is already included in the weigths produced
            ! by the above routines so weigth_q must be set to one here.
            weigth_q = one
@@ -1019,33 +1023,121 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! TODO: In principle mu_e(T) (important if semimetal) but need to treat T --> 0 in new_occ
                !f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
-               if (sigma%use_doublegrid) then
-                 cfact = 0
-                 do jj=1,eph_dg%ndiv
-                   ! Double Grid shared points weights
-                   ikq_bz_fine  = eph_dg_mapping(2, jj)
-                   weight = eph_dg%weights_dense(ikq_bz_fine)
+               ! Here we have to handle 3 different logical values
+               ! leading to 9 different cases:
+               !
+               ! qint_method         0      1  
+               !   use_doublegrid   .true. .false.
+               !     imag_only      .true. .false.
+               !
+               ! we will write this with nested conditionals using the order above
 
-                   ! Electronic eigenvalue
-                   ikq_ibz_fine = eph_dg_mapping(5, jj)
-                   eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+               if (sigma%qint_method == 0) then
+                 if (sigma%use_doublegrid) then
+                   cfact = 0
+                   do jj=1,eph_dg%ndiv
+                     ! Double Grid shared points weights
+                     ikq_bz_fine  = eph_dg_mapping(2, jj)
+                     weight = eph_dg%weights_dense(ikq_bz_fine)
 
-                   ! Phonon frequency
-                   wqnu = phfrq_dense(nu,jj)
-                   if (wqnu < tol6) cycle
-                   nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
-                   
-                   cfact = cfact + &
-                          ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                           (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) )*weight
-                 enddo
+                     ! Electronic eigenvalue
+                     ikq_ibz_fine = eph_dg_mapping(5, jj)
+                     eig0mkq = ebands_dense%eig(ibsum_kq,ikq_ibz_fine,spin)
+
+                     ! Phonon frequency
+                     wqnu = phfrq_dense(nu,jj)
+                     if (wqnu < tol6) cycle
+                     nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
+                     
+                     cfact = cfact + &
+                            ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) )*weight
+                   enddo
+                 else
+                   cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+                 endif
+                 if (sigma%imag_only) then
+                   sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * aimag(cfact)
+                 else
+                   sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
+                 end if
                else
-                 cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                          (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
-               endif
+                 if (sigma%use_doublegrid) then
+                   do jj=1,ndiv
+                     ! Double Grid shared points weights
+                     ikq_bz_fine  = eph_dg_mapping(2, jj)
+                     weight = eph_dg%weights_dense(ikq_bz_fine)
 
+                     ! Phonon frequency
+                     wqnu = phfrq_dense(nu,jj)
+                     if (wqnu < tol6) cycle
+                     nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
+                     
+                     if (sigma%imag_only) then
+                       sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
+                         (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, jj) +  &
+                         (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, jj) )*weight
+                     else
+                       sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
+                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, jj) +  &
+                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, jj) )*weight
+                     end if
+                   end do
+                 else
+                   if (sigma%imag_only) then
+                     sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * pi * ( &
+                       (nqnu + f_mkq      ) * sigma%deltaw_pm(ib_k, 1, nu, 1) +  &
+                       (nqnu - f_mkq + one) * sigma%deltaw_pm(ib_k, 2, nu, 1) )
+                   else
+                     sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * ( &
+                       (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, 1) +  &
+                       (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, 1) )
+                   endif
+                 end if
+               end if
+
+               ! Derivative of sigma
+               ! TODO: should calculate this with the double grid as well
+               if (.not. sigma%imag_only) then
+                 if (sigma%qint_method == 1) then
+                   ! Have to rescale gkk2 before computing derivative (HM: why?)
+                   gkk2 = gkk2 * sigma%wtq_k(iq_ibz)
+                 end if
+ 
+                 ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
+                 !old derivative
+                 ! This to avoid numerical instability
+                 !cfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) ** 2 &
+                 !        -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ** 2
+                 !sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * cfact
+                 !cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                 !         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+                 !sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * cfact
+                 cfact = (eig0nk - eig0mkq + wqnu + sigma%ieta)
+                 gmod2 = cfact * dconjg(cfact)
+                 cfact = (eig0nk - eig0mkq - wqnu + sigma%ieta)
+                 hmod2 = cfact * dconjg(cfact)
+
+                 sigma%dvals_de0ks(it, ib_k) = sigma%dvals_de0ks(it, ib_k) + gkk2 * ( &
+                   (nqnu + f_mkq)        * (gmod2 - two * (eig0nk - eig0mkq + wqnu) ** 2) / gmod2 ** 2 + &
+                   (nqnu - f_mkq + one)  * (hmod2 - two * (eig0nk - eig0mkq - wqnu) ** 2) / hmod2 ** 2   &
+                 )
+
+                 ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
+                 ! TODO: weigths
+                 if (sigma%nwr > 0) then
+                   cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
+                                 (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
+                   sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * cfact_wr(:)
+                 end if
+                  
+               end if
+
+ 
+#if 0
                if (sigma%imag_only) then
-                  ! Accumulate imaginary part at w = eKS
+                 ! Accumulate imaginary part at w = eKS
                  if (sigma%qint_method == 0) then
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkk2 * j_dpc * aimag(cfact)
                  else
@@ -1092,6 +1184,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                    sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * cfact_wr(:)
                  end if
                end if ! imag_only
+#endif
              end do ! it
            end do ! ib_k
          end do ! nu
@@ -1365,6 +1458,54 @@ end subroutine sigmaph
 !!***
 
 
+subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, ikq_bz, ibsum_kq, spin, comm)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sigmaph_get_qweights'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(sigmaph_t),intent(inout) :: sigma
+ integer,intent(in) :: ikcalc, ikq_bz, ibsum_kq, spin, comm
+
+!Local variables-------------------------
+!scalars
+ integer,parameter :: bcorr0 = 0, nz = 1
+ integer :: jj, ikq_ibz, ikq_bz_fine, ikq_ibz_fine, nbc
+ real(dp) :: qpt(3)
+ complex(dpc), allocatable :: zvals(:,:)
+
+! *************************************************************************
+
+  nbc = sigma%nbcalc_ks(ikcalc, spin)
+
+  do jj=1,sigma%eph_doublegrid%ndiv
+    ikq_bz_fine = sigma%eph_doublegrid%coarse_to_dense(ikq_bz,jj) 
+    ikq_ibz_fine = sigma%eph_doublegrid%bz2ibz_dense(ikq_bz_fine)
+
+    if (sigma%imag_only) then
+      ! Compute weigths for delta functions at the KS energies with tetra.
+      call ephwg_get_dweights(sigma%ephwg, ikq_ibz_fine, nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,jj), comm, &
+        use_bzsum=sigma%symsigma == 0)
+    else
+      ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
+      ABI_MALLOC(zvals, (nz, nbc))
+      zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
+      call ephwg_zinv_weights(sigma%ephwg, ikq_ibz_fine, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,jj), comm, &
+        use_bzsum=sigma%symsigma == 0)
+      ABI_FREE(zvals)
+    end if
+  end do
+
+end subroutine sigmaph_get_qweights_doublegrid
+
+
+
 !----------------------------------------------------------------------
 
 !!****f* m_sigmaph/sigmaph_get_qweights
@@ -1416,6 +1557,7 @@ subroutine sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, comm)
 
   nbc = sigma%nbcalc_ks(ikcalc, spin)
   qpt = sigma%qibz_k(:,iq_ibz)
+
   ! iqlk is the index of the q-point in the IBZ(k) that must be passed to the ephwg routines
   ! The case symsigma == 0 is tricky because we are summing over the BZ but ephwg always used IBZ(k)
   ! Thus we have to find the corresponding image in the IBZ(k).
@@ -1428,13 +1570,13 @@ subroutine sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, comm)
 
   if (sigma%imag_only) then
     ! Compute weigths for delta functions at the KS energies with tetra.
-    call ephwg_get_dweights(sigma%ephwg, iqlk, nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm, comm, &
+    call ephwg_get_dweights(sigma%ephwg, iqlk, nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,1), comm, &
       use_bzsum=sigma%symsigma == 0)
   else
     ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
     ABI_MALLOC(zvals, (nz, nbc))
     zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
-    call ephwg_zinv_weights(sigma%ephwg, iqlk, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights, comm, &
+    call ephwg_zinv_weights(sigma%ephwg, iqlk, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,1), comm, &
       use_bzsum=sigma%symsigma == 0)
     ABI_FREE(zvals)
   end if
