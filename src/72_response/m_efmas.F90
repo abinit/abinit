@@ -937,8 +937,7 @@ CONTAINS
 !!
 !! SOURCE
 
- subroutine efmas_analysis(dtset,efmasdeg,efmasval,&
-&   kpt_rbz,mpert,mpi_enreg,nkpt_rbz,rprimd)
+ subroutine efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz,rprimd)
 
   use m_cgtools
   use m_gaussian_quadrature, only : cgqf
@@ -955,7 +954,7 @@ CONTAINS
 
  !Arguments ------------------------------------
  !scalars
-  integer,            intent(in)    :: mpert,nkpt_rbz
+  integer,            intent(in)    :: nkpt_rbz
   type(dataset_type), intent(in)    :: dtset
   type(MPI_type),     intent(in) :: mpi_enreg
  !arrays
