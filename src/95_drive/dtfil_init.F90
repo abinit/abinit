@@ -70,7 +70,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 #undef ABI_FUNC
 #define ABI_FUNC 'dtfil_init'
  use interfaces_32_util
- use interfaces_54_abiutil
+ use interfaces_55_abiutil
 !End of the abilint section
 
  implicit none

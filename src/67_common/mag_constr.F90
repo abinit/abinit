@@ -68,7 +68,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 #undef ABI_FUNC
 #define ABI_FUNC 'mag_constr'
  use interfaces_32_util
- use interfaces_54_abiutil
+ use interfaces_55_abiutil
 !End of the abilint section
 
  implicit none
