@@ -771,62 +771,6 @@ CONTAINS
 
   mdim = dtset%efmas_dim
 
-  gprimd = rprimd
-  call dgetrf(mdim,mdim,gprimd,mdim,ipiv,info)
-  ABI_ALLOCATE(rwork,(3))
-  call dgetri(mdim,gprimd,mdim,ipiv,rwork,3,info)
-  ABI_DEALLOCATE(rwork)
-  gprimd = two_pi*transpose(gprimd)
-
-  cdirs = dtset%efmas_calc_dirs
-  ndirs = mdim
-  if(cdirs/=0) ndirs = dtset%efmas_n_dirs
-  ABI_ALLOCATE(dirs,(3,ndirs))
-  if(cdirs==0) then
-    dirs = zero
-    do adir=1,ndirs
-      dirs(adir,adir)=1.0_dp
-    end do
-  elseif(cdirs==1) then
-    dirs(:,:) = dtset%efmas_dirs(:,1:ndirs)
-    do adir=1,ndirs
-      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
-    end do
-  elseif(cdirs==2) then
-    dirs(:,:) = matmul(gprimd,dtset%efmas_dirs(:,1:ndirs))
-    do adir=1,ndirs
-      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
-    end do
-  elseif(cdirs==3) then
-    dirs(1,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*cos(dtset%efmas_dirs(2,1:ndirs)*pi/180)
-    dirs(2,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*sin(dtset%efmas_dirs(2,1:ndirs)*pi/180)
-    dirs(3,:) = cos(dtset%efmas_dirs(1,1:ndirs)*pi/180)
-  end if
-
-  !!! Initialization of integrals for the degenerate case.
-  ntheta   = dtset%efmas_ntheta
-  nphi     = 2*ntheta
-  ABI_ALLOCATE(gq_points_th,(ntheta))
-  ABI_ALLOCATE(gq_points_costh,(ntheta))
-  ABI_ALLOCATE(gq_points_sinth,(ntheta))
-  ABI_ALLOCATE(gq_weights_th,(ntheta))
-  ABI_ALLOCATE(gq_points_ph,(nphi))
-  ABI_ALLOCATE(gq_points_cosph,(nphi))
-  ABI_ALLOCATE(gq_points_sinph,(nphi))
-  ABI_ALLOCATE(gq_weights_ph,(nphi))
-  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
-  !XG180501 : TODO : There is no need to make a Gauss-Legendre integral for the phi variable, 
-  !since the function to be integrated is periodic...
-  call cgqf(nphi,1,zero,zero,zero,2*pi,gq_points_ph,gq_weights_ph)
-  do itheta=1,ntheta
-    gq_points_costh(itheta)=cos(gq_points_th(itheta))
-    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
-  enddo
-  do iphi=1,nphi
-    gq_points_cosph(iphi)=cos(gq_points_ph(iphi))
-    gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
-  enddo
-
   icg2 = 0
   band2tot_index=0
   bandtot_index=0
@@ -986,6 +930,62 @@ CONTAINS
   end do ! ikpt
 
 !HERE ALLOCATE
+
+  gprimd = rprimd
+  call dgetrf(mdim,mdim,gprimd,mdim,ipiv,info)
+  ABI_ALLOCATE(rwork,(3))
+  call dgetri(mdim,gprimd,mdim,ipiv,rwork,3,info)
+  ABI_DEALLOCATE(rwork)
+  gprimd = two_pi*transpose(gprimd)
+
+  cdirs = dtset%efmas_calc_dirs
+  ndirs = mdim
+  if(cdirs/=0) ndirs = dtset%efmas_n_dirs
+  ABI_ALLOCATE(dirs,(3,ndirs))
+  if(cdirs==0) then
+    dirs = zero
+    do adir=1,ndirs
+      dirs(adir,adir)=1.0_dp
+    end do
+  elseif(cdirs==1) then
+    dirs(:,:) = dtset%efmas_dirs(:,1:ndirs)
+    do adir=1,ndirs
+      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
+    end do
+  elseif(cdirs==2) then
+    dirs(:,:) = matmul(gprimd,dtset%efmas_dirs(:,1:ndirs))
+    do adir=1,ndirs
+      dirs(:,adir) = dirs(:,adir)/sqrt(sum(dirs(:,adir)**2))
+    end do
+  elseif(cdirs==3) then
+    dirs(1,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*cos(dtset%efmas_dirs(2,1:ndirs)*pi/180)
+    dirs(2,:) = sin(dtset%efmas_dirs(1,1:ndirs)*pi/180)*sin(dtset%efmas_dirs(2,1:ndirs)*pi/180)
+    dirs(3,:) = cos(dtset%efmas_dirs(1,1:ndirs)*pi/180)
+  end if
+
+  !!! Initialization of integrals for the degenerate case.
+  ntheta   = dtset%efmas_ntheta
+  nphi     = 2*ntheta
+  ABI_ALLOCATE(gq_points_th,(ntheta))
+  ABI_ALLOCATE(gq_points_costh,(ntheta))
+  ABI_ALLOCATE(gq_points_sinth,(ntheta))
+  ABI_ALLOCATE(gq_weights_th,(ntheta))
+  ABI_ALLOCATE(gq_points_ph,(nphi))
+  ABI_ALLOCATE(gq_points_cosph,(nphi))
+  ABI_ALLOCATE(gq_points_sinph,(nphi))
+  ABI_ALLOCATE(gq_weights_ph,(nphi))
+  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
+  !XG180501 : TODO : There is no need to make a Gauss-Legendre integral for the phi variable,
+  !since the function to be integrated is periodic...
+  call cgqf(nphi,1,zero,zero,zero,2*pi,gq_points_ph,gq_weights_ph)
+  do itheta=1,ntheta
+    gq_points_costh(itheta)=cos(gq_points_th(itheta))
+    gq_points_sinth(itheta)=sin(gq_points_th(itheta))
+  enddo
+  do iphi=1,nphi
+    gq_points_cosph(iphi)=cos(gq_points_ph(iphi))
+    gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
+  enddo
 
   ABI_ALLOCATE(eff_mass,(mdim,mdim))
 
