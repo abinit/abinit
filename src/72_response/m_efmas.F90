@@ -39,6 +39,7 @@ module m_efmas
  public :: check_degeneracies
  public :: print_efmas
  public :: efmas_main
+ public :: efmas_analysis 
 
 !private procedures.
  private :: MATMUL_ ! Workaround to make tests pass on ubu/buda slaves
@@ -705,6 +706,7 @@ CONTAINS
   complex(dpc) :: eig1a, eig1b, g_ch
   complex(dpc), allocatable :: eigen1_deg(:,:)
   complex(dpc), allocatable :: eig2_diag(:,:,:,:)
+  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
 
 ! *********************************************************************
 
@@ -902,6 +904,7 @@ CONTAINS
     band2tot_index=band2tot_index+2*nband_k**2
   end do ! ikpt
 
+ end subroutine efmas_main
 !!***
 
 !----------------------------------------------------------------------
@@ -1810,7 +1813,7 @@ CONTAINS
   write(std_out,'(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
   write(ab_out, '(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
 
- end subroutine efmas_main
+ end subroutine efmas_analysis
 !!***
 
 !----------------------------------------------------------------------
