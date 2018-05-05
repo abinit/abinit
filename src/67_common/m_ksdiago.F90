@@ -367,7 +367,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
    write(msg,'(7a)')&
 &   ' istwfk/=1 not allowed:',ch10,&
 &   ' States output not programmed for time-reversal symmetry.',ch10,&
-&   ' Action : change istwfk in input file (put it to 1 for all kpt).',ch10,&
+&   ' Action: change istwfk in input file (put it to 1 for all kpt).',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
    MSG_WARNING(msg)
    ierr=ierr+1

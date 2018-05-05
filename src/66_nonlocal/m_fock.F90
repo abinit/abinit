@@ -2462,7 +2462,7 @@ end subroutine bare_vqg
 !!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
 !!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_bz= number of k points in the BZ

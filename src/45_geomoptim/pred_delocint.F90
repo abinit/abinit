@@ -30,7 +30,7 @@
 !!    S matrix is eigenvectors of F = B^{T}B
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2018 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -641,7 +641,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
 end subroutine pred_delocint
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/deloc2xcart
 !! NAME
 !! deloc2xcart
@@ -652,13 +652,6 @@ end subroutine pred_delocint
 !!  is non-linear, so use an iterative scheme, as in Baker
 !!  JCP .105. 192 (1996).
 !!  Older reference: Pulay and co. JACS 101 2550 (1979)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!   deloc <type(delocint)>=Important variables for
@@ -870,4 +863,1228 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
  end if
 
 end subroutine deloc2xcart
+!!***
+
+!!****f* ABINIT/fred2fdeloc
+!! NAME
+!! fred2fdeloc
+!!
+!! FUNCTION
+!!  calculate delocalized forces from reduced coordinate ones
+!!
+!! INPUTS
+!! btinv(3*(natom-1),3*natom)= inverse transpose of B matrix (see delocint)
+!! natom = number of atoms
+!! gprimd(3,3)=dimensional translations in reciprocal space (bohr-1)
+!!
+!! OUTPUT
+!! deloc_force(3*(natom-1))=delocalized forces from reduced coordinate ones
+!! fred(3,natom)=delocalized forces in reduced coordinates
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      pred_delocint,xfh_recover_deloc
+!!
+!! CHILDREN
+!!      dgemm,dgemv,wrtout
+!!
+!! SOURCE
+
+subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
+
+ use defs_basis
+ use m_profiling_abi
+ use m_linalg_interfaces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fred2fdeloc'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom
+!arrays
+ real(dp),intent(in) :: btinv(3*(natom-1),3*natom),gprimd(3,3),fred(3,natom)
+ real(dp),intent(out) :: deloc_force(3*(natom-1))
+
+!Local variables-------------------------------
+ integer :: ii
+!arrays
+ real(dp) :: fcart(3,natom)
+ character(len=500) :: message
+
+! ******************************************************************
+
+!make cartesian forces
+
+ call dgemm('N','N',3,natom,3,one,&
+& gprimd,3,fred,3,zero,fcart,3)
+
+!turn cartesian to delocalized forces
+ call dgemv('N',3*(natom-1),3*natom,one,&
+& btinv,3*(natom-1),fcart,1,zero,deloc_force,1)
+
+ write (message,'(a)') 'fred2fdeloc : deloc_force = '
+ call wrtout(std_out,message,'COLL')
+
+ do ii = 1, 3*(natom-1)
+   write (message,'(I6,E16.6)') ii, deloc_force(ii)
+   call wrtout(std_out,message,'COLL')
+ end do
+
+end subroutine fred2fdeloc
+!!***
+
+!!****f* ABINIT/calc_b_matrix
+!! NAME
+!! calc_b_matrix
+!!
+!! FUNCTION
+!!  calculate values of derivatives of internal coordinates as a function of
+!!  cartesian ones =  B matrix
+!!
+!! INPUTS
+!! angs= number of angles
+!! bonds(2,2,nbond)=for a bond between iatom and jatom
+!!              bonds(1,1,nbond) = iatom
+!!              bonds(2,1,nbond) = icenter
+!!              bonds(1,2,nbond) = jatom
+!!              bonds(2,2,nbond) = irshift
+!! carts(2,ncart)= index of total primitive internal, and atom (carts(2,:))
+!! dihedrals(2,4,ndihed)=indexes to characterize dihedrals
+!! nang(2,3,nang)=indexes to characterize angles
+!! nbond=number of bonds
+!! ncart=number of auxiliary cartesian atom coordinates (used for constraints)
+!! ndihed= number of dihedrals
+!! ninternal=nbond+nang+ndihed+ncart: number of internal coordinates
+!! nrshift= dimension of rshift
+!! rprimd(3,3)=dimensional real space primitive translations (bohr)
+!! rshift(3,nrshift)=shift in xred that must be done to find all neighbors of
+!!                   a given atom within a given number of neighboring shells
+!! xcart(3,natom)=cartesian coordinates of atoms (bohr)
+!!
+!! OUTPUT
+!! b_matrix(ninternal,3*natom)=matrix of derivatives of internal coordinates
+!!   wrt cartesians
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      xcart2deloc
+!!
+!! CHILDREN
+!!      acrossb
+!!
+!! SOURCE
+
+subroutine calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
+
+ use defs_basis
+ use m_abimover
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'calc_b_matrix'
+ use interfaces_45_geomoptim, except_this_one => calc_b_matrix
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom
+ type(delocint),intent(inout) :: deloc
+
+!arrays
+ real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
+ real(dp),intent(out) :: b_matrix(deloc%ninternal,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,i3,i4,iang,ibond,icart,idihed,iprim,s1,s2,s3,s4
+!arrays
+ real(dp) :: bb(3),r1(3),r2(3),r3(3),r4(3)
+
+! *************************************************************************
+
+ iprim=0
+ b_matrix(:,:) = zero
+
+ do ibond=1,deloc%nbond
+   i1 = deloc%bonds(1,1,ibond)
+   s1 = deloc%bonds(2,1,ibond)
+   r1(:) = xcart(:,i1)+deloc%rshift(1,s1)*rprimd(:,1)&
+&   +deloc%rshift(2,s1)*rprimd(:,2)&
+&   +deloc%rshift(3,s1)*rprimd(:,3)
+   i2 = deloc%bonds(1,2,ibond)
+   s2 = deloc%bonds(2,2,ibond)
+   r2(:) = xcart(:,i2)+deloc%rshift(1,s2)*rprimd(:,1)&
+&   +deloc%rshift(2,s2)*rprimd(:,2)&
+&   +deloc%rshift(3,s2)*rprimd(:,3)
+   iprim=iprim+1
+   call dbond_length_d1(r1,r2,bb)
+   b_matrix(iprim,3*(i1-1)+1:3*i1) = b_matrix(iprim,3*(i1-1)+1:3*i1) + bb(:)
+   call dbond_length_d1(r2,r1,bb)
+   b_matrix(iprim,3*(i2-1)+1:3*i2) = b_matrix(iprim,3*(i2-1)+1:3*i2) + bb(:)
+ end do
+
+!second: angle values (ang)
+ do iang=1,deloc%nang
+   i1 = deloc%angs(1,1,iang)
+   s1 = deloc%angs(2,1,iang)
+   r1(:) = xcart(:,i1)+deloc%rshift(1,s1)*rprimd(:,1)&
+&   +deloc%rshift(2,s1)*rprimd(:,2)&
+&   +deloc%rshift(3,s1)*rprimd(:,3)
+   i2 = deloc%angs(1,2,iang)
+   s2 = deloc%angs(2,2,iang)
+   r2(:) = xcart(:,i2)+deloc%rshift(1,s2)*rprimd(:,1)&
+&   +deloc%rshift(2,s2)*rprimd(:,2)&
+&   +deloc%rshift(3,s2)*rprimd(:,3)
+   i3 = deloc%angs(1,3,iang)
+   s3 = deloc%angs(2,3,iang)
+   r3(:) = xcart(:,i3)+deloc%rshift(1,s3)*rprimd(:,1)&
+&   +deloc%rshift(2,s3)*rprimd(:,2)&
+&   +deloc%rshift(3,s3)*rprimd(:,3)
+   iprim=iprim+1
+   call dang_d1(r1,r2,r3,bb)
+   b_matrix(iprim,3*(i1-1)+1:3*i1) = b_matrix(iprim,3*(i1-1)+1:3*i1) + bb(:)
+   call dang_d2(r1,r2,r3,bb)
+   b_matrix(iprim,3*(i2-1)+1:3*i2) = b_matrix(iprim,3*(i2-1)+1:3*i2) + bb(:)
+   call dang_d1(r3,r2,r1,bb)
+   b_matrix(iprim,3*(i3-1)+1:3*i3) = b_matrix(iprim,3*(i3-1)+1:3*i3) + bb(:)
+ end do
+
+!third: dihedral values
+ do idihed=1,deloc%ndihed
+   i1 = deloc%dihedrals(1,1,idihed)
+   s1 = deloc%dihedrals(2,1,idihed)
+   r1(:) = xcart(:,i1)+deloc%rshift(1,s1)*rprimd(:,1)&
+&   +deloc%rshift(2,s1)*rprimd(:,2)&
+&   +deloc%rshift(3,s1)*rprimd(:,3)
+   i2 = deloc%dihedrals(1,2,idihed)
+   s2 = deloc%dihedrals(2,2,idihed)
+   r2(:) = xcart(:,i2)+deloc%rshift(1,s2)*rprimd(:,1)&
+&   +deloc%rshift(2,s2)*rprimd(:,2)&
+&   +deloc%rshift(3,s2)*rprimd(:,3)
+   i3 = deloc%dihedrals(1,3,idihed)
+   s3 = deloc%dihedrals(2,3,idihed)
+   r3(:) = xcart(:,i3)+deloc%rshift(1,s3)*rprimd(:,1)&
+&   +deloc%rshift(2,s3)*rprimd(:,2)&
+&   +deloc%rshift(3,s3)*rprimd(:,3)
+   i4 = deloc%dihedrals(1,4,idihed)
+   s4 = deloc%dihedrals(2,4,idihed)
+   r4(:) = xcart(:,i4)+deloc%rshift(1,s4)*rprimd(:,1)&
+&   +deloc%rshift(2,s4)*rprimd(:,2)&
+&   +deloc%rshift(3,s4)*rprimd(:,3)
+!  write(std_out,*) 'dihed ',idihed
+!  write(std_out,*) r1
+!  write(std_out,*) r2
+!  write(std_out,*) r3
+!  write(std_out,*) r4
+
+   iprim=iprim+1
+   call ddihedral_d1(r1,r2,r3,r4,bb)
+   b_matrix(iprim,3*(i1-1)+1:3*i1) = b_matrix(iprim,3*(i1-1)+1:3*i1) + bb(:)
+   call ddihedral_d2(r1,r2,r3,r4,bb)
+   b_matrix(iprim,3*(i2-1)+1:3*i2) = b_matrix(iprim,3*(i2-1)+1:3*i2) + bb(:)
+   call ddihedral_d2(r4,r3,r2,r1,bb)
+   b_matrix(iprim,3*(i3-1)+1:3*i3) = b_matrix(iprim,3*(i3-1)+1:3*i3) + bb(:)
+   call ddihedral_d1(r4,r3,r2,r1,bb)
+   b_matrix(iprim,3*(i4-1)+1:3*i4) = b_matrix(iprim,3*(i4-1)+1:3*i4) + bb(:)
+ end do
+
+ do icart=1,deloc%ncart
+   iprim=iprim+1
+   b_matrix(iprim,3*(deloc%carts(2,icart)-1)+deloc%carts(1,icart)) = &
+&   b_matrix(iprim,3*(deloc%carts(2,icart)-1)+deloc%carts(1,icart)) + one
+ end do
+
+!DEBUG
+! write (200,*) 'calc_b_matrix : b_matrix = '
+! do iprim=1,deloc%ninternal
+!   do i1=1, 3*natom
+!     write (200,'(E16.6,2x)',ADVANCE='NO') b_matrix(iprim,i1)
+!   end do
+!   write (200,*)
+! end do
+!ENDDEBUG
+
+end subroutine calc_b_matrix
+!!***
+
+!!****f* ABINIT/dbond_length_d1
+!! NAME
+!! dbond_length_d1
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      calc_b_matrix
+!!
+!! CHILDREN
+!!      acrossb
+!!
+!! SOURCE
+!!
+
+subroutine dbond_length_d1(r1,r2,bb)
+
+ use defs_basis
+ use m_abimover, only : bond_length
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dbond_length_d1'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: r1(3),r2(3)
+ real(dp),intent(out) :: bb(3)
+
+!Local variables ------------------------------
+!arrays
+ real(dp) :: rpt(3)
+
+!************************************************************************
+ rpt(:) = r1(:)-r2(:)
+ bb(:) = rpt(:)/bond_length(r1,r2)
+
+end subroutine dbond_length_d1
+!!***
+
+
+!!****f* ABINIT/dang_d1
+!! NAME
+!! dang_d1
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      calc_b_matrix
+!!
+!! CHILDREN
+!!      acrossb
+!!
+!! SOURCE
+!!
+
+subroutine dang_d1(r1,r2,r3,bb)
+
+ use defs_basis
+
+ use m_geometry,  only : acrossb
+ use m_abimover, only : bond_length
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dang_d1'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: r1(3),r2(3),r3(3)
+ real(dp),intent(out) :: bb(3)
+
+!Local variables ------------------------------
+!scalars
+ real(dp) :: cos_ang,n1,n1232,n2,tmp
+!arrays
+ real(dp) :: cp1232(3),rpt(3),rpt12(3),rpt32(3)
+
+!************************************************************************
+ n1=bond_length(r1,r2)
+ n2=bond_length(r3,r2)
+
+ rpt12(:) = r1(:)-r2(:)
+ rpt32(:) = r3(:)-r2(:)
+
+ cos_ang = (rpt12(1)*rpt32(1)+rpt12(2)*rpt32(2)+rpt12(3)*rpt32(3))/n1/n2
+ if (cos_ang > one - epsilon(one)*two) then
+   cos_ang = one
+ else if(cos_ang < -one + epsilon(one)*two) then
+   cos_ang = -one
+ end if
+
+ rpt(:) = rpt32(:)/n1/n2 - rpt12(:)*cos_ang/n1/n1
+
+ tmp = sqrt(one-cos_ang**2)
+ bb(:) = zero
+ if (tmp > epsilon(one)) then
+   bb(:) = rpt(:) * (-one)/tmp
+ end if
+
+!TEST: version from MOLECULAR VIBRATIONS EB Wilson
+ call acrossb(rpt12,rpt32,cp1232)
+ n1232 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
+ rpt(:) = (cos_ang*rpt12(:)*n2/n1 - rpt32(:))/n1232
+ if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3)) > tol10) then
+   write(std_out,*) 'Compare bb ang 1 : '
+   write(std_out,*) bb(:), rpt(:), bb(:)-rpt(:)
+ end if
+ bb(:) = rpt(:)
+
+end subroutine dang_d1
+!!***
+
+
+!!****f* ABINIT/dang_d2
+!! NAME
+!! dang_d2
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      calc_b_matrix
+!!
+!! CHILDREN
+!!      acrossb
+!!
+!! SOURCE
+!!
+
+subroutine dang_d2(r1,r2,r3,bb)
+
+ use defs_basis
+
+ use m_geometry,  only : acrossb
+ use m_abimover, only : bond_length
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dang_d2'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: r1(3),r2(3),r3(3)
+ real(dp),intent(out) :: bb(3)
+
+!Local variables ------------------------------
+!scalars
+ real(dp) :: cos_ang,n1,n1232,n2,tmp
+!arrays
+ real(dp) :: cp1232(3),rpt(3),rpt12(3),rpt32(3)
+
+!************************************************************************
+ n1=bond_length(r1,r2)
+ n2=bond_length(r3,r2)
+
+ rpt12(:) = r1(:)-r2(:)
+ rpt32(:) = r3(:)-r2(:)
+
+ cos_ang = (rpt12(1)*rpt32(1)+rpt12(2)*rpt32(2)+rpt12(3)*rpt32(3))/n1/n2
+ if (cos_ang > one - epsilon(one)*two) then
+   cos_ang = one
+ else if(cos_ang < -one + epsilon(one)*two) then
+   cos_ang = -one
+ end if
+
+ rpt(:) = -rpt32(:)/n1/n2 - rpt12(:)/n1/n2 &
+& + rpt12(:)*cos_ang/n1/n1 + rpt32(:)*cos_ang/n2/n2
+
+ tmp = sqrt(one-cos_ang**2)
+ bb(:) = zero
+ if (tmp > tol12) then
+   bb(:) = rpt(:) * (-one)/tmp
+ end if
+
+!TEST: version from MOLECULAR VIBRATIONS EB Wilson
+ call acrossb(rpt12,rpt32,cp1232)
+ n1232 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
+ rpt(:) = ((n1-n2*cos_ang)*rpt12(:)/n1 + (n2-n1*cos_ang)*rpt32(:)/n2) / n1232
+ if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3))  > tol10) then
+   write(std_out,*) 'Compare bb ang 2 : '
+   write(std_out,*) bb(:), rpt(:), bb(:)-rpt(:)
+ end if
+ bb(:) = rpt(:)
+
+end subroutine dang_d2
+!!***
+
+!!****f* ABINIT/ddihedral_d1
+!! NAME
+!! ddihedral_d1
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      calc_b_matrix
+!!
+!! CHILDREN
+!!      acrossb
+!!
+!! SOURCE
+!!
+
+subroutine ddihedral_d1(r1,r2,r3,r4,bb)
+
+ use defs_basis
+
+ use m_geometry,  only : acrossb
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddihedral_d1'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: r1(3),r2(3),r3(3),r4(3)
+ real(dp),intent(out) :: bb(3)
+
+!Local variables ------------------------------------
+!scalars
+ real(dp) :: cos_dihedral,dih_sign,n1,n2,n23,sin_dihedral,tmp
+!arrays
+ real(dp) :: cp1232(3),cp32_1232(3),cp32_3432(3),cp3432(3),cpcp(3),rpt(3)
+ real(dp) :: rpt12(3),rpt32(3),rpt34(3)
+
+!******************************************************************
+ rpt12(:) = r1(:)-r2(:)
+ rpt32(:) = r3(:)-r2(:)
+ rpt34(:) = r3(:)-r4(:)
+
+ call acrossb(rpt12,rpt32,cp1232)
+ call acrossb(rpt34,rpt32,cp3432)
+
+!DEBUG
+!write(std_out,*) ' cos_dihedral : cp1232 = ', cp1232
+!write(std_out,*) ' cos_dihedral : cp3432 = ', cp3432
+!ENDDEBUG
+
+ n1 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
+ n2 = sqrt(cp3432(1)**2+cp3432(2)**2+cp3432(3)**2)
+
+ cos_dihedral = (cp1232(1)*cp3432(1)+cp1232(2)*cp3432(2)+cp1232(3)*cp3432(3))/n1/n2
+ if (cos_dihedral > one - epsilon(one)*two) then
+   cos_dihedral = one
+ else if(cos_dihedral < -one + epsilon(one)*two) then
+   cos_dihedral = -one
+ end if
+!we use complementary of standard angle, so
+!cos_dihedral = -cos_dihedral
+
+ call acrossb(cp1232,cp3432,cpcp)
+ cpcp(:) = cpcp(:)/n1/n2
+!we use complementary of standard angle, but sin is invariant
+ sin_dihedral = -(cpcp(1)*rpt32(1)+cpcp(2)*rpt32(2)+cpcp(3)*rpt32(3))&
+& /sqrt(rpt32(1)**2+rpt32(2)**2+rpt32(3)**2)
+ dih_sign = one
+ if (sin_dihedral < -epsilon(one)) then
+   dih_sign = -one
+ end if
+
+!DEBUG
+!write(std_out,'(a,3E16.6)') 'ddihedral_d1 : cos abs(sin) dih_sign= ',&
+!&    cos_dihedral,sin_dihedral,dih_sign
+!ENDDEBUG
+
+!ddihedral_d1 = dih_sign* acos(cos_dihedral)
+ call acrossb(rpt32,cp1232,cp32_1232)
+ call acrossb(rpt32,cp3432,cp32_3432)
+
+ rpt(:) = cp32_3432(:)/n1/n2 - cp32_1232(:)/n1/n1 * cos_dihedral
+ bb(:) = zero
+
+!DEBUG
+!write(std_out,*) 'ddihedral_d1 cp1232 cp3432 = ',cp1232,cp3432,rpt32
+!write(std_out,*) 'ddihedral_d1 cp32_1232 cp32_3432 = ',cp32_1232,cp32_3432,cos_dihedral,n1,n2
+!write(std_out,*) 'ddihedral_d1 rpt = ',rpt
+!ENDDEBUG
+
+ tmp = sqrt(one-cos_dihedral**2)
+ if (tmp > tol12) then
+!  we use complementary of standard angle, so cosine in acos has - sign,
+!  and it appears for the derivative
+   bb(:) = -dih_sign * rpt(:) * (-one) / tmp
+ else
+   bb(:) = dih_sign * cp32_3432(:) / n1 / n2 / &
+&   sqrt(cp32_3432(1)**2+cp32_3432(2)**2+cp32_3432(3)**2)
+ end if
+
+!TEST: version from MOLECULAR VIBRATIONS EB Wilson
+
+ n23 = sqrt(rpt32(1)*rpt32(1)+rpt32(2)*rpt32(2)+rpt32(3)*rpt32(3))
+ rpt(:) = cp1232(:)*n23/n1/n1
+!if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3))  > tol10) then
+!write(std_out,*) 'Compare bb1 : '
+!write(std_out,*) bb(:), rpt(:), bb(:)-rpt(:)
+!end if
+ bb(:) = rpt(:)
+
+end subroutine ddihedral_d1
+!!***
+
+!!****f* ABINIT/ddihedral_d2
+!! NAME
+!! ddihedral_d2
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      calc_b_matrix
+!!
+!! CHILDREN
+!!      acrossb
+!!
+!! SOURCE
+!!
+
+subroutine ddihedral_d2(r1,r2,r3,r4,bb)
+
+ use defs_basis
+
+ use m_geometry,  only : acrossb
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddihedral_d2'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: r1(3),r2(3),r3(3),r4(3)
+ real(dp),intent(out) :: bb(3)
+
+!Local variables
+!scalars
+ real(dp) :: cos_dihedral,dih_sign,n1,n2,n23,sin_dihedral,sp1232,sp3432,tmp
+!arrays
+ real(dp) :: cp1232(3),cp1232_12(3),cp1232_34(3),cp32_1232(3),cp32_3432(3)
+ real(dp) :: cp3432(3),cp3432_12(3),cp3432_34(3),cpcp(3),rpt(3),rpt12(3)
+ real(dp) :: rpt32(3),rpt34(3)
+
+! *************************************************************************
+ rpt12(:) = r1(:)-r2(:)
+ rpt32(:) = r3(:)-r2(:)
+ rpt34(:) = r3(:)-r4(:)
+
+ call acrossb(rpt12,rpt32,cp1232)
+ call acrossb(rpt34,rpt32,cp3432)
+
+!DEBUG
+!write(std_out,*) ' cos_dihedral : cp1232 = ', cp1232
+!write(std_out,*) ' cos_dihedral : cp3432 = ', cp3432
+!ENDDEBUG
+
+ n1 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
+ n2 = sqrt(cp3432(1)**2+cp3432(2)**2+cp3432(3)**2)
+
+ cos_dihedral = (cp1232(1)*cp3432(1)+cp1232(2)*cp3432(2)+cp1232(3)*cp3432(3))/n1/n2
+ if (cos_dihedral > one - epsilon(one)*two) then
+   cos_dihedral = one
+ else if(cos_dihedral < -one + epsilon(one)*two) then
+   cos_dihedral = -one
+ end if
+!we use complementary of standard angle, so
+!cos_dihedral = -cos_dihedral
+
+ call acrossb(cp1232,cp3432,cpcp)
+ cpcp(:) = cpcp(:)/n1/n2
+!we use complementary of standard angle, but sin is invariant
+ sin_dihedral = -(cpcp(1)*rpt32(1)+cpcp(2)*rpt32(2)+cpcp(3)*rpt32(3))&
+& /sqrt(rpt32(1)**2+rpt32(2)**2+rpt32(3)**2)
+ dih_sign = one
+ if (sin_dihedral <  -tol12) then
+   dih_sign = -one
+ end if
+
+!DEBUG
+!write(std_out,'(a,3E16.6)') 'ddihedral_d2 : cos abs(sin) dih_sign= ',&
+!&    cos_dihedral,sin_dihedral,dih_sign
+!ENDDEBUG
+
+!ddihedral_d2 = dih_sign* acos(cos_dihedral)
+ call acrossb(rpt32,cp3432,cp32_3432)
+ call acrossb(cp3432,rpt12,cp3432_12)
+ call acrossb(cp1232,rpt34,cp1232_34)
+
+ call acrossb(rpt32,cp1232,cp32_1232)
+ call acrossb(cp1232,rpt12,cp1232_12)
+ call acrossb(cp3432,rpt34,cp3432_34)
+
+ rpt(:) = -(cp32_3432(:) + cp3432_12(:) + cp1232_34(:))/n1/n2 &
+& +cos_dihedral*(cp32_1232(:)/n1/n1 + cp1232_12(:)/n1/n1 + cp3432_34(:)/n2/n2)
+ bb(:) = zero
+ tmp = sqrt(one-cos_dihedral**2)
+ if (tmp > tol12) then
+!  we use complementary of standard angle, so cosine in acos has - sign,
+!  and it appears for derivative
+   bb(:) = -dih_sign * rpt(:) * (-one) / tmp
+ else
+   bb(:) = dih_sign * cos_dihedral * &
+&   ( cp32_1232(:)/n1/n1/sqrt(cp32_1232(1)**2+cp32_1232(2)**2+cp32_1232(3)**2) &
+&   +cp1232_12(:)/n1/n1/sqrt(cp1232_12(1)**2+cp1232_12(2)**2+cp1232_12(3)**2) &
+&   +cp3432_34(:)/n2/n2/sqrt(cp3432_34(1)**2+cp3432_34(2)**2+cp3432_34(3)**2) )
+ end if
+
+!TEST: version from MOLECULAR VIBRATIONS EB Wilson p. 61
+ n23 = sqrt(rpt32(1)*rpt32(1)+rpt32(2)*rpt32(2)+rpt32(3)*rpt32(3))
+ sp1232 = rpt12(1)*rpt32(1)+rpt12(2)*rpt32(2)+rpt12(3)*rpt32(3)
+ sp3432 = rpt34(1)*rpt32(1)+rpt34(2)*rpt32(2)+rpt34(3)*rpt32(3)
+
+ rpt(:) = -cp1232(:)*(n23-sp1232/n23)/n1/n1 - cp3432(:)*sp3432/n23/n2/n2
+!if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3))  > tol10) then
+!write(std_out,*) 'Compare bb2 : '
+!write(std_out,*) bb(:), rpt(:), bb(:)-rpt(:)
+!write(std_out,*) -cp1232(:)*(n23-sp1232/n23)/n1/n1, -cp3432(:)*sp3432/n23/n2/n2
+!end if
+ bb(:) = rpt(:)
+
+end subroutine ddihedral_d2
+!!***
+
+!!****f* ABINIT/xcart2deloc
+!! NAME
+!! xcart2deloc
+!!
+!! FUNCTION
+!!  Calculate values of delocalized coordinates as a function of
+!!  cartesian ones. First primitive internals, then B matrix,
+!!  then F, then U then delocalized internals.
+!!
+!! INPUTS
+!! deloc <type(delocint)>=Important variables for pred_delocint
+!!   |
+!!   | nang     = Number of angles
+!!   | nbond    = Number of bonds
+!!   | ncart    = Number of cartesian directions
+!!   |             (used for constraints)
+!!   | ndihed   = Number of dihedrals
+!!   | nrshift  = Dimension of rshift
+!!   | ninternal= Number of internal coordinates
+!!   |            ninternal=nbond+nang+ndihed+ncart
+!!   |
+!!   | angs(2,3,nang)  = Indexes to characterize angles
+!!   | bonds(2,2,nbond)= For a bond between iatom and jatom
+!!   |                   bonds(1,1,nbond) = iatom
+!!   |                   bonds(2,1,nbond) = icenter
+!!   |                   bonds(1,2,nbond) = jatom
+!!   |                   bonds(2,2,nbond) = irshift
+!!   | carts(2,ncart)  = Index of total primitive internal,
+!!   |                   and atom (carts(2,:))
+!!   | dihedrals(2,4,ndihed)= Indexes to characterize dihedrals
+!!   |
+!!   | rshift(3,nrshift)= Shift in xred that must be done to find
+!!   |                    all neighbors of a given atom within a
+!!   |                    given number of neighboring shells
+!! natom = Number of atoms
+!! rprimd(3,3) = Dimensional real space primitive translations
+!!               (bohr)
+!! xcart(3,natom) = Cartesian coordinates of atoms (bohr)
+!!
+!! OUTPUT
+!! bt_inv_matrix(3*(natom-1),3*natom) = Inverse of B^{T} matrix
+!! deloc_int(3*(natom-1)) = Delocalized internal coordinates
+!! prim_int(ninternal) = Primitive internal coordinates
+!!
+!! SIDE EFFECTS
+!! u_matrix(ninternal,3*(natom-1)) = Eigenvectors of BB^T matrix
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      deloc2xcart,pred_delocint,xfh_recover_deloc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+ use m_abimover
+ use m_linalg_interfaces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xcart2deloc'
+ use interfaces_45_geomoptim, except_this_one => xcart2deloc
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom
+ type(delocint),intent(inout) :: deloc
+!arrays
+ real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
+ real(dp),intent(inout) :: u_matrix(deloc%ninternal,3*(natom-1))
+ real(dp),intent(out) :: bt_inv_matrix(3*(natom-1),3*natom)
+ real(dp),intent(out) :: deloc_int(3*(natom-1))
+ real(dp),intent(out) :: prim_int(deloc%ninternal)
+
+!Local variables-------------------------------
+!scalars
+integer :: ii
+logical :: DEBUG=.FALSE.
+!arrays
+ real(dp) :: b_matrix(deloc%ninternal,3*natom)
+
+! ******************************************************************
+
+ call calc_prim_int(deloc,natom,rprimd,xcart,prim_int)
+ if (DEBUG)then
+   write(std_out,*) 'Primitive Internals'
+   do ii=1,deloc%ninternal
+     write(std_out,*) prim_int(ii)
+   end do
+ end if
+
+ call calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
+ if (DEBUG)then
+   write(std_out,*) 'B Matrix'
+   do ii=1,deloc%ninternal
+     write(std_out,*) b_matrix(:,ii)
+   end do
+ end if
+
+ call calc_btinv_matrix(b_matrix,natom,deloc%ninternal,&
+& bt_inv_matrix,u_matrix)
+ if (DEBUG)then
+   write(std_out,*) 'BT Inverse Matrix'
+   do ii=1,3*natom
+     write(std_out,*) bt_inv_matrix(:,ii)
+   end do
+ end if
+
+!calculate value of delocalized internals
+
+ call dgemv('T',deloc%ninternal,3*(natom-1),one,&
+& u_matrix,deloc%ninternal,prim_int,1,zero,deloc_int,1)
+
+end subroutine xcart2deloc
+!!***
+
+
+!!****f* ABINIT/calc_btinv_matrix
+!! NAME
+!! calc_btinv_matrix
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      xcart2deloc
+!!
+!! NOTES
+!!   bt_inv_matrix is inverse transpose of the delocalized
+!!    coordinate B matrix. b_matrix is the primitive internal B matrix
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine calc_btinv_matrix(b_matrix,natom,ninternal,bt_inv_matrix,u_matrix)
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_linalg_interfaces
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'calc_btinv_matrix'
+ use interfaces_45_geomoptim, except_this_one => calc_btinv_matrix
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ninternal,natom
+ real(dp),intent(in) :: b_matrix(ninternal,3*natom)
+ real(dp),intent(out) :: bt_inv_matrix(3*(natom-1),3*natom)
+ real(dp),intent(inout) :: u_matrix(ninternal,3*(natom-1))
+
+!Local variables ------------------------------------
+!scalars
+ integer :: ii,info,lwork
+!arrays
+ real(dp) :: f_eigs(3*natom),f_matrix(3*natom,3*natom)
+ real(dp) :: s_matrix(3*natom,3*natom)
+ real(dp) :: s_red(3*natom,3*(natom-1))
+ real(dp) :: u_matrix_old(ninternal,3*(natom-1))
+ real(dp),allocatable :: work(:)
+
+!******************************************************************
+
+!f matrix = B^{T} B
+ call dgemm('T','N',3*natom,3*natom,ninternal,one,&
+& b_matrix,ninternal,b_matrix,ninternal,zero,f_matrix,3*natom)
+
+ lwork = max(1,3*3*natom-1)
+ ABI_ALLOCATE(work,(lwork))
+ s_matrix(:,:) = f_matrix(:,:)
+
+ call dsyev('V','L',3*natom,s_matrix,3*natom,f_eigs,work,lwork,info)
+
+ ABI_DEALLOCATE(work)
+
+ if (abs(f_eigs(1)) + abs(f_eigs(2)) + abs(f_eigs(3)) > tol10 ) then
+   write(std_out,*) 'Error: 3 lowest eigenvalues are not zero'
+   write(std_out,*) '  internal coordinates do NOT span the full degrees of freedom !'
+   write(std_out,'(6E16.6)') f_eigs
+   MSG_ERROR("Aborting now")
+ end if
+ if ( abs(f_eigs(4)) < tol10 ) then
+   write(std_out,*) 'Error: fourth eigenvalue is zero'
+   write(std_out,*) '  internal coordinates do NOT span the full degrees of freedom !'
+   write(std_out,'(6E16.6)') f_eigs
+   MSG_ERROR("Aborting now")
+ end if
+
+!calculate U matrix from U = B * S_red * lambda^{-1/2}
+ do ii=1,3*(natom-1)
+   s_red(:,ii) = s_matrix(:,ii+3)/sqrt(f_eigs(ii+3))
+ end do
+
+ u_matrix_old(:,:) = u_matrix(:,:)
+
+ call dgemm('N','N',ninternal,3*(natom-1),3*natom,one,&
+& b_matrix,ninternal,s_red,3*natom,zero,u_matrix,ninternal)
+
+
+!align eigenvectors, to preserve a form of continuity in convergences
+!!!! eigenvalues are no longer in increasing order!!! but only s_red is reordered
+!so that btinv is correct.
+ call align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
+
+!calculate B_deloc^{-1} matrix for transformation of forces to deloc coord.
+!(B^{T}_deloc)^{-1} = (B_deloc B^{T}_deloc)^{-1} B_deloc = lambda^{-3/2} S^{T} F
+!= ( S lambda^{3/2} )^{T} F
+
+!! DEFINITION
+!! real(dp),intent(out) :: bt_inv_matrix(3*(natom-1),3*natom)
+
+!even better: B_deloc^{-1} = lambda^{-1/2} S^{T}
+ do ii=1,3*(natom-1)
+!  s_red(:,ii) = s_matrix(:,ii+3)*sqrt(f_eigs(ii+3))
+   bt_inv_matrix(ii,:) = s_matrix(:,ii+3)/sqrt(f_eigs(ii+3))
+ end do
+
+end subroutine calc_btinv_matrix
+!!***
+
+!!****f* ABINIT/align_u_matrices
+!! NAME
+!! align_u_matrices
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      xcart2deloc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
+
+ use defs_basis
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'align_u_matrices'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ninternal,natom
+!arrays
+ real(dp),intent(in) :: u_matrix_old(ninternal,3*(natom-1))
+ real(dp),intent(inout) :: f_eigs(3*natom)
+ real(dp),intent(inout) :: s_matrix(3*natom,3*natom)
+ real(dp),intent(inout) :: u_matrix(ninternal,3*(natom-1))
+
+!Local variables ------------------------------
+!scalars
+ integer :: ii,iint1,imax
+ real(dp) :: ss
+!arrays
+ integer :: eigv_flag(3*(natom-1)),eigv_ind(3*(natom-1))
+ real(dp) :: tmps(3*natom,3*natom)
+ real(dp) :: tmpu(ninternal,3*(natom-1))
+ real(dp) :: tmpf(3*natom)
+
+!******************************************************************
+
+ eigv_flag(:) = 0
+ eigv_ind(:) = 0
+
+!just permit a change in sign
+ do iint1=1,3*(natom-1)
+   ss = zero
+   do ii=1,ninternal
+     ss = ss + u_matrix_old(ii,iint1)*u_matrix(ii,iint1)
+   end do
+   if (ss < -tol12) then
+     imax = -iint1
+   else
+     imax = iint1
+   end if
+   eigv_ind(iint1) = imax
+   eigv_flag(abs(imax)) = 1
+ end do
+
+ tmpu(:,:) = u_matrix
+ tmps(:,:) = s_matrix
+ tmpf(:) = f_eigs
+!exchange eigenvectors...
+ do iint1=1,3*(natom-1)
+   ss = one
+   if (eigv_ind(iint1) < 0) ss = -one
+
+   imax = abs(eigv_ind(iint1))
+
+   tmpu(:,imax) = ss*u_matrix(:,iint1)
+
+   tmps(:,imax+3) = ss*s_matrix(:,iint1+3)
+
+   tmpf(imax+3) = f_eigs(iint1+3)
+ end do
+
+ u_matrix(:,:) = tmpu(:,:)
+ s_matrix(:,:) = tmps(:,:)
+ f_eigs(:) = tmpf(:)
+
+end subroutine align_u_matrices
+!!***
+
+!!****f* ABINIT/xfh_recover_deloc
+!! NAME
+!! xfh_recover_deloc
+!!
+!! FUNCTION
+!! Update the contents of the history xfhist taking values
+!! from xred, acell, rprim, fred_corrected and strten
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      pred_delocint
+!!
+!! CHILDREN
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!
+!! SOURCE
+
+subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
+& fred,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
+& vout,vout_prev,xred,deloc,deloc_int,deloc_force,btinv,gprimd,prim_int,&
+& u_matrix)
+
+ use m_profiling_abi
+ use defs_basis
+ use m_abimover
+
+ use m_geometry,    only : xred2xcart
+ use m_results_gs , only : results_gs_type
+ use m_bfgs,        only : hessupdt
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xfh_recover_deloc'
+ use interfaces_45_geomoptim, except_this_one => xfh_recover_deloc
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+
+integer,intent(in) :: ndim
+integer,intent(out) :: cycl_main
+real(dp),intent(inout) :: ucvol,ucvol0
+type(ab_xfh_type),intent(inout) :: ab_xfh
+type(abimover),intent(in) :: ab_mover
+! DELOCINT specials
+type(delocint),intent(inout) :: deloc
+
+!arrays
+real(dp),intent(inout) :: acell(3)
+real(dp),intent(in) :: acell0(3)
+real(dp),intent(inout) :: hessin(:,:)
+real(dp),intent(inout) :: xred(3,ab_mover%natom)
+real(dp),intent(inout) :: rprim(3,3)
+real(dp),intent(inout) :: rprimd0(3,3)
+real(dp),intent(inout) :: fred(3,ab_mover%natom)
+real(dp),intent(inout) :: strten(6)
+real(dp),intent(inout) :: vin(:)
+real(dp),intent(inout) :: vin_prev(:)
+real(dp),intent(inout) :: vout(:)
+real(dp),intent(inout) :: vout_prev(:)
+! DELOCINT specials
+real(dp),intent(inout) :: deloc_force(3*(ab_mover%natom-1))
+real(dp),intent(inout) :: deloc_int(3*(ab_mover%natom-1))
+real(dp),intent(inout) :: btinv(3*(ab_mover%natom-1),3*ab_mover%natom)
+real(dp),intent(inout) :: prim_int(:),u_matrix(:,:),gprimd(3,3)
+
+!Local variables-------------------------------
+!scalars
+integer :: ixfh
+real(dp) :: xcart(3,ab_mover%natom)
+
+!*********************************************************************
+
+ if(ab_xfh%nxfh/=0)then
+!  Loop over previous time steps
+   do ixfh=1,ab_xfh%nxfh
+
+!    For that time step, get new (x,f) from xfhist
+     xred(:,:)     =ab_xfh%xfhist(:,1:ab_mover%natom        ,1,ixfh)
+     rprim(1:3,1:3)=ab_xfh%xfhist(:,ab_mover%natom+2:ab_mover%natom+4,1,ixfh)
+     acell(:)      =ab_xfh%xfhist(:,ab_mover%natom+1,1,ixfh)
+     fred(:,:)     =ab_xfh%xfhist(:,1:ab_mover%natom,2,ixfh)
+!    This use of results_gs is unusual
+     strten(1:3)   =ab_xfh%xfhist(:,ab_mover%natom+2,2,ixfh)
+     strten(4:6)   =ab_xfh%xfhist(:,ab_mover%natom+3,2,ixfh)
+
+!    !DEBUG
+!    write (ab_out,*) '---READ FROM XFHIST---'
+
+!    write (ab_out,*) 'XRED'
+!    do kk=1,ab_mover%natom
+!    write (ab_out,*) xred(:,kk)
+!    end do
+!    write (ab_out,*) 'FRED'
+!    do kk=1,ab_mover%natom
+!    write (ab_out,*) fred(:,kk)
+!    end do
+!    write(ab_out,*) 'RPRIM'
+!    do kk=1,3
+!    write(ab_out,*) rprim(:,kk)
+!    end do
+!    write(ab_out,*) 'ACELL'
+!    write(ab_out,*) acell(:)
+!    !DEBUG
+
+!    Convert input xred (reduced coordinates) to xcart (cartesian)
+     call xred2xcart(ab_mover%natom,rprimd0,xcart,xred)
+!    Convert input coordinates in Delocalized internals
+     call xcart2deloc(deloc,ab_mover%natom,rprimd0,xcart,&
+&     btinv,u_matrix,deloc_int,prim_int)
+!    Convert forces to delocalized coordinates for next step
+     call fred2fdeloc(btinv,deloc_force,fred,ab_mover%natom,gprimd)
+
+!    Transfer it in vin, vout
+     call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+&     ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
+&     ab_mover%symrel,ucvol,ucvol0,vin,deloc_int)
+     call xfpack_f2vout(deloc_force,ab_mover%natom-1,&
+&     ndim,ab_mover%optcell,ab_mover%strtarget,strten,&
+&     ucvol,vout)
+!    Get old time step, if any, and update inverse hessian
+     if(ixfh/=1)then
+       xred(:,:)     =ab_xfh%xfhist(:,1:ab_mover%natom,1,ixfh-1)
+       rprim(1:3,1:3)=&
+&       ab_xfh%xfhist(:,ab_mover%natom+2:ab_mover%natom+4,1,ixfh-1)
+       acell(:)=ab_xfh%xfhist(:,ab_mover%natom+1,1,ixfh-1)
+       fred(:,:)=ab_xfh%xfhist(:,1:ab_mover%natom,2,ixfh-1)
+!      This use of results_gs is unusual
+       strten(1:3)=ab_xfh%xfhist(:,ab_mover%natom+2,2,ixfh-1)
+       strten(4:6)=ab_xfh%xfhist(:,ab_mover%natom+3,2,ixfh-1)
+
+!      Convert input xred (reduced coordinates) to xcart (cartesian)
+       call xred2xcart(ab_mover%natom,rprimd0,xcart,xred)
+!      Convert input coordinates in Delocalized internals
+       call xcart2deloc(deloc,ab_mover%natom,rprimd0,xcart,&
+&       btinv,u_matrix,deloc_int,prim_int)
+!      Convert forces to delocalized coordinates for next step
+       call fred2fdeloc(btinv,deloc_force,fred,ab_mover%natom,gprimd)
+
+!      Tranfer it in vin_prev, vout_prev
+       call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+&       ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
+&       ab_mover%symrel,ucvol,ucvol0,vin_prev,deloc_int)
+       call xfpack_f2vout(deloc_force,ab_mover%natom-1,&
+&       ndim,ab_mover%optcell,ab_mover%strtarget,strten,&
+&       ucvol,vout_prev)
+
+!      write(ab_out,*) 'Hessian matrix before update',ndim,'x',ndim
+!      write(ab_out,*) 'ixfh=',ixfh
+!      do kk=1,ndim
+!      do jj=1,ndim,3
+!      if (jj+2<=ndim)then
+!      write(ab_out,*) jj,hessin(jj:jj+2,kk)
+!      else
+!      write(ab_out,*) jj,hessin(jj:ndim,kk)
+!      end if
+!      end do
+!      end do
+
+       call hessupdt(hessin,ab_mover%iatfix,ab_mover%natom-1,ndim,&
+&       vin,vin_prev,vout,vout_prev)
+
+!      !DEBUG
+!      write(ab_out,*) 'Hessian matrix after update',ndim,'x',ndim
+!      do kk=1,ndim
+!      do jj=1,ndim,3
+!      if (jj+2<=ndim)then
+!      write(ab_out,*) jj,hessin(jj:jj+2,kk)
+!      else
+!      write(ab_out,*) jj,hessin(jj:ndim,kk)
+!      end if
+!      end do
+!      end do
+!      !DEBUG
+
+     end if !if(ab_xfh%nxfh/=0)
+
+!    End loop over previous time steps
+   end do
+
+!  The hessian has been generated,
+!  as well as the latest vin and vout
+!  so will cycle the main loop
+   cycl_main=1
+
+ end if
+
+end subroutine xfh_recover_deloc
 !!***

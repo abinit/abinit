@@ -27,7 +27,7 @@
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpsang=
 !!  mpw= maximum number of plane waves
 !!  my_natom=number of atoms treated by current processor

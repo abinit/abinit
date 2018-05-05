@@ -148,6 +148,7 @@
 !!  rhor(nfftf,nspden)=total electron density (el/bohr**3)
 !!  taug(2,nfftf*dtset%usekden)=array for Fourier transform of kinetic energy density
 !!  taur(nfftf,nspden*dtset%usekden)=array for kinetic energy density
+!!  tauresid(nfftf,nspden*dtset%usekden)=array for kinetic energy density residual
 !!  wvl <type(wvl_data)>=wavelets structures in case of wavelets basis.
 !!  ==== if (usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
@@ -193,7 +194,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
-&           rmet,rprimd,susmat,symrec,taug,taur,&
+&           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
 
  use defs_basis
@@ -237,6 +238,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_kg,                 only : mkkin, mkkpg
  use m_suscep_stat,        only : suscep_stat
  use m_fft,                only : fftpac
+ use m_spacepar,           only : symrhg
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
@@ -306,6 +308,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(inout) :: kxc(nfftf,nkxc),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp), intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden)
  real(dp), intent(inout) :: taug(2,nfftf*dtset%usekden),taur(nfftf,dtset%nspden*dtset%usekden)
+ real(dp), intent(inout) :: tauresid(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(inout),optional :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  type(pawcprj_type),allocatable,intent(inout) :: cprj(:,:)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
@@ -450,7 +453,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Initialize rhor if needed; store old rhor
  if(iscf>=0 .or. iscf==-3) then
-   if (optres==1) nvresid=rhor
+   if (optres==1) then
+     nvresid=rhor
+     tauresid=taur
+   end if
 !  NC and plane waves
    if (psps%usepaw==0 .and. dtset%usewvl==0) then
      rhor=zero
@@ -1651,13 +1657,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Build symetrized packed rhoij and compensated pseudo density
      cplex=1;ipert=0;idir=0;qpt(:)=zero
      if(dtset%usewvl==0) then
-       call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+       call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &       my_natom,natom,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
      else
 !      here do not pass rhog, we do not use it
-       call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+       call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &       my_natom,natom,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat)
@@ -1688,6 +1694,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if (optres==1) then
        nvresid=rhor-nvresid
        call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid,mpi_comm_sphgrid=mpi_comm_sphgrid)
+       tauresid=taur-tauresid
      end if
    end if
 

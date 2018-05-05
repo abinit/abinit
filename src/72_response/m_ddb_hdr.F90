@@ -44,8 +44,8 @@ MODULE m_ddb_hdr
  private
 
  public :: ddb_getdims      ! Open a DDB file and read basic dimensions and variables.
- public :: ioddb8_in      ! Temporary
- public :: psddb8      ! Temporary
+ public :: ioddb8_in        ! Temporary
+ public :: psddb8           ! Temporary
 
  type,public :: ddb_hdr_type
 
@@ -2492,10 +2492,10 @@ subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
 
  if (.not. found) then
    write(message, '(a,a,a,a,a,a,a,a,a,a,a)' )&
-&   '  Reading DDB, expected name was "',trim(nmxpct_),'"',ch10,&
-&   '               and name found is "',trim(nmfond_),'"',ch10,&
-&   '  Likely your DDB is incorrect.',ch10,&
-&   '  Action : correct your DDB, or contact the ABINIT group.'
+&   'Reading DDB, expected name was "',trim(nmxpct_),'"',ch10,&
+&   '             and name found is "',trim(nmfond_),'"',ch10,&
+&   'Likely your DDB is incorrect.',ch10,&
+&   'Action: correct your DDB, or contact the ABINIT group.'
    MSG_ERROR(message)
  end if
 
@@ -2853,7 +2853,7 @@ subroutine compare_ddb_variables(&
    end if
  end if
 
-!Now compare several PAW dataset informations
+!Now compare several PAW dataset information
  if (usepaw==1) then
    if (fullinit/=0 .and. fullmrgddb_init/=0) then
      do itypat=1,ntypat
@@ -2943,14 +2943,14 @@ subroutine chkr8(reali,realt,name,tol)
 
 ! *********************************************************************
 
-   if(abs(reali-realt)>tol) then
-     write(message, '(a,a,a,a,a,es16.6,a,a,a,es16.6,a,a,a)' )&
-     'Comparing reals for variable',name,'.',ch10,&
-     'Value from input DDB is',reali,' and',ch10,&
-     'from transfer DDB is',realt,'.',ch10,&
-     'Action: check your DDBs.'
-     MSG_ERROR(message)
-   end if
+ if(abs(reali-realt)>tol) then
+   write(message, '(a,a,a,a,a,es16.6,a,a,a,es16.6,a,a,a)' )&
+   'Comparing reals for variable',name,'.',ch10,&
+   'Value from input DDB is',reali,' and',ch10,&
+   'from transfer DDB is',realt,'.',ch10,&
+   'Action: check your DDBs.'
+   MSG_ERROR(message)
+ end if
 
  end subroutine chkr8
 !!***

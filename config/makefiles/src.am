@@ -71,8 +71,8 @@ abiauty:
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/51_manage_mpi >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/52_manage_cuda >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/53_ffts >> tmp-abiauty.log
-	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/53_spacepar >> tmp-abiauty.log
-	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/54_abiutil >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/54_spacepar >> tmp-abiauty.log
+	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/55_abiutil >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_io_mpi >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_mixing >> tmp-abiauty.log
 	@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/src/56_recipspace >> tmp-abiauty.log

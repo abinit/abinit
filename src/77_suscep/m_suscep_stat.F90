@@ -42,6 +42,7 @@ MODULE m_suscep_stat
  use m_gsphere, only : symg
  use m_fftcore, only : sphereboundary
  use m_fft,     only : fftpac
+ use m_spacepar,     only : symrhg
 
  implicit none
 
@@ -173,7 +174,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  use interfaces_32_util
  use interfaces_51_manage_mpi
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

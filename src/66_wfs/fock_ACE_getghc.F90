@@ -122,7 +122,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  if (fockcommon%ieigen/=0) then
    eigen=zero
 !* Dot product of cwavef and ghc
-!* inspired from the routine 53_spacepar/meanvalue_g but without the reference to parallelism and filtering
+!* inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
    if(gs_ham%istwf_k==2) then
      eigen=half*cwavef(1,1)*ghc1(1,1)
    else

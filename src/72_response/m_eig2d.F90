@@ -77,7 +77,7 @@ MODULE m_eig2d
 !! eig2d_t
 !!
 !! FUNCTION
-!! It contains informations about the second-order derivative of the
+!! It contains information about the second-order derivative of the
 !! eigenenergies wrt atomic displacement
 !!
 !! SOURCE
@@ -108,7 +108,7 @@ MODULE m_eig2d
 !! fan_t
 !!
 !! FUNCTION
-!! It contains informations about the second-order derivative of the
+!! It contains information about the second-order derivative of the
 !! eigenenergies wrt atomic displacement
 !!
 !! SOURCE
@@ -138,7 +138,7 @@ MODULE m_eig2d
 !! gkk_t
 !!
 !! FUNCTION
-!! It contains informations about the second-order derivative of the
+!! It contains information about the second-order derivative of the
 !! eigenenergies wrt atomic displacement
 !!
 !! SOURCE
@@ -857,7 +857,7 @@ end subroutine gkk_free
 !!  npert = number of phonon perturbations, without taking into account directions:
 !!            natom.
 !!  nsym = number of symmetries (not used yet).
-!!  mpi_enreg = informations about MPI parallelization.
+!!  mpi_enreg = information about MPI parallelization.
 !!  mpw1 = maximum number of planewaves used to represent first-order wavefunctions.
 !!  nkpt_rbz = number of k-points for each perturbation.
 !!  npwar1(nkpt_rbz,mpert) = number of planewaves at k-point for first-order.
@@ -1362,7 +1362,7 @@ end subroutine eig2stern
 !!  npert = number of phonon perturbations, without taking into account directions:
 !!            natom.
 !!  nsym = number of symmetries (not used yet).
-!!  mpi_enreg = informations about MPI parallelization.
+!!  mpi_enreg = information about MPI parallelization.
 !!  nkpt_rbz = number of k-points for each perturbation.
 !!  nsppol = 1 for unpolarized, 2 for spin-polarized.
 !!  smdelta = integer controling the calculation of electron lifetimes.

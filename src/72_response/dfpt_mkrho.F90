@@ -89,6 +89,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  use m_io_tools,  only : get_unit, iomode_from_fname
  use m_fftcore,   only : sphereboundary
  use m_fft,       only : fftpac
+ use m_spacepar,  only : symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -97,7 +98,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

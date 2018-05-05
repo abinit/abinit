@@ -157,6 +157,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type
+ use m_dtfil,        only : dtfil_init, status
 
 #if defined  HAVE_BIGDFT
  use BigDFT_API, only: mpi_environment_set
@@ -167,7 +168,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 #undef ABI_FUNC
 #define ABI_FUNC 'gstateimg'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_45_geomoptim
  use interfaces_95_drive, except_this_one => gstateimg
 !End of the abilint section

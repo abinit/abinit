@@ -8,7 +8,7 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer,BXu,MG)
+!! Copyright (C) 2004-2018 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +55,8 @@ module m_elphon
  use m_iogkk,           only : read_el_veloc,  read_gkk
  use m_bz_mesh,         only : make_path
  use m_fstab,           only : mkqptequiv
+ use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
+ use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
 
  implicit none
 
@@ -158,7 +160,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 #define ABI_FUNC 'elphon'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -2092,13 +2093,13 @@ end subroutine mkFSkgrid
 subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
  use m_special_funcs,  only : fermi_dirac, bose_einstein
+ use m_epweights,      only : d2c_wtq, ep_ph_weights
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mka2f'
  use interfaces_14_hidewrite
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -3128,8 +3129,6 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 end subroutine ep_setupqpt
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mkph_linwid
 !!
 !! NAME
@@ -3137,13 +3136,6 @@ end subroutine ep_setupqpt
 !!
 !! FUNCTION
 !!  Calculate the phonon linewidths on a trajectory in q space
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  Cryst<crystal_t>=Info on the unit cell and symmetries.
@@ -3783,7 +3775,6 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'interpolate_gkk'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4181,8 +4172,8 @@ end subroutine get_all_gkq
 !!
 !! FUNCTION
 !! This routine determines what to do with the rspace
-!!   matrix elements of the el phon coupling (to disk or in memory),
-!!   then reads those given in the gkq file and Fourier Transforms them
+!! matrix elements of the el phon coupling (to disk or in memory),
+!! then reads those given in the gkq file and Fourier Transforms them
 !!
 !! INPUTS
 !!   elph_ds = elphon datastructure with data and dimensions
@@ -4212,7 +4203,6 @@ subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_all_gkr'
- use interfaces_77_ddb
 !End of the abilint section
 
  implicit none
@@ -4306,7 +4296,7 @@ end subroutine get_all_gkr
 !! FUNCTION
 !! Use the set of special q points calculated by the Monkhorst &
 !! Pack Technique.
-!! Check if all the informations for the q points are present in
+!! Check if all the information for the q points are present in
 !! the DDB to determine the elphon interaction matrices
 !! Generate the gkk matrices of the set of q points which
 !! samples homogeneously the entire Brillouin zone.
@@ -4625,6 +4615,1637 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  ABI_DEALLOCATE(gkk_qpt_tmp)
 
 end subroutine complete_gkk
+!!***
+
+!!****f* ABINIT/get_nv_fs_en
+!! NAME
+!!  get_nv_fs_en
+!!
+!! FUNCTION
+!! This routine finds the energy grids for the integration on epsilon
+!! and epsilon prime. It then calculates the DOS and FS averaged velocity_sq at
+!! these energies. Metals and semiconductors are treated differently, to deal
+!! correctly with the gap.
+!!
+!! INPUTS
+!! crystal<crystal_t>=data type gathering info on the crystalline structure.
+!! Ifc<ifc_type>=Object containing the interatomic force constants.
+!!  elph_ds
+!!    elph_ds%nband = number of bands in ABINIT
+!!    elph_ds%k_fine%nkptirr = Number of irreducible points for which there exist at least one band that crosses the Fermi level.
+!!    elph_ds%nbranch = number of phonon branches = 3*natom
+!!    elph_ds%k_phon%nkpt = number of k points
+!!    elph_ds%k_fine%irredtoGS = mapping of elph k-points to ground state grid
+!!    elph_ds%minFSband = lowest band included in the FS integration
+!!    elph_ds%nFSband = number of bands included in the FS integration
+!!    elph_ds%fermie = fermi energy
+!!    elph_ds%tempermin = minimum temperature at which resistivity etc are calculated (in K)
+!!    elph_ds%temperinc = interval temperature grid on which resistivity etc are calculated (in K)
+!!    elph_ds%ep_b_min= first band taken into account in FS integration (if telphint==2)
+!!    elph_ds%ep_b_max= last band taken into account in FS integration (if telphint==2)
+!!    elph_ds%telphint = flag for integration over the FS with 0=tetrahedra 1=gaussians
+!!    elph_ds%elphsmear = smearing width for gaussian integration
+!!           or buffer in energy for calculations with tetrahedra (telphint=0)
+!!
+!!  elph_tr_ds
+!!    elph_tr_ds%el_veloc = electronic velocities from the fine k-grid
+!!
+!!  eigenGS = Ground State eigenvalues
+!!  kptrlatt_fine = k-point grid vectors (if divided by determinant of present matrix)
+!!  max_occ = maximal occupancy for a band
+!!
+!! OUTPUT
+!!  elph_ds%nenergy = number of energy points for integration on epsilon
+!!  elph_tr_ds%en_all = energy points
+!!  elph_tr_ds%de_all = differences between energy points
+!!  elph_tr_ds%dos_n = DOS at selected energy points
+!!  elph_tr_ds%veloc_sq = FS averaged velocity square at selected energy points
+!!  elph_tr_ds%tmp_gkk_intweight = integration weights at coarse k grid
+!!  elph_tr_ds%tmp_velocwtk = velocity times integration weights at coarse k grid
+!!  elph_tr_ds%tmp_vvelocwtk = velocity square times integration weights at coarse k grid
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      d2c_weights,ep_el_weights,ep_fs_weights,get_veloc_tr,ifc_fourq,wrtout
+!!
+!! SOURCE
+
+subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_nv_fs_en'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!Scalars
+ real(dp), intent(in)  :: max_occ
+ real(dp), intent(out) :: omega_max
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: crystal
+ type(elph_type),intent(inout) :: elph_ds
+ type(elph_tr_type),intent(inout) :: elph_tr_ds
+!Arrays
+
+ real(dp), intent(in)  :: eigenGS(elph_ds%nband,elph_ds%k_fine%nkptirr,elph_ds%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer ::  iFSqpt,isppol,ie1,ierr
+ integer ::  i_metal,low_T
+ integer ::  in_nenergy, out_nenergy
+ integer ::  n_edge1, n_edge2, edge
+ integer ::  ie_all, ne_all
+ integer ::  sz1, sz2, sz3, sz4
+  real(dp) :: e_vb_max, e_cb_min,ucvol
+ real(dp) :: e1,max_e,fine_range
+ real(dp) :: enemin,enemax
+ real(dp) :: Temp,e_tiny,de0
+ real(dp) :: eff_mass1, eff_mass2, tmp_dos
+ character(len=500) :: message
+!arrays
+ real(dp) :: gprimd(3,3)
+ real(dp) :: kpt_2nd(3), e_cb_2nd(2), en1(2)
+ real(dp),allocatable :: dos_e1(:,:),tmp_wtk(:,:,:,:)
+ real(dp),allocatable :: phfrq(:,:)
+ real(dp),allocatable :: displ(:,:,:,:)
+
+! *************************************************************************
+
+ gprimd = crystal%gprimd
+ ucvol = crystal%ucvol
+
+ Temp             = elph_ds%tempermin+elph_ds%temperinc
+ elph_ds%delta_e  = kb_HaK*Temp ! about 1000 cm^-1/100, no need to be omega_max
+ max_e            = elph_ds%nenergy*kb_HaK*Temp
+ e_tiny           = kb_HaK*0.00001_dp ! this is the min. delta_e
+ de0              = kb_HaK*Temp ! Kb*T
+
+ in_nenergy = elph_ds%nenergy
+
+ ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,4))
+ ABI_ALLOCATE(dos_e1,(elph_ds%nsppol,3))
+
+ ABI_ALLOCATE(phfrq,(elph_ds%nbranch, elph_ds%k_phon%nkpt))
+ ABI_ALLOCATE(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_phon%nkpt))
+
+ do iFSqpt=1,elph_ds%k_phon%nkpt
+   call ifc_fourq(ifc,crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt))
+ end do
+
+ omega_max = maxval(phfrq)*1.1_dp
+ ABI_DEALLOCATE(phfrq)
+ ABI_DEALLOCATE(displ)
+
+ write(message,'(a,E20.12)')' The max phonon energy is  ', omega_max
+ call wrtout(std_out,message,'COLL')
+
+ enemin = elph_ds%fermie - max_e*2
+ enemax = elph_ds%fermie + max_e
+ call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+& enemin, enemax, 4, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+& elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+& elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine, tmp_wtk)
+
+ do isppol=1,elph_ds%nsppol
+   dos_e1(isppol,1) = sum(tmp_wtk(:,:,isppol,2))/elph_ds%k_fine%nkpt
+   dos_e1(isppol,2) = sum(tmp_wtk(:,:,isppol,3))/elph_ds%k_fine%nkpt
+   dos_e1(isppol,3) = sum(tmp_wtk(:,:,isppol,4))/elph_ds%k_fine%nkpt
+
+!  ! BXU, only treat metallic case at this moment, as variational method may not
+!  ! apply to insulators
+!  i_metal = -1
+   i_metal = 1
+!  if (dos_e1(isppol,1) .gt. 0.1_dp .and. dos_e1(isppol,2) .gt. 0.1_dp .and. &
+!  &   dos_e1(isppol,3) .gt. 0.1_dp) then ! metal
+!  i_metal = 1
+   if (i_metal == 1) then
+     write(message,'(a)')' This is a metal.'
+     call wrtout(std_out,message,'COLL')
+
+     fine_range = 1.5_dp
+     e1 = elph_ds%fermie + omega_max*fine_range
+     out_nenergy = 0
+     low_T = 1
+     if (omega_max*fine_range .lt. max_e) then
+       low_T = 0
+       de0 = omega_max*fine_range/in_nenergy ! energy spacing within Ef +/- omega_max
+       do while ((e1-elph_ds%fermie) .lt. max_e)
+         e1 = e1 + elph_ds%delta_e
+         out_nenergy = out_nenergy + 1
+       end do
+     end if
+
+     if (low_T == 0) max_e = e1 - elph_ds%fermie
+     elph_ds%nenergy = in_nenergy*2 + 1 + out_nenergy*2
+
+   else ! semiconductor/insulator, need careful consideration later
+     i_metal = 0
+!    between CB min and the next k point, use free electron to replace
+!    The weights will be proportional to the DOS, relative to the weights
+!    calculated with ep_fs_weights, tetrahedron method prefered
+
+!    output VB and CB edges for semiconductor/insulator
+     e_vb_max = maxval(eigenGS(elph_ds%minFSband+elph_ds%nFSband/2-1,:,isppol))
+     e_cb_min = minval(eigenGS(elph_ds%minFSband+elph_ds%nFSband/2,:,isppol))
+     e_cb_2nd(1) = eigenGS(elph_ds%minFSband+elph_ds%nFSband/2,2,isppol)
+     e_cb_2nd(2) = eigenGS(elph_ds%minFSband+elph_ds%nFSband/2+1,2,isppol)
+     write(message,'(a,E20.12,2x,E20.12)')' elphon : top of VB, bottom of CB = ',&
+&     e_vb_max, e_cb_min
+     call wrtout(std_out,message,'COLL')
+     write(message,'(a,E20.12)')' elphon : energy at the neighbor kpt = ',e_cb_2nd(1)
+     call wrtout(std_out,message,'COLL')
+
+     n_edge1 = 4 ! at the very edge
+     n_edge2 = 8  ! sparse to the end of free-electron part
+
+     kpt_2nd(:) = gprimd(:,1)*elph_ds%k_fine%kptirr(1,2) + &
+&     gprimd(:,2)*elph_ds%k_fine%kptirr(2,2) + &
+&     gprimd(:,3)*elph_ds%k_fine%kptirr(3,2)
+     write(message,'(a,3E20.12)')' The neighbor k point is:  ', elph_ds%k_fine%kptirr(:,2)
+     call wrtout(std_out,message,'COLL')
+
+     if (dabs(elph_ds%fermie-e_cb_min) .lt. dabs(elph_ds%fermie-e_vb_max)) then
+       e1 = e_cb_2nd(1)
+     else
+       e1 = e_vb_max
+     end if
+     call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&     e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+
+     elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+
+     eff_mass1 = (kpt_2nd(1)*kpt_2nd(1) + kpt_2nd(2)*kpt_2nd(2) + kpt_2nd(3)*kpt_2nd(3)) / &
+&     (2.0_dp*(e_cb_2nd(1)-e_cb_min))
+     write(message,'(a,E20.12)')' The eff. mass from band1 is: ', eff_mass1
+     call wrtout(std_out,message,'COLL')
+     eff_mass2 = (kpt_2nd(1)*kpt_2nd(1) + kpt_2nd(2)*kpt_2nd(2) + kpt_2nd(3)*kpt_2nd(3)) / &
+&     (2.0_dp*(e_cb_2nd(2)-e_cb_min))
+     write(message,'(a,E20.12)')' The eff. mass from band2 is: ', eff_mass2
+     call wrtout(std_out,message,'COLL')
+
+!    bxu, but the eff. mass estimated in this way is too small
+!    The following is obtained by roughly fitting to the DOS of 48x48x48
+     eff_mass1 = 0.91036
+     write(message,'(a,E20.12)')' The eff. mass we are using is: ', eff_mass1
+     call wrtout(std_out,message,'COLL')
+
+     tmp_dos = (ucvol/2.0_dp/pi**2.0_dp)*(2.0_dp*eff_mass1)**1.5_dp*(e1-e_cb_min)**0.5_dp + &
+&     2.0_dp*(ucvol/2.0_dp/pi**2.0_dp)*(2.0_dp*eff_mass2)**1.5_dp*(e1-e_cb_min)**0.5_dp
+     write(message,'(a,E20.12)')' The fake DOS at kpt1 =   ', tmp_dos
+     call wrtout(std_out,message,'COLL')
+     write(message,'(a,E20.12)')' The calculated DOS at kpt1 =   ', elph_ds%n0(isppol)
+     call wrtout(std_out,message,'COLL')
+
+
+     e1 = elph_ds%fermie - max_e
+     ie_all = 1
+     ne_all = 0
+     edge = 0
+
+     call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&     e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+
+     elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+     do while ((e1-elph_ds%fermie) .lt. max_e)
+       if (e1 .lt. e_cb_min .and. elph_ds%n0(isppol) .lt. tol9) then
+         e1 = e_cb_2nd(1)
+         edge = 1
+         e1 = e1 + de0
+       end if
+
+       if (e1 .lt. e_cb_2nd(1)) then
+         e1 = e_cb_2nd(1)
+         edge = 1
+         e1 = e1 + de0
+       end if
+
+       if (e1 .gt. e_cb_2nd(1)) then
+         call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&         e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&         elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&         elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+
+         elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+
+         e1 = e1 + de0
+         ie_all = ie_all + 1
+       end if
+     end do ! e_all
+     ne_all = ie_all - 1 + (n_edge1 + n_edge2 - 1)*edge ! energy levels in the free-electron range
+     write(message,'(a,i3,a,i3,a)')' For spin', isppol, '  there are ', &
+&     ne_all, '  energy levels considered '
+     call wrtout(std_out,message,'COLL')
+
+     elph_ds%nenergy = ne_all
+   end if ! metal or insulator
+ end do ! isppol
+
+ ABI_DEALLOCATE(tmp_wtk)
+
+ if (elph_ds%nenergy .lt. 2) then
+   MSG_ERROR('There are too few energy levels for non-LOVA')
+ end if
+
+ sz1=elph_ds%ngkkband;sz2=elph_ds%k_phon%nkpt
+ sz3=elph_ds%nsppol;sz4=elph_ds%nenergy+1
+ ABI_ALLOCATE(elph_tr_ds%dos_n,(sz4,sz3))
+ ABI_ALLOCATE(elph_tr_ds%veloc_sq,(3,sz3,sz4))
+ ABI_ALLOCATE(elph_tr_ds%en_all,(sz3,sz4))
+ ABI_ALLOCATE(elph_tr_ds%de_all,(sz3,sz4+1))
+ ABI_ALLOCATE(elph_tr_ds%tmp_gkk_intweight,(sz1,sz2,sz3,sz4))
+ ABI_ALLOCATE(elph_tr_ds%tmp_velocwtk,(sz1,sz2,3,sz3,sz4))
+ ABI_ALLOCATE(elph_tr_ds%tmp_vvelocwtk,(sz1,sz2,3,3,sz3,sz4))
+
+ elph_tr_ds%dos_n = zero
+ elph_tr_ds%veloc_sq = zero
+ elph_tr_ds%tmp_gkk_intweight = zero
+ elph_tr_ds%tmp_velocwtk = zero
+ elph_tr_ds%tmp_vvelocwtk = zero
+
+ ABI_STAT_ALLOCATE(elph_ds%k_phon%velocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol), ierr)
+ ABI_CHECK(ierr==0, 'allocating elph_ds%k_phon%velocwtk')
+
+ ABI_STAT_ALLOCATE(elph_ds%k_phon%vvelocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol), ierr)
+ ABI_CHECK(ierr==0, 'allocating elph_ds%k_phon%vvelocwtk')
+
+ elph_ds%k_phon%velocwtk = zero
+ elph_ds%k_phon%vvelocwtk = zero
+
+!metal
+ if (i_metal .eq. 1) then
+   e1 = elph_ds%fermie - max_e
+   en1(:) = elph_ds%fermie - max_e
+   if (low_T .eq. 1) then
+     enemin = elph_ds%fermie - max_e - elph_ds%delta_e
+     enemax = elph_ds%fermie + max_e
+
+     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,elph_ds%nenergy+1))
+     call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&     enemin, enemax, elph_ds%nenergy+1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine, tmp_wtk)
+
+     do isppol=1,elph_ds%nsppol
+       do ie1 = 1, elph_ds%nenergy
+         elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
+         elph_tr_ds%de_all(isppol,ie1) = elph_ds%delta_e
+
+         elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:,isppol,ie1+1)
+         elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
+         elph_tr_ds%dos_n(ie1,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+
+         call get_veloc_tr(elph_ds,elph_tr_ds)
+         elph_tr_ds%veloc_sq(:,isppol,ie1)=elph_tr_ds%FSelecveloc_sq(:,isppol)
+
+         call d2c_weights(elph_ds,elph_tr_ds)
+
+         elph_tr_ds%tmp_gkk_intweight(:,:,isppol,ie1) = elph_ds%k_phon%wtk(:,:,isppol)
+         elph_tr_ds%tmp_velocwtk(:,:,:,isppol,ie1) = elph_ds%k_phon%velocwtk(:,:,:,isppol)
+         elph_tr_ds%tmp_vvelocwtk(:,:,:,:,isppol,ie1) = elph_ds%k_phon%vvelocwtk(:,:,:,:,isppol)
+         en1(isppol) = en1(isppol) + elph_ds%delta_e
+       end do
+     end do
+     ABI_DEALLOCATE(tmp_wtk)
+
+   else ! low_T = 0
+     enemin = e1 - elph_ds%delta_e
+     enemax = e1 + (out_nenergy-1)*elph_ds%delta_e
+
+     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,out_nenergy+1))
+     call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&     enemin, enemax, out_nenergy+1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine, tmp_wtk)
+     do isppol=1,elph_ds%nsppol
+       do ie1 = 1, out_nenergy
+         elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
+         elph_tr_ds%de_all(isppol,ie1) = elph_ds%delta_e
+
+         elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:,isppol,ie1+1)
+         elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
+         elph_tr_ds%dos_n(ie1,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+
+         call get_veloc_tr(elph_ds,elph_tr_ds)
+         elph_tr_ds%veloc_sq(:,isppol,ie1)=elph_tr_ds%FSelecveloc_sq(:,isppol)
+
+         call d2c_weights(elph_ds,elph_tr_ds)
+
+         elph_tr_ds%tmp_gkk_intweight(:,:,isppol,ie1) = elph_ds%k_phon%wtk(:,:,isppol)
+         elph_tr_ds%tmp_velocwtk(:,:,:,isppol,ie1) = elph_ds%k_phon%velocwtk(:,:,:,isppol)
+         elph_tr_ds%tmp_vvelocwtk(:,:,:,:,isppol,ie1) = elph_ds%k_phon%vvelocwtk(:,:,:,:,isppol)
+
+         en1(isppol) = en1(isppol) + elph_ds%delta_e
+       end do
+     end do
+     ABI_DEALLOCATE(tmp_wtk)
+
+     e1 = en1(1)
+     enemin = e1 - de0
+     enemax = e1 + in_nenergy*2*de0
+
+     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,in_nenergy*2+2))
+     call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&     enemin, enemax, in_nenergy*2+2, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine, tmp_wtk)
+
+     do isppol=1,elph_ds%nsppol
+       do ie1 = out_nenergy+1, out_nenergy+in_nenergy*2+1
+         elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
+         elph_tr_ds%de_all(isppol,ie1) = de0
+
+         elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:,isppol,ie1-out_nenergy+1)
+         elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
+         elph_tr_ds%dos_n(ie1,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+
+         call get_veloc_tr(elph_ds,elph_tr_ds)
+         elph_tr_ds%veloc_sq(:,isppol,ie1)=elph_tr_ds%FSelecveloc_sq(:,isppol)
+
+         call d2c_weights(elph_ds,elph_tr_ds)
+
+         elph_tr_ds%tmp_gkk_intweight(:,:,isppol,ie1) = elph_ds%k_phon%wtk(:,:,isppol)
+         elph_tr_ds%tmp_velocwtk(:,:,:,isppol,ie1) = elph_ds%k_phon%velocwtk(:,:,:,isppol)
+         elph_tr_ds%tmp_vvelocwtk(:,:,:,:,isppol,ie1) = elph_ds%k_phon%vvelocwtk(:,:,:,:,isppol)
+
+         en1(isppol) = en1(isppol) + de0
+       end do
+     end do
+     ABI_DEALLOCATE(tmp_wtk)
+
+     e1 = en1(1)
+     enemin = e1 - elph_ds%delta_e
+     enemax = e1 + (out_nenergy-1)*elph_ds%delta_e
+
+     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,out_nenergy+1))
+     call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&     enemin, enemax, out_nenergy+1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&     elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine, tmp_wtk)
+
+     en1(:) = en1(:) - de0 + elph_ds%delta_e ! adjust to make the points symmetric around Ef
+     do isppol=1,elph_ds%nsppol
+       do ie1 = out_nenergy+in_nenergy*2+2, in_nenergy*2+1+out_nenergy*2
+         elph_tr_ds%en_all(isppol,ie1) = en1(isppol)
+         elph_tr_ds%de_all(isppol,ie1) = elph_ds%delta_e
+
+         elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:,isppol,ie1-out_nenergy-in_nenergy*2)
+         elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
+         elph_tr_ds%dos_n(ie1,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+
+         call get_veloc_tr(elph_ds,elph_tr_ds)
+         elph_tr_ds%veloc_sq(:,isppol,ie1)=elph_tr_ds%FSelecveloc_sq(:,isppol)
+
+         call d2c_weights(elph_ds,elph_tr_ds)
+
+         elph_tr_ds%tmp_gkk_intweight(:,:,isppol,ie1) = elph_ds%k_phon%wtk(:,:,isppol)
+         elph_tr_ds%tmp_velocwtk(:,:,:,isppol,ie1) = elph_ds%k_phon%velocwtk(:,:,:,isppol)
+         elph_tr_ds%tmp_vvelocwtk(:,:,:,:,isppol,ie1) = elph_ds%k_phon%vvelocwtk(:,:,:,:,isppol)
+
+         en1(isppol) = en1(isppol) + elph_ds%delta_e
+       end do
+     end do
+     ABI_DEALLOCATE(tmp_wtk)
+   end if
+
+!semiconductor
+ else if (i_metal .eq. 0) then
+   e1 = elph_ds%fermie - max_e
+   ie_all = 1
+
+   call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&   e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&   elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&   elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+
+   elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+   do while ((e1-elph_ds%fermie) .lt. max_e)
+     if (e1 .lt. e_cb_min .and. elph_ds%n0(isppol) .lt. tol9) then
+       e1 = e_cb_min
+     end if
+
+     if (ie_all .ge. n_edge1+n_edge2) then
+       if (ie_all .eq. n_edge1+n_edge2) e1 = e1 + de0
+       call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&       e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&       elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&       elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+
+       elph_tr_ds%tmp_gkk_intweight(:,:,isppol,ie_all) = elph_ds%k_fine%wtk(:,:,isppol)
+       elph_tr_ds%dos_n(ie_all,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+       elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
+
+       elph_tr_ds%en_all(isppol,ie_all) = e1
+       call get_veloc_tr(elph_ds,elph_tr_ds)
+       elph_tr_ds%veloc_sq(:,isppol,ie_all)=elph_tr_ds%FSelecveloc_sq(:,isppol)
+!      bxu
+!      veloc_sq(1,isppol,ie_all) is "1" good and general??
+
+       elph_tr_ds%de_all(isppol,ie_all) = de0
+       e1 = e1 + elph_tr_ds%de_all(isppol,ie_all)
+       ie_all = ie_all + 1
+     else ! divided according to the 1/DOS (evenly)
+       if (ie_all .lt. n_edge1) then
+         elph_tr_ds%en_all(isppol,ie_all) = e_cb_min + &
+&         (e_tiny**(-0.5_dp) - ie_all*(e_tiny**(-0.5_dp)-(e_cb_2nd(1)-e_cb_min)**(-0.5_dp))/ &
+&         dble(n_edge1))**(-2.0_dp)
+         if (ie_all .gt. 1) then
+           elph_tr_ds%de_all(isppol,ie_all) = elph_tr_ds%en_all(isppol,ie_all) - elph_tr_ds%en_all(isppol,ie_all-1)
+         else
+           elph_tr_ds%de_all(isppol,ie_all) = elph_tr_ds%en_all(isppol,ie_all) - e_cb_min - e_tiny
+         end if
+         e1 = elph_tr_ds%en_all(isppol,ie_all)
+       else
+         elph_tr_ds%en_all(isppol,ie_all) = e_cb_min + &
+&         ((ie_all-n_edge1+1)/dble(n_edge2))**2.0_dp*(e_cb_2nd(1)-e_cb_min)
+         if (ie_all .gt. 1) then
+           elph_tr_ds%de_all(isppol,ie_all) = elph_tr_ds%en_all(isppol,ie_all) - elph_tr_ds%en_all(isppol,ie_all-1)
+         else
+           elph_tr_ds%de_all(isppol,ie_all) = (e_cb_2nd(1)-e_cb_min)/(dble(n_edge2)**2.0_dp)
+         end if
+         e1 = elph_tr_ds%en_all(isppol,ie_all)
+       end if
+
+       call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+&       e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
+&       elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&       elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+
+       elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
+
+       tmp_dos = (ucvol/2.0_dp/pi**2.0_dp)*(2.0_dp*eff_mass1)**1.5_dp*(e1-e_cb_min)**0.5_dp + &
+&       2.0_dp*(ucvol/2.0_dp/pi**2.0_dp)*(2.0_dp*eff_mass2)**1.5_dp*(e1-e_cb_min)**0.5_dp
+       elph_tr_ds%dos_n(ie_all,isppol) = tmp_dos
+       elph_tr_ds%tmp_gkk_intweight(:,:,isppol,ie_all) = elph_ds%k_fine%wtk(:,:,isppol)*tmp_dos/elph_ds%n0(isppol)
+
+       call get_veloc_tr(elph_ds,elph_tr_ds)
+       elph_tr_ds%veloc_sq(:,isppol,ie_all)=elph_tr_ds%FSelecveloc_sq(:,isppol)
+
+       if (ie_all .eq. (n_edge1+n_edge2)) e1 = e_cb_2nd(1) + de0
+       ie_all = ie_all + 1
+     end if
+   end do ! ie_all
+ else
+   MSG_BUG('check i_metal!')
+ end if ! metal or insulator
+
+ ABI_DEALLOCATE(dos_e1)
+
+end subroutine get_nv_fs_en
+!!***
+
+!!****f* ABINIT/get_nv_fs_temp
+!! NAME
+!!  get_nv_fs_temp
+!!
+!! FUNCTION
+!! This routine calculates the fermi energy, FD smeared DOS(Ef) and
+!! Veloc_sq(Ef) at looped temperatures.
+!!
+!! INPUTS
+!!  elph_ds
+!!    elph_ds%nband = number of bands in ABINIT
+!!    elph_ds%k_fine%nkptirr = Number of irreducible points for which there exist at least one band that crosses the Fermi level.
+!!    elph_ds%nFSband = number of bands included in the FS integration
+!!    elph_ds%k_fine%nkpt = number of k points for fine k-grid
+!!    elph_ds%k_phon%nkpt = number of k points for coarse k-grid
+!!    elph_ds%tempermin = minimum temperature at which resistivity etc are calculated (in K)
+!!    elph_ds%temperinc = interval temperature grid on which resistivity etc are calculated (in K)
+!!    elph_ds%ep_b_min= first band taken into account in FS integration (if telphint==2)
+!!    elph_ds%ep_b_max= last band taken into account in FS integration (if telphint==2)
+!!    elph_ds%telphint = flag for integration over the FS with 0=tetrahedra 1=gaussians
+!!    elph_ds%elphsmear = smearing width for gaussian integration
+!!           or buffer in energy for calculations with tetrahedra (telphint=0)
+!!
+!!  eigenGS = Ground State eigenvalues
+!!  gprimd = reciprocal lattice vectors (dimensionful)
+!!  kptrlatt_fine = k-point grid vectors (if divided by determinant of present matrix)
+!!  max_occ = maximal occupancy for a band
+!!
+!! OUTPUT
+!!  elph_ds%fermie=Fermi level at input temperature
+!!  elph_tr_ds%dos_n0=DOS(Ef) at looped temperatures
+!!  elph_tr_ds%veloc_sq0=FS averaged velocity at Ef at looped temperatures
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      ebands_update_occ,ep_fs_weights,get_veloc_tr,wrtout
+!!
+!! SOURCE
+
+subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_nv_fs_temp'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+
+!data_type
+ type(elph_type),intent(inout) :: elph_ds
+ type(ebands_t),intent(inout)   :: BSt
+ type(elph_tr_type),intent(inout) :: elph_tr_ds
+
+!Scalars
+ real(dp), intent(in) :: max_occ
+
+! arrays
+ real(dp), intent(in) :: gprimd(3,3)
+ real(dp), intent(in) :: eigenGS(elph_ds%nband,elph_ds%k_fine%nkptirr,elph_ds%nsppol)
+
+!Local variables-------------------------------
+
+ integer :: isppol!, ie1
+ integer :: itemp, tmp_nenergy
+
+ character(len=500) :: message
+
+ real(dp) :: Temp, tmp_elphsmear, tmp_delta_e
+! real(dp) :: xtr, e1
+! real(dp),allocatable :: tmp_wtk(:,:)
+
+! *************************************************************************
+
+ ABI_ALLOCATE(elph_tr_ds%dos_n0,(elph_ds%ntemper,elph_ds%nsppol))
+ ABI_ALLOCATE(elph_tr_ds%veloc_sq0,(elph_ds%ntemper,3,elph_ds%nsppol))
+!if (elph_ds%use_k_fine == 1) then
+!ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt))
+!else
+!ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt))
+!end if
+
+ elph_tr_ds%dos_n0 = zero
+ elph_tr_ds%veloc_sq0 = zero
+
+ tmp_nenergy = 8
+ do itemp=1,elph_ds%ntemper  ! runs over temperature in K
+   Temp=elph_ds%tempermin + elph_ds%temperinc*dble(itemp)
+   tmp_delta_e = kb_HaK*Temp
+   Bst%occopt = 3
+   Bst%tsmear = Temp*kb_HaK
+   tmp_elphsmear = Temp*kb_HaK
+   call ebands_update_occ(Bst,-99.99_dp)
+   write(message,'(a,f12.6,a,E20.12)')'At T=',Temp,' Fermi level is:',Bst%fermie
+   call wrtout(std_out,message,'COLL')
+   if (abs(elph_ds%fermie) < tol10) then
+     elph_ds%fermie = BSt%fermie
+   end if
+
+!  FD smeared DOS and veloc
+
+   call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, tmp_elphsmear, &
+&   elph_ds%fermie, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine,&
+&   max_occ, elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+&   elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+
+   do isppol=1,elph_ds%nsppol
+     elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+     write(message,'(a,f12.6,a,f12.6)')'At T=',Temp,' The DOS at Ef is:', elph_ds%n0(isppol)
+     call wrtout(std_out,message,'COLL')
+
+!    For the non-LOVA case, N(Ef) is not that important (canceled out eventually).
+!    Should not be important for metal, comment out for now
+!    tmp_wtk = zero
+!    do ie1=-tmp_nenergy,tmp_nenergy ! use ie1 here, hope there is no confusion
+!    e1=Bst%fermie+ie1*tmp_delta_e
+!    xtr=(e1-Bst%fermie)/(2.0_dp*kb_HaK*Temp)
+!
+!    call ep_fs_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
+!    &       e1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, &
+!    &       max_occ, elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
+!    &       elph_ds%nsppol, elph_ds%telphint, elph_ds%k_fine)
+!
+!    tmp_wtk(:,:) = tmp_wtk(:,:) + elph_ds%k_fine%wtk(:,:,isppol)* &
+!    &       tmp_delta_e/(4.0d0*kb_HaK*Temp)/(COSH(xtr)**2.0d0)
+!    end do ! ie1
+
+!    elph_ds%k_fine%wtk(:,:,isppol) = tmp_wtk(:,:)
+     elph_tr_ds%dos_n0(itemp,isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt
+!    elph_ds%n0(isppol) = sum(elph_ds%k_fine%wtk(:,:,isppol))/elph_ds%k_fine%nkpt ! for get_veloc_tr
+!    write(message,'(a,f12.6,a,f12.6)')'At T=',Temp,' The eff. DOS at Ef is:', elph_tr_ds%dos_n0(itemp,isppol)
+!    call wrtout(std_out,message,'COLL')
+   end do ! isppol
+   call get_veloc_tr(elph_ds,elph_tr_ds)
+   elph_tr_ds%veloc_sq0(itemp,:,:) = elph_tr_ds%FSelecveloc_sq(:,:)
+
+ end do ! temperature
+
+end subroutine get_nv_fs_temp
+!!***
+
+!!****f* ABINIT/get_veloc_tr
+!!
+!! NAME
+!! get_veloc_tr
+!!
+!! FUNCTION
+!!  calculate the (in) and (out) velocity factors for transport
+!!
+!! INPUTS
+!!  elph_ds
+!!    elph_ds%nFSband = number of bands included in the FS integration
+!!    elph_ds%k_fine%nkpt = number of kpts included in the FS integration
+!!    elph_ds%nFSband = number of bands included in the FS integration
+!!    elph_ds%minFSband = index of the lowest FS band
+!!    elph_ds%nqpt_full  = number of Q pts
+!!    elph_ds%nqptirred  = number of irreducible Q pts
+!!  to index the GS electronic states :
+!!  kphon_full2irr = mapping of full FS kpts to irreducible ones
+!!   FSfullpqtofull = mapping of k + q to k
+!!   FSirredtoGS = mapping of irreducible kpoints to GS set
+!! OUTPUT
+!! elph_tr_ds%FSelecveloc_sq = avergae FS electronic velocity
+!!
+!! PARENTS
+!!      elphon,get_nv_fs_en,get_nv_fs_temp
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine get_veloc_tr(elph_ds,elph_tr_ds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_veloc_tr'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!arrays
+  type(elph_type),intent(in) :: elph_ds
+  type(elph_tr_type),intent(inout) :: elph_tr_ds
+
+!Local variables-------------------------------
+  !scalars
+  integer :: ikpt_fine
+  integer :: ib1,fib1,isppol, ii
+  real(dp) :: eta2
+  !arrays
+  real(dp) :: elvelock(3)
+
+! *********************************************************************
+
+ ABI_CHECK(allocated(elph_tr_ds%FSelecveloc_sq),"FSele not associated")
+
+
+!precalculate the Fermi speed modulus squared
+ elph_tr_ds%FSelecveloc_sq = zero
+ do isppol=1,elph_ds%nsppol
+   do ikpt_fine=1,elph_ds%k_fine%nkpt
+     do ib1=1,elph_ds%nFSband
+       fib1=ib1+elph_ds%minFSband-1
+       elvelock(:)=elph_tr_ds%el_veloc(ikpt_fine,fib1,:,isppol)
+       do ii=1, 3
+         eta2=elvelock(ii)*elvelock(ii)
+         elph_tr_ds%FSelecveloc_sq(ii, isppol)=elph_tr_ds%FSelecveloc_sq(ii, isppol)&
+&         +eta2*elph_ds%k_fine%wtk(ib1,ikpt_fine,isppol)
+       end do
+     end do
+   end do
+   elph_tr_ds%FSelecveloc_sq(:,isppol) = elph_tr_ds%FSelecveloc_sq(:,isppol)/elph_ds%k_fine%nkpt/elph_ds%n0(isppol)
+!  for factor 1/elph_ds%n0(isppol) see eq 12 of Allen prb 17 3725: sum of v**2 over all k gives n0 times FSelecveloc_sq
+ end do ! end isppol
+ write (std_out,*) '  get_veloc_tr: FSelecveloc_sq ', elph_tr_ds%FSelecveloc_sq
+
+ write (std_out,*) 'out of get_veloc_tr'
+
+end subroutine get_veloc_tr
+!!***
+
+!!****f* ABINIT/integrate_gamma
+!!
+!! NAME
+!! integrate_gamma
+!!
+!! FUNCTION
+!! This routine integrates the electron phonon coupling matrix
+!! over the kpoints on the fermi surface. A dependency on qpoint
+!! remains for gamma_qpt
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!      elph_ds%qpt_full = qpoint coordinates
+!!      elph_ds%nqptirred = number of irred qpoints
+!!      elph_ds%qirredtofull = indexing of the GKK qpoints found
+!!   FSfullpqtofull = mapping of k+q to k
+!!
+!! OUTPUT
+!!   elph_ds = modified elph_ds%gamma_qpt and created elph_ds%gamma_rpt
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      get_rank_1kpt,wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine integrate_gamma(elph_ds,FSfullpqtofull)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'integrate_gamma'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+
+!Local variables-------------------------------
+!scalars
+ integer :: comm,ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,iqpt,iqpt_fullbz,isppol,ierr
+ integer :: irec, symrankkpt_phon,nbranch,nsppol,ngkkband, ik_this_proc
+ character(len=500) :: message
+ character(len=fnlen) :: fname
+!arrays
+ real(dp),allocatable :: tmp_gkk(:,:,:,:)
+
+! *************************************************************************
+
+ comm = xmpi_world
+
+ write (message,'(3a)')ch10,' entering integrate_gamma ',ch10
+ call wrtout(std_out,message,'COLL')
+
+ nsppol   = elph_ds%nsppol
+ nbranch  = elph_ds%nbranch
+ ngkkband = elph_ds%ngkkband
+
+ ABI_ALLOCATE(elph_ds%gamma_qpt,(2,nbranch**2,nsppol,elph_ds%nqpt_full))
+ elph_ds%gamma_qpt = zero
+
+ ABI_ALLOCATE(tmp_gkk ,(2,ngkkband**2,nbranch**2,nsppol))
+
+ if (elph_ds%gkqwrite == 0) then
+   call wrtout(std_out,' integrate_gamma : keeping gamma matrices in memory','COLL')
+ else if (elph_ds%gkqwrite == 1) then
+   fname=trim(elph_ds%elph_base_name) // '_GKKQ'
+   write (message,'(2a)')' integrate_gamma : reading gamma matrices from file ',trim(fname)
+   call wrtout(std_out,message,'COLL')
+ else
+   write (message,'(a,i0)')' Wrong value for gkqwrite = ',elph_ds%gkqwrite
+   MSG_BUG(message)
+ end if
+
+
+
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+   call get_rank_1kpt (elph_ds%k_phon%kpt(:,iqpt_fullbz),symrankkpt_phon, elph_ds%k_phon%kptrank_t)
+   write (std_out,*) ' iqpt_fullbz in qpt grid only,  rank ', iqpt_fullbz, symrankkpt_phon
+
+   do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     if (elph_ds%gkqwrite == 0) then
+       tmp_gkk = elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,iqpt)
+     else if (elph_ds%gkqwrite == 1) then
+       irec = (iqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc
+       if (ikpt_phon == 1) then
+         write (std_out,*) ' integrate_gamma  read record ', irec
+       end if
+       read (elph_ds%unitgkq,REC=irec) tmp_gkk(:,:,:,:)
+     end if
+
+     do isppol=1,nsppol
+       ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+!
+       do ib1=1,ngkkband
+         do ib2=1,ngkkband
+           ibeff = ib2+(ib1-1)*ngkkband
+           elph_ds%gamma_qpt(:,:,isppol,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,isppol,iqpt_fullbz) + &
+&           tmp_gkk(:,ibeff,:,isppol)&
+&           *elph_ds%gkk_intweight(ib1,ikpt_phon,isppol)*elph_ds%gkk_intweight(ib2,ikpt_phonq,isppol)
+!          NOTE: if ngkkband==1 we are using trivial weights since average
+!          over bands was done in normsq_gkk (nmsq_gam_sumFS or nmsq_pure_gkk)
+         end do ! ib2
+       end do ! ib1
+     end do ! isppol
+   end do ! ikpt_phon
+ end do ! iqpt
+
+ call xmpi_sum (elph_ds%gamma_qpt, comm, ierr)
+
+ ABI_DEALLOCATE(tmp_gkk)
+
+!need prefactor of 1/nkpt for each integration over 1 kpoint index. NOT INCLUDED IN elph_ds%gkk_intweight
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+!  elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) / elph_ds%k_phon%nkpt / n0(1) / n0(1)
+!  elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) / elph_ds%k_phon%nkpt / elph_ds%k_phon%nkpt
+   elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) = elph_ds%gamma_qpt(:,:,:,iqpt_fullbz) * elph_ds%occ_factor / elph_ds%k_phon%nkpt
+ end do
+
+ call wrtout(std_out,' integrate_gamma: gamma matrices have been calculated for recip space and irred qpoints ',"COLL")
+
+end subroutine integrate_gamma
+!!***
+
+!!****f* ABINIT/integrate_gamma_tr
+!!
+!! NAME
+!! integrate_gamma_tr
+!!
+!! FUNCTION
+!! This routine integrates the TRANSPORT electron phonon coupling matrices
+!! over the kpoints on the fermi surface. A dependency on qpoint
+!! remains for gamma_qpt_in/out
+!! Copied from integrate_gamma
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!      elph_ds%qpt_full = qpoint coordinates
+!!   FSfullpqtofull = mapping of k+q to k
+!!   veloc_sq1 = mean square electronic velocity on constant energy surface
+!!   veloc_sq2 = mean square electronic velocity on constant energy surface
+!!
+!! OUTPUT
+!!   elph_tr_ds%gamma_qpt_tr and created elph_tr_ds%gamma_rpt_tr
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,elph_tr_ds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'integrate_gamma_tr'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: s1,s2
+ type(elph_tr_type), intent(inout) :: elph_tr_ds
+ type(elph_type),intent(in) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+ real(dp),intent(in) :: veloc_sq1(3,elph_ds%nsppol), veloc_sq2(3,elph_ds%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ierr,iqpt,iqpt_fullbz,isppol
+ integer :: itensor, icomp, jcomp,comm
+ integer :: fib1, fib2
+ integer :: ik_this_proc
+! integer :: ikpttemp
+ character(len=500) :: message
+ real(dp) :: wtk, wtkpq, interm
+ real(dp) :: veloc1_i, veloc1_j, veloc2_i, veloc2_j
+!arrays
+ real(dp) :: elvelock(3), elvelockpq(3)
+ real(dp) :: velocwtk(3), velocwtkpq(3)
+ real(dp) :: vvelocwtk(3,3), vvelocwtkpq(3,3)
+ real(dp),allocatable :: tmp_gkk(:,:,:,:)
+
+! *************************************************************************
+
+ comm = xmpi_world
+
+!information
+ if (elph_ds%gkqwrite == 0) then
+   write (message,'(a)')' integrate_gamma_tr : keeping gamma matrices in memory'
+   call wrtout(std_out,message,'COLL')
+ else if (elph_ds%gkqwrite == 1) then
+   write (message,'(a)')' integrate_gamma_tr : reading gamma matrices from disk'
+   call wrtout(std_out,message,'COLL')
+ else
+   write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
+&   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
+   MSG_BUG(message)
+ end if
+
+!allocate temp variables
+ ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+!  write(std_out,*)'iqpt, iqptfullbz  ',iqpt, iqpt_fullbz
+
+   do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     if (elph_ds%gkqwrite == 0) then
+       tmp_gkk = elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,iqpt)
+     else if (elph_ds%gkqwrite == 1) then
+       read(elph_ds%unitgkq,REC=((iqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc)) tmp_gkk
+     end if
+
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+
+     do isppol=1,elph_ds%nsppol
+       do ib1=1,elph_ds%ngkkband !FS bands
+         fib1=ib1+elph_ds%minFSband-1 ! full bands
+         elvelock(:)=elph_tr_ds%el_veloc(ikpt_phon,fib1,:,isppol)
+         wtk=elph_tr_ds%tmp_gkk_intweight1(ib1,ikpt_phon,isppol)
+         velocwtk(:)=elph_tr_ds%tmp_velocwtk1(ib1,ikpt_phon,:,isppol)
+         vvelocwtk(:,:)=elph_tr_ds%tmp_vvelocwtk1(ib1,ikpt_phon,:,:,isppol)
+
+         do ib2=1,elph_ds%ngkkband ! FS bands
+           ibeff=ib2+(ib1-1)*elph_ds%ngkkband ! full bands
+           fib2=ib2+elph_ds%minFSband-1
+           elvelockpq(:)= elph_tr_ds%el_veloc(ikpt_phonq,fib2,:,isppol)
+           wtkpq=elph_tr_ds%tmp_gkk_intweight2(ib2,ikpt_phonq,isppol)
+           velocwtkpq(:)=elph_tr_ds%tmp_velocwtk2(ib2,ikpt_phonq,:,isppol)
+           vvelocwtkpq(:,:)=elph_tr_ds%tmp_vvelocwtk2(ib2,ikpt_phonq,:,:,isppol)
+
+!          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
+!          see also Allen PRB 17 3725
+!          generalization to tensorial quantities is simple, by keeping the directional
+!          references of velock and velockpq as indices.
+           do icomp = 1, 3
+             do jcomp = 1, 3
+               itensor = (icomp-1)*3+jcomp
+!              FIXME: could use symmetry i <-> j
+
+               veloc1_i = sqrt(veloc_sq1(icomp,isppol))
+               veloc1_j = sqrt(veloc_sq1(jcomp,isppol))
+               veloc2_i = sqrt(veloc_sq2(icomp,isppol))
+               veloc2_j = sqrt(veloc_sq2(jcomp,isppol))
+               if (elph_ds%use_k_fine == 1) then
+                 interm = vvelocwtk(icomp,jcomp)*wtkpq/veloc1_i/veloc1_j + &
+&                 s1*s2*vvelocwtkpq(icomp,jcomp)*wtk/veloc2_i/veloc2_j - &
+&                 s1*velocwtk(jcomp)*velocwtkpq(icomp)/veloc1_j/veloc2_i - &
+&                 s2*velocwtk(icomp)*velocwtkpq(jcomp)/veloc1_i/veloc2_j
+
+                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) = &
+&                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) + &
+&                 tmp_gkk(:,ibeff,:,isppol)*interm
+               else
+                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) = &
+&                 elph_tr_ds%gamma_qpt_tr(:,itensor,:,isppol,iqpt_fullbz) + &
+&                 tmp_gkk(:,ibeff,:,isppol) &
+&                 *(elvelock(icomp)/veloc1_i - s1*elvelockpq(icomp)/veloc2_i) &
+&                 *(elvelock(jcomp)/veloc1_j - s2*elvelockpq(jcomp)/veloc2_j) &
+&                 *wtk*wtkpq
+               end if
+             end do
+           end do
+
+         end do
+       end do
+     end do ! isppol
+
+   end do ! ik
+ end do ! iq
+
+ call xmpi_sum (elph_tr_ds%gamma_qpt_tr, comm, ierr)
+
+ ABI_DEALLOCATE(tmp_gkk)
+
+
+!need prefactor of 1/nkpt for each integration over 1 kpoint index.
+!NOT INCLUDED IN elph_ds%gkk_intweight
+!Add a factor of 1/2 for the cross terms of (v-v')(v-v')
+ elph_tr_ds%gamma_qpt_tr = elph_tr_ds%gamma_qpt_tr* elph_ds%occ_factor*0.5_dp / elph_ds%k_phon%nkpt
+
+ write (message,'(2a)')' integrate_gamma_tr : transport gamma matrices are calculated ',&
+& ' in recip space and for irred qpoints'
+!call wrtout(std_out,message,'COLL')
+
+end subroutine integrate_gamma_tr
+!!***
+
+!!****f* ABINIT/integrate_gamma_tr_lova
+!!
+!! NAME
+!! integrate_gamma_tr_lova
+!!
+!! FUNCTION
+!! This routine integrates the TRANSPORT electron phonon coupling matrices
+!! over the kpoints on the fermi surface. A dependency on qpoint
+!! remains for gamma_qpt_in/out
+!! Copied from integrate_gamma
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with data and dimensions
+!!      elph_ds%qpt_full = qpoint coordinates
+!!   FSfullpqtofull = mapping of k+q to k
+!!
+!! OUTPUT
+!!   elph_tr_ds%gamma_qpt_trout
+!!   elph_tr_ds%gamma_qpt_trin
+!!
+!! PARENTS
+!!      elphon
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'integrate_gamma_tr_lova'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(elph_tr_type), intent(inout) :: elph_tr_ds
+ type(elph_type),intent(in) :: elph_ds
+!arrays
+ integer,intent(in) :: FSfullpqtofull(elph_ds%k_phon%nkpt,elph_ds%nqpt_full)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,ikpt_phonq,ib1,ib2,ibeff,ierr,iqpt,iqpt_fullbz,isppol
+ integer :: itensor, icomp, jcomp,comm
+ integer :: fib1, fib2
+ integer :: ik_this_proc
+ real(dp) :: etain, etaout
+ character(len=500) :: message
+!arrays
+ real(dp) :: elvelock(3), elvelockpq(3)
+ real(dp),allocatable :: tmp_gkk(:,:,:,:)
+
+! *************************************************************************
+
+ comm = xmpi_world
+
+ ib1=elph_ds%nbranch*elph_ds%nbranch ; ib2=elph_ds%nqpt_full
+ ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trin,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trin')
+ elph_tr_ds%gamma_qpt_trin = zero
+
+ ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trout,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trout')
+ elph_tr_ds%gamma_qpt_trout = zero
+
+!information
+ if (elph_ds%gkqwrite == 0) then
+   write (message,'(a)')' integrate_gamma_tr : keeping gamma matrices in memory'
+   call wrtout(std_out,message,'COLL')
+ else if (elph_ds%gkqwrite == 1) then
+   write (message,'(a)')' integrate_gamma_tr : reading gamma matrices from disk'
+   call wrtout(std_out,message,'COLL')
+ else
+   write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
+&   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
+   MSG_ERROR(message)
+ end if
+
+!allocate temp variables
+ ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
+ ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+
+ do iqpt=1,elph_ds%nqptirred
+   iqpt_fullbz = elph_ds%qirredtofull(iqpt)
+   write(std_out,*)'iqpt, iqptfullbz  ',iqpt, iqpt_fullbz
+
+   do ik_this_proc =1,elph_ds%k_phon%my_nkpt
+     ikpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
+
+     if (elph_ds%gkqwrite == 0) then
+       tmp_gkk = elph_ds%gkk_qpt(:,:,:,ik_this_proc,:,iqpt)
+     else if (elph_ds%gkqwrite == 1) then
+       read(elph_ds%unitgkq,REC=((iqpt-1)*elph_ds%k_phon%my_nkpt+ik_this_proc)) tmp_gkk
+     end if
+
+     ikpt_phonq = FSfullpqtofull(ikpt_phon,iqpt_fullbz)
+
+     do isppol=1,elph_ds%nsppol
+       do ib1=1,elph_ds%ngkkband
+         fib1=ib1+elph_ds%minFSband-1
+         elvelock(:)=elph_tr_ds%el_veloc(ikpt_phon,fib1,:,isppol)
+
+         do ib2=1,elph_ds%ngkkband
+           ibeff=ib2+(ib1-1)*elph_ds%ngkkband
+           fib2=ib2+elph_ds%minFSband-1
+           elvelockpq(:)= elph_tr_ds%el_veloc(ikpt_phonq,fib2,:,isppol)
+
+
+!          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
+!          see also Allen PRB 17 3725
+!          generalization to tensorial quantities is simple, by keeping the directional
+!          references of velock and velockpq as indices.
+           do icomp = 1, 3
+             do jcomp = 1, 3
+               itensor = (icomp-1)*3+jcomp
+!              FIXME: could use symmetry i <-> j
+
+               etain  = elvelock(icomp)*elvelockpq(jcomp)
+               etaout = elvelock(icomp)*elvelock(jcomp)
+
+
+               elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,iqpt_fullbz) = &
+&               elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,iqpt_fullbz) + &
+&               tmp_gkk(:,ibeff,:,isppol) &
+&               *etain &
+&               *elph_ds%gkk_intweight(ib1,ikpt_phon,isppol)*elph_ds%gkk_intweight(ib2,ikpt_phonq,isppol)
+
+               elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,iqpt_fullbz) = &
+&               elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,iqpt_fullbz) + &
+&               tmp_gkk(:,ibeff,:,isppol) &
+&               *etaout &
+&               *elph_ds%gkk_intweight(ib1,ikpt_phon,isppol)*elph_ds%gkk_intweight(ib2,ikpt_phonq,isppol)
+
+             end do
+           end do
+         end do
+       end do
+
+     end do ! isppol
+   end do ! ik
+
+ end do ! iq
+
+ ABI_DEALLOCATE(tmp_gkk)
+
+ call xmpi_sum (elph_tr_ds%gamma_qpt_trout, comm, ierr)
+ call xmpi_sum (elph_tr_ds%gamma_qpt_trin, comm, ierr)
+
+
+!
+!normalize tensor with 1/sqrt(v_x**2 * v_y**2)
+!
+!move the veloc into mka2f_tr_lova, where T dependence is dealt with
+!This will cause some slight difference to the results
+ if (.true.) then
+   do isppol=1, elph_ds%nsppol
+     do icomp = 1, 3
+       do jcomp = 1, 3
+         itensor = (icomp-1)*3+jcomp
+         if(abs(elph_tr_ds%FSelecveloc_sq(icomp,isppol))>tol14**2 .and. abs(elph_tr_ds%FSelecveloc_sq(jcomp,isppol))>tol14**2)then
+           elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,:) = elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,:) / &
+&           sqrt(elph_tr_ds%FSelecveloc_sq(icomp,isppol)*elph_tr_ds%FSelecveloc_sq(jcomp,isppol))
+           elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,:) = elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,:) / &
+&           sqrt(elph_tr_ds%FSelecveloc_sq(icomp,isppol)*elph_tr_ds%FSelecveloc_sq(jcomp,isppol))
+         else
+!          XG120528 Fixed problem with zero velocity
+           elph_tr_ds%gamma_qpt_trin(:,itensor,:,isppol,:)=zero
+           elph_tr_ds%gamma_qpt_trout(:,itensor,:,isppol,:)=zero
+         end if
+       end do
+     end do
+   end do ! isppol
+ end if
+
+!need prefactor of 1/nkpt for each integration over 1 kpoint index.
+!NOT INCLUDED IN elph_ds%gkk_intweight
+ elph_tr_ds%gamma_qpt_trout = elph_tr_ds%gamma_qpt_trout* elph_ds%occ_factor / elph_ds%k_phon%nkpt
+ elph_tr_ds%gamma_qpt_trin  = elph_tr_ds%gamma_qpt_trin * elph_ds%occ_factor / elph_ds%k_phon%nkpt
+
+ write (message,'(2a)')' integrate_gamma_tr : transport gamma matrices are calculated ',&
+& ' in recip space and for irred qpoints'
+ call wrtout(std_out,message,'COLL')
+
+!DEBUG
+!write(std_out,*)' integrate_gamma_tr_lova: end  elph_tr_ds%gamma_qpt_trin(1,9,1,1,1)=',elph_tr_ds%gamma_qpt_trin(1,9,1,1,1)
+!ENDDEBUG
+
+end subroutine integrate_gamma_tr_lova
+!!***
+
+!!****f* ABINIT/ftgkk
+!!
+!! NAME
+!! ftgkk
+!!
+!! FUNCTION
+!! If qtor=1 (q->r):
+!! Generates the Fourier transform of the recip space gkk matrices
+!! to obtain the real space ones.
+!! If qtor=0 (r->q):
+!! Generates the Fourier transform of the real space gkk matrices
+!! to obtain the reciprocal space ones.
+!!
+!! INPUTS
+!! gkqwrite = flag to write recip space matrix elements to disk
+!! gkrwrite = flag to write real space matrix elements to disk
+!! gprim(3,3)= Normalized coordinates in reciprocal space
+!! ikpt_phon0 = starting kpt number for forward FT.
+!! natom= Number of atoms in the unit cell
+!! nkpt_phon= Number of kpoints used for the FS
+!! ngkkband = number of bands kept in gkq and gkr matrix elements (=1 or nband)
+!! nkpt_used= number of FS kpoints used, starting at ikpt_phon0
+!! nqpt= Number of q points in the Brillouin zone
+!!           if qtor=0 this number is read in the input file
+!! nrpt= Number of R points in the Big Box
+!! qtor= ( q to r : see above )
+!! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
+!!           These coordinates are normalized (=> * acell(3)!!)
+!! qpt_full(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
+!!           if qtor=0 these vectors are read in the input file
+!! unit_gkk_rpt = fortran unit for writing real-space matrix elements
+!! unitgkq = fortran unit for writing reciprocal-space matrix elements
+!! wghatm(natom,natom,nrpt)
+!!         = Weights associated to a pair of atoms and to a R vector
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!! Input/output
+!! gkk_qpt(2,3*natom,nFSband,nFSband,nkpt_used,nqpt)
+!!  = gkk matrices in recip space coming from the Derivative Data Base
+!! gkk_rpt(2,3*natom,nFSband,nFSband,nkpt_phon,nqpt)
+!!  = gkk matrices in real space stored in file unit_gkk_rpt
+!!
+!! PARENTS
+!!      get_all_gkr,interpolate_gkk,test_ftgkk
+!!
+!! CHILDREN
+!!
+!! NOTES
+!!   copied from ftiaf9.f
+!!   recip to real space: real space is forced to disk file unit_gkk_rpt
+!!                        recip space depends on gkqwrite and unitgkq
+!!   real to recip space: real space is forced to disk file unit_gkk_rpt
+!!                        recip space is necessarily in memory in gkk_qpt
+!!
+!!    real space elements are complex, but could be reduced, as (-r) = (+r)*
+!!
+!! SOURCE
+
+subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
+&                  natom,nkpt_phon,ngkkband,nkpt_used,nqpt,nrpt,nsppol,&
+&                  qtor,rpt,qpt_full,unit_gkk_rpt,unitgkq)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ftgkk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: gkqwrite,gkrwrite,ikpt_phon0,nkpt_phon,natom,ngkkband
+ integer,intent(in) :: nkpt_used,nqpt,nrpt,nsppol,qtor,unit_gkk_rpt,unitgkq
+!arrays
+ real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt_full(3,nqpt)
+ real(dp),intent(in) :: wghatm(natom,natom,nrpt)
+ real(dp),intent(inout) :: gkk_qpt(2,ngkkband*ngkkband,3*natom*3*natom,nkpt_used,nsppol,nqpt)
+ real(dp),intent(inout) :: gkk_rpt(2,ngkkband*ngkkband,3*natom*3*natom,nkpt_used,nsppol,nrpt)
+
+!Local variables -------------------------
+!scalars
+ integer :: ikpt_phon,iatom,ib1,ieffkpt_phon,ip,iqpt,irpt,isppol
+ integer :: jatom
+ real(dp) :: im,kr,re
+ character(len=500) :: message
+!arrays
+ real(dp) :: coskr(nqpt,nrpt),ftwght(2,3*natom*3*natom)
+ real(dp) :: gkk_qpt_tmp(2,ngkkband*ngkkband,3*natom*3*natom,nkpt_used,nsppol)
+ real(dp) :: gkk_rpt_tmp(2,ngkkband*ngkkband,3*natom*3*natom,nkpt_phon,nsppol)
+ real(dp) :: kk(3),sinkr(nqpt,nrpt)
+
+! *********************************************************************
+
+!rewind (unit_gkk_rpt)
+
+!prepare the phase factors
+ do iqpt=1,nqpt
+!  Calculation of the k coordinates in Normalized Reciprocal
+!  coordinates
+   kk(1)=   qpt_full(1,iqpt)*gprim(1,1)+&
+&   qpt_full(2,iqpt)*gprim(1,2)+&
+&   qpt_full(3,iqpt)*gprim(1,3)
+   kk(2)=   qpt_full(1,iqpt)*gprim(2,1)+&
+&   qpt_full(2,iqpt)*gprim(2,2)+&
+&   qpt_full(3,iqpt)*gprim(2,3)
+   kk(3)=   qpt_full(1,iqpt)*gprim(3,1)+&
+&   qpt_full(2,iqpt)*gprim(3,2)+&
+&   qpt_full(3,iqpt)*gprim(3,3)
+   do irpt=1,nrpt
+!    Product of k and r
+     kr =        kk(1)*rpt(1,irpt)+&
+&     kk(2)*rpt(2,irpt)+&
+&     kk(3)*rpt(3,irpt)
+     coskr(iqpt,irpt)=cos(two_pi*kr)
+     sinkr(iqpt,irpt)=sin(two_pi*kr)
+!    DEBUG
+!    if (iqpt < 1000 .and. (irpt == 101 .or. irpt == 901)) then
+!    write(std_out,*) iqpt,irpt,kk,rpt(:,irpt),coskr(iqpt,irpt), sinkr(iqpt,irpt)
+!    end if
+!    ENDDEBUG
+   end do
+ end do
+
+
+
+!Recip to real space
+ if (qtor==1) then
+!
+   if (nkpt_used /= nkpt_phon) write(std_out,*) 'ftgkk: strange usage of nkpt_used for back FT!'
+   do irpt=1,nrpt
+!    DEBUG
+!    write(std_out,*) ' ftgkk : G->R irpt = ',irpt,' / ',nrpt
+!    ENDDEBUG
+     gkk_rpt_tmp(:,:,:,:,:) = zero
+
+     do iqpt=1,nqpt
+
+!      write(std_out,*) iqpt
+
+       if (gkqwrite == 0) then
+         gkk_qpt_tmp(:,:,:,:,:) = gkk_qpt(:,:,:,:,:,iqpt)
+       else
+         do ikpt_phon=1, nkpt_phon
+           read(unitgkq,REC=((iqpt-1)*nkpt_phon+ikpt_phon)) gkk_qpt_tmp(:,:,:,ikpt_phon,:)
+         end do
+       end if
+!      Get the phase factor with normalization!
+       re=coskr(iqpt,irpt)/nqpt
+       im=sinkr(iqpt,irpt)/nqpt
+       do isppol=1,nsppol
+         do ikpt_phon=1,nkpt_used
+!          DEBUG
+!          write(std_out,*) ' ftgkk : G->R ikpt_phon = ',ikpt_phon,' / ',nkpt_used
+!          ENDDEBUG
+           do ip=1,3*natom*3*natom
+!            Real and imaginary part of the real-space gkk matrices -> exp(-i k.r)
+             do ib1=1,ngkkband*ngkkband
+               gkk_rpt_tmp(1,ib1,ip,ikpt_phon,isppol) = gkk_rpt_tmp(1,ib1,ip,ikpt_phon,isppol)&
+&               +re*gkk_qpt_tmp(1,ib1,ip,ikpt_phon,isppol) &
+&               +im*gkk_qpt_tmp(2,ib1,ip,ikpt_phon,isppol)
+               gkk_rpt_tmp(2,ib1,ip,ikpt_phon,isppol) = gkk_rpt_tmp(2,ib1,ip,ikpt_phon,isppol)&
+&               +re*gkk_qpt_tmp(2,ib1,ip,ikpt_phon,isppol) &
+&               -im*gkk_qpt_tmp(1,ib1,ip,ikpt_phon,isppol)
+             end do
+           end do
+         end do
+       end do
+     end do
+     if (gkrwrite == 0) then
+       gkk_rpt(:,:,:,:,:,irpt) = gkk_rpt_tmp(:,:,:,:,:)
+     else
+       write (unit_gkk_rpt,REC=irpt) gkk_rpt_tmp
+     end if
+   end do
+
+!  Real space to recip space
+ else if (qtor==0) then
+
+!  write(std_out,*) 'ftgkk : shape(gkk_qpt) = ', shape(gkk_qpt)
+   gkk_qpt(:,:,:,:,:,:)=zero
+
+!  rewind (unit_gkk_rpt)
+   do irpt=1,nrpt
+     if (gkrwrite == 0) then
+       gkk_rpt_tmp(:,:,:,:,:) = gkk_rpt(:,:,:,:,:,irpt)
+     else
+       read(unit_gkk_rpt,REC=irpt) gkk_rpt_tmp
+     end if
+
+
+     do iqpt=1,nqpt
+
+!      Avoid recalculating weights nkpt_used*9 times
+       do iatom=1,natom
+         do jatom=1,natom
+           ip = 3*((iatom-1)*natom+jatom-1)
+!          copy same weight for all 3 directions
+           ftwght(1,ip+1:ip+3)=coskr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
+           ftwght(2,ip+1:ip+3)=sinkr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
+         end do
+       end do
+
+
+
+       do ip=1,3*natom*3*natom
+!        Get phase factor
+         re = ftwght(1,ip)
+         im = ftwght(2,ip)
+
+         do isppol=1,nsppol
+           do ikpt_phon=1,nkpt_used
+
+
+!            DEBUG
+!            write(std_out,*) ' ftgkk : R->G ikpt_phon = ',ikpt_phon,' / ',nkpt_used
+!            ENDDEBUG
+!            effective FS kpt in real space array is ikpt_phon+ikpt_phon0-1 to allow for offset
+             ieffkpt_phon = ikpt_phon+ikpt_phon0-1
+!            write(std_out,*) 'ftgkk :ikpt_phon,iqpt,ieffkpt_phon ', ikpt_phon,iqpt,ieffkpt_phon
+
+             do ib1=1,ngkkband*ngkkband
+!              Real and imaginary part of the gamma matrices
+               gkk_qpt(1,ib1,ip,ikpt_phon,isppol,iqpt)=&
+&               gkk_qpt(1,ib1,ip,ikpt_phon,isppol,iqpt)&
+&               +re*gkk_rpt_tmp(1,ib1,ip,ieffkpt_phon,isppol)&
+&               -im*gkk_rpt_tmp(2,ib1,ip,ieffkpt_phon,isppol)
+!              !DEBUG
+               gkk_qpt(2,ib1,ip,ikpt_phon,isppol,iqpt)=&
+&               gkk_qpt(2,ib1,ip,ikpt_phon,isppol,iqpt)&
+&               +im*gkk_rpt_tmp(1,ib1,ip,ieffkpt_phon,isppol)&
+&               +re*gkk_rpt_tmp(2,ib1,ip,ieffkpt_phon,isppol)
+!              !ENDDEBUG
+
+!              if (iqpt < 100 .and. irpt < 100 .and. &
+!              &   tmpgkkrim(irpt)**2+tmpgkkrre(irpt)**2 > tol6) then
+!              write(std_out,'(2I4,2E16.8,x,2E16.8)') &
+!              &   iqpt,irpt,re,im,tmpgkkrre(irpt),tmpgkkrim(irpt)
+!              end if
+
+             end do
+           end do
+!          end ikpt_phon
+         end do
+!        end isppol
+!        write(std_out,'(a)') ' ftgkk :gkk_qpt :'
+!        write(std_out,'(4E16.5)') gkk_qpt(:,1,1,,ikpt_phon,1:nqpt)
+       end do
+!      end ip
+     end do
+!    end iqpt
+   end do
+!  end irpt
+
+
+!  There is no other space to Fourier transform from ??
+ else
+   write(message,'(a,a,a,i0,a)' )&
+&   'The only allowed values for qtor are 0 or 1, while',ch10,&
+&   'qtor=',qtor,' has been required.'
+   MSG_BUG(message)
+ end if
+
+end subroutine ftgkk
+!!***
+
+!!****f* ABINIT/test_ftgkk
+!! NAME
+!! test_ftgkk
+!!
+!! FUNCTION
+!!  Test the fourier transform routine ftgkk for the el-phon matrix elements
+!!
+!! INPUTS
+!!   elph_ds = elphon datastructure with matrix elements
+!!   gprim = reciprocal lattice vectors
+!!   natom = number of atoms
+!!   nrpt = number of real space points for FT interpolation
+!!   rpt = coordinates of real space points for FT interpolation
+!!   qpt_full = qpoint coordinates
+!!   wghatm = weights for pairs of atoms in FT interpolation
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!!  MJV 18/5/2008 reverted to old syntax/use for ftgkk, with all ft being done
+!!   in a batch. Might come back to 5.5 version with atomic FT in ftgkk, but later.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      ftgkk
+!!
+!! SOURCE
+
+subroutine test_ftgkk(elph_ds,gprim,natom,nrpt,rpt,qpt_full,wghatm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'test_ftgkk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nrpt
+ type(elph_type),intent(inout) :: elph_ds
+!arrays
+ real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt_full(3,elph_ds%nqpt_full)
+ real(dp),intent(in) :: wghatm(natom,natom,nrpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,iqpt,isppol,qtor,sz1,sz2
+!arrays
+ real(dp),allocatable :: gkq_disk(:,:,:,:,:),tmp_gkq(:,:,:,:,:)
+
+! *************************************************************************
+
+!for each qpt do FT to recuperate original values
+
+ isppol = 1
+ qtor = 0
+ sz1=elph_ds%ngkkband*elph_ds%ngkkband
+ sz2=elph_ds%nbranch*elph_ds%nbranch
+ ABI_ALLOCATE(gkq_disk,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+ ABI_ALLOCATE(tmp_gkq,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+
+ do iqpt=1,elph_ds%nqpt_full
+   tmp_gkq(:,:,:,:,:) = zero
+
+   call ftgkk (wghatm,tmp_gkq,elph_ds%gkk_rpt,elph_ds%gkqwrite,&
+&   elph_ds%gkk_rptwrite,gprim,1,natom,&
+&   elph_ds%k_phon%nkpt,elph_ds%ngkkband,elph_ds%k_phon%nkpt,1,&
+&   nrpt,elph_ds%nsppol,qtor,rpt,qpt_full,elph_ds%unit_gkk_rpt,elph_ds%unitgkq)
+
+   if (elph_ds%gkqwrite == 0) then
+     do ikpt_phon=1,10
+       write (93,*) tmp_gkq(:,:,:,ikpt_phon,isppol)-elph_ds%gkk_qpt(:,:,:,ikpt_phon,isppol,iqpt)
+     end do
+   else
+     do ikpt_phon=1, elph_ds%k_phon%nkpt
+       read (elph_ds%unitgkq,REC=((iqpt-1)*elph_ds%k_phon%nkpt+ikpt_phon)) gkq_disk(:,:,:,ikpt_phon,:)
+     end do
+     do ikpt_phon=1,10
+       write (93,*) tmp_gkq(:,:,:,ikpt_phon,isppol)-gkq_disk(:,:,:,ikpt_phon,isppol)
+     end do
+   end if
+ end do
+
+end subroutine test_ftgkk
 !!***
 
 end module m_elphon

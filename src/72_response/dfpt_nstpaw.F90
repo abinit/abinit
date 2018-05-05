@@ -191,7 +191,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawfgr,   only : pawfgr_type
  use m_kg,       only : mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac
- use m_spacepar, only : hartrestr
+ use m_spacepar, only : hartrestr, symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -206,7 +206,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_nstpaw
 !End of the abilint section
 
@@ -1473,7 +1472,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &         pawang,pawfgrtab,pawrhoij,pawtab,rprimd,&
 &         mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
        end if
-       call pawmkrho(arg,cplex,gprimd,idir1,indsy1,ipert1,&
+       call pawmkrho(1,arg,cplex,gprimd,idir1,indsy1,ipert1,&
 &       mpi_enreg,my_natom,dtset%natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,&
 &       pawfgr,pawfgrtab,-10001,pawdrhoij1(:,idir1),pawdrhoij1_unsym(:,idir1),pawtab,&
 &       dtset%qptn,drho1wfg,drho1wfr(:,:,idir1),drhor1,rprimd,symaf1,symrc1,dtset%typat,&

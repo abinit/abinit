@@ -4,7 +4,7 @@
 !!  m_mpiotk
 !!
 !! FUNCTION
-!!  This module provides helper functions for MPI-IO operations. 
+!!  This module provides helper functions for MPI-IO operations.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2009-2018 ABINIT group (MG)
@@ -105,7 +105,7 @@ end subroutine no_mpiotk
 !!
 !! FUNCTION
 !!  Setup tables used in (read|write) a 2D array stored in a Fortran file
-!!  
+!!
 !! NOTES
 !!  The value of ierr should always be checked by the caller
 !!
@@ -113,7 +113,7 @@ end subroutine no_mpiotk
 !!  sizes(2)
 !!  subsizes(2)
 !!  starts(2)
-!!  chunk_bsize = 
+!!  chunk_bsize =
 !!  comm = MPI communicator
 !!
 !! OUTPUTS
@@ -121,7 +121,7 @@ end subroutine no_mpiotk
 !!  my_subsizes(:,:)
 !!  my_starts(:,:)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
-!!    and therefore bufsz has not been read. 
+!!    and therefore bufsz has not been read.
 !!
 !! PARENTS
 !!      m_mpiotk
@@ -133,7 +133,7 @@ end subroutine no_mpiotk
 !! SOURCE
 
 subroutine setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,&
-&  my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr) 
+&  my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -161,7 +161,7 @@ subroutine setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,&
 
 !************************************************************************
 
- size_x  = sizes(1) 
+ size_x  = sizes(1)
  subs_x  = subsizes(1)
  start_x = starts(1)
  start_y = starts(2)
@@ -211,7 +211,7 @@ subroutine setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,&
        my_starts(:,icall) = (/start_x, stop_y-yrest+1/)
        my_basead(icall) = 1 + 2 * (ny2read-yrest) * subs_x ! 2 accounts for real and imag part.
      else
-       my_starts(:,icall) = starts 
+       my_starts(:,icall) = starts
        my_basead(icall) = 1
      end if
    end if
@@ -228,9 +228,9 @@ end subroutine setup_fsuba_dp2D
 !!  mpiotk_read_fsuba_dp2D
 !!
 !! FUNCTION
-!!  Read a block of contiguous data stored in a 2D matrix. 
+!!  Read a block of contiguous data stored in a 2D matrix.
 !!  Data is placed within Fortran records. Target: complex data stored in a real array.
-!!  
+!!
 !! NOTES
 !!  The value of ierr should always be checked by the caller
 !!
@@ -241,16 +241,16 @@ end subroutine setup_fsuba_dp2D
 !!  subsizes(2)
 !!  starts(2)
 !!  bufsz = dimension of buffer (takes into accout both real and imaginary part)
-!!  chunk_bsize = 
+!!  chunk_bsize =
 !!  sc_mode= MPI-IO option
 !!    xmpio_single     ==> for reading by current proc.
 !!    xmpio_collective ==> for collective reading.
 !!  comm = MPI communicator
 !!
 !! OUTPUTS
-!!  buffer(bufsz) 
+!!  buffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
-!!    and therefore bufsz has not been read. 
+!!    and therefore bufsz has not been read.
 !!
 !! PARENTS
 !!      m_wfk
@@ -261,7 +261,7 @@ end subroutine setup_fsuba_dp2D
 !!
 !! SOURCE
 
-subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr) 
+subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -279,18 +279,18 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(2),subsizes(2),starts(2)
- real(dp),intent(out) :: buffer(bufsz) 
+ real(dp),intent(out) :: buffer(bufsz)
 
 !Local variables ------------------------------
 !scalars
  integer :: mpierr,ptr,ncount,myfh
  integer :: fsub_type,my_ncalls,icall,ncalls,subs_x
- integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad 
+ integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  !character(len=500) :: msg
 !arrays
  integer :: call_subsizes(2),call_starts(2)
  integer,allocatable :: my_basead(:),my_subsizes(:,:),my_starts(:,:)
- real(dp),allocatable :: dummy_buf(:,:) 
+ real(dp),allocatable :: dummy_buf(:,:)
 
 !************************************************************************
 
@@ -306,14 +306,14 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
    !MSG_WARNING("comm != xmpi_comm_self")
  else if (sc_mode==xmpio_collective) then
    continue
- else 
+ else
    MSG_ERROR("Wrong sc_mode")
  end if
 
  subs_x  = subsizes(1)
 
- call setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr) 
- if (ierr/=0) RETURN 
+ call setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
+ if (ierr/=0) RETURN
 
  do icall=1,ncalls
 
@@ -323,8 +323,8 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
      ptr           = my_basead(icall)
    else
      ! Fake values needed to call read_all collectively.
-     call_subsizes = (/subs_x, 1/) 
-     call_starts   = starts 
+     call_subsizes = (/subs_x, 1/)
+     call_starts   = starts
    end if
    ncount = PRODUCT(call_subsizes)
    !write(std_out,*)"  icall,ptr, ncount, ",icall,ptr,ncount
@@ -336,11 +336,11 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
    ABI_CHECK_MPI(mpierr,"fsubarray_2D")
 
    ! Update the offset.
-   my_offset = offset + my_offpad 
+   my_offset = offset + my_offpad
 
    call MPI_FILE_SET_VIEW(myfh, my_offset, MPI_BYTE, fsub_type, 'native', MPI_INFO_NULL, mpierr)
    ABI_CHECK_MPI(mpierr,"SET_VIEW")
-                                                                                                             
+
    call MPI_TYPE_FREE(fsub_type, mpierr)
    ABI_CHECK_MPI(mpierr,"MPI_TYPE_FREE")
 
@@ -362,7 +362,7 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
    end if
 
  end do
- 
+
  ABI_FREE(my_subsizes)
  ABI_FREE(my_starts)
  ABI_FREE(my_basead)
@@ -377,9 +377,9 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!  mpiotk_write_fsuba_dp2D
 !!
 !! FUNCTION
-!!  Write a block of contiguous data stored in a 2D matrix. 
+!!  Write a block of contiguous data stored in a 2D matrix.
 !!  Data is placed within Fortran records. Target: complex data stored in a real array.
-!!  
+!!
 !! NOTES
 !!  The value of ierr should always be checked by the caller
 !!
@@ -390,16 +390,16 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!  subsizes(2)
 !!  starts(2)
 !!  bufsz = dimension of buffer (takes into accout both real and imaginary part)
-!!  chunk_bsize = 
+!!  chunk_bsize =
 !!  sc_mode= MPI-IO option
 !!    xmpio_single     ==> for reading by current proc.
 !!    xmpio_collective ==> for collective reading.
 !!  comm = MPI communicator
 !!
 !! OUTPUTS
-!!  buffer(bufsz) 
+!!  buffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
-!!    and therefore bufsz has not been written. 
+!!    and therefore bufsz has not been written.
 !!
 !! PARENTS
 !!      m_wfk
@@ -410,7 +410,7 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!
 !! SOURCE
 
-subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr) 
+subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -428,13 +428,13 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(2),subsizes(2),starts(2)
- real(dp),intent(in) :: buffer(bufsz) 
+ real(dp),intent(in) :: buffer(bufsz)
 
 !Local variables ------------------------------
 !scalars
  integer :: mpierr,ptr,ncount,myfh
  integer :: fsub_type,my_ncalls,icall,ncalls,subs_x
- integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad 
+ integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  !character(len=500) :: msg
 !arrays
  integer :: call_subsizes(2),call_starts(2)
@@ -452,13 +452,13 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
  end if
 
  if (sc_mode==xmpio_single) then
-   call setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,my_basead,my_subsizes,my_starts,my_ncalls,ncalls,xmpi_comm_self,ierr) 
+   call setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,my_basead,my_subsizes,my_starts,my_ncalls,ncalls,xmpi_comm_self,ierr)
  else if (sc_mode==xmpio_collective) then
-   call setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr) 
- else 
+   call setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
+ else
    MSG_ERROR("Wrong sc_mode")
  end if
- if (ierr/=0) RETURN 
+ if (ierr/=0) RETURN
 
  subs_x = subsizes(1)
  do icall=1,ncalls
@@ -469,8 +469,8 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
      ptr           = my_basead(icall)
    else
      ! Fake values needed to call write_all collectively.
-     call_subsizes = (/subs_x, 1/) 
-     call_starts   = starts 
+     call_subsizes = (/subs_x, 1/)
+     call_starts   = starts
    end if
    ncount = PRODUCT(call_subsizes)
    !write(std_out,*)"  icall,ptr, ncount, ",icall,ptr,ncount
@@ -482,11 +482,11 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
    ABI_CHECK_MPI(mpierr,"fsubarray_2D")
 
    ! Update the offset.
-   my_offset = offset + my_offpad 
-                                                                                                              
+   my_offset = offset + my_offpad
+
    call MPI_FILE_SET_VIEW(myfh, my_offset, MPI_BYTE, fsub_type, 'native', MPI_INFO_NULL, mpierr)
    ABI_CHECK_MPI(mpierr,"SET_VIEW")
-                                                                                                             
+
    call MPI_TYPE_FREE(fsub_type, mpierr)
    ABI_CHECK_MPI(mpierr,"MPI_TYPE_FREE")
 
@@ -507,7 +507,7 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
    end if
 
  end do
- 
+
  ABI_FREE(my_subsizes)
  ABI_FREE(my_starts)
  ABI_FREE(my_basead)
@@ -524,7 +524,7 @@ end subroutine mpiotk_write_fsuba_dp2D
 !!  mpiotk_read_fsuba_dpc3D
 !!
 !! FUNCTION
-!!  Read of a block of contiguous data stored in a 3D matrix. 
+!!  Read of a block of contiguous data stored in a 3D matrix.
 !!  Data is placed within Fortran records. Target: complex data stored in a complex array.
 !!
 !! NOTES
@@ -536,17 +536,17 @@ end subroutine mpiotk_write_fsuba_dp2D
 !!  sizes(3)
 !!  subsizes(3)
 !!  starts(3)
-!!  bufsz = dimension of cbuffer 
-!!  chunk_bsize = 
+!!  bufsz = dimension of cbuffer
+!!  chunk_bsize =
 !!  comm = MPI communicator
 !!  sc_mode= MPI-IO option
 !!    xmpio_single     ==> for reading by current proc.
 !!    xmpio_collective ==> for collective reading.
 !!
 !! OUTPUTS
-!!  cbuffer(bufsz) 
+!!  cbuffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
-!!    and therefore bufsz has not been read. 
+!!    and therefore bufsz has not been read.
 !!
 !! PARENTS
 !!      m_io_screening
@@ -557,7 +557,7 @@ end subroutine mpiotk_write_fsuba_dp2D
 !!
 !! SOURCE
 
-subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr) 
+subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -575,14 +575,14 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(3),subsizes(3),starts(3)
- complex(dpc),intent(out) :: cbuffer(bufsz) 
+ complex(dpc),intent(out) :: cbuffer(bufsz)
 
 !Local variables-------------------------------
 !scalars
  integer :: mpierr,nz2read,nz_chunk,ptr,ncount,myfh
- integer :: fsub_type,my_ncalls,icall,zrest,ncalls 
+ integer :: fsub_type,my_ncalls,icall,zrest,ncalls
  integer :: size_x,size_y,subs_x,subs_y,subs_xy,start_x,start_y,start_z,stop_z
- integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad 
+ integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  !character(len=500) :: msg
 !arrays
  integer :: call_subsizes(3),call_starts(3)
@@ -592,7 +592,7 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
 !************************************************************************
 
  ! Workaround for XLF
- myfh = fh 
+ myfh = fh
 
  if (bufsz < PRODUCT(subsizes) ) then
    MSG_ERROR("bufsz is too small")
@@ -602,12 +602,12 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
   ABI_CHECK(comm==xmpi_comm_self,"comm != xmpi_comm_self")
  else if (sc_mode==xmpio_collective) then
    continue
- else 
+ else
    MSG_ERROR("Wrong sc_mode")
  end if
 
- size_x  = sizes(1) 
- size_y  = sizes(2) 
+ size_x  = sizes(1)
+ size_y  = sizes(2)
  subs_x  = subsizes(1)
  subs_y  = subsizes(2)
  subs_xy = subs_x * subs_y
@@ -657,9 +657,9 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
      my_subsizes(:,icall) = (/subs_x, subs_y, zrest/)
      if (nz2read >= nz_chunk) then
        my_starts(:,icall) = (/start_x, start_y, stop_z-zrest+1/)
-       my_basead(icall) = 1 + (nz2read-zrest) * subs_xy 
+       my_basead(icall) = 1 + (nz2read-zrest) * subs_xy
      else
-       my_starts(:,icall) = starts 
+       my_starts(:,icall) = starts
        my_basead(icall) = 1
      end if
    end if
@@ -674,8 +674,8 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
      ptr           = my_basead(icall)
    else
      ! Fake values needed to call read_all collectively.
-     call_subsizes = (/subs_x, 1, 1/) 
-     call_starts   = starts 
+     call_subsizes = (/subs_x, 1, 1/)
+     call_starts   = starts
    end if
    ncount = PRODUCT(call_subsizes)
    !write(std_out,*)"  icall,ptr, ncount, ",icall,ptr,ncount
@@ -688,11 +688,11 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
    ABI_CHECK_MPI(mpierr,"fsubarray_3D")
 
    ! Update the offset.
-   my_offset = offset + my_offpad 
-                                                                                                              
+   my_offset = offset + my_offpad
+
    call MPI_FILE_SET_VIEW(myfh, my_offset, MPI_BYTE, fsub_type, 'native', MPI_INFO_NULL, mpierr)
    ABI_CHECK_MPI(mpierr,"SET_VIEW")
-                                                                                                             
+
    call MPI_TYPE_FREE(fsub_type, mpierr)
    ABI_CHECK_MPI(mpierr,"MPI_TYPE_FREE")
 
@@ -714,7 +714,7 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
    end if
 
  end do
- 
+
  ABI_FREE(my_subsizes)
  ABI_FREE(my_starts)
  ABI_FREE(my_basead)
@@ -729,7 +729,7 @@ end subroutine mpiotk_read_fsuba_dpc3D
 !!  mpiotk_read_fsuba_dpc4D
 !!
 !! FUNCTION
-!!  Reading a block of contiguous data stored in a 4D matrix. 
+!!  Reading a block of contiguous data stored in a 4D matrix.
 !!  Data is placed within Fortran records. Target: complex data stored in a complex array.
 !!
 !! NOTES
@@ -741,17 +741,17 @@ end subroutine mpiotk_read_fsuba_dpc3D
 !!  sizes(4)
 !!  subsizes(4)
 !!  starts(4)
-!!  bufsz = dimension of cbuffer 
-!!  chunk_bsize = 
+!!  bufsz = dimension of cbuffer
+!!  chunk_bsize =
 !!  comm = MPI communicator
 !!  sc_mode= MPI-IO option
 !!    xmpio_single     ==> for reading by current proc.
 !!    xmpio_collective ==> for collective reading.
 !!
 !! OUTPUTS
-!!  cbuffer(bufsz) 
+!!  cbuffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
-!!    and therefore bufsz has not been read. 
+!!    and therefore bufsz has not been read.
 !!
 !! PARENTS
 !!      m_io_screening
@@ -762,7 +762,7 @@ end subroutine mpiotk_read_fsuba_dpc3D
 !!
 !! SOURCE
 
-subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr) 
+subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -780,14 +780,14 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(4),subsizes(4),starts(4)
- complex(dpc),intent(out) :: cbuffer(bufsz) 
+ complex(dpc),intent(out) :: cbuffer(bufsz)
 
 !Local variables-------------------------------
 !scalars
  integer :: mpierr,na2read,na_chunk,ptr,ncount,myfh
- integer :: fsub_type,my_ncalls,icall,arest,ncalls 
+ integer :: fsub_type,my_ncalls,icall,arest,ncalls
  integer :: size_x,size_y,size_z,subs_x,subs_y,subs_z,subs_xyz,start_x,start_y,start_z,start_a,stop_a
- integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad 
+ integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  !character(len=500) :: msg
 !arrays
  integer :: call_subsizes(4),call_starts(4)
@@ -807,12 +807,12 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
   ABI_CHECK(comm==xmpi_comm_self,"comm != xmpi_comm_self")
  else if (sc_mode==xmpio_collective) then
    continue
- else 
+ else
    MSG_ERROR("Wrong sc_mode")
  end if
 
- size_x  = sizes(1) 
- size_y  = sizes(2) 
+ size_x  = sizes(1)
+ size_y  = sizes(2)
  size_z  = sizes(3)
 
  subs_x  = subsizes(1)
@@ -869,7 +869,7 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
        my_starts(:,icall) = (/start_x, start_y, start_z, stop_a-arest+1/)
        my_basead(icall) = 1 + (na2read-arest) * subs_xyz
      else
-       my_starts(:,icall) = starts 
+       my_starts(:,icall) = starts
        my_basead(icall) = 1
      end if
    end if
@@ -884,8 +884,8 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
      ptr           = my_basead(icall)
    else
      ! Fake values needed to call read_all collectively.
-     call_subsizes = (/subs_x, 1, 1, 1/) 
-     call_starts   = starts 
+     call_subsizes = (/subs_x, 1, 1, 1/)
+     call_starts   = starts
    end if
    ncount = PRODUCT(call_subsizes)
    !
@@ -899,11 +899,11 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
    ABI_CHECK_MPI(mpierr,"fsubarray_4D")
 
    ! Update the offset.
-   my_offset = offset + my_offpad 
-                                                                                                              
+   my_offset = offset + my_offpad
+
    call MPI_FILE_SET_VIEW(myfh, my_offset, MPI_BYTE, fsub_type, 'native', MPI_INFO_NULL, mpierr)
    ABI_CHECK_MPI(mpierr,"SET_VIEW")
-                                                                                                             
+
    call MPI_TYPE_FREE(fsub_type, mpierr)
    ABI_CHECK_MPI(mpierr,"MPI_TYPE_FREE")
 
@@ -924,7 +924,7 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
    end if
 
  end do
- 
+
  ABI_FREE(my_subsizes)
  ABI_FREE(my_starts)
  ABI_FREE(my_basead)

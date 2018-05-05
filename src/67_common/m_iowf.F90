@@ -96,7 +96,7 @@ CONTAINS  !=====================================================================
 !!   where resid(n,k)=|<C(n,k)|(H-e(n,k))|C(n,k)>|^2 for the ground state
 !!  response: if == 0, GS wavefunctions , if == 1, RF wavefunctions
 !!  unwff2=unit for output of wavefunction
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!  (only writing)

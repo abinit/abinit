@@ -152,6 +152,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_hdr
  use m_ebands
 
+ use m_dtfil,      only : status
  use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
@@ -182,6 +183,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
  use m_inwffil,    only : inwffil
+ use m_spacepar,   only : rotate_rho, setsym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -524,6 +526,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          if (rfdir(idir) == 1) to_compute_this_pert = 1
        else
          if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+       end if
+     else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1) then
+       if (idir <= 3 .and. rfdir(idir) == 1) then
+         to_compute_this_pert = 1
+       else if (idir>=4.and.idir<=6) then
+         if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+       else if (idir>=7.and.idir<=9) then
+         if (rfdir(idir) == 1 .or. rfdir(idir-3) == 1) to_compute_this_pert = 1
        end if
      end if
      if (to_compute_this_pert /= 0) then
@@ -890,8 +900,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &     dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&     ipert==dtset%natom+5 .or. &
-&     dtset%prtfull1wf==1) timrev_pert=0
+&     ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
      nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
    end if

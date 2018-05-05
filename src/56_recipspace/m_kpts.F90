@@ -34,7 +34,7 @@ module m_kpts
  use m_xmpi
 
  use m_time,           only : timab
- use m_symtk,          only : mati3inv, mati3det, matr3inv
+ use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
@@ -2305,7 +2305,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 #define ABI_FUNC 'testkgrid'
  use interfaces_14_hidewrite
  use interfaces_16_hideleave
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
