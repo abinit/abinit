@@ -2118,7 +2118,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
  if (write_procar) then
    ! open file for each proc, and print header for master node
-   unit_procar=get_unit()
    call int2char4(me_kpt, ikproc_str)
    filename = 'PROCAR_'//ikproc_str
    if (open_file(filename, msg, newunit=unit_procar, form="formatted", action="write") /= 0) then
@@ -2283,7 +2282,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
          !write(std_out,*)"in band:",iband
          ! TODO: eventually import eig and occ down to here - a pain, but printing outside would imply saving a huge array in memory
-         if (write_procar)
+         if (write_procar) then
            write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
              eigen(abs_shift_b), ' # occ. ', occ(abs_shift_b), ch10
          end if
