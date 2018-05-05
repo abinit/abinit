@@ -431,6 +431,7 @@ end subroutine crystal_init
 
 type(crystal_t) function crystal_without_symmetries(self) result(new)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
