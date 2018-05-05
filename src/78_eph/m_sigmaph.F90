@@ -219,6 +219,12 @@ module m_sigmaph
    ! Defines the method used to integrate in q-space
    ! 0 --> Standard quadrature (one point per small box)
    ! 1 --> Use tetrahedron method
+ 
+  logical :: use_doublegrid
+   ! whether to use double grid or not
+
+  type(eph_double_grid_t) :: eph_doublegrid
+   ! store the double grid related object
 
   logical :: imag_only
    ! True if only the imaginary part of the self-energy must be computed
@@ -389,8 +395,7 @@ contains  !=====================================================
 !! SOURCE
 
 subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm,&
-                   eph_dg)
+                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -418,7 +423,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
  type(mpi_type),intent(in) :: mpi_enreg
- type(eph_double_grid_t),optional,intent(in) :: eph_dg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
@@ -453,6 +457,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  type(sigmaph_t) :: sigma
  type(gspline_t) :: gspl
  type(ebands_t) :: ebands_dense
+ type(eph_double_grid_t) :: eph_dg
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
@@ -548,7 +553,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
 
  ! Double grid stuff
- if (present(eph_dg)) then
+ if (sigma%use_doublegrid) then
+   eph_dg = sigma%eph_doublegrid
    ABI_MALLOC(eph_dg_mapping,(6,eph_dg%ndiv))
    ABI_MALLOC(phfrq_dense,(3*cryst%natom,eph_dg%ndiv))
    nkpt_coarse = eph_dg%nkpt_coarse
@@ -781,7 +787,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        end if
 
        ! Double grid stuff
-       if (present(eph_dg)) then
+       if (sigma%use_doublegrid) then
          ik_bz  = eph_dg%indexes_to_coarse(&
                    mod(nint((kk(1)+1)*nkpt_coarse(1)),nkpt_coarse(1))+1,&
                    mod(nint((kk(2)+1)*nkpt_coarse(2)),nkpt_coarse(2))+1,&
@@ -1013,7 +1019,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                ! TODO: In principle mu_e(T) (important if semimetal) but need to treat T --> 0 in new_occ
                !f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
 
-               if (present(eph_dg)) then
+               if (sigma%use_doublegrid) then
                  cfact = 0
                  do jj=1,eph_dg%ndiv
                    ! Double Grid shared points weights
@@ -1342,7 +1348,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_FREE(dt_weights)
  end if
 
- if (present(eph_dg)) then
+ if (sigma%use_doublegrid) then
    ABI_FREE(eph_dg_mapping)
    ABI_FREE(phfrq_dense)
  endif
@@ -1573,15 +1579,20 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  logical :: downsample, use_doublegrid
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: dksqmax,ph_wstep
+ character(len=500) :: wfk_fname_dense
  character(len=500) :: msg
  logical :: changed,found
- type(ebands_t) :: tmp_ebands
+ type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
+ type(hdr_type) :: hdr_wfk_dense 
 !arrays
- integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6)
- integer :: val_indeces(ebands%nkpt, ebands%nsppol)
+ integer :: intp_kptrlatt(3,3)
+ integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),nkpt_dense(3),band_block(2)
+ integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
+ real(dp):: params(3)
  integer,allocatable :: gtmp(:,:),degblock(:,:)
- real(dp) :: my_shiftq(3,1),kk(3),kq(3)
+ real(dp) :: my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
+ real(dp),pointer :: energies_dense(:,:,:)
 
 ! *************************************************************************
 
@@ -1911,8 +1922,78 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  !
  !  NB: The routines assume that the k-mesh for electrons and the q-mesh for phonons are the same.
  !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
+
+ ! =======================================
+ ! === Prepare Double grid integration ===
+ ! =======================================
+
+ ! 1. Read kpoints and eig from a WFK/EIG/GSR file
+ ! 2. Initialize a double grid object for the calculations
+ ! of the integration weights on a coarse grid using the
+ ! values of energies in a fine grid
+ !
+ ! -------------------
+ ! |. . .|. . .|. . .| 
+ ! |. x .|. x .|. x .| 
+ ! |. . .|. . .|. . .|
+ ! -------------------
+ ! . = double grid
+ ! x = coarse grid
+ !
+ ! The fine grid is used to evaluate the weights on the coarse grid
+ ! The points of the fine grid are associated to the points of the
+ ! coarse grid according to proximity
+ ! The integration weights are returned on the coarse grid.
+ !
+ ! Steps of the implementation
+ ! 1. Load the fine k grid from file or interpolation
+ ! 2. Find the matching between the k_coarse and k_dense using the double_grid object
+ ! 3. Calculate the phonon frequencies on the dense mesh and store them on a array
+ ! 4. Create an array to bring the points in the full brillouin zone to the irreducible brillouin zone
+ ! 5. Create a scatter array between the points in the fine grid
+ ! 
+
  use_doublegrid = .False.
- !use_doublegrid = F(dtset%, dtftil% ....)
+ if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
+     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
+
+   wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
+   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense),"COLL")
+
+   if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   call wfk_read_eigenvalues(wfk_fname_dense,energies_dense,hdr_wfk_dense,comm)
+   ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
+
+   !TODO add a check for consistency
+   ! number of bands and kpoints (comensurability)
+   ABI_CHECK(hdr_wfk_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
+
+   use_doublegrid = .True.
+
+ !read bs_interpmult
+ else if (dtset%bs_interp_kmult(1) /= 0 .or.&
+          dtset%bs_interp_kmult(2) /= 0 .or.&
+          dtset%bs_interp_kmult(3) /= 0 ) then
+
+   call wrtout(std_out,"EPH Interpolation: will use star functions interpolation","COLL")
+
+   ! Interpolate band energies with star-functions
+   params = 0; params(1) = 1; params(2) = 5
+   !TODO: mband should be min of nband
+   band_block = [1, ebands%mband]
+   intp_kptrlatt(:,1) = [ebands%kptrlatt(1,1)*dtset%bs_interp_kmult(1), 0, 0]
+   intp_kptrlatt(:,2) = [0, ebands%kptrlatt(2,2)*dtset%bs_interp_kmult(2), 0]
+   intp_kptrlatt(:,3) = [0, 0, ebands%kptrlatt(3,3)*dtset%bs_interp_kmult(3)]
+
+   intp_shiftk = zero
+   intp_nshiftk = 1
+   ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt,&
+                                      intp_nshiftk, intp_shiftk, band_block, comm)
+   use_doublegrid = .True.
+ end if
 
  if (new%qint_method > 0) then
    ! bstart and new%bsum select the band range.
@@ -1940,11 +2021,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      !    intp_kptrlatt, my_nshiftq, my_shiftq, [bstart, bstart + new%nbsum - 1], comm)
      !  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
      !end if
-     !new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
+     new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
      !new%double_grid = ...
      !call ebands_free(tmp_ebands)
    end if
+ else if (use_doublegrid) then
+   new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
  end if
+ new%use_doublegrid = use_doublegrid
 
  ! Open netcdf file (only master work for the time being because cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
@@ -2196,6 +2280,10 @@ subroutine sigmaph_free(self)
     ABI_DT_FREE(self%degtab)
  end if
  call ephwg_free(self%ephwg)
+ 
+ if (self%use_doublegrid) then
+   call eph_double_grid_free(self%eph_doublegrid)
+ end if
 
  ! Close netcdf file.
 #ifdef HAVE_NETCDF
