@@ -955,7 +955,7 @@ CONTAINS
 
  !Arguments ------------------------------------
  !scalars
-  integer,            intent(in)    :: dim_eig2rf,mpert,nkpt_rbz
+  integer,            intent(in)    :: mpert,nkpt_rbz
   type(dataset_type), intent(in)    :: dtset
   type(MPI_type),     intent(in) :: mpi_enreg
  !arrays
@@ -972,17 +972,11 @@ CONTAINS
   integer :: info
   integer :: ipert
   integer :: isppol
-  integer :: icg2   !TODOM : Reactivate the sections for icg2 / allow choice of k-point other than the first in the list.
-  integer :: npw_k
   integer :: nband_k
-  integer :: nspinor
   integer :: ideg,jdeg
   integer :: ikpt
-  integer :: istwf_k
   integer :: master,me,spaceworld
-  integer :: band2tot_index
-  integer :: bandtot_index
-  integer :: iband, jband, kband
+  integer :: iband, jband
   integer :: adir,bdir
   integer :: deg_dim
   integer :: degl
@@ -994,16 +988,10 @@ CONTAINS
   integer :: ipiv(3)
   integer :: io_unit
   character(len=500) :: msg, filename
-  real(dp) :: deltae
   real(dp) :: cosph,costh,sinph,sinth
-  real(dp) :: dot2i,dot2r,dot3i,dot3r,doti,dotr
   real(dp) :: f3d_scal
   real(dp) :: weight
   real(dp) :: gprimd(3,3)
-  !real(dp) :: A, B, C, R
-  real(dp), allocatable :: cg0(:,:)
-  real(dp), allocatable :: cg1_pert2(:,:),cg1_pert1(:,:)
-  real(dp), allocatable :: gh1c_pert2(:,:),gh1c_pert1(:,:),gh0c1_pert1(:,:)
   real(dp), allocatable :: unit_r(:), dr_dth(:), dr_dph(:)
   real(dp), allocatable :: eigenval(:), rwork(:)
   real(dp), allocatable :: eigf3d(:)
@@ -1018,14 +1006,9 @@ CONTAINS
   real(dp), allocatable :: dirs(:,:)
   real(dp),allocatable :: prodr(:,:)
   !real(dp), allocatable :: f3dfd(:,:,:)
-  complex(dpc) :: eig2_part(3,3)
-  complex(dpc) :: eig2_ch2c(3,3)
-  complex(dpc) :: eig2_paral(3,3)
-  complex(dpc) :: eig2_gauge_change(3,3)
-  complex(dpc) :: eig1a, eig1b, g_ch
   complex(dpc) :: matr2d(2,2)
   complex(dpc), allocatable :: eigen1_deg(:,:), eigenvec(:,:), work(:)
-  complex(dpc), allocatable :: eig2_diag(:,:,:,:),eig2_diag_cart(:,:,:,:)
+  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
   complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
   complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
   complex(dpc),allocatable :: prodc(:,:)
@@ -1042,27 +1025,6 @@ CONTAINS
   spaceworld=mpi_enreg%comm_cell
   me=mpi_enreg%me_kpt
 
-  write(msg,'(4a)') ch10,&
-&  ' CALCULATION OF EFFECTIVE MASSES',ch10,&
-&  ' NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-
-  if(dtset%nsppol/=1)then
-    write(msg,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
-    MSG_ERROR(msg)
-  end if
-  if(dtset%nspden/=1)then
-    write(msg,'(a,i3,a)') 'nspden=',dtset%nspden,' is not yet treated in m_efmas.'
-    MSG_ERROR(msg)
-  end if
-  if(dtset%efmas_deg==0) then
-    write(msg,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
-    MSG_WARNING(msg)
-    write(ab_out,'(6a)') ch10,'--- !WARNING',ch10,TRIM(msg),ch10,'---'
-  end if
-
-  ipert = dtset%natom+1
   isppol = 1
 
   mdim = dtset%efmas_dim
