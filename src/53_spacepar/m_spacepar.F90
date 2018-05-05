@@ -35,7 +35,7 @@ module m_spacepar
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, chkgrp, symdet, symatm
+ use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
  use m_geometry,        only : metric, symredcart
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym
@@ -52,6 +52,7 @@ public :: redgr             ! Compute reduced gradients of a real function on th
 public :: hartrestr         ! FFT of (rho(G)/pi)*[d(1/G**2)/d(strain) - delta(diagonal strain)*(1/G**2)]
 public :: symrhg            ! Symmetrize rhor(r)
 public :: irrzg             ! Find the irreducible zone in reciprocal space (used by symrhg)
+public :: setsym            ! Set up irreducible zone in  G space by direct calculation.
 
 ! MG FIXME This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
 public :: rotate_rho
