@@ -996,7 +996,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! Precompute weigths with tetrahedron
          if (sigma%qint_method > 0) then
            if (sigma%use_doublegrid) then
-             call sigmaph_get_qweights_doublegrid(sigma, ikcalc, ikq_ibz, ibsum_kq, spin, xmpi_comm_self)
+             call sigmaph_get_qweights_doublegrid(sigma, ikcalc, eph_dg_mapping, ibsum_kq, spin, xmpi_comm_self)
            else
              call sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, xmpi_comm_self)
            end if
@@ -1064,7 +1064,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  end if
                else
                  if (sigma%use_doublegrid) then
-                   do jj=1,ndiv
+                   do jj=1,eph_dg%ndiv
                      ! Double Grid shared points weights
                      ikq_bz_fine  = eph_dg_mapping(2, jj)
                      weight = eph_dg%weights_dense(ikq_bz_fine)
@@ -1458,7 +1458,7 @@ end subroutine sigmaph
 !!***
 
 
-subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, ikq_bz, ibsum_kq, spin, comm)
+subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, eph_dg_mapping, ibsum_kq, spin, comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1471,12 +1471,12 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, ikq_bz, ibsum_kq, spin
 !Arguments ------------------------------------
 !scalars
  type(sigmaph_t),intent(inout) :: sigma
- integer,intent(in) :: ikcalc, ikq_bz, ibsum_kq, spin, comm
+ integer,intent(in) :: ikcalc, eph_dg_mapping(6,sigma%eph_doublegrid%ndiv), ibsum_kq, spin, comm
 
 !Local variables-------------------------
 !scalars
  integer,parameter :: bcorr0 = 0, nz = 1
- integer :: jj, ikq_ibz, ikq_bz_fine, ikq_ibz_fine, nbc
+ integer :: jj, iq_ibz_fine, iqlk, nbc
  real(dp) :: qpt(3)
  complex(dpc), allocatable :: zvals(:,:)
 
@@ -1485,18 +1485,18 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, ikq_bz, ibsum_kq, spin
   nbc = sigma%nbcalc_ks(ikcalc, spin)
 
   do jj=1,sigma%eph_doublegrid%ndiv
-    ikq_bz_fine = sigma%eph_doublegrid%coarse_to_dense(ikq_bz,jj) 
-    ikq_ibz_fine = sigma%eph_doublegrid%bz2ibz_dense(ikq_bz_fine)
+    iq_ibz_fine = eph_dg_mapping(6,jj)
+    iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, sigma%eph_doublegrid%kpts_dense_ibz(:,iq_ibz_fine))
 
     if (sigma%imag_only) then
       ! Compute weigths for delta functions at the KS energies with tetra.
-      call ephwg_get_dweights(sigma%ephwg, ikq_ibz_fine, nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,jj), comm, &
+      call ephwg_get_dweights(sigma%ephwg, iqlk, nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,jj), comm, &
         use_bzsum=sigma%symsigma == 0)
     else
       ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
       ABI_MALLOC(zvals, (nz, nbc))
       zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
-      call ephwg_zinv_weights(sigma%ephwg, ikq_ibz_fine, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,jj), comm, &
+      call ephwg_zinv_weights(sigma%ephwg, iqlk, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,jj), comm, &
         use_bzsum=sigma%symsigma == 0)
       ABI_FREE(zvals)
     end if
@@ -2164,11 +2164,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      !  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
      !end if
      new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
-     !new%double_grid = ...
+     new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
      !call ebands_free(tmp_ebands)
    end if
- else if (use_doublegrid) then
-   new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
+ else 
+   if (use_doublegrid) then
+     new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
+   endif
  end if
  new%use_doublegrid = use_doublegrid
 
