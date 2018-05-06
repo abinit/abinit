@@ -6,7 +6,7 @@
 !! FUNCTION
 !! Prepare the application of the projectors to the shifted wavefunctions,
 !! by precomputing the k+G factors and their product with the form factors
-!! Do this on a block of plane wave.
+!! Do this on a block of plane waves.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT, DRH)
@@ -62,7 +62,6 @@
 #endif
 
 #include "abi_common.h"
-
 
 subroutine mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &                  kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&

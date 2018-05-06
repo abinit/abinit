@@ -64,15 +64,15 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
  use m_profiling_abi
  use m_errors
 
+ use m_time,     only : timab
  use m_mpinfo,   only : ptabs_fourdp
+ use m_fft_mesh, only : phase
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcden'
- use interfaces_18_timing
  use interfaces_53_ffts
- use interfaces_56_xc, except_this_one => xcden
 !End of the abilint section
 
  implicit none

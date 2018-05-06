@@ -85,18 +85,19 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  use m_cgtools
  use m_xmpi
 
+ use m_time,      only : timab
  use m_io_tools,  only : get_unit, iomode_from_fname
+ use m_fftcore,   only : sphereboundary
+ use m_fft,       only : fftpac
+ use m_spacepar,  only : symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkrho'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -160,7 +161,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  me=mpi_enreg%me_kpt
 
 !zero the charge density array in real space
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
  do ispden=1,nspden
    do ifft=1,cplex*nfft
      rhor1(ifft,ispden)=zero
@@ -202,7 +203,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
          bdtot_index=bdtot_index+nband_k
          cycle
        end if
-       
+
        ABI_ALLOCATE(gbound,(2*mgfft+8,2))
        ABI_ALLOCATE(kg_k,(3,npw_k))
        ABI_ALLOCATE(gbound1,(2*mgfft+8,2))
@@ -243,7 +244,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
 !          Accumulate density
              if(cplex==2)then
-!$OMP PARALLEL DO PRIVATE(im0,im1,re0,re1) 
+!$OMP PARALLEL DO PRIVATE(im0,im1,re0,re1)
                do i3=1,n3
                  do i2=1,n2
                    do i1=1,n1
@@ -255,7 +256,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
                  end do
                end do
              else
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
                do i3=1,n3
                  do i2=1,n2
                    do i1=1,n1
@@ -266,7 +267,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
                end do
              end if ! cplex
            end do ! ispinor
-         else !abs(occ_rbz(iband+bdtot_index))>tol8  
+         else !abs(occ_rbz(iband+bdtot_index))>tol8
            nskip=nskip+1  ! if the state is not occupied. Accumulate the number of one-way 3D ffts skipped
          end if ! abs(occ_rbz(iband+bdtot_index))>tol8
        end do ! iband
@@ -322,7 +323,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
        bdtot_index=bdtot_index+nband_k
        cycle
      end if
-     
+
      ABI_ALLOCATE(gbound,(2*mgfft+8,2))
      ABI_ALLOCATE(kg_k,(3,npw_k))
      ABI_ALLOCATE(gbound1,(2*mgfft+8,2))
@@ -382,8 +383,8 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997)??)
          weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
-!density components 
-!GS wfk Fourrier Tranform 
+!density components
+!GS wfk Fourrier Tranform
 ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
          call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gbound,gbound,istwf_k,kg_k,kg_k,&
 &         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&

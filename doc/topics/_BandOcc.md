@@ -2,6 +2,7 @@
 description: How to to specify bands and occupation numbers, for metals or insulators
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to to specify bands and occupation numbers, 
 for metals or insulators with the ABINIT package.

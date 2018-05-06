@@ -73,11 +73,12 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  use m_cgtools
  use m_abi_linalg
 
+ use m_time,          only : timab
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pw_orthon'
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none
@@ -241,18 +242,18 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
      ABI_DEALLOCATE(rblockvectorbx)
    end if
 
- else if (ortalgo==4) then 
-!  else if (ANY(ortalgo==(/0,2/))) then 
+ else if (ortalgo==4) then
+!  else if (ANY(ortalgo==(/0,2/))) then
 
    cg_idx = cgindex(1)
-   if (useoverlap==0) then 
+   if (useoverlap==0) then
      call cgnc_gramschmidt(nelem,nvec,vecnm(1,cg_idx),istwf_k,me_g0,comm)
-   else 
+   else
      gsc_idx = gscindex(1)
      call cgpaw_gramschmidt(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
    end if
 
- else if (ANY(ortalgo==(/0,2/))) then 
+ else if (ANY(ortalgo==(/0,2/))) then
 !  =======================
 !  Third (old) algorithm
 !  =======================
@@ -502,7 +503,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
              call timab(48,1,tsec)
              call xmpi_sum(dotr,comm,ierr)
              call timab(48,2,tsec)
-             
+
 !            Then subtract the appropriate amount of the lower state
              ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
 #ifdef FC_INTEL
@@ -554,7 +555,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 !    end loop over vectors (or bands) with index ivec :
    end do
 
- else 
+ else
    write(msg,'(a,i0)')"Wrong value for ortalgo: ",ortalgo
    MSG_ERROR(msg)
  end if ! End of the second algorithm

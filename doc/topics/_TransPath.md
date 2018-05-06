@@ -2,6 +2,7 @@
 description: How to calculate transition paths
 authors: GG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to calculate transition paths with the ABINIT package.
 

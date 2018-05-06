@@ -122,6 +122,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  use m_cgtools
  use m_rf2
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type,KPRIME_H_KPRIME
 
@@ -130,7 +131,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_cgwf'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -196,18 +196,20 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  nline = nline_in
  usetolrde = 1
-! LB-29/11/17:
+
+! LB-23/04/17:
 ! For ipert=natom+10 or ipert=natom+11, the Sternheimer equation is non-self-consistent, so we have
-! to solve a true linear problem (A.x = b) for each kpoint and band. In this case, the conjugate
-! gradient algorithm can find the solution up to numerical precision with only ONE call of dfpt_cgwf
-! (per kpoint and band). This way, in order to avoid useless scfcv loops (and calls of rf2_init, which
-! can be time-consuming), we want leave this routine only if tolwfr is reached so tolrde and nline are
-! not used to end the procedure.
-! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be
-! changed...
+! to solve a true linear problem (A.X = B) for each kpoint and band. In this case, the conjugate
+! gradient algorithm can find the exact solution (within the numerical precision) with only ONE call
+! of dfpt_cgwf (per kpoint and band...). The solution is found with at most N iterations, N being the dimension of X.
+! In order to avoid useless scfcv loops (and many calls of rf2_init, which can be time consuming),
+! we want to leave this routine only if 'tolwfr' is reached. Consequently, 'tolrde' is not used and 'nline' is set to 100.
+! One could use nline=npw1*nspinor (>> 100 !) instead, but when the method cannot converge (i.e when tolwfr is lower than the
+! numerical noise) the program could be stuck here for a very long time.
+! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be changed...
  if(ipert==natom+10.or.ipert==natom+11) then
-   nline = 200 ! The default value is only 4...
-   if (nline_in>200) nline = nline_in ! Keep the possibility to increase nline
+   nline = 100 ! The default value is only 4... This should be sufficient to converge with nstep=1 or 2
+   if (nline_in > 100) nline = nline_in ! Keep the possibility to increase nline
    usetolrde = 0  ! see below
  end if
 

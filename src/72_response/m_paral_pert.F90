@@ -34,6 +34,7 @@ MODULE m_paral_pert
  use m_errors
  use m_xmpi
 
+ use m_time,      only : timab
  use m_copy,      only : deep_copy
  use m_paw_an,    only : paw_an_type, paw_an_free, paw_an_redistribute
  use m_paw_ij,    only : paw_ij_type, paw_ij_free, paw_ij_redistribute
@@ -53,7 +54,7 @@ MODULE m_paral_pert
 
 !private procedures.
  private :: get_exchatom_list
- private :: get_exchatom_list1 
+ private :: get_exchatom_list1
 !!***
 
 CONTAINS
@@ -234,7 +235,6 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'set_pert_paw'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -249,13 +249,13 @@ subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !arrays
  integer,pointer,intent(out) :: old_atmtab(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
- type(paw_ij_type),optional,pointer,intent(out) :: paw_ij_out(:)
+ type(paw_ij_type),optional,pointer,intent(inout) :: paw_ij_out(:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
- type(paw_an_type),optional,pointer,intent(out) :: paw_an_out(:)
+ type(paw_an_type),optional,pointer,intent(inout) :: paw_an_out(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
- type(pawfgrtab_type),optional,pointer,intent(out) :: pawfgrtab_out(:)
+ type(pawfgrtab_type),optional,pointer,intent(inout) :: pawfgrtab_out(:)
  type(pawrhoij_type),allocatable,target,intent(inout) :: pawrhoij(:)
- type(pawrhoij_type),optional,pointer,intent(out) :: pawrhoij_out(:)
+ type(pawrhoij_type),optional,pointer,intent(inout) :: pawrhoij_out(:)
 
 !Local variables ---------------------------------------
 !scalars
@@ -450,7 +450,7 @@ end  subroutine set_pert_paw
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  old_atmtab=index of atoms to restore
 !!  old_comm_atom=MPI communicator to restore
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!
 !! OUTPUT
@@ -470,7 +470,7 @@ end  subroutine set_pert_paw
 !! old_comm_atom=save the identifier of the MPI communicator
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  paw_an(my_natom)<type(paw_an_type)>=PAW arrays given on angular mesh
 !!  paw_ij(my_natom)<type(paw_ij_type)>=PAW arrays given on (i,j) channels
@@ -494,7 +494,6 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'unset_pert_paw'
- use interfaces_18_timing
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -509,13 +508,13 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 !arrays
  integer,pointer,intent(inout) :: old_atmtab(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
- type(paw_ij_type),optional,pointer,intent(out) :: paw_ij_out(:)
+ type(paw_ij_type),optional,pointer,intent(inout) :: paw_ij_out(:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
- type(paw_an_type),optional,pointer,intent(out) :: paw_an_out(:)
+ type(paw_an_type),optional,pointer,intent(inout) :: paw_an_out(:)
  type(pawfgrtab_type),allocatable,target,intent(inout) :: pawfgrtab(:)
- type(pawfgrtab_type),optional,pointer,intent(out) :: pawfgrtab_out(:)
+ type(pawfgrtab_type),optional,pointer,intent(inout) :: pawfgrtab_out(:)
  type(pawrhoij_type),allocatable,target,intent(inout) :: pawrhoij(:)
- type(pawrhoij_type),optional,pointer,intent(out) :: pawrhoij_out(:)
+ type(pawrhoij_type),optional,pointer,intent(inout) :: pawrhoij_out(:)
 
 !Local variables ---------------------------------------
 !scalars
@@ -742,14 +741,14 @@ end  subroutine unset_pert_paw
  nbgroup=0;
  nproc_max=0
  ranks(:)=-1;group(:)=-1;sizecomm(:)=-1;master_commout(:)=-1
- 
+
  do ii=1,nproc_in
    ranks(ii)=buf_int_all(3*ii-2)    !me_out
    master_commout(ii)=buf_int_all(3*ii-1) !rank of me_out=0 of mpicomm_out expressed in mpicomm_in
-   
+
    if (ranks(ii)==0) then
      nbgroup=nbgroup+1
-     sizecomm(nbgroup)=buf_int_all(3*ii) !nproc_out   
+     sizecomm(nbgroup)=buf_int_all(3*ii) !nproc_out
      group(master_commout(ii))=nbgroup
      if (sizecomm(nbgroup)>nproc_max) nproc_max=sizecomm(nbgroup)
    end if
@@ -766,7 +765,7 @@ end  subroutine unset_pert_paw
    ranks1(igroup,me_in_out)=ii-1 !numbering of procs
  enddo
 
-!Send 
+!Send
  nbsend=0
  if (my_natom_in>0) then
    ABI_ALLOCATE(SendAtomList,(my_natom_in*nbgroup))
@@ -885,12 +884,12 @@ subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,
  call xmpi_bcast(nproc_in,0,mpicomm_out,ier)
  ABI_ALLOCATE(ranks_in_out,(0:nproc_in-1))
 
-!All atoms are distributed among each mpicomm_in 
-!redistribute the atoms of one mpicomm_in among mpicomm_out 
+!All atoms are distributed among each mpicomm_in
+!redistribute the atoms of one mpicomm_in among mpicomm_out
 
-!Look for the communicator mpicomm_in from which me_out=0 belong 
+!Look for the communicator mpicomm_in from which me_out=0 belong
 !Get ranks of all processors of mpicomm_in expressed in mpicomm_out
- if (me_out==0) then  
+ if (me_out==0) then
    ABI_ALLOCATE(ranks_in,(0:nproc_in-1))
    ranks_in=(/ (i1,i1=0,nproc_in-1 )/)
    call xmpi_comm_translate_ranks(mpicomm_in,nproc_in,ranks_in,mpicomm_out,ranks_in_out)
@@ -910,19 +909,19 @@ subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,
 
 !Send
  if (my_natom_in>0.and.sender) then
-   ABI_ALLOCATE(SendAtomList,(my_natom_in)) 
+   ABI_ALLOCATE(SendAtomList,(my_natom_in))
    ABI_ALLOCATE(SendAtomProc,(my_natom_in))
    SendAtomList(:)=my_atmtab_in(:)
 !  The atoms are put in increasing order,see get_my_atmtab
 !  so the procs are sorted by growing process
-   call get_atm_proc(SendAtomList,natom,nproc_out,SendAtomProc) 
+   call get_atm_proc(SendAtomList,natom,nproc_out,SendAtomProc)
  else
-   ABI_ALLOCATE(SendAtomList,(0)) 
+   ABI_ALLOCATE(SendAtomList,(0))
    ABI_ALLOCATE(SendAtomProc,(0))
  end if
 
 !Recv
- if (my_natom_out>0) then 
+ if (my_natom_out>0) then
    ABI_ALLOCATE(RecvAtomProc,(my_natom_out))
    ABI_ALLOCATE(RecvAtomList,(my_natom_out))
    RecvAtomList(:)=my_atmtab_out(:)

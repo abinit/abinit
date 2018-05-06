@@ -96,6 +96,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
  use m_errors
  use m_efield
 
+ use m_geometry, only : metric
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawcprj,  only : pawcprj_type
@@ -105,7 +106,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 #undef ABI_FUNC
 #define ABI_FUNC 'elpolariz'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_67_common
 !End of the abilint section
 
@@ -139,9 +139,9 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
  real(dp) :: pdif_mod,eenth,ucvol_local
  character(len=500) :: message
 !arrays
- real(dp) :: gmet(3,3),gprimdlc(3,3),pdif(3),ptot(3),red_ptot(3),rmet(3,3)   
-!! ptot(3) = total polarization (not reduced) REC       
-!! red_ptot(3) = internal reduced total polarization REC  
+ real(dp) :: gmet(3,3),gprimdlc(3,3),pdif(3),ptot(3),red_ptot(3),rmet(3,3)
+!! ptot(3) = total polarization (not reduced) REC
+!! red_ptot(3) = internal reduced total polarization REC
  real(dp) ::  A(3,3),A1(3,3),A_new(3,3),efield_new(3)
 
 ! *************************************************************************
@@ -186,7 +186,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
      option = 3
    case (-2)
      option = 2
-   case (-1) 
+   case (-1)
      option = 1
    case (4)
      option = 1
@@ -212,7 +212,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
      option = 1
      pel(:) = zero
      pelev(:) = zero
-   end select 
+   end select
 
    unit_out = ab_out
    call berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
@@ -230,7 +230,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 
 !    Check if pel has the same value as pel_cg
 !    if (psps%usepaw == 1) pel(:) = pel(:) + pelev(:) ! add on-site term for PAW
-!    if (psps%usepaw == 1) red_ptot(:) = red_ptot(:) + pelev(:) ! add on-site term for PAW  !! REC 
+!    if (psps%usepaw == 1) red_ptot(:) = red_ptot(:) + pelev(:) ! add on-site term for PAW  !! REC
 !    above line suppressed because in the PAW case, pel already includes all on-site
 !    terms and pelev should not be added in additionally. We are computing pelev separately for
 !    reporting purposes only.
@@ -267,7 +267,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
        eenth = zero
        do iir=1,3
          do jjr=1,3
-           eenth= eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)         !! HONG g^{-1})_ij ebar_i ebar_j  
+           eenth= eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)         !! HONG g^{-1})_ij ebar_i ebar_j
          end do
        end do
        eenth=-1_dp*(ucvol_local/(8.0d0*pi))*eenth
@@ -290,7 +290,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
        call metric(gmet,gprimdlc,-1,rmet,rprimd,ucvol_local)
        do iir=1,3
          do jjr=1,3
-           enefield= enefield+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)         !! HONG g^{-1})_ij ebar_i ebar_j  
+           enefield= enefield+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)         !! HONG g^{-1})_ij ebar_i ebar_j
          end do
        end do
        enefield= ucvol_local/(8.0d0*pi)*enefield
@@ -313,22 +313,22 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
        A(:,:)=(4*pi/ucvol_local)*rmet(:,:)
        A1(:,:)=A(:,:)
        A_new(:,:)=A(:,:)
-       efield_new(:)=dtset%red_efield(:)   
+       efield_new(:)=dtset%red_efield(:)
        eenth = zero
 
        do kkr=1,3
          if (dtset%jfielddir(kkr)==1) then    ! fixed ebar direction
-!          step 1 add -ebar*p 
-           eenth=eenth - dtset%red_efieldbar(kkr)*red_ptot(kkr)   
+!          step 1 add -ebar*p
+           eenth=eenth - dtset%red_efieldbar(kkr)*red_ptot(kkr)
 
 !          step 2  chang to e_new (change e to ebar)
-           efield_new(kkr)=dtset%red_efieldbar(kkr)         
+           efield_new(kkr)=dtset%red_efieldbar(kkr)
 
 !          step 3  chang matrix A to A1
 
            do iir=1,3
              do jjr=1,3
-               if (iir==kkr .and. jjr==kkr) A1(iir,jjr)=-1.0/A(kkr,kkr) 
+               if (iir==kkr .and. jjr==kkr) A1(iir,jjr)=-1.0/A(kkr,kkr)
                if ((iir==kkr .and. jjr/=kkr) .or.  (iir/=kkr .and.  jjr==kkr)) &
 &               A1(iir,jjr)=-1.0*A(iir,jjr)/A(kkr,kkr)
                if (iir/=kkr .and. jjr/=kkr) A1(iir,jjr)=A(iir,jjr)-A(iir,kkr)*A(kkr,jjr)/A(kkr,kkr)
@@ -344,7 +344,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 
        do iir=1,3
          do jjr=1,3
-           eenth= eenth+(1/2.0)*A_new(iir,jjr)*efield_new(iir)*efield_new(jjr)  
+           eenth= eenth+(1/2.0)*A_new(iir,jjr)*efield_new(iir)*efield_new(jjr)
          end do
        end do
 

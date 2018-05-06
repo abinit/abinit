@@ -71,21 +71,21 @@
 
 subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
 
-
  use defs_basis
  use defs_abitypes
  use m_errors
  use m_xmpi
  use m_profiling_abi
- use m_cgtools, only : dotprod_g
  use m_efield
  use m_abi_linalg
  use m_invovl
- use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use m_time, only : timab
+ use m_cgtools, only : dotprod_g
+ use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type
 
@@ -94,7 +94,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 #undef ABI_FUNC
 #define ABI_FUNC 'chebfi'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_66_wfs, except_this_one => chebfi
 !End of the abilint section
 

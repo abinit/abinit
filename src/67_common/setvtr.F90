@@ -152,12 +152,18 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use m_xmpi
  use m_xcdata
 
+ use m_time,              only : timab
+ use m_geometry,          only : xred2xcart
+ use m_cgtools,           only : dotprod_vn
  use m_ewald,             only : ewald
  use m_energies,          only : energies_type
  use m_electronpositron,  only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,   only : libxc_functionals_is_hybrid
  use m_pawrad,            only : pawrad_type
  use m_pawtab,            only : pawtab_type
+ use m_jellium,           only : jellium
+ use m_spacepar,          only : hartre
+ use m_dens,              only : mag_constr
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history
@@ -167,9 +173,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setvtr'
- use interfaces_18_timing
- use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs
@@ -220,7 +223,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,option_eff,optn,optn2,optstr,optv,vloc_method
  real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
- logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
+ logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
  type(xcdata_type) :: xcdata,xcdatahyb
@@ -239,6 +242,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 ! *********************************************************************
 
  call timab(91,1,tsec)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
@@ -484,20 +490,20 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
-!        Setup the auxiliary xc functional information 
-         call xcdata_init(xcdata,dtset=dtset,auxc_ixc=0,ixc=dtset%auxc_ixc) 
+!        Setup the auxiliary xc functional information
+         call xcdata_init(xcdata,dtset=dtset,auxc_ixc=0,ixc=dtset%auxc_ixc)
        end if
 !      Use the periodic solver to compute Hxc
        nk3xc=1
        if (ipositron==0) then
 
 !        Compute energies%e_xc and associated quantities
-         if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then 
+         if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
 !          Not yet able to deal fully with the full XC kernel in case of GGA + spin
            option_eff=option
            if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &           option_eff,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &           taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
          else
@@ -508,13 +514,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !        Possibly compute energies%e_hybcomp_E0
          if(mod(dtset%fockoptmix,100)==11)then
-!          This call to rhotoxc uses the hybrid xc functional 
+!          This call to rhotoxc uses the hybrid xc functional
            if(.not.is_hybrid_ncpp)then
 !            Not yet able to deal fully with the full XC kernel in case of GGA + spin
              option_eff=option
              if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
              call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
-&             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &             option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &             taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
@@ -535,7 +541,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          option_eff=option
          if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,&
+&         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &         option,dtset%paral_kgb,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
@@ -639,7 +645,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    vzeeman(:) = zero                            ! vzeeman_ij = -1/2*sigma_ij^alpha*B_alpha
    if(dtset%nspden==2)then
-     vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z  
+     vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z
      vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
      do ifft=1,nfft
        vtrial(ifft,1) = vtrial(ifft,1) + vzeeman(1) !SPr: added 1st component
@@ -647,7 +653,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      end do !ifft
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)     ! v_dwndwn                  => v_11 
+     vzeeman(1)=-half*dtset%zeemanfield(3)     ! v_dwndwn                  => v_11
      vzeeman(2)= half*dtset%zeemanfield(3)     ! v_upup                    => v_22
      vzeeman(3)=-half*dtset%zeemanfield(1)     ! Re(v_dwnup) = Re(v_updwn) => Re(v_12)
      vzeeman(4)= half*dtset%zeemanfield(2)     ! Im(v_dwnup) =-Im(v_dwnup) => Im(v_12)
@@ -708,8 +714,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      call dotprod_vn(1,rhor,energies%e_hybcomp_v0,doti,nfft,nfftot,1,1,vxc_hybcomp,ucvol_local,&
 &     mpi_comm_sphgrid=mpi_comm_sphgrid)
      energies%e_hybcomp_v=energies%e_hybcomp_v0
-   end if 
- end if 
+   end if
+ end if
 
  if (optene==2.or.optene==4 .and. .not. wvlbigdft) then
 !  Compute local psp energy eei
@@ -747,6 +753,148 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  moved_atm_inside=0
 
  call timab(91,2,tsec)
+
+contains
+!!***
+
+!!****m* ABINIT/spatialchempot
+!! NAME
+!!  spatialchempot
+!!
+!! FUNCTION
+!!  Treat spatially varying chemical potential.
+!!  Compute energy and derivative with respect to dimensionless reduced atom coordinates of the
+!!  spatially varying chemical potential. No contribution to stresses.
+!!
+!! INPUTS
+!! chempot(3,nzchempot,ntypat)=input array with information about the chemical potential (see input variable description)
+!! natom=number of atoms in unit cell
+!! ntypat=number of type of atoms
+!! nzchempot=number of limiting planes for chemical potential
+!! typat(natom)=integer label of each type of atom (1,2,...)
+!! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
+!!
+!! OUTPUT
+!! e_chempot=chemical potential energy in hartrees
+!! grchempottn(3,natom)=grads of e_chempot wrt xred(3,natom), hartrees.
+!!
+!! PARENTS
+!!      setvtr
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine spatialchempot(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,typat,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spatialchempot'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat,nzchempot
+ real(dp),intent(out) :: e_chempot
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: chempot(3,nzchempot,ntypat),xred(3,natom)
+ real(dp),intent(out) :: grchempottn(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,itypat,iz
+ real(dp) :: a_2,a_3,cp0,cp1,dcp0,dcp1,ddz,deltaz,deltaziz
+ real(dp) :: dqz,dz1,qz,zred,z0
+!character(len=500) :: message
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' spatialchempot : enter '
+!write(std_out,'(a,2i6)')' nzchempot,ntypat',nzchempot,ntypat
+!write(std_out,'(a,6es13.3)') ' chempot(1:3,1:2,1)=',chempot(1:3,1:2,1)
+!write(std_out,'(a,6es13.3)') ' chempot(1:3,1:2,2)=',chempot(1:3,1:2,2)
+!ENDDEBUG
+
+ e_chempot=zero
+ grchempottn(:,:)=zero
+
+!Loop on the different atoms
+ do iatom=1,natom
+
+   itypat=typat(iatom)
+   zred=xred(3,iatom)
+
+!  Determine the delimiting plane just lower to zred
+!  First compute the relative zred with respect to the first delimiting plane
+!  Take into account a tolerance :
+   deltaz=zred-chempot(1,1,itypat)
+   deltaz=modulo(deltaz+tol12,1.0d0)-tol12
+!  deltaz is positive (or higher than -tol12), and lower than one-tol12.
+   do iz=2,nzchempot+1
+     if(iz/=nzchempot+1)then
+       deltaziz=chempot(1,iz,itypat)-chempot(1,1,itypat)
+     else
+       deltaziz=one
+     end if
+     if(deltaziz>deltaz)exit
+   end do
+
+!  Defines coordinates and values inside the delimiting interval,
+!  with respect to the lower delimiting plane
+   z0=chempot(1,iz-1,itypat)-chempot(1,1,itypat) ; cp0=chempot(2,iz-1,itypat) ; dcp0=chempot(3,iz-1,itypat)
+   if(iz/=nzchempot+1)then
+     dz1=chempot(1,iz,itypat)-chempot(1,iz-1,itypat) ; cp1=chempot(2,iz,itypat) ; dcp1=chempot(3,iz,itypat)
+   else
+     dz1=(chempot(1,1,itypat)+one)-chempot(1,nzchempot,itypat) ; cp1=chempot(2,1,itypat) ; dcp1=chempot(3,1,itypat)
+   end if
+   ddz=deltaz-z0
+
+!DEBUG
+!  write(std_out,'(a,2i5)')' Delimiting planes, iz-1 and iz=',iz-1,iz
+!  write(std_out,'(a,2es13.3)')' z0,  dz1= :',z0,dz1
+!  write(std_out,'(a,2es13.3)')' cp0, cp1= :',cp0,cp1
+!  write(std_out,'(a,2es13.3)')' dcp0, dcp1= :',dcp0,dcp1
+!  write(std_out,'(a,2es13.3)')' deltaz,ddz=',deltaz,ddz
+!ENDDEBUG
+
+!  Determine the coefficient of the third-order polynomial taking z0 as origin
+!  P(dz=z-z0)= a_3*dz**3 + a_2*dz**2 + a_1*dz + a_0 ; obviously a_0=cp0 and a_1=dcp0
+!  Define qz=a_3*dz + a_2 and dqz=3*a_3*dz + 2*a_2
+   qz=((cp1-cp0)-dcp0*dz1)/dz1**2
+   dqz=(dcp1-dcp0)/dz1
+   a_3=(dqz-two*qz)/dz1
+   a_2=three*qz-dqz
+
+!  Compute value and gradient of the chemical potential, at ddz wrt to lower delimiting plane
+   e_chempot=e_chempot+(a_3*ddz**3 + a_2*ddz**2 + dcp0*ddz + cp0)
+   grchempottn(3,iatom)=three*a_3*ddz**2 + two*a_2*ddz + dcp0
+
+!DEBUG
+!  write(std_out,'(a,4es16.6)')' qz,dqz=',qz,dqz
+!  write(std_out,'(a,4es16.6)')' cp0,dcp0,a_2,a_3=',cp0,dcp0,a_2,a_3
+!  write(std_out,'(a,2es13.3)')' dcp0*ddz + cp0=',dcp0*ddz + cp0
+!  write(std_out,'(a,2es13.3)')' a_2*ddz**2=',a_2*ddz**2
+!  write(std_out,'(a,2es13.3)')' a_3*ddz**3=',a_3*ddz**3
+!  write(std_out,'(a,2es13.3)')' contrib=',a_3*ddz**3 + a_2*ddz**2 + dcp0*ddz + cp0
+!  write(std_out,'(a,2es13.3)')' e_chempot=',e_chempot
+!  write(std_out,'(a,3es20.10)')' grchempottn=',grchempottn(:,iatom)
+!ENDDEBUG
+
+ end do
+
+!DEBUG
+!write(std_out,'(a)')' spatialchempot : exit '
+!write(std_out,'(a,es16.6)') ' e_chempot=',e_chempot
+!ENDDEBUG
+
+end subroutine spatialchempot
+!!***
 
 end subroutine setvtr
 !!***

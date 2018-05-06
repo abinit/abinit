@@ -57,6 +57,7 @@ MODULE m_ebands
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
  use m_pptools,        only : printbxsf
+ use m_occ,            only : getnel, newocc
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
@@ -2218,7 +2219,6 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_update_occ'
  use interfaces_14_hidewrite
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -2474,7 +2474,6 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_set_fermie'
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -2591,7 +2590,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
- if (ebands_has_metal_scheme(ebands)) then
+ if (.not. ebands_has_metal_scheme(ebands)) then
    msg = "set_nelect assumes a metallic occupation scheme. Use ebands_set_scheme!"
    MSG_ERROR(msg)
  end if
@@ -3628,7 +3627,6 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_expandk'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -3801,7 +3799,6 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebspl_new'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -4839,6 +4836,7 @@ end subroutine ebands_prtbltztrp
 !!  eigen(mband*nkpt*nsppol) = array for holding eigenvalues (hartree)
 !!  fermie = Fermi level
 !!  fname_radix = radix of file names for output
+!!  natom = number of atoms in cell.
 !!  nband = number of bands
 !!  nkpt = number of k points.
 !!  nsppol = 1 for unpolarized, 2 for spin-polarized
@@ -4861,7 +4859,7 @@ end subroutine ebands_prtbltztrp
 !! SOURCE
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
-&       nband, nelec, nkpt, nspinor, nsppol, nsym, &
+&       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, &
 &       rprimd, symrel, tau_k)
 
 
@@ -4875,7 +4873,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: nsym, nband, nkpt, nsppol, nspinor, ntemper
+ integer, intent(in) :: natom, nsym, nband, nkpt, nsppol, nspinor, ntemper
  real(dp), intent(in) :: tempermin, temperinc
  real(dp), intent(in) :: nelec
  character(len=fnlen), intent(in) :: fname_radix

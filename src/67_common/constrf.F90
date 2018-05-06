@@ -60,12 +60,13 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
  use m_errors
  use m_profiling_abi
 
+ use m_geometry, only : xred2xcart
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'constrf'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_67_common, except_this_one => constrf
 !End of the abilint section
 
@@ -135,9 +136,9 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 
  if (info/=0) then
    write(message, '(a,a,a,a,a)' )&
-&   '  Constraint matrix is not positive definite,',ch10,&
-&   '  probably because constraints are linearly dependent.',ch10,&
-&   '  Action : Check for linear dependence of constraints.'
+&   'Constraint matrix is not positive definite,',ch10,&
+&   'probably because constraints are linearly dependent.',ch10,&
+&   'Action: Check for linear dependence of constraints.'
    MSG_ERROR(message)
  end if
 

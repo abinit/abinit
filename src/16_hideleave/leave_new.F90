@@ -19,7 +19,7 @@
 !!   'PERS' if the procs are calling the routine with different mesgs
 !!     each to be written, or if one proc is calling the routine
 !!  print_config=(optional, default=true)
-!!       if true print out several informations before leaving
+!!       if true print out several information before leaving
 !!
 !! OUTPUT
 !!  (only writing, then stop)

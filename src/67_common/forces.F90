@@ -133,18 +133,20 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  use m_profiling_abi
  use m_efield
  use m_errors
+
+ use m_time,             only : timab
+ use m_geometry,         only : fred2fcart, metric
  use m_fock,             only : fock_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,  only : libxc_functionals_is_hybrid
+ use m_fft,              only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forces'
- use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_64_psp
@@ -191,7 +193,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  logical :: is_hybrid_ncpp
 !arrays
  integer :: qprtrb_dum(3)
- real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3) 
+ real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3)
  real(dp) :: rmet(3,3),strn_dummy6(6),strv_dummy6(6),tsec(2),vprtrb_dum(2)
  real(dp),allocatable :: atmrho_dum(:),atmvloc_dum(:),dyfrlo_dum(:,:,:)
  real(dp),allocatable :: dyfrn_dum(:,:,:),dyfrv_dum(:,:,:)
@@ -253,7 +255,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
-   else 
+   else
      ABI_ALLOCATE(vxctotg,(0,0))
    end if
 !  Allocate (unused) dummy variables, otherwise some compilers complain
@@ -393,15 +395,15 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  efield_flag = (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or. &
 & dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17)
  calc_epaw3_forces = (efield_flag .and. dtset%optforces /= 0 .and. psps%usepaw == 1)
- if ( efield_flag ) then 
+ if ( efield_flag ) then
    ABI_ALLOCATE(fionred,(3,dtset%natom))
    fionred(:,:)=zero
    do iatom=1,dtset%natom
      itypat=dtset%typat(iatom)
 ! force on ion due to electric field, cartesian representation
      fioncart(:)=psps%ziontypat(itypat)*dtset%efield(:)
-! form fionred = rprimd^T * fioncart, note that forces transform 
-! oppositely to coordinates, because they are derivative with respect to 
+! form fionred = rprimd^T * fioncart, note that forces transform
+! oppositely to coordinates, because they are derivative with respect to
 ! coordinates
      call dgemv('T',3,3,one,rprimd,3,fioncart,1,zero,fionred(1:3,iatom),1)
 !     do mu=1,3
@@ -413,9 +415,9 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  end if
 
 !(compute additional F3-type force due to projectors for electric field with PAW)
- if ( efield_flag .and. calc_epaw3_forces ) then  
+ if ( efield_flag .and. calc_epaw3_forces ) then
    ABI_ALLOCATE(epawf3red,(3,dtset%natom))
-! dtefield%epawf3(iatom,idir,fdir) contains 
+! dtefield%epawf3(iatom,idir,fdir) contains
    epawf3red(:,:)=zero
    do iatom=1,dtset%natom
      do fdir = 1, 3
@@ -464,7 +466,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 ! note that fionred is subtracted, because it really is a force and we need to
 ! turn it back into a gradient. The fred2fcart routine below includes the minus
 ! sign to convert gradients back to forces
- if ( efield_flag ) grtn(:,:)=grtn(:,:)-fionred(:,:)  
+ if ( efield_flag ) grtn(:,:)=grtn(:,:)-fionred(:,:)
 ! epawf3red is added, because it actually is a gradient, not a force
  if ( efield_flag .and. calc_epaw3_forces ) grtn(:,:) = grtn(:,:) + epawf3red(:,:)
 
@@ -513,7 +515,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Conversion to cartesian coordinates (bohr) AND
 !Subtract off average force from each force component
 !to avoid spurious drifting of atoms across cell.
-! notice that fred2fcart multiplies fred by -1 to convert it 
+! notice that fred2fcart multiplies fred by -1 to convert it
 ! from a gradient (input) to a force (output)
 
  call fred2fcart(favg,(dtset%jellslab==0 .and. dtset%nzchempot==0),fcart,fred,gprimd,dtset%natom)
@@ -543,14 +545,113 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  ABI_DEALLOCATE(grl)
  ABI_DEALLOCATE(grtn)
  ABI_DEALLOCATE(fin)
- if ( efield_flag )  then   
+ if ( efield_flag )  then
    ABI_DEALLOCATE(fionred)
-   if ( calc_epaw3_forces ) then 
+   if ( calc_epaw3_forces ) then
      ABI_DEALLOCATE(epawf3red)
    end if
  end if
 
  call timab(69,2,tsec)
+
+contains
+!!***
+
+!!****f* ABINIT/sygrad
+!!
+!! NAME
+!! sygrad
+!!
+!! FUNCTION
+!! Symmetrize derivatives of energy with respect to coordinates.
+!! Unsymmetrized gradients are input as dedt; symmetrized grads are then placed in fred.
+!! If nsym=1 simply copy dedt into fred (only symmetry is identity).
+!!
+!! INPUTS
+!!  natom=number of atoms in cell
+!!  dedt(3,natom)=unsymmetrized gradients wrt dimensionless tn (hartree)
+!!  nsym=number of symmetry operators in group
+!!  symrec(3,3,nsym)=symmetries of group in terms of operations on
+!!    reciprocal space primitive translations--see comments below
+!!  indsym(4,nsym,natom)=label given by subroutine symatm, indicating atom
+!!   label which gets rotated into given atom by given symmetry
+!!   (first three elements are related primitive translation--
+!!   see symatm where this is computed)
+!!
+!! OUTPUT
+!! fred(3,3,natom)=symmetrized gradients wrt reduced coordinates (hartree)
+!!
+!! NOTES
+!! symmetrization of gradients with respect to reduced
+!! coordinates tn is conducted according to the expression
+!! $[d(e)/d(t(n,a))]_{symmetrized} = (1/Nsym)*Sum(S)*symrec(n,m,S)*
+!!              [d(e)/d(t(m,b))]_{unsymmetrized}$
+!! where $t(m,b)= (symrel^{-1})(m,n)*(t(n,a)-tnons(n))$ and tnons
+!! is a possible nonsymmorphic translation.  The label "b" here
+!! refers to the atom which gets rotated into "a" under symmetry "S".
+!! symrel is the symmetry matrix in real space, which is the inverse
+!! transpose of symrec.  symrec is the symmetry matrix in reciprocal
+!! space.  $sym_{cartesian} = R * symrel * R^{-1} = G * symrec * G^{-1}$
+!! where the columns of R and G are the dimensional primitive translations
+!! in real and reciprocal space respectively.
+!! Note the use of "symrec" in the symmetrization expression above.
+!!
+!! PARENTS
+!!      forces
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sygrad'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nsym
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym)
+ real(dp),intent(in) :: dedt(3,natom)
+ real(dp),intent(out) :: fred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ia,ind,isym,mu
+ real(dp),parameter :: tol=1.0d-30
+ real(dp) :: summ
+
+! *************************************************************************
+!
+ if (nsym==1) then
+!  only symmetry is identity so simply copy
+   fred(:,:)=dedt(:,:)
+ else
+!  actually conduct symmetrization
+   do ia=1,natom
+     do mu=1,3
+       summ=0._dp
+       do isym=1,nsym
+         ind=indsym(4,isym,ia)
+         summ=summ+dble(symrec(mu,1,isym))*dedt(1,ind)+&
+&         dble(symrec(mu,2,isym))*dedt(2,ind)+&
+&         dble(symrec(mu,3,isym))*dedt(3,ind)
+       end do
+       fred(mu,ia)=summ/dble(nsym)
+       if(abs(fred(mu,ia))<tol)fred(mu,ia)=0.0_dp
+     end do
+   end do
+ end if
+
+end subroutine sygrad
+!!***
 
 end subroutine forces
 !!***

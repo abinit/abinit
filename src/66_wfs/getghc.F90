@@ -92,6 +92,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  use m_profiling_abi
  use m_xmpi
 
+ use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_getdim
  use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type,KPRIME_H_K,K_H_KPRIME,K_H_K,KPRIME_H_KPRIME
@@ -102,7 +103,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 #undef ABI_FUNC
 #define ABI_FUNC 'getghc'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => getghc
@@ -153,6 +153,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
 
 ! *********************************************************************
+
+ DBG_ENTER("COLL")
 
 !Keep track of total time spent in getghc:
  call timab(200+tim_getghc,1,tsec)
@@ -703,6 +705,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  end if ! type_calc
 
  call timab(200+tim_getghc,2,tsec)
+
+ DBG_EXIT("COLL")
 
 end subroutine getghc
 !!***

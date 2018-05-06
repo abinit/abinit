@@ -81,21 +81,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use netcdf
 #endif
 
+ use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_symtk,     only : matr3inv
+ use m_parser,    only : intagm
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
+ use m_inkpts,    only : inkpts
+ use m_ingeo,     only : invacuum
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_42_parser
- use interfaces_56_recipspace
- use interfaces_57_iovars, except_this_one => invars2
 !End of the abilint section
 
  implicit none
@@ -497,6 +497,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    end if
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
+ if(tread==1) dtset%nonlinear_info=intarr(1)
+
 !NONLINEAR integer input variables (same definition as for rfarr)
 !Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
 !--Keep the old input variables for backward compatibility
@@ -569,6 +572,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'Action: change to the d3e_pertx_*** input parameters!'
      MSG_WARNING(message)
    end if
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepead',tread,'INT')
+   if(tread==1) dtset%usepead=intarr(1)
 
  end if
 
@@ -1231,6 +1237,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if (dtset%paral_kgb==1) dtset%densfor_pred=6
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmcsst',tread,'INT')
+ if(tread==1) dtset%hmcsst=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmctt',tread,'INT')
+ if(tread==1) dtset%hmctt=intarr(1)
+
 !--For the moment LOTF does not use different from 2
  if(dtset%ionmov==23) then
 #ifdef HAVE_LOTF
@@ -1607,7 +1619,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 .and. dtset%nbandkss==0) dtset%usepawu = 10
+ if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
+  if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+  if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -1757,6 +1772,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
+   if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
+     write(message, '(a,a,a)' )&
+&     'usepawu==4 and usedmft=1, dmft_dc should be equal to 5  ',ch10,&
+&     'impose dmft_dc = 5'
+     MSG_WARNING(message)
+     dtset%dmft_dc=5
+   endif
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
@@ -2365,9 +2387,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread_key==1) then
    if(dtset%nsym/=1) then
      write(message,"(a,i0,3a)")&
-&     '  Value of nsym different from 1 when ucrpa_bands is used is under test ',dtset%nsym,&
-&     '(because symmetry is not yet used)',ch10,&
-&     '  Action : check your calculation  with nsym=1'
+&     'Value of nsym different from 1 when ucrpa_bands is used is under test ',dtset%nsym,&
+&     ' (because symmetry is not yet used)',ch10,&
+&     'Action: check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_bands(1:2)=intarr(1:2)
@@ -2377,9 +2399,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) then
    if(dtset%nsym/=1) then
      write(message,*)&
-&     '  Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
-&     '  (because symmetry is not yet used)',ch10,&
-&     '  Action : check your calculation  with nsym=1'
+&     'Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
+&     ' (because symmetry is not yet used)',ch10,&
+&     'Action: check your calculation  with nsym=1'
      MSG_WARNING(message)
    end if
    dtset%ucrpa_window(1:2)=dprarr(1:2)
@@ -2387,9 +2409,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  if(tread==1.and.tread_key==1) then
    write(message, '(a,a,a,a,a)' )&
-&   ' ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
-&   ' for the same dataset.',ch10,&
-&   ' Action : check the input file.'
+&   'ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
+&   'for the same dataset.',ch10,&
+&   'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -2443,9 +2465,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
- if(tread==1) dtset%toldfe=dprarr(1)
+ if(tread==1) dtset%focktoldfe=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrde',tread,'DPR')
  if(tread==1) dtset%tolrde=dprarr(1)
 
 !find which tolXXX are defined generically and for this jdtset

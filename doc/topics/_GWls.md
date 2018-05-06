@@ -2,6 +2,7 @@
 description: How to perform a GW- Lanczos-Sternheimer calculation
 authors: JL
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a GW- Lanczos-Sternheimer calculation with the ABINIT package.
 

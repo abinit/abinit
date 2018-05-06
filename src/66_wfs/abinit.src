@@ -36,8 +36,8 @@ sources = [
  "getgh2c.F90",
  "getgsc.F90",
  "lincom_cgcprj.F90",
- "m_bandfft_kpt.F90",
- "m_esymm.F90",
+ #"m_bandfft_kpt.F90",
+ #"m_esymm.F90",
  "multithreaded_getghc.F90",
  "prep_bandfft_tabs.F90",
  "prep_fourwf.F90",
@@ -50,7 +50,6 @@ sources = [
  "pw_orthon.F90",
  "rayleigh_ritz.F90",
  "subdiago.F90",
- "wfconv.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

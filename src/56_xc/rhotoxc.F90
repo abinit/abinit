@@ -26,6 +26,7 @@
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  nkxc=second dimension of the kxc array. If /=0,
 !!   the exchange-correlation kernel must be computed.
+!!  non_magnetic_xc= true if usepawu==4
 !!  n3xccc=dimension of the xccc3d array (0 or nfft or cplx*nfft).
 !!  option=0 or 1 for xc only (exc, vxc, strsxc),
 !!         2 for xc and kxc (no paramagnetic part if xcdata%nspden=1)
@@ -212,7 +213,7 @@
 #include "abi_common.h"
 
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,n3xccc,option,paral_kgb, &
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,paral_kgb, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 
@@ -226,16 +227,15 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  use m_xc_vdw
  use libxc_functionals
 
+ use m_time,             only : timab
+ use m_geometry,         only : metric
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotoxc'
- use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
- use interfaces_53_spacepar
  use interfaces_56_xc, except_this_one => rhotoxc
 !End of the abilint section
 
@@ -245,6 +245,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !scalars
  integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,option,paral_kgb
  integer,intent(in) :: usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  logical,intent(in),optional :: add_tfw
  real(dp),intent(out) :: enxc,vxcavg
  real(dp),intent(out),optional :: exc_vdw_out
@@ -486,6 +487,17 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end do
      end do
    end if
+
+  if(non_magnetic_xc) then
+    if(nspden==2) then
+      rhor_(:,2)=rhor_(:,1)/two
+    endif
+    if(nspden==4) then
+      rhor_(:,2)=zero
+      rhor_(:,3)=zero
+      rhor_(:,4)=zero
+    endif
+  endif
 
 !  Some initializations for the electron-positron correlation
    if (ipositron==2) then
@@ -1142,13 +1154,19 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !  Calculate van der Waals correction when requested
 #if defined DEV_YP_VDWXC
-   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
+   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 3) .and. (xc_vdw_status()) ) then
      call xc_vdw_aggregate(ucvol,gprimd,nfft,nspden_updn,ngrad*ngrad, &
 &     ngfft(1),ngfft(2),ngfft(3),rhonow, &
 &     deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,strsxc_vdw)
    end if
+#else
+   if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 3) ) then
+     write(message,'(3a)')&
+&     'vdW-DF functionals are not fully operational yet.',ch10,&
+&     'Action : modify vdw_xc'
+     MSG_ERROR(message)
+   end if
 #endif
-
 !  Normalize enxc, strsxc and vxc
    divshft=one/dble(xcdata%intxc+1)
    strsxc(:)=strsxc(:)/dble(nfftot)*divshft

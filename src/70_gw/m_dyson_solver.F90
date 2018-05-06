@@ -32,6 +32,7 @@ MODULE m_dyson_solver
  use m_errors
  use m_profiling_abi
 
+ use m_time,          only : timab
  use m_gwdefs,        only : sigparams_t
  use m_numeric_tools, only : linfit, pade, dpade, newrap_step
  use m_io_tools,      only : open_file
@@ -119,7 +120,6 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
 #undef ABI_FUNC
 #define ABI_FUNC 'solve_dyson'
  use interfaces_14_hidewrite
- use interfaces_18_timing
 !End of the abilint section
 
  implicit none

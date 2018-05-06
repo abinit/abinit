@@ -172,9 +172,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_cgtools
  use m_nctk
 
+ use m_time,     only : timab
  use m_io_tools, only : file_exists
+ use m_geometry, only : stresssym
  use m_mpinfo,   only : destroy_mpi_enreg
  use m_hdr,      only : hdr_skip
+ use m_occ,      only : occeig
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -186,26 +189,23 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawcprj,  only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
+ use m_kg,       only : mkkin, kpgstr, mkkpg
+ use m_fft,      only : fftpac
+ use m_spacepar, only : hartrestr, symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstpaw'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
- use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_56_recipspace
  use interfaces_56_xc
- use interfaces_61_occeig
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_nstpaw
 !End of the abilint section
 
@@ -1472,7 +1472,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &         pawang,pawfgrtab,pawrhoij,pawtab,rprimd,&
 &         mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
        end if
-       call pawmkrho(arg,cplex,gprimd,idir1,indsy1,ipert1,&
+       call pawmkrho(1,arg,cplex,gprimd,idir1,indsy1,ipert1,&
 &       mpi_enreg,my_natom,dtset%natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,&
 &       pawfgr,pawfgrtab,-10001,pawdrhoij1(:,idir1),pawdrhoij1_unsym(:,idir1),pawtab,&
 &       dtset%qptn,drho1wfg,drho1wfr(:,:,idir1),drhor1,rprimd,symaf1,symrc1,dtset%typat,&

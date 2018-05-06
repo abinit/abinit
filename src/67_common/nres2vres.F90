@@ -52,7 +52,7 @@
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! === optional inputs ===
-!! vxc(cplex*nfft,nspden)=XC GS potential 
+!! vxc(cplex*nfft,nspden)=XC GS potential
 !!
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
@@ -82,16 +82,17 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  use m_xmpi
  use m_xcdata
 
+ use m_geometry, only : metric
  use m_pawang,   only : pawang_type
  use m_pawtab,   only : pawtab_type
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_spacepar, only : hartre
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nres2vres'
- use interfaces_41_geometry
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_62_poisson
@@ -122,6 +123,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !scalars
  integer :: cplex,ider,idir,ipert,ispden,nhatgrdim,nkxc_cur,option,me,nproc,comm,usexcnhat
  logical :: has_nkxc_gga
+ logical :: non_magnetic_xc
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
@@ -135,6 +137,9 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !Compatibility tests:
  has_nkxc_gga=(nkxc==7.or.nkxc==19)
+
+! Initialise non_magnetic_xc for rhohxc
+ non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
@@ -229,7 +234,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
        !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
 &       nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
-       ABI_DEALLOCATE(rhor0)  
+       ABI_DEALLOCATE(rhor0)
      end if
 
    else
@@ -257,7 +262,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !  To be adjusted for the call to rhotoxc
    nk3xc=1
    call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
-&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,n3xccc,option,dtset%paral_kgb,&
+&   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,&
 &   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_DEALLOCATE(rhor0)

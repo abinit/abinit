@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
+!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -148,6 +148,7 @@
 !!  rhor(nfftf,nspden)=total electron density (el/bohr**3)
 !!  taug(2,nfftf*dtset%usekden)=array for Fourier transform of kinetic energy density
 !!  taur(nfftf,nspden*dtset%usekden)=array for kinetic energy density
+!!  tauresid(nfftf,nspden*dtset%usekden)=array for kinetic energy density residual
 !!  wvl <type(wvl_data)>=wavelets structures in case of wavelets basis.
 !!  ==== if (usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
@@ -193,7 +194,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
-&           rmet,rprimd,susmat,symrec,taug,taur,&
+&           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
 
  use defs_basis
@@ -207,7 +208,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_wffile
  use m_efield
  use m_cgtools
+ use m_gemm_nonlop
 
+ use m_time,               only : timab
+ use m_geometry,           only : xred2xcart
+ use m_occ,                only : newocc
+ use m_dtset,              only : testsusmat
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -225,12 +231,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
- use m_abi2big,            only : wvl_occ_abi2big,wvl_rho_abi2big,wvl_occopt_abi2big
- use m_fock,               only : fock_type,fock_ACE_type,fock_updateikpt,fock_calc_ene
+ use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
+ use m_fock,               only : fock_type, fock_ACE_type, fock_updateikpt, fock_calc_ene
  use m_invovl,             only : make_invovl
- use m_gemm_nonlop
+ use m_tddft,              only : tddft
+ use m_kg,                 only : mkkin, mkkpg
+ use m_suscep_stat,        only : suscep_stat
+ use m_fft,                only : fftpac
+ use m_spacepar,           only : symrhg
+
 #if defined HAVE_BIGDFT
- use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
+ use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
@@ -238,20 +249,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
- use interfaces_16_hideleave
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_77_suscep
  use interfaces_79_seqpar_mpi, except_this_one => vtorho
 !End of the abilint section
 
@@ -303,6 +308,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(inout) :: kxc(nfftf,nkxc),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp), intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden)
  real(dp), intent(inout) :: taug(2,nfftf*dtset%usekden),taur(nfftf,dtset%nspden*dtset%usekden)
+ real(dp), intent(inout) :: tauresid(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(inout),optional :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  type(pawcprj_type),allocatable,intent(inout) :: cprj(:,:)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
@@ -384,7 +390,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  usefock = (dtset%usefock==1 .and. associated(fock))
  usefock_ACE=0
  if (usefock) usefock_ACE=fock%fock_common%use_ACE
- 
+
 
 !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
@@ -447,7 +453,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Initialize rhor if needed; store old rhor
  if(iscf>=0 .or. iscf==-3) then
-   if (optres==1) nvresid=rhor
+   if (optres==1) then
+     nvresid=rhor
+     tauresid=taur
+   end if
 !  NC and plane waves
    if (psps%usepaw==0 .and. dtset%usewvl==0) then
      rhor=zero
@@ -817,7 +826,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
          call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
        end if
-       
+
 
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
@@ -1191,7 +1200,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              write(message,'(a,e12.3)')&
 &             ' ERROR: Wavefunctions not converged : DFT+DMFT calculation cannot be carried out safely ',residm
              call wrtout(std_out,message,'COLL')
-             call leave_new('COLL')
+             write(message,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
+             MSG_ERROR(message)
            end if
 
          else if (paw_dmft%use_dmft>0 .and. residm>tol10.and. dtset%dmftcheck>=0) then
@@ -1289,7 +1299,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
      energies%e_nonlocalpsp = zero
-     if (usefock) then 
+     if (usefock) then
        energies%e_fock     = zero
        if (optforces>0) fock%fock_common%forces=zero
      end if
@@ -1647,13 +1657,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Build symetrized packed rhoij and compensated pseudo density
      cplex=1;ipert=0;idir=0;qpt(:)=zero
      if(dtset%usewvl==0) then
-       call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+       call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &       my_natom,natom,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
      else
 !      here do not pass rhog, we do not use it
-       call pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+       call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &       my_natom,natom,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat)
@@ -1684,6 +1694,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if (optres==1) then
        nvresid=rhor-nvresid
        call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid,mpi_comm_sphgrid=mpi_comm_sphgrid)
+       tauresid=taur-tauresid
      end if
    end if
 
@@ -1770,20 +1781,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!  Non-self-consistent field cycle in Wavelets
 !!  See also "wvl_nscf_loop_bigdft"
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  nnsclo= number of non-self consistent field iterations
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      vtorho
@@ -1795,13 +1796,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 subroutine wvl_nscf_loop()
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
-
- use m_errors
- use m_energies, only : energies_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1898,21 +1892,11 @@ subroutine wvl_nscf_loop()
 !!  It follows the BigDFT scheme.
 !!  See also "wvl_nscf_loop"
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel, D. Caliste)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  nnsclo= number of non-self consistent field iterations
 !!
 !! OUTPUT
 !!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      vtorho
@@ -1922,21 +1906,8 @@ subroutine wvl_nscf_loop()
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine wvl_nscf_loop_bigdft()
 
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_errors
-
- use m_energies, only : energies_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2016,12 +1987,6 @@ subroutine wvl_nscf_loop_bigdft()
 !! FUNCTION
 !!  Computes eigenvalues energy from eigen, occ, kpt, wtk
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  eigen(nkpt*nsppol)=eigenvalues
 !!  mband= maximum number of bands
@@ -2034,10 +1999,6 @@ subroutine wvl_nscf_loop_bigdft()
 !! OUTPUT
 !!  e_eigenvalues= eigenvalues energy
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      vtorho
 !!
@@ -2048,8 +2009,6 @@ subroutine wvl_nscf_loop_bigdft()
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
- use defs_basis
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2100,17 +2059,9 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! FUNCTION
 !!  Computes occupations for the wavelet case
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
@@ -2125,15 +2076,11 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
 subroutine wvl_occ()
 
- use defs_basis
- use m_errors
- use defs_wvltypes
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_occ'
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -2171,12 +2118,6 @@ subroutine wvl_occ()
 !!  Computes occupations for the wavelet case
 !!  Using BigDFT routines
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -2196,8 +2137,6 @@ subroutine wvl_occ()
 
 subroutine wvl_occ_bigdft()
 
- use defs_basis
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2240,12 +2179,6 @@ subroutine wvl_occ_bigdft()
 !!  Computes occupations for the wavelet case
 !!  Using BigDFT routines
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (D.Caliste, T. Rangel)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -2265,13 +2198,6 @@ subroutine wvl_occ_bigdft()
 
 subroutine wvl_comm_eigen()
 
- use defs_basis
- use m_errors
-
- use m_abi2big, only : wvl_eigen_abi2big
-#if defined HAVE_BIGDFT
- use BigDFT_API, only: eigensystem_info
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

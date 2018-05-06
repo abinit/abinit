@@ -111,7 +111,10 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use m_nctk
  use m_hamiltonian
 
+ use m_time,      only : timab
+ use m_symtk,     only : mati3inv
  use m_io_tools,  only : file_exists
+ use m_cgtools,   only : dotprod_vn
  use m_hdr,       only : hdr_skip
  use m_pawtab,    only : pawtab_type
 
@@ -120,9 +123,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstdy'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
- use interfaces_53_spacepar
  use interfaces_56_xc
  use interfaces_72_response, except_this_one => dfpt_nstdy
 !End of the abilint section

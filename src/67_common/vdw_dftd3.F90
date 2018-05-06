@@ -7,11 +7,11 @@
 !! FUNCTION
 !! Compute energy, forces, stress, interatomic force constant and elastic
 !! contribution due to dispersion interaction as formulated by Grimme in
-!! the DFT-D3 approach. The last cited adds a dispersion potential 
-!! (pair-wise force field, rij^6 and rij^8) to Kohn-Sham DFT energy. 
-!! It is also possible to include a three-body term and molecular 
+!! the DFT-D3 approach. The last cited adds a dispersion potential
+!! (pair-wise force field, rij^6 and rij^8) to Kohn-Sham DFT energy.
+!! It is also possible to include a three-body term and molecular
 !! dispersion (using vdw_tol_3bt>0).
-!! DFT-D3(Becke and Johnson), another formulation which avoids the use of a damping 
+!! DFT-D3(Becke and Johnson), another formulation which avoids the use of a damping
 !! function to remove the undesired short-range behaviour
 !!  is also activable using vdw_xc=7
 !!
@@ -30,27 +30,27 @@
 !!  typat(natom)=type integer for each atom in cell
 !!  vdw_xc= select van-der-Waals correction
 !!             if =6: DFT-D3 as in Grimme, J. Chem. Phys. 132, 154104 (2010)
-!!             if =7: DFT-D3(BJ) as in Grimme, Comput. Chem. 32, 1456 (2011) 
+!!             if =7: DFT-D3(BJ) as in Grimme, Comput. Chem. 32, 1456 (2011)
 !!                    Only the use of R0 = a1 C8/C6 + a2 is available here
-!!   
+!!
 !!  vdw_tol=tolerance use to converge the pair-wise potential
-!!          (a pair of atoms is included in potential if its contribution 
+!!          (a pair of atoms is included in potential if its contribution
 !!          is larger than vdw_tol) vdw_tol<0 takes default value (10^-10)
 !!  vdw_tol_3bt= tolerance use to converge three body terms (only for vdw_xc=6)
 !!               a triplet of atom contributes to the correction if its
-!!               contribution is larger than vdw_tol_3bt              
+!!               contribution is larger than vdw_tol_3bt
 !!  xred(3,natom)=reduced atomic coordinates
 !!  znucl(ntypat)=atomic number of atom type
 !!  === optional input ===
 !!  [qphon(3)]= reduced q-vector along which is computed the DFT-D3 contribution
-!!  to the IFCs in reciprocal space 
+!!  to the IFCs in reciprocal space
 !!
 !! OUTPUT
 !!  e_vdw_dftd3=contribution to energy from DFT-D3 dispersion potential
 !!  === optional outputs ===
-!!  [elt_vdw_dftd3(6+3*natom,6)]= contribution to elastic constant and 
+!!  [elt_vdw_dftd3(6+3*natom,6)]= contribution to elastic constant and
 !!  internal strains from DFT-D3 dispersion potential
-!!  [fred_vdw_dftd3(3,natom)]=contribution to gradient w.r.to atomic displ. 
+!!  [fred_vdw_dftd3(3,natom)]=contribution to gradient w.r.to atomic displ.
 !!  from DFT-D3 dispersion potential
 !!  [str_vdw_dftd3(6)]=contribution to stress tensor from DFT-D3 dispersion potential
 !!  [dyn_vdw_dftd3(2,3,natom,3,natom)]= contribution to the interatomic force
@@ -58,14 +58,15 @@
 !!  from DFT-D3 dispersion potential
 !!
 !! NOTES
-!!  Ref.: 
+!!  Ref.:
 !!  DFT-D3: S. Grimme, J. Antony, S. Ehrlich, and H. Krieg
-!!  A consistent and accurate ab initio parametrization of density functional 
+!!  A consistent and accurate ab initio parametrization of density functional
 !!  dispersion correction (DFT-D) for the 94 elements H-Pu
 !!  J. Chem. Phys. 132, 154104 (2010)
 !!  DFT-D3(BJ) S. Grimme, S. Ehrlich and L. Goerigk
 !!  Effect of the damping function in dispersion corrected density functional theory
 !!  Comput. Chem. 32, 1456 (2011)
+!!
 !! PARENTS
 !!      respfn,setvtr,stress
 !!
@@ -87,16 +88,16 @@ subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
  use m_profiling_abi
  use m_errors
  use m_atomdata
+
  use m_special_funcs,  only : abi_derfc
-!
+ use m_geometry,       only : metric
+ use m_vdw_dftd3_data, only : vdw_dftd3_data
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vdw_dftd3'
  use interfaces_14_hidewrite
- use interfaces_20_datashare
- use interfaces_41_geometry
 !End of the abilint section
 
 implicit none
@@ -295,7 +296,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    end if
    dyn_vdw_dftd3=zero
  end if
- e_vdw_dftd3 = zero 
+ e_vdw_dftd3 = zero
  if (need_forces) fred_vdw_dftd3=zero
  if (need_stress) str_vdw_dftd3=zero
  if (need_elast) elt_vdw_dftd3=zero
@@ -313,7 +314,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    end if
  end do
 
-! Determination of coefficients that depend of the 
+! Determination of coefficients that depend of the
 ! exchange-correlation functional
  vdw_s6=one
  vdw_s8=one
@@ -366,7 +367,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_ALLOCATE(vdw_cnrefi,(ntypat,ntypat,refmax,refmax))
  ABI_ALLOCATE(vdw_cnrefj,(ntypat,ntypat,refmax,refmax))
  ABI_ALLOCATE(vdw_r0,(ntypat,ntypat))
- if (bol_3bt) then 
+ if (bol_3bt) then
    ABI_ALLOCATE(r0ijk,(ntypat,ntypat,ntypat))
  end if
 
@@ -383,7 +384,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
          do ia=1,size(index_c6)
            do ja=1,size(index_c6)
              if (index_c6(ia)==indi.and.index_c6(ja)==indj) then
-               nline = ia*(ia-1)/2 + ja 
+               nline = ia*(ia-1)/2 + ja
                vdw_c6ref(itypat,jtypat,refi,refj) = vdw_dftd3_c6(nline)
                vdw_c6ref(jtypat,itypat,refj,refi) = vdw_dftd3_c6(nline)
                found = .false.
@@ -466,7 +467,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_ALLOCATE(fdcn,(2,3,natom,natom))
  ABI_ALLOCATE(cfdcn,(2,3,natom,natom))
  ABI_ALLOCATE(elt_cn,(6+3*natom,6,natom))
- 
+
 ! Initializing the computed quantities to zero
  nshell = 0
  cn = zero
@@ -484,7 +485,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  end if
  rcutcn = 200**2 ! Bohr
 !Loop over shells of cell replicas
- do 
+ do
    newshell=.false.;nshell=nshell+1
 !   Loop over cell replicas in the shell
    do is3=-nshell,nshell
@@ -501,7 +502,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
            end if
 !               Loop over atoms ia and ja
            do ia=1,natom
-             itypat=typat(ia)   
+             itypat=typat(ia)
              do ja=1,natom
                jtypat=typat(ja)
                r(:)=xred01(:,ia)-xred01(:,ja)-dble(is(:))
@@ -512,9 +513,9 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                  rr = sqrt(rsq)
                  rcovij = rcov(ivdw(itypat))+rcov(ivdw(jtypat))
 
-!                         Computation of partial contribution to cn coefficients 
+!                         Computation of partial contribution to cn coefficients
                  exp_cn = exp(-k1*(rcovij/rr-one))
-                 frac_cn= one/(one+exp_cn) 
+                 frac_cn= one/(one+exp_cn)
 !                         Introduction of a damping function for the coordination
 !                         number because of the divergence with increasing
 !                         number of cells of this quantity in periodic systems
@@ -540,7 +541,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                      dcn(:,ia,ja) = dcn(:,ia,ja)-grad*rred(:)
                    elseif (need_stress.or.need_elast) then
 !                               The following quantity (str_dcn) is used for the computation
-!                               of the DFT-D3 contribution to stress and elastic constants 
+!                               of the DFT-D3 contribution to stress and elastic constants
                      vec(1:3)=rcart(1:3)*rcart(1:3); vec(4)=rcart(2)*rcart(3)
                      vec(5)=rcart(1)*rcart(3); vec(6)=rcart(1)*rcart(2)
                      str_dcn(:,ia)=str_dcn(:,ia)+grad*vec(:)
@@ -621,7 +622,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                            if (ii==ll) elt_cn(alpha,beta,ia) = elt_cn(alpha,beta,ia)+half*grad*rcart(jj)*rcart(kk)
                            if (jj==ll) elt_cn(alpha,beta,ia) = elt_cn(alpha,beta,ia)+half*grad*rcart(ii)*rcart(kk)
                          end do
-                       end do 
+                       end do
                                    ! Derivative of str_dcn w.r. to atomic displacement
                                    ! for internal strains
                        dcn_cart(:,ia,ia) = dcn_cart(:,ia,ia)+grad*rcart(:)
@@ -665,7 +666,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  call wrtout(std_out,msg,'COLL')
 
 !----------------------------------------------------------------
-! Computation of the C6 coefficient 
+! Computation of the C6 coefficient
 ! ---------------------------------------------------------------
 
  write(msg,'(3a)')&
@@ -693,7 +694,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  if (bol_3bt) then
    dc9ijri = zero; dc9ijrj = zero
  end if
-! C6 coefficients are interpolated from tabulated 
+! C6 coefficients are interpolated from tabulated
 ! ab initio C6 values (following loop).
 ! C8 coefficients are obtained by:
 ! C8 = vdw_dftd3_q(itypat)*vdw_dftd3_q(jtypat)*C6
@@ -728,7 +729,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
          vdw_c6(ia,ja)=vdw_c6(ia,ja)+vdw_c6ref(itypat,jtypat,refi,refj)*l
 
          if (need_grad) then
-!               Derivative of l(ia,ja) with respect to the displacement 
+!               Derivative of l(ia,ja) with respect to the displacement
 !               of atom ka in reduced coordinates.
 !               This factor is identical in the case of stress.
 !               In purpose of speed up this routine, the prefactor of
@@ -743,7 +744,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                  different contributions:
 !                  d2lri: prefactor of dCNi/drk*dCNi/drl
 !                  d2lrj: prefactor of dCNj/drk*dCNj/drl
-!                  d2lrirj: prefacto of dCNi/drk*dCNj/drl 
+!                  d2lrirj: prefacto of dCNi/drk*dCNj/drl
 !                  The prefactor for d2CNi/drkdrl is dlri; for d2CNj/drkdrl is dlrj
              d2lri = -two*k3*l*(one-two*k3*dsysref_a**two)
              d2lrj = -two*k3*l*(one-two*k3*dsysref_b**two)
@@ -752,13 +753,13 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
              sum_d2lrirj = sum_d2lrirj+d2lrirj
              sum_d2lc6ri=sum_d2lc6ri+d2lri*vdw_c6ref(itypat,jtypat,refi,refj)
              sum_d2lc6rj=sum_d2lc6rj+d2lrj*vdw_c6ref(itypat,jtypat,refi,refj)
-             sum_d2lc6rirj = sum_d2lc6rirj + d2lrirj*vdw_c6ref(itypat,jtypat,refi,refj)   
+             sum_d2lc6rirj = sum_d2lc6rirj + d2lrirj*vdw_c6ref(itypat,jtypat,refi,refj)
            end if ! Boolean second derivative
          end if ! Boolean gradient
-       end do ! Loop over references 
+       end do ! Loop over references
      end do ! Loop over references
-!      In some specific case (really covalently bound compounds) ltot -> 0 
-!      which may cause numerical problems for all quantities related to dispersion coefficient. 
+!      In some specific case (really covalently bound compounds) ltot -> 0
+!      which may cause numerical problems for all quantities related to dispersion coefficient.
 !      To be consistent with VASP implementation, the c6 value is taken as the last
 !      referenced value of the dispersion coefficient.
      if (ltot>tol12) then
@@ -766,7 +767,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
        vdw_c8(ia,ja)=three*vdw_q_dftd3(ivdw(itypat))*vdw_q_dftd3(ivdw(jtypat))*vdw_c6(ia,ja)
 !         If Force of Stress is required
        if (need_grad) then
-!            Computation of the derivative of C6 w.r.to the displacement 
+!            Computation of the derivative of C6 w.r.to the displacement
 !            of atom ka, in reduced coordinates (separated for dCNi/drk and dCNj/drk)
 !            This is the crucial step to reduce the scaling from O(N^3) to O(N^2) for
 !            the gradients
@@ -801,7 +802,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      end do
    end do
  end if
- 
+
  write(msg,'(3a,f8.5,1a,f8.5)')&
 & '                                            ... Done.',ch10,&
 & '  max(C6) =', maxval(vdw_c6),' ;  min(C6) =', minval(vdw_c6)
@@ -809,7 +810,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 
 ! Deallocation of used variables not needed anymore
  ABI_DEALLOCATE(vdw_c6ref)
- ABI_DEALLOCATE(vdw_cnrefi) 
+ ABI_DEALLOCATE(vdw_cnrefi)
  ABI_DEALLOCATE(vdw_cnrefj)
 
 !----------------------------------------------------
@@ -826,9 +827,9 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  end if
  ! Cut-off radius for three-body term
  rcut9 = zero
- if (bol_3bt) then 
+ if (bol_3bt) then
    rcut9=(128.0_dp*vdw_s6/(vdw_tol_3bt)*maxval(vdw_c6)**(3.0/2.0))**(1.0/9.0)
- end if 
+ end if
  rcut2=rcut*rcut
 
 !--------------------------------------------------------------------
@@ -848,7 +849,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_ALLOCATE(e_no_c,(natom,natom))
  ABI_ALLOCATE(fe_no_c,(2,natom,natom))
  e_alpha1 =zero ; e_alpha2 = zero
- e_alpha3 =zero ; e_alpha4 = zero 
+ e_alpha3 =zero ; e_alpha4 = zero
  e_no_c=zero  ; fe_no_c = zero
  ABI_ALLOCATE(grad_no_cij,(3,natom,natom))
  ABI_ALLOCATE(fgrad_no_c,(2,3,natom,natom))
@@ -861,11 +862,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  str_alpha1 = zero ; str_alpha2 = zero
 
  re_arg = zero ; im_arg = zero
- dmp6 = zero ; dmp8 = zero 
+ dmp6 = zero ; dmp8 = zero
  e_no_c6 = zero ; e_no_c8 = zero
  fdmp6 = zero ; fdmp8 = zero
- grad6 = zero ; grad8 = zero 
- grad6_no_c6 = zero ; grad8_no_c8 = zero 
+ grad6 = zero ; grad8 = zero
+ grad6_no_c6 = zero ; grad8_no_c8 = zero
  hess6 = zero ; hess8 = zero
  do
    newshell=.false.;nshell=nshell+1
@@ -906,7 +907,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                        Computation of e_vdw_dftd3 (case DFT+D3-BJ)
                  elseif (vdw_xc == 7) then
                    dmp = (vdw_a1*sqrt(vdw_q)+vdw_a2)
-                   fdmp6 = one/(dmp**six+rr**six) 
+                   fdmp6 = one/(dmp**six+rr**six)
                    fdmp8 = one/(dmp**eight+rr**eight)
                    e_no_c6 = -sfact6*fdmp6 ; e_no_c8 = -sfact8*fdmp8
                    e_vdw_dftd3=e_vdw_dftd3-sfact6*c6*fdmp6-sfact8*c8*fdmp8
@@ -926,8 +927,8 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                      grad8_no_c8 = -sfact8*eight*(fdmp8)**two*rsq**three
                      grad8 = grad8_no_c8*c8
                    end if
-                   grad =grad6+grad8    
-                   grad_no_c = grad6_no_c6+grad8_no_c8*vdw_q 
+                   grad =grad6+grad8
+                   grad_no_c = grad6_no_c6+grad8_no_c8*vdw_q
                    rcart=matmul(rprimd,r)
                    rred= matmul(transpose(rprimd),rcart)
 !                           Additional contribution due to c6(cn(r))
@@ -937,7 +938,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                           Part related to alpha1ij/alpha2ij
                    e_alpha1(ia) = e_alpha1(ia)+(e_no_c6+vdw_q*e_no_c8)*dc6ri(ia,ja)
                    e_alpha2(ja) = e_alpha2(ja)+(e_no_c6+vdw_q*e_no_c8)*dc6rj(ia,ja)
-!                           Contribution to gradients wr to atomic displacement 
+!                           Contribution to gradients wr to atomic displacement
 !                           (forces)
                    if (need_forces.and.ia/=ja) then
                      fred(:)=grad*rred(:)
@@ -966,7 +967,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                        hess6 = -four*grad6*(three*rsq**two*fdmp6-one/rsq)
                        hess8 = -two*grad8*(eight*rsq**three*fdmp8-three/rsq)
                      end if
-!                              Contribution of d2C6 to the interatomic force constants 
+!                              Contribution of d2C6 to the interatomic force constants
 !                              Not yet multiply by CN derivative and summed to reduce the scaling from O(N^3) to O(N^2)
                      hessij = hess6+hess8
 !                              Contribution of cross-derivative dC6 and grad
@@ -1095,7 +1096,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !&         !   dc6ri(ia,ja)+str_dcn(:,ja)*dc6rj(ia,ja))
           !end do
        str_vdw_dftd3(:) = str_vdw_dftd3(:)+e_alpha1(ia)*str_dcn(:,ia)+&
-&       e_alpha2(ia)*str_dcn(:,ia)  
+&       e_alpha2(ia)*str_dcn(:,ia)
      end do
    end if ! Optimization
 !   If dynmat is required, add all the terms related to dc6, d2c6, ...
@@ -1140,7 +1141,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !             Finally the cross derivative dCNi/dr dCNj/dr
                temp_comp2(:) = d2c6rirj(ia,ja)*fe_no_c(:,ia,ja)
                call comp_prod(cfdcn(:,alpha,ia,ka),temp_comp2,temp_comp)
-               temp_prod(:,ja) = temp_prod(:,ja)+temp_comp(:) 
+               temp_prod(:,ja) = temp_prod(:,ja)+temp_comp(:)
              end do
              do la = 1,natom
                do beta=1,3
@@ -1175,7 +1176,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
          index_ia = 6+3*(ia-1)
          do alpha=1,6
 !          Add the second derivative of C6 contribution to the elastic tensor
-!          First, the second derivative of CN with strain  
+!          First, the second derivative of CN with strain
            elt_vdw_dftd3(alpha,:) = elt_vdw_dftd3(alpha,:)+(&
 &           e_alpha1(ia)+e_alpha2(ia))*elt_cn(alpha,:,ia)
 !          Then, the derivative product dCNi/deta dCNi/deta
@@ -1270,7 +1271,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
        do is1 = -nshell_3bt(1),nshell_3bt(1)
          is(1) = is1 ; is(2)=is2 ; is(3) = is3
          do alpha=1,3
-           jmin(alpha) = max(-nshell_3bt(alpha), -nshell_3bt(alpha)+is(alpha)) 
+           jmin(alpha) = max(-nshell_3bt(alpha), -nshell_3bt(alpha)+is(alpha))
            jmax(alpha) = min(nshell_3bt(alpha), nshell_3bt(alpha)+is(alpha))
          end do
          do js3=jmin(3),jmax(3)
@@ -1280,7 +1281,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                do ia=1,natom
                  itypat=typat(ia)
                  do ja=1,ia
-                   jtypat=typat(ja) 
+                   jtypat=typat(ja)
                    do ka=1,ja
                      ktypat=typat(ka)
                      rij(:) = xred01(:,ia)-xred01(:,ja)-dble(is(:))
@@ -1347,13 +1348,13 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 &                           (cosb*cosc*dcosa_r3drki+cosa*cosc*dcosb_r3drki+cosa*cosb*dcosc_r3drki))*&
 &                           fdmp9+dfdmp_drki*ang)*rijk*rrij*rrjk
                            rcartki=matmul(rprimd,rki)
-                         end if 
-!                                        Contribution to gradients wr to atomic displacement 
+                         end if
+!                                        Contribution to gradients wr to atomic displacement
 !                                        (forces)
                          if (need_forces) then
                            if (ia/=ja) fredij=d_drij*matmul(transpose(rprimd),rcartij)
                            if (ja/=ka) fredjk=d_drjk*matmul(transpose(rprimd),rcartjk)
-                           if (ka/=ia) fredki=d_drki*matmul(transpose(rprimd),rcartki) 
+                           if (ka/=ia) fredki=d_drki*matmul(transpose(rprimd),rcartki)
                            if (ia/=ja.and.ka/=ia) then
                              fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)-fredij(:)+fredki(:)
                              fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)+fredij(:)-fredjk(:)
@@ -1382,7 +1383,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                            vecki(5)=rcartki(1)*rcartki(3); vecki(6)=rcartki(1)*rcartki(2)
                            str_3bt(:)=str_3bt(:)-d_drij*vecij(:)-d_drjk*vecjk(:)-d_drki*vecki(:) !-str_3bt_dcn9(:)
                          end if
-                       end if ! Optimization 
+                       end if ! Optimization
                      end if   ! Tolerance
                    end do  ! Loop over atom k
                  end do     ! Loop over atom j
@@ -1439,7 +1440,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    elseif (vdw_xc==7) then
      write(msg,'(5a)') &
 &     '    Van der Waals DFT-D3 semi-empirical dispersion potential  ' ,ch10,&
-&     '    with Becke-Jonhson (BJ) refined by Grimme et al. J.    ',ch10,& 
+&     '    with Becke-Jonhson (BJ) refined by Grimme et al. J.    ',ch10,&
 &     '    Comput. Chem. 32, 1456 (2011) '
      call wrtout(std_out,msg,'COLL')
    end if
@@ -1473,7 +1474,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      write(msg,'(a,f6.3,a,f6.3)') &
 &     '      Damping parameters:    a1 = ', vdw_a1, ',    a2 = ', vdw_a2
      call wrtout(std_out,msg,'COLL')
-   end if 
+   end if
    write(msg,'(a,es12.5,3a,i8,2a,es12.5,1a)') &
 &   '      Cut-off radius   = ',rcut,' Bohr',ch10,&
 &   '      Number of pairs contributing = ',npairs,ch10,&
@@ -1501,7 +1502,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_DEALLOCATE(e_alpha2)
  ABI_DEALLOCATE(e_alpha3)
  ABI_DEALLOCATE(e_alpha4)
- ABI_DEALLOCATE(grad_no_cij) 
+ ABI_DEALLOCATE(grad_no_cij)
  ABI_DEALLOCATE(fgrad_no_c)
  ABI_DEALLOCATE(cfgrad_no_c)
  ABI_DEALLOCATE(vdw_c6)
@@ -1512,7 +1513,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_DEALLOCATE(d2c6rj)
  ABI_DEALLOCATE(d2c6rirj)
  ABI_DEALLOCATE(cn)
- ABI_DEALLOCATE(d2cn) 
+ ABI_DEALLOCATE(d2cn)
  ABI_DEALLOCATE(dcn)
  ABI_DEALLOCATE(fdcn)
  ABI_DEALLOCATE(cfdcn)
@@ -1523,7 +1524,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_DEALLOCATE(str_alpha2)
  ABI_DEALLOCATE(dcn_cart)
  DBG_EXIT("COLL")
- 
+
  contains
 !! ***
 
@@ -1534,11 +1535,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !!
 !! FUNCTION
 !! Return the product of two complex numbers stored in rank 1 array
-!! 
+!!
 !! PARENTS
 !!      vdw_dftd3
 !!
-!! CHILDREN 
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1557,7 +1558,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    real(dp),intent(out) :: c(2)
 
 ! *********************************************************************
-   
+
    c(1) = a(1)*b(1)-a(2)*b(2)
    c(2) = a(1)*b(2)+a(2)*b(1)
 
@@ -1571,11 +1572,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !!
 !! FUNCTION
 !! Convert gradients from cartesian to reduced coordinates
-!! 
+!!
 !! PARENTS
 !!      vdw_dftd3
 !!
-!! CHILDREN 
+!! CHILDREN
 !!
 !! SOURCE
 

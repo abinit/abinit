@@ -292,6 +292,7 @@ class Website(object):
 
         # Build flat list of tests.
         from doc import tests as tmod
+        self.abinit_tests = tmod.abitests
         tests = tmod.abitests.select_tests(suite_args=[], regenerate=True, flat_list=True)
 
         # Construct dictionary rpath --> test. Use OrderedDict to have deterministic behaviour.
@@ -510,6 +511,7 @@ This page gathers the autoconf files used by the buildbot testfarm
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}
         with self.new_mdfile("variables", "index.md", meta=meta) as mdf:
+            mdf.write("\n\n# Input variables \n\n")
             for code, vd in self.codevars.items():
                 mdf.write("## %s variables   \n\n" % code)
                 mdf.write(vd.get_vartabs_html(self, mdf.rpath))
@@ -629,15 +631,19 @@ in order of number of occurrence in the input files provided with the package.
                 def sort_relevances(t):
                     # TODO: Add rank to ABI_RELEVANCES
                     try:
-                        return {"basic": 0, "compulsory": 1, "expert": 2, "useful": 3, "internal": 4,
+                        return {"compulsory": 0, "basic": 1, "useful": 2, "expert": 3, "internal": 4,
                                 "prpot": 5, "prfermi": 6, "prden": 7, "prgeo": 8, "prdos": 9, "prgs": 10,
                                 "prngs": 11, "prmisc": 12}[t[0]]
                     except KeyError:
                         raise KeyError("Cannot find relevance `%s` in dict. Add it to sort_relevances with the proper rank."
                                 % str(t))
 
-                items = sorted([(v.topic2relevances[topic][0], v) for v in vlist], key=lambda t: sort_relevances(t))
-                for relevance, group in sort_and_groupby(items, key=lambda t: t[0]):
+                # Build list of (relevance, variable) tuple then sort and group by relevance.
+                items = [(v.topic2relevances[topic][0], v) for v in vlist]
+                for num, group in sort_and_groupby(items, key=lambda t: sort_relevances(t)):
+                    # Alphabetical order inside group.
+                    group = list(sorted(group, key=lambda t: t[1].name))
+                    relevance = group[0][0]
                     lines.append("*%s:*\n" % relevance)
                     lines.extend("- %s  %s" % (v.wikilink, v.mnemonics) for (_, v) in group)
                     lines.append(" ")
@@ -658,6 +664,7 @@ in order of number of occurrence in the input files provided with the package.
             # Read template, interpolate and write md file included in mkdocs.yml.
             with io.open(os.path.join(self.root, "topics", "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
                 template = fh.read()
+                template = template.replace("is the source file for this topics. Can be edited."," file has been generated automatically from the corresponding _* source file. DO NOT EDIT. Edit the source file instead.")
                 template = template.replace("{{ related_variables }}", related_variables)
                 template = template.replace("{{ selected_input_files }}", selected_input_files)
 
@@ -945,31 +952,8 @@ The bibtex file is available [here](../abiref.bib).
                 url = ""
                 if a.text is None: a.text = fragment
             else:
-                if name.startswith("lesson_"):
-                    self.warn("lesson_NAME is DEPRECATED, use lesson:name. %s in %s is deprecated" % (token, page_rpath))
-                    # Handle [[lesson_gw1|text]]
-                    url = "/tutorials/%s" % name.replace("lesson_" , " ", 1).strip()
-                    if a.text is None: a.text = name
-                    html_classes.append("lesson-wikilink")
 
-                elif name.startswith("topic_"):
-                    # Handle [[topic_SelfEnergy|text]]
-                    self.warn("topic_NAME is DEPRECATED, use topic:name. %s in %s is deprecated" % (token, page_rpath))
-                    name = name.replace("topic_" , " ", 1).strip()
-                    url = "/topics/%s" % name
-                    if a.text is None: a.text = "%s topic" % name
-                    html_classes.append("topic-wikilink")
-                    add_popover(a, content=self.howto_topic[name])
-
-                elif name.startswith("help_"):
-                    self.warn("help_NAME is DEPRECATED, use help:name. %s in %s is deprecated" % (token, page_rpath))
-                    # Handle [[help_abinit|text]]
-                    code = name.replace("help_" , " ", 1).strip()
-                    url = "/guide/%s" % code
-                    if a.text is None: a.text = "%s help file" % code
-                    html_classes.append("user-guide-wikilink")
-
-                elif "@" in name:
+                if "@" in name:
                     # Handle [[dipdip@anaddb|text]]
                     vname, code = name.split("@")
                     var = self.codevars[code][vname]
@@ -984,18 +968,6 @@ The bibtex file is available [here](../abiref.bib).
                     html_classes.append("codevar-wikilink")
                     if a.text is None:
                         a.text = var.name if not var.is_internal else "%%%s" % var.name
-
-                elif name in self.bib_data.entries:
-                    # Handle citation
-                    self.warn("DEPRECATED citation without `cite` --> %s in %s is deprecated" % (token, page_rpath))
-                    ref = self.bib_data.entries[name]
-                    url = "/theory/bibliography#%s" % self.slugify(name)
-                    content = ref.fields.get("title", "Unknown")
-                    if content == "Unknown":
-                        self.warn("Entry for %s does not provide title" % name)
-                    add_popover(a, content=content) #+ "\n\n" + ref.authors
-                    if a.text is None: a.text = "[%s]" % name
-                    html_classes.append("citation-wikilink")
 
                 elif name.startswith("tests/") or name.startswith("~abinit/tests/"):
                     assert fragment is None
@@ -1079,16 +1051,13 @@ The bibtex file is available [here](../abiref.bib).
                     if a.text is None: a.text = "%s_%s" % (namespace, name)
                     add_popover(a, content=self.howto_topic[name])
 
-            elif namespace in ("bib", "cite"):
-                if namespace == "bib":
-                    self.warn("%s in %s is deprecated" % (token, page_rpath))
+            elif namespace == "cite":
                 # Handle [[bib:biblio|bibliography]]
                 if name == "biblio":
                     url = "/theory/bibliography/"
                     if a.text is None: a.text = "bibliography"
                 else:
                     # Handle [[bib:Amadon2008]]
-                    # TODO bib --> cite
                     try:
                         ref = self.bib_data.entries[name]
                         url = "/theory/bibliography#%s" % self.slugify(name)
@@ -1101,10 +1070,7 @@ The bibtex file is available [here](../abiref.bib).
                                 (exc.__class__, str(exc), token, page_rpath))
                         url, a.text = "FAKE_URL", "FAKE_URL"
 
-            elif namespace in ("theorydoc", "theory"):
-                if namespace == "theorydoc":
-                    self.warn("%s in %s is deprecated" % (token, page_rpath))
-                # TODO theorydoc --> theory
+            elif namespace == "theory":
                 # Handle [[theorydoc:mbpt|text]]
                 url = "/theory/%s" % name
                 html_classes.append("theory-wikilink")
@@ -1120,12 +1086,18 @@ The bibtex file is available [here](../abiref.bib).
                 if a.text is None: a.text = "%s varset" % name
 
             elif namespace == "test":
-                # Handle [[test:libxc_41]]
-                # TODO: Treat subsuite
+                # Handle [[test:libxc_41]] (syntax for suite) [[test:gspw_01]] (syntax for subsuite)
                 tokens = name.split("_")
-                suite_name, tnum = "_".join(tokens[:-1]), tokens[-1]
-                url = "/tests/%s/Input/t%s.in" % (suite_name, tnum)
-                if a.text is None: a.text = "%s[%s]" % (suite_name, tnum)
+                prefix, tnum = "_".join(tokens[:-1]), tokens[-1]
+                if prefix in self.abinit_tests.all_subsuite_names:
+                    # [[test:gspw_01]]  --> Need to get the name of suite from subsuite.
+                    suite_name = self.abinit_tests.suite_of_subsuite(prefix).name
+                    url = "/tests/%s/Input/t%s.in" % (suite_name, name)
+                else:
+                    # [[test:libxc_41]]
+                    url = "/tests/%s/Input/t%s.in" % (prefix, tnum)
+
+                if a.text is None: a.text = "%s[%s]" % (prefix, tnum)
                 test = self.rpath2test[url[1:]]
                 content = test.description # + "\n\n" + ", ".join(test.authors)
                 add_popover(a, content=content)
@@ -1141,7 +1113,10 @@ The bibtex file is available [here](../abiref.bib).
 
             elif namespace == "ac":
                 # Handle [[ac:abiref_gnu_5.3_debug.ac]]
-                url = "/build/config-examples/%s" % name
+                # The following is incorrect: files in /build/config-examples are generated when makemake is issued.
+                # url = "/build/config-examples/%s" % name
+                # By contrast, the following is a permanent reference
+                url = "/abichecks/buildsys/Refs/%s" % name
                 if a.text is None: a.text = name
                 target = "_blank"
                 html_classes.append("abifile-wikilink")

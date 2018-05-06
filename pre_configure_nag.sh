@@ -1,2 +1,1 @@
-#!/bin/bash
-sed -i -e 's/ -little/& \| -library/' -e 's/\-\\#\\#\\#/& -dryrun/' configure
+scripts/configure/nag_config/pre_configure_nag.sh

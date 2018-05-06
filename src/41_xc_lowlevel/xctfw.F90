@@ -56,11 +56,12 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
  use m_profiling_abi
  use m_errors
 
+ use m_numeric_tools,      only : invcb
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xctfw'
- use interfaces_41_xc_lowlevel, except_this_one => xctfw
 !End of the abilint section
 
  implicit none

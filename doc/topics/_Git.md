@@ -2,6 +2,7 @@
 description:  How to use git with Abinit
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to  with the ABINIT package.
 

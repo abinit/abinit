@@ -24,12 +24,11 @@
 !! cpui=initial CPU time
 !! filnam(5)=character strings giving file names
 !! filstat=character strings giving name of status file
-!! mpi_enregs=informations about MPI parallelization
+!! mpi_enregs=information about MPI parallelization
 !! ndtset=number of datasets
-!! ndtset_alloc=number of datasets, corrected for allocation of at
-!!               least one data set.
+!! ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !! npsp=number of pseudopotentials
-!! pspheads(npsp)=<type pspheader_type>all the important information from the
+!! pspheads(npsp)=<type pspheader_type>all the important informatio from the
 !!   pseudopotential file header, as well as the psp file name
 !!
 !! OUTPUT
@@ -82,7 +81,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
 
  use defs_basis
- use defs_parameters
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
@@ -98,17 +96,28 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
- use m_xg, only : xg_finalize
+ use m_xgScalapack
 
+ use m_time,         only : timab
+ use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
+ use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
  use m_pawang,       only : pawang_type, pawang_free
  use m_pawrad,       only : pawrad_type, pawrad_free
  use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
  use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
- use m_dtset,        only : dtset_copy, dtset_free
+ use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
- use m_xgScalapack
+ use m_dtfil,        only : dtfil_init, dtfil_init_img, status
+
+ use m_respfn_driver,    only : respfn
+ use m_screening_driver, only : screening
+ use m_sigma_driver,     only : sigma
+ use m_bethe_salpeter,   only : bethe_salpeter
+ use m_eph_driver,       only : eph
+ use m_wfk_analyze,      only : wfk_analyze
+ use m_gwls_sternheimer, only : gwls_sternheimer
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -120,12 +129,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #undef ABI_FUNC
 #define ABI_FUNC 'driver'
  use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_54_abiutil
  use interfaces_95_drive, except_this_one => driver
 !End of the abilint section
 
@@ -271,7 +276,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call xgScalapack_config(SLK_AUTO)
    else if ( dtset%np_slk > 1 ) then
      call xgScalapack_config(dtset%np_slk)
-   else 
+   else
      call xgScalapack_config(SLK_AUTO)
    end if
 
@@ -552,7 +557,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Nullify wvl_data. It is important to do so irregardless of the value of usewvl:
    call nullify_wvl_data(wvl)
 
-!  Set up mpi informations from the dataset
+!  Set up mpi information from the dataset
    if (dtset%usewvl == 1) then
 #if defined HAVE_BIGDFT
      call f_malloc_set_status(iproc=mpi_enregs(idtset)%me_wvl)
@@ -590,7 +595,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call libxc_functionals_init(dtset%ixc,dtset%nspden)
 
 #if defined DEV_YP_VDWXC
-     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) ) then
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
        vdw_params%functional = dtset%vdw_xc
        vdw_params%acutmin = dtset%vdw_df_acutmin
        vdw_params%aratio = dtset%vdw_df_aratio
@@ -634,6 +639,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &       '[vdW-DF] activation threshold: vdw_df_threshold=',dtset%vdw_df_threshold,ch10
        call xc_vdw_trigger(.false.)
        call wrtout(std_out,message,'COLL')
+     end if
+#else
+     if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
+       write(message,'(3a)')&
+&       'vdW-DF functionals are not fully operational yet.',ch10,&
+&       'Action : modify vdw_xc'
+       MSG_ERROR(message)
      end if
 #endif
    end if
@@ -682,9 +694,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_NONLINEAR)
 
      call status(jdtset_status,filstat,iexit,level,'call nonlinear')
-     call nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
-&     dtset%mband,dtset%mgfft,dtset%mkmem,mpi_enregs(idtset),dtset%mpw,dtset%natom,dtset%nfft,dtset%nkpt,npwtot,dtset%nspden,&
-&     dtset%nspinor,dtset%nsppol,dtset%nsym,occ,pawrad,pawtab,psps,xred)
+     call nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enregs(idtset),npwtot,occ,&
+&     pawang,pawrad,pawtab,psps,xred)
 
    case(6)
 

@@ -4,10 +4,10 @@
 !! update_e_field_vars
 !!
 !! FUNCTION
-!! This routine updates E field variables 
+!! This routine updates E field variables
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group 
+!! Copyright (C) 2003-2018 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,13 +115,13 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_kg,       only : getph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'update_e_field_vars'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => update_e_field_vars
 !End of the abilint section
@@ -206,12 +206,12 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
 &   dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
    ABI_DEALLOCATE(ph1d)
- else 
+ else
    ABI_DATATYPE_ALLOCATE(cprj,(0,0))
  end if ! end update of cprj
 
  if ( efield ) then ! compute polarization and if necessary store cprj in efield
-   optberry=1 
+   optberry=1
    pel_cg(:) = zero;pelev=zero
    call berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,gprimd,hdr,psps%indlmn,kg,&
 &   psps%lmnmax,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,&
@@ -227,7 +227,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
  if (efield .and. (scfcv_level == 0) ) then ! do this before scfcv loop
 
    efield_old_cart(:)=dtset%efield(:)   !!HONG
-   
+
 !  save this value in order to print the final value of real electric field, comparing with the desired red_fieldbar
    dtefield%efield2(:)=dtset%efield(:)
 
@@ -237,7 +237,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
        red_efield2_old(ii)  =(ucvol/(4*pi))*dot_product(dtset%efield(:),gprimd(:,ii))
      end do
    end if
-   
+
    if (dtset%berryopt == 14 .and. scfcv_quit /=1) then
 !    ! Convert polarization to cartesian coords
 
@@ -276,7 +276,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
  end if ! end efield .and. scfcv_level 0 tasks
 
-!!! 
+!!!
 !!! Various printing and update steps for the different efield options
 !!!
 
@@ -495,9 +495,9 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
        end do
 
 
-       dtset%red_efield(:)=(red_efield1(:) + red_efield2(:))/2.0d0 ! average reduced efield, 
-!      one is from fixed ebar part, 
-!      the other is from fixed d part. 
+       dtset%red_efield(:)=(red_efield1(:) + red_efield2(:))/2.0d0 ! average reduced efield,
+!      one is from fixed ebar part,
+!      the other is from fixed d part.
 !      This may need to be optimized !!
 
        write(message,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Reduced efield from fixed ebar:', ch10, &

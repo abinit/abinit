@@ -53,10 +53,13 @@ module m_sigmaph
  use m_special_funcs,  only : dirac_delta, gspline_t, gspline_new, gspline_eval, gspline_free
  use m_fftcore,        only : ngfft_seq
  use m_cgtools,        only : dotprod_g !set_istwfk
+ use m_cgtk,           only : cgtk_rotate
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
+ use m_lgroup,         only : lgroup_t, lgroup_new, lgroup_free
  use m_fftcore,        only : get_kg
+ use m_kg,             only : getph
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
@@ -272,56 +275,6 @@ module m_sigmaph
  private :: sigmaph_gather_and_write  ! Compute the QP corrections.
  private :: sigmaph_print             ! Print results to main output file.
 
-!!****t* m_sigmaph/lgroup_t
-!! NAME
-!! lgroup_t
-!!
-!! FUNCTION
-!! The little group of a q-point is defined as the subset of the space group that preserves q,
-!! modulo a G0 vector (also called umklapp vector). Namely:
-!!
-!!    Sq = q +G0
-!!
-!! where S is an operation in reciprocal space (symrec)
-!! If time reversal symmetry holds true, it is possible to enlarge the little group by
-!! including the operations such as:
-!!
-!!   -Sq = q+ G0
-!!
-!! The operations of little group define an irriducible wedge that is usually larger
-!! than the irredubile zone defined by the space group. The two zones coincide when q=0
-!!
-!! SOURCE
-
- type,private :: lgroup_t
-
-   integer :: nkibz_q
-   ! Number of k-points in the IBZ(q)
-
-   real(dp) :: qpoint(3)
-   ! The external q-point.
-
-   integer,allocatable :: symq(:,:,:)
-   ! symq(4,2,cryst%nsym)
-   ! nsym is the total number of symmetries of the system as given by cryst%nsym
-   ! three first numbers define the G vector;
-   ! fourth number is zero if the q-vector is not preserved, is 1 otherwise
-   ! second index is one without time-reversal symmetry, two with time-reversal symmetry
-
-   real(dp),allocatable :: kibz_q(:,:)
-   ! K-points in the IBZ(q)
-   ! kibz_q(3, nkibz_q)
-
-   real(dp),allocatable :: wtk_q(:)
-   ! Weights in the IBZ(q)
-   ! wtk_q(nkibz_q)
-
- end type lgroup_t
-!!***
-
- private :: lgroup_new       ! Creation method.
- private :: lgroup_free      ! Free memory.
-
 contains  !=====================================================
 !!***
 
@@ -366,7 +319,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -839,9 +791,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            ! Use cgwork as workspace array, results stored in bra_kq
            !g0_kq =  g0ibz_kq + g0bz_kq
            call wfd_copy_cg(wfd, ibsum_kq, ikq_ibz, spin, cgwork)
-           call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
-                          npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
-                          npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
+           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
+                            npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
+                            npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
            !bra_kq = zero
          end if
 
@@ -1484,7 +1436,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph_new'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1839,7 +1790,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
-   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
+   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
    ncid = new%ncid
 
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
@@ -2150,10 +2101,10 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
    ! Use the symmetries of the little group
    lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
 
-   self%nqibz_k = lgk%nkibz_q
+   self%nqibz_k = lgk%nibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
-   self%qibz_k = lgk%kibz_q; self%wtq_k = lgk%wtk_q
+   self%qibz_k = lgk%ibz; self%wtq_k = lgk%weights
    call lgroup_free(lgk)
  else
    MSG_ERROR(sjoin("Wrong symsigma:", itoa(self%symsigma)))
@@ -2501,166 +2452,6 @@ subroutine sigmaph_print(self, dtset, unt)
  end do
 
 end subroutine sigmaph_print
-!!***
-
-!!****f* m_sigmaph/lgroup_new
-!! NAME
-!!  lgroup_new
-!!
-!! FUNCTION
-!!  Build little group of k-point.
-!!
-!! INPUTS
-!!  cryst(crystal_t)=Crystalline structure
-!!  kpoint(3)=External k-point defining the little-group
-!!  timrev=1 if time-reversal symmetry can be used, 0 otherwise.
-!!  nkbz=Number of k-points in the BZ.
-!!  kbz(3,nkbz)=K-points in the BZ.
-!!  nkibz=Number of k-points in the IBZ
-!!  kibz(3,nkibz)=Irreducible zone.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lgroup_new'
- use interfaces_32_util
- use interfaces_41_geometry
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: timrev,nkibz,nkbz
- type(crystal_t),intent(in) :: cryst
-!arrays
- real(dp),intent(in) :: kpoint(3),kbz(3,nkbz),kibz(3,nkibz)
-
-!Local variables ------------------------------
-!scalars
- integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,verbose=0
- integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik
-!arrays
- integer :: symrec_lg(3,3,2*cryst%nsym),symafm_lg(3,3,2*cryst%nsym)
- integer,allocatable :: ibz2bz(:)
- real(dp),allocatable :: wtk(:),wtk_folded(:)
-
-! *************************************************************************
-
- ! TODO: Option to exclude umklapp/time-reversal symmetry.
- new%qpoint = kpoint
-
- ! Determines the symmetry operations by which the k-point is preserved,
- ABI_MALLOC(new%symq, (4, 2, cryst%nsym))
- call littlegroup_q(cryst%nsym, kpoint, new%symq, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
-
- ABI_CHECK(timrev==1, "timrev == 0 not coded")
- nsym_lg = 0
- do itim=1,2
-   do isym=1,cryst%nsym
-     if (cryst%symafm(isym) == -1) cycle
-     if (new%symq(4,itim,isym) /= 1) cycle ! not \pm Sq = q+g0
-     nsym_lg = nsym_lg + 1
-     symrec_lg(:,:,nsym_lg) = cryst%symrec(:,:,isym) * (-2* itim + 3)
-   end do
- end do
-
- ! Check group closure.
- symafm_lg = 1
- call chkgrp(nsym_lg, symafm_lg, symrec_lg, ierr)
- ABI_CHECK(ierr == 0, "Error in group closure")
-
- ! Find the irreducible zone with the little group operations.
- ! Do not use time-reversal since it has been manually introduced previously
- ABI_MALLOC(ibz2bz, (nkbz))
- ABI_MALLOC(wtk_folded, (nkbz))
- ABI_MALLOC(wtk, (nkbz))
- wtk = one / nkbz ! Weights sum up to one
-
- ! FIXME: In principle here we would like to have a set that contains the initial IBZ.
- call symkpt(chksymbreak0,cryst%gmet,ibz2bz,iout0,kbz,nkbz,new%nkibz_q,&
-   nsym_lg,symrec_lg,my_timrev0,wtk,wtk_folded)
-
- ABI_MALLOC(new%kibz_q, (3, new%nkibz_q))
- ABI_MALLOC(new%wtk_q, (new%nkibz_q))
-
- do ik=1,new%nkibz_q
-   new%wtk_q(ik) = wtk_folded(ibz2bz(ik))
-   new%kibz_q(:,ik) = kbz(:, ibz2bz(ik))
- end do
- ABI_CHECK(sum(new%wtk_q) - one < tol12, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%wtk_q))))
-
- ABI_FREE(ibz2bz)
- ABI_FREE(wtk_folded)
- ABI_FREE(wtk)
-
- if (verbose /= 0) then
-   do ik=1,new%nkibz_q
-     if (ik <= nkibz) then
-       write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), ktoa(new%kibz_q(:,ik) - kibz(:,ik)), ftoa(new%wtk_q(ik)))
-     else
-       write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), "[---]", ftoa(new%wtk_q(ik)))
-     end if
-   end do
- end if
-
-end function lgroup_new
-!!***
-
-!!****f* m_sigmaph/lgroup_free
-!! NAME
-!!  lgroup_free
-!!
-!! FUNCTION
-!!  Free memory
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine lgroup_free(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lgroup_free'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- type(lgroup_t),intent(inout) :: self
-
-! *************************************************************************
-
- ! integer
- if (allocated(self%symq)) then
-   ABI_FREE(self%symq)
- end if
-
- ! real
- if (allocated(self%kibz_q)) then
-   ABI_FREE(self%kibz_q)
- end if
- if (allocated(self%wtk_q)) then
-   ABI_FREE(self%wtk_q)
- end if
-
-end subroutine lgroup_free
 !!***
 
 end module m_sigmaph

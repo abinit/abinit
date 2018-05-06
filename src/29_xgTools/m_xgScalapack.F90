@@ -2,9 +2,9 @@
 !!****m* ABINIT/m_xgScalapack
 !! NAME
 !!  m_xgScalapack
-!! 
-!! FUNCTION 
-!! 
+!!
+!! FUNCTION
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2017 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
@@ -20,12 +20,15 @@
 #include "abi_common.h"
 
 module m_xgScalapack
+
   use defs_basis, only : std_err, std_out, dp
   use m_profiling_abi
-  use m_xmpi 
+  use m_xmpi
   use m_errors
   use m_slk
   use m_xg
+
+  use m_time,     only: timab
 
 #ifdef HAVE_MPI2
  use mpi
@@ -71,7 +74,7 @@ module m_xgScalapack
   public :: xgScalapack_heev
   public :: xgScalapack_hegv
   public :: xgScalapack_config
-  contains 
+  contains
 !!***
 
 !!****f* m_xgScalapack/xgScalapack_init
@@ -100,7 +103,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_init'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -170,7 +172,7 @@ module m_xgScalapack
        xgScalapack%rank(mycomm(2)) = xmpi_undefined_rank
        xgScalapack%size(mycomm(1)) = xmpi_comm_size(xgScalapack%comms(mycomm(1)))
        xgScalapack%size(mycomm(2)) = nproc - xgScalapack%size(mycomm(1))
-    else 
+    else
        call MPI_Comm_dup(comm,xgScalapack%comms(M__SLK),ierr)
        if ( ierr /= 0 ) then
          MSG_ERROR("Error duplicating communicator")
@@ -227,7 +229,7 @@ module m_xgScalapack
     else
       MSG_WARNING("Bad value for xgScalapack config -> autodetection")
       M__CONFIG = SLK_AUTO
-    end if 
+    end if
 
   end subroutine xgScalapack_config
 
@@ -258,7 +260,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_heev'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -278,14 +279,14 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_heev,1,tsec)
 
-    ! Keep only working processors 
+    ! Keep only working processors
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
 
       call xgBlock_getSize(eigenvalues,nbli_global,nbco_global)
       if ( cols(matrixA) /= nbli_global ) then
         MSG_ERROR("Number of eigen values differ from number of vectors")
       end if
-  
+
       if ( space(matrixA) == SPACE_C ) then
         cplex = 2
         istwf_k = 1
@@ -293,14 +294,14 @@ module m_xgScalapack
         cplex = 1
         istwf_k = 2
       endif
-  
+
       call xgBlock_getSize(matrixA,nbli_global,nbco_global)
-  
+
       call xgBlock_reverseMap(matrixA,matrix,nbli_global,nbco_global)
       call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,nbco_global,1)
       cptr = c_loc(eigenvalues_tmp)
       call c_f_pointer(cptr,vector,(/ nbco_global /))
-  
+
       call compute_eigen1(xgScalapack%comms(M__SLK), &
         toProcessorScalapack(xgScalapack), &
         cplex,nbli_global,nbco_global,matrix,vector,istwf_k)
@@ -330,7 +331,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_hegv'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -352,7 +352,7 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_hegv,1,tsec)
 
-    ! Keep only working processors 
+    ! Keep only working processors
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
 
       call xgBlock_getSize(eigenvalues,nbli_global,nbco_global)
@@ -408,7 +408,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_scatter'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(in   ) :: xgScalapack
@@ -425,10 +424,10 @@ module m_xgScalapack
     call xgBlock_getSize(matrix,rows,cols)
     call xgBlock_reverseMap(matrix,tab,rows,cols)
 
-    if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then 
+    if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
       lap = 1
       sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
-      do while ( sendto < xgScalapack%size(M__WORLD) ) 
+      do while ( sendto < xgScalapack%size(M__WORLD) )
         !call xmpi_send(tab,sendto,sendto,xgScalapack%comms(M__WORLD),ierr)
         call xmpi_isend(tab,sendto,sendto,xgScalapack%comms(M__WORLD),req,ierr)
         if ( ierr /= 0 ) then
@@ -462,7 +461,6 @@ module m_xgScalapack
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgScalapack_free'
- use interfaces_18_timing
 !End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
@@ -479,7 +477,7 @@ module m_xgScalapack
     end if
     if ( xgScalapack%comms(M__UNUSED) /= xmpi_comm_null ) then
       call MPI_Comm_free(xgScalapack%comms(M__UNUSED),ierr)
-    end if 
+    end if
 #else
     ABI_UNUSED(xgScalapack%verbosity)
 #endif

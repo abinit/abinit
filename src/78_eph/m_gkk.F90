@@ -21,7 +21,6 @@
 
 #include "abi_common.h"
 
-
 module m_gkk
 
  use defs_basis
@@ -45,12 +44,14 @@ module m_gkk
  use m_time,           only : cwtime, sec2str
  use m_io_tools,       only : iomode_from_fname
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
+ use m_symtk,          only : littlegroup_q
  use m_fftcore,        only : ngfft_seq, get_kg, kpgsph, sphere
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : findqg0
  use m_cgtools,        only : dotprod_g
+ use m_kg,             only : getph
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
@@ -119,7 +120,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 #define ABI_FUNC 'eph_gkk'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_66_wfs
 !End of the abilint section
 
