@@ -147,6 +147,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_errors
  use m_wfk
 
+ use m_dtfil,       only : status
  use m_time,        only : timab
  use m_io_tools,    only : get_unit, iomode_from_fname
  use m_occ,         only : occeig
@@ -163,6 +164,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawfgr,      only : pawfgr_type
  use m_kg,          only : mkkin, kpgstr, mkkpg
  use m_fft,         only : fftpac
+ use m_spacepar,    only : symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -171,7 +173,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_rhofermi
 !End of the abilint section
 

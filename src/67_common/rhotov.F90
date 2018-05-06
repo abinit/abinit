@@ -136,6 +136,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_spacepar,         only : hartre
+ use m_dens,             only : mag_constr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -144,7 +145,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs
- use interfaces_67_common, except_this_one => rhotov
 !End of the abilint section
 
  implicit none

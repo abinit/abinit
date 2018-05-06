@@ -163,6 +163,8 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
  use m_geometry,   only : strconv
  use m_kg,         only : ph1d3d
+ use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
+                          metcon, metcon_so, metric_so
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

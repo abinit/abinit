@@ -79,6 +79,7 @@
  use m_geometry,     only : mkrdim, metric
  use m_fftcore,      only : kpgcount
  use m_dtset,        only : get_npert_rbz
+ use m_dtfil,        only : mkfilename
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -86,7 +87,6 @@
 #define ABI_FUNC 'finddistrproc'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_54_abiutil
  use interfaces_57_iovars, except_this_one => finddistrproc
 !End of the abilint section
 

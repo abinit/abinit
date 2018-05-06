@@ -4,7 +4,7 @@
 !!  initmpi_band
 !!
 !! FUNCTION
-!!  Initializes the mpi informations for band parallelism (paralbd=1).
+!!  Initializes the mpi information for band parallelism (paralbd=1).
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2018 ABINIT group (MT)
@@ -15,7 +15,7 @@
 !!  ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  nband(nkpt*nsppol)= number of bands per k point, for each spin
 !!  nkpt= number of k-points
 !!  nsppol= 1 for unpolarized, 2 for polarized

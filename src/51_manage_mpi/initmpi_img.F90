@@ -4,7 +4,7 @@
 !!  initmpi_img
 !!
 !! FUNCTION
-!!  Initializes the mpi informations for parallelism over images of the cell (npimage>1).
+!!  Initializes the mpi information for parallelism over images of the cell (npimage>1).
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2018 ABINIT group (MT,GG)
@@ -16,7 +16,7 @@
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  option= see below
 !!
 !! OUTPUT

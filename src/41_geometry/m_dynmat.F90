@@ -4677,7 +4677,7 @@ end subroutine sytens
 !!
 !! FUNCTION
 !! Use the set of special k points calculated by the Monkhorst & Pack Technique.
-!! Check if all the informations for the k points are present in
+!! Check if all the information for the k points are present in
 !! the DDB to determine their dynamical matrices.
 !! Generate the dynamical matrices of the set of k points which
 !! samples homogeneously the entire Brillouin zone.
@@ -4849,7 +4849,7 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
    end if
  end do !  End of the loop on the q points of the DDB
 
-! Check if all the informations relatives to the q points sampling are found in the DDB;
+! Check if all the information relatives to the q points sampling are found in the DDB;
 ! if not => stop message
  nqmiss = 0
  do iqpt=1,nqpt
@@ -4929,7 +4929,7 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
          do idir1=1,3
            if(blkflg(idir1,ipert1,idir2,ipert2,q1)/=1)then
              write(message, '(a,a,a,i6,a,a,a,4i4,a,a,a,a)' )&
-&             'Informations are missing in the DDB.',ch10,&
+&             'Information are missing in the DDB.',ch10,&
 &             'In block',q1,' the following element is missing :',ch10,&
 &             'idir1,ipert1,idir2,ipert2=',idir1,ipert1,idir2,ipert2,ch10,&
 &             'Action: add the required information in the DDB,',ch10,&

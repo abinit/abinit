@@ -33,6 +33,7 @@ MODULE m_esymm
 
  use m_io_tools,       only : file_exists
  use m_symtk,          only : matr3inv, chkgrp, symrelrot, littlegroup_q
+ use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
  use m_abilasi,        only : xgeev, xginv
@@ -261,7 +262,6 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 #undef ABI_FUNC
 #define ABI_FUNC 'esymm_init'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

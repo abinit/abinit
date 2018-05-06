@@ -40,7 +40,7 @@
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  fatvshift=factor to multiply dtset%atvshift
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mcg=size of wave-functions array (cg) =mpw*my_nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)= # atoms of each type.
@@ -185,15 +185,16 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_hdr
  use m_xcdata
 
+ use m_dtfil,            only : status
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
+ use m_symtk,            only : symmetrize_xred
  use m_geometry,         only : metric
  use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_abi_etsf,         only : abi_etsf_init
  use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar
- use m_ioarr,            only : ioarr, fftdatar_write_from_hdr
+ use m_ioarr,            only : fftdatar_write_from_hdr
  use m_results_gs ,      only : results_gs_type
  use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
  use m_energies,         only : energies_type, energies_init, energies_copy
@@ -222,14 +223,16 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_kg,               only : getcut, getmpw, kpgio, getph
  use m_vtorhorec,        only : first_rec, vtorhorec
  use m_vtorhotf,         only : vtorhotf
+ use m_outscfcv,         only : outscfcv
+ use m_afterscfloop,     only : afterscfloop
+ use m_extraprho,        only : extraprho
+ use m_spacepar,         only : setsym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'scfcv'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
  use interfaces_51_manage_mpi
@@ -243,7 +246,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_67_common
  use interfaces_68_rsprc
  use interfaces_79_seqpar_mpi
- use interfaces_94_scfcv, except_this_one => scfcv
 !End of the abilint section
 
  implicit none
@@ -371,6 +373,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
+ real(dp),allocatable :: tauresid(:,:)
  type(scf_history_type) :: scf_history_wf
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
@@ -737,7 +740,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
    dielar(5)=dtset%diegap;dielar(6)=dtset%dielam
    dielar(7)=dtset%diemix;if (dtset%iscf>=10) dielar(7)=dtset%diemixmag
    ABI_ALLOCATE(nvresid,(nfftf,dtset%nspden))
-   if (nstep==0) nvresid=zero
+   ABI_ALLOCATE(tauresid,(nfftf,dtset%nspden*dtset%usekden))
+   if (nstep==0) then
+     nvresid=zero
+     tauresid=zero
+   end if
    ABI_ALLOCATE(dtn_pc,(3,dtset%natom))
 !  The next arrays are needed if iscf==5 and ionmov==4,
 !  but for the time being, they are always allocated
@@ -782,6 +789,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
    end if
  else
    ABI_ALLOCATE(nvresid,(0,0))
+   ABI_ALLOCATE(tauresid,(0,0))
    ABI_ALLOCATE(dtn_pc,(0,0))
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
@@ -1522,7 +1530,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &     computed_forces,optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrhoij,pawtab,phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
-&     susmat,symrec,taug,taur,ucvol_local,usecprj,wffnew,vtrial,vxctau,wvl,xred,&
+&     susmat,symrec,taug,taur,tauresid,ucvol_local,usecprj,wffnew,vtrial,vxctau,wvl,xred,&
 &     ylm,ylmgr,ylmdiel)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
@@ -1595,6 +1603,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
      end if
 !    If the density mixing is required, compute the total energy here
+! TODO: add taur taug tauresid if needed
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     elast,electronpositron,energies,&
 &     etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
@@ -1680,7 +1689,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 &     mgfftf,mix,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
 &     nfftmix,nfftmix_per_nfft,ngfftf,ngfftmix,nkxc,npawmix,npwdiel,nvresid,psps%ntypat,&
 &     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
-&     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred)
+&     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,&
+&     taug=taug,taur=taur,tauresid=tauresid)
    end if   ! iscf>=10
 
    call timab(68,2,tsec)
@@ -1756,6 +1766,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 
      optene=2*optres;if(psps%usepaw==1) optene=2
 
+! TODO: check if tauresid is needed here too for potential residual in the future for MGGA potential mixing
      call rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
@@ -1800,6 +1811,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
      end if
 
      if (.not.wvlbigdft) then
+! TODO: add taur taug tauresid if needed
        call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &       elast,electronpositron,energies,&
 &       etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
@@ -1843,6 +1855,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
 !    If criteria in scprqt say to quit, then exit the loop over istep.
      if (quit==1) then
        do ispden=1,dtset%nspden
+! TODO: if we add potential mixing for the MGGA generalize the tauresid to vtauresid and add in here
          vtrial(:,ispden)=vtrial(:,ispden)+nvresid(:,ispden)+vres_mean(ispden)
        end do
        call timab(244,2,tsec) ! Due to the exit instruction, two timab calls are needed
@@ -1920,7 +1933,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          fildata=trim(dtfil%fnametmp_app_den)//'_'//trim(tag)
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          call fftdatar_write_from_hdr("density",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-         dtset%nspden,rhor,mpi_enreg,eigen=eigen)
+&          dtset%nspden,rhor,mpi_enreg,eigen=eigen)
        end if
      end if
 
@@ -1934,7 +1947,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
          if (dtset%iomode == IO_MODE_ETSF) fildata = nctk_ncify(fildata)
          ! output the Laplacian of density
          call fftdatar_write_from_hdr("kinedr",fildata,dtset%iomode,hdr,ngfftf,cplex1,nfftf,&
-         dtset%nspden,taur,mpi_enreg,eigen=eigen)
+&          dtset%nspden,taur,mpi_enreg,eigen=eigen)
        end if
      end if
 
@@ -2166,6 +2179,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  ABI_DEALLOCATE(dtn_pc)
  ABI_DEALLOCATE(grhf)
  ABI_DEALLOCATE(nvresid)
+ ABI_DEALLOCATE(tauresid)
 
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then
    ABI_DEALLOCATE(dielinv)

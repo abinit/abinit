@@ -94,6 +94,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  use m_errors
  use m_xmpi
 
+ use m_dtfil,         only : status
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_pawrhoij,      only : pawrhoij_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
@@ -103,7 +104,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_accrho'
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_66_nonlocal

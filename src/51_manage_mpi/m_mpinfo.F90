@@ -813,10 +813,10 @@ end function mpi_distrib_is_ok
 !!  clnmpi_atom
 !!
 !! FUNCTION
-!!  Cleans-up the mpi informations for the parallelism over atoms (PAW).
+!!  Cleans-up the mpi information for the parallelism over atoms (PAW).
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
 !!      abinit
@@ -869,10 +869,10 @@ end subroutine clnmpi_atom
 !!  clnmpi_grid
 !!
 !! FUNCTION
-!!  Cleans-up the mpi informations for parallelism over grid (kpt/band/fft).
+!!  Cleans-up the mpi information for parallelism over grid (kpt/band/fft).
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
 !!      abinit
@@ -958,7 +958,7 @@ end subroutine clnmpi_grid
 !!  clnmpi_img
 !!
 !! FUNCTION
-!!  Cleans-up the mpi informations for parallelism over images of the cell (npimage>1).
+!!  Cleans-up the mpi information for parallelism over images of the cell (npimage>1).
 !!
 !! PARENTS
 !!      abinit
@@ -1023,7 +1023,7 @@ end subroutine clnmpi_img
 !!  clnmpi_pert
 !!
 !! FUNCTION
-!!  Cleans-up the mpi informations for parallelization over perturbations.
+!!  Cleans-up the mpi information for parallelization over perturbations.
 !!
 !! INPUTS
 !!

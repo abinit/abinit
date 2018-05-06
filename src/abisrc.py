@@ -107,6 +107,11 @@ def get_parser():
         help="Show children of module/procedure.")
     p_print.add_argument("what", nargs="?", default=None, help="File or procedure name")
 
+    # Subparser for edit.
+    p_edit = subparsers.add_parser("edit", parents=[copts_parser],
+        help="Edit parents of module/procedure.")
+    p_edit.add_argument("what", help="File or procedure name")
+
     # Subparser for graph.
     p_graph = subparsers.add_parser('graph', parents=[copts_parser],
         help=("Draw flow and node dependencies with graphviz package. Accept (FLOWDIR|WORKDIR|TASKDIR). "
@@ -180,11 +185,14 @@ def main():
     elif options.command == "print":
         if options.what is None:
             print(proj.to_string(verbose=options.verbose))
+
         elif os.path.isdir(options.what):
             proj.print_dir(options.what, verbose=options.verbose)
+
         elif os.path.isfile(options.what):
             fort_file = proj.fort_files[os.path.basename(options.what)]
             print(fort_file.to_string(verbose=options.verbose))
+
         else:
             obj = proj.find_public_entity(options.what)
             if obj is not None:
@@ -196,14 +204,17 @@ def main():
     elif options.command == "graph":
         if options.what is None:
             graph = proj.get_graphviz(engine=options.engine)
+
         elif os.path.isdir(options.what):
             graph = proj.get_graphviz_dir(options.what, engine=options.engine)
+
         elif os.path.isfile(options.what):
             fort_file = proj.fort_files[os.path.basename(options.what)]
             print(fort_file.to_string(verbose=options.verbose))
             graph = fort_file.get_graphviz(engine=options.engine)
+
         else:
-            graph = proj.get_graphviz_dir(options.what, engine=options.engine)
+            graph = proj.get_graphviz_pubname(options.what, engine=options.engine)
             if graph is None:
                 return 1
 
@@ -229,9 +240,11 @@ def main():
     #elif options.command == "canimove":
     #   return proj.canimove(src, dest)
 
-    elif options.command in ("edit_parents", "edit_children"):
-        relation = options.command.split("_")[1]
-        proj.edit_connections(options.what, relation)
+    #elif options.command in ("edit_parents", "edit_children"):
+    elif options.command == "edit":
+        #relation = options.command.split("_")[1]
+        relation = "parents"
+        return proj.edit_connections(options.what, relation=relation, verbose=options.verbose)
 
     elif options.command == "stats":
         if options.what is None:

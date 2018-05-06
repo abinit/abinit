@@ -32,6 +32,7 @@ class Procedure(object):
         self.contains, self.local_uses, self.includes = [], [], []
         self.parents, self.children = [], []
         #self.visibility = "public"
+        #self.has_implicit_none = False
 
     @lazy_property
     def is_program(self):
@@ -84,10 +85,9 @@ class Procedure(object):
         w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         lines = []; app = lines.append
 
-        app("%s: %s\n" % (self.__class__.__name__.upper(), self.name)),
+        app("%s: %s (%s)\n" % (self.__class__.__name__.upper(), self.name, os.path.basename(self.dirname))),
         if self.ancestor is not None:
             app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.ftype))
-        app("")
         if self.uses:
             app("USES:\n%s\n" % w.fill(", ".join(self.uses)))
             diff = sorted(set(self.local_uses) - set(self.uses))
@@ -99,7 +99,16 @@ class Procedure(object):
             app("CONTAINS:\n%s\n" % w.fill(", ".join(c.name for c in self.contains)))
 
         app("PARENTS:\n%s\n" % w.fill(", ".join(p.name for p in self.parents)))
+        #if verbose:
+        # Add directory of parents
+        dirnames = sorted(set(os.path.basename(p.dirname) for p in self.parents))
+        app("PARENT_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
+
         app("CHILDREN:\n%s\n" % w.fill(", ".join(c for c in self.children)))
+        #if verbose:
+        ## Add directory of children
+        #dirnames = sorted(set(os.path.basename(p.dirname) for p in self.children))
+        #app("CHILDREN_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
 
         return "\n".join(lines)
 
@@ -395,7 +404,7 @@ re.I | re.VERBOSE)
                 preamble = []
                 continue
 
-            # Invokations of Fortran functions are difficult to handle
+            # Invokations of Fortran functions are difficult to handle at this level
             # without inspecting locals so we only handle explicit calls to routines.
             m = self.RE_SUBCALL.match(line)
             if m:

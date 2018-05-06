@@ -142,7 +142,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 #endif
 
  use m_fstrings,           only : strcat, sjoin, indent
- use m_symtk,              only : matr3inv
+ use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx
  use m_crystal,            only : crystal_init, crystal_free, crystal_t
  use m_crystal_io,         only : crystal_ncwrite_path
@@ -151,21 +151,19 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
+ use m_dtfil,              only : dtfil_init_time, status
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mover'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_45_geomoptim
  use interfaces_56_recipspace
  use interfaces_59_ionetcdf
  use interfaces_67_common
  use interfaces_78_effpot
  use interfaces_79_seqpar_mpi
- use interfaces_95_drive, except_this_one => mover
 !End of the abilint section
 
 implicit none
@@ -922,7 +920,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ###     acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
-     
+
      if(ab_mover%optcell/=0)then
 
        call matr3inv(rprimd,gprimd)
@@ -948,7 +946,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
 
      end if
-     
+
      vel(:,:)=hist%vel(:,:,hist%ihist)
 
 !    vel_cell(3,3)= velocities of cell parameters

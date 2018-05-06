@@ -1114,7 +1114,7 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
    inversion_flag=1
    write(message, '(4a)' )&
 &   'inversion operation will be appended to axis transformation',ch10,&
-&   'Action : If you did not intend this, make |z|<10 and |x|<10 ',ch10
+&   'Action: If you did not intend this, make |z|<10 and |x|<10 ',ch10
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -1190,12 +1190,11 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
        if ( iatfix(1,jatom) /=  iatfix(1,iatom) .or. &
 &       iatfix(2,jatom) /=  iatfix(2,iatom) .or. &
 &       iatfix(3,jatom) /=  iatfix(3,iatom)       ) then
-         write(message, '(a,i6,a,a,i6,a,a,a,a,a,a,a)' )&
-&         '  Atom number ',jatom,' is symmetrically',&
-&         ' equivalent to atom number ',iatom,',',ch10,&
-&         '  but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
-&         '  are not fixed along the same directions, which is forbidden.',ch10,&
-&         '  Action : modify either the symmetry or iatfix(x,y,z) and resubmit.'
+         write(message, '(a,i0,a,i0,7a)' )&
+&         'Atom number ',jatom,' is symmetrically  equivalent to atom number ',iatom,',',ch10,&
+&         'but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
+&         'are not fixed along the same directions, which is forbidden.',ch10,&
+&         'Action: modify either the symmetry or iatfix(x,y,z) and resubmit.'
          MSG_ERROR(message)
        end if
      end do
@@ -1294,7 +1293,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
    write(message,'(5a)')&
 &   'Input rprim and acell gives vanishing unit cell volume.',ch10,&
 &   'This indicates linear dependency between primitive lattice vectors',ch10,&
-&   'Action : correct either rprim or acell in input file.'
+&   'Action: correct either rprim or acell in input file.'
    MSG_ERROR(message)
  end if
  if (ucvol<zero)then
@@ -2098,7 +2097,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
      close(temp_unit)
      write(message, '(a,i8,a,a)' )&
 &     'bonds_lgth_angles cannot handle more than 9999 atoms, while natom=',natom,ch10,&
-&     'Action : decrease natom, or contact ABINIT group.'
+&     'Action: decrease natom, or contact ABINIT group.'
      MSG_BUG(message)
    end if
  end do
@@ -2407,7 +2406,7 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
 &   'Input variable random_atpos= ',random_atpos,ch10,&
 &   'However, the number of pseudopotentials ',npsp,', is not equal to the number of type of atoms ',ntypat,ch10,&
 &   'The use of alchemical mixing cannot be combined with the constraint based on the mixing of covalent radii.',ch10,&
-&   'Action : switch to another value of random_atpos.'
+&   'Action: switch to another value of random_atpos.'
    MSG_ERROR(message)
  end if
 

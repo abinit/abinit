@@ -131,6 +131,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_wffile
  use m_wfk
 
+ use m_dtfil,    only : status
  use m_time,     only : timab
  use m_io_tools,    only : file_exists
  use m_kg,       only : getph

@@ -42,14 +42,16 @@ module m_respfn_driver
  use m_crystal
  use m_xcdata
 
+ use m_dtfil,       only : status
  use m_time,        only : timab
  use m_fstrings,    only : strcat
- use m_symtk,       only : matr3inv, littlegroup_q
+ use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_interpolate, only : outddbnc
  use m_occ,         only : newocc
  use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
  use m_wfk,         only : wfk_read_eigenvalues
@@ -69,7 +71,7 @@ module m_respfn_driver
  use m_kg,          only : getcut, getph, kpgio
  use m_eig2d,       only : eig2tot, elph2_fanddw
  use m_inwffil,     only : inwffil
- use m_spacepar,    only : hartre
+ use m_spacepar,    only : hartre, setsym
 
  implicit none
 
@@ -187,8 +189,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
 #if defined HAVE_GPU_CUDA
  use interfaces_52_manage_cuda

@@ -23,11 +23,10 @@
 !!  nsppol = 1 for unpolarized, 2 for polarized
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg = informations about MPI parallelization
+!!  mpi_enreg = information about MPI parallelization
 !!   mpi_enreg%proc_distrb(nkpt,mband,nsppol)=number of the processor
 !!       that will treat each band in each k point.
 !!   mpi_enreg%nproc_kpt is set
-!!
 !!
 !! NOTES
 !!  For the time being, the band parallelisation works only
@@ -173,7 +172,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      write(message, '(a,i0,a,a,a,i0,a,a,a)' )&
 &     'Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
 &     'when',nproc_kpt,' processors are available.',ch10,&
-&     'Action : adjust number of processors and kpt_distrb file.'
+&     'Action: adjust number of processors and kpt_distrb file.'
      MSG_ERROR(message)
    end if
 

@@ -141,6 +141,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_rf2
  use m_kg
 
+ use m_dtfil,      only : status
  use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
  use m_pawang,     only : pawang_type
  use m_pawfgrtab,  only : pawfgrtab_type

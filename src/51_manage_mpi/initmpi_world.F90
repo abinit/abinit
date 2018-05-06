@@ -15,12 +15,10 @@
 !!  ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! OUTPUT
-!!
-!!  mpi_enreg=informations about MPI parallelization
-!!
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! SIDE EFFECTS
 !!  xmpi_world is redifined for the number of processors on which ABINIT is launched
@@ -44,9 +42,9 @@ subroutine initmpi_world(mpi_enreg,nproc)
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_xmpi
 
  use defs_abitypes, only : MPI_type
- use m_xmpi, only : xmpi_world,xmpi_comm_rank,xmpi_comm_size,xmpi_subcomm
  use m_libpaw_tools, only : libpaw_write_comm_set
 
 !This section has been created automatically by the script Abilint (TD).
