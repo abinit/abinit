@@ -10,59 +10,42 @@ import argparse
 
 from fkiss.project import FortranFile, AbinitProject
 
-master_foo = """\
-
-Master Foo and the Hardware Designer
-
-On one occasion, as Master Foo was traveling to a conference
-with a few of his senior disciples, he was accosted by a hardware designer.
-
-The hardware designer said:
-“It is rumored that you are a great programmer. How many lines of code do you write per year?”
-
-Master Foo replied with a question:
-“How many square inches of silicon do you lay out per year?”
-
-“Why...we hardware designers never measure our work in that way,” the man said.
-
-“And why not?” Master Foo inquired.
-
-“If we did so,” the hardware designer replied, “we would be tempted to design chips
-so large that they cannot be fabricated - and, if they were fabricated,
-their overwhelming complexity would make it be impossible to generate proper test vectors for them.”
-
-Master Foo smiled, and bowed to the hardware designer.
-
-In that moment, the hardware designer achieved enlightenment.
-
-From http://www.catb.org/esr/writings/unix-koans/
-"""
-
 def get_epilog():
     return """\
 
 Usage example:
 
-  abisrc.py parse 41_geometry/m_crystal.F90   ==> Parse file, print results
+################
+# Documentation
+################
 
-  abisrc.py print 41_geometry/m_crystal.F90   ==> Print info about file
-  abisrc.py print 41_geometry                 ==> Print info about directory
-  abisrc.py print crystal_init                ==> Print info about file
+  abisrc.py print 41_geometry/m_crystal.F90   ==> Print info about file.
+  abisrc.py print 41_geometry                 ==> Print info about directory.
+  abisrc.py print crystal_init                ==> Print info about public procedure.
+  abisrc.py print m_crystal                   ==> Print info about module.
 
-########
-# Graphs
-########
+  abisrc.py parse 41_geometry/m_crystal.F90   ==> Parse file, print results.
+
+#################
+# Graphviz graphs
+#################
 
   abisrc.py graph 41_geometry/m_crystal.F90   => Plot dependency graph for module.
-  abisrc.py graph fourdp                      => Plot dependency graph for function.
+  abisrc.py graph 41_geometry                 => Plot dependency graph for directory.
+  abisrc.py graph fourdp                      => Plot dependency graph for public procedure.
 
 #############
 # Developers
 #############
 
-  abisrc.py makemake              => Generate files required by build system.
-  abisrc.py abirules              =>
-  abisrc.py master                => Master the Abinit source tree.
+  abisrc.py makemake           => Generate files required by the build system.
+  abisrc.py touch              => Touch all files that have been changed + parents.
+                                  so that make can recompile all the relevant files.
+                                  Useful when changing API/ABI.
+  abisrc.py pedit fourdp       => Call $EDITOR to edit all the parents of fourdp.
+  abisrc.py stats              =>
+  abisrc.py abirules           =>
+  abisrc.py master             => Master the Abinit source tree.
 """
 
 def get_parser():
@@ -82,8 +65,6 @@ def get_parser():
     # Build the main parser.
     parser = argparse.ArgumentParser(epilog=get_epilog(),
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    #parser.add_argument('flowdir', nargs="?", help=("File or directory containing the ABINIT flow/work/task. "
-    #                                                "If not given, the flow in the current workdir is selected."))
     #parser.add_argument('-V', '--version', action='version', version=abilab.__version__)
 
     # Create the parsers for the sub-commands
@@ -100,16 +81,16 @@ def get_parser():
     # Subparser for touch.
     p_touch = subparsers.add_parser('touch', parents=[copts_parser],
         help="Change timestamp of all files that.")
-    p_touch.add_argument("what_list", nargs="*", default=None, help="List of files or empty for auto.")
+    #p_touch.add_argument("what_list", nargs="*", default=None, help="List of files or empty for auto.")
 
     # Subparser for print.
     p_print = subparsers.add_parser('print', parents=[copts_parser],
         help="Show children of module/procedure.")
     p_print.add_argument("what", nargs="?", default=None, help="File or procedure name")
 
-    # Subparser for edit.
-    p_edit = subparsers.add_parser("edit", parents=[copts_parser],
-        help="Edit parents of module/procedure.")
+    # Subparser for pedit.
+    p_edit = subparsers.add_parser("pedit", parents=[copts_parser],
+        help="Edit parents of public procedure or module.")
     p_edit.add_argument("what", help="File or procedure name")
 
     # Subparser for graph.
@@ -128,7 +109,7 @@ def get_parser():
     p_validate = subparsers.add_parser('validate', parents=[copts_parser],
         help="Validate source tree.")
 
-    p_master = subparsers.add_parser('master', parents=[copts_parser], help="Master.")
+    p_master = subparsers.add_parser('master', parents=[copts_parser], help="How to become a great programmer.")
 
     return parser
 
@@ -142,7 +123,7 @@ def main():
         sys.exit(error_code)
 
     # This to avoid RecursionError in pickle as we have a highly recursive datastructure.
-    sys.setrecursionlimit(sys.getrecursionlimit() * 3)
+    #sys.setrecursionlimit(sys.getrecursionlimit() * 3)
 
     parser = get_parser()
 
@@ -160,8 +141,22 @@ def main():
         print(fort_file.to_string(verbose=options.verbose))
         return 0
 
+    elif options.command == "touch":
+        # Load old project and touch files that have been changed.
+        old_proj = AbinitProject.pickle_load()
+        ntouch = old_proj.touch_alldeps(verbose=options.verbose)
+
+        if ntouch:
+            print("\nTouched %d files. Need to parse source files again and dump new pickle file\n" % ntouch)
+            new_proj = AbinitProject(".", verbose=options.verbose)
+            new_proj.pickle_dump()
+        else:
+            print("\nNo change detected. No need to touch files.\n")
+
+        return ntouch
+
     # After this point I operate an AbinitProject instance.
-    # Load the object from pickle first and then check if we need to parse the source again.
+    # Load the object from pickle first and then check if we need to parse the source files again.
     needs_reload = True
     if not options.regenerate and os.path.exists(AbinitProject.DEFAULT_PICKLE_FILE):
         proj = AbinitProject.pickle_load()
@@ -177,10 +172,8 @@ def main():
     #assert "abinit.F90" in proj.fort_files
 
     if options.command == "makemake":
-        proj.write_buildsys_files()
-
-    elif options.command == "touch":
-        proj.touch_alldeps(what_list=options.what_list, verbose=options.verbose)
+        return proj.write_binaries_conf()
+        #proj.write_buildsys_files()
 
     elif options.command == "print":
         if options.what is None:
@@ -227,9 +220,6 @@ def main():
     elif options.command == "validate":
        proj.validate(verbose=options.verbose)
 
-    elif options.command == "master":
-       print(master_foo)
-
     #elif options.command == "plot":
     #    if os.path.isdir(options.what):
     #        proj.plot_dir(options.what)
@@ -240,21 +230,22 @@ def main():
     #elif options.command == "canimove":
     #   return proj.canimove(src, dest)
 
-    #elif options.command in ("edit_parents", "edit_children"):
-    elif options.command == "edit":
-        #relation = options.command.split("_")[1]
-        relation = "parents"
-        return proj.edit_connections(options.what, relation=relation, verbose=options.verbose)
+    elif options.command == "pedit":
+        return proj.pedit(options.what, verbose=options.verbose)
 
     elif options.command == "stats":
         if options.what is None:
-            proj.stats(verbose=options.verbose)
+            df = proj.stats(verbose=options.verbose)
         elif os.path.isdir(options.what):
-            proj.stats_dir(options.what, verbose=options.verbose)
+            df = proj.stats_dir(options.what, verbose=options.verbose)
         elif os.path.isfile(options.what):
-            proj.stats_file(options.what, verbose=options.verbose)
+            df = proj.stats_file(options.what, verbose=options.verbose)
         else:
             raise TypeError("Don't know how to produce stats for %s" % str(options.what))
+        #print(df)
+
+    elif options.command == "master":
+        print(proj.master())
 
     else:
         raise ValueError("Don't know how to handle command: %s" % options.command)
