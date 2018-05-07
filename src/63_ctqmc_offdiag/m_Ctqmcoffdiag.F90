@@ -45,7 +45,7 @@ MODULE m_Ctqmcoffdiag
  USE m_ImpurityOperatoroffdiag
  USE m_Statoffdiag
  USE m_FFTHyboffdiag
- USE m_OurRngoffdiag
+ USE m_OurRng
 #ifdef HAVE_MPI2
  USE mpi
 #endif
@@ -2371,7 +2371,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 !prt!    do it=1,op%Bath%sumtails
     !sui!write(6,'(a,3x,500e10.3)') "        M start",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
 !prt!    enddo
-    CALL OurRngoffdiag(op%seed,action)
+    CALL OurRng(op%seed,action)
 
     !==========================
     ! Add segment/antisegment
@@ -2381,7 +2381,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 
       ! Select time1 (>0) in [0,beta]
       !==============================
-      CALL OurRngoffdiag(op%seed,time1)
+      CALL OurRng(op%seed,time1)
       time1 = time1 * beta
 
       ! time_avail is the distance between between time1 and 
@@ -2396,8 +2396,8 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 
         ! Time2 is  the length of the proposed new (anti)segment
         !=======================================================
-        CALL OurRngoffdiag(op%seed,time2)
-        IF ( time2 .EQ. 0.d0 ) CALL OurRngoffdiag(op%seed,time2) ! Prevent null segment
+        CALL OurRng(op%seed,time2)
+        IF ( time2 .EQ. 0.d0 ) CALL OurRng(op%seed,time2) ! Prevent null segment
 
         ! Now time2 is the time at the end of the proposed new (anti) segment
         ! time2 > time1 
@@ -2430,7 +2430,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         signdetprev  = ImpurityOperatoroffdiag_getsign(op%Impurity, time2, i, action, position)
 
         !write(6,*) "      overlap   ", overlap
-        CALL OurRngoffdiag(op%seed,time1)
+        CALL OurRng(op%seed,time1)
         !write(6,*) "      Rnd", time1
         signdet=1.d0
         det_ratio=det_ratio*signdetprev
@@ -2490,7 +2490,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
     ELSE ! Remove a segment among the segment of the flavor activeflavor
       !ii if(op%prtopt==1)  write(6,*) "        =try: Segment removed of type",i
       IF ( tail .GT. 0.d0 ) THEN
-        CALL OurRngoffdiag(op%seed,time1)
+        CALL OurRng(op%seed,time1)
         position = INT(((time1 * tail) + 1.d0) * signe )
         !prt!if(op%prtopt==1)  write(6,*) "         position",position 
         time_avail = ImpurityOperatoroffdiag_getAvailedTime(op%Impurity,position)
@@ -2502,7 +2502,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         !write(6,*) "        length   ", length
         overlap    = ImpurityOperatoroffdiag_getNewOverlap(op%Impurity,CdagC_1)
         !write(6,*) "        overlap  ", overlap
-        CALL OurRngoffdiag(op%seed,time1)
+        CALL OurRng(op%seed,time1)
         !write(6,*) "        Random   ",time1
         signdetprev = ImpurityOperatoroffdiag_getsign(op%Impurity, time2, i, action, position)
         det_ratio=det_ratio*signdetprev
@@ -2791,10 +2791,10 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
 
   !CALL RANDOM_NUMBER(rnd)
-  CALL OurRngoffdiag(op%seed,rnd)
+  CALL OurRng(op%seed,rnd)
   flavor_i = NINT(rnd*DBLE(op%flavors-1.d0))+1
   !CALL RANDOM_NUMBER(rnd)
-  CALL OurRngoffdiag(op%seed,rnd)
+  CALL OurRng(op%seed,rnd)
   flavor_j = NINT(rnd*DBLE(op%flavors-1.d0))+1
   !ii write(6,'(a,2i4)') "--------------- new swap --------------------------------",flavor_i,flavor_j
   
@@ -2857,7 +2857,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
     ! Wloc = exp(muN-Uo)
     !CALL RANDOM_NUMBER(rnd)
-    CALL OurRngoffdiag(op%seed,rnd)
+    CALL OurRng(op%seed,rnd)
     IF ( rnd .LT. local_ratio*det_ratio ) THEN ! swap accepted
    !ii    write(6,*) "        = M Matrix before swap"
    !ii    write(6,'(a,2x,100(i12))') "Flavor=",((iflavor,it=1,op%Impurity%particles(iflavor)%tail),iflavor=1,op%flavors)
