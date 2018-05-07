@@ -29,8 +29,8 @@
 MODULE m_GreenHyboffdiag
 
  USE m_MatrixHyboffdiag
- USE m_Vectoroffdiag
- USE m_VectoroffdiagInt
+ USE m_Vector
+ USE m_VectorInt
  USE m_ListCdagCoffdiag
  USE m_MapHyboffdiag
 #ifdef HAVE_MPI2
@@ -147,10 +147,10 @@ MODULE m_GreenHyboffdiag
   COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:) :: oper_w_old
    ! Old frequency Green's function (not used)
 
-  TYPE(Vectoroffdiag)                            :: oper_old          
+  TYPE(Vector)                            :: oper_old          
    ! useless data
 
-  TYPE(VectoroffdiagInt)                         :: index_old          
+  TYPE(VectorInt)                         :: index_old          
    ! useless data
 
   TYPE(MapHyboffdiag), ALLOCATABLE, DIMENSION(:,:)  :: map
@@ -283,8 +283,8 @@ include 'mpif.h'
     op%iTech = GREENHYB_TAU
   END IF
   ! end if
-  CALL Vectoroffdiag_init(op%oper_old,10000)
-  CALL VectoroffdiagInt_init(op%index_old,10000)
+  CALL Vector_init(op%oper_old,10000)
+  CALL VectorInt_init(op%index_old,10000)
   DT_FREEIF(op%map)
   MALLOC(op%map,(nflavors,nflavors))
   do iflavor=1,nflavors
@@ -397,8 +397,8 @@ SUBROUTINE GreenHyboffdiag_clear(op)
   TYPE(GreenHyboffdiag)     , INTENT(INOUT) :: op
   INTEGER :: iflavor,iflavorbis
 
-  !CALL Vectoroffdiag_clear(op%oper_old)
-  !CALL VectoroffdiagInt_clear(op%index_old)
+  !CALL Vector_clear(op%oper_old)
+  !CALL VectorInt_clear(op%index_old)
   do iflavor=1,op%nflavors
     do iflavorbis=1,op%nflavors
       CALL MapHyboffdiag_clear(op%map(iflavor,iflavorbis))
@@ -1945,8 +1945,8 @@ SUBROUTINE GreenHyboffdiag_destroy(op)
   op%inv_beta     = 0.d0
   op%inv_dt       = 0.d0
   op%delta_t      = 0.d0
-  CALL VectoroffdiagInt_destroy(op%index_old)
-  CALL Vectoroffdiag_destroy(op%oper_old)
+  CALL VectorInt_destroy(op%index_old)
+  CALL Vector_destroy(op%oper_old)
   do iflavor=1,op%nflavors
     do iflavorbis=1,op%nflavors
      !sui!write(6,*) "test",iflavor,iflavorbis

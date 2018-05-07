@@ -31,8 +31,8 @@ inp_files = [
 "tdfpt_04.in",
 #"tdfpt_03PAW.in,"
 #"tdfpt_04PAW.in",
-"tdmft_01.in",
-"tdmft_02.in",
+#"tdmft_1.in",
+#"tdmft_2.in",
 "tgspw_01.in",
 "tgspw_02.in",    # OK
 "tgspw_03.in",    # OK
@@ -54,9 +54,9 @@ inp_files = [
 #"tstring_02.in",
 #"tstring_03.in",
 #"tstring_04.in",
-"tucrpa_1.in",
-"tucrpa_2.in",
-"tucrpa_3.in",
-"tucrpa_4.in",
-"tucrpa_5.in",
+#"tucrpa_1.in",
+#"tucrpa_2.in",
+#"tucrpa_3.in",
+#"tucrpa_4.in",
+#"tucrpa_5.in",
 ]

@@ -257,8 +257,8 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: abNoiseG   !(ab,tau,flavor)
 ! Noise but for G
 
-  TYPE(Vectoroffdiag)             , DIMENSION(1:2) :: measNoise 
-  TYPE(Vectoroffdiag), ALLOCATABLE, DIMENSION(:,:,:) :: measNoiseG       !(tau,flavor,mod) 
+  TYPE(Vector)             , DIMENSION(1:2) :: measNoise 
+  TYPE(Vector), ALLOCATABLE, DIMENSION(:,:,:) :: measNoiseG       !(tau,flavor,mod) 
 ! accumulate each value relataed to measurenoise 1 2
 
 !#ifdef CTCtqmcoffdiag_ANALYSIS
@@ -456,10 +456,10 @@ include 'mpif.h'
   op%swap         = 0.d0
   op%runTime      = 0.d0
 
-  CALL Vectoroffdiag_init(op%measNoise(1),op%sweeps/op%modNoise1)
-  CALL Vectoroffdiag_init(op%measNoise(2),(op%sweeps/op%modNoise1+1)*CTQMC_SLICE2)
-  !CALL Vectoroffdiag_init(op%measNoise(3),101)
-  !CALL Vectoroffdiag_init(op%measNoise(4),101)
+  CALL Vector_init(op%measNoise(1),op%sweeps/op%modNoise1)
+  CALL Vector_init(op%measNoise(2),(op%sweeps/op%modNoise1+1)*CTQMC_SLICE2)
+  !CALL Vector_init(op%measNoise(3),101)
+  !CALL Vector_init(op%measNoise(4),101)
 
   op%set  = op%para .AND. op%inF
   op%done = .FALSE.
@@ -818,7 +818,7 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
       DO i=1,2
         DO j = 1, op%flavors
           DO k= 1, op%samples+1
-            CALL Vectoroffdiag_destroy(op%measNoiseG(k,j,i))
+            CALL Vector_destroy(op%measNoiseG(k,j,i))
           END DO
         END DO
       END DO
@@ -828,12 +828,12 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     !DO i=1,2
       DO j = 1, op%flavors
         DO k= 1, op%samples+1
-          CALL Vectoroffdiag_init(op%measNoiseG(k,j,1),CTQMC_SLICE1)
+          CALL Vector_init(op%measNoiseG(k,j,1),CTQMC_SLICE1)
         END DO
       END DO
       DO j = 1, op%flavors
         DO k= 1, op%samples+1
-          CALL Vectoroffdiag_init(op%measNoiseG(k,j,2),CTQMC_SLICE1*CTQMC_SLICE2+1) ! +1 pour etre remplacer ceil
+          CALL Vector_init(op%measNoiseG(k,j,2),CTQMC_SLICE1*CTQMC_SLICE2+1) ! +1 pour etre remplacer ceil
         END DO
       END DO
     !END DO
@@ -1124,8 +1124,8 @@ SUBROUTINE Ctqmcoffdiag_clear(op)
   op%swap         = 0.d0
   op%runTime      = 0.d0
   op%modGlobalMove(2) = 0 
-  CALL Vectoroffdiag_clear(op%measNoise(1))
-  CALL Vectoroffdiag_clear(op%measNoise(2))
+  CALL Vector_clear(op%measNoise(1))
+  CALL Vector_clear(op%measNoise(2))
 !#ifdef CTCtqmcoffdiag_CHECK
   op%errorImpurity = 0.d0
   op%errorBath     = 0.d0
@@ -1142,7 +1142,7 @@ SUBROUTINE Ctqmcoffdiag_clear(op)
     DO i=1,2
       DO j = 1, op%flavors
         DO k= 1, op%samples+1
-          CALL Vectoroffdiag_clear(op%measNoiseG(k,j,i))
+          CALL Vector_clear(op%measNoiseG(k,j,i))
         END DO
       END DO
     END DO
@@ -2192,7 +2192,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
     IF ( MOD(isweep, modNoise1) .EQ. 0 ) THEN
       !modNext = isweep + modNoise2
       NRJ_new = op%measDE(1,1)
-      CALL Vectoroffdiag_pushBack(op%measNoise(1),NRJ_new - NRJ_old1)
+      CALL Vector_pushBack(op%measNoise(1),NRJ_new - NRJ_old1)
       NRJ_old1 = NRJ_new
 
       !! Try to limit accumulation error
@@ -2206,7 +2206,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
                      +op%Greens%map(ifl1,ifl1)%listDBLE(ind)*DBLE(op%Greens%factor)
           END DO
           DO itau = 1, sp1
-           CALL Vectoroffdiag_pushBack(op%measNoiseG(itau,ifl1,1), gtmp_new(itau,ifl1) - gtmp_old1(itau,ifl1))
+           CALL Vector_pushBack(op%measNoiseG(itau,ifl1,1), gtmp_new(itau,ifl1) - gtmp_old1(itau,ifl1))
            gtmp_old1(itau,ifl1) = gtmp_new(itau,ifl1)
           END DO
         END DO
@@ -2215,7 +2215,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
     IF ( MOD(isweep,modNoise2) .EQ. 0 ) THEN
       NRJ_new = op%measDE(1,1)
-      CALL Vectoroffdiag_pushBack(op%measNoise(2),NRJ_new - NRJ_old2)
+      CALL Vector_pushBack(op%measNoise(2),NRJ_new - NRJ_old2)
       NRJ_old2 = NRJ_new
       IF ( op%opt_noise .EQ. 1 ) THEN
         DO ifl1 = 1, flavors
@@ -2225,7 +2225,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
                   +op%Greens%map(ifl1,ifl1)%listDBLE(ind)*op%Greens%factor
           END DO
           DO itau = 1, sp1
-            CALL Vectoroffdiag_pushBack(op%measNoiseG(itau,ifl1,2), gtmp_new(itau,ifl1) - gtmp_old2(itau,ifl1))
+            CALL Vector_pushBack(op%measNoiseG(itau,ifl1,2), gtmp_new(itau,ifl1) - gtmp_old2(itau,ifl1))
             gtmp_old2(itau,ifl1) = gtmp_new(itau,ifl1)
           END DO
         END DO 
@@ -3379,7 +3379,7 @@ include 'mpif.h'
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
 #endif
     n1 = op%size*n1
-    CALL Vectoroffdiag_setSize(op%measNoise(1),n1)
+    CALL Vector_setSize(op%measNoise(1),n1)
     op%measNoise(1)%vec(1:n1) = freqs(:)
     ! Gather de Noise2
     FREE(freqs)
@@ -3394,7 +3394,7 @@ include 'mpif.h'
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
 #endif
     n2 = op%size*n2
-    CALL Vectoroffdiag_setSize(op%measNoise(2),n2)
+    CALL Vector_setSize(op%measNoise(2),n2)
     op%measNoise(2)%vec(1:n2) = freqs(:)
     FREE(counts)
     FREE(displs)
@@ -3413,7 +3413,7 @@ include 'mpif.h'
     freqs(:) = freqs(:)/DBLE(itau)
     op%modNoise1 = op%modNoise1*itau
     n1 = n1/itau
-    CALL Vectoroffdiag_setSize(op%measNoise(1),n1)
+    CALL Vector_setSize(op%measNoise(1),n1)
     op%measNoise(1)%vec(1:n1) = freqs(:)
     FREE(freqs)
   END IF
@@ -3426,7 +3426,7 @@ include 'mpif.h'
     freqs(:) = freqs(:)/DBLE(itau)
     op%modNoise2 = op%modNoise2*itau
     n2 = n2/itau
-    CALL Vectoroffdiag_setSize(op%measNoise(2),n2)
+    CALL Vector_setSize(op%measNoise(2),n2)
     op%measNoise(2)%vec(1:n2) = freqs(:)
     FREE(freqs)
   END IF
@@ -3440,8 +3440,8 @@ include 'mpif.h'
   ! Il faut calculer pour chaque modulo 10 ecarts type sur les donnes acquises
   op%measNoise(1)%vec(1:n1) = op%measNoise(1)%vec(1:n1)/(op%beta*DBLE(op%modNoise1))*DBLE(op%measurements)
   op%measNoise(2)%vec(1:n2) = op%measNoise(2)%vec(1:n2)/(op%beta*DBLE(op%modNoise2))*DBLE(op%measurements)
-!  CALL Vectoroffdiag_print(op%measNoise(1),op%rank+70)
-!  CALL Vectoroffdiag_print(op%measNoise(2),op%rank+50)
+!  CALL Vector_print(op%measNoise(1),op%rank+70)
+!  CALL Vector_print(op%measNoise(2),op%rank+50)
 !  DO iflavor=1,10
 !    debut = (iflavor-1)*n2/10+1
 !    fin   = iflavor*n2/10
@@ -3469,8 +3469,8 @@ include 'mpif.h'
   TabY(1) = Statoffdiag_deviation(op%measNoise(2)%vec(1:n2))!*SQRT(n2/(n2-1))
 !!  write(op%rank+10,*) TabX(2)
 !!  write(op%rank+40,*) TabX(1)
-!!  CALL Vectoroffdiag_print(op%measNoise(1),op%rank+10)
-!!  CALL Vectoroffdiag_print(op%measNoise(2),op%rank+40)
+!!  CALL Vector_print(op%measNoise(1),op%rank+10)
+!!  CALL Vector_print(op%measNoise(2),op%rank+40)
 !!  CLOSE(op%rank+10)
 !!  CLOSE(op%rank+40)
   TabY(2) = Statoffdiag_deviation(op%measNoise(1)%vec(1:n1))!*SQRT(n1/(n1-1))
@@ -4932,8 +4932,8 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
 
   CALL ImpurityOperatoroffdiag_destroy(op%Impurity)
   CALL BathOperatoroffdiag_destroy(op%Bath)
-  CALL Vectoroffdiag_destroy(op%measNoise(1))
-  CALL Vectoroffdiag_destroy(op%measNoise(2))
+  CALL Vector_destroy(op%measNoise(1))
+  CALL Vector_destroy(op%measNoise(2))
 
 !sui!write(6,*) "before greenhyb_destroy in ctmqc_destroy"
   CALL GreenHyboffdiag_destroy(op%Greens)
@@ -4950,7 +4950,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
     DO i=1,2
       DO j = 1, op%flavors
         DO k= 1, op%samples+1
-          CALL Vectoroffdiag_destroy(op%measNoiseG(k,j,i))
+          CALL Vector_destroy(op%measNoiseG(k,j,i))
         END DO
       END DO
     END DO

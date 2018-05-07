@@ -29,8 +29,8 @@
 #include "defs.h"
 MODULE m_BathOperatoroffdiag
 USE m_MatrixHyboffdiag
-USE m_Vectoroffdiag
-USE m_VectoroffdiagInt
+USE m_Vector
+USE m_VectorInt
 USE m_Global
 USE m_ListCdagCoffdiag
 IMPLICIT NONE
@@ -158,23 +158,23 @@ TYPE BathOperatoroffdiag
   DOUBLE PRECISION                            :: Stilde
   ! Sherman Morrison notations 
 
-  TYPE(Vectoroffdiag)                                :: R 
+  TYPE(Vector)                                :: R 
   ! Sherman Morrison notations R%vec(size).
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
-  TYPE(Vectoroffdiag)                                :: Q 
+  TYPE(Vector)                                :: Q 
   ! Sherman Morrison notations 
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
-  TYPE(Vectoroffdiag)                                :: Rtau
+  TYPE(Vector)                                :: Rtau
   ! Sherman Morrison notations 
   ! Rtau gives the time length for each elements of R
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
-  TYPE(Vectoroffdiag)                                :: Qtau
+  TYPE(Vector)                                :: Qtau
   ! Sherman Morrison notations 
   ! Qtau gives the time length for each elements of Q
   ! computed for each flavor (As matrices are made of Blocks for each
@@ -283,10 +283,10 @@ SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondia
   DT_MALLOC(op%Fshift,(1:op%flavors+1))
   op%Fshift=0
   
-  CALL Vectoroffdiag_init(op%R,100*op%flavors)
-  CALL Vectoroffdiag_init(op%Q,100*op%flavors)
-  CALL Vectoroffdiag_init(op%Rtau,100*op%flavors)
-  CALL Vectoroffdiag_init(op%Qtau,100*op%flavors)
+  CALL Vector_init(op%R,100*op%flavors)
+  CALL Vector_init(op%Q,100*op%flavors)
+  CALL Vector_init(op%Rtau,100*op%flavors)
+  CALL Vector_init(op%Qtau,100*op%flavors)
 
   CALL MatrixHyboffdiag_init(op%M,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
   CALL MatrixHyboffdiag_init(op%M_update,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
@@ -350,10 +350,10 @@ SUBROUTINE BathOperatoroffdiag_reset(op)
   op%sumtails    = 0
 !#endif
   op%doCheck = .FALSE.
-  CALL Vectoroffdiag_clear(op%R)
-  CALL Vectoroffdiag_clear(op%Q)
-  CALL Vectoroffdiag_clear(op%Rtau)
-  CALL Vectoroffdiag_clear(op%Qtau)
+  CALL Vector_clear(op%R)
+  CALL Vector_clear(op%Q)
+  CALL Vector_clear(op%Rtau)
+  CALL Vector_clear(op%Qtau)
 
   CALL MatrixHyboffdiag_clear(op%M) !FIXME Should be consistent with ListCagC
   op%F       = 0.d0
@@ -602,12 +602,12 @@ DOUBLE PRECISION  FUNCTION BathOperatoroffdiag_getDetAdd(op,CdagC_1, position, p
     IF ( Cdagbeta .LT. particle(op%activeFlavor)%list(op%updatePosCol,Cdag_) ) op%antiShift = .TRUE.
   END IF
 
-!  CALL Vectoroffdiag_setSize(op%R,tail)
-!  CALL Vectoroffdiag_setSize(op%Q,tail)
-  Vectoroffdiag_QuickResize(op%R,new_tail)
-  Vectoroffdiag_QuickResize(op%Q,new_tail)
-  Vectoroffdiag_QuickResize(op%Rtau,new_tail)
-  Vectoroffdiag_QuickResize(op%Qtau,new_tail)
+!  CALL Vector_setSize(op%R,tail)
+!  CALL Vector_setSize(op%Q,tail)
+  Vector_QuickResize(op%R,new_tail)
+  Vector_QuickResize(op%Q,new_tail)
+  Vector_QuickResize(op%Rtau,new_tail)
+  Vector_QuickResize(op%Qtau,new_tail)
 
 !  This loop compute all Row and Col except op%updatePosRow
   tcheck=0
@@ -1014,8 +1014,8 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
   DOUBLE PRECISION                  :: time
   DOUBLE PRECISION                  :: mbeta_two
   DOUBLE PRECISION                  :: inv_dt
-  TYPE(Vectoroffdiag) :: vec_tmp
-  TYPE(VectoroffdiagInt) :: vecI_tmp
+  TYPE(Vector) :: vec_tmp
+  TYPE(VectorInt) :: vecI_tmp
   INTEGER :: m
   INTEGER :: count
   INTEGER :: i
@@ -1278,8 +1278,8 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
 
   IF ( op%antiShift .EQV. .TRUE. ) THEN ! antisegment
   if(3==4) then
-    CALL Vectoroffdiag_init(vec_tmp,new_tail)
-    CALL VectoroffdiagInt_init(vecI_tmp,new_tail)
+    CALL Vector_init(vec_tmp,new_tail)
+    CALL VectorInt_init(vecI_tmp,new_tail)
   ! Shift if necessary according to op%antishift
   ! shift DIM=2 (col)
 
@@ -1333,8 +1333,8 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
       count = count+1
       m = m+1
     END DO
-    CALL Vectoroffdiag_destroy(vec_tmp)
-    CALL VectoroffdiagInt_destroy(vecI_tmp)
+    CALL Vector_destroy(vec_tmp)
+    CALL VectorInt_destroy(vecI_tmp)
   endif
     !op%M(aF)%mat(1:new_tail,1:new_tail) = CSHIFT(op%M(aF)%mat(1:new_tail,1:new_tail), SHIFT=-1, DIM=1) ! Shift to the bottom
     !op%M(aF)%mat(1:new_tail,1:new_tail) = CSHIFT(op%M(aF)%mat(1:new_tail,1:new_tail), SHIFT=-1, DIM=2) ! Shift to the right
@@ -1437,8 +1437,8 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
   INTEGER                              :: p
   DOUBLE PRECISION                   :: invStilde
   DOUBLE PRECISION                   :: invStilde2
-  TYPE(VectoroffdiagInt) :: vecI_tmp
-  TYPE(Vectoroffdiag)    :: vec_tmp
+  TYPE(VectorInt) :: vecI_tmp
+  TYPE(Vector)    :: vec_tmp
 
   IF ( op%MRemoveFlag .EQV. .FALSE. ) &
     CALL ERROR("BathOperatoroffdiag_setMRemove : MRemoveFlag turn off     ")
@@ -1481,10 +1481,10 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
 !    RETURN
 !  END IF
 
-!  CALL Vectoroffdiag_setSize(op%Q,new_tail)
-!  CALL Vectoroffdiag_setSize(op%R,new_tail)
-  Vectoroffdiag_QuickResize(op%Q,new_tail)
-  Vectoroffdiag_QuickResize(op%R,new_tail)
+!  CALL Vector_setSize(op%Q,new_tail)
+!  CALL Vector_setSize(op%R,new_tail)
+  Vector_QuickResize(op%Q,new_tail)
+  Vector_QuickResize(op%R,new_tail)
 
 !  We use R and Q as op%R%vec and op%Q%vec
 !  op%R%vec => op%R
@@ -1510,8 +1510,8 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
 !!    op%Q%vec(positionRow:new_tail) = op%M(aF)%mat(positionRow+1:tail,positionCol)
 !write(*,*) positionRow, positionCol
 !CALL MatrixHyboffdiag_print(M)
-!CALL Vectoroffdiag_print(op%R)
-!CALL Vectoroffdiag_print(op%Q)
+!CALL Vector_print(op%R)
+!CALL Vector_print(op%Q)
 !CALL ListCdagCoffdiag_print(op%ListCdagCoffdiag)
 
   col      = 1
@@ -1541,8 +1541,8 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
    if(3==4) then
     ! Shift if necessary according to op%antishift
     ! shift DIM=2 (col)
-    CALL Vectoroffdiag_init(vec_tmp,new_tail)
-    CALL VectoroffdiagInt_init(vecI_tmp,new_tail)
+    CALL Vector_init(vec_tmp,new_tail)
+    CALL VectorInt_init(vecI_tmp,new_tail)
     p = 1
     m = 1
     count = 0
@@ -1564,8 +1564,8 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
       count = count+1
       m = m+1
     END DO
-    CALL Vectoroffdiag_destroy(vec_tmp)
-    CALL VectoroffdiagInt_destroy(vecI_tmp)
+    CALL Vector_destroy(vec_tmp)
+    CALL VectorInt_destroy(vecI_tmp)
     !op%M(aF)%mat(1:new_tail,1:new_tail) = &
     !           CSHIFT(op%M(aF)%mat(1:new_tail,1:new_tail), SHIFT=1, DIM=2) ! Shift to the top
     !op%M(aF)%mat_tau(1:new_tail,1:new_tail) = &
@@ -2087,10 +2087,10 @@ SUBROUTINE  BathOperatoroffdiag_destroy(op)
   CALL MatrixHyboffdiag_destroy(op%M)
   CALL MatrixHyboffdiag_destroy(op%M_update)
 
-  CALL Vectoroffdiag_destroy(op%R)
-  CALL Vectoroffdiag_destroy(op%Q)
-  CALL Vectoroffdiag_destroy(op%Rtau)
-  CALL Vectoroffdiag_destroy(op%Qtau)
+  CALL Vector_destroy(op%R)
+  CALL Vector_destroy(op%Q)
+  CALL Vector_destroy(op%Rtau)
+  CALL Vector_destroy(op%Qtau)
   FREEIF(op%F)
 
   op%MAddFlag     = .FALSE.
