@@ -126,8 +126,6 @@ module m_sigmaph
    ! map coarse to dense mesh (nbz_coarse,mult(interp_kmult))
 
  end type eph_double_grid_t 
- public eph_double_grid_new
- public eph_double_grid_free 
  
  ! Tables for degenerated KS states.
  type bids_t
@@ -1460,10 +1458,11 @@ end subroutine sigmaph
 
 subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, eph_dg_mapping, ibsum_kq, spin, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_get_qweights'
+#define ABI_FUNC 'sigmaph_get_qweights_doublegrid'
 !End of the abilint section
 
  implicit none
@@ -2179,7 +2178,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
-   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
+   !NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
+   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
    ncid = new%ncid
 
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
@@ -2296,8 +2296,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Now reopen the file in parallel.
  call xmpi_barrier(comm)
- NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
- !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
+ !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+ NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), comm))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
 
@@ -3161,7 +3161,14 @@ end function eph_double_grid_new
 
 subroutine eph_double_grid_free(self)
 
- type(eph_double_grid_t) self
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'eph_double_grid_free'
+!End of the abilint section
+
+ type(eph_double_grid_t) :: self
  
  ABI_FREE(self%weights_dense)
  ABI_FREE(self%bz2ibz_dense)
