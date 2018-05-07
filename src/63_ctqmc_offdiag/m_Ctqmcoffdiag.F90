@@ -3351,8 +3351,10 @@ include 'mpif.h'
       enddo
     enddo
    !write(6,*) "beforempi",op%Greens%oper(1,1,1) ,buffer2(1,1,1)
+#ifdef HAVE_MPI
    CALL MPI_COMM_SIZE(op%MY_COMM,nbprocs,ierr)
    CALL MPI_COMM_RANK(op%MY_COMM,myrank,ierr)
+#endif
   !write(6,*) "procs",nbprocs,myrank
   END IF
   last = sp1
