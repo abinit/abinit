@@ -87,6 +87,9 @@ MODULE m_paw_dmft
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
 
+!  integer :: dmft_mag
+!  ! 0 if non magnetic calculation, 1 if magnetic calculation
+
   integer :: dmft_nwlo
   ! dmft frequencies
 
@@ -593,6 +596,13 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
      MSG_ERROR(message)
    endif
  enddo
+
+! paw_dmft%dmft_mag=0
+! do iatom=1,dtset%natom
+!   do  ii=1,3
+!     if ( dtset(ii,iatom) > 0.001 ) paw_dmft%dmft_mag=1
+!   enddo
+! enddo
 
 !=======================
 !==  Define integers and reals

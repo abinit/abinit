@@ -968,7 +968,7 @@ SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
   CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk)  ! mu is changed
   CALL BathOperatoroffdiag_setF(op%Bath, F)
-  CALL BathOperatoroffdiag_printF(op%Bath,333)
+ ! CALL BathOperatoroffdiag_printF(op%Bath,333)
   FREE(F)
 
   op%inF = .TRUE.
@@ -1394,6 +1394,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   DOUBLE PRECISION                                :: im
   DOUBLE PRECISION                                :: det
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: F_omega
+  COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
   TYPE(GreenHyboffdiag)                                     :: F_tmp
   character(len=4) :: tag_proc
@@ -1420,6 +1421,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   ! --- Allocate F_omega
   !=================================
   MALLOC(F_omega,(1:op%Wmax,1:flavors,1:flavors))
+  MALLOC(F_omega_inv,(1:flavors,1:flavors))
   MALLOC(Gomega_tmp,(1:op%Wmax,1:flavors,1:flavors))
   !op%hybri_limit(2,2)=op%hybri_limit(1,1)
   !op%mu(1)=op%mu(1)/10
@@ -1462,14 +1464,14 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
        do iflavor=1,flavors
          do iflavor2=1,flavors
            if (iflavor==iflavor2) then
-             F_omega(iomega,iflavor,iflavor2)= (cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta) &
+             F_omega_inv(iflavor,iflavor2)= (cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8) &
 &             + op%mu(iflavor)- Gomega_tmp(iomega,iflavor,iflavor2))
            else
-             F_omega(iomega,iflavor,iflavor2)= (- Gomega_tmp(iomega,iflavor,iflavor2))
+             F_omega_inv(iflavor,iflavor2)= (- Gomega_tmp(iomega,iflavor,iflavor2))
            endif
          enddo
        enddo
-     END DO
+  !   END DO
   ! IF ( op%rank .EQ. 0 ) THEN
   !   DO iflavor = 1, flavors
   !     DO iflavor2 = 1, flavors
@@ -1485,8 +1487,13 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !   END DO
   ! ENDIF
 
-     DO iomega=1,op%Wmax
-       call xginv(F_omega(iomega,:,:),flavors)
+  !   DO iomega=1,op%Wmax
+       call xginv(F_omega_inv,flavors)
+       do iflavor=1,flavors
+         do iflavor2=1,flavors
+           F_omega(iomega,iflavor,iflavor2) = F_omega_inv(iflavor,iflavor2)
+         enddo
+       enddo
      END DO
 
    !IF ( op%rank .EQ. 0 ) THEN
@@ -1776,6 +1783,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   ENDIF
   FREE(Gomega_tmp)
   FREE(F_omega)
+  FREE(F_omega_inv)
   CALL GreenHyboffdiag_destroy(F_tmp)
 
 
@@ -3199,6 +3207,7 @@ include 'mpif.h'
   DOUBLE PRECISION                              :: r
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: alpha
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: beta
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)   :: measN_1
   DOUBLE PRECISION,              DIMENSION(1:2) :: TabX
   DOUBLE PRECISION,              DIMENSION(1:2) :: TabY
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)   :: freqs
@@ -3326,7 +3335,12 @@ include 'mpif.h'
   CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue)
   CALL GreenHyboffdiag_getHybrid(op%Greens)
   write(6,*) "op%measN",op%measN(1,:)
-  CALL GreenHyboffdiag_setN(op%Greens, op%measN(1,:))
+  MALLOC(measN_1,(flavors))
+  do iflavor=1,flavors
+    measN_1(iflavor)=op%measN(1,iflavor)
+  enddo
+  CALL GreenHyboffdiag_setN(op%Greens, measN_1(:))
+  FREE(measN_1)
 
 ! todoab case _nd and _d are not completely described.
   FREEIF(buffer2)
