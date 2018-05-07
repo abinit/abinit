@@ -465,7 +465,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: indkk_kq(1,6), nkpt_coarse(3), nkpt_dense(3)
  integer :: indexes_qq(3), indexes_jk(3), indexes_ik(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:),deg_ibk(:) !,degblock(:,:),
- integer,allocatable :: eph_dg_mapping(:,:)
+ integer,allocatable :: eph_dg_mapping(:,:), iqlk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: lf(2),rg(2),res(2)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,f_mkq
@@ -561,6 +561,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    nkpt_dense  = eph_dg%nkpt_dense
    ebands_dense = eph_dg%ebands_dense
  end if
+
+ ndiv = 1; if (sigma%use_doublegrid) ndiv = eph_dg%ndiv
+ ! Mapping of q point to IBZ
+ ABI_MALLOC(iqlk,(ndiv))
 
  ! TODO FOR PAW
  usecprj = 0
@@ -710,7 +714,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        sigma%e0vals(ib_k) = ebands%eig(band, ik_ibz, spin)
      end do
 
-     ndiv = 1; if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
      ! Weights for Re-Im with i.eta shift.
      ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, ndiv))
      ! Weights for Im (tethraedron, eta --> 0)
@@ -836,7 +839,25 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            call ifc_fourq(ifc, cryst, eph_dg%kpts_dense(:,iq_bz_fine), phfrq_dense(:,jj), displ_cart )
          enddo
        endif
-       
+ 
+       !map q to qibz for tetrahedron
+       if (sigma%qint_method > 0) then
+         if (sigma%use_doublegrid) then
+           do jj=1,eph_dg%ndiv
+             iq_bz_fine = eph_dg_mapping(3,jj) 
+             iqlk(jj) = lgroup_find_ibzimage(sigma%ephwg%lgk, eph_dg%kpts_dense(:,iq_bz_fine))
+             ABI_CHECK(iqlk(jj) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
+           end do
+         else
+           iqlk(1) = iq_ibz
+           if (sigma%symsigma == 0) iqlk(1) = lgroup_find_ibzimage(sigma%ephwg%lgk, qpt)
+           ABI_CHECK(iqlk(1) /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
+           if (sigma%symsigma == 1) then
+             ABI_CHECK(all(abs(sigma%qibz_k(:, iq_ibz) - sigma%ephwg%lgk%ibz(:, iqlk(1))) < tol12), "Mismatch in qpoints.")
+           end if
+         endif
+       end if
+ 
        ! Get npw_kq, kg_kq for k+q
        ! Be careful with time-reversal symmetry and istwf_kq
        if (isirr_kq) then
@@ -996,9 +1017,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! Precompute weigths with tetrahedron
          if (sigma%qint_method > 0) then
            if (sigma%use_doublegrid) then
-             call sigmaph_get_qweights_doublegrid(sigma, ikcalc, eph_dg_mapping, ibsum_kq, spin, xmpi_comm_self)
+             call sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, xmpi_comm_self)
            else
-             call sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, xmpi_comm_self)
+             call sigmaph_get_qweights(sigma, ikcalc, iqlk(1), ibsum_kq, spin, xmpi_comm_self)
            end if
            ! The Nstar(q) / N_qbz factor is already included in the weigths produced
            ! by the above routines so weigth_q must be set to one here.
@@ -1434,6 +1455,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ABI_FREE(ph1d)
  ABI_FREE(vlocal)
  ABI_FREE(nqnu_tlist)
+ ABI_FREE(iqlk)
  if (sigma%nwr > 0) then
    ABI_FREE(cfact_wr)
  end if
@@ -1458,7 +1480,7 @@ end subroutine sigmaph
 !!***
 
 
-subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, eph_dg_mapping, ibsum_kq, spin, comm)
+subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, iqlk, ibsum_kq, spin, comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1471,12 +1493,12 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, eph_dg_mapping, ibsum_
 !Arguments ------------------------------------
 !scalars
  type(sigmaph_t),intent(inout) :: sigma
- integer,intent(in) :: ikcalc, eph_dg_mapping(6,sigma%eph_doublegrid%ndiv), ibsum_kq, spin, comm
+ integer,intent(in) :: ikcalc, iqlk(sigma%eph_doublegrid%ndiv), ibsum_kq, spin, comm
 
 !Local variables-------------------------
 !scalars
  integer,parameter :: bcorr0 = 0, nz = 1
- integer :: jj, iq_ibz_fine, iqlk, nbc
+ integer :: jj, iq_ibz_fine, nbc
  real(dp) :: qpt(3)
  complex(dpc), allocatable :: zvals(:,:)
 
@@ -1485,18 +1507,18 @@ subroutine sigmaph_get_qweights_doublegrid(sigma, ikcalc, eph_dg_mapping, ibsum_
   nbc = sigma%nbcalc_ks(ikcalc, spin)
 
   do jj=1,sigma%eph_doublegrid%ndiv
-    iq_ibz_fine = eph_dg_mapping(6,jj)
-    iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, sigma%eph_doublegrid%kpts_dense_ibz(:,iq_ibz_fine))
+    !iq_ibz_fine = eph_dg_mapping(6,jj)
+    !iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, sigma%eph_doublegrid%kpts_dense_ibz(:,iq_ibz_fine))
 
     if (sigma%imag_only) then
       ! Compute weigths for delta functions at the KS energies with tetra.
-      call ephwg_get_dweights(sigma%ephwg, iqlk, nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,jj), comm, &
+      call ephwg_get_dweights(sigma%ephwg, iqlk(jj), nbc, sigma%e0vals, ibsum_kq, spin, bcorr0, sigma%deltaw_pm(:,:,:,jj), comm, &
         use_bzsum=sigma%symsigma == 0)
     else
       ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
       ABI_MALLOC(zvals, (nz, nbc))
       zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
-      call ephwg_zinv_weights(sigma%ephwg, iqlk, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,jj), comm, &
+      call ephwg_zinv_weights(sigma%ephwg, iqlk(jj), nz, nbc, zvals, ibsum_kq, spin, sigma%cweights(:,:,:,:,jj), comm, &
         use_bzsum=sigma%symsigma == 0)
       ABI_FREE(zvals)
     end if
@@ -1530,7 +1552,7 @@ end subroutine sigmaph_get_qweights_doublegrid
 !!
 !! SOURCE
 
-subroutine sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, comm)
+subroutine sigmaph_get_qweights(sigma, ikcalc, iqlk, ibsum_kq, spin, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1544,29 +1566,29 @@ subroutine sigmaph_get_qweights(sigma, ikcalc, iq_ibz, ibsum_kq, spin, comm)
 !Arguments ------------------------------------
 !scalars
  type(sigmaph_t),intent(inout) :: sigma
- integer,intent(in) :: ikcalc, iq_ibz, ibsum_kq, spin, comm
+ integer,intent(in) :: ikcalc, iqlk, ibsum_kq, spin, comm
 
 !Local variables-------------------------
 !scalars
  integer,parameter :: bcorr0 = 0, nz = 1
- integer :: iqlk, nbc
+ integer :: nbc
  real(dp) :: qpt(3)
  complex(dpc), allocatable :: zvals(:,:)
 
 ! *************************************************************************
 
   nbc = sigma%nbcalc_ks(ikcalc, spin)
-  qpt = sigma%qibz_k(:,iq_ibz)
+  !qpt = sigma%qibz_k(:,iq_ibz)
 
   ! iqlk is the index of the q-point in the IBZ(k) that must be passed to the ephwg routines
   ! The case symsigma == 0 is tricky because we are summing over the BZ but ephwg always used IBZ(k)
   ! Thus we have to find the corresponding image in the IBZ(k).
-  iqlk = iq_ibz
-  if (sigma%symsigma == 0) iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, qpt)
-  ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
-  if (sigma%symsigma == 1) then
-    ABI_CHECK(all(abs(sigma%qibz_k(:, iq_ibz) - sigma%ephwg%lgk%ibz(:, iqlk)) < tol12), "Mismatch in qpoints.")
-  end if
+  !iqlk = iq_ibz
+  !if (sigma%symsigma == 0) iqlk = lgroup_find_ibzimage(sigma%ephwg%lgk, qpt)
+  !ABI_CHECK(iqlk /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
+  !if (sigma%symsigma == 1) then
+  !  ABI_CHECK(all(abs(sigma%qibz_k(:, iq_ibz) - sigma%ephwg%lgk%ibz(:, iqlk)) < tol12), "Mismatch in qpoints.")
+  !end if
 
   if (sigma%imag_only) then
     ! Compute weigths for delta functions at the KS energies with tetra.
