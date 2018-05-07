@@ -42,8 +42,8 @@
 
 #define Global_SIZE 100
 #define MODCYCLE(a,b,c) c=a; IF(c .GT. b) c = c-b;
-#define Vectoroffdiag_QuickResize(a,b) IF( b .GT. a%size ) CALL Vectoroffdiag_enlarge(a,MAX(b-a%size,Global_SIZE)); a%tail = b
-#define VectoroffdiagInt_QuickResize(a,b) IF( b .GT. a%size ) CALL VectoroffdiagInt_enlarge(a,MAX(b-a%size,Global_SIZE)); a%tail = b
+#define Vector_QuickResize(a,b) IF( b .GT. a%size ) CALL Vector_enlarge(a,MAX(b-a%size,Global_SIZE)); a%tail = b
+#define VectorInt_QuickResize(a,b) IF( b .GT. a%size ) CALL VectorInt_enlarge(a,MAX(b-a%size,Global_SIZE)); a%tail = b
 #define ImpurityOperatoroffdiag_QuickActivation(a,b) a%activeFlavor = b
 #define BathOperator_QuickActivation(a,b) a%activeFlavor = b; a%MAddFlag = .FALSE.;a%MRemoveFlag = .FALSE.
 #define Cdag_ 1

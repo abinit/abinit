@@ -23,9 +23,6 @@
 !! m_ListCdagCoffdiag.F90
 !! m_MapHyboffdiag.F90
 !! m_MatrixHyboffdiag.F90
-!! m_OurRngoffdiag.F90
 !! m_Statoffdiag.F90
-!! m_Vectoroffdiag.F90
-!! m_VectoroffdiagInt.F90
 !!
 !!***

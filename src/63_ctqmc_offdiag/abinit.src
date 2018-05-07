@@ -27,10 +27,7 @@ sources = [
  "m_ListCdagCoffdiag.F90",
  "m_MapHyboffdiag.F90",
  "m_MatrixHyboffdiag.F90",
- "m_OurRngoffdiag.F90",
  "m_Statoffdiag.F90",
- "m_Vectoroffdiag.F90",
- "m_VectoroffdiagInt.F90",
  ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
