@@ -233,8 +233,8 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, &
 
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt
-   ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), shape = (/nsize/))                                                                          
-   ddb_new%val(2,1:nsize,jblok) = reshape(d2red(2,:,:,:,:), shape = (/nsize/)) 
+   ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), shape = (/nsize/))
+   ddb_new%val(2,1:nsize,jblok) = reshape(d2red(2,:,:,:,:), shape = (/nsize/))
 
    ! Store the q-point
    ddb_new%qpt(1:3,jblok) = qpt
