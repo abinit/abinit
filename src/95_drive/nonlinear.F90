@@ -112,6 +112,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft, only : paw_dmft_type
  use m_mkrho,    only : mkrho
+ use m_getshell, only : getshell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -993,8 +994,8 @@ end if
    ABI_ALLOCATE(kpt3,(3,nkpt3))
 
    call getshell(gmet,kneigh,kg_neigh,kptindex,dtset%kptopt,&
-&   dtset%kptrlatt,dtset%kptns,kpt3,dtset%mkmem,mkmem_max,mpi_enreg,mvwtk,&
-&   dtset%nkpt,nkpt3,nneigh,dtset%nshiftk,rmet,rprimd,dtset%shiftk,dtset%wtk)
+&   dtset%kptrlatt,dtset%kptns,kpt3,dtset%mkmem,mkmem_max,mvwtk,&
+&   dtset%nkpt,nkpt3,nneigh,dtset%nshiftk,rmet,rprimd,dtset%shiftk,dtset%wtk, mpi_enreg%comm_cell)
 
    ABI_ALLOCATE(pwind,(dtset%mpw,nneigh,dtset%mkmem))
    ABI_ALLOCATE(cgindex,(dtset%nkpt,dtset%nsppol))

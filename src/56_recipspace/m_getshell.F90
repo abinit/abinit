@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_getshell
+!! NAME
+!!  m_getshell
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (MVeithen)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_geshell
+
+ use defs_basis
+ !use defs_abitypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_errors
+ use m_linalg_interfaces
+
+ use m_kpts,            only : getkgrid
+
+ implicit none
+
+ private
+!!***
+
+ public :: getshell
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/getshell
 !! NAME
 !! getshell
@@ -8,13 +55,6 @@
 !! the weigths required for the finite difference expression
 !! of Marzari and Vanderbilt (see PRB 56, 12847 (1997)).
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MVeithen)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! gmet(3,3) = metric tensor of reciprocal space
 !! kptopt = option for the generation of k points
@@ -22,7 +62,6 @@
 !! kpt2(3,nkpt2) = reduced coordinates of the k-points in the
 !!                 reduced part of the BZ (see below)
 !! mkmem = number of k points which can fit in memory
-!! mpi_enreg = information about MPI parallelization
 !! nkpt2 = number of k-points in the reduced BZ
 !! nkpt3 = number of k-points in the full BZ
 !! nshiftk = number of kpoint grid shifts
@@ -30,16 +69,17 @@
 !! rprimd(3,3) = dimensional primitive translations (bohr)
 !! shiftk = shift vectors for k point generation
 !! wtk2 = weight assigned to each k point
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !! kneigh(30,nkpt2) = for each k-point in the reduced part of the BZ
 !!                    kneigh stores the index (ikpt) of the neighbouring
 !!                    k-points
-!! kg_neigh(30,nkpt2,3) = kg-neigh takes values of -1, 0 or 1, 
-!!                        and can be non-zero only for a single k-point, 
-!!                        a line of k-points or a plane of k-points. 
-!!                        The vector joining the ikpt2-th k-point to its 
-!!                        ineigh-th nearest neighbour is : 
+!! kg_neigh(30,nkpt2,3) = kg-neigh takes values of -1, 0 or 1,
+!!                        and can be non-zero only for a single k-point,
+!!                        a line of k-points or a plane of k-points.
+!!                        The vector joining the ikpt2-th k-point to its
+!!                        ineigh-th nearest neighbour is :
 !!                        dk(:)-nint(dk(:))+real(kg_neigh(ineigh,ikpt2,:))
 !!                        with dk(:)=kpt2(:,kneigh(ineigh,ikpt2))-kpt2(:,ikpt2)
 !! kptindex(2,nkpt3)
@@ -78,25 +118,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
-& kpt3,mkmem,mkmem_max,mpi_enreg,mvwtk,&
-& nkpt2,nkpt3,nneigh,nshiftk,rmet,rprimd,shiftk,wtk2)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_linalg_interfaces
-
- use m_kpts,            only : getkgrid
+& kpt3,mkmem,mkmem_max,mvwtk,&
+& nkpt2,nkpt3,nneigh,nshiftk,rmet,rprimd,shiftk,wtk2, comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -109,10 +133,9 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,mkmem,nkpt2,nkpt3
+ integer,intent(in) :: kptopt,mkmem,nkpt2,nkpt3,comm
  integer,intent(inout) :: nshiftk
  integer,intent(out) :: mkmem_max,nneigh
- type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(inout) :: kptrlatt(3,3)
  integer,intent(out) :: kneigh(30,nkpt2),kptindex(2,nkpt3),kg_neigh(30,nkpt2,3)
@@ -124,7 +147,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 !scalars
  integer :: bis,flag,ier,ii,ikpt,ikpt2,ikpt3,ineigh,info,irank,is1,ishell
  integer :: jj,kptopt_used,mkmem_cp,nkpt_computed,nshell,nsym1,orig
- integer :: spaceComm,wtkflg, coord1, coord2, coord3
+ integer :: wtkflg, coord1, coord2, coord3
  real(dp) :: dist_,kptrlen,last_dist,max_dist,resdm,s1
  character(len=500) :: message
 !arrays
@@ -138,9 +161,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
 !In case of MPI //: compute maximum number of k-points per processor
  if (xmpi_paral == 1) then
-   spaceComm=mpi_enreg%comm_cell
    mkmem_cp=mkmem
-   call xmpi_max(mkmem_cp,mkmem_max,spaceComm,ier) 
+   call xmpi_max(mkmem_cp,mkmem_max,comm,ier)
  else
    mkmem_max = mkmem
  end if
@@ -266,7 +288,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  resdm = rmet(1,1)*rmet(1,1) + rmet(2,2)*rmet(2,2) + rmet(3,3)*rmet(3,3)&
 & + rmet(1,2)*rmet(1,2) + rmet(2,3)*rmet(2,3) + rmet(3,1)*rmet(3,1)
 
-!Initialize shell loop 
+!Initialize shell loop
  ishell = 0
  last_dist = 0._dp
  wtkflg = 0
@@ -322,14 +344,14 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
                dist_ = dist_ + dk_(ii)*gmet(ii,jj)*dk_(jj)
              end do
            end do
-!          Note : for ipkt3 = 1, coord1 = coord2 = coord3 = 0, the distance is 0 ; 
-!          but the next "if" statement is false with the tol8 criteria and the k-point 
+!          Note : for ipkt3 = 1, coord1 = coord2 = coord3 = 0, the distance is 0 ;
+!          but the next "if" statement is false with the tol8 criteria and the k-point
 !          should be ignored even for ishell = 1 and last_dist= 0.
 !          !$write(std_out,*)ikpt,coord1,coord2,coord3
 !          !$write(std_out,*)dk_
 !          !$write(std_out,*)'dist_2', dist_
 !          !!      end if
-           if ((dist_ < dist(ishell)).and.(dist_ - last_dist > tol8)) then 
+           if ((dist_ < dist(ishell)).and.(dist_ - last_dist > tol8)) then
              dist(ishell) = dist_
            end if
          end do
@@ -495,8 +517,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      call wrtout(std_out,  message,'COLL')
      wtkflg = 1
    end if
-   
-!  Calculate the total number of neighbors 
+
+!  Calculate the total number of neighbors
    nneigh = sum(neigh(1:ishell,1))
 !  DEBUG
    write(std_out,*)'ishell = ',ishell,'nneigh = ',nneigh
@@ -519,7 +541,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      do ineigh = orig+1, bis
        dk_(:) = kpt3(:,kneigh(ineigh,ikpt)) - kpt2(:,ikpt)
        dk(:) = dk_(:) - nint(dk_(:))
-       dk(:) = dk(:) + real(kg_neigh(ineigh,ikpt,:),dp) 
+       dk(:) = dk(:) + real(kg_neigh(ineigh,ikpt,:),dp)
        mat(1,is1) = mat(1,is1) + dk(1)*dk(1)
        mat(2,is1) = mat(2,is1) + dk(2)*dk(2)
        mat(3,is1) = mat(3,is1) + dk(3)*dk(3)
@@ -535,14 +557,14 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    rvec(4) = rmet(1,2)
    rvec(5) = rmet(2,3)
    rvec(6) = rmet(3,1)
-   
+
 !  DEBUG
    do ii = 1, 6
      write(std_out,*)mat(ii,1:ishell), ' : ', rvec(ii)
    end do
 !  ENDDEBUG
 
-!  Solve the linear least square problem 
+!  Solve the linear least square problem
    call dgelss(6,ishell,1,mat,6,rvec,6,sgval,tol8,irank,work,30,info)
 
    if( info /= 0 ) then
@@ -552,7 +574,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      MSG_COMMENT(message)
      wtkflg = 1
    end if
-   
+
 !  Check that the system has maximum rank
    if( irank == ishell ) then
 !    System has full rank. Calculate the residuum
@@ -561,7 +583,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      do is1 = ishell + 1, 6
        resdm = resdm + rvec(is1) * rvec(is1)
      end do
-     
+
      if( ishell == 6 .and. resdm > tol8 ) then
        write(message,'(4a)')&
 &       ' Linear system determining the weights could not be solved',ch10,&
@@ -576,13 +598,13 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      write(std_out,*) 'Shell not linear independent from previous shells. Skipped.'
 !    ENDDEBUG
    end if
-   
+
 !  DEBUG
    write(std_out,*) ishell, nneigh, irank, resdm
 !  ENDDEBUG
 
 !  end of loop over shells
- end do 
+ end do
 
 !Copy weights
  ikpt=1
@@ -598,10 +620,10 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 !Report weights
  write(std_out,*) 'Neighbors', neigh(1:ishell,1)
  write(std_out,*) 'Weights', rvec(1:ishell)
- write(std_out,*) mvwtk(1:nneigh,1) 
+ write(std_out,*) mvwtk(1:nneigh,1)
 
 !Check the computed weights
- if (wtkflg == 0) then 
+ if (wtkflg == 0) then
    do ikpt = 1, nkpt2
      do ii = 1,3
        do jj = 1,3
@@ -691,10 +713,6 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
  end if
 
-
-
-!----------------------------------------------------------------------------
-
  if (allocated(tnons1))  then
    ABI_DEALLOCATE(tnons1)
  end if
@@ -704,6 +722,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
  ABI_DEALLOCATE(wtk3)
 
-
 end subroutine getshell
+!!***
+
+end module m_getshell
 !!***
