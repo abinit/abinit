@@ -1,18 +1,79 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_gstateimg
+!! NAME
+!!  m_gstateimg
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG, AR, GG, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_gstateimg
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use defs_rectypes
+ use m_profiling_abi
+ use m_abihist
+ use m_mep
+ use m_ga
+ use m_pimd
+ use m_xmpi
+ use m_errors
+ use m_rec
+ use m_args_gs
+ use m_results_img
+ use m_scf_history
+ use m_io_redirect
+
+ use m_time,         only : timab
+ use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
+ use m_specialmsg,   only : specialmsg_mpisum
+ use m_libpaw_tools, only : libpaw_spmsg_mpisum
+ use m_pawang,       only : pawang_type
+ use m_pawrad,       only : pawrad_type
+ use m_pawtab,       only : pawtab_type
+ use m_dtfil,        only : dtfil_init, status
+ use m_gstate,       only : gstate
+
+#if defined  HAVE_BIGDFT
+ use BigDFT_API, only: mpi_environment_set
+#endif
+
+ implicit none
+
+ private
+!!***
+
+ public :: gstateimg
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/gstateimg
 !! NAME
 !! gstateimg
 !!
 !! FUNCTION
 !! Routine for conducting DFT calculations for a set of (dynamical) images
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG, AR, GG, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  codvsn=code version
@@ -119,49 +180,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
 &                    fred_img,iexit,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
 &                    pawang,pawrad,pawtab,psps,&
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
-
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use defs_rectypes
- use m_profiling_abi
- use m_abihist
- use m_mep
- use m_ga
- use m_pimd
- use m_xmpi
- use m_errors
- use m_rec
- use m_args_gs
- use m_results_img
- use m_scf_history
- use m_io_redirect
-
- use m_time,         only : timab
- use m_geometry,     only : mkradim, mkrdim, fcart2fred
- use m_specialmsg,   only : specialmsg_mpisum
- use m_libpaw_tools, only : libpaw_spmsg_mpisum
- use m_pawang,       only : pawang_type
- use m_pawrad,       only : pawrad_type
- use m_pawtab,       only : pawtab_type
- use m_dtfil,        only : dtfil_init, status
-
-#if defined  HAVE_BIGDFT
- use BigDFT_API, only: mpi_environment_set
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -775,14 +798,6 @@ end subroutine gstateimg
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
 &                 prt_all_images,prtvolimg,resimg)
 
- use defs_basis
- use defs_abitypes
- use m_results_img
- use m_errors
- use m_profiling_abi
-
- use m_geometry,  only : xred2xcart, metric
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -930,4 +945,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
  DBG_EXIT('COLL')
 
 end subroutine prtimg
+!!***
+
+end module m_gstateimg
 !!***

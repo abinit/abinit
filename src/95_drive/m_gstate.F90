@@ -1,17 +1,119 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/gstate
+!!****m* ABINIT/m_gstate
+!! NAME
+!!  m_gstate
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_gstate
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_rectypes
+ use m_errors
+ use m_xmpi
+ use m_profiling_abi
+ use libxc_functionals
+ use m_exit
+ use m_crystal
+ use m_crystal_io
+ use m_scf_history
+ use m_abimover
+ use m_wffile
+ use m_rec
+ use m_efield
+ use m_orbmag
+ use m_ddb
+ use m_bandfft_kpt
+ use m_invovl
+ use m_gemm_nonlop
+ use m_tetrahedron
+ use m_wfk
+ use m_nctk
+ use m_hdr
+ use m_ebands
+
+ use m_time,             only : timab
+ use m_symtk,            only : matr3inv
+ use m_io_tools,         only : open_file
+ use m_occ,              only : newocc, getnel
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_fstrings,         only : strcat, sjoin
+ use m_geometry,         only : fixsym, mkradim, metric
+ use m_kpts,             only : tetra_from_kptrlatt
+ use m_kg,               only : kpgio, getph
+ use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
+ use m_pawtab,           only : pawtab_type
+ use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_abi2big,          only : wvl_occ_abi2big
+ use m_energies,         only : energies_type, energies_init
+ use m_args_gs,          only : args_gs_type
+ use m_results_gs,       only : results_gs_type
+ use m_pawrhoij,         only : pawrhoij_type, pawrhoij_copy, pawrhoij_free
+ use m_paw_dmft,         only : init_sc_dmft,destroy_sc_dmft,print_sc_dmft,paw_dmft_type,readocc_dmft
+ use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
+ use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
+&                               electronpositron_calctype
+ use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
+ use m_dtfil,            only : dtfil_init_time, status
+ use m_jellium,          only : jellium
+ use m_iowf,             only : outwf
+ use m_outqmc,           only : outqmc
+ use m_ioarr,            only : ioarr,read_rhor
+ use m_inwffil,          only : inwffil
+ use m_spacepar,         only : setsym
+ use m_mkrho,            only : mkrho, initro, prtrhomxmn
+
+ use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
+#if defined HAVE_BIGDFT
+ use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
+&                               local_potential_dimensions,nullify_gaussian_basis, &
+&                               copy_coulomb_operator,deallocate_coulomb_operator
+#else
+ use defs_wvltypes,      only : coulomb_operator
+#endif
+
+#if defined HAVE_LOTF
+ use defs_param_lotf,    only : lotfparam_init
+#endif
+
+ implicit none
+
+ private
+!!***
+
+ public :: gstate
+!!***
+
+contains
+!!***
+
+!!****f* m_gstate/gstate
 !! NAME
 !! gstate
 !!
 !! FUNCTION
 !! Primary routine for conducting DFT calculations by CG minimization.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  args_gs<type(args_gs_type)>=various input arguments for the GS calculation
@@ -105,87 +207,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                 mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
 &                 psps,results_gs,rprim,scf_history,vel,vel_cell,wvl,xred)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_rectypes
- use m_errors
- use m_xmpi
- use m_profiling_abi
- use libxc_functionals
- use m_exit
- use m_crystal
- use m_crystal_io
- use m_scf_history
- use m_abimover
- use m_wffile
- use m_rec
- use m_efield
- use m_orbmag
- use m_ddb
- use m_bandfft_kpt
- use m_invovl
- use m_gemm_nonlop
- use m_tetrahedron
- use m_wfk
- use m_nctk
- use m_hdr
- use m_ebands
-
- use m_time,             only : timab
- use m_symtk,            only : matr3inv
- use m_io_tools,         only : open_file
- use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
- use m_fstrings,         only : strcat, sjoin
- use m_geometry,         only : fixsym, mkradim, metric
- use m_kpts,             only : tetra_from_kptrlatt
- use m_kg,               only : kpgio, getph
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
- use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_abi2big,          only : wvl_occ_abi2big
- use m_energies,         only : energies_type, energies_init
- use m_args_gs,          only : args_gs_type
- use m_results_gs,       only : results_gs_type
- use m_pawrhoij,         only : pawrhoij_type, pawrhoij_copy, pawrhoij_free
- use m_paw_dmft,         only : init_sc_dmft,destroy_sc_dmft,print_sc_dmft,paw_dmft_type,readocc_dmft
- use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
- use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
-&                               electronpositron_calctype
- use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
- use m_dtfil,            only : dtfil_init_time, status
- use m_jellium,          only : jellium
- use m_iowf,             only : outwf
- use m_outqmc,           only : outqmc
- use m_ioarr,            only : ioarr,read_rhor
- use m_inwffil,          only : inwffil
- use m_spacepar,         only : setsym
- use m_mkrho,            only : mkrho, initro, prtrhomxmn
-
- use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
-#if defined HAVE_BIGDFT
- use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
-&                               local_potential_dimensions,nullify_gaussian_basis, &
-&                               copy_coulomb_operator,deallocate_coulomb_operator
-#else
- use defs_wvltypes,      only : coulomb_operator
-#endif
-
-#if defined HAVE_LOTF
- use defs_param_lotf,    only : lotfparam_init
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1667,12 +1691,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call timab(32,2,tsec)
 
  DBG_EXIT("COLL")
-
+end subroutine gstate
 !!***
 
- contains
-
-!!****f* ABINIT/setup2
+!!****f* m_gstate/setup2
 !!
 !! NAME
 !! setup2
@@ -1784,7 +1806,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
  end subroutine setup2
 !!***
 
-!!****f* ABINIT/clnup1
+!!****f* m_gstate/clnup1
 !! NAME
 !! clnup1
 !!
@@ -1813,8 +1835,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  natom=number of atoms in unit cell
 !!  nband(nkpt*nsppol)=number of bands
 !!  nfft=(effective) number of FFT grid points (for this processor)
-!!  ngfft(18)=contain all needed information about 3D FFT,
-!!            see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt=number of k points
 !!  nspden=number of spin-density components
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -2007,7 +2028,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 end subroutine clnup1
 !!***
 
-!!****f* ABINIT/prtxf
+!!****f* m_gstate/prtxf
 !! NAME
 !! prtxf
 !!
@@ -2186,7 +2207,7 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 end subroutine prtxf
 !!***
 
-!!****f* ABINIT/clnup2
+!!****f* m_gstate/clnup2
 !! NAME
 !! clnup2
 !!
@@ -2413,20 +2434,13 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 end subroutine clnup2
 !!***
 
-!!****f* ABINIT/pawuj_drive
+!!****f* m_gstate/pawuj_drive
 !! NAME
 !! pawuj_drive
 !!
 !! FUNCTION
 !!  Drive for automatic determination of U
 !!  Relevant only in PAW+U context
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DJA)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -2598,5 +2612,5 @@ subroutine pawuj_drive(scfcv, dtset,electronpositron,rhog,rhor,rprimd, xred,xred
 end subroutine pawuj_drive
 !!***
 
-end subroutine gstate
+end module m_gstate
 !!***
