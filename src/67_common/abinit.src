@@ -81,7 +81,7 @@ sources = [
  "scprqt.F90",
  "setup_positron.F90",
  "setup1.F90",
- "setvtr.F90",
+ "m_setvtr.F90",
  "m_spin_current.F90",
  "stress.F90",
  "strhar.F90",

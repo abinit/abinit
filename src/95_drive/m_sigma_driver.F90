@@ -98,6 +98,7 @@ module m_sigma_driver
  use m_cohsex,        only : cohsex_me
  use m_sigx,          only : calc_sigx_me
  use m_sigc,          only : calc_sigc_me
+ use m_setvtr,        only : setvtr
 
  implicit none
 

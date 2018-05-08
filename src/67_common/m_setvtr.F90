@@ -1,18 +1,74 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/setvtr
+!!****m* ABINIT/m_setvtr
+!! NAME
+!!  m_setvtr
 !!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_setvtr
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_profiling_abi
+ use m_errors
+ use m_abi2big
+ use m_xmpi
+ use m_xcdata
+
+ use m_time,              only : timab
+ use m_geometry,          only : xred2xcart
+ use m_cgtools,           only : dotprod_vn
+ use m_ewald,             only : ewald
+ use m_energies,          only : energies_type
+ use m_electronpositron,  only : electronpositron_type,electronpositron_calctype
+ use libxc_functionals,   only : libxc_functionals_is_hybrid
+ use m_pawrad,            only : pawrad_type
+ use m_pawtab,            only : pawtab_type
+ use m_jellium,           only : jellium
+ use m_spacepar,          only : hartre
+ use m_dens,              only : mag_constr
+
+#if defined HAVE_BIGDFT
+ use BigDFT_API, only: denspot_set_history
+#endif
+
+ implicit none
+
+ private
+!!***
+
+ public :: setvtr
+!!***
+
+contains
+!!***
+
+!!****f* m_setvtr/setvtr
 !! NAME
 !! setvtr
 !!
 !! FUNCTION
 !! Set up the trial potential and some energy terms
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
@@ -141,33 +197,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
 &  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optionals arguments
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
- use m_errors
- use m_abi2big
- use m_xmpi
- use m_xcdata
-
- use m_time,              only : timab
- use m_geometry,          only : xred2xcart
- use m_cgtools,           only : dotprod_vn
- use m_ewald,             only : ewald
- use m_energies,          only : energies_type
- use m_electronpositron,  only : electronpositron_type,electronpositron_calctype
- use libxc_functionals,   only : libxc_functionals_is_hybrid
- use m_pawrad,            only : pawrad_type
- use m_pawtab,            only : pawtab_type
- use m_jellium,           only : jellium
- use m_spacepar,          only : hartre
- use m_dens,              only : mag_constr
-
-#if defined HAVE_BIGDFT
- use BigDFT_API, only: denspot_set_history
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -754,10 +783,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
  call timab(91,2,tsec)
 
-contains
+end subroutine setvtr
 !!***
 
-!!****m* ABINIT/spatialchempot
+!!****m* m_setvtr/spatialchempot
 !! NAME
 !!  spatialchempot
 !!
@@ -896,5 +925,5 @@ subroutine spatialchempot(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,t
 end subroutine spatialchempot
 !!***
 
-end subroutine setvtr
+end module m_setvtr
 !!***
