@@ -1,4 +1,44 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_vtorho
+!! NAME
+!!  m_vtorho
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_vtorho
+
+ use m_vtowfk,   only : vtowfk
+
+ implicit none
+
+ private
+!!***
+
+ public :: vtorho
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/vtorho
 !! NAME
 !! vtorho
@@ -7,13 +47,6 @@
 !! This routine compute the new density from a fixed potential (vtrial)
 !! but might also simply compute eigenvectors and eigenvalues.
 !! The main part of it is a wf update over all k points.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  afford=used to dimension susmat
@@ -177,12 +210,6 @@
 !!  back in the 95_drive directory.
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
@@ -2254,4 +2281,7 @@ subroutine wvl_comm_eigen()
  end subroutine wvl_comm_eigen
 
 end subroutine vtorho
+!!***
+
+end module m_vtorho
 !!***

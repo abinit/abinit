@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_vtowfk
+!! NAME
+!!  m_vtowfk
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_vtowfk
+
+ implicit none
+
+ private
+!!***
+
+ public :: vtowfk
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/vtowfk
 !! NAME
 !! vtowfk
@@ -7,13 +45,6 @@
 !! This routine compute the partial density at a given k-point,
 !! for a given spin-polarization, from a fixed Hamiltonian
 !! but might also simply compute eigenvectors and eigenvalues at this k point
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  cgq = array that holds the WF of the nearest neighbours of
@@ -96,13 +127,6 @@
 !!  are stored on each proc.
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 & eig_k,ek_k,ek_k_nd,enl_k,fixed_occ,grnl_k,gs_hamk,&
@@ -940,4 +964,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  DBG_EXIT("COLL")
 
 end subroutine vtowfk
+!!***
+
+end module m_vtowfk
 !!***
