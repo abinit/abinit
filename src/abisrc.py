@@ -172,7 +172,7 @@ def main():
     #assert "abinit.F90" in proj.fort_files
 
     if options.command == "makemake":
-        return proj.write_binaries_conf()
+        proj.write_binaries_conf()
         #proj.write_buildsys_files()
 
     elif options.command == "print":
@@ -235,11 +235,11 @@ def main():
 
     elif options.command == "stats":
         if options.what is None:
-            df = proj.stats(verbose=options.verbose)
+            df = proj.get_stats(verbose=options.verbose)
         elif os.path.isdir(options.what):
-            df = proj.stats_dir(options.what, verbose=options.verbose)
+            df = proj.get_stats_dir(options.what, verbose=options.verbose)
         elif os.path.isfile(options.what):
-            df = proj.stats_file(options.what, verbose=options.verbose)
+            df = proj.get_stats_file(options.what, verbose=options.verbose)
         else:
             raise TypeError("Don't know how to produce stats for %s" % str(options.what))
         #print(df)

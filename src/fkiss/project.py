@@ -21,13 +21,13 @@ EXTERNAL_MODS = {
     "ieee_arithmetic",
     "ieee_exceptions",
     "ieee_features",
-    # MPI modules.
-    "mpi",
-    "mpi_f08",
     # Modules provided by compilers.
     "f90_unix_proc",
     "f90_unix_dir",
     "ifcore",
+    # MPI modules.
+    "mpi",
+    "mpi_f08",
     # External libraries.
     "openacc",
     "omp_lib",
@@ -112,7 +112,9 @@ class FortranFile(object):
         return hash(self.path)
 
     def stree(self):
-        """Return string with textual representation of the tree."""
+        """
+        Return string with textual representation of the tree.
+        """
         lines = [repr(self)]; app = lines.append
         for a in ["programs", "modules", "subroutines", "functions"]:
             for p in getattr(self, a):
@@ -277,6 +279,13 @@ class FortranFile(object):
 
 
 class AbinitProject(object):
+    """
+    This object defines the main entry point for client code.
+    It contains a dictionary (fort_files) mapping the basename of the
+    Fortran files to FortranFile instances.
+    Provides methods to traverse the DAG, print information about the source code
+    and generate the configuration files required by the build system.
+    """
 
     DEFAULT_PICKLE_FILE = "_project.pickle"
 
@@ -301,7 +310,7 @@ class AbinitProject(object):
         def filter_fortran(files):
             return [f for f in files if f.endswith(".f") or f.endswith(".F90")]
 
-        # Build dict basename --> FortranFile
+        # Get source files from abinit.src and build mapping basename --> FortranFile
         print("Analyzing directories...")
         start = time.time()
         self.fort_files = OrderedDict()
@@ -407,7 +416,7 @@ class AbinitProject(object):
         l = sorted([d for d in os.listdir(self.srcdir) if os.path.isdir(d) and
                     os.path.isfile(os.path.join(d, "abinit.src"))])
 
-        # 98_main does not contain abinit.src so we have to add it explicitely
+        # 98_main does not have abinit.src so we have to add it here.
         return l + [os.path.join(self.srcdir, "98_main")]
 
     def needs_reload(self):
@@ -460,6 +469,9 @@ class AbinitProject(object):
         return None
 
     def find_module_from_entity(self, name):
+        """
+        Return the Module object that contains the public entity `name`.
+        """
         obj = self.find_public_entity(name)
         if obj.is_module: return obj
         assert obj.ancestor is not None and obj.ancestor.is_module
@@ -504,27 +516,37 @@ class AbinitProject(object):
     #                cycles[fort_file].append(child)
     #    return cycles
 
-    def find_allmods(self, root_path):
+    def find_allmods(self, head_path):
         """
-        Traverse the *entire* graph starting from root_path.
-        and return full list of `Module` required by this file.
+        Traverse the *entire* graph starting from head_path.
+        Return full list of `Module` objects required by head_path.
         """
-        head = self.fort_files[root_path]
-        allmods = set()
-        queue = set()
-        seen = set()
+        head = self.fort_files[head_path]
+        allmods, queue, visited = set(), set(), set()
         queue.add(head)
         while queue:
             fort_file = queue.pop()
             for mod in fort_file.used_mods:
                 #print(mod.name)
-                if mod.basename in seen: continue
-                seen.add(mod.basename)
+                if mod.basename in visited: continue
+                visited.add(mod.basename)
                 allmods.add(mod)
                 queue.add(self.fort_files[mod.basename])
+
         return allmods
 
     def write_binaries_conf(self):
+        """
+        Print new binaries.conf file.
+        """
+        # Read binaries.conf and add new list of libraries.
+        # To treat depencies in an automatic way, I would need either an
+        # explicit "use external_module" or an explicit "include foo.h" so
+        # that I can map these names to external libraries.
+        import configparser
+        config = configparser.ConfigParser()
+        config.read(os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf"))
+
         print("Find all dependenciies of binaries...")
         start = time.time()
         # Find programs
@@ -536,17 +558,24 @@ class AbinitProject(object):
         for prog_file, path in program_paths:
             allmods = self.find_allmods(path)
             dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
-            print("For program:", prog_file.name)
+            #print("For program:", prog_file.name)
             pprint(dirnames)
+
+            prog_name = prog_file.programs[0].name
+            if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
+            config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
 
         print("Analysis completed in %.2f [s]" % (time.time() - start))
 
-        import configparser
-        config = configparser.ConfigParser()
-        config.read(os.path.join(self.srcdir, "..", "config", "specs", "binaries.conf"))
-        print(config)
-        #for prog_file, path in program_paths:
-        #    config[prog_file.name]["libraries"]
+        try:
+            from io import StringIO
+        except ImportError:
+            from StringIO import StringIO
+
+        fobj = StringIO()
+        config.write(fobj)
+        print(fobj.getvalue())
+        fobj.close()
 
         return 0
 
@@ -583,6 +612,7 @@ class AbinitProject(object):
                 k = k.replace(".F90", "")
                 lines.append("%s.$(OBJEXT): %s" % (k, " ".join("%s.$(OBJEXT)" % v for v in dlist)))
 
+            # Write abinit.dep
             s = template.format(kind="inside the directory", directory=os.path.basename(dirpath))
             s += "\n\n".join(lines)
             print(s, end=2 * "\n")
@@ -605,6 +635,7 @@ class AbinitProject(object):
     def touch_alldeps(self, verbose=0):
         """
         Touch all files that depend on the modules that have been changed.
+        Return number of touched files.
         """
         def touch(fname, times=None):
             """Emulate Unix touch."""
@@ -614,7 +645,7 @@ class AbinitProject(object):
 
         count = 0
 
-        # TODO: possible problem if new files have been added
+        # TODO: possible problem if new files have been added.
         changed_fort_files = []
         for fort_file in self.fort_files.values():
             if fort_file.stat.st_mtime != os.stat(fort_file.path).st_mtime:
@@ -635,13 +666,6 @@ class AbinitProject(object):
                 count += 1
 
         return count
-
-    #def iter_deps_of_fortpath(self, fort_path):
-    #    this = self.fort_files[fort_path]
-    #    mod_names = [mod.namd for mod in this.modules]
-    #    for fort_file in self.fort_files.values():
-    #        if any(m in fort_file.all_uses for m in mod_names):
-    #            yield fort_file
 
     def validate(self, verbose=0):
         """
@@ -677,6 +701,24 @@ class AbinitProject(object):
         #from pymods.tools import Editor
         from fkiss.tools import Editor
         return Editor().edit_files(paths, ask_for_exit=True)
+
+    def get_stats_file(self, filename, verbose=0):
+        fort_file = self.fort_file[os.path.basename(filename)]
+        return fort_file.get_stats(as_dataframe=True)
+
+    def get_stats_dir(self, dirname, verbose=0):
+        dir2files = self.groupby_dirname()
+        index, rows = [], []
+        for fort_file in dir2files[dirname]:
+            index.append(fort_file.basename)
+            rows.append(fort_file.get_stats())
+
+        import pandas as pd
+        return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+
+    #def get_stats(self, verbose=0):
+    #    import pandas as pd
+    #    return df
 
     def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """

@@ -1,4 +1,42 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_newvtr
+!! NAME
+!!  m_newvtr
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_newvtr
+
+ implicit none
+
+ private
+!!***
+
+ public :: newvtr
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/newvtr
 !! NAME
 !! newvtr
@@ -8,13 +46,6 @@
 !! Call prcref to compute preconditioned residual potential and forces,
 !! Then, call one of the self-consistency drivers,
 !! then update vtrial.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -136,12 +167,6 @@
 !!      metric,prcref_pma,timab,wvl_prcref,wvl_vtrial_abi2big
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      &  dtn_pc,dtset,etotal,fcart,ffttomix,&
@@ -637,4 +662,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  call timab(93,2,tsec)
 
 end subroutine newvtr
+!!***
+
+end module m_newvtr
 !!***

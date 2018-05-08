@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_newrho
+!! NAME
+!!  m_newrho
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2005-2018 ABINIT group (MT).
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_newrho
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: newrho
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/newrho
 !! NAME
 !! newrho
@@ -6,15 +48,7 @@
 !! FUNCTION
 !! Compute new trial density by mixing new and old values.
 !! Call prcref to compute preconditioned residual density and forces,
-!! Then, call one of the self-consistency drivers,
-!! then update density.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MT).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!! Then, call one of the self-consistency drivers, then update density.
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -123,12 +157,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,fcart,ffttomix,&
 &  gmet,grhf,gsqcut,initialized,ispmix,istep,kg_diel,kxc,mgfft,mix,mixtofft,&
 &  moved_atm_inside,mpi_enreg,my_natom,nattyp,nfft,&
@@ -195,10 +223,10 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden)
  real(dp),intent(inout), target :: xred(3,dtset%natom)
  real(dp),intent(inout) :: rhog(2,nfft) !vz_i
- real(dp),intent(inout), optional :: taug(2,nfft*dtset%usekden) 
- real(dp),intent(inout), optional :: taur(nfft,dtset%nspden*dtset%usekden) 
- real(dp),intent(inout), optional :: tauresid(nfft,dtset%nspden*dtset%usekden) 
- 
+ real(dp),intent(inout), optional :: taug(2,nfft*dtset%usekden)
+ real(dp),intent(inout), optional :: taur(nfft,dtset%nspden*dtset%usekden)
+ real(dp),intent(inout), optional :: tauresid(nfft,dtset%nspden*dtset%usekden)
+
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
 
@@ -236,11 +264,10 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
  if(dtset%usewvl==1) then
    if( (ispmix/=1 .or. nfftmix/=nfft)) then
-     MSG_BUG('newrho: nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
+     MSG_BUG('nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
    end if
    if(dtset%wvl_bigdft_comp==1) then
-     message = 'newrho: usewvl == 1 and wvl_bigdft_comp==1 not allowed!'
-     MSG_BUG(message)
+     MSG_BUG('usewvl == 1 and wvl_bigdft_comp==1 not allowed!')
    end if
  end if
 
@@ -600,7 +627,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !MGGA: apply a simple mixing to taur
  if (dtset%usekden > 0)then
-   
+
  end if
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
@@ -667,4 +694,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  DBG_EXIT("COLL")
 
 end subroutine newrho
+!!***
+
+end module m_newrho
 !!***

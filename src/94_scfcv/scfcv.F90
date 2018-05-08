@@ -227,6 +227,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_afterscfloop,     only : afterscfloop
  use m_extraprho,        only : extraprho
  use m_spacepar,         only : setsym
+ use m_newrho,           only : newrho
+ use m_newvtr,           only : newvtr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
