@@ -177,9 +177,9 @@ Variable(
     text="""
 * 0  --> do not active the fit process
 
-* 1  --> active the fit process
+* 1 -->  Activate the fit process. This option will first generate a set of coefficients if [[multibinit:fit_generateCoeff]] is set to one. This generation is mainly parametrized by [[multibinit:fit_rangePower]] and [[multibinit:fit_cutoff]]. You can also provided a list of coefficients with the  model_anharmonic.MXL (see [[help:multibinit]]). Then the fit process will select the coefficients one by one up to [[multibinit:fit_ncoeff]] (see this [[cite:Escorihuela-Sayalero2017|paper]] for the details of the procedure). 
 
-* -1 --> only for developers, print the files for the scripts
+* -1 --> **only for developers**, print the files for the scripts
 """,
 ),
 
@@ -206,6 +206,8 @@ Variable(
     mnemonics="FIT GENERATE anharmonic COEFFicient ",
     text="""
 Flag to activate the generation of the anharmonic coefficient for the fit process
+
+**Related variables:** The  power range of the coefficients ([[multibinit:fit_rangePower]]), the cut off of the interactions ([[multibinit:fit_cutoff]]), the flag to add ahnarmonic strain ([[multibinit:fit_anhaStrain]]), the flag to add phonon strain coupling ([[multibinit:fit_SPCoupling]])
 """,
 ),
 
@@ -418,9 +420,9 @@ Flag to activate the bound process:
 
 * 0 --> Do not activate the bound process 
 
-* 1 --> activate bound process. This option will generate all the possible combinaisons of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power. Finaly, the code will try all the possible combinaisons and try to find a bounded model.
+* 1 --> This option will generate all the possible combinaisons of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power. Finaly, the code will try all the possible combinaisons and try to find a bounded model.
 
-* 2 -->  **new version** activate bound process. This option will generate a set of coefficients with a power range defined by [[multibinit:bound_rangePower]] and keep only even power. Then the procedure is similar to the fit process with the constrains to only keep positive coefficients. The bound process will select coefficient one by one up to [[multibinit:bound_maxCoeff]] and try if the model is bound at each step of the process. 
+* 2 -->  **new version** This option will generate a set of coefficients with a power range defined by [[multibinit:bound_rangePower]] and keep only the coefficients with even power. Then the procedure is similar to the fit process with the constrains to only keep positive coefficients. The bound process will select the coefficients one by one up to [[multibinit:bound_maxCoeff]] and try if the model is bound at each step of the process. 
 
 **Related variables:** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
 """,
@@ -499,9 +501,9 @@ Variable(
     topics=['BoundProcess_expert'],
     dimensions=[3],
     defaultval="6,6,6",
-    mnemonics="BOUND superCELL size",
+    mnemonics="BOUND superCELL size for the molecular dynamics",
     text="""
-    Flag to set the size of the supercell during the bound process. When the process will try a given model, this input variable is used to  set the size of the supercell for the molecular dynamics
+When the process will try a given model, this input variable is used to  set the size of the supercell for the molecular dynamics
 """,
 ),
 
@@ -512,9 +514,9 @@ Variable(
     topics=['BoundProcess_expert'],
     dimensions="scalar",
     defaultval=500,
-    mnemonics="BOUND",
+    mnemonics="BOUND TEMPerature for the molecular dynamics (in Kelvin)",
     text="""
-Set the temperature of the MD during the bound process 
+When the process will try a given model, this input variable is used to set the temperature for the molecular dynamics
 """,
 ),
 
@@ -525,9 +527,9 @@ Variable(
     topics=['BoundProcess_expert'],
     dimensions="scalar",
     defaultval=1000,
-    mnemonics="BOUND",
+    mnemonics="BOUND number of STEP for the molecular dynamics",
     text="""
-Set the maximum number of MD step during the bound process
+When the process will try a given model, this input variable is used to set the maximum number of molecular dynamics steps
 """,
 ),
 
@@ -569,6 +571,19 @@ Variable(
     mnemonics="Delta Time for IONs",
     text="""
 See [[abinit:dtion]]
+""",
+),
+
+Variable(
+    abivarname="ntime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=200,
+    mnemonics="Number of TIME step",
+    text="""
+Number of step for the dynamics
 """,
 ),
 
