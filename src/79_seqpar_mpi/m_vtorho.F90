@@ -69,7 +69,7 @@ module m_vtorho
  use m_fft,                only : fftpac
  use m_spacepar,           only : symrhg
  use m_vtowfk,             only : vtowfk
- use m_mkrho,              only : mkrho
+ use m_mkrho,              only : mkrho, prtrhomxmn
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif

@@ -70,7 +70,6 @@ sources = [
  "prteigrs.F90",
  "prtene.F90",
  "prtefield.F90",
- "prtrhomxmn.F90",
  "prtxvf.F90",
  "rhotov.F90",
  "scprqt.F90",

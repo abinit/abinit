@@ -172,7 +172,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_ioarr,            only : ioarr,read_rhor
  use m_inwffil,          only : inwffil
  use m_spacepar,         only : setsym
- use m_mkrho,            only : mkrho, initro
+ use m_mkrho,            only : mkrho, initro, prtrhomxmn
 
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT

@@ -86,6 +86,7 @@ module m_bethe_salpeter
  use m_paw_dmft,        only : paw_dmft_type
  use m_exc_build,       only : exc_build_ham
  use m_setvtr,          only : setvtr
+ use m_mkrho,           only : prtrhomxmn
 
  implicit none
 
