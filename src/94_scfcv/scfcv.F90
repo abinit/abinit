@@ -2427,6 +2427,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  use m_pawrhoij,         only : pawrhoij_type
  use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_forces,           only : forces
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

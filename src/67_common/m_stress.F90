@@ -1,4 +1,59 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_stress
+!! NAME
+!!  m_stress
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_stress
+
+ use defs_basis
+ use defs_abitypes
+ use m_efield
+ use m_profiling_abi
+ use m_errors
+
+ use m_time,             only : timab
+ use m_geometry,         only : metric, stresssym
+ use m_fock,             only : fock_type
+ use m_ewald,            only : ewald2
+ use defs_datatypes,     only : pseudopotential_type
+ use m_pawrad,           only : pawrad_type
+ use m_pawtab,           only : pawtab_type
+ use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_fft,              only : zerosym
+ use m_mpinfo,           only : ptabs_fourdp
+
+ implicit none
+
+ private
+!!***
+
+ public :: stress
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/stress
 !!
 !! NAME
@@ -11,13 +66,6 @@
 !! volume, r(i,iat) is the ith position of atom iat,
 !! and eps(i,j) is an infinitesimal strain which maps each
 !! point r to r(i) -> r(i) + Sum(j) [eps(i,j)*r(j)].
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FJ, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
@@ -117,12 +165,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
 &                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,paral_kgb,psps,pawrad,pawtab,ph1d,&
@@ -130,22 +172,6 @@
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
-
- use defs_basis
- use defs_abitypes
- use m_efield
- use m_profiling_abi
- use m_errors
-
- use m_time,             only : timab
- use m_geometry,         only : metric, stresssym
- use m_fock,             only : fock_type
- use m_ewald,            only : ewald2
- use defs_datatypes,     only : pseudopotential_type
- use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_fft,              only : zerosym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -648,7 +674,6 @@
 end subroutine stress
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/strhar
 !!
 !! NAME
@@ -656,13 +681,6 @@ end subroutine stress
 !!
 !! FUNCTION
 !! Compute Hartree energy contribution to stress tensor (Cartesian coordinates).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  ehart=Hartree energy (hartree)
@@ -691,16 +709,6 @@ end subroutine stress
 
 subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 &                 rhog2) ! optional argument
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_xmpi
-
- use m_time,       only : timab
- use m_geometry,   only : metric
- use m_mpinfo,     only : ptabs_fourdp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -826,4 +834,7 @@ subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
  call timab(568,2,tsec)
 
 end subroutine strhar
+!!***
+
+end module m_stree
 !!***
