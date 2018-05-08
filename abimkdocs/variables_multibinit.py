@@ -17,8 +17,8 @@ Variable(
     defaultval=1,
     mnemonics="DIPole-DIPole interaction",    
     text="""
-* 1 --> Recompute the dipole-dipole interaction.
 * 0 --> Do not recompute the dipole-dipole interaction.
+* 1 --> Recompute the dipole-dipole interaction based on ewald summation .
 """,
 ),
 
@@ -270,7 +270,7 @@ Variable(
     defaultval=1,
     mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
     text="""
-Flag to activate the strain  phonon coupling. This option will add coefficients like  (Sr-Ti)^1(eta^4)
+Flag to activate the strain  phonon coupling. This option will add coefficients like  (Sr-Ti)^1 (eta^4)
 """,
 ),
 
@@ -416,14 +416,16 @@ Variable(
     text="""
 Flag to activate the bound process:
 
-* 0 --> no bound process 
+* 0 --> Do not activate the bound process 
 
-* 1 --> bound process 
+* 1 --> activate bound process. This option will generate all the possible combinaisons of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power. Finaly, the code will try all the possible combinaisons and try to find a bounded model.
 
-* 2 -->  new version of the bound process 
+* 2 -->  **new version** activate bound process. This option will generate a set of coefficients with a power range defined by [[multibinit:bound_rangePower]] and keep only even power. Then the procedure is similar to the fit process with the constrains to only keep positive coefficients. The bound process will select coefficient one by one up to [[multibinit:bound_maxCoeff]] and try if the model is bound at each step of the process. 
+
+**Related variables:** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
 """,
 ),
-
+     
 Variable(
     abivarname="bound_maxCoeff@multibinit",
     varset="multibinit",
@@ -459,7 +461,7 @@ Variable(
     defaultval="1 unit cell",
     mnemonics="BOUND CUT OFF",
     text="""
-Cut-off for the anharmonic phonon interaction in the bound process (in Bohr)
+Cut-off for the anharmonic phonon interaction during the bound process (in Bohr)
 """,
 ),
 
@@ -473,7 +475,7 @@ Variable(
     defaultval=0,
     mnemonics="BOUND ANHArmonic STRAIN coefficients",
     text="""
-Flag to activate the anharmonic strain. This option will add terms like (eta^4)
+Flag to activate the anharmonic strain. When the bound process will generate the possible coefficients for the fit, if this input variable is set to 1, the generator will consider coefficients like eta^4
 """,
 ),
 
@@ -486,7 +488,7 @@ Variable(
     defaultval=1,
     mnemonics="BOUND Strain Phonon COUPLING coefficients",
     text="""
-Flag to activate the strain phonon coupling. This option will add term like (Sr-Ti)^1eta^2
+Flag to activate the strain phonon coupling. When the bound process will generate the possible coefficients for the fit, if this input variable is set to 1, the generator will consider coefficients like (Sr-Ti)^2 eta^2
 """,
 ),
 
@@ -499,7 +501,7 @@ Variable(
     defaultval="6,6,6",
     mnemonics="BOUND superCELL size",
     text="""
-Set the size of the supercell during the bound process 
+    Flag to set the size of the supercell during the bound process. When the process will try a given model, this input variable is used to  set the size of the supercell for the molecular dynamics
 """,
 ),
 
@@ -545,7 +547,6 @@ Set the Dynamics option for Multibinit. This option is equivalent to [[abinit:io
 * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)], as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)]. The conservation of the kinetic energy is obtained within machine precision, at each step.
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
-**Related variables:**
 
 * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat and a barostat are solved with the algorithm proposed by Martyna, Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].
 If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in

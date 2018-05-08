@@ -3564,7 +3564,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  logical :: revelant_factor,need_map,need_verbose
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
- integer :: ncell(3)
+ integer :: supercell(3)
  integer,allocatable  :: blkval(:),list(:)
  real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
  character(len=500) :: msg
@@ -3605,11 +3605,11 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     ncell(ia) = nint(factor)
+     supercell(ia) = nint(factor)
    end if
  end do
 
- ncell = product(ncell)
+ ncell = product(supercell)
 
 !Check if the energy store in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
@@ -3632,7 +3632,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 
 !Set the new supercell datatype into the effective potential reference
- call effective_potential_setSupercell(eff_pot,comm,ncell)
+ call effective_potential_setSupercell(eff_pot,comm,supercell)
 
 !allocation
  ABI_ALLOCATE(blkval,(natom_hist))
@@ -3648,7 +3648,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
  if(need_verbose) then
    write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
-&       ' The size of the supercell for the fit is ',ncell(1),' ',ncell(2),' ',ncell(3)
+&       ' The size of the supercell for the fit is ',supercell(1),' ',supercell(2),' ',supercell(3)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if

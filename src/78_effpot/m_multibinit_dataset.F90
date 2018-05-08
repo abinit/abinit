@@ -1851,7 +1851,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
    write(nunit,'(1x,a16,I3.1)')'       fit_coeff',multibinit_dtset%fit_coeff
-   write(nunit,'(1x,a16,I3.1)')'fit_generateCoeff',multibinit_dtset%fit_generateCoeff
+   write(nunit,'(1x,a17,I3.1)')'fit_generateCoeff',multibinit_dtset%fit_generateCoeff
    if(multibinit_dtset%fit_initializeData==0)then
      write(nunit,'(1x,a16,I3.1)')'fit_initializeData',multibinit_dtset%fit_initializeData
    end if

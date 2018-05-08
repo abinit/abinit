@@ -27,6 +27,7 @@ pages:
     - Fold2Bloch: guide/fold2bloch.md
     - Mrgddb: guide/mrgddb.md
     - Mrgscr: guide/mrgscr.md
+    - Multibinit: guide/multibinit.md
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md

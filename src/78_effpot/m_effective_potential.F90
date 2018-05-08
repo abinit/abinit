@@ -668,7 +668,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  integer :: ia,i1,i2,i3,ii,ierr,irpt,irpt2,irpt_ref,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
  integer :: max1,max2,max3,my_rank,natom_uc
- integer :: ncell,nproc,second_coordinate,size,sumg0
+ integer :: nproc,second_coordinate,size,sumg0
  integer :: my_nrpt,nrpt_alone
  real(dp) :: ucvol
  character(len=500) :: msg
@@ -708,8 +708,6 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 &   eff_pot%crystal%xcart,&
 &   eff_pot%crystal%znucl,&
 &   supercell)
-
- ncell = product(ncell(:))
 
 !set variables
  natom_uc = eff_pot%crystal%natom

@@ -314,6 +314,7 @@ contains
     read(40,*) string,InVar%angle_alpha
     write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%angle_alpha
   else
+    read(40,*)
     InVar%angle_alpha=90.d0
   end if
   read(40,*) string,InVar%natom_unitcell
