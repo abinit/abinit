@@ -111,6 +111,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
  use m_paw_dmft, only : paw_dmft_type
+ use m_mkrho,    only : mkrho
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
