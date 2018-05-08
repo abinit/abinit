@@ -132,6 +132,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
 &                option) !optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -140,7 +141,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_66_wfs
- use interfaces_67_common, except_this_one => mkrho
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -782,6 +783,7 @@ end subroutine mkrho
 subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
 &  nfft,ngfft,nspden,ntypat,paral_kgb,psps,pawtab,ph1d,qgrid,rhog,rhor,spinat,ucvol,usepaw,zion,znucl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1280,6 +1282,7 @@ end subroutine initro
 !! SOURCE
 
 subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

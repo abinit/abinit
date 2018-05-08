@@ -249,8 +249,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
- use interfaces_68_rsprc
- use interfaces_79_seqpar_mpi
 !End of the abilint section
 
  implicit none

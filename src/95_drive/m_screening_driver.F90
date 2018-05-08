@@ -180,7 +180,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use interfaces_53_ffts
  use interfaces_64_psp
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

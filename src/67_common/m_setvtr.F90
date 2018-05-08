@@ -198,6 +198,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
 &  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optionals arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -206,7 +207,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs
  use interfaces_64_psp
- use interfaces_67_common, except_this_one => setvtr
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -955,6 +956,7 @@ end subroutine spatialchempot
 !! SOURCE
 
 subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -270,6 +270,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -283,7 +284,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_68_dmft
- use interfaces_79_seqpar_mpi, except_this_one => vtorho
 !End of the abilint section
 
  implicit none
@@ -2333,6 +2333,7 @@ end subroutine vtorho
 subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
 &                      me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
 &                      npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

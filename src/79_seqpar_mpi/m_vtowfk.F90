@@ -161,7 +161,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use interfaces_53_ffts
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_79_seqpar_mpi, except_this_one => vtowfk
+ use interfaces_79_seqpar_mpi
 !End of the abilint section
 
  implicit none
