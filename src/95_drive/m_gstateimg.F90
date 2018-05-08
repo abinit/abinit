@@ -186,13 +186,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gstateimg'
  use interfaces_14_hidewrite
  use interfaces_45_geomoptim
- use interfaces_95_drive, except_this_one => gstateimg
 !End of the abilint section
 
  implicit none
@@ -797,6 +797,7 @@ end subroutine gstateimg
 
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
 &                 prt_all_images,prtvolimg,resimg)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
