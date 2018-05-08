@@ -250,6 +250,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
+ use interfaces_94_scfcv, except_this_one => scfcv
 !End of the abilint section
 
  implicit none
@@ -2432,7 +2433,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 #undef ABI_FUNC
 #define ABI_FUNC 'etotfor'
  use interfaces_65_paw
- use interfaces_67_common, except_this_one => etotfor
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
