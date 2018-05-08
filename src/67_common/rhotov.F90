@@ -1,4 +1,41 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_rhotov
+!! NAME
+!!  m_rhotov
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG, GMR, MT, EB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_rhotov
+
+ implicit none
+
+ private
+!!***
+
+ public :: rhotov
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/rhotov
 !! NAME
 !! rhotov
@@ -6,13 +43,6 @@
 !! FUNCTION
 !! This routine is called to compute, from a given total density
 !! the trial (local) potential and the residual potential.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG, GMR, MT, EB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
@@ -106,12 +136,6 @@
 !!      xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
@@ -588,4 +612,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  DBG_EXIT("COLL")
 
 end subroutine rhotov
+!!***
+
+end module m_rhotov
 !!***
