@@ -124,7 +124,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_72_response
  use interfaces_95_drive, except_this_one => nonlinear
 !End of the abilint section
 

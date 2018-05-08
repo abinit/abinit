@@ -24,10 +24,9 @@
 
 #include "abi_common.h"
 
-module m_geshell
+module m_getshell
 
  use defs_basis
- !use defs_abitypes
  use m_profiling_abi
  use m_xmpi
  use m_errors
@@ -121,6 +120,7 @@ contains
 subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 & kpt3,mkmem,mkmem_max,mvwtk,&
 & nkpt2,nkpt3,nneigh,nshiftk,rmet,rprimd,shiftk,wtk2, comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
