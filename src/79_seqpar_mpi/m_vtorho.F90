@@ -27,6 +27,7 @@
 module m_vtorho
 
  use m_vtowfk,   only : vtowfk
+ use m_mkrho,    only : mkrho
 
  implicit none
 

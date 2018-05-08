@@ -1,4 +1,57 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mkrho
+!! NAME
+!!  m_mkrho
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mkrho
+
+ use defs_basis
+ use defs_abitypes
+ use defs_wvltypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_errors
+
+ use m_time,         only : timab
+ use m_fftcore,      only : sphereboundary
+ use m_fft,          only : fftpac
+ use m_hamiltonian,  only : gs_hamiltonian_type
+ use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
+ use m_paw_dmft,     only : paw_dmft_type
+ use m_spacepar,     only : symrhg
+
+ implicit none
+
+ private
+!!***
+
+ public :: mkrho
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mkrho
 !! NAME
 !! mkrho
@@ -12,13 +65,6 @@
 !! --Compute a given element of the kinetic energy density tensor
 !!   tau_{alpha,beta}(r) and tau_{alpha,beta}(G) in bohr**-5
 !!   from input wavefunctions, band occupations, and k point wts.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mcg)=wf in G space
@@ -76,30 +122,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
 &                option) !optional
-
- use defs_basis
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
-
- use m_time,         only : timab
- use m_fftcore,      only : sphereboundary
- use m_fft,          only : fftpac
- use m_hamiltonian,  only : gs_hamiltonian_type
- use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
- use m_paw_dmft,     only : paw_dmft_type
- use m_spacepar,     only : symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -698,4 +723,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  DBG_EXIT("COLL")
 
 end subroutine mkrho
+!!***
+
+end module m_mkrho
 !!***

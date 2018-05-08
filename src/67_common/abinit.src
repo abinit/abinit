@@ -56,7 +56,7 @@ sources = [
  "mklocl_recipspace.F90",
  "mklocl_wavelets.F90",
  "mkresi.F90",
- "mkrho.F90",
+ "m_mkrho.F90",
  "m_ioarr.F90",
  "m_iowf.F90",
  "m_mlwfovlp.F90",
