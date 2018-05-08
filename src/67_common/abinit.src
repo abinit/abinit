@@ -22,7 +22,6 @@ sources = [
  "berryphase_new.F90",
  "calc_efg.F90",
  "calc_fc.F90",
- "cgq_builder.F90",
  "chern_number.F90",
  "m_conducti.F90",
  "constrf.F90",
