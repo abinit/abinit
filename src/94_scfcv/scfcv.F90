@@ -233,6 +233,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_setvtr,           only : setvtr
  use m_mkrho,            only : mkrho
  use m_rhotov,           only : rhotov
+ use m_forces,           only : fresid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

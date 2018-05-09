@@ -52,6 +52,7 @@ module m_prcref
  use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian
  use m_distribfft, only : init_distribfft_seq
+ use m_forces,     only : fresid
 
  implicit none
 
