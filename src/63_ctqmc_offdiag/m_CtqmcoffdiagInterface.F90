@@ -105,7 +105,8 @@ CONTAINS
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag)
+SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
+&measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag)
 
 !Arguments ------------------------------------
 

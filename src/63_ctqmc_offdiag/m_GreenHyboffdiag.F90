@@ -631,7 +631,8 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagCoffdiag_1, updated,s
       ! MapHyboffdiag_setSize with resize map tail*tail will thus be the new
       ! op%map%tail
       ! update size of map and map%tail
-          CALL MapHyboffdiag_setSize(op%map(iflavor,iflavorbis),ListCdagCoffdiag_1(iflavor)%tail*ListCdagCoffdiag_1(iflavorbis)%tail)
+          CALL MapHyboffdiag_setSize(op%map(iflavor,iflavorbis),&
+&          ListCdagCoffdiag_1(iflavor)%tail*ListCdagCoffdiag_1(iflavorbis)%tail)
         END DO
       END DO
       op%signvaluemeas = op%signvaluemeas + op%signvalueold * argument

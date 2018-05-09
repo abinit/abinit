@@ -1786,7 +1786,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            close(unt)
          endif
          if(paw_dmft%dmft_solv==8) then
-           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
+&           message, newunit=unt) /= 0) then
              MSG_ERROR(message)
            end if
            do itau=1,paw_dmft%dmftqmc_l
