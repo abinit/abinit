@@ -18,9 +18,9 @@
 !!  gmet(3,3) = reciprocal space metric tensor in bohr**-2
 !!  kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !!  kneigh(30,nkpt2) = index of the neighbours of each k-point
-!!  kg_neigh(30,nkpt2,3) = necessary to construct the vector joining a k-point 
-!!                         to its nearest neighbour in case of a single k-point, 
-!!                         a line of k-points or a plane of k-points. 
+!!  kg_neigh(30,nkpt2,3) = necessary to construct the vector joining a k-point
+!!                         to its nearest neighbour in case of a single k-point,
+!!                         a line of k-points or a plane of k-points.
 !!                         See getshell.F90 for details
 !!  kptindex(2,nkpt3)= index of the k-points in the reduced BZ
 !!                     related to a k-point in the full BZ
@@ -156,7 +156,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 !ENDDEBUG
 
 
- 
+
 
 
 
@@ -214,7 +214,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
  end do
 
 
-!Build pwind 
+!Build pwind
 
  do ineigh = 1, nneigh
 
@@ -297,7 +297,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 
  call xmpi_sum(mpi_enreg%kpt_loc2ibz_sp,spaceComm,ierr)
  call xmpi_sum(mpi_enreg%mkmem,spaceComm,ierr)
- 
+
 
 !----------------------------------------------------------------------------
 
