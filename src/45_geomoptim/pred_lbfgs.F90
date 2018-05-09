@@ -65,6 +65,7 @@ subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_abimover
  use m_abihist
  use m_lbfgs
+ use m_xfpack
 
  use m_geometry,       only : mkrdim, fcart2fred, metric
 

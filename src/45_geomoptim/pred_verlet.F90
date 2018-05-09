@@ -73,6 +73,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  use m_profiling_abi
  use m_abimover
  use m_abihist
+ use m_xfpack
 
  use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2fred, metric
 

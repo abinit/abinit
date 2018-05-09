@@ -74,6 +74,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  use m_profiling_abi
  use m_abimover
  use m_abihist
+ use m_xfpack
 
  use m_geometry,  only : fcart2fred, xcart2xred, xred2xcart, metric
  use m_bfgs,      only : hessinit, hessupdt, brdene

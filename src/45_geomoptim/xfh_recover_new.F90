@@ -19,10 +19,6 @@
 !!
 !! OUTPUT
 !!
-!!
-!! SIDE EFFECTS
-!!
-!!
 !! PARENTS
 !!      pred_bfgs,pred_lbfgs
 !!
@@ -45,6 +41,7 @@ subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,fred,&
  use defs_basis
  use m_profiling_abi
  use m_abimover
+ use m_xfpack
 
  use m_results_gs , only : results_gs_type
  use m_bfgs,        only : hessupdt
@@ -184,7 +181,7 @@ integer :: ixfh ! kk,jj
 
 end subroutine xfh_recover_new
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/xfh_update
 !! NAME
 !! xfh_update
@@ -205,10 +202,6 @@ end subroutine xfh_recover_new
 !!
 !! OUTPUT
 !!
-!!
-!! SIDE EFFECTS
-!!
-!!
 !! PARENTS
 !!      mover
 !!
@@ -216,18 +209,12 @@ end subroutine xfh_recover_new
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine xfh_update(ab_xfh,acell,fred_corrected,natom,rprim,strten,xred)
 
  use m_profiling_abi
  use defs_basis
  use m_abimover
+ use m_xfpack
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -1,4 +1,50 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_xfpack
+!! NAME
+!!  m_xfpack
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG, MJV)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_xfpack
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ use m_symtk,      only : matr3inv
+ use m_geometry,   only : mkradim, mkrdim, metric, strainsym
+
+ implicit none
+
+ private
+!!***
+
+ public :: xfpack_vin2x
+ public :: xfpack_x2vin
+ public :: xfpack_f2vout
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/xfpack_vin2x
 !! NAME
 !! xfpack_vin2x
@@ -6,17 +52,8 @@
 !! FUNCTION
 !! Old option=2, transfer vin  to xred, acell and rprim
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG,MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
-!! acell0(3)=reference length scales of primitive translations (bohr), needed
-!!   for some values of optcell.
+!! acell0(3)=reference length scales of primitive translations (bohr), needed for some values of optcell.
 !! natom=number of atoms in cell
 !! ndim=dimension of vin array
 !! nsym=order of group.
@@ -48,21 +85,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- use m_geometry,         only : mkradim, metric, strainsym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -224,7 +248,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 
 end subroutine xfpack_vin2x
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/xfpack_x2vin
 !! NAME
 !! xfpack_x2vin
@@ -232,17 +256,8 @@ end subroutine xfpack_vin2x
 !! FUNCTION
 !! Old option=1, transfer xred, acell, and rprim to vin
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG,MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
-!! acell0(3)=reference length scales of primitive translations (bohr), needed
-!!   for some values of optcell.
+!! acell0(3)=reference length scales of primitive translations (bohr), needed for some values of optcell.
 !! natom=number of atoms in cell
 !! ndim=dimension of vin arrays
 !! nsym=order of group.
@@ -275,22 +290,8 @@ end subroutine xfpack_vin2x
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
   & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- use m_symtk,      only : matr3inv
- use m_geometry,   only : mkrdim, metric, strainsym
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -433,24 +434,15 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
 
  end if
 
-
 end subroutine xfpack_x2vin
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/xfpack_f2vout
 !! NAME
 !! xfpack_f2vout
 !!
 !! FUNCTION
 !! Old option=3, transfer fred and strten to vout
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG,MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! natom=number of atoms in cell
@@ -480,18 +472,7 @@ end subroutine xfpack_x2vin
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -596,4 +577,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
  end if
 
 end subroutine xfpack_f2vout
+!!***
+
+end module m_xfpack
 !!***
