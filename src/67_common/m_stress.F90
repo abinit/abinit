@@ -31,6 +31,7 @@ module m_stress
  use m_efield
  use m_profiling_abi
  use m_errors
+ use m_xmpi
 
  use m_time,             only : timab
  use m_geometry,         only : metric, stresssym
@@ -173,6 +174,7 @@ contains
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -181,7 +183,7 @@ contains
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_64_psp
- use interfaces_67_common, except_this_one => stress
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -710,6 +712,7 @@ end subroutine stress
 subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 &                 rhog2) ! optional argument
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -836,5 +839,5 @@ subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 end subroutine strhar
 !!***
 
-end module m_stree
+end module m_stress
 !!***

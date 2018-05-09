@@ -169,6 +169,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &                  vresid,vxc,wvl,wvl_den,xred,&
 &                  electronpositron) ! optional argument
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -176,7 +177,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_64_psp
- use interfaces_67_common, except_this_one => forces
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -732,6 +733,7 @@ end subroutine sygrad
 
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
 &          ngfft,ntypat,psps,pawtab,ph1d,qgrid,ucvol,usepaw,vresid,zion,znucl)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
