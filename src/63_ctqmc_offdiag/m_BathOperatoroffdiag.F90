@@ -2301,7 +2301,7 @@ SUBROUTINE BathOperatoroffdiag_checkM(op,particle)
         IF ( op%M_update%mat_tau(iC,iCdag) .NE. op%M%mat_tau(iC,iCdag) ) then
                 checkTau = .TRUE.
                 !write(6,*) "op%M_update%mat_tau(iC,iCdag), op%M%mat_tau(iC,iCdag)",op%M_update%mat_tau(iC,iCdag), op%M%mat_tau(iC,iCdag)
-                call flush(6)
+                !call flush(6)
          CALL ERROR("BathOperatoroffdiag_checkM : "//a//"%                        ") 
         ENDIF
   

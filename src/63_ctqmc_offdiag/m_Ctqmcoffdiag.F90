@@ -1572,10 +1572,10 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
      !  !sui!write(6,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
      !  END DO
      !ENDIF
-     call flush(436)
-     call flush(437)
+     !call flush(436)
+     !call flush(437)
      close(436)
-     call flush(6)
+     !call flush(6)
      
      call xmpi_barrier(op%MY_COMM)
      !CALL ERROR("END OF CALCULATION")
@@ -4507,7 +4507,7 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
   CLOSE(43)
   CLOSE(44)
-  call flush_unit(43)
+  !call flush_unit(43)
 
 END SUBROUTINE Ctqmcoffdiag_printGreen
 !!***
