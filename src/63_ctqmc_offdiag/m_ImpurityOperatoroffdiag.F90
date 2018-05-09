@@ -2025,7 +2025,7 @@ SUBROUTINE ImpurityOperatoroffdiag_checkOverlap(op, Tmin, Tmax, iOverlap, iflavo
   INTEGER                                :: imaxbeta
   INTEGER                                :: isegment
   INTEGER                                :: tail
-  BYTE, DIMENSION(1:size,1:2)            :: checktab
+  INTEGER(1), DIMENSION(1:size,1:2)      :: checktab 
   CHARACTER(LEN=4)                       :: a
   DOUBLE PRECISION                       :: dt
   DOUBLE PRECISION                       :: inv_dt
