@@ -164,6 +164,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use interfaces_67_common
  use interfaces_78_effpot
  use interfaces_79_seqpar_mpi
+ use interfaces_95_drive, except_this_one => mover
 !End of the abilint section
 
 implicit none

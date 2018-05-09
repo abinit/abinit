@@ -1526,7 +1526,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 #undef ABI_FUNC
 #define ABI_FUNC 'constrf'
  use interfaces_14_hidewrite
- use interfaces_67_common, except_this_one => constrf
+ use interfaces_67_common
 !End of the abilint section
 
  implicit none

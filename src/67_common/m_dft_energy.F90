@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-module m_energy
+module m_dft_energy
 
  use defs_basis
  use defs_datatypes
@@ -216,6 +216,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
 & add_tfw) ! optional argument
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -227,7 +228,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common, except_this_one => energy
 !End of the abilint section
 
  implicit none
@@ -952,6 +952,7 @@ end subroutine energy
 
 subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,resid_k)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1079,5 +1080,5 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 end subroutine mkresi
 !!***
 
-end module m_energy
+end module m_dft_energy
 !!***
