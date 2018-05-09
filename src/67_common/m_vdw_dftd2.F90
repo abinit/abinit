@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_vdw_dftd2
+!! NAME
+!!  m_vdw_dftd2
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_vdw_dftd2
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_atomdata
+
+ use m_geometry,         only : metric
+
+ implicit none
+
+ private
+!!***
+
+ public :: vdw_dftd2
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/vdw_dftd2
 !!
 !! NAME
@@ -10,13 +54,6 @@
 !! The formalism here follows the DFT-D2 approach of Grimme
 !! which consists in adding a semi-empirical dispersion potential
 !! (pair-wise force field) to the conventional Kohn-Sham DFT energy.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  ixc=choice of exchange-correlation functional
@@ -54,21 +91,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xred,znucl,&
 &          dyn_vdw_dftd2,elt_vdw_dftd2,fred_vdw_dftd2,str_vdw_dftd2,qphon) ! Optionals
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_atomdata
-
- use m_geometry,         only : metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -516,4 +540,7 @@ implicit none
 !!***
 
 end subroutine vdw_dftd2
+!!***
+
+end module m_vdw_dftd2
 !!***

@@ -47,6 +47,8 @@ module m_setvtr
  use m_jellium,           only : jellium
  use m_spacepar,          only : hartre
  use m_dens,              only : mag_constr
+ use m_vdw_dftd2,         only : vdw_dftd2
+ use m_vdw_dftd3,         only : vdw_dftd3
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history

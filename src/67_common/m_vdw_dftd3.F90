@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_vdw_dftd3
+!! NAME
+!!  m_vdw_dftd3
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2015-2018 ABINIT group (BVT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_vdw_dftd3
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_atomdata
+
+ use m_special_funcs,  only : abi_derfc
+ use m_geometry,       only : metric
+ use m_vdw_dftd3_data, only : vdw_dftd3_data
+
+ implicit none
+
+ private
+!!***
+
+ public :: vdw_dftd3
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/vdw_dftd3
 !!
 !! NAME
@@ -14,13 +61,6 @@
 !! DFT-D3(Becke and Johnson), another formulation which avoids the use of a damping
 !! function to remove the undesired short-range behaviour
 !!  is also activable using vdw_xc=7
-!!
-!! COPYRIGHT
-!! Copyright (C) 2015-2018 ABINIT group (BVT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  ixc=choice of exchange-correlation functional
@@ -74,24 +114,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 &          vdw_tol,vdw_tol_3bt,xred,znucl,dyn_vdw_dftd3,elt_vdw_dftd3,&
 &          fred_vdw_dftd3,str_vdw_dftd3,qphon)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_atomdata
-
- use m_special_funcs,  only : abi_derfc
- use m_geometry,       only : metric
- use m_vdw_dftd3_data, only : vdw_dftd3_data
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1607,4 +1632,7 @@ implicit none
 !!***
 
 end subroutine vdw_dftd3
+!!***
+
+end module m_vdw_dftd3
 !!***

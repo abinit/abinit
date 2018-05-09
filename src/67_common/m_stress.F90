@@ -43,6 +43,8 @@ module m_stress
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_fft,              only : zerosym
  use m_mpinfo,           only : ptabs_fourdp
+ use m_vdw_dftd2,        only : vdw_dftd2
+ use m_vdw_dftd3,        only : vdw_dftd3
 
  implicit none
 
