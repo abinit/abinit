@@ -1,6 +1,6 @@
 
-.Version 8.7.6 of ANADDB 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.8.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  8 Mar 2018.
-- ( at 22h46 )
+.Starting date : Fri  4 May 2018.
+- ( at 16h07 )
   
 
 ================================================================================
@@ -74,7 +74,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.011  and twall      0.011 sec
+-begin at tcpu      0.012  and twall      0.012 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -106,9 +106,9 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.161403E-10    0.000000E+00
-       2        0.000000E+00    3.161403E-10    0.000000E+00
-       3        0.000000E+00    3.161403E-10    0.000000E+00
+       1        0.000000E+00    3.727504E-10    0.000000E+00
+       2        0.000000E+00    3.727504E-10    0.000000E+00
+       3        0.000000E+00    3.727504E-10    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -118,9 +118,9 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.161403E-10    0.000000E+00
-       2        0.000000E+00    3.161403E-10    0.000000E+00
-       3        0.000000E+00    3.161403E-10    0.000000E+00
+       1        0.000000E+00    3.727504E-10    0.000000E+00
+       2        0.000000E+00    3.727504E-10    0.000000E+00
+       3        0.000000E+00    3.727504E-10    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -136,9 +136,9 @@
 
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -1.070823E-03    4.447357E-06    4.336884E-02
-       2        9.899831E-04    5.870691E-05    6.697997E-01
-       3        9.899831E-04    5.870691E-05    6.697997E-01
+       1       -1.070823E-03    4.447352E-06    4.336880E-02
+       2        9.899831E-04    5.870691E-05    6.697996E-01
+       3        9.899831E-04    5.870691E-05    6.697996E-01
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -149,14 +149,14 @@
 
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
 
- mka2f: lambda <omega^2> =     8.891284E-07
- mka2f: lambda <omega^3> =     9.635612E-10
+ mka2f: lambda <omega^2> =     8.891286E-07
+ mka2f: lambda <omega^3> =     9.635614E-10
  mka2f: lambda <omega^4> =     1.146305E-12
  mka2f: lambda <omega^5> =     1.460943E-15
  mka2f: isotropic lambda =     1.312184E+00
- mka2f: omegalog  =     6.231136E-04 (Ha)     1.967635E+02 (Kelvin)
+ mka2f: omegalog  =     6.231137E-04 (Ha)     1.967635E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     5.436092E-05 (Ha)     1.716580E+01 (Kelvin)
+-mka2f: MacMillan Tc =     5.436094E-05 (Ha)     1.716581E+01 (Kelvin)
 
 ================================================================================
 
@@ -193,13 +193,13 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
 - Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
-+Total cpu time      1.372  and wall time      1.375 sec
++Total cpu time      1.405  and wall time      1.410 sec
 
  anaddb : the run completed succesfully.

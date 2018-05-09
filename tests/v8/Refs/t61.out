@@ -1,6 +1,6 @@
 
-.Version 8.7.6 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.8.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  8 Mar 2018.
-- ( at 23h02 )
+.Starting date : Fri  4 May 2018.
+- ( at 10h00 )
   
 - input  file    -> t61.in
 - output file    -> t61.out
@@ -531,8 +531,8 @@ P          mk1mem5         64
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.08537
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -771,7 +771,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
  Perturbation : displacement of atom   1   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
- is reduced to    24 .
+ is reduced to    40 .
 
 --------------------------------------------------------------------------------
 
@@ -782,40 +782,40 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   22.017870844128     -1.658E+02 5.118E-01 3.768E+03
- ETOT  2   14.582255273084     -7.436E+00 1.629E-02 5.811E+01
- ETOT  3   14.432971538005     -1.493E-01 3.061E-04 2.376E-01
- ETOT  4   14.432527558033     -4.440E-04 6.323E-06 1.689E-02
- ETOT  5   14.432480124056     -4.743E-05 1.442E-07 3.087E-03
- ETOT  6   14.432468811800     -1.131E-05 1.744E-08 1.397E-06
- ETOT  7   14.432468807837     -3.963E-09 8.856E-12 3.388E-09
- ETOT  8   14.432468807828     -8.697E-12 1.302E-13 3.270E-11
+-ETOT  1   22.017903605681     -1.658E+02 5.118E-01 3.768E+03
+ ETOT  2   14.582289721448     -7.436E+00 1.629E-02 5.811E+01
+ ETOT  3   14.433006062160     -1.493E-01 3.061E-04 2.376E-01
+ ETOT  4   14.432562083892     -4.440E-04 6.323E-06 1.689E-02
+ ETOT  5   14.432514652066     -4.743E-05 1.442E-07 3.087E-03
+ ETOT  6   14.432503339904     -1.131E-05 1.744E-08 1.397E-06
+ ETOT  7   14.432503335940     -3.963E-09 8.856E-12 3.388E-09
+ ETOT  8   14.432503335932     -8.043E-12 1.302E-13 3.270E-11
 
  At SCF step    8       vres2   =  3.27E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.0813E-15; max=  1.3023E-13
+ Mean square residual over all n,k,spin=   3.4420E-15; max=  1.3022E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.28065022E+02 eigvalue=  -2.14468208E+01  local=  -1.23218266E+02
+     kin0=   2.28064970E+02 eigvalue=  -2.14468123E+01  local=  -1.23218227E+02
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -9.86388699E+01  Hartree=   2.26666833E+01     xc=  -8.29476172E+00
+ loc psp =  -9.86388725E+01  Hartree=   2.26666789E+01     xc=  -8.29475981E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   7.56594756E+01   enl1=  -2.48223795E+02
+    edocc=   0.00000000E+00     enl0=   7.56594488E+01   enl1=  -2.48223723E+02
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -1.73431333E+02
+   erelax=  -1.73431298E+02
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   3.27334609E+01 fr.nonlo=   1.37007809E+02  Ewald=   1.99958120E+01
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.14389001E+01  frxc 2 =   9.56561922E+00
  Resulting in :
- 2DEtotal=    0.1443246881E+02 Ha. Also 2DEtotal=    0.392727448777E+03 eV
-    (2DErelax=   -1.7343133251E+02 Ha. 2DEnonrelax=    1.8786380132E+02 Ha)
-    (  non-var. 2DEtotal :    1.4432468834E+01 Ha)
+ 2DEtotal=    0.1443250334E+02 Ha. Also 2DEtotal=    0.392728388335E+03 eV
+    (2DErelax=   -1.7343129798E+02 Ha. 2DEnonrelax=    1.8786380132E+02 Ha)
+    (  non-var. 2DEtotal :    1.4432503362E+01 Ha)
 
 ================================================================================
 
@@ -829,27 +829,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        14.4330953069         0.0000000000
-   1    1   2    1         7.2165476535         0.0000000000
-   1    1   3    1         7.2165476535         0.0000000000
+   1    1   1    1        14.4331227714         0.0000000000
+   1    1   2    1         7.2165613857         0.0000000000
+   1    1   3    1         7.2165613857         0.0000000000
    1    1   1    2       -14.4327749531        -0.0000000000
    1    1   2    2        -7.2163874765         0.0000000000
    1    1   3    2        -7.2163874765        -0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         7.2165476535         0.0000000000
-   2    1   2    1        14.4330953069         0.0000000000
-   2    1   3    1         7.2165476535         0.0000000000
+   2    1   1    1         7.2165613857         0.0000000000
+   2    1   2    1        14.4331227714         0.0000000000
+   2    1   3    1         7.2165613857         0.0000000000
    2    1   1    2        -7.2163874765         0.0000000000
    2    1   2    2       -14.4327749531         0.0000000000
    2    1   3    2        -7.2163874765        -0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         7.2165476535         0.0000000000
-   3    1   2    1         7.2165476535         0.0000000000
-   3    1   3    1        14.4330953069         0.0000000000
+   3    1   1    1         7.2165613857         0.0000000000
+   3    1   2    1         7.2165613857         0.0000000000
+   3    1   3    1        14.4331227714         0.0000000000
    3    1   1    2        -7.2163874765        -0.0000000000
    3    1   2    2        -7.2163874765        -0.0000000000
    3    1   3    2       -14.4327749531         0.0000000000
@@ -859,27 +859,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
    1    2   1    1       -14.4327749531         0.0000000000
    1    2   2    1        -7.2163874765        -0.0000000000
    1    2   3    1        -7.2163874765         0.0000000000
-   1    2   1    2        14.4330953069         0.0000000000
-   1    2   2    2         7.2165476535         0.0000000000
-   1    2   3    2         7.2165476535         0.0000000000
+   1    2   1    2        14.4331227714         0.0000000000
+   1    2   2    2         7.2165613857         0.0000000000
+   1    2   3    2         7.2165613857         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
    2    2   1    1        -7.2163874765        -0.0000000000
    2    2   2    1       -14.4327749531        -0.0000000000
    2    2   3    1        -7.2163874765         0.0000000000
-   2    2   1    2         7.2165476535         0.0000000000
-   2    2   2    2        14.4330953069         0.0000000000
-   2    2   3    2         7.2165476535         0.0000000000
+   2    2   1    2         7.2165613857         0.0000000000
+   2    2   2    2        14.4331227714         0.0000000000
+   2    2   3    2         7.2165613857         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
    3    2   1    1        -7.2163874765         0.0000000000
    3    2   2    1        -7.2163874765         0.0000000000
    3    2   3    1       -14.4327749531        -0.0000000000
-   3    2   1    2         7.2165476535         0.0000000000
-   3    2   2    2         7.2165476535         0.0000000000
-   3    2   3    2        14.4330953069         0.0000000000
+   3    2   1    2         7.2165613857         0.0000000000
+   3    2   2    2         7.2165613857         0.0000000000
+   3    2   3    2        14.4331227714         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
   
@@ -904,55 +904,55 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.6423775986         0.0000000000
+   1    1   1    1         0.6423788209         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.6423633405         0.0000000000
-   1    1   2    2        -0.0000000000         0.0000000000
+   1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.6423775986         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
-   2    1   1    2        -0.0000000000         0.0000000000
+   2    1   2    1         0.6423788209         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2        -0.6423633405        -0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.6423775986         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   3    1         0.6423788209         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.6423633405         0.0000000000
   
    1    2   1    1        -0.6423633405        -0.0000000000
-   1    2   2    1        -0.0000000000        -0.0000000000
+   1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
-   1    2   1    2         0.6423775986         0.0000000000
+   1    2   1    2         0.6423788209         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
   
-   2    2   1    1        -0.0000000000        -0.0000000000
+   2    2   1    1         0.0000000000        -0.0000000000
    2    2   2    1        -0.6423633405         0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.6423775986         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   2    2         0.6423788209         0.0000000000
+   2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.6423633405        -0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.6423775986         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   2    2        -0.0000000000         0.0000000000
+   3    2   3    2         0.6423788209         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   2.551883E-05  2.551883E-05  2.551883E-05  7.660165E-03  7.660165E-03
-   7.660165E-03
+   2.659023E-05  2.659023E-05  2.659023E-05  7.660169E-03  7.660169E-03
+   7.660169E-03
  Phonon frequencies in cm-1    :
--  5.600737E+00  5.600737E+00  5.600737E+00  1.681212E+03  1.681212E+03
--  1.681212E+03
+-  5.835880E+00  5.835880E+00  5.835880E+00  1.681213E+03  1.681213E+03
+-  1.681213E+03
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -977,8 +977,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.92946
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1264,8 +1264,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93230
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/trunk__henrique/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1487,7 +1487,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.484     115.407
              ecut      1.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
            etotal1    -1.1819793549E+01
-           etotal3     1.4432468808E+01
+           etotal3     1.4432503336E+01
            etotal4     1.4343101914E+01
            etotal5     1.7156958007E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -1881,61 +1881,10 @@ P          mk1mem5         64
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          8.7        0.15      0.002
-- Total wall clock time (s,m,h):          9.3        0.15      0.003
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            8.7, wall_time =            9.3
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   4.063  46.6      3.921  42.3          46982      -1.00        1.04       1.04
-- pspini                         1.012  11.6      1.013  10.9              5      -1.00        1.00       1.00
-- fourwf%(G->r)                  0.683   7.8      0.582   6.3          13952      -1.00        1.17       1.17
-- projbd                         0.551   6.3      0.443   4.8          76428      -1.00        1.24       1.24
-- dfpt_cgwf-O(npw)               0.514   5.9      0.488   5.3             -1      -1.00        1.05       1.05
-- nonlop(apply)                  0.260   3.0      0.422   4.6          40006      -1.00        0.62       0.62
-- dfpt_vtowfk(contrib)           0.213   2.4      0.282   3.0             -1      -1.00        0.76       0.76
-- getghc-other                   0.212   2.4      0.328   3.5             -1      -1.00        0.65       0.65
-- nonlop(forces)                 0.159   1.8      0.184   2.0          11584      -1.00        0.86       0.86
-- invars2                        0.152   1.7      0.153   1.7              5      -1.00        0.99       0.99
-- timing timab                   0.122   1.4      0.122   1.3             10      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.107   1.2      0.097   1.0             -1      -1.00        1.10       1.10
-- dfpt_vtorho-kpt loop           0.100   1.1      0.094   1.0             36      -1.00        1.07       1.07
-- newkpt(excl. rwwf   )          0.051   0.6      0.049   0.5             -1      -1.00        1.04       1.04
-- others (99)                    0.216   2.5      0.225   2.4             -1      -1.00        0.96       0.96
--<END_TIMER>
--
-- subtotal                       8.415  96.4      8.403  90.8                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           8.7, wall_time =           9.3
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   4.063  46.6      3.921  42.3          46982      -1.00        1.04       1.04
-- pspini                         1.012  11.6      1.013  10.9              5      -1.00        1.00       1.00
-- fourwf%(G->r)                  0.683   7.8      0.582   6.3          13952      -1.00        1.17       1.17
-- projbd                         0.551   6.3      0.443   4.8          76428      -1.00        1.24       1.24
-- dfpt_cgwf-O(npw)               0.514   5.9      0.488   5.3             -1      -1.00        1.05       1.05
-- nonlop(apply)                  0.260   3.0      0.422   4.6          40006      -1.00        0.62       0.62
-- dfpt_vtowfk(contrib)           0.213   2.4      0.282   3.0             -1      -1.00        0.76       0.76
-- getghc-other                   0.212   2.4      0.328   3.5             -1      -1.00        0.65       0.65
-- nonlop(forces)                 0.159   1.8      0.184   2.0          11584      -1.00        0.86       0.86
-- invars2                        0.152   1.7      0.153   1.7              5      -1.00        0.99       0.99
-- timing timab                   0.122   1.4      0.122   1.3             10      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.107   1.2      0.097   1.0             -1      -1.00        1.10       1.10
-- dfpt_vtorho-kpt loop           0.100   1.1      0.094   1.0             36      -1.00        1.07       1.07
-- newkpt(excl. rwwf   )          0.051   0.6      0.049   0.5             -1      -1.00        1.04       1.04
-- others (99)                    0.216   2.5      0.225   2.4             -1      -1.00        0.96       0.96
--<END_TIMER>
 
-- subtotal                       8.415  96.4      8.403  90.8                                  1.00       1.00
 
 ================================================================================
 
@@ -2002,10 +1951,10 @@ P          mk1mem5         64
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=          8.7  wall=          9.3
+- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  35 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.7  wall=          9.3
+.Delivered  37 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.0  wall=          8.4
