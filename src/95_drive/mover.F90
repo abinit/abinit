@@ -152,6 +152,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
  use m_dtfil,              only : dtfil_init_time, status
+ use m_xfpack,             only : xfh_update
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

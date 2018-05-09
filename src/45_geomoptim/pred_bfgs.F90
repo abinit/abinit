@@ -81,7 +81,6 @@ subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_bfgs'
- use interfaces_45_geomoptim, except_this_one => pred_bfgs
 !End of the abilint section
 
 implicit none
