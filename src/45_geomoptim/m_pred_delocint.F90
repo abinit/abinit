@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_delocint
+!! NAME
+!! m_pred_delocint
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_delocint
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+ use m_xfpack
+ use m_linalg_interfaces
+
+ use m_geometry,   only : fcart2fred, xcart2xred, xred2xcart, metric, acrossb
+ use m_bfgs,       only : hessinit, hessupdt, brdene
+ use m_results_gs, only : results_gs_type
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_delocint
+
+contains
+!!***
+
 !!****f* ABINIT/pred_delocint
 !! NAME
 !! pred_delocint
@@ -29,17 +76,8 @@
 !!    U matrix is eigenvectors of G = B*B^{T}
 !!    S matrix is eigenvectors of F = B^{T}B
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
-!! ab_mover <type(abimover)> : Datatype with all the information
-!!                                needed by the preditor
+!! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
 !! ionmov : (10 or 11) Specific kind of BFGS
@@ -48,8 +86,7 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
+!! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
 !!      mover
@@ -62,22 +99,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
- use m_xfpack
-
- use m_geometry,  only : fcart2fred, xcart2xred, xred2xcart, metric
- use m_bfgs,      only : hessinit, hessupdt, brdene
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -702,13 +724,6 @@ end subroutine pred_delocint
 
 subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 
- use defs_basis
- use m_abimover
- use m_errors
- use m_profiling_abi
- use m_linalg_interfaces
- use m_xfpack
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -883,10 +898,6 @@ end subroutine deloc2xcart
 !! deloc_force(3*(natom-1))=delocalized forces from reduced coordinate ones
 !! fred(3,natom)=delocalized forces in reduced coordinates
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      pred_delocint,xfh_recover_deloc
 !!
@@ -896,11 +907,6 @@ end subroutine deloc2xcart
 !! SOURCE
 
 subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
-
- use defs_basis
- use m_profiling_abi
- use m_linalg_interfaces
- use m_xfpack
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -978,10 +984,6 @@ end subroutine fred2fdeloc
 !! b_matrix(ninternal,3*natom)=matrix of derivatives of internal coordinates
 !!   wrt cartesians
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      xcart2deloc
 !!
@@ -991,11 +993,6 @@ end subroutine fred2fdeloc
 !! SOURCE
 
 subroutine calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
-
- use defs_basis
- use m_abimover
- use m_profiling_abi
- use m_xfpack
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1145,9 +1142,6 @@ end subroutine calc_b_matrix
 
 subroutine dbond_length_d1(r1,r2,bb)
 
- use defs_basis
- use m_abimover, only : bond_length
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1189,11 +1183,6 @@ end subroutine dbond_length_d1
 !!
 
 subroutine dang_d1(r1,r2,r3,bb)
-
- use defs_basis
-
- use m_geometry,  only : acrossb
- use m_abimover, only : bond_length
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1267,11 +1256,6 @@ end subroutine dang_d1
 
 subroutine dang_d2(r1,r2,r3,bb)
 
- use defs_basis
-
- use m_geometry,  only : acrossb
- use m_abimover, only : bond_length
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1343,10 +1327,6 @@ end subroutine dang_d2
 !!
 
 subroutine ddihedral_d1(r1,r2,r3,r4,bb)
-
- use defs_basis
-
- use m_geometry,  only : acrossb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1460,10 +1440,6 @@ end subroutine ddihedral_d1
 !!
 
 subroutine ddihedral_d2(r1,r2,r3,r4,bb)
-
- use defs_basis
-
- use m_geometry,  only : acrossb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1624,12 +1600,6 @@ end subroutine ddihedral_d2
 
 subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
 
- use defs_basis
- use m_errors
- use m_profiling_abi
- use m_abimover
- use m_linalg_interfaces
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1715,11 +1685,6 @@ end subroutine xcart2deloc
 !! SOURCE
 
  subroutine calc_btinv_matrix(b_matrix,natom,ninternal,bt_inv_matrix,u_matrix)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_linalg_interfaces
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1824,8 +1789,6 @@ end subroutine calc_btinv_matrix
 
  subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
 
- use defs_basis
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1921,15 +1884,6 @@ subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 & fred,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 & vout,vout_prev,xred,deloc,deloc_int,deloc_force,btinv,gprimd,prim_int,&
 & u_matrix)
-
- use m_profiling_abi
- use defs_basis
- use m_abimover
- use m_xfpack
-
- use m_geometry,    only : xred2xcart
- use m_results_gs , only : results_gs_type
- use m_bfgs,        only : hessupdt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2092,4 +2046,7 @@ real(dp) :: xcart(3,ab_mover%natom)
  end if
 
 end subroutine xfh_recover_deloc
+!!***
+
+end module m_pred_delocint
 !!***

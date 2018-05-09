@@ -35,7 +35,7 @@ sources = [
  "pimd_nosehoover_nvt.F90",
  "prec_simple.F90",
  "pred_bfgs.F90",
- "pred_delocint.F90",
+ "m_pred_delocint.F90",
  "pred_diisrelax.F90",
  "pred_hmc.F90",
  "pred_isokinetic.F90",
