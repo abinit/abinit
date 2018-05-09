@@ -87,3 +87,7 @@ At the end, use [[help:mrgddb|DDB merge tool]] to generate the model.ddb.
 ### 3.2 How to compute the anharmonic part from a training set
 
 To compute the anharmonic part of the model, multibinit requires a training set with several DFT calculations. This file will be used to fit a polynome following the method developed in this [[cite:Escorihuela-Sayalero2017|paper]]. Generate the training set requieres to get some experience in molecular dynamics simulation. 
+
+### 3.3 How to bound a model
+
+### 3.4 How to bound run a dynamics
