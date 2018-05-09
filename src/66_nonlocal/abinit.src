@@ -23,6 +23,7 @@ sources = [
  "ddkten.F90",
  "dfpt_mkffkg.F90",
  "getcprj.F90",
+ "getcprjb.F90",
  "metstr.F90",
  "mkffkg.F90",
  "mkffnl.F90",

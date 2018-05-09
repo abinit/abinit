@@ -628,12 +628,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                          end do
                          hmat(1,n1,nn,ikpt,gdx,bdx) = dotr
                          hmat(2,n1,nn,ikpt,gdx,bdx) = doti
-                         ! hmat(1,nn,n1,ikpt,bdx,gdx) = dotr
-                         ! hmat(2,nn,n1,ikpt,bdx,gdx) = -doti
+                         hmat(1,nn,n1,ikpt,bdx,gdx) = dotr
+                         hmat(2,nn,n1,ikpt,bdx,gdx) = -doti
                       end do
                    end do
                    has_hmat(ikpt,gdx,bdx) = .TRUE.
-                   ! has_hmat(ikpt,bdx,gdx) = .TRUE.
+                   has_hmat(ikpt,bdx,gdx) = .TRUE.
 
                    ABI_DEALLOCATE(cwavef)
                    ABI_DEALLOCATE(bra)
