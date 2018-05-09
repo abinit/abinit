@@ -50,7 +50,6 @@ subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,fred,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xfh_recover_new'
- use interfaces_45_geomoptim, except_this_one => xfh_recover_new
 !End of the abilint section
 
  implicit none

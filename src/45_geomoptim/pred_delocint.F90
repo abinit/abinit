@@ -707,6 +707,7 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
  use m_errors
  use m_profiling_abi
  use m_linalg_interfaces
+ use m_xfpack
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -899,6 +900,7 @@ subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
  use defs_basis
  use m_profiling_abi
  use m_linalg_interfaces
+ use m_xfpack
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -993,6 +995,7 @@ subroutine calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
  use defs_basis
  use m_abimover
  use m_profiling_abi
+ use m_xfpack
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1922,6 +1925,7 @@ subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
  use m_profiling_abi
  use defs_basis
  use m_abimover
+ use m_xfpack
 
  use m_geometry,    only : xred2xcart
  use m_results_gs , only : results_gs_type

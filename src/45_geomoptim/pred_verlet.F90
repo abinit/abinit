@@ -82,7 +82,6 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_verlet'
  use interfaces_14_hidewrite
- use interfaces_45_geomoptim, except_this_one => pred_verlet
 !End of the abilint section
 
  implicit none
