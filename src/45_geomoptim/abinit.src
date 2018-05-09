@@ -54,7 +54,6 @@ sources = [
  "predict_pimd.F90",
  "predict_steepest.F90",
  "predict_string.F90",
- "prtxfase.F90",
  "xfh_recover_new.F90",
  "xfh_update.F90",
  "xfpack_f2vout.F90",
