@@ -1,4 +1,76 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_energy
+!! NAME
+!!  m_energy
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_energy
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_profiling_abi
+ use m_hamiltonian
+ use m_errors
+ use m_xmpi
+ use m_gemm_nonlop
+ use m_xcdata
+ use m_cgtools
+
+ use m_time,             only : timab
+ use m_geometry,         only : metric
+ use m_kg,               only : mkkin
+ use m_energies,         only : energies_type
+ use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
+&                               bandfft_kpt_savetabs,bandfft_kpt_restoretabs
+ use m_pawang,           only : pawang_type
+ use m_pawtab,           only : pawtab_type
+ use m_paw_ij,           only : paw_ij_type
+ use m_pawfgrtab,        only : pawfgrtab_type
+ use m_pawrhoij,         only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked,&
+&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,pawrhoij_get_nspden,symrhoij
+ use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
+ use m_pawfgr,           only : pawfgr_type
+ use m_paw_dmft,         only : paw_dmft_type
+ use m_cgtools,          only : dotprod_vn
+ use m_fft,              only : fftpac
+ use m_spacepar,         only : meanvalue_g, hartre
+ use m_dens,             only : mag_constr
+ use m_mkrho,            only : mkrho
+
+ implicit none
+
+ private
+!!***
+
+ public :: energy
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/energy
 !! NAME
 !! energy
@@ -13,13 +85,6 @@
 !! enl=nonlocal pseudopotential energy
 !! Also, compute new density from provided wfs, after the evaluation
 !! of ehart, enxc, and eei.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
@@ -144,52 +209,12 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine energy(cg,compch_fft,dtset,electronpositron,&
 & energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
 & add_tfw) ! optional argument
-
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_profiling_abi
- use m_hamiltonian
- use m_errors
- use m_xmpi
- use m_gemm_nonlop
- use m_xcdata
-
- use m_time,             only : timab
- use m_geometry,         only : metric
- use m_kg,               only : mkkin
- use m_energies,         only : energies_type
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
-&                               bandfft_kpt_savetabs,bandfft_kpt_restoretabs
- use m_pawang,           only : pawang_type
- use m_pawtab,           only : pawtab_type
- use m_paw_ij,           only : paw_ij_type
- use m_pawfgrtab,        only : pawfgrtab_type
- use m_pawrhoij,         only : pawrhoij_type,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked,&
-&                               pawrhoij_mpisum_unpacked,pawrhoij_free_unpacked,pawrhoij_get_nspden,symrhoij
- use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
- use m_pawfgr,           only : pawfgr_type
- use m_paw_dmft,         only : paw_dmft_type
- use m_cgtools,          only : dotprod_vn
- use m_fft,              only : fftpac
- use m_spacepar,         only : meanvalue_g, hartre
- use m_dens,             only : mag_constr
- use m_mkrho,            only : mkrho
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -899,12 +924,6 @@ end subroutine energy
 !! FUNCTION
 !! Make residuals from knowledge of wf in G space and application of Hamiltonian.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  cg(2,mcg)=<G|Cnk>=Fourier coefficients of wavefunction
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
@@ -932,17 +951,6 @@ end subroutine energy
 !! SOURCE
 
 subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,resid_k)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
- use m_cgtools
-
- use m_time,        only : timab
- use m_pawcprj,     only : pawcprj_type
- use m_hamiltonian, only : gs_hamiltonian_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1069,4 +1077,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  call timab(13,2,tsec)
 
 end subroutine mkresi
+!!***
+
+end module m_energy
 !!***
