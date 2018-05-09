@@ -42,7 +42,7 @@ The previous flags will activate the fit process ([[multibinit:fit_coeff]]=1) an
 
   These next flags can be used for adding a criteria to stop the fit process. For example if you set [[multibinit:fit_ncoeff]] to 100, the fit process can be stop before to reach the 100 coefficients if one of these tolerance flags:
 
-* Tolerance on the Mean Standard Deviation of the Energy in (meV/f.u.):
+* Tolerance on the Mean Standard Deviation of the Energy in (meV/atm):
 
         fit_tolMSDE  = 1E-01
   
@@ -78,12 +78,12 @@ Here an example of using these flags:
           2434 => (Ti-O1)^3(eta_4)^1
           5234 => (Ti-O2)^3(eta_5)^1
 
-So now you want to add more coefficients to you model but not restart from scratch, you can add in the input:
+* So now you want to add more coefficients to you model but not restart from scratch, you can add in the input:
 
           fit_nfixcoeff = 5
           fit_fixcoeff  = 12 452 6543 2434 5234
 
-Moreover, if you want to exclude a specific coefficient you can add:
+* Moreover, if you want to exclude a specific coefficient you can add:
   
           fit_nbancoeff = 1 
           fit_bancoeff  = 5234
