@@ -22,7 +22,6 @@ sources = [
  "dfpt_atm2fft.F90",
  "m_psptk.F90",
  "m_psps.F90",
- "pspatm.F90",
  "m_pspini.F90",
  "m_psp1.F90",
  "m_psp_hgh.F90",
