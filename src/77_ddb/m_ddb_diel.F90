@@ -1,4 +1,54 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_ddb_diel
+!! NAME
+!! m_ddb_diel
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XG,XW, MVeithen)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_ddb_diel
+
+ use defs_basis
+ use m_errors
+ use m_xmpi
+ use m_profiling_abi
+ use m_ddb
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+
+ use m_anaddb_dataset, only : anaddb_dataset_type
+ use m_crystal,        only : crystal_t
+
+ implicit none
+
+ private
+!!***
+
+ public :: ddb_diel
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/ddb_diel
 !!
 !! NAME
@@ -9,13 +59,6 @@
 !! oscillator strengths and mode effective charges,
 !! and reflectivities (without damping)
 !! See the definitions Eq.(53-54) in PRB55, 10355 (1997).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,XW, MVeithen)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! amu(ntypat)=mass of the atoms (atomic mass unit)
@@ -62,28 +105,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
 & iout,lst,mpert,natom,nph2l,phfrq,comm,ncid)
-
- use defs_basis
- use m_errors
- use m_xmpi
- use m_profiling_abi
- use m_ddb
- use m_nctk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
-
- use m_anaddb_dataset, only : anaddb_dataset_type
- use m_crystal,        only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -495,7 +518,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  ABI_DEALLOCATE(modez)
  ABI_DEALLOCATE(oscstr)
 
-contains
+end subroutine ddb_diel
 !!***
 
 !!****f* ABINIT/alignph
@@ -569,10 +592,6 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
  real(dp),allocatable :: modez(:,:,:),modezabs(:),oscstr(:,:,:),vec(:,:),vect(:,:)
 
 ! *********************************************************************
-
-!DEBUG
-! write(std_out,*)'alignph : enter'
-!ENDDEBUG
 
 !Get the oscillator strength and mode effective charge for each mode
  ABI_ALLOCATE(oscstr,(2,3,3*natom))
@@ -815,5 +834,5 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
 end subroutine alignph
 !!***
 
-end subroutine ddb_diel
+end module m_ddb_diel
 !!***
