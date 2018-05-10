@@ -1,16 +1,78 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mover
+!! NAME
+!!  m_mover
+!!
+!! FUNCTION
+!! Move ion or change acell acording to forces and stresses
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mover
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_abimover
+ use m_abihist
+ use m_xmpi
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+#if defined HAVE_LOTF
+ use lotfpath
+ use m_pred_lotf
+#endif
+
+ use m_fstrings,           only : strcat, sjoin, indent
+ use m_symtk,              only : matr3inv, symmetrize_xred
+ use m_geometry,           only : fcart2fred, chkdilatmx
+ use m_crystal,            only : crystal_init, crystal_free, crystal_t
+ use m_crystal_io,         only : crystal_ncwrite_path
+ use m_time,               only : abi_wtime, sec2str
+ use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
+ use m_electronpositron,   only : electronpositron_type
+ use m_scfcv,              only : scfcv_t, scfcv_run
+ use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
+ use m_dtfil,              only : dtfil_init_time, status
+ use m_xfpack,             only : xfh_update
+ use m_pred_delocint,      only : pred_delocint
+ use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
+ use m_initylmg,           only : initylmg
+ implicit none
+
+ private
+!!***
+
+ public :: mover
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mover
 !! NAME
 !! mover
 !!
 !! FUNCTION
 !! Move ion or change acell acording to forces and stresses
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  amass(natom)=mass of each atom, in unit of electronic mass (=amu*1822...)
@@ -116,46 +178,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abimover
- use m_abihist
- use m_xmpi
- use m_nctk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
-#if defined HAVE_LOTF
- use lotfpath
- use m_pred_lotf
-#endif
-
- use m_fstrings,           only : strcat, sjoin, indent
- use m_symtk,              only : matr3inv, symmetrize_xred
- use m_geometry,           only : fcart2fred, chkdilatmx
- use m_crystal,            only : crystal_init, crystal_free, crystal_t
- use m_crystal_io,         only : crystal_ncwrite_path
- use m_time,               only : abi_wtime, sec2str
- use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_electronpositron,   only : electronpositron_type
- use m_scfcv,              only : scfcv_t, scfcv_run
- use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time, status
- use m_xfpack,             only : xfh_update
- use m_pred_delocint,      only : pred_delocint
- use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
- use m_initylmg,           only : initylmg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

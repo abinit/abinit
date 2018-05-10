@@ -1,17 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_nonlinear
+!! NAME
+!!  m_nonlinear
+!!
+!! FUNCTION
+!! DFT calculations of non linear response functions.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2002-2018 ABINIT group (MVeithen,MB,LB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_nonlinear
+
+ implicit none
+
+ private
+!!***
+
+ public :: nonlinear
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/nonlinear
 !! NAME
 !! nonlinear
 !!
 !! FUNCTION
 !! Primary routine for conducting DFT calculations of non linear response functions.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (MVeithen,MB,LB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  codvsn = code version
@@ -55,6 +86,7 @@
 !!      It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
+!!
 !! PARENTS
 !!      driver
 !!
@@ -1454,4 +1486,7 @@ end if
 !!***
 
 end subroutine nonlinear
+!!***
+
+end module m_nonlinear
 !!***
