@@ -85,7 +85,7 @@ xred              # Reduced coordinate of atoms
       0.25 0.25 0.25
 
 # Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
-ecut 4.5          # Maximal kinetic energy cut-off, in Hartree
+ecut 6.5          # Maximal kinetic energy cut-off, in Hartree
 
 # Definition of the SCF procedure
 nstep   150       # Maximal number of SCF cycles
