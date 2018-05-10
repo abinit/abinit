@@ -39,9 +39,10 @@ module m_pspini
  use m_io_tools,  only : open_file
  use m_pawrad,    only : pawrad_type
  use m_pawtab,    only : pawtab_type, pawtab_set_flags
- use m_psps,      only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch
+ use m_psps,      only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch, test_xml_xmlpaw_upf, &
+                         nctab_eval_tcorespl
  use m_pawpsp,    only : pawpsp_bcast, pawpsp_read_pawheader, pawpsp_read_header_xml,&
-&                        pawpsp_header_type, pawpsp_wvl, pawpsp_7in, pawpsp_17in
+                         pawpsp_header_type, pawpsp_wvl, pawpsp_7in, pawpsp_17in
  use m_pawxmlps,  only : paw_setup, ipsp2xml
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : dictionary, atomic_info, dict_init, dict_free, UNINITIALIZED
@@ -137,7 +138,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
  use interfaces_14_hidewrite
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -827,13 +827,13 @@ end subroutine pspcor
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspatm'
  use interfaces_14_hidewrite
  use interfaces_43_wvl_wrappers
- use interfaces_64_psp, except_this_one => pspatm
 !End of the abilint section
 
  implicit none
