@@ -26,6 +26,7 @@
 module m_pred_delocint
 
  use defs_basis
+ use m_errors
  use m_profiling_abi
  use m_abimover
  use m_abihist
@@ -101,12 +102,12 @@ contains
 
 subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_delocint'
  use interfaces_14_hidewrite
- use interfaces_45_geomoptim, except_this_one => pred_delocint
 !End of the abilint section
 
  implicit none
@@ -724,12 +725,12 @@ end subroutine pred_delocint
 
 subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'deloc2xcart'
  use interfaces_14_hidewrite
- use interfaces_45_geomoptim, except_this_one => deloc2xcart
 !End of the abilint section
 
  implicit none
@@ -908,6 +909,7 @@ end subroutine deloc2xcart
 
 subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -994,11 +996,11 @@ end subroutine fred2fdeloc
 
 subroutine calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_b_matrix'
- use interfaces_45_geomoptim, except_this_one => calc_b_matrix
 !End of the abilint section
 
  implicit none
@@ -1142,6 +1144,7 @@ end subroutine calc_b_matrix
 
 subroutine dbond_length_d1(r1,r2,bb)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1183,6 +1186,7 @@ end subroutine dbond_length_d1
 !!
 
 subroutine dang_d1(r1,r2,r3,bb)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1256,6 +1260,7 @@ end subroutine dang_d1
 
 subroutine dang_d2(r1,r2,r3,bb)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1327,6 +1332,7 @@ end subroutine dang_d2
 !!
 
 subroutine ddihedral_d1(r1,r2,r3,r4,bb)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1440,6 +1446,7 @@ end subroutine ddihedral_d1
 !!
 
 subroutine ddihedral_d2(r1,r2,r3,r4,bb)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1600,11 +1607,11 @@ end subroutine ddihedral_d2
 
 subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xcart2deloc'
- use interfaces_45_geomoptim, except_this_one => xcart2deloc
 !End of the abilint section
 
  implicit none
@@ -1686,11 +1693,11 @@ end subroutine xcart2deloc
 
  subroutine calc_btinv_matrix(b_matrix,natom,ninternal,bt_inv_matrix,u_matrix)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_btinv_matrix'
- use interfaces_45_geomoptim, except_this_one => calc_btinv_matrix
 !End of the abilint section
 
  implicit none
@@ -1789,6 +1796,7 @@ end subroutine calc_btinv_matrix
 
  subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1885,11 +1893,11 @@ subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 & vout,vout_prev,xred,deloc,deloc_int,deloc_force,btinv,gprimd,prim_int,&
 & u_matrix)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xfh_recover_deloc'
- use interfaces_45_geomoptim, except_this_one => xfh_recover_deloc
 !End of the abilint section
 
 implicit none
