@@ -201,7 +201,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_65_paw

@@ -464,7 +464,6 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kdata_init'
- use interfaces_56_recipspace
  use interfaces_66_nonlocal
 !End of the abilint section
 

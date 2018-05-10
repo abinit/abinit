@@ -92,7 +92,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_test'
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => nonlop_test
 !End of the abilint section
 

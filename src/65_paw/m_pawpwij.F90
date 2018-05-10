@@ -348,7 +348,6 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpwij_init'
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

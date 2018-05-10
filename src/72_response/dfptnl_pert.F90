@@ -154,6 +154,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
 &                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked
  use m_paw_an,     only : paw_an_type
+ use m_initylmg,   only : initylmg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -161,7 +162,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 #define ABI_FUNC 'dfptnl_pert'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs

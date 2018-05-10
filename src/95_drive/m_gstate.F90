@@ -225,7 +225,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
  use interfaces_53_ffts
  use interfaces_56_io_mpi
- use interfaces_56_recipspace
  use interfaces_62_poisson
  use interfaces_64_psp
  use interfaces_65_paw

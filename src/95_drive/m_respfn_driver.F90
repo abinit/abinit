@@ -198,7 +198,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use interfaces_52_manage_cuda
 #endif
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_65_paw
