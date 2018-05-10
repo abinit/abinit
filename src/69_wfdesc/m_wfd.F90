@@ -62,6 +62,7 @@ MODULE m_wfd
  use m_paw_io,         only : pawio_print_ij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
  use m_spacepar,       only : symrhg, irrzg
+ use m_initylmg,       only : initylmg
 
  implicit none
 

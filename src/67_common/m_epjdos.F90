@@ -59,6 +59,7 @@ module m_epjdos
  use m_pawrad,         only : pawrad_type, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
+ use m_initylmg,       only : initylmg
 
  implicit none
 

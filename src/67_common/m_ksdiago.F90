@@ -47,7 +47,7 @@ module m_ksdiago
  use m_paw_ij,            only : paw_ij_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder
  use m_pawfgr,            only : pawfgr_type
-
+ use m_initylmg,          only : initylmg
 
  implicit none
 

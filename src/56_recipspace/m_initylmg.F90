@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_initylmg
+!! NAME
+!!  m_initylmg
+!!
+!! FUNCTION
+!! Calculate the real spherical harmonics Ylm (and gradients)
+!! over a set of (reciprocal space) (k+G) vectors
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (FJ, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_initylmg
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+
+ use m_paw_sphharm, only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
+
+ implicit none
+
+ private
+!!***
+
+ public :: initylmg
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/initylmg
 !! NAME
 !! initylmg
@@ -6,14 +53,6 @@
 !! FUNCTION
 !! Calculate the real spherical harmonics Ylm (and gradients)
 !! over a set of (reciprocal space) (k+G) vectors
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  gprimd(3,3)=dimensional reciprocal space primitive
@@ -67,22 +106,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 &  nband,nkpt,npwarr,nsppol,optder,rprimd,ylm,ylm_gr)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
-
- use m_paw_sphharm, only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -152,7 +177,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
  ikg=0
  do ikpt=1,nkpt
 
-   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband(ikpt),-1,me_distrb)) cycle 
+   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband(ikpt),-1,me_distrb)) cycle
 
 
 !  Get k+G-vectors, for this k-point:
@@ -393,4 +418,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
  end if
 
 end subroutine initylmg
+!!***
+
+end module m_initylmg
 !!***

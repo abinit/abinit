@@ -83,6 +83,7 @@ module m_gstate
  use m_inwffil,          only : inwffil
  use m_spacepar,         only : setsym
  use m_mkrho,            only : mkrho, initro, prtrhomxmn
+ use m_initylmg,         only : initylmg
 
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT

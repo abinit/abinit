@@ -205,6 +205,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_stress,           only : stress
  use m_forces,           only : forces
+ use m_initylmg,         only : initylmg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

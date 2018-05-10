@@ -75,6 +75,7 @@ module m_respfn_driver
  use m_mkrho,       only : mkrho
  use m_vdw_dftd2,   only : vdw_dftd2
  use m_vdw_dftd3,   only : vdw_dftd3
+ use m_initylmg,    only : initylmg
 
  implicit none
 

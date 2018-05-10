@@ -41,6 +41,7 @@ MODULE m_pawpwij
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type
  use m_mpinfo,         only : destroy_mpi_enreg
+ use m_initylmg,       only : initylmg
 
  implicit none
 

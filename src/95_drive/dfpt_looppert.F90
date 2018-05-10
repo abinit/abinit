@@ -184,6 +184,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_iogkk,      only : outgkk
  use m_inwffil,    only : inwffil
  use m_spacepar,   only : rotate_rho, setsym
+ use m_initylmg,   only : initylmg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

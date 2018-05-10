@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_energy
+!!****m* ABINIT/m_dft_energy
 !! NAME
-!!  m_energy
+!!  m_dft_energy
 !!
 !! FUNCTION
 !!
