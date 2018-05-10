@@ -96,7 +96,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 #undef ABI_FUNC
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
- use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
 
 implicit none

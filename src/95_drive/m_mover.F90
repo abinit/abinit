@@ -182,6 +182,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -192,7 +193,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use interfaces_67_common
  use interfaces_78_effpot
  use interfaces_79_seqpar_mpi
- use interfaces_95_drive, except_this_one => mover
 !End of the abilint section
 
 implicit none
@@ -1776,4 +1776,7 @@ implicit none
 !!***
 
 end subroutine prtxfase
+!!***
+
+end module m_mover
 !!***

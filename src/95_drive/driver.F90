@@ -133,7 +133,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use interfaces_14_hidewrite
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_95_drive, except_this_one => driver
 !End of the abilint section
 
  implicit none

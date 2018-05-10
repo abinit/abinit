@@ -157,7 +157,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_95_drive, except_this_one => nonlinear
+ use interfaces_95_drive
 !End of the abilint section
 
  implicit none

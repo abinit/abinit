@@ -229,7 +229,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_62_poisson
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_95_drive
 !End of the abilint section
 
  implicit none
