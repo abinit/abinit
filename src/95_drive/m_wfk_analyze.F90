@@ -147,7 +147,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 #define ABI_FUNC 'wfk_analyze'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_64_psp
  use interfaces_65_paw
 !End of the abilint section
 

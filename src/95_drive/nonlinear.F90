@@ -114,6 +114,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_mkrho,       only : mkrho
  use m_getshell,    only : getshell
  use m_pspini,      only : pspini
+ use m_atm2fft,     only : atm2fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -122,7 +123,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_95_drive, except_this_one => nonlinear

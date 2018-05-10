@@ -180,7 +180,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
- character(len=500) :: message
+ !character(len=500) :: message
 !arrays
  integer,allocatable :: gbound(:,:),kg_k(:,:)
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc

@@ -130,7 +130,6 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 #undef ABI_FUNC
 #define ABI_FUNC 'extraprho'
  use interfaces_14_hidewrite
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none

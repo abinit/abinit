@@ -180,7 +180,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 #define ABI_FUNC 'forces'
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_67_common
 !End of the abilint section
 
@@ -745,7 +744,6 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
 #define ABI_FUNC 'fresidrsp'
  use interfaces_14_hidewrite
  use interfaces_53_ffts
- use interfaces_64_psp
 !End of the abilint section
 
  implicit none

@@ -114,12 +114,13 @@ contains
 
 subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
  use interfaces_14_hidewrite
- use interfaces_64_psp, except_this_one => pspini
+ use interfaces_64_psp
 !End of the abilint section
 
  implicit none
@@ -659,6 +660,7 @@ end subroutine pspini
 !! SOURCE
 
 subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

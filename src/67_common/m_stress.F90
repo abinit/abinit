@@ -45,6 +45,7 @@ module m_stress
  use m_mpinfo,           only : ptabs_fourdp
  use m_vdw_dftd2,        only : vdw_dftd2
  use m_vdw_dftd3,        only : vdw_dftd3
+ use m_atm2fft,          only : atm2fft
 
  implicit none
 
@@ -184,7 +185,6 @@ contains
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_67_common
 !End of the abilint section
 

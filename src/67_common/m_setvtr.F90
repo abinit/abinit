@@ -49,6 +49,7 @@ module m_setvtr
  use m_dens,              only : mag_constr
  use m_vdw_dftd2,         only : vdw_dftd2
  use m_vdw_dftd3,         only : vdw_dftd3
+ use m_atm2fft,           only : atm2fft
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history
@@ -208,7 +209,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_62_wvl_wfs
- use interfaces_64_psp
  use interfaces_67_common
 !End of the abilint section
 

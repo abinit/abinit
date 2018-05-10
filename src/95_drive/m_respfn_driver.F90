@@ -77,6 +77,7 @@ module m_respfn_driver
  use m_vdw_dftd3,   only : vdw_dftd3
  use m_initylmg,    only : initylmg
  use m_pspini,      only : pspini
+ use m_atm2fft,     only : atm2fft
 
  implicit none
 
@@ -200,7 +201,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #endif
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response
