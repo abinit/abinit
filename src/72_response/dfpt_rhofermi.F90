@@ -173,7 +173,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 #define ABI_FUNC 'dfpt_rhofermi'
  use interfaces_32_util
  use interfaces_65_paw
- use interfaces_66_nonlocal
  use interfaces_72_response, except_this_one => dfpt_rhofermi
 !End of the abilint section
 

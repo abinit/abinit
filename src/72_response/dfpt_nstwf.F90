@@ -103,7 +103,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nstwf'
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 

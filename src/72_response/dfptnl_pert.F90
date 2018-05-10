@@ -155,6 +155,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 &                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked
  use m_paw_an,     only : paw_an_type
  use m_initylmg,   only : initylmg
+ use m_mkffnl,     only : mkffnl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
