@@ -154,7 +154,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_dtfil,              only : dtfil_init_time, status
  use m_xfpack,             only : xfh_update
  use m_pred_delocint,      only : pred_delocint
- use m_pred_bfgs,          only : pred_bfgs
+ use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

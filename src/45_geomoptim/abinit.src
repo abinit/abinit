@@ -41,7 +41,6 @@ sources = [
  "pred_isokinetic.F90",
  "pred_isothermal.F90",
  "pred_langevin.F90",
- "pred_lbfgs.F90",
  "pred_moldyn.F90",
  "pred_nose.F90",
  "pred_simple.F90",
