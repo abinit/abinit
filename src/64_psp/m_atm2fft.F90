@@ -1,4 +1,55 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_atm2fft
+!! NAME
+!!  m_atm2fft
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (FJ, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_atm2fft
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+
+ use m_time,        only : timab
+ use defs_datatypes,only : pseudopotential_type
+ use m_pawtab,      only : pawtab_type
+ use m_distribfft,  only : distribfft_type
+ use m_fft,         only : zerosym
+ use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft
+
+ implicit none
+
+ private
+!!***
+
+ public :: atm2fft
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/atm2fft
 !! NAME
 !! atm2fft
@@ -17,12 +68,6 @@
 !!   optgr  =1: computes contribution of atomic pot./dens. to forces
 !!   optstr =1: computes contribution of atomic pot./dens. to stress tensor
 !!   optdyfr=1: computes contribution of atomic pot./dens. to frozen part of dyn. matrix
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
@@ -142,31 +187,11 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &                  grn,grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
 &                  optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
 &                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
 &                  is2_in,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
-
- use m_profiling_abi
- use m_errors
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_xmpi
-
- use m_time,        only : timab
- use defs_datatypes,only : pseudopotential_type
- use m_pawtab,      only : pawtab_type
- use m_distribfft,  only : distribfft_type
- use m_fft,         only : zerosym
- use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -241,7 +266,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  end if
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
- 
+
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
 
@@ -362,7 +387,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl
    end if
-   
+
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
      ig3_=ig3;if (ig3_==(n3/2+1)) ig3_=0
@@ -626,7 +651,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                term  = vg (re,ii)*sfr + vg (im,ii)*sfi
                term1 = vg1(re,ii)*sfr + vg1(im,ii)*sfi
                term2 = vg1_core(re,ii)*sfr + vg1_core(im,ii)*sfi
-               
+
                do is1=1,6
 
 !                Compute G*dG/Deps_{\alpha\beta}
@@ -661,9 +686,9 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !                Compute -2pi*G*i*vxc(G)*(dnat*dG/deps-delta*nat(G))*(exp(-iGr))
                  term=(vg(im,ii)*phre_igia(ia)+vg(re,ii)*phim_igia(ia))*&
 &                 (dn_at*dg2-delta(is2_in)*n_at)*two_pi
-                 eltfrn(js  ,is2_in) = eltfrn(js  ,is2_in) - dbl_ig1*term 
-                 eltfrn(js+1,is2_in) = eltfrn(js+1,is2_in) - dbl_ig2*term 
-                 eltfrn(js+2,is2_in) = eltfrn(js+2,is2_in) - dbl_ig3*term 
+                 eltfrn(js  ,is2_in) = eltfrn(js  ,is2_in) - dbl_ig1*term
+                 eltfrn(js+1,is2_in) = eltfrn(js+1,is2_in) - dbl_ig2*term
+                 eltfrn(js+2,is2_in) = eltfrn(js+2,is2_in) - dbl_ig3*term
                end do
              end if
 !            End skip G**2 outside cutoff:
@@ -816,7 +841,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !   end do
 ! end if
 
-!Normalize stress tensor: 
+!Normalize stress tensor:
  if (optstr==1) then
    if (optv==1) then
      strv(:)=strv(:)/ucvol
@@ -901,4 +926,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  end function d2gsqds_atm
 
 end subroutine atm2fft
+!!***
+
+end subroutine m_atm2fft
 !!***

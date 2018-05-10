@@ -45,6 +45,7 @@ module m_forces
  use m_fft,              only : zerosym
  use m_cgtools,          only : mean_fftr
  use m_mpinfo,           only : pre_gather, pre_scatter
+ use m_atm2fft,          only : atm2fft
 
  implicit none
 

@@ -39,6 +39,7 @@ module m_extraprho
  use m_geometry, only : metric
  use m_kg, only : getph
  use m_jellium,  only : jellium
+ use m_atm2fft,  only : atm2fft
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &

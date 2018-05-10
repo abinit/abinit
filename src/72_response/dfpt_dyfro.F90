@@ -108,6 +108,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  use defs_datatypes,  only : pseudopotential_type
  use m_pawtab,        only : pawtab_type
  use m_fft,           only : zerosym
+ use m_atm2fft,       only : atm2fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
