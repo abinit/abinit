@@ -17,8 +17,7 @@
 !! only performed if optcell/=0. The convergence requirement on
 !! the atomic forces, dtset%tolmxf,  allows an early exit.
 !! Otherwise no more than dtset%ntime steps are performed.
-!! Returned quantities are xred, and eventually acell and rprim
-!! (new ones!).
+!! Returned quantities are xred, and eventually acell and rprim (new ones!).
 !! Could see MinPack on netlib.org
 !!
 !! COPYRIGHT
@@ -30,8 +29,7 @@
 !! see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! ab_mover <type(abimover)> : Datatype with all the information
-!!                                needed by the preditor
+!! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
 !! ionmov : (22) Specific kind of BFGS
@@ -40,8 +38,7 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
+!! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
 !!      mover
@@ -438,4 +435,3 @@ real(dp) :: strten(6)
 
 end subroutine pred_lbfgs
 !!***
-

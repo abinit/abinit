@@ -1,4 +1,50 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_bfgs
+!! NAME
+!!  m_pred_bfgs
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_bfgs
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+ use m_xfpack
+
+ use m_geometry,    only : mkrdim, fcart2fred, metric
+ use m_bfgs,        only : hessinit, hessupdt, brdene
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_bfgs
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_bfgs
 !! NAME
 !! pred_bfgs
@@ -17,8 +63,7 @@
 !! only performed if optcell/=0. The convergence requirement on
 !! the atomic forces, dtset%tolmxf,  allows an early exit.
 !! Otherwise no more than dtset%ntime steps are performed.
-!! Returned quantities are xred, and eventually acell and rprim
-!! (new ones!).
+!! Returned quantities are xred, and eventually acell and rprim (new ones!).
 !! Could see Numerical Recipes (Fortran), 1986, page 307.
 !!
 !! IONMOV 3:
@@ -26,16 +71,7 @@
 !! Goldfarb-Shanno minimization (BFGS), modified to take into
 !! account the total energy as well as the gradients (as in usual
 !! BFGS). See the paper by Schlegel, J. Comp. Chem. 3, 214 (1982).
-!! Might be better than ionmov=2 for few degrees of freedom (less
-!! than 3 or 4)
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
+!! Might be better than ionmov=2 for few degrees of freedom (less than 3 or 4)
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information
@@ -48,8 +84,7 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
+!! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
 !!      mover
@@ -60,22 +95,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
- use m_xfpack
-
- use m_geometry,    only : mkrdim, fcart2fred, metric
- use m_bfgs,        only : hessinit, hessupdt, brdene
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -536,3 +556,5 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 end subroutine pred_bfgs
 !!***
 
+end module m_pred_bfgs
+!!***
