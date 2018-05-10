@@ -122,7 +122,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phpi'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

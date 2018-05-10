@@ -124,6 +124,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &          gvnl1,idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,&
 &          rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -854,6 +855,7 @@ end subroutine getgh1c
 subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvloc,&
 &                                pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -963,6 +965,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,dkinpw,nkpg,&               ! In
 &                nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                     ! Out
 &                ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                               ! Optional
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -320,7 +320,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

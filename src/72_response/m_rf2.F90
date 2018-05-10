@@ -292,6 +292,7 @@ end subroutine rf2_getidirs
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
                                  jband,debug_mode,vi,v1j,v2j)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -465,6 +466,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 &                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
 &                                debug_mode,prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &                                conj,enl,ffnl1,ffnl1_test) ! optional
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
