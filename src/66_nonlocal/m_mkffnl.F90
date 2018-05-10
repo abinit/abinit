@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mkffnl
+!! NAME
+!!  m_mkffnl
+!!
+!! FUNCTION
+!! Make FFNL, nonlocal form factors, for each type of atom up to ntypat
+!! and for each angular momentum.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, DRH)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mkffnl
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_splines
+
+ use m_time,     only : timab
+ use m_kg,       only : mkkin
+
+ implicit none
+
+ private
+!!***
+
+ public :: mkffnl
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mkffnl
 !! NAME
 !! mkffnl
@@ -11,12 +58,6 @@
 !!   case, form factors are real and divided by |k+G|^l;
 !! When spherical harmonics are used, FFNLs depend on (l,m,n)
 !!   components; in this case, form factors are multiplied by Ylm(k+G).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, DRH)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  dimekb=second dimension of ekb (see ekb)
@@ -143,23 +184,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 &                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
 &                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
- use m_splines
-
- use m_time,     only : timab
- use m_kg,       only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -659,4 +686,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  DBG_EXIT("COLL")
 
 end subroutine mkffnl
+!!***
+
+end module m_mkffnl
 !!***

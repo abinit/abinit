@@ -193,6 +193,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_fft,      only : fftpac
  use m_spacepar, only : hartrestr, symrhg
  use m_initylmg, only : initylmg
+ use m_mkffnl,   only : mkffnl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

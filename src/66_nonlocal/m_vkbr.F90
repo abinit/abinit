@@ -36,6 +36,7 @@ MODULE m_vkbr
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_kg,            only : mkkin
+ use m_mkffnl,        only : mkffnl
 
  implicit none
 

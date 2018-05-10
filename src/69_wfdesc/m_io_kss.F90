@@ -61,6 +61,7 @@ MODULE m_io_kss
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_kg,               only : mkkin, mkkpg
  use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
+ use m_mkffnl,           only : mkffnl
 
  implicit none
 

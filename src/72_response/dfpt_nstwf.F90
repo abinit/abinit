@@ -97,6 +97,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use m_time,    only : timab
  use m_pawcprj, only : pawcprj_type
  use m_kg,      only : mkkpg
+ use m_mkffnl,  only : mkffnl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
