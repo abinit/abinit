@@ -76,6 +76,7 @@ module m_respfn_driver
  use m_vdw_dftd2,   only : vdw_dftd2
  use m_vdw_dftd3,   only : vdw_dftd3
  use m_initylmg,    only : initylmg
+ use m_pspini,      only : pspini
 
  implicit none
 

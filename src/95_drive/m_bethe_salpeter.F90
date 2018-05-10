@@ -87,6 +87,7 @@ module m_bethe_salpeter
  use m_exc_build,       only : exc_build_ham
  use m_setvtr,          only : setvtr
  use m_mkrho,           only : prtrhomxmn
+ use m_pspini,          only : pspini
 
  implicit none
 

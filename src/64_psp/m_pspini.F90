@@ -1,4 +1,54 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pspini
+!! NAME
+!!  m_pspini
+!!
+!! FUNCTION
+!!  Initialize pseudopotential datastructures from files.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pspini
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+
+ use m_time,          only : timab
+ use m_pawrad,        only : pawrad_type
+ use m_pawtab,        only : pawtab_type, pawtab_set_flags
+ use m_psps,          only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch
+
+ implicit none
+
+ private
+!!***
+
+ public :: pspini
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pspini
 !! NAME
 !! pspini
@@ -62,25 +112,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_xmpi
-
- use m_time,          only : timab
- use m_psps,          only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch
- use m_pawrad,        only : pawrad_type
- use m_pawtab,        only : pawtab_type, pawtab_set_flags
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -628,9 +660,6 @@ end subroutine pspini
 
 subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
 
- use defs_basis
- use m_profiling_abi
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -666,4 +695,7 @@ subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
  ecore=charge*esum
 
 end subroutine pspcor
+!!***
+
+end module m_pspini
 !!***

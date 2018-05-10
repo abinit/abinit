@@ -30,6 +30,8 @@ module m_eph_driver
  use m_errors
  use m_profiling_abi
 
+ use m_pspini,          only : pspini
+
  implicit none
 
  private

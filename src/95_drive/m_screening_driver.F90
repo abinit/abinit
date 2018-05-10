@@ -86,6 +86,7 @@ module m_screening_driver
  use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
+ use m_pspini,        only : pspini
 
  implicit none
 

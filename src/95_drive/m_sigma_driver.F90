@@ -100,6 +100,7 @@ module m_sigma_driver
  use m_sigc,          only : calc_sigc_me
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
+ use m_pspini,        only : pspini
 
  implicit none
 
