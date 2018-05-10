@@ -1,4 +1,60 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_getgh1c
+!! NAME
+!!  m_getgh1c
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG, DRH, MT, SPr)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_getgh1c
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use defs_abitypes, only : MPI_type, dataset_type
+ use defs_datatypes, only : pseudopotential_type
+ use m_time,        only : timab
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_kg,          only : kpgstr, mkkin, mkkpg
+ use m_mkffnl,      only : mkffnl
+ use m_pawfgr,      only : pawfgr_type
+ use m_fft,         only : fftpac
+ use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
+&                          load_k_hamiltonian,load_kprime_hamiltonian,&
+&                          load_k_rf_hamiltonian
+
+ implicit none
+
+ private
+!!***
+
+ public :: getgh1c
+ public :: rf_transgrid_and_pack
+ public :: getgh1c_setup
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/getgh1c
 !!
 !! NAME
@@ -10,13 +66,6 @@
 !! Result is put in array gh1c.
 !! If required, part of <G|K(1)+Vnonlocal^(1)|C> not depending on VHxc^(1) is also returned in gvnl1c.
 !! If required, <G|S^(1)|C> is returned in gs1c (S=overlap - PAW only)
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG, DRH, MT, SPr)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  berryopt=option for Berry phase
@@ -71,25 +120,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &          gvnl1,idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,&
 &          rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
-
- use m_time,        only : timab
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
- use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
- use m_kg,          only : kpgstr, mkkin, mkkpg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -821,15 +854,6 @@ end subroutine getgh1c
 subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvloc,&
 &                                pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
-
- use m_pawfgr, only : pawfgr_type
- use m_kg,     only : mkkin, kpgstr
- use m_fft,    only : fftpac
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -939,18 +963,6 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,dkinpw,nkpg,&               ! In
 &                nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                     ! Out
 &                ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                               ! Optional
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_errors
-
- use m_kg,          only : mkkin, kpgstr, mkkpg
- use m_mkffnl,      only : mkffnl
- use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
-&                          load_k_hamiltonian,load_kprime_hamiltonian,&
-&                          load_k_rf_hamiltonian
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1190,4 +1202,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  end if
 
 end subroutine getgh1c_setup
+!!***
+
+end module m_getgh1c
 !!***

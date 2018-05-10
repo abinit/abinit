@@ -59,6 +59,7 @@ module m_phgamma
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
  use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
 
  implicit none
 

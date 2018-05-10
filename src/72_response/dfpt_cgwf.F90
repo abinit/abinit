@@ -124,7 +124,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
- use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type,KPRIME_H_KPRIME
+ use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
+ use m_getgh1c,     only : getgh1c
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -256,7 +257,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
 !Several checking statements
  if (prtvol==-level.or.prtvol==-19.or.prtvol==-20) then
-   write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done" 
+   write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
    ! Search CGWF3_WARNING in the log file to find errors (if any)
    call wrtout(std_out,msg,'PERS')
    ABI_ALLOCATE(work,(2,npw1*nspinor))
@@ -274,7 +275,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        if(abs(dotr)>tol12) test_is_ok=0
      end if
      if(abs(doti)>tol12) test_is_ok=0
-     if(test_is_ok/=1) then 
+     if(test_is_ok/=1) then
        write(msg,'(a,i3,a,2es22.15)') "CGWF3_WARNING : <Psi_k+q,i^(0)|S(0)|Psi_k+q,j^(0)> for band j=",iband," is ",dotr,doti
        call wrtout(std_out,msg,'PERS')
      end if

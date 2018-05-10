@@ -32,7 +32,7 @@ sources = [
  "fock_ACE_getghc.F90",
  "fock_getghc.F90",
  "getghc.F90",
- "getgh1c.F90",
+ "m_getgh1c.F90",
  "getgh2c.F90",
  "getgsc.F90",
  "lincom_cgcprj.F90",

@@ -60,6 +60,7 @@ module m_sigmaph
  use m_lgroup,         only : lgroup_t, lgroup_new, lgroup_free
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
