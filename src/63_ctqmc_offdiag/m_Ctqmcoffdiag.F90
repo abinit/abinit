@@ -1583,9 +1583,9 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
      !  END OF TEST
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-     DO iomega=1,op%Wmax
-       call xginv(F_omega(iomega,:,:),flavors)
-     END DO
+     !DO iomega=1,op%Wmax
+     !  call xginv(F_omega(iomega,:,:),flavors)
+     !END DO
     !F_omega = CMPLX(-1.d0,0,8)/Gomega_tmp
   !ELSE
   !=============================================================================================
@@ -1738,6 +1738,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
       END DO
     END DO
   ENDIF
+  close(346)
   DO iflavor = 1, flavors
     DO iflavor2 = 1, flavors
       DO itau=1,samples+1
@@ -4508,6 +4509,9 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
   CLOSE(43)
   CLOSE(44)
+  CLOSE(45)
+  CLOSE(46)
+  CLOSE(47)
   !call flush_unit(43)
 
 END SUBROUTINE Ctqmcoffdiag_printGreen

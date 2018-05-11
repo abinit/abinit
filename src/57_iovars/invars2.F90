@@ -1840,6 +1840,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
        MSG_ERROR(message)
      end if
      if(dtset%dmft_solv==5.or.dtset%dmft_solv==8) then
+    ! if(dtset%dmft_solv==5) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
        if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_check',tread,'INT')

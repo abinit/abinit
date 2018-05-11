@@ -2099,6 +2099,8 @@ SUBROUTINE  BathOperatoroffdiag_destroy(op)
   CALL Vector_destroy(op%Rtau)
   CALL Vector_destroy(op%Qtau)
   FREEIF(op%F)
+  FREEIF(op%Fshift)
+  FREEIF(op%tails)
 
   op%MAddFlag     = .FALSE.
   op%MRemoveFlag  = .FALSE.

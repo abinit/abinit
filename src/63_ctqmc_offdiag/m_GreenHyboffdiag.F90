@@ -1610,14 +1610,14 @@ include 'mpif.h'
     END IF
   END IF
 
-  IF ( ALLOCATED(op%oper_w) ) THEN
-    IF ( SIZE(op%oper_w,1) .NE. Nom ) THEN
-      FREE(op%oper_w)
-      MALLOC(op%oper_w,(1:Nom,nflavors,nflavors))
-    END IF
-  ELSE
-    MALLOC(op%oper_w,(1:Nom,nflavors,nflavors))
-  END IF
+  !!IF ( ALLOCATED(op%oper_w) ) THEN
+  !!  IF ( SIZE(op%oper_w,1) .NE. Nom ) THEN
+  !!    FREE(op%oper_w)
+  !!    MALLOC(op%oper_w,(1:Nom,nflavors,nflavors))
+  !!  END IF
+  !!ELSE
+  !!  MALLOC(op%oper_w,(1:Nom,nflavors,nflavors))
+  !!END IF
 
   !!write(6,*) "PRESENT(GOMEGA)", PRESENT(GOMEGA)
   !!write(6,*) "PRESENT(OMEGA)", PRESENT(OMEGA)
@@ -1795,7 +1795,7 @@ include 'mpif.h'
       op%setW = .TRUE.
     ENDDO ! iflavor1
   ENDDO ! iflavor2
-  op%oper_w=Gomega
+  !!op%oper_w=Gomega
   do iflavor1=1,nflavors
     !sui!write(6,*)  iflavor1
       do i=1,Nom
@@ -1956,6 +1956,7 @@ SUBROUTINE GreenHyboffdiag_destroy(op)
   enddo
   DT_FREEIF(op%map)
   FREEIF(op%oper)
+  FREEIF(op%Mk)
   FREEIF(op%oper_w)
   FREEIF(op%oper_w_old)
   FREEIF(op%omega)

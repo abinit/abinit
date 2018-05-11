@@ -1353,9 +1353,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call wrtout(std_out,message,'COLL')
      end if
 
-     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==8) then
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
-       open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
+       if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+         open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
+       endif
      else
        ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
@@ -1800,13 +1802,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
          !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here
          !close(4243)
-         if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-           MSG_ERROR(message)
-         end if
-         do ifreq=1,paw_dmft%dmft_nwlo
-           write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
-&           (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
-         end do
+         if(paw_dmft%dmft_solv==5) then
+           if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
+             MSG_ERROR(message)
+           end if
+           do ifreq=1,paw_dmft%dmft_nwlo
+             write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
+&             (gw_tmp(ifreq,iflavor), iflavor=1, nflavor)
+           end do
+         endif
          close(unt)
        end if
 ! </ HACK >
@@ -1944,7 +1948,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
        end do
      end if
-     if(paw_dmft%dmft_solv<6) ABI_DEALLOCATE(gw_tmp)
+     if(paw_dmft%dmft_solv<6) then
+      ! write(6,*) "dmft_solv",paw_dmft%dmft_solv
+       ABI_DEALLOCATE(gw_tmp)
+     endif
      ABI_DEALLOCATE(gw_tmp_nd)
      ABI_DEALLOCATE(gtmp)
      ABI_DEALLOCATE(gtmp_nd)
