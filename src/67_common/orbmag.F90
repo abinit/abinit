@@ -476,9 +476,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
              if (.NOT. has_cprj_k_kb(bdx)) then
 
-                call ctocprjb(atindx1,dkb,cg,cprj_k_kb(:,:,bdx),gprimd,icgb,ikgb,kg,kpointb,&
-                     & mcg,dtset%mpw,dtset%mkmem,dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
-                     & pawang,pawrad,pawtab,psps,dtset%typat,xred,ylm)
+                call ctocprjb(atindx1,cg,cprj_k_kb(:,:,bdx),dtorbmag,icgb,bdir,bfor,ikgb,&
+                     & ikptb,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
+                     & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
+                     & pawang,pawrad,pawtab,dtset%typat,ylm)
 
                 has_cprj_k_kb(bdx) = .TRUE.
                 
@@ -542,9 +543,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                 if (.NOT. has_cprj_k_kb(gdx)) then
 
-                   call ctocprjb(atindx1,dkg,cg,cprj_k_kb(:,:,gdx),gprimd,icgg,ikgg,kg,kpointg,&
-                        & mcg,dtset%mpw,dtset%mkmem,dtset%natom,nband_k,ncpgr,npw_kg,my_nspinor,dtset%ntypat,&
-                        & pawang,pawrad,pawtab,psps,dtset%typat,xred,ylm)
+                   call ctocprjb(atindx1,cg,cprj_k_kb(:,:,gdx),dtorbmag,icgg,gdir,gfor,ikgg,&
+                        & ikptg,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
+                        & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
+                        & pawang,pawrad,pawtab,dtset%typat,ylm)
 
                    has_cprj_k_kb(gdx) = .TRUE.
                 

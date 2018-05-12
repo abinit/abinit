@@ -36,19 +36,20 @@
 
 #include "abi_common.h"
 
-subroutine ctocprjb(atindx1,bvec,cg,cprj,gprimd,icgb,ikgb,kg,kpointb,&
-     & mcg,mpw,mkmem,natom,nband_k,ncpgr,npwb,nspinor,ntypat,&
-     & pawang,pawrad,pawtab,psps,typat,xred,ylm)
+subroutine ctocprjb(atindx1,cg,cprj,dtorbmag,icgb,idir,ifor,ikgb,&
+     & ikptb,mcg,mkmem,mpsang,mpw,natom,nband_k,ncpgr,npwb,nspinor,ntypat,&
+     & pawang,pawrad,pawtab,typat,ylm)
 
  use defs_basis
  use defs_abitypes
- use defs_datatypes, only : pseudopotential_type
  use m_profiling_abi
  use m_errors
 
- use m_pawang,  only : pawang_type
+ use m_orbmag
+ 
+ use m_pawang,           only : pawang_type
  use m_pawcprj, only : pawcprj_type, pawcprj_put, pawcprj_alloc, pawcprj_free, pawcprj_getdim
- use m_pawrad,  only : pawrad_type
+ use m_pawrad,           only : pawrad_type
  use m_pawtab,  only : pawtab_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -62,22 +63,23 @@ subroutine ctocprjb(atindx1,bvec,cg,cprj,gprimd,icgb,ikgb,kg,kpointb,&
 
 !Arguments -------------------------------
  !scalars
- integer,intent(in) :: icgb,ikgb,mcg,mpw,mkmem,natom,nband_k,ncpgr,npwb,nspinor,ntypat
+ integer,intent(in) :: icgb,idir,ifor,ikgb,ikptb,mcg,mkmem,mpsang,mpw
+ integer,intent(in) :: natom,nband_k,ncpgr,npwb,nspinor,ntypat
  type(pawang_type),intent(in) :: pawang
- type(pseudopotential_type),intent(in) :: psps
  !arrays
- integer,intent(in) :: atindx1(natom),kg(3,mpw*mkmem),typat(natom)
- real(dp),intent(in) :: bvec(3),cg(2,mcg),gprimd(3,3),kpointb(3),xred(3,natom)
- real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
- type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
+ integer,intent(in) :: atindx1(natom),typat(natom)
+ real(dp),intent(in) :: cg(2,mcg)
+ real(dp),intent(in) :: ylm(mpw*mkmem,mpsang*mpsang)
+ type(orbmag_type),intent(inout) :: dtorbmag
+ type(pawrad_type),intent(in) :: pawrad(ntypat)
+ type(pawtab_type),intent(in) :: pawtab(ntypat)
  type(pawcprj_type),intent(out) ::  cprj(natom,nband_k)
 
 !Local variables-------------------------------
  !scalars
  integer :: ilm, iband
  !arrays
- integer,allocatable :: dimlmn(:),kbg(:,:),nattyp_dum(:)
+ integer,allocatable :: dimlmn(:),nattyp_dum(:)
  real(dp),allocatable :: cwavef(:,:),ylm_kb(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -92,11 +94,8 @@ subroutine ctocprjb(atindx1,bvec,cg,cprj,gprimd,icgb,ikgb,kg,kpointb,&
  ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,1))
  call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
 
- ABI_ALLOCATE(kbg,(3,npwb))
- kbg(:,1:npwb)=kg(:,ikgb+1:ikgb+npwb)
-
- ABI_ALLOCATE(ylm_kb,(npwb,psps%mpsang*psps%mpsang*psps%useylm))
- do ilm=1,psps%mpsang*psps%mpsang
+ ABI_ALLOCATE(ylm_kb,(npwb,mpsang*mpsang))
+ do ilm=1,mpsang*mpsang
     ylm_kb(1:npwb,ilm)=ylm(1+ikgb:npwb+ikgb,ilm)
  end do
  
@@ -104,8 +103,8 @@ subroutine ctocprjb(atindx1,bvec,cg,cprj,gprimd,icgb,ikgb,kg,kpointb,&
 
     cwavef(1:2,1:npwb) = cg(1:2,icgb+(iband-1)*npwb+1:icgb+iband*npwb)
     
-    call getcprjb(bvec,cwavef,cwaveprj,gprimd,kbg,kpointb,natom,npwb,nspinor,ntypat,&
-         & pawang,pawrad,pawtab,psps,typat,xred,ylm_kb)
+    call getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
+     &mpsang,natom,npwb,nspinor,ntypat,pawang,pawrad,pawtab,typat,ylm_kb)
 
     ! hard-coded for nspinor 1, nsppol 1
     call pawcprj_put(atindx1,cwaveprj,cprj,natom,iband,0,0,0,1,&
@@ -114,7 +113,6 @@ subroutine ctocprjb(atindx1,bvec,cg,cprj,gprimd,icgb,ikgb,kg,kpointb,&
  end do
 
  ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(kbg)
  ABI_DEALLOCATE(ylm_kb)
  ABI_DEALLOCATE(dimlmn)
 
