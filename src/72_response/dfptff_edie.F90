@@ -352,5 +352,6 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
  ABI_DEALLOCATE(vect2)
  ABI_DEALLOCATE(pwind_tmp)
  ABI_DEALLOCATE(Amat)
+
 end subroutine dfptff_edie
 !!***

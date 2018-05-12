@@ -326,8 +326,6 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    end do
 
 
-
-
 !  compute <u^(0)_{k_j+n}|u^(1)_{k_j-1,q}> matrix----------------------------------------------------
 
 !  prepare to calculate overlap matrix

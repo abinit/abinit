@@ -531,16 +531,9 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
          ikg1 = ikg1 + npw_k1
 
        end do    ! close loop over ikpt
-
      end do    ! close loop over ifor
-
    end if      ! rfdir(idir) == 1
-
  end do        ! close loop over idir
-
-
-
-
 
 
 !--------------------------------------------------------------------------- 
@@ -602,15 +595,9 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
          ikg1 = ikg1 + npw_k1
 
        end do    ! close loop over ikpt
-
      end do    ! close loop over ifor
-
    end if      ! rfdir(idir) == 1
-
  end do        ! close loop over idir===============================================================
-
-
-
 
 
 !Build the array pwind3 that is needed to compute the overlap matrices===============================
@@ -672,18 +659,14 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
          ikg1 = ikg1 + npw_k1
 
        end do    ! close loop over ikpt
-
      end do    ! close loop over ifor
-
    end if      ! rfdir(idir) == 1
-
  end do        ! close loop over idir====================================================================
 
  ABI_DEALLOCATE(kg_tmp)
  ABI_DEALLOCATE(kpt1)
  ABI_DEALLOCATE(npwarr_tmp)
  ABI_DEALLOCATE(npwtot)
-
 
 end subroutine dfptff_initberry
 !!***

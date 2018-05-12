@@ -195,5 +195,6 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
  ABI_DEALLOCATE(vect1)
  ABI_DEALLOCATE(vect2)
  ABI_DEALLOCATE(pwind_tmp)
+
 end subroutine dfptff_bec
 !!***

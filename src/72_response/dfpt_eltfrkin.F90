@@ -218,6 +218,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  DBG_EXIT("COLL")
 
 contains
+!!***
 
 !!****f* ABINIT/d2kindstr2
 !! NAME
