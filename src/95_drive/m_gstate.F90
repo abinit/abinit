@@ -86,7 +86,9 @@ module m_gstate
  use m_initylmg,         only : initylmg
  use m_pspini,           only : pspini
  use m_mover,            only : mover
+#if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
+#endif
 
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
@@ -222,9 +224,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_43_wvl_wrappers
-#if defined HAVE_GPU_CUDA
- use interfaces_52_manage_cuda
-#endif
  use interfaces_53_ffts
  use interfaces_56_io_mpi
  use interfaces_62_poisson

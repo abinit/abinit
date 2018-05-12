@@ -78,7 +78,10 @@ module m_respfn_driver
  use m_initylmg,    only : initylmg
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
+ use m_dfpt_loopert, only : dfpt_looppert
+#if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
+#endif
 
  implicit none
 
@@ -197,15 +200,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #define ABI_FUNC 'respfn'
  use interfaces_14_hidewrite
  use interfaces_41_xc_lowlevel
-#if defined HAVE_GPU_CUDA
- use interfaces_52_manage_cuda
-#endif
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_65_paw
  use interfaces_67_common
  use interfaces_72_response
- use interfaces_95_drive
 !End of the abilint section
 
  implicit none

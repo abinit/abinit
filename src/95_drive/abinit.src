@@ -25,7 +25,7 @@ sources = [
  "m_gstateimg.F90",
  "m_gwls_sternheimer.F90",
  "dfptnl_loop.F90",
- "dfpt_looppert.F90",
+ "m_dfpt_looppert.F90",
  "m_mover.F90",
  "mover_effpot.F90",
  "m_argparse.F90",
