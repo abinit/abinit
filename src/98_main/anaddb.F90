@@ -80,6 +80,7 @@ program anaddb
  use m_thmeig,         only : thmeig
  use m_raman,          only : ramansus, electrooptic
  use m_ddb_diel,       only : ddb_diel
+ use m_relaxpol,       only : relaxpol
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

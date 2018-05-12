@@ -1,6 +1,53 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/relaxpol
+!!****m* ABINIT/m_relaxpol
+!! NAME
+!!  m_relaxpol
 !!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (MVeithen)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_relaxpol
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use m_fstrings,  only : sjoin, itoa
+ use m_symtk,     only : matr3inv
+ use m_abilasi,   only : dzgedi, dzgefa
+ use m_geometry,  only : xcart2xred
+ use m_dynmat,    only : symdyma
+ use m_crystal,   only : crystal_t
+
+ implicit none
+
+ private
+!!***
+
+ public :: relaxpol
+!!***
+
+contains
+!!***
+
+!!****f* ABINIT/relaxpol
 !! NAME
 !! relaxpol
 !!
@@ -9,13 +56,6 @@
 !! 2) Structural relaxation at fixed polarization: this routine
 !!    solves the linear system of equations Eq.(13)
 !!    of Na Sai et al., PRB 66, 104108 (2002).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MVeithen)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! blkflg(msize) = flag for every matrix element (0=> the element
@@ -64,27 +104,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 & mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
 & strten,targetpol,usepaw)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_fstrings,  only : sjoin, itoa
- use m_symtk,     only : matr3inv
- use m_abilasi,   only : dzgedi, dzgefa
- use m_geometry,  only : xcart2xred
- use m_dynmat,    only : symdyma
- use m_crystal,   only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -646,4 +668,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
  ABI_DEALLOCATE(irelaxat)
 
 end subroutine relaxpol
+!!***
+
+end module m_relaxpol
 !!***
