@@ -127,21 +127,28 @@ subroutine getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
 
        cpc = czero
 
-       do ll=0,pawtab(itypat)%l_size
-          do lt=0,pawtab(itypat)%l_size
+       do ll=0,pawtab(itypat)%l_size-1
+          do lt=0,pawtab(itypat)%l_size-1
              ! require |ll-lt| <= il <= ll+lt
              if ((il .GT. (ll+lt)) .OR. (il .LT. abs(ll-lt))) cycle
              if ( mod((il+ll+lt),2) .NE. 0 ) cycle
 
              do ipw = 1, npwb
 
-                ff(1:mesh_size) = pawrad(itypat)%rad(1:mesh_size)*&
-                     &pawtab(itypat)%tproj(1:mesh_size,iln)*&
-                     &dtorbmag%jb_bessel(idir,itypat,1:mesh_size,ll+1)*&
-                     &dtorbmag%jkg_bessel(itypat,1:mesh_size,ikptb,ipw,lt+1)
-                call simp_gen(intg,ff,pawrad(itypat))
+                ! ff(1:mesh_size) = pawrad(itypat)%rad(1:mesh_size)*&
+                !      &pawtab(itypat)%tproj(1:mesh_size,iln)*&
+                !      &dtorbmag%jb_bessel(idir,itypat,1:mesh_size,ll+1)*&
+                !      &dtorbmag%jkg_bessel(itypat,1:mesh_size,ikptb,ipw,lt+1)
+                ! call simp_gen(intg,ff,pawrad(itypat))
                 
                 etk = dtorbmag%phkgi(ikptb,ipw,iatom)
+
+                if (dtorbmag%has_pjj_integral(itypat,iln,ll+1,lt+1,idir,ikptb)) then
+                   intg = dtorbmag%pjj_integral(itypat,iln,ll+1,lt+1,idir,ikptb,ipw)
+                else
+                   intg = zero
+                   write(std_out,'(a)')'JWZ Debug: no pjj'
+                end if
 
                 c1 = sxpi2*etb*etk*iexpl(mod(il,4))*iexpl(mod(lt,4))*intg
 

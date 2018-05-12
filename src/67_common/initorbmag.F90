@@ -735,11 +735,11 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
  end do ! end loop over fnkpt
 
- ABI_ALLOCATE(dtorbmag%has_pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),maxval(pawtab(:)%l_size),&
-      &maxval(pawtab(:)%l_size),3,dtorbmag%fnkpt))
+ ABI_ALLOCATE(dtorbmag%has_pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),pawang%l_size_max,&
+      &pawang%l_size_max,3,dtorbmag%fnkpt))
 
- ABI_ALLOCATE(dtorbmag%pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),maxval(pawtab(:)%l_size),&
-      &maxval(pawtab(:)%l_size),3,dtorbmag%fnkpt,dtset%mpw))
+ ABI_ALLOCATE(dtorbmag%pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),pawang%l_size_max,&
+      &pawang%l_size_max,3,dtorbmag%fnkpt,dtset%mpw))
 
  dtorbmag%has_pjj_integral = .FALSE.
  dtorbmag%pjj_integral = zero
@@ -755,8 +755,8 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
        ilm=pawtab(itypat)%indlmn(4,ilmn)
        iln=pawtab(itypat)%indlmn(5,ilmn)
 
-       do ll=0,pawtab(itypat)%l_size
-          do lt=0,pawtab(itypat)%l_size
+       do ll=0,pawtab(itypat)%l_size-1
+          do lt=0,pawtab(itypat)%l_size-1
              ! require |ll-lt| <= il <= ll+lt
              if ((il .GT. (ll+lt)) .OR. (il .LT. abs(ll-lt))) cycle
              if ( mod((il+ll+lt),2) .NE. 0 ) cycle
@@ -764,16 +764,16 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
              do idir = 1, 3
                 do ikpt = 1, dtorbmag%fnkpt
 
-                   if(.NOT. dtorbmag%has_pjj_integral(itypat,iln,ll,lt,idir,ikpt)) then
+                   if(.NOT. dtorbmag%has_pjj_integral(itypat,iln,ll+1,lt+1,idir,ikpt)) then
                       do ipw=1,npwarr(ikpt)
                          ff(1:mesh_size) = pawrad(itypat)%rad(1:mesh_size)*&
                               &pawtab(itypat)%tproj(1:mesh_size,iln)*&
                               &dtorbmag%jb_bessel(idir,itypat,1:mesh_size,ll+1)*&
                               &dtorbmag%jkg_bessel(itypat,1:mesh_size,ikpt,ipw,lt+1)
                          call simp_gen(intg,ff,pawrad(itypat))
-                         dtorbmag%pjj_integral(itypat,iln,ll,lt,idir,ikpt,ipw)=intg
+                         dtorbmag%pjj_integral(itypat,iln,ll+1,lt+1,idir,ikpt,ipw)=intg
                       end do
-                      dtorbmag%has_pjj_integral(itypat,iln,ll,lt,idir,ikpt) = .TRUE.
+                      dtorbmag%has_pjj_integral(itypat,iln,ll+1,lt+1,idir,ikpt) = .TRUE.
                    end if
                 end do ! end loop over ikpt
              end do ! end loop over idir
