@@ -123,14 +123,29 @@ module m_orbmag
 
   real(dp), allocatable :: fkptns(:,:)       ! fkptns(3,1:dtorbmag%fnkpt) k-points in FBZ
 
+  real(dp), allocatable :: jb_bessel(:,:,:,:) ! jb_bessel(3,ntypat,mesh_size,l_size_max)
+  ! spherical bessel functions evaluated on each mesh at |b|*r
+
+  real(dp), allocatable :: jkg_bessel(:,:,:,:,:) ! jkg_bessel(ntypat,mesh_size,nkpt,mpw,l_size_max)
+  ! spherical bessel functions evaluated on each mesh at |k+G|*r
+
   real(dp),allocatable :: twdij0(:,:,:,:)    ! twdij0(2,24,lmn2max,natom) k1/k2/k3 twisted Dij0 terms
+
+  real(dp),allocatable :: ylmb(:,:) ! ylmb(6,l_size_max*l_size_max) spherical harmonics at \hat{-b}
   
   real(dp), allocatable :: zarot(:,:,:,:)
    !  zarot(l_size_max,l_size_max,l_max,nsym)
    !  Coeffs of the transformation of real spherical
    !  harmonics under the symmetry operations. These are needed when the
    ! cprj's need to be computed in the full BZ, that is,
-   ! in the PAW case with kptopt /= 3.
+  ! in the PAW case with kptopt /= 3.
+
+  ! complex(dpc) allocatable
+
+  complex(dpc),allocatable :: expibi(:,:) ! expibi(6,natom) = exp(-i*b.I) dkvec*I at each atomic site
+
+  complex(dpc),allocatable :: phkgi(:,:,:) ! phkgi(fnkpt,mpw,natom) = exp(i*(k+G)*I) phase factors for each
+  ! kpnt and plane wave at each atomic site
 
  end type orbmag_type
 
@@ -208,13 +223,30 @@ subroutine destroy_orbmag(dtorbmag)
 
   if(allocated(dtorbmag%fkptns))  then
     ABI_DEALLOCATE(dtorbmag%fkptns)
-  end if
-  if(allocated(dtorbmag%twdij0)) then
+ end if
+ if(allocated(dtorbmag%jb_bessel)) then
+    ABI_DEALLOCATE(dtorbmag%jb_bessel)
+ end if
+ if(allocated(dtorbmag%jkg_bessel)) then
+    ABI_DEALLOCATE(dtorbmag%jkg_bessel)
+ end if
+   if(allocated(dtorbmag%twdij0)) then
      ABI_DEALLOCATE(dtorbmag%twdij0)
   end if
+ if(allocated(dtorbmag%ylmb)) then
+    ABI_DEALLOCATE(dtorbmag%ylmb)
+ end if
   if(allocated(dtorbmag%zarot))  then
     ABI_DEALLOCATE(dtorbmag%zarot)
-  end if
+ end if
+
+ ! complex(dpc) pointers
+ if(allocated(dtorbmag%expibi)) then
+    ABI_DEALLOCATE(dtorbmag%expibi)
+ end if
+ if(allocated(dtorbmag%phkgi)) then
+    ABI_DEALLOCATE(dtorbmag%phkgi)
+ end if
 
 end subroutine destroy_orbmag
 !!***

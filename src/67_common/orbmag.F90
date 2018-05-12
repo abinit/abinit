@@ -143,7 +143,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !scalars
  integer :: adir,bdir,bdx,bdxc,bfor,bsigma,cpopt,ddkflag,dimffnl,epsabg
  integer :: gdir,gdx,gdxc,gfor,gsigma
- integer :: icg,icgb,icgg,icprj,icprjb,icprjg,ider,idir
+ integer :: icg,icgb,icgg,icprj,icprjb,icprjg,ider,idir,idx
  integer :: ikg,ikgb,ikgg,ikpt,ikptb,ikptg,ilm,ipw,isppol,istwf_k,itrs,job,jpw
  integer :: mcg1_k,my_cpopt,my_nspinor,nband_k,ncpgr,ndat,nkpg,nn,n1,n2
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,npw_k,npw_kb,npw_kg
@@ -163,9 +163,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp),allocatable :: my_nucdipmom(:,:),ph3d(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:,:),smat_inv(:,:,:)
  real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:),ylm_k(:,:)
  complex(dpc),allocatable :: nucdipmom_k(:)
+ logical :: has_cprj_k_kb(6)
  logical,allocatable :: has_hmat(:,:,:),has_smat(:,:,:)
- type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
- type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:),cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:),cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cprj_k_kb(:,:,:)
 
  ! ***********************************************************************
  ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
@@ -188,12 +189,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
     ABI_DATATYPE_ALLOCATE(cprj_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
     call pawcprj_alloc(cprj_kg,ncpgr,dimlmn)
-    if (dtset%kptopt /= 3) then
-       ABI_DATATYPE_ALLOCATE(cprj_ikn,(dtset%natom,dtorbmag%nspinor*dtset%mband))
-       ABI_DATATYPE_ALLOCATE(cprj_fkn,(dtset%natom,dtorbmag%nspinor*dtset%mband))
-       call pawcprj_alloc(cprj_ikn,ncpgr,dimlmn)
-       call pawcprj_alloc(cprj_fkn,ncpgr,dimlmn)
-    end if
     ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
     call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
  else
@@ -312,6 +307,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
           ikg = dtorbmag%fkgindex(ikpt)
           ABI_ALLOCATE(kg_k,(3,npw_k))
           kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+
+          ABI_DATATYPE_ALLOCATE(cprj_k_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband,6))
+          do idx = 1, 6
+             call pawcprj_alloc(cprj_k_kb(:,:,idx),ncpgr,dimlmn)
+          end do
+          has_cprj_k_kb(:) = .FALSE.
 
           call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
                & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
@@ -432,9 +433,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
              deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
 
              ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+             kpointb(:)=dtorbmag%fkptns(:,ikptb)
+
              icprjb = dtorbmag%cprjindex(ikptb,isppol)
              
+             ikgb = dtorbmag%fkgindex(ikptb)
              npw_kb = npwarr(ikptb)
+             ABI_ALLOCATE(kg_kb,(3,npw_kb))
+             kg_kb(:,1:npw_kb)=kg(:,ikgb+1:ikgb+npw_kb)
+
              icgb = dtorbmag%cgindex(ikptb,dtset%nsppol)
 
              pwind_kb(1:npw_k) = pwind(ikg+1:ikg+npw_k,bfor,bdir)
@@ -466,6 +473,17 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                 has_smat(ikptb,bdxc,0) = .TRUE.
 
              end if
+
+             if (.NOT. has_cprj_k_kb(bdx)) then
+
+                call ctocprjb(atindx1,cg,cprj_k_kb(:,:,bdx),dtorbmag,icgb,bdir,bfor,ikgb,&
+                     & ikptb,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
+                     & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
+                     & pawang,pawrad,pawtab,dtset%typat,ylm)
+
+                has_cprj_k_kb(bdx) = .TRUE.
+                
+             end if
              
              do gfor = 1, 2
                 if (gfor .EQ. 1) then
@@ -482,9 +500,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                 deltag = sqrt(DOT_PRODUCT(dkg,MATMUL(gmet,dkg)))
 
                 ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
+                kpointg(:)=dtorbmag%fkptns(:,ikptg)
+
                 icprjg = dtorbmag%cprjindex(ikptg,isppol)
              
                 npw_kg = npwarr(ikptg)
+                ABI_ALLOCATE(kg_kg,(3,npw_kg))
+                ikgg = dtorbmag%fkgindex(ikptg)
+                kg_kg(:,1:npw_kg)=kg(:,ikgg+1:ikgg+npw_kg)
+
                 icgg = dtorbmag%cgindex(ikptg,dtset%nsppol)
 
                 pwind_kg(1:npw_k) = pwind(ikg+1:ikg+npw_k,gfor,gdir)
@@ -515,6 +539,17 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                    has_smat(ikpt,gdx,0) = .TRUE.
                    has_smat(ikptg,gdxc,0) = .TRUE.
 
+                end if
+
+                if (.NOT. has_cprj_k_kb(gdx)) then
+
+                   call ctocprjb(atindx1,cg,cprj_k_kb(:,:,gdx),dtorbmag,icgg,gdir,gfor,ikgg,&
+                        & ikptg,mcg,dtset%mkmem,psps%mpsang,dtset%mpw,&
+                        & dtset%natom,nband_k,ncpgr,npw_kb,my_nspinor,dtset%ntypat,&
+                        & pawang,pawrad,pawtab,dtset%typat,ylm)
+
+                   has_cprj_k_kb(gdx) = .TRUE.
+                
                 end if
 
                 dkbg = dkg - dkb
@@ -549,14 +584,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                 if (.NOT. has_hmat(ikpt,gdx,bdx)) then
 
-                   kpointb(:)=dtorbmag%fkptns(:,ikptb)
-                   ikgb = dtorbmag%fkgindex(ikptb)
-                   ABI_ALLOCATE(kg_kb,(3,npw_kb))
-                   kg_kb(:,1:npw_kb)=kg(:,ikgb+1:ikgb+npw_kb)
-                   kpointg(:)=dtorbmag%fkptns(:,ikptg)
-                   ikgg = dtorbmag%fkgindex(ikptg)
-                   ABI_ALLOCATE(kg_kg,(3,npw_kg))
-                   kg_kg(:,1:npw_kg)=kg(:,ikgg+1:ikgg+npw_kg)
 
                    call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
                         & dtorbmag%indkk_f2ibz,ikptg,ikptb,&
@@ -600,15 +627,17 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                                dotr=dotr+bra(1,ipw)*ghc(1,jpw)+bra(2,ipw)*ghc(2,jpw)
                                doti=doti+bra(1,ipw)*ghc(2,jpw)-bra(2,ipw)*ghc(1,jpw)
 
-                               ! twisted kinetic energy: here we are computing <u_kg|e^{-i.k.r}\nabla^2 e^{i.k.r}|u_kb>
+                               ! twisted kinetic energy: here we are computing
+                               ! -\frac{1}{2}<u_kg|e^{-i.k.r}\nabla^2 e^{i.k.r}|u_kb>,
                                ! that is, kinetic energy at k between wavefunctions at kg and kb. The correct
                                ! formula is htpisq*(ikpt + G_right)^2\delta(G_left,G_right) but it's hard to apply
-                               ! because the G's have shifts (output of mkpwind_k) for the kpts near and at the edge
-                               ! of the IBZ. The following approach is based on the bra <u_kg| expansion, because
+                               ! because the G's have wrap-around shifts (output of mkpwind_k)
+                               ! for the kpts near and at the edge of the IBZ.
+                               ! The following approach is based on the bra <u_kg| expansion, because
                                ! these G vectors are unshifted (indexed by ipw, not jpw). So we are using
                                ! k+G_left = (k-kg) + (kg+G_left) = -dkg + (kg+G_left). When squared we obtain
                                ! |kg+G_left|^2 - 2*dkg*(kg+G_left) + |dkg|^2. In this way we only use the G_left
-                               ! expansion vectors, with no shift, for any k points.
+                               ! expansion vectors, with no shift, for each k point.
 
                                ! normal kinetic energy for bra
                                keg=htpisq*dot_product((kpointg(:)+kg_kg(:,ipw)),MATMUL(gmet,(kpointg(:)+kg_kg(:,ipw))))
@@ -628,12 +657,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                          end do
                          hmat(1,n1,nn,ikpt,gdx,bdx) = dotr
                          hmat(2,n1,nn,ikpt,gdx,bdx) = doti
-                         ! hmat(1,nn,n1,ikpt,bdx,gdx) = dotr
-                         ! hmat(2,nn,n1,ikpt,bdx,gdx) = -doti
+                         hmat(1,nn,n1,ikpt,bdx,gdx) = dotr
+                         hmat(2,nn,n1,ikpt,bdx,gdx) = -doti
                       end do
                    end do
                    has_hmat(ikpt,gdx,bdx) = .TRUE.
-                   ! has_hmat(ikpt,bdx,gdx) = .TRUE.
+                   has_hmat(ikpt,bdx,gdx) = .TRUE.
 
                    ABI_DEALLOCATE(cwavef)
                    ABI_DEALLOCATE(bra)
@@ -642,8 +671,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                    ABI_DEALLOCATE(gvnlc)
 
                    ABI_DEALLOCATE(kpg_k_dummy)
-                   ABI_DEALLOCATE(kg_kb)
-                   ABI_DEALLOCATE(kg_kg)
                    
                 end if
 
@@ -671,12 +698,21 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                       end do ! end n2
                    end do ! end n1
                 end do ! end nn
+
+                ABI_DEALLOCATE(kg_kg)
                 
              end do ! end gfor
+
+             ABI_DEALLOCATE(kg_kb)
 
           end do ! end bfor
 
           ABI_DEALLOCATE(kg_k)
+
+          do idx=1, 6
+             call pawcprj_free(cprj_k_kb(:,:,idx))
+          end do
+          ABI_DATATYPE_DEALLOCATE(cprj_k_kb)
 
        end do ! end loop over fnkpt
 
@@ -719,12 +755,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     ABI_DATATYPE_DEALLOCATE(cprj_kb)
     call pawcprj_free(cprj_kg)
     ABI_DATATYPE_DEALLOCATE(cprj_kg)
-    if (dtset%kptopt /= 3) then
-       call pawcprj_free(cprj_ikn)
-       call pawcprj_free(cprj_fkn)
-       ABI_DATATYPE_DEALLOCATE(cprj_ikn)
-       ABI_DATATYPE_DEALLOCATE(cprj_fkn)
-    end if
     call pawcprj_free(cwaveprj)
     ABI_DATATYPE_DEALLOCATE(cwaveprj)
  end if

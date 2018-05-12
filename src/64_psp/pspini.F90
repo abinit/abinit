@@ -193,6 +193,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    has_shapefncg=(dtset%optdriver==RUNL_GSTATE.and.((dtset%iprcel>=20.and.dtset%iprcel<70).or.dtset%iprcel>=80))
    has_wvl=(dtset%usewvl==1.or.dtset%icoulomb/=0)
    has_tproj=(dtset%usewvl==1) ! projectors will be free at the end of the psp reading
+   has_tproj=(dtset%orbmag>1) ! projectors needed in orbmag case
    has_vminushalf=(maxval(dtset%ldaminushalf)==1)
    if (has_kij)       paw_options(1)=1
    if (has_tvale)     paw_options(2)=1
