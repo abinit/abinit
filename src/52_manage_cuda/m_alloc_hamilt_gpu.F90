@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_alloc_hamilt_gpu
+!! NAME
+!!  m_alloc_hamilt_gpu
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2000-2018 ABINIT group (MT, FDahm)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_alloc_hamilt_gpu
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_profiling_abi
+ use m_xmpi
+#if defined HAVE_GPU_CUDA
+ use m_initcuda
+#endif
+
+ implicit none
+
+ private
+!!***
+
+ public :: alloc_hamilt_gpu
+ public :: dealloc_hamilt_gpu
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/alloc_hamilt_gpu
 !! NAME
 !! alloc_hamilt_gpu
@@ -6,13 +53,6 @@
 !! FUNCTION
 !! allocate several memory pieces on a GPU device for the application
 !! of Hamiltonian using a GPU
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (MT, FDahm)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -37,23 +77,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,psps,use_gpu_cuda)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
-#if defined HAVE_GPU_CUDA
- use m_initcuda
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -96,7 +120,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    else
      npw_max_loc=dtset%mpw
    end if
-!  Initialize gpu date needed in fourwf
+!  Initialize gpu data needed in fourwf
 !  ndat=bandpp when paral_kgb=1
    if(mpi_enreg%paral_kgb==1) then
      call alloc_gpu_fourwf(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
@@ -135,8 +159,6 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 end subroutine alloc_hamilt_gpu
 !!***
 
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/dealloc_hamilt_gpu
 !! NAME
 !! dealloc_hamilt_gpu
@@ -144,13 +166,6 @@ end subroutine alloc_hamilt_gpu
 !! FUNCTION
 !! deallocate several memory pieces on a GPU device used for the application
 !! of Hamiltonian using a GPU
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (MT, FDahm)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  option=0: deallocate data for local operator (FFT)
@@ -170,13 +185,6 @@ end subroutine alloc_hamilt_gpu
 !! SOURCE
 
 subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
-
- use m_profiling_abi
-
- use defs_basis
-#if defined HAVE_GPU_CUDA
- use m_initcuda
-#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -211,4 +219,7 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 #endif
 
 end subroutine dealloc_hamilt_gpu
+!!***
+
+end module m_alloc_hamilt_gpu
 !!***
