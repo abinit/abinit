@@ -127,8 +127,8 @@ subroutine getcprjb(cwavef,cwaveprj,dtorbmag,idir,ifor,ikptb,&
 
        cpc = czero
 
-       do ll=0,il
-          do lt=0,il
+       do ll=0,pawtab(itypat)%l_size
+          do lt=0,pawtab(itypat)%l_size
              ! require |ll-lt| <= il <= ll+lt
              if ((il .GT. (ll+lt)) .OR. (il .LT. abs(ll-lt))) cycle
              if ( mod((il+ll+lt),2) .NE. 0 ) cycle

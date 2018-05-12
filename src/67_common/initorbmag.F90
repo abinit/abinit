@@ -66,7 +66,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_fftcore, only : kpgsph
  use m_kpts,    only : listkk, smpbz
  use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
+ use m_pawrad,           only : pawrad_type, simp_gen
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
  use m_paw_sphharm, only : initylmr
@@ -105,12 +105,12 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 !scalars
  integer :: brav,exchn2n3d,fnkpt_computed
  integer :: iband,iatom,icg,icprj,idir,idum,idum1,idx,ierr,ifor,ikg,ikg1
- integer :: ikpt,ikpt_loc,ikpti,ikpt1,ikpt1f,ikpt1i
+ integer :: ikpt,ikpt_loc,ikpti,ikpt1,ikpt1f,ikpt1i,il,ilm,im,ilmn,iln
  integer :: index,ipw,ipwnsfac,ir,isign,isppol,istwf_k,isym,isym1,itrs,itypat
- integer :: jpw,lmax,lmn2_size_max
+ integer :: jpw,ll,lmax,lmn2_size_max,lt
  integer :: mband_occ_k,me,me_g0,mesh_size,mkmem_,mkpt,my_nspinor,nband_k,nkptlatt,nproc,npw_k,npw_k1
  integer :: option,spaceComm,ylmr_normchoice,ylmr_npts,ylmr_option
- real(dp) :: arg,bnorm,diffk1,diffk2,diffk3,ecut_eff
+ real(dp) :: arg,bnorm,diffk1,diffk2,diffk3,ecut_eff,intg
  real(dp) :: kpgnorm,kpt_shifted1,kpt_shifted2,kpt_shifted3,phfac,rdum
  character(len=500) :: message
  !arrays
@@ -118,7 +118,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  integer,allocatable :: kg1_k(:,:)
  real(dp) :: bb(3),bbn(3),bcart(3),diffk(3),dk(3),dum33(3,3),kpgcart(3),kpoint(3),kpgvec(3),kpt1(3)
  real(dp) :: tsec(2),ylmgr(1,1,0),ylmr_nrm(1)
- real(dp),allocatable :: calc_expibi(:,:),sb_out(:),spkpt(:,:),ylmb(:)
+ real(dp),allocatable :: calc_expibi(:,:),ff(:),sb_out(:),spkpt(:,:),ylmb(:)
 
 ! *************************************************************************
 
@@ -734,6 +734,58 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
     end do ! end loop over npw_k
 
  end do ! end loop over fnkpt
+
+ ABI_ALLOCATE(dtorbmag%has_pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),maxval(pawtab(:)%l_size),&
+      &maxval(pawtab(:)%l_size),3,dtorbmag%fnkpt))
+
+ ABI_ALLOCATE(dtorbmag%pjj_integral,(dtset%ntypat,maxval(pawtab(:)%basis_size),maxval(pawtab(:)%l_size),&
+      &maxval(pawtab(:)%l_size),3,dtorbmag%fnkpt,dtset%mpw))
+
+ dtorbmag%has_pjj_integral = .FALSE.
+ dtorbmag%pjj_integral = zero
+
+ do itypat=1,dtset%ntypat
+
+    mesh_size = pawtab(itypat)%mesh_size
+    ABI_ALLOCATE(ff,(mesh_size))
+
+    do ilmn=1,pawtab(itypat)%lmn_size
+       il=pawtab(itypat)%indlmn(1,ilmn)
+       im=pawtab(itypat)%indlmn(2,ilmn)
+       ilm=pawtab(itypat)%indlmn(4,ilmn)
+       iln=pawtab(itypat)%indlmn(5,ilmn)
+
+       do ll=0,pawtab(itypat)%l_size
+          do lt=0,pawtab(itypat)%l_size
+             ! require |ll-lt| <= il <= ll+lt
+             if ((il .GT. (ll+lt)) .OR. (il .LT. abs(ll-lt))) cycle
+             if ( mod((il+ll+lt),2) .NE. 0 ) cycle
+
+             do idir = 1, 3
+                do ikpt = 1, dtorbmag%fnkpt
+
+                   if(.NOT. dtorbmag%has_pjj_integral(itypat,iln,ll,lt,idir,ikpt)) then
+                      do ipw=1,npwarr(ikpt)
+                         ff(1:mesh_size) = pawrad(itypat)%rad(1:mesh_size)*&
+                              &pawtab(itypat)%tproj(1:mesh_size,iln)*&
+                              &dtorbmag%jb_bessel(idir,itypat,1:mesh_size,ll+1)*&
+                              &dtorbmag%jkg_bessel(itypat,1:mesh_size,ikpt,ipw,lt+1)
+                         call simp_gen(intg,ff,pawrad(itypat))
+                         dtorbmag%pjj_integral(itypat,iln,ll,lt,idir,ikpt,ipw)=intg
+                      end do
+                      dtorbmag%has_pjj_integral(itypat,iln,ll,lt,idir,ikpt) = .TRUE.
+                   end if
+                end do ! end loop over ikpt
+             end do ! end loop over idir
+          end do ! end loop over lt
+       end do ! end loop over ll
+    end do ! end loop over ilmn
+
+    ABI_DEALLOCATE(ff)
+    
+ end do ! end loop over itypat
+ 
+
  
  ABI_DEALLOCATE(calc_expibi)
  ABI_DEALLOCATE(ylmb)

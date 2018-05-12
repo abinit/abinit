@@ -129,6 +129,9 @@ module m_orbmag
   real(dp), allocatable :: jkg_bessel(:,:,:,:,:) ! jkg_bessel(ntypat,mesh_size,nkpt,mpw,l_size_max)
   ! spherical bessel functions evaluated on each mesh at |k+G|*r
 
+  real(dp),allocatable :: pjj_integral(:,:,:,:,:,:,:)
+  ! has_pjj_integral(ntypat,basis_size,l_size,l_size,idir,fnkpt,mpw)
+
   real(dp),allocatable :: twdij0(:,:,:,:)    ! twdij0(2,24,lmn2max,natom) k1/k2/k3 twisted Dij0 terms
 
   real(dp),allocatable :: ylmb(:,:) ! ylmb(6,l_size_max*l_size_max) spherical harmonics at \hat{-b}
@@ -146,6 +149,9 @@ module m_orbmag
 
   complex(dpc),allocatable :: phkgi(:,:,:) ! phkgi(fnkpt,mpw,natom) = exp(i*(k+G)*I) phase factors for each
   ! kpnt and plane wave at each atomic site
+
+  logical,allocatable :: has_pjj_integral(:,:,:,:,:,:)
+  ! has_pjj_integral(ntypat,basis_size,l_size,l_size,idir,fnkpt)
 
  end type orbmag_type
 
@@ -230,7 +236,10 @@ subroutine destroy_orbmag(dtorbmag)
  if(allocated(dtorbmag%jkg_bessel)) then
     ABI_DEALLOCATE(dtorbmag%jkg_bessel)
  end if
-   if(allocated(dtorbmag%twdij0)) then
+ if(allocated(dtorbmag%pjj_integral)) then
+    ABI_DEALLOCATE(dtorbmag%pjj_integral)
+ end if
+  if(allocated(dtorbmag%twdij0)) then
      ABI_DEALLOCATE(dtorbmag%twdij0)
   end if
  if(allocated(dtorbmag%ylmb)) then
@@ -246,6 +255,11 @@ subroutine destroy_orbmag(dtorbmag)
  end if
  if(allocated(dtorbmag%phkgi)) then
     ABI_DEALLOCATE(dtorbmag%phkgi)
+ end if
+
+ ! logical pointers
+ if(allocated(dtorbmag%has_pjj_integral)) then
+    ABI_DEALLOCATE(dtorbmag%has_pjj_integral)
  end if
 
 end subroutine destroy_orbmag
