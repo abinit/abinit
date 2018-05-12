@@ -3352,7 +3352,7 @@ invalid. However, it is still possible to define a 'transport equivalent mass
 tensor' that reproduces the contribution of the band to the conductivity
 tensor. To obtain this tensor, an integration over the solid sphere is
 required. The angular variables are sampled using [[efmas_ntheta]] points for the theta coordinate,
-and twice [[efmas_ntheta]] points for the phi coordinate. 
+and twice [[efmas_ntheta]] points for the phi coordinate.
 The default value gives a tensor accurate to the 4th decimal in Ge.
 """,
 ),
@@ -11895,10 +11895,9 @@ Variable(
     mnemonics="PAW PRinT band",
     characteristics=['[[DEVELOP]]'],
     text="""
-Forces the output of the all-electron wavefunction for only a single band. To
-be used in conjuction with: **
-[[pawprtwf]]=1 ** and [[pawprt_k]]. The indexing of the bands start with one
-for the lowest occupied band and goes up from there.
+Forces the output of the all-electron wavefunction for only a single band.
+To be used in conjuction with: [[pawprtwf]] = 1 and [[pawprt_k]].
+The indexing of the bands start with one for the lowest occupied band and goes up from there.
 """,
 ),
 
@@ -11913,9 +11912,8 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     text="""
 Forces the output of the all-electron wavefunction for only a single k-point.
-To be used in conjuction with: **
-[[pawprtwf]]=1 ** and [[pawprt_b]]. The indexing follows the order in ouptput
-of the internal variable **kpt** in the beginning of the run.
+To be used in conjuction with: [[pawprtwf]] = 1 and [[pawprt_b]].
+The indexing follows the order in ouptput of the internal variable **kpt** in the beginning of the run.
 """,
 ),
 
@@ -11980,19 +11978,18 @@ Variable(
     text="""
 Control print volume and debugging output for PAW in log file or standard
 output. If set to 0, the print volume is at its minimum.
-[[pawprtvol]] can have values from -3 to 3:
+**pawprtvol** can have values from -3 to 3:
 
-- [[pawprtvol]]=-1 or 1: matrices rho_ij (atomic occupancies) and D_ij (psp
+- **pawprtvol** = -1 or 1: matrices rho_ij (atomic occupancies) and D_ij (psp
   strength) are printed at each SCF cycle with details about their contributions.
-- [[pawprtvol]]=-2 or 2: like -1 or 1 plus additional printing: moments of
+- **pawprtvol** = -2 or 2: like -1 or 1 plus additional printing: moments of
   "on-site" densities, details about local exact exchange.
-- [[pawprtvol]]=-3 or 3: like -2 or 2 plus additional printing: details about
+- **pawprtvol** = -3 or 3: like -2 or 2 plus additional printing: details about
   PAW+U, rotation matrices of sphercal harmonics.
 
-When [[pawprtvol]]>=0, up to 12 components of rho_ij and D_ij matrices for the
+When **pawprtvol** >= 0, up to 12 components of rho_ij and D_ij matrices for the
 1st and last atom are printed.
-When [[pawprtvol]]<0, all components of rho_ij and D_ij matrices for all atoms
-are printed.
+When **pawprtvol** < 0, all components of rho_ij and D_ij matrices for all atoms are printed.
 """,
 ),
 
@@ -12006,18 +12003,19 @@ Variable(
     mnemonics="PAW: PRinT WaveFunctions",
     requires="[[usepaw]]==1",
     text="""
-This input variable controls the output of the full PAW wave functions
-including the on-site contribution inside each PAW sphere needed to
-reconstruct the correct nodal shape in the augmentation region. **pawprtwf=1**
-causes the generation of a file _AE_WFK that contains the full wavefunctions
-in real space on the fine FFT grid defined by [[pawecutdg]] or [[ngfftdg]].
-Limitations: At present (v6.0), **pawprtwf=1** is not compatible neither with
-the k-point parallelism nor with the parallelism over G-vectors. Therefore the
-output of the _AE_WFK has to be done in sequential. Moreover, in order to use
-this feature, one has to enable the support for ETSF-IO at configure-time as
-the _AW_WFK file is written using the NETCDF file format following the ETSF-IO
-specification for wavefunctions in real space. If the code is run entirely in
-serial, additional output is made of various contributions to the all-electron
+This input variable controls the output of the **full** PAW wave functions
+including the on-site contributions inside each PAW sphere needed to
+reconstruct the correct nodal shape in the augmentation region.
+**pawprtwf = 1** causes the generation of a file _PAWAVES.nc containing the full wavefunctions
+in **real space** on the fine FFT grid defined by [[pawecutdg]] or [[ngfftdg]].
+
+Limitations: At present (v8.0), **pawprtwf = 1** is not compatible with [[nspinor]] =2 and parallel executions
+Therefore the output of the _AE_WFK has to be done in sequential.
+Moreover, in order to use this feature, one has to enable the support for netcdf at configure-time
+as the _PAWAVES file is written using the NETCDF file format following the ETSF-IO
+specifications for wavefunctions in real space.
+
+If the code is run entirely in serial, additional output is made of various contributions to the all-electron
 wavefunction. By default the full available set of bands and k-points are
 ouput, but a single band and k-point index can be requested by using the
 variables [[pawprt_b]] and [[pawprt_k]].
@@ -16508,11 +16506,11 @@ reduced set of atoms, the full set of atoms. Note that a value larger than
 (so, it is not worth to set [[tolsym]] bigger than 0.01).
 
 Note: ABINIT needs the atomic positions to be symmmetric to each others
-within 1.e-8, irrespective of [[tolsym]]. 
+within 1.e-8, irrespective of [[tolsym]].
 So, if [[tolsym]] is set to a larger value than 1.e-8, then the
 input atomic coordinates will be nevertheless automatically symmetrized by the symmetry
-operations that will have been found. 
-""" 
+operations that will have been found.
+"""
 ),
 
 Variable(
