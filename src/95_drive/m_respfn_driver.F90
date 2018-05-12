@@ -78,6 +78,7 @@ module m_respfn_driver
  use m_initylmg,    only : initylmg
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
+ use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
 
  implicit none
 

@@ -62,6 +62,7 @@ module m_dynmat
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
  public :: q0dy3_apply          ! Takes care of the inclusion of the ewald q=0 term in the dynamical matrix
  public :: q0dy3_calc           ! Calculate the q=0 correction term to the dynamical matrix
+ ! TODO: 3 routines to symmetrize. Clarify different use cases
  public :: symdyma              ! Symmetrize the dynamical matrices
  public :: dfpt_sygra           ! Symmetrize derivatives of energy with respect to coordinates,
  public :: dfpt_sydy            ! Symmetrize dynamical matrix (eventually diagonal wrt to the atoms)
