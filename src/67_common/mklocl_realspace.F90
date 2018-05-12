@@ -73,6 +73,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 
  use m_time,        only : timab
  use m_geometry,    only : xred2xcart
+ use m_fft_mesh,    only : mkgrid_fft
  use m_mpinfo,      only : ptabs_fourdp
  use m_pawtab,      only : pawtab_type
  use m_paw_numeric, only : paw_splint

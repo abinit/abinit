@@ -43,7 +43,6 @@ sources = [
  "mkcore_inner.F90",
  "mkcore_paw.F90",
  "mkcore_wvl.F90",
- "mkgrid_fft.F90",
  "mklocl.F90",
  "mklocl_realspace.F90",
  "mklocl_recipspace.F90",
