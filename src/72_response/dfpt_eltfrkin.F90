@@ -78,7 +78,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrkin'
  use interfaces_32_util
- use interfaces_72_response, except_this_one => dfpt_eltfrkin
 !End of the abilint section
 
  implicit none
@@ -265,6 +264,7 @@ contains
 
 subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &            istwfk,kg_k,kpt,npw,nspinor)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

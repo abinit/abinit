@@ -26,7 +26,6 @@
 
 module m_dfpt_loopert
 
-
  use defs_basis
  use defs_datatypes
  use defs_abitypes
@@ -81,6 +80,8 @@ module m_dfpt_loopert
  use m_inwffil,    only : inwffil
  use m_spacepar,   only : rotate_rho, setsym
  use m_initylmg,   only : initylmg
+ use m_dfpt_scfcv, only : dfpt_scfcv
+
  implicit none
 
  private

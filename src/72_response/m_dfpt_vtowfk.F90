@@ -1,4 +1,82 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfpt_vtowfk
+!! NAME
+!!  m_dfpt_vtowfk
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfpt_vtowfk
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+ use m_cgtools
+ use m_wfk
+ use m_rf2
+
+ use m_dtfil,        only : status
+ use m_time,         only : timab
+ use m_pawrhoij,     only : pawrhoij_type
+ use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby
+ use m_hamiltonian,  only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
+ use m_spacepar,     only : meanvalue_g
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfpt_vtowfk
+!!***
+
+contains
+!!***
+
+
+
+
+
+
+
+
+
+
+!{\src2tex{textfont=tt}}
 !!****f* ABINIT/dfpt_vtowfk
 !! NAME
 !! dfpt_vtowfk
@@ -6,13 +84,6 @@
 !! FUNCTION
 !! This routine compute the partial density at a given k-point,
 !! for a given spin-polarization, from a fixed potential (vlocal1).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions
@@ -115,12 +186,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & dim_eig2rf,dtfil,dtset,&
 & edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,&
@@ -133,22 +198,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
 & ddk_f,wtk_k,nlines_done,cg1_out)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
- use m_cgtools
- use m_wfk
- use m_rf2
-
- use m_dtfil,        only : status
- use m_time,         only : timab
- use m_pawrhoij,     only : pawrhoij_type
- use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby
- use m_hamiltonian,  only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
- use m_spacepar,     only : meanvalue_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -156,7 +205,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 #define ABI_FUNC 'dfpt_vtowfk'
  use interfaces_14_hidewrite
  use interfaces_66_wfs
- use interfaces_72_response, except_this_one => dfpt_vtowfk
+ use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -593,7 +642,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  DBG_EXIT('COLL')
 
-contains
+end subroutine dfpt_vtowfk
 !!***
 
 !!****f* ABINIT/full_active_wf1
@@ -739,11 +788,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 end subroutine full_active_wf1
 !!***
 
-end subroutine dfpt_vtowfk
-!!***
-
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/corrmetalwf1
 !!
 !! NAME
@@ -753,13 +797,6 @@ end subroutine dfpt_vtowfk
 !! Response function calculation only:
 !! Correct 1st-order wave-function, taking into account "metallic" occupations.
 !! 1st-order WF orthogonal to C_n,k+q, restore the "active space" content of the first-order WF.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mcgq)=planewave coefficients of wavefunctions at k+q
@@ -810,14 +847,6 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
 &          ibgq,icgq,istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,nspinor,occ,rocceig,timcount,&
 &          usepaw,wf_corrected)
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_cgtools
-
- use m_time,    only : timab
- use m_pawcprj, only : pawcprj_type, pawcprj_copy, pawcprj_zaxpby
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -925,4 +954,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
  DBG_EXIT("COLL")
 
 end subroutine corrmetalwf1
+!!***
+
+end module m_dfpt_vtowfk
 !!***
