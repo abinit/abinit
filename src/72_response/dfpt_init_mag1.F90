@@ -21,12 +21,12 @@
 !!  nfft  = dimension of the fft grid
 !!  nspden= number of density matrix components
 !!  nkxc  = number of kxc components
-!!  vxc0(nfft,nspden)  = GS XC potential 
-!!  kxc0(nfft,nspden)  = GS XC derivatives 
-!!  rhor0(nfft,nspden) = GS density matrix 
+!!  vxc0(nfft,nspden)  = GS XC potential
+!!  kxc0(nfft,nspden)  = GS XC derivatives
+!!  rhor0(nfft,nspden) = GS density matrix
 !!
 !! OUTPUT
-!!  rhor1(cplex*nfft) = first order density magnetization guess 
+!!  rhor1(cplex*nfft) = first order density magnetization guess
 !!
 !! SIDE EFFECTS
 !!
@@ -47,7 +47,7 @@
 
 
 subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
-    
+
  use defs_basis
  use m_errors
  use m_profiling_abi
@@ -64,15 +64,15 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
  integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
  real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
  real(dp), intent(in)    :: kxc0(nfft,nkxc)
- real(dp), intent(out)   :: rhor1(cplex*nfft,nspden)                        
+ real(dp), intent(out)   :: rhor1(cplex*nfft,nspden)
 
 !Local variables-------------------------------
- integer  :: ipt                                     
- real(dp) :: bxc0,bxc1                  
+ integer  :: ipt
+ real(dp) :: bxc0,bxc1
  real(dp) :: m1_norm,m0_norm
  real(dp) :: f_dot_m
- real(dp) :: mdir(3),fdir(3)               
- 
+ real(dp) :: mdir(3),fdir(3)
+
 ! *************************************************************************
 
  if (nspden==2) then
@@ -95,7 +95,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
 
    fdir=zero
    fdir(idir)= 1.0d0
-   do ipt=1,nfft  
+   do ipt=1,nfft
      m0_norm=sqrt(rhor0(ipt,2)**2+rhor0(ipt,3)**2+rhor0(ipt,4)**2)
      mdir(1)=rhor0(ipt,2)/m0_norm
      mdir(2)=rhor0(ipt,3)/m0_norm
@@ -105,7 +105,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
      bxc1=half*(half*(kxc0(ipt,1)+kxc0(ipt,3))-kxc0(ipt,2))  ! d/dm Bxc
      m1_norm=(-half/bxc1)*f_dot_m                            ! get an estimate of the norm of m1
 
-     bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)       
+     bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)
      if(cplex==1) then
        rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
        rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
@@ -130,7 +130,6 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
      end if
    end do
  end if
-
 
 end subroutine dfpt_init_mag1
 !!***

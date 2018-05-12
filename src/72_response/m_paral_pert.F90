@@ -98,11 +98,6 @@ subroutine set_pert_comm(mpi_enreg,nppert)
 !scalars
  integer,intent(in) :: nppert
  type(MPI_type), intent(inout) :: mpi_enreg
-!arrays
-
-!Local variables ---------------------------------------
-!scalars
-!arrays
 
 ! *************************************************************************
 
@@ -119,7 +114,7 @@ subroutine set_pert_comm(mpi_enreg,nppert)
  mpi_enreg%comm_kptband=mpi_enreg%comm_cell
  mpi_enreg%comm_wvl    =mpi_enreg%comm_cell
 
-end  subroutine set_pert_comm
+end subroutine set_pert_comm
 !!***
 
 !----------------------------------------------------------------------
@@ -156,11 +151,6 @@ subroutine unset_pert_comm(mpi_enreg)
 !Arguments ---------------------------------------------
 !scalars
  type(MPI_type), intent(inout) :: mpi_enreg
-!arrays
-
-!Local variables ---------------------------------------
-!scalars
-!arrays
 
 ! *************************************************************************
 
@@ -649,7 +639,6 @@ integer :: my_natom_old
 
 end  subroutine unset_pert_paw
 !!***
-
 
 !----------------------------------------------------------------------
 

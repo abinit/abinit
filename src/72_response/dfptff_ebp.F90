@@ -306,5 +306,6 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
  ABI_DEALLOCATE(vect2)
  ABI_DEALLOCATE(pwind_tmp)
  ABI_DEALLOCATE(Amat)
+
 end subroutine dfptff_ebp
 !!***
