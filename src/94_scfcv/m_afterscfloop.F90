@@ -273,6 +273,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
  use m_mkrho,            only : mkrho, prtrhomxmn
+ use m_elpolariz,        only : elpolariz
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
