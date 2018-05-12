@@ -1,4 +1,50 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_evdw_wannier
+!! NAME
+!! m_evdw_wannier
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2010-2018 ABINIT group (CE, TR, AR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_evdw_wannier
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use m_special_funcs,   only : abi_derf
+ use m_numeric_tools,   only : simpson_int
+ use m_geometry,        only : xcart2xred, xred2xcart
+
+ implicit none
+
+ private
+!!***
+
+ public :: evdw_wannier
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/evdw_wannier
 !! NAME
 !! evdw_wannier
@@ -9,12 +55,6 @@
 !!         P. L. Silvestrelli in PRL 100:053002 (2008) vdw_xc=10 and
 !!         A. Ambrosetti and P. L. Silvestrelli in PRB 85:073101 (2012) vdw_xc=11.
 !!         P. L. Silvestrelli in J.Chem.Phys. 139:054106 (2013) vdw_xc=14.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (CE, TR and AR)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!   nsppol          = Spin polarization.
@@ -34,9 +74,6 @@
 !! OUTPUT
 !!   csix(origmwan,origmwan,nsppol,nsppol) = dispersion coefficient between each pair of MLWF.
 !!   corrvdw           = van der Waals correction to the energy.
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      mlwfovlp
@@ -45,21 +82,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine evdw_wannier(csix,corrvdw,origmwan,natom,nsppol,orignwan,tdocc_wan,vdw_nfrag,&
 & vdw_supercell,vdw_typfrag,vdw_xc,rprimd,wann_centres,wann_spreads,xcart)
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_special_funcs,   only : abi_derf
- use m_geometry,        only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1034,20 +1058,9 @@ end subroutine evdw_wannier
 !!  Performs double integral needed to evaluate C6
 !!  coefficients. Eq. (9) in J.Phys.Chem. 113:5224
 !!
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (CE and TR)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
-
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      evdw_wannier
@@ -1057,11 +1070,6 @@ end subroutine evdw_wannier
 !! SOURCE
 
  subroutine getFu(sn,sl,rn,rl,occn,occl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
-
- use m_profiling_abi
- use defs_basis
-
- use m_numeric_tools,   only : simpson_int
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1127,19 +1135,10 @@ end subroutine getFu
 !!  to vdw_typfrag array. Assignation is done by evaluating the distance
 !!  from each MLWF center to the unit cell atoms. MLWFs belong to the
 !!  same fragment as their nearest atom.
-!! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (CE and TR)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!
 !! OUTPUT
-
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      evdw_wannier
@@ -1148,10 +1147,6 @@ end subroutine getFu
 !!
 !! SOURCE
  subroutine order_wannier(mwan,natom,nwan,nsppol,ord,vdw_typfrag,wanncent,xcart)
-
- use m_profiling_abi
-
-   use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1205,19 +1200,9 @@ end subroutine getFu
 !!  Evaluate volumen reduction of MLWFs
 !!  due to intrafragment overlapping
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (CE)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
-
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      evdw_wannier
@@ -1226,10 +1211,6 @@ end subroutine getFu
 !!
 !! SOURCE
  subroutine ovlp_wann(mwan,nwan,nsppol,ord,wanncent,wannspr,xi)
-
- use m_profiling_abi
-
-   use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1364,6 +1345,7 @@ end subroutine getFu
  ABI_DEALLOCATE(intsec)
  ABI_DEALLOCATE(rpoint)
  ABI_DEALLOCATE(tmp)
+
  end subroutine ovlp_wann
 !!***
 
@@ -1377,19 +1359,9 @@ end subroutine getFu
 !!  functional (Phys. Rev. A. 81:062708 (2010))
 !!  as expressed in terms of MLWFs.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (CE)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
-
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      evdw_wannier
@@ -1399,11 +1371,6 @@ end subroutine getFu
 !! SOURCE
 
  subroutine vv10limit(sn,sl,rn,rl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
-
- use m_profiling_abi
- use defs_basis
-
- use m_numeric_tools,   only : simpson_int
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1485,21 +1452,9 @@ end subroutine vv10limit
 !!  Amalgamates MLWFs, which are close enough,
 !!  into one MLWF as suggested in J.Chem.Phys.135:154105 (2011)
 !!
-!!
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (CE)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      evdw_wannier
@@ -1509,9 +1464,6 @@ end subroutine vv10limit
 !! SOURCE
 
  subroutine amalgam(amagr,ngr,nsppol,nw,mwan,ord,nwan,vdw_nfrag,wanncent,wannspr)
-
- use m_profiling_abi
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1686,4 +1638,7 @@ end subroutine vv10limit
 
  ABI_DEALLOCATE(tmp)
  end subroutine amalgam
+!!***
+
+end module m_evdw_wannier
 !!***
