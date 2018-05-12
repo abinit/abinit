@@ -2397,6 +2397,7 @@ end subroutine symdyma
 
 subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2536,6 +2537,7 @@ end subroutine dfpt_sygra
 !! SOURCE
 
 subroutine dfpt_sydy(cplex,dyfrow,indsym,natom,nondiag,nsym,qphon,sdyfro,symq,symrec)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -293,7 +293,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common
- use interfaces_94_scfcv
 !End of the abilint section
 
  implicit none

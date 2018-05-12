@@ -142,6 +142,7 @@ contains
 subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &                    pawang,pawrad,pawtab,psps,xred)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1534,6 +1535,7 @@ end subroutine nonlinear
 subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 &  kpt3,mband,mkmem,mpi_enreg,mpw,nband,nkpt2,&
 &  nkpt3,nneigh,npwarr,nsppol,occ,pwind)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
