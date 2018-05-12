@@ -49,7 +49,7 @@ sources = [
  "dfpt_nstwf.F90",
  "dfpt_rhofermi.F90",
  "dfpt_rhotov.F90",
- "dfpt_scfcv.F90",
+ "m_dfpt_scfcv.F90",
  "dfpt_vlocal.F90",
  "dfpt_vtorho.F90",
  "m_dfpt_vtowfk.F90",

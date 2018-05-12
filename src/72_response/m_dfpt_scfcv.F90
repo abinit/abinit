@@ -1,4 +1,46 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfpt_scfcv
+!! NAME
+!!  m_dfpt_scfcv
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (XG, DRH, MB, XW, MT, SPr)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfpt_scfcv
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfpt_scfcv
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfpt_scfcv
 !! NAME
 !! dfpt_scfcv
@@ -7,13 +49,6 @@
 !! Conducts set of passes or overall iterations of preconditioned
 !! conjugate gradient algorithm to converge wavefunctions to
 !! optimum and optionally to compute mixed derivatives of energy.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG, DRH, MB, XW, MT, SPr)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -185,12 +220,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &  dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset,&
 &  d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
@@ -258,7 +287,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_53_ffts
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_72_response, except_this_one => dfpt_scfcv
+ use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -1500,4 +1529,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  DBG_EXIT("COLL")
 
 end subroutine dfpt_scfcv
+!!***
+
+end module m_dfpt_scfcv
 !!***
