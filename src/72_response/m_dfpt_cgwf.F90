@@ -1,4 +1,43 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfpt_cgwf
+!! NAME
+!!  m_dfpt_cgwf
+!!
+!! FUNCTION
+!! Update one single wavefunction (cwavef), non self-consistently.
+!! Uses a conjugate-gradient algorithm.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfpt_cgwf
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfpt_cgwf
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfpt_cgwf
 !! NAME
 !! dfpt_cgwf
@@ -100,12 +139,6 @@
 !!      sqnorm_g,timab,wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwavef,&
 & eig0nk,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
@@ -1099,4 +1132,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  DBG_EXIT("COLL")
 
 end subroutine dfpt_cgwf
+!!***
+
+end module m_dfpt_cgwf
 !!***
