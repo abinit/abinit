@@ -1029,7 +1029,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 #undef ABI_FUNC
 #define ABI_FUNC 'gshgg_mkncwrite'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 
@@ -1723,7 +1722,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 #undef ABI_FUNC
 #define ABI_FUNC 'outkss'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

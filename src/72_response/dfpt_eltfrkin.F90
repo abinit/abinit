@@ -78,7 +78,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_eltfrkin'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

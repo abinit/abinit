@@ -88,7 +88,7 @@ MODULE m_mpinfo
  public :: iwrite_fftdatar  ! Select the subset of processors that will write density/potential files.
 
  public :: distrb2          !  Creates the tabs of repartition of processors for sharing the jobs on k-points, spins and bands.
- public ::
+ public :: distrb2_hf
 !!***
 
 CONTAINS  !========================================================================================
@@ -848,6 +848,7 @@ end function mpi_distrib_is_ok
 !! SOURCE
 
 function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2486,11 +2487,11 @@ end function iwrite_fftdatar
 
 subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'distrb2'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2772,6 +2773,7 @@ end subroutine distrb2
 !! SOURCE
 
 subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

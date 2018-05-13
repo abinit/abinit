@@ -188,7 +188,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 #undef ABI_FUNC
 #define ABI_FUNC 'inwffil'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_79_seqpar_mpi
 !End of the abilint section
 
@@ -1141,7 +1140,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfsinp'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2120,7 +2118,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 #undef ABI_FUNC
 #define ABI_FUNC 'newkpt'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

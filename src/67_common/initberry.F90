@@ -115,7 +115,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 #undef ABI_FUNC
 #define ABI_FUNC 'initberry'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 

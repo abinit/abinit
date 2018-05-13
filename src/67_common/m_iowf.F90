@@ -124,7 +124,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #undef ABI_FUNC
 #define ABI_FUNC 'outwf'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_62_wvl_wfs
 !End of the abilint section
 
@@ -650,7 +649,6 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 #undef ABI_FUNC
 #define ABI_FUNC 'cg_ncwrite'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

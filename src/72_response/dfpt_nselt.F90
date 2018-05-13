@@ -137,7 +137,6 @@ use m_mpinfo,      only : proc_distrb_cycle
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_nselt'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_72_response, except_this_one => dfpt_nselt
 !End of the abilint section
 

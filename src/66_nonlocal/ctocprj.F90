@@ -115,7 +115,6 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ctocprj'
- use interfaces_32_util
  use interfaces_66_nonlocal, except_this_one => ctocprj
 !End of the abilint section
 

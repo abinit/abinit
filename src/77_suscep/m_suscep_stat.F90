@@ -170,7 +170,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'suscep_stat'
- use interfaces_32_util
  use interfaces_65_paw
 !End of the abilint section
 
