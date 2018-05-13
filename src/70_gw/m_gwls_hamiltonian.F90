@@ -1221,7 +1221,6 @@ subroutine Hpsik(psi_out,psi_in,cte)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'Hpsik'
- use interfaces_66_wfs
 !End of the abilint section
 
 implicit none

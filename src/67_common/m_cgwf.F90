@@ -162,7 +162,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_66_wfs
  use interfaces_67_common
 !End of the abilint section
 

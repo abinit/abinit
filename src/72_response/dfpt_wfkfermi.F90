@@ -109,7 +109,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_wfkfermi'
  use interfaces_14_hidewrite
- use interfaces_72_response, except_this_one => dfpt_wfkfermi
 !End of the abilint section
 
  implicit none

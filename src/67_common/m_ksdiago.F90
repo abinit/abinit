@@ -263,7 +263,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  use interfaces_51_manage_mpi
  use interfaces_65_paw
  use interfaces_66_nonlocal
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

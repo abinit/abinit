@@ -123,6 +123,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 &                 prtvol,sij_opt,tim_getghc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -130,7 +131,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  use interfaces_14_hidewrite
  use interfaces_53_ffts
  use interfaces_66_nonlocal
- use interfaces_66_wfs, except_this_one => getghc
+ use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -791,6 +792,7 @@ end subroutine getghc
 
 subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
 &                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vxctaulocal,use_gpu_cuda)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

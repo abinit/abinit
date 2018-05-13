@@ -1031,7 +1031,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_65_paw
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
