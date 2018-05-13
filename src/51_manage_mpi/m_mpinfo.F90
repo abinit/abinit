@@ -87,8 +87,8 @@ MODULE m_mpinfo
  public :: pre_scatter
  public :: iwrite_fftdatar  ! Select the subset of processors that will write density/potential files.
 
- public :: distrb2          !  Creates the tabs of repartition of processors for sharing the jobs on k-points, spins and bands.
- public :: distrb2_hf
+ public :: distrb2          ! Creates the tabs of repartition of processors for sharing the jobs on k-points, spins and bands.
+ public :: distrb2_hf       ! Ceate the tabs of repartition for Hartree-Fock calculations.
 !!***
 
 CONTAINS  !========================================================================================
@@ -2742,9 +2742,8 @@ end subroutine distrb2
 !!  distrb2_hf
 !!
 !! FUNCTION
-!!  Ceate the tabs of repartition of processors
-!!  for sharing the jobs on occupied states (labeled by k-points,
-!!  bands and spin indices) for an Hartree-Fock calculation.
+!!  Ceate the tabs of repartition of processors for sharing the jobs
+!!  on occupied states (labeled by k-points, bands and spin indices) for Hartree-Fock calculation.
 !!
 !! INPUTS
 !!  nbandhf = maximum number of occupied bands

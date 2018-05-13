@@ -1,21 +1,105 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mpi_setup
+!! NAME
+!! m_mpi_setup
+!!
+!! FUNCTION
+!!  Initialize MPI parameters and datastructures for parallel execution
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1999-2018 ABINIT group (FJ,MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_mpi_setup
+
+ use defs_basis
+ use defs_abitypes
+ use m_distribfft
+ use m_xmpi
+ use m_errors
+ use m_profiling_abi
+
+ use m_geometry,     only : metric
+ use m_parser,       only : intagm
+ use m_geometry,     only : mkrdim
+ use m_fftcore,      only : fftalg_for_npfft, getng
+ use m_mpinfo,       only : init_mpi_enreg, mpi_distrib_is_ok, initmpi_atom, proc_distrb_cycle, &
+                            initmpi_grid, initmpi_pert, initmpi_img, distrb2, distrb2_hf
+ use m_libpaw_tools, only : libpaw_write_comm_set
+ use m_dtset,        only : get_npert_rbz
+ use m_kg,           only : getmpw
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ implicit none
+
+ private
+!!***
+
+ public :: mpi_setup
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/mpi_setup
 !! NAME
 !! mpi_setup
 !!
 !! FUNCTION
-!! Big loop on the datasets :
+!! Big loop on the datasets:
 !! - compute mgfft,mpw,nfft,... for this data set;
 !! - fill mpi_enreg
 !!  *** At the output of this routine, all the dtsets input variables are known ***
 !! The content of dtsets should not be modified anymore afterwards.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  filnam(5)=character strings giving file names
@@ -42,30 +126,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
-
- use defs_basis
- use defs_abitypes
- use m_distribfft
- use m_xmpi
- use m_errors
- use m_profiling_abi
-
- use m_geometry,     only : metric
- use m_parser,       only : intagm
- use m_geometry,     only : mkrdim
- use m_fftcore,      only : fftalg_for_npfft, getng
- use m_mpinfo,       only : init_mpi_enreg, mpi_distrib_is_ok, initmpi_atom, proc_distrb_cycle, &
-                            initmpi_grid, initmpi_pert, initmpi_img, distrb2, distrb2_hf
- use m_libpaw_tools, only : libpaw_write_comm_set
- use m_dtset,        only : get_npert_rbz
- use m_kg,           only : getmpw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -922,4 +983,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  DBG_EXIT("COLL")
 
 end subroutine mpi_setup
+!!***
+
+end module m_mpi_setup
 !!***
