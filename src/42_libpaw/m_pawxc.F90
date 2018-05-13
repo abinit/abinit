@@ -32,6 +32,7 @@ module m_pawxc
 
  use m_libpaw_libxc
 
+ use m_xcpositron, only : xcpositron
  use m_pawang, only : pawang_type
  use m_pawrad, only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
 
@@ -1057,7 +1058,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        if(nspden==2) then
          rhoarr(:,2)=rhoarr(:,1)/two
        endif
-       if(nspden==4) then 
+       if(nspden==4) then
          rhoarr(:,2)=zero
          rhoarr(:,3)=zero
          rhoarr(:,4)=zero
@@ -3872,7 +3873,7 @@ end subroutine pawxcsphpositron
    if(nspden==2) then
      rho_updn(:,:,2)=rho_updn(:,:,1)/two
    endif
-   if(nspden==4) then 
+   if(nspden==4) then
      rho_updn(:,:,2)=zero
      rho_updn(:,:,3)=zero
      rho_updn(:,:,4)=zero

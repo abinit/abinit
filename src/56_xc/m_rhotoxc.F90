@@ -260,6 +260,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  use m_time,             only : timab
  use m_geometry,         only : metric
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_xcpositron,       only : xcpositron
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
