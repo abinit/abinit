@@ -102,6 +102,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_axpby, pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
  use m_getgh1c,     only : getgh1c
+ use m_dfpt_mkrho, only : dfpt_accrho
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

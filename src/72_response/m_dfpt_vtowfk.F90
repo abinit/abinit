@@ -42,19 +42,7 @@ module m_dfpt_vtowfk
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby
  use m_hamiltonian,  only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
  use m_spacepar,     only : meanvalue_g
-
-
-
-
-
-
-
-
-
-
-
-
-
+ use m_dfpt_mkrho, only : dfpt_accrho
 
  implicit none
 
