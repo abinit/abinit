@@ -17,13 +17,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "dfptff_bec.F90",
- "dfptff_die.F90",
- "dfptff_ebp.F90",
- "dfptff_edie.F90",
- "dfptff_gbefd.F90",
- "dfptff_gradberry.F90",
- "dfptff_initberry.F90",
+ "m_dfpt_fef.F90",
  "dfptnl_pert.F90",
  "dfpt_cgwf.F90",
  "dfpt_accrho.F90",

@@ -196,6 +196,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use m_spacepar, only : symrhg
  use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
  use m_dfpt_vtowfk, only : dfpt_vtowfk
+ use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
