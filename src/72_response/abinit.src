@@ -27,7 +27,6 @@ sources = [
  "dfpt_eltfrkin.F90",
  "dfpt_eltfrloc.F90",
  "dfpt_eltfrxc.F90",
- "dfpt_etot.F90",
  "dfpt_ewald.F90",
  "dfpt_gatherdy.F90",
  "dfpt_init_mag1.F90",
