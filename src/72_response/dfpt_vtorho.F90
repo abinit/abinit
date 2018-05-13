@@ -1,4 +1,70 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfpt_vtorho
+!! NAME
+!! m_dfpt_vtorho
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfpt_vtorho
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_errors
+ use m_efield
+ use m_hamiltonian
+ use m_wfk
+ use m_cgtools
+
+ use m_time,     only : timab
+ use m_occ,      only : occeig
+ use m_hdr,      only : hdr_skip, hdr_io
+ use m_pawang,   only : pawang_type
+ use m_pawtab,   only : pawtab_type
+ use m_paw_ij,   only : paw_ij_type
+ use m_pawfgrtab,only : pawfgrtab_type
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, &
+&                       pawrhoij_init_unpacked, pawrhoij_free_unpacked, &
+&                       pawrhoij_mpisum_unpacked
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
+ use m_pawfgr,   only : pawfgr_type
+ use m_fft,      only : fftpac
+ use m_spacepar, only : symrhg
+ use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
+ use m_dfpt_vtowfk, only : dfpt_vtowfk
+ use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfpt_vtorho
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfpt_vtorho
 !! NAME
 !! dfpt_vtorho
@@ -7,13 +73,6 @@
 !! This routine compute the new 1-density from a fixed 1-potential (vtrial1)
 !! but might also simply compute eigenvectors and eigenvalues.
 !! The main part of it is a wf update over all k points
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions
@@ -151,12 +210,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,qphon,&
 & edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,&
@@ -168,35 +221,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,&
 & usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_efield
- use m_hamiltonian
- use m_wfk
- use m_cgtools
-
- use m_time,     only : timab
- use m_occ,      only : occeig
- use m_hdr,      only : hdr_skip, hdr_io
- use m_pawang,   only : pawang_type
- use m_pawtab,   only : pawtab_type
- use m_paw_ij,   only : paw_ij_type
- use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, &
-&                       pawrhoij_init_unpacked, pawrhoij_free_unpacked, &
-&                       pawrhoij_mpisum_unpacked
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
- use m_pawfgr,   only : pawfgr_type
- use m_fft,      only : fftpac
- use m_spacepar, only : symrhg
- use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
- use m_dfpt_vtowfk, only : dfpt_vtowfk
- use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -799,7 +823,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 ! FR symrhg will manage correctly this rearrangement
      rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    !(n+mx)
      rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
-     call timab(17,2,tsec)
    end if
 !
    if (psps%usepaw==0) then
@@ -860,4 +883,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  DBG_EXIT('COLL')
 
 end subroutine dfpt_vtorho
+!!***
+
+end module m_dfpt_vtorho
 !!***

@@ -64,6 +64,7 @@ module m_dfpt_scfcv
  use m_rf2,      only : rf2_getidirs
  use m_dens,     only : calcdensph
  use m_dfpt_fef, only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
+ use m_dfpt_vtorho, only : dfpt_vtorho
 
  implicit none
 
