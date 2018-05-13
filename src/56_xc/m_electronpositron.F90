@@ -41,6 +41,7 @@ MODULE m_electronpositron
  use m_paw_an,   only : paw_an_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_mpinfo,   only : proc_distrb_cycle
 
  implicit none
 

@@ -35,6 +35,7 @@ module m_occ
  use m_time,         only : timab
  use m_fstrings,     only : sjoin, itoa
  use defs_abitypes,  only : MPI_type
+ use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
 

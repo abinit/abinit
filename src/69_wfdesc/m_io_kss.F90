@@ -53,7 +53,7 @@ MODULE m_io_kss
  use m_abilasi,          only : xheevx, xhegvx
  use m_geometry,         only : metric, remove_inversion
  use m_dtset,            only : dtset_copy, dtset_free
- use m_mpinfo,           only : destroy_mpi_enreg
+ use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
  use m_crystal ,         only : crystal_t

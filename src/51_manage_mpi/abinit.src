@@ -18,8 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 #apack_single Source files
 sources = [
- "distrb2.F90",
- "distrb2_hf.F90",
  "m_io_redirect.F90",
  "m_mpinfo.F90",
  "m_wffile.F90",

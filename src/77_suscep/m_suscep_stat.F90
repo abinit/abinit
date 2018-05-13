@@ -35,9 +35,8 @@ MODULE m_suscep_stat
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, &
-&                      pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
- use m_mpinfo,  only : destroy_mpi_enreg, initmpi_seq
+ use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
+ use m_mpinfo,  only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
  use m_kg,      only : ph1d3d
  use m_gsphere, only : symg
  use m_fftcore, only : sphereboundary

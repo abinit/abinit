@@ -87,6 +87,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_kg,             only : mkkpg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
+ use m_mpinfo,         only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

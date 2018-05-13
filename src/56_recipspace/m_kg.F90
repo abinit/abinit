@@ -34,6 +34,7 @@ MODULE m_kg
 
  use m_fftcore,     only : kpgsph, bound
  use defs_abitypes, only : MPI_type
+ use m_mpinfo,      only : proc_distrb_cycle
 
  implicit none
 

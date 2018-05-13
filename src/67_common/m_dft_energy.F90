@@ -62,6 +62,7 @@ module m_dft_energy
  use m_mkffnl,           only : mkffnl
  use m_getghc,           only : getghc
  use m_rhotoxc,          only : rhotoxc
+ use m_mpinfo,           only : proc_distrb_cycle
 
  implicit none
 

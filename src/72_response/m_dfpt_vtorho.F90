@@ -53,6 +53,7 @@ module m_dfpt_vtorho
  use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
  use m_dfpt_vtowfk, only : dfpt_vtowfk
  use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
+use m_mpinfo,         only : proc_distrb_cycle
 
  implicit none
 

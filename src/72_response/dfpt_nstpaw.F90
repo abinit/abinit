@@ -176,7 +176,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_io_tools, only : file_exists
  use m_geometry, only : stresssym
  use m_dynmat,   only : dfpt_sygra
- use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq
+ use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
  use m_hdr,      only : hdr_skip
  use m_occ,      only : occeig
  use m_pawang,   only : pawang_type

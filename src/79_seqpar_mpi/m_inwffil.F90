@@ -48,7 +48,7 @@ module m_inwffil
  use m_cgtools,  only : cg_envlop, pw_orthon
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
- use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg
+ use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg, proc_distrb_cycle
  use m_kg,       only : kpgio, ph1d3d, getph
  use m_kpts,     only : listkk
  use m_occ,      only : pareigocc

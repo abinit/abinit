@@ -71,6 +71,7 @@
  use m_pawrad,    only : pawrad_type, pawrad_init, pawrad_free, pawrad_ifromr, &
 &                        pawrad_deducer0, simp_gen, nderiv_gen, bound_deriv
  use m_splines,   only : spline,splint
+ use m_mpinfo,    only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

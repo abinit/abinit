@@ -71,6 +71,7 @@ module m_vtorho
  use m_vtowfk,             only : vtowfk
  use m_mkrho,              only : mkrho, prtrhomxmn
  use m_mkffnl,             only : mkffnl
+ use m_mpinfo,             only : proc_distrb_cycle
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif

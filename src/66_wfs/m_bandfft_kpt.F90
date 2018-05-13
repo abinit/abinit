@@ -34,6 +34,7 @@ MODULE m_bandfft_kpt
  use m_xmpi
 
  use m_fftcore,   only : sphereboundary
+ use m_mpinfo,    only : proc_distrb_cycle
 
  implicit none
 

@@ -34,6 +34,7 @@ module m_initylmg
  use m_xmpi
 
  use m_paw_sphharm, only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
+ use m_mpinfo,      only : proc_distrb_cycle
 
  implicit none
 

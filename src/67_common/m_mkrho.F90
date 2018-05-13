@@ -42,7 +42,7 @@ module m_mkrho
  use m_spacepar,     only : symrhg
  use defs_datatypes, only : pseudopotential_type
  use m_atomdata,     only : atom_length
- use m_mpinfo,       only : ptabs_fourdp
+ use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
  use m_pawtab,       only : pawtab_type
 
  implicit none

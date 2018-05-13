@@ -42,8 +42,10 @@ module m_extraprho
  use m_atm2fft,  only : atm2fft
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
-&                      pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
+                        pawcprj_free, pawcprj_zaxpby, pawcprj_put, pawcprj_getdim
+ use m_mpinfo,   only : proc_distrb_cycle
+
 
  implicit none
 

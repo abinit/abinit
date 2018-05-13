@@ -34,6 +34,7 @@ module m_dfpt_fef
 
  use m_kg,        only : kpgio
  use m_cgtools,   only : overlap_g
+ use m_mpinfo,    only : proc_distrb_cycle
 
  implicit none
 

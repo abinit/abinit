@@ -30,6 +30,7 @@ MODULE m_plowannier
  use m_profiling_abi
 
  use m_io_tools,  only : open_file
+ use m_mpinfo,    only : proc_distrb_cycle
 
  implicit none
 

@@ -43,6 +43,7 @@ module m_dfpt_mkrho
  use m_pawrhoij,      only : pawrhoij_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paral_atom,    only : get_my_atmtab
+use m_mpinfo,         only : proc_distrb_cycle
 
  implicit none
 

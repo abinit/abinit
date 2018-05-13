@@ -61,7 +61,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use m_parser,       only : intagm
  use m_geometry,     only : mkrdim
  use m_fftcore,      only : fftalg_for_npfft, getng
- use m_mpinfo,       only : init_mpi_enreg, mpi_distrib_is_ok, initmpi_atom, initmpi_grid, initmpi_pert, initmpi_img
+ use m_mpinfo,       only : init_mpi_enreg, mpi_distrib_is_ok, initmpi_atom, proc_distrb_cycle, &
+                            initmpi_grid, initmpi_pert, initmpi_img, distrb2, distrb2_hf
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_dtset,        only : get_npert_rbz
  use m_kg,           only : getmpw

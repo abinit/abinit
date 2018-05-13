@@ -66,6 +66,7 @@ module m_nonlinear
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
  use m_rhotoxc,     only : rhotoxc
+ use m_mpinfo,         only : proc_distrb_cycle
 
  implicit none
 

@@ -65,10 +65,11 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
  use m_symtk,   only : symatm
  use m_fftcore, only : kpgsph
  use m_kpts,    only : listkk, smpbz
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type
+ use m_pawang,  only : pawang_type
+ use m_pawrad,  only : pawrad_type
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_alloc, pawcprj_getdim
+ use m_mpinfo,  only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

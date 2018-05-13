@@ -47,6 +47,7 @@ MODULE m_iowf
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite, crystal_from_hdr
  use m_rwwf,           only : rwwf
+use m_mpinfo,          only : proc_distrb_cycle
 
  implicit none
 

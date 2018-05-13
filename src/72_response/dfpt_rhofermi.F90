@@ -166,6 +166,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  use m_fft,         only : fftpac
  use m_spacepar,    only : symrhg
  use m_mkffnl,      only : mkffnl
+use m_mpinfo,       only : proc_distrb_cycle
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

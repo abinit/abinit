@@ -50,6 +50,7 @@ MODULE m_eig2d
  use m_ddb,        only : DDB_VERSION
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_double_grid,only : kptfine_av
+ use m_mpinfo,     only : distrb2, proc_distrb_cycle
 
  implicit none
 
