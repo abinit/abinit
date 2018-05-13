@@ -21,7 +21,7 @@ sources = [
 "libxc_tools.c",
 "check_kxc.F90",
 "drivexc.F90",
-"drivexc_main.F90",
+"m_drivexc.F90",
 "echo_xc_name.F90",
 "m_libxc_functionals.F90",
 "m_xc_noncoll.F90",

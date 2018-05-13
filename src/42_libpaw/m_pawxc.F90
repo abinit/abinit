@@ -30,11 +30,13 @@ module m_pawxc
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
 
+#if defined HAVE_LIBPAW_ABINIT
+ use m_xcpositron,  only : xcpositron
+ use m_drivexc,     only : drivexc_main
+#endif
  use m_libpaw_libxc
-
- use m_xcpositron, only : xcpositron
- use m_pawang, only : pawang_type
- use m_pawrad, only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
+ use m_pawang,      only : pawang_type
+ use m_pawrad,      only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
 
  implicit none
  private
