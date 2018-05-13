@@ -54,6 +54,7 @@ module m_prcref
  use m_distribfft, only : init_distribfft_seq
  use m_forces,     only : fresid
  use m_atm2fft,    only : atm2fft
+ use m_rhotoxc,    only : rhotoxc
 
  implicit none
 

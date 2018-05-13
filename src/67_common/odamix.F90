@@ -160,6 +160,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  use m_pawrhoij, only : pawrhoij_type
  use m_energies, only : energies_type
  use m_spacepar, only : hartre
+ use m_rhotoxc,  only : rhotoxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

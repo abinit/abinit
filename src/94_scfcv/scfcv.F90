@@ -236,6 +236,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_forces,           only : fresid
  use m_dft_energy,       only : energy
  use m_initylmg,         only : initylmg
+ use m_rhotoxc,          only : rhotoxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

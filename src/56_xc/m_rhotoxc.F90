@@ -1,4 +1,45 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_rhotoxc
+!! NAME
+!!  m_rhotox
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_rhotoxc
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+ private
+!!***
+
+ public :: rhotoxc
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/rhotoxc
 !! NAME
 !! rhotoxc
@@ -8,13 +49,6 @@
 !! compute xc correlation potential and energies.
 !! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12).
 !! Cannot be used with wavelets.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  mpi_enreg=information about MPI parallelization
@@ -186,10 +220,12 @@
 !!   l... --> means laplacian of something (e.g. : lrho --> means laplacian of electron density)
 !!   d...d... --> means derivative of something with regards to something else.
 !!   (d2...d...d...  ---> means second derivative of ... with regards to ... and to ...) etc...
-!!   d... --> without the occurence of the second "d" means that this is an array of several derivative of the same quantity (e.g. : depsxc)
+!!   d... --> without the occurence of the second "d" means that this is an array of
+!!            several derivative of the same quantity (e.g. : depsxc)
 !!
 !!   ..._b ----> means a block of the quantity "..." (use in mpi loops which treat the data block by block)
-!!   ..._updn -> means that spin up and spin down is available in that array as (..,1) and (..,2). (if xcdata%nspden >=2 of course).
+!!   ..._updn -> means that spin up and spin down is available in that array
+!!               as (..,1) and (..,2). (if xcdata%nspden >=2 of course).
 !!   ..._apn --> in case of positrons are concerned.
 !!
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
@@ -205,12 +241,6 @@
 !!      xcpositron,xcpot,xctfw,xmpi_sum
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,paral_kgb, &
@@ -1263,4 +1293,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  DBG_EXIT("COLL")
 
 end subroutine rhotoxc
+!!***
+
+end module m_rhotoxc
 !!***

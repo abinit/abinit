@@ -65,6 +65,7 @@ module m_nonlinear
  use m_getshell,    only : getshell
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
+ use m_rhotoxc,     only : rhotoxc
 
  implicit none
 

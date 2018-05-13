@@ -61,6 +61,7 @@ module m_dft_energy
  use m_mkrho,            only : mkrho
  use m_mkffnl,           only : mkffnl
  use m_getghc,           only : getghc
+ use m_rhotoxc,          only : rhotoxc
 
  implicit none
 
