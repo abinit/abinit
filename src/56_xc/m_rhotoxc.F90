@@ -266,7 +266,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotoxc'
  use interfaces_41_xc_lowlevel
- use interfaces_56_xc, except_this_one => rhotoxc
+ use interfaces_56_xc
 !End of the abilint section
 
  implicit none

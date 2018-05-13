@@ -246,7 +246,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
  use interfaces_53_ffts
- use interfaces_56_xc
  use interfaces_62_poisson
  use interfaces_65_paw
  use interfaces_66_nonlocal

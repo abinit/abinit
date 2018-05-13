@@ -146,7 +146,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vhxc_me'
  use interfaces_14_hidewrite
- use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section
 
