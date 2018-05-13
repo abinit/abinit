@@ -80,13 +80,13 @@
  use m_fftcore,      only : kpgcount
  use m_dtset,        only : get_npert_rbz
  use m_dtfil,        only : mkfilename
+ use m_mpinfo,       only : initmpi_world
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'finddistrproc'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_57_iovars, except_this_one => finddistrproc
 !End of the abilint section
 
@@ -893,7 +893,6 @@
      nproc1=(nproc1/dtset%nppert)*dtset%nppert
    end if
    call initmpi_world(mpi_enreg,nproc1)
-!   call initmpi_world(mpi_enreg,nproc1)
  end if
 
  100 continue

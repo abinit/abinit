@@ -120,7 +120,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use m_paw_sphharm, only : initylmr
  use m_pawpsp,  only : pawpsp_read_corewf
  use m_crystal, only : crystal_t
- use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg
+ use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq
  use m_io_tools,only : open_file,close_unit,get_unit
  use m_fftcore, only : sphereboundary
 
@@ -131,7 +131,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_xc_lowlevel
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_65_paw

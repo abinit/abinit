@@ -137,7 +137,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_crystal,     only : crystal_t
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
  use m_dtset,       only : dtset_copy, dtset_free
- use m_mpinfo,      only : destroy_mpi_enreg
+ use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_kg,          only : mkkin
 
 !This section has been created automatically by the script Abilint (TD).
@@ -145,7 +145,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_vhxc_me'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section

@@ -50,7 +50,7 @@ module m_screening_driver
  use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_crystal,       only : crystal_free, crystal_t, crystal_print
  use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
@@ -177,7 +177,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #undef ABI_FUNC
 #define ABI_FUNC 'screening'
  use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_65_paw
 !End of the abilint section

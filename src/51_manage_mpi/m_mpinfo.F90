@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MT, GG)
+!!  Copyright (C) 2008-2018 ABINIT group (MT, GG, XG, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,14 +32,25 @@ MODULE m_mpinfo
  use defs_basis
  use m_errors
  use m_profiling_abi
+#if defined HAVE_MPI2
+ use mpi
+#endif
  use m_xmpi
+ use m_sort
  use m_distribfft
 
- use defs_abitypes,   only : MPI_type
+ use defs_abitypes,   only : MPI_type, dataset_type
+ use m_libpaw_tools,  only : libpaw_write_comm_set
+ use m_paral_atom,    only : get_my_natom, get_my_atmtab
+ use m_dtset,         only : get_npert_rbz
 
  implicit none
 
  private
+
+#if defined HAVE_MPI1 || (defined HAVE_MPI && defined FC_G95)
+ include 'mpif.h'
+#endif
 
  public :: init_mpi_enreg        ! Initialise a mpi_enreg structure with dataset independent values.
  public :: nullify_mpi_enreg     ! nullify a mpi_enreg datastructure
@@ -52,11 +63,22 @@ MODULE m_mpinfo
  public :: mpi_distrib_is_ok     ! Check if a MPI datastructure contains number of processors
                                  ! compatible (in terms of efficiency) with the number of spins/kpts/bands
 
-! Destructor methods
+ public :: initmpi_seq
+ public :: initmpi_world
+
+ public :: initmpi_atom
  public :: clnmpi_atom
+
+ public :: initmpi_grid
  public :: clnmpi_grid
+
+ public :: initmpi_img
  public :: clnmpi_img
+
+ public :: initmpi_pert
  public :: clnmpi_pert
+
+ public :: initmpi_band
 
 ! Helper functions.
  public :: pre_gather
@@ -105,7 +127,6 @@ subroutine init_mpi_enreg(mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_mpi_enreg'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -806,6 +827,307 @@ logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol
 end function mpi_distrib_is_ok
 !!***
 
+!!****f* ABINIT/initmpi_world
+!! NAME
+!!  initmpi_world
+!!
+!! FUNCTION
+!!  Initializes the mpi information for world.
+!!  xmpi_world is redifined for the number of processors on which ABINIT is launched
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      finddistrproc
+!!
+!! CHILDREN
+!!      abi_io_redirect,libpaw_write_comm_set
+!!
+!! SOURCE
+
+subroutine initmpi_world(mpi_enreg,nproc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'initmpi_world'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer, intent(in)::nproc
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+!arrays
+ integer,allocatable :: ranks(:)
+
+! ***********************************************************************
+
+ DBG_ENTER("COLL")
+
+ if(nproc==mpi_enreg%nproc) return
+
+ ABI_ALLOCATE(ranks,(0:nproc-1))
+ ranks(0:nproc-1)=(/((ii),ii=0,nproc-1)/)
+ mpi_enreg%comm_world=xmpi_subcomm(xmpi_world,nproc,ranks)
+ ABI_DEALLOCATE(ranks)
+
+ if(mpi_enreg%me<nproc)  then
+   mpi_enreg%me=xmpi_comm_rank(mpi_enreg%comm_world)
+   mpi_enreg%nproc=xmpi_comm_size(mpi_enreg%comm_world)
+   call abi_io_redirect(new_io_comm=mpi_enreg%comm_world)
+   call libpaw_write_comm_set(mpi_enreg%comm_world)
+ else
+   mpi_enreg%me=-1
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine initmpi_world
+!!***
+
+!!****f* ABINIT/initmpi_seq
+!! NAME
+!!  initmpi_seq
+!!
+!! FUNCTION
+!!  Initializes the MPI information for a sequential use of other routines.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! PARENTS
+!!      atm2fft,bethe_salpeter,bsepostproc,calc_vhxc_me,cut3d,debug_tools
+!!      dfpt_atm2fft,dfpt_nstpaw,dieltcel,eph,fftprof,ks_ddiago
+!!      linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof,m_fftcore,m_gsphere
+!!      m_hamiltonian,m_ioarr,m_kxc,m_mpinfo,m_pawpwij,m_ppmodel,m_screening
+!!      m_wfd,m_wfk,mlwfovlp_qp,mrggkk,mrgscr,partial_dos_fractions,pawmknhat
+!!      pawmknhat_psipsi,pawsushat,posdoppler,scfcv,screening,sigma,suscep_stat
+!!      susk,suskmm,ujdet,vdw_kernelgen,wfk_analyze
+!!
+!! CHILDREN
+!!      nullify_mpi_enreg
+!!
+!! SOURCE
+
+subroutine initmpi_seq(mpi_enreg)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'initmpi_seq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(MPI_type),intent(out) :: mpi_enreg
+
+! ***********************************************************************
+
+ DBG_ENTER("COLL")
+
+!Set default seq values for scalars
+ mpi_enreg%bandpp=1
+ mpi_enreg%me=0
+ mpi_enreg%me_band=0
+ mpi_enreg%me_cell=0
+ mpi_enreg%me_fft=0
+ mpi_enreg%me_g0=1
+ mpi_enreg%me_img=0
+ mpi_enreg%me_hf=0
+ mpi_enreg%me_kpt=0
+ mpi_enreg%me_pert=0
+ mpi_enreg%me_spinor=0
+ mpi_enreg%me_wvl=0
+ mpi_enreg%my_natom=0       ! Should be natom
+ mpi_enreg%my_isppoltab=0   ! Should be (1,0) if nsppol=1 or (1,1) if nsppol=2
+ mpi_enreg%ngfft3_ionic=1
+ mpi_enreg%my_nimage=1
+ mpi_enreg%nproc=1
+ mpi_enreg%nproc_atom=1
+ mpi_enreg%nproc_band=1
+ mpi_enreg%nproc_cell=1
+ mpi_enreg%nproc_fft=1
+ mpi_enreg%nproc_img=1
+ mpi_enreg%nproc_hf=1
+ mpi_enreg%nproc_kpt=1
+ mpi_enreg%nproc_pert=1
+ mpi_enreg%nproc_spinor=1
+ mpi_enreg%nproc_wvl=1
+ mpi_enreg%paralbd=0
+ mpi_enreg%paral_img=0
+ mpi_enreg%paral_hf=0
+ mpi_enreg%paral_kgb=0
+ mpi_enreg%paral_pert=0
+ mpi_enreg%paral_spinor=0
+ mpi_enreg%pw_unbal_thresh=-1._dp
+
+!Set default seq values for communicators
+ mpi_enreg%comm_world          = xmpi_world
+ mpi_enreg%comm_atom           = xmpi_comm_self
+ mpi_enreg%comm_band           = xmpi_comm_self
+ mpi_enreg%comm_bandspinor     = xmpi_comm_self
+ mpi_enreg%comm_bandfft        = xmpi_comm_self
+ mpi_enreg%comm_bandspinorfft  = xmpi_comm_self
+ mpi_enreg%comm_cell           = xmpi_comm_self
+ mpi_enreg%comm_cell_pert      = xmpi_comm_self
+ mpi_enreg%comm_fft            = xmpi_comm_self
+ mpi_enreg%comm_hf             = xmpi_comm_self
+ mpi_enreg%comm_img            = xmpi_comm_self
+ mpi_enreg%comm_kpt            = xmpi_comm_self
+ mpi_enreg%comm_kptband        = xmpi_comm_self
+ mpi_enreg%comm_pert           = xmpi_comm_self
+ mpi_enreg%comm_spinor         = xmpi_comm_self
+ mpi_enreg%comm_spinorfft      = xmpi_comm_self
+ mpi_enreg%comm_wvl            = xmpi_comm_self
+
+!Nullify all pointers
+ call nullify_mpi_enreg(mpi_enreg)
+
+!Allocate and nullify distribfft datastructure
+! This is not good since distribfft is not initialized here (even with 0s).
+! It can be dangerous if use with no care (Valgrind might complain)
+ ABI_DATATYPE_ALLOCATE(mpi_enreg%distribfft,)
+
+ DBG_EXIT("COLL")
+
+end subroutine initmpi_seq
+!!***
+
+!!****f* ABINIT/initmpi_atom
+!! NAME
+!!  initmpi_atom
+!!
+!! FUNCTION
+!!  Initializes the mpi information for parallelism over atoms (PAW).
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  mpi_enreg= information about MPI parallelization
+!!
+!! OUTPUT
+!!  mpi_enreg= information about MPI parallelization
+!!    comm_atom                 =communicator over atoms
+!!    nproc_atom                =size of the communicator over atoms
+!!    my_natom                  =number of atoms treated by current proc
+!!    my_atmtab(mpi_enreg%natom)=indexes of the atoms treated by current processor
+!!
+!! PARENTS
+!!      m_paral_pert,mpi_setup
+!!
+!! CHILDREN
+!!      get_my_atmtab,get_my_natom
+!!
+!! SOURCE
+
+subroutine initmpi_atom(dtset,mpi_enreg)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'initmpi_atom'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ logical :: my_atmtab_allocated,paral_atom
+ character(len=500) :: msg
+ integer :: iatom
+
+! ***********************************************************************
+
+ DBG_ENTER("COLL")
+
+ mpi_enreg%nproc_atom=1
+ mpi_enreg%comm_atom=xmpi_comm_self
+ mpi_enreg%my_natom=dtset%natom
+ if (associated(mpi_enreg%my_atmtab))then
+   ABI_DEALLOCATE(mpi_enreg%my_atmtab)
+ end if
+ nullify(mpi_enreg%my_atmtab)
+
+ if (xmpi_paral==0) then
+   mpi_enreg%nproc_atom=0
+   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   return
+ end if
+
+!Check compatibility
+ if (dtset%paral_atom>0) then
+   msg=''
+   if (dtset%usepaw==0)  msg= 'Parallelisation over atoms not compatible with usepaw=0 !'
+   if (dtset%usedmft==1) msg=' Parallelisation over atoms not compatible with usedmft=1 !'
+   if (dtset%usewvl==1)  msg= 'Parallelisation over atoms not compatible with usewvl=1 !'
+   if (dtset%prtden>1.and.dtset%paral_kgb<=0) &
+&   msg= 'Parallelisation over atoms not compatible with prtden>1 (PAW AE densities) !'
+   if (dtset%optdriver/=RUNL_GSTATE.and.dtset%optdriver/=RUNL_RESPFN) &
+&   msg=' Parallelisation over atoms only compatible with GS or RF !'
+   if (dtset%macro_uj/=0)msg=' Parallelisation over atoms not compatible with macro_uj!=0 !'
+   if (msg/='') then
+     MSG_ERROR(msg)
+   end if
+ end if
+
+ if (mpi_enreg%comm_atom==xmpi_comm_null) then
+   mpi_enreg%nproc_atom=0;mpi_enreg%my_natom=0
+   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   return
+ end if
+
+ if (dtset%paral_atom>0) then
+
+!  Build correct atom communicator
+   if (dtset%optdriver==RUNL_GSTATE.and.dtset%paral_kgb==1) then
+     mpi_enreg%comm_atom=mpi_enreg%comm_kptband
+   else
+     mpi_enreg%comm_atom=mpi_enreg%comm_cell
+   end if
+
+!  Get number of processors sharing the atomic data distribution
+   mpi_enreg%nproc_atom=xmpi_comm_size(mpi_enreg%comm_atom)
+
+!  Get local number of atoms
+   call get_my_natom(mpi_enreg%comm_atom,mpi_enreg%my_natom,dtset%natom)
+   paral_atom=(mpi_enreg%my_natom/=dtset%natom)
+
+!  Build atom table
+   if (mpi_enreg%my_natom>0.and.paral_atom) then
+     my_atmtab_allocated=.false.
+     call get_my_atmtab(mpi_enreg%comm_atom,mpi_enreg%my_atmtab,my_atmtab_allocated, &
+&     paral_atom,dtset%natom)
+   else if (.not.paral_atom) then
+     ABI_ALLOCATE(mpi_enreg%my_atmtab,(dtset%natom))
+     mpi_enreg%my_atmtab(1:dtset%natom)=(/(iatom, iatom=1,dtset%natom)/)
+   else if (mpi_enreg%my_natom==0) then
+     ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   end if
+
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine initmpi_atom
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_mpinfo/clnmpi_atom
@@ -860,6 +1182,302 @@ subroutine clnmpi_atom(mpi_enreg)
  DBG_EXIT("COLL")
 
 end subroutine clnmpi_atom
+!!***
+
+!!****f* ABINIT/initmpi_grid
+!! NAME
+!!  initmpi_grid
+!!
+!! FUNCTION
+!!  Initializes the MPI information for the grid:
+!!    * 2D if parallization KPT/FFT (!paral_kgb & MPI)
+!!    * 3D if parallization KPT/FFT/BAND (paral_kgb & MPI)
+!!    * 2D in case of an Hartree-Fock calculation
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      mpi_setup
+!!
+!! CHILDREN
+!!      mpi_cart_coords,mpi_cart_create,mpi_cart_sub,mpi_comm_rank,wrtout
+!!      xmpi_abort,xmpi_comm_free
+!!
+!! SOURCE
+
+subroutine initmpi_grid(mpi_enreg)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'initmpi_grid'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ integer :: nproc,nproc_eff,spacecomm
+ character(len=500) :: msg
+#if defined HAVE_MPI
+ integer :: commcart_4d,dimcart,ierr,me_cart_4d
+ integer :: commcart_2d,me_cart_2d
+ logical :: reorder
+!arrays
+ integer,allocatable :: coords(:),sizecart(:)
+ logical,allocatable :: periode(:), keepdim(:)
+#endif
+
+! *********************************************************************
+
+ DBG_ENTER("COLL")
+
+!Select the correct "world" communicator"
+ nproc=mpi_enreg%nproc_cell
+ if(mpi_enreg%paral_pert==1) nproc=mpi_enreg%nproc_cell
+ spacecomm=mpi_enreg%comm_cell
+
+!Fake values for null communicator
+ if (nproc==0) then
+   mpi_enreg%nproc_fft    = 0
+   mpi_enreg%nproc_band   = 0
+   mpi_enreg%nproc_hf    = 0
+   mpi_enreg%nproc_kpt    = 0
+   mpi_enreg%nproc_spinor   = 0
+   mpi_enreg%comm_fft            = xmpi_comm_null
+   mpi_enreg%comm_band           = xmpi_comm_null
+   mpi_enreg%comm_hf             = xmpi_comm_null
+   mpi_enreg%comm_kpt            = xmpi_comm_null
+   mpi_enreg%comm_kptband        = xmpi_comm_null
+   mpi_enreg%comm_spinor         = xmpi_comm_null
+   mpi_enreg%comm_bandspinor     = xmpi_comm_null
+   mpi_enreg%comm_spinorfft      = xmpi_comm_null
+   mpi_enreg%comm_bandfft        = xmpi_comm_null
+   mpi_enreg%comm_bandspinorfft  = xmpi_comm_null
+   mpi_enreg%bandpp       = 1
+   return
+ end if
+
+#if defined HAVE_MPI
+ if (mpi_enreg%paral_hf==0) then
+   ! either the option Fock exchange is not active or there is no parallelization on Fock exchange calculation.
+
+   if (mpi_enreg%nproc_spinor>1) mpi_enreg%paral_spinor=1
+
+    !Effective number of processors used for the grid
+   nproc_eff=mpi_enreg%nproc_fft*mpi_enreg%nproc_band *mpi_enreg%nproc_kpt*mpi_enreg%nproc_spinor
+   if(nproc_eff/=nproc) then
+     write(msg,'(4a,5(a,i0))') &
+&     '  The number of band*FFT*kpt*spinor processors, npband*npfft*npkpt*npspinor should be',ch10,&
+&     '  equal to the total number of processors, nproc.',ch10,&
+&     '  However, npband   =',mpi_enreg%nproc_band,&
+&     '           npfft    =',mpi_enreg%nproc_fft,&
+&     '           npkpt    =',mpi_enreg%nproc_kpt,&
+&     '           npspinor =',mpi_enreg%nproc_spinor,&
+&     '       and nproc    =',nproc
+     MSG_WARNING(msg)
+   end if
+
+   !Nothing to do if only 1 proc
+   if (nproc_eff==1) return
+
+   ! Initialize the communicator for Hartree-Fock to xmpi_comm_self
+   mpi_enreg%me_hf =0
+   mpi_enreg%comm_hf=xmpi_comm_self
+
+   if(mpi_enreg%paral_kgb==0) then
+     mpi_enreg%me_fft =0
+     mpi_enreg%me_band=0
+     mpi_enreg%me_kpt =mpi_enreg%me_cell
+     mpi_enreg%me_spinor=0
+     mpi_enreg%comm_fft=xmpi_comm_self
+     mpi_enreg%comm_band=xmpi_comm_self
+     mpi_enreg%comm_kpt=mpi_enreg%comm_cell
+     mpi_enreg%comm_spinor=xmpi_comm_self
+     mpi_enreg%comm_bandspinor=xmpi_comm_self
+     mpi_enreg%comm_kptband=mpi_enreg%comm_cell
+     mpi_enreg%comm_spinorfft=xmpi_comm_self
+     mpi_enreg%comm_bandfft=xmpi_comm_self
+     mpi_enreg%comm_bandspinorfft=xmpi_comm_self
+   else
+     !  CREATE THE 4D GRID
+     !  ==================================================
+
+     !  Create the global cartesian 4D- communicator
+     !  valgrind claims this is not deallocated in test v5/72
+     !  Can someone knowledgable check?
+     dimcart=4
+     ABI_ALLOCATE(sizecart,(dimcart))
+     ABI_ALLOCATE(periode,(dimcart))
+!    MT 2012-june: change the order of the indexes; not sure this is efficient
+!    (not efficient on TGCC-Curie).
+     sizecart(1)=mpi_enreg%nproc_kpt  ! mpi_enreg%nproc_kpt
+     sizecart(2)=mpi_enreg%nproc_band ! mpi_enreg%nproc_band
+     sizecart(3)=mpi_enreg%nproc_spinor ! mpi_enreg%nproc_spinor
+     sizecart(4)=mpi_enreg%nproc_fft  ! mpi_enreg%nproc_fft
+     periode(:)=.false.;reorder=.false.
+     call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_4d,ierr)
+     ABI_DEALLOCATE(periode)
+     ABI_DEALLOCATE(sizecart)
+
+!    Find the index and coordinates of the current processor
+     call MPI_COMM_RANK(commcart_4d, me_cart_4d, ierr)
+     ABI_ALLOCATE(coords,(dimcart))
+     call MPI_CART_COORDS(commcart_4d, me_cart_4d,dimcart,coords,ierr)
+     mpi_enreg%me_kpt =coords(1)
+     mpi_enreg%me_band=coords(2)
+     mpi_enreg%me_spinor=coords(3)
+     mpi_enreg%me_fft =coords(4)
+     ABI_DEALLOCATE(coords)
+
+     ABI_ALLOCATE(keepdim,(dimcart))
+
+!    Create the communicator for fft distribution
+     keepdim(1)=.false.
+     keepdim(2)=.false.
+     keepdim(3)=.false.
+     keepdim(4)=.true.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_fft,ierr)
+
+!    Create the communicator for band distribution
+     keepdim(1)=.false.
+     keepdim(2)=.true.
+     keepdim(3)=.false.
+     keepdim(4)=.false.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_band,ierr)
+
+!    Create the communicator for kpt distribution
+     keepdim(1)=.true.
+     keepdim(2)=.false.
+     keepdim(3)=.false.
+     keepdim(4)=.false.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_kpt,ierr)
+
+!    Create the communicator for spinor distribution
+     keepdim(1)=.false.
+     keepdim(2)=.false.
+     keepdim(3)=.true.
+     keepdim(4)=.false.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_spinor,ierr)
+
+!    Create the communicator for band-spinor distribution
+     keepdim(1)=.false.
+     keepdim(2)=.true.
+     keepdim(3)=.true.
+     keepdim(4)=.false.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_bandspinor,ierr)
+     if (ierr /= MPI_SUCCESS ) then
+       call xmpi_abort(mpi_enreg%comm_world,ierr)
+     end if
+
+!    Create the communicator for kpt-band distribution
+     keepdim(1)=.true.
+     keepdim(2)=.true.
+     keepdim(3)=.false.
+     keepdim(4)=.false.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_kptband,ierr)
+
+!    Create the communicator for fft-spinor distribution
+     keepdim(1)=.false.
+     keepdim(2)=.false.
+     keepdim(3)=.true.
+     keepdim(4)=.true.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_spinorfft,ierr)
+
+!    Create the communicator for fft-band distribution
+     keepdim(1)=.false.
+     keepdim(2)=.true.
+     keepdim(3)=.false.
+     keepdim(4)=.true.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_bandfft,ierr)
+
+!    Create the communicator for fft-band-spinor distribution
+     keepdim(1)=.false.
+     keepdim(2)=.true.
+     keepdim(3)=.true.
+     keepdim(4)=.true.
+     call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_bandspinorfft,ierr)
+
+     ABI_DEALLOCATE(keepdim)
+     call xmpi_comm_free(commcart_4d)
+   end if
+
+!  Write some data
+   write(msg,'(a,4i5)') 'npfft, npband, npspinor and npkpt: ',&
+&   mpi_enreg%nproc_fft,mpi_enreg%nproc_band, &
+&   mpi_enreg%nproc_spinor,mpi_enreg%nproc_kpt
+   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
+&   mpi_enreg%me_fft,mpi_enreg%me_band,&
+&   mpi_enreg%me_spinor, mpi_enreg%me_kpt
+
+ else ! paral_hf==1
+!* Option Hartree-Fock is active and more than 1 processor is dedicated to the parallelization over occupied states.
+
+!* Initialize the values of fft, band and spinor communicators, as in the case paral_kgb==0.
+   mpi_enreg%me_fft =0
+   mpi_enreg%me_band=0
+   mpi_enreg%me_spinor=0
+   mpi_enreg%comm_fft=xmpi_comm_self
+   mpi_enreg%comm_band=xmpi_comm_self
+   mpi_enreg%comm_spinor=xmpi_comm_self
+   mpi_enreg%comm_bandspinor=xmpi_comm_self
+   mpi_enreg%comm_kptband=mpi_enreg%comm_cell
+   mpi_enreg%comm_spinorfft=xmpi_comm_self
+   mpi_enreg%comm_bandfft=xmpi_comm_self
+   mpi_enreg%comm_bandspinorfft=xmpi_comm_self
+
+!* Create the global cartesian 2D- communicator
+   dimcart=2
+   ABI_ALLOCATE(sizecart,(dimcart))
+   ABI_ALLOCATE(periode,(dimcart))
+   sizecart(1)=mpi_enreg%nproc_kpt  ! mpi_enreg%nproc_kpt
+   sizecart(2)=mpi_enreg%nproc_hf   ! mpi_enreg%nproc_hf
+   periode(:)=.false.;reorder=.false.
+   call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_2d,ierr)
+   ABI_DEALLOCATE(periode)
+   ABI_DEALLOCATE(sizecart)
+
+!* Find the index and coordinates of the current processor
+   call MPI_COMM_RANK(commcart_2d, me_cart_2d, ierr)
+   ABI_ALLOCATE(coords,(dimcart))
+   call MPI_CART_COORDS(commcart_2d, me_cart_2d,dimcart,coords,ierr)
+   mpi_enreg%me_kpt =coords(1)
+   mpi_enreg%me_hf=coords(2)
+   ABI_DEALLOCATE(coords)
+
+   ABI_ALLOCATE(keepdim,(dimcart))
+
+!* Create the communicator for kpt distribution
+   keepdim(1)=.true.
+   keepdim(2)=.false.
+   call MPI_CART_SUB(commcart_2d, keepdim, mpi_enreg%comm_kpt,ierr)
+
+!* Create the communicator for hf distribution
+   keepdim(1)=.false.
+   keepdim(2)=.true.
+   call MPI_CART_SUB(commcart_2d, keepdim, mpi_enreg%comm_hf,ierr)
+
+   ABI_DEALLOCATE(keepdim)
+   call xmpi_comm_free(commcart_2d)
+
+!* Write some data
+   write(msg,'(a,2(1x,i0))') 'nphf and npkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_kpt
+   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a,2(1x,i0))') 'me_hf, me_kpt: ',mpi_enreg%me_hf, mpi_enreg%me_kpt
+ end if
+#endif
+
+ DBG_EXIT("COLL")
+
+end subroutine initmpi_grid
 !!***
 
 !----------------------------------------------------------------------
@@ -951,6 +1569,336 @@ subroutine clnmpi_grid(mpi_enreg)
 end subroutine clnmpi_grid
 !!***
 
+!!****f* ABINIT/initmpi_img
+!! NAME
+!!  initmpi_img
+!!
+!! FUNCTION
+!!  Initializes the mpi information for parallelism over images of the cell (npimage>1).
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables in this dataset
+!!  mpi_enreg= information about MPI parallelization
+!!  option= see below
+!!
+!! OUTPUT
+!!  mpi_enreg%my_nimage= number of images of the cell treated by current proc
+!!  ===== if option==1 or option==-1
+!!    mpi_enreg%my_imgtab= indexes of images of the cell treated by current proc
+!!  ===== if option==2 or option==3 or option==-1
+!!    mpi_enreg%comm_cell=Communicator over all processors treating the same image
+!!    mpi_enreg%nproc_cell=size of comm_cell
+!!    mpi_enreg%me_cell=my rank in comm_cell
+!!  ===== if option==3 or option==-1
+!!    mpi_enreg%comm_img=Communicator over all images
+!!    mpi_enreg%nproc_img=size of comm_img
+!!    mpi_enreg%me_img=my rank in comm_img
+!!    mpi_enreg%distrb_img(:)=index of processor treating each image (in comm_img communicator)
+!!
+!! PARENTS
+!!      mpi_setup
+!!
+!! CHILDREN
+!!      sort_int
+!!
+!! SOURCE
+
+subroutine initmpi_img(dtset,mpi_enreg,option)
+
+ !use m_io_tools,  only: flush_unit
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'initmpi_img'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: option
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+!Local variables-------------------------------
+ integer :: imod,irank,iprocmax,iprocmin,jrank
+ integer :: ndynimage_eff,nimage_eff,nproc_per_image,nrank
+ logical,parameter :: debug=.false.
+ integer,allocatable :: ranks(:)
+ character(len=500) :: msg
+
+!integer :: group_cell,ierr
+
+! ***********************************************************************
+
+ DBG_ENTER("COLL")
+ if (option/=0) then
+   mpi_enreg%comm_img=xmpi_comm_self
+   mpi_enreg%comm_cell=mpi_enreg%comm_world
+ end if
+
+ if (xmpi_paral==1.and.dtset%npimage>1.and.dtset%optdriver==RUNL_GSTATE) then
+
+!  Activate flag for parallelization over images
+   mpi_enreg%paral_img=1
+
+   ndynimage_eff=dtset%ndynimage;if (dtset%ntimimage<=1) ndynimage_eff=0
+
+!  Print several warnings
+   if (option==0) then
+     nimage_eff=max(ndynimage_eff,dtset%nimage-ndynimage_eff)
+     if (dtset%npimage>nimage_eff) then
+       write(unit=msg,fmt='(3a,i4,a,i4,4a)') &
+&       'The number of processors used for the parallelization',ch10,&
+&       ' over images (npimage=',dtset%npimage,&
+&       ') is greater than the number of dynamic (or static) images (',nimage_eff,') !',ch10,&
+&       ' This is unefficient.',ch10
+       MSG_WARNING(msg)
+     end if
+     if (dtset%npimage>mpi_enreg%nproc) then
+       write(unit=msg,fmt='(3a,i6,a,i4,4a)') &
+&       'The number of processors used for the parallelization',ch10,&
+&       ' over images (nproc=',mpi_enreg%nproc,&
+&       ') is smaller than npimage in input file (',dtset%npimage,&
+&       ')!',ch10,' This is unconsistent.',ch10
+       MSG_ERROR(msg)
+     end if
+     if (mod(nimage_eff,dtset%npimage)/=0) then
+       write(unit=msg,fmt='(3a,i4,a,i4,4a)') &
+&       'The number of processors used for the parallelization',ch10,&
+&       ' over images (npimage=',dtset%npimage,&
+&       ') does not divide the number of dynamic images (',nimage_eff,&
+&       ') !',ch10,' This is unefficient (charge unbalancing).',ch10
+       MSG_WARNING(msg)
+     end if
+   end if
+
+!  # of images treated by current proc
+   nproc_per_image=mpi_enreg%nproc/dtset%npimage
+   iprocmax=nproc_per_image*dtset%npimage-1
+   if (mpi_enreg%me<=iprocmax) then
+     mpi_enreg%my_nimage=(ndynimage_eff/dtset%npimage)+((dtset%nimage-ndynimage_eff)/dtset%npimage)
+     imod=mod(ndynimage_eff,dtset%npimage)-1
+     if (mpi_enreg%me/nproc_per_image<=imod) mpi_enreg%my_nimage=mpi_enreg%my_nimage+1
+     imod=mod((dtset%nimage-ndynimage_eff),dtset%npimage)-1
+     if (mpi_enreg%me/nproc_per_image<=imod) mpi_enreg%my_nimage=mpi_enreg%my_nimage+1
+   else
+     mpi_enreg%my_nimage=0
+   end if
+   if (option==1.or.option==-1) then
+!    Indexes of images treated by current proc
+     if (mpi_enreg%me<=iprocmax) then
+       ABI_ALLOCATE(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
+       nrank=0
+       imod=mpi_enreg%me/nproc_per_image+1;imod=mod(imod,dtset%npimage)
+!      Dynamic images
+       irank=0
+       do jrank=1,dtset%nimage
+         if (dtset%dynimage(jrank)/=0.and.dtset%ntimimage>1) then
+           irank=irank+1
+           if (mod(irank,dtset%npimage)==imod) then
+             nrank=nrank+1
+             mpi_enreg%my_imgtab(nrank)=jrank
+           end if
+         end if
+       end do
+!      Static images
+       irank=0
+       do jrank=1,dtset%nimage
+         if (dtset%dynimage(jrank)==0.or.dtset%ntimimage<=1) then
+           irank=irank+1
+           if (mod(irank,dtset%npimage)==imod) then
+             nrank=nrank+1
+             mpi_enreg%my_imgtab(nrank)=jrank
+           end if
+         end if
+       end do
+       if (nrank/=mpi_enreg%my_nimage) then
+         MSG_BUG('Error on nrank !')
+       end if
+!      Sort images by increasing index (this step is MANDATORY !!)
+       ABI_ALLOCATE(ranks,(nrank))
+       call sort_int(nrank,mpi_enreg%my_imgtab,ranks)
+       ABI_DEALLOCATE(ranks)
+     else
+       ABI_ALLOCATE(mpi_enreg%my_imgtab,(0))
+     end if
+   end if
+   if (option==2.or.option==3.or.option==-1) then
+!    Communicator over one image
+     if (mpi_enreg%me<=iprocmax) then
+       ABI_ALLOCATE(ranks,(nproc_per_image))
+       iprocmin=(mpi_enreg%me/nproc_per_image)*nproc_per_image
+       ranks=(/((iprocmin+irank-1),irank=1,nproc_per_image)/)
+       mpi_enreg%comm_cell=xmpi_subcomm(mpi_enreg%comm_world,nproc_per_image,ranks)
+       ABI_DEALLOCATE(ranks)
+       mpi_enreg%me_cell=xmpi_comm_rank(mpi_enreg%comm_cell)
+       mpi_enreg%nproc_cell=nproc_per_image
+       if (mpi_enreg%me_cell==0.and.mod(mpi_enreg%me,nproc_per_image)/=0) then
+         MSG_BUG('Error on me_cell !')
+       end if
+     else
+       mpi_enreg%comm_img=xmpi_comm_null
+       mpi_enreg%nproc_cell=0
+       mpi_enreg%me_cell=-1
+     end if
+   end if
+   if (option==3.or.option==-1) then
+!    Communicator over all images
+     if (mpi_enreg%me<=iprocmax) then
+       ABI_ALLOCATE(ranks,(dtset%npimage))
+       iprocmin=mod(mpi_enreg%me,nproc_per_image)
+       ranks=(/((iprocmin+(irank-1)*nproc_per_image),irank=1,dtset%npimage)/)
+       mpi_enreg%comm_img=xmpi_subcomm(mpi_enreg%comm_world,dtset%npimage,ranks)
+       ABI_DEALLOCATE(ranks)
+       mpi_enreg%me_img=xmpi_comm_rank(mpi_enreg%comm_img)
+       mpi_enreg%nproc_img=dtset%npimage
+       if (iprocmin==0.and.mpi_enreg%me_img==0.and.mpi_enreg%me/=0) then
+         MSG_BUG('Error on me_img!')
+       end if
+       ABI_ALLOCATE(mpi_enreg%distrb_img,(dtset%nimage))
+!      Dynamic images
+       nrank=0
+       do irank=1,dtset%nimage
+         if (dtset%dynimage(irank)/=0.and.dtset%ntimimage>1) then
+           nrank=nrank+1
+           mpi_enreg%distrb_img(irank)=mod(nrank,dtset%npimage)-1
+           if (mpi_enreg%distrb_img(irank)==-1) mpi_enreg%distrb_img(irank)=dtset%npimage-1
+         end if
+       end do
+!      Static images
+       nrank=0
+       do irank=1,dtset%nimage
+         if (dtset%dynimage(irank)==0.or.dtset%ntimimage<=1) then
+           nrank=nrank+1
+           mpi_enreg%distrb_img(irank)=mod(nrank,dtset%npimage)-1
+           if (mpi_enreg%distrb_img(irank)==-1) mpi_enreg%distrb_img(irank)=dtset%npimage-1
+         end if
+       end do
+     else
+       mpi_enreg%comm_img=xmpi_comm_null
+       mpi_enreg%nproc_img=0
+       mpi_enreg%me_img=-1
+       ABI_ALLOCATE(mpi_enreg%distrb_img,(0))
+     end if
+   end if
+
+!  if (debug) then
+!  write(200+mpi_enreg%me,*) "=================================="
+!  write(200+mpi_enreg%me,*) "DEBUGGING STATMENTS IN INITMPI_IMG"
+!  write(200+mpi_enreg%me,*) "=================================="
+!  write(200+mpi_enreg%me,*) "option         =",option
+!  write(200+mpi_enreg%me,*) "MPI_UNDEFINED  =",MPI_UNDEFINED
+!  write(200+mpi_enreg%me,*) "MPI_IDENT      =",MPI_IDENT
+!  write(200+mpi_enreg%me,*) "MPI_CONGRUENT  =",MPI_CONGRUENT
+!  write(200+mpi_enreg%me,*) "MPI_SIMILAR    =",MPI_SIMILAR
+!  write(200+mpi_enreg%me,*) "MPI_UNEQUAL    =",MPI_UNEQUAL
+!  write(200+mpi_enreg%me,*) "null_comm      =",MPI_COMM_NULL
+!  write(200+mpi_enreg%me,*) "self_comm      =",xmpi_comm_self
+!  write(200+mpi_enreg%me,*) "world_comm     =",mpi_enreg%comm_world
+!  write(200+mpi_enreg%me,*) "empty_group    =",MPI_GROUP_EMPTY
+!  write(200+mpi_enreg%me,*) "nimage         =",mpi_enreg%my_nimage
+!  write(200+mpi_enreg%me,*) "nproc_per_image=",nproc_per_image
+!  call MPI_COMM_SIZE(mpi_enreg%comm_world,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Size of world_comm    =",irank
+!  call MPI_COMM_RANK(mpi_enreg%comm_world,irank,ierr)
+!  write(200+mpi_enreg%me,*) "My rank in world_comm =",irank
+!  if (option==1.or.option==-1) then
+!  write(200+mpi_enreg%me,*) "index_img=",mpi_enreg%my_imgtab(:)
+!  end if
+!  if (option==2.or.option==3.or.option==-1) then
+!  write(200+mpi_enreg%me,*) "nproc_cell  =",mpi_enreg%nproc_cell
+!  write(200+mpi_enreg%me,*) "me_cell     =",mpi_enreg%me_cell
+!  call xmpi_comm_group(mpi_enreg%comm_cell,group_cell,ierr)
+!  write(200+mpi_enreg%me,*) "group_cell  =",group_cell
+!  write(200+mpi_enreg%me,*) "comm_cell   =",mpi_enreg%comm_cell
+!  if (group_cell/=MPI_GROUP_EMPTY) then
+!  call MPI_GROUP_SIZE(group_cell,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Size of group_cell   =",irank
+!  call MPI_GROUP_RANK(group_cell,irank,ierr)
+!  write(200+mpi_enreg%me,*) "My rank in group_cell=",irank
+!  else
+!  write(200+mpi_enreg%me,*) "Size of group_cell   =",0
+!  write(200+mpi_enreg%me,*) "My rank in group_cell=",-1
+!  end if
+!  if (mpi_enreg%comm_cell/=MPI_COMM_NULL) then
+!  call MPI_COMM_SIZE(mpi_enreg%comm_cell,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Size of comm_cell   =",irank
+!  call MPI_COMM_RANK(mpi_enreg%comm_cell,irank,ierr)
+!  write(200+mpi_enreg%me,*) "My rank in comm_cell=",irank
+!  call MPI_COMM_COMPARE(mpi_enreg%comm_world,mpi_enreg%comm_cell,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Comparison world_comm/comm_cell=",irank
+!  call MPI_COMM_COMPARE(xmpi_comm_self,mpi_enreg%comm_cell,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Comparison self_comm/comm_cell =",irank
+!  else
+!  write(200+mpi_enreg%me,*) "Size of comm_cell   =",0
+!  write(200+mpi_enreg%me,*) "My rank in comm_cell=",-1
+!  write(200+mpi_enreg%me,*) "Comparison world_comm/comm_cell=",MPI_UNEQUAL
+!  write(200+mpi_enreg%me,*) "Comparison self_comm/comm_cell =",MPI_UNEQUAL
+!  end if
+!  end if
+!  if (option==3.or.option==-1) then
+!  write(200+mpi_enreg%me,*) "nproc_img  =",mpi_enreg%nproc_img
+!  write(200+mpi_enreg%me,*) "me_img     =",mpi_enreg%me_img
+!  write(200+mpi_enreg%me,*) "img_comm   =",mpi_enreg%comm_img
+!  if (mpi_enreg%comm_img/=MPI_COMM_NULL) then
+!  call MPI_COMM_SIZE(mpi_enreg%comm_img,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Size of img_comm   =",irank
+!  call MPI_COMM_RANK(mpi_enreg%comm_img,irank,ierr)
+!  write(200+mpi_enreg%me,*) "My rank in img_comm=",irank
+!  call MPI_COMM_COMPARE(mpi_enreg%comm_world,mpi_enreg%comm_img,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Comparison world_comm/img_comm=",irank
+!  call MPI_COMM_COMPARE(xmpi_comm_self,mpi_enreg%comm_img,irank,ierr)
+!  write(200+mpi_enreg%me,*) "Comparison self_comm/img_comm =",irank
+!  else
+!  write(200+mpi_enreg%me,*) "Size of img_comm   =",0
+!  write(200+mpi_enreg%me,*) "My rank in img_comm=",-1
+!  write(200+mpi_enreg%me,*) "Comparison world_comm/img_comm=",MPI_UNEQUAL
+!  write(200+mpi_enreg%me,*) "Comparison self_comm/img_comm =",MPI_UNEQUAL
+!  end if
+!  write(200+mpi_enreg%me,*) "distrb_img=",mpi_enreg%distrb_img(:)
+!  end if
+!  write(200+mpi_enreg%me,*)
+!  call flush_unit(200+mpi_enreg%me)
+!  if (option==-1) stop
+!  end if
+
+ else
+
+!  Do not activate flag for parallelization over images
+   mpi_enreg%paral_img=0
+!  # of images treated by current proc
+   if (dtset%optdriver==RUNL_GSTATE) then
+     mpi_enreg%my_nimage=dtset%nimage
+   else
+     mpi_enreg%my_nimage=1
+   end if
+!  Indexes of images treated by current proc
+   if (option==1.or.option==-1) then
+     ABI_ALLOCATE(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
+     mpi_enreg%my_imgtab=(/(irank,irank=1,mpi_enreg%my_nimage)/)
+   end if
+!  Communicator over all images
+   if (option==2.or.option==3.or.option==-1) then
+!    Communicator for one image
+     mpi_enreg%nproc_cell=mpi_enreg%nproc
+     mpi_enreg%me_cell=mpi_enreg%me
+   end if
+   if (option==3.or.option==-1) then
+!    Communicator over all images
+     mpi_enreg%nproc_img=1
+     mpi_enreg%comm_img=xmpi_comm_self
+     mpi_enreg%me_img=0
+     ABI_ALLOCATE(mpi_enreg%distrb_img,(dtset%nimage))
+     mpi_enreg%distrb_img(:)=0
+   end if
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine initmpi_img
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_mpinfo/clnmpi_img
@@ -1016,6 +1964,128 @@ subroutine clnmpi_img(mpi_enreg)
 end subroutine clnmpi_img
 !!***
 
+!!****f* ABINIT/initmpi_pert
+!! NAME
+!!  initmpi_pert
+!!
+!! FUNCTION
+!!  Creates group for Parallelization over Perturbations.
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables in this dataset
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! PARENTS
+!!      mpi_setup
+!!
+!! CHILDREN
+!!      get_npert_rbz,xmpi_comm_free
+!!
+!! SOURCE
+
+subroutine initmpi_pert(dtset,mpi_enreg)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'initmpi_pert'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(MPI_type),intent(inout) :: mpi_enreg
+ type(dataset_type),intent(in) :: dtset
+
+!Local variables-------------------------------
+!scalars
+ integer:: iprocmin,irank,npert,nproc_per_cell,nrank,numproc
+ integer,allocatable :: ranks(:)
+ character(len=500) :: msg
+!arrays
+ integer,pointer :: nkpt_rbz(:)
+ real(dp),pointer :: nband_rbz(:,:)
+
+! ***********************************************************************
+
+ if (mpi_enreg%me_pert<0) then
+   msg='Error in MPI distribution! Change your proc(s) distribution or use autoparal>0.'
+   MSG_ERROR(msg)
+ end if
+
+ call get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
+
+ if (dtset%nppert>=1) then
+   if (mpi_enreg%comm_cell/=mpi_enreg%comm_world) then
+     call xmpi_comm_free(mpi_enreg%comm_cell)
+   end if
+   mpi_enreg%comm_cell=mpi_enreg%comm_world
+
+   ! These values will be properly set in set_pert_comm
+   mpi_enreg%me_cell=mpi_enreg%me
+   mpi_enreg%nproc_cell=mpi_enreg%nproc
+
+   if (mpi_enreg%me>=0) then
+     nproc_per_cell=mpi_enreg%nproc/dtset%nppert
+     ABI_ALLOCATE(ranks,(dtset%nppert))
+     iprocmin=mod(mpi_enreg%me,nproc_per_cell)
+     ranks=(/((iprocmin+(irank-1)*nproc_per_cell),irank=1,dtset%nppert)/)
+     mpi_enreg%comm_pert=xmpi_subcomm(mpi_enreg%comm_world,dtset%nppert,ranks)
+     ABI_DEALLOCATE(ranks)
+     mpi_enreg%me_pert=xmpi_comm_rank(mpi_enreg%comm_pert)
+     mpi_enreg%nproc_pert=dtset%nppert
+     if (iprocmin==0.and.mpi_enreg%me_pert==0.and.mpi_enreg%me/=0) then
+       MSG_BUG('Error on me_pert!')
+     end if
+!    Define mpi_enreg%distrb_pert
+     ABI_ALLOCATE(mpi_enreg%distrb_pert,(npert))
+     nrank=0
+     do irank=1,npert
+       nrank=nrank+1
+       mpi_enreg%distrb_pert(irank)=mod(nrank,dtset%nppert)-1
+       if (mpi_enreg%distrb_pert(irank)==-1) mpi_enreg%distrb_pert(irank)=dtset%nppert-1
+     end do
+     ! Make sure that subrank 0 is working on the last perturbation
+     ! Swap the ranks if necessary
+     numproc=mpi_enreg%distrb_pert(npert)
+     if(numproc/=0) then
+       do irank=1,npert
+         if (mpi_enreg%distrb_pert(irank)==numproc) mpi_enreg%distrb_pert(irank)=-2
+         if (mpi_enreg%distrb_pert(irank)==0) mpi_enreg%distrb_pert(irank)=-3
+       end do
+       do irank=1,npert
+         if (mpi_enreg%distrb_pert(irank)==-2) mpi_enreg%distrb_pert(irank)=0
+         if (mpi_enreg%distrb_pert(irank)==-3) mpi_enreg%distrb_pert(irank)=numproc
+       end do
+     end if
+!    Communicator over one cell
+     ABI_ALLOCATE(ranks,(nproc_per_cell))
+     iprocmin=(mpi_enreg%me/nproc_per_cell)*nproc_per_cell
+     ranks=(/((iprocmin+irank-1),irank=1,nproc_per_cell)/)
+     mpi_enreg%comm_cell_pert=xmpi_subcomm(mpi_enreg%comm_world,nproc_per_cell,ranks)
+     ABI_DEALLOCATE(ranks)
+   end if
+
+ else  !nppert<=1
+   mpi_enreg%nproc_pert=1
+   mpi_enreg%comm_pert=xmpi_comm_self
+   mpi_enreg%me_pert=0
+   ABI_ALLOCATE(mpi_enreg%distrb_pert,(npert))
+   mpi_enreg%distrb_pert(:)=0
+ end if
+
+ ABI_DEALLOCATE(nband_rbz)
+ ABI_DEALLOCATE(nkpt_rbz)
+
+end subroutine initmpi_pert
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_mpinfo/clnmpi_pert
@@ -1075,6 +2145,106 @@ subroutine clnmpi_pert(mpi_enreg)
  DBG_EXIT("COLL")
 
 end subroutine clnmpi_pert
+!!***
+
+!!****f* ABINIT/initmpi_band
+!! NAME
+!!  initmpi_band
+!!
+!! FUNCTION
+!!  Initializes the mpi information for band parallelism (paralbd=1).
+!!
+!! INPUTS
+!!  mpi_enreg= information about MPI parallelization
+!!  nband(nkpt*nsppol)= number of bands per k point, for each spin
+!!  nkpt= number of k-points
+!!  nsppol= 1 for unpolarized, 2 for polarized
+!!
+!! OUTPUT
+!!  mpi_enreg=information about MPI parallelization
+!!  mpi_enreg%comm_band=communicator of BAND set
+!!
+!! PARENTS
+!!      dfpt_looppert
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'initmpi_band'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt,nsppol
+ integer,intent(in) :: nband(nkpt*nsppol)
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,ikpt,iproc_min,iproc_max,irank,isppol
+ integer :: me,nband_k,nproc,nbsteps,nrank,nstates,spacecomm
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: ranks(:)
+
+! ***********************************************************************
+
+ mpi_enreg%comm_band=xmpi_comm_self
+
+ if (mpi_enreg%paralbd==1.and.xmpi_paral==1) then
+
+!  Comm_kpt is supposed to treat spins, k-points and bands
+   spacecomm=mpi_enreg%comm_kpt
+   nproc=mpi_enreg%nproc_kpt
+   me=mpi_enreg%me_kpt
+
+   nstates=sum(nband(1:nkpt*nsppol))
+   nbsteps=nstates/nproc
+   if (mod(nstates,nproc)/=0) nbsteps=nbsteps+1
+
+   if (nbsteps<maxval(nband(1:nkpt*nsppol))) then
+
+     nrank=0
+     do isppol=1,nsppol
+       do ikpt=1,nkpt
+         ii=ikpt+(isppol-1)*nkpt
+         nband_k=nband(ii)
+         if (nbsteps<nband_k) then
+           iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
+           iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
+           if ((me>=iproc_min).and.(me<=iproc_max)) then
+             nrank=iproc_max-iproc_min+1
+             if (.not.allocated(ranks)) then
+               ABI_ALLOCATE(ranks,(nrank))
+               if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
+             else if (nrank/=size(ranks)) then
+               msg='Number of bands per proc should be the same for all k-points!'
+               MSG_BUG(msg)
+             end if
+           end if
+         end if
+       end do
+     end do
+     if (.not.allocated(ranks)) then
+       ABI_ALLOCATE(ranks,(0))
+     end if
+
+     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
+
+     ABI_DEALLOCATE(ranks)
+   end if
+ end if
+
+end subroutine initmpi_band
 !!***
 
 !----------------------------------------------------------------------

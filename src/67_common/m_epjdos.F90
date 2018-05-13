@@ -2034,7 +2034,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

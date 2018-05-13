@@ -193,7 +193,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use m_fftcore,          only : getng, sphereboundary
  use m_time,             only : abi_wtime, sec2str
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar
+ use m_mpinfo,           only : destroy_mpi_enreg, iwrite_fftdatar, initmpi_seq
  use m_ioarr,            only : fftdatar_write_from_hdr
  use m_results_gs ,      only : results_gs_type
  use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
@@ -244,7 +244,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj
  use interfaces_14_hidewrite
  use interfaces_41_xc_lowlevel
  use interfaces_43_wvl_wrappers
- use interfaces_51_manage_mpi
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_62_poisson

@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Big loop on the datasets :
-!! - compute mgfft,mpw,nfft,... for this data set ;
+!! - compute mgfft,mpw,nfft,... for this data set;
 !! - fill mpi_enreg
 !!  *** At the output of this routine, all the dtsets input variables are known ***
 !! The content of dtsets should not be modified anymore afterwards.
@@ -61,7 +61,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  use m_parser,       only : intagm
  use m_geometry,     only : mkrdim
  use m_fftcore,      only : fftalg_for_npfft, getng
- use m_mpinfo,       only : init_mpi_enreg,mpi_distrib_is_ok
+ use m_mpinfo,       only : init_mpi_enreg, mpi_distrib_is_ok, initmpi_atom, initmpi_grid, initmpi_pert, initmpi_img
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_dtset,        only : get_npert_rbz
  use m_kg,           only : getmpw
