@@ -82,6 +82,7 @@ module m_dfpt_loopert
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
  use m_dfpt_mkrho, only : dfpt_mkrho
+ use m_mpinfo,     only : initmpi_band
 
  implicit none
 
