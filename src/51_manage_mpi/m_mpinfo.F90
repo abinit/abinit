@@ -40,7 +40,7 @@ MODULE m_mpinfo
  use m_distribfft
 
  use defs_abitypes,   only : MPI_type, dataset_type
- use m_io_tools,    only : file_exists, open_file
+ use m_io_tools,      only : file_exists, open_file
  use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_paral_atom,    only : get_my_natom, get_my_atmtab
  use m_dtset,         only : get_npert_rbz
@@ -65,22 +65,22 @@ MODULE m_mpinfo
                                  ! compatible (in terms of efficiency) with the number of spins/kpts/bands
  public :: proc_distrb_cycle     ! Test a condition to cycle
 
- public :: initmpi_seq
- public :: initmpi_world
+ public :: initmpi_seq           ! Initializes the MPI information for sequential use.
+ public :: initmpi_world         ! %comm_world is redifined for the number of processors on which ABINIT is launched
 
- public :: initmpi_atom
- public :: clnmpi_atom
+ public :: initmpi_atom          ! Initializes the mpi information for parallelism over atoms (PAW).
+ public :: clnmpi_atom           ! Cleans-up the mpi information for the parallelism over atoms (PAW).
 
- public :: initmpi_grid
- public :: clnmpi_grid
+ public :: initmpi_grid          ! Initializes the MPI information for the grid
+ public :: clnmpi_grid           ! Cleans-up the mpi information for parallelism over grid (kpt/band/fft).
 
- public :: initmpi_img
- public :: clnmpi_img
+ public :: initmpi_img           ! Initializes the mpi information for parallelism over images of the cell (npimage>1).
+ public :: clnmpi_img            ! Cleans-up the mpi information for parallelism over images of the cell (npimage>1).
 
- public :: initmpi_pert
- public :: clnmpi_pert
+ public :: initmpi_pert          ! Creates group for Parallelization over Perturbations.
+ public :: clnmpi_pert           ! Cleans-up the mpi information for parallelization over perturbations.
 
- public :: initmpi_band
+ public :: initmpi_band          !  Initializes the mpi information for band parallelism (paralbd=1).
 
 ! Helper functions.
  public :: pre_gather
@@ -882,8 +882,7 @@ end function proc_distrb_cycle
 !!  initmpi_world
 !!
 !! FUNCTION
-!!  Initializes the mpi information for world.
-!!  xmpi_world is redifined for the number of processors on which ABINIT is launched
+!!  %comm_world is redifined for the number of processors on which ABINIT is launched
 !!
 !! INPUTS
 !!
@@ -948,7 +947,7 @@ end subroutine initmpi_world
 !!  initmpi_seq
 !!
 !! FUNCTION
-!!  Initializes the MPI information for a sequential use of other routines.
+!!  Initializes the MPI information for sequential use.
 !!
 !! INPUTS
 !!
@@ -1240,8 +1239,8 @@ end subroutine clnmpi_atom
 !!
 !! FUNCTION
 !!  Initializes the MPI information for the grid:
-!!    * 2D if parallization KPT/FFT (!paral_kgb & MPI)
-!!    * 3D if parallization KPT/FFT/BAND (paral_kgb & MPI)
+!!    * 2D if parallization KPT/FFT (paral_kgb == 0 & MPI)
+!!    * 3D if parallization KPT/FFT/BAND (paral_kgb == 1 & MPI)
 !!    * 2D in case of an Hartree-Fock calculation
 !!
 !! INPUTS
