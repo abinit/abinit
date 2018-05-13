@@ -81,6 +81,7 @@ module m_dfpt_loopert
  use m_spacepar,   only : rotate_rho, setsym
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
+ use m_dfpt_mkrho, only : dfpt_mkrho
 
  implicit none
 

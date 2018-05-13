@@ -1,4 +1,55 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfpt_mkrho
+!! NAME
+!!  m_dfpt_mkrho
+!!
+!! FUNCTION
+!! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfpt_mkrho
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_cgtools
+ use m_xmpi
+
+ use m_time,      only : timab
+ use m_io_tools,  only : get_unit, iomode_from_fname
+ use m_fftcore,   only : sphereboundary
+ use m_fft,       only : fftpac
+ use m_spacepar,  only : symrhg
+
+ implicit none
+
+ private
+!!***
+
+ public :: dfpt_mkrho
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/dfpt_mkrho
 !! NAME
 !! dfpt_mkrho
@@ -7,21 +58,13 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !! from input RF and GS wavefunctions, band occupations, and k point weights.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=wf in G space
 !!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=first-order wf in G space
 !!  cplex=1 if rhor1 is real, 2 if rhor1 is complex
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
-!!  istwfk_rbz(nkpt_rbz)=input option parameter that describes the
-!!    storage of wfs
+!!  istwfk_rbz(nkpt_rbz)=input option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates, GS data.
 !!  kg1(3,mpw1*mkmem1)=reduced planewave coordinates, RF data.
 !!  mband=maximum number of bands
@@ -66,30 +109,10 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & kg,kg1,mband,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
 & occ_rbz,paral_kgb,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_cgtools
- use m_xmpi
-
- use m_time,      only : timab
- use m_io_tools,  only : get_unit, iomode_from_fname
- use m_fftcore,   only : sphereboundary
- use m_fft,       only : fftpac
- use m_spacepar,  only : symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -512,4 +535,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !DBG_EXIT("COLL")
 
 end subroutine dfpt_mkrho
+!!***
+
+end module m_dfpt_mkrho
 !!***
