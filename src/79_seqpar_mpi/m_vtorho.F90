@@ -278,7 +278,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #undef ABI_FUNC
 #define ABI_FUNC 'vtorho'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_56_recipspace
  use interfaces_62_wvl_wfs
  use interfaces_65_paw

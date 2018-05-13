@@ -92,7 +92,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 #undef ABI_FUNC
 #define ABI_FUNC 'datafordmft'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_68_dmft, except_this_one => datafordmft
 !End of the abilint section
 

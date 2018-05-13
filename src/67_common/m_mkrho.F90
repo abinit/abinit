@@ -138,7 +138,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 #undef ABI_FUNC
 #define ABI_FUNC 'mkrho'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_66_wfs
  use interfaces_67_common

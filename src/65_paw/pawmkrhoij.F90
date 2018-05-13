@@ -90,7 +90,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'pawmkrhoij'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw, except_this_one => pawmkrhoij
 !End of the abilint section
 

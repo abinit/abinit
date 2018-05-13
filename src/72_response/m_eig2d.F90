@@ -907,8 +907,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2stern'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -1409,8 +1407,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eig2tot'
- use interfaces_32_util
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none

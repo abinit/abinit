@@ -204,7 +204,6 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_init1'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -925,7 +924,6 @@ subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_destroy_array'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1002,7 +1000,6 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'bandfft_kpt_copy'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

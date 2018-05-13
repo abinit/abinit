@@ -164,7 +164,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 #undef ABI_FUNC
 #define ABI_FUNC 'dfptnl_pert'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs

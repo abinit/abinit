@@ -127,7 +127,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_mkrho'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_53_ffts
 !End of the abilint section
 
