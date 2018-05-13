@@ -36,7 +36,8 @@ module m_thmeig
  use m_sort
 
  use m_geometry,       only : mkrdim, xred2xcart, metric
- use m_symtk,          only : mati3inv, matr3inv
+ use m_symfind,        only : symfind, symlatt
+ use m_symtk,          only : mati3inv, matr3inv, symatm
  use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq
@@ -88,7 +89,6 @@ subroutine thmeig(inp, ddb, crystal, &
 #undef ABI_FUNC
 #define ABI_FUNC 'thmeig'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -353,8 +353,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
    if(found==0)then
      write(message,'(a,i3,2a)')&
-&     '  Was unable to find the blok for Gamma point in EIG2 DDB file, while thmflag= ',thmflag,ch10,&
-&     '  Action : compute the contribution from Gamma, and merge it in your EIG2 DDB file.'
+&     'Was unable to find the blok for Gamma point in EIG2 DDB file, while thmflag= ',thmflag,ch10,&
+&     'Action: compute the contribution from Gamma, and merge it in your EIG2 DDB file.'
      MSG_ERROR(message)
    end if
 
@@ -401,7 +401,7 @@ subroutine thmeig(inp, ddb, crystal, &
      tolsym=tol8
      call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      use_inversion=1
-     call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,&
+     call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,0,&
 &     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
      write(std_out,*)' thmeig : found ',nsym_new,' symmetries ',ch10
      qptopt=1
@@ -493,8 +493,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
    if(iblok==0) then
      write(message,'(a,3es16.6,2a)')&
-&     ' Was unable to find in DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
-&     ' Action : compute the contribution from this point, and merge it in your DDB file.'
+&     'Was unable to find in DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
+&     'Action: compute the contribution from this point, and merge it in your DDB file.'
      MSG_ERROR(message)
    end if
 
@@ -559,8 +559,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
      if(found==0)then
        write(message,'(a,3es16.6,2a)')&
-&       ' Was unable to find in EIG2 DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
-&       ' Action : compute the contribution from this point, and merge it in your EIG2 DDB file.'
+&       'Was unable to find in EIG2 DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
+&       'Action: compute the contribution from this point, and merge it in your EIG2 DDB file.'
        MSG_ERROR(message)
      end if
 

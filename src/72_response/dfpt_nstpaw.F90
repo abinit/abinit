@@ -191,7 +191,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_pawfgr,   only : pawfgr_type
  use m_kg,       only : mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac
- use m_spacepar, only : hartrestr
+ use m_spacepar, only : hartrestr, symrhg
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -206,7 +206,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs
- use interfaces_67_common
  use interfaces_72_response, except_this_one => dfpt_nstpaw
 !End of the abilint section
 

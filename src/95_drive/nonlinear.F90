@@ -88,11 +88,17 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_ebands
  use m_xcdata
 
- use m_time,        only : timab
- use m_dynmat,      only : d3sym, sytens
- use m_ddb,         only : nlopt, DDB_VERSION,dfptnl_doutput
- use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
- use m_ioarr,       only : read_rhor
+ use m_dtfil,    only : status
+ use m_time,     only : timab
+ use m_symtk,    only : symmetrize_xred, littlegroup_q
+ use m_dynmat,   only : d3sym, sytens
+ use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
+ use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ioarr,    only : read_rhor
+ use m_kg,       only : getcut, kpgio, getph
+ use m_kpts,     only : getkgrid
+ use m_inwffil,  only : inwffil
+ use m_spacepar, only : hartre, setsym
  use m_pawfgr,      only : pawfgr_type,pawfgr_init, pawfgr_destroy
  use m_pawang,      only : pawang_type, pawang_init, pawang_free
  use m_pawrad,      only : pawrad_type
@@ -104,23 +110,14 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &                          pawrhoij_bcast, pawrhoij_nullify
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
- use m_kg,          only : getcut,kpgio,getph
- use m_kpts,        only : getkgrid
- use m_symtk,       only : littlegroup_q
- 
- use m_paw_dmft,    only : paw_dmft_type
- use m_inwffil,     only : inwffil
- use m_spacepar,    only : hartre
+ use m_paw_dmft, only : paw_dmft_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlinear'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_53_ffts
- use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_64_psp
  use interfaces_65_paw
@@ -205,7 +202,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: d3e_7(:,:,:,:,:,:,:),d3cart_7(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3e_8(:,:,:,:,:,:,:),d3cart_8(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3e_9(:,:,:,:,:,:,:),d3cart_9(:,:,:,:,:,:,:)
- real(dp),allocatable :: dum_wtk(:),dyfrlo_indx(:,:,:),dyfrx2(:,:,:),eigen0(:) 
+ real(dp),allocatable :: dum_wtk(:),dyfrlo_indx(:,:,:),dyfrx2(:,:,:),eigen0(:)
  real(dp),allocatable :: grtn_indx(:,:),grxc(:,:),k3xc(:,:),kpt3(:,:),kxc(:,:)
  real(dp),allocatable :: mvwtk(:,:),nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:),phnons(:,:,:),phnons1(:,:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:),tnons1(:,:)
@@ -685,7 +682,7 @@ end if
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
 
-!  Note: many derivatives of cprj are needed and used a few times only, so for simplicity the 
+!  Note: many derivatives of cprj are needed and used a few times only, so for simplicity the
 !  computation of all needed derivatives will be done on-the-fly.
    usecprj=0
 

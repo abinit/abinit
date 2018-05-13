@@ -100,6 +100,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  use m_efield
 
  use m_time,    only : timab
+ use m_symtk,   only : symatm
  use m_geometry,only : metric
  use m_kpts,    only : listkk, smpbz
  use m_fftcore, only : kpgsph
@@ -114,7 +115,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 #define ABI_FUNC 'initberry'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_65_paw
 !End of the abilint section
 

@@ -91,16 +91,16 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 &                   mpw,mvwtk,natom,nkpt2,nkpt3,nneigh,npwarr,nspinor,&
 &                   nsppol,pwind)
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
+ use m_profiling_abi
  use m_xmpi
 #if defined HAVE_MPI2
  use mpi
 #endif
 
- use m_abilasi,          only : dzgedi, dzgefa
+ use m_dtfil,      only : status
+ use m_abilasi,    only : dzgedi, dzgefa
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

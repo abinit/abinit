@@ -38,6 +38,7 @@ module m_vtorhorec
  use m_time,           only : timein, timab
  use m_rec,            only : Calcnrec, init_nlpsprec, cpu_distribution
  use m_rec_tools,      only : reshape_pot, trottersum, get_pt0_pt1
+ use m_spacepar,       only : symrhg
 
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,       only : cudap
@@ -126,7 +127,6 @@ subroutine vtorhorec(dtset,&
 #define ABI_FUNC 'vtorhorec'
  use interfaces_14_hidewrite
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

@@ -29,7 +29,7 @@
 !!   initialized previously.
 !!
 !! SIDE EFFECTS
-!!   mpi_enregs=informations about MPI parallelization
+!!   mpi_enregs=information about MPI parallelization
 !!
 !! PARENTS
 !!      abinit

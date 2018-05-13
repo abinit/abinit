@@ -450,7 +450,7 @@ end  subroutine set_pert_paw
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  old_atmtab=index of atoms to restore
 !!  old_comm_atom=MPI communicator to restore
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!
 !! OUTPUT
@@ -470,7 +470,7 @@ end  subroutine set_pert_paw
 !! old_comm_atom=save the identifier of the MPI communicator
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  paw_an(my_natom)<type(paw_an_type)>=PAW arrays given on angular mesh
 !!  paw_ij(my_natom)<type(paw_ij_type)>=PAW arrays given on (i,j) channels

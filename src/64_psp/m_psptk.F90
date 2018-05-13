@@ -795,7 +795,7 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 &     'lmax=',lmax,' is not an allowed value.',ch10,&
 &     'Allowed values are -1 for no nonlocal correction or else',ch10,&
 &     '0, 1,2 or 3 for maximum l nonlocal correction.',ch10,&
-&     'Action : check the input atomic psp data file for lmax.'
+&     'Action: check the input atomic psp data file for lmax.'
      MSG_ERROR(message)
    end if
 

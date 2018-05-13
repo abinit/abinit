@@ -33,14 +33,14 @@ AR_RECIPSPACE=[.src.56_recipspace]lib56_recipspace.olb
 AR_XC=[.src.56_xc]lib56_xc.olb
 AR_XML=[.src.47_xml]lib47_xml.olb
 AR_BADER=[.src.62_bader]lib62_bader.olb
-AR_ABIUTIL=[.src.54_abiutil]lib54_abiutil.olb
+AR_ABIUTIL=[.src.55_abiutil]lib55_abiutil.olb
 AR_NONLOCAL=[.src.13nonlocal]lib13nonlocal.olb
 AR_FFTS=[.src.53_ffts]lib53_ffts.olb
 AR_PSP=[.src.13psp]lib13psp.olb
 AR_GEOMETRY=[.src.42_geometry]lib42_geometry.olb
 AR_GEOMOPTIM=[.src.45_geomoptim]lib45_geomoptim.olb
 AR_PARSER=[.src.42_parser]lib42_parser.olb
-AR_SPACEPAR=[.src.53_spacepar]lib53_spacepar.olb
+AR_SPACEPAR=[.src.54_spacepar]lib54_spacepar.olb
 AR_MGMPI=[.src.51_manage_mpi]lib51_manage_mpi.olb
 AR_CONTRACT=[.src.32_contract]lib32_contract.olb
 AR_CG=[.src.62_cg_noabirule]lib62_cg_noabirule.olb
@@ -356,10 +356,10 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	$(MMS) m_pseudo_types.obj
 	$(MMS) defs_basis.obj
 	$(MMS) defs_datatypes.obj
-	$(MMS) interfaces_53_spacepar.obj
+	$(MMS) interfaces_54_spacepar.obj
 	$(MMS) interfaces_56_recipspace.obj
 	$(MMS) interfaces_32_util.obj
-	$(MMS) interfaces_54_abiutil.obj
+	$(MMS) interfaces_55_abiutil.obj
 	$(MMS) interfaces_62_cg_noabirule.obj
 	$(MMS) interfaces_56_xc.obj
 	$(MMS) interfaces_53_ffts.obj
@@ -560,9 +560,9 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	$(MMS)
 	set default [--]
 
-[.src.53_spacepar]lib53_spacepar.olb :
-	$(MMS) [.src.53_spacepar]descrip.mms
-	set default [.src.53_spacepar]
+[.src.54_spacepar]lib54_spacepar.olb :
+	$(MMS) [.src.54_spacepar]descrip.mms
+	set default [.src.54_spacepar]
 	$(MMS)
 	set default [--]
 
@@ -572,9 +572,9 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	$(MMS)
 	set default [--]
 
-[.src.54_abiutil]lib54_abiutil.olb :
-        $(MMS) [.src.54_abiutil]descrip.mms
-        set default [.src.54_abiutil]
+[.src.55_abiutil]lib55_abiutil.olb :
+        $(MMS) [.src.55_abiutil]descrip.mms
+        set default [.src.55_abiutil]
         $(MMS)
         set default [--]
 
@@ -659,8 +659,8 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	run [--]crea_descrip_mms
 	set def [--]
 
-[.src.54_abiutil]descrip.mms : crea_descrip_mms.exe
-        set def [.src.54_abiutil]
+[.src.55_abiutil]descrip.mms : crea_descrip_mms.exe
+        set def [.src.55_abiutil]
         run [--]crea_descrip_mms
         set def [--]
 
@@ -694,8 +694,8 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	run [--]crea_descrip_mms
 	set def [--]
 
-[.src.53_spacepar]descrip.mms : crea_descrip_mms.exe
-	set def [.src.53_spacepar]
+[.src.54_spacepar]descrip.mms : crea_descrip_mms.exe
+	set def [.src.54_spacepar]
 	run [--]crea_descrip_mms
 	set def [--]
 

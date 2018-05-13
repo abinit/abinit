@@ -61,7 +61,7 @@ MODULE m_bandfft_kpt
 !! about the triple band-fft-kpt parallelisation :
 !! tabs which are distributed over all the three dimensions and stored during
 !! the calculation, dimensions of messages exchange during the calculations...
-!! i.e.: all the informations which were spread over the entire code before and
+!! i.e.: all the information which were spread over the entire code before and
 !! recomputed at each iline, istep or itime STEP with a large probability to
 !! make a mistake.
 !!
@@ -121,7 +121,7 @@ MODULE m_bandfft_kpt
 !!***
 
  type(bandfft_kpt_type),save,public,pointer :: bandfft_kpt(:) => null()
-    ! Contains all the informations related to the band/FFT parallelism
+    ! Contains all the information related to the band/FFT parallelism
     ! which depends on kpt exists only if mpi_enreg%paral_kgb==1
 
  integer,save,private :: bandfft_kpt_current_ikpt=-1
@@ -148,7 +148,7 @@ CONTAINS
 !!  kg(3,mpw*mkmem)    = dimensionless coords of G vecs in basis sphere at k point
 !!  mgfft              = maximum single fft dimension (IN)
 !!  mkmem              = number of k points which can fit in memory; set to 0 if use disk
-!!  mpi_enreg          = informations about MPI parallelization
+!!  mpi_enreg          = information about MPI parallelization
 !!  mpw                = maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol) = number of bands at each k point
 !!  nkpt               = number of k points
@@ -2060,7 +2060,7 @@ end subroutine bandfft_kpt_restoretabs
 !!
 !! INPUT
 !!  ikpt=index of k-point (in the global array dtset%kpt)
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!
 !! OUTPUT
 !!  bandfft_kpt_current_ikpt value changed

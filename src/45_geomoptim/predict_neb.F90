@@ -74,9 +74,9 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
  use m_mep
  use m_profiling_abi
  use m_errors
+ use m_xmpi
 
- use m_results_img, only : results_img_type,gather_array_img,scatter_array_img,get_geometry_img
- use m_xmpi, only : xmpi_bcast
+ use m_results_img, only : results_img_type, gather_array_img, scatter_array_img, get_geometry_img
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

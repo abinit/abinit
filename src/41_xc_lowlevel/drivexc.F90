@@ -67,7 +67,7 @@
 !!    be equal to the spin-up kinetic energy density,
 !!    and both are half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
-!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals. 
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals.
 !!    If not specified, the underlying xc_global(2) is used by libxc.
 !!  [xc_tb09_c]= c parameter for the Tran-Blaha mGGA functional, within libxc
 !!
@@ -146,6 +146,8 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  use m_profiling_abi
  use m_errors
  use libxc_functionals
+
+ use m_numeric_tools,      only : invcb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -694,7 +696,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      exc=exc-exc_x*hyb_mixing
      vxcrho=vxcrho-vxcrho_x*hyb_mixing
      vxcgrho=vxcgrho-vxcgrho_x*hyb_mixing
-     d2vxc=d2vxc-d2vxc_x*hyb_mixing 
+     d2vxc=d2vxc-d2vxc_x*hyb_mixing
      dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*hyb_mixing
      ABI_DEALLOCATE(dvxc_x)
      ABI_DEALLOCATE(d2vxc_x)
@@ -713,11 +715,11 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 
 !>>>>> GGA counterpart of the B3LYP functional
  else if(ixc==1402000) then
-!  Requires to evaluate exchange-correlation 
+!  Requires to evaluate exchange-correlation
 !  with 5/4 B3LYP - 1/4 B3LYPc, where
 !  B3LYPc = (0.19 Ec VWN3 + 0.81 Ec LYP)
 
-!  First evaluate B3LYP. 
+!  First evaluate B3LYP.
    if(present(xc_funcs))then
      if (abs(order)==1) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
@@ -725,7 +727,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      elseif (abs(order)==2) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
 &       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
-     else 
+     else
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
 &       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
      end if

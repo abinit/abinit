@@ -1222,7 +1222,7 @@ subroutine psp2params_init(gth_params, npsp)
  ABI_ALLOCATE(gth_params%set,(npsp))
  gth_params%set(:) = .false.
 
-!Check array, have geometric informations been filled?
+!Check array, have geometric information been filled?
  ABI_ALLOCATE(gth_params%hasGeometry,(npsp))
  gth_params%hasGeometry(:) = .false.
 

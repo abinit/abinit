@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !!  This routine creates the tabs of repartition of processors
-!!  for sharing the jobs on occupied states (labeled by k-points, 
+!!  for sharing the jobs on occupied states (labeled by k-points,
 !!  bands and spin indices) for an Hartree-Fock calculation.
 !!
 !! COPYRIGHT
@@ -23,7 +23,7 @@
 !!  nsppol = 1 for unpolarized, 2 for polarized
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg = informations about MPI parallelization
+!!  mpi_enreg = information about MPI parallelization
 !!   mpi_enreg%proc_distrb(nkpthf,nbandhf,nsppol)=number of the processor
 !!       that will treat each band in each k point.
 !!   mpi_enreg%nproc_kpt is set
@@ -141,12 +141,12 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
      ind=ind+1
    end do
 
- else 
+ else
 !* In this case, a parallelization over all the occupied states is possible.
    if (nproc_hf < nbandhf*nkpthf) then
      iistep=(nbandhf*nkpthf)/nproc_hf;
      if (mod((nbandhf*nkpthf),nproc_hf) /=0) iistep=iistep+1
-   else 
+   else
      iistep=1
    end if
    ind=0
@@ -175,7 +175,7 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 !    end if
 !    first=.false.
 !  end if
-! 
+!
 ! !* Initialize the processor distribution, either from a file, or from an algorithm
 !  if (file_exist == 1) then
 ! !* Read (k-points,bands) distribution out of the file
@@ -191,31 +191,31 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 !      proc_max=maxval(mpi_enreg%distrb_hf(iikpt,1:mband_occ_k,1))
 !      proc_min=minval(mpi_enreg%distrb_hf(iikpt,1:mband_occ_k,1))
 !    end do
-! 
+!
 !    if(proc_max>(nproc_hf-1)) then
 ! !*    Too much proc. requested
 !      write(message, '(a,a,a,i4,a,a,a)' )&
 ! &     '  The number of processors mentioned in the kpt_distrb file',ch10,&
 ! &     '  must be lower or equal to the actual number of processors =',&
 ! &     nproc_hf-1,ch10,&
-! &     '  Action : change the kpt_distrb file, or increase the',&
+! &     '  Action: change the kpt_distrb file, or increase the',&
 ! &     '  number of processors.'
 !      MSG_ERROR(message)
 !    end if
-! 
+!
 !    if(proc_max/=(nproc_hf-1)) then
 ! !*    Too few proc. used
 !      write(message, '(a,i4,a,a,a,i4,a,a,a)' )&
 ! &     '  Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
 ! &     '  when',nproc_hf,' processors are available.',ch10,&
-! &     '  Action : adjust number of processors and kpt_distrb file.'
+! &     '  Action: adjust number of processors and kpt_distrb file.'
 !      MSG_ERROR(message)
 !    end if
-! 
+!
 !    if(proc_min<0) then
 !      write(message, '(a,a,a)' )&
 ! &     '  The number of processors must be bigger than 0 in kpt_distrb file.',ch10,&
-! &     ' Action : modify kpt_distrb file.'
+! &     ' Action: modify kpt_distrb file.'
 !      MSG_ERROR(message)
 !    end if
 !  else

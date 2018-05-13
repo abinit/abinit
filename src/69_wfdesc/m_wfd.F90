@@ -61,6 +61,7 @@ MODULE m_wfd
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
  use m_paw_io,         only : pawio_print_ij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
+ use m_spacepar,       only : symrhg, irrzg
 
  implicit none
 
@@ -6847,8 +6848,6 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfd_mkrho'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

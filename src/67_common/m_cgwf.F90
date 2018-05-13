@@ -81,7 +81,7 @@ contains
 !!  mcgq=second dimension of the cgq array
 !!  mgsc=second dimension of the gsc array
 !!  mkgq = second dimension of pwnsfacq
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw
 !!  nband=number of bands.
 !!  nbdblock=number of bands in a block

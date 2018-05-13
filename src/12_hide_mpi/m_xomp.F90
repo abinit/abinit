@@ -345,14 +345,14 @@ function xomp_in_parallel() result(ans)
  implicit none
 
 !Arguments-------------------------
- logical :: ans 
+ logical :: ans
 
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP
  ans = omp_in_parallel()
 #else
- ans = .FALSE. 
+ ans = .FALSE.
 #endif
 
 end function xomp_in_parallel
@@ -399,14 +399,14 @@ function xomp_get_num_cores_node()
  xomp_get_num_cores_node=omp_get_thread_limit()
  !We test if thread_limit has been set (if not it should be a large value)
  ! In 2012, 4096 cores is the biggest known shared memory system
- if(xomp_get_num_cores_node > 4096) then 
+ if(xomp_get_num_cores_node > 4096) then
     !so if not set, we used system 'num procs' values which should be the default case
     xomp_get_num_cores_node=omp_get_num_procs()
  end if
 #else
  xomp_get_num_cores_node=0
 #endif
- 
+
 end function xomp_get_num_cores_node
 
 !----------------------------------------------------------------------

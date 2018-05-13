@@ -63,7 +63,7 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
  use defs_basis
  use m_profiling_abi
 
- use m_symtk,          only : matr3inv
+ use m_symtk,          only : matr3inv, matpointsym
  use m_geometry,       only : xred2xcart
  use m_special_funcs,  only : abi_derfc
 
@@ -71,7 +71,6 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'make_efg_ion'
- use interfaces_45_geomoptim
 !End of the abilint section
 
  implicit none

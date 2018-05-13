@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.8.1 is for production
+The present release ABINITv8.9.0 is for development
 0. List of platforms
 1. Batteries of tests
 2. List of known problems
@@ -13,7 +13,7 @@ The present release ABINITv8.8.1 is for production
 ================================================================
 0. Platforms
 
-For ABINITv8.8.1, list closed on 2018 04 28
+For ABINITv8.9.0, list closed on 2018 05 04
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -807,3 +807,6 @@ P871.1 (XG171106)
 Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correcty, because the difference 
 with the reference for this quantity can be very large, while the difference for the total energy and other quantities
 is very small.
+
+P890.1 (XG180504)
+Test v8#34 (Hybrid Monte-Carlo) from Serguei Prokhorenko gives randomly different results on nag@abiref.

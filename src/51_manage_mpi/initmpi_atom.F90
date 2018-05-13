@@ -4,7 +4,7 @@
 !!  initmpi_atom
 !!
 !! FUNCTION
-!!  Initializes the mpi informations for parallelism over atoms (PAW).
+!!  Initializes the mpi information for parallelism over atoms (PAW).
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2018 ABINIT group (MT)
@@ -16,10 +16,10 @@
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!
 !! OUTPUT
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!    comm_atom                 =communicator over atoms
 !!    nproc_atom                =size of the communicator over atoms
 !!    my_natom                  =number of atoms treated by current proc
@@ -81,7 +81,7 @@ subroutine initmpi_atom(dtset,mpi_enreg)
  end if
  nullify(mpi_enreg%my_atmtab)
 
- if (xmpi_paral==0) then 
+ if (xmpi_paral==0) then
    mpi_enreg%nproc_atom=0
    ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
    return

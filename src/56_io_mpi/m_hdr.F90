@@ -55,7 +55,7 @@ MODULE m_hdr
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
  use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust
- use m_crystal,       only : print_symmetries
+ use m_symtk,         only : print_symmetries
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use defs_abitypes,   only : hdr_type, dataset_type

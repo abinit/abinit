@@ -2228,7 +2228,7 @@ subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 &           *eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
    end do
    if (isacoustic == 0) cycle
-   imode_acoustic = imode_acoustic + 1
+   imode_acoustic = min(imode_acoustic + 1, 3)
 
 !   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
 !   call wrtout(std_out,msg,'COLL')
@@ -2414,7 +2414,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_ALLOCATE (bose_msqv, (PHdos%nomega, ntemper))
 
  do io=1, PHdos%nomega
-     if (PHdos%omega(io) >= 1.d-10) exit
+     if ( PHdos%omega(io) >= 2._dp * 4.56d-6 ) exit ! 2 cm-1 TODO: make this an input parameter
  end do
  iomin = io
 
@@ -2423,7 +2423,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  bose_msqv = zero
  do itemp = 1, ntemper
    temper = tempermin + (itemp-1) * temperinc
-   if (abs(temper) < 1.e-10) cycle
+   if (temper < 1.e-3) cycle ! millikelvin at least to avoid exploding Bose factor(TM)
    do io = iomin, PHdos%nomega
 ! NB: factors follow convention in phonopy documentation
 !   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition

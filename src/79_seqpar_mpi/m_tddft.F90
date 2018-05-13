@@ -252,7 +252,7 @@ contains
 &   'The computation of excited states using TDDFT is only allowed',ch10,&
 &   'with nkpt=1, kpt=(0 0 0), but the following values are input:',ch10,&
 &   'nkpt=',nkpt,', kpt=',dtset%kptns(1:3,1),'.',ch10,&
-&   'Action : in the input file, set nkpt to 1 and kpt to 0 0 0 ,',ch10,&
+&   'Action: in the input file, set nkpt to 1 and kpt to 0 0 0 ,',ch10,&
 &   'or change iscf.'
    MSG_ERROR(message)
  end if
@@ -261,7 +261,7 @@ contains
    write(message, '(a,a,a,a,a,a,a)' )&
 &   'The computation of excited states using TDDFT is restricted',ch10,&
 &   'for the time being to nspinor=1, while input nspinor=2.',ch10,&
-&   'Action : if you want to compute excited states within TDDFT,',ch10,&
+&   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set nsppol to 1 in the input file. Otherwise, do not use iscf=-1.'
    MSG_ERROR(message)
  end if
@@ -272,7 +272,7 @@ contains
 &   'The computation of excited states using TDDFT in the spin',ch10,&
 &   'polarized case for the time being cannot be used with ixc=20',ch10,&
 &   'or ixc=22',ch10,&
-&   'Action : if you want to compute excited states within TDDFT,',ch10,&
+&   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set ixc different from 20 or 22. Otherwise, do not use iscf=-1',ch10,&
 &   'with nsppol=2.'
    MSG_ERROR(message)
@@ -283,7 +283,7 @@ contains
    write(message, '(a,a,a,i2,a,a,a,a,a)' )&
 &   'The computation of excited states using TDDFT is only allowed',ch10,&
 &   'with occopt=0, 1, or 2, while input occopt=',dtset%occopt,'.',ch10,&
-&   'Action : if you want to compute excited states within TDDFT,',ch10,&
+&   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set occopt=0, 1, or 2 in the input file. Otherwise, do not use iscf=-1.'
    MSG_ERROR(message)
  end if

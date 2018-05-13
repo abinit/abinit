@@ -1649,7 +1649,7 @@ end subroutine dotprod_v
 !! INPUTS
 !!  cplex=if 1, real space functions on FFT grid are REAL, if 2, COMPLEX
 !!  dens(cplex*nfft,nspden)=real space density on FFT grid
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft= (effective) number of FFT grid points (for this processor)
 !!  nfftot= total number of FFT grid points
 !!  nspden=number of spin-density components
@@ -2120,10 +2120,6 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc),parameter :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
- complex(dpc),parameter :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
- complex(dpc),parameter :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
- complex(dpc),parameter :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
  complex(dpc) :: cspin(0:3), cgcmat_(2,2)
 ! ***********************************************************************
 
@@ -2131,15 +2127,15 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
  cgcmat_ = czero
  call zgemm('n','c',2,2,npw_k,cone,cgcband,2,cgcband,2,czero,cgcmat_,2)
 
-! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_*(si,sj) cgcband(sj,pi)
- cspin(0) = cgcmat_(1,1)*pauli_0(1,1) + cgcmat_(2,1)*pauli_0(2,1) &
-& + cgcmat_(1,2)*pauli_0(1,2) + cgcmat_(2,2)*pauli_0(2,2)
- cspin(1) = cgcmat_(1,1)*pauli_x(1,1) + cgcmat_(2,1)*pauli_x(2,1) &
-& + cgcmat_(1,2)*pauli_x(1,2) + cgcmat_(2,2)*pauli_x(2,2)
- cspin(2) = cgcmat_(1,1)*pauli_y(1,1) + cgcmat_(2,1)*pauli_y(2,1) &
-& + cgcmat_(1,2)*pauli_y(1,2) + cgcmat_(2,2)*pauli_y(2,2)
- cspin(3) = cgcmat_(1,1)*pauli_z(1,1) + cgcmat_(2,1)*pauli_z(2,1) &
-& + cgcmat_(1,2)*pauli_z(1,2) + cgcmat_(2,2)*pauli_z(2,2)
+! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_mat*(si,sj) cgcband(sj,pi)
+ cspin(0) = cgcmat_(1,1)*pauli_mat(1,1,0) + cgcmat_(2,1)*pauli_mat(2,1,0) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,0) + cgcmat_(2,2)*pauli_mat(2,2,0)
+ cspin(1) = cgcmat_(1,1)*pauli_mat(1,1,1) + cgcmat_(2,1)*pauli_mat(2,1,1) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,1) + cgcmat_(2,2)*pauli_mat(2,2,1)
+ cspin(2) = cgcmat_(1,1)*pauli_mat(1,1,2) + cgcmat_(2,1)*pauli_mat(2,1,2) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,2) + cgcmat_(2,2)*pauli_mat(2,2,2)
+ cspin(3) = cgcmat_(1,1)*pauli_mat(1,1,3) + cgcmat_(2,1)*pauli_mat(2,1,3) &
+&         + cgcmat_(1,2)*pauli_mat(1,2,3) + cgcmat_(2,2)*pauli_mat(2,2,3)
 !write(std_out,*) 'cgmat: ', cgcmat_
 !write(std_out,*) 'real(spin): ', real(cspin)
 !write(std_out,*) 'aimag(spin): ', aimag(cspin)
@@ -4352,7 +4348,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !scalars
  integer :: iblocksize,ierr,ig,igs,ispinor
  real(dp) :: fac,poly,xx
- character(len=500) :: message
+ !character(len=500) :: message
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
@@ -4412,8 +4408,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
      do iblocksize=1,blocksize
        if(ek0(iblocksize)<1.0d-10)then
-         message = 'the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.'
-         MSG_WARNING(message)
+         MSG_WARNING('the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.')
          ek0(iblocksize)=0.1_dp
        end if
      end do
@@ -4765,15 +4760,13 @@ subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
 !Local variables-------------------------------
 !scalars
  integer :: ipw,ispinor,jpw,spnshft1,spnshft2
- character(len=500) :: message
 
 ! *************************************************************************
 
 !Check if vect1(:,0) = 0 and vect2(:,0) = 0
  if ((abs(vect1(1,0)) > tol12).or.(abs(vect1(2,0)) > tol12).or. &
 & (abs(vect2(1,0)) > tol12).or.(abs(vect2(2,0)) > tol12)) then
-   message = ' vect1(:,0) and/or vect2(:,0) are not equal to zero'
-   MSG_BUG(message)
+   MSG_BUG('vect1(:,0) and/or vect2(:,0) are not equal to zero')
  end if
 
 !Compute the scalar product
