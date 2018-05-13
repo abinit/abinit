@@ -56,7 +56,7 @@ use m_io_kss,           only : make_gvec_kss
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
 use m_fft,              only : fftpac
-
+use m_getghc,           only : getghc
 
 implicit none
 save

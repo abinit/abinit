@@ -90,6 +90,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambd
  !use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type !,KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  !use m_fock,        only : fock_type,fock_get_getghc_call
+ use m_getgh, only : getghc
 
 #ifdef HAVE_OPENMP
    use omp_lib

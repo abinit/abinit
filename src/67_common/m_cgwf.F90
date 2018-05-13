@@ -34,12 +34,13 @@ module m_cgwf
  use m_cgtools
  use m_efield
 
- use m_time, only : timab
+ use m_time,          only : timab
  use m_numeric_tools, only : rhophi
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
-&                          pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_fock,        only : fock_set_ieigen,fock_set_getghc_call
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
+                             pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
+ use m_hamiltonian,   only : gs_hamiltonian_type
+ use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
+ use m_getghc,        only : getghc
 
  implicit none
 

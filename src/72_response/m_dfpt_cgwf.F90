@@ -8,7 +8,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 1999-2018 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,6 +26,20 @@
 #include "abi_common.h"
 
 module m_dfpt_cgwf
+
+ use defs_basis
+ use defs_abitypes
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+ use m_cgtools
+ use m_rf2
+
+ use m_time,        only : timab
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
+ use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
+ use m_getgh1c,     only : getgh1c
+ use m_getghc,      only : getghc
 
  implicit none
 
@@ -52,13 +66,6 @@ contains
 !! The wavefunction that is generated is always orthogonal to cgq .
 !! It is orthogonal to the active Hilbert space, and will be complemented
 !! by contributions from the active space in the calling routine, if needed.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,DRH,XW,FJ,MT,LB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  band=which particular band we are converging.
@@ -146,19 +153,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnl1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
-
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use m_errors
- use m_xmpi
- use m_cgtools
- use m_rf2
-
- use m_time,        only : timab
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
- use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
- use m_getgh1c,     only : getgh1c
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

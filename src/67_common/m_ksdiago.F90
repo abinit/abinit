@@ -49,6 +49,7 @@ module m_ksdiago
  use m_pawfgr,            only : pawfgr_type
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
+ use m_getghc,            only : getghc
 
  implicit none
 

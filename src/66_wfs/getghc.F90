@@ -1,4 +1,54 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_getghc
+!! NAME
+!!  m_getghc
+!!
+!! FUNCTION
+!! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_getghc
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+
+ use m_time,        only : timab
+ use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_getdim
+ use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
+ use m_hamiltonian, only : gs_hamiltonian_type,KPRIME_H_K,K_H_KPRIME,K_H_K,KPRIME_H_KPRIME
+ use m_fock,        only : fock_common_type,fock_get_getghc_call
+
+ implicit none
+
+ private
+!!***
+
+ public :: getghc
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/getghc
 !!
 !! NAME
@@ -10,13 +60,6 @@
 !! <G|Vnonlocal|C> is also returned in gvnlc.
 !! if required, <G|S|C> is returned in gsc (S=overlap - PAW only)
 !! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! cpopt=flag defining the status of cwaveprj%cp(:)=<Proj_i|Cnk> scalars (PAW only)
@@ -76,27 +119,9 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,ndat,&
 &                 prtvol,sij_opt,tim_getghc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
- use m_xmpi
-
- use m_time,        only : timab
- use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_getdim
- use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
- use m_hamiltonian, only : gs_hamiltonian_type,KPRIME_H_K,K_H_KPRIME,K_H_K,KPRIME_H_KPRIME
- use m_fock,        only : fock_common_type,fock_get_getghc_call
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -764,19 +789,8 @@ end subroutine getghc
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
 &                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vxctaulocal,use_gpu_cuda)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1032,3 +1046,5 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 end subroutine getghc_mGGA
 !!***
 
+end module m_getghc
+!!***
