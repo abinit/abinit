@@ -85,13 +85,14 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_cgtools
 
  use m_kg,             only : mkkpg
+ use m_initylmg,       only : initylmg
+ use m_mkffnl,         only : mkffnl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop_test'
  use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_66_nonlocal, except_this_one => nonlop_test
 !End of the abilint section
 

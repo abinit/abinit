@@ -85,6 +85,9 @@ module m_bethe_salpeter
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_paw_dmft,        only : paw_dmft_type
  use m_exc_build,       only : exc_build_ham
+ use m_setvtr,          only : setvtr
+ use m_mkrho,           only : prtrhomxmn
+ use m_pspini,          only : pspini
 
  implicit none
 
@@ -186,9 +189,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use interfaces_41_xc_lowlevel
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

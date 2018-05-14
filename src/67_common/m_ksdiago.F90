@@ -47,7 +47,8 @@ module m_ksdiago
  use m_paw_ij,            only : paw_ij_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder
  use m_pawfgr,            only : pawfgr_type
-
+ use m_initylmg,          only : initylmg
+ use m_mkffnl,            only : mkffnl
 
  implicit none
 
@@ -259,7 +260,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 #define ABI_FUNC 'ksdiago'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_66_wfs

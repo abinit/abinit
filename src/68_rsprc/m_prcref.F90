@@ -52,6 +52,8 @@ module m_prcref
  use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian
  use m_distribfft, only : init_distribfft_seq
+ use m_forces,     only : fresid
+ use m_atm2fft,    only : atm2fft
 
  implicit none
 
@@ -201,7 +203,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 #define ABI_FUNC 'prcref'
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_67_common
 !End of the abilint section
 
@@ -855,7 +856,6 @@ end subroutine prcref
 #define ABI_FUNC 'prcref_PMA'
  use interfaces_53_ffts
  use interfaces_56_xc
- use interfaces_64_psp
  use interfaces_67_common
 !End of the abilint section
 

@@ -45,7 +45,7 @@ module m_inwffil
  use m_geometry, only : getspinrot
  use m_pptools,  only : prmat
  use m_symtk,    only : matr3inv, mati3inv
- use m_cgtools,  only : cg_envlop
+ use m_cgtools,  only : cg_envlop, pw_orthon
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
  use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg
@@ -2725,7 +2725,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 #undef ABI_FUNC
 #define ABI_FUNC 'wfconv'
  use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

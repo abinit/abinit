@@ -98,6 +98,9 @@ module m_sigma_driver
  use m_cohsex,        only : cohsex_me
  use m_sigx,          only : calc_sigx_me
  use m_sigc,          only : calc_sigc_me
+ use m_setvtr,        only : setvtr
+ use m_mkrho,         only : prtrhomxmn
+ use m_pspini,        only : pspini
 
  implicit none
 
@@ -194,9 +197,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
- use interfaces_64_psp
  use interfaces_65_paw
- use interfaces_67_common
  use interfaces_70_gw
 !End of the abilint section
 

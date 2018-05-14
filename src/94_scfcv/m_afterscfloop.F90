@@ -272,6 +272,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
+ use m_mkrho,            only : mkrho, prtrhomxmn
+ use m_elpolariz,        only : elpolariz
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -291,7 +293,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common
- use interfaces_94_scfcv
 !End of the abilint section
 
  implicit none

@@ -108,6 +108,7 @@
  use m_geometry, only : strconv
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
 &                       pawcprj_set_zero, pawcprj_mpi_sum
+ use m_mkffnl,   only : mkffnl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

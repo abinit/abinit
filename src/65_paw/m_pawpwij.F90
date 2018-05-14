@@ -41,6 +41,7 @@ MODULE m_pawpwij
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type
  use m_mpinfo,         only : destroy_mpi_enreg
+ use m_initylmg,       only : initylmg
 
  implicit none
 
@@ -347,7 +348,6 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 #undef ABI_FUNC
 #define ABI_FUNC 'pawpwij_init'
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

@@ -194,6 +194,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use m_pawfgr,   only : pawfgr_type
  use m_fft,      only : fftpac
  use m_spacepar, only : symrhg
+ use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
+ use m_dfpt_vtowfk, only : dfpt_vtowfk
+ use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -201,8 +204,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 #define ABI_FUNC 'dfpt_vtorho'
  use interfaces_32_util
  use interfaces_65_paw
- use interfaces_66_wfs
- use interfaces_72_response, except_this_one => dfpt_vtorho
 !End of the abilint section
 
  implicit none

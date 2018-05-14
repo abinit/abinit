@@ -59,6 +59,7 @@ module m_epjdos
  use m_pawrad,         only : pawrad_type, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
+ use m_initylmg,       only : initylmg
 
  implicit none
 
@@ -2034,7 +2035,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_51_manage_mpi
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

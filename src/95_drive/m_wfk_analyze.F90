@@ -139,6 +139,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !use m_paw_dmft,       only : paw_dmft_type
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_classify_bands,  only : classify_bands
+ use m_pspini,          only : pspini
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -146,7 +147,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 #define ABI_FUNC 'wfk_analyze'
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
- use interfaces_64_psp
  use interfaces_65_paw
 !End of the abilint section
 
