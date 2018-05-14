@@ -35,7 +35,7 @@ module m_predtk
  private
 !!***
 
- !public :: fdtion
+ public :: fdtion
 !!***
 
 contains
@@ -75,6 +75,7 @@ contains
 !! SOURCE
 
 function fdtion(ab_mover,itime,xcart,fcart,vel)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

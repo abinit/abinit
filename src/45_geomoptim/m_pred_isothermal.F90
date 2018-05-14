@@ -95,12 +95,12 @@ contains
 
 subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_isothermal'
  use interfaces_14_hidewrite
- use interfaces_45_geomoptim, except_this_one => pred_isothermal
 !End of the abilint section
 
  implicit none
@@ -653,6 +653,7 @@ end subroutine pred_isothermal
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -798,6 +799,7 @@ end subroutine isotemp
 
  subroutine isopress(amass,bmass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,&
    & strten,strtarget,ucvol,vel,vlogv)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
