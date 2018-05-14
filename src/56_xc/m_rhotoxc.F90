@@ -26,10 +26,20 @@
 module m_rhotoxc
 
  use defs_basis
- use m_errors
+ use defs_abitypes
+ use m_xmpi
  use m_profiling_abi
+ use m_errors
+ use m_cgtools
+ use m_xcdata
+ use m_xc_vdw
+ use libxc_functionals
 
- use m_drivexc, only : drivexc_main, xcmult
+ use m_time,             only : timab
+ use m_geometry,         only : metric
+ use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_xcpositron,       only : xcpositron
+ use m_drivexc,          only : size_dvxc, drivexc_main, xcmult, mkdenpos
 
  implicit none
 
@@ -248,22 +258,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,paral_kgb, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_profiling_abi
- use m_errors
- use m_cgtools
- use m_xcdata
- use m_xc_vdw
- use libxc_functionals
-
- use m_time,             only : timab
- use m_geometry,         only : metric
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_xcpositron,       only : xcpositron
- use m_drivexc,          only : size_dvxc
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

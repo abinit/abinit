@@ -55,6 +55,7 @@ subroutine wvl_initro(&
  use m_geometry,   only : xred2xcart, metric
  use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab, only : pawtab_type
+ use m_drivexc, only : mkdenpos
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY, ext_buffers, ind_positions
 #endif

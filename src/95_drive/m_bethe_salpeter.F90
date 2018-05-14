@@ -88,6 +88,7 @@ module m_bethe_salpeter
  use m_setvtr,          only : setvtr
  use m_mkrho,           only : prtrhomxmn
  use m_pspini,          only : pspini
+ use m_drivexc,         only : mkdenpos
 
  implicit none
 

@@ -60,7 +60,6 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  use m_profiling_abi
  use m_errors
  use m_xmpi
-
  use m_electronpositron
 
  use m_pawang, only : pawang_type
@@ -68,6 +67,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  use m_pawtab, only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_pawxc, only: pawxcsum
+ use m_drivexc,     only : mkdenpos
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
