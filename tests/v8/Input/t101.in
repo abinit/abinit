@@ -33,6 +33,10 @@
 # SCF procedure
 #*******************************
    nstep    100
+
+# Bands
+#*******************************
+  occopt    1
    nband    4
 
 # Plane wave basis set
