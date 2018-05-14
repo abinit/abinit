@@ -63,6 +63,8 @@ module m_mover
  use m_pred_isothermal,    only : pred_isothermal
  use m_pred_verlet,        only : pred_verlet
  use m_pred_velverlet,     only : pred_velverlet
+ use m_pred_moldyn,        only : pred_moldyn
+ use m_pred_langevin,      only : pred_langevin
 
  implicit none
 

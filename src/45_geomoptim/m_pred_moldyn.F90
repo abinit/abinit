@@ -1,4 +1,48 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_moldyn
+!! NAME
+!!  m_pred_moldyn
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_moldyn
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+
+ use m_geometry,    only : xcart2xred, xred2xcart
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_moldyn
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_moldyn
 !! NAME
 !! pred_moldyn
@@ -9,12 +53,6 @@
 !! Molecular dynamics, with or without viscous damping
 !! This function should be after the call to scfcv
 !! Updates positions, velocities and forces
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! ab_mover<type abimover>=Subset of dtset only related with
@@ -40,8 +78,7 @@
 !! * This routine is a predictor, it only produces new positions
 !!   to be computed in the next iteration, this routine should
 !!   produce not output at all
-!! * ncycle changes from 4 for the first iteration (itime==1)
-!!   to 1 for (itime>1)
+!! * ncycle changes from 4 for the first iteration (itime==1) to 1 for (itime>1)
 !! * The arrays vec_tmp1 and vec_tmp2 are triky, they are use with
 !!   different meanings, during the initialization they contains
 !!   working positions and velocities that acumulated produce the
@@ -58,20 +95,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
- use m_geometry,    only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -410,12 +434,6 @@ end subroutine pred_moldyn
 !! Compute the apropiated "dtion" from the present values
 !! of forces, velocity and viscosity
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS (in)
 !! hist<type abihist>=Historical record of positions, forces
 !!      |                    acell, stresses, and energies,
@@ -434,8 +452,6 @@ end subroutine pred_moldyn
 !! OUTPUT (out)
 !! fdtion = time step computed
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      pred_moldyn
 !!
@@ -443,15 +459,7 @@ end subroutine pred_moldyn
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 function fdtion(ab_mover,itime,xcart,fcart,vel)
-
-! define dp,sixth,third,etc...
-  use defs_basis
-  use m_abimover
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -515,4 +523,7 @@ function fdtion(ab_mover,itime,xcart,fcart,vel)
  end if
 
  end function fdtion
+!!***
+
+end module m_pred_moldyn
 !!***
