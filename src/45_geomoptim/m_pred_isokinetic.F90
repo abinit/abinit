@@ -40,40 +40,13 @@ module m_pred_isokinetic
  private
 !!***
 
- !public :: prtposcar
+ public :: pred_isokinetic
 !!***
 
 contains
 !!***
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/pred_isokinetic
 !! NAME
 !! pred_isokinetic
@@ -109,6 +82,7 @@ contains
 !! SOURCE
 
 subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
