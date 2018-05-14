@@ -165,11 +165,12 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 &                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
 &                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs,xc_tb09_c) ! Optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'drivexc_main'
- use interfaces_41_xc_lowlevel, except_this_one => drivexc_main
+ use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none

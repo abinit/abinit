@@ -96,12 +96,12 @@ contains
 
 subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mpi_setup'
  use interfaces_14_hidewrite
- use interfaces_57_iovars, except_this_one => mpi_setup
 !End of the abilint section
 
  implicit none
@@ -1008,12 +1008,12 @@ end subroutine mpi_setup
 
  subroutine finddistrproc(dtsets,filnam,idtset,iexit,mband,mpi_enreg,ndtset_alloc,tread)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'finddistrproc'
  use interfaces_14_hidewrite
- use interfaces_57_iovars, except_this_one => finddistrproc
 !End of the abilint section
 
  implicit none

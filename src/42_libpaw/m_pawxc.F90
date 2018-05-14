@@ -189,7 +189,6 @@ subroutine pawxc_xcpositron_abinit()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_xcpositron_abinit'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
@@ -5453,7 +5452,6 @@ subroutine pawxc_drivexc_abinit()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pawxc_drivexc_abinit'
- use interfaces_41_xc_lowlevel
 !End of the abilint section
 
  implicit none
