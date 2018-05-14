@@ -1,4 +1,51 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_diisrelax
+!! NAME
+!!  m_pred_diisrelax
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_diisrelax
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+ use m_linalg_interfaces
+
+ use m_geometry,  only : xcart2xred, xred2xcart
+ use m_bfgs, only : hessinit, hessupdt
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_diisrelax
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_diisrelax
 !! NAME
 !! pred_diisrelax
@@ -16,14 +63,6 @@
 !! This method is known to converge to the nearest point where gradients
 !! vanish. This is efficient to refine positions around a saddle point
 !! for instance.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information
@@ -47,22 +86,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
- use m_linalg_interfaces
-
- use m_geometry,  only : xcart2xred, xred2xcart
- use m_bfgs, only : hessinit, hessupdt
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -582,4 +606,7 @@ implicit none
  if (.false.) write(std_out,*) ntime
 
 end subroutine pred_diisrelax
+!!***
+
+end module m_pred_diisrelax
 !!***

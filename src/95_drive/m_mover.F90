@@ -52,10 +52,13 @@ module m_mover
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
  use m_dtfil,              only : dtfil_init_time, status
+ use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_pred_delocint,      only : pred_delocint
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
- use m_initylmg,           only : initylmg
+ use m_pred_isokinetic,    only : pred_isokinetic
+ use m_pred_diisrelax,     only : pred_diisrelax
+
  implicit none
 
  private

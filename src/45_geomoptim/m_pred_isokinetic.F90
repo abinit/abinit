@@ -1,4 +1,79 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_isokinetic
+!! NAME
+!!  m_pred_isokinetic
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_isokinetic
+
+ use m_profiling_abi
+ use defs_basis
+ use m_abimover
+ use m_abihist
+
+ use m_numeric_tools,  only : uniformrandom
+ use m_geometry,  only : xcart2xred, xred2xcart
+
+
+ implicit none
+
+ private
+!!***
+
+ !public :: prtposcar
+!!***
+
+contains
+!!***
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!{\src2tex{textfont=tt}}
 !!****f* ABINIT/pred_isokinetic
 !! NAME
 !! pred_isokinetic
@@ -9,26 +84,14 @@
 !! IONMOV 12:
 !! Isokinetic ensemble molecular dynamics.
 !! The equation of motion of the ions in contact with a thermostat
-!! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106,
-!! 6102 (1997)],
+!! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)],
 !! as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].
-!! The conservation of the kinetic energy is obtained within machine
-!! precision, at each step.
+!! The conservation of the kinetic energy is obtained within machine precision, at each step.
 !! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)),
 !! the final temperature (mdtemp(2)), and the friction coefficient (friction).
 !!
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
-!! ab_mover <type(abimover)> : Datatype with all the information
-!!                                needed by the preditor
+!! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
 !! zDEBUG : if true print some debugging information
@@ -36,11 +99,7 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
-!!
-!! NOTES
-!!
+!! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !! PARENTS
 !!      mover
 !!
@@ -49,21 +108,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
-
- use m_profiling_abi
- use defs_basis
- use m_abimover
- use m_abihist
-
- use m_numeric_tools,  only : uniformrandom
- use m_geometry,  only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -445,4 +490,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  if (.false.) write(std_out,*) ntime
 
 end subroutine pred_isokinetic
+!!***
+
+end module m_pred_isokinetic
 !!***
