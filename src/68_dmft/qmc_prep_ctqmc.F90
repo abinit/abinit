@@ -1353,17 +1353,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call wrtout(std_out,message,'COLL')
      end if
 
-     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==8) then
+     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
-       if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
          open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
-       endif
      else
-       ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       if(paw_dmft%dmft_solv==5) ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
 !     use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo
-         gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+          if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
          gw_tmp_nd(ifreq,nflavor,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
        end do
      end if
