@@ -1,4 +1,50 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_velverlet
+!! NAME
+!!  m_pred_velverlet
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2017-2018 ABINIT group (SPr)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_velverlet
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+
+ use m_geometry,  only : xcart2xred, xred2xcart
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_velverlet
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_velverlet
 !! NAME
 !!  pred_velverlet
@@ -10,15 +56,7 @@
 !!  it better conserves the total energy and time-reversibility).
 !!  VV is a second order integration scheme that requires a single
 !!  evaluatoin of forces per time step. These properties make VV
-!!  a good candidate integrator for use in Hybrid Monte Carlo
-!!  simulation scheme.
-!!
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (SPr)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!  a good candidate integrator for use in Hybrid Monte Carlo simulation scheme.
 !!
 !! INPUTS
 !!  ab_mover =  Data structure containing information about
@@ -51,22 +89,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,ncycle)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
- use m_abimover
- use m_abihist
-
- use m_geometry,  only : xcart2xred, xred2xcart
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -278,4 +301,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
 end subroutine pred_velverlet
+!!***
+
+end module m_pred_velverlet
 !!***

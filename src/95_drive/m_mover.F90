@@ -61,6 +61,8 @@ module m_mover
  use m_pred_nose,          only : pred_nose
  use m_pred_srkhna14,      only : pred_srkna14
  use m_pred_isothermal,    only : pred_isothermal
+ use m_pred_verlet,        only : pred_verlet
+ use m_pred_velverlet,     only : pred_velverlet
 
  implicit none
 

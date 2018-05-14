@@ -1,4 +1,50 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pred_verlet
+!! NAME
+!!  m_pred_verlet
+!!
+!! FUNCTION
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_pred_verlet
+
+ use defs_basis
+ use m_profiling_abi
+ use m_abimover
+ use m_abihist
+ use m_xfpack
+
+ use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2fred, metric
+
+ implicit none
+
+ private
+!!***
+
+ public :: pred_verlet
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/pred_verlet
 !! NAME
 !! pred_verlet
@@ -19,8 +65,7 @@
 !! No more than ab_mover%ntime steps are performed.
 !! The time step is governed by dtion, contained in ab_mover
 !! (coming from dtset).
-!! Returned quantities are xred, and eventually acell and rprimd
-!! (new ones!).
+!! Returned quantities are xred, and eventually acell and rprimd (new ones!).
 !!
 !! IONMOV 7:
 !! Block every atom for which the scalar product of velocity and
@@ -28,29 +73,16 @@
 !! The convergence requirement on the atomic forces, ab_mover%tolmxf,
 !! allows an early exit.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors,
-!! see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
-!! ab_mover <type(abimover)> : Datatype with all the information
-!!                                needed by the preditor
+!! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
 !! ionmov : (6 or 7) Specific kind of VERLET
 !! zDEBUG : if true print some debugging information
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      mover
@@ -61,21 +93,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
-
- use defs_basis
- use m_profiling_abi
- use m_abimover
- use m_abihist
- use m_xfpack
-
- use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2fred, metric
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -553,4 +571,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  if (.false.) write(std_out,*) ntime
 
 end subroutine pred_verlet
+!!***
+
+end module m_pred_verlet
 !!***

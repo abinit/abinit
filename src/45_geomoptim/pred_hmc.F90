@@ -57,8 +57,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  use m_abihist
  use m_io_tools
  use m_hmc
+
  use m_geometry,  only : xred2xcart
  use m_numeric_tools,  only : uniformrandom
+ use m_pred_velverlet,     only : pred_velverlet
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -178,7 +180,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  !IN CASE THE SWEEP IS FOR UPDATE OF ATOMIC COORDINATES************************************************
  !if(.NOT.strain_sweep) then
 
-   ! *---->* 
+   ! *---->*
    ! 1     n
 
    if (icycle==1) then
@@ -204,7 +206,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      end if
 
      write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
-&                                            epot,' ekin=',ekin,' de=',de                                    
+&                                            epot,' ekin=',ekin,' de=',de
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
@@ -214,13 +216,13 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
 
      call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
- 
+
    else !icycle/=1
 
     call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
 
-   end if  
- 
+   end if
+
  !end if
  !END OF ATOMIC COORDINATES SWEEP************************************************
 
@@ -265,17 +267,17 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !       else if (ab_mover%optcell==9) then
 !         rprimd(:,3)=rprimd_original(:,3)
 !       endif
-!     case(4) 
+!     case(4)
 !       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(5) 
+!     case(5)
 !       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(6) 
+!     case(6)
 !       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
 !     case default
 !     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
 !     !  MSG_ERROR(message)
 !     end select
-! 
+!
 !     !update the new suggested rprimd and or acell in the history record
 !     hist%ihist=abihist_findIndex(hist,+1)
 !     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
@@ -283,7 +285,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !
 !     etotal = hist%etot(hist%ihist)
 !     de = etotal - etotal_hmc_prev
-! 
+!
 !     iacc=0
 !     rnd=uniformrandom(seed)
 !     if(de<0)then
@@ -301,7 +303,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !      call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
 !      strain_hmc_prev(:,:) = strain(:,:)
 !      etotal_hmc_prev=etotal
-!     endif 
+!     endif
 
      !suggest new acell/rprimd values depending on the optcell value
 !     select case (ab_mover%optcell)
@@ -335,17 +337,17 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !       else if (ab_mover%optcell==9) then
 !         rprimd(:,3)=rprimd_original(:,3)
 !       endif
-!     case(4) 
+!     case(4)
 !       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(5) 
+!     case(5)
 !       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(6) 
+!     case(6)
 !       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
 !     case default
 !     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
 !     !  MSG_ERROR(message)
 !     end select
-! 
+!
 !     !update the new suggested rprimd/acell in the history record
 !     hist%ihist=abihist_findIndex(hist,+1)
 !     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
