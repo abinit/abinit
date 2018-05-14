@@ -29,7 +29,7 @@ sources = [
 "m_xciit.F90",
 "xclb.F90",
 "xcmult.F90",
-"xcpbe.F90",
+"m_xcpbe.F90",
 "m_xcpositron.F90",
 "xcpzca.F90",
 "xcspol.F90",

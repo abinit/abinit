@@ -1,11 +1,54 @@
 !{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_xcpbe
+!! NAME
+!!  m_xcpbe
+!!
+!! FUNCTION
+!! Treat XC functionals closely linked with the Perdew-Wang 92 LSD and the PBE GGA.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 1998-2018 ABINIT group (XG,MF,LG,CE)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_xcpbe
+
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+
+ use m_numeric_tools,      only : invcb
+
+ implicit none
+
+ private
+!!***
+
+ public :: xcpbe
+!!***
+
+contains
+!!***
+
 !!****f* ABINIT/xcpbe
 !! NAME
 !! xcpbe
 !!
 !! FUNCTION
-!! Treat XC functionals closely linked with the Perdew-Wang 92 LSD
-!! and the PBE GGA.
+!! Treat XC functionals closely linked with the Perdew-Wang 92 LSD and the PBE GGA.
 !!
 !! For a series of values of the density and, if GGA, the square of the
 !! gradient of the density, return the associated Exc energy,
@@ -22,12 +65,6 @@
 !! If option==5, revPBE functional of Zhang and Yang, PRL 80, 890 (1998)
 !! If option==6, RPBE functional of Hammer, Hansen and Norskov, PRB 59, 7413 (1999)
 !! If option==7, WC functional of Wu and Cohen, PRB 73, 235116 (2006)
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (XG,MF,LG,CE)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  exexch= choice of local exact exchange. Active if exexch=1
@@ -44,7 +81,6 @@
 !!  nd2vxci=size of d2vxci(npts,nd2vxci)
 !!
 !! OUTPUT
-!!
 !!  d2vxci=third derivative of the xc energy with respect to the density, only
 !!    only if local-density approximation
 !!   calculated if order==3
@@ -95,8 +131,6 @@
 !! TODO
 !!  WARNING: option=4 not yet implemented.
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      drivexc
 !!
@@ -105,20 +139,8 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci, & !Mandatory Arguments
 &                d2vxci,dvxcdgr,dvxci,exexch,grho2_updn)                          !Optional Arguments
-
- use defs_basis
- use m_profiling_abi
- use m_errors
-
- use m_numeric_tools,      only : invcb
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5153,4 +5175,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 !ENDDEBUG
 
 end subroutine xcpbe
+!!***
+
+end module m_xcpbe
 !!***
