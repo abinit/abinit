@@ -30,6 +30,7 @@ MODULE m_electronpositron
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
+ use m_errors
  use m_energies
  use m_xmpi
  use m_cgtools
@@ -855,11 +856,12 @@ end function electronpositron_calctype
 subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nhat,nkxc,nspden,n3xccc,&
 &                         paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxcapn,vxcavg,xccc3d,xc_denpos)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rhohxcpositron'
- use interfaces_56_xc, except_this_one => rhohxcpositron
+ use interfaces_56_xc
 !End of the abilint section
 
  implicit none

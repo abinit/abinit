@@ -74,7 +74,6 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'posratecore'
- use interfaces_56_xc
  use interfaces_65_paw
 !End of the abilint section
 
