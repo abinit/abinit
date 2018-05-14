@@ -1,5 +1,5 @@
 
-.Version 8.1.7 of ABINIT 
+.Version 8.8.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 10 Dec 2016.
-- ( at 22h51 )
+.Starting date : Fri  4 May 2018.
+- ( at 09h59 )
   
 - input  file    -> t41.in
 - output file    -> t41.out
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       3.013 Mbytes of memory.
+P This job should need less than                       2.972 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       4.198 Mbytes of memory.
+P This job should need less than                       4.157 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -531,8 +531,8 @@ P          mk1mem5         64
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -541,7 +541,7 @@ P          mk1mem5         64
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -784,7 +784,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
  Perturbation : displacement of atom   1   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
- is reduced to    24 .
+ is reduced to    40 .
 
 --------------------------------------------------------------------------------
 
@@ -795,22 +795,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   18.325574637967     -2.293E+02 6.547E-01 1.038E+04
- ETOT  2   9.5003180233127     -8.825E+00 2.700E-02 1.657E+02
- ETOT  3   9.3082975385223     -1.920E-01 1.868E-03 1.235E+00
- ETOT  4   9.3074267254833     -8.708E-04 9.067E-05 3.499E-01
- ETOT  5   9.3068708268906     -5.559E-04 3.470E-06 1.570E-02
- ETOT  6   9.3068450388504     -2.579E-05 5.994E-08 3.945E-06
- ETOT  7   9.3068450348917     -3.959E-09 3.155E-11 4.349E-08
- ETOT  8   9.3068450348337     -5.795E-11 1.785E-13 4.343E-10
- ETOT  9   9.3068450348358      2.103E-12 4.066E-15 1.975E-12
+-ETOT  1   18.325580019319     -2.293E+02 6.547E-01 1.038E+04
+ ETOT  2   9.5003426520371     -8.825E+00 2.701E-02 1.657E+02
+ ETOT  3   9.3083131315778     -1.920E-01 1.867E-03 1.245E+00
+ ETOT  4   9.3074371978304     -8.759E-04 9.180E-05 3.561E-01
+ ETOT  5   9.3068706757011     -5.665E-04 3.485E-06 1.561E-02
+ ETOT  6   9.3068450393748     -2.564E-05 5.979E-08 3.982E-06
+ ETOT  7   9.3068450353616     -4.013E-09 3.331E-11 4.483E-08
+ ETOT  8   9.3068450353031     -5.849E-11 1.666E-13 4.224E-10
+ ETOT  9   9.3068450353020     -1.108E-12 4.460E-15 2.021E-12
 
- At SCF step    9       vres2   =  1.97E-12 < tolvrs=  1.00E-10 =>converged.
+ At SCF step    9       vres2   =  2.02E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.7670E-16; max=  4.0659E-15
+ Mean square residual over all n,k,spin=   4.4715E-16; max=  4.4596E-15
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -827,9 +827,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.07902252E+01  frxc 2 =   9.58779568E+00
  Resulting in :
- 2DEtotal=    0.9306845035E+01 Ha. Also 2DEtotal=    0.253252132768E+03 eV
+ 2DEtotal=    0.9306845035E+01 Ha. Also 2DEtotal=    0.253252132781E+03 eV
     (2DErelax=   -2.3836407648E+02 Ha. 2DEnonrelax=    2.4767092151E+02 Ha)
-    (  non-var. 2DEtotal :    9.3068449869E+00 Ha)
+    (  non-var. 2DEtotal :    9.3068449885E+00 Ha)
 
 ================================================================================
 
@@ -843,57 +843,57 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1         9.3068449017         0.0000000000
-   1    1   2    1         4.6534224508         0.0000000000
-   1    1   3    1         4.6534224508         0.0000000000
-   1    1   1    2        -9.3068421972        -0.0000000000
-   1    1   2    2        -4.6534210986         0.0000000000
-   1    1   3    2        -4.6534210986        -0.0000000000
+   1    1   1    1         9.3068449044         0.0000000000
+   1    1   2    1         4.6534224522         0.0000000000
+   1    1   3    1         4.6534224522         0.0000000000
+   1    1   1    2        -9.3068421983        -0.0000000000
+   1    1   2    2        -4.6534210992         0.0000000000
+   1    1   3    2        -4.6534210992        -0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         4.6534224508         0.0000000000
-   2    1   2    1         9.3068449017         0.0000000000
-   2    1   3    1         4.6534224508         0.0000000000
-   2    1   1    2        -4.6534210986         0.0000000000
-   2    1   2    2        -9.3068421972         0.0000000000
-   2    1   3    2        -4.6534210986        -0.0000000000
+   2    1   1    1         4.6534224522         0.0000000000
+   2    1   2    1         9.3068449044         0.0000000000
+   2    1   3    1         4.6534224522         0.0000000000
+   2    1   1    2        -4.6534210992         0.0000000000
+   2    1   2    2        -9.3068421983         0.0000000000
+   2    1   3    2        -4.6534210992        -0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         4.6534224508         0.0000000000
-   3    1   2    1         4.6534224508         0.0000000000
-   3    1   3    1         9.3068449017         0.0000000000
-   3    1   1    2        -4.6534210986        -0.0000000000
-   3    1   2    2        -4.6534210986        -0.0000000000
-   3    1   3    2        -9.3068421972         0.0000000000
+   3    1   1    1         4.6534224522         0.0000000000
+   3    1   2    1         4.6534224522         0.0000000000
+   3    1   3    1         9.3068449044         0.0000000000
+   3    1   1    2        -4.6534210992        -0.0000000000
+   3    1   2    2        -4.6534210992        -0.0000000000
+   3    1   3    2        -9.3068421983         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
   
-   1    2   1    1        -9.3068421972         0.0000000000
-   1    2   2    1        -4.6534210986        -0.0000000000
-   1    2   3    1        -4.6534210986         0.0000000000
-   1    2   1    2         9.3068449017         0.0000000000
-   1    2   2    2         4.6534224508         0.0000000000
-   1    2   3    2         4.6534224508         0.0000000000
+   1    2   1    1        -9.3068421983         0.0000000000
+   1    2   2    1        -4.6534210992        -0.0000000000
+   1    2   3    1        -4.6534210992         0.0000000000
+   1    2   1    2         9.3068449044         0.0000000000
+   1    2   2    2         4.6534224522         0.0000000000
+   1    2   3    2         4.6534224522         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -4.6534210986        -0.0000000000
-   2    2   2    1        -9.3068421972        -0.0000000000
-   2    2   3    1        -4.6534210986         0.0000000000
-   2    2   1    2         4.6534224508         0.0000000000
-   2    2   2    2         9.3068449017         0.0000000000
-   2    2   3    2         4.6534224508         0.0000000000
+   2    2   1    1        -4.6534210992        -0.0000000000
+   2    2   2    1        -9.3068421983        -0.0000000000
+   2    2   3    1        -4.6534210992         0.0000000000
+   2    2   1    2         4.6534224522         0.0000000000
+   2    2   2    2         9.3068449044         0.0000000000
+   2    2   3    2         4.6534224522         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -4.6534210986         0.0000000000
-   3    2   2    1        -4.6534210986         0.0000000000
-   3    2   3    1        -9.3068421972        -0.0000000000
-   3    2   1    2         4.6534224508         0.0000000000
-   3    2   2    2         4.6534224508         0.0000000000
-   3    2   3    2         9.3068449017         0.0000000000
+   3    2   1    1        -4.6534210992         0.0000000000
+   3    2   2    1        -4.6534210992         0.0000000000
+   3    2   3    1        -9.3068421983        -0.0000000000
+   3    2   1    2         4.6534224522         0.0000000000
+   3    2   2    2         4.6534224522         0.0000000000
+   3    2   3    2         9.3068449044         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
   
@@ -918,54 +918,54 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.4142222130         0.0000000000
+   1    1   1    1         0.4142222131         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-   1    1   1    2        -0.4142220926         0.0000000000
-   1    1   2    2        -0.0000000000         0.0000000000
+   1    1   1    2        -0.4142220927         0.0000000000
+   1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.4142222130         0.0000000000
+   2    1   2    1         0.4142222131         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.4142220926        -0.0000000000
+   2    1   2    2        -0.4142220927        -0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.4142222130         0.0000000000
+   3    1   3    1         0.4142222131         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.4142220926         0.0000000000
+   3    1   3    2        -0.4142220927         0.0000000000
   
-   1    2   1    1        -0.4142220926        -0.0000000000
-   1    2   2    1        -0.0000000000        -0.0000000000
+   1    2   1    1        -0.4142220927        -0.0000000000
+   1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
-   1    2   1    2         0.4142222130         0.0000000000
+   1    2   1    2         0.4142222131         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.4142220926         0.0000000000
+   2    2   2    1        -0.4142220927         0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.4142222130         0.0000000000
+   2    2   1    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.4142222131         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.4142220926        -0.0000000000
+   3    2   3    1        -0.4142220927        -0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.4142222130         0.0000000000
+   3    2   3    2         0.4142222131         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   2.344688E-06  2.344688E-06  2.344690E-06  6.151231E-03  6.151231E-03
+   2.345426E-06  2.345426E-06  2.345428E-06  6.151231E-03  6.151231E-03
    6.151231E-03
  Phonon frequencies in cm-1    :
--  5.145995E-01  5.145996E-01  5.145999E-01  1.350039E+03  1.350039E+03
+-  5.147615E-01  5.147616E-01  5.147619E-01  1.350039E+03  1.350039E+03
 -  1.350039E+03
 
 ================================================================================
@@ -991,8 +991,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1001,7 +1001,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -1280,8 +1280,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1290,7 +1290,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -1504,7 +1504,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
            etotal1    -1.2056977179E+01
-           etotal3     9.3068450348E+00
+           etotal3     9.3068450353E+00
            etotal4     9.4534316923E+00
            etotal5     1.2215472464E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -1968,10 +1968,10 @@ P          mk1mem5         64
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         15.4  wall=         15.8
+- Proc.   0 individual time (sec): cpu=         17.9  wall=         18.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  35 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.4  wall=         15.8
+.Delivered  37 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.9  wall=         18.3
