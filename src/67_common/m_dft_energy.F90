@@ -42,9 +42,9 @@ module m_dft_energy
  use m_geometry,         only : metric
  use m_kg,               only : mkkin
  use m_energies,         only : energies_type
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
-&                               bandfft_kpt_savetabs,bandfft_kpt_restoretabs
+&                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
  use m_pawang,           only : pawang_type
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type

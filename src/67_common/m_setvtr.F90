@@ -40,7 +40,7 @@ module m_setvtr
  use m_cgtools,           only : dotprod_vn
  use m_ewald,             only : ewald
  use m_energies,          only : energies_type
- use m_electronpositron,  only : electronpositron_type,electronpositron_calctype
+ use m_electronpositron,  only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,   only : libxc_functionals_is_hybrid
  use m_pawrad,            only : pawrad_type
  use m_pawtab,            only : pawtab_type

@@ -83,6 +83,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
  use m_pawrhoij, only : pawrhoij_type
  use m_pawxc, only: pawxcsum
  use m_drivexc,     only : mkdenpos
+ use m_gammapositron, only : gammapositron, gammapositron_fft
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
