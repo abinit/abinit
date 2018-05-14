@@ -32,7 +32,7 @@ module m_pawxc
 
 #ifdef HAVE_LIBPAW_ABINIT
  use m_xcpositron,  only : xcpositron
- use m_drivexc,     only : drivexc_main
+ use m_drivexc,     only : drivexc_main, size_dvxc
 #endif
 
  use m_libpaw_libxc

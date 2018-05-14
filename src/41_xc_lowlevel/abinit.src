@@ -24,7 +24,6 @@ sources = [
 "m_libxc_functionals.F90",
 "m_xc_noncoll.F90",
 "mkdenpos.F90",
-"size_dvxc.F90",
 "xchcth.F90",
 "xchelu.F90",
 "m_xciit.F90",
